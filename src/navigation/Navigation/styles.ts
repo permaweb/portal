@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { transition1, openRight } from 'helpers/animations';
+import { openRight,transition1 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const Panel = styled.nav<{ open: boolean }>`
@@ -36,15 +36,15 @@ export const PanelContent = styled.div<{ open: boolean }>`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		border: 1px solid transparent;
 		border-radius: ${STYLING.dimensions.radius.alt2};
 		transition: all 100ms;
-		padding: 0 7.5px;
+		padding: 0 10px;
 		svg {
-			height: 15.5px;
-			width: 15.5px;
-			margin: 6.5px 8.5px 0 0;
+			height: 17.5px;
+			width: 17.5px;
+			margin: 6.5px 12.5px 0 0;
 			color: ${(props) => props.theme.colors.font.alt1};
 			fill: ${(props) => props.theme.colors.font.alt1};
 		}

@@ -2,7 +2,6 @@ import Arweave from 'arweave';
 import { ArweaveWebIrys } from '@irys/sdk/build/esm/web/tokens/arweave';
 import { createDataItemSigner, dryrun, message, result, results } from '@permaweb/aoconnect';
 
-import { CONTENT_TYPES, CURSORS, GATEWAYS, PAGINATORS, UPLOAD_CONFIG } from 'helpers/config';
 import {
 	BatchAGQLResponseType,
 	BatchGQLArgsType,
@@ -14,6 +13,34 @@ import {
 	UploadMethodType,
 } from 'helpers/types';
 import { getByteSize, getTagValue } from 'helpers/utils';
+
+const PAGINATORS = {
+	default: 100
+};
+
+export const CONTENT_TYPES = {
+	json: 'application/json',
+	mp4: 'video/mp4',
+	textPlain: 'text/plain',
+};
+
+const GATEWAYS = {
+	arweave: 'arweave.net',
+	goldsky: 'arweave-search.goldsky.com',
+};
+
+const UPLOAD_CONFIG = {
+	node1: 'https://up.arweave.net',
+	node2: 'https://turbo.ardrive.io',
+	batchSize: 1,
+	chunkSize: 7500000,
+	dispatchUploadSize: 100 * 1024,
+};
+
+const CURSORS = {
+	p1: 'P1',
+	end: 'END',
+};
 
 export async function getGQLData(args: GQLArgsType): Promise<DefaultGQLResponseType> {
 	const paginator = args.paginator ? args.paginator : PAGINATORS.default;

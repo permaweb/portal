@@ -14,7 +14,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const paths: { path: string; label: string; target?: '_blank' }[] = [{ path: URLS.docs, label: language.docs }];
+	const paths: { path: string; label: string; icon: string, target?: '_blank' }[] = [{ path: URLS.docs, icon: ASSETS.docs, label: language.docs }];
 
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(false);
 
@@ -39,9 +39,10 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 			<S.Panel open={props.open}>
 				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
 				<S.PanelContent open={props.open}>
-					{paths.map((element: { path: string; label: string; target?: '_blank' }, index: number) => {
+					{paths.map((element: { path: string; label: string; icon: string; target?: '_blank' }, index: number) => {
 						return (
 							<Link key={index} to={element.path} target={element.target || ''} onClick={() => setPanelOpen(false)}>
+								<ReactSVG src={element.icon} />
 								{element.label}
 							</Link>
 						);

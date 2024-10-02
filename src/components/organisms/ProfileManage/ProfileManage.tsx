@@ -9,7 +9,7 @@ import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Notification } from 'components/atoms/Notification';
 import { TextArea } from 'components/atoms/TextArea';
-import { AO, ASSETS, GATEWAYS } from 'helpers/config';
+import { AO, ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { NotificationType } from 'helpers/types';
 import { checkValidAddress, getBase64Data, getDataURLContentType } from 'helpers/utils';
@@ -166,7 +166,7 @@ export default function ProfileManage(props: IProps) {
 							while (!fetchedAssetId) {
 								await new Promise((r) => setTimeout(r, 2000));
 								const gqlResponse = await getGQLData({
-									gateway: GATEWAYS.goldsky,
+									gateway: 'https://arweave-search.goldsky.com',
 									ids: [processId],
 									tagFilters: null,
 									owners: null,
