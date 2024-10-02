@@ -87,7 +87,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	function getDropdown() {
 		return (
 			<>
-				<S.DHeaderWrapper>
+				{/* <S.DHeaderWrapper>
 					<S.DHeaderFlex>
 						<Avatar
 							owner={arProvider.profile}
@@ -104,8 +104,8 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 							</span>
 						</S.DHeader>
 					</S.DHeaderFlex>
-				</S.DHeaderWrapper>
-				<S.DBodyWrapper>
+				</S.DHeaderWrapper> */}
+				{/* <S.DBodyWrapper>
 					<li onClick={handleProfileAction}>
 						{arProvider.profile && arProvider.profile.id ? (
 							<>
@@ -148,7 +148,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 						<ReactSVG src={ASSETS.disconnect} />
 						{language.disconnect}
 					</li>
-				</S.DFooterWrapper>
+				</S.DFooterWrapper> */}
 			</>
 		);
 	}
@@ -176,7 +176,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 			<S.Wrapper>
 				{getHeader()}
 				{showWalletDropdown && (
-					<Panel open={showWalletDropdown} header={language.profileMenu} handleClose={() => setShowWalletDropdown(false)} width={375}>
+					<Panel open={showWalletDropdown} header={label} handleClose={() => setShowWalletDropdown(false)} width={375}>
 						{getDropdown()}
 					</Panel>
 				)}

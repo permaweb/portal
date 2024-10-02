@@ -19,6 +19,5 @@ export interface IProps {
 	height?: number;
 	fullWidth?: boolean;
 	tooltip?: string;
-	useBottomToolTip?: boolean;
 	className?: string;
 }

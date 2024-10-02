@@ -10,35 +10,54 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
-export default function Header() {
+export default function Navigation(props: { open: boolean; toggle: () => void }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const paths: { path: string; label: string; target?: '_blank' }[] = [
-		{ path: URLS.docs, label: language.docs },
-	];
+	const paths: { path: string; label: string; target?: '_blank' }[] = [{ path: URLS.docs, label: language.docs }];
 
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(false);
 
+	const navigationToggle = React.useMemo(() => {
+		return (
+			<IconButton
+				type={'primary'}
+				src={ASSETS.navigation}
+				handlePress={props.toggle}
+				dimensions={{
+					wrapper: 36.5,
+					icon: 23.5,
+				}}
+				tooltip={props.open ? language.sidebarClose : language.sidebarOpen}
+				tooltipPosition={'right'}
+			/>
+		);
+	}, [props.open]);
+
 	return (
 		<>
-			<S.Wrapper>
-				<S.Content className={'max-view-wrapper'}>
+			<S.Panel open={props.open}>
+				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
+				<S.PanelContent open={props.open}>
+					{paths.map((element: { path: string; label: string; target?: '_blank' }, index: number) => {
+						return (
+							<Link key={index} to={element.path} target={element.target || ''} onClick={() => setPanelOpen(false)}>
+								{element.label}
+							</Link>
+						);
+					})}
+				</S.PanelContent>
+			</S.Panel>
+
+			<S.Header navigationOpen={props.open}>
+				<S.Content>
 					<S.C1Wrapper>
-						<S.LogoWrapper>
+						{!props.open && navigationToggle}
+						{/* <S.LogoWrapper>
 							<Link to={URLS.base}>
 								<ReactSVG src={ASSETS.logo} />
 							</Link>
-						</S.LogoWrapper>
-						<S.DNavWrapper>
-							{paths.map((element: { path: string; label: string; target?: '_blank' }, index: number) => {
-								return (
-									<Link key={index} to={element.path} target={element.target || ''}>
-										{element.label}
-									</Link>
-								);
-							})}
-						</S.DNavWrapper>
+							</S.LogoWrapper> */}
 					</S.C1Wrapper>
 					<S.ActionsWrapper>
 						<WalletConnect />
@@ -52,8 +71,8 @@ export default function Header() {
 						</S.MWrapper>
 					</S.ActionsWrapper>
 				</S.Content>
-			</S.Wrapper>
-			{panelOpen && (
+			</S.Header>
+			{/* {panelOpen && (
 				<div className={'overlay'}>
 					<S.PWrapper className={'border-wrapper-primary'}>
 						<CloseHandler active={panelOpen} disabled={!panelOpen} callback={() => setPanelOpen(false)}>
@@ -88,7 +107,7 @@ export default function Header() {
 						</CloseHandler>
 					</S.PWrapper>
 				</div>
-			)}
+			)} */}
 		</>
 	);
 }

@@ -97,7 +97,7 @@ export default function Button(props: IProps) {
 		if (props.tooltip) {
 			return (
 				<S.Wrapper>
-					<S.Tooltip className={'info-text'} useBottom={props.useBottomToolTip ? props.useBottomToolTip : false}>
+					<S.Tooltip className={'info-text'} useBottom={true}>
 						<span>{props.tooltip}</span>
 					</S.Tooltip>
 					{getAction()}

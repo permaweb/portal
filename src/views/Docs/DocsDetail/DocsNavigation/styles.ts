@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { fadeIn2, open } from 'helpers/animations';
+import { transition2, open } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const NWrapper = styled.div`
@@ -8,7 +8,7 @@ export const NWrapper = styled.div`
 	width: 300px;
 	position: sticky;
 	top: 0;
-	animation: ${open} ${fadeIn2};
+	animation: ${open} ${transition2};
 	@media (max-width: ${STYLING.cutoffs.initial}) {
 		height: auto;
 		width: 100%;

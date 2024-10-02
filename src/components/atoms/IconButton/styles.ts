@@ -1,17 +1,79 @@
 import styled from 'styled-components';
 
-export const Tooltip = styled.div<{ useBottom: boolean }>`
-	position: absolute;
-	top: ${(props) => (props.useBottom ? 'auto' : '-25px')};
-	bottom: ${(props) => (props.useBottom ? '-25px' : 'auto')};
-	left: 50%;
-	transform: translate(-50%, 0);
-	z-index: 1;
-	display: none;
-	span {
-		display: block;
-		line-height: 1.65;
-	}
+export const Tooltip = styled.div<{ position: string }>`
+  position: absolute;
+  z-index: 1;
+  display: none;
+  white-space: nowrap;
+
+  ${(props) => {
+    switch (props.position) {
+      case 'top':
+        return `
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-bottom: 5px;
+        `;
+      case 'bottom':
+        return `
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-top: 5px;
+        `;
+      case 'left':
+        return `
+          right: 100%;
+          top: 50%;
+          transform: translateY(-50%);
+          margin-right: 5px;
+        `;
+      case 'right':
+        return `
+          left: 100%;
+          top: 50%;
+          transform: translateY(-50%);
+          margin-left: 5px;
+        `;
+      case 'top-left':
+        return `
+          bottom: 100%;
+          left: 0;
+          margin-bottom: 5px;
+        `;
+      case 'top-right':
+        return `
+          bottom: 100%;
+          right: 0;
+          margin-bottom: 5px;
+        `;
+      case 'bottom-left':
+        return `
+          top: 100%;
+          left: 0;
+          margin-top: 5px;
+        `;
+      case 'bottom-right':
+        return `
+          top: 100%;
+          right: 0;
+          margin-top: 5px;
+        `;
+      default:
+        return `
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-top: 5px;
+        `;
+    }
+  }}
+
+  span {
+    display: block;
+    line-height: 1.65;
+  }
 `;
 
 export const Wrapper = styled.div`
@@ -44,6 +106,12 @@ export const Primary = styled.button<{
 	svg {
 		height: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)};
 		width: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)};
+		color: ${(props) =>
+			props.disabled
+				? props.theme.colors.icon.primary.disabled
+				: props.active
+				? props.theme.colors.icon.primary.fill
+				: props.theme.colors.icon.primary.fill};
 		fill: ${(props) =>
 			props.disabled
 				? props.theme.colors.icon.primary.disabled

@@ -1,15 +1,71 @@
 import styled from 'styled-components';
 
-import { openRight } from 'helpers/animations';
+import { transition1, openRight } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.header`
+export const Panel = styled.nav<{ open: boolean }>`
+  height: 100vh;
+  width: ${STYLING.dimensions.nav.width};
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  transform: translateX(${(props) => (props.open ? '0' : '-100%')});
+  transition: transform ${transition1};
+  background: ${(props) => props.theme.colors.container.alt1.background};
+`;
+
+export const PanelHeader = styled.nav`
 	height: ${STYLING.dimensions.nav.height};
 	width: 100%;
-	position: sticky;
-	z-index: 2;
-	top: 0;
-	background: ${(props) => props.theme.colors.view.background};
+	display: flex;
+	align-items: center;
+	padding: 0 15px;
+`;
+
+export const PanelContent = styled.div<{ open: boolean }>`
+  height: calc(100vh - ${STYLING.dimensions.nav.height});
+  padding: 15px;
+  overflow-y: auto;
+
+  a {
+		height: 40.5px;
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		color: ${(props) => props.theme.colors.font.primary};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.small};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		border: 1px solid transparent;
+		border-radius: ${STYLING.dimensions.radius.alt2};
+		transition: all 100ms;
+		padding: 0 7.5px;
+		svg {
+			height: 15.5px;
+			width: 15.5px;
+			margin: 6.5px 8.5px 0 0;
+			color: ${(props) => props.theme.colors.font.alt1};
+			fill: ${(props) => props.theme.colors.font.alt1};
+		}
+		&:hover {
+			color: ${(props) => props.theme.colors.font.primary};
+			background: ${(props) => props.theme.colors.container.alt2.background};
+		}
+  }
+`;
+
+export const Header = styled.header<{ navigationOpen: boolean }>`
+  height: ${STYLING.dimensions.nav.height};
+  width: ${(props) => (props.navigationOpen ? `calc(100% - ${STYLING.dimensions.nav.width})` : '100%')};
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  padding: 0 15px;
+  background: ${(props) => props.theme.colors.view.background};
+  transition: transform ${transition1}, width ${transition1};
 `;
 
 export const Content = styled.div`
@@ -22,15 +78,16 @@ export const Content = styled.div`
 
 export const C1Wrapper = styled.div`
 	display: flex;
+	gap: 15px;
 	align-items: center;
 `;
 
 export const LogoWrapper = styled.div`
-	height: 25px;
-	width: 25px;
+	height: 22.5px;
+	width: 22.5px;
 	svg {
-		height: 25px;
-		width: 25px;
+		height: 22.5px;
+		width: 22.5px;
 		fill: ${(props) => props.theme.colors.icon.alt2.fill};
 		&:hover {
 			fill: ${(props) => props.theme.colors.icon.alt2.active};

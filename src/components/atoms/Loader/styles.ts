@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { fadeIn1, loaderKeyFrame, open } from 'helpers/animations';
+import { transition1, loaderKeyFrame, open } from 'helpers/animations';
 
 export const Wrapper = styled.div`
 	height: 100%;
@@ -10,7 +10,7 @@ export const Wrapper = styled.div`
 	top: 0;
 	left: 0;
 	background: ${(props) => props.theme.colors.view.background};
-	// animation: ${open} ${fadeIn1};
+	// animation: ${open} ${transition1};
 `;
 
 export const Container = styled.div<{ relative: boolean }>`

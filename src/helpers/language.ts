@@ -28,6 +28,8 @@ export const language = {
 		removeAvatar: `Remove avatar`,
 		removeBanner: `Remove banner`,
 		save: `Save`,
+		sidebarClose: `Close sidebar`,
+		sidebarOpen: `Open sidebar`,
 		viewProfile: `View profile`,
 		uploadAvatar: `Upload avatar`,
 		uploadBanner: `Upload banner`,

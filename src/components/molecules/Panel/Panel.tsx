@@ -60,7 +60,6 @@ export default function Panel(props: IProps) {
 												icon: 20,
 											}}
 											tooltip={language.close}
-											useBottomToolTip
 										/>
 									</S.Close>
 								)}

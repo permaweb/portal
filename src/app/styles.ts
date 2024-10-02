@@ -1,6 +1,6 @@
 import styled, { createGlobalStyle } from 'styled-components';
 
-import { fadeIn1, open } from 'helpers/animations';
+import { transition1, open } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const GlobalStyle = createGlobalStyle`
@@ -30,7 +30,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   body {
-		overflow-x: hidden !important;
+		overflow-x: hidden;
     background: ${(props) => props.theme.colors.view.background};
   }
 
@@ -79,7 +79,7 @@ export const GlobalStyle = createGlobalStyle`
 				border-radius: 36px;
 				border: 3.5px solid transparent;
 				background-clip: padding-box;
-			} 
+			}
 	}
 
   h1, h2, h3, h4, h5, h6 {
@@ -194,15 +194,18 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
   .info-text {
-    padding: 0 4.25px;
+    padding: 0.5px 5.25px;
     background: ${(props) => props.theme.colors.container.primary.background};
-    border: 1px solid ${(props) => props.theme.colors.border.primary};
+    background: #333;
+    border: 1px solid ${(props) => props.theme.colors.border.alt2};
+    border: 1px solid transparent;
     border-radius: ${STYLING.dimensions.radius.alt2};
-    animation: ${open} ${fadeIn1};
+    animation: ${open} ${transition1};
     span {
       color: ${(props) => props.theme.colors.font.primary};
+      color: #fff;
       font-size: ${(props) => props.theme.typography.size.xxxSmall};
-      font-weight: ${(props) => props.theme.typography.weight.medium};
+      font-weight: ${(props) => props.theme.typography.weight.bold};
       white-space: nowrap;
 	  }
   }
@@ -216,8 +219,8 @@ export const GlobalStyle = createGlobalStyle`
     top: 0;
     left: 0;
     background: ${(props) => props.theme.colors.overlay.primary};
-    backdrop-filter: blur(7.5px);
-    animation: ${open} ${fadeIn1};
+    backdrop-filter: blur(1.5px);
+    animation: ${open} ${transition1};
   }
 
   .page-overlay {
@@ -229,8 +232,8 @@ export const GlobalStyle = createGlobalStyle`
     top: 0;
     left: 0;
     background: ${(props) => props.theme.colors.view.background};
-    backdrop-filter: blur(7.5px);
-    animation: ${open} ${fadeIn1};
+    backdrop-filter: blur(1.5px);
+    animation: ${open} ${transition1};
   }
 
 	.app-loader {
@@ -242,7 +245,7 @@ export const GlobalStyle = createGlobalStyle`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    animation: ${open} ${fadeIn1};
+    animation: ${open} ${transition1};
     svg {
       height: auto;
       width: 50px;
@@ -251,7 +254,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
 	.fade-in {
-		animation: ${open} ${fadeIn1};
+		animation: ${open} ${transition1};
 	}
 
   .scroll-wrapper {
@@ -284,153 +287,19 @@ export const AppWrapper = styled.div`
 	position: relative;
 `;
 
-export const View = styled.main`
+export const View = styled.main<{ navigationOpen: boolean }>`
+  min-height: calc(100vh - ${STYLING.dimensions.nav.height});
+  position: relative;
+  top: ${STYLING.dimensions.nav.height};
+	padding: 0 20px 0 ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 20px)` : '20px')};;
+  transition: padding-left ${transition1}; /* Smooth transition for padding */
+  display: flex;
+  flex-direction: column;
+`;
+
+export const ViewContainer = styled.div`
+	height: 100%;
 	min-height: calc(100vh - ${STYLING.dimensions.nav.height});
 	width: 100%;
-	padding: 20px;
-`;
-
-export const DrawerWrapper = styled.div`
-	width: 100%;
-	margin: 20px 0 0 0;
-`;
-
-export const DrawerContent = styled.div<{ transparent?: boolean }>`
-	width: 100%;
-	padding: ${(props) => (props.transparent ? `0` : `20px`)};
-	background: ${(props) =>
-		props.transparent ? props.theme.colors.transparent : props.theme.colors.container.alt2.background};
-	border-bottom-left-radius: ${(props) => (props.transparent ? `0` : STYLING.dimensions.radius.primary)};
-	border-bottom-right-radius: ${(props) => (props.transparent ? `0` : STYLING.dimensions.radius.primary)};
-	> * {
-		&:not(:last-child) {
-			margin: 0 0 15px 0;
-		}
-		&:last-child {
-			margin: 0;
-		}
-	}
-`;
-
-export const DrawerHeaderWrapper = styled.div`
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 0 0 7.5px 0;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
-	width: 100%;
-	> * {
-		&:not(:first-child) {
-			text-align: right;
-		}
-	}
-`;
-
-export const DrawerHeader = styled.p`
-	font-size: ${(props) => props.theme.typography.size.lg};
-	font-family: ${(props) => props.theme.typography.family.alt1};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	color: ${(props) => props.theme.colors.font.primary.primary};
-	line-height: 1.75;
-	word-wrap: break-word;
-`;
-
-export const DrawerContentLine = styled.div`
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	position: relative;
-	width: 100%;
-	> * {
-		&:not(:first-child) {
-			text-align: right;
-			display: flex;
-			justify-content: flex-end;
-		}
-	}
-	@media (max-width: ${STYLING.cutoffs.secondary}) {
-		flex-direction: column;
-		align-items: flex-start;
-		> * {
-			&:not(:first-child) {
-				text-align: left;
-				display: flex;
-				justify-content: flex-start;
-			}
-		}
-	}
-`;
-
-export const DrawerContentHeader = styled.p`
-	flex: 1;
-	font-size: ${(props) => props.theme.typography.size.base};
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-weight: ${(props) => props.theme.typography.weight.medium};
-	color: ${(props) => props.theme.colors.font.alt1};
-	word-wrap: break-word;
-`;
-
-export const DrawerContentFlex = styled.div`
-	display: flex;
-	align-items: center;
-	flex: 1.5;
-`;
-
-export const DrawerContentFlexEnd = styled.div`
-	display: flex;
-	align-items: center;
-	flex: 1;
-`;
-
-export const DrawerContentDetail = styled.p`
-	flex: 1;
-	font-size: ${(props) => props.theme.typography.size.base};
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	color: ${(props) => props.theme.colors.font.primary};
-	word-wrap: break-word;
-	white-space: nowrap;
-	a {
-		text-decoration: underline;
-	}
-	img {
-		height: 20px;
-		width: 17.5px;
-	}
-`;
-
-export const DrawerContentDescription = styled(DrawerContentDetail)`
-	white-space: normal;
-	line-height: 1.65;
-`;
-
-export const DrawerContentLink = styled.a`
-	font-size: ${(props) => props.theme.typography.size.base};
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	color: ${(props) => props.theme.colors.font.primary};
-	text-decoration: underline;
-	&:hover {
-		color: ${(props) => props.theme.colors.font.alt1};
-	}
-	word-wrap: break-word;
-`;
-
-export const DrawerContentDetailAlt = styled(DrawerContentDetail)`
-	font-family: ${(props) => props.theme.typography.family.alt1};
-`;
-
-export const FullMessageWrapper = styled.div`
-	height: 150px;
-	width: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	p {
-		font-size: ${(props) => props.theme.typography.size.xLg};
-		font-family: ${(props) => props.theme.typography.family.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		color: ${(props) => props.theme.colors.font.primary};
-		text-align: center;
-	}
+	border: 1px solid blue;
 `;

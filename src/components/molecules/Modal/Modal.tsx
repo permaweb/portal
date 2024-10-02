@@ -58,7 +58,6 @@ export default function Modal(props: IProps) {
 											icon: 20,
 										}}
 										tooltip={language.close}
-										useBottomToolTip
 									/>
 								</S.Close>
 							)}

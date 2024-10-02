@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { fadeIn2, open } from 'helpers/animations';
+import { transition2, open } from 'helpers/animations';
 
 export const Wrapper = styled.div`
 	width: 500px;
@@ -10,7 +10,7 @@ export const Wrapper = styled.div`
 	align-items: center;
 	margin: 0 auto;
 	padding: 20px 20px;
-	animation: ${open} ${fadeIn2};
+	animation: ${open} ${transition2};
 	p {
 		font-size: ${(props) => props.theme.typography.size.base};
 		font-weight: ${(props) => props.theme.typography.weight.bold};

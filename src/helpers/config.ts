@@ -27,6 +27,7 @@ import logo from 'assets/logo.svg';
 import market from 'assets/market.svg';
 import media from 'assets/media.svg';
 import menu from 'assets/menu.svg';
+import navigation from 'assets/navigation.svg';
 import orders from 'assets/orders.svg';
 import othent from 'assets/othent.svg';
 import overview from 'assets/overview.svg';
@@ -88,6 +89,7 @@ export const ASSETS = {
 	market,
 	media,
 	menu,
+	navigation,
 	orders,
 	othent,
 	overview,
@@ -139,7 +141,8 @@ export const STYLING = {
 			max: '47.5px',
 		},
 		nav: {
-			height: '75px',
+			height: '65px',
+			width: '260px'
 		},
 		radius: {
 			primary: '10px',

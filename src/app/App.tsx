@@ -4,10 +4,8 @@ import { ReactSVG } from 'react-svg';
 
 import { readHandler } from 'api';
 
-import { Loader } from 'components/atoms/Loader';
 import { AO, ASSETS, DOM } from 'helpers/config';
-import { Footer } from 'navigation/footer';
-import { Header } from 'navigation/Header';
+import { Navigation } from 'navigation/Navigation';
 import { RootState } from 'store';
 
 import * as S from './styles';
@@ -19,19 +17,23 @@ const Routes = lazy(() =>
 );
 
 export default function App() {
+	const [navigationOpen, setNavigationOpen] = React.useState<boolean>(true);
+
 	return (
 		<>
 			<div id={DOM.loader} />
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />
 			{true ? (
-				<Suspense fallback={<Loader />}>
+				<Suspense fallback={null}>
 					<S.AppWrapper>
-						<Header />
-						<S.View className={'max-view-wrapper'}>
-							<Routes />
+						<Navigation open={navigationOpen} toggle={() => setNavigationOpen(!navigationOpen)} />
+						<S.View navigationOpen={navigationOpen}>
+							{/* <Routes /> */}
+							<S.ViewContainer>
+								
+							</S.ViewContainer>
 						</S.View>
-						<Footer />
 					</S.AppWrapper>
 				</Suspense>
 			) : (
