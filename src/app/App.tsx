@@ -1,12 +1,9 @@
 import React, { lazy, Suspense } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { ReactSVG } from 'react-svg';
+import { debounce } from 'lodash';
 
-import { readHandler } from 'api';
-
-import { AO, ASSETS, DOM } from 'helpers/config';
+import { DOM, STYLING } from 'helpers/config';
+import { checkWindowCutoff } from 'helpers/window';
 import { Navigation } from 'navigation/Navigation';
-import { RootState } from 'store';
 
 import * as S from './styles';
 
@@ -16,31 +13,44 @@ const Routes = lazy(() =>
 	}))
 );
 
+// TODO: Connected view / onboarding
 export default function App() {
-	const [navigationOpen, setNavigationOpen] = React.useState<boolean>(true);
+	const [navigationOpen, setNavigationOpen] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
+	const [_desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
+
+	function handleWindowResize() {
+		if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {
+			setDesktop(true);
+			setNavigationOpen(navigationOpen);
+		} else {
+			setDesktop(false);
+			setNavigationOpen(false);
+		}
+	}
+
+	const debouncedResize = React.useCallback(debounce(handleWindowResize, 0), [navigationOpen]);
+
+	React.useEffect(() => {
+		window.addEventListener('resize', debouncedResize);
+
+		return () => {
+			window.removeEventListener('resize', debouncedResize);
+		};
+	}, [debouncedResize]);
 
 	return (
 		<>
 			<div id={DOM.loader} />
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />
-			{true ? (
-				<Suspense fallback={null}>
-					<S.AppWrapper>
-						<Navigation open={navigationOpen} toggle={() => setNavigationOpen(!navigationOpen)} />
-						<S.View navigationOpen={navigationOpen}>
-							{/* <Routes /> */}
-							<S.ViewContainer>
-								
-							</S.ViewContainer>
-						</S.View>
-					</S.AppWrapper>
-				</Suspense>
-			) : (
-				<div className={'app-loader'}>
-					<ReactSVG src={ASSETS.logo} />
-				</div>
-			)}
+			<Suspense fallback={null}>
+				<S.AppWrapper>
+					<Navigation open={navigationOpen} toggle={() => setNavigationOpen(!navigationOpen)} />
+					<S.View navigationOpen={navigationOpen}>
+						<Routes />
+					</S.View>
+				</S.AppWrapper>
+			</Suspense>
 		</>
 	);
 }

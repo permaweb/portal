@@ -15,7 +15,7 @@ import {
 import { getByteSize, getTagValue } from 'helpers/utils';
 
 const PAGINATORS = {
-	default: 100
+	default: 100,
 };
 
 export const CONTENT_TYPES = {

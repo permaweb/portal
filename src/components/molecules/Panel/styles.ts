@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 
-import { transition1, open, openRight } from 'helpers/animations';
+import { open, transition1, transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.div<{ top: number; noHeader: boolean }>`
+export const Wrapper = styled.div<{ top: number; noHeader: boolean; open: boolean }>`
 	min-height: 100vh;
 	height: 100%;
 	width: 100%;
@@ -12,32 +12,29 @@ export const Wrapper = styled.div<{ top: number; noHeader: boolean }>`
 	top: 0;
 	left: 0;
 	background: ${(props) => props.theme.colors.overlay.primary};
-	backdrop-filter: blur(1.5px);
 	animation: ${open} ${transition1};
 `;
 
 export const Container = styled.div<{
 	noHeader: boolean;
 	width?: number;
-}>`
+  }>`
 	height: calc(100dvh - 20px);
 	min-width: ${(props) => (props.width ? `${props.width.toString()}px` : '425px')};
 	width: fit-content;
 	max-width: calc(100vw - 30px);
 	position: fixed;
+	z-index: 10;
 	overflow: hidden;
 	top: 10px;
 	right: 10px;
-	transition: width 50ms ease-out;
-	animation: ${openRight} 200ms;
-	background: ${(props) => props.theme.colors.container.primary.background};
-	box-shadow: -1px -1px 10px 1px ${(props) => props.theme.colors.shadow.alt3};
-	border: 1px solid ${(props) => props.theme.colors.border.alt4};
-	border-radius: ${STYLING.dimensions.radius.primary};
+	animation: open ${transition2};
+  
+	border-radius: ${STYLING.dimensions.radius.alt1} !important;
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
-		min-width: 82.5vw;
+	  min-width: 82.5vw;
 	}
-`;
+  `;  
 
 export const Header = styled.div`
 	height: 65px;

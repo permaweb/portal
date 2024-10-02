@@ -1,12 +1,12 @@
 import styled from 'styled-components';
 
-import { transition2, open } from 'helpers/animations';
+import { open, transition3 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div<{ isView: boolean }>`
 	width: ${(props) => (props.isView ? 'calc(100% - 300px)' : '100%')};
 	padding: ${(props) => (props.isView ? '0 0 0 30px' : '0')};
-	animation: ${open} ${transition2};
+	animation: ${open} ${transition3};
 	margin: 0 0 0 auto;
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {

@@ -114,7 +114,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 							</>
 						) : (
 							<>
-								<ReactSVG src={ASSETS.edit} />
+								<ReactSVG src={ASSETS.write} />
 								{`${language.createProfile}`}
 							</>
 						)}
@@ -122,7 +122,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 					{arProvider.profile && arProvider.profile.id && (
 						<>
 							<li onClick={() => setShowProfileManage(true)}>
-								<ReactSVG src={ASSETS.edit} />
+								<ReactSVG src={ASSETS.write} />
 								{language.editProfile}
 							</li>
 							<li onClick={() => copyAddress(arProvider.profile.id)}>

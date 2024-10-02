@@ -1,6 +1,6 @@
 import styled, { createGlobalStyle } from 'styled-components';
 
-import { transition1, open } from 'helpers/animations';
+import { open, transition1, transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const GlobalStyle = createGlobalStyle`
@@ -157,28 +157,8 @@ export const GlobalStyle = createGlobalStyle`
 
   .border-wrapper-primary {
     background: ${(props) => props.theme.colors.container.primary.background};
-    box-shadow: 0 0 1px ${(props) => props.theme.colors.shadow.alt1};
-    border: 1px solid ${(props) => props.theme.colors.border.primary};
-    border-radius: ${STYLING.dimensions.radius.primary};
-  }
-
-  .border-wrapper-alt1 {
-    background: ${(props) => props.theme.colors.container.alt3.background};
-    border: 1px solid ${(props) => props.theme.colors.border.primary};
-    border-radius: ${STYLING.dimensions.radius.primary};
-  }
-
-  .border-wrapper-alt2 {
-    background: ${(props) => props.theme.colors.container.primary.background};
-    box-shadow: 0 5px 15px 2.5px ${(props) => props.theme.colors.shadow.primary};
-    border: 1px solid ${(props) => props.theme.colors.border.alt4};
-    border-radius: ${STYLING.dimensions.radius.primary};
-  }
-
-  .border-wrapper-alt3 {
-    background: ${(props) => props.theme.colors.container.primary.background};
-		box-shadow: 0px 3.5px 5px 0px ${(props) => props.theme.colors.shadow.alt2};
-		border: 1px solid ${(props) => props.theme.colors.border.alt4};
+    box-shadow: 0 1px 2px 0.5px ${(props) => props.theme.colors.shadow.primary};
+    border: 1px solid ${(props) => props.theme.colors.border.alt3};
     border-radius: ${STYLING.dimensions.radius.primary};
   }
 
@@ -194,16 +174,13 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
   .info-text {
-    padding: 0.5px 5.25px;
-    background: ${(props) => props.theme.colors.container.primary.background};
-    background: #333;
-    border: 1px solid ${(props) => props.theme.colors.border.alt2};
-    border: 1px solid transparent;
+    padding: 0 5px 0.5px 5px;
+    background: ${(props) => props.theme.colors.tooltip.background};
+    border: 1px solid ${(props) => props.theme.colors.tooltip.border};
     border-radius: ${STYLING.dimensions.radius.alt2};
-    animation: ${open} ${transition1};
+    animation: ${open} ${transition2};
     span {
-      color: ${(props) => props.theme.colors.font.primary};
-      color: #fff;
+      color: ${(props) => props.theme.colors.tooltip.color};
       font-size: ${(props) => props.theme.typography.size.xxxSmall};
       font-weight: ${(props) => props.theme.typography.weight.bold};
       white-space: nowrap;
@@ -219,21 +196,7 @@ export const GlobalStyle = createGlobalStyle`
     top: 0;
     left: 0;
     background: ${(props) => props.theme.colors.overlay.primary};
-    backdrop-filter: blur(1.5px);
-    animation: ${open} ${transition1};
-  }
-
-  .page-overlay {
-    min-height: 100vh;
-    height: 100%;
-    width: 100%;
-    position: fixed;
-    z-index: 11;
-    top: 0;
-    left: 0;
-    background: ${(props) => props.theme.colors.view.background};
-    backdrop-filter: blur(1.5px);
-    animation: ${open} ${transition1};
+    animation: ${open} ${transition2};
   }
 
 	.app-loader {
@@ -245,7 +208,7 @@ export const GlobalStyle = createGlobalStyle`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    animation: ${open} ${transition1};
+    animation: ${open} ${transition2};
     svg {
       height: auto;
       width: 50px;
@@ -288,18 +251,15 @@ export const AppWrapper = styled.div`
 `;
 
 export const View = styled.main<{ navigationOpen: boolean }>`
-  min-height: calc(100vh - ${STYLING.dimensions.nav.height});
-  position: relative;
-  top: ${STYLING.dimensions.nav.height};
-	padding: 0 20px 0 ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 20px)` : '20px')};;
-  transition: padding-left ${transition1}; /* Smooth transition for padding */
-  display: flex;
-  flex-direction: column;
-`;
-
-export const ViewContainer = styled.div`
-	height: 100%;
 	min-height: calc(100vh - ${STYLING.dimensions.nav.height});
-	width: 100%;
-	border: 1px solid blue;
+	position: relative;
+	top: ${STYLING.dimensions.nav.height};
+	padding: 0 20px 0 ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 20px)` : '20px')};
+	transition: padding-left ${transition2};
+	display: flex;
+	flex-direction: column;
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		padding: 0 20px;
+	}
 `;

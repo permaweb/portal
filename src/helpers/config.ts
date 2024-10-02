@@ -15,15 +15,16 @@ export const ASSETS = {
 	dark: getTxEndpoint('frDBQmgmo9MLraz4dcGqknHOeUVj9Yx8XNfSozJd4Uo'),
 	disconnect: getTxEndpoint('eWncZs2hH5oNSsWTIImJhqdZ4-n0P4CfZbduK2ae4L4'),
 	docs: getTxEndpoint('iJ2kFspeaXTNSl5aO8CZ2iLGA99Bmc0u-7PTX0Vl0l4'),
-	edit: getTxEndpoint('SUWTk8Qtcub9EsP5PDF6-vzgKsP5Irg1bB9b8NImDDk'),
 	info: getTxEndpoint('QQ4EJ_wH2EY1_ElfSNKffixnzVcbnvd2547lmluvT-0'),
 	light: getTxEndpoint('n-yu6JZZwWEF0aJE8B_UskiubcYmHDRTofyc5J1pvc4'),
-	logo: getTxEndpoint('WzomcwfXZ_4hhUvDso1wsyJpNBHGeHezFZQv3V706Hw'),
+	logo: getTxEndpoint('4txDbfbymP1RNMQCsFzyZOZR9qeUZXt_IacmL4IXYD8'),
 	media: getTxEndpoint('357HeJjvG10nK28juQ8YMp6DlvHhGbmU7pOvZphEhUk'),
 	menu: getTxEndpoint('0La3-o2_gGMDbkfV4zVVUMjTYQ7Cn9YWQ2JO-FbjAIk'),
 	navigation: getTxEndpoint('uFsSvBhbWZak9j5QWXIdeZ97ky_s0JsaIZ45KVXmD_8'),
+	portals: getTxEndpoint('WzomcwfXZ_4hhUvDso1wsyJpNBHGeHezFZQv3V706Hw'),
 	othent: getTxEndpoint('jDmU1yqdfK41qZ8mUj61MZlji-rX7bHJV12s1lMlw3A'),
-	user: getTxEndpoint('aOk91wDJnZ1xQbQum0MHoaOldAiumdFjdjM4LVM83NQ')
+	user: getTxEndpoint('aOk91wDJnZ1xQbQum0MHoaOldAiumdFjdjM4LVM83NQ'),
+	write: getTxEndpoint('SUWTk8Qtcub9EsP5PDF6-vzgKsP5Irg1bB9b8NImDDk'),
 };
 
 export const DOM = {
@@ -43,7 +44,7 @@ export const STYLING = {
 	},
 	dimensions: {
 		button: {
-			height: '32.5px',
+			height: '37.5px',
 			width: 'fit-content',
 		},
 		form: {
@@ -52,7 +53,7 @@ export const STYLING = {
 		},
 		nav: {
 			height: '65px',
-			width: '260px'
+			width: '260px',
 		},
 		radius: {
 			primary: '10px',

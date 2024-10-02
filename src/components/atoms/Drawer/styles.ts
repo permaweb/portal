@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { transition2, open } from 'helpers/animations';
+import { open, transition3 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
@@ -53,7 +53,7 @@ export const Title = styled.div`
 `;
 
 export const Content = styled.div`
-	animation: ${open} ${transition2};
+	animation: ${open} ${transition3};
 	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-bottom-left-radius: ${STYLING.dimensions.radius.primary};
 	border-bottom-right-radius: ${STYLING.dimensions.radius.primary};

@@ -21,9 +21,9 @@ export const lightTheme = {
 	neutralA5: '#525252',
 	neutralA6: '#666666',
 	neutralA7: '#707070',
-	overlay1: 'rgb(30, 30, 30, .65)',
-	primary1: '#6E44FF',
-	primary2: '#4F1FFF',
+	overlay1: 'rgb(105, 105, 105, .35)',
+	primary1: '#5158BB',
+	primary2: '#454CB0',
 	semiTransparent1: 'rgba(255, 255, 255, 0.575)',
 	semiTransparent2: 'rgba(40, 40, 40, 0.575)',
 	semiTransparent3: 'rgba(0, 0, 0, 0.55)',
@@ -32,6 +32,7 @@ export const lightTheme = {
 	light1: '#FFFFFF',
 	light2: '#DADADA',
 	dark1: '#151515',
+	dark2: '#333333',
 	stats: {
 		primary: '#FF8385',
 		alt1: '#A3DEE2',
@@ -80,6 +81,7 @@ export const darkTheme = {
 	light1: '#FFFFFF',
 	light2: '#DADADA',
 	dark1: '#151515',
+	dark2: '#333333',
 	stats: {
 		primary: '#FF8080',
 		alt1: '#9BD4E0',
@@ -107,7 +109,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			primary: currentTheme.neutral3,
 			alt1: currentTheme.neutral4,
 			alt2: currentTheme.neutral5,
-			alt3: currentTheme.neutral5,
+			alt3: currentTheme.neutral6,
 			alt4: currentTheme.neutral8,
 		},
 		button: {
@@ -116,9 +118,9 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 				border: currentTheme.neutral3,
 				color: currentTheme.neutralA1,
 				active: {
-					background: currentTheme.primary1,
-					border: currentTheme.primary2,
-					color: currentTheme.light1,
+					background: currentTheme.neutral3,
+					border: currentTheme.neutral4,
+					color: currentTheme.neutralA1,
 				},
 				disabled: {
 					background: currentTheme.neutral3,
@@ -296,6 +298,11 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 				background: currentTheme.primary1,
 				color: currentTheme.neutralA1,
 			},
+		},
+		tooltip: {
+			background: currentTheme.dark2,
+			border: currentTheme.dark2,
+			color: currentTheme.light1
 		},
 		view: {
 			background: currentTheme.neutral1,

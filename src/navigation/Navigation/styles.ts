@@ -1,21 +1,41 @@
 import styled from 'styled-components';
 
-import { openRight,transition1 } from 'helpers/animations';
+import { open, openRight, transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
-export const Panel = styled.nav<{ open: boolean }>`
-  height: 100vh;
-  width: ${STYLING.dimensions.nav.width};
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 3;
-  transform: translateX(${(props) => (props.open ? '0' : '-100%')});
-  transition: transform ${transition1};
-  background: ${(props) => props.theme.colors.container.alt1.background};
+export const PanelOverlay = styled.div<{ open: boolean }>`
+	height: 100vh;
+    width: 100%;
+    position: fixed;
+    z-index: 3;
+    top: 0;
+    left: 0;
+    background: ${(props) => props.theme.colors.overlay.primary};
+    animation: ${open} ${transition2};
+	display: none;
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		display: ${(props) => props.open ? 'block' : 'none'};
+	}
 `;
 
-export const PanelHeader = styled.nav`
+export const Panel = styled.nav<{ open: boolean }>`
+	height: 100vh;
+	width: ${STYLING.dimensions.nav.width};
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 4;
+	transform: translateX(${(props) => (props.open ? '0' : '-100%')});
+	transition: transform ${transition2};
+	background: ${(props) => props.theme.colors.container.alt1.background};
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		border-right: 1px solid ${(props) => props.theme.colors.border.primary};
+	}
+`;
+
+export const PanelHeader = styled.div`
 	height: ${STYLING.dimensions.nav.height};
 	width: 100%;
 	display: flex;
@@ -24,11 +44,11 @@ export const PanelHeader = styled.nav`
 `;
 
 export const PanelContent = styled.div<{ open: boolean }>`
-  height: calc(100vh - ${STYLING.dimensions.nav.height});
-  padding: 15px;
-  overflow-y: auto;
+	height: calc(100vh - ${STYLING.dimensions.nav.height});
+	padding: 15px;
+	overflow-y: auto;
 
-  a {
+	a {
 		height: 40.5px;
 		display: flex;
 		align-items: center;
@@ -38,7 +58,7 @@ export const PanelContent = styled.div<{ open: boolean }>`
 		font-size: ${(props) => props.theme.typography.size.small};
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 		border: 1px solid transparent;
-		border-radius: ${STYLING.dimensions.radius.alt2};
+		border-radius: ${STYLING.dimensions.radius.primary};
 		transition: all 100ms;
 		padding: 0 10px;
 		svg {
@@ -52,20 +72,23 @@ export const PanelContent = styled.div<{ open: boolean }>`
 			color: ${(props) => props.theme.colors.font.primary};
 			background: ${(props) => props.theme.colors.container.alt2.background};
 		}
-  }
+	}
 `;
 
 export const Header = styled.header<{ navigationOpen: boolean }>`
-  height: ${STYLING.dimensions.nav.height};
-  width: ${(props) => (props.navigationOpen ? `calc(100% - ${STYLING.dimensions.nav.width})` : '100%')};
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 2;
-  padding: 0 15px;
-  background: ${(props) => props.theme.colors.view.background};
-  transition: transform ${transition1}, width ${transition1};
+	height: ${STYLING.dimensions.nav.height};
+	width: 100%;
+	padding: 0 20px 0 ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 20px)` : '20px')};
+	transition: padding-left ${transition2};
+	position: fixed;
+	top: 0;
+	z-index: 2;
+	background: ${(props) => props.theme.colors.view.background};
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		padding: 0 20px;
+	}
 `;
 
 export const Content = styled.div`
@@ -83,14 +106,14 @@ export const C1Wrapper = styled.div`
 `;
 
 export const LogoWrapper = styled.div`
-	height: 22.5px;
-	width: 22.5px;
+	height: 29.5px;
 	svg {
-		height: 22.5px;
-		width: 22.5px;
+		height: 30px;
+		width: 30px;
 		fill: ${(props) => props.theme.colors.icon.alt2.fill};
 		&:hover {
 			fill: ${(props) => props.theme.colors.icon.alt2.active};
+			opacity: 0.85;
 		}
 	}
 `;
@@ -157,7 +180,7 @@ export const PHeader = styled.div`
 		fill: ${(props) => props.theme.colors.icon.primary.fill};
 	}
 	h4 {
-		font-size: ${(props) => props.theme.typography.size.xLg};
+		font-size: ${(props) => props.theme.typography.size.lg};
 	}
 `;
 
@@ -168,7 +191,7 @@ export const MNavWrapper = styled.div`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.xBold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		padding: 15px;
 		&:hover {
 			color: ${(props) => props.theme.colors.font.primary};

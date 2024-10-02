@@ -1,79 +1,79 @@
 import styled from 'styled-components';
 
 export const Tooltip = styled.div<{ position: string }>`
-  position: absolute;
-  z-index: 1;
-  display: none;
-  white-space: nowrap;
+	position: absolute;
+	z-index: 1;
+	display: none;
+	white-space: nowrap;
 
-  ${(props) => {
-    switch (props.position) {
-      case 'top':
-        return `
+	${(props) => {
+		switch (props.position) {
+			case 'top':
+				return `
           bottom: 100%;
           left: 50%;
           transform: translateX(-50%);
           margin-bottom: 5px;
         `;
-      case 'bottom':
-        return `
+			case 'bottom':
+				return `
           top: 100%;
           left: 50%;
           transform: translateX(-50%);
           margin-top: 5px;
         `;
-      case 'left':
-        return `
+			case 'left':
+				return `
           right: 100%;
           top: 50%;
           transform: translateY(-50%);
           margin-right: 5px;
         `;
-      case 'right':
-        return `
+			case 'right':
+				return `
           left: 100%;
           top: 50%;
           transform: translateY(-50%);
           margin-left: 5px;
         `;
-      case 'top-left':
-        return `
+			case 'top-left':
+				return `
           bottom: 100%;
           left: 0;
           margin-bottom: 5px;
         `;
-      case 'top-right':
-        return `
+			case 'top-right':
+				return `
           bottom: 100%;
           right: 0;
           margin-bottom: 5px;
         `;
-      case 'bottom-left':
-        return `
+			case 'bottom-left':
+				return `
           top: 100%;
           left: 0;
           margin-top: 5px;
         `;
-      case 'bottom-right':
-        return `
+			case 'bottom-right':
+				return `
           top: 100%;
           right: 0;
           margin-top: 5px;
         `;
-      default:
-        return `
+			default:
+				return `
           top: 100%;
           left: 50%;
           transform: translateX(-50%);
           margin-top: 5px;
         `;
-    }
-  }}
+		}
+	}}
 
-  span {
-    display: block;
-    line-height: 1.65;
-  }
+	span {
+		display: block;
+		line-height: 1.65;
+	}
 `;
 
 export const Wrapper = styled.div`

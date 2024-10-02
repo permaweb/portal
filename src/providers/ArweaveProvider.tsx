@@ -62,7 +62,7 @@ function WalletList(props: { handleConnect: any }) {
 				<S.WalletListItem
 					key={index}
 					onClick={() => props.handleConnect(wallet.type)}
-					className={'border-wrapper-alt2'}
+					className={'border-wrapper-primary'}
 				>
 					<img src={`${wallet.logo}`} alt={''} />
 					<span>{wallet.type.charAt(0).toUpperCase() + wallet.type.slice(1)}</span>

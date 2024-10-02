@@ -1,13 +1,13 @@
 import styled from 'styled-components';
 
-import { transition2, open } from 'helpers/animations';
+import { open, transition3 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
 	height: 100%;
 	display: flex;
 	position: relative;
-	animation: ${open} ${transition2};
+	animation: ${open} ${transition3};
 `;
 
 export const PWrapper = styled.div`

@@ -40,7 +40,7 @@ export default function Panel(props: IProps) {
 	function getBody() {
 		return (
 			<>
-				<S.Container noHeader={!props.header} className={'border-wrapper-alt2'} width={props.width}>
+				<S.Container noHeader={!props.header} className={'border-wrapper-primary'} width={props.width}>
 					<CloseHandler active={props.open} disabled={!props.open} callback={() => props.handleClose()}>
 						{props.header && (
 							<S.Header>
@@ -56,8 +56,8 @@ export default function Panel(props: IProps) {
 											handlePress={() => props.handleClose()}
 											active={false}
 											dimensions={{
-												wrapper: 35,
-												icon: 20,
+												wrapper: 32.5,
+												icon: 18.5,
 											}}
 											tooltip={language.close}
 										/>
@@ -74,7 +74,7 @@ export default function Panel(props: IProps) {
 
 	return (
 		<Portal node={DOM.overlay}>
-			<S.Wrapper noHeader={!props.header} top={window ? (window as any).pageYOffset : 0}>
+			<S.Wrapper open={true} noHeader={!props.header} top={window ? (window as any).pageYOffset : 0}>
 				{getBody()}
 			</S.Wrapper>
 		</Portal>

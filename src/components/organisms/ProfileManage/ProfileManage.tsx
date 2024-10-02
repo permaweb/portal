@@ -359,7 +359,7 @@ export default function ProfileManage(props: IProps) {
 								</S.PActions>
 							</S.PWrapper>
 							<S.Form>
-								<S.TForm className={'border-wrapper-alt2'}>
+								<S.TForm className={'border-wrapper-primary'}>
 									<FormField
 										label={language.name}
 										value={name}

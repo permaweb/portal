@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { transition1, open } from 'helpers/animations';
+import { open, transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div<{ warning: boolean | undefined }>`
@@ -10,7 +10,7 @@ export const Wrapper = styled.div<{ warning: boolean | undefined }>`
 	bottom: 20px;
 	transform: translate(-50%, 0);
 	z-index: 20;
-	animation: ${open} ${transition1};
+	animation: ${open} ${transition2};
 	display: flex;
 	align-items: center;
 	padding: 11.5px 17.5px;

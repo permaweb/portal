@@ -1,6 +1,6 @@
 export const language = {
 	en: {
-		app: `Portals Editor`,
+		app: `Portals`,
 		balances: `Balances`,
 		bio: `Bio`,
 		close: `Close`,
@@ -22,6 +22,7 @@ export const language = {
 		maxCharsReached: `Max chars reached`,
 		name: `Name`,
 		pageNotFound: `Page not found`,
+		portals: `Portals`,
 		profileCreated: `Profile created`,
 		profileMenu: `Profile menu`,
 		profileUpdated: `Profile updated`,
@@ -34,6 +35,6 @@ export const language = {
 		uploadAvatar: `Upload avatar`,
 		uploadBanner: `Upload banner`,
 		useDarkDisplay: `Use dark display`,
-		useLightDisplay: `Use light display`
+		useLightDisplay: `Use light display`,
 	},
 };

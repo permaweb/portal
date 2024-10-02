@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { transition1, open } from 'helpers/animations';
+import { open, transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div<{ top: number; noHeader: boolean }>`
@@ -12,8 +12,7 @@ export const Wrapper = styled.div<{ top: number; noHeader: boolean }>`
 	top: 0;
 	left: 0;
 	background: ${(props) => props.theme.colors.overlay.primary};
-	backdrop-filter: blur(1.5px);
-	animation: ${open} ${transition1};
+	animation: ${open} ${transition2};
 `;
 
 export const Container = styled.div<{
