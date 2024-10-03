@@ -78,13 +78,12 @@ export const PanelContent = styled.div<{ open: boolean }>`
 export const Header = styled.header<{ navigationOpen: boolean }>`
 	height: ${STYLING.dimensions.nav.height};
 	width: 100%;
-	padding: 0 20px 0 ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 20px)` : '20px')};
+	padding: 0 20px 0 ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 10px)` : '20px')};
 	transition: padding-left ${transition2};
 	position: fixed;
 	top: 0;
 	z-index: 2;
 	background: ${(props) => props.theme.colors.view.background};
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		padding: 0 20px;
@@ -101,8 +100,8 @@ export const Content = styled.div`
 
 export const C1Wrapper = styled.div`
 	display: flex;
-	gap: 15px;
 	align-items: center;
+	gap: 10px;
 `;
 
 export const LogoWrapper = styled.div`
@@ -114,6 +113,137 @@ export const LogoWrapper = styled.div`
 		&:hover {
 			fill: ${(props) => props.theme.colors.icon.alt2.active};
 			opacity: 0.85;
+		}
+	}
+`;
+
+export const PortalWrapper = styled.div`
+	position: relative;
+`;
+
+export const Portal = styled.button<{ active: boolean }>`
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	background: ${(props) =>
+		props.active ? props.theme.colors.container.primary.active : props.theme.colors.container.primary.background};
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: ${(props) => props.theme.typography.size.lg} !important;
+	font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
+	font-family: ${(props) => props.theme.typography.family.primary} !important;
+	border-radius: ${STYLING.dimensions.radius.alt2};
+	padding: 7.5px 16.5px;
+
+	svg {
+		height: 16.5px;
+		width: 16.5px;
+		color: ${(props) => props.theme.colors.font.alt1};
+		fill: ${(props) => props.theme.colors.font.alt1};
+		margin: 4.75px 0px 0 12.5px;
+	}
+	&:hover {
+		background: ${(props) => props.theme.colors.container.primary.active};
+	}
+	&:focus {
+		background: ${(props) => props.theme.colors.container.primary.active};
+	}
+`;
+
+export const PortalDropdown = styled.div`
+	min-width: 350px;
+	max-width: 90vw;
+	position: absolute;
+	top: 47.5px;
+	left: 0;
+	padding: 11.5px 10px;
+`;
+
+export const PDropdownHeader = styled.div`
+	padding: 0 7.5px;
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
+`;
+
+export const PDropdownBody = styled.div`
+	margin: 7.5px 0 0 0;
+`;
+
+export const PDropdownLinks = styled.div`
+	display: flex;
+	flex-direction: column;
+`;
+
+export const PDropdownLink = styled.div<{ active: boolean }>`
+	a {
+		height: 40px;
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		cursor: pointer;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		color: ${(props) => props.theme.colors.font.primary} !important;
+		font-size: ${(props) => props.theme.typography.size.small} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		border-radius: ${STYLING.dimensions.radius.alt2};
+		transition: all 100ms;
+		padding: 0 10px;
+		svg {
+			height: 17.5px;
+			width: 17.5px;
+			margin: 2.5px 0 0 0;
+			color: ${(props) => props.theme.colors.font.alt1};
+			fill: ${(props) => props.theme.colors.font.alt1};
+		}
+		img {
+			height: 22.5px;
+			width: 22.5px;
+			margin: 0 12.5px 0 0;
+		}
+		&:hover {
+			background: ${(props) => props.theme.colors.container.primary.active};
+		}
+	}
+`;
+
+export const PDropdownFooter = styled.div`
+	padding: 10px 0 0 0;
+	margin: 10px 0 0 0;
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+
+	button {
+		height: 40px;
+		width: 100%;
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		color: ${(props) => props.theme.colors.font.primary} !important;
+		font-size: ${(props) => props.theme.typography.size.small} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		border-radius: ${STYLING.dimensions.radius.alt2};
+		transition: all 100ms;
+		padding: 0 10px;
+		svg {
+			height: 16.5px;
+			width: 16.5px;
+			margin: 5.5px 9.5px 0 0;
+			color: ${(props) => props.theme.colors.font.alt1};
+			fill: ${(props) => props.theme.colors.font.alt1};
+		}
+		&:hover {
+			background: ${(props) => props.theme.colors.container.primary.active};
 		}
 	}
 `;

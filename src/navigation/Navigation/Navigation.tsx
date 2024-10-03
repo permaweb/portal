@@ -13,6 +13,23 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 import * as S from './styles';
 
 // TODO: Cache panel open
+// TODO: Portal switch (create provider)
+// TODO: Portal create
+
+const PORTALS = [
+	// TODO
+	{
+		id: 'IR2hzJyfSGp7lgqqgnoeza2caaus96e56uTVP1gV7GE',
+		name: 'My first portal',
+		logo: '4txDbfbymP1RNMQCsFzyZOZR9qeUZXt_IacmL4IXYD8',
+	},
+	{
+		id: 'WhW2X0sy3bvzvzSgFdxOSrU3jHJBmVleLf1GX-IWEjU',
+		name: 'Independent Media Alliance',
+		// logo: '357HeJjvG10nK28juQ8YMp6DlvHhGbmU7pOvZphEhUk',
+	},
+];
+
 export default function Navigation(props: { open: boolean; toggle: () => void }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -23,6 +40,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(false);
+	const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
 
 	function handleWindowResize() {
 		if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {
@@ -95,6 +113,52 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		}
 	}, [props.open, desktop]);
 
+	const portal = React.useMemo(() => {
+		const parts = window.location.href.split('/');
+		const id = parts[parts.indexOf('#') + 1];
+		const name = PORTALS.find((portal: any) => id === portal.id).name;
+
+		return (
+			<S.PortalWrapper>
+				<CloseHandler
+					active={showPortalDropdown}
+					disabled={!showPortalDropdown}
+					callback={() => setShowPortalDropdown(false)}
+				>
+					<S.Portal onClick={() => setShowPortalDropdown(!showPortalDropdown)} active={showPortalDropdown}>
+						{name}
+						<ReactSVG src={ASSETS.arrow} />
+					</S.Portal>
+					{showPortalDropdown && (
+						<S.PortalDropdown className={'border-wrapper-alt1 fade-in'}>
+							<S.PDropdownHeader>
+								<p>{language.portals}</p>
+							</S.PDropdownHeader>
+							<S.PDropdownBody>
+								{PORTALS.map((portal: any) => {
+									const active = id === portal.id;
+									return (
+										<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>
+											<Link to={`${URLS.base}${portal.id}`}>
+												{portal.name} {active && <ReactSVG src={ASSETS.checkmark} />}
+											</Link>
+										</S.PDropdownLink>
+									);
+								})}
+							</S.PDropdownBody>
+							<S.PDropdownFooter>
+								<button onClick={() => console.log('Create portal')}>
+									<ReactSVG src={ASSETS.add} />
+									Create a new portal
+								</button>
+							</S.PDropdownFooter>
+						</S.PortalDropdown>
+					)}
+				</CloseHandler>
+			</S.PortalWrapper>
+		);
+	}, [showPortalDropdown]);
+
 	return (
 		<>
 			{panel}
@@ -107,6 +171,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 								<ReactSVG src={ASSETS.logo} />
 							</Link>
 						</S.LogoWrapper> */}
+						{portal}
 					</S.C1Wrapper>
 					<S.ActionsWrapper>
 						<WalletConnect />

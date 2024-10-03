@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 
+import { STYLING } from 'helpers/config';
+
 export const Wrapper = styled.div`
 	height: 100vh;
 	width: 100%;
@@ -11,7 +13,7 @@ export const Wrapper = styled.div`
 `;
 
 export const HeaderWrapper = styled.div`
-	max-width: 500px;
+	max-width: 515px;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -30,34 +32,92 @@ export const HeaderWrapper = styled.div`
 
 export const BodyWrapper = styled.div`
 	width: 100%;
-	max-width: 750px;
+	max-width: 840px;
 	display: flex;
 	flex-wrap: wrap;
-	margin: 40px 0 0 0;
+	margin: 50px 0 0 0;
 
-	> * {
+	/* > * {
 		&:not(:last-child) {
-			border-right: 1px solid ${(props) => props.theme.colors.border.alt1};
+			border-right: 1px solid ${(props) => props.theme.colors.border.primary};
 		}
-	}
+	} */
 `;
 
 export const Section = styled.div`
-	min-height: 300px;
 	width: 50%;
 	display: flex;
-	padding: 0 40px;
+	padding: 0 30px;
 `;
 
 export const ConnectionWrapper = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
 	gap: 10px;
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
+	}
+`;
+
+export const PortalsWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+	}
+`;
+
+export const PLoadingWrapper = styled.div`
+	p {
+		text-align: center;
+		margin: 0 0 10px 0;
+	}
+`;
+
+export const PListWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 15px;
+	margin: 0 0 5px 0;
+
+	a {
+		height: 47.5px;
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.small} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		border: 1px solid ${(props) => props.theme.colors.border.primary};
+		border-radius: ${STYLING.dimensions.radius.alt3};
+		transition: all 100ms;
+		padding: 0 15px;
+		svg {
+			height: 20.5px;
+			width: 20.5px;
+			margin: 6.5px 14.5px 0 0;
+			color: ${(props) => props.theme.colors.font.alt1};
+			fill: ${(props) => props.theme.colors.font.alt1};
+		}
+		img {
+			height: 22.5px;
+			width: 22.5px;
+			margin: 0 12.5px 0 0;
+		}
+		&:hover {
+			background: ${(props) => props.theme.colors.container.primary.active};
+		}
 	}
 `;

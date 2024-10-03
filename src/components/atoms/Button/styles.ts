@@ -119,10 +119,10 @@ export const IconPrimary = styled.div<{
 	leftAlign: boolean;
 }>`
 	svg {
-		height: 15px;
-		width: 15px;
+		height: 15.5px;
+		width: 15.5px;
 		padding: 1.5px 0 0 0;
-		margin: ${(props) => (props.leftAlign ? '0 7.5px 0 0' : '0 0 0 7.5px')};
+		margin: ${(props) => (props.leftAlign ? '3.5px 7.5px 0 0' : '3.5px 0 0 7.5px')};
 		color: ${(props) =>
 			props.disabled
 				? props.theme.colors.button.primary.disabled.color

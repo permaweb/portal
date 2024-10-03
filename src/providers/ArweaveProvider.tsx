@@ -1,11 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { getProfileByWalletAddress } from 'api';
 
 import { Modal } from 'components/molecules/Modal';
 import { Panel } from 'components/molecules/Panel';
 import { ProfileManage } from 'components/organisms/ProfileManage';
-import { ASSETS } from 'helpers/config';
+import { ASSETS, URLS } from 'helpers/config';
 import { getARBalanceEndpoint } from 'helpers/endpoints';
 import { ProfileHeaderType, WalletEnum } from 'helpers/types';
 import Othent from 'helpers/wallet';
@@ -90,6 +91,8 @@ function WalletList(props: { handleConnect: any }) {
 }
 
 export function ArweaveProvider(props: ArweaveProviderProps) {
+	const navigate = useNavigate();
+
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -244,6 +247,7 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
 		setWallet(null);
 		setWalletAddress(null);
 		setProfile(null);
+		navigate(URLS.base);
 		if (localStorage.getItem('walletType')) localStorage.removeItem('walletType');
 	}
 

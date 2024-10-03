@@ -86,7 +86,7 @@ export const BInput = styled.button<{ hasBanner: boolean }>`
 	height: 200px;
 	width: 100%;
 	background: ${(props) => props.theme.colors.container.primary.background};
-	border: ${(props) => (props.hasBanner ? `none` : `1px dashed ${props.theme.colors.border.alt1}`)};
+	border: ${(props) => (props.hasBanner ? `none` : `1px dashed ${props.theme.colors.border.primary}`)};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	overflow: hidden;
 	span {
@@ -167,7 +167,7 @@ export const AInput = styled.button<{ hasAvatar: boolean }>`
 	height: 115px;
 	width: 115px;
 	background: ${(props) => props.theme.colors.container.primary.background};
-	border: ${(props) => (props.hasAvatar ? `none` : `1px dashed ${props.theme.colors.border.alt1}`)};
+	border: ${(props) => (props.hasAvatar ? `none` : `1px dashed ${props.theme.colors.border.primary}`)};
 	border-radius: 50%;
 	position: absolute;
 	bottom: -55px;

@@ -13,16 +13,16 @@ import { persistor, store } from 'store';
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 	<Provider store={store}>
 		<PersistGate loading={null} persistor={persistor}>
-			<CustomThemeProvider>
-				<LanguageProvider>
-					<ArweaveProvider>
-						<HashRouter>
+			<HashRouter>
+				<CustomThemeProvider>
+					<LanguageProvider>
+						<ArweaveProvider>
 							<GlobalStyle />
 							<App />
-						</HashRouter>
-					</ArweaveProvider>
-				</LanguageProvider>
-			</CustomThemeProvider>
+						</ArweaveProvider>
+					</LanguageProvider>
+				</CustomThemeProvider>
+			</HashRouter>
 		</PersistGate>
 	</Provider>
 );

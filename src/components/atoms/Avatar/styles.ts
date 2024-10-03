@@ -12,7 +12,6 @@ export const Wrapper = styled.div<{
 	width: ${(props) => `${props.dimensions.wrapper.toString()}px`};
 	background: ${(props) =>
 		props.hasOwner ? props.theme.colors.container.primary.background : props.theme.colors.icon.alt1.fill};
-	box-shadow: 0 5px 15px 2.5px ${(props) => props.theme.colors.shadow.primary};
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-radius: 50%;
 	overflow: hidden;
@@ -31,7 +30,7 @@ export const Wrapper = styled.div<{
 		height: ${(props) => `${props.dimensions.icon.toString()}px`};
 		width: ${(props) => `${props.dimensions.icon.toString()}px`};
 		padding: 2.5px 0 0 0px;
-		margin: 0 0 -3.5px 0;
+		margin: 0 0 -2.5px 0;
 	}
 
 	pointer-events: none;

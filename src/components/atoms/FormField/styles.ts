@@ -52,6 +52,7 @@ export const Input = styled.input<{
 	font-family: ${(props) => props.theme.typography.family.primary};
 	font-size: ${(props) => props.theme.typography.size.base};
 	font-weight: ${(props) => props.theme.typography.weight.bold};
+	letter-spacing: 0.15px;
 	margin: 10px 0 0 0;
 	background: ${(props) => props.theme.colors.form.background};
 	border: 1px solid

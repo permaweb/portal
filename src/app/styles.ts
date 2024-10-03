@@ -61,6 +61,7 @@ export const GlobalStyle = createGlobalStyle`
 			font-weight: ${(props) => props.theme.typography.weight.medium};
 			color: ${(props) => props.theme.colors.font.primary};
 			line-height: 1.5;
+			letter-spacing: 0.15px;
 			-webkit-font-smoothing: antialiased;
 			-moz-osx-font-smoothing: grayscale;
 			box-sizing: border-box;
@@ -157,9 +158,15 @@ export const GlobalStyle = createGlobalStyle`
 
   .border-wrapper-primary {
     background: ${(props) => props.theme.colors.container.primary.background};
-    box-shadow: 0 1px 2px 0.5px ${(props) => props.theme.colors.shadow.primary};
     border: 1px solid ${(props) => props.theme.colors.border.alt1};
     border-radius: ${STYLING.dimensions.radius.primary};
+  }
+
+  .border-wrapper-alt1 {
+    background: ${(props) => props.theme.colors.container.primary.background};
+    box-shadow: 0 0 3.5px 0.5px ${(props) => props.theme.colors.shadow.primary};
+    border: 1px solid ${(props) => props.theme.colors.border.primary};
+    border-radius: ${STYLING.dimensions.radius.alt1};
   }
 
   .max-view-wrapper {

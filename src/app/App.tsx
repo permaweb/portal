@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import { debounce } from 'lodash';
 
 const Landing = getLazyImport('Landing');
+const Portal = getLazyImport('Portal');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
 
@@ -71,6 +72,7 @@ export default function App() {
 				<S.App>
 					<Routes>
 						{getRoute(URLS.base, <Landing />)}
+						{getRoute(`${URLS.base}:portalId/*`, <Portal />)}
 						{getRoute(URLS.docs, <Docs />)}
 						{getRoute(`${URLS.docs}:active/*`, <Docs />)}
 						{getRoute(URLS.notFound, <NotFound />)}

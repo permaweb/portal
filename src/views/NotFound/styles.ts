@@ -21,6 +21,7 @@ export const Content = styled.div`
 
 export const Header = styled.h2`
 	font-size: 28px;
+	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 
 export const Divider = styled.div`
