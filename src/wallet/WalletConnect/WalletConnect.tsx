@@ -24,7 +24,6 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(false);
 	const [showProfileManage, setShowProfileManage] = React.useState<boolean>(false);
 
-	const [copied, setCopied] = React.useState<boolean>(false);
 	const [label, setLabel] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
@@ -64,16 +63,6 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 			setShowProfileManage(true);
 		}
 	}
-
-	const copyAddress = React.useCallback(async (address: string) => {
-		if (address) {
-			if (address.length > 0) {
-				await navigator.clipboard.writeText(address);
-				setCopied(true);
-				setTimeout(() => setCopied(false), 2000);
-			}
-		}
-	}, []);
 
 	function handleToggleTheme() {
 		themeProvider.setCurrent(themeProvider.current === 'light' ? 'dark' : 'light');
@@ -119,18 +108,6 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 							</>
 						)}
 					</li>
-					{arProvider.profile && arProvider.profile.id && (
-						<>
-							<li onClick={() => setShowProfileManage(true)}>
-								<ReactSVG src={ASSETS.write} />
-								{language.editProfile}
-							</li>
-							<li onClick={() => copyAddress(arProvider.profile.id)}>
-								<ReactSVG src={ASSETS.copy} />
-								{copied ? `${language.copied}!` : language.copyProfileAddress}
-							</li>
-						</>
-					)}
 					<li onClick={handleToggleTheme}>
 						{themeProvider.current === 'light' ? (
 							<>
@@ -142,13 +119,13 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 							</>
 						)}
 					</li>
-				</S.DBodyWrapper>
+				</S.DBodyWrapper> */}
 				<S.DFooterWrapper>
 					<li onClick={handleDisconnect}>
 						<ReactSVG src={ASSETS.disconnect} />
 						{language.disconnect}
 					</li>
-				</S.DFooterWrapper> */}
+				</S.DFooterWrapper>
 			</>
 		);
 	}
@@ -175,11 +152,21 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		return (
 			<S.Wrapper>
 				{getHeader()}
-				{showWalletDropdown && (
-					<Panel open={showWalletDropdown} header={label} handleClose={() => setShowWalletDropdown(false)} width={375}>
-						{getDropdown()}
-					</Panel>
-				)}
+				<Panel
+					open={showWalletDropdown}
+					header={
+						<S.DHeaderFlex>
+							<Avatar owner={arProvider.profile} dimensions={{ wrapper: 32.5, icon: 19.5 }} callback={null} />
+							<S.DHeader>
+								<p>{label}</p>
+							</S.DHeader>
+						</S.DHeaderFlex>
+					}
+					handleClose={() => setShowWalletDropdown(false)}
+					width={350}
+				>
+					{getDropdown()}
+				</Panel>
 			</S.Wrapper>
 		);
 	}

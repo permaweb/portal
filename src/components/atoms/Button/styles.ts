@@ -55,7 +55,7 @@ export const Primary = styled.button<{
 	max-width: ${(props) => (props.useMaxWidth ? STYLING.dimensions.button.width : '100%')};
 	overflow: hidden;
 	text-overflow: ellipsis;
-	padding: 0 15px 1.15px 15px;
+	padding: 0 15px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -102,8 +102,10 @@ export const Primary = styled.button<{
 		text-overflow: ellipsis;
 		overflow: hidden;
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+		letter-spacing: 0.35px;
 		color: ${(props) =>
 			props.active
 				? props.theme.colors.button.primary.active.color
@@ -177,7 +179,7 @@ export const Alt1 = styled(Primary)`
 		text-overflow: ellipsis;
 		overflow: hidden;
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		color: ${(props) => props.theme.colors.font.light1} !important;
 	}
 `;
@@ -227,6 +229,7 @@ export const Alt2 = styled(Alt1)`
 		overflow: hidden;
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		text-transform: none;
 		color: ${(props) =>
 			props.active ? props.theme.colors.button.alt2.active.color : props.theme.colors.button.alt2.color} !important;
 	}

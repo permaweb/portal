@@ -30,7 +30,7 @@ export const LAction = styled.button`
 	display: none;
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
-		font-family: ${(props) => props.theme.typography.family.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.base};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		display: block;
@@ -73,40 +73,23 @@ export const DHeaderFlex = styled.div`
 	width: 100%;
 	display: flex;
 	align-items: center;
+	padding: 2.5px 0 0 0;
 `;
 
 export const DHeader = styled.div`
-	margin: 0 0 0 10px;
+	margin: 0 0 0 15px;
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
-		font-family: ${(props) => props.theme.typography.family.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.base};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
-		&:hover {
-			color: ${(props) => props.theme.colors.font.alt1};
-		}
-	}
-	span {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		&:hover {
-			color: ${(props) => props.theme.colors.font.primary};
-		}
-	}
-	p,
-	span {
-		transition: all 100ms;
-		&:hover {
-			cursor: pointer;
-		}
 	}
 `;
 
 export const DBodyWrapper = styled.ul`
 	width: 100%;
 	padding: 10px 7.5px;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.alt4};
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 	li {
 		text-align: center;
 		height: 40.5px;
@@ -120,11 +103,11 @@ export const DBodyWrapper = styled.ul`
 		border: 1px solid transparent;
 		border-radius: ${STYLING.dimensions.radius.alt2};
 		transition: all 100ms;
-		padding: 0 7.5px;
+		padding: 0 10px;
 		svg {
-			height: 15.5px;
-			width: 15.5px;
-			margin: 6.5px 8.5px 0 0;
+			height: 16.5px;
+			width: 16.5px;
+			margin: 6.5px 12.5px 0 0;
 			color: ${(props) => props.theme.colors.font.alt1};
 			fill: ${(props) => props.theme.colors.font.alt1};
 		}

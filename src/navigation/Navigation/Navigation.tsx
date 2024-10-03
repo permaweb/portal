@@ -18,7 +18,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	const language = languageProvider.object[languageProvider.current];
 
 	const paths: { path: string; label: string; icon: string; target?: '_blank' }[] = [
-		{ path: URLS.base, icon: ASSETS.portals, label: language.portals }
+		{ path: URLS.base, icon: ASSETS.portals, label: language.portals },
 	];
 
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
@@ -76,7 +76,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		);
 
 		if (desktop) {
-			return <S.Panel open={props.open} className={'fade-in'}>{content}</S.Panel>;
+			return (
+				<S.Panel open={props.open} className={'fade-in'}>
+					{content}
+				</S.Panel>
+			);
 		} else {
 			return (
 				<>
@@ -98,11 +102,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				<S.Content>
 					<S.C1Wrapper>
 						{!props.open && navigationToggle}
-						<S.LogoWrapper>
+						{/* <S.LogoWrapper>
 							<Link to={URLS.base}>
 								<ReactSVG src={ASSETS.logo} />
 							</Link>
-							</S.LogoWrapper>
+						</S.LogoWrapper> */}
 					</S.C1Wrapper>
 					<S.ActionsWrapper>
 						<WalletConnect />
@@ -111,7 +115,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 								type={'primary'}
 								src={ASSETS.menu}
 								handlePress={() => setPanelOpen(true)}
-								dimensions={{ wrapper: 36.5, icon: 23.5 }}
+								dimensions={{ wrapper: 32.5, icon: 21.5 }}
 							/>
 						</S.MWrapper>
 					</S.ActionsWrapper>
@@ -129,9 +133,10 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										src={ASSETS.close}
 										handlePress={() => setPanelOpen(false)}
 										dimensions={{
-											wrapper: 35,
-											icon: 20,
+											wrapper: 32.5,
+											icon: 18.5,
 										}}
+										tooltip={language.close}
 									/>
 								</S.PHeader>
 								<S.MNavWrapper>

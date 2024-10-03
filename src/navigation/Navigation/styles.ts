@@ -5,17 +5,17 @@ import { STYLING } from 'helpers/config';
 
 export const PanelOverlay = styled.div<{ open: boolean }>`
 	height: 100vh;
-    width: 100%;
-    position: fixed;
-    z-index: 3;
-    top: 0;
-    left: 0;
-    background: ${(props) => props.theme.colors.overlay.primary};
-    animation: ${open} ${transition2};
+	width: 100%;
+	position: fixed;
+	z-index: 3;
+	top: 0;
+	left: 0;
+	background: ${(props) => props.theme.colors.overlay.primary};
+	animation: ${open} ${transition2};
 	display: none;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		display: ${(props) => props.open ? 'block' : 'none'};
+		display: ${(props) => (props.open ? 'block' : 'none')};
 	}
 `;
 
@@ -56,7 +56,7 @@ export const PanelContent = styled.div<{ open: boolean }>`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
 		border: 1px solid transparent;
 		border-radius: ${STYLING.dimensions.radius.primary};
 		transition: all 100ms;

@@ -24,6 +24,7 @@ export const language = {
 		pageNotFound: `Page not found`,
 		portals: `Portals`,
 		profileCreated: `Profile created`,
+		profileCreatingInfo: `Creating your profile`,
 		profileMenu: `Profile menu`,
 		profileUpdated: `Profile updated`,
 		removeAvatar: `Remove avatar`,

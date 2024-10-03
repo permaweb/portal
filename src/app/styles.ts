@@ -84,7 +84,7 @@ export const GlobalStyle = createGlobalStyle`
 
   h1, h2, h3, h4, h5, h6 {
     font-family: ${(props) => props.theme.typography.family.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
     color: ${(props) => props.theme.colors.font.primary};
 		overflow-wrap: anywhere;
   }
@@ -158,7 +158,7 @@ export const GlobalStyle = createGlobalStyle`
   .border-wrapper-primary {
     background: ${(props) => props.theme.colors.container.primary.background};
     box-shadow: 0 1px 2px 0.5px ${(props) => props.theme.colors.shadow.primary};
-    border: 1px solid ${(props) => props.theme.colors.border.alt3};
+    border: 1px solid ${(props) => props.theme.colors.border.alt1};
     border-radius: ${STYLING.dimensions.radius.primary};
   }
 
@@ -242,11 +242,8 @@ export const GlobalStyle = createGlobalStyle`
   }
 `;
 
-export const AppWrapper = styled.div`
+export const App = styled.div`
 	min-height: 100vh;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
 	position: relative;
 `;
 

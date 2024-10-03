@@ -21,7 +21,7 @@ export const Container = styled.div<{
 	width: 650px;
 	max-width: ${(props) => (props.noHeader ? '100%' : '90vw')};
 	background: ${(props) => (props.noHeader ? 'transparent' : props.theme.colors.container.primary.background)};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border: 1.25px solid ${(props) => props.theme.colors.border.alt4};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	margin: 20px auto;
 `;
@@ -44,7 +44,7 @@ export const LT = styled.div`
 export const Title = styled.p`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.lg};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	line-height: calc(${(props) => props.theme.typography.size.lg} + 5px);
 	font-family: ${(props) => props.theme.typography.family.alt1};
 	white-space: nowrap;

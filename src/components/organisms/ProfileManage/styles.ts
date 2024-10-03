@@ -36,8 +36,7 @@ export const Form = styled.div`
 `;
 
 export const TForm = styled.div`
-	margin: 20px 0 30px 0;
-	padding: 10px 20px 25px 20px;
+	margin: 40px 0 30px 0;
 	> * {
 		&:last-child {
 			margin: 20px 0 0 0;
@@ -86,8 +85,8 @@ export const BWrapper = styled.div`
 export const BInput = styled.button<{ hasBanner: boolean }>`
 	height: 200px;
 	width: 100%;
-	background: ${(props) => props.theme.colors.container.primary.active};
-	border: ${(props) => (props.hasBanner ? `none` : `1px dashed ${props.theme.colors.border.alt2}`)};
+	background: ${(props) => props.theme.colors.container.primary.background};
+	border: ${(props) => (props.hasBanner ? `none` : `1px dashed ${props.theme.colors.border.alt1}`)};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	overflow: hidden;
 	span {
@@ -99,7 +98,8 @@ export const BInput = styled.button<{ hasBanner: boolean }>`
 		height: 35px;
 		width: 35px;
 		margin: 0 0 10px 0;
-		stroke: ${(props) => props.theme.colors.font.alt1};
+		color: ${(props) => props.theme.colors.icon.primary.fill};
+		fill: ${(props) => props.theme.colors.icon.primary.fill};
 	}
 	img {
 		height: 200px;
@@ -108,13 +108,7 @@ export const BInput = styled.button<{ hasBanner: boolean }>`
 	}
 	&:hover {
 		border: 1px dashed ${(props) => props.theme.colors.border.alt2};
-		background: ${(props) => props.theme.colors.container.alt1.background};
-		span {
-			color: ${(props) => props.theme.colors.font.primary};
-		}
-		svg {
-			stroke: ${(props) => props.theme.colors.font.primary};
-		}
+		background: ${(props) => props.theme.colors.container.primary.active};
 	}
 	&:focus {
 		opacity: 1;
@@ -126,10 +120,12 @@ export const BInput = styled.button<{ hasBanner: boolean }>`
 			color: ${(props) => props.theme.colors.button.primary.disabled.color};
 		}
 		svg {
-			stroke: ${(props) => props.theme.colors.button.primary.disabled.color};
+			fill: ${(props) => props.theme.colors.button.primary.disabled.color};
+			color: ${(props) => props.theme.colors.button.primary.disabled.color};
 			g {
 				.svg-primary-fill {
 					fill: ${(props) => props.theme.colors.button.primary.disabled.color};
+					color: ${(props) => props.theme.colors.button.primary.disabled.color};
 				}
 			}
 		}
@@ -170,8 +166,8 @@ export const BInput = styled.button<{ hasBanner: boolean }>`
 export const AInput = styled.button<{ hasAvatar: boolean }>`
 	height: 115px;
 	width: 115px;
-	background: ${(props) => props.theme.colors.container.primary.active};
-	border: ${(props) => (props.hasAvatar ? `none` : `1px dashed ${props.theme.colors.border.alt2}`)};
+	background: ${(props) => props.theme.colors.container.primary.background};
+	border: ${(props) => (props.hasAvatar ? `none` : `1px dashed ${props.theme.colors.border.alt1}`)};
 	border-radius: 50%;
 	position: absolute;
 	bottom: -55px;
@@ -187,7 +183,8 @@ export const AInput = styled.button<{ hasAvatar: boolean }>`
 		height: 25px;
 		width: 25px;
 		margin: 0 0 5px 0;
-		color: ${(props) => props.theme.colors.font.alt1};
+		color: ${(props) => props.theme.colors.icon.primary.fill};
+		fill: ${(props) => props.theme.colors.icon.primary.fill};
 	}
 	img {
 		height: 100%;
@@ -197,13 +194,7 @@ export const AInput = styled.button<{ hasAvatar: boolean }>`
 	}
 	&:hover {
 		border: 1px dashed ${(props) => props.theme.colors.border.alt2};
-		background: ${(props) => props.theme.colors.container.alt1.background};
-		span {
-			color: ${(props) => props.theme.colors.font.primary};
-		}
-		svg {
-			color: ${(props) => props.theme.colors.font.primary};
-		}
+		background: ${(props) => props.theme.colors.container.primary.active};
 	}
 	&:focus {
 		opacity: 1;
@@ -215,6 +206,7 @@ export const AInput = styled.button<{ hasAvatar: boolean }>`
 			color: ${(props) => props.theme.colors.button.primary.disabled.color};
 		}
 		svg {
+			fill: ${(props) => props.theme.colors.button.primary.disabled.color};
 			color: ${(props) => props.theme.colors.button.primary.disabled.color};
 		}
 	}
@@ -276,7 +268,7 @@ export const Message = styled.div`
 	left: 0;
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
-		font-family: ${(props) => props.theme.typography.family.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		line-height: 1.5;

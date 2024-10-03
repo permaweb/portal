@@ -35,8 +35,9 @@ export const Icon = styled.div`
 	svg {
 		height: 75px;
 		width: 75px;
+		color: ${(props) => props.theme.colors.icon.primary.fill};
 		fill: ${(props) => props.theme.colors.icon.primary.fill};
-		margin: 3.5px 0 0 0;
+		margin: 13.5px 0 0 0;
 	}
 `;
 

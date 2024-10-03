@@ -3,6 +3,8 @@ import React from 'react';
 import { getProfileByWalletAddress } from 'api';
 
 import { Modal } from 'components/molecules/Modal';
+import { Panel } from 'components/molecules/Panel';
+import { ProfileManage } from 'components/organisms/ProfileManage';
 import { ASSETS } from 'helpers/config';
 import { getARBalanceEndpoint } from 'helpers/endpoints';
 import { ProfileHeaderType, WalletEnum } from 'helpers/types';
@@ -13,7 +15,10 @@ import * as S from './styles';
 
 const WALLET_PERMISSIONS = ['ACCESS_ADDRESS', 'ACCESS_PUBLIC_KEY', 'SIGN_TRANSACTION', 'DISPATCH', 'SIGNATURE'];
 
-const AR_WALLETS = [{ type: WalletEnum.arConnect, logo: ASSETS.arconnect }];
+const AR_WALLETS = [
+	{ type: WalletEnum.arConnect, label: 'ArConnect', logo: ASSETS.arconnect },
+	{ type: WalletEnum.othent, label: 'Othent', logo: ASSETS.othent },
+];
 
 interface ArweaveContextState {
 	wallets: { type: WalletEnum; logo: string }[];
@@ -26,6 +31,8 @@ interface ArweaveContextState {
 	walletModalVisible: boolean;
 	setWalletModalVisible: (open: boolean) => void;
 	profile: ProfileHeaderType;
+	showProfileManage: boolean;
+	setShowProfileManage: (toggle: boolean) => void;
 	toggleProfileUpdate: boolean;
 	setToggleProfileUpdate: (toggleUpdate: boolean) => void;
 }
@@ -47,6 +54,8 @@ const DEFAULT_CONTEXT = {
 	profile: null,
 	toggleProfileUpdate: false,
 	setToggleProfileUpdate(_toggleUpdate: boolean) {},
+	showProfileManage: false,
+	setShowProfileManage(_toggle: boolean) {},
 };
 
 const ARContext = React.createContext<ArweaveContextState>(DEFAULT_CONTEXT);
@@ -64,10 +73,18 @@ function WalletList(props: { handleConnect: any }) {
 					onClick={() => props.handleConnect(wallet.type)}
 					className={'border-wrapper-primary'}
 				>
-					<img src={`${wallet.logo}`} alt={''} />
-					<span>{wallet.type.charAt(0).toUpperCase() + wallet.type.slice(1)}</span>
+					<img src={wallet.logo} alt={''} />
+					<span>{wallet.label}</span>
 				</S.WalletListItem>
 			))}
+			<S.WalletLink>
+				<span>
+					Don't have an Arweave Wallet? You can create one{' '}
+					<a href={'https://arconnect.io'} target={'_blank'}>
+						here.
+					</a>
+				</span>
+			</S.WalletLink>
 		</S.WalletListContainer>
 	);
 }
@@ -86,6 +103,7 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
 	const [arBalance, setArBalance] = React.useState<number | null>(null);
 
 	const [profile, setProfile] = React.useState<ProfileHeaderType | null>(null);
+	const [showProfileManage, setShowProfileManage] = React.useState<boolean>(false);
 	const [toggleProfileUpdate, setToggleProfileUpdate] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
@@ -254,11 +272,25 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
 					walletModalVisible,
 					setWalletModalVisible,
 					profile,
+					showProfileManage,
+					setShowProfileManage,
 					toggleProfileUpdate,
 					setToggleProfileUpdate,
 				}}
 			>
 				{props.children}
+				<Panel
+					open={showProfileManage}
+					header={profile && profile.id ? language.editProfile : `${language.createProfile}!`}
+					handleClose={() => setShowProfileManage(false)}
+					width={575}
+				>
+					<ProfileManage
+						profile={profile && profile.id ? profile : null}
+						handleClose={() => setShowProfileManage(false)}
+						handleUpdate={null}
+					/>
+				</Panel>
 			</ARContext.Provider>
 		</>
 	);

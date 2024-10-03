@@ -8,7 +8,7 @@ export const AO = {
 };
 
 export const ASSETS = {
-	arconnect: getTxEndpoint('w1F2knRApU5yRH7jYCr6ug-YUJrjh0HE5aQKk5u_9-0'),
+	arconnect: getTxEndpoint('-A1IutbyzVDJHi91QwRDQ_mpNa9Jbz-Tapu4YDVsCrc'),
 	arrow: getTxEndpoint('ghFL1fzQ2C1eEAnqSVvfAMP5Jikx7NKSPP5neoNPALw'),
 	checkmark: getTxEndpoint('mVnNwxm-F6CV043zVtORE-EaMWfd2j8w6HHX70IcVbI'),
 	close: getTxEndpoint('BASlMnOWcLCcLUSrO2wUybQL_06231dLONeVkdTWs3o'),
@@ -24,6 +24,7 @@ export const ASSETS = {
 	portals: getTxEndpoint('WzomcwfXZ_4hhUvDso1wsyJpNBHGeHezFZQv3V706Hw'),
 	othent: getTxEndpoint('jDmU1yqdfK41qZ8mUj61MZlji-rX7bHJV12s1lMlw3A'),
 	user: getTxEndpoint('aOk91wDJnZ1xQbQum0MHoaOldAiumdFjdjM4LVM83NQ'),
+	wallet: getTxEndpoint('_t97i0BzskALIFERWR6iDs_uX7U6bbd4-3Pqq3HDkfI'),
 	write: getTxEndpoint('SUWTk8Qtcub9EsP5PDF6-vzgKsP5Irg1bB9b8NImDDk'),
 };
 

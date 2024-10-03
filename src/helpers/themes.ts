@@ -8,7 +8,7 @@ export const lightTheme = {
 	negative2: '#E52461',
 	neutral1: '#FFFFFF',
 	neutral2: '#F9F9F9',
-	neutral3: '#EBEBEB',
+	neutral3: '#F0F0F0',
 	neutral4: '#D6D6D6',
 	neutral5: '#CCCCCC',
 	neutral6: '#ADADAD',
@@ -21,8 +21,8 @@ export const lightTheme = {
 	neutralA5: '#525252',
 	neutralA6: '#666666',
 	neutralA7: '#707070',
-	overlay1: 'rgb(105, 105, 105, .35)',
-	primary1: '#5158BB',
+	overlay1: 'rgb(0, 0, 0, .35)',
+	primary1: '#5E66DB',
 	primary2: '#454CB0',
 	semiTransparent1: 'rgba(255, 255, 255, 0.575)',
 	semiTransparent2: 'rgba(40, 40, 40, 0.575)',
@@ -115,7 +115,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 		button: {
 			primary: {
 				background: currentTheme.neutral2,
-				border: currentTheme.neutral3,
+				border: currentTheme.neutral4,
 				color: currentTheme.neutralA1,
 				active: {
 					background: currentTheme.neutral3,
@@ -125,7 +125,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 				disabled: {
 					background: currentTheme.neutral3,
 					border: currentTheme.neutral5,
-					color: currentTheme.neutral5,
+					color: currentTheme.neutral7,
 				},
 			},
 			alt1: {
@@ -140,7 +140,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 				disabled: {
 					background: currentTheme.neutral3,
 					border: currentTheme.neutral5,
-					color: currentTheme.neutral5,
+					color: currentTheme.neutral7,
 				},
 			},
 			alt2: {
@@ -155,7 +155,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 				disabled: {
 					background: currentTheme.neutral3,
 					border: currentTheme.neutral3,
-					color: currentTheme.neutralA2,
+					color: currentTheme.neutral7,
 				},
 			},
 		},
@@ -170,7 +170,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 		container: {
 			primary: {
 				background: currentTheme.neutral1,
-				active: currentTheme.neutral2,
+				active: currentTheme.neutral3,
 			},
 			alt1: {
 				background: currentTheme.neutral2,
@@ -222,8 +222,8 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 				shadow: currentTheme.negative2,
 			},
 			valid: {
-				outline: currentTheme.neutralA4,
-				shadow: currentTheme.neutral3,
+				outline: currentTheme.primary1,
+				shadow: currentTheme.primary2,
 			},
 			disabled: {
 				background: currentTheme.neutral2,
@@ -238,7 +238,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 		},
 		icon: {
 			primary: {
-				fill: currentTheme.neutralA2,
+				fill: currentTheme.neutralA4,
 				active: currentTheme.neutral4,
 				disabled: currentTheme.neutralA3,
 			},
@@ -302,7 +302,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 		tooltip: {
 			background: currentTheme.dark2,
 			border: currentTheme.dark2,
-			color: currentTheme.light1
+			color: currentTheme.light1,
 		},
 		view: {
 			background: currentTheme.neutral1,
@@ -315,7 +315,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 	typography: {
 		family: {
 			primary: `'Lato', system-ui`,
-			alt1: `'Lato', system-ui`,
+			alt1: `'Merriweather', serif`,
 		},
 		size: {
 			xxxSmall: '12px',

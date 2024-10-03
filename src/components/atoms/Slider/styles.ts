@@ -217,7 +217,7 @@ export const Value = styled(Label)`
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-family: ${(props) => props.theme.typography.family.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 	}
 `;

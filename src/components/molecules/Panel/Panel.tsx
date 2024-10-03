@@ -37,16 +37,28 @@ export default function Panel(props: IProps) {
 		};
 	}, [escFunction]);
 
+	function getHeader() {
+		switch (typeof props.header) {
+			case 'string':
+				return <S.Title>{props.header}</S.Title>;
+			case 'object':
+				return props.header;
+		}
+	}
+
 	function getBody() {
 		return (
 			<>
-				<S.Container noHeader={!props.header} className={'border-wrapper-primary'} width={props.width}>
+				<S.Container
+					open={props.open}
+					noHeader={!props.header}
+					width={props.width}
+					className={'border-wrapper-primary'}
+				>
 					<CloseHandler active={props.open} disabled={!props.open} callback={() => props.handleClose()}>
 						{props.header && (
 							<S.Header>
-								<S.LT>
-									<S.Title>{props.header}</S.Title>
-								</S.LT>
+								<S.LT>{getHeader()}</S.LT>
 								{props.handleClose && (
 									<S.Close>
 										<IconButton
@@ -74,11 +86,18 @@ export default function Panel(props: IProps) {
 
 	return (
 		<Portal node={DOM.overlay}>
-			<S.Wrapper open={true} noHeader={!props.header} top={window ? (window as any).pageYOffset : 0}>
-				{getBody()}
-			</S.Wrapper>
+			{getBody()}
+			<S.PanelOverlay open={props.open} />
 		</Portal>
 	);
+
+	// return (
+	// 	<Portal node={DOM.overlay}>
+	// 		<S.Wrapper open={true} noHeader={!props.header} top={window ? (window as any).pageYOffset : 0}>
+	// 			{getBody()}
+	// 		</S.Wrapper>
+	// 	</Portal>
+	// );
 }
 
 let panelOpenCounter = 0;
