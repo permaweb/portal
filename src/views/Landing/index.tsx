@@ -8,14 +8,17 @@ import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { ButtonType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-// TODO: Mobile
-// TODO: Language
+// TODO: Layout
 // TODO: Portal create
 export default function Landing() {
 	const arProvider = useArweaveProvider();
+
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
 
 	const connection = React.useMemo(() => {
 		let header: string | null = null;
@@ -25,24 +28,24 @@ export default function Landing() {
 		let disabled: boolean = false;
 
 		if (!arProvider.wallet) {
-			header = 'Connect your wallet';
-			label = 'Connect';
+			header = language.connectWallet;
+			label = language.connect;
 			type = 'alt1';
 			action = () => arProvider.setWalletModalVisible(true);
 		} else if (!arProvider.profile) {
-			header = 'Getting your info...';
-			label = 'Fetching...';
+			header = `${language.gettingInfo}...`;
+			label = `${language.fetching}...`;
 			type = 'alt1';
 			action = null;
 			disabled = true;
 		} else if (!arProvider.profile.id) {
-			header = 'Create your profile';
-			label = 'Create';
+			header = language.createProfile;
+			label = language.create;
 			type = 'alt1';
 			action = () => arProvider.setShowProfileManage(true);
 		} else {
-			header = `Welcome, ${arProvider.profile.username}`;
-			label = 'Disconnect';
+			header = `${language.welcome}, ${arProvider.profile.username}`;
+			label = language.disconnect;
 			type = 'primary';
 			action = () => arProvider.handleDisconnect();
 		}
@@ -65,7 +68,7 @@ export default function Landing() {
 			disabled = true;
 			content = (
 				<>
-					<p>Your portals will be listed here</p>
+					<p>{language.portalsInfo}</p>
 				</>
 			);
 		} else if (!arProvider.profile) {
@@ -73,7 +76,7 @@ export default function Landing() {
 			disabled = true;
 			content = (
 				<S.PLoadingWrapper>
-					<p>Fetching portals...</p>
+					<p>{`${language.fetchingPortals}...`}</p>
 					<Loader sm relative />
 				</S.PLoadingWrapper>
 			);
@@ -90,7 +93,6 @@ export default function Landing() {
 				{
 					id: 'WhW2X0sy3bvzvzSgFdxOSrU3jHJBmVleLf1GX-IWEjU',
 					name: 'Independent Media Alliance',
-					// logo: '357HeJjvG10nK28juQ8YMp6DlvHhGbmU7pOvZphEhUk',
 				},
 			];
 			content = (
@@ -112,12 +114,12 @@ export default function Landing() {
 		}
 
 		return (
-			<S.PortalsWrapper>
+			<S.PortalsWrapper className={'scroll-wrapper'}>
 				{content}
 				{showAction && (
 					<Button
 						type={'primary'}
-						label={'Create new portal'}
+						label={language.createPortal}
 						handlePress={null}
 						disabled={disabled}
 						icon={ASSETS.add}
@@ -133,11 +135,8 @@ export default function Landing() {
 	return (
 		<S.Wrapper className={'fade-in'}>
 			<S.HeaderWrapper>
-				<h4>Connect to Portals</h4>
-				<p>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor, Lorem ipsum dolor sit amet,
-					consectetur adipiscing elit.
-				</p>
+				<h4>{language.portalsHeader}</h4>
+				<p>{language.portalsSubheader}</p>
 			</S.HeaderWrapper>
 			<S.BodyWrapper>
 				<S.Section>{connection}</S.Section>

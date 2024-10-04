@@ -14,11 +14,13 @@ export default function Panel(props: IProps) {
 	const language = languageProvider.object[languageProvider.current];
 
 	React.useEffect(() => {
-		hideDocumentBody();
-		return () => {
-			showDocumentBody();
-		};
-	}, []);
+		if (props.open) {
+			hideDocumentBody();
+			return () => {
+				showDocumentBody();
+			};
+		}
+	}, [props.open]);
 
 	const escFunction = React.useCallback(
 		(e: any) => {

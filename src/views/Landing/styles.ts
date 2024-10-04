@@ -3,13 +3,13 @@ import styled from 'styled-components';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
-	height: 100vh;
+	min-height: 100vh;
 	width: 100%;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	padding: 20px;
+	padding: 60px 20px;
 `;
 
 export const HeaderWrapper = styled.div`
@@ -32,22 +32,22 @@ export const HeaderWrapper = styled.div`
 
 export const BodyWrapper = styled.div`
 	width: 100%;
-	max-width: 840px;
+	max-width: 900px;
 	display: flex;
 	flex-wrap: wrap;
+	gap: 30px;
 	margin: 50px 0 0 0;
-
-	/* > * {
-		&:not(:last-child) {
-			border-right: 1px solid ${(props) => props.theme.colors.border.primary};
-		}
-	} */
 `;
 
 export const Section = styled.div`
-	width: 50%;
+	width: calc(50% - 15px);
 	display: flex;
 	padding: 0 30px;
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		width: 100%;
+		padding: 0;
+	}
 `;
 
 export const ConnectionWrapper = styled.div`
@@ -63,6 +63,7 @@ export const ConnectionWrapper = styled.div`
 `;
 
 export const PortalsWrapper = styled.div`
+	height: 300px;
 	width: 100%;
 	display: flex;
 	flex-direction: column;
@@ -71,6 +72,10 @@ export const PortalsWrapper = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
+	}
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		height: auto;
 	}
 `;
 
@@ -100,6 +105,7 @@ export const PListWrapper = styled.div`
 		font-size: ${(props) => props.theme.typography.size.small} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		background: ${(props) => props.theme.colors.container.primary.background};
 		border: 1px solid ${(props) => props.theme.colors.border.primary};
 		border-radius: ${STYLING.dimensions.radius.alt3};
 		transition: all 100ms;
@@ -117,7 +123,8 @@ export const PListWrapper = styled.div`
 			margin: 0 12.5px 0 0;
 		}
 		&:hover {
-			background: ${(props) => props.theme.colors.container.primary.active};
+			background: ${(props) => props.theme.colors.button.primary.active.background};
+			border: 1px solid ${(props) => props.theme.colors.button.primary.active.border};
 		}
 	}
 `;

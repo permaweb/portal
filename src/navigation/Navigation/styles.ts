@@ -86,7 +86,7 @@ export const Header = styled.header<{ navigationOpen: boolean }>`
 	background: ${(props) => props.theme.colors.view.background};
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		padding: 0 20px;
+		padding: 0 20px 0 10px;
 	}
 `;
 
@@ -99,9 +99,14 @@ export const Content = styled.div`
 `;
 
 export const C1Wrapper = styled.div`
+	width: fit-content;
 	display: flex;
 	align-items: center;
 	gap: 10px;
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		max-width: calc(100% - 60px);
+	}
 `;
 
 export const LogoWrapper = styled.div`
@@ -119,22 +124,32 @@ export const LogoWrapper = styled.div`
 
 export const PortalWrapper = styled.div`
 	position: relative;
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		max-width: calc(100% - 45px);
+	}
 `;
 
 export const Portal = styled.button<{ active: boolean }>`
+	max-width: 100%;
 	display: flex;
 	align-items: center;
 	cursor: pointer;
-	text-overflow: ellipsis;
-	overflow: hidden;
 	background: ${(props) =>
 		props.active ? props.theme.colors.container.primary.active : props.theme.colors.container.primary.background};
-	color: ${(props) => props.theme.colors.font.alt1};
-	font-size: ${(props) => props.theme.typography.size.lg} !important;
-	font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
-	font-family: ${(props) => props.theme.typography.family.primary} !important;
 	border-radius: ${STYLING.dimensions.radius.alt2};
 	padding: 7.5px 16.5px;
+
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.lg} !important;
+		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		display: block;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+	}
 
 	svg {
 		height: 16.5px;
@@ -152,8 +167,9 @@ export const Portal = styled.button<{ active: boolean }>`
 `;
 
 export const PortalDropdown = styled.div`
-	min-width: 350px;
-	max-width: 90vw;
+	max-height: 50vh;
+	width: 350px;
+	max-width: 80vw;
 	position: absolute;
 	top: 47.5px;
 	left: 0;
@@ -188,15 +204,20 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 		align-items: center;
 		justify-content: space-between;
 		cursor: pointer;
-		text-overflow: ellipsis;
-		overflow: hidden;
-		color: ${(props) => props.theme.colors.font.primary} !important;
-		font-size: ${(props) => props.theme.typography.size.small} !important;
-		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
-		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		border-radius: ${STYLING.dimensions.radius.alt2};
 		transition: all 100ms;
 		padding: 0 10px;
+		span {
+			color: ${(props) => props.theme.colors.font.primary} !important;
+			font-size: ${(props) => props.theme.typography.size.small} !important;
+			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
+			font-family: ${(props) => props.theme.typography.family.primary} !important;
+			display: block;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			max-width: 85%;
+			overflow: hidden;
+		}
 		svg {
 			height: 17.5px;
 			width: 17.5px;

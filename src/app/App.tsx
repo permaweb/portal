@@ -21,7 +21,6 @@ function getLazyImport(view: string) {
 	);
 }
 
-// TODO: Connected view / onboarding
 export default function App() {
 	const [navigationOpen, setNavigationOpen] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
 	const [_desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));

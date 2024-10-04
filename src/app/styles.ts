@@ -169,6 +169,18 @@ export const GlobalStyle = createGlobalStyle`
     border-radius: ${STYLING.dimensions.radius.alt1};
   }
 
+	.border-wrapper-alt2 {
+    background: ${(props) => props.theme.colors.container.primary.background};
+    border: 1px solid ${(props) => props.theme.colors.border.primary};
+    border-radius: ${STYLING.dimensions.radius.alt2};
+  }
+
+	.border-wrapper-alt3 {
+    background: ${(props) => props.theme.colors.container.alt1.background};
+    border: 1px solid ${(props) => props.theme.colors.border.primary};
+    border-radius: ${STYLING.dimensions.radius.alt2};
+  }
+
   .max-view-wrapper {
     width: 100%;
     max-width: ${STYLING.cutoffs.max};
@@ -258,12 +270,12 @@ export const View = styled.main<{ navigationOpen: boolean }>`
 	min-height: calc(100vh - ${STYLING.dimensions.nav.height});
 	position: relative;
 	top: ${STYLING.dimensions.nav.height};
-	padding: 0 20px 0 ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 20px)` : '20px')};
+	padding: 10px 20px 20px ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 30px)` : '30px')};
 	transition: padding-left ${transition2};
 	display: flex;
 	flex-direction: column;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		padding: 0 20px;
+		padding: 10px 20px 20px 20px;
 	}
 `;

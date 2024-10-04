@@ -26,7 +26,6 @@ const PORTALS = [
 	{
 		id: 'WhW2X0sy3bvzvzSgFdxOSrU3jHJBmVleLf1GX-IWEjU',
 		name: 'Independent Media Alliance',
-		// logo: '357HeJjvG10nK28juQ8YMp6DlvHhGbmU7pOvZphEhUk',
 	},
 ];
 
@@ -34,12 +33,15 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	// TODO
 	const paths: { path: string; label: string; icon: string; target?: '_blank' }[] = [
-		{ path: URLS.base, icon: ASSETS.portals, label: language.portals },
+		{ path: URLS.base, icon: ASSETS.design, label: language.design },
+		{ path: URLS.base, icon: ASSETS.posts, label: language.posts },
+		{ path: URLS.base, icon: ASSETS.domain, label: language.domain },
+		{ path: URLS.base, icon: ASSETS.users, label: language.users },
 	];
 
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
-	const [panelOpen, setPanelOpen] = React.useState<boolean>(false);
 	const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
 
 	function handleWindowResize() {
@@ -83,7 +85,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				<S.PanelContent open={props.open}>
 					{paths.map((element: { path: string; label: string; icon: string; target?: '_blank' }, index: number) => {
 						return (
-							<Link key={index} to={element.path} target={element.target || ''} onClick={() => setPanelOpen(false)}>
+							<Link key={index} to={element.path} target={element.target || ''}>
 								<ReactSVG src={element.icon} />
 								{element.label}
 							</Link>
@@ -126,11 +128,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 					callback={() => setShowPortalDropdown(false)}
 				>
 					<S.Portal onClick={() => setShowPortalDropdown(!showPortalDropdown)} active={showPortalDropdown}>
-						{name}
+						<span>{name}</span>
 						<ReactSVG src={ASSETS.arrow} />
 					</S.Portal>
 					{showPortalDropdown && (
-						<S.PortalDropdown className={'border-wrapper-alt1 fade-in'}>
+						<S.PortalDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
 							<S.PDropdownHeader>
 								<p>{language.portals}</p>
 							</S.PDropdownHeader>
@@ -140,7 +142,8 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 									return (
 										<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>
 											<Link to={`${URLS.base}${portal.id}`}>
-												{portal.name} {active && <ReactSVG src={ASSETS.checkmark} />}
+												<span>{portal.name}</span>
+												{active && <ReactSVG src={ASSETS.checkmark} />}
 											</Link>
 										</S.PDropdownLink>
 									);
@@ -150,6 +153,10 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 								<button onClick={() => console.log('Create portal')}>
 									<ReactSVG src={ASSETS.add} />
 									Create a new portal
+								</button>
+								<button onClick={() => console.log('Create portal')}>
+									<ReactSVG src={ASSETS.disconnect} />
+									Return to all portals
 								</button>
 							</S.PDropdownFooter>
 						</S.PortalDropdown>
@@ -175,54 +182,9 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 					</S.C1Wrapper>
 					<S.ActionsWrapper>
 						<WalletConnect />
-						<S.MWrapper>
-							<IconButton
-								type={'primary'}
-								src={ASSETS.menu}
-								handlePress={() => setPanelOpen(true)}
-								dimensions={{ wrapper: 32.5, icon: 21.5 }}
-							/>
-						</S.MWrapper>
 					</S.ActionsWrapper>
 				</S.Content>
 			</S.Header>
-			{panelOpen && (
-				<div className={'overlay'}>
-					<S.PWrapper className={'border-wrapper-primary'}>
-						<CloseHandler active={panelOpen} disabled={!panelOpen} callback={() => setPanelOpen(false)}>
-							<S.PMenu>
-								<S.PHeader>
-									<h4>{language.goTo}</h4>
-									<IconButton
-										type={'primary'}
-										src={ASSETS.close}
-										handlePress={() => setPanelOpen(false)}
-										dimensions={{
-											wrapper: 32.5,
-											icon: 18.5,
-										}}
-										tooltip={language.close}
-									/>
-								</S.PHeader>
-								<S.MNavWrapper>
-									{paths.map((element: { path: string; label: string; target?: '_blank' }, index: number) => {
-										return (
-											<Link
-												key={index}
-												to={element.path}
-												target={element.target || ''}
-												onClick={() => setPanelOpen(false)}
-											>
-												{element.label}
-											</Link>
-										);
-									})}
-								</S.MNavWrapper>
-							</S.PMenu>
-						</CloseHandler>
-					</S.PWrapper>
-				</div>
-			)}
 		</>
 	);
 }
