@@ -44,9 +44,8 @@ export const PanelHeader = styled.div`
 `;
 
 export const PanelContent = styled.div<{ open: boolean }>`
-	height: calc(100vh - ${STYLING.dimensions.nav.height});
-	padding: 15px;
-	overflow-y: auto;
+	height: calc(100vh - (${STYLING.dimensions.nav.height} + 70px));
+	padding: 0 15px 15px 15px;
 
 	a {
 		height: 40.5px;
@@ -71,6 +70,39 @@ export const PanelContent = styled.div<{ open: boolean }>`
 		&:hover {
 			color: ${(props) => props.theme.colors.font.primary};
 			background: ${(props) => props.theme.colors.container.alt2.background};
+		}
+	}
+`;
+
+export const PanelFooter = styled.div<{ open: boolean }>`
+	height: 70px;
+	width: 100%;
+	padding: 15px;
+
+	a {
+		height: 40.5px;
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		color: ${(props) => props.theme.colors.font.primary};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.small};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		border: 1px solid ${(props) => props.theme.colors.border.primary};
+		border-radius: ${STYLING.dimensions.radius.primary};
+		transition: all 100ms;
+		padding: 0 10px;
+		svg {
+			height: 17.5px;
+			width: 17.5px;
+			margin: 6.5px 12.5px 0 0;
+			color: ${(props) => props.theme.colors.font.alt1};
+			fill: ${(props) => props.theme.colors.font.alt1};
+		}
+		&:hover {
+			color: ${(props) => props.theme.colors.font.primary};
+			background: ${(props) => props.theme.colors.container.alt2.background};
+			border: 1px solid ${(props) => props.theme.colors.border.alt2};
 		}
 	}
 `;
@@ -164,6 +196,10 @@ export const Portal = styled.button<{ active: boolean }>`
 	&:focus {
 		background: ${(props) => props.theme.colors.container.primary.active};
 	}
+
+	&:disabled {
+		background: ${(props) => props.theme.colors.container.primary.background};
+	}
 `;
 
 export const PortalDropdown = styled.div`
@@ -203,7 +239,9 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		cursor: pointer;
+		cursor: ${(props) => (props.active ? 'default' : 'pointer')};
+		pointer-events: ${(props) => (props.active ? 'none' : 'auto')};
+		background: ${(props) => props.theme.colors.container.primary.background};
 		border-radius: ${STYLING.dimensions.radius.alt2};
 		transition: all 100ms;
 		padding: 0 10px;

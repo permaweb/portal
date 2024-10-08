@@ -24,7 +24,7 @@ const MAX_BIO_LENGTH = 500;
 const ALLOWED_BANNER_TYPES = 'image/png, image/jpeg, image/gif';
 const ALLOWED_AVATAR_TYPES = 'image/png, image/jpeg, image/gif';
 
-export default function ProfileManage(props: IProps) {
+export default function ProfileManager(props: IProps) {
 	const arProvider = useArweaveProvider();
 
 	const languageProvider = useLanguageProvider();

@@ -5,10 +5,10 @@ import { getProfileByWalletAddress } from 'api';
 
 import { Modal } from 'components/molecules/Modal';
 import { Panel } from 'components/molecules/Panel';
-import { ProfileManage } from 'components/organisms/ProfileManage';
+import { ProfileManager } from 'components/organisms/ProfileManager';
 import { ASSETS, URLS } from 'helpers/config';
 import { getARBalanceEndpoint } from 'helpers/endpoints';
-import { ProfileHeaderType, WalletEnum } from 'helpers/types';
+import { ProfileType, WalletEnum } from 'helpers/types';
 import Othent from 'helpers/wallet';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -31,15 +31,11 @@ interface ArweaveContextState {
 	handleDisconnect: () => void;
 	walletModalVisible: boolean;
 	setWalletModalVisible: (open: boolean) => void;
-	profile: ProfileHeaderType;
-	showProfileManage: boolean;
-	setShowProfileManage: (toggle: boolean) => void;
+	profile: ProfileType;
+	showProfileManager: boolean;
+	setShowProfileManager: (toggle: boolean) => void;
 	toggleProfileUpdate: boolean;
 	setToggleProfileUpdate: (toggleUpdate: boolean) => void;
-}
-
-interface ArweaveProviderProps {
-	children: React.ReactNode;
 }
 
 const DEFAULT_CONTEXT = {
@@ -55,8 +51,8 @@ const DEFAULT_CONTEXT = {
 	profile: null,
 	toggleProfileUpdate: false,
 	setToggleProfileUpdate(_toggleUpdate: boolean) {},
-	showProfileManage: false,
-	setShowProfileManage(_toggle: boolean) {},
+	showProfileManager: false,
+	setShowProfileManager(_toggle: boolean) {},
 };
 
 const ARContext = React.createContext<ArweaveContextState>(DEFAULT_CONTEXT);
@@ -90,7 +86,7 @@ function WalletList(props: { handleConnect: any }) {
 	);
 }
 
-export function ArweaveProvider(props: ArweaveProviderProps) {
+export function ArweaveProvider(props: { children: React.ReactNode }) {
 	const navigate = useNavigate();
 
 	const languageProvider = useLanguageProvider();
@@ -105,8 +101,8 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
 
 	const [arBalance, setArBalance] = React.useState<number | null>(null);
 
-	const [profile, setProfile] = React.useState<ProfileHeaderType | null>(null);
-	const [showProfileManage, setShowProfileManage] = React.useState<boolean>(false);
+	const [profile, setProfile] = React.useState<ProfileType | null>(null);
+	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 	const [toggleProfileUpdate, setToggleProfileUpdate] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
@@ -276,22 +272,22 @@ export function ArweaveProvider(props: ArweaveProviderProps) {
 					walletModalVisible,
 					setWalletModalVisible,
 					profile,
-					showProfileManage,
-					setShowProfileManage,
+					showProfileManager,
+					setShowProfileManager,
 					toggleProfileUpdate,
 					setToggleProfileUpdate,
 				}}
 			>
 				{props.children}
 				<Panel
-					open={showProfileManage}
+					open={showProfileManager}
 					header={profile && profile.id ? language.editProfile : `${language.createProfile}!`}
-					handleClose={() => setShowProfileManage(false)}
+					handleClose={() => setShowProfileManager(false)}
 					width={575}
 				>
-					<ProfileManage
+					<ProfileManager
 						profile={profile && profile.id ? profile : null}
-						handleClose={() => setShowProfileManage(false)}
+						handleClose={() => setShowProfileManager(false)}
 						handleUpdate={null}
 					/>
 				</Panel>

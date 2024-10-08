@@ -17,7 +17,8 @@ export const ASSETS = {
 	design: getTxEndpoint('UUvx4WWSyuNC8fOQ5OsYudP77Reae8wmvHh1PDB196c'),
 	disconnect: getTxEndpoint('eWncZs2hH5oNSsWTIImJhqdZ4-n0P4CfZbduK2ae4L4'),
 	docs: getTxEndpoint('iJ2kFspeaXTNSl5aO8CZ2iLGA99Bmc0u-7PTX0Vl0l4'),
-	domain: getTxEndpoint('HCp8UMAiBcJyBuMwH8PLrNM6lJqlRLGKe6iDRRBid6I'),
+	domains: getTxEndpoint('HCp8UMAiBcJyBuMwH8PLrNM6lJqlRLGKe6iDRRBid6I'),
+	help: getTxEndpoint('827_dxZR1WAnw_hqxfwwb4jgP5m2fpkSrTMtdjRUWw4'),
 	info: getTxEndpoint('QQ4EJ_wH2EY1_ElfSNKffixnzVcbnvd2547lmluvT-0'),
 	light: getTxEndpoint('n-yu6JZZwWEF0aJE8B_UskiubcYmHDRTofyc5J1pvc4'),
 	logo: getTxEndpoint('4txDbfbymP1RNMQCsFzyZOZR9qeUZXt_IacmL4IXYD8'),
@@ -27,6 +28,7 @@ export const ASSETS = {
 	portals: getTxEndpoint('WzomcwfXZ_4hhUvDso1wsyJpNBHGeHezFZQv3V706Hw'),
 	posts: getTxEndpoint('scJ-YfxBggKURU_lF7eLLrKSe9L7cBD1GB1bcIpzKJI'),
 	othent: getTxEndpoint('jDmU1yqdfK41qZ8mUj61MZlji-rX7bHJV12s1lMlw3A'),
+	settings: getTxEndpoint('e3jdELVw-3jNIOCbWTYCh1fuH4zIa7tDqmOqE6HyizY'),
 	user: getTxEndpoint('aOk91wDJnZ1xQbQum0MHoaOldAiumdFjdjM4LVM83NQ'),
 	users: getTxEndpoint('LfFkPVJBgBWgJwCtoceyS_EAyYa-r__AjAB5_JAx3aw'),
 	wallet: getTxEndpoint('_t97i0BzskALIFERWR6iDs_uX7U6bbd4-3Pqq3HDkfI'),
@@ -43,14 +45,14 @@ export const STYLING = {
 	cutoffs: {
 		desktop: '1200px',
 		initial: '1024px',
-		max: '1440px',
+		max: '1600px',
 		tablet: '840px',
 		tabletSecondary: '768px',
 		secondary: '540px',
 	},
 	dimensions: {
 		button: {
-			height: '37.5px',
+			height: '35px',
 			width: 'fit-content',
 		},
 		form: {
@@ -62,7 +64,7 @@ export const STYLING = {
 			width: '260px',
 		},
 		radius: {
-			primary: '10px',
+			primary: '7.5px',
 			alt1: '15px',
 			alt2: '5px',
 			alt3: '2.5px',
@@ -72,8 +74,17 @@ export const STYLING = {
 
 function createURLs() {
 	const base = `/`;
+	const portal = `${base}:portalId`;
+	const post = `post/`;
 	return {
 		base: base,
+		portal: portal,
+		portalDesign: (portalId: string) => `${URLS.base}${portalId}/design/`,
+		portalPosts: (portalId: string) => `${URLS.base}${portalId}/posts/`,
+		portalDomains: (portalId: string) => `${URLS.base}${portalId}/domains/`,
+		portalUsers: (portalId: string) => `${URLS.base}${portalId}/users/`,
+		portalSettings: (portalId: string) => `${URLS.base}${portalId}/settings/`,
+		postCreate: (portalId: string) => `${URLS.base}${portalId}/${post}create/`,
 		docs: `${base}docs/`,
 		notFound: `${base}404`,
 	};

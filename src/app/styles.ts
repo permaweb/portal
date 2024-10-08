@@ -164,8 +164,8 @@ export const GlobalStyle = createGlobalStyle`
 
   .border-wrapper-alt1 {
     background: ${(props) => props.theme.colors.container.primary.background};
-    box-shadow: 0 0 3.5px 0.5px ${(props) => props.theme.colors.shadow.primary};
-    border: 1px solid ${(props) => props.theme.colors.border.primary};
+    box-shadow: 0 3.5px 7.5px 0 ${(props) => props.theme.colors.shadow.primary};
+    border: 1px solid ${(props) => props.theme.colors.border.alt1};
     border-radius: ${STYLING.dimensions.radius.alt1};
   }
 
@@ -268,9 +268,11 @@ export const App = styled.div`
 
 export const View = styled.main<{ navigationOpen: boolean }>`
 	min-height: calc(100vh - ${STYLING.dimensions.nav.height});
+	max-width: ${STYLING.cutoffs.max};
 	position: relative;
 	top: ${STYLING.dimensions.nav.height};
 	padding: 10px 20px 20px ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 30px)` : '30px')};
+	margin: 0 auto;
 	transition: padding-left ${transition2};
 	display: flex;
 	flex-direction: column;

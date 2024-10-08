@@ -1,45 +1,44 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import { debounce } from 'lodash';
 
 import { IconButton } from 'components/atoms/IconButton';
+import { Loader } from 'components/atoms/Loader';
 import { ASSETS, STYLING, URLS } from 'helpers/config';
 import { checkWindowCutoff } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePortalProvider } from 'providers/PortalProvider';
 import { WalletConnect } from 'wallet/WalletConnect';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
 // TODO: Cache panel open
-// TODO: Portal switch (create provider)
-// TODO: Portal create
-
-const PORTALS = [
-	// TODO
-	{
-		id: 'IR2hzJyfSGp7lgqqgnoeza2caaus96e56uTVP1gV7GE',
-		name: 'My first portal',
-		logo: '4txDbfbymP1RNMQCsFzyZOZR9qeUZXt_IacmL4IXYD8',
-	},
-	{
-		id: 'WhW2X0sy3bvzvzSgFdxOSrU3jHJBmVleLf1GX-IWEjU',
-		name: 'Independent Media Alliance',
-	},
-];
-
 export default function Navigation(props: { open: boolean; toggle: () => void }) {
+	const navigate = useNavigate();
+
+	const portalProvider = usePortalProvider();
+
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	// TODO
-	const paths: { path: string; label: string; icon: string; target?: '_blank' }[] = [
-		{ path: URLS.base, icon: ASSETS.design, label: language.design },
-		{ path: URLS.base, icon: ASSETS.posts, label: language.posts },
-		{ path: URLS.base, icon: ASSETS.domain, label: language.domain },
-		{ path: URLS.base, icon: ASSETS.users, label: language.users },
-	];
+	const paths = React.useMemo(() => {
+		if (portalProvider.current) {
+			return [
+				{
+					path: `${URLS.base}${portalProvider.current.id}`,
+					icon: ASSETS.portals,
+					label: language.home,
+				},
+				{ path: URLS.portalDesign(portalProvider.current.id), icon: ASSETS.design, label: language.design },
+				{ path: URLS.portalPosts(portalProvider.current.id), icon: ASSETS.posts, label: language.posts },
+				{ path: URLS.portalDomains(portalProvider.current.id), icon: ASSETS.domains, label: language.domains },
+				{ path: URLS.portalUsers(portalProvider.current.id), icon: ASSETS.users, label: language.users },
+			];
+		}
+		return null;
+	}, [portalProvider.current]);
 
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
 	const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
@@ -82,16 +81,28 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		const content = (
 			<>
 				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
-				<S.PanelContent open={props.open}>
-					{paths.map((element: { path: string; label: string; icon: string; target?: '_blank' }, index: number) => {
-						return (
-							<Link key={index} to={element.path} target={element.target || ''}>
-								<ReactSVG src={element.icon} />
-								{element.label}
+				{portalProvider.current ? (
+					<>
+						<S.PanelContent open={props.open} className={'fade-in scroll-wrapper'}>
+							{paths.map((element: { path: string; label: string; icon: string; target?: '_blank' }, index: number) => {
+								return (
+									<Link key={index} to={element.path} target={element.target || ''}>
+										<ReactSVG src={element.icon} />
+										{element.label}
+									</Link>
+								);
+							})}
+						</S.PanelContent>
+						<S.PanelFooter open={props.open} className={'fade-in'}>
+							<Link to={URLS.docs}>
+								<ReactSVG src={ASSETS.help} />
+								{'Help center'}
 							</Link>
-						);
-					})}
-				</S.PanelContent>
+						</S.PanelFooter>
+					</>
+				) : (
+					<Loader sm relative />
+				)}
 			</>
 		);
 
@@ -113,58 +124,77 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				</>
 			);
 		}
-	}, [props.open, desktop]);
+	}, [props.open, desktop, portalProvider.current]);
 
 	const portal = React.useMemo(() => {
-		const parts = window.location.href.split('/');
-		const id = parts[parts.indexOf('#') + 1];
-		const name = PORTALS.find((portal: any) => id === portal.id).name;
-
-		return (
-			<S.PortalWrapper>
-				<CloseHandler
-					active={showPortalDropdown}
-					disabled={!showPortalDropdown}
-					callback={() => setShowPortalDropdown(false)}
-				>
-					<S.Portal onClick={() => setShowPortalDropdown(!showPortalDropdown)} active={showPortalDropdown}>
-						<span>{name}</span>
-						<ReactSVG src={ASSETS.arrow} />
-					</S.Portal>
-					{showPortalDropdown && (
-						<S.PortalDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
-							<S.PDropdownHeader>
-								<p>{language.portals}</p>
-							</S.PDropdownHeader>
-							<S.PDropdownBody>
-								{PORTALS.map((portal: any) => {
-									const active = id === portal.id;
-									return (
-										<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>
-											<Link to={`${URLS.base}${portal.id}`}>
-												<span>{portal.name}</span>
-												{active && <ReactSVG src={ASSETS.checkmark} />}
-											</Link>
-										</S.PDropdownLink>
-									);
-								})}
-							</S.PDropdownBody>
-							<S.PDropdownFooter>
-								<button onClick={() => console.log('Create portal')}>
-									<ReactSVG src={ASSETS.add} />
-									Create a new portal
-								</button>
-								<button onClick={() => console.log('Create portal')}>
-									<ReactSVG src={ASSETS.disconnect} />
-									Return to all portals
-								</button>
-							</S.PDropdownFooter>
-						</S.PortalDropdown>
-					)}
-				</CloseHandler>
-			</S.PortalWrapper>
-		);
-	}, [showPortalDropdown]);
+		if (portalProvider.current) {
+			return (
+				<S.PortalWrapper className={'fade-in'}>
+					<CloseHandler
+						active={showPortalDropdown}
+						disabled={!showPortalDropdown}
+						callback={() => setShowPortalDropdown(false)}
+					>
+						<S.Portal
+							onClick={() => setShowPortalDropdown(!showPortalDropdown)}
+							active={showPortalDropdown}
+							disabled={!portalProvider.current}
+						>
+							<span>{portalProvider.current ? portalProvider.current.name : '-'}</span>
+							<ReactSVG src={ASSETS.arrow} />
+						</S.Portal>
+						{showPortalDropdown && (
+							<S.PortalDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
+								<S.PDropdownHeader>
+									<p>{language.portals}</p>
+								</S.PDropdownHeader>
+								{portalProvider.portals && portalProvider.portals.length > 0 && (
+									<S.PDropdownBody>
+										{portalProvider.portals.map((portal: any) => {
+											const active = portalProvider.current ? portalProvider.current.id === portal.id : false;
+											return (
+												<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>
+													<Link to={`${URLS.base}${portal.id}`}>
+														<span>{portal.name}</span>
+														{active && <ReactSVG src={ASSETS.checkmark} />}
+													</Link>
+												</S.PDropdownLink>
+											);
+										})}
+									</S.PDropdownBody>
+								)}
+								<S.PDropdownFooter>
+									<button
+										onClick={() => {
+											navigate(`${URLS.base}${portalProvider.current.id}`);
+											setShowPortalDropdown(false);
+										}}
+									>
+										<ReactSVG src={ASSETS.portals} />
+										{language.portalReturn}
+									</button>
+									<button
+										onClick={() => {
+											portalProvider.setShowPortalManager(true);
+											setShowPortalDropdown(false);
+										}}
+									>
+										<ReactSVG src={ASSETS.add} />
+										{language.portalCreate}
+									</button>
+									<button onClick={() => navigate(URLS.base)}>
+										<ReactSVG src={ASSETS.disconnect} />
+										{language.portalsReturn}
+									</button>
+								</S.PDropdownFooter>
+							</S.PortalDropdown>
+						)}
+					</CloseHandler>
+				</S.PortalWrapper>
+			);
+		}
+		return null;
+	}, [showPortalDropdown, portalProvider.portals, portalProvider.current]);
 
 	return (
 		<>
@@ -173,11 +203,6 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				<S.Content>
 					<S.C1Wrapper>
 						{!props.open && navigationToggle}
-						{/* <S.LogoWrapper>
-							<Link to={URLS.base}>
-								<ReactSVG src={ASSETS.logo} />
-							</Link>
-						</S.LogoWrapper> */}
 						{portal}
 					</S.C1Wrapper>
 					<S.ActionsWrapper>

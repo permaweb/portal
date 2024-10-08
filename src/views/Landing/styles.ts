@@ -9,7 +9,7 @@ export const Wrapper = styled.div`
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	padding: 60px 20px;
+	padding: 20vh 20px 20px 20px;
 `;
 
 export const HeaderWrapper = styled.div`
@@ -34,15 +34,18 @@ export const BodyWrapper = styled.div`
 	width: 100%;
 	max-width: 900px;
 	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 	flex-wrap: wrap;
-	gap: 30px;
+	gap: 40px;
 	margin: 50px 0 0 0;
 `;
 
 export const Section = styled.div`
-	width: calc(50% - 15px);
+	width: 100%;
+	max-width: 500px;
 	display: flex;
-	padding: 0 30px;
 
 	@media (max-width: ${STYLING.cutoffs.tablet}) {
 		width: 100%;
@@ -71,7 +74,7 @@ export const PortalsWrapper = styled.div`
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 
 	@media (max-width: ${STYLING.cutoffs.tablet}) {
@@ -103,11 +106,11 @@ export const PListWrapper = styled.div`
 		overflow: hidden;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.small} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		background: ${(props) => props.theme.colors.container.primary.background};
 		border: 1px solid ${(props) => props.theme.colors.border.primary};
-		border-radius: ${STYLING.dimensions.radius.alt3};
+		border-radius: ${STYLING.dimensions.radius.primary};
 		transition: all 100ms;
 		padding: 0 15px;
 		svg {

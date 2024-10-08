@@ -24,7 +24,7 @@ export const lightTheme = {
 	neutralA7: '#707070',
 	overlay1: 'rgb(0, 0, 0, .35)',
 	overlay2: 'rgb(0, 0, 0, .5)',
-	shadow1: 'rgb(200, 200, 200, .5)',
+	shadow1: 'rgb(220, 220, 220, .5)',
 	primary1: '#5E66DB',
 	primary2: '#454CB0',
 	light1: '#FFFFFF',

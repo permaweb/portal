@@ -1,19 +1,34 @@
+import { useNavigate } from 'react-router-dom';
+
 import { Button } from 'components/atoms/Button';
-import { ASSETS } from 'helpers/config';
+import { ASSETS, URLS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
 // TODO: Portal auth
 export default function Portal() {
+	const navigate = useNavigate();
+
+	const portalProvider = usePortalProvider();
+
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
 	return (
 		<S.Wrapper className={'fade-in'}>
 			<S.HeaderWrapper>
-				<h4>Your portal</h4>
-				<Button type={'alt1'} label={language.createPost} handlePress={() => {}} icon={ASSETS.add} iconLeftAlign />
+				<h4>{language.portalHeader}</h4>
+				<Button
+					type={'alt1'}
+					label={language.createPost}
+					handlePress={() => navigate(URLS.postCreate(portalProvider.current.id))}
+					disabled={!portalProvider.current}
+					height={37.5}
+					icon={ASSETS.add}
+					iconLeftAlign
+				/>
 			</S.HeaderWrapper>
 			<S.BodyWrapper>
 				<S.SectionWrapper>
@@ -25,7 +40,7 @@ export default function Portal() {
 					</S.DesignSection>
 					<S.DomainSection className={'border-wrapper-alt3'}>
 						<S.SectionHeader>
-							<p>{language.domain}</p>
+							<p>{language.domains}</p>
 						</S.SectionHeader>
 						<S.SectionBody></S.SectionBody>
 					</S.DomainSection>

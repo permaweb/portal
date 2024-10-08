@@ -4,6 +4,7 @@ import { debounce } from 'lodash';
 
 const Landing = getLazyImport('Landing');
 const Portal = getLazyImport('Portal');
+const PostCreate = getLazyImport('Portal/Post/Create');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
 
@@ -46,7 +47,7 @@ export default function App() {
 	}, [debouncedResize]);
 
 	function getRoute(path: string, element: React.ReactNode) {
-		const baseRoutes = [URLS.base, URLS.notFound, '*'];
+		const baseRoutes = [URLS.base, URLS.docs, `URLS.docs/*`, `${URLS.docs}:active/*`, URLS.notFound, '*'];
 
 		if (baseRoutes.includes(path)) return <Route path={path} element={element} />;
 		return (
@@ -71,7 +72,8 @@ export default function App() {
 				<S.App>
 					<Routes>
 						{getRoute(URLS.base, <Landing />)}
-						{getRoute(`${URLS.base}:portalId/*`, <Portal />)}
+						{getRoute(`${URLS.base}:portalId`, <Portal />)}
+						{getRoute(`${URLS.base}:portalId/post/create`, <PostCreate />)}
 						{getRoute(URLS.docs, <Docs />)}
 						{getRoute(`${URLS.docs}:active/*`, <Docs />)}
 						{getRoute(URLS.notFound, <NotFound />)}

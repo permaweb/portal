@@ -9,13 +9,14 @@ import { getTxEndpoint } from 'helpers/endpoints';
 import { ButtonType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
-// TODO: Layout
 // TODO: Portal create
 export default function Landing() {
 	const arProvider = useArweaveProvider();
+	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -42,7 +43,7 @@ export default function Landing() {
 			header = language.createProfile;
 			label = language.create;
 			type = 'alt1';
-			action = () => arProvider.setShowProfileManage(true);
+			action = () => arProvider.setShowProfileManager(true);
 		} else {
 			header = `${language.welcome}, ${arProvider.profile.username}`;
 			label = language.disconnect;
@@ -83,34 +84,29 @@ export default function Landing() {
 		} else {
 			showAction = true;
 			disabled = false;
-			const PORTALS = [
-				// TODO
-				{
-					id: 'IR2hzJyfSGp7lgqqgnoeza2caaus96e56uTVP1gV7GE',
-					name: 'My first portal',
-					logo: '4txDbfbymP1RNMQCsFzyZOZR9qeUZXt_IacmL4IXYD8',
-				},
-				{
-					id: 'WhW2X0sy3bvzvzSgFdxOSrU3jHJBmVleLf1GX-IWEjU',
-					name: 'Independent Media Alliance',
-				},
-			];
-			content = (
-				<S.PListWrapper>
-					{PORTALS.map((portal: any) => {
-						return (
-							<Link key={portal.id} to={`${URLS.base}${portal.id}`}>
-								{portal.logo ? (
-									<img src={getTxEndpoint(portal.logo)} alt={'Portal Logo'} />
-								) : (
-									<ReactSVG src={ASSETS.portals} />
-								)}
-								{portal.name}
-							</Link>
-						);
-					})}
-				</S.PListWrapper>
-			);
+			if (portalProvider.portals && portalProvider.portals.length > 0) {
+				content = (
+					<>
+						<p>{language.selectPortal}</p>
+						<S.PListWrapper>
+							{portalProvider.portals.map((portal: any) => {
+								return (
+									<Link key={portal.id} to={`${URLS.base}${portal.id}`}>
+										{portal.logo ? (
+											<img src={getTxEndpoint(portal.logo)} alt={'Portal Logo'} />
+										) : (
+											<ReactSVG src={ASSETS.portals} />
+										)}
+										{portal.name}
+									</Link>
+								);
+							})}
+						</S.PListWrapper>
+					</>
+				);
+			} else {
+				content = <p>{language.portalCreate}</p>;
+			}
 		}
 
 		return (
@@ -120,7 +116,7 @@ export default function Landing() {
 					<Button
 						type={'primary'}
 						label={language.createPortal}
-						handlePress={null}
+						handlePress={() => portalProvider.setShowPortalManager(true)}
 						disabled={disabled}
 						icon={ASSETS.add}
 						iconLeftAlign
@@ -130,7 +126,7 @@ export default function Landing() {
 				)}
 			</S.PortalsWrapper>
 		);
-	}, [arProvider.wallet, arProvider.profile]);
+	}, [arProvider.wallet, arProvider.profile, portalProvider.portals]);
 
 	return (
 		<S.Wrapper className={'fade-in'}>

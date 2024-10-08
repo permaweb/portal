@@ -4,25 +4,25 @@ import { ReactSVG } from 'react-svg';
 import { Avatar } from 'components/atoms/Avatar';
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/molecules/Panel';
-import { ProfileManage } from 'components/organisms/ProfileManage';
+import { ProfileManager } from 'components/organisms/ProfileManager';
 import { ASSETS } from 'helpers/config';
 import { formatAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
-import { useCustomThemeProvider } from 'providers/CustomThemeProvider';
+// import { useCustomThemeProvider } from 'providers/CustomThemeProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
 export default function WalletConnect(_props: { callback?: () => void }) {
 	const arProvider = useArweaveProvider();
-	const themeProvider = useCustomThemeProvider();
+	// const themeProvider = useCustomThemeProvider();
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
 	const [showWallet, setShowWallet] = React.useState<boolean>(false);
 	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(false);
-	const [showProfileManage, setShowProfileManage] = React.useState<boolean>(false);
+	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 
 	const [label, setLabel] = React.useState<string | null>(null);
 
@@ -60,13 +60,13 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		if (arProvider.profile && arProvider.profile.id) {
 			setShowWalletDropdown(false);
 		} else {
-			setShowProfileManage(true);
+			setShowProfileManager(true);
 		}
 	}
 
-	function handleToggleTheme() {
-		themeProvider.setCurrent(themeProvider.current === 'light' ? 'dark' : 'light');
-	}
+	// function handleToggleTheme() {
+	// 	themeProvider.setCurrent(themeProvider.current === 'light' ? 'dark' : 'light');
+	// }
 
 	function handleDisconnect() {
 		arProvider.handleDisconnect();
@@ -174,16 +174,16 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	return (
 		<>
 			{getView()}
-			{showProfileManage && (
+			{showProfileManager && (
 				<Panel
-					open={showProfileManage}
+					open={showProfileManager}
 					header={arProvider.profile && arProvider.profile.id ? language.editProfile : `${language.createProfile}!`}
-					handleClose={() => setShowProfileManage(false)}
+					handleClose={() => setShowProfileManager(false)}
 				>
 					<S.PManageWrapper>
-						<ProfileManage
+						<ProfileManager
 							profile={arProvider.profile && arProvider.profile.id ? arProvider.profile : null}
-							handleClose={() => setShowProfileManage(false)}
+							handleClose={() => setShowProfileManager(false)}
 							handleUpdate={null}
 						/>
 					</S.PManageWrapper>

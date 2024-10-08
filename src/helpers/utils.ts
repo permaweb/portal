@@ -1,13 +1,4 @@
-import {
-	AssetDetailType,
-	AssetOrderType,
-	AssetSortType,
-	DateType,
-	EntryOrderType,
-	OrderbookEntryType,
-	OwnerType,
-	RegistryProfileType,
-} from './types';
+import { DateType } from './types';
 
 export function checkValidAddress(address: string | null) {
 	if (!address) return false;
@@ -136,138 +127,6 @@ export function getTagDisplay(value: string) {
 	return result;
 }
 
-export function getOwners(asset: AssetDetailType, profiles: RegistryProfileType[] | null): OwnerType[] | null {
-	if (asset && asset.state && asset.state.balances) {
-		const balances: any = Object.keys(asset.state.balances).map((address: string) => {
-			return Number(asset.state.balances[address]);
-		});
-		const totalBalance = balances.reduce((a: number, b: number) => a + b, 0);
-
-		return Object.keys(asset.state.balances).map((address: string) => {
-			return {
-				address: address,
-				ownerQuantity: Number(asset.state.balances[address]),
-				ownerPercentage: Number(asset.state.balances[address]) / totalBalance,
-				profile: profiles ? profiles.find((profile: RegistryProfileType) => profile.id === address) : null,
-			};
-		});
-	}
-	return null;
-}
-
-export function getAssetOrderType(order: EntryOrderType, currency: string): AssetOrderType {
-	let currentAssetOrder: AssetOrderType = {
-		creator: order.Creator,
-		dateCreated: order.DateCreated,
-		id: order.Id,
-		originalQuantity: order.OriginalQuantity,
-		quantity: order.Quantity,
-		token: order.Token,
-		currency: currency,
-	};
-
-	if (order.Price) currentAssetOrder.price = order.Price;
-	return currentAssetOrder;
-}
-
-export function sortOrders(orders: AssetOrderType[], sortType: AssetSortType) {
-	const sortedOrders = orders.sort((a: AssetOrderType, b: AssetOrderType) => {
-		switch (sortType) {
-			case 'low-to-high':
-				return a.price && b.price ? Number(a.price) - Number(b.price) : 0;
-			case 'high-to-low':
-				return a.price && b.price ? Number(b.price) - Number(a.price) : 0;
-		}
-	});
-	return sortedOrders;
-}
-
-export function sortByAssetOrders(assets: AssetDetailType[], sortType: AssetSortType): AssetDetailType[] {
-	const getSortKey = (asset: AssetDetailType): number => {
-		if (!asset.orders || asset.orders.length === 0) return Infinity;
-		return Number(sortOrders(asset.orders, sortType)[0].price);
-	};
-
-	const getDateKey = (asset: AssetDetailType): number => {
-		if (!asset.orders || asset.orders.length === 0) return 0;
-		return new Date(asset.orders[0].dateCreated).getTime();
-	};
-
-	let direction: number;
-
-	switch (sortType) {
-		case 'high-to-low':
-			direction = -1;
-			break;
-		case 'low-to-high':
-			direction = 1;
-			break;
-		case 'recently-listed':
-			direction = -1;
-			break;
-		default:
-			direction = 1;
-	}
-
-	let assetsWithOrders = assets.filter((asset) => asset.orders && asset.orders.length > 0);
-	const assetsWithoutOrders = assets.filter((asset) => !asset.orders || asset.orders.length === 0);
-
-	assetsWithOrders.sort((a, b) => {
-		if (sortType === 'recently-listed') {
-			return direction * (getDateKey(b) - getDateKey(a));
-		} else {
-			return direction * (getSortKey(a) - getSortKey(b));
-		}
-	});
-
-	return [...assetsWithOrders, ...assetsWithoutOrders];
-}
-
-export function sortOrderbookEntries(entries: OrderbookEntryType[], sortType: AssetSortType): OrderbookEntryType[] {
-	const getSortKey = (entry: OrderbookEntryType): number => {
-		if (!entry.Orders || entry.Orders.length === 0) return Infinity;
-		return Number(entry.Orders[0].Price);
-	};
-
-	const getDateKey = (entry: OrderbookEntryType): number => {
-		if (!entry.Orders || entry.Orders.length === 0) return 0;
-		return new Date(entry.Orders[0].DateCreated).getTime();
-	};
-
-	let direction: number;
-
-	switch (sortType) {
-		case 'high-to-low':
-			direction = -1;
-			break;
-		case 'low-to-high':
-			direction = 1;
-			break;
-		case 'recently-listed':
-			direction = -1;
-			break;
-		default:
-			direction = 1;
-	}
-
-	let entriesWithOrders = entries.filter((entry) => entry.Orders && entry.Orders.length > 0);
-	const entriesWithoutOrders = entries.filter((entry) => !entry.Orders || entry.Orders.length === 0);
-
-	entriesWithOrders.sort((a, b) => {
-		if (sortType === 'recently-listed') {
-			return direction * (getDateKey(b) - getDateKey(a));
-		} else {
-			return direction * (getSortKey(a) - getSortKey(b));
-		}
-	});
-
-	if (sortType === 'recently-listed') {
-		entriesWithOrders = entriesWithOrders.reverse();
-	}
-
-	return [...entriesWithOrders, ...entriesWithoutOrders];
-}
-
 export function getDataURLContentType(dataURL: string) {
 	const result = dataURL.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,/);
 	return result ? result[1] : null;
@@ -288,10 +147,4 @@ export function getByteSize(input: string | Buffer): number {
 	}
 
 	return sizeInBytes;
-}
-
-export function getTotalTokenBalance(tokenBalances: { profileBalance: number; walletBalance: number } | null) {
-	if (!tokenBalances) return null;
-	const total = (tokenBalances.profileBalance || 0) + (tokenBalances.walletBalance || 0);
-	return total;
 }

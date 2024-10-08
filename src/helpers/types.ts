@@ -1,103 +1,6 @@
-export type EntryOrderType = {
-	DepositTxId: string;
-	DateCreated: string;
-	OriginalQuantity: string;
-	Creator: string;
-	Id: string;
-	Token: string;
-	Quantity: string;
-	Price?: string;
-};
+export type PortalType = { id: string; name: string; logo: string | null };
 
-export type OrderbookEntryType = {
-	Pair: string[];
-	Orders?: EntryOrderType[];
-	PriceData?: {
-		DominantToken: string;
-		Vwap: string;
-		MatchLogs: {
-			Id: string;
-			Quantity: string;
-			Price: string;
-		}[];
-		Block: string;
-	};
-};
-
-export type AssetStateType = {
-	name: string | null;
-	ticker: string | null;
-	denomination: number | null;
-	logo: string | null;
-	transferable: boolean;
-	balances: { [address: string]: string } | null;
-};
-
-export type AssetOrderType = {
-	creator: string | null;
-	dateCreated: string | null;
-	id: string | null;
-	originalQuantity: string | null;
-	price?: string | null;
-	quantity: string | null;
-	token: string | null;
-	currency: string | null;
-};
-
-export type LicenseValueType = {
-	value: string;
-	icon?: string;
-	endText?: string;
-};
-
-export type LicenseType = {
-	access: LicenseValueType | null;
-	derivations: LicenseValueType | null;
-	commercialUse: LicenseValueType | null;
-	dataModelTraining: LicenseValueType | null;
-	paymentMode: string | null;
-	paymentAddress: string | null;
-	currency: string | null;
-};
-
-export type AssetType = {
-	data: {
-		id: string;
-		creator: string;
-		title: string;
-		description: string | null;
-		dateCreated: number;
-		blockHeight: number;
-		renderWith: string | null;
-		license: string | null;
-		udl: LicenseType | null;
-		thumbnail: string | null;
-		implementation: string | null;
-		collectionId?: string | null;
-		collectionName?: string | null;
-	};
-};
-
-export type AssetDetailType = AssetType & {
-	state?: AssetStateType;
-	orders?: AssetOrderType[];
-};
-
-// export type ProfileType = {
-// 	txId: string;
-// 	displayName: string | null;
-// 	handle: string | null;
-// 	avatar: string | null;
-// 	walletAddress: string;
-// 	profileIndex: string | null;
-// 	banner: string | null;
-// };
-
-// export type FullProfileType = ProfileType & {
-// 	bio: string;
-// };
-
-export type AOProfileType = {
+export type ProfileType = {
 	id: string;
 	walletAddress: string;
 	displayName: string | null;
@@ -105,52 +8,14 @@ export type AOProfileType = {
 	bio: string | null;
 	avatar: string | null;
 	banner: string | null;
+	portals: PortalType[] | null;
 };
-
-export type ProfileHeaderType = AOProfileType;
 
 export type RegistryProfileType = {
 	id: string;
 	avatar: string | null;
 	username: string;
 	bio?: string;
-};
-
-export type OwnerType = {
-	address: string;
-	profile: RegistryProfileType | null;
-	ownerQuantity?: number;
-	ownerPercentage?: number;
-};
-
-export type ListingType = AssetOrderType & { profile: RegistryProfileType };
-
-export type CollectionManifestType = {
-	type: string;
-	items: string[];
-};
-
-export type CollectionMetricsType = {
-	assetCount: number | null;
-	floorPrice: number | null;
-	percentageListed: number | null;
-	defaultCurrency: string;
-};
-
-export type CollectionType = {
-	id: string;
-	title: string;
-	description: string | null;
-	creator: string;
-	dateCreated: string;
-	banner: string | null;
-	thumbnail: string | null;
-};
-
-export type CollectionDetailType = CollectionType & {
-	assetIds: string[];
-	creatorProfile: ProfileHeaderType;
-	metrics: CollectionMetricsType;
 };
 
 export type TagType = { name: string; value: string };
@@ -214,23 +79,11 @@ export enum WalletEnum {
 	othent = 'othent',
 }
 
-export type RenderType = 'renderer' | 'raw';
-
-export type ContentType = 'renderer' | any;
-
-export type AssetRenderType = {
-	url: string;
-	type: RenderType;
-	contentType: ContentType;
-};
-
 export type DateType = 'iso' | 'epoch';
 
 export type FormFieldType = 'number' | 'password';
 
 export type TabType = 'primary' | 'alt1';
-
-export type AssetMarketActionOrderType = 'buy' | 'sell' | 'transfer';
 
 export type ReduxActionType = {
 	type: string;
@@ -241,10 +94,6 @@ export type ValidationType = {
 	status: boolean;
 	message: string | null;
 };
-
-export type AssetSortType = 'high-to-low' | 'low-to-high' | 'recently-listed';
-
-export type IdGroupType = { [index: string]: string[] };
 
 export type ButtonType = 'primary' | 'alt1' | 'alt2' | 'alt3' | 'success' | 'warning';
 

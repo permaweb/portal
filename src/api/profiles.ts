@@ -1,27 +1,23 @@
 import { readHandler } from 'api';
 
 import { AO } from 'helpers/config';
+import { PortalType, ProfileType, RegistryProfileType } from 'helpers/types';
 
-export type AOProfileType = {
-	id: string;
-	walletAddress: string;
-	displayName: string | null;
-	username: string | null;
-	bio: string | null;
-	avatar: string | null;
-	banner: string | null;
-};
+// TODO
+const PORTALS: PortalType[] = [
+	{
+		id: 'IR2hzJyfSGp7lgqqgnoeza2caaus96e56uTVP1gV7GE',
+		name: 'My first portal',
+		logo: '4txDbfbymP1RNMQCsFzyZOZR9qeUZXt_IacmL4IXYD8',
+	},
+	{
+		id: 'WhW2X0sy3bvzvzSgFdxOSrU3jHJBmVleLf1GX-IWEjU',
+		name: 'Independent Media Alliance',
+		logo: null,
+	},
+];
 
-export type ProfileHeaderType = AOProfileType;
-
-export type RegistryProfileType = {
-	id: string;
-	avatar: string | null;
-	username: string;
-	bio?: string;
-};
-
-export async function getProfileById(args: { profileId: string }): Promise<ProfileHeaderType | null> {
+export async function getProfileById(args: { profileId: string }): Promise<ProfileType | null> {
 	const emptyProfile = {
 		id: args.profileId,
 		walletAddress: null,
@@ -30,6 +26,7 @@ export async function getProfileById(args: { profileId: string }): Promise<Profi
 		bio: null,
 		avatar: null,
 		banner: null,
+		portals: null,
 	};
 
 	try {
@@ -48,6 +45,7 @@ export async function getProfileById(args: { profileId: string }): Promise<Profi
 				bio: fetchedProfile.Profile.Description || null,
 				avatar: fetchedProfile.Profile.ProfileImage || null,
 				banner: fetchedProfile.Profile.CoverImage || null,
+				portals: PORTALS,
 			};
 		} else return emptyProfile;
 	} catch (e: any) {
@@ -55,7 +53,7 @@ export async function getProfileById(args: { profileId: string }): Promise<Profi
 	}
 }
 
-export async function getProfileByWalletAddress(args: { address: string }): Promise<ProfileHeaderType | null> {
+export async function getProfileByWalletAddress(args: { address: string }): Promise<ProfileType | null> {
 	const emptyProfile = {
 		id: null,
 		walletAddress: args.address,
@@ -64,6 +62,7 @@ export async function getProfileByWalletAddress(args: { address: string }): Prom
 		bio: null,
 		avatar: null,
 		banner: null,
+		portals: null,
 	};
 
 	try {
@@ -94,6 +93,7 @@ export async function getProfileByWalletAddress(args: { address: string }): Prom
 					bio: fetchedProfile.Profile.Description || null,
 					avatar: fetchedProfile.Profile.ProfileImage || null,
 					banner: fetchedProfile.Profile.CoverImage || null,
+					portals: PORTALS,
 				};
 			} else return emptyProfile;
 		} else return emptyProfile;

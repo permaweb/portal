@@ -8,6 +8,7 @@ import { GlobalStyle } from 'app/styles';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { CustomThemeProvider } from 'providers/CustomThemeProvider';
 import { LanguageProvider } from 'providers/LanguageProvider';
+import { PortalProvider } from 'providers/PortalProvider';
 import { persistor, store } from 'store';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
@@ -17,8 +18,10 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 				<CustomThemeProvider>
 					<LanguageProvider>
 						<ArweaveProvider>
-							<GlobalStyle />
-							<App />
+							<PortalProvider>
+								<GlobalStyle />
+								<App />
+							</PortalProvider>
 						</ArweaveProvider>
 					</LanguageProvider>
 				</CustomThemeProvider>
