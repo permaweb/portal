@@ -2,19 +2,22 @@ import styled from 'styled-components';
 
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.div``;
+export const Wrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+`;
 
 export const ToolbarWrapper = styled.div`
-	/* border: 1px solid blue; */
 	display: flex;
 	gap: 20px;
-	margin: 0 0 20px 0;
 `;
 
 export const EditorWrapper = styled.div<{ blockEditMode: boolean }>`
 	display: flex;
 	flex-direction: column;
-	gap: ${(props) => (props.blockEditMode ? '40px' : '0')};
+	gap: ${(props) => (props.blockEditMode ? '40px' : '20px')};
+	margin: 0 0 40px 0;
 
 	[contenteditable] {
 		&:focus {
@@ -24,19 +27,18 @@ export const EditorWrapper = styled.div<{ blockEditMode: boolean }>`
 	}
 `;
 
-export const OutputWrapper = styled.div`
-	margin: 0 0 20px 0;
-`;
-
-export const PreviewWrapper = styled.div`
-	border: 1px solid purple;
-	margin: 0 0 20px 0;
+export const ElementDragWrapper = styled.div`
+	display: flex;
+	gap: 10px;
+	position: relative;
 `;
 
 export const ElementWrapper = styled.div`
+	width: 100%;
 	display: flex;
 	flex-direction: column;
-	gap: 7.5px;
+	gap: 5px;
+	position: relative;
 `;
 
 export const Element = styled.div<{ blockEditMode: boolean }>`
@@ -82,5 +84,16 @@ export const EToolbarDelete = styled.div`
 		&:hover {
 			color: ${(props) => props.theme.colors.warning.alt1} !important;
 		}
+	}
+`;
+
+export const EDragWrapper = styled.div``;
+
+export const EDragHandler = styled.div`
+	svg {
+		width: 17.5px;
+		margin: 5px 0 0 0;
+		color: ${(props) => props.theme.colors.font.alt1};
+		fill: ${(props) => props.theme.colors.font.alt1};
 	}
 `;

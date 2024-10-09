@@ -26,6 +26,7 @@ export const BlockAddDropdown = styled.div`
 	width: 350px;
 	max-width: 80vw;
 	position: absolute;
+	z-index: 1;
 	top: 45px;
 	right: 0;
 	padding: 11.5px 10px;
@@ -42,7 +43,7 @@ export const BADropdownSection = styled.div``;
 export const BADropdownSectionHeader = styled.div`
 	width: 100%;
 	padding: 0 10px;
-	margin: 0 0 5px 0;
+	margin: 0 0 2.5px 0;
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
