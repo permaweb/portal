@@ -26,18 +26,21 @@ export default function ArticleToolbar(props: IProps) {
 		{
 			label: 'Headers',
 			blocks: [
-				{ type: 'header', label: 'Header 1', icon: ASSETS.header1 },
-				{ type: 'header', label: 'Header 2', icon: ASSETS.header2 },
-				{ type: 'header', label: 'Header 3', icon: ASSETS.header3 },
-				{ type: 'header', label: 'Header 4', icon: ASSETS.header4 },
-				{ type: 'header', label: 'Header 5', icon: ASSETS.header5 },
-				{ type: 'header', label: 'Header 6', icon: ASSETS.header6 },
+				{ type: 'header-1', label: 'Header 1', icon: ASSETS.header1 },
+				{ type: 'header-2', label: 'Header 2', icon: ASSETS.header2 },
+				{ type: 'header-3', label: 'Header 3', icon: ASSETS.header3 },
+				{ type: 'header-4', label: 'Header 4', icon: ASSETS.header4 },
+				{ type: 'header-5', label: 'Header 5', icon: ASSETS.header5 },
+				{ type: 'header-6', label: 'Header 6', icon: ASSETS.header6 },
 			],
 		},
 	];
 
 	return (
 		<S.Wrapper>
+			<S.TitleWrapper>
+				<p>Untitled post</p>
+			</S.TitleWrapper>
 			<S.EndActions>
 				<Button
 					type={'primary'}

@@ -289,7 +289,7 @@ export default function ProfileManager(props: IProps) {
 		if (banner) return <img src={checkValidAddress(banner) ? getTxEndpoint(banner) : banner} />;
 		return (
 			<>
-				<ReactSVG src={ASSETS.media} />
+				<ReactSVG src={ASSETS.image} />
 				<span>{language.uploadBanner}</span>
 			</>
 		);

@@ -292,8 +292,8 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			base: '16px',
 			lg: '18px',
 			xLg: '24px',
-			h1: 'clamp(38px, 4.5vw, 62px)',
-			h2: 'clamp(32px, 3.75vw, 44px)',
+			h1: 'clamp(32px, 2.85vw, 48px)',
+			h2: 'clamp(28px, 2.45vw, 44px)',
 			h4: 'clamp(24px, 2vw, 36px)',
 		},
 		weight: {

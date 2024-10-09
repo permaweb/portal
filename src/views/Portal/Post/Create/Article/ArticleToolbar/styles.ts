@@ -11,6 +11,15 @@ export const Wrapper = styled.div`
 	position: relative;
 `;
 
+export const TitleWrapper = styled.div`
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.base} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+`;
+
 export const EndActions = styled.div`
 	display: flex;
 	flex-wrap: wrap;

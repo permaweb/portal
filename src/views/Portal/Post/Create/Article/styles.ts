@@ -46,6 +46,33 @@ export const Element = styled.div<{ blockEditMode: boolean }>`
 	background: ${(props) => (props.blockEditMode ? props.theme.colors.container.alt1.background : 'transparent')};
 	border: 1px solid ${(props) => (props.blockEditMode ? props.theme.colors.border.alt2 : 'transparent')};
 	border-radius: ${(props) => (props.blockEditMode ? STYLING.dimensions.radius.primary : '0')};
+
+	/* All individual element styling */
+	h1 {
+		font-size: clamp(28px, 2.5vw, 40px);
+		line-height: 1.2;
+		font-weight: 600;
+	}
+	h2 {
+		font-size: clamp(24px, 2.15vw, 36px);
+		line-height: 1.25;
+	}
+	h3 {
+		font-size: clamp(22px, 1.9vw, 30px);
+		line-height: 1.3;
+	}
+	h4 {
+		font-size: clamp(20px, 1.7vw, 26px);
+		line-height: 1.35;
+	}
+	h5 {
+		font-size: clamp(18px, 1.5vw, 22px);
+		line-height: 1.4;
+	}
+	h6 {
+		font-size: clamp(16px, 1.25vw, 18px);
+		line-height: 1.45;
+	}
 `;
 
 export const ElementToolbar = styled.div`

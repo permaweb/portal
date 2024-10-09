@@ -5,12 +5,13 @@ import { ReactSVG } from 'react-svg';
 import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS } from 'helpers/config';
 import { ArticleBlockElementType, ArticleBlockType } from 'helpers/types';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import { ArticleToolbar } from './ArticleToolbar';
 import * as S from './styles';
 
-function ContentEditable(props: { value: any; onChange: any }) {
-	const ref = React.useRef(null);
+function ContentEditable(props: { value: string; onChange: (content: string) => void; autoFocus?: boolean }) {
+	const ref = React.useRef<HTMLDivElement>(null);
 	const isUserInput = React.useRef(false);
 
 	React.useEffect(() => {
@@ -20,8 +21,14 @@ function ContentEditable(props: { value: any; onChange: any }) {
 		isUserInput.current = false;
 	}, [props.value]);
 
-	const handleInput = (e: any) => {
-		const newValue = e.target.innerHTML;
+	React.useEffect(() => {
+		if (props.autoFocus && ref.current) {
+			ref.current.focus();
+		}
+	}, [props.autoFocus]);
+
+	const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+		const newValue = e.currentTarget.innerHTML;
 		isUserInput.current = true;
 		props.onChange(newValue);
 	};
@@ -29,19 +36,46 @@ function ContentEditable(props: { value: any; onChange: any }) {
 	return <div ref={ref} contentEditable onInput={handleInput} suppressContentEditableWarning={true} />;
 }
 
-// TODO: Auto focus
 // TODO: All element types
 function Block(props: {
+	index: number;
 	block: ArticleBlockType;
 	blockEditMode: boolean;
 	onChangeBlock: (id: string, content: any) => void;
 	onDeleteBlock: (id: string) => void;
-	index: number;
+	autoFocus: boolean;
 }) {
-	const Element = props.block.type === 'header' ? 'h2' : 'div';
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
+
+	let Element: any = null;
+
+	switch (props.block.type) {
+		case 'paragraph':
+			Element = 'p';
+			break;
+		case 'header-1':
+			Element = 'h1';
+			break;
+		case 'header-2':
+			Element = 'h2';
+			break;
+		case 'header-3':
+			Element = 'h3';
+			break;
+		case 'header-4':
+			Element = 'h4';
+			break;
+		case 'header-5':
+			Element = 'h5';
+			break;
+		case 'header-6':
+			Element = 'h6';
+			break;
+	}
 
 	return (
-		<Draggable draggableId={props.block.id} index={props.index}>
+		<Draggable draggableId={props.block.id} index={props.index} className={'fade-in'}>
 			{(provided) => (
 				<S.ElementDragWrapper ref={provided.innerRef} {...provided.draggableProps}>
 					{props.blockEditMode && (
@@ -56,7 +90,7 @@ function Block(props: {
 							<>
 								<S.ElementToolbar>
 									<S.EToolbarHeader>
-										<span>{props.block.type.toUpperCase()}</span>
+										<span>{props.block.type.replace('-', ' ').toUpperCase()}</span>
 									</S.EToolbarHeader>
 									<S.EToolbarDelete>
 										<IconButton
@@ -65,7 +99,7 @@ function Block(props: {
 											src={ASSETS.delete}
 											handlePress={() => props.onDeleteBlock(props.block.id)}
 											dimensions={{ wrapper: 23.5, icon: 13.5 }}
-											tooltip={'Delete block'}
+											tooltip={language.deleteBlock}
 											tooltipPosition={'bottom-right'}
 										/>
 									</S.EToolbarDelete>
@@ -77,6 +111,7 @@ function Block(props: {
 								<ContentEditable
 									value={props.block.content}
 									onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
+									autoFocus={props.autoFocus}
 								/>
 							</Element>
 						</S.Element>
@@ -88,34 +123,15 @@ function Block(props: {
 }
 
 export default function Article() {
-	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
+	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
+	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(false);
+	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 
-	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([
-		{
-			id: Date.now().toString(),
-			type: 'paragraph',
-			content:
-				'Here is a **Lorem ipsum** text with approximately 300 characters:*Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat.*',
-		},
-		{
-			id: (Date.now() + 1).toString(),
-			type: 'paragraph',
-			content:
-				'Here is a **Lorem ipsum** text with approximately 300 characters:*Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat.*',
-		},
-		{
-			id: (Date.now() + 2).toString(),
-			type: 'paragraph',
-			content:
-				'Here is a **Lorem ipsum** text with approximately 300 characters:*Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat.*',
-		},
-		{
-			id: (Date.now() + 3).toString(),
-			type: 'paragraph',
-			content:
-				'Here is a **Lorem ipsum** text with approximately 300 characters:*Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat.*',
-		},
-	]);
+	React.useEffect(() => {
+		if (blocks.length <= 0) {
+			addBlock('header-1');
+		}
+	}, []);
 
 	const onDragEnd = (result: any) => {
 		if (!result.destination) {
@@ -140,6 +156,7 @@ export default function Article() {
 			content: '',
 		};
 		setBlocks([...blocks, newBlock]);
+		setLastAddedBlockId(newBlock.id);
 	};
 
 	const deleteBlock = (id: string) => {
@@ -161,12 +178,13 @@ export default function Article() {
 						<S.EditorWrapper {...provided.droppableProps} ref={provided.innerRef} blockEditMode={blockEditMode}>
 							{blocks.map((block, index) => (
 								<Block
+									index={index}
 									key={block.id}
 									block={block}
 									blockEditMode={blockEditMode}
 									onChangeBlock={handleBlockChange}
 									onDeleteBlock={deleteBlock}
-									index={index}
+									autoFocus={block.id === lastAddedBlockId}
 								/>
 							))}
 							{provided.placeholder}

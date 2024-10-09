@@ -273,7 +273,7 @@ export default function PortalManager(props: IProps) {
 	// 	if (banner) return <img src={checkValidAddress(banner) ? getTxEndpoint(banner) : banner} />;
 	// 	return (
 	// 		<>
-	// 			<ReactSVG src={ASSETS.media} />
+	// 			<ReactSVG src={ASSETS.image} />
 	// 			<span>{language.uploadBanner}</span>
 	// 		</>
 	// 	);
@@ -283,7 +283,7 @@ export default function PortalManager(props: IProps) {
 		if (logo) return <img src={checkValidAddress(logo) ? getTxEndpoint(logo) : logo} />;
 		return (
 			<>
-				<ReactSVG src={ASSETS.media} />
+				<ReactSVG src={ASSETS.image} />
 				<span>{language.uploadLogo}</span>
 			</>
 		);
