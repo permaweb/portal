@@ -227,11 +227,6 @@ export const PDropdownBody = styled.div`
 	margin: 7.5px 0 0 0;
 `;
 
-export const PDropdownLinks = styled.div`
-	display: flex;
-	flex-direction: column;
-`;
-
 export const PDropdownLink = styled.div<{ active: boolean }>`
 	a {
 		height: 40px;
@@ -280,15 +275,15 @@ export const PIndicator = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	border: 1px solid ${(props) => props.theme.colors.border.alt4};
+	border: 1px solid ${(props) => props.theme.colors.font.dark2};
 	background: ${(props) => props.theme.colors.font.dark2};
 	border-radius: 50%;
 
 	svg {
 		height: 11.5px !important;
 		width: 11.5px !important;
-		color: ${(props) => props.theme.colors.font.light2} !important;
-		fill: ${(props) => props.theme.colors.font.light2} !important;
+		color: ${(props) => props.theme.colors.font.light1} !important;
+		fill: ${(props) => props.theme.colors.font.light1} !important;
 		margin: 5px 0 0 0 !important;
 
 		polyline {

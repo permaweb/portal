@@ -1,5 +1,13 @@
 export type PortalType = { id: string; name: string; logo: string | null };
 
+export type ArticleBlockElementType = 'paragraph' | 'header' | 'image';
+
+export type ArticleBlockType = {
+	id: string;
+	type: ArticleBlockElementType;
+	content: string;
+};
+
 export type ProfileType = {
 	id: string;
 	walletAddress: string;

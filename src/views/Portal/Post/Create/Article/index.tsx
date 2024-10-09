@@ -1,70 +1,80 @@
 import React from 'react';
 
+import { ArticleBlockElementType, ArticleBlockType } from 'helpers/types';
+
+import { ArticleToolbar } from './ArticleToolbar';
 import * as S from './styles';
 
-interface Block {
-	id: string;
-	type: 'paragraph' | 'header' | 'image';
-	content: string;
-}
-
-const ContentEditable = ({ value, onChange }) => {
+function ContentEditable(props: { value: any; onChange: any }) {
 	const ref = React.useRef(null);
 	const isUserInput = React.useRef(false);
 
 	React.useEffect(() => {
-		console.log('Effect running, value:', value);
-		console.log('ref.current:', ref.current);
-		console.log('ref.current.innerHTML:', ref.current?.innerHTML);
-
-		if (ref.current && value !== ref.current.innerHTML && !isUserInput.current) {
-			console.log('Updating content');
-			ref.current.innerHTML = value;
-		} else {
-			console.log('No update needed');
+		if (ref.current && props.value !== ref.current.innerHTML && !isUserInput.current) {
+			ref.current.innerHTML = props.value;
 		}
 		isUserInput.current = false;
-	}, [value]);
+	}, [props.value]);
 
 	const handleInput = (e: any) => {
 		const newValue = e.target.innerHTML;
-		console.log('handleInput called, newValue:', newValue);
 		isUserInput.current = true;
-		onChange(newValue);
+		props.onChange(newValue);
 	};
 
 	return <div ref={ref} contentEditable onInput={handleInput} suppressContentEditableWarning={true} />;
-};
+}
 
-const Block = ({ block, onChangeBlock }) => {
-	console.log('Block rendering, content:', block.content);
-	const Element = block.type === 'header' ? 'h2' : 'div';
+// TODO: Auto focus
+// TODO: All element types
+function Block(props: {
+	block: ArticleBlockType;
+	blockEditMode: boolean;
+	onChangeBlock: (id: string, content: any) => void;
+	onDeleteBlock: (id: string) => void;
+}) {
+	const Element = props.block.type === 'header' ? 'h2' : 'div';
 
 	return (
-		<S.Editor>
-			<Element>
-				<ContentEditable
-					value={block.content}
-					onChange={(newContent: any) => {
-						console.log('onChange called with:', newContent);
-						onChangeBlock(block.id, newContent);
-					}}
-				/>
-			</Element>
-		</S.Editor>
+		<S.ElementWrapper>
+			{props.blockEditMode && (
+				<S.ElementToolbar>
+					<S.EToolbarHeader>
+						<span>{props.block.type.toUpperCase()}</span>
+					</S.EToolbarHeader>
+					<S.EToolbarDelete>
+						<button onClick={() => props.onDeleteBlock(props.block.id)}>Delete</button>
+					</S.EToolbarDelete>
+				</S.ElementToolbar>
+			)}
+			<S.Element blockEditMode={props.blockEditMode}>
+				<Element>
+					<ContentEditable
+						value={props.block.content}
+						onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
+					/>
+				</Element>
+			</S.Element>
+		</S.ElementWrapper>
 	);
-};
+}
 
 export default function Article() {
-	const [blocks, setBlocks] = React.useState<Block[]>([{ id: Date.now().toString(), type: 'paragraph', content: '' }]);
+	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
+
+	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([
+		{ id: Date.now().toString(), type: 'paragraph', content: '1' },
+		{ id: (Date.now() + 1).toString(), type: 'paragraph', content: '2' },
+		{ id: (Date.now() + 2).toString(), type: 'paragraph', content: '3' },
+		{ id: (Date.now() + 3).toString(), type: 'paragraph', content: '4' },
+	]);
 
 	const handleBlockChange = (id: string, content: string) => {
-		console.log('handleBlockChange called, id:', id, 'content:', content);
 		setBlocks((prevBlocks) => prevBlocks.map((block) => (block.id === id ? { ...block, content } : block)));
 	};
 
-	const addBlock = (type: Block['type']) => {
-		const newBlock: Block = {
+	const addBlock = (type: ArticleBlockElementType) => {
+		const newBlock: ArticleBlockType = {
 			id: Date.now().toString(),
 			type,
 			content: '',
@@ -72,15 +82,28 @@ export default function Article() {
 		setBlocks([...blocks, newBlock]);
 	};
 
+	const deleteBlock = (id: string) => {
+		setBlocks((prevBlocks) => prevBlocks.filter((block) => block.id !== id));
+	};
+
 	return (
 		<S.Wrapper>
 			<S.ToolbarWrapper>
-				<button onClick={() => addBlock('paragraph')}>Add Paragraph</button>
-				<button onClick={() => addBlock('header')}>Add Header</button>
+				<ArticleToolbar
+					addBlock={(type: ArticleBlockElementType) => addBlock(type)}
+					blockEditMode={blockEditMode}
+					toggleBlockEditMode={() => setBlockEditMode(!blockEditMode)}
+				/>
 			</S.ToolbarWrapper>
-			<S.EditorWrapper>
+			<S.EditorWrapper blockEditMode={blockEditMode}>
 				{blocks.map((block) => (
-					<Block key={block.id} block={block} onChangeBlock={handleBlockChange} />
+					<Block
+						key={block.id}
+						block={block}
+						blockEditMode={blockEditMode}
+						onChangeBlock={handleBlockChange}
+						onDeleteBlock={deleteBlock}
+					/>
 				))}
 			</S.EditorWrapper>
 			{/* <S.PreviewWrapper>
@@ -89,10 +112,10 @@ export default function Article() {
 					<div key={block.id} dangerouslySetInnerHTML={{ __html: block.content }} />
 				))}
 			</S.PreviewWrapper> */}
-			<S.OutputWrapper>
+			{/* <S.OutputWrapper>
 				<h3>HTML Output:</h3>
 				<pre>{JSON.stringify(blocks, null, 2)}</pre>
-			</S.OutputWrapper>
+			</S.OutputWrapper> */}
 		</S.Wrapper>
 	);
 }
