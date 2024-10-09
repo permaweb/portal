@@ -5,6 +5,7 @@ import { debounce } from 'lodash';
 const Landing = getLazyImport('Landing');
 const Portal = getLazyImport('Portal');
 const PostCreate = getLazyImport('Portal/Post/Create');
+const ArticleCreate = getLazyImport('Portal/Post/Create/Article');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
 
@@ -74,6 +75,7 @@ export default function App() {
 						{getRoute(URLS.base, <Landing />)}
 						{getRoute(`${URLS.base}:portalId`, <Portal />)}
 						{getRoute(`${URLS.base}:portalId/post/create`, <PostCreate />)}
+						{getRoute(`${URLS.base}:portalId/post/create/article`, <ArticleCreate />)}
 						{getRoute(URLS.docs, <Docs />)}
 						{getRoute(`${URLS.docs}:active/*`, <Docs />)}
 						{getRoute(URLS.notFound, <NotFound />)}

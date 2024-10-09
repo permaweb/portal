@@ -313,7 +313,7 @@ export default function ProfileManager(props: IProps) {
 					<S.Wrapper>
 						<S.Body>
 							<S.PWrapper>
-								<S.BWrapper>
+								<S.FileInputWrapper>
 									<S.BInput
 										hasBanner={banner !== null}
 										onClick={() => bannerInputRef.current.click()}
@@ -342,7 +342,7 @@ export default function ProfileManager(props: IProps) {
 										disabled={loading}
 										accept={ALLOWED_AVATAR_TYPES}
 									/>
-								</S.BWrapper>
+								</S.FileInputWrapper>
 								<S.PActions>
 									<Button
 										type={'primary'}

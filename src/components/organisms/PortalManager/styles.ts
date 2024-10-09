@@ -46,8 +46,7 @@ export const TForm = styled.div`
 
 export const PWrapper = styled.div`
 	height: fit-content;
-	min-width: 500px;
-	width: calc(50% - 20px);
+	width: 100%;
 	flex: 1;
 	input {
 		display: none;
@@ -77,101 +76,20 @@ export const CWrapper = styled.div`
 	}
 `;
 
-export const BWrapper = styled.div`
+export const FileInputWrapper = styled.div`
 	width: 100%;
+	display: flex;
+	justify-content: center;
 	position: relative;
 `;
 
-export const BInput = styled.button<{ hasBanner: boolean }>`
-	height: 200px;
-	width: 100%;
+export const LInput = styled.button<{ hasLogo: boolean }>`
+	height: 135px;
+	width: 135px;
+	position: relative;
 	background: ${(props) => props.theme.colors.container.primary.background};
-	border: ${(props) => (props.hasBanner ? `none` : `1px dashed ${props.theme.colors.border.primary}`)};
-	border-radius: ${STYLING.dimensions.radius.primary};
-	overflow: hidden;
-	span {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-	}
-	svg {
-		height: 35px;
-		width: 35px;
-		margin: 0 0 10px 0;
-		color: ${(props) => props.theme.colors.icon.primary.fill};
-		fill: ${(props) => props.theme.colors.icon.primary.fill};
-	}
-	img {
-		height: 200px;
-		width: 100%;
-		object-fit: cover;
-	}
-	&:hover {
-		border: 1px dashed ${(props) => props.theme.colors.border.alt2};
-		background: ${(props) => props.theme.colors.container.primary.active};
-	}
-	&:focus {
-		opacity: 1;
-	}
-	&:disabled {
-		background: ${(props) => props.theme.colors.button.primary.disabled.background};
-		border: 1px dashed ${(props) => props.theme.colors.button.primary.disabled.border};
-		span {
-			color: ${(props) => props.theme.colors.button.primary.disabled.color};
-		}
-		svg {
-			fill: ${(props) => props.theme.colors.button.primary.disabled.color};
-			color: ${(props) => props.theme.colors.button.primary.disabled.color};
-			g {
-				.svg-primary-fill {
-					fill: ${(props) => props.theme.colors.button.primary.disabled.color};
-					color: ${(props) => props.theme.colors.button.primary.disabled.color};
-				}
-			}
-		}
-	}
-	${(props) =>
-		props.hasBanner && !props.disabled
-			? `
-        pointer-events: all;
-        ::after {
-            content: "";
-            position: absolute;
-            height: 200px;
-            width: 100%;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: ${props.theme.colors.overlay.alt1};
-			border-radius: ${STYLING.dimensions.radius.primary};
-            opacity: 0;
-            transition: all 100ms;
-        }
-        
-        &:hover::after {
-            opacity: 1;
-        }
-        &:focus::after {
-            opacity: 1;
-        }
-        &:hover {
-            cursor: pointer;
-            border: none;
-        }
-    `
-			: ''}
-`;
-
-export const AInput = styled.button<{ hasAvatar: boolean }>`
-	height: 115px;
-	width: 115px;
-	background: ${(props) => props.theme.colors.container.primary.background};
-	border: ${(props) => (props.hasAvatar ? `none` : `1px dashed ${props.theme.colors.border.primary}`)};
+	border: ${(props) => (props.hasLogo ? `none` : `1px dashed ${props.theme.colors.border.primary}`)};
 	border-radius: 50%;
-	position: absolute;
-	bottom: -55px;
-	left: 20px;
 	z-index: 1;
 	overflow: hidden;
 	span {
@@ -211,7 +129,7 @@ export const AInput = styled.button<{ hasAvatar: boolean }>`
 		}
 	}
 	${(props) =>
-		props.hasAvatar && !props.disabled
+		props.hasLogo && !props.disabled
 			? `
         pointer-events: all;
         ::after {
@@ -245,7 +163,7 @@ export const AInput = styled.button<{ hasAvatar: boolean }>`
 export const PActions = styled.div`
 	margin: 20px 0 0 0;
 	display: flex;
-	justify-content: flex-end;
+	justify-content: center;
 	flex-wrap: wrap;
 	gap: 15px;
 	@media (max-width: ${STYLING.cutoffs.secondary}) {

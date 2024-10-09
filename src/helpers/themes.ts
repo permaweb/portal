@@ -80,7 +80,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			alt1: currentTheme.neutral5,
 			alt2: currentTheme.neutral6,
 			alt3: currentTheme.neutral7,
-			alt4: currentTheme.neutral8,
+			alt4: currentTheme.neutral9,
 		},
 		button: {
 			primary: {
@@ -183,6 +183,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			light1: currentTheme.light1,
 			light2: currentTheme.light2,
 			dark1: currentTheme.dark1,
+			dark2: currentTheme.dark2,
 		},
 		form: {
 			background: currentTheme.neutral1,

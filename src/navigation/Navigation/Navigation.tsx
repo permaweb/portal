@@ -96,7 +96,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						<S.PanelFooter open={props.open} className={'fade-in'}>
 							<Link to={URLS.docs}>
 								<ReactSVG src={ASSETS.help} />
-								{'Help center'}
+								{language.helpCenter}
 							</Link>
 						</S.PanelFooter>
 					</>
@@ -156,7 +156,12 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 												<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>
 													<Link to={`${URLS.base}${portal.id}`}>
 														<span>{portal.name}</span>
-														{active && <ReactSVG src={ASSETS.checkmark} />}
+														{/* {active && <ReactSVG src={ASSETS.checkmark} />} */}
+														{active && (
+															<S.PIndicator>
+																<ReactSVG src={ASSETS.checkmark} />
+															</S.PIndicator>
+														)}
 													</Link>
 												</S.PDropdownLink>
 											);
@@ -179,8 +184,8 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 											setShowPortalDropdown(false);
 										}}
 									>
-										<ReactSVG src={ASSETS.add} />
-										{language.portalCreate}
+										<ReactSVG src={ASSETS.write} />
+										{language.editPortal}
 									</button>
 									<button onClick={() => navigate(URLS.base)}>
 										<ReactSVG src={ASSETS.disconnect} />

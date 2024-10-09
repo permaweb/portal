@@ -1,18 +1,15 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { connect, createDataItemSigner } from '@permaweb/aoconnect';
-
-import { createTransaction, getGQLData, messageResult } from 'api';
-
+// import { connect, createDataItemSigner } from '@permaweb/aoconnect';
+// import { createTransaction, getGQLData, messageResult } from 'api';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Notification } from 'components/atoms/Notification';
-import { TextArea } from 'components/atoms/TextArea';
-import { AO, ASSETS } from 'helpers/config';
+import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { NotificationType } from 'helpers/types';
-import { checkValidAddress, getBase64Data, getDataURLContentType } from 'helpers/utils';
+import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
@@ -20,9 +17,7 @@ import { WalletBlock } from 'wallet/WalletBlock';
 import * as S from './styles';
 import { IProps } from './types';
 
-const MAX_BIO_LENGTH = 500;
-const ALLOWED_BANNER_TYPES = 'image/png, image/jpeg, image/gif';
-const ALLOWED_AVATAR_TYPES = 'image/png, image/jpeg, image/gif';
+const ALLOWED_LOGO_TYPES = 'image/png, image/jpeg, image/gif';
 
 export default function PortalManager(props: IProps) {
 	const arProvider = useArweaveProvider();
@@ -30,32 +25,23 @@ export default function PortalManager(props: IProps) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const bannerInputRef = React.useRef<any>(null);
-	const avatarInputRef = React.useRef<any>(null);
+	const logoInputRef = React.useRef<any>(null);
 
 	const [name, setName] = React.useState<string>('');
-	const [username, setUsername] = React.useState<string>('');
-	const [bio, setBio] = React.useState<string>('');
-	const [banner, setBanner] = React.useState<any>(null);
-	const [avatar, setAvatar] = React.useState<any>(null);
+	const [logo, setLogo] = React.useState<any>(null);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [profileResponse, setProfileResponse] = React.useState<NotificationType | null>(null);
 
-	// React.useEffect(() => {
-	// 	if (props.profile) {
-	// 		setUsername(props.profile.username ?? '');
-	// 		setName(props.profile.displayName ?? '');
-	// 		setBio(props.profile.bio ?? '');
-	// 		setBanner(props.profile.banner && checkValidAddress(props.profile.banner) ? props.profile.banner : null);
-	// 		setAvatar(props.profile.avatar && checkValidAddress(props.profile.avatar) ? props.profile.avatar : null);
-	// 	}
-	// }, [props.profile]);
-
-	// function handleUpdate() {
-	// 	arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
-	// 	if (props.handleUpdate) props.handleUpdate();
-	// }
+	React.useEffect(() => {
+		if (props.portal) {
+			setName(props.portal.name ?? '');
+			setLogo(props.portal.logo && checkValidAddress(props.portal.logo) ? props.portal.logo : null);
+		} else {
+			setName('');
+			setLogo(null);
+		}
+	}, [props.portal]);
 
 	async function handleSubmit() {
 		console.log('Create / edit portal');
@@ -90,13 +76,13 @@ export default function PortalManager(props: IProps) {
 		// 	}
 
 		// 	let avatarTx: any = null;
-		// 	if (avatar) {
-		// 		if (checkValidAddress(avatar)) {
-		// 			avatarTx = avatar;
+		// 	if (logo) {
+		// 		if (checkValidAddress(logo)) {
+		// 			avatarTx = logo;
 		// 		} else {
 		// 			try {
-		// 				const avatarContentType = getDataURLContentType(avatar);
-		// 				const base64Data = getBase64Data(avatar);
+		// 				const avatarContentType = getDataURLContentType(logo);
+		// 				const base64Data = getBase64Data(logo);
 		// 				const bufferData = Buffer.from(base64Data, 'base64');
 
 		// 				avatarTx = await createTransaction({
@@ -249,17 +235,17 @@ export default function PortalManager(props: IProps) {
 		// }
 	}
 
-	function getInvalidBio() {
-		if (bio && bio.length > MAX_BIO_LENGTH) {
-			return {
-				status: true,
-				message: `${language.maxCharsReached} (${bio.length} / ${MAX_BIO_LENGTH})`,
-			};
-		}
-		return { status: false, message: null };
-	}
+	// function getInvalidBio() {
+	// 	if (bio && bio.length > MAX_BIO_LENGTH) {
+	// 		return {
+	// 			status: true,
+	// 			message: `${language.maxCharsReached} (${bio.length} / ${MAX_BIO_LENGTH})`,
+	// 		};
+	// 	}
+	// 	return { status: false, message: null };
+	// }
 
-	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'avatar') {
+	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'logo') {
 		if (e.target.files && e.target.files.length) {
 			const file = e.target.files[0];
 			if (file.type.startsWith('image/')) {
@@ -268,11 +254,8 @@ export default function PortalManager(props: IProps) {
 				reader.onload = (event: ProgressEvent<FileReader>) => {
 					if (event.target?.result) {
 						switch (type) {
-							case 'banner':
-								setBanner(event.target.result);
-								break;
-							case 'avatar':
-								setAvatar(event.target.result);
+							case 'logo':
+								setLogo(event.target.result);
 								break;
 							default:
 								break;
@@ -286,22 +269,22 @@ export default function PortalManager(props: IProps) {
 		}
 	}
 
-	function getBannerWrapper() {
-		if (banner) return <img src={checkValidAddress(banner) ? getTxEndpoint(banner) : banner} />;
+	// function getBannerWrapper() {
+	// 	if (banner) return <img src={checkValidAddress(banner) ? getTxEndpoint(banner) : banner} />;
+	// 	return (
+	// 		<>
+	// 			<ReactSVG src={ASSETS.media} />
+	// 			<span>{language.uploadBanner}</span>
+	// 		</>
+	// 	);
+	// }
+
+	function getLogoWrapper() {
+		if (logo) return <img src={checkValidAddress(logo) ? getTxEndpoint(logo) : logo} />;
 		return (
 			<>
 				<ReactSVG src={ASSETS.media} />
-				<span>{language.uploadBanner}</span>
-			</>
-		);
-	}
-
-	function getAvatarWrapper() {
-		if (avatar) return <img src={checkValidAddress(avatar) ? getTxEndpoint(avatar) : avatar} />;
-		return (
-			<>
-				<ReactSVG src={ASSETS.user} />
-				<span>{language.uploadAvatar}</span>
+				<span>{language.uploadLogo}</span>
 			</>
 		);
 	}
@@ -314,48 +297,25 @@ export default function PortalManager(props: IProps) {
 					<S.Wrapper>
 						<S.Body>
 							<S.PWrapper>
-								<S.BWrapper>
-									<S.BInput
-										hasBanner={banner !== null}
-										onClick={() => bannerInputRef.current.click()}
-										disabled={loading}
-									>
-										{getBannerWrapper()}
-									</S.BInput>
+								<S.FileInputWrapper>
+									<S.LInput hasLogo={logo !== null} onClick={() => logoInputRef.current.click()} disabled={loading}>
+										{getLogoWrapper()}
+									</S.LInput>
 									<input
-										ref={bannerInputRef}
+										ref={logoInputRef}
 										type={'file'}
-										onChange={(e: any) => handleFileChange(e, 'banner')}
+										onChange={(e: any) => handleFileChange(e, 'logo')}
 										disabled={loading}
-										accept={ALLOWED_BANNER_TYPES}
+										accept={ALLOWED_LOGO_TYPES}
 									/>
-									<S.AInput
-										hasAvatar={avatar !== null}
-										onClick={() => avatarInputRef.current.click()}
-										disabled={loading}
-									>
-										{getAvatarWrapper()}
-									</S.AInput>
-									<input
-										ref={avatarInputRef}
-										type={'file'}
-										onChange={(e: any) => handleFileChange(e, 'avatar')}
-										disabled={loading}
-										accept={ALLOWED_AVATAR_TYPES}
-									/>
-								</S.BWrapper>
+								</S.FileInputWrapper>
 								<S.PActions>
 									<Button
 										type={'primary'}
-										label={language.removeAvatar}
-										handlePress={() => setAvatar(null)}
-										disabled={loading || !avatar}
-									/>
-									<Button
-										type={'primary'}
-										label={language.removeBanner}
-										handlePress={() => setBanner(null)}
-										disabled={loading || !banner}
+										label={language.removeLogo}
+										handlePress={() => setLogo(null)}
+										disabled={loading || !logo}
+										height={32.5}
 									/>
 								</S.PActions>
 							</S.PWrapper>
@@ -370,30 +330,14 @@ export default function PortalManager(props: IProps) {
 										required
 										hideErrorMessage
 									/>
-									<FormField
-										label={language.handle}
-										value={username}
-										onChange={(e: any) => setUsername(e.target.value)}
-										disabled={loading}
-										invalid={{ status: false, message: null }}
-										hideErrorMessage
-										required
-									/>
 								</S.TForm>
-								<TextArea
-									label={language.bio}
-									value={bio}
-									onChange={(e: any) => setBio(e.target.value)}
-									disabled={loading}
-									invalid={getInvalidBio()}
-								/>
 							</S.Form>
 							<S.SAction>
-								{/* {(!props.profile || !props.profile.id) && loading && (
+								{(!props.portal || !props.portal.id) && loading && (
 									<S.Message>
-										<span>{`${language.profileCreatingInfo}...`}</span>
+										<span>{`${language.portalCreatingInfo}...`}</span>
 									</S.Message>
-								)} */}
+								)}
 								{props.handleClose && (
 									<Button
 										type={'primary'}
@@ -407,7 +351,7 @@ export default function PortalManager(props: IProps) {
 									type={'alt1'}
 									label={language.save}
 									handlePress={handleSubmit}
-									disabled={!username || !name || loading}
+									disabled={!name || loading}
 									loading={loading}
 								/>
 							</S.SAction>

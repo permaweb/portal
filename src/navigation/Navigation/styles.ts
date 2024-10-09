@@ -31,7 +31,7 @@ export const Panel = styled.nav<{ open: boolean }>`
 	background: ${(props) => props.theme.colors.container.alt1.background};
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		border-right: 1px solid ${(props) => props.theme.colors.border.primary};
+		border-right: 1px solid ${(props) => props.theme.colors.border.alt4};
 	}
 `;
 
@@ -270,6 +270,29 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 		}
 		&:hover {
 			background: ${(props) => props.theme.colors.container.primary.active};
+		}
+	}
+`;
+
+export const PIndicator = styled.div`
+	height: 17.5px;
+	width: 17.5px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border: 1px solid ${(props) => props.theme.colors.border.alt4};
+	background: ${(props) => props.theme.colors.font.dark2};
+	border-radius: 50%;
+
+	svg {
+		height: 11.5px !important;
+		width: 11.5px !important;
+		color: ${(props) => props.theme.colors.font.light2} !important;
+		fill: ${(props) => props.theme.colors.font.light2} !important;
+		margin: 5px 0 0 0 !important;
+
+		polyline {
+			stroke-width: 40px !important;
 		}
 	}
 `;

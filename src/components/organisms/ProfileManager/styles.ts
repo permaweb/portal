@@ -77,7 +77,7 @@ export const CWrapper = styled.div`
 	}
 `;
 
-export const BWrapper = styled.div`
+export const FileInputWrapper = styled.div`
 	width: 100%;
 	position: relative;
 `;

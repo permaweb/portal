@@ -6,6 +6,7 @@ import { PortalManager } from 'components/organisms/PortalManager';
 import { PortalType } from 'helpers/types';
 
 import { useArweaveProvider } from './ArweaveProvider';
+import { useLanguageProvider } from './LanguageProvider';
 
 interface PortalContextState {
 	portals: PortalType[] | null;
@@ -32,6 +33,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	const arProvider = useArweaveProvider();
 
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
+
 	const [portals, setPortals] = React.useState<PortalType[] | null>(null);
 	const [current, setCurrent] = React.useState<PortalType | null>(null);
 
@@ -55,12 +59,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			{props.children}
 			<Panel
 				open={showPortalManager}
-				// header={profile && profile.id ? language.editProfile : `${language.createProfile}!`}
-				header={'Portal manager'}
+				header={current && current.id ? language.editPortal : language.createPortal}
 				handleClose={() => setShowPortalManager(false)}
-				width={575}
+				width={500}
 			>
-				<PortalManager portal={null} handleClose={() => setShowPortalManager(false)} handleUpdate={null} />
+				<PortalManager portal={current} handleClose={() => setShowPortalManager(false)} handleUpdate={null} />
 			</Panel>
 		</PortalContext.Provider>
 	);
