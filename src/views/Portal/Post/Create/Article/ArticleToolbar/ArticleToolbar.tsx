@@ -3,24 +3,32 @@ import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
 import { ASSETS } from 'helpers/config';
+import { ArticleBlockElementType } from 'helpers/types';
+import { isMac } from 'helpers/utils';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 import { IProps } from './types';
 
+type BlockConfigType = {
+	label: string;
+	blocks: { type: ArticleBlockElementType; label: string; icon: string }[];
+}[];
+
 // TODO: Language
+// TODO: Post title
 export default function ArticleToolbar(props: IProps) {
 	const [showBlockAddDropdown, setShowBlockAddDropdown] = React.useState<boolean>(false);
 
-	// TODO
-	const BLOCK_TYPES = [
+	const BLOCK_TYPES: BlockConfigType = [
 		{
 			label: 'Text',
 			blocks: [
 				{ type: 'paragraph', label: 'Paragraph', icon: ASSETS.paragraph },
-				{ type: 'paragraph', label: 'Quote', icon: ASSETS.quotes },
-				{ type: 'paragraph', label: 'List', icon: ASSETS.list },
-				{ type: 'paragraph', label: 'Code', icon: ASSETS.code },
+				{ type: 'quote', label: 'Quote', icon: ASSETS.quotes },
+				{ type: 'ordered-list', label: 'Numbered List', icon: ASSETS.listOrdered },
+				{ type: 'unordered-list', label: 'Bulleted List', icon: ASSETS.listUnordered },
+				{ type: 'code', label: 'Code', icon: ASSETS.code },
 			],
 		},
 		{
@@ -36,6 +44,89 @@ export default function ArticleToolbar(props: IProps) {
 		},
 	];
 
+	React.useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if ((event.metaKey || event.ctrlKey) && event.key === 'e') {
+				event.preventDefault();
+				props.toggleBlockEditMode();
+			}
+		};
+
+		document.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [props.toggleBlockEditMode]);
+
+	React.useEffect(() => {
+		let ctrlSlashPressed = false;
+
+		const handleKeyDown = (event: KeyboardEvent) => {
+			console.log(event.key);
+			if (event.ctrlKey && event.key === '/') {
+				ctrlSlashPressed = true;
+				event.preventDefault();
+			} else if (ctrlSlashPressed) {
+				switch (event.key.toLowerCase()) {
+					case '1':
+						event.preventDefault();
+						props.addBlock('header-1');
+						break;
+					case '2':
+						event.preventDefault();
+						props.addBlock('header-2');
+						break;
+					case '3':
+						event.preventDefault();
+						props.addBlock('header-3');
+						break;
+					case '4':
+						event.preventDefault();
+						props.addBlock('header-4');
+						break;
+					case '5':
+						event.preventDefault();
+						props.addBlock('header-5');
+						break;
+					case '6':
+						event.preventDefault();
+						props.addBlock('header-6');
+						break;
+					case 'p':
+						event.preventDefault();
+						props.addBlock('paragraph');
+						break;
+					case 'q':
+						event.preventDefault();
+						props.addBlock('quote');
+						break;
+					case 'c':
+						event.preventDefault();
+						props.addBlock('code');
+						break;
+					case 'o':
+						event.preventDefault();
+						props.addBlock('ordered-list');
+						break;
+					case 'u':
+						event.preventDefault();
+						props.addBlock('unordered-list');
+						break;
+					default:
+						break;
+				}
+				ctrlSlashPressed = false;
+			}
+		};
+
+		document.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [props.addBlock]);
+
 	return (
 		<S.Wrapper>
 			<S.TitleWrapper>
@@ -44,11 +135,12 @@ export default function ArticleToolbar(props: IProps) {
 			<S.EndActions>
 				<Button
 					type={'primary'}
-					label={props.blockEditMode ? 'Hide block editor' : 'Edit blocks'}
+					label={'Block editor'}
 					handlePress={() => props.toggleBlockEditMode()}
 					active={props.blockEditMode}
 					icon={props.blockEditMode ? ASSETS.close : ASSETS.write}
 					iconLeftAlign
+					tooltip={isMac() ? '⌘ + E' : 'Ctrl + E'}
 				/>
 				<S.BlockAddWrapper>
 					<CloseHandler

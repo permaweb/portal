@@ -280,11 +280,11 @@ export const PIndicator = styled.div`
 	border-radius: 50%;
 
 	svg {
-		height: 11.5px !important;
-		width: 11.5px !important;
+		height: 10.5px !important;
+		width: 10.5px !important;
 		color: ${(props) => props.theme.colors.font.light1} !important;
 		fill: ${(props) => props.theme.colors.font.light1} !important;
-		margin: 5px 0 0 0 !important;
+		margin: 0 0 0.5px 0 !important;
 
 		polyline {
 			stroke-width: 40px !important;

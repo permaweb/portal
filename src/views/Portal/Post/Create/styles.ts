@@ -17,7 +17,7 @@ export const HeaderWrapper = styled.div`
 
 export const BodyWrapper = styled.div`
 	width: 100%;
-	max-width: 700px;
+	max-width: 600px;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;

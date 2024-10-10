@@ -2,6 +2,10 @@ export type PortalType = { id: string; name: string; logo: string | null };
 
 export type ArticleBlockElementType =
 	| 'paragraph'
+	| 'quote'
+	| 'ordered-list'
+	| 'unordered-list'
+	| 'code'
 	| 'header-1'
 	| 'header-2'
 	| 'header-3'

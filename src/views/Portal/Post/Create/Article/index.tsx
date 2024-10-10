@@ -36,7 +36,6 @@ function ContentEditable(props: { value: string; onChange: (content: string) => 
 	return <div ref={ref} contentEditable onInput={handleInput} suppressContentEditableWarning={true} />;
 }
 
-// TODO: All element types
 function Block(props: {
 	index: number;
 	block: ArticleBlockType;
@@ -53,6 +52,18 @@ function Block(props: {
 	switch (props.block.type) {
 		case 'paragraph':
 			Element = 'p';
+			break;
+		case 'quote':
+			Element = 'blockquote';
+			break;
+		case 'ordered-list':
+			Element = 'ol';
+			break;
+		case 'unordered-list':
+			Element = 'ul';
+			break;
+		case 'code':
+			Element = 'code';
 			break;
 		case 'header-1':
 			Element = 'h1';
@@ -72,8 +83,12 @@ function Block(props: {
 		case 'header-6':
 			Element = 'h6';
 			break;
+		default:
+			Element = 'p';
+			break;
 	}
 
+	// TODO: Tab index
 	return (
 		<Draggable draggableId={props.block.id} index={props.index} className={'fade-in'}>
 			{(provided) => (
@@ -106,7 +121,7 @@ function Block(props: {
 								</S.ElementToolbar>
 							</>
 						)}
-						<S.Element blockEditMode={props.blockEditMode}>
+						<S.Element blockEditMode={props.blockEditMode} type={props.block.type}>
 							<Element>
 								<ContentEditable
 									value={props.block.content}
@@ -123,8 +138,24 @@ function Block(props: {
 }
 
 export default function Article() {
-	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
-	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(false);
+	// const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
+	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([
+		{ id: '1', type: 'code', content: 'for i = 0; i < elements.length; i++ <br>&nbsp;&nbsp;runFn()<br>end' }, // TODO: Can't add code
+		{ id: '2', type: 'quote', content: 'My famous quote' }, // TODO: Can't add quotes
+		// {
+		// 	id: '1',
+		// 	type: 'paragraph',
+		// 	content:
+		// 		'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat.',
+		// },
+		// { id: '2', type: 'header-1', content: 'Header 1' },
+		// { id: '3', type: 'header-2', content: 'Header 2' },
+		// { id: '4', type: 'header-3', content: 'Header 3' },
+		// { id: '5', type: 'header-4', content: 'Header 4' },
+		// { id: '6', type: 'header-5', content: 'Header 5' },
+		// { id: '7', type: 'header-6', content: 'Header 6' },
+	]);
+	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
@@ -153,7 +184,7 @@ export default function Article() {
 		const newBlock: ArticleBlockType = {
 			id: Date.now().toString(),
 			type,
-			content: '',
+			content: type === 'ordered-list' || type === 'unordered-list' ? '<li></li>' : '',
 		};
 		setBlocks([...blocks, newBlock]);
 		setLastAddedBlockId(newBlock.id);
@@ -173,7 +204,7 @@ export default function Article() {
 				/>
 			</S.ToolbarWrapper>
 			<DragDropContext onDragEnd={onDragEnd}>
-				<Droppable droppableId="blocks">
+				<Droppable droppableId={'blocks'}>
 					{(provided) => (
 						<S.EditorWrapper {...provided.droppableProps} ref={provided.innerRef} blockEditMode={blockEditMode}>
 							{blocks.map((block, index) => (

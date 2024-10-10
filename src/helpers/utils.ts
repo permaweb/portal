@@ -148,3 +148,7 @@ export function getByteSize(input: string | Buffer): number {
 
 	return sizeInBytes;
 }
+
+export function isMac(): boolean {
+	return navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+}
