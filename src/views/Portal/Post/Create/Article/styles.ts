@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 import { STYLING } from 'helpers/config';
-import { ArticleBlockElementType } from 'helpers/types';
+import { ArticleBlockEnum } from 'helpers/types';
 
 export const Wrapper = styled.div`
 	display: flex;
@@ -44,9 +44,17 @@ export const ElementWrapper = styled.div`
 	position: relative;
 `;
 
-function getElementPadding(type: ArticleBlockElementType) {
+function getElementPadding(type: ArticleBlockEnum) {
 	switch (type) {
 		case 'paragraph':
+			return '10px 12.5px';
+		case 'quote':
+			return '7.5px';
+		case 'code':
+			return '10px';
+		case 'ordered-list':
+			return '10px';
+		case 'unordered-list':
 			return '10px';
 		case 'header-1':
 		case 'header-2':
@@ -60,7 +68,7 @@ function getElementPadding(type: ArticleBlockElementType) {
 	}
 }
 
-export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockElementType }>`
+export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEnum }>`
 	padding: ${(props) => (props.blockEditMode ? getElementPadding(props.type) : '0')};
 	background: ${(props) => (props.blockEditMode ? props.theme.colors.container.alt1.background : 'transparent')};
 	border: 1px solid ${(props) => (props.blockEditMode ? props.theme.colors.border.alt1 : 'transparent')};

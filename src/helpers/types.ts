@@ -1,21 +1,22 @@
 export type PortalType = { id: string; name: string; logo: string | null };
 
-export type ArticleBlockElementType =
-	| 'paragraph'
-	| 'quote'
-	| 'ordered-list'
-	| 'unordered-list'
-	| 'code'
-	| 'header-1'
-	| 'header-2'
-	| 'header-3'
-	| 'header-4'
-	| 'header-5'
-	| 'header-6';
+export enum ArticleBlockEnum {
+	Paragraph = 'paragraph',
+	Quote = 'quote',
+	OrderedList = 'ordered-list',
+	UnorderedList = 'unordered-list',
+	Code = 'code',
+	Header1 = 'header-1',
+	Header2 = 'header-2',
+	Header3 = 'header-3',
+	Header4 = 'header-4',
+	Header5 = 'header-5',
+	Header6 = 'header-6',
+}
 
 export type ArticleBlockType = {
 	id: string;
-	type: ArticleBlockElementType;
+	type: ArticleBlockEnum;
 	content: string;
 };
 

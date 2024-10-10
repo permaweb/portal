@@ -1,4 +1,5 @@
 import { getTxEndpoint } from './endpoints';
+import { ArticleBlockEnum } from './types';
 
 export const AO = {
 	module: 'Pq2Zftrqut0hdisH_MC2pDOT6S4eQFoxGsFUzR6r350',
@@ -113,3 +114,72 @@ function createURLs() {
 }
 
 export const URLS = createURLs();
+
+export const ARTICLE_BLOCKS = {
+	[ArticleBlockEnum.Paragraph]: {
+		type: ArticleBlockEnum.Paragraph,
+		label: 'Paragraph',
+		icon: ASSETS.paragraph,
+		shortcut: 'Ctrl / P',
+	},
+	[ArticleBlockEnum.Quote]: {
+		type: ArticleBlockEnum.Quote,
+		label: 'Quote',
+		icon: ASSETS.quotes,
+		shortcut: 'Ctrl / Q',
+	},
+	[ArticleBlockEnum.OrderedList]: {
+		type: ArticleBlockEnum.OrderedList,
+		label: 'Numbered List',
+		icon: ASSETS.listOrdered,
+		shortcut: 'Ctrl / N',
+	},
+	[ArticleBlockEnum.UnorderedList]: {
+		type: ArticleBlockEnum.UnorderedList,
+		label: 'Bulleted List',
+		icon: ASSETS.listUnordered,
+		shortcut: 'Ctrl / B',
+	},
+	[ArticleBlockEnum.Code]: {
+		type: ArticleBlockEnum.Code,
+		label: 'Code',
+		icon: ASSETS.code,
+		shortcut: 'Ctrl / C',
+	},
+	[ArticleBlockEnum.Header1]: {
+		type: ArticleBlockEnum.Header1,
+		label: 'Header 1',
+		icon: ASSETS.header1,
+		shortcut: 'Ctrl / 1',
+	},
+	[ArticleBlockEnum.Header2]: {
+		type: ArticleBlockEnum.Header2,
+		label: 'Header 2',
+		icon: ASSETS.header2,
+		shortcut: 'Ctrl / 2',
+	},
+	[ArticleBlockEnum.Header3]: {
+		type: ArticleBlockEnum.Header3,
+		label: 'Header 3',
+		icon: ASSETS.header3,
+		shortcut: 'Ctrl / 3',
+	},
+	[ArticleBlockEnum.Header4]: {
+		type: ArticleBlockEnum.Header4,
+		label: 'Header 4',
+		icon: ASSETS.header4,
+		shortcut: 'Ctrl / 4',
+	},
+	[ArticleBlockEnum.Header5]: {
+		type: ArticleBlockEnum.Header5,
+		label: 'Header 5',
+		icon: ASSETS.header5,
+		shortcut: 'Ctrl / 5',
+	},
+	[ArticleBlockEnum.Header6]: {
+		type: ArticleBlockEnum.Header6,
+		label: 'Header 6',
+		icon: ASSETS.header6,
+		shortcut: 'Ctrl / 6',
+	},
+};

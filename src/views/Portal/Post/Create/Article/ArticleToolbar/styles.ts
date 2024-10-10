@@ -95,3 +95,19 @@ export const BADropdownAction = styled.div`
 		}
 	}
 `;
+
+export const BADropdownActionShortcut = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 3.5px;
+	margin: 0 0 0 auto;
+	p {
+		text-transform: uppercase;
+		padding: 2.5px 6.5px;
+		background: ${(props) => props.theme.colors.container.alt4.background};
+		border-radius: ${STYLING.dimensions.radius.alt3};
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: 10px !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+	}
+`;

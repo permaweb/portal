@@ -149,10 +149,10 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 				background: currentTheme.neutral3,
 			},
 			alt3: {
-				background: currentTheme.neutral2,
+				background: currentTheme.neutral4,
 			},
 			alt4: {
-				background: currentTheme.neutral2,
+				background: currentTheme.neutral5,
 			},
 			alt5: {
 				background: currentTheme.neutralA4,

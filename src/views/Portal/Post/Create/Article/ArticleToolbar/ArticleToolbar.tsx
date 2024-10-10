@@ -2,44 +2,42 @@ import React from 'react';
 import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
-import { ASSETS } from 'helpers/config';
-import { ArticleBlockElementType } from 'helpers/types';
+import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
+import { ArticleBlockEnum } from 'helpers/types';
 import { isMac } from 'helpers/utils';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 import { IProps } from './types';
 
-type BlockConfigType = {
-	label: string;
-	blocks: { type: ArticleBlockElementType; label: string; icon: string }[];
-}[];
-
 // TODO: Language
 // TODO: Post title
 export default function ArticleToolbar(props: IProps) {
 	const [showBlockAddDropdown, setShowBlockAddDropdown] = React.useState<boolean>(false);
 
-	const BLOCK_TYPES: BlockConfigType = [
+	const BLOCK_TYPES: {
+		label: string;
+		blocks: { type: ArticleBlockEnum; label: string; icon: string }[];
+	}[] = [
 		{
 			label: 'Text',
 			blocks: [
-				{ type: 'paragraph', label: 'Paragraph', icon: ASSETS.paragraph },
-				{ type: 'quote', label: 'Quote', icon: ASSETS.quotes },
-				{ type: 'ordered-list', label: 'Numbered List', icon: ASSETS.listOrdered },
-				{ type: 'unordered-list', label: 'Bulleted List', icon: ASSETS.listUnordered },
-				{ type: 'code', label: 'Code', icon: ASSETS.code },
+				ARTICLE_BLOCKS[ArticleBlockEnum.Paragraph],
+				ARTICLE_BLOCKS[ArticleBlockEnum.Quote],
+				ARTICLE_BLOCKS[ArticleBlockEnum.OrderedList],
+				ARTICLE_BLOCKS[ArticleBlockEnum.UnorderedList],
+				ARTICLE_BLOCKS[ArticleBlockEnum.Code],
 			],
 		},
 		{
 			label: 'Headers',
 			blocks: [
-				{ type: 'header-1', label: 'Header 1', icon: ASSETS.header1 },
-				{ type: 'header-2', label: 'Header 2', icon: ASSETS.header2 },
-				{ type: 'header-3', label: 'Header 3', icon: ASSETS.header3 },
-				{ type: 'header-4', label: 'Header 4', icon: ASSETS.header4 },
-				{ type: 'header-5', label: 'Header 5', icon: ASSETS.header5 },
-				{ type: 'header-6', label: 'Header 6', icon: ASSETS.header6 },
+				ARTICLE_BLOCKS[ArticleBlockEnum.Header1],
+				ARTICLE_BLOCKS[ArticleBlockEnum.Header2],
+				ARTICLE_BLOCKS[ArticleBlockEnum.Header3],
+				ARTICLE_BLOCKS[ArticleBlockEnum.Header4],
+				ARTICLE_BLOCKS[ArticleBlockEnum.Header5],
+				ARTICLE_BLOCKS[ArticleBlockEnum.Header6],
 			],
 		},
 	];
@@ -63,7 +61,6 @@ export default function ArticleToolbar(props: IProps) {
 		let ctrlSlashPressed = false;
 
 		const handleKeyDown = (event: KeyboardEvent) => {
-			console.log(event.key);
 			if (event.ctrlKey && event.key === '/') {
 				ctrlSlashPressed = true;
 				event.preventDefault();
@@ -105,11 +102,11 @@ export default function ArticleToolbar(props: IProps) {
 						event.preventDefault();
 						props.addBlock('code');
 						break;
-					case 'o':
+					case 'n':
 						event.preventDefault();
 						props.addBlock('ordered-list');
 						break;
-					case 'u':
+					case 'b':
 						event.preventDefault();
 						props.addBlock('unordered-list');
 						break;
@@ -126,6 +123,17 @@ export default function ArticleToolbar(props: IProps) {
 			document.removeEventListener('keydown', handleKeyDown);
 		};
 	}, [props.addBlock]);
+
+	function getShortcut(shortcut: string) {
+		const keys = shortcut.split(' ');
+		return (
+			<S.BADropdownActionShortcut>
+				{keys.map((key: string) => {
+					return <p>{key}</p>;
+				})}
+			</S.BADropdownActionShortcut>
+		);
+	}
 
 	return (
 		<S.Wrapper>
@@ -174,6 +182,7 @@ export default function ArticleToolbar(props: IProps) {
 													>
 														<ReactSVG src={block.icon} />
 														<span>{block.label}</span>
+														{block.shortcut && getShortcut(block.shortcut)}
 													</button>
 												</S.BADropdownAction>
 											))}
