@@ -271,13 +271,13 @@ export const View = styled.main<{ navigationOpen: boolean }>`
 	max-width: ${STYLING.cutoffs.max};
 	position: relative;
 	top: ${STYLING.dimensions.nav.height};
-	padding: 10px 20px 20px ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 30px)` : '30px')};
+	padding: 0 20px 20px ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 30px)` : '30px')};
 	margin: 0 auto;
 	transition: padding-left ${transition2};
 	display: flex;
 	flex-direction: column;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		padding: 10px 20px 20px 20px;
+		padding: 0 20px 20px 20px;
 	}
 `;

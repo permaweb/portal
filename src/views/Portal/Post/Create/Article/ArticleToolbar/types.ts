@@ -1,7 +1,9 @@
-import { ArticleBlockElementType } from 'helpers/types';
+import { ArticleBlockEnum } from 'helpers/types';
 
 export interface IProps {
-	addBlock: (type: ArticleBlockElementType) => void;
+	addBlock: (type: ArticleBlockEnum) => void;
 	blockEditMode: boolean;
 	toggleBlockEditMode: () => void;
+	panelOpen: boolean;
+	togglePanelOpen: () => void;
 }

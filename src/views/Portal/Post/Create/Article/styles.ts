@@ -7,14 +7,22 @@ export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
+	position: relative;
 `;
 
 export const ToolbarWrapper = styled.div`
-	display: flex;
-	gap: 20px;
+	position: sticky;
+	top: ${STYLING.dimensions.nav.height};
+	z-index: 1;
+	background: ${(props) => props.theme.colors.view.background};
+	padding: 10px 0;
 `;
 
-export const EditorWrapper = styled.div<{ blockEditMode: boolean }>`
+export const EditorWrapper = styled.div<{ panelOpen: boolean }>`
+	padding: 0 ${(props) => (props.panelOpen ? `330px` : '0')} 0 0;
+`;
+
+export const Editor = styled.div<{ blockEditMode: boolean }>`
 	display: flex;
 	flex-direction: column;
 

@@ -168,6 +168,8 @@ export default function Article() {
 	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 
+	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
+
 	React.useEffect(() => {
 		if (blocks.length <= 0) {
 			addBlock(ArticleBlockEnum.Header1);
@@ -211,38 +213,32 @@ export default function Article() {
 					addBlock={(type: ArticleBlockEnum) => addBlock(type)}
 					blockEditMode={blockEditMode}
 					toggleBlockEditMode={() => setBlockEditMode(!blockEditMode)}
+					panelOpen={panelOpen}
+					togglePanelOpen={() => setPanelOpen(!panelOpen)}
 				/>
 			</S.ToolbarWrapper>
-			<DragDropContext onDragEnd={onDragEnd}>
-				<Droppable droppableId={'blocks'}>
-					{(provided) => (
-						<S.EditorWrapper {...provided.droppableProps} ref={provided.innerRef} blockEditMode={blockEditMode}>
-							{blocks.map((block, index) => (
-								<Block
-									index={index}
-									key={block.id}
-									block={block}
-									blockEditMode={blockEditMode}
-									onChangeBlock={handleBlockChange}
-									onDeleteBlock={deleteBlock}
-									autoFocus={block.id === lastAddedBlockId}
-								/>
-							))}
-							{provided.placeholder}
-						</S.EditorWrapper>
-					)}
-				</Droppable>
-			</DragDropContext>
-			{/* <S.PreviewWrapper>
-				<h3>Rendered Preview:</h3>
-				{blocks.map((block) => (
-					<div key={block.id} dangerouslySetInnerHTML={{ __html: block.content }} />
-				))}
-			</S.PreviewWrapper> */}
-			{/* <S.OutputWrapper>
-				<h3>HTML Output:</h3>
-				<pre>{JSON.stringify(blocks, null, 2)}</pre>
-			</S.OutputWrapper> */}
+			<S.EditorWrapper panelOpen={panelOpen}>
+				<DragDropContext onDragEnd={onDragEnd}>
+					<Droppable droppableId={'blocks'}>
+						{(provided) => (
+							<S.Editor {...provided.droppableProps} ref={provided.innerRef} blockEditMode={blockEditMode}>
+								{blocks.map((block, index) => (
+									<Block
+										index={index}
+										key={block.id}
+										block={block}
+										blockEditMode={blockEditMode}
+										onChangeBlock={handleBlockChange}
+										onDeleteBlock={deleteBlock}
+										autoFocus={block.id === lastAddedBlockId}
+									/>
+								))}
+								{provided.placeholder}
+							</S.Editor>
+						)}
+					</Droppable>
+				</DragDropContext>
+			</S.EditorWrapper>
 		</S.Wrapper>
 	);
 }

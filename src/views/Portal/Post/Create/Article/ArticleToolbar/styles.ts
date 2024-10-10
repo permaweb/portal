@@ -30,6 +30,16 @@ export const EndActions = styled.div`
 
 export const BlockAddWrapper = styled.div``;
 
+export const Panel = styled.div`
+	max-height: calc(100vh - 65px - 100px);
+	width: 300px;
+	position: absolute;
+	right: 0;
+	z-index: 1;
+	top: 75px;
+	padding: 15px 10px 10px 10px;
+`;
+
 export const BlockAddDropdown = styled.div`
 	max-height: 65vh;
 	width: 350px;
