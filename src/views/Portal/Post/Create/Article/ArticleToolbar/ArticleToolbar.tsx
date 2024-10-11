@@ -42,15 +42,60 @@ export default function ArticleToolbar(props: IProps) {
 				ARTICLE_BLOCKS[ArticleBlockEnum.Header6],
 			],
 		},
-		{
-			label: 'Media', // TODO
-			blocks: [
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header1],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header2],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header3],
-			],
-		},
+		// {
+		// 	label: 'Media', // TODO
+		// 	blocks: [
+		// 		ARTICLE_BLOCKS[ArticleBlockEnum.Header1],
+		// 		ARTICLE_BLOCKS[ArticleBlockEnum.Header2],
+		// 		ARTICLE_BLOCKS[ArticleBlockEnum.Header3],
+		// 	],
+		// },
 	];
+
+	const buttonRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+	const [focusedIndex, setFocusedIndex] = React.useState<number>(-1);
+
+	React.useEffect(() => {
+		if (props.toggleBlockFocus && props.panelOpen) {
+			console.log('Attempting to focus first button');
+			setFocusedIndex(0);
+		}
+	}, [props.toggleBlockFocus, props.panelOpen]);
+
+	React.useEffect(() => {
+		if (focusedIndex >= 0 && buttonRefs.current[focusedIndex]) {
+			buttonRefs.current[focusedIndex]?.focus();
+			console.log(`Button at index ${focusedIndex} focused`);
+		}
+	}, [focusedIndex]);
+
+	const handleKeyDown = React.useCallback(
+		(event: React.KeyboardEvent) => {
+			if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+				event.preventDefault();
+				const direction = event.key === 'ArrowDown' ? 1 : -1;
+				setFocusedIndex((prevIndex) => {
+					const newIndex = prevIndex + direction;
+					if (newIndex < 0) return buttonRefs.current.length - 1;
+					if (newIndex >= buttonRefs.current.length) return 0;
+					return newIndex;
+				});
+			} else if (event.key === 'Enter') {
+				event.preventDefault();
+				if (focusedIndex >= 0 && focusedIndex < buttonRefs.current.length) {
+					const focusedButton = buttonRefs.current[focusedIndex];
+					if (focusedButton) {
+						console.log(focusedButton);
+						const blockType = focusedButton.getAttribute('data-block-type');
+						if (blockType) {
+							props.addBlock(blockType as ArticleBlockEnum);
+						}
+					}
+				}
+			}
+		},
+		[focusedIndex, props.addBlock]
+	);
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -155,15 +200,21 @@ export default function ArticleToolbar(props: IProps) {
 		switch (currentTab) {
 			case 'Blocks':
 				return (
-					<S.BADropdownBody>
-						{BLOCK_TYPES.map((section: any) => (
+					<S.BADropdownBody onKeyDown={handleKeyDown}>
+						{BLOCK_TYPES.map((section: any, sectionIndex: number) => (
 							<S.BADropdownSection key={section.label}>
 								<S.BADropdownSectionHeader>
 									<p>{section.label}</p>
 								</S.BADropdownSectionHeader>
-								{section.blocks.map((block: any) => (
-									<S.BADropdownAction key={block.label}>
-										<button onClick={() => props.addBlock(block.type)}>
+								{section.blocks.map((block: any, blockIndex: number) => (
+									<S.BADropdownAction key={`${section.label}-${block.label}`}>
+										<button
+											onClick={() => props.addBlock(block.type)}
+											ref={(el) => {
+												buttonRefs.current[sectionIndex * section.blocks.length + blockIndex] = el;
+											}}
+											data-block-type={block.type}
+										>
 											<ReactSVG src={block.icon} />
 											<span>{block.label}</span>
 											{block.shortcut && getShortcut(block.shortcut)}

@@ -6,4 +6,5 @@ export interface IProps {
 	toggleBlockEditMode: () => void;
 	panelOpen: boolean;
 	togglePanelOpen: () => void;
+	toggleBlockFocus: boolean;
 }

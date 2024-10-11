@@ -3,6 +3,7 @@ export const language = {
 		app: `Portals`,
 		article: `Article`,
 		bio: `Bio`,
+		blocksEmpty: `Choose a block to start your post`,
 		close: `Close`,
 		connect: `Connect`,
 		connectWallet: `Connect your wallet`,

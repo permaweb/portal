@@ -10,7 +10,12 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { ArticleToolbar } from './ArticleToolbar';
 import * as S from './styles';
 
-function ContentEditable(props: { value: string; onChange: (content: string) => void; autoFocus?: boolean }) {
+function ContentEditable(props: {
+	element: any;
+	value: string;
+	onChange: (content: string) => void;
+	autoFocus?: boolean;
+}) {
 	const ref = React.useRef<HTMLDivElement>(null);
 	const isUserInput = React.useRef(false);
 
@@ -33,7 +38,9 @@ function ContentEditable(props: { value: string; onChange: (content: string) => 
 		props.onChange(newValue);
 	};
 
-	return <div ref={ref} contentEditable onInput={handleInput} suppressContentEditableWarning={true} />;
+	const Element = props.element;
+
+	return <Element ref={ref} contentEditable onInput={handleInput} suppressContentEditableWarning={true} />;
 }
 
 function Block(props: {
@@ -43,56 +50,56 @@ function Block(props: {
 	onChangeBlock: (id: string, content: any) => void;
 	onDeleteBlock: (id: string) => void;
 	autoFocus: boolean;
+	onFocus: () => void;
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	let Element: any = null;
+	let element: any = null;
 
 	switch (props.block.type) {
 		case 'paragraph':
-			Element = 'p';
+			element = 'p';
 			break;
 		case 'quote':
-			Element = 'blockquote';
+			element = 'blockquote';
 			break;
 		case 'ordered-list':
-			Element = 'ol';
+			element = 'ol';
 			break;
 		case 'unordered-list':
-			Element = 'ul';
+			element = 'ul';
 			break;
 		case 'code':
-			Element = 'code';
+			element = 'code';
 			break;
 		case 'header-1':
-			Element = 'h1';
+			element = 'h1';
 			break;
 		case 'header-2':
-			Element = 'h2';
+			element = 'h2';
 			break;
 		case 'header-3':
-			Element = 'h3';
+			element = 'h3';
 			break;
 		case 'header-4':
-			Element = 'h4';
+			element = 'h4';
 			break;
 		case 'header-5':
-			Element = 'h5';
+			element = 'h5';
 			break;
 		case 'header-6':
-			Element = 'h6';
+			element = 'h6';
 			break;
 		default:
-			Element = 'p';
+			element = 'p';
 			break;
 	}
 
-	// TODO: Tab index
 	return (
-		<Draggable draggableId={props.block.id} index={props.index} className={'fade-in'}>
+		<Draggable draggableId={props.block.id} index={props.index}>
 			{(provided) => (
-				<S.ElementDragWrapper ref={provided.innerRef} {...provided.draggableProps}>
+				<S.ElementDragWrapper ref={provided.innerRef} {...provided.draggableProps} onFocus={props.onFocus}>
 					{props.blockEditMode && (
 						<S.EDragWrapper>
 							<S.EDragHandler {...provided.dragHandleProps} tabIndex={-1}>
@@ -100,7 +107,7 @@ function Block(props: {
 							</S.EDragHandler>
 						</S.EDragWrapper>
 					)}
-					<S.ElementWrapper>
+					<S.ElementWrapper className={'fade-in'}>
 						{props.blockEditMode && (
 							<>
 								<S.ElementToolbar tabIndex={-1}>
@@ -123,13 +130,12 @@ function Block(props: {
 							</>
 						)}
 						<S.Element blockEditMode={props.blockEditMode} type={props.block.type}>
-							<Element>
-								<ContentEditable
-									value={props.block.content}
-									onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
-									autoFocus={props.autoFocus}
-								/>
-							</Element>
+							<ContentEditable
+								element={element}
+								value={props.block.content}
+								onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
+								autoFocus={props.autoFocus}
+							/>
 						</S.Element>
 					</S.ElementWrapper>
 				</S.ElementDragWrapper>
@@ -138,21 +144,52 @@ function Block(props: {
 	);
 }
 
-// TODO: Can't see quotes / code cursor
-// TODO: No blocks indicator
-// TODO: Enter key on header - create paragraph block
+// TODO: Quotes
+// TODO: Code
 export default function Article() {
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
+
 	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
+	const [focusedBlock, setFocusedBlock] = React.useState<ArticleBlockType | null>(null);
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
-	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(false);
+	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
+
+	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
 		if (blocks.length <= 0) {
 			addBlock(ArticleBlockEnum.Header1);
 		}
 	}, []);
+
+	React.useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key.toLowerCase() === 'enter' && focusedBlock) {
+				if (focusedBlock.type.includes('header')) {
+					event.preventDefault();
+					addBlock(ArticleBlockEnum.Paragraph);
+				}
+			}
+			// TODO: Auto focus panel
+			// if (event.key.toLowerCase() === 'tab' && focusedBlock) {
+			// 	const lastBlockIndex = blocks.length - 1;
+			// 	if (blocks[lastBlockIndex].id === focusedBlock.id) {
+			// 		event.preventDefault();
+			// 		setToggleBlockFocus(!toggleBlockFocus);
+			// 	}
+			// 	else setToggleBlockFocus(false)
+			// }
+		};
+
+		document.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [blocks, focusedBlock]);
 
 	const onDragEnd = (result: any) => {
 		if (!result.destination) {
@@ -171,12 +208,45 @@ export default function Article() {
 	};
 
 	const addBlock = (type: ArticleBlockEnum) => {
+		let content: any = null;
+
+		switch (type) {
+			case 'paragraph':
+			case 'quote':
+			case 'code':
+			case 'header-1':
+			case 'header-2':
+			case 'header-3':
+			case 'header-4':
+			case 'header-5':
+			case 'header-6':
+				content = '';
+				break;
+			case 'ordered-list':
+			case 'unordered-list':
+				content = '<li></li>';
+				break;
+			default:
+				content = '';
+				break;
+		}
+
 		const newBlock: ArticleBlockType = {
 			id: Date.now().toString(),
 			type,
-			content: type === 'ordered-list' || type === 'unordered-list' ? '<li></li>' : '',
+			content: content,
 		};
-		setBlocks([...blocks, newBlock]);
+
+		setBlocks((prevBlocks) => {
+			const focusedIndex = prevBlocks.findIndex((block) => block.id === focusedBlock.id);
+			if (focusedIndex === -1) {
+				return [...prevBlocks, newBlock];
+			} else {
+				const newBlocks = [...prevBlocks];
+				newBlocks.splice(focusedIndex + 1, 0, newBlock);
+				return newBlocks;
+			}
+		});
 		setLastAddedBlockId(newBlock.id);
 	};
 
@@ -184,18 +254,9 @@ export default function Article() {
 		setBlocks((prevBlocks) => prevBlocks.filter((block) => block.id !== id));
 	};
 
-	return (
-		<S.Wrapper>
-			<S.ToolbarWrapper>
-				<ArticleToolbar
-					addBlock={(type: ArticleBlockEnum) => addBlock(type)}
-					blockEditMode={blockEditMode}
-					toggleBlockEditMode={() => setBlockEditMode(!blockEditMode)}
-					panelOpen={panelOpen}
-					togglePanelOpen={() => setPanelOpen(!panelOpen)}
-				/>
-			</S.ToolbarWrapper>
-			<S.EditorWrapper panelOpen={panelOpen}>
+	const editor = React.useMemo(() => {
+		if (blocks && blocks.length) {
+			return (
 				<DragDropContext onDragEnd={onDragEnd}>
 					<Droppable droppableId={'blocks'}>
 						{(provided) => (
@@ -209,6 +270,7 @@ export default function Article() {
 										onChangeBlock={handleBlockChange}
 										onDeleteBlock={deleteBlock}
 										autoFocus={block.id === lastAddedBlockId}
+										onFocus={() => setFocusedBlock(block)}
 									/>
 								))}
 								{provided.placeholder}
@@ -216,7 +278,28 @@ export default function Article() {
 						)}
 					</Droppable>
 				</DragDropContext>
-			</S.EditorWrapper>
+			);
+		}
+		return (
+			<S.BlocksEmpty className={'fade-in'}>
+				<span>{language.blocksEmpty}</span>
+			</S.BlocksEmpty>
+		);
+	}, [blocks, blockEditMode]);
+
+	return (
+		<S.Wrapper>
+			<S.ToolbarWrapper>
+				<ArticleToolbar
+					addBlock={(type: ArticleBlockEnum) => addBlock(type)}
+					blockEditMode={blockEditMode}
+					toggleBlockEditMode={() => setBlockEditMode(!blockEditMode)}
+					panelOpen={panelOpen}
+					togglePanelOpen={() => setPanelOpen(!panelOpen)}
+					toggleBlockFocus={toggleBlockFocus}
+				/>
+			</S.ToolbarWrapper>
+			<S.EditorWrapper panelOpen={panelOpen}>{editor}</S.EditorWrapper>
 		</S.Wrapper>
 	);
 }

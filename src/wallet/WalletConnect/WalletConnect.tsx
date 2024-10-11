@@ -4,7 +4,6 @@ import { ReactSVG } from 'react-svg';
 import { Avatar } from 'components/atoms/Avatar';
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/molecules/Panel';
-import { ProfileManager } from 'components/organisms/ProfileManager';
 import { ASSETS } from 'helpers/config';
 import { formatAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -22,7 +21,6 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 
 	const [showWallet, setShowWallet] = React.useState<boolean>(false);
 	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(false);
-	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 
 	const [label, setLabel] = React.useState<string | null>(null);
 
@@ -56,14 +54,6 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		}
 	}
 
-	function handleProfileAction() {
-		if (arProvider.profile && arProvider.profile.id) {
-			setShowWalletDropdown(false);
-		} else {
-			setShowProfileManager(true);
-		}
-	}
-
 	// function handleToggleTheme() {
 	// 	themeProvider.setCurrent(themeProvider.current === 'light' ? 'dark' : 'light');
 	// }
@@ -73,69 +63,16 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		setShowWalletDropdown(false);
 	}
 
-	function getDropdown() {
-		return (
-			<>
-				{/* <S.DHeaderWrapper>
-					<S.DHeaderFlex>
-						<Avatar
-							owner={arProvider.profile}
-							dimensions={{ wrapper: 35, icon: 21.5 }}
-							callback={handleProfileAction}
-						/>
-						<S.DHeader>
-							<p onClick={handleProfileAction}>{label}</p>
-							<span onClick={handleProfileAction}>
-								{formatAddress(
-									arProvider.profile && arProvider.profile.id ? arProvider.profile.id : arProvider.walletAddress,
-									false
-								)}
-							</span>
-						</S.DHeader>
-					</S.DHeaderFlex>
-				</S.DHeaderWrapper> */}
-				{/* <S.DBodyWrapper>
-					<li onClick={handleProfileAction}>
-						{arProvider.profile && arProvider.profile.id ? (
-							<>
-								<ReactSVG src={ASSETS.user} />
-								{`${language.viewProfile}`}
-							</>
-						) : (
-							<>
-								<ReactSVG src={ASSETS.write} />
-								{`${language.createProfile}`}
-							</>
-						)}
-					</li>
-					<li onClick={handleToggleTheme}>
-						{themeProvider.current === 'light' ? (
-							<>
-								<ReactSVG src={ASSETS.dark} /> {`${language.useDarkDisplay}`}
-							</>
-						) : (
-							<>
-								<ReactSVG src={ASSETS.light} /> {`${language.useLightDisplay}`}
-							</>
-						)}
-					</li>
-				</S.DBodyWrapper> */}
-				<S.DFooterWrapper>
-					<li onClick={handleDisconnect}>
-						<ReactSVG src={ASSETS.disconnect} />
-						{language.disconnect}
-					</li>
-				</S.DFooterWrapper>
-			</>
-		);
-	}
-
-	function getHeader() {
-		return (
+	return (
+		<S.Wrapper>
 			<S.PWrapper>
 				{arProvider.profile && !arProvider.profile.id && (
 					<S.CAction className={'fade-in'}>
-						<Button type={'alt1'} label={language.createProfile} handlePress={handleProfileAction} />
+						<Button
+							type={'alt1'}
+							label={language.createProfile}
+							handlePress={() => arProvider.setShowProfileManager(!arProvider.showProfileManager)}
+						/>
 					</S.CAction>
 				)}
 				{label && (
@@ -145,50 +82,26 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 				)}
 				<Avatar owner={arProvider.profile} dimensions={{ wrapper: 35, icon: 21.5 }} callback={handlePress} />
 			</S.PWrapper>
-		);
-	}
-
-	function getView() {
-		return (
-			<S.Wrapper>
-				{getHeader()}
-				<Panel
-					open={showWalletDropdown}
-					header={
-						<S.DHeaderFlex>
-							<Avatar owner={arProvider.profile} dimensions={{ wrapper: 32.5, icon: 19.5 }} callback={null} />
-							<S.DHeader>
-								<p>{label}</p>
-							</S.DHeader>
-						</S.DHeaderFlex>
-					}
-					handleClose={() => setShowWalletDropdown(false)}
-					width={350}
-				>
-					{getDropdown()}
-				</Panel>
-			</S.Wrapper>
-		);
-	}
-
-	return (
-		<>
-			{getView()}
-			{showProfileManager && (
-				<Panel
-					open={showProfileManager}
-					header={arProvider.profile && arProvider.profile.id ? language.editProfile : `${language.createProfile}!`}
-					handleClose={() => setShowProfileManager(false)}
-				>
-					<S.PManageWrapper>
-						<ProfileManager
-							profile={arProvider.profile && arProvider.profile.id ? arProvider.profile : null}
-							handleClose={() => setShowProfileManager(false)}
-							handleUpdate={null}
-						/>
-					</S.PManageWrapper>
-				</Panel>
-			)}
-		</>
+			<Panel
+				open={showWalletDropdown}
+				header={
+					<S.DHeaderFlex>
+						<Avatar owner={arProvider.profile} dimensions={{ wrapper: 32.5, icon: 19.5 }} callback={null} />
+						<S.DHeader>
+							<p>{label}</p>
+						</S.DHeader>
+					</S.DHeaderFlex>
+				}
+				handleClose={() => setShowWalletDropdown(false)}
+				width={350}
+			>
+				<S.DFooterWrapper>
+					<li onClick={handleDisconnect}>
+						<ReactSVG src={ASSETS.disconnect} />
+						{language.disconnect}
+					</li>
+				</S.DFooterWrapper>
+			</Panel>
+		</S.Wrapper>
 	);
 }

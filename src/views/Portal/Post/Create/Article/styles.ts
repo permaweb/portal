@@ -97,35 +97,23 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 		font-size: ${(props) => props.theme.typography.size.base};
 	}
 	blockquote {
-		width: fit-content;
-		padding: 0 10px;
+		font-family: Georgia, serif;
 		font-style: italic;
+		font-size: 15px;
+		font-weight: 500;
 		color: ${(props) => props.theme.colors.font.alt2};
-		position: relative;
+		/* position: relative;
+		display: flex;
+		align-items: flex-start; */
 
-		&::before,
+		/* &::before,
 		&::after {
+			content: '"';
 			font-family: Georgia, serif;
-			font-size: 20px;
+			font-size: 16px;
 			color: ${(props) => props.theme.colors.font.alt2};
-			position: absolute;
-		}
-
-		&::before {
-			content: '"';
-			left: -0.5px;
-			top: -2.5px;
-		}
-
-		&::after {
-			content: '"';
-			right: 1.5px;
-			bottom: -3.5px;
-		}
-
-		p {
-			margin: 0;
-		}
+			
+		} */
 	}
 	ol,
 	ul {
@@ -154,7 +142,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 			color: ${(props) => props.theme.colors.font.primary};
 
 			&::marker {
-				font-weight: ${(props) => props.theme.typography.weight.bold}; // Bold weight for decimal markers
+				font-weight: ${(props) => props.theme.typography.weight.bold};
 				color: ${(props) => props.theme.colors.font.alt1};
 			}
 		}
@@ -167,24 +155,29 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 			color: ${(props) => props.theme.colors.font.primary};
 
 			&::marker {
-				font-weight: ${(props) => props.theme.typography.weight.bold}; // Bold weight for decimal markers
+				font-weight: ${(props) => props.theme.typography.weight.bold};
 				color: ${(props) => props.theme.colors.font.alt1};
 			}
 		}
 	}
 	code {
-		padding: 0.5px 3.5px;
-		line-height: 1.75;
-		display: block;
-		width: fit-content;
 		color: #df4657;
 		font-family: Monaco, Menlo, Consolas, Courier New, monospace;
 		font-size: 12px;
 		font-weight: 600;
 	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-weight: 600;
+	}
+
 	h1 {
 		font-size: clamp(26px, 2.3vw, 36px);
-		font-weight: 600;
 	}
 	h2 {
 		font-size: clamp(22px, 2vw, 32px);
@@ -250,5 +243,13 @@ export const EDragHandler = styled.div`
 		margin: 5px 0 0 0;
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
+	}
+`;
+
+export const BlocksEmpty = styled.div`
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.small};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 `;

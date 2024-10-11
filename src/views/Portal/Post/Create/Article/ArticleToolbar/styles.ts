@@ -107,6 +107,11 @@ export const BADropdownAction = styled.div`
 		&:hover {
 			background: ${(props) => props.theme.colors.container.primary.active};
 		}
+		&:focus {
+			border: 0;
+			outline: 0;
+			background: ${(props) => props.theme.colors.container.primary.active};
+		}
 	}
 `;
 
