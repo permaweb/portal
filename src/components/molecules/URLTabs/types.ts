@@ -1,4 +1,9 @@
-import { URLViewType } from 'helpers/types';
+type URLViewType = {
+	label: string;
+	disabled: boolean;
+	url: any;
+	view: React.ComponentType;
+};
 
 export interface ITProps {
 	label: string;

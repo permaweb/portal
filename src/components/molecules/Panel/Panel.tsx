@@ -107,11 +107,11 @@ let panelOpenCounter = 0;
 const showDocumentBody = () => {
 	panelOpenCounter -= 1;
 	if (panelOpenCounter === 0) {
-		document.body.style.overflow = 'auto';
+		document.body.style.overflowY = 'auto';
 	}
 };
 
 const hideDocumentBody = () => {
 	panelOpenCounter += 1;
-	document.body.style.overflow = 'hidden';
+	document.body.style.overflowY = 'hidden';
 };

@@ -11,7 +11,6 @@ class Tab extends React.Component<any, any> {
 	static propTypes = {
 		activeTab: PropTypes.string.isRequired,
 		label: PropTypes.string.isRequired,
-		icon: PropTypes.string.isRequired,
 		onClick: PropTypes.func.isRequired,
 		type: PropTypes.string.isRequired,
 	};

@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 export const Tooltip = styled.div<{ position: string }>`
 	position: absolute;
-	z-index: 1;
+	z-index: 2;
 	display: none;
 	white-space: nowrap;
 

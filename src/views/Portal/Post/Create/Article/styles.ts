@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+import { transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 import { ArticleBlockEnum } from 'helpers/types';
 
@@ -16,10 +17,20 @@ export const ToolbarWrapper = styled.div`
 	z-index: 1;
 	background: ${(props) => props.theme.colors.view.background};
 	padding: 10px 0;
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		position: relative;
+		top: auto;
+	}
 `;
 
 export const EditorWrapper = styled.div<{ panelOpen: boolean }>`
 	padding: 0 ${(props) => (props.panelOpen ? `330px` : '0')} 0 0;
+	transition: padding-right ${transition2};
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		padding: 0;
+	}
 `;
 
 export const Editor = styled.div<{ blockEditMode: boolean }>`
@@ -80,7 +91,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 	padding: ${(props) => (props.blockEditMode ? getElementPadding(props.type) : '0')};
 	background: ${(props) => (props.blockEditMode ? props.theme.colors.container.alt1.background : 'transparent')};
 	border: 1px solid ${(props) => (props.blockEditMode ? props.theme.colors.border.alt1 : 'transparent')};
-	border-radius: ${(props) => (props.blockEditMode ? STYLING.dimensions.radius.primary : '0')};
+	border-radius: ${(props) => (props.blockEditMode ? STYLING.dimensions.radius.alt2 : '0')};
 
 	p {
 		font-size: ${(props) => props.theme.typography.size.base};

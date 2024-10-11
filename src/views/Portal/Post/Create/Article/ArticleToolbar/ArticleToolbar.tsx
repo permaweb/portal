@@ -2,10 +2,10 @@ import React from 'react';
 import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
+import { Tabs } from 'components/molecules/Tabs';
 import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
 import { ArticleBlockEnum } from 'helpers/types';
 import { isMac } from 'helpers/utils';
-import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 import { IProps } from './types';
@@ -13,7 +13,9 @@ import { IProps } from './types';
 // TODO: Language
 // TODO: Post title
 export default function ArticleToolbar(props: IProps) {
-	const [showBlockAddDropdown, setShowBlockAddDropdown] = React.useState<boolean>(false);
+	const TABS = [{ label: 'Blocks' }]; // TODO: { label: 'Post' }
+
+	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.label);
 
 	const BLOCK_TYPES: {
 		label: string;
@@ -40,16 +42,24 @@ export default function ArticleToolbar(props: IProps) {
 				ARTICLE_BLOCKS[ArticleBlockEnum.Header6],
 			],
 		},
+		{
+			label: 'Media', // TODO
+			blocks: [
+				ARTICLE_BLOCKS[ArticleBlockEnum.Header1],
+				ARTICLE_BLOCKS[ArticleBlockEnum.Header2],
+				ARTICLE_BLOCKS[ArticleBlockEnum.Header3],
+			],
+		},
 	];
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if (event.metaKey || event.ctrlKey) {
-				if (event.key === 'b') {
+				if (event.key.toLowerCase() === 'k') {
 					event.preventDefault();
 					props.togglePanelOpen();
 				}
-				if (event.key === 'e') {
+				if (event.key.toLowerCase() === 'l') {
 					event.preventDefault();
 					props.toggleBlockEditMode();
 				}
@@ -135,10 +145,40 @@ export default function ArticleToolbar(props: IProps) {
 		return (
 			<S.BADropdownActionShortcut>
 				{keys.map((key: string) => {
-					return <p>{key}</p>;
+					return <p key={key}>{key}</p>;
 				})}
 			</S.BADropdownActionShortcut>
 		);
+	}
+
+	function getCurrentTab() {
+		switch (currentTab) {
+			case 'Blocks':
+				return (
+					<S.BADropdownBody>
+						{BLOCK_TYPES.map((section: any) => (
+							<S.BADropdownSection key={section.label}>
+								<S.BADropdownSectionHeader>
+									<p>{section.label}</p>
+								</S.BADropdownSectionHeader>
+								{section.blocks.map((block: any) => (
+									<S.BADropdownAction key={block.label}>
+										<button onClick={() => props.addBlock(block.type)}>
+											<ReactSVG src={block.icon} />
+											<span>{block.label}</span>
+											{block.shortcut && getShortcut(block.shortcut)}
+										</button>
+									</S.BADropdownAction>
+								))}
+							</S.BADropdownSection>
+						))}
+					</S.BADropdownBody>
+				);
+			case 'Post':
+				return <p>Post actions</p>;
+			default:
+				return null;
+		}
 	}
 
 	return (
@@ -150,87 +190,33 @@ export default function ArticleToolbar(props: IProps) {
 				<S.EndActions>
 					<Button
 						type={'primary'}
-						label={'Block editor'}
+						label={'Toolkit'}
+						handlePress={() => props.togglePanelOpen()}
+						active={props.panelOpen}
+						icon={props.panelOpen ? ASSETS.close : ASSETS.tools}
+						iconLeftAlign
+						tooltip={isMac() ? '⌘ + K' : 'Ctrl + K'}
+					/>
+					<Button
+						type={'primary'}
+						label={'Layout'}
 						handlePress={() => props.toggleBlockEditMode()}
 						active={props.blockEditMode}
-						icon={props.blockEditMode ? ASSETS.close : ASSETS.write}
+						icon={props.blockEditMode ? ASSETS.close : ASSETS.layout}
 						iconLeftAlign
-						tooltip={isMac() ? '⌘ + E' : 'Ctrl + E'}
+						tooltip={isMac() ? '⌘ + L' : 'Ctrl + L'}
 					/>
-					<S.BlockAddWrapper>
-						<CloseHandler
-							active={showBlockAddDropdown}
-							disabled={!showBlockAddDropdown}
-							callback={() => setShowBlockAddDropdown(false)}
-						>
-							<Button
-								type={'primary'}
-								label={'Panel'}
-								handlePress={() => props.togglePanelOpen()}
-								active={props.panelOpen}
-								icon={props.panelOpen ? ASSETS.close : ASSETS.add}
-								iconLeftAlign
-								tooltip={isMac() ? '⌘ + B' : 'Ctrl + B'}
-							/>
-
-							{/* {showBlockAddDropdown && (
-								<S.BlockAddDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
-									<S.BADropdownBody>
-										{BLOCK_TYPES.map((section: any) => (
-											<S.BADropdownSection key={section.label}>
-												<S.BADropdownSectionHeader>
-													<p>{section.label}</p>
-												</S.BADropdownSectionHeader>
-												{section.blocks.map((block: any) => (
-													<S.BADropdownAction key={block.label}>
-														<button
-															onClick={() => {
-																props.addBlock(block.type);
-																setShowBlockAddDropdown(false);
-															}}
-														>
-															<ReactSVG src={block.icon} />
-															<span>{block.label}</span>
-															{block.shortcut && getShortcut(block.shortcut)}
-														</button>
-													</S.BADropdownAction>
-												))}
-											</S.BADropdownSection>
-										))}
-									</S.BADropdownBody>
-								</S.BlockAddDropdown>
-							)} */}
-						</CloseHandler>
-					</S.BlockAddWrapper>
+					<Button type={'alt1'} label={'Publish'} handlePress={() => alert('Publish this post!')} active={false} />
 				</S.EndActions>
 			</S.Wrapper>
-			{props.panelOpen && (
-				<S.Panel className={'border-wrapper-primary fade-in scroll-wrapper'}>
-					<S.BADropdownBody>
-						{BLOCK_TYPES.map((section: any) => (
-							<S.BADropdownSection key={section.label}>
-								<S.BADropdownSectionHeader>
-									<p>{section.label}</p>
-								</S.BADropdownSectionHeader>
-								{section.blocks.map((block: any) => (
-									<S.BADropdownAction key={block.label}>
-										<button
-											onClick={() => {
-												props.addBlock(block.type);
-												setShowBlockAddDropdown(false);
-											}}
-										>
-											<ReactSVG src={block.icon} />
-											<span>{block.label}</span>
-											{block.shortcut && getShortcut(block.shortcut)}
-										</button>
-									</S.BADropdownAction>
-								))}
-							</S.BADropdownSection>
-						))}
-					</S.BADropdownBody>
-				</S.Panel>
-			)}
+			<S.Panel open={props.panelOpen} className={'border-wrapper-primary fade-in scroll-wrapper'}>
+				<Tabs onTabPropClick={(label: string) => setCurrentTab(label)} type={'alt1'}>
+					{TABS.map((tab: { label: string; icon?: string }, index: number) => {
+						return <S.TabWrapper key={index} label={tab.label} icon={tab.icon ? tab.icon : null} />;
+					})}
+				</Tabs>
+				<S.TabContent>{getCurrentTab()}</S.TabContent>
+			</S.Panel>
 		</>
 	);
 }

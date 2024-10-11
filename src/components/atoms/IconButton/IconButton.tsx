@@ -40,6 +40,7 @@ export default function IconButton(props: IProps) {
 	function getAction() {
 		return (
 			<StyledButton
+				tabIndex={props.noFocus ? -1 : 0}
 				onMouseDown={handlePress}
 				disabled={props.disabled}
 				active={props.active}

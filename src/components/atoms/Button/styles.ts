@@ -24,7 +24,7 @@ export const Tooltip = styled.div<{ useBottom: boolean }>`
 	bottom: ${(props) => (props.useBottom ? '-32.5px' : 'auto')};
 	left: 50%;
 	transform: translate(-50%, 0);
-	z-index: 1;
+	z-index: 2;
 	display: none;
 `;
 

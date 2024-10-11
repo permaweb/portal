@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+import { transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
@@ -28,41 +29,44 @@ export const EndActions = styled.div`
 	margin: 0 0 0 auto;
 `;
 
-export const BlockAddWrapper = styled.div``;
-
-export const Panel = styled.div`
+export const Panel = styled.div<{ open: boolean }>`
 	max-height: calc(100vh - 65px - 100px);
 	width: 300px;
 	position: absolute;
 	right: 0;
 	z-index: 1;
+	transform: translateX(${(props) => (props.open ? '0' : 'calc(100% + 20px)')});
+	transition: transform ${transition2};
 	top: 75px;
-	padding: 15px 10px 10px 10px;
+	padding: 13.5px 10px 10px 10px;
+	border: 1px solid ${(props) => props.theme.colors.border.primary} !important;
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		top: 55px;
+		border: 1px solid ${(props) => props.theme.colors.border.alt2} !important;
+		box-shadow: 0 3.5px 7.5px 0 ${(props) => props.theme.colors.shadow.primary};
+	}
 `;
 
-export const BlockAddDropdown = styled.div`
-	max-height: 65vh;
-	width: 350px;
-	max-width: 80vw;
-	position: absolute;
-	z-index: 1;
-	top: 45px;
-	right: 0;
-	padding: 11.5px 10px;
+export const TabWrapper = styled.div<{ label: string; icon?: string }>``;
+
+export const TabContent = styled.div`
+	margin: 20px 0 0 0;
 `;
 
+/* Blocks */
 export const BADropdownBody = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
+	gap: 10px;
 `;
 
 export const BADropdownSection = styled.div``;
 
 export const BADropdownSectionHeader = styled.div`
 	width: 100%;
+	margin: 0 0 3.5px 0;
 	padding: 0 10px;
-	margin: 0 0 2.5px 0;
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
@@ -74,7 +78,7 @@ export const BADropdownSectionHeader = styled.div`
 
 export const BADropdownAction = styled.div`
 	button {
-		height: 40px;
+		height: 35px;
 		width: 100%;
 		display: flex;
 		align-items: center;

@@ -95,7 +95,7 @@ function Block(props: {
 				<S.ElementDragWrapper ref={provided.innerRef} {...provided.draggableProps}>
 					{props.blockEditMode && (
 						<S.EDragWrapper>
-							<S.EDragHandler {...provided.dragHandleProps}>
+							<S.EDragHandler {...provided.dragHandleProps} tabIndex={-1}>
 								<ReactSVG src={ASSETS.drag} />
 							</S.EDragHandler>
 						</S.EDragWrapper>
@@ -103,7 +103,7 @@ function Block(props: {
 					<S.ElementWrapper>
 						{props.blockEditMode && (
 							<>
-								<S.ElementToolbar>
+								<S.ElementToolbar tabIndex={-1}>
 									<S.EToolbarHeader>
 										<span>{ARTICLE_BLOCKS[props.block.type].label}</span>
 									</S.EToolbarHeader>
@@ -116,6 +116,7 @@ function Block(props: {
 											dimensions={{ wrapper: 23.5, icon: 13.5 }}
 											tooltip={language.deleteBlock}
 											tooltipPosition={'bottom-right'}
+											noFocus
 										/>
 									</S.EToolbarDelete>
 								</S.ElementToolbar>
@@ -137,38 +138,15 @@ function Block(props: {
 	);
 }
 
+// TODO: Can't see quotes / code cursor
+// TODO: No blocks indicator
+// TODO: Enter key on header - create paragraph block
 export default function Article() {
-	// const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
-	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([
-		{
-			id: '1',
-			type: ArticleBlockEnum.Code,
-			content: 'for i = 0; i < elements.length; i++ <br>&nbsp;&nbsp;runFn()<br>end',
-		}, // TODO: Can't see code cursor
-		{ id: '2', type: ArticleBlockEnum.Quote, content: 'My famous quote' }, // TODO: Can't see quotes cursor
-		{
-			id: '3',
-			type: ArticleBlockEnum.Paragraph,
-			content:
-				'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat.',
-		},
-		{ id: '4', type: ArticleBlockEnum.Header1, content: 'Header 1' },
-		{ id: '5', type: ArticleBlockEnum.Header2, content: 'Header 2' },
-		{ id: '6', type: ArticleBlockEnum.Header3, content: 'Header 3' },
-		{ id: '7', type: ArticleBlockEnum.Header4, content: 'Header 4' },
-		{ id: '8', type: ArticleBlockEnum.Header5, content: 'Header 5' },
-		{ id: '9', type: ArticleBlockEnum.Header6, content: 'Header 6' },
-		{
-			id: '10',
-			type: ArticleBlockEnum.Paragraph,
-			content:
-				'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra risus et ante ultricies, vel facilisis justo aliquet. Morbi eu mauris vehicula, cursus turpis sed, aliquet metus. Donec at facilisis metus. Cras convallis lacus vel ex malesuada, eget suscipit sapien euismod. Aliquam erat volutpat.',
-		},
-	]);
-	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
+	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
+	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
 		if (blocks.length <= 0) {

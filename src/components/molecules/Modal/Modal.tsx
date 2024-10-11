@@ -83,11 +83,11 @@ let modalOpenCounter = 0;
 const showDocumentBody = () => {
 	modalOpenCounter -= 1;
 	if (modalOpenCounter === 0) {
-		document.body.style.overflow = 'auto';
+		document.body.style.overflowY = 'auto';
 	}
 };
 
 const hideDocumentBody = () => {
 	modalOpenCounter += 1;
-	document.body.style.overflow = 'hidden';
+	document.body.style.overflowY = 'hidden';
 };
