@@ -99,7 +99,7 @@ export default function ArticleToolbar(props: IProps) {
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.metaKey || event.ctrlKey) {
+			if (event.ctrlKey) {
 				if (event.key.toLowerCase() === 'k') {
 					event.preventDefault();
 					props.togglePanelOpen();

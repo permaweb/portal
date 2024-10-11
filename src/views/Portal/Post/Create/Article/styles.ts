@@ -165,6 +165,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 		font-family: Monaco, Menlo, Consolas, Courier New, monospace;
 		font-size: 12px;
 		font-weight: 600;
+		display: block;
 	}
 
 	h1,
