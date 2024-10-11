@@ -155,7 +155,7 @@ export default function Article() {
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
-	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
+	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(false);
 
 	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
 

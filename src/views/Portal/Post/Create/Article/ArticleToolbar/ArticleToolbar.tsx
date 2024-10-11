@@ -5,7 +5,6 @@ import { Button } from 'components/atoms/Button';
 import { Tabs } from 'components/molecules/Tabs';
 import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
 import { ArticleBlockEnum } from 'helpers/types';
-import { isMac } from 'helpers/utils';
 
 import * as S from './styles';
 import { IProps } from './types';
@@ -246,7 +245,7 @@ export default function ArticleToolbar(props: IProps) {
 						active={props.panelOpen}
 						icon={props.panelOpen ? ASSETS.close : ASSETS.tools}
 						iconLeftAlign
-						tooltip={isMac() ? '⌘ + K' : 'Ctrl + K'}
+						tooltip={'CTRL + K'}
 					/>
 					<Button
 						type={'primary'}
@@ -255,7 +254,7 @@ export default function ArticleToolbar(props: IProps) {
 						active={props.blockEditMode}
 						icon={props.blockEditMode ? ASSETS.close : ASSETS.layout}
 						iconLeftAlign
-						tooltip={isMac() ? '⌘ + L' : 'Ctrl + L'}
+						tooltip={'CTRL + L'}
 					/>
 					<Button type={'alt1'} label={'Publish'} handlePress={() => alert('Publish this post!')} active={false} />
 				</S.EndActions>

@@ -130,35 +130,25 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 		}
 
 		font-size: 15px;
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		color: ${(props) => props.theme.colors.font.alt1};
+
 		li {
+			color: ${(props) => props.theme.colors.font.primary};
 			font-weight: ${(props) => props.theme.typography.weight.medium};
+			font-size: 15px;
+
+			&::marker {
+				font-weight: ${(props) => props.theme.typography.weight.bold};
+				color: ${(props) => props.theme.colors.font.alt1};
+			}
 		}
 	}
 	ol {
 		list-style-type: decimal;
-		color: ${(props) => props.theme.colors.font.alt1};
-
-		> div > li {
-			color: ${(props) => props.theme.colors.font.primary};
-
-			&::marker {
-				font-weight: ${(props) => props.theme.typography.weight.bold};
-				color: ${(props) => props.theme.colors.font.alt1};
-			}
-		}
 	}
 	ul {
 		list-style-type: disc;
-		color: ${(props) => props.theme.colors.font.alt1};
-
-		> div > li {
-			color: ${(props) => props.theme.colors.font.primary};
-
-			&::marker {
-				font-weight: ${(props) => props.theme.typography.weight.bold};
-				color: ${(props) => props.theme.colors.font.alt1};
-			}
-		}
 	}
 	code {
 		color: #df4657;
