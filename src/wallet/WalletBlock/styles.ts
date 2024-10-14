@@ -3,8 +3,6 @@ import styled from 'styled-components';
 import { open, transition3 } from 'helpers/animations';
 
 export const Wrapper = styled.div`
-	width: 500px;
-	max-width: 95vw;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -13,7 +11,7 @@ export const Wrapper = styled.div`
 	animation: ${open} ${transition3};
 	p {
 		font-size: ${(props) => props.theme.typography.size.base};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-align: center;
 	}
 	button {
@@ -27,9 +25,8 @@ export const Icon = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	background: ${(props) => props.theme.colors.container.primary.background};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
-	box-shadow: 0 5px 15px 0 ${(props) => props.theme.colors.shadow.primary};
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	border: 1px solid ${(props) => props.theme.colors.border.alt1};
 	border-radius: 50%;
 	margin: 0 0 20px 0;
 	svg {

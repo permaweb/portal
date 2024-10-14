@@ -10,6 +10,10 @@ export const Wrapper = styled.div`
 	justify-content: center;
 	align-items: center;
 	padding: 20vh 20px 20px 20px;
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		padding: 20px;
+	}
 `;
 
 export const HeaderWrapper = styled.div`

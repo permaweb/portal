@@ -43,13 +43,11 @@ export default function ProfileManager(props: IProps) {
 	const [profileResponse, setProfileResponse] = React.useState<NotificationType | null>(null);
 
 	React.useEffect(() => {
-		if (props.profile) {
-			setUsername(props.profile.username ?? '');
-			setName(props.profile.displayName ?? '');
-			setBio(props.profile.bio ?? '');
-			setBanner(props.profile.banner && checkValidAddress(props.profile.banner) ? props.profile.banner : null);
-			setAvatar(props.profile.avatar && checkValidAddress(props.profile.avatar) ? props.profile.avatar : null);
-		}
+		setUsername(props.profile?.username ?? '');
+		setName(props.profile?.displayName ?? '');
+		setBio(props.profile?.bio ?? '');
+		setBanner(props.profile?.banner && checkValidAddress(props.profile.banner) ? props.profile.banner : null);
+		setAvatar(props.profile?.avatar && checkValidAddress(props.profile.avatar) ? props.profile.avatar : null);
 	}, [props.profile]);
 
 	function handleUpdate() {

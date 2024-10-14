@@ -148,7 +148,7 @@ export default function ArticleToolbar(props: IProps) {
 						break;
 					case '6':
 						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header5);
+						props.addBlock(ArticleBlockEnum.Header6);
 						break;
 					case 'p':
 						event.preventDefault();

@@ -186,6 +186,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	async function handleWallet() {
 		if (localStorage.getItem('walletType')) {
 			try {
+				setProfile(null);
 				await handleConnect(localStorage.getItem('walletType') as any);
 			} catch (e: any) {
 				console.error(e);

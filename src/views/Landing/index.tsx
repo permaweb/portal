@@ -126,7 +126,7 @@ export default function Landing() {
 				)}
 			</S.PortalsWrapper>
 		);
-	}, [arProvider.wallet, arProvider.profile, portalProvider.portals]);
+	}, [arProvider.walletAddress, arProvider.profile, portalProvider.portals]);
 
 	return (
 		<S.Wrapper className={'fade-in'}>
