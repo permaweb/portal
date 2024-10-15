@@ -163,9 +163,9 @@ export default function Article() {
 	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
 	const [focusedBlock, setFocusedBlock] = React.useState<ArticleBlockType | null>(null);
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
-
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
 	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
+	const [postTitle, setPostTitle] = React.useState<string>('');
 
 	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
 
@@ -209,7 +209,14 @@ export default function Article() {
 			if (event.key === 'Backspace' && focusedBlock) {
 				const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
 				const currentBlock = blocks[currentBlockIndex];
-				if (currentBlock && !currentBlock.content.length) {
+				if (
+					currentBlock &&
+					(!currentBlock.content.length ||
+						(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
+						currentBlock.content === '<li><br></li>' ||
+						(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
+						currentBlock.content === '<li><br></li>')
+				) {
 					event.preventDefault();
 					deleteBlock(currentBlock.id);
 					if (currentBlockIndex > 0) {
@@ -332,6 +339,8 @@ export default function Article() {
 		<S.Wrapper>
 			<S.ToolbarWrapper>
 				<ArticleToolbar
+					postTitle={postTitle}
+					setPostTitle={(value: string) => setPostTitle(value)}
 					addBlock={(type: ArticleBlockEnum) => addBlock(type)}
 					blockEditMode={blockEditMode}
 					toggleBlockEditMode={() => setBlockEditMode(!blockEditMode)}

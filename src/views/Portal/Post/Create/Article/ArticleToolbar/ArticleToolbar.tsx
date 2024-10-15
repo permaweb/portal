@@ -101,7 +101,6 @@ export default function ArticleToolbar(props: IProps) {
 
 		if (focusedIndex >= 0 && blockRefs.current[focusedIndex] && props.panelOpen) {
 			if (props.toggleBlockFocus) blockRefs.current[focusedIndex]?.focus();
-			// else document.activeElement instanceof HTMLElement && document.activeElement.blur();
 		}
 
 		blockRefs.current.forEach((ref) => {
@@ -287,7 +286,7 @@ export default function ArticleToolbar(props: IProps) {
 
 	const panel = React.useMemo(() => {
 		const content = (
-			<S.Panel className={'border-wrapper-primary fade-in scroll-wrapper'}>
+			<S.Panel className={'border-wrapper-primary fade-in scroll-wrapper'} open={props.panelOpen}>
 				<Tabs onTabPropClick={(label: string) => setCurrentTab(label)} type={'alt1'}>
 					{TABS.map((tab: { label: string; icon?: string }, index: number) => {
 						return <S.TabWrapper key={index} label={tab.label} icon={tab.icon ? tab.icon : null} />;
@@ -310,11 +309,11 @@ export default function ArticleToolbar(props: IProps) {
 			</S.Panel>
 		);
 		if (!desktop)
-			return (
+			return props.panelOpen ? (
 				<Portal node={DOM.overlay}>
 					<div className={'overlay'}>{content}</div>
 				</Portal>
-			);
+			) : null;
 		return content;
 	}, [props.panelOpen, currentTab, props.addBlock, focusedIndex, desktop]);
 
@@ -322,7 +321,11 @@ export default function ArticleToolbar(props: IProps) {
 		<>
 			<S.Wrapper>
 				<S.TitleWrapper>
-					<p>Untitled post</p>
+					<input
+						value={props.postTitle}
+						onChange={(e: any) => props.setPostTitle(e.target.value)}
+						placeholder={'Untitled post'}
+					/>
 				</S.TitleWrapper>
 				<S.EndActions>
 					<Button
@@ -346,7 +349,7 @@ export default function ArticleToolbar(props: IProps) {
 					<Button type={'alt1'} label={'Publish'} handlePress={() => alert('Publish this post!')} active={false} />
 				</S.EndActions>
 			</S.Wrapper>
-			{props.panelOpen && panel}
+			{panel}
 		</>
 	);
 }

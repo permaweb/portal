@@ -26,6 +26,7 @@ export const ToolbarWrapper = styled.div`
 
 export const EditorWrapper = styled.div<{ panelOpen: boolean }>`
 	padding: 0 ${(props) => (props.panelOpen ? `330px` : '0')} 0 0;
+	transition: padding-right ${transition2};
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {
 		padding: 0;
@@ -101,6 +102,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 		font-size: 15px;
 		font-weight: 500;
 		color: ${(props) => props.theme.colors.font.alt2};
+
 		/* position: relative;
 		display: flex;
 		align-items: flex-start; */
