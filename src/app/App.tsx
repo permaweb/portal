@@ -12,6 +12,7 @@ const NotFound = getLazyImport('NotFound');
 import { DOM, STYLING, URLS } from 'helpers/config';
 import { checkWindowCutoff } from 'helpers/window';
 import { Navigation } from 'navigation/Navigation';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
@@ -24,8 +25,11 @@ function getLazyImport(view: string) {
 }
 
 export default function App() {
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
+
 	const [navigationOpen, setNavigationOpen] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
-	const [_desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
+	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
 
 	function handleWindowResize() {
 		if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {
@@ -47,6 +51,18 @@ export default function App() {
 		};
 	}, [debouncedResize]);
 
+	React.useEffect(() => {
+		if (!desktop && navigationOpen) {
+			document.body.style.overflowY = 'hidden';
+		} else {
+			document.body.style.overflowY = 'auto';
+		}
+
+		return () => {
+			document.body.style.overflowY = 'auto';
+		};
+	}, [desktop, navigationOpen]);
+
 	function getRoute(path: string, element: React.ReactNode) {
 		const baseRoutes = [URLS.base, URLS.docs, `URLS.docs/*`, `${URLS.docs}:active/*`, URLS.notFound, '*'];
 
@@ -58,6 +74,13 @@ export default function App() {
 					<>
 						<Navigation open={navigationOpen} toggle={() => setNavigationOpen(!navigationOpen)} />
 						<S.View navigationOpen={navigationOpen}>{element}</S.View>
+						<S.Footer navigationOpen={navigationOpen}>
+							<div />
+							<p>
+								{language.app} {new Date().getFullYear()}
+							</p>
+							<div />
+						</S.Footer>
 					</>
 				}
 			/>

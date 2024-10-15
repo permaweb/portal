@@ -9,7 +9,6 @@ import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
-// TODO: Asset create type list
 export default function Create() {
 	const portalProvider = usePortalProvider();
 

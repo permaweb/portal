@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 
-import { transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
@@ -8,6 +7,7 @@ export const Wrapper = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
+	justify-content: space-between;
 	gap: 20px;
 	position: relative;
 `;
@@ -26,26 +26,31 @@ export const EndActions = styled.div`
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 20px;
-	margin: 0 0 0 auto;
 `;
 
-export const Panel = styled.div<{ open: boolean }>`
-	max-height: calc(100vh - 65px - 100px);
+export const Panel = styled.div`
+	max-height: calc(100vh - 65px - 130px);
 	width: 300px;
 	position: absolute;
 	right: 0;
 	z-index: 1;
-	transform: translateX(${(props) => (props.open ? '0' : 'calc(100% + 20px)')});
-	transition: transform ${transition2};
 	top: 75px;
+
 	padding: 13.5px 10px 10px 10px;
 	border: 1px solid ${(props) => props.theme.colors.border.primary} !important;
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {
-		top: 55px;
-		border: 1px solid ${(props) => props.theme.colors.border.alt2} !important;
-		box-shadow: 0 3.5px 7.5px 0 ${(props) => props.theme.colors.shadow.primary};
+		top: 40%;
+		left: 50%;
+		transform: translate(-50%, -40%);
+		border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
 	}
+`;
+
+export const PanelCloseWrapper = styled.div`
+	position: absolute;
+	top: 10px;
+	right: 10px;
 `;
 
 export const TabWrapper = styled.div<{ label: string; icon?: string }>``;
@@ -87,10 +92,10 @@ export const BADropdownAction = styled.div`
 		transition: all 100ms;
 		padding: 0 10px;
 		span {
-			color: ${(props) => props.theme.colors.font.primary} !important;
-			font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
-			font-family: ${(props) => props.theme.typography.family.primary} !important;
+			color: ${(props) => props.theme.colors.font.primary};
+			font-size: ${(props) => props.theme.typography.size.xSmall};
+			font-weight: ${(props) => props.theme.typography.weight.medium};
+			font-family: ${(props) => props.theme.typography.family.primary};
 			display: block;
 			white-space: nowrap;
 			text-overflow: ellipsis;
@@ -105,12 +110,36 @@ export const BADropdownAction = styled.div`
 			fill: ${(props) => props.theme.colors.font.alt1};
 		}
 		&:hover {
-			background: ${(props) => props.theme.colors.container.primary.active};
+			background: ${(props) => props.theme.colors.button.alt1.background};
+			span {
+				color: ${(props) => props.theme.colors.button.alt1.color};
+			}
+			svg {
+				color: ${(props) => props.theme.colors.button.alt1.color};
+				fill: ${(props) => props.theme.colors.button.alt1.color};
+			}
+			p {
+				background: ${(props) => props.theme.colors.button.alt1.background};
+				color: ${(props) => props.theme.colors.button.alt1.color};
+				border: 1px solid ${(props) => props.theme.colors.border.alt6};
+			}
 		}
 		&:focus {
 			border: 0;
 			outline: 0;
-			background: ${(props) => props.theme.colors.container.primary.active};
+			background: ${(props) => props.theme.colors.button.alt1.background};
+			span {
+				color: ${(props) => props.theme.colors.button.alt1.color};
+			}
+			svg {
+				color: ${(props) => props.theme.colors.button.alt1.color};
+				fill: ${(props) => props.theme.colors.button.alt1.color};
+			}
+			p {
+				background: ${(props) => props.theme.colors.button.alt1.background};
+				color: ${(props) => props.theme.colors.button.alt1.color};
+				border: 1px solid ${(props) => props.theme.colors.border.alt6};
+			}
 		}
 	}
 `;
@@ -123,6 +152,7 @@ export const BADropdownActionShortcut = styled.div`
 	p {
 		text-transform: uppercase;
 		padding: 2.5px 6.5px;
+		border: 1px solid transparent;
 		background: ${(props) => props.theme.colors.container.alt4.background};
 		border-radius: ${STYLING.dimensions.radius.alt3};
 		color: ${(props) => props.theme.colors.font.primary};

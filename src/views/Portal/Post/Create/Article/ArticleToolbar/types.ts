@@ -7,4 +7,5 @@ export interface IProps {
 	panelOpen: boolean;
 	togglePanelOpen: () => void;
 	toggleBlockFocus: boolean;
+	setToggleBlockFocus: () => void;
 }

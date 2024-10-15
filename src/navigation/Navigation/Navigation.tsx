@@ -23,6 +23,9 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
+	const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
+
 	const paths = React.useMemo(() => {
 		if (portalProvider.current) {
 			return [
@@ -39,9 +42,6 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		}
 		return null;
 	}, [portalProvider.current]);
-
-	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
-	const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
 
 	function handleWindowResize() {
 		if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {

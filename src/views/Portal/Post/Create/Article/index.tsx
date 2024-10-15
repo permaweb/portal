@@ -28,7 +28,18 @@ function ContentEditable(props: {
 
 	React.useEffect(() => {
 		if (props.autoFocus && ref.current) {
-			ref.current.focus();
+			const focusElement = () => {
+				ref.current?.focus();
+				const range = document.createRange();
+				const selection = window.getSelection();
+				range.selectNodeContents(ref.current);
+				range.collapse(false);
+				selection?.removeAllRanges();
+				selection?.addRange(range);
+			};
+
+			focusElement();
+			setTimeout(focusElement, 0);
 		}
 	}, [props.autoFocus]);
 
@@ -144,8 +155,7 @@ function Block(props: {
 	);
 }
 
-// TODO: Quotes
-// TODO: Code
+// TODO: Links
 export default function Article() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -155,7 +165,7 @@ export default function Article() {
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
-	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(false);
+	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
 
 	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
 
@@ -167,21 +177,52 @@ export default function Article() {
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.key.toLowerCase() === 'enter' && focusedBlock) {
-				if (focusedBlock.type.includes('header')) {
-					event.preventDefault();
-					addBlock(ArticleBlockEnum.Paragraph);
+			if (event.key === 'Enter' && focusedBlock) {
+				switch (focusedBlock.type) {
+					case 'ordered-list':
+					case 'unordered-list':
+					case 'quote':
+					case 'code':
+						break;
+					case 'paragraph':
+					case 'header-1':
+					case 'header-2':
+					case 'header-3':
+					case 'header-4':
+					case 'header-5':
+					case 'header-6':
+						event.preventDefault();
+						addBlock(ArticleBlockEnum.Paragraph);
+						setToggleBlockFocus(false);
+						break;
+					default:
+						break;
 				}
 			}
-			// TODO: Auto focus panel
-			// if (event.key.toLowerCase() === 'tab' && focusedBlock) {
-			// 	const lastBlockIndex = blocks.length - 1;
-			// 	if (blocks[lastBlockIndex].id === focusedBlock.id) {
-			// 		event.preventDefault();
-			// 		setToggleBlockFocus(!toggleBlockFocus);
-			// 	}
-			// 	else setToggleBlockFocus(false)
-			// }
+			if (event.key === 'Tab' && !event.shiftKey && !toggleBlockFocus) {
+				const lastBlockIndex = blocks.length - 1;
+				if (!blocks.length || blocks[lastBlockIndex].id === focusedBlock.id) {
+					event.preventDefault();
+					setToggleBlockFocus(true);
+				}
+			}
+			if (event.key === 'Backspace' && focusedBlock) {
+				const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
+				const currentBlock = blocks[currentBlockIndex];
+				if (currentBlock && !currentBlock.content.length) {
+					event.preventDefault();
+					deleteBlock(currentBlock.id);
+					if (currentBlockIndex > 0) {
+						const previousBlock = blocks[currentBlockIndex - 1];
+						setFocusedBlock(previousBlock);
+						setLastAddedBlockId(previousBlock.id);
+					} else if (blocks.length > 1) {
+						const nextBlock = blocks[1];
+						setFocusedBlock(nextBlock);
+						setLastAddedBlockId(nextBlock.id);
+					}
+				}
+			}
 		};
 
 		document.addEventListener('keydown', handleKeyDown);
@@ -189,7 +230,7 @@ export default function Article() {
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [blocks, focusedBlock]);
+	}, [blocks, focusedBlock, toggleBlockFocus]);
 
 	const onDragEnd = (result: any) => {
 		if (!result.destination) {
@@ -282,10 +323,10 @@ export default function Article() {
 		}
 		return (
 			<S.BlocksEmpty className={'fade-in'}>
-				<span>{language.blocksEmpty}</span>
+				<span>{`${language.blocksEmpty}!`}</span>
 			</S.BlocksEmpty>
 		);
-	}, [blocks, blockEditMode]);
+	}, [blocks, blockEditMode, lastAddedBlockId, focusedBlock]);
 
 	return (
 		<S.Wrapper>
@@ -297,6 +338,7 @@ export default function Article() {
 					panelOpen={panelOpen}
 					togglePanelOpen={() => setPanelOpen(!panelOpen)}
 					toggleBlockFocus={toggleBlockFocus}
+					setToggleBlockFocus={() => setToggleBlockFocus(false)}
 				/>
 			</S.ToolbarWrapper>
 			<S.EditorWrapper panelOpen={panelOpen}>{editor}</S.EditorWrapper>
