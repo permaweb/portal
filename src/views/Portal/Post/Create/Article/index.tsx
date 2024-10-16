@@ -7,6 +7,7 @@ import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
 import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
+import { Image } from './blocks/Image';
 import { ArticleToolbar } from './ArticleToolbar';
 import * as S from './styles';
 
@@ -66,6 +67,7 @@ function Block(props: {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	let useCustom: boolean = false;
 	let element: any = null;
 
 	switch (props.block.type) {
@@ -101,6 +103,15 @@ function Block(props: {
 			break;
 		case 'header-6':
 			element = 'h6';
+			break;
+		case 'image':
+			useCustom = true;
+			element = (
+				<Image
+					content={props.block.content}
+					onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
+				/>
+			);
 			break;
 		default:
 			element = 'p';
@@ -141,12 +152,16 @@ function Block(props: {
 							</>
 						)}
 						<S.Element blockEditMode={props.blockEditMode} type={props.block.type}>
-							<ContentEditable
-								element={element}
-								value={props.block.content}
-								onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
-								autoFocus={props.autoFocus}
-							/>
+							{useCustom ? (
+								element
+							) : (
+								<ContentEditable
+									element={element}
+									value={props.block.content}
+									onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
+									autoFocus={props.autoFocus}
+								/>
+							)}
 						</S.Element>
 					</S.ElementWrapper>
 				</S.ElementDragWrapper>
@@ -177,27 +192,32 @@ export default function Article() {
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.key === 'Enter' && focusedBlock) {
-				switch (focusedBlock.type) {
-					case 'ordered-list':
-					case 'unordered-list':
-					case 'quote':
-					case 'code':
-						break;
-					case 'paragraph':
-					case 'header-1':
-					case 'header-2':
-					case 'header-3':
-					case 'header-4':
-					case 'header-5':
-					case 'header-6':
+			switch (focusedBlock.type) {
+				case 'ordered-list':
+				case 'unordered-list':
+				case 'quote':
+				case 'code':
+					if ((event.metaKey || event.ctrlKey) && event.key === 'Enter' && focusedBlock) {
 						event.preventDefault();
 						addBlock(ArticleBlockEnum.Paragraph);
 						setToggleBlockFocus(false);
-						break;
-					default:
-						break;
-				}
+					}
+					break;
+				case 'paragraph':
+				case 'header-1':
+				case 'header-2':
+				case 'header-3':
+				case 'header-4':
+				case 'header-5':
+				case 'header-6':
+					if (event.key === 'Enter' && focusedBlock) {
+						event.preventDefault();
+						addBlock(ArticleBlockEnum.Paragraph);
+						setToggleBlockFocus(false);
+					}
+					break;
+				default:
+					break;
 			}
 			if (event.key === 'Tab' && !event.shiftKey && !toggleBlockFocus) {
 				const lastBlockIndex = blocks.length - 1;
@@ -211,6 +231,7 @@ export default function Article() {
 				const currentBlock = blocks[currentBlockIndex];
 				if (
 					currentBlock &&
+					!(currentBlock.type === 'image') &&
 					(!currentBlock.content.length ||
 						(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
 						currentBlock.content === '<li><br></li>' ||
@@ -251,10 +272,6 @@ export default function Article() {
 		setBlocks(items);
 	};
 
-	const handleBlockChange = (id: string, content: string) => {
-		setBlocks((prevBlocks) => prevBlocks.map((block) => (block.id === id ? { ...block, content } : block)));
-	};
-
 	const addBlock = (type: ArticleBlockEnum) => {
 		let content: any = null;
 
@@ -268,6 +285,7 @@ export default function Article() {
 			case 'header-4':
 			case 'header-5':
 			case 'header-6':
+			case 'image':
 				content = '';
 				break;
 			case 'ordered-list':
@@ -296,6 +314,10 @@ export default function Article() {
 			}
 		});
 		setLastAddedBlockId(newBlock.id);
+	};
+
+	const handleBlockChange = (id: string, content: string) => {
+		setBlocks((prevBlocks) => prevBlocks.map((block) => (block.id === id ? { ...block, content } : block)));
 	};
 
 	const deleteBlock = (id: string) => {

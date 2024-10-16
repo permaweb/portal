@@ -12,6 +12,7 @@ export enum ArticleBlockEnum {
 	Header4 = 'header-4',
 	Header5 = 'header-5',
 	Header6 = 'header-6',
+	Image = 'image',
 }
 
 export type ArticleBlockType = {

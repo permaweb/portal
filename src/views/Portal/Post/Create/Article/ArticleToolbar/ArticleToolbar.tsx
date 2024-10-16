@@ -9,19 +9,22 @@ import { Tabs } from 'components/molecules/Tabs';
 import { ARTICLE_BLOCKS, ASSETS, DOM, STYLING } from 'helpers/config';
 import { ArticleBlockEnum } from 'helpers/types';
 import { checkWindowCutoff } from 'helpers/window';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 import { IProps } from './types';
 
-// TODO: Language
-// TODO: Post title
 export default function ArticleToolbar(props: IProps) {
-	const TABS = [{ label: 'Blocks' }]; // TODO: { label: 'Post' }
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
+
+	const TABS = [{ label: language.blocks }]; // TODO: { label: 'Post' }
 
 	const blockRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
 
 	const [focusedIndex, setFocusedIndex] = React.useState<number>(-1);
 	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.label);
+	const [totalBlockCount, setTotalBlockCount] = React.useState(0);
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.initial)));
 
 	const BLOCK_TYPES: {
@@ -29,7 +32,7 @@ export default function ArticleToolbar(props: IProps) {
 		blocks: { type: ArticleBlockEnum; label: string; icon: string }[];
 	}[] = [
 		{
-			label: 'Text',
+			label: language.text,
 			blocks: [
 				ARTICLE_BLOCKS[ArticleBlockEnum.Paragraph],
 				ARTICLE_BLOCKS[ArticleBlockEnum.Quote],
@@ -39,7 +42,7 @@ export default function ArticleToolbar(props: IProps) {
 			],
 		},
 		{
-			label: 'Headers',
+			label: language.headers,
 			blocks: [
 				ARTICLE_BLOCKS[ArticleBlockEnum.Header1],
 				ARTICLE_BLOCKS[ArticleBlockEnum.Header2],
@@ -49,14 +52,10 @@ export default function ArticleToolbar(props: IProps) {
 				ARTICLE_BLOCKS[ArticleBlockEnum.Header6],
 			],
 		},
-		// {
-		// 	label: 'Media', // TODO
-		// 	blocks: [
-		// 		ARTICLE_BLOCKS[ArticleBlockEnum.Header1],
-		// 		ARTICLE_BLOCKS[ArticleBlockEnum.Header2],
-		// 		ARTICLE_BLOCKS[ArticleBlockEnum.Header3],
-		// 	],
-		// },
+		{
+			label: language.media,
+			blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image]],
+		},
 	];
 
 	function handleWindowResize() {
@@ -80,6 +79,11 @@ export default function ArticleToolbar(props: IProps) {
 	React.useEffect(() => {
 		if (!desktop) props.togglePanelOpen();
 	}, [desktop]);
+
+	React.useEffect(() => {
+		const count = BLOCK_TYPES.reduce((acc, section) => acc + section.blocks.length, 0);
+		setTotalBlockCount(count);
+	}, [BLOCK_TYPES]);
 
 	React.useEffect(() => {
 		if (props.panelOpen && props.toggleBlockFocus) {
@@ -127,8 +131,8 @@ export default function ArticleToolbar(props: IProps) {
 					let newIndex = prevIndex;
 					do {
 						newIndex += direction;
-						if (newIndex < 0) newIndex = blockRefs.current.length - 1;
-						if (newIndex >= blockRefs.current.length) newIndex = 0;
+						if (newIndex < 0) newIndex = totalBlockCount - 1;
+						if (newIndex >= totalBlockCount) newIndex = 0;
 					} while (!blockRefs.current[newIndex]);
 					return newIndex;
 				});
@@ -223,6 +227,10 @@ export default function ArticleToolbar(props: IProps) {
 						event.preventDefault();
 						props.addBlock(ArticleBlockEnum.UnorderedList);
 						break;
+					case 'i':
+						event.preventDefault();
+						props.addBlock(ArticleBlockEnum.Image);
+						break;
 					default:
 						break;
 				}
@@ -258,21 +266,25 @@ export default function ArticleToolbar(props: IProps) {
 								<S.BADropdownSectionHeader>
 									<p>{section.label}</p>
 								</S.BADropdownSectionHeader>
-								{section.blocks.map((block: any, blockIndex: number) => (
-									<S.BADropdownAction key={`${section.label}-${block.label}`}>
-										<button
-											onClick={() => props.addBlock(block.type)}
-											ref={(el) => {
-												blockRefs.current[sectionIndex * section.blocks.length + blockIndex] = el;
-											}}
-											data-block-type={block.type}
-										>
-											<ReactSVG src={block.icon} />
-											<span>{block.label}</span>
-											{block.shortcut && getShortcut(block.shortcut)}
-										</button>
-									</S.BADropdownAction>
-								))}
+								{section.blocks.map((block: any, blockIndex: number) => {
+									const globalBlockIndex =
+										BLOCK_TYPES.slice(0, sectionIndex).reduce((acc, s) => acc + s.blocks.length, 0) + blockIndex;
+									return (
+										<S.BADropdownAction key={`${section.label}-${block.label}`}>
+											<button
+												onClick={() => props.addBlock(block.type)}
+												ref={(el) => {
+													blockRefs.current[globalBlockIndex] = el;
+												}}
+												data-block-type={block.type}
+											>
+												<ReactSVG src={block.icon} />
+												<span>{block.label}</span>
+												{block.shortcut && getShortcut(block.shortcut)}
+											</button>
+										</S.BADropdownAction>
+									);
+								})}
 							</S.BADropdownSection>
 						))}
 					</S.BADropdownBody>
@@ -298,7 +310,7 @@ export default function ArticleToolbar(props: IProps) {
 						type={'primary'}
 						src={ASSETS.close}
 						handlePress={() => props.togglePanelOpen()}
-						tooltip={'Close Toolkit'}
+						tooltip={language.closeToolkit}
 						tooltipPosition={'bottom-right'}
 						dimensions={{
 							icon: 12.5,
@@ -324,13 +336,13 @@ export default function ArticleToolbar(props: IProps) {
 					<input
 						value={props.postTitle}
 						onChange={(e: any) => props.setPostTitle(e.target.value)}
-						placeholder={'Untitled post'}
+						placeholder={language.untitledPost}
 					/>
 				</S.TitleWrapper>
 				<S.EndActions>
 					<Button
 						type={'primary'}
-						label={'Toolkit'}
+						label={language.toolkit}
 						handlePress={() => props.togglePanelOpen()}
 						active={props.panelOpen}
 						icon={props.panelOpen ? ASSETS.close : ASSETS.tools}
@@ -339,7 +351,7 @@ export default function ArticleToolbar(props: IProps) {
 					/>
 					<Button
 						type={'primary'}
-						label={'Layout'}
+						label={language.layout}
 						handlePress={() => props.toggleBlockEditMode()}
 						active={props.blockEditMode}
 						icon={props.blockEditMode ? ASSETS.close : ASSETS.layout}

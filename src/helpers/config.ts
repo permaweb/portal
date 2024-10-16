@@ -76,7 +76,7 @@ export const STYLING = {
 			width: 'fit-content',
 		},
 		form: {
-			small: '45px',
+			small: '42.5px',
 			max: '47.5px',
 		},
 		nav: {
@@ -183,5 +183,11 @@ export const ARTICLE_BLOCKS = {
 		label: 'Header 6',
 		icon: ASSETS.header6,
 		shortcut: 'Ctrl / 6',
+	},
+	[ArticleBlockEnum.Image]: {
+		type: ArticleBlockEnum.Image,
+		label: 'Image',
+		icon: ASSETS.image,
+		shortcut: 'Ctrl / I',
 	},
 };

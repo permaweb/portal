@@ -290,7 +290,6 @@ export const Footer = styled.footer<{ navigationOpen: boolean }>`
 	margin: ${STYLING.dimensions.nav.height} 0 0 0;
 	display: flex;
 	align-items: center;
-	justify-content: flex-end;
 
 	p {
 		font-size: ${(props) => props.theme.typography.size.xSmall};

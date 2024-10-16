@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
 import { transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
@@ -87,11 +87,23 @@ function getElementPadding(type: ArticleBlockEnum) {
 	}
 }
 
+function getElementWrapper(blockEditMode: boolean, type: ArticleBlockEnum, theme: DefaultTheme) {
+	switch (type) {
+		case 'image':
+		case 'code':
+			return '';
+		default:
+			return `
+				padding: ${blockEditMode ? getElementPadding(type) : '0'};
+				background: ${blockEditMode ? theme.colors.container.alt1.background : 'transparent'};
+				border: 1px solid ${blockEditMode ? theme.colors.border.alt1 : 'transparent'};
+				border-radius: ${blockEditMode ? STYLING.dimensions.radius.alt2 : '0'};
+			`;
+	}
+}
+
 export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEnum }>`
-	padding: ${(props) => (props.blockEditMode ? getElementPadding(props.type) : '0')};
-	background: ${(props) => (props.blockEditMode ? props.theme.colors.container.alt1.background : 'transparent')};
-	border: 1px solid ${(props) => (props.blockEditMode ? props.theme.colors.border.alt1 : 'transparent')};
-	border-radius: ${(props) => (props.blockEditMode ? STYLING.dimensions.radius.alt2 : '0')};
+	${(props) => getElementWrapper(props.blockEditMode, props.type, props.theme)};
 
 	p {
 		font-size: ${(props) => props.theme.typography.size.base};
@@ -152,11 +164,14 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 		list-style-type: disc;
 	}
 	code {
-		color: #df4657;
+		color: ${(props) => props.theme.colors.font.primary};
+		background: ${(props) => props.theme.colors.container.alt1.background};
+		border-radius: ${STYLING.dimensions.radius.alt2};
 		font-family: Monaco, Menlo, Consolas, Courier New, monospace;
 		font-size: 12px;
 		font-weight: 600;
 		display: block;
+		padding: 12.5px 15px;
 	}
 
 	h1,

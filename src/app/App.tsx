@@ -75,11 +75,9 @@ export default function App() {
 						<Navigation open={navigationOpen} toggle={() => setNavigationOpen(!navigationOpen)} />
 						<S.View navigationOpen={navigationOpen}>{element}</S.View>
 						<S.Footer navigationOpen={navigationOpen}>
-							<div />
 							<p>
 								{language.app} {new Date().getFullYear()}
 							</p>
-							<div />
 						</S.Footer>
 					</>
 				}

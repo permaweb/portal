@@ -33,7 +33,7 @@ export const EndActions = styled.div`
 `;
 
 export const Panel = styled.div<{ open: boolean }>`
-	max-height: calc(100vh - 65px - 100px);
+	max-height: calc(100vh - 65px - 130px);
 	width: 300px;
 	position: absolute;
 	right: 0;
