@@ -33,7 +33,6 @@ export const EndActions = styled.div`
 `;
 
 export const Panel = styled.div<{ open: boolean }>`
-	max-height: calc(100vh - 65px - 130px);
 	width: 300px;
 	position: absolute;
 	right: 0;
@@ -63,6 +62,7 @@ export const TabWrapper = styled.div<{ label: string; icon?: string }>``;
 
 export const TabContent = styled.div`
 	margin: 20px 0 0 0;
+	max-height: calc(100vh - 65px - 155px);
 `;
 
 /* Blocks */

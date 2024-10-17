@@ -19,9 +19,14 @@ export default function Image(props: { content: any; onChange: any }) {
 		return urlPattern.test(url);
 	};
 
-	const buildContent = (data: any) => {
-		return `<img src="${data}" />`;
-	};
+	function buildContent(data: any) {
+		return `
+			<div class="portal-image-wrapper portal-image-column">
+				<img src="${data}"/>
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor, Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+			</div>
+		`;
+	}
 
 	const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		e.preventDefault();
@@ -31,6 +36,10 @@ export default function Image(props: { content: any; onChange: any }) {
 		setIsValidUrl(validateUrl(url));
 		if (validateUrl(url)) {
 			props.onChange(buildContent(url));
+		}
+
+		if (url.length <= 0) {
+			setIsValidUrl(true);
 		}
 	};
 
@@ -46,8 +55,6 @@ export default function Image(props: { content: any; onChange: any }) {
 			reader.readAsDataURL(file);
 		}
 	};
-
-	console.log(props.content);
 
 	return (
 		<S.Wrapper>
@@ -89,7 +96,7 @@ export default function Image(props: { content: any; onChange: any }) {
 					</S.InputActions>
 				</S.InputWrapper>
 			) : (
-				parse(props.content)
+				<S.Content>{parse(props.content)}</S.Content>
 			)}
 		</S.Wrapper>
 	);

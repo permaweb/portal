@@ -185,41 +185,33 @@ export default function Article() {
 	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		if (blocks.length <= 0) {
-			addBlock(ArticleBlockEnum.Header1);
-		}
-	}, []);
-
-	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			switch (focusedBlock.type) {
-				case 'ordered-list':
-				case 'unordered-list':
-				case 'quote':
-				case 'code':
-					if ((event.metaKey || event.ctrlKey) && event.key === 'Enter' && focusedBlock) {
-						event.preventDefault();
-						addBlock(ArticleBlockEnum.Paragraph);
-						setToggleBlockFocus(false);
-					}
-					break;
-				case 'paragraph':
-				case 'header-1':
-				case 'header-2':
-				case 'header-3':
-				case 'header-4':
-				case 'header-5':
-				case 'header-6':
-					if (event.key === 'Enter' && focusedBlock) {
-						event.preventDefault();
-						addBlock(ArticleBlockEnum.Paragraph);
-						setToggleBlockFocus(false);
-					}
-					break;
-				default:
-					break;
+			if (focusedBlock) {
+				switch (focusedBlock.type) {
+					case 'ordered-list':
+					case 'unordered-list':
+					case 'quote':
+					case 'code':
+						if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+							handleKeyAddBlock(event);
+						}
+						break;
+					case 'paragraph':
+					case 'header-1':
+					case 'header-2':
+					case 'header-3':
+					case 'header-4':
+					case 'header-5':
+					case 'header-6':
+						if (event.key === 'Enter') {
+							handleKeyAddBlock(event);
+						}
+						break;
+					default:
+						break;
+				}
 			}
-			if (event.key === 'Tab' && !event.shiftKey && !toggleBlockFocus) {
+			if (event.key === 'Tab' && !event.shiftKey && !toggleBlockFocus && focusedBlock) {
 				const lastBlockIndex = blocks.length - 1;
 				if (!blocks.length || blocks[lastBlockIndex].id === focusedBlock.id) {
 					event.preventDefault();
@@ -251,6 +243,9 @@ export default function Article() {
 					}
 				}
 			}
+			if (event.key === 'Enter' && (!blocks || blocks.length <= 0)) {
+				handleKeyAddBlock(event);
+			}
 		};
 
 		document.addEventListener('keydown', handleKeyDown);
@@ -259,6 +254,12 @@ export default function Article() {
 			document.removeEventListener('keydown', handleKeyDown);
 		};
 	}, [blocks, focusedBlock, toggleBlockFocus]);
+
+	function handleKeyAddBlock(event: any) {
+		event.preventDefault();
+		addBlock(blocks && blocks.length > 0 ? ArticleBlockEnum.Paragraph : ArticleBlockEnum.Header1);
+		setToggleBlockFocus(false);
+	}
 
 	const onDragEnd = (result: any) => {
 		if (!result.destination) {
@@ -304,7 +305,7 @@ export default function Article() {
 		};
 
 		setBlocks((prevBlocks) => {
-			const focusedIndex = prevBlocks.findIndex((block) => block.id === focusedBlock.id);
+			const focusedIndex = prevBlocks.findIndex((block) => block.id === focusedBlock?.id);
 			if (focusedIndex === -1) {
 				return [...prevBlocks, newBlock];
 			} else {
@@ -321,7 +322,20 @@ export default function Article() {
 	};
 
 	const deleteBlock = (id: string) => {
-		setBlocks((prevBlocks) => prevBlocks.filter((block) => block.id !== id));
+		setBlocks((prevBlocks) => {
+			const updatedBlocks = prevBlocks.filter((block) => block.id !== id);
+			const deletedIndex = prevBlocks.findIndex((block) => block.id === id);
+
+			if (deletedIndex > 0) {
+				setFocusedBlock(updatedBlocks[deletedIndex - 1]);
+			} else if (updatedBlocks.length > 0) {
+				setFocusedBlock(updatedBlocks[0]);
+			} else {
+				setFocusedBlock(null);
+			}
+
+			return updatedBlocks;
+		});
 	};
 
 	const editor = React.useMemo(() => {
@@ -352,7 +366,7 @@ export default function Article() {
 		}
 		return (
 			<S.BlocksEmpty className={'fade-in'}>
-				<span>{`${language.blocksEmpty}!`}</span>
+				<span>{language.blocksEmpty}</span>
 			</S.BlocksEmpty>
 		);
 	}, [blocks, blockEditMode, lastAddedBlockId, focusedBlock]);
@@ -370,6 +384,7 @@ export default function Article() {
 					togglePanelOpen={() => setPanelOpen(!panelOpen)}
 					toggleBlockFocus={toggleBlockFocus}
 					setToggleBlockFocus={() => setToggleBlockFocus(false)}
+					handleInitAddBlock={(e) => handleKeyAddBlock(e)}
 				/>
 			</S.ToolbarWrapper>
 			<S.EditorWrapper panelOpen={panelOpen}>{editor}</S.EditorWrapper>

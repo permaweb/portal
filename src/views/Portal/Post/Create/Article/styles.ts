@@ -96,7 +96,7 @@ function getElementWrapper(blockEditMode: boolean, type: ArticleBlockEnum, theme
 			return `
 				padding: ${blockEditMode ? getElementPadding(type) : '0'};
 				background: ${blockEditMode ? theme.colors.container.alt1.background : 'transparent'};
-				border: 1px solid ${blockEditMode ? theme.colors.border.alt1 : 'transparent'};
+				border: 1px solid ${blockEditMode ? theme.colors.border.primary : 'transparent'};
 				border-radius: ${blockEditMode ? STYLING.dimensions.radius.alt2 : '0'};
 			`;
 	}
@@ -255,7 +255,7 @@ export const EDragHandler = styled.div`
 
 export const BlocksEmpty = styled.div`
 	span {
-		color: ${(props) => props.theme.colors.font.alt1};
+		color: ${(props) => props.theme.colors.font.alt3};
 		font-size: ${(props) => props.theme.typography.size.small};
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}

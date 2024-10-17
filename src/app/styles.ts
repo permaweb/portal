@@ -285,14 +285,15 @@ export const View = styled.main<{ navigationOpen: boolean }>`
 export const Footer = styled.footer<{ navigationOpen: boolean }>`
 	width: 100%;
 	max-width: ${STYLING.cutoffs.max};
-	padding: 20px 20px 20px ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 30px)` : '30px')};
+	padding: 0 20px 15px
+		${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 20px)` : '20px 30px')};
 	transition: padding-left ${transition2};
 	margin: ${STYLING.dimensions.nav.height} 0 0 0;
 	display: flex;
 	align-items: center;
 
 	p {
-		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		color: ${(props) => props.theme.colors.font.alt1};

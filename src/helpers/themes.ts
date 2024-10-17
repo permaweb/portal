@@ -179,7 +179,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			primary: currentTheme.neutralA1,
 			alt1: currentTheme.neutralA5,
 			alt2: currentTheme.neutralA4,
-			alt3: currentTheme.neutral5,
+			alt3: currentTheme.neutral8,
 			alt4: currentTheme.neutral1,
 			alt5: currentTheme.primary1,
 			light1: currentTheme.light1,
@@ -299,6 +299,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			h4: 'clamp(24px, 2vw, 36px)',
 		},
 		weight: {
+			light: '300',
 			medium: '500',
 			bold: '600',
 			xBold: '700',

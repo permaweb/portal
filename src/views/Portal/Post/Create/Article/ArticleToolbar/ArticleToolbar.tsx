@@ -20,6 +20,7 @@ export default function ArticleToolbar(props: IProps) {
 
 	const TABS = [{ label: language.blocks }]; // TODO: { label: 'Post' }
 
+	const titleRef = React.useRef<any>(null);
 	const blockRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
 
 	const [focusedIndex, setFocusedIndex] = React.useState<number>(-1);
@@ -77,6 +78,10 @@ export default function ArticleToolbar(props: IProps) {
 	}, [debouncedResize]);
 
 	React.useEffect(() => {
+		if (titleRef && titleRef.current) titleRef.current.focus();
+	}, [titleRef]);
+
+	React.useEffect(() => {
 		if (!desktop) props.togglePanelOpen();
 	}, [desktop]);
 
@@ -122,6 +127,38 @@ export default function ArticleToolbar(props: IProps) {
 		};
 	}, [props.toggleBlockFocus, focusedIndex, props.panelOpen, props.setToggleBlockFocus, blockRefs]);
 
+	React.useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.ctrlKey) {
+				if (event.key.toLowerCase() === 'k') {
+					event.preventDefault();
+					props.togglePanelOpen();
+				}
+				if (event.key.toLowerCase() === 'l') {
+					event.preventDefault();
+					props.toggleBlockEditMode();
+				}
+			}
+			if (
+				event.key === 'Enter' ||
+				((event.ctrlKey || event.metaKey) && event.key === 'Enter') ||
+				event.key === 'Tab' ||
+				event.key === 'ArrowDown'
+			) {
+				if (document.activeElement === titleRef.current) {
+					event.preventDefault();
+					props.handleInitAddBlock(event);
+				}
+			}
+		};
+
+		document.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [props.toggleBlockEditMode, props.togglePanelOpen]);
+
 	const handleKeyDown = React.useCallback(
 		(event: React.KeyboardEvent) => {
 			if (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Tab') {
@@ -152,27 +189,6 @@ export default function ArticleToolbar(props: IProps) {
 		},
 		[focusedIndex, props.addBlock]
 	);
-
-	React.useEffect(() => {
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.ctrlKey) {
-				if (event.key.toLowerCase() === 'k') {
-					event.preventDefault();
-					props.togglePanelOpen();
-				}
-				if (event.key.toLowerCase() === 'l') {
-					event.preventDefault();
-					props.toggleBlockEditMode();
-				}
-			}
-		};
-
-		document.addEventListener('keydown', handleKeyDown);
-
-		return () => {
-			document.removeEventListener('keydown', handleKeyDown);
-		};
-	}, [props.toggleBlockEditMode, props.togglePanelOpen]);
 
 	React.useEffect(() => {
 		let ctrlSlashPressed = false;
@@ -298,13 +314,13 @@ export default function ArticleToolbar(props: IProps) {
 
 	const panel = React.useMemo(() => {
 		const content = (
-			<S.Panel className={'border-wrapper-primary fade-in scroll-wrapper'} open={props.panelOpen}>
+			<S.Panel className={'border-wrapper-primary fade-in'} open={props.panelOpen}>
 				<Tabs onTabPropClick={(label: string) => setCurrentTab(label)} type={'alt1'}>
 					{TABS.map((tab: { label: string; icon?: string }, index: number) => {
 						return <S.TabWrapper key={index} label={tab.label} icon={tab.icon ? tab.icon : null} />;
 					})}
 				</Tabs>
-				<S.TabContent>{getCurrentTab()}</S.TabContent>
+				<S.TabContent className={'scroll-wrapper'}>{getCurrentTab()}</S.TabContent>
 				<S.PanelCloseWrapper>
 					<IconButton
 						type={'primary'}
@@ -316,6 +332,7 @@ export default function ArticleToolbar(props: IProps) {
 							icon: 12.5,
 							wrapper: 20,
 						}}
+						noFocus
 					/>
 				</S.PanelCloseWrapper>
 			</S.Panel>
@@ -334,6 +351,7 @@ export default function ArticleToolbar(props: IProps) {
 			<S.Wrapper>
 				<S.TitleWrapper>
 					<input
+						ref={titleRef}
 						value={props.postTitle}
 						onChange={(e: any) => props.setPostTitle(e.target.value)}
 						placeholder={language.untitledPost}
@@ -348,6 +366,7 @@ export default function ArticleToolbar(props: IProps) {
 						icon={props.panelOpen ? ASSETS.close : ASSETS.tools}
 						iconLeftAlign
 						tooltip={'CTRL + K'}
+						noFocus
 					/>
 					<Button
 						type={'primary'}
@@ -357,8 +376,15 @@ export default function ArticleToolbar(props: IProps) {
 						icon={props.blockEditMode ? ASSETS.close : ASSETS.layout}
 						iconLeftAlign
 						tooltip={'CTRL + L'}
+						noFocus
 					/>
-					<Button type={'alt1'} label={'Publish'} handlePress={() => alert('Publish this post!')} active={false} />
+					<Button
+						type={'alt1'}
+						label={'Publish'}
+						handlePress={() => alert('Publish this post!')}
+						active={false}
+						noFocus
+					/>
 				</S.EndActions>
 			</S.Wrapper>
 			{panel}

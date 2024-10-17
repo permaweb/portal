@@ -4,11 +4,6 @@ import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
 	width: 100%;
-
-	img {
-		width: 100%;
-		border-radius: ${STYLING.dimensions.radius.primary};
-	}
 `;
 
 export const InputWrapper = styled.div`
@@ -85,5 +80,37 @@ export const InputActionsDivider = styled.div`
 	}
 	@media (max-width: ${STYLING.cutoffs.tablet}) {
 		display: none;
+	}
+`;
+
+export const Content = styled.div`
+	.portal-image-wrapper {
+		display: flex;
+		gap: 10px;
+	}
+
+	.portal-image-column {
+		flex-direction: column;
+	}
+	.portal-image-flex-reverse {
+		flex-direction: row-reverse;
+	}
+	.portal-image-column-reverse {
+		flex-direction: column-reverse;
+	}
+
+	.portal-image-wrapper img {
+		width: 100%;
+		border-radius: 10px;
+	}
+
+	.portal-image-wrapper p {
+		text-align: center;
+		max-width: 600px;
+		margin: 0 auto;
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.small};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-family: ${(props) => props.theme.typography.family.primary};
 	}
 `;

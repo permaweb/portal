@@ -30,7 +30,7 @@ class Tab extends React.Component<any, any> {
 			switch (type) {
 				case 'primary':
 					return (
-						<S.Tab>
+						<S.Tab tabIndex={-1}>
 							<Button
 								type={'primary'}
 								label={label}
@@ -38,13 +38,14 @@ class Tab extends React.Component<any, any> {
 								handlePress={handlePress}
 								icon={icon}
 								iconLeftAlign
+								noFocus
 							/>
 						</S.Tab>
 					);
 				case 'alt1':
 					return (
 						<S.AltTab>
-							<S.AltTabAction active={activeTab === label} onClick={handlePress} icon={icon !== null}>
+							<S.AltTabAction active={activeTab === label} onClick={handlePress} icon={icon !== null} tabIndex={-1}>
 								{icon && (
 									<S.Icon active={activeTab === label}>
 										<ReactSVG src={icon} />
