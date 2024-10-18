@@ -181,6 +181,13 @@ export const GlobalStyle = createGlobalStyle`
     border-radius: ${STYLING.dimensions.radius.alt2};
   }
 
+	.border-wrapper-alt4 {
+    background: ${(props) => props.theme.colors.container.primary.background};
+    box-shadow: 0 3.5px 7.5px 0 ${(props) => props.theme.colors.shadow.primary};
+    border: 1px solid ${(props) => props.theme.colors.border.alt1};
+    border-radius: ${STYLING.dimensions.radius.alt2};
+  }
+
   .max-view-wrapper {
     width: 100%;
     max-width: ${STYLING.cutoffs.max};
@@ -267,7 +274,7 @@ export const App = styled.div`
 `;
 
 export const View = styled.main<{ navigationOpen: boolean }>`
-	min-height: calc(100vh - ${STYLING.dimensions.nav.height});
+	min-height: calc(100vh - ${STYLING.dimensions.nav.height} - 35px);
 	max-width: ${STYLING.cutoffs.max};
 	position: relative;
 	top: ${STYLING.dimensions.nav.height};
@@ -285,8 +292,7 @@ export const View = styled.main<{ navigationOpen: boolean }>`
 export const Footer = styled.footer<{ navigationOpen: boolean }>`
 	width: 100%;
 	max-width: ${STYLING.cutoffs.max};
-	padding: 0 20px 15px
-		${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 20px)` : '20px 30px')};
+	padding: 0 20px 15px ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 30px)` : '30px')};
 	transition: padding-left ${transition2};
 	margin: ${STYLING.dimensions.nav.height} 0 0 0;
 	display: flex;
@@ -297,13 +303,6 @@ export const Footer = styled.footer<{ navigationOpen: boolean }>`
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		color: ${(props) => props.theme.colors.font.alt1};
-		margin: 0 12.5px;
-	}
-
-	div {
-		height: 1px;
-		flex: 1;
-		border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 	}
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {

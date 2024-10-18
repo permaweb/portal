@@ -147,6 +147,25 @@ export const BADropdownAction = styled.div`
 				border: 1px solid ${(props) => props.theme.colors.border.alt6};
 			}
 		}
+
+		&:disabled {
+			background: ${(props) => props.theme.colors.container.primary.background};
+
+			span {
+				color: ${(props) => props.theme.colors.font.primary};
+			}
+
+			svg {
+				color: ${(props) => props.theme.colors.font.primary};
+				fill: ${(props) => props.theme.colors.font.primary};
+			}
+
+			p {
+				color: ${(props) => props.theme.colors.font.primary};
+				border: 1px solid transparent;
+				background: ${(props) => props.theme.colors.container.alt4.background};
+			}
+		}
 	}
 `;
 

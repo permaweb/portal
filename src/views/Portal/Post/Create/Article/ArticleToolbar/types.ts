@@ -11,4 +11,7 @@ export interface IProps {
 	toggleBlockFocus: boolean;
 	setToggleBlockFocus: () => void;
 	handleInitAddBlock: (e: any) => void;
+	handleSubmit: () => void;
+	submitDisabled: boolean;
+	loading: boolean;
 }

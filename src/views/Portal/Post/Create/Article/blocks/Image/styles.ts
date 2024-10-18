@@ -83,17 +83,28 @@ export const InputActionsDivider = styled.div`
 	}
 `;
 
+export const ContentWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	/* justify-content: center;
+	align-items: center; */
+`;
+
 export const Content = styled.div`
 	.portal-image-wrapper {
 		display: flex;
-		gap: 10px;
+		gap: 12.5px;
 	}
 
+	.portal-image-row {
+		/* Default Flex */
+	}
+	.portal-image-row-reverse {
+		flex-direction: row-reverse;
+	}
 	.portal-image-column {
 		flex-direction: column;
-	}
-	.portal-image-flex-reverse {
-		flex-direction: row-reverse;
 	}
 	.portal-image-column-reverse {
 		flex-direction: column-reverse;
@@ -101,16 +112,43 @@ export const Content = styled.div`
 
 	.portal-image-wrapper img {
 		width: 100%;
+		/* max-width: 700px; */
+		/* margin: 0 auto; */
 		border-radius: 10px;
 	}
 
 	.portal-image-wrapper p {
-		text-align: center;
+		/* display: flex;
+		align-items: center;
+		text-align: center; */
 		max-width: 600px;
-		margin: 0 auto;
+		/* margin: 0 auto; */
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 	}
+`;
+
+export const ContentActionsWrapper = styled.div`
+	width: fit-content;
+	display: flex;
+	flex-direction: column;
+	gap: 7.5px;
+	padding: 12.5px 15px 15px 15px;
+
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		text-transform: uppercase;
+	}
+`;
+
+export const ContentActions = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
 `;

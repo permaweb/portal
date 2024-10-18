@@ -293,6 +293,7 @@ export default function ArticleToolbar(props: IProps) {
 													blockRefs.current[globalBlockIndex] = el;
 												}}
 												data-block-type={block.type}
+												disabled={props.loading}
 											>
 												<ReactSVG src={block.icon} />
 												<span>{block.label}</span>
@@ -333,6 +334,7 @@ export default function ArticleToolbar(props: IProps) {
 							wrapper: 20,
 						}}
 						noFocus
+						disabled={props.loading}
 					/>
 				</S.PanelCloseWrapper>
 			</S.Panel>
@@ -344,7 +346,7 @@ export default function ArticleToolbar(props: IProps) {
 				</Portal>
 			) : null;
 		return content;
-	}, [props.panelOpen, currentTab, props.addBlock, focusedIndex, desktop]);
+	}, [props.panelOpen, currentTab, props.addBlock, focusedIndex, desktop, props.loading]);
 
 	return (
 		<>
@@ -355,6 +357,7 @@ export default function ArticleToolbar(props: IProps) {
 						value={props.postTitle}
 						onChange={(e: any) => props.setPostTitle(e.target.value)}
 						placeholder={language.untitledPost}
+						disabled={props.loading}
 					/>
 				</S.TitleWrapper>
 				<S.EndActions>
@@ -363,6 +366,7 @@ export default function ArticleToolbar(props: IProps) {
 						label={language.toolkit}
 						handlePress={() => props.togglePanelOpen()}
 						active={props.panelOpen}
+						disabled={props.loading}
 						icon={props.panelOpen ? ASSETS.close : ASSETS.tools}
 						iconLeftAlign
 						tooltip={'CTRL + K'}
@@ -373,6 +377,7 @@ export default function ArticleToolbar(props: IProps) {
 						label={language.layout}
 						handlePress={() => props.toggleBlockEditMode()}
 						active={props.blockEditMode}
+						disabled={props.loading}
 						icon={props.blockEditMode ? ASSETS.close : ASSETS.layout}
 						iconLeftAlign
 						tooltip={'CTRL + L'}
@@ -380,9 +385,11 @@ export default function ArticleToolbar(props: IProps) {
 					/>
 					<Button
 						type={'alt1'}
-						label={'Publish'}
-						handlePress={() => alert('Publish this post!')}
+						label={language.save}
+						handlePress={props.handleSubmit}
 						active={false}
+						disabled={props.loading || props.submitDisabled}
+						loading={props.loading}
 						noFocus
 					/>
 				</S.EndActions>

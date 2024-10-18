@@ -1,59 +1,18 @@
 import React from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { ReactSVG } from 'react-svg';
+import { aoCreateProcess, createAsset } from '@permaweb/sdk';
 
+import { ContentEditable } from 'components/atoms/ContentEditable';
 import { IconButton } from 'components/atoms/IconButton';
 import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
 import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
-import { Image } from './blocks/Image';
+import { Image } from './Blocks/Image';
 import { ArticleToolbar } from './ArticleToolbar';
 import * as S from './styles';
-
-function ContentEditable(props: {
-	element: any;
-	value: string;
-	onChange: (content: string) => void;
-	autoFocus?: boolean;
-}) {
-	const ref = React.useRef<HTMLDivElement>(null);
-	const isUserInput = React.useRef(false);
-
-	React.useEffect(() => {
-		if (ref.current && props.value !== ref.current.innerHTML && !isUserInput.current) {
-			ref.current.innerHTML = props.value;
-		}
-		isUserInput.current = false;
-	}, [props.value]);
-
-	React.useEffect(() => {
-		if (props.autoFocus && ref.current) {
-			const focusElement = () => {
-				ref.current?.focus();
-				const range = document.createRange();
-				const selection = window.getSelection();
-				range.selectNodeContents(ref.current);
-				range.collapse(false);
-				selection?.removeAllRanges();
-				selection?.addRange(range);
-			};
-
-			focusElement();
-			setTimeout(focusElement, 0);
-		}
-	}, [props.autoFocus]);
-
-	const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-		const newValue = e.currentTarget.innerHTML;
-		isUserInput.current = true;
-		props.onChange(newValue);
-	};
-
-	const Element = props.element;
-
-	return <Element ref={ref} contentEditable onInput={handleInput} suppressContentEditableWarning={true} />;
-}
 
 function Block(props: {
 	index: number;
@@ -172,6 +131,8 @@ function Block(props: {
 
 // TODO: Links
 export default function Article() {
+	const arProvider = useArweaveProvider();
+
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -181,8 +142,8 @@ export default function Article() {
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
 	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
 	const [postTitle, setPostTitle] = React.useState<string>('');
-
 	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
+	const [loading, setLoading] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -222,13 +183,14 @@ export default function Article() {
 				const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
 				const currentBlock = blocks[currentBlockIndex];
 				if (
-					currentBlock &&
-					!(currentBlock.type === 'image') &&
-					(!currentBlock.content.length ||
-						(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
-						currentBlock.content === '<li><br></li>' ||
-						(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
-						currentBlock.content === '<li><br></li>')
+					(currentBlock &&
+						!(currentBlock.type === 'image') &&
+						(!currentBlock.content.length ||
+							(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
+							currentBlock.content === '<li><br></li>' ||
+							(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
+							currentBlock.content === '<li><br></li>')) ||
+					(currentBlock.type === 'code' && currentBlock.content === '<br>')
 				) {
 					event.preventDefault();
 					deleteBlock(currentBlock.id);
@@ -255,6 +217,39 @@ export default function Article() {
 		};
 	}, [blocks, focusedBlock, toggleBlockFocus]);
 
+	function getSubmitDisabled() {
+		return (
+			!postTitle ||
+			postTitle.length <= 0 ||
+			!blocks ||
+			blocks.length <= 0 ||
+			!blocks.some((block) => block.content.length > 0)
+		);
+	}
+
+	// TODO: Clean blocks
+	async function handleSubmit() {
+		if (arProvider.wallet) {
+			setLoading(true);
+			try {
+				console.log('Creating asset...');
+				const assetId = await createAsset({
+					title: postTitle,
+					description: postTitle,
+					topics: ['Topic 1'],
+					data: blocks,
+					contentType: 'application/json',
+					wallet: arProvider.wallet,
+				});
+
+				console.log(`Asset ID: ${assetId}`);
+			} catch (e: any) {
+				console.error(e);
+			}
+			setLoading(false);
+		}
+	}
+
 	function handleKeyAddBlock(event: any) {
 		event.preventDefault();
 		addBlock(blocks && blocks.length > 0 ? ArticleBlockEnum.Paragraph : ArticleBlockEnum.Header1);
@@ -274,6 +269,8 @@ export default function Article() {
 	};
 
 	const addBlock = (type: ArticleBlockEnum) => {
+		if (loading) return;
+
 		let content: any = null;
 
 		switch (type) {
@@ -385,6 +382,9 @@ export default function Article() {
 					toggleBlockFocus={toggleBlockFocus}
 					setToggleBlockFocus={() => setToggleBlockFocus(false)}
 					handleInitAddBlock={(e) => handleKeyAddBlock(e)}
+					handleSubmit={handleSubmit}
+					submitDisabled={getSubmitDisabled()}
+					loading={loading}
 				/>
 			</S.ToolbarWrapper>
 			<S.EditorWrapper panelOpen={panelOpen}>{editor}</S.EditorWrapper>

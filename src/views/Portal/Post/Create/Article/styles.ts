@@ -90,8 +90,12 @@ function getElementPadding(type: ArticleBlockEnum) {
 function getElementWrapper(blockEditMode: boolean, type: ArticleBlockEnum, theme: DefaultTheme) {
 	switch (type) {
 		case 'image':
-		case 'code':
 			return '';
+		case 'code':
+			return `
+				border: 1px solid ${blockEditMode ? theme.colors.border.primary : 'transparent'};
+				border-radius: ${blockEditMode ? STYLING.dimensions.radius.alt2 : '0'};
+			`;
 		default:
 			return `
 				padding: ${blockEditMode ? getElementPadding(type) : '0'};

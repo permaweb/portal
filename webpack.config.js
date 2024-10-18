@@ -187,6 +187,7 @@ module.exports = {
 			wrappers: path.resolve(__dirname, 'src/wrappers/'),
 			'asn1.js': path.resolve(__dirname, 'node_modules/asn1.js'),
 			elliptic: path.resolve(__dirname, 'node_modules/elliptic'),
+			'@permaweb/aoconnect': path.resolve(__dirname, 'node_modules/@permaweb/aoconnect/dist/browser.js'),
 		},
 	},
 	output: {
