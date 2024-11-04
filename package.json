@@ -19,7 +19,7 @@
 	},
 	"dependencies": {
 		"@othent/kms": "^1.0.7",
-		"@permaweb/sdk": "file:../ao-permaweb/sdk",
+		"@permaweb/libs": "file:../permaweb-libs/sdk",
 		"html-react-parser": "^5.1.18",
 		"jwt-decode": "^4.0.0",
 		"react": "^18.2.0",

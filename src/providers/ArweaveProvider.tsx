@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { getProfileByWalletAddress } from 'api';
+import { getProfileByWalletAddress } from '@permaweb/libs';
 
 import { Modal } from 'components/molecules/Modal';
 import { Panel } from 'components/molecules/Panel';

@@ -1,5 +1,6 @@
+import { ArweaveWebIrys } from '@irys/sdk/build/esm/web/tokens/arweave'; // TODO
+
 import Arweave from 'arweave';
-import { ArweaveWebIrys } from '@irys/sdk/build/esm/web/tokens/arweave';
 import { createDataItemSigner, dryrun, message, result, results } from '@permaweb/aoconnect';
 
 import {

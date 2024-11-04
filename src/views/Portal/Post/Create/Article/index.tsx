@@ -1,12 +1,15 @@
 import React from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { ReactSVG } from 'react-svg';
-import { aoCreateProcess, createAsset } from '@permaweb/sdk';
+
+import { createAtomicAsset } from '@permaweb/libs';
 
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { IconButton } from 'components/atoms/IconButton';
-import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
-import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
+// import { Notification } from 'components/atoms/Notification';
+import { Portal } from 'components/atoms/Portal';
+import { ARTICLE_BLOCKS, ASSETS, DOM } from 'helpers/config';
+import { ArticleBlockEnum, ArticleBlockType, NotificationType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -130,6 +133,7 @@ function Block(props: {
 }
 
 // TODO: Links
+// TODO: Topics
 export default function Article() {
 	const arProvider = useArweaveProvider();
 
@@ -143,7 +147,9 @@ export default function Article() {
 	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
 	const [postTitle, setPostTitle] = React.useState<string>('');
 	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
+
 	const [loading, setLoading] = React.useState<boolean>(false);
+	const [response, setResponse] = React.useState<NotificationType | null>(null);
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -233,18 +239,27 @@ export default function Article() {
 			setLoading(true);
 			try {
 				console.log('Creating asset...');
-				const assetId = await createAsset({
-					title: postTitle,
-					description: postTitle,
-					topics: ['Topic 1'],
-					data: blocks,
-					contentType: 'application/json',
-					wallet: arProvider.wallet,
-				});
+
+				const assetId = await createAtomicAsset(
+					{
+						title: postTitle,
+						description: postTitle,
+						type: 'Article',
+						topics: ['Topic 1'],
+						data: blocks,
+						contentType: 'application/json',
+					},
+					arProvider.wallet,
+					(value) => setResponse({ status: 'success', message: value })
+				);
 
 				console.log(`Asset ID: ${assetId}`);
+
+				setResponse({ status: 'success', message: 'Post generated!' });
+
+				window.open(`https://arweave.net/${assetId}`, '_blank');
 			} catch (e: any) {
-				console.error(e);
+				setResponse({ status: 'warning', message: e });
 			}
 			setLoading(false);
 		}
@@ -369,25 +384,41 @@ export default function Article() {
 	}, [blocks, blockEditMode, lastAddedBlockId, focusedBlock]);
 
 	return (
-		<S.Wrapper>
-			<S.ToolbarWrapper>
-				<ArticleToolbar
-					postTitle={postTitle}
-					setPostTitle={(value: string) => setPostTitle(value)}
-					addBlock={(type: ArticleBlockEnum) => addBlock(type)}
-					blockEditMode={blockEditMode}
-					toggleBlockEditMode={() => setBlockEditMode(!blockEditMode)}
-					panelOpen={panelOpen}
-					togglePanelOpen={() => setPanelOpen(!panelOpen)}
-					toggleBlockFocus={toggleBlockFocus}
-					setToggleBlockFocus={() => setToggleBlockFocus(false)}
-					handleInitAddBlock={(e) => handleKeyAddBlock(e)}
-					handleSubmit={handleSubmit}
-					submitDisabled={getSubmitDisabled()}
-					loading={loading}
-				/>
-			</S.ToolbarWrapper>
-			<S.EditorWrapper panelOpen={panelOpen}>{editor}</S.EditorWrapper>
-		</S.Wrapper>
+		<>
+			<S.Wrapper>
+				<S.ToolbarWrapper>
+					<ArticleToolbar
+						postTitle={postTitle}
+						setPostTitle={(value: string) => setPostTitle(value)}
+						addBlock={(type: ArticleBlockEnum) => addBlock(type)}
+						blockEditMode={blockEditMode}
+						toggleBlockEditMode={() => setBlockEditMode(!blockEditMode)}
+						panelOpen={panelOpen}
+						togglePanelOpen={() => setPanelOpen(!panelOpen)}
+						toggleBlockFocus={toggleBlockFocus}
+						setToggleBlockFocus={() => setToggleBlockFocus(false)}
+						handleInitAddBlock={(e) => handleKeyAddBlock(e)}
+						handleSubmit={handleSubmit}
+						submitDisabled={getSubmitDisabled()}
+						loading={loading}
+					/>
+				</S.ToolbarWrapper>
+				<S.EditorWrapper panelOpen={panelOpen}>{editor}</S.EditorWrapper>
+			</S.Wrapper>
+			{(loading || response) && (
+				<>
+					<Portal node={DOM.overlay}>
+						<div className={'overlay'}>
+							<S.MessageWrapper className={'info-text'}>
+								<span>{response ? response.message : 'Generating post...'}</span>
+							</S.MessageWrapper>
+						</div>
+					</Portal>
+				</>
+			)}
+			{/* {response && (
+				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
+			)} */}
+		</>
 	);
 }

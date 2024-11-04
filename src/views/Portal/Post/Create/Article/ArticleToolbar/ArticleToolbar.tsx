@@ -389,7 +389,6 @@ export default function ArticleToolbar(props: IProps) {
 						handlePress={props.handleSubmit}
 						active={false}
 						disabled={props.loading || props.submitDisabled}
-						loading={props.loading}
 						noFocus
 					/>
 				</S.EndActions>
