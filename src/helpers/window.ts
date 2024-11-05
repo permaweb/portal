@@ -3,11 +3,11 @@ export function checkWindowCutoff(width: number): boolean {
 }
 
 export function hideDocumentBody(): void {
-	document.body.style.overflow = 'hidden';
+	document.body.style.overflowY = 'hidden';
 }
 
 export function showDocumentBody(): void {
-	document.body.style.overflow = 'auto';
+	document.body.style.overflowY = 'auto';
 }
 
 export function checkWindowResize(fn: () => void): void {

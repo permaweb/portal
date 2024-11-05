@@ -52,6 +52,7 @@ export const Primary = styled.button<{
 	position: relative;
 	background: ${(props) =>
 		props.active ? props.theme.colors.button.primary.active.background : props.theme.colors.button.primary.background};
+	min-height: ${(props) => getHeight(props.height)};
 	height: ${(props) => getHeight(props.height)};
 	min-width: ${(props) => getWidth(props.noMinWidth, props.width, props.fullWidth)};
 	width: ${(props) => getWidth(props.noMinWidth, props.width, props.fullWidth)};

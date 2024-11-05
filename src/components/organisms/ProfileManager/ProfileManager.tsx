@@ -5,6 +5,7 @@ import { createProfile } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
+import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
 import { TextArea } from 'components/atoms/TextArea';
 import { ASSETS } from 'helpers/config';
@@ -230,11 +231,6 @@ export default function ProfileManager(props: IProps) {
 								/>
 							</S.Form>
 							<S.SAction>
-								{(!props.profile || !props.profile.id) && loading && (
-									<S.Message>
-										<span>{`${language.profileCreatingInfo}...`}</span>
-									</S.Message>
-								)}
 								{props.handleClose && (
 									<Button
 										type={'primary'}
@@ -249,11 +245,20 @@ export default function ProfileManager(props: IProps) {
 									label={language.save}
 									handlePress={handleSubmit}
 									disabled={!username || !name || loading}
-									loading={loading}
+									loading={false}
 								/>
 							</S.SAction>
 						</S.Body>
 					</S.Wrapper>
+					{loading && (
+						<Loader
+							message={
+								props.profile && props.profile.id
+									? `${language.profileUpdatingInfo}...`
+									: `${language.profileCreatingInfo}...`
+							}
+						/>
+					)}
 					{profileResponse && (
 						<Notification
 							message={profileResponse.message}

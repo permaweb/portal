@@ -6,9 +6,9 @@ import { createAtomicAsset } from '@permaweb/libs';
 
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { IconButton } from 'components/atoms/IconButton';
-// import { Notification } from 'components/atoms/Notification';
-import { Portal } from 'components/atoms/Portal';
-import { ARTICLE_BLOCKS, ASSETS, DOM } from 'helpers/config';
+import { Loader } from 'components/atoms/Loader';
+import { Notification } from 'components/atoms/Notification';
+import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
 import { ArticleBlockEnum, ArticleBlockType, NotificationType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -134,6 +134,9 @@ function Block(props: {
 
 // TODO: Links
 // TODO: Topics
+// TODO: Notification causes x overflow when toolkit is closed
+// TODO: React dnd replacement
+// TODO: Media upload
 export default function Article() {
 	const arProvider = useArweaveProvider();
 
@@ -196,7 +199,7 @@ export default function Article() {
 							currentBlock.content === '<li><br></li>' ||
 							(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
 							currentBlock.content === '<li><br></li>')) ||
-					(currentBlock.type === 'code' && currentBlock.content === '<br>')
+					currentBlock.content === '<br>'
 				) {
 					event.preventDefault();
 					deleteBlock(currentBlock.id);
@@ -209,6 +212,21 @@ export default function Article() {
 						setFocusedBlock(nextBlock);
 						setLastAddedBlockId(nextBlock.id);
 					}
+				}
+			}
+			if (focusedBlock && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+				const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
+
+				if (event.key === 'ArrowDown' && currentBlockIndex < blocks.length - 1) {
+					event.preventDefault();
+					const nextBlock = blocks[currentBlockIndex + 1];
+					setFocusedBlock(nextBlock);
+					setLastAddedBlockId(nextBlock.id);
+				} else if (event.key === 'ArrowUp' && currentBlockIndex > 0) {
+					event.preventDefault();
+					const previousBlock = blocks[currentBlockIndex - 1];
+					setFocusedBlock(previousBlock);
+					setLastAddedBlockId(previousBlock.id);
 				}
 			}
 			if (event.key === 'Enter' && (!blocks || blocks.length <= 0)) {
@@ -250,12 +268,13 @@ export default function Article() {
 						contentType: 'application/json',
 					},
 					arProvider.wallet,
-					(value) => setResponse({ status: 'success', message: value })
+					// (value) => setResponse({ status: 'success', message: value }) // TODO
+					(status) => console.log(status)
 				);
 
 				console.log(`Asset ID: ${assetId}`);
 
-				setResponse({ status: 'success', message: 'Post generated!' });
+				setResponse({ status: 'success', message: 'Post saved!' });
 
 				window.open(`https://arweave.net/${assetId}`, '_blank');
 			} catch (e: any) {
@@ -405,20 +424,10 @@ export default function Article() {
 				</S.ToolbarWrapper>
 				<S.EditorWrapper panelOpen={panelOpen}>{editor}</S.EditorWrapper>
 			</S.Wrapper>
-			{(loading || response) && (
-				<>
-					<Portal node={DOM.overlay}>
-						<div className={'overlay'}>
-							<S.MessageWrapper className={'info-text'}>
-								<span>{response ? response.message : 'Generating post...'}</span>
-							</S.MessageWrapper>
-						</div>
-					</Portal>
-				</>
-			)}
-			{/* {response && (
+			{loading && <Loader message={`${language.savingPost}...`} />}
+			{response && (
 				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
-			)} */}
+			)}
 		</>
 	);
 }

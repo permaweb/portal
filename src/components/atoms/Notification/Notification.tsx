@@ -17,29 +17,26 @@ export default function Notification(props: IProps) {
 
 	function handleClose() {
 		setShow(false);
-		props.callback();
+		if (props.callback) props.callback();
 	}
 
-	// TODO
-	// React.useEffect(() => {
-	// 	if (show && props.type !== 'warning') {
-	// 		const timer = setTimeout(() => {
-	// 			handleClose();
-	// 		}, 5000);
+	React.useEffect(() => {
+		if (show && props.type !== 'warning') {
+			const timer = setTimeout(() => {
+				handleClose();
+			}, 5000);
 
-	// 		return () => clearTimeout(timer);
-	// 	}
-	// }, [props.type]);
+			return () => clearTimeout(timer);
+		}
+	}, [props.type]);
 
 	return show ? (
 		<Portal node={DOM.notification}>
 			<S.Wrapper warning={props.type === 'warning'}>
 				<S.Message>{props.message}</S.Message>
-				{props.callback && (
-					<S.Close>
-						<Button type={'alt2'} label={language.dismiss} handlePress={handleClose} />
-					</S.Close>
-				)}
+				<S.Close>
+					<Button type={'alt2'} label={language.dismiss} handlePress={handleClose} />
+				</S.Close>
 			</S.Wrapper>
 		</Portal>
 	) : null;

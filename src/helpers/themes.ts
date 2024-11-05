@@ -22,13 +22,14 @@ export const lightTheme = {
 	neutralA5: '#525252',
 	neutralA6: '#666666',
 	neutralA7: '#707070',
-	overlay1: 'rgb(0, 0, 0, .35)',
+	overlay1: 'rgb(0, 0, 0, .45)',
 	overlay2: 'rgb(0, 0, 0, .5)',
 	shadow1: 'rgb(220, 220, 220, .5)',
 	primary1: '#5E66DB',
 	primary2: '#454CB0',
 	light1: '#FFFFFF',
 	light2: '#DADADA',
+	light3: '#B3B3B3',
 	dark1: '#151515',
 	dark2: '#333333',
 };
@@ -63,6 +64,7 @@ export const darkTheme = {
 	primary2: '#454CB0',
 	light1: '#FFFFFF',
 	light2: '#DADADA',
+	light3: '#B3B3B3',
 	dark1: '#151515',
 	dark2: '#333333',
 };
@@ -97,6 +99,7 @@ export const darkThemeAlt1 = {
 	primary2: '#454CB0',
 	light1: '#FFFFFF',
 	light2: '#DADADA',
+	light3: '#B3B3B3',
 	dark1: '#151515',
 	dark2: '#333333',
 };
@@ -131,6 +134,7 @@ export const darkThemeAlt2 = {
 	primary2: '#454CB0',
 	light1: '#FFFFFF',
 	light2: '#DADADA',
+	light3: '#B3B3B3',
 	dark1: '#151515',
 	dark2: '#333333',
 };
@@ -252,6 +256,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			alt5: currentTheme.primary1,
 			light1: currentTheme.light1,
 			light2: currentTheme.light2,
+			light3: currentTheme.light3,
 			dark1: currentTheme.dark1,
 			dark2: currentTheme.dark2,
 		},

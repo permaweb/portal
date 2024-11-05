@@ -1,9 +1,8 @@
 import { ConnectReturnType } from '@othent/kms';
 import * as OTHENT_KMS from '@othent/kms';
-import { jwtDecode } from 'jwt-decode';
-
 import { SignatureOptions } from 'arweave/web/lib/crypto/crypto-interface';
 import Transaction from 'arweave/web/lib/transaction';
+import { jwtDecode } from 'jwt-decode';
 
 export interface EncryptOptions {
 	algorithm: string;

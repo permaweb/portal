@@ -1,6 +1,8 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { getKeyedElements } from '@permaweb/libs';
+
 import { Panel } from 'components/molecules/Panel';
 import { PortalManager } from 'components/organisms/PortalManager';
 import { PortalType } from 'helpers/types';
@@ -42,32 +44,24 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [showPortalManager, setShowPortalManager] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		setPortals([
-			{
-				id: 'IR2hzJyfSGp7lgqqgnoeza2caaus96e56uTVP1gV7GE',
-				name: 'My first portal',
-				logo: '4txDbfbymP1RNMQCsFzyZOZR9qeUZXt_IacmL4IXYD8',
-			},
-		]);
-	}, []);
+		if (arProvider.profile) {
+			const portalsList: any[] = getKeyedElements(arProvider.profile, 'portal');
+			setPortals(portalsList);
+		}
+	}, [arProvider.profile]);
 
 	React.useEffect(() => {
-		if (portals && portals.length) setCurrent(portals[0]);
-	}, [portals]);
-
-	// TODO
-	// React.useEffect(() => {
-	// 	if (arProvider.profile && arProvider.profile.portals) {
-	// 		setPortals(arProvider.profile.portals);
-	// 	}
-	// }, [arProvider.profile]);
-
-	// React.useEffect(() => {
-	// 	if (portals) {
-	// 		const currentPortal = portals.find((portal) => location.pathname.startsWith(`/${portal.id}`));
-	// 		setCurrent(currentPortal || null);
-	// 	} else setCurrent(null);
-	// }, [location.pathname, portals]);
+		if (portals) {
+			try {
+				const currentPortal = portals.find((portal) => location.pathname.startsWith(`/${portal.id}`));
+				setCurrent(currentPortal || null);
+			} catch (e: any) {
+				setCurrent(null);
+			}
+		} else {
+			setCurrent(null);
+		}
+	}, [location.pathname, portals]);
 
 	return (
 		<PortalContext.Provider value={{ portals, current, showPortalManager, setShowPortalManager }}>

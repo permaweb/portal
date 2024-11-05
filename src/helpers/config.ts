@@ -105,6 +105,7 @@ function createURLs() {
 
 	return {
 		base: base,
+		portalBase: portalBase,
 		portalDesign: (portalId: string) => `${portalBase(portalId)}design/`,
 		portalPosts: (portalId: string) => `${portalBase(portalId)}posts/`,
 		portalDomains: (portalId: string) => `${portalBase(portalId)}domains/`,

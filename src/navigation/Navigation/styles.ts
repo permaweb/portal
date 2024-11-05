@@ -203,7 +203,7 @@ export const Portal = styled.button<{ active: boolean }>`
 `;
 
 export const PortalDropdown = styled.div`
-	max-height: 50vh;
+	max-height: 65vh;
 	width: 350px;
 	max-width: 80vw;
 	position: absolute;

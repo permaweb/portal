@@ -9,7 +9,7 @@ export const Wrapper = styled.div`
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	padding: 20vh 20px 20px 20px;
+	padding: 10vh 20px 20px 20px;
 
 	@media (max-width: ${STYLING.cutoffs.tablet}) {
 		padding: 20px;

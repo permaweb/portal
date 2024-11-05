@@ -1,6 +1,5 @@
 import React, { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { debounce } from 'lodash';
 
 const Landing = getLazyImport('Landing');
 const Portal = getLazyImport('Portal');
@@ -9,10 +8,10 @@ const ArticleCreate = getLazyImport('Portal/Post/Create/Article');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
 
-import { DOM, STYLING, URLS } from 'helpers/config';
-import { checkWindowCutoff } from 'helpers/window';
+import { DOM, URLS } from 'helpers/config';
 import { Navigation } from 'navigation/Navigation';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useSettingsProvider } from 'providers/SettingsProvider';
 
 import * as S from './styles';
 
@@ -28,40 +27,7 @@ export default function App() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [navigationOpen, setNavigationOpen] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
-	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
-
-	function handleWindowResize() {
-		if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {
-			setDesktop(true);
-			setNavigationOpen(navigationOpen);
-		} else {
-			setDesktop(false);
-			setNavigationOpen(false);
-		}
-	}
-
-	const debouncedResize = React.useCallback(debounce(handleWindowResize, 0), [navigationOpen]);
-
-	React.useEffect(() => {
-		window.addEventListener('resize', debouncedResize);
-
-		return () => {
-			window.removeEventListener('resize', debouncedResize);
-		};
-	}, [debouncedResize]);
-
-	React.useEffect(() => {
-		if (!desktop && navigationOpen) {
-			document.body.style.overflowY = 'hidden';
-		} else {
-			document.body.style.overflowY = 'auto';
-		}
-
-		return () => {
-			document.body.style.overflowY = 'auto';
-		};
-	}, [desktop, navigationOpen]);
+	const { settings, updateSettings } = useSettingsProvider();
 
 	function getRoute(path: string, element: React.ReactNode) {
 		const baseRoutes = [URLS.base, URLS.docs, `URLS.docs/*`, `${URLS.docs}:active/*`, URLS.notFound, '*'];
@@ -72,9 +38,12 @@ export default function App() {
 				path={path}
 				element={
 					<>
-						<Navigation open={navigationOpen} toggle={() => setNavigationOpen(!navigationOpen)} />
-						<S.View navigationOpen={navigationOpen}>{element}</S.View>
-						<S.Footer navigationOpen={navigationOpen}>
+						<Navigation
+							open={settings.sidebarOpen}
+							toggle={() => updateSettings('sidebarOpen', !settings.sidebarOpen)}
+						/>
+						<S.View navigationOpen={settings.sidebarOpen}>{element}</S.View>
+						<S.Footer navigationOpen={settings.sidebarOpen}>
 							<p>
 								{language.app} {new Date().getFullYear()}
 							</p>

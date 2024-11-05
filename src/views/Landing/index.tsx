@@ -7,6 +7,7 @@ import { Loader } from 'components/atoms/Loader';
 import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { ButtonType } from 'helpers/types';
+import { formatAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
@@ -45,7 +46,7 @@ export default function Landing() {
 			type = 'alt1';
 			action = () => arProvider.setShowProfileManager(true);
 		} else {
-			header = `${language.welcome}, ${arProvider.profile.username}`;
+			header = `${language.welcome}, ${arProvider.profile.username ?? formatAddress(arProvider.walletAddress, false)}`;
 			label = language.disconnect;
 			type = 'primary';
 			action = () => arProvider.handleDisconnect();

@@ -14,7 +14,6 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
-// TODO: Cache panel open
 export default function Navigation(props: { open: boolean; toggle: () => void }) {
 	const navigate = useNavigate();
 
@@ -156,7 +155,6 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 												<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>
 													<Link to={`${URLS.base}${portal.id}`}>
 														<span>{portal.name}</span>
-														{/* {active && <ReactSVG src={ASSETS.checkmark} />} */}
 														{active && (
 															<S.PIndicator>
 																<ReactSVG src={ASSETS.checkmark} />

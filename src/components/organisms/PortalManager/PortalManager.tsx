@@ -1,12 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
-// import { connect, createDataItemSigner } from '@permaweb/aoconnect';
-// import { createTransaction, getGQLData, messageResult } from 'api';
+import { createZone, resolveTransaction, updateZone } from '@permaweb/libs';
+
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
+import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
-import { ASSETS } from 'helpers/config';
+import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { NotificationType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
@@ -20,6 +22,8 @@ import { IProps } from './types';
 const ALLOWED_LOGO_TYPES = 'image/png, image/jpeg, image/gif';
 
 export default function PortalManager(props: IProps) {
+	const navigate = useNavigate();
+
 	const arProvider = useArweaveProvider();
 
 	const languageProvider = useLanguageProvider();
@@ -31,7 +35,7 @@ export default function PortalManager(props: IProps) {
 	const [logo, setLogo] = React.useState<any>(null);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
-	const [profileResponse, setProfileResponse] = React.useState<NotificationType | null>(null);
+	const [portalResponse, setPortalResponse] = React.useState<NotificationType | null>(null);
 
 	React.useEffect(() => {
 		if (props.portal) {
@@ -44,206 +48,75 @@ export default function PortalManager(props: IProps) {
 	}, [props.portal]);
 
 	async function handleSubmit() {
-		console.log('Create / edit portal');
-		// if (arProvider.wallet) {
-		// 	setLoading(true);
+		if (arProvider.wallet && arProvider.profile && arProvider.profile.id) {
+			setLoading(true);
 
-		// 	const data: any = {
-		// 		DisplayName: name,
-		// 		UserName: username,
-		// 		Description: bio,
-		// 	};
+			try {
+				if (props.portal && props.portal.id) {
+					console.log('Update portal'); // TODO
+				} else {
+					let data: any = {
+						name: name,
+					};
 
-		// 	let bannerTx: any = null;
-		// 	if (banner) {
-		// 		if (checkValidAddress(banner)) {
-		// 			bannerTx = banner;
-		// 		} else {
-		// 			try {
-		// 				const bannerContentType = getDataURLContentType(banner);
-		// 				const base64Data = getBase64Data(banner);
-		// 				const bufferData = Buffer.from(base64Data, 'base64');
+					if (logo) {
+						try {
+							data.logo = await resolveTransaction(logo);
+						} catch (e: any) {
+							console.error(`Failed to resolve logo: ${e.message}`);
+						}
+					}
 
-		// 				bannerTx = await createTransaction({
-		// 					content: bufferData,
-		// 					contentType: bannerContentType,
-		// 					tags: [{ name: 'Content-Type', value: bannerContentType }],
-		// 				});
-		// 			} catch (e: any) {
-		// 				console.error(e);
-		// 			}
-		// 		}
-		// 	}
+					const portalId = await createZone({}, arProvider.wallet, (status: any) => console.log(status));
 
-		// 	let avatarTx: any = null;
-		// 	if (logo) {
-		// 		if (checkValidAddress(logo)) {
-		// 			avatarTx = logo;
-		// 		} else {
-		// 			try {
-		// 				const avatarContentType = getDataURLContentType(logo);
-		// 				const base64Data = getBase64Data(logo);
-		// 				const bufferData = Buffer.from(base64Data, 'base64');
+					console.log(`Portal ID: ${portalId}`);
 
-		// 				avatarTx = await createTransaction({
-		// 					content: bufferData,
-		// 					contentType: avatarContentType,
-		// 					tags: [{ name: 'Content-Type', value: avatarContentType }],
-		// 				});
-		// 			} catch (e: any) {
-		// 				console.error(e);
-		// 			}
-		// 		}
-		// 	}
+					const portalUpdateId = await updateZone(
+						{
+							zoneId: portalId,
+							data: data,
+						},
+						arProvider.wallet
+					);
 
-		// 	data.CoverImage = bannerTx || 'None';
-		// 	data.ProfileImage = avatarTx || 'None';
+					console.log(`Portal Update ID: ${portalUpdateId}`);
 
-		// 	try {
-		// 		if (props.profile && props.profile.id) {
-		// 			let updateResponse = await messageResult({
-		// 				processId: props.profile.id,
-		// 				action: 'Update-Profile',
-		// 				tags: null,
-		// 				data: data,
-		// 				wallet: arProvider.wallet,
-		// 			});
-		// 			if (updateResponse && updateResponse['Profile-Success']) {
-		// 				setProfileResponse({
-		// 					message: `${language.profileUpdated}!`,
-		// 					status: 'success',
-		// 				});
-		// 				handleUpdate();
-		// 			} else {
-		// 				console.log(updateResponse);
-		// 				setProfileResponse({
-		// 					message: language.errorUpdatingProfile,
-		// 					status: 'warning',
-		// 				});
-		// 			}
-		// 		} else {
-		// 			const aos = connect();
+					const profileUpdateId = await updateZone(
+						{
+							zoneId: arProvider.profile.id,
+							data: {
+								[`portal:${portalId}`]: {
+									id: portalId,
+									...data,
+								},
+							},
+						},
+						arProvider.wallet
+					);
 
-		// 			let processSrc = null;
-		// 			try {
-		// 				const processSrcFetch = await fetch(getTxEndpoint(AO.profileSrc));
-		// 				if (processSrcFetch.ok) {
-		// 					processSrc = await processSrcFetch.text();
+					console.log(`Profile Update ID: ${profileUpdateId}`);
 
-		// 					const dateTime = new Date().getTime().toString();
+					arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
+					if (props.handleUpdate) props.handleUpdate();
 
-		// 					const profileTags: { name: string; value: string }[] = [
-		// 						{ name: 'Date-Created', value: dateTime },
-		// 						{ name: 'Action', value: 'CreateProfile' },
-		// 					];
+					setPortalResponse({
+						message: `${language.portalCreated}!`,
+						status: 'success',
+					});
 
-		// 					console.log('Spawning profile process...');
-		// 					const processId = await aos.spawn({
-		// 						module: AO.module,
-		// 						scheduler: AO.scheduler,
-		// 						signer: createDataItemSigner(arProvider.wallet),
-		// 						tags: profileTags,
-		// 					});
+					navigate(URLS.portalBase(portalId));
+					props.handleClose();
+				}
+			} catch (e: any) {
+				setPortalResponse({
+					message: e.message ?? language.errorUpdatingProfile,
+					status: 'warning',
+				});
+			}
 
-		// 					console.log(`Process Id -`, processId);
-
-		// 					console.log('Fetching profile process...');
-		// 					let fetchedAssetId: string;
-		// 					let retryCount: number = 0;
-		// 					while (!fetchedAssetId) {
-		// 						await new Promise((r) => setTimeout(r, 2000));
-		// 						const gqlResponse = await getGQLData({
-		// 							gateway: 'https://arweave-search.goldsky.com',
-		// 							ids: [processId],
-		// 							tagFilters: null,
-		// 							owners: null,
-		// 							cursor: null,
-		// 						});
-
-		// 						if (gqlResponse && gqlResponse.data.length) {
-		// 							console.log(`Fetched transaction -`, gqlResponse.data[0].node.id);
-		// 							fetchedAssetId = gqlResponse.data[0].node.id;
-		// 						} else {
-		// 							console.log(`Transaction not found -`, processId);
-		// 							retryCount++;
-		// 							if (retryCount >= 10) {
-		// 								throw new Error(`Profile not found, please try again`);
-		// 							}
-		// 						}
-		// 					}
-		// 					if (fetchedAssetId) {
-		// 						console.log('Sending source eval...');
-		// 						const evalMessage = await aos.message({
-		// 							process: processId,
-		// 							signer: createDataItemSigner(arProvider.wallet),
-		// 							tags: [{ name: 'Action', value: 'Eval' }],
-		// 							data: processSrc,
-		// 						});
-
-		// 						console.log(evalMessage);
-
-		// 						const evalResult = await aos.result({
-		// 							message: evalMessage,
-		// 							process: processId,
-		// 						});
-
-		// 						console.log(evalResult);
-
-		// 						await new Promise((r) => setTimeout(r, 1000));
-
-		// 						console.log('Updating profile data...');
-		// 						let updateResponse = await messageResult({
-		// 							processId: processId,
-		// 							action: 'Update-Profile',
-		// 							tags: null,
-		// 							data: data,
-		// 							wallet: arProvider.wallet,
-		// 						});
-
-		// 						if (updateResponse && updateResponse['Profile-Success']) {
-		// 							setProfileResponse({
-		// 								message: `${language.profileCreated}!`,
-		// 								status: 'success',
-		// 							});
-		// 							handleUpdate();
-		// 						} else {
-		// 							console.log(updateResponse);
-		// 							setProfileResponse(language.errorUpdatingProfile);
-		// 							setProfileResponse({
-		// 								message: language.errorUpdatingProfile,
-		// 								status: 'warning',
-		// 							});
-		// 						}
-		// 					} else {
-		// 						setProfileResponse({
-		// 							message: language.errorUpdatingProfile,
-		// 							status: 'warning',
-		// 						});
-		// 					}
-		// 				}
-		// 			} catch (e: any) {
-		// 				setProfileResponse({
-		// 					message: e.message ?? language.errorUpdatingProfile,
-		// 					status: 'warning',
-		// 				});
-		// 			}
-		// 		}
-		// 	} catch (e: any) {
-		// 		setProfileResponse(e.message ?? e);
-		// 	}
-		// 	setLoading(false);
-		// }
+			setLoading(false);
+		}
 	}
-
-	// function getInvalidBio() {
-	// 	if (bio && bio.length > MAX_BIO_LENGTH) {
-	// 		return {
-	// 			status: true,
-	// 			message: `${language.maxCharsReached} (${bio.length} / ${MAX_BIO_LENGTH})`,
-	// 		};
-	// 	}
-	// 	return { status: false, message: null };
-	// }
 
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'logo') {
 		if (e.target.files && e.target.files.length) {
@@ -268,16 +141,6 @@ export default function PortalManager(props: IProps) {
 			e.target.value = '';
 		}
 	}
-
-	// function getBannerWrapper() {
-	// 	if (banner) return <img src={checkValidAddress(banner) ? getTxEndpoint(banner) : banner} />;
-	// 	return (
-	// 		<>
-	// 			<ReactSVG src={ASSETS.image} />
-	// 			<span>{language.uploadBanner}</span>
-	// 		</>
-	// 	);
-	// }
 
 	function getLogoWrapper() {
 		if (logo) return <img src={checkValidAddress(logo) ? getTxEndpoint(logo) : logo} />;
@@ -333,16 +196,11 @@ export default function PortalManager(props: IProps) {
 								</S.TForm>
 							</S.Form>
 							<S.SAction>
-								{(!props.portal || !props.portal.id) && loading && (
-									<S.Message>
-										<span>{`${language.portalCreatingInfo}...`}</span>
-									</S.Message>
-								)}
 								{props.handleClose && (
 									<Button
 										type={'primary'}
 										label={language.close}
-										handlePress={() => props.handleClose(true)}
+										handlePress={() => props.handleClose()}
 										disabled={loading}
 										loading={false}
 									/>
@@ -352,16 +210,25 @@ export default function PortalManager(props: IProps) {
 									label={language.save}
 									handlePress={handleSubmit}
 									disabled={!name || loading}
-									loading={loading}
+									loading={false}
 								/>
 							</S.SAction>
 						</S.Body>
 					</S.Wrapper>
-					{profileResponse && (
+					{loading && (
+						<Loader
+							message={
+								props.portal && props.portal.id
+									? `${language.portalUpdatingInfo}...`
+									: `${language.portalCreatingInfo}...`
+							}
+						/>
+					)}
+					{portalResponse && (
 						<Notification
-							message={profileResponse.message}
-							type={profileResponse.status}
-							callback={() => setProfileResponse(null)}
+							message={portalResponse.message}
+							type={portalResponse.status}
+							callback={() => setPortalResponse(null)}
 						/>
 					)}
 				</>

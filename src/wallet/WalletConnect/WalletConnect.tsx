@@ -2,22 +2,22 @@ import React from 'react';
 import { ReactSVG } from 'react-svg';
 
 import { Avatar } from 'components/atoms/Avatar';
-import { Button } from 'components/atoms/Button';
-import { Panel } from 'components/molecules/Panel';
 import { ASSETS } from 'helpers/config';
 import { formatAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
-// import { useCustomThemeProvider } from 'providers/CustomThemeProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useSettingsProvider } from 'providers/SettingsProvider';
+import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
 export default function WalletConnect(_props: { callback?: () => void }) {
 	const arProvider = useArweaveProvider();
-	// const themeProvider = useCustomThemeProvider();
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+
+	const { settings, updateSettings } = useSettingsProvider();
 
 	const [showWallet, setShowWallet] = React.useState<boolean>(false);
 	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(false);
@@ -54,54 +54,55 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		}
 	}
 
-	// function handleToggleTheme() {
-	// 	themeProvider.setCurrent(themeProvider.current === 'light' ? 'dark' : 'light');
-	// }
-
 	function handleDisconnect() {
 		arProvider.handleDisconnect();
 		setShowWalletDropdown(false);
 	}
 
 	return (
-		<S.Wrapper>
-			<S.PWrapper>
-				{arProvider.profile && !arProvider.profile.id && (
-					<S.CAction className={'fade-in'}>
-						<Button
-							type={'alt1'}
-							label={language.createProfile}
-							handlePress={() => arProvider.setShowProfileManager(!arProvider.showProfileManager)}
-						/>
-					</S.CAction>
+		<CloseHandler
+			callback={() => {
+				setShowWalletDropdown(false);
+			}}
+			active={showWalletDropdown}
+			disabled={!showWalletDropdown}
+		>
+			<S.Wrapper>
+				<S.PWrapper>
+					<Avatar owner={arProvider.profile} dimensions={{ wrapper: 35, icon: 21.5 }} callback={handlePress} />
+				</S.PWrapper>
+				{showWalletDropdown && (
+					<S.Dropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
+						<S.DHeaderWrapper>
+							<S.PDropdownHeader>
+								<p>{language.profileMenu}</p>
+							</S.PDropdownHeader>
+							<S.DHeaderFlex>
+								<Avatar owner={arProvider.profile} dimensions={{ wrapper: 32.5, icon: 19.5 }} callback={null} />
+								<S.DHeader>
+									<p>{label}</p>
+								</S.DHeader>
+							</S.DHeaderFlex>
+						</S.DHeaderWrapper>
+						<S.DBodyWrapper>
+							<li onClick={() => arProvider.setShowProfileManager(true)}>
+								<ReactSVG src={ASSETS.write} />
+								{language.editProfile}
+							</li>
+							<li onClick={() => updateSettings('theme', settings.theme === 'light' ? 'dark' : 'light')}>
+								<ReactSVG src={settings.theme === 'light' ? ASSETS.dark : ASSETS.light} />
+								{`Use ${settings.theme === 'light' ? 'dark' : 'light'} mode`}
+							</li>
+						</S.DBodyWrapper>
+						<S.DFooterWrapper>
+							<li onClick={handleDisconnect}>
+								<ReactSVG src={ASSETS.disconnect} />
+								{language.disconnect}
+							</li>
+						</S.DFooterWrapper>
+					</S.Dropdown>
 				)}
-				{label && (
-					<S.LAction onClick={handlePress} className={'border-wrapper-primary'}>
-						<span>{label}</span>
-					</S.LAction>
-				)}
-				<Avatar owner={arProvider.profile} dimensions={{ wrapper: 35, icon: 21.5 }} callback={handlePress} />
-			</S.PWrapper>
-			<Panel
-				open={showWalletDropdown}
-				header={
-					<S.DHeaderFlex>
-						<Avatar owner={arProvider.profile} dimensions={{ wrapper: 32.5, icon: 19.5 }} callback={null} />
-						<S.DHeader>
-							<p>{label}</p>
-						</S.DHeader>
-					</S.DHeaderFlex>
-				}
-				handleClose={() => setShowWalletDropdown(false)}
-				width={350}
-			>
-				<S.DFooterWrapper>
-					<li onClick={handleDisconnect}>
-						<ReactSVG src={ASSETS.disconnect} />
-						{language.disconnect}
-					</li>
-				</S.DFooterWrapper>
-			</Panel>
-		</S.Wrapper>
+			</S.Wrapper>
+		</CloseHandler>
 	);
 }

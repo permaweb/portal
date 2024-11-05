@@ -65,7 +65,6 @@ export const TabContent = styled.div`
 	max-height: calc(100vh - 65px - 155px);
 `;
 
-/* Blocks */
 export const BADropdownBody = styled.div`
 	display: flex;
 	flex-direction: column;

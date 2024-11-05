@@ -106,12 +106,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	const [toggleProfileUpdate, setToggleProfileUpdate] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		(async function () {
-			await handleWallet();
-		})();
-	}, []);
-
-	React.useEffect(() => {
 		handleWallet();
 
 		window.addEventListener('arweaveWalletLoaded', handleWallet);
@@ -240,12 +234,12 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}
 
 	async function handleDisconnect() {
+		if (localStorage.getItem('walletType')) localStorage.removeItem('walletType');
 		await global.window?.arweaveWallet?.disconnect();
 		setWallet(null);
 		setWalletAddress(null);
 		setProfile(null);
 		navigate(URLS.base);
-		if (localStorage.getItem('walletType')) localStorage.removeItem('walletType');
 	}
 
 	async function getARBalance(walletAddress: string) {

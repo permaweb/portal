@@ -264,20 +264,3 @@ export const BlocksEmpty = styled.div`
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 `;
-
-export const MessageWrapper = styled.div`
-	width: 300px;
-	max-width: 90vw;
-	padding: 15px 20px;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-
-	span {
-		font-size: ${(props) => props.theme.typography.size.xSmall};
-	}
-`;
