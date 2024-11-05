@@ -14,7 +14,6 @@ import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
-// TODO: Portal create
 export default function Landing() {
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();

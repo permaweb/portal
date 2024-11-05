@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { getKeyedElements } from '@permaweb/libs';
+import { getStoreNamespace } from '@permaweb/libs';
 
 import { Panel } from 'components/molecules/Panel';
 import { PortalManager } from 'components/organisms/PortalManager';
@@ -45,7 +45,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		if (arProvider.profile) {
-			const portalsList: any[] = getKeyedElements(arProvider.profile, 'portal');
+			const portalsList: any[] = getStoreNamespace(arProvider.profile, 'portal');
 			setPortals(portalsList);
 		}
 	}, [arProvider.profile]);

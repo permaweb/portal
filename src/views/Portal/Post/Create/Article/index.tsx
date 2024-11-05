@@ -134,7 +134,6 @@ function Block(props: {
 
 // TODO: Links
 // TODO: Topics
-// TODO: Notification causes x overflow when toolkit is closed
 // TODO: React dnd replacement
 // TODO: Media upload
 export default function Article() {
@@ -253,7 +252,7 @@ export default function Article() {
 
 	// TODO: Clean blocks
 	async function handleSubmit() {
-		if (arProvider.wallet) {
+		if (arProvider.wallet && arProvider.profile && arProvider.profile.id) {
 			setLoading(true);
 			try {
 				console.log('Creating asset...');
@@ -266,6 +265,7 @@ export default function Article() {
 						topics: ['Topic 1'],
 						data: blocks,
 						contentType: 'application/json',
+						creator: arProvider.profile.id,
 					},
 					arProvider.wallet,
 					// (value) => setResponse({ status: 'success', message: value }) // TODO
