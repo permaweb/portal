@@ -37,17 +37,16 @@ export const SectionWrapper = styled.div`
 export const Section = styled.div`
 	height: 300px;
 	width: 100%;
-	padding: 12.5px 15.5px;
+	overflow: hidden;
 `;
 
 export const SectionHeader = styled.div`
-	margin: 0 0 6.5px 0;
+	padding: 12.5px 15.5px;
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
+		font-size: ${(props) => props.theme.typography.size.base};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
-		text-transform: uppercase;
 	}
 `;
 
@@ -58,7 +57,11 @@ export const SectionBody = styled.div`
 export const DesignSection = styled(Section)``;
 
 export const PostsSection = styled(Section)`
-	height: 100vh;
+	height: fit-content;
+
+	> :first-child {
+		background: ${(props) => props.theme.colors.container.alt1.background};
+	}
 `;
 
 export const DomainSection = styled(Section)`

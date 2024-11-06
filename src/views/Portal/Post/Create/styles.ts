@@ -99,9 +99,9 @@ export const Icon = styled.div`
 	svg {
 		height: 80px;
 		width: 80px;
-		margin: 7.5px 0 0 0;
-		color: ${(props) => props.theme.colors.font.alt1};
-		fill: ${(props) => props.theme.colors.font.alt1};
+		margin: 10px 0 0 0;
+		color: ${(props) => props.theme.colors.font.primary};
+		fill: ${(props) => props.theme.colors.font.primary};
 	}
 `;
 

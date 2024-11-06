@@ -2,6 +2,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 
 import { open, transition1, transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
+import { ArticleStatusType } from 'helpers/types';
 
 export const GlobalStyle = createGlobalStyle`
   html, body, div, span, applet, object, iframe,
@@ -275,7 +276,6 @@ export const App = styled.div`
 
 export const View = styled.main<{ navigationOpen: boolean }>`
 	min-height: calc(100vh - ${STYLING.dimensions.nav.height} - 35px);
-	max-width: ${STYLING.cutoffs.max};
 	position: relative;
 	top: ${STYLING.dimensions.nav.height};
 	padding: 0 20px 20px ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 30px)` : '30px')};
@@ -309,3 +309,14 @@ export const Footer = styled.footer<{ navigationOpen: boolean }>`
 		padding: 20px 30px 30px 30px;
 	}
 `;
+
+export const getPostStatusBackground = (status: ArticleStatusType, theme: any) => {
+	switch (status) {
+		case 'draft':
+			return theme.colors.status.draft;
+		case 'published':
+			return theme.colors.status.published;
+		default:
+			return theme.colors.status.draft;
+	}
+};

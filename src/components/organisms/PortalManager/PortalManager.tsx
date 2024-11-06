@@ -47,69 +47,75 @@ export default function PortalManager(props: IProps) {
 		}
 	}, [props.portal]);
 
+	async function updatePortal(portalId: string, response: string) {
+		try {
+			let data: any = {
+				name: name,
+			};
+
+			if (logo) {
+				try {
+					data.logo = await resolveTransaction(logo);
+				} catch (e: any) {
+					console.error(`Failed to resolve logo: ${e.message}`);
+				}
+			}
+
+			const portalUpdateId = await updateZone(
+				{
+					zoneId: portalId,
+					data: data,
+				},
+				arProvider.wallet
+			);
+
+			console.log(`Portal update: ${portalUpdateId}`);
+
+			const profileUpdateId = await updateZone(
+				{
+					zoneId: arProvider.profile.id,
+					data: {
+						[`portal:${portalId}`]: {
+							id: portalId,
+							...data,
+						},
+					},
+				},
+				arProvider.wallet
+			);
+
+			console.log(`Profile update: ${profileUpdateId}`);
+
+			arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
+
+			if (props.handleUpdate) props.handleUpdate();
+			if (props.handleClose) props.handleClose();
+
+			setPortalResponse({
+				message: response,
+				status: 'success',
+			});
+		} catch (e: any) {
+			throw new Error(e);
+		}
+	}
+
 	async function handleSubmit() {
 		if (arProvider.wallet && arProvider.profile && arProvider.profile.id) {
 			setLoading(true);
 
 			try {
 				if (props.portal && props.portal.id) {
-					console.log('Update portal'); // TODO
+					await updatePortal(props.portal.id, `${language.portalUpdated}!`);
 				} else {
-					let data: any = {
-						name: name,
-					};
-
-					if (logo) {
-						try {
-							data.logo = await resolveTransaction(logo);
-						} catch (e: any) {
-							console.error(`Failed to resolve logo: ${e.message}`);
-						}
-					}
-
 					const portalId = await createZone({}, arProvider.wallet, (status: any) => console.log(status));
-
 					console.log(`Portal ID: ${portalId}`);
-
-					const portalUpdateId = await updateZone(
-						{
-							zoneId: portalId,
-							data: data,
-						},
-						arProvider.wallet
-					);
-
-					console.log(`Portal Update ID: ${portalUpdateId}`);
-
-					const profileUpdateId = await updateZone(
-						{
-							zoneId: arProvider.profile.id,
-							data: {
-								[`portal:${portalId}`]: {
-									id: portalId,
-									...data,
-								},
-							},
-						},
-						arProvider.wallet
-					);
-
-					console.log(`Profile Update ID: ${profileUpdateId}`);
-
-					arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
-					if (props.handleUpdate) props.handleUpdate();
-
-					setPortalResponse({
-						message: `${language.portalCreated}!`,
-						status: 'success',
-					});
-
+					await updatePortal(portalId, `${language.portalCreated}!`);
 					navigate(URLS.portalBase(portalId));
-					props.handleClose();
 				}
 			} catch (e: any) {
 				setPortalResponse({
-					message: e.message ?? language.errorUpdatingProfile,
+					message: e.message ?? language.errorUpdatingPortal,
 					status: 'warning',
 				});
 			}

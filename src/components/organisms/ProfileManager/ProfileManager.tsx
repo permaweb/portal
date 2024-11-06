@@ -1,7 +1,7 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { createProfile } from '@permaweb/libs';
+import { createProfile, updateProfile } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
@@ -34,9 +34,9 @@ export default function ProfileManager(props: IProps) {
 
 	const [name, setName] = React.useState<string>('');
 	const [username, setUsername] = React.useState<string>('');
-	const [bio, setBio] = React.useState<string>('');
+	const [description, setDescription] = React.useState<string>('');
 	const [banner, setBanner] = React.useState<any>(null);
-	const [avatar, setAvatar] = React.useState<any>(null);
+	const [thumbnail, setThumbnail] = React.useState<any>(null);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [profileResponse, setProfileResponse] = React.useState<NotificationType | null>(null);
@@ -44,41 +44,51 @@ export default function ProfileManager(props: IProps) {
 	React.useEffect(() => {
 		setUsername(props.profile?.username ?? '');
 		setName(props.profile?.displayName ?? '');
-		setBio(props.profile?.bio ?? '');
+		setDescription(props.profile?.description ?? '');
 		setBanner(props.profile?.banner && checkValidAddress(props.profile.banner) ? props.profile.banner : null);
-		setAvatar(props.profile?.avatar && checkValidAddress(props.profile.avatar) ? props.profile.avatar : null);
+		setThumbnail(
+			props.profile?.thumbnail && checkValidAddress(props.profile.thumbnail) ? props.profile.thumbnail : null
+		);
 	}, [props.profile]);
 
-	// function handleUpdate() {
-	// 	arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
-	// 	if (props.handleUpdate) props.handleUpdate();
-	// }
+	function handleUpdate(response: string) {
+		arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
+
+		if (props.handleUpdate) props.handleUpdate();
+		if (props.handleClose) props.handleClose();
+
+		setProfileResponse({
+			message: response,
+			status: 'success',
+		});
+	}
 
 	async function handleSubmit() {
 		if (arProvider.wallet) {
 			setLoading(true);
 
 			try {
+				let data: any = {
+					username: username,
+					displayName: name,
+					description: description,
+				};
+
+				if (thumbnail) data.thumbnail = thumbnail;
+				if (banner) data.banner = banner;
+
 				if (props.profile && props.profile.id) {
-					console.log('Update profile'); // TODO
+					const profileUpdateId = await updateProfile(data, props.profile.id, arProvider.wallet, (status: any) =>
+						console.log(status)
+					);
+					console.log(`Profile update: ${profileUpdateId}`);
+					handleUpdate(`${language.profileUpdated}!`);
 				} else {
-					let data: any = {
-						username: username,
-						displayName: name,
-						description: bio,
-					};
-
-					if (avatar) data.thumbnail = avatar;
-					if (banner) data.banner = banner;
-
 					const profileId = await createProfile(data, arProvider.wallet, (status: any) => console.log(status));
 
 					console.log(`Profile ID: ${profileId}`);
 
-					setProfileResponse({
-						message: `${language.profileCreated}!`,
-						status: 'success',
-					});
+					handleUpdate(`${language.profileCreated}!`);
 				}
 			} catch (e: any) {
 				setProfileResponse({
@@ -92,16 +102,16 @@ export default function ProfileManager(props: IProps) {
 	}
 
 	function getInvalidBio() {
-		if (bio && bio.length > MAX_BIO_LENGTH) {
+		if (description && description.length > MAX_BIO_LENGTH) {
 			return {
 				status: true,
-				message: `${language.maxCharsReached} (${bio.length} / ${MAX_BIO_LENGTH})`,
+				message: `${language.maxCharsReached} (${description.length} / ${MAX_BIO_LENGTH})`,
 			};
 		}
 		return { status: false, message: null };
 	}
 
-	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'avatar') {
+	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'thumbnail') {
 		if (e.target.files && e.target.files.length) {
 			const file = e.target.files[0];
 			if (file.type.startsWith('image/')) {
@@ -113,8 +123,8 @@ export default function ProfileManager(props: IProps) {
 							case 'banner':
 								setBanner(event.target.result);
 								break;
-							case 'avatar':
-								setAvatar(event.target.result);
+							case 'thumbnail':
+								setThumbnail(event.target.result);
 								break;
 							default:
 								break;
@@ -139,7 +149,7 @@ export default function ProfileManager(props: IProps) {
 	}
 
 	function getAvatarWrapper() {
-		if (avatar) return <img src={checkValidAddress(avatar) ? getTxEndpoint(avatar) : avatar} />;
+		if (thumbnail) return <img src={checkValidAddress(thumbnail) ? getTxEndpoint(thumbnail) : thumbnail} />;
 		return (
 			<>
 				<ReactSVG src={ASSETS.user} />
@@ -172,7 +182,7 @@ export default function ProfileManager(props: IProps) {
 										accept={ALLOWED_BANNER_TYPES}
 									/>
 									<S.AInput
-										hasAvatar={avatar !== null}
+										hasAvatar={thumbnail !== null}
 										onClick={() => avatarInputRef.current.click()}
 										disabled={loading}
 									>
@@ -181,7 +191,7 @@ export default function ProfileManager(props: IProps) {
 									<input
 										ref={avatarInputRef}
 										type={'file'}
-										onChange={(e: any) => handleFileChange(e, 'avatar')}
+										onChange={(e: any) => handleFileChange(e, 'thumbnail')}
 										disabled={loading}
 										accept={ALLOWED_AVATAR_TYPES}
 									/>
@@ -190,8 +200,8 @@ export default function ProfileManager(props: IProps) {
 									<Button
 										type={'primary'}
 										label={language.removeAvatar}
-										handlePress={() => setAvatar(null)}
-										disabled={loading || !avatar}
+										handlePress={() => setThumbnail(null)}
+										disabled={loading || !thumbnail}
 									/>
 									<Button
 										type={'primary'}
@@ -223,9 +233,9 @@ export default function ProfileManager(props: IProps) {
 									/>
 								</S.TForm>
 								<TextArea
-									label={language.bio}
-									value={bio}
-									onChange={(e: any) => setBio(e.target.value)}
+									label={language.description}
+									value={description}
+									onChange={(e: any) => setDescription(e.target.value)}
 									disabled={loading}
 									invalid={getInvalidBio()}
 								/>
@@ -235,7 +245,7 @@ export default function ProfileManager(props: IProps) {
 									<Button
 										type={'primary'}
 										label={language.close}
-										handlePress={() => props.handleClose(true)}
+										handlePress={() => props.handleClose()}
 										disabled={loading}
 										loading={false}
 									/>

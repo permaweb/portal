@@ -9,9 +9,10 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
 import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
-import { ArticleBlockEnum, ArticleBlockType, NotificationType } from 'helpers/types';
+import { ArticleBlockEnum, ArticleBlockType, ArticleStatusType, NotificationType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePortalProvider } from 'providers/PortalProvider';
 
 import { Image } from './Blocks/Image';
 import { ArticleToolbar } from './ArticleToolbar';
@@ -138,15 +139,17 @@ function Block(props: {
 // TODO: Media upload
 export default function Article() {
 	const arProvider = useArweaveProvider();
+	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	const [status, setStatus] = React.useState<ArticleStatusType>('draft');
 	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
 	const [focusedBlock, setFocusedBlock] = React.useState<ArticleBlockType | null>(null);
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
-	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
+	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(false);
 	const [postTitle, setPostTitle] = React.useState<string>('');
 	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
 
@@ -261,7 +264,7 @@ export default function Article() {
 
 	// TODO: Clean blocks
 	async function handleSubmit() {
-		if (arProvider.wallet && arProvider.profile && arProvider.profile.id) {
+		if (arProvider.wallet && portalProvider.current) {
 			setLoading(true);
 			try {
 				console.log('Creating asset...');
@@ -272,20 +275,22 @@ export default function Article() {
 						description: postTitle,
 						type: 'Article',
 						topics: ['Topic 1'],
-						data: blocks,
+						data: {
+							status: status,
+							content: blocks,
+							categories: [{ label: 'Topic 1', link: 'https://test.com' }],
+						},
 						contentType: 'application/json',
-						creator: arProvider.profile.id,
+						creator: portalProvider.current.id,
+						tags: [{ name: 'Status', value: status }],
 					},
 					arProvider.wallet,
-					// (value) => setResponse({ status: 'success', message: value }) // TODO
 					(status) => console.log(status)
 				);
 
 				console.log(`Asset ID: ${assetId}`);
 
 				setResponse({ status: 'success', message: 'Post saved!' });
-
-				window.open(`https://arweave.net/${assetId}`, '_blank');
 			} catch (e: any) {
 				setResponse({ status: 'warning', message: e });
 			}
@@ -418,6 +423,8 @@ export default function Article() {
 					<ArticleToolbar
 						postTitle={postTitle}
 						setPostTitle={(value: string) => setPostTitle(value)}
+						status={status}
+						setStatus={(value: ArticleStatusType) => setStatus(value)}
 						addBlock={(type: ArticleBlockEnum) => addBlock(type)}
 						blockEditMode={blockEditMode}
 						toggleBlockEditMode={() => setBlockEditMode(!blockEditMode)}

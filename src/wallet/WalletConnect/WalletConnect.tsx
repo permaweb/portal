@@ -117,7 +117,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 								</li>
 								<li onClick={() => setShowThemeSelector(true)}>
 									<ReactSVG src={ASSETS.design} />
-									{'Choose app appearance'}
+									{language.chooseAppAppearance}
 								</li>
 							</S.DBodyWrapper>
 							<S.DFooterWrapper>
@@ -131,7 +131,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 				</S.Wrapper>
 			</CloseHandler>
 			{showThemeSelector && (
-				<Modal header={'Choose app appearance'} handleClose={() => setShowThemeSelector(false)}>
+				<Modal header={language.chooseAppAppearance} handleClose={() => setShowThemeSelector(false)}>
 					<S.MWrapper className={'modal-wrapper'}>
 						{Object.entries(THEMES).map(([key, theme]) => (
 							<S.ThemeSection key={key}>

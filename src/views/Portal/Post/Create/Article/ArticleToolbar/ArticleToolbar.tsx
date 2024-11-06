@@ -361,6 +361,17 @@ export default function ArticleToolbar(props: IProps) {
 					/>
 				</S.TitleWrapper>
 				<S.EndActions>
+					<S.StatusAction status={props.status}>
+						<Button
+							type={'primary'}
+							label={props.status.toUpperCase()}
+							handlePress={() => props.setStatus(props.status === 'draft' ? 'published' : 'draft')}
+							active={false}
+							disabled={props.loading}
+							tooltip={`Mark as ${props.status === 'draft' ? 'published' : 'draft'}`}
+							noFocus
+						/>
+					</S.StatusAction>
 					<Button
 						type={'primary'}
 						label={language.toolkit}

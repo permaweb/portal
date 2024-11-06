@@ -1,7 +1,7 @@
-import { ProfileType } from 'helpers/types';
+import { ProfileType } from '@permaweb/libs';
 
 export interface IProps {
 	profile: ProfileType | null;
-	handleClose: (handleUpdate: boolean) => void;
+	handleClose: () => void;
 	handleUpdate: () => void;
 }

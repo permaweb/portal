@@ -1,7 +1,7 @@
-import { PortalType } from 'helpers/types';
+import { PortalHeaderType } from 'helpers/types';
 
 export interface IProps {
-	portal: PortalType | null;
+	portal: PortalHeaderType | null;
 	handleClose: () => void;
 	handleUpdate: () => void;
 }

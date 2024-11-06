@@ -1,5 +1,3 @@
-import { DateType } from './types';
-
 export function checkValidAddress(address: string | null) {
 	if (!address) return false;
 	return /^[a-z0-9_-]{43}$/i.test(address);
@@ -78,30 +76,6 @@ export function formatPercentage(percentage: any) {
 	}
 
 	return `${multiplied.toFixed(nonZeroIndex)}%`;
-}
-
-export function formatDate(dateArg: string | number | null, dateType: DateType) {
-	if (!dateArg) {
-		return null;
-	}
-
-	let date: Date | null = null;
-
-	switch (dateType) {
-		case 'iso':
-			date = new Date(dateArg);
-			break;
-		case 'epoch':
-			date = new Date(Number(dateArg));
-			break;
-		default:
-			date = new Date(dateArg);
-			break;
-	}
-
-	return `${date.toLocaleString('default', {
-		month: 'long',
-	})} ${date.getDate()}, ${date.getUTCFullYear()}`;
 }
 
 export function formatRequiredField(field: string) {

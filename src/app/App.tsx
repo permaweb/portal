@@ -8,9 +8,11 @@ const ArticleCreate = getLazyImport('Portal/Post/Create/Article');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
 
+import { Loader } from 'components/atoms/Loader';
 import { DOM, URLS } from 'helpers/config';
 import { Navigation } from 'navigation/Navigation';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePortalProvider } from 'providers/PortalProvider';
 import { useSettingsProvider } from 'providers/SettingsProvider';
 
 import * as S from './styles';
@@ -24,6 +26,8 @@ function getLazyImport(view: string) {
 }
 
 export default function App() {
+	const portalProvider = usePortalProvider();
+
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -48,6 +52,7 @@ export default function App() {
 								{language.app} {new Date().getFullYear()}
 							</p>
 						</S.Footer>
+						{!portalProvider.current && <Loader message={'Fetching your portal...'} />}
 					</>
 				}
 			/>

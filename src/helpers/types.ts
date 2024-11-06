@@ -1,4 +1,13 @@
-export type PortalType = { id: string; name: string; logo: string | null };
+import { AssetHeaderType } from '@permaweb/libs';
+
+export type PortalHeaderType = { id: string; name: string; logo: string | null };
+
+export type PortalDetailType = {
+	id: string;
+	name: string;
+	logo: string | null;
+	assets?: AssetHeaderType[];
+};
 
 export enum ArticleBlockEnum {
 	Paragraph = 'paragraph',
@@ -21,16 +30,7 @@ export type ArticleBlockType = {
 	content: string;
 };
 
-export type ProfileType = {
-	id: string;
-	walletAddress: string;
-	displayName: string | null;
-	username: string | null;
-	bio: string | null;
-	avatar: string | null;
-	banner: string | null;
-	portals: PortalType[] | null;
-};
+export type ArticleStatusType = 'draft' | 'published';
 
 export type RegistryProfileType = {
 	id: string;
@@ -99,8 +99,6 @@ export enum WalletEnum {
 	arConnect = 'arconnect',
 	othent = 'othent',
 }
-
-export type DateType = 'iso' | 'epoch';
 
 export type FormFieldType = 'number' | 'password';
 

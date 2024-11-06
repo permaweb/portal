@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from 'components/atoms/Button';
+import { PostList } from 'components/organisms/PostList';
 import { ASSETS, URLS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
@@ -23,7 +24,7 @@ export default function Portal() {
 				<Button
 					type={'alt1'}
 					label={language.createPost}
-					handlePress={() => navigate(URLS.postCreate(portalProvider.current.id))}
+					handlePress={() => navigate(URLS.postCreateArticle(portalProvider.current.id))}
 					disabled={!portalProvider.current}
 					height={37.5}
 					icon={ASSETS.add}
@@ -56,7 +57,9 @@ export default function Portal() {
 						<S.SectionHeader>
 							<p>{language.posts}</p>
 						</S.SectionHeader>
-						<S.SectionBody></S.SectionBody>
+						<S.SectionBody>
+							<PostList />
+						</S.SectionBody>
 					</S.PostsSection>
 				</S.SectionWrapper>
 			</S.BodyWrapper>

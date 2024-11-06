@@ -1,18 +1,18 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { getStoreNamespace } from '@permaweb/libs';
+import { getAtomicAssets, getStoreNamespace, getZone, ZoneAssetType } from '@permaweb/libs';
 
 import { Panel } from 'components/molecules/Panel';
 import { PortalManager } from 'components/organisms/PortalManager';
-import { PortalType } from 'helpers/types';
+import { PortalDetailType, PortalHeaderType } from 'helpers/types';
 
 import { useArweaveProvider } from './ArweaveProvider';
 import { useLanguageProvider } from './LanguageProvider';
 
 interface PortalContextState {
-	portals: PortalType[] | null;
-	current: PortalType | null;
+	portals: PortalHeaderType[] | null;
+	current: PortalDetailType | null;
 	showPortalManager: boolean;
 	setShowPortalManager: (toggle: boolean) => void;
 }
@@ -30,6 +30,7 @@ export function usePortalProvider(): PortalContextState {
 	return React.useContext(PortalContext);
 }
 
+// TODO: Create new portal from home page selects current portal
 export function PortalProvider(props: { children: React.ReactNode }) {
 	const location = useLocation();
 
@@ -38,8 +39,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [portals, setPortals] = React.useState<PortalType[] | null>(null);
-	const [current, setCurrent] = React.useState<PortalType | null>(null);
+	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
+	const [current, setCurrent] = React.useState<PortalDetailType | null>(null);
 
 	const [showPortalManager, setShowPortalManager] = React.useState<boolean>(false);
 
@@ -51,29 +52,53 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	}, [arProvider.profile]);
 
 	React.useEffect(() => {
-		if (portals) {
-			try {
-				const currentPortal = portals.find((portal) => location.pathname.startsWith(`/${portal.id}`));
-				setCurrent(currentPortal || null);
-			} catch (e: any) {
+		(async function () {
+			if (portals) {
+				try {
+					const currentPortal = portals.find((portal) => location.pathname.startsWith(`/${portal.id}`));
+
+					if (currentPortal && currentPortal.id) {
+						if (current && current.id && current.id !== currentPortal.id) setCurrent(null);
+						const currentPortalFetch = await getZone(currentPortal.id);
+						if (currentPortalFetch) {
+							let data: PortalDetailType = {
+								id: currentPortal.id,
+								name: currentPortalFetch.store?.name || 'None',
+								logo: currentPortalFetch.store?.logo || 'None',
+							};
+
+							if (currentPortalFetch.assets && currentPortalFetch.assets.length > 0) {
+								const assetsFetch = await getAtomicAssets({
+									ids: currentPortalFetch.assets.map((asset: ZoneAssetType) => asset.id),
+								});
+								if (assetsFetch && assetsFetch.length > 0) data.assets = assetsFetch;
+							}
+
+							setCurrent(data);
+						}
+					}
+				} catch (e: any) {
+					setCurrent(null);
+				}
+			} else {
 				setCurrent(null);
 			}
-		} else {
-			setCurrent(null);
-		}
+		})();
 	}, [location.pathname, portals]);
 
 	return (
-		<PortalContext.Provider value={{ portals, current, showPortalManager, setShowPortalManager }}>
-			{props.children}
-			<Panel
-				open={showPortalManager}
-				header={current && current.id ? language.editPortal : language.createPortal}
-				handleClose={() => setShowPortalManager(false)}
-				width={500}
-			>
-				<PortalManager portal={current} handleClose={() => setShowPortalManager(false)} handleUpdate={null} />
-			</Panel>
-		</PortalContext.Provider>
+		<>
+			<PortalContext.Provider value={{ portals, current, showPortalManager, setShowPortalManager }}>
+				{props.children}
+				<Panel
+					open={showPortalManager}
+					header={current && current.id ? language.editPortal : language.createPortal}
+					handleClose={() => setShowPortalManager(false)}
+					width={500}
+				>
+					<PortalManager portal={current} handleClose={() => setShowPortalManager(false)} handleUpdate={null} />
+				</Panel>
+			</PortalContext.Provider>
+		</>
 	);
 }
