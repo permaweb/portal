@@ -148,3 +148,67 @@ export const DFooterWrapper = styled(DBodyWrapper)`
 	border-bottom: none;
 	padding: 10px 0 0 0;
 `;
+
+export const MWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 30px;
+`;
+
+export const ThemeSection = styled.div``;
+
+export const ThemeSectionHeader = styled.div`
+	display: flex;
+	padding: 0 0 3.5px 0;
+	margin: 0 0 15px 0;
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+	svg {
+		height: 16.5px;
+		width: 16.5px;
+		margin: 3.5px 9.5px 0 0;
+		color: ${(props) => props.theme.colors.font.alt1};
+		fill: ${(props) => props.theme.colors.font.alt1};
+	}
+
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
+`;
+
+export const ThemeSectionBody = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
+`;
+
+export const ThemeSectionBodyElement = styled.button`
+	padding: 10px 17.5px;
+
+	display: flex;
+	align-items: center;
+	gap: 12.5px;
+
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.small} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+
+	&:hover {
+		background: ${(props) => props.theme.colors.container.primary.active};
+		border: 1px solid ${(props) => props.theme.colors.border.alt2};
+	}
+`;
+
+export const Indicator = styled.div<{ active: boolean }>`
+	height: 12.5px;
+	width: 12.5px;
+	border-radius: 50%;
+	border: 1px solid ${(props) => props.theme.colors.border.alt4};
+	background: ${(props) => (props.active ? props.theme.colors.indicator.active : 'transparent')};
+`;

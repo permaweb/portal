@@ -215,17 +215,26 @@ export default function Article() {
 			}
 			if (focusedBlock && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
 				const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
+				const currentBlock = blocks[currentBlockIndex];
 
-				if (event.key === 'ArrowDown' && currentBlockIndex < blocks.length - 1) {
-					event.preventDefault();
-					const nextBlock = blocks[currentBlockIndex + 1];
-					setFocusedBlock(nextBlock);
-					setLastAddedBlockId(nextBlock.id);
-				} else if (event.key === 'ArrowUp' && currentBlockIndex > 0) {
-					event.preventDefault();
-					const previousBlock = blocks[currentBlockIndex - 1];
-					setFocusedBlock(previousBlock);
-					setLastAddedBlockId(previousBlock.id);
+				const isEmpty =
+					!currentBlock.content ||
+					currentBlock.content === '<br>' ||
+					currentBlock.content === '<li></li>' ||
+					currentBlock.content === '<li><br></li>';
+
+				if (isEmpty) {
+					if (event.key === 'ArrowDown' && currentBlockIndex < blocks.length - 1) {
+						event.preventDefault();
+						const nextBlock = blocks[currentBlockIndex + 1];
+						setFocusedBlock(nextBlock);
+						setLastAddedBlockId(nextBlock.id);
+					} else if (event.key === 'ArrowUp' && currentBlockIndex > 0) {
+						event.preventDefault();
+						const previousBlock = blocks[currentBlockIndex - 1];
+						setFocusedBlock(previousBlock);
+						setLastAddedBlockId(previousBlock.id);
+					}
 				}
 			}
 			if (event.key === 'Enter' && (!blocks || blocks.length <= 0)) {

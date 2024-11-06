@@ -128,6 +128,7 @@ export const PListWrapper = styled.div`
 			height: 22.5px;
 			width: 22.5px;
 			margin: 0 12.5px 0 0;
+			border-radius: 50%;
 		}
 		&:hover {
 			background: ${(props) => props.theme.colors.button.primary.active.background};

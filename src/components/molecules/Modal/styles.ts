@@ -44,9 +44,8 @@ export const LT = styled.div`
 export const Title = styled.p`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.lg};
-	font-weight: ${(props) => props.theme.typography.weight.medium};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
 	line-height: calc(${(props) => props.theme.typography.size.lg} + 5px);
-	font-family: ${(props) => props.theme.typography.family.alt1};
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
