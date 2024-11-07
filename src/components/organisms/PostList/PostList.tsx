@@ -3,6 +3,7 @@ import { ReactSVG } from 'react-svg';
 import { AssetHeaderType, formatDate } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
+import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS } from 'helpers/config';
 import { ArticleStatusType } from 'helpers/types';
 import { getTagValue } from 'helpers/utils';
@@ -11,7 +12,6 @@ import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
-// TODO: Mobile
 // TODO: Post edit
 // TODO: Post link
 export default function PostList() {
@@ -25,6 +25,8 @@ export default function PostList() {
 			{portalProvider.current.assets
 				.sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())
 				.map((asset: AssetHeaderType) => {
+					const status = asset.tags && (getTagValue(asset.tags, 'Status') as ArticleStatusType);
+
 					return (
 						<S.PostWrapper key={asset.id} className={'fade-in'}>
 							<S.PostHeader>
@@ -35,26 +37,33 @@ export default function PostList() {
 								</span>
 							</S.PostHeader>
 							<S.PostDetail>
-								{asset.tags && getTagValue(asset.tags, 'Status') && (
-									<S.PostStatus status={getTagValue(asset.tags, 'Status') as ArticleStatusType}>
-										<p>{`Status: ${getTagValue(asset.tags, 'Status')}`}</p>
+								<S.PostActions>
+									<Button
+										type={'alt3'}
+										label={language.edit}
+										handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
+									/>
+									<Button
+										type={'alt3'}
+										label={language.view}
+										handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
+									/>
+									<IconButton
+										type={'primary'}
+										active={false}
+										src={ASSETS.listUnordered}
+										handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
+										dimensions={{ wrapper: 23.5, icon: 13.5 }}
+										tooltip={language.moreActions}
+										tooltipPosition={'bottom-right'}
+									/>
+								</S.PostActions>
+								{status && (
+									<S.PostStatus status={status as ArticleStatusType}>
+										<p>{status}</p>
 										<div id={'post-status'} />
 									</S.PostStatus>
 								)}
-								<S.PostActions>
-									<Button
-										type={'alt1'}
-										label={language.edit}
-										handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
-										height={23.5}
-									/>
-									<Button
-										type={'primary'}
-										label={language.view}
-										handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
-										height={23.5}
-									/>
-								</S.PostActions>
 							</S.PostDetail>
 						</S.PostWrapper>
 					);

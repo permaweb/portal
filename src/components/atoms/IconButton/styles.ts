@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 
+import { STYLING } from 'helpers/config';
+
 export const Tooltip = styled.div<{ position: string }>`
 	position: absolute;
 	z-index: 2;
@@ -99,7 +101,7 @@ export const Primary = styled.button<{
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	padding: 4.5px 0 0 0;
+	padding: 4.5px 0 0 0 !important;
 	pointer-events: ${(props) => (props.disabled ? 'none' : 'all')};
 	border-radius: 50%;
 
@@ -138,11 +140,17 @@ export const Alt1 = styled(Primary)`
 				: props.disabled
 				? props.theme.colors.button.primary.disabled.border
 				: props.theme.colors.button.primary.border};
-	// box-shadow: 0px 2.5px 5px 0px ${(props) => props.theme.colors.shadow.alt2};
+	border-radius: ${STYLING.dimensions.radius.alt3};
 	svg {
 		height: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)};
 		width: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)};
 		color: ${(props) =>
+			props.active
+				? props.theme.colors.font.light1
+				: props.disabled
+				? props.theme.colors.button.primary.disabled.color
+				: props.theme.colors.button.primary.color};
+		fill: ${(props) =>
 			props.active
 				? props.theme.colors.font.light1
 				: props.disabled
@@ -155,9 +163,5 @@ export const Alt1 = styled(Primary)`
 			props.disabled
 				? props.theme.colors.button.primary.disabled.background
 				: props.theme.colors.button.primary.active.background};
-		svg {
-			color: ${(props) =>
-				props.disabled ? props.theme.colors.button.primary.disabled.color : props.theme.colors.font.light1};
-		}
 	}
 `;

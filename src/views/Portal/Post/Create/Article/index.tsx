@@ -2,13 +2,14 @@ import React from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { ReactSVG } from 'react-svg';
 
-import { createAtomicAsset } from '@permaweb/libs';
+import { aoSend, createAtomicAsset } from '@permaweb/libs';
 
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
 import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
 import { ArticleBlockEnum, ArticleBlockType, ArticleStatusType, NotificationType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -133,6 +134,7 @@ function Block(props: {
 	);
 }
 
+// TODO: Post edit - Remove existing asset from kv store and replace
 // TODO: Links
 // TODO: Topics
 // TODO: React dnd replacement
@@ -145,7 +147,9 @@ export default function Article() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [status, setStatus] = React.useState<ArticleStatusType>('draft');
+	const [topics, setTopics] = React.useState<{ label: string; link?: string }[]>([]);
 	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
+
 	const [focusedBlock, setFocusedBlock] = React.useState<ArticleBlockType | null>(null);
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
@@ -263,36 +267,53 @@ export default function Article() {
 	}
 
 	// TODO: Clean blocks
+	// TODO: Validation (topics)
 	async function handleSubmit() {
 		if (arProvider.wallet && portalProvider.current) {
 			setLoading(true);
 			try {
 				console.log('Creating asset...');
 
+				const data = {
+					Status: status,
+					Content: blocks,
+					Topics: topics,
+					Categories: [{ label: 'Category 1', link: 'https://test.com' }],
+				};
+
+				const assetDataFetch = await fetch(getTxEndpoint('lBWtTMWN-jtrecImXZsQ7noVQ9pofTjGBqsfwjdVApg'));
+				const dataSrc = await assetDataFetch.text();
+
 				const assetId = await createAtomicAsset(
 					{
 						title: postTitle,
 						description: postTitle,
 						type: 'Article',
-						topics: ['Topic 1'],
-						data: {
-							status: status,
-							content: blocks,
-							categories: [{ label: 'Topic 1', link: 'https://test.com' }],
-						},
-						contentType: 'application/json',
+						topics: topics?.length ? topics.map((topic: any) => topic.label) : ['Topic 1'],
+						data: dataSrc,
+						contentType: 'text/html',
 						creator: portalProvider.current.id,
 						tags: [{ name: 'Status', value: status }],
+						src: 'NDkzQN-eKWeJr5Be8iPbP1fv9LoT81jp6XTt6fuHjBY',
 					},
 					arProvider.wallet,
 					(status) => console.log(status)
 				);
 
-				console.log(`Asset ID: ${assetId}`);
+				console.log(`Asset: ${assetId}`);
+
+				const assetUpdateId = await aoSend({
+					processId: assetId,
+					wallet: arProvider.wallet,
+					action: 'Update-Post',
+					data: data,
+				});
+
+				console.log(`Asset update: ${assetUpdateId}`);
 
 				setResponse({ status: 'success', message: 'Post saved!' });
 			} catch (e: any) {
-				setResponse({ status: 'warning', message: e });
+				setResponse({ status: 'warning', message: e.message ?? 'Error creating post' });
 			}
 			setLoading(false);
 		}

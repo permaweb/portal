@@ -116,7 +116,7 @@ export default function Landing() {
 					<Button
 						type={'primary'}
 						label={language.createPortal}
-						handlePress={() => portalProvider.setShowPortalManager(true)}
+						handlePress={() => portalProvider.setShowPortalManager(true, true)}
 						disabled={disabled}
 						icon={ASSETS.add}
 						iconLeftAlign

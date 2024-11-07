@@ -57,7 +57,7 @@ export const StatusAction = styled.div<{ status: ArticleStatusType }>`
 `;
 
 export const Panel = styled.div<{ open: boolean }>`
-	width: 300px;
+	width: 330px;
 	position: absolute;
 	right: 0;
 	z-index: 1;

@@ -4,7 +4,8 @@ import { open, transition1 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div<{ warning: boolean | undefined }>`
-	width: 375px;
+	min-width: 375px;
+	max-width: 50vw;
 	position: fixed;
 	left: 50%;
 	bottom: 20px;
@@ -14,6 +15,7 @@ export const Wrapper = styled.div<{ warning: boolean | undefined }>`
 	display: flex;
 	align-items: center;
 	padding: 11.5px 17.5px;
+	gap: 20px;
 	background: ${(props) => (props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.indicator.active)};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
@@ -23,7 +25,6 @@ export const Wrapper = styled.div<{ warning: boolean | undefined }>`
 
 export const Message = styled.span`
 	display: block;
-	max-width: 65%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;

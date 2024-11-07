@@ -11,6 +11,7 @@ import { ArticleBlockEnum } from 'helpers/types';
 import { checkWindowCutoff } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
+import { ArticleToolbarPost } from './ArticleToolbarPost';
 import * as S from './styles';
 import { IProps } from './types';
 
@@ -18,7 +19,7 @@ export default function ArticleToolbar(props: IProps) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const TABS = [{ label: language.blocks }]; // TODO: { label: 'Post' }
+	const TABS = [{ label: language.post }, { label: language.blocks }];
 
 	const titleRef = React.useRef<any>(null);
 	const blockRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
@@ -307,7 +308,7 @@ export default function ArticleToolbar(props: IProps) {
 					</S.BADropdownBody>
 				);
 			case 'Post':
-				return <p>Post actions</p>;
+				return <ArticleToolbarPost />;
 			default:
 				return null;
 		}

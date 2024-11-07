@@ -38,6 +38,12 @@ export default function Button(props: IProps) {
 					icon: S.IconAlt2,
 				};
 				break;
+			case 'alt3':
+				buttonObj = {
+					wrapper: S.Alt3,
+					icon: S.IconAlt3,
+				};
+				break;
 			default:
 				buttonObj = {
 					wrapper: S.Primary,

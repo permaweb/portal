@@ -4,6 +4,16 @@ import { ReactSVG } from 'react-svg';
 import { Avatar } from 'components/atoms/Avatar';
 import { Modal } from 'components/molecules/Modal';
 import { ASSETS } from 'helpers/config';
+import {
+	darkTheme,
+	darkThemeAlt1,
+	darkThemeAlt2,
+	darkThemeHighContrast,
+	lightTheme,
+	lightThemeAlt1,
+	lightThemeAlt2,
+	lightThemeHighContrast,
+} from 'helpers/themes';
 import { formatAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -66,20 +76,60 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 			label: 'Light themes',
 			icon: ASSETS.light,
 			variants: [
-				{ id: 'light-primary', name: 'Light default' },
-				{ id: 'light-high-contrast', name: 'Light high contrast' },
-				{ id: 'light-alt-1', name: 'Daybreak' },
-				{ id: 'light-alt-2', name: 'Sunlit' },
+				{
+					id: 'light-primary',
+					name: 'Light default',
+					background: lightTheme.neutral1,
+					accent1: lightTheme.primary1,
+				},
+				{
+					id: 'light-high-contrast',
+					name: 'Light high contrast',
+					background: lightThemeHighContrast.neutral1,
+					accent1: lightThemeHighContrast.neutral9,
+				},
+				{
+					id: 'light-alt-2',
+					name: 'Daybreak',
+					background: lightThemeAlt2.neutral1,
+					accent1: lightThemeAlt2.primary1,
+				},
+				{
+					id: 'light-alt-1',
+					name: 'Sunlit',
+					background: lightThemeAlt1.neutral1,
+					accent1: lightThemeAlt1.primary1,
+				},
 			],
 		},
 		dark: {
 			label: 'Dark themes',
 			icon: ASSETS.dark,
 			variants: [
-				{ id: 'dark-primary', name: 'Dark default' },
-				{ id: 'dark-high-contrast', name: 'Dark high contrast' },
-				{ id: 'dark-alt-1', name: 'Eclipse' },
-				{ id: 'dark-alt-2', name: 'Midnight' },
+				{
+					id: 'dark-primary',
+					name: 'Dark default',
+					background: darkTheme.neutral1,
+					accent1: darkTheme.primary1,
+				},
+				{
+					id: 'dark-high-contrast',
+					name: 'Dark high contrast',
+					background: darkThemeHighContrast.neutral1,
+					accent1: darkThemeHighContrast.neutralA1,
+				},
+				{
+					id: 'dark-alt-1',
+					name: 'Eclipse',
+					background: darkThemeAlt1.neutral1,
+					accent1: darkThemeAlt1.primary1,
+				},
+				{
+					id: 'dark-alt-2',
+					name: 'Midnight',
+					background: darkThemeAlt2.neutral1,
+					accent1: darkThemeAlt2.primary1,
+				},
 			],
 		},
 	};
@@ -143,11 +193,15 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 									{theme.variants.map((variant) => (
 										<S.ThemeSectionBodyElement
 											key={variant.id}
-											className={'border-wrapper-primary'}
 											onClick={() => updateSettings('theme', variant.id as any)}
 										>
-											<S.Indicator active={settings.theme === variant.id} />
-											<p>{variant.name}</p>
+											<S.Preview background={variant.background} accent={variant.accent1}>
+												<div id={'preview-accent-1'} />
+											</S.Preview>
+											<div>
+												<S.Indicator active={settings.theme === variant.id} />
+												<p>{variant.name}</p>
+											</div>
 										</S.ThemeSectionBodyElement>
 									))}
 								</S.ThemeSectionBody>

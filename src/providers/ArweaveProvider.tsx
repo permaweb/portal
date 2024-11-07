@@ -1,14 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { getProfileByWalletAddress } from '@permaweb/libs';
+import { getProfileByWalletAddress, ProfileType } from '@permaweb/libs';
 
 import { Modal } from 'components/molecules/Modal';
 import { Panel } from 'components/molecules/Panel';
 import { ProfileManager } from 'components/organisms/ProfileManager';
 import { ASSETS, URLS } from 'helpers/config';
 import { getARBalanceEndpoint } from 'helpers/endpoints';
-import { ProfileType, WalletEnum } from 'helpers/types';
+import { WalletEnum } from 'helpers/types';
 import Othent from 'helpers/wallet';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -133,7 +133,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		(async function () {
 			if (wallet && walletAddress) {
 				try {
-					setProfile(await getProfileByWalletAddress({ address: walletAddress }));
+					setProfile(await getProfileByWalletAddress(walletAddress));
 				} catch (e: any) {
 					console.error(e);
 				}
@@ -152,7 +152,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					while (!changeDetected && tries < maxTries) {
 						try {
 							const existingProfile = profile;
-							const newProfile = await getProfileByWalletAddress({ address: walletAddress });
+							const newProfile = await getProfileByWalletAddress(walletAddress);
 
 							if (JSON.stringify(existingProfile) !== JSON.stringify(newProfile)) {
 								setProfile(newProfile);

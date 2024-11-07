@@ -182,26 +182,28 @@ export const ThemeSectionHeader = styled.div`
 export const ThemeSectionBody = styled.div`
 	display: flex;
 	flex-wrap: wrap;
-	gap: 15px;
+	gap: 20px;
 `;
 
 export const ThemeSectionBodyElement = styled.button`
-	padding: 10px 17.5px;
+	width: 175px;
 
 	display: flex;
-	align-items: center;
-	gap: 12.5px;
+	flex-direction: column;
+	gap: 10px;
 
-	p {
-		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.small} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
-		font-family: ${(props) => props.theme.typography.family.primary} !important;
-	}
+	border-radius: ${STYLING.dimensions.radius.alt3} !important;
 
-	&:hover {
-		background: ${(props) => props.theme.colors.container.primary.active};
-		border: 1px solid ${(props) => props.theme.colors.border.alt2};
+	div {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		p {
+			color: ${(props) => props.theme.colors.font.primary};
+			font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+			font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+			font-family: ${(props) => props.theme.typography.family.primary} !important;
+		}
 	}
 `;
 
@@ -209,6 +211,25 @@ export const Indicator = styled.div<{ active: boolean }>`
 	height: 12.5px;
 	width: 12.5px;
 	border-radius: 50%;
-	border: 1px solid ${(props) => props.theme.colors.border.alt4};
 	background: ${(props) => (props.active ? props.theme.colors.indicator.active : 'transparent')};
+	border: 1px solid ${(props) => props.theme.colors.border.alt4};
+`;
+
+export const Preview = styled.div<{ background: string; accent: string }>`
+	position: relative;
+	height: 100px;
+	width: 100%;
+	border-radius: ${STYLING.dimensions.radius.primary};
+	background: ${(props) => props.background};
+	border: 1.25px solid ${(props) => props.theme.colors.border.alt4};
+
+	#preview-accent-1 {
+		height: 32.5px;
+		width: 32.5px;
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		border-radius: ${STYLING.dimensions.radius.alt2};
+		background: ${(props) => props.accent};
+	}
 `;

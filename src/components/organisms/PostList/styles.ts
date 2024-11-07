@@ -21,7 +21,7 @@ export const Wrapper = styled.div`
 
 export const PostWrapper = styled.div`
 	display: flex;
-	padding: 10px 15px;
+	padding: 12.5px 15px;
 	justify-content: space-between;
 	align-items: center;
 	flex-wrap: wrap;
@@ -88,21 +88,14 @@ export const PostDetail = styled.div`
 
 export const PostActions = styled.div`
 	display: flex;
-	gap: 10px;
-
-	button {
-		padding: 0 10px !important;
-		span {
-			font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
-			font-weight: ${(props) => props.theme.typography.weight.bold} !important;
-		}
-	}
+	gap: 12.5px;
+	margin: 0 -4.5px 0 0;
 `;
 
 export const PostStatus = styled.div<{ status: ArticleStatusType }>`
 	display: flex;
 	align-items: center;
-	gap: 5px;
+	gap: 7.5px;
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};

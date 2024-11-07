@@ -14,7 +14,7 @@ interface PortalContextState {
 	portals: PortalHeaderType[] | null;
 	current: PortalDetailType | null;
 	showPortalManager: boolean;
-	setShowPortalManager: (toggle: boolean) => void;
+	setShowPortalManager: (toggle: boolean, useNew?: boolean) => void;
 }
 
 const DEFAULT_CONTEXT = {
@@ -30,7 +30,6 @@ export function usePortalProvider(): PortalContextState {
 	return React.useContext(PortalContext);
 }
 
-// TODO: Create new portal from home page selects current portal
 export function PortalProvider(props: { children: React.ReactNode }) {
 	const location = useLocation();
 
@@ -43,6 +42,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [current, setCurrent] = React.useState<PortalDetailType | null>(null);
 
 	const [showPortalManager, setShowPortalManager] = React.useState<boolean>(false);
+	const [createNewPortal, setCreateNewPortal] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
 		if (arProvider.profile) {
@@ -86,9 +86,16 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [location.pathname, portals]);
 
+	function handleShowPortalManager(toggle: boolean, useNew?: boolean) {
+		setShowPortalManager(toggle);
+		setCreateNewPortal(useNew ?? false);
+	}
+
 	return (
 		<>
-			<PortalContext.Provider value={{ portals, current, showPortalManager, setShowPortalManager }}>
+			<PortalContext.Provider
+				value={{ portals, current, showPortalManager, setShowPortalManager: handleShowPortalManager }}
+			>
 				{props.children}
 				<Panel
 					open={showPortalManager}
@@ -96,7 +103,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					handleClose={() => setShowPortalManager(false)}
 					width={500}
 				>
-					<PortalManager portal={current} handleClose={() => setShowPortalManager(false)} handleUpdate={null} />
+					<PortalManager
+						portal={createNewPortal ? null : current}
+						handleClose={() => setShowPortalManager(false)}
+						handleUpdate={null}
+					/>
 				</Panel>
 			</PortalContext.Provider>
 		</>

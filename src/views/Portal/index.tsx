@@ -26,7 +26,6 @@ export default function Portal() {
 					label={language.createPost}
 					handlePress={() => navigate(URLS.postCreateArticle(portalProvider.current.id))}
 					disabled={!portalProvider.current}
-					height={37.5}
 					icon={ASSETS.add}
 					iconLeftAlign
 				/>
