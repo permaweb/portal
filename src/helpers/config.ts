@@ -104,6 +104,7 @@ function createURLs() {
 
 	const portalBase = (portalId: string) => `${base}${portalId}/`;
 	const postCreateBase = (portalId: string) => `${base}${portalId}/${post}create/`;
+	const postEditBase = (portalId: string) => `${base}${portalId}/${post}edit/`;
 
 	return {
 		base: base,
@@ -114,9 +115,13 @@ function createURLs() {
 		portalUsers: (portalId: string) => `${portalBase(portalId)}users/`,
 		portalSettings: (portalId: string) => `${portalBase(portalId)}settings/`,
 		postCreate: (portalId: string) => `${postCreateBase(portalId)}`,
+		postEdit: (portalId: string) => `${postEditBase(portalId)}`,
 		postCreateArticle: (portalId: string) => `${postCreateBase(portalId)}article/`,
 		postCreateImage: (portalId: string) => `${postCreateBase(portalId)}image/`,
 		postCreateVideo: (portalId: string) => `${postCreateBase(portalId)}video/`,
+		postEditArticle: (portalId: string) => `${postEditBase(portalId)}article/`,
+		postEditImage: (portalId: string) => `${postEditBase(portalId)}image/`,
+		postEditVideo: (portalId: string) => `${postEditBase(portalId)}video/`,
 		docs: `${base}docs/`,
 		notFound: `${base}404`,
 	};

@@ -1,16 +1,18 @@
 import React from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
-import { aoSend, createAtomicAsset } from '@permaweb/libs';
+import { aoDryRun, aoSend, createAtomicAsset } from '@permaweb/libs';
 
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
-import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
+import { ARTICLE_BLOCKS, ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { ArticleBlockEnum, ArticleBlockType, ArticleStatusType, NotificationType } from 'helpers/types';
+import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
@@ -134,12 +136,15 @@ function Block(props: {
 	);
 }
 
-// TODO: Post edit - Remove existing asset from kv store and replace
+// TODO: Post edit
 // TODO: Links
 // TODO: Topics
 // TODO: React dnd replacement
 // TODO: Media upload
-export default function Article() {
+export default function ArticleEditor() {
+	const navigate = useNavigate();
+	const { assetId } = useParams<{ assetId?: string }>();
+
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 
@@ -157,8 +162,40 @@ export default function Article() {
 	const [postTitle, setPostTitle] = React.useState<string>('');
 	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
 
-	const [loading, setLoading] = React.useState<boolean>(false);
+	const [loading, setLoading] = React.useState<{ active: boolean; message: string | null }>({
+		active: false,
+		message: null,
+	});
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
+
+	// TODO: Auth on post
+	React.useEffect(() => {
+		(async function () {
+			if (portalProvider.current?.id) {
+				if (assetId) {
+					if (!checkValidAddress(assetId)) navigate(URLS.postCreateArticle(portalProvider.current.id));
+
+					setLoading({ active: true, message: `${language.loadingPost}...` });
+					try {
+						const response = await aoDryRun({
+							processId: assetId,
+							action: 'Get-Post',
+						});
+
+						if (response) {
+							if (response.content?.length > 0) setBlocks(response.content);
+							if (response.status) setStatus(response.status);
+						}
+					} catch (e: any) {
+						console.error(e);
+					}
+					setLoading({ active: false, message: null });
+				} else {
+					console.log('Create new post');
+				}
+			}
+		})();
+	}, [assetId, portalProvider.current]);
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -270,7 +307,7 @@ export default function Article() {
 	// TODO: Validation (topics)
 	async function handleSubmit() {
 		if (arProvider.wallet && arProvider.profile?.id && portalProvider.current?.id) {
-			setLoading(true);
+			setLoading({ active: true, message: `${language.savingPost}...` });
 			try {
 				console.log('Creating asset...');
 
@@ -324,7 +361,7 @@ export default function Article() {
 			} catch (e: any) {
 				setResponse({ status: 'warning', message: e.message ?? 'Error creating post' });
 			}
-			setLoading(false);
+			setLoading({ active: false, message: null });
 		}
 	}
 
@@ -465,12 +502,12 @@ export default function Article() {
 						handleInitAddBlock={(e) => handleKeyAddBlock(e)}
 						handleSubmit={handleSubmit}
 						submitDisabled={getSubmitDisabled()}
-						loading={loading}
+						loading={loading.active}
 					/>
 				</S.ToolbarWrapper>
 				<S.EditorWrapper panelOpen={panelOpen}>{editor}</S.EditorWrapper>
 			</S.Wrapper>
-			{loading && <Loader message={`${language.savingPost}...`} />}
+			{loading.active && <Loader message={loading.message} />}
 			{response && (
 				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
 			)}

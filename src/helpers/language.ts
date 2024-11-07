@@ -39,6 +39,8 @@ export const language = {
 		image: `Image`,
 		layout: `Layout`,
 		loading: `Loading`,
+		loadingPortal: `Loading your portal`,
+		loadingPost: `Loading post`,
 		maxCharsReached: `Max chars reached`,
 		media: `Media`,
 		moreActions: `More actions`,

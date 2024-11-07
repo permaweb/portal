@@ -4,7 +4,6 @@ import { Route, Routes } from 'react-router-dom';
 const Landing = getLazyImport('Landing');
 const Portal = getLazyImport('Portal');
 const PostCreate = getLazyImport('Portal/Post/Create');
-const ArticleCreate = getLazyImport('Portal/Post/Create/Article');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
 
@@ -14,6 +13,7 @@ import { Navigation } from 'navigation/Navigation';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { useSettingsProvider } from 'providers/SettingsProvider';
+import { ArticleEditor } from 'views/Portal/Post/Editors/ArticleEditor';
 
 import * as S from './styles';
 
@@ -52,7 +52,7 @@ export default function App() {
 								{language.app} {new Date().getFullYear()}
 							</p>
 						</S.Footer>
-						{!portalProvider.current && <Loader message={'Fetching your portal...'} />}
+						{!portalProvider.current && <Loader message={`${language.loadingPortal}...`} />}
 					</>
 				}
 			/>
@@ -70,7 +70,8 @@ export default function App() {
 						{getRoute(URLS.base, <Landing />)}
 						{getRoute(`${URLS.base}:portalId`, <Portal />)}
 						{getRoute(`${URLS.base}:portalId/post/create`, <PostCreate />)}
-						{getRoute(`${URLS.base}:portalId/post/create/article`, <ArticleCreate />)}
+						{getRoute(`${URLS.base}:portalId/post/create/article`, <ArticleEditor />)}
+						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <ArticleEditor />)}
 						{getRoute(URLS.docs, <Docs />)}
 						{getRoute(`${URLS.docs}:active/*`, <Docs />)}
 						{getRoute(URLS.notFound, <NotFound />)}

@@ -1,12 +1,13 @@
-import { useMemo } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
 import { AssetHeaderType, formatDate } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
-import { IconButton } from 'components/atoms/IconButton';
+// import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
-import { ASSETS } from 'helpers/config';
+import { ASSETS, URLS } from 'helpers/config';
 import { ArticleStatusType } from 'helpers/types';
 import { getTagValue } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -15,13 +16,14 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import * as S from './styles';
 
 export default function PostList() {
+	const navigate = useNavigate();
+
 	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const posts = useMemo(() => {
-		console.log(portalProvider.current);
+	const posts = React.useMemo(() => {
 		if (!portalProvider.current?.assets) {
 			return (
 				<S.LoadingWrapper>
@@ -36,7 +38,7 @@ export default function PostList() {
 			);
 		}
 
-		return (
+		return portalProvider.current?.id ? (
 			<S.Wrapper>
 				{portalProvider.current.assets
 					.sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())
@@ -57,14 +59,14 @@ export default function PostList() {
 										<Button
 											type={'alt3'}
 											label={language.edit}
-											handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
+											handlePress={() => navigate(`${URLS.postEditArticle(portalProvider.current.id)}${asset.id}`)}
 										/>
 										<Button
 											type={'alt3'}
 											label={language.view}
 											handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
 										/>
-										<IconButton
+										{/* <IconButton
 											type={'primary'}
 											active={false}
 											src={ASSETS.listUnordered}
@@ -72,7 +74,7 @@ export default function PostList() {
 											dimensions={{ wrapper: 23.5, icon: 13.5 }}
 											tooltip={language.moreActions}
 											tooltipPosition={'bottom-right'}
-										/>
+										/> */}
 									</S.PostActions>
 									{status && (
 										<S.PostStatus status={status as ArticleStatusType}>
@@ -85,7 +87,7 @@ export default function PostList() {
 						);
 					})}
 			</S.Wrapper>
-		);
+		) : null;
 	}, [portalProvider, languageProvider, portalProvider.current?.assets, language]);
 
 	return posts;

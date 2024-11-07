@@ -196,7 +196,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				</S.PortalWrapper>
 			);
 		}
-		return null;
+		return <Loader sm relative />;
 	}, [showPortalDropdown, portalProvider.portals, portalProvider.current]);
 
 	return (
