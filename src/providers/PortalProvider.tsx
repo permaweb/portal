@@ -65,6 +65,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								id: currentPortal.id,
 								name: currentPortalFetch.store?.name || 'None',
 								logo: currentPortalFetch.store?.logo || 'None',
+								assets: [],
 							};
 
 							if (currentPortalFetch.assets && currentPortalFetch.assets.length > 0) {

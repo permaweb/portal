@@ -269,7 +269,7 @@ export default function Article() {
 	// TODO: Clean blocks
 	// TODO: Validation (topics)
 	async function handleSubmit() {
-		if (arProvider.wallet && portalProvider.current) {
+		if (arProvider.wallet && arProvider.profile?.id && portalProvider.current?.id) {
 			setLoading(true);
 			try {
 				console.log('Creating asset...');
@@ -292,9 +292,9 @@ export default function Article() {
 						topics: topics?.length ? topics.map((topic: any) => topic.label) : ['Topic 1'],
 						data: dataSrc,
 						contentType: 'text/html',
-						creator: portalProvider.current.id,
+						creator: arProvider.profile.id,
 						tags: [{ name: 'Status', value: status }],
-						src: 'NDkzQN-eKWeJr5Be8iPbP1fv9LoT81jp6XTt6fuHjBY',
+						src: '3frPHzA6W7ceSEyg1feJ2NqtHcAGq7uMAZan4QIPBBU',
 					},
 					arProvider.wallet,
 					(status) => console.log(status)
@@ -302,14 +302,23 @@ export default function Article() {
 
 				console.log(`Asset: ${assetId}`);
 
-				const assetUpdateId = await aoSend({
+				const assetContentUpdateId = await aoSend({
 					processId: assetId,
 					wallet: arProvider.wallet,
 					action: 'Update-Post',
 					data: data,
 				});
 
-				console.log(`Asset update: ${assetUpdateId}`);
+				console.log(`Asset content update: ${assetContentUpdateId}`);
+
+				const assetHoldersUpdateId = await aoSend({
+					processId: assetId,
+					wallet: arProvider.wallet,
+					action: 'Update-Post-Balance-Holders',
+					data: { Recipients: [portalProvider.current.id] },
+				});
+
+				console.log(`Asset holders update: ${assetHoldersUpdateId}`);
 
 				setResponse({ status: 'success', message: 'Post saved!' });
 			} catch (e: any) {

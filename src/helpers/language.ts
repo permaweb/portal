@@ -43,6 +43,7 @@ export const language = {
 		media: `Media`,
 		moreActions: `More actions`,
 		name: `Name`,
+		noPostsFound: `No posts found`,
 		pageNotFound: `Page not found`,
 		portals: `Portals`,
 		portalCreate: `Create a new portal`,
