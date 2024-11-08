@@ -1,7 +1,7 @@
 import React from 'react';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 import { aoDryRun, aoSend, createAtomicAsset } from '@permaweb/libs';
 
@@ -84,55 +84,74 @@ function Block(props: {
 			break;
 	}
 
-	return (
-		<Draggable draggableId={props.block.id} index={props.index}>
-			{(provided) => (
-				<S.ElementDragWrapper ref={provided.innerRef} {...provided.draggableProps} onFocus={props.onFocus}>
-					{props.blockEditMode && (
+	// Conditionally render Draggable only if blockEditMode is true
+	if (props.blockEditMode) {
+		return (
+			<Draggable draggableId={props.block.id} index={props.index}>
+				{(provided) => (
+					<S.ElementDragWrapper
+						ref={provided.innerRef}
+						{...provided.draggableProps}
+						{...provided.dragHandleProps}
+						onFocus={props.onFocus}
+					>
 						<S.EDragWrapper>
-							<S.EDragHandler {...provided.dragHandleProps} tabIndex={-1}>
+							<S.EDragHandler tabIndex={-1}>
 								<ReactSVG src={ASSETS.drag} />
 							</S.EDragHandler>
 						</S.EDragWrapper>
-					)}
-					<S.ElementWrapper className={'fade-in'}>
-						{props.blockEditMode && (
-							<>
-								<S.ElementToolbar tabIndex={-1}>
-									<S.EToolbarHeader>
-										<span>{ARTICLE_BLOCKS[props.block.type].label}</span>
-									</S.EToolbarHeader>
-									<S.EToolbarDelete>
-										<IconButton
-											type={'primary'}
-											active={false}
-											src={ASSETS.delete}
-											handlePress={() => props.onDeleteBlock(props.block.id)}
-											dimensions={{ wrapper: 23.5, icon: 13.5 }}
-											tooltip={language.deleteBlock}
-											tooltipPosition={'bottom-right'}
-											noFocus
-										/>
-									</S.EToolbarDelete>
-								</S.ElementToolbar>
-							</>
-						)}
-						<S.Element blockEditMode={props.blockEditMode} type={props.block.type}>
-							{useCustom ? (
-								element
-							) : (
-								<ContentEditable
-									element={element}
-									value={props.block.content}
-									onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
-									autoFocus={props.autoFocus}
-								/>
-							)}
-						</S.Element>
-					</S.ElementWrapper>
-				</S.ElementDragWrapper>
-			)}
-		</Draggable>
+						<S.ElementWrapper className={'fade-in'}>
+							<S.ElementToolbar tabIndex={-1}>
+								<S.EToolbarHeader>
+									<span>{ARTICLE_BLOCKS[props.block.type].label}</span>
+								</S.EToolbarHeader>
+								<S.EToolbarDelete>
+									<IconButton
+										type={'primary'}
+										active={false}
+										src={ASSETS.delete}
+										handlePress={() => props.onDeleteBlock(props.block.id)}
+										dimensions={{ wrapper: 23.5, icon: 13.5 }}
+										tooltip={language.deleteBlock}
+										tooltipPosition={'bottom-right'}
+										noFocus
+									/>
+								</S.EToolbarDelete>
+							</S.ElementToolbar>
+							<S.Element blockEditMode={props.blockEditMode} type={props.block.type}>
+								{useCustom ? (
+									element
+								) : (
+									<ContentEditable
+										element={element}
+										value={props.block.content}
+										onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
+										autoFocus={props.autoFocus}
+									/>
+								)}
+							</S.Element>
+						</S.ElementWrapper>
+					</S.ElementDragWrapper>
+				)}
+			</Draggable>
+		);
+	}
+
+	return (
+		<S.ElementWrapper onFocus={props.onFocus} className={'fade-in'}>
+			<S.Element blockEditMode={props.blockEditMode} type={props.block.type}>
+				{useCustom ? (
+					element
+				) : (
+					<ContentEditable
+						element={element}
+						value={props.block.content}
+						onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
+						autoFocus={props.autoFocus}
+					/>
+				)}
+			</S.Element>
+		</S.ElementWrapper>
 	);
 }
 
@@ -158,7 +177,7 @@ export default function ArticleEditor() {
 	const [focusedBlock, setFocusedBlock] = React.useState<ArticleBlockType | null>(null);
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
-	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(false);
+	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
 	const [postTitle, setPostTitle] = React.useState<string>('');
 	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
 

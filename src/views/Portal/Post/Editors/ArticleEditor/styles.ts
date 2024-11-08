@@ -61,6 +61,7 @@ export const ElementWrapper = styled.div`
 	flex-direction: column;
 	gap: 5px;
 	position: relative;
+	cursor: default;
 `;
 
 function getElementPadding(type: ArticleBlockEnum) {
@@ -109,9 +110,12 @@ function getElementWrapper(blockEditMode: boolean, type: ArticleBlockEnum, theme
 export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEnum }>`
 	${(props) => getElementWrapper(props.blockEditMode, props.type, props.theme)};
 
+	cursor: text;
+
 	p {
 		font-size: ${(props) => props.theme.typography.size.base};
 	}
+
 	blockquote {
 		font-family: Georgia, serif;
 		font-style: italic;
