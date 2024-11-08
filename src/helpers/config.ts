@@ -1,12 +1,12 @@
 import { getTxEndpoint } from './endpoints';
 import { ArticleBlockEnum } from './types';
 
-export const AO = {
-	module: 'Pq2Zftrqut0hdisH_MC2pDOT6S4eQFoxGsFUzR6r350',
-	scheduler: '_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA',
-	profileRegistry: 'SNy4m-DrqxWl01YqGM4sxI8qCni-58re8uuJLvZPypY',
-	profileSrc: 'pbrl1fkS3_SZP3RqqPIjbt3-f81L9vIpV2_OnUmxqGQ',
-};
+// export const AO = {
+// 	module: 'Pq2Zftrqut0hdisH_MC2pDOT6S4eQFoxGsFUzR6r350',
+// 	scheduler: '_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA',
+// 	profileRegistry: 'SNy4m-DrqxWl01YqGM4sxI8qCni-58re8uuJLvZPypY',
+// 	profileSrc: 'pbrl1fkS3_SZP3RqqPIjbt3-f81L9vIpV2_OnUmxqGQ',
+// };
 
 export const ASSETS = {
 	add: getTxEndpoint('RLWnDhoB0Dd_X-sLnNy4w2S7ds3l9591HcHK8nc3YRw'),
@@ -59,6 +59,15 @@ export const ASSETS = {
 	video: getTxEndpoint('T2astk8vaCBLLP8PD2rXgLKbwhNYkdHXllXvGbk-Wps'),
 	wallet: getTxEndpoint('_t97i0BzskALIFERWR6iDs_uX7U6bbd4-3Pqq3HDkfI'),
 	write: getTxEndpoint('SUWTk8Qtcub9EsP5PDF6-vzgKsP5Irg1bB9b8NImDDk'),
+};
+
+export const ASSET_UPLOAD = {
+	src: {
+		data: 'lBWtTMWN-jtrecImXZsQ7noVQ9pofTjGBqsfwjdVApg',
+		process: '2V8WnljDug2oa-b0F5jslqBTqmxZ63LLtg8uyjjRJx0',
+	},
+	ansType: 'blog-post',
+	contentType: 'text/html',
 };
 
 export const DOM = {

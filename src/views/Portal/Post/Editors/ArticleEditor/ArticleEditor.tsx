@@ -9,7 +9,7 @@ import { ContentEditable } from 'components/atoms/ContentEditable';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
-import { ARTICLE_BLOCKS, ASSETS, URLS } from 'helpers/config';
+import { ARTICLE_BLOCKS, ASSET_UPLOAD, ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { ArticleBlockEnum, ArticleBlockType, ArticleStatusType, NotificationType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
@@ -169,6 +169,7 @@ export default function ArticleEditor() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	const [title, setTitle] = React.useState<string>('');
 	const [status, setStatus] = React.useState<ArticleStatusType>('draft');
 	const [topics, setTopics] = React.useState<{ label: string; link?: string }[]>([]);
 	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
@@ -177,7 +178,6 @@ export default function ArticleEditor() {
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
 	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
-	const [postTitle, setPostTitle] = React.useState<string>('');
 	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
 
 	const [loading, setLoading] = React.useState<{ active: boolean; message: string | null }>({
@@ -187,7 +187,6 @@ export default function ArticleEditor() {
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
 
 	// TODO: Auth on post
-	// TODO: Return post title from get post
 	React.useEffect(() => {
 		(async function () {
 			if (portalProvider.current?.id) {
@@ -202,8 +201,9 @@ export default function ArticleEditor() {
 						});
 
 						if (response) {
-							if (response.content?.length > 0) setBlocks(response.content);
+							if (response.title) setTitle(response.title);
 							if (response.status) setStatus(response.status);
+							if (response.content?.length > 0) setBlocks(response.content);
 						}
 					} catch (e: any) {
 						console.error(e);
@@ -315,11 +315,7 @@ export default function ArticleEditor() {
 
 	function getSubmitDisabled() {
 		return (
-			!postTitle ||
-			postTitle.length <= 0 ||
-			!blocks ||
-			blocks.length <= 0 ||
-			!blocks.some((block) => block.content.length > 0)
+			!title || title.length <= 0 || !blocks || blocks.length <= 0 || !blocks.some((block) => block.content.length > 0)
 		);
 	}
 
@@ -328,58 +324,77 @@ export default function ArticleEditor() {
 	async function handleSubmit() {
 		if (arProvider.wallet && arProvider.profile?.id && portalProvider.current?.id) {
 			setLoading({ active: true, message: `${language.savingPost}...` });
-			try {
-				console.log('Creating asset...');
 
-				const data = {
-					Status: status,
-					Content: blocks,
-					Topics: topics,
-					Categories: [{ label: 'Category 1', link: 'https://test.com' }],
-				};
+			const data = {
+				Title: title,
+				Status: status,
+				Content: blocks,
+				Topics: topics,
+				Categories: [{ label: 'Category 1', link: 'https://test.com' }],
+			};
 
-				const assetDataFetch = await fetch(getTxEndpoint('lBWtTMWN-jtrecImXZsQ7noVQ9pofTjGBqsfwjdVApg'));
-				const dataSrc = await assetDataFetch.text();
+			if (assetId) {
+				try {
+					const assetContentUpdateId = await aoSend({
+						processId: assetId,
+						wallet: arProvider.wallet,
+						action: 'Update-Post',
+						data: data,
+					});
 
-				const assetId = await createAtomicAsset(
-					{
-						title: postTitle,
-						description: postTitle,
-						type: 'Article',
-						topics: topics?.length ? topics.map((topic: any) => topic.label) : ['Topic 1'],
-						data: dataSrc,
-						contentType: 'text/html',
-						creator: arProvider.profile.id,
-						tags: [{ name: 'Status', value: status }],
-						src: '3frPHzA6W7ceSEyg1feJ2NqtHcAGq7uMAZan4QIPBBU',
-					},
-					arProvider.wallet,
-					(status) => console.log(status)
-				);
+					console.log(`Asset content update: ${assetContentUpdateId}`);
 
-				console.log(`Asset: ${assetId}`);
+					setResponse({ status: 'success', message: 'Post updated!' });
+				} catch (e: any) {
+					setResponse({ status: 'warning', message: e.message ?? 'Error updating post' });
+				}
+			} else {
+				try {
+					console.log('Creating asset...');
 
-				const assetContentUpdateId = await aoSend({
-					processId: assetId,
-					wallet: arProvider.wallet,
-					action: 'Update-Post',
-					data: data,
-				});
+					const assetDataFetch = await fetch(getTxEndpoint(ASSET_UPLOAD.src.data));
+					const dataSrc = await assetDataFetch.text();
 
-				console.log(`Asset content update: ${assetContentUpdateId}`);
+					const assetId = await createAtomicAsset(
+						{
+							title: title,
+							description: title,
+							type: ASSET_UPLOAD.ansType,
+							topics: topics?.length ? topics.map((topic: any) => topic.label) : ['Topic 1'],
+							data: dataSrc,
+							contentType: ASSET_UPLOAD.contentType,
+							creator: arProvider.profile.id,
+							tags: [{ name: 'Status', value: status }],
+							src: ASSET_UPLOAD.src.process,
+						},
+						arProvider.wallet,
+						(status) => console.log(status)
+					);
 
-				const assetHoldersUpdateId = await aoSend({
-					processId: assetId,
-					wallet: arProvider.wallet,
-					action: 'Update-Post-Balance-Holders',
-					data: { Recipients: [portalProvider.current.id] },
-				});
+					console.log(`Asset: ${assetId}`);
 
-				console.log(`Asset holders update: ${assetHoldersUpdateId}`);
+					const assetContentUpdateId = await aoSend({
+						processId: assetId,
+						wallet: arProvider.wallet,
+						action: 'Update-Post',
+						data: data,
+					});
 
-				setResponse({ status: 'success', message: 'Post saved!' });
-			} catch (e: any) {
-				setResponse({ status: 'warning', message: e.message ?? 'Error creating post' });
+					console.log(`Asset content update: ${assetContentUpdateId}`);
+
+					const assetHoldersUpdateId = await aoSend({
+						processId: assetId,
+						wallet: arProvider.wallet,
+						action: 'Update-Post-Balance-Holders',
+						data: { Recipients: [portalProvider.current.id] },
+					});
+
+					console.log(`Asset holders update: ${assetHoldersUpdateId}`);
+
+					setResponse({ status: 'success', message: 'Post saved!' });
+				} catch (e: any) {
+					setResponse({ status: 'warning', message: e.message ?? 'Error creating post' });
+				}
 			}
 			setLoading({ active: false, message: null });
 		}
@@ -508,8 +523,8 @@ export default function ArticleEditor() {
 			<S.Wrapper>
 				<S.ToolbarWrapper>
 					<ArticleToolbar
-						postTitle={postTitle}
-						setPostTitle={(value: string) => setPostTitle(value)}
+						postTitle={title}
+						setPostTitle={(value: string) => setTitle(value)}
 						status={status}
 						setStatus={(value: ArticleStatusType) => setStatus(value)}
 						addBlock={(type: ArticleBlockEnum) => addBlock(type)}
