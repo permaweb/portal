@@ -84,7 +84,6 @@ function Block(props: {
 			break;
 	}
 
-	// Conditionally render Draggable only if blockEditMode is true
 	if (props.blockEditMode) {
 		return (
 			<Draggable draggableId={props.block.id} index={props.index}>
@@ -94,6 +93,7 @@ function Block(props: {
 						{...provided.draggableProps}
 						{...provided.dragHandleProps}
 						onFocus={props.onFocus}
+						tabIndex={-1}
 					>
 						<S.EDragWrapper>
 							<S.EDragHandler tabIndex={-1}>
@@ -158,7 +158,6 @@ function Block(props: {
 // TODO: Post edit
 // TODO: Links
 // TODO: Topics
-// TODO: React dnd replacement
 // TODO: Media upload
 export default function ArticleEditor() {
 	const navigate = useNavigate();
@@ -281,13 +280,14 @@ export default function ArticleEditor() {
 				const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
 				const currentBlock = blocks[currentBlockIndex];
 
-				const isEmpty =
-					!currentBlock.content ||
-					currentBlock.content === '<br>' ||
-					currentBlock.content === '<li></li>' ||
-					currentBlock.content === '<li><br></li>';
+				const disabledNavigation =
+					!currentBlock.type ||
+					currentBlock.type === 'quote' ||
+					currentBlock.type === 'ordered-list' ||
+					currentBlock.type === 'unordered-list' ||
+					currentBlock.type === 'code';
 
-				if (isEmpty) {
+				if (!disabledNavigation) {
 					if (event.key === 'ArrowDown' && currentBlockIndex < blocks.length - 1) {
 						event.preventDefault();
 						const nextBlock = blocks[currentBlockIndex + 1];
