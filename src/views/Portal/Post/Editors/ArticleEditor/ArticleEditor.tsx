@@ -169,6 +169,7 @@ export default function ArticleEditor() {
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
 
 	// TODO: Auth on post
+	// TODO: Return post title from get post
 	React.useEffect(() => {
 		(async function () {
 			if (portalProvider.current?.id) {
@@ -384,7 +385,7 @@ export default function ArticleEditor() {
 	};
 
 	const addBlock = (type: ArticleBlockEnum) => {
-		if (loading) return;
+		if (loading.active) return;
 
 		let content: any = null;
 
