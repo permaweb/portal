@@ -29,10 +29,7 @@ export const Panel = styled.nav<{ open: boolean }>`
 	transform: translateX(${(props) => (props.open ? '0' : '-100%')});
 	transition: transform ${transition2};
 	background: ${(props) => props.theme.colors.container.alt1.background};
-
-	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		border-right: 1px solid ${(props) => props.theme.colors.border.alt4};
-	}
+	border-right: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
 export const PanelHeader = styled.div`

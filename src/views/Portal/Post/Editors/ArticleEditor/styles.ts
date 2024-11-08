@@ -56,7 +56,7 @@ export const ElementDragWrapper = styled.div`
 `;
 
 export const ElementWrapper = styled.div`
-	width: 100%;
+	width: calc(100% - 27.5px);
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
@@ -250,7 +250,9 @@ export const EToolbarDelete = styled.div`
 	}
 `;
 
-export const EDragWrapper = styled.div``;
+export const EDragWrapper = styled.div`
+	width: 17.5px;
+`;
 
 export const EDragHandler = styled.div`
 	svg {
