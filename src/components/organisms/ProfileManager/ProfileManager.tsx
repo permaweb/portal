@@ -233,7 +233,7 @@ export default function ProfileManager(props: IProps) {
 									/>
 								</S.TForm>
 								<TextArea
-									label={language.description}
+									label={language.bio}
 									value={description}
 									onChange={(e: any) => setDescription(e.target.value)}
 									disabled={loading}

@@ -12,6 +12,7 @@ export const Wrapper = styled.div<{
 	width: ${(props) => `${props.dimensions.wrapper.toString()}px`};
 	background: ${(props) =>
 		props.hasOwner ? props.theme.colors.container.primary.background : props.theme.colors.icon.alt1.fill};
+	background: transparent;
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-radius: 50%;
 	overflow: hidden;
@@ -30,7 +31,6 @@ export const Wrapper = styled.div<{
 		height: ${(props) => `${props.dimensions.icon.toString()}px`};
 		width: ${(props) => `${props.dimensions.icon.toString()}px`};
 		padding: 2.5px 0 0 0px;
-		margin: 0 0 -2.5px 0;
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
 	}

@@ -61,26 +61,18 @@ export default function PortalManager(props: IProps) {
 				}
 			}
 
-			const portalUpdateId = await updateZone(
-				{
-					zoneId: portalId,
-					data: data,
-				},
-				arProvider.wallet
-			);
+			const portalUpdateId = await updateZone(data, portalId, arProvider.wallet);
 
 			console.log(`Portal update: ${portalUpdateId}`);
 
 			const profileUpdateId = await updateZone(
 				{
-					zoneId: arProvider.profile.id,
-					data: {
-						[`portal:${portalId}`]: {
-							id: portalId,
-							...data,
-						},
+					[`portal:${portalId}`]: {
+						id: portalId,
+						...data,
 					},
 				},
+				arProvider.profile.id,
 				arProvider.wallet
 			);
 

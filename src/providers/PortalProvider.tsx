@@ -59,6 +59,14 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 					if (currentPortal && currentPortal.id) {
 						if (current && current.id && current.id !== currentPortal.id) setCurrent(null);
+
+						// TODO
+						// setCurrent({
+						// 	id: currentPortal.id,
+						// 	name: currentPortal.name,
+						// 	logo: currentPortal.logo ?? null
+						// });
+
 						const currentPortalFetch = await getZone(currentPortal.id);
 						if (currentPortalFetch) {
 							let data: PortalDetailType = {
@@ -66,12 +74,19 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								name: currentPortalFetch.store?.name || 'None',
 								logo: currentPortalFetch.store?.logo || 'None',
 								assets: [],
+								users: [
+									{ username: 'bob_crypto', displayName: 'Bob Smith', role: 'Contributor' },
+									{ username: 'carol_dev', displayName: 'Carol Williams', role: 'Admin' },
+									{ username: 'dave_builder', displayName: 'Dave Anderson', role: 'Contributor' },
+									{ username: 'eva_permaweb', displayName: 'Eva Martinez', role: 'Contributor' },
+								],
+								domains: ['stratpol', 'stratpol-staging'], // TODO
 							};
 
-							if (currentPortalFetch.assets && currentPortalFetch.assets.length > 0) {
-								const assetsFetch = await getAtomicAssets({
-									ids: currentPortalFetch.assets.map((asset: ZoneAssetType) => asset.id),
-								});
+							if (currentPortalFetch.assets?.length > 0) {
+								const assetsFetch = await getAtomicAssets(
+									currentPortalFetch.assets.map((asset: ZoneAssetType) => asset.id)
+								);
 								if (assetsFetch && assetsFetch.length > 0) data.assets = assetsFetch;
 							}
 
@@ -100,7 +115,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				{props.children}
 				<Panel
 					open={showPortalManager}
-					header={current && current.id ? language.editPortal : language.createPortal}
+					header={current && current.id && !createNewPortal ? language.editPortal : language.createPortal}
 					handleClose={() => setShowPortalManager(false)}
 					width={500}
 				>

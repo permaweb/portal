@@ -406,3 +406,18 @@ export const MNavWrapper = styled.div`
 		border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 	}
 `;
+
+export const LoadingWrapper = styled.div`
+	padding: 7.5px 16.5px;
+
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.lg} !important;
+		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		display: block;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+	}
+`;

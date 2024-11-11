@@ -13,6 +13,11 @@ export const Wrapper = styled.div`
 export const PWrapper = styled.div`
 	display: flex;
 	align-items: center;
+
+	svg {
+		padding: 2.5px 0 0 0;
+		margin: 2.5px 0 0 0;
+	}
 `;
 
 export const CAction = styled.div`
@@ -87,6 +92,11 @@ export const DHeaderFlex = styled.div`
 	margin: 15px 0 0 0;
 	padding: 0 5px 15px 5px;
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+
+	svg {
+		padding: 2.5px 0 0 0;
+		margin: 2.5px 0 0 0;
+	}
 `;
 
 export const DHeader = styled.div`

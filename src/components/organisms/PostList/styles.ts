@@ -127,6 +127,4 @@ export const WrapperEmpty = styled.div`
 	}
 `;
 
-export const LoadingWrapper = styled(WrapperEmpty)`
-	padding: 2.5px 15px;
-`;
+export const LoadingWrapper = styled(WrapperEmpty)``;

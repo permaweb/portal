@@ -7,6 +7,8 @@ export type PortalDetailType = {
 	name: string;
 	logo: string | null;
 	assets?: AssetHeaderType[];
+	users?: PortalUserType[];
+	domains?: string[];
 };
 
 export enum ArticleBlockEnum {
@@ -37,6 +39,13 @@ export type RegistryProfileType = {
 	avatar: string | null;
 	username: string;
 	bio?: string;
+};
+
+// TODO
+export type PortalUserType = {
+	username: string;
+	displayName: string;
+	role: string;
 };
 
 export type TagType = { name: string; value: string };

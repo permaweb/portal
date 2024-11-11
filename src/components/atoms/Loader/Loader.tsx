@@ -46,7 +46,7 @@ export default function Loader(props: IProps) {
 		return (
 			<Portal node={DOM.overlay}>
 				<div className={'overlay'}>
-					<S.MessageWrapper className={'info-text'}>
+					<S.MessageWrapper className={'info'}>
 						{getLoader(16.5, 5.5, 1.95, true, true)}
 						<span>{props.message}</span>
 					</S.MessageWrapper>

@@ -103,7 +103,7 @@ export default function Button(props: IProps) {
 		if (props.tooltip) {
 			return (
 				<S.Wrapper>
-					<S.Tooltip className={'info-text'} useBottom={true}>
+					<S.Tooltip className={'info'} useBottom={true}>
 						<span>{props.tooltip}</span>
 					</S.Tooltip>
 					{getAction()}

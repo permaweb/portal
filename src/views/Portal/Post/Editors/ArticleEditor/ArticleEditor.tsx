@@ -209,8 +209,6 @@ export default function ArticleEditor() {
 						console.error(e);
 					}
 					setLoading({ active: false, message: null });
-				} else {
-					console.log('Create new post');
 				}
 			}
 		})();
@@ -321,6 +319,8 @@ export default function ArticleEditor() {
 
 	// TODO: Clean blocks
 	// TODO: Validation (topics)
+	// TODO: Redirect to post edit on save
+	// TODO: Update portal assets on save
 	async function handleSubmit() {
 		if (arProvider.wallet && arProvider.profile?.id && portalProvider.current?.id) {
 			setLoading({ active: true, message: `${language.savingPost}...` });
@@ -344,9 +344,9 @@ export default function ArticleEditor() {
 
 					console.log(`Asset content update: ${assetContentUpdateId}`);
 
-					setResponse({ status: 'success', message: 'Post updated!' });
+					setResponse({ status: 'success', message: `${language.postUpdated}!` });
 				} catch (e: any) {
-					setResponse({ status: 'warning', message: e.message ?? 'Error updating post' });
+					setResponse({ status: 'warning', message: e.message ?? language.errorUpdatingPost });
 				}
 			} else {
 				try {
@@ -391,7 +391,8 @@ export default function ArticleEditor() {
 
 					console.log(`Asset holders update: ${assetHoldersUpdateId}`);
 
-					setResponse({ status: 'success', message: 'Post saved!' });
+					setResponse({ status: 'success', message: `${language.postSaved}!` });
+					navigate(`${URLS.postEditArticle(portalProvider.current.id)}${assetId}`);
 				} catch (e: any) {
 					setResponse({ status: 'warning', message: e.message ?? 'Error creating post' });
 				}

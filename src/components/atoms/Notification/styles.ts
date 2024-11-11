@@ -14,12 +14,44 @@ export const Wrapper = styled.div<{ warning: boolean | undefined }>`
 	animation: ${open} ${transition1};
 	display: flex;
 	align-items: center;
-	padding: 11.5px 17.5px;
+	padding: 11.5px 17.5px !important;
 	gap: 20px;
-	background: ${(props) => (props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.indicator.active)};
+	border: none !important;
 	border-radius: ${STYLING.dimensions.radius.primary};
+	box-shadow: 0 0 10px 1px ${(props) => props.theme.colors.shadow.primary};
+
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
+		min-width: 0;
+		max-width: none;
 		width: 90vw;
+	}
+`;
+
+export const MessageWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
+
+export const Icon = styled.div<{ warning: boolean | undefined }>`
+	min-height: 17.5px;
+	height: 17.5px;
+	min-width: 17.5px;
+	width: 17.5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: ${(props) => (props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.indicator.active)};
+	border-radius: 50%;
+
+	svg {
+		height: 11.5px;
+		width: 11.5px;
+		margin: 6.5px 0 0 0;
+		color: ${(props) => props.theme.colors.font.light1};
+		fill: ${(props) => props.theme.colors.font.light1};
 	}
 `;
 
@@ -29,8 +61,8 @@ export const Message = styled.span`
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	color: ${(props) => props.theme.colors.font.light1};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	font-size: ${(props) => props.theme.typography.size.small};
+	font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+	font-size: ${(props) => props.theme.typography.size.small} !important;
 `;
 
 export const Close = styled.div`

@@ -6,7 +6,6 @@ import { AssetHeaderType, formatDate } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 // import { IconButton } from 'components/atoms/IconButton';
-import { Loader } from 'components/atoms/Loader';
 import { ASSETS, URLS } from 'helpers/config';
 import { ArticleStatusType } from 'helpers/types';
 import { getTagValue } from 'helpers/utils';
@@ -15,6 +14,7 @@ import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
+// TODO: Post index in portal process
 export default function PostList() {
 	const navigate = useNavigate();
 
@@ -27,7 +27,7 @@ export default function PostList() {
 		if (!portalProvider.current?.assets) {
 			return (
 				<S.LoadingWrapper>
-					<Loader sm relative />
+					<p>{`${language.gettingPosts}...`}</p>
 				</S.LoadingWrapper>
 			);
 		} else if (portalProvider.current?.assets.length === 0) {

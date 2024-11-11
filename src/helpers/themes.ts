@@ -33,6 +33,8 @@ export const lightTheme = {
 	light3: '#B3B3B3',
 	dark1: '#151515',
 	dark2: '#333333',
+	link1: '#0074E4',
+	link2: '#0074E4',
 };
 
 export const lightThemeHighContrast = {
@@ -68,6 +70,8 @@ export const lightThemeHighContrast = {
 	light3: '#B0B0B0',
 	dark1: '#0D0D0D',
 	dark2: '#1A1A1A',
+	link1: '#0074E4',
+	link2: '#0074E4',
 };
 
 export const lightThemeAlt1 = {
@@ -77,22 +81,22 @@ export const lightThemeAlt1 = {
 	caution1: '#EECA00',
 	negative1: '#E94278',
 	negative2: '#E52461',
-	neutral1: '#FAFAFA',
-	neutral2: '#E3E3E3',
-	neutral3: '#D8D8D8',
-	neutral4: '#CDCDCD',
-	neutral5: '#C2C2C2',
-	neutral6: '#B7B7B7',
-	neutral7: '#A9A9A9',
-	neutral8: '#8E8E8E',
-	neutral9: '#737373',
+	neutral1: '#FEFEFE',
+	neutral2: '#EEEEEE',
+	neutral3: '#D4D4D4',
+	neutral4: '#C9C9C9',
+	neutral5: '#BFBFBF',
+	neutral6: '#B3B3B3',
+	neutral7: '#A6A6A6',
+	neutral8: '#999999',
+	neutral9: '#8D8D8D',
 	neutralA1: '#1C1C1C',
-	neutralA2: '#3D3D3D',
-	neutralA3: '#474747',
-	neutralA4: '#525252',
+	neutralA2: '#393939',
+	neutralA3: '#454545',
+	neutralA4: '#505050',
 	neutralA5: '#3A3A3A',
-	neutralA6: '#767676',
-	neutralA7: '#848484',
+	neutralA6: '#787878',
+	neutralA7: '#858585',
 	overlay1: 'rgba(0, 0, 0, 0.4)',
 	overlay2: 'rgba(0, 0, 0, 0.55)',
 	shadow1: 'rgba(200, 200, 200, 0.5)',
@@ -103,17 +107,19 @@ export const lightThemeAlt1 = {
 	light3: '#BFBFBF',
 	dark1: '#1C1C1C',
 	dark2: '#383838',
+	link1: '#0074E4',
+	link2: '#0074E4',
 };
 
 export const lightThemeAlt2 = {
 	scheme: 'light',
-	positive1: '#64B686',
-	positive2: '#4EA673',
+	positive1: '#5AB6A0',
+	positive2: '#4BAA94',
 	caution1: '#EECA00',
-	negative1: '#E94278',
-	negative2: '#E52461',
+	negative1: '#E83151',
+	negative2: '#DC1839',
 	neutral1: '#FEFEFE',
-	neutral2: '#DFDFDF',
+	neutral2: '#EEEEEE',
 	neutral3: '#D4D4D4',
 	neutral4: '#C9C9C9',
 	neutral5: '#BFBFBF',
@@ -138,6 +144,8 @@ export const lightThemeAlt2 = {
 	light3: '#BCBCBC',
 	dark1: '#1C1C1C',
 	dark2: '#393939',
+	link1: '#0C84CB',
+	link2: '#2274A5',
 };
 
 export const darkTheme = {
@@ -173,6 +181,8 @@ export const darkTheme = {
 	light3: '#B3B3B3',
 	dark1: '#151515',
 	dark2: '#333333',
+	link1: '#4DA8FF',
+	link2: '#0074E4',
 };
 
 export const darkThemeHighContrast = {
@@ -208,6 +218,8 @@ export const darkThemeHighContrast = {
 	light3: '#C2C2C2',
 	dark1: '#121212',
 	dark2: '#181818',
+	link1: '#009AF7',
+	link2: '#0074E4',
 };
 
 export const darkThemeAlt1 = {
@@ -243,6 +255,8 @@ export const darkThemeAlt1 = {
 	light3: '#B3B3B3',
 	dark1: '#151515',
 	dark2: '#333333',
+	link1: '#4DA8FF',
+	link2: '#0074E4',
 };
 
 export const darkThemeAlt2 = {
@@ -254,11 +268,11 @@ export const darkThemeAlt2 = {
 	negative2: '#E43A72',
 	neutral1: '#111216',
 	neutral2: '#15161A',
-	neutral3: '#1A1B20',
-	neutral4: '#1E1F24',
+	neutral3: '#262834',
+	neutral4: '#2E2F34',
 	neutral5: '#22232A',
 	neutral6: '#27282F',
-	neutral7: '#2C2D34',
+	neutral7: '#52545F',
 	neutral8: '#4D4F57',
 	neutral9: '#36363F',
 	neutralA1: '#F9F9F9',
@@ -278,6 +292,8 @@ export const darkThemeAlt2 = {
 	light3: '#B3B3B3',
 	dark1: '#151515',
 	dark2: '#333333',
+	link1: '#0099B0',
+	link2: '#00B6d1',
 };
 
 export const theme = (currentTheme: any): DefaultTheme => ({
@@ -449,8 +465,8 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			active: currentTheme.positive1,
 		},
 		link: {
-			color: currentTheme.neutralA1,
-			active: currentTheme.neutralA4,
+			color: currentTheme.link1,
+			active: currentTheme.link2,
 		},
 		loader: {
 			primary: currentTheme.primary1,

@@ -200,7 +200,7 @@ export const GlobalStyle = createGlobalStyle`
 		padding: 0 20px 20px 20px !important;
 	}
 
-  .info-text {
+  .info {
     padding: 0 5px 0.5px 5px;
     background: ${(props) => props.theme.colors.tooltip.background};
     border: 1px solid ${(props) => props.theme.colors.tooltip.border};

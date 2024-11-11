@@ -41,7 +41,10 @@ export const Section = styled.div`
 `;
 
 export const SectionHeader = styled.div`
-	padding: 12.5px 15.5px;
+	padding: 12.5px 15px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
@@ -56,6 +59,10 @@ export const SectionBody = styled.div`
 
 export const DesignSection = styled(Section)``;
 
+export const SetupSection = styled(Section)`
+	height: 225px;
+`;
+
 export const PostsSection = styled(Section)`
 	height: fit-content;
 
@@ -65,9 +72,9 @@ export const PostsSection = styled(Section)`
 `;
 
 export const DomainSection = styled(Section)`
-	height: 100px;
+	height: fit-content;
 `;
 
 export const UsersSection = styled(Section)`
-	height: 200px;
+	height: fit-content;
 `;

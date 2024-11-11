@@ -58,7 +58,7 @@ export default function IconButton(props: IProps) {
 		if (props.tooltip) {
 			return (
 				<S.Wrapper>
-					<S.Tooltip className={'info-text'} position={props.tooltipPosition || 'bottom'}>
+					<S.Tooltip className={'info'} position={props.tooltipPosition || 'bottom'}>
 						<span>{props.tooltip}</span>
 					</S.Tooltip>
 					{getAction()}

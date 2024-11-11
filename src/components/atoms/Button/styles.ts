@@ -36,7 +36,7 @@ export const Wrapper = styled.div`
 			display: block;
 		}
 	}
-	.info-text {
+	.info {
 		padding: 0px 10px 2.5px 10px !important;
 	}
 `;
@@ -291,6 +291,17 @@ export const Alt3 = styled(Primary)`
 		svg {
 			fill: ${(props) => props.theme.colors.button.alt1.active.color} !important;
 			color: ${(props) => props.theme.colors.button.alt1.active.color} !important;
+		}
+	}
+	&:disabled {
+		background: ${(props) => props.theme.colors.button.primary.disabled.background};
+		border: 1px solid ${(props) => props.theme.colors.button.primary.disabled.border};
+		span {
+			color: ${(props) => props.theme.colors.button.primary.disabled.color} !important;
+		}
+		svg {
+			fill: ${(props) => props.theme.colors.button.primary.disabled.color} !important;
+			color: ${(props) => props.theme.colors.button.primary.disabled.color} !important;
 		}
 	}
 `;

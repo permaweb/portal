@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from 'components/atoms/Button';
+import { DomainList } from 'components/organisms/DomainList';
 import { PostList } from 'components/organisms/PostList';
+import { UserList } from 'components/organisms/UserList';
 import { ASSETS, URLS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
@@ -38,18 +40,25 @@ export default function Portal() {
 						</S.SectionHeader>
 						<S.SectionBody></S.SectionBody>
 					</S.DesignSection>
+					<S.SetupSection className={'border-wrapper-alt2'}>
+						<S.SectionHeader>
+							<p>{language.setup}</p>
+						</S.SectionHeader>
+						<S.SectionBody></S.SectionBody>
+					</S.SetupSection>
 					<S.DomainSection className={'border-wrapper-alt3'}>
 						<S.SectionHeader>
 							<p>{language.domains}</p>
+							<Button
+								type={'alt3'}
+								label={'Manage domains'}
+								handlePress={() => navigate(URLS.portalDomains(portalProvider.current.id))}
+							/>
 						</S.SectionHeader>
-						<S.SectionBody></S.SectionBody>
+						<S.SectionBody>
+							<DomainList />
+						</S.SectionBody>
 					</S.DomainSection>
-					<S.UsersSection className={'border-wrapper-alt3'}>
-						<S.SectionHeader>
-							<p>{language.users}</p>
-						</S.SectionHeader>
-						<S.SectionBody></S.SectionBody>
-					</S.UsersSection>
 				</S.SectionWrapper>
 				<S.SectionWrapper>
 					<S.PostsSection className={'border-wrapper-alt2'}>
@@ -60,6 +69,19 @@ export default function Portal() {
 							<PostList />
 						</S.SectionBody>
 					</S.PostsSection>
+					<S.UsersSection className={'border-wrapper-alt3'}>
+						<S.SectionHeader>
+							<p>{language.users}</p>
+							<Button
+								type={'alt3'}
+								label={'Manage users'}
+								handlePress={() => navigate(URLS.portalUsers(portalProvider.current.id))}
+							/>
+						</S.SectionHeader>
+						<S.SectionBody>
+							<UserList />
+						</S.SectionBody>
+					</S.UsersSection>
 				</S.SectionWrapper>
 			</S.BodyWrapper>
 		</S.Wrapper>
