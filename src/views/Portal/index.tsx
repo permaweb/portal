@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { Button } from 'components/atoms/Button';
 import { DomainList } from 'components/organisms/DomainList';
+import { PortalDesign } from 'components/organisms/PortalDesign';
 import { PortalSetup } from 'components/organisms/PortalSetup';
 import { PostList } from 'components/organisms/PostList';
 import { UserList } from 'components/organisms/UserList';
@@ -35,20 +36,32 @@ export default function Portal() {
 			</S.HeaderWrapper>
 			<S.BodyWrapper>
 				<S.SectionWrapper>
-					<S.DesignSection className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<p>{language.design}</p>
-						</S.SectionHeader>
-						<S.SectionBody></S.SectionBody>
-					</S.DesignSection>
 					<S.SetupSection className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
 							<p>{language.setup}</p>
+							<Button
+								type={'alt3'}
+								label={'Go to full setup'}
+								handlePress={() => navigate(URLS.portalUsers(portalProvider.current.id))}
+							/>
 						</S.SectionHeader>
 						<S.SectionBody>
 							<PortalSetup type={'Header'} />
 						</S.SectionBody>
 					</S.SetupSection>
+					<S.DesignSection className={'border-wrapper-alt2'}>
+						<S.SectionHeader>
+							<p>{language.design}</p>
+							<Button
+								type={'alt3'}
+								label={'Go to full designer'}
+								handlePress={() => navigate(URLS.portalDesign(portalProvider.current.id))}
+							/>
+						</S.SectionHeader>
+						<S.SectionBody>
+							<PortalDesign />
+						</S.SectionBody>
+					</S.DesignSection>
 					<S.UsersSection className={'border-wrapper-alt3'}>
 						<S.SectionHeader>
 							<p>{language.users}</p>

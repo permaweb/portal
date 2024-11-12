@@ -79,7 +79,7 @@ export const UserRole = styled.div<{ role: PortalUserRoleType }>`
 	background: ${(props) => getRoleBackground(props.theme, props.role)};
 	span {
 		color: ${(props) => props.theme.colors.font.light1};
-		font-size: ${(props) => props.theme.typography.size.xxxxSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;

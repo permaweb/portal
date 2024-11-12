@@ -482,7 +482,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 		icon: {
 			primary: {
 				fill: currentTheme.neutralA4,
-				active: currentTheme.neutral4,
+				active: currentTheme.neutral3,
 				disabled: currentTheme.neutralA3,
 			},
 			alt1: {
@@ -566,7 +566,6 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			alt1: `'Merriweather', serif`,
 		},
 		size: {
-			xxxxSmall: '11px',
 			xxxSmall: '12px',
 			xxSmall: '13px',
 			xSmall: '14px',

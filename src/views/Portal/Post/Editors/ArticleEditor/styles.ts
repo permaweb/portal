@@ -257,9 +257,11 @@ export const EToolbarDelete = styled.div`
 
 export const EDragWrapper = styled.div`
 	width: 17.5px;
+	cursor: default;
 `;
 
 export const EDragHandler = styled.div`
+	cursor: grab;
 	svg {
 		width: 17.5px;
 		margin: 5px 0 0 0;

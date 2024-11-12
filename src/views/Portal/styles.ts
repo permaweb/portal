@@ -35,7 +35,6 @@ export const SectionWrapper = styled.div`
 `;
 
 export const Section = styled.div`
-	height: 300px;
 	width: 100%;
 `;
 
@@ -58,13 +57,9 @@ export const SectionBody = styled.div`
 
 export const DesignSection = styled(Section)``;
 
-export const SetupSection = styled(Section)`
-	height: fit-content;
-`;
+export const SetupSection = styled(Section)``;
 
 export const PostsSection = styled(Section)`
-	height: fit-content;
-
 	> :first-child {
 		background: ${(props) => props.theme.colors.container.alt1.background};
 		border-top-left-radius: 3.5px;
@@ -72,10 +67,6 @@ export const PostsSection = styled(Section)`
 	}
 `;
 
-export const DomainSection = styled(Section)`
-	height: fit-content;
-`;
+export const DomainSection = styled(Section)``;
 
-export const UsersSection = styled(Section)`
-	height: fit-content;
-`;
+export const UsersSection = styled(Section)``;

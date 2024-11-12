@@ -9,6 +9,7 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import * as S from './styles';
 import { IProps } from './types';
 
+// TODO
 export default function PortalSetup(props: IProps) {
 	const portalProvider = usePortalProvider();
 
@@ -16,10 +17,13 @@ export default function PortalSetup(props: IProps) {
 	const language = languageProvider.object[languageProvider.current];
 
 	const links = [
-		{ id: 'facebook', href: '#' },
-		{ id: 'twitter', href: '#' },
-		{ id: 'youtube', href: '#' },
+		{ id: 'facebook', href: '#', icon: ASSETS.facebook },
+		{ id: 'x', href: '#', icon: ASSETS.x },
+		{ id: 'youtube', href: '#', icon: ASSETS.youtube },
 		{ id: 'odysee', href: '#' },
+		{ id: 'linkedin', href: '#', icon: ASSETS.linkedin },
+		{ id: 'discord', href: '#', icon: ASSETS.discord },
+		{ id: 'telegram', href: '#', icon: ASSETS.telegram },
 	];
 
 	return (
@@ -72,10 +76,15 @@ export default function PortalSetup(props: IProps) {
 				<S.LinksSection>
 					{links?.length > 0 && (
 						<>
-							{links.map((link: any) => {
+							{links.map((link: any, index: number) => {
 								return (
-									<S.LinkWrapper>
-										<a href={link.href} target={'_blank'}></a>
+									<S.LinkWrapper key={index}>
+										<a href={link.href} target={'_blank'}>
+											<ReactSVG src={link.icon ?? ASSETS.link} />
+										</a>
+										<S.LinkTooltip className={'info'}>
+											<span>{link.id}</span>
+										</S.LinkTooltip>
 									</S.LinkWrapper>
 								);
 							})}
@@ -85,6 +94,9 @@ export default function PortalSetup(props: IProps) {
 						<button>
 							<ReactSVG src={ASSETS.add} />
 						</button>
+						<S.LinkTooltip className={'info'}>
+							<span>{'Add a new link'}</span>
+						</S.LinkTooltip>
 					</S.LinkWrapper>
 				</S.LinksSection>
 			</S.Section>

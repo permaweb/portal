@@ -261,7 +261,7 @@ export const Alt3 = styled(Primary)`
 			props.active ? props.theme.colors.button.alt1.active.border : props.theme.colors.button.primary.border};
 
 	span {
-		font-size: ${(props) => props.theme.typography.size.xxxxSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		color: ${(props) =>
 			props.active ? props.theme.colors.font.light1 : props.theme.colors.button.primary.color} !important;

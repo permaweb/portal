@@ -17,9 +17,11 @@ export const ASSETS = {
 	delete: getTxEndpoint('aKjWuVXkSeYOKzGP0MnnhHwoYUXqTHFMJfVCbqzYEo0'),
 	design: getTxEndpoint('UUvx4WWSyuNC8fOQ5OsYudP77Reae8wmvHh1PDB196c'),
 	disconnect: getTxEndpoint('eWncZs2hH5oNSsWTIImJhqdZ4-n0P4CfZbduK2ae4L4'),
+	discord: getTxEndpoint('3X1BfFleeCZZdVZIx8DKDIblcLw7jzzRBCzSItlBy9E'),
 	docs: getTxEndpoint('iJ2kFspeaXTNSl5aO8CZ2iLGA99Bmc0u-7PTX0Vl0l4'),
 	domains: getTxEndpoint('HCp8UMAiBcJyBuMwH8PLrNM6lJqlRLGKe6iDRRBid6I'),
 	drag: getTxEndpoint('BfwMIGxk7WTqI3rYOyzM0DQXAfo_n4I4yyBbTsqe_QE'),
+	facebook: getTxEndpoint('mEcWrUwBKrp_9azlko-h2sta-UJu07UeCXPRBi8yDpA'),
 	header1: getTxEndpoint('Me8rAW3kmQxPclDnl7lupTXyWg2t3vV3yfFdCzyXbNA'),
 	header2: getTxEndpoint('6U8907x3L_phk9loiiBCHIXqDBWaV5IfK19IJnH8Q4A'),
 	header3: getTxEndpoint('fBTN-aLZM0VFaLGw7VhBiGSdHuNDGcO0qGKbtXLiwnA'),
@@ -33,6 +35,7 @@ export const ASSETS = {
 	layout: getTxEndpoint('U2cqnDWOoQr3mBpIOdsnJUPKS-G4v0twlwFTqvj4qkY'),
 	light: getTxEndpoint('n-yu6JZZwWEF0aJE8B_UskiubcYmHDRTofyc5J1pvc4'),
 	link: getTxEndpoint('UMfjnj-8e7fb3lYRdcFygu8c4JoBZq3hB-mzycYT4DU'),
+	linkedin: getTxEndpoint('8S2jArSLL2aZYZy9_sUkFlqbZUpGhYUNmFFVI4gMbPo'),
 	listOrdered: getTxEndpoint('LCGDNvNEerXlE8vE65J6XRuAMm54u2zNAyvwQbyoBEs'),
 	listUnordered: getTxEndpoint('lSpJ-R6JoI9J814Iy2JJZWnrkvKU8iFqVIWtVsmI4Os'),
 	logo: getTxEndpoint('4txDbfbymP1RNMQCsFzyZOZR9qeUZXt_IacmL4IXYD8'),
@@ -48,6 +51,7 @@ export const ASSETS = {
 	setup: getTxEndpoint('dyFHmCSxONAiUPJsr6HeAdED_MSsRAL9nQDvdmGryT0'),
 	shortcuts: getTxEndpoint('RHIjV5uz9SGb9FVDdc-MAQlXFRtfpnTwQWLexcClMW0'),
 	success: getTxEndpoint('mVnNwxm-F6CV043zVtORE-EaMWfd2j8w6HHX70IcVbI'),
+	telegram: getTxEndpoint('uerxx9yd8y3DGRIJ4F9TjF4BryagPuINo5-Jo8qmno4'),
 	time: getTxEndpoint('EDfjYP_Fq8XycJ92uVeLDCmOCUMoSoPVbAhfE1ZwCJE'),
 	tools: getTxEndpoint('ORGiGGMr6wIsjVNmWuy9m-CIH8jbY3juwoDLDdxvER8'),
 	user: getTxEndpoint('aOk91wDJnZ1xQbQum0MHoaOldAiumdFjdjM4LVM83NQ'),
@@ -56,6 +60,8 @@ export const ASSETS = {
 	wallet: getTxEndpoint('_t97i0BzskALIFERWR6iDs_uX7U6bbd4-3Pqq3HDkfI'),
 	warning: getTxEndpoint('BASlMnOWcLCcLUSrO2wUybQL_06231dLONeVkdTWs3o'),
 	write: getTxEndpoint('SUWTk8Qtcub9EsP5PDF6-vzgKsP5Irg1bB9b8NImDDk'),
+	x: getTxEndpoint('8j0KOYorbeN1EI2_tO-o9tUYi4LJkDwFCDStu0sWMV8'),
+	youtube: getTxEndpoint('vEToNqLt0U4CXLW-u7DykeGNqFLfuzKWebnu_1d5FRs'),
 };
 
 export const ASSET_UPLOAD = {
