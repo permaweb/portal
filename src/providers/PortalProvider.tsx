@@ -46,7 +46,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		if (arProvider.profile) {
-			const portalsList: any[] = getStoreNamespace(arProvider.profile, 'portal');
+			const portalsList: any[] = getStoreNamespace('portal', arProvider.profile);
 			setPortals(portalsList);
 		}
 	}, [arProvider.profile]);
@@ -74,6 +74,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								name: currentPortalFetch.store?.name || 'None',
 								logo: currentPortalFetch.store?.logo || 'None',
 								assets: [],
+								topics: getStoreNamespace('topic', currentPortalFetch.store),
 								users: [
 									{ username: 'bob_crypto', displayName: 'Bob Smith', role: 'Contributor' },
 									{ username: 'carol_dev', displayName: 'Carol Williams', role: 'Admin' },

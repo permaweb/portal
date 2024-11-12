@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { Avatar } from 'components/atoms/Avatar';
-import { Button } from 'components/atoms/Button';
 import { PortalUserType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
@@ -40,7 +39,9 @@ export default function UserList() {
 							</S.UserHeader>
 							<S.UserDetail>
 								<S.UserActions>
-									<Button type={'alt3'} label={user.role} handlePress={() => {}} disabled />
+									<S.UserRole role={user.role}>
+										<span>{user.role}</span>
+									</S.UserRole>
 								</S.UserActions>
 							</S.UserDetail>
 						</S.UserWrapper>

@@ -1,10 +1,11 @@
 export const language = {
 	en: {
+		addTopic: `Add a topic`,
 		app: `Portals`,
 		article: `Article`,
 		bio: `Bio`,
 		blocks: `Blocks`,
-		blocksEmpty: `Press enter or select a block to start your post`,
+		blocksEmpty: `Start your post - Press enter, click here, or choose a block type`,
 		chooseAppAppearance: `Choose app appearance`,
 		close: `Close`,
 		closeToolkit: `Close toolkit`,
@@ -25,7 +26,10 @@ export const language = {
 		domains: `Domains`,
 		edit: `Edit`,
 		editPortal: `Edit portal`,
+		editPostTopics: `Edit post topics`,
 		editProfile: `Edit your profile`,
+		editSiteCategories: `Edit site categories`,
+		editSiteLinks: `Edit site links`,
 		errorUpdatingPortal: `Error updating portal`,
 		errorUpdatingPost: `Error updating post`,
 		errorUpdatingProfile: `Error updating profile`,

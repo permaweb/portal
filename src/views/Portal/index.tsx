@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { Button } from 'components/atoms/Button';
 import { DomainList } from 'components/organisms/DomainList';
+import { PortalSetup } from 'components/organisms/PortalSetup';
 import { PostList } from 'components/organisms/PostList';
 import { UserList } from 'components/organisms/UserList';
 import { ASSETS, URLS } from 'helpers/config';
@@ -44,8 +45,23 @@ export default function Portal() {
 						<S.SectionHeader>
 							<p>{language.setup}</p>
 						</S.SectionHeader>
-						<S.SectionBody></S.SectionBody>
+						<S.SectionBody>
+							<PortalSetup type={'Header'} />
+						</S.SectionBody>
 					</S.SetupSection>
+					<S.UsersSection className={'border-wrapper-alt3'}>
+						<S.SectionHeader>
+							<p>{language.users}</p>
+							<Button
+								type={'alt3'}
+								label={'Manage users'}
+								handlePress={() => navigate(URLS.portalUsers(portalProvider.current.id))}
+							/>
+						</S.SectionHeader>
+						<S.SectionBody>
+							<UserList />
+						</S.SectionBody>
+					</S.UsersSection>
 					<S.DomainSection className={'border-wrapper-alt3'}>
 						<S.SectionHeader>
 							<p>{language.domains}</p>
@@ -69,19 +85,6 @@ export default function Portal() {
 							<PostList />
 						</S.SectionBody>
 					</S.PostsSection>
-					<S.UsersSection className={'border-wrapper-alt3'}>
-						<S.SectionHeader>
-							<p>{language.users}</p>
-							<Button
-								type={'alt3'}
-								label={'Manage users'}
-								handlePress={() => navigate(URLS.portalUsers(portalProvider.current.id))}
-							/>
-						</S.SectionHeader>
-						<S.SectionBody>
-							<UserList />
-						</S.SectionBody>
-					</S.UsersSection>
 				</S.SectionWrapper>
 			</S.BodyWrapper>
 		</S.Wrapper>

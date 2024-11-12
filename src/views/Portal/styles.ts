@@ -37,7 +37,6 @@ export const SectionWrapper = styled.div`
 export const Section = styled.div`
 	height: 300px;
 	width: 100%;
-	overflow: hidden;
 `;
 
 export const SectionHeader = styled.div`
@@ -60,7 +59,7 @@ export const SectionBody = styled.div`
 export const DesignSection = styled(Section)``;
 
 export const SetupSection = styled(Section)`
-	height: 225px;
+	height: fit-content;
 `;
 
 export const PostsSection = styled(Section)`
@@ -68,6 +67,8 @@ export const PostsSection = styled(Section)`
 
 	> :first-child {
 		background: ${(props) => props.theme.colors.container.alt1.background};
+		border-top-left-radius: 3.5px;
+		border-top-right-radius: 3.5px;
 	}
 `;
 

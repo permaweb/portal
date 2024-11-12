@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
-import { createZone, resolveTransaction, updateZone } from '@permaweb/libs';
+import { buildStoreNamespace, createZone, resolveTransaction, updateZone } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
@@ -67,7 +67,7 @@ export default function PortalManager(props: IProps) {
 
 			const profileUpdateId = await updateZone(
 				{
-					[`portal:${portalId}`]: {
+					[buildStoreNamespace('portal', portalId)]: {
 						id: portalId,
 						...data,
 					},

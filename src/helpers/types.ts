@@ -7,6 +7,7 @@ export type PortalDetailType = {
 	name: string;
 	logo: string | null;
 	assets?: AssetHeaderType[];
+	topics?: PortalTopicType[];
 	users?: PortalUserType[];
 	domains?: string[];
 };
@@ -45,8 +46,12 @@ export type RegistryProfileType = {
 export type PortalUserType = {
 	username: string;
 	displayName: string;
-	role: string;
+	role: PortalUserRoleType;
 };
+
+export type PortalTopicType = { value: string };
+
+export type PortalUserRoleType = 'Admin' | 'Contributor';
 
 export type TagType = { name: string; value: string };
 

@@ -61,7 +61,8 @@ export const Panel = styled.div<{ open: boolean }>`
 	position: absolute;
 	right: 0;
 	z-index: 1;
-	transform: translateX(${(props) => (props.open ? '0' : 'calc(100% + 20px)')});
+	/* transform: translateX(${(props) => (props.open ? '0' : 'calc(100% + 20px)')}); TODO */
+	display: ${(props) => (props.open ? 'block' : 'none')};
 	transition: transform ${transition2};
 	top: 75px;
 	padding: 13.5px 10px 10px 10px;
@@ -73,6 +74,11 @@ export const Panel = styled.div<{ open: boolean }>`
 		transform: translate(-50%, -40%);
 		display: ${(props) => (props.open ? 'block' : 'none')};
 		border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
+	}
+
+	@media (min-width: ${STYLING.cutoffs.max}) {
+		transform: 0;
+		display: ${(props) => (props.open ? 'block' : 'none')};
 	}
 `;
 

@@ -155,10 +155,9 @@ function Block(props: {
 	);
 }
 
-// TODO: Post edit
 // TODO: Links
-// TODO: Topics
 // TODO: Media upload
+// TODO: Categories
 export default function ArticleEditor() {
 	const navigate = useNavigate();
 	const { assetId } = useParams<{ assetId?: string }>();
@@ -171,7 +170,7 @@ export default function ArticleEditor() {
 
 	const [title, setTitle] = React.useState<string>('');
 	const [status, setStatus] = React.useState<ArticleStatusType>('draft');
-	const [topics, setTopics] = React.useState<{ label: string; link?: string }[]>([]);
+	const [topics, setTopics] = React.useState<string[]>([]);
 	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
 
 	const [focusedBlock, setFocusedBlock] = React.useState<ArticleBlockType | null>(null);
@@ -203,6 +202,7 @@ export default function ArticleEditor() {
 						if (response) {
 							if (response.title) setTitle(response.title);
 							if (response.status) setStatus(response.status);
+							if (response.topics) setTopics(response.topics);
 							if (response.content?.length > 0) setBlocks(response.content);
 						}
 					} catch (e: any) {
@@ -312,15 +312,9 @@ export default function ArticleEditor() {
 	}, [blocks, focusedBlock, toggleBlockFocus]);
 
 	function getSubmitDisabled() {
-		return (
-			!title || title.length <= 0 || !blocks || blocks.length <= 0 || !blocks.some((block) => block.content.length > 0)
-		);
+		return !blocks || blocks.length <= 0 || !blocks.some((block) => block.content.length > 0);
 	}
 
-	// TODO: Clean blocks
-	// TODO: Validation (topics)
-	// TODO: Redirect to post edit on save
-	// TODO: Update portal assets on save
 	async function handleSubmit() {
 		if (arProvider.wallet && arProvider.profile?.id && portalProvider.current?.id) {
 			setLoading({ active: true, message: `${language.savingPost}...` });
@@ -360,7 +354,7 @@ export default function ArticleEditor() {
 							title: title,
 							description: title,
 							type: ASSET_UPLOAD.ansType,
-							topics: topics?.length ? topics.map((topic: any) => topic.label) : ['Topic 1'],
+							topics: topics,
 							data: dataSrc,
 							contentType: ASSET_UPLOAD.contentType,
 							creator: arProvider.profile.id,
@@ -417,6 +411,12 @@ export default function ArticleEditor() {
 		items.splice(result.destination.index, 0, reorderedItem);
 
 		setBlocks(items);
+	};
+
+	const handleEditorClick = () => {
+		if (!blocks || blocks.length <= 0) {
+			addBlock(ArticleBlockEnum.Header1);
+		}
 	};
 
 	const addBlock = (type: ArticleBlockEnum) => {
@@ -528,6 +528,8 @@ export default function ArticleEditor() {
 						setPostTitle={(value: string) => setTitle(value)}
 						status={status}
 						setStatus={(value: ArticleStatusType) => setStatus(value)}
+						topics={topics}
+						setTopics={(newTopics: string[]) => setTopics(newTopics)}
 						addBlock={(type: ArticleBlockEnum) => addBlock(type)}
 						blockEditMode={blockEditMode}
 						toggleBlockEditMode={() => setBlockEditMode(!blockEditMode)}
@@ -541,7 +543,9 @@ export default function ArticleEditor() {
 						loading={loading.active}
 					/>
 				</S.ToolbarWrapper>
-				<S.EditorWrapper panelOpen={panelOpen}>{editor}</S.EditorWrapper>
+				<S.EditorWrapper panelOpen={panelOpen} onClick={handleEditorClick}>
+					{editor}
+				</S.EditorWrapper>
 			</S.Wrapper>
 			{loading.active && <Loader message={loading.message} />}
 			{response && (

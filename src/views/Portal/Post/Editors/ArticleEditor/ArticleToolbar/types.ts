@@ -5,6 +5,8 @@ export interface IProps {
 	setPostTitle: (value: string) => void;
 	status: ArticleStatusType;
 	setStatus: (value: ArticleStatusType) => void;
+	topics: string[];
+	setTopics: (topics: string[]) => void;
 	addBlock: (type: ArticleBlockEnum) => void;
 	blockEditMode: boolean;
 	toggleBlockEditMode: () => void;

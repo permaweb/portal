@@ -35,6 +35,11 @@ export const lightTheme = {
 	dark2: '#333333',
 	link1: '#0074E4',
 	link2: '#0074E4',
+	roles: {
+		primary: '#FF8385',
+		alt1: '#46B0B7',
+		alt2: '#8886D9',
+	},
 };
 
 export const lightThemeHighContrast = {
@@ -72,6 +77,11 @@ export const lightThemeHighContrast = {
 	dark2: '#1A1A1A',
 	link1: '#0074E4',
 	link2: '#0074E4',
+	roles: {
+		primary: '#FF8385',
+		alt1: '#46B0B7',
+		alt2: '#8886D9',
+	},
 };
 
 export const lightThemeAlt1 = {
@@ -109,6 +119,11 @@ export const lightThemeAlt1 = {
 	dark2: '#383838',
 	link1: '#0074E4',
 	link2: '#0074E4',
+	roles: {
+		primary: '#FF8385',
+		alt1: '#46B0B7',
+		alt2: '#8886D9',
+	},
 };
 
 export const lightThemeAlt2 = {
@@ -146,6 +161,11 @@ export const lightThemeAlt2 = {
 	dark2: '#393939',
 	link1: '#0C84CB',
 	link2: '#2274A5',
+	roles: {
+		primary: '#FF8385',
+		alt1: '#46B0B7',
+		alt2: '#8886D9',
+	},
 };
 
 export const darkTheme = {
@@ -183,6 +203,11 @@ export const darkTheme = {
 	dark2: '#333333',
 	link1: '#4DA8FF',
 	link2: '#0074E4',
+	roles: {
+		primary: '#FF8385',
+		alt1: '#46B0B7',
+		alt2: '#8886D9',
+	},
 };
 
 export const darkThemeHighContrast = {
@@ -220,6 +245,11 @@ export const darkThemeHighContrast = {
 	dark2: '#181818',
 	link1: '#009AF7',
 	link2: '#0074E4',
+	roles: {
+		primary: '#FF8385',
+		alt1: '#46B0B7',
+		alt2: '#8886D9',
+	},
 };
 
 export const darkThemeAlt1 = {
@@ -257,6 +287,11 @@ export const darkThemeAlt1 = {
 	dark2: '#333333',
 	link1: '#4DA8FF',
 	link2: '#0074E4',
+	roles: {
+		primary: '#FF8385',
+		alt1: '#46B0B7',
+		alt2: '#8886D9',
+	},
 };
 
 export const darkThemeAlt2 = {
@@ -294,6 +329,11 @@ export const darkThemeAlt2 = {
 	dark2: '#333333',
 	link1: '#0099B0',
 	link2: '#00B6d1',
+	roles: {
+		primary: '#FF8385',
+		alt1: '#46B0B7',
+		alt2: '#8886D9',
+	},
 };
 
 export const theme = (currentTheme: any): DefaultTheme => ({
@@ -475,6 +515,11 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			primary: currentTheme.overlay1,
 			alt1: currentTheme.overlay2,
 		},
+		roles: {
+			primary: currentTheme.roles.primary,
+			alt1: currentTheme.roles.alt1,
+			alt2: currentTheme.roles.alt2,
+		},
 		row: {
 			active: {
 				background: currentTheme.neutral3,
@@ -521,6 +566,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			alt1: `'Merriweather', serif`,
 		},
 		size: {
+			xxxxSmall: '11px',
 			xxxSmall: '12px',
 			xxSmall: '13px',
 			xSmall: '14px',

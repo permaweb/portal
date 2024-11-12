@@ -1,6 +1,7 @@
-import styled from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
 import { STYLING } from 'helpers/config';
+import { PortalUserRoleType } from 'helpers/types';
 
 export const Wrapper = styled.div`
 	display: flex;
@@ -9,7 +10,7 @@ export const Wrapper = styled.div`
 
 export const UserWrapper = styled.div`
 	display: flex;
-	padding: 12.5px 15px;
+	padding: 10.5px 15px;
 	justify-content: space-between;
 	align-items: center;
 	flex-wrap: wrap;
@@ -56,6 +57,33 @@ export const UserDetail = styled.div`
 export const UserActions = styled.div`
 	display: flex;
 	gap: 12.5px;
+`;
+
+function getRoleBackground(theme: DefaultTheme, role: PortalUserRoleType) {
+	switch (role) {
+		case 'Admin':
+			return theme.colors.roles.primary;
+		case 'Contributor':
+			return theme.colors.roles.alt1;
+		default:
+			return theme.colors.roles.alt2;
+	}
+}
+
+export const UserRole = styled.div<{ role: PortalUserRoleType }>`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1.5px 10px;
+	border-radius: 20px;
+	background: ${(props) => getRoleBackground(props.theme, props.role)};
+	span {
+		color: ${(props) => props.theme.colors.font.light1};
+		font-size: ${(props) => props.theme.typography.size.xxxxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
 `;
 
 export const WrapperEmpty = styled.div`
