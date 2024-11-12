@@ -6,6 +6,7 @@ import { PortalUserRoleType } from 'helpers/types';
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
+	padding: 0 0 5px 0;
 `;
 
 export const UserWrapper = styled.div`

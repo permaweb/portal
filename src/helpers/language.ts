@@ -40,6 +40,7 @@ export const language = {
 		gettingPosts: `Getting posts`,
 		gettingUsers: `Getting users`,
 		goBack: `Go back`,
+		goToSite: `Go to site`,
 		handle: `Handle`,
 		headers: `Headers`,
 		helpCenter: `Help Center`,

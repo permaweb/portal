@@ -25,14 +25,23 @@ export default function Portal() {
 		<S.Wrapper className={'fade-in'}>
 			<S.HeaderWrapper>
 				<h4>{language.portalHeader}</h4>
-				<Button
-					type={'alt1'}
-					label={language.createPost}
-					handlePress={() => navigate(URLS.postCreateArticle(portalProvider.current.id))}
-					disabled={!portalProvider.current}
-					icon={ASSETS.add}
-					iconLeftAlign
-				/>
+				<S.HeaderActions>
+					<Button
+						type={'primary'}
+						label={language.goToSite}
+						handlePress={() => console.log('TODO: Go to site')}
+						disabled={!portalProvider.current}
+						iconLeftAlign
+					/>
+					<Button
+						type={'alt1'}
+						label={language.createPost}
+						handlePress={() => navigate(URLS.postCreateArticle(portalProvider.current.id))}
+						disabled={!portalProvider.current}
+						icon={ASSETS.add}
+						iconLeftAlign
+					/>
+				</S.HeaderActions>
 			</S.HeaderWrapper>
 			<S.BodyWrapper>
 				<S.SectionWrapper>

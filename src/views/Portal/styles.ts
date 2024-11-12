@@ -12,7 +12,14 @@ export const HeaderWrapper = styled.div`
 	align-items: center;
 	justify-content: space-between;
 	flex-wrap: wrap;
-	gap: 10px;
+	gap: 20px;
+`;
+
+export const HeaderActions = styled.div`
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 15px;
 `;
 
 export const BodyWrapper = styled.div`

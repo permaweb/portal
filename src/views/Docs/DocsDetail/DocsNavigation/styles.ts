@@ -1,14 +1,18 @@
 import styled from 'styled-components';
 
-import { open, transition3 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const NWrapper = styled.div`
-	height: calc(100vh - 40px);
-	width: 300px;
-	position: sticky;
+	height: 100vh;
+	width: ${STYLING.dimensions.nav.width};
+	position: fixed;
 	top: 0;
-	animation: ${open} ${transition3};
+	left: 0;
+	z-index: 4;
+
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	border-right: 1px solid ${(props) => props.theme.colors.border.primary};
+
 	@media (max-width: ${STYLING.cutoffs.initial}) {
 		height: auto;
 		width: 100%;
@@ -17,19 +21,18 @@ export const NWrapper = styled.div`
 `;
 
 export const NContent = styled.div`
-	max-height: calc(100vh - 160px);
+	height: 100%;
 	width: 100%;
-	position: sticky;
 	z-index: 1;
-	top: 105px;
-	overflow: auto;
-	margin: 10.5px 0 0 0;
-	padding: 15px 20px 0 20px;
+	padding: 15px 20px;
 	@media (max-width: ${STYLING.cutoffs.initial}) {
 		position: relative;
 		top: auto;
 		padding: 0 15px;
 		max-height: none;
+		background: ${(props) => props.theme.colors.container.alt3.background};
+		border: 1px solid ${(props) => props.theme.colors.border.primary};
+		border-radius: ${STYLING.dimensions.radius.primary};
 	}
 `;
 
@@ -38,9 +41,9 @@ export const NTitle = styled.div`
 	display: flex;
 	justify-content: flex-start;
 	align-items: center;
-	margin: 0 0 10px 0;
+	margin: 0 0 20px 0;
 	p {
-		font-family: ${(props) => props.theme.typography.family.primary};
+		font-family: ${(props) => props.theme.typography.family.alt1};
 		font-size: 22px !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		color: ${(props) => props.theme.colors.font.primary} !important;
@@ -73,14 +76,18 @@ export const NTitleMobile = styled.button<{ open: boolean }>`
 		height: 12.5px;
 		width: 12.5px;
 		margin: 3.5px 0 0 0;
-		transform: rotate(${(props) => (props.open ? '270deg' : '90deg')});
+		transform: rotate(${(props) => (props.open ? '180deg' : '0deg')});
 		fill: ${(props) => props.theme.colors.font.primary};
+		color: ${(props) => props.theme.colors.font.primary};
 	}
 `;
 
 export const NList = styled.ul`
 	width: 100%;
 	overflow: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
 	a {
 		width: fit-content;
 		text-decoration: none;
@@ -98,7 +105,7 @@ export const NListItem = styled.li<{ disabled: boolean; active: boolean }>`
 	align-items: center;
 	cursor: pointer;
 	font-size: ${(props) => props.theme.typography.size.small};
-	color: ${(props) => (props.active ? props.theme.colors.font.alt5 : props.theme.colors.font.primary)};
+	color: ${(props) => (props.active ? props.theme.colors.font.alt5 : props.theme.colors.font.alt1)};
 	font-weight: ${(props) => props.theme.typography.weight.bold};
 	margin: 0 0 7.5px 0;
 	line-height: 1.75;
@@ -107,13 +114,11 @@ export const NListItem = styled.li<{ disabled: boolean; active: boolean }>`
 	background: transparent;
 
 	&:hover {
-		color: ${(props) => (props.active ? props.theme.colors.font.alt5 : props.theme.colors.font.alt1)};
+		color: ${(props) => (props.active ? props.theme.colors.font.alt5 : props.theme.colors.font.primary)};
 	}
 `;
 
-export const NGroup = styled.div`
-	margin: 12.5px 0 20px 0;
-`;
+export const NGroup = styled.div``;
 
 export const NSubHeader = styled(NTitle)`
 	height: auto;
@@ -123,8 +128,9 @@ export const NSubHeader = styled(NTitle)`
 	border-top-right-radius: 0;
 	margin: 0 0 10px 0;
 	p {
-		font-size: ${(props) => props.theme.typography.size.small} !important;
-		color: ${(props) => props.theme.colors.font.alt1} !important;
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.base} !important;
+		color: ${(props) => props.theme.colors.font.primary} !important;
 	}
 `;
 

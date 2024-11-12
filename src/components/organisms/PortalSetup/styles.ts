@@ -73,7 +73,7 @@ export const LinkWrapper = styled.div`
 		align-items: center;
 		justify-content: center;
 		position: relative;
-		background: ${(props) => props.theme.colors.container.primary.background};
+		background: ${(props) => props.theme.colors.container.alt1.background};
 		border: 1px solid ${(props) => props.theme.colors.border.alt1};
 		border-radius: 50%;
 

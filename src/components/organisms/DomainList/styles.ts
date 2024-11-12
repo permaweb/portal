@@ -5,11 +5,12 @@ import { STYLING } from 'helpers/config';
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
+	padding: 0 0 5px 0;
 `;
 
 export const DomainWrapper = styled.div`
 	display: flex;
-	padding: 10.5px 15px;
+	padding: 7.5px 15px;
 	justify-content: space-between;
 	align-items: center;
 	flex-wrap: wrap;
