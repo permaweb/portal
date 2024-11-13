@@ -16,7 +16,7 @@ export default function Create() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const options = React.useMemo(() => {
-		if (portalProvider.current) {
+		if (portalProvider.current?.id) {
 			return [
 				{ url: URLS.postCreateArticle(portalProvider.current.id), label: language.article, icon: ASSETS.article },
 				{ url: URLS.postCreateVideo(portalProvider.current.id), label: language.video, icon: ASSETS.video },
@@ -24,7 +24,7 @@ export default function Create() {
 			];
 		}
 		return null;
-	}, [portalProvider.current]);
+	}, [portalProvider.current?.id]);
 
 	return (
 		<S.Wrapper className={'fade-in'}>

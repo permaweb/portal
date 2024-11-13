@@ -15,7 +15,7 @@ export const Wrapper = styled.div<{ warning: boolean | undefined }>`
 	display: flex;
 	align-items: center;
 	padding: 11.5px 17.5px !important;
-	gap: 20px;
+	gap: 45px;
 	border: none !important;
 	border-radius: ${STYLING.dimensions.radius.primary};
 

@@ -14,6 +14,7 @@ import { NotificationType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePortalProvider } from 'providers/PortalProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
@@ -25,6 +26,8 @@ export default function PortalManager(props: IProps) {
 	const navigate = useNavigate();
 
 	const arProvider = useArweaveProvider();
+
+	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -78,10 +81,14 @@ export default function PortalManager(props: IProps) {
 
 			console.log(`Profile update: ${profileUpdateId}`);
 
+			portalProvider.refreshCurrentPortal();
 			arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
 
 			if (props.handleUpdate) props.handleUpdate();
 			if (props.handleClose) props.handleClose();
+
+			setName('');
+			setLogo(null);
 
 			setPortalResponse({
 				message: response,

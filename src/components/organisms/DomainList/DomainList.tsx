@@ -15,7 +15,7 @@ export default function DomainList() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const posts = React.useMemo(() => {
+	const domains = React.useMemo(() => {
 		if (!portalProvider.current?.domains) {
 			return (
 				<S.LoadingWrapper>
@@ -69,7 +69,7 @@ export default function DomainList() {
 				})}
 			</S.Wrapper>
 		) : null;
-	}, [portalProvider, languageProvider, portalProvider.current?.domains, language]);
+	}, [portalProvider, languageProvider, portalProvider.current?.id, portalProvider.current?.domains, language]);
 
-	return posts;
+	return domains;
 }

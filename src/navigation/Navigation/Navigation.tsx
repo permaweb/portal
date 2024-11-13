@@ -5,6 +5,7 @@ import { debounce } from 'lodash';
 
 import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS, STYLING, URLS } from 'helpers/config';
+import { PortalHeaderType } from 'helpers/types';
 import { checkWindowCutoff } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
@@ -57,7 +58,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				label: language.domains,
 			},
 		];
-	}, [portalProvider.current]);
+	}, [portalProvider.current?.id]);
 
 	function handleWindowResize() {
 		if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {
@@ -136,10 +137,10 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				</>
 			);
 		}
-	}, [props.open, desktop, portalProvider.current]);
+	}, [props.open, desktop, portalProvider.current?.id]);
 
 	const portal = React.useMemo(() => {
-		if (portalProvider.current) {
+		if (portalProvider.current?.id) {
 			return (
 				<S.PortalWrapper className={'fade-in'}>
 					<CloseHandler
@@ -162,7 +163,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 								</S.PDropdownHeader>
 								{portalProvider.portals && portalProvider.portals.length > 0 && (
 									<S.PDropdownBody>
-										{portalProvider.portals.map((portal: any) => {
+										{portalProvider.portals.map((portal: PortalHeaderType) => {
 											const active = portalProvider.current ? portalProvider.current.id === portal.id : false;
 											return (
 												<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>
@@ -223,7 +224,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				<span>{`${language.loading}...`}</span>
 			</S.LoadingWrapper>
 		);
-	}, [showPortalDropdown, portalProvider.portals, portalProvider.current]);
+	}, [showPortalDropdown, portalProvider.portals, portalProvider.current?.id, portalProvider.current?.name]);
 
 	return (
 		<>

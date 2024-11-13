@@ -157,7 +157,6 @@ function Block(props: {
 
 // TODO: Links
 // TODO: Media upload
-// TODO: Categories
 export default function ArticleEditor() {
 	const navigate = useNavigate();
 	const { assetId } = useParams<{ assetId?: string }>();
@@ -214,7 +213,7 @@ export default function ArticleEditor() {
 				}
 			}
 		})();
-	}, [assetId, portalProvider.current]);
+	}, [assetId, portalProvider.current?.id]);
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -377,6 +376,7 @@ export default function ArticleEditor() {
 					console.log(`Asset content update: ${assetContentUpdateId}`);
 
 					setResponse({ status: 'success', message: `${language.postUpdated}!` });
+					portalProvider.refreshCurrentPortal();
 				} catch (e: any) {
 					setResponse({ status: 'warning', message: e.message ?? language.errorUpdatingPost });
 				}
@@ -424,6 +424,7 @@ export default function ArticleEditor() {
 					console.log(`Asset holders update: ${assetHoldersUpdateId}`);
 
 					setResponse({ status: 'success', message: `${language.postSaved}!` });
+					portalProvider.refreshCurrentPortal();
 					navigate(`${URLS.postEditArticle(portalProvider.current.id)}${assetId}`);
 				} catch (e: any) {
 					setResponse({ status: 'warning', message: e.message ?? 'Error creating post' });

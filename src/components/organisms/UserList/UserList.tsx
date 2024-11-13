@@ -13,7 +13,7 @@ export default function UserList() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const posts = React.useMemo(() => {
+	const users = React.useMemo(() => {
 		if (!portalProvider.current?.assets) {
 			return (
 				<S.LoadingWrapper>
@@ -49,7 +49,7 @@ export default function UserList() {
 				})}
 			</S.Wrapper>
 		) : null;
-	}, [portalProvider, languageProvider, portalProvider.current?.assets, language]);
+	}, [portalProvider, languageProvider, portalProvider.current?.id, portalProvider.current?.assets, language]);
 
-	return posts;
+	return users;
 }

@@ -40,7 +40,7 @@ export default function ArticleToolbarPost(props: IProps) {
 				setTopicOptions(portalProvider.current.topics.map((topic: PortalTopicType) => topic.value));
 			if (portalProvider.current.categories) setCategoryOptions(portalProvider.current.categories);
 		}
-	}, [portalProvider.current]);
+	}, [portalProvider.current?.id]);
 
 	const addCategory = async () => {
 		if (newCategoryName && portalProvider.current?.id && arProvider.wallet) {

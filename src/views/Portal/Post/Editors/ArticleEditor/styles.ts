@@ -61,7 +61,7 @@ export const ElementDragWrapper = styled.div`
 `;
 
 export const ElementWrapper = styled.div`
-	width: calc(100% - 27.5px);
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
