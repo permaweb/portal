@@ -1,10 +1,12 @@
-import { ArticleBlockEnum, ArticleStatusType } from 'helpers/types';
+import { ArticleBlockEnum, ArticleStatusType, CategoryType } from 'helpers/types';
 
 export interface IProps {
 	postTitle: string;
 	setPostTitle: (value: string) => void;
 	status: ArticleStatusType;
 	setStatus: (value: ArticleStatusType) => void;
+	categories: CategoryType[];
+	setCategories: (categories: CategoryType[]) => void;
 	topics: string[];
 	setTopics: (topics: string[]) => void;
 	addBlock: (type: ArticleBlockEnum) => void;

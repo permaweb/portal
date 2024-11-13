@@ -18,7 +18,6 @@ export const Wrapper = styled.div<{ warning: boolean | undefined }>`
 	gap: 20px;
 	border: none !important;
 	border-radius: ${STYLING.dimensions.radius.primary};
-	box-shadow: 0 0 10px 1px ${(props) => props.theme.colors.shadow.primary};
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		min-width: 0;

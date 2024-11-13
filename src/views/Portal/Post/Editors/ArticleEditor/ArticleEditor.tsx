@@ -11,7 +11,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
 import { ARTICLE_BLOCKS, ASSET_UPLOAD, ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { ArticleBlockEnum, ArticleBlockType, ArticleStatusType, NotificationType } from 'helpers/types';
+import { ArticleBlockEnum, ArticleBlockType, ArticleStatusType, CategoryType, NotificationType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -170,6 +170,7 @@ export default function ArticleEditor() {
 
 	const [title, setTitle] = React.useState<string>('');
 	const [status, setStatus] = React.useState<ArticleStatusType>('draft');
+	const [categories, setCategories] = React.useState<CategoryType[]>([]);
 	const [topics, setTopics] = React.useState<string[]>([]);
 	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
 
@@ -202,6 +203,7 @@ export default function ArticleEditor() {
 						if (response) {
 							if (response.title) setTitle(response.title);
 							if (response.status) setStatus(response.status);
+							if (response.categories) setCategories(response.categories);
 							if (response.topics) setTopics(response.topics);
 							if (response.content?.length > 0) setBlocks(response.content);
 						}
@@ -315,16 +317,52 @@ export default function ArticleEditor() {
 		return !blocks || blocks.length <= 0 || !blocks.some((block) => block.content.length > 0);
 	}
 
+	function validateSubmit() {
+		let valid: boolean = true;
+		let message: string | null = null;
+
+		if (!title) {
+			valid = false;
+			message = 'Post title is required.';
+		}
+		if (!status) {
+			valid = false;
+			message = 'Status is required.';
+		}
+		if (!blocks?.length) {
+			valid = false;
+			message = 'No content found in post.';
+		}
+		if (!categories?.length) {
+			valid = false;
+			message = 'Categories are required.';
+		}
+		if (!topics?.length) {
+			valid = false;
+			message = 'Topics are required.';
+		}
+
+		if (!valid) {
+			setResponse({ status: 'warning', message: message });
+		}
+
+		return valid;
+	}
+
 	async function handleSubmit() {
 		if (arProvider.wallet && arProvider.profile?.id && portalProvider.current?.id) {
 			setLoading({ active: true, message: `${language.savingPost}...` });
+			if (!validateSubmit()) {
+				setLoading({ active: false, message: null });
+				return;
+			}
 
 			const data = {
 				Title: title,
 				Status: status,
 				Content: blocks,
 				Topics: topics,
-				Categories: [{ label: 'Category 1', link: 'https://test.com' }], // TODO
+				Categories: categories,
 			};
 
 			if (assetId) {
@@ -528,6 +566,8 @@ export default function ArticleEditor() {
 						setPostTitle={(value: string) => setTitle(value)}
 						status={status}
 						setStatus={(value: ArticleStatusType) => setStatus(value)}
+						categories={categories}
+						setCategories={(newCategories: CategoryType[]) => setCategories(newCategories)}
 						topics={topics}
 						setTopics={(newTopics: string[]) => setTopics(newTopics)}
 						addBlock={(type: ArticleBlockEnum) => addBlock(type)}

@@ -35,7 +35,7 @@ export const SectionBody = styled.div`
 `;
 
 export const TopicsSection = styled(Section)`
-	margin: -20px 0 0 0;
+	margin: -10px 0 0 0;
 `;
 
 export const TopicsWrapper = styled.div`
@@ -114,7 +114,8 @@ export const ParentCategoryDropdown = styled.div`
 	position: absolute;
 	z-index: 2;
 	top: 52.5px;
-	border-radius: ${STYLING.dimensions.radius.primary};
+	background: ${(props) => props.theme.colors.container.alt1.background} !important;
+	border-radius: ${STYLING.dimensions.radius.alt2} !important;
 `;
 
 export const ParentCategoryOptions = styled.div``;
@@ -174,7 +175,7 @@ export const CategoryOption = styled.li<{ level: number }>`
 
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.small} !important;
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}

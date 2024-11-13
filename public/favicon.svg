@@ -1,12 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 50 50">
-  <!-- Outer blue circle -->
-  <circle cx="25" cy="25" r="25" fill="#5158BB"/>
-  <!-- Inner gray circle, now larger -->
-  <circle cx="25" cy="25" r="20" fill="#D3D3D3"/>
-  <!-- Center square, now larger -->
-  <rect x="14" y="23" width="15" height="15" fill="#333333" rx="1" ry="1"/>
-  <!-- Top-left square, adjusted position -->
-  <rect x="21" y="12" width="8" height="8" fill="#333333" rx="1" ry="1"/>
-  <!-- Bottom-right square, adjusted position -->
-  <rect x="31" y="15" width="8" height="18" fill="#333333" rx="1" ry="1"/>
-</svg>
+<svg 
+	xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256"
+		fill="none" />
+		<style>
+			/* Use black for light mode, white for dark mode */
+			svg {
+			color: black;
+			}
+	
+			@media (prefers-color-scheme: dark) {
+			svg {
+			color: white;
+			}
+			}
+	</style><path
+		d="M84.27,171.73l-55.09-20.3a7.92,7.92,0,0,1,0-14.86l55.09-20.3,20.3-55.09a7.92,7.92,0,0,1,14.86,0l20.3,55.09,55.09,20.3a7.92,7.92,0,0,1,0,14.86l-55.09,20.3-20.3,55.09a7.92,7.92,0,0,1-14.86,0Z"
+		fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+		stroke-width="24" /><line x1="176" y1="16" x2="176" y2="64" fill="none" stroke="currentColor"
+		stroke-linecap="round" stroke-linejoin="round" stroke-width="24" /><line x1="224" y1="72"
+		x2="224" y2="104" fill="none" stroke="currentColor" stroke-linecap="round"
+		stroke-linejoin="round" stroke-width="24" /><line x1="152" y1="40" x2="200" y2="40" fill="none"
+		stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="24" /><line
+		x1="208" y1="88" x2="240" y2="88" fill="none" stroke="currentColor" stroke-linecap="round"
+		stroke-linejoin="round" stroke-width="24" /></svg>

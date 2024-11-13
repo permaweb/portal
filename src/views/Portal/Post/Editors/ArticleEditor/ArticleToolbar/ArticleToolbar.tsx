@@ -308,7 +308,14 @@ export default function ArticleToolbar(props: IProps) {
 					</S.BADropdownBody>
 				);
 			case 'Post':
-				return <ArticleToolbarPost topics={props.topics} setTopics={props.setTopics} />;
+				return (
+					<ArticleToolbarPost
+						categories={props.categories}
+						setCategories={props.setCategories}
+						topics={props.topics}
+						setTopics={props.setTopics}
+					/>
+				);
 			default:
 				return null;
 		}

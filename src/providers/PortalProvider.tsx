@@ -74,6 +74,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								name: currentPortalFetch.store?.name || 'None',
 								logo: currentPortalFetch.store?.logo || 'None',
 								assets: [],
+								categories: currentPortalFetch.store?.categories || [],
 								topics: getStoreNamespace('topic', currentPortalFetch.store),
 								users: [
 									{ username: 'bob_crypto', displayName: 'Bob Smith', role: 'Contributor' },

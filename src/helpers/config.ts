@@ -67,7 +67,7 @@ export const ASSETS = {
 export const ASSET_UPLOAD = {
 	src: {
 		data: 'lBWtTMWN-jtrecImXZsQ7noVQ9pofTjGBqsfwjdVApg',
-		process: '2V8WnljDug2oa-b0F5jslqBTqmxZ63LLtg8uyjjRJx0',
+		process: 'w5XWFAaa_8kNR7ruP-i5jf4zC5hlAxM4nlXu516Xxg8',
 	},
 	ansType: 'blog-post',
 	contentType: 'text/html',

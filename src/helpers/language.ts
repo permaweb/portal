@@ -1,6 +1,7 @@
 export const language = {
 	en: {
 		add: `Add`,
+		addCategory: `Add a category`,
 		addTopic: `Add a topic`,
 		app: `Portals`,
 		article: `Article`,
