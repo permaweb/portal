@@ -15,6 +15,7 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import * as S from './styles';
 
 // TODO: Post index in portal process
+// TODO: Pagination / sorting
 export default function PostList() {
 	const navigate = useNavigate();
 

@@ -176,7 +176,7 @@ export default function ArticleEditor() {
 	const [focusedBlock, setFocusedBlock] = React.useState<ArticleBlockType | null>(null);
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
-	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(true);
+	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(false);
 	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
 
 	const [loading, setLoading] = React.useState<{ active: boolean; message: string | null }>({
@@ -324,7 +324,7 @@ export default function ArticleEditor() {
 				Status: status,
 				Content: blocks,
 				Topics: topics,
-				Categories: [{ label: 'Category 1', link: 'https://test.com' }],
+				Categories: [{ label: 'Category 1', link: 'https://test.com' }], // TODO
 			};
 
 			if (assetId) {

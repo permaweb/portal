@@ -217,7 +217,7 @@ export const darkThemeHighContrast = {
 	caution1: '#EECA00',
 	negative1: '#D81E5B',
 	negative2: '#E43A72',
-	neutral1: '#121212',
+	neutral1: '#151515',
 	neutral2: '#1E1E1E',
 	neutral3: '#2A2A2A',
 	neutral4: '#606060',
@@ -402,7 +402,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 		},
 		checkbox: {
 			active: {
-				background: currentTheme.primary2,
+				background: currentTheme.primary1,
 			},
 			background: currentTheme.neutral1,
 			hover: currentTheme.neutral3,

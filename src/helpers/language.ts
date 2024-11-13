@@ -1,11 +1,13 @@
 export const language = {
 	en: {
+		add: `Add`,
 		addTopic: `Add a topic`,
 		app: `Portals`,
 		article: `Article`,
 		bio: `Bio`,
 		blocks: `Blocks`,
 		blocksEmpty: `Start your post - Press enter, click here, or choose a block type`,
+		categories: `Categories`,
 		chooseAppAppearance: `Choose app appearance`,
 		close: `Close`,
 		closeToolkit: `Close toolkit`,
@@ -87,6 +89,7 @@ export const language = {
 		removeLogo: `Remove logo`,
 		save: `Save`,
 		savingPost: `Saving your post`,
+		selectParentCategory: `Select parent category`,
 		sidebarClose: `Close sidebar`,
 		sidebarOpen: `Open sidebar`,
 		selectPortal: `Select your portal`,

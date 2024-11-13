@@ -58,7 +58,7 @@ export const FlexAction = styled.div`
 	}
 `;
 
-export const Dropdown = styled.ul`
+export const Dropdown = styled.div`
 	max-height: 65vh;
 	width: 325px;
 	max-width: 75vw;
