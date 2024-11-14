@@ -112,10 +112,20 @@ function getElementWrapper(blockEditMode: boolean, type: ArticleBlockEnum, theme
 	}
 }
 
+function getElementCursor(type: ArticleBlockEnum) {
+	switch (type) {
+		case 'image':
+		case 'video':
+			return 'default';
+		default:
+			return 'text';
+	}
+}
+
 export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEnum }>`
 	${(props) => getElementWrapper(props.blockEditMode, props.type, props.theme)};
 
-	cursor: text;
+	cursor: ${(props) => getElementCursor(props.type)};
 
 	p {
 		font-size: ${(props) => props.theme.typography.size.base};

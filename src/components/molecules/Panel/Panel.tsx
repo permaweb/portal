@@ -57,7 +57,11 @@ export default function Panel(props: IProps) {
 					width={props.width}
 					className={'border-wrapper-primary'}
 				>
-					<CloseHandler active={props.open} disabled={!props.open} callback={() => props.handleClose()}>
+					<CloseHandler
+						active={props.open && !props.closeHandlerDisabled}
+						disabled={!props.open || props.closeHandlerDisabled}
+						callback={() => props.handleClose()}
+					>
 						{props.header && (
 							<S.Header>
 								<S.LT>{getHeader()}</S.LT>

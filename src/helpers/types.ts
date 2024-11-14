@@ -26,12 +26,14 @@ export enum ArticleBlockEnum {
 	Header5 = 'header-5',
 	Header6 = 'header-6',
 	Image = 'image',
+	Video = 'video',
 }
 
 export type ArticleBlockType = {
 	id: string;
 	type: ArticleBlockEnum;
 	content: string;
+	data?: any;
 };
 
 export type ArticleStatusType = 'draft' | 'published';

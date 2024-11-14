@@ -86,9 +86,7 @@ export const InputActionsDivider = styled.div`
 export const ContentWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
-	/* justify-content: center;
-	align-items: center; */
+	gap: 12.5px;
 `;
 
 export const Content = styled.div`
@@ -98,7 +96,6 @@ export const Content = styled.div`
 	}
 
 	.portal-image-row {
-		/* Default Flex */
 	}
 	.portal-image-row-reverse {
 		flex-direction: row-reverse;
@@ -111,18 +108,24 @@ export const Content = styled.div`
 	}
 
 	.portal-image-wrapper img {
-		width: 100%;
-		/* max-width: 700px; */
-		/* margin: 0 auto; */
 		border-radius: 10px;
 	}
 
+	.portal-image-row img {
+		width: calc(100% - 312.5px);
+	}
+	.portal-image-row-reverse img {
+		width: calc(100% - 312.5px);
+	}
+	.portal-image-column img {
+		width: 100%;
+	}
+	.portal-image-column-reverse img {
+		width: 100%;
+	}
+
 	.portal-image-wrapper p {
-		/* display: flex;
-		align-items: center;
-		text-align: center; */
-		max-width: 600px;
-		/* margin: 0 auto; */
+		min-width: 300px;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
 		font-weight: ${(props) => props.theme.typography.weight.medium};
@@ -130,12 +133,61 @@ export const Content = styled.div`
 	}
 `;
 
-export const ContentActionsWrapper = styled.div`
-	width: fit-content;
+export const CaptionEmpty = styled.div`
+	p {
+		color: ${(props) => props.theme.colors.font.alt3};
+		font-size: ${(props) => props.theme.typography.size.small};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		cursor: text;
+	}
+`;
+
+export const ModalCaptionWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 7.5px;
-	padding: 12.5px 15px 15px 15px;
+	gap: 10px;
+`;
+
+export const ModalCaptionActionWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 20px;
+	margin: 10px 0 0 0;
+`;
+
+function getContentActionPosition(alignment: string) {
+	switch (alignment) {
+		case 'portal-image-row':
+			return `
+				top: 30px;
+			`;
+		case 'portal-image-row-reverse':
+			return `
+				top: 30px;
+			`;
+		case 'portal-image-column':
+			return `
+				bottom: 35px;
+			`;
+		case 'portal-image-column-reverse':
+			return `
+				top: 35px;
+			`;
+	}
+}
+
+export const ContentActionsWrapper = styled.div<{ alignment: string }>`
+	width: fit-content;
+	max-width: 90vw;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 15px 15px 15px;
+	display: flex;
+	${(props) => getContentActionPosition(props.alignment)};
 
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
@@ -146,9 +198,33 @@ export const ContentActionsWrapper = styled.div`
 	}
 `;
 
-export const ContentActions = styled.div`
+export const ContentActions = styled.div<{ useColumn: boolean }>`
 	display: flex;
+	flex-direction: ${(props) => (props.useColumn ? 'column' : 'row')};
 	align-items: center;
 	gap: 10px;
 	flex-wrap: wrap;
 `;
+
+export const ContentActionsEnd = styled.div<{ useColumn: boolean }>`
+	width: fit-content;
+	display: flex;
+	flex-direction: ${(props) => (props.useColumn ? 'column' : 'row')};
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	margin: ${(props) => (props.useColumn ? '10px 0 0 0' : '7.5px auto 0 auto')};
+`;
+
+export const CaptionWrapper = styled.div`
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 10px;
+	p {
+		cursor: text;
+	}
+`;
+
+export const CaptionToolsAction = styled.div``;

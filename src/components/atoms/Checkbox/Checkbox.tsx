@@ -7,7 +7,7 @@ import { IProps } from './types';
 
 export default function Checkbox(props: IProps) {
 	return (
-		<S.Wrapper>
+		<S.Wrapper disabled={props.disabled}>
 			<S.Input checked={props.checked} disabled={props.disabled} type={'checkbox'} onChange={props.handleSelect} />
 			{props.checked && <ReactSVG src={ASSETS.checkmark} />}
 		</S.Wrapper>

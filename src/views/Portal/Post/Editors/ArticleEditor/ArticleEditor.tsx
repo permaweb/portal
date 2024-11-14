@@ -25,7 +25,7 @@ function Block(props: {
 	index: number;
 	block: ArticleBlockType;
 	blockEditMode: boolean;
-	onChangeBlock: (id: string, content: any) => void;
+	onChangeBlock: (id: string, content: any, data?: any) => void;
 	onDeleteBlock: (id: string) => void;
 	autoFocus: boolean;
 	onFocus: () => void;
@@ -75,7 +75,8 @@ function Block(props: {
 			element = (
 				<Image
 					content={props.block.content}
-					onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
+					data={props.block.data ?? null}
+					onChange={(newContent: any, data: any) => props.onChangeBlock(props.block.id, newContent, data)}
 				/>
 			);
 			break;
@@ -171,7 +172,13 @@ export default function ArticleEditor() {
 	const [status, setStatus] = React.useState<ArticleStatusType>('draft');
 	const [categories, setCategories] = React.useState<CategoryType[]>([]);
 	const [topics, setTopics] = React.useState<string[]>([]);
-	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
+	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([
+		{
+			id: '1',
+			type: 'image' as any,
+			content: '',
+		},
+	]);
 
 	const [focusedBlock, setFocusedBlock] = React.useState<ArticleBlockType | null>(null);
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
@@ -504,8 +511,12 @@ export default function ArticleEditor() {
 		setLastAddedBlockId(newBlock.id);
 	};
 
-	const handleBlockChange = (id: string, content: string) => {
-		setBlocks((prevBlocks) => prevBlocks.map((block) => (block.id === id ? { ...block, content } : block)));
+	const handleBlockChange = (id: string, content: string, data?: any) => {
+		setBlocks((prevBlocks) =>
+			prevBlocks.map((block) =>
+				block.id === id ? (data ? { ...block, content, data } : { ...block, content }) : block
+			)
+		);
 	};
 
 	const deleteBlock = (id: string) => {

@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div<{ disabled: boolean }>`
 	position: relative;
 	svg {
 		height: 9.5px;
@@ -11,8 +11,10 @@ export const Wrapper = styled.div`
 		left: 50%;
 		transform: translate(-50%, 0px);
 		pointer-events: none;
-		color: ${(props) => props.theme.colors.font.light1};
-		fill: ${(props) => props.theme.colors.font.light1};
+		color: ${(props) =>
+			props.disabled ? props.theme.colors.button.primary.disabled.color : props.theme.colors.font.light1};
+		fill: ${(props) =>
+			props.disabled ? props.theme.colors.button.primary.disabled.color : props.theme.colors.font.light1};
 	}
 `;
 

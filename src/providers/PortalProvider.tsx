@@ -139,6 +139,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					header={current && current.id && !createNewPortal ? language.editPortal : language.createPortal}
 					handleClose={() => setShowPortalManager(false)}
 					width={500}
+					closeHandlerDisabled={true}
 				>
 					<PortalManager
 						portal={createNewPortal ? null : current}

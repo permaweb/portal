@@ -42,6 +42,7 @@ export default function ArticleToolbarPost(props: IProps) {
 		}
 	}, [portalProvider.current?.id]);
 
+	// TODO: Handle duplicates
 	const addCategory = async () => {
 		if (newCategoryName && portalProvider.current?.id && arProvider.wallet) {
 			setCategoryLoading(true);

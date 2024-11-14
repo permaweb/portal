@@ -279,6 +279,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					header={profile && profile.id ? language.editProfile : `${language.createProfile}!`}
 					handleClose={() => setShowProfileManager(false)}
 					width={575}
+					closeHandlerDisabled
 				>
 					<ProfileManager
 						profile={profile && profile.id ? profile : null}
