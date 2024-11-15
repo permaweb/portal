@@ -17,7 +17,7 @@ import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
-import { Image } from './Blocks/Image';
+import { MediaBlock } from './Blocks/MediaBlock';
 import { ArticleToolbar } from './ArticleToolbar';
 import * as S from './styles';
 
@@ -73,7 +73,19 @@ function Block(props: {
 		case 'image':
 			useCustom = true;
 			element = (
-				<Image
+				<MediaBlock
+					type={'image'}
+					content={props.block.content}
+					data={props.block.data ?? null}
+					onChange={(newContent: any, data: any) => props.onChangeBlock(props.block.id, newContent, data)}
+				/>
+			);
+			break;
+		case 'video':
+			useCustom = true;
+			element = (
+				<MediaBlock
+					type={'video'}
 					content={props.block.content}
 					data={props.block.data ?? null}
 					onChange={(newContent: any, data: any) => props.onChangeBlock(props.block.id, newContent, data)}
@@ -586,6 +598,7 @@ export default function ArticleEditor() {
 						blockEditMode={blockEditMode}
 						toggleBlockEditMode={() => setBlockEditMode(!blockEditMode)}
 						panelOpen={panelOpen}
+						setPanelOpen={(status: boolean) => setPanelOpen(status)}
 						togglePanelOpen={() => setPanelOpen(!panelOpen)}
 						toggleBlockFocus={toggleBlockFocus}
 						setToggleBlockFocus={() => setToggleBlockFocus(false)}

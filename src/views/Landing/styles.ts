@@ -43,7 +43,7 @@ export const BodyWrapper = styled.div`
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 40px;
-	margin: 50px 0 0 0;
+	margin: 30px 0 0 0;
 `;
 
 export const Section = styled.div`
@@ -70,7 +70,6 @@ export const ConnectionWrapper = styled.div`
 `;
 
 export const PortalsWrapper = styled.div`
-	height: 300px;
 	width: 100%;
 	display: flex;
 	flex-direction: column;
@@ -102,6 +101,7 @@ export const PListWrapper = styled.div`
 	margin: 0 0 5px 0;
 
 	a {
+		min-height: 47.5px;
 		height: 47.5px;
 		display: flex;
 		align-items: center;

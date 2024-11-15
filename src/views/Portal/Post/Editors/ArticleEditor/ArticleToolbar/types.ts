@@ -13,6 +13,7 @@ export interface IProps {
 	blockEditMode: boolean;
 	toggleBlockEditMode: () => void;
 	panelOpen: boolean;
+	setPanelOpen: (status: boolean) => void;
 	togglePanelOpen: () => void;
 	toggleBlockFocus: boolean;
 	setToggleBlockFocus: () => void;

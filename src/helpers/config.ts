@@ -214,4 +214,10 @@ export const ARTICLE_BLOCKS = {
 		icon: ASSETS.image,
 		shortcut: 'Ctrl / I',
 	},
+	[ArticleBlockEnum.Video]: {
+		type: ArticleBlockEnum.Video,
+		label: 'Video',
+		icon: ASSETS.video,
+		shortcut: 'Ctrl / V',
+	},
 };

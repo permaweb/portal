@@ -207,7 +207,7 @@ export const BADropdownActionShortcut = styled.div`
 		text-transform: uppercase;
 		padding: 2.5px 6.5px;
 		border: 1px solid transparent;
-		background: ${(props) => props.theme.colors.container.alt4.background};
+		background: ${(props) => props.theme.colors.container.alt2.background};
 		border-radius: ${STYLING.dimensions.radius.alt3};
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: 10px !important;

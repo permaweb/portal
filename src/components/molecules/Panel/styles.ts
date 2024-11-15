@@ -21,9 +21,8 @@ export const Container = styled.div<{
 	width?: number;
 }>`
 	height: calc(100dvh - 20px);
-	min-width: ${(props) => (props.width ? `${props.width.toString()}px` : '400px')};
 	width: ${(props) => (props.width ? `${props.width.toString()}px` : 'fit-content')};
-	max-width: calc(100vw - 30px);
+	max-width: calc(100vw - 20px);
 	position: fixed;
 	z-index: 10;
 	overflow: hidden;

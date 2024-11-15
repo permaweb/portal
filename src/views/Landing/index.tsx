@@ -88,7 +88,7 @@ export default function Landing() {
 				content = (
 					<>
 						<p>{language.selectPortal}</p>
-						<S.PListWrapper>
+						<S.PListWrapper className={'scroll-wrapper'}>
 							{portalProvider.portals.map((portal: any) => {
 								return (
 									<Link key={portal.id} to={`${URLS.base}${portal.id}`}>
@@ -110,7 +110,7 @@ export default function Landing() {
 		}
 
 		return (
-			<S.PortalsWrapper className={'scroll-wrapper'}>
+			<S.PortalsWrapper>
 				{content}
 				{showAction && (
 					<Button
@@ -132,7 +132,7 @@ export default function Landing() {
 		<S.Wrapper className={'fade-in'}>
 			<S.HeaderWrapper>
 				<h4>{language.portalsHeader}</h4>
-				<p>{language.portalsSubheader}</p>
+				{/* <p>{language.portalsSubheader}</p> */}
 			</S.HeaderWrapper>
 			<S.BodyWrapper>
 				<S.Section>{connection}</S.Section>

@@ -10,8 +10,28 @@ export const InputWrapper = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
+	position: relative;
 	padding: 10px 20px;
 	border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
+`;
+
+export const InputOverlay = styled.div`
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	border: none !important;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+	}
 `;
 
 export const InputHeader = styled.div`
@@ -49,17 +69,17 @@ export const InputActions = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 20px;
-	margin: 15px 0 0 0;
+	margin: 25px 0 0 0;
 
 	button {
-		margin: 28.5px 0 0 0;
+		margin: 29.5px 0 0 0;
 	}
 
 	input {
 		max-width: 400px;
 	}
 
-	#image-file-input {
+	#media-file-input {
 		display: none;
 	}
 
@@ -67,59 +87,57 @@ export const InputActions = styled.div`
 		align-items: flex-start;
 		flex-direction: column;
 		gap: 15px;
-	}
-`;
 
-export const InputActionsDivider = styled.div`
-	margin: 23.5px 0 0 0;
-	span {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		font-family: ${(props) => props.theme.typography.family.primary};
-	}
-	@media (max-width: ${STYLING.cutoffs.tablet}) {
-		display: none;
+		button {
+			margin: 0;
+		}
 	}
 `;
 
 export const ContentWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 12.5px;
+	gap: 15px;
 `;
 
 export const Content = styled.div`
 	.portal-image-wrapper {
 		display: flex;
-		gap: 12.5px;
+		gap: 15px;
 	}
 
 	.portal-image-row {
 	}
+
 	.portal-image-row-reverse {
 		flex-direction: row-reverse;
 	}
+
 	.portal-image-column {
 		flex-direction: column;
 	}
+
 	.portal-image-column-reverse {
 		flex-direction: column-reverse;
 	}
 
 	.portal-image-wrapper img {
+		height: fit-content;
 		border-radius: 10px;
 	}
 
 	.portal-image-row img {
 		width: calc(100% - 312.5px);
 	}
+
 	.portal-image-row-reverse img {
 		width: calc(100% - 312.5px);
 	}
+
 	.portal-image-column img {
 		width: 100%;
 	}
+
 	.portal-image-column-reverse img {
 		width: 100%;
 	}
@@ -131,12 +149,26 @@ export const Content = styled.div`
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 	}
+
+	@media (max-width: 840px) {
+		.portal-image-wrapper {
+			flex-direction: column !important;
+		}
+
+		.portal-image-wrapper img {
+			width: 100% !important;
+		}
+
+		.portal-image-wrapper p {
+			max-width: 100% !important;
+		}
+	}
 `;
 
 export const CaptionEmpty = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt3};
-		font-size: ${(props) => props.theme.typography.size.small};
+		font-size: ${(props) => props.theme.typography.size.small} !important;
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 		cursor: text;
 	}
@@ -182,8 +214,6 @@ export const ContentActionsWrapper = styled.div<{ alignment: string }>`
 	max-width: 90vw;
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
-	align-items: center;
 	gap: 10px;
 	padding: 10px 15px 15px 15px;
 	display: flex;
@@ -213,17 +243,26 @@ export const ContentActionsEnd = styled.div<{ useColumn: boolean }>`
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 10px;
-	margin: ${(props) => (props.useColumn ? '10px 0 0 0' : '7.5px auto 0 auto')};
+	margin: ${(props) => (props.useColumn ? '10px 0 0 0' : '0 auto')};
 `;
 
-export const CaptionWrapper = styled.div`
+export const CaptionWrapper = styled.div<{ editMode: boolean; useColumn: boolean }>`
 	position: relative;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	gap: 10px;
+	gap: 15px;
 	p {
 		cursor: text;
+		max-width: ${(props) => (props.useColumn ? '300px' : '100%')} !important;
+		${(props) =>
+			props.editMode &&
+			`
+			padding: 10px;
+			background: ${props.theme.colors.container.alt1.background};
+			border: 1px solid ${props.theme.colors.border.primary};
+			border-radius: ${STYLING.dimensions.radius.alt2};
+		`}
 	}
 `;
 

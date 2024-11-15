@@ -8,7 +8,7 @@ import { Portal } from 'components/atoms/Portal';
 import { Tabs } from 'components/molecules/Tabs';
 import { ARTICLE_BLOCKS, ASSETS, DOM, STYLING } from 'helpers/config';
 import { ArticleBlockEnum } from 'helpers/types';
-import { checkWindowCutoff } from 'helpers/window';
+import { checkWindowCutoff, hideDocumentBody, showDocumentBody } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import { ArticleToolbarPost } from './ArticleToolbarPost';
@@ -56,7 +56,7 @@ export default function ArticleToolbar(props: IProps) {
 		},
 		{
 			label: language.media,
-			blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image]],
+			blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image], ARTICLE_BLOCKS[ArticleBlockEnum.Video]],
 		},
 	];
 
@@ -83,8 +83,17 @@ export default function ArticleToolbar(props: IProps) {
 	}, [titleRef]);
 
 	React.useEffect(() => {
-		if (!desktop) props.togglePanelOpen();
+		props.setPanelOpen(desktop);
 	}, [desktop]);
+
+	React.useEffect(() => {
+		if (props.panelOpen && !desktop) {
+			hideDocumentBody();
+			return () => {
+				showDocumentBody();
+			};
+		}
+	}, [props.panelOpen, desktop]);
 
 	React.useEffect(() => {
 		const count = BLOCK_TYPES.reduce((acc, section) => acc + section.blocks.length, 0);
@@ -247,6 +256,10 @@ export default function ArticleToolbar(props: IProps) {
 					case 'i':
 						event.preventDefault();
 						props.addBlock(ArticleBlockEnum.Image);
+						break;
+					case 'v':
+						event.preventDefault();
+						props.addBlock(ArticleBlockEnum.Video);
 						break;
 					default:
 						break;
