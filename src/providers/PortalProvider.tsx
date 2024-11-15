@@ -71,6 +71,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	}, [location.pathname, portals, currentId]);
 
 	// TODO: Duplicate zones being saved
+	// TODO: Hot update saves
 	React.useEffect(() => {
 		(async function () {
 			if (currentId) {

@@ -1,18 +1,40 @@
 import styled from 'styled-components';
 
-export const Wrapper = styled.div`
+import { STYLING } from 'helpers/config';
+import { ViewLayoutType } from 'helpers/types';
+
+export const Wrapper = styled.div<{ type: ViewLayoutType }>`
 	width: 100%;
+	display: flex;
+	flex-direction: ${(props) => (props.type === 'header' ? 'column' : 'row')};
+	flex-wrap: wrap;
+	gap: ${(props) => (props.type === 'header' ? '0' : '25px')};
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		flex-direction: column;
+	}
 `;
 
-export const Section = styled.div`
-	padding: 7.5px 15px;
+export const SectionWrapper = styled.div<{ type: ViewLayoutType }>`
+	height: fit-content;
+	width: ${(props) => (props.type === 'header' ? '100%' : 'calc(50% - 12.5px)')};
+	display: flex;
+	flex-direction: column;
+	gap: ${(props) => (props.type === 'header' ? '0' : '25px')};
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		width: 100%;
+	}
 `;
 
-export const DividerSection = styled.div`
-	height: 1px;
-	width: calc(100% - 30px);
-	margin: 5px auto;
-	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+export const Section = styled.div<{ type: ViewLayoutType }>`
+	padding: ${(props) => (props.type === 'header' ? '0 15px' : '15px 15px 0 15px')};
+`;
+
+export const CategoriesSection = styled(Section)<{ type: ViewLayoutType }>``;
+
+export const TopicsSection = styled(Section)<{ type: ViewLayoutType }>`
+	padding: ${(props) => (props.type === 'header' ? '0 15px 15px 15px' : '15px 15px 0 15px')};
 `;
 
 export const SectionHeader = styled.div`
@@ -28,6 +50,10 @@ export const SectionHeader = styled.div`
 	}
 `;
 
+export const CategoriesHeader = styled(SectionHeader)`
+	margin: 0 0 10px 0;
+`;
+
 export const SectionBody = styled.div`
 	margin: 15px 0 0 0;
 `;
@@ -36,7 +62,7 @@ export const LinksSection = styled(SectionBody)`
 	display: flex;
 	flex-wrap: wrap;
 	gap: 15px;
-	padding: 0 0 5px 0;
+	padding: 0 0 12.5px 0;
 `;
 
 export const LinkTooltip = styled.div`
@@ -97,3 +123,37 @@ export const LinkWrapper = styled.div`
 		}
 	}
 `;
+
+export const TopicList = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 12.5px;
+	padding: 0 0 15px 0;
+`;
+
+export const TopicWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 12.5px;
+
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
+`;
+
+export const WrapperEmpty = styled.div`
+	padding: 0 0 15px 0;
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
+`;
+
+export const LoadingWrapper = styled(WrapperEmpty)``;

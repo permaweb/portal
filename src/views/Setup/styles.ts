@@ -10,5 +10,4 @@ export const BodyWrapper = styled.div`
 	flex-wrap: wrap;
 	gap: 25px;
 	margin: 20px 0 0 0;
-	border: 1px solid ${(props) => props.theme.colors.border.primary} !important;
 `;

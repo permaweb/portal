@@ -148,3 +148,5 @@ export type NotificationType = {
 	message: string;
 	status: 'success' | 'warning';
 };
+
+export type ViewLayoutType = 'header' | 'detail';

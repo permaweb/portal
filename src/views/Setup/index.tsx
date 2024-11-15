@@ -11,8 +11,8 @@ export default function Setup() {
 	return (
 		<S.Wrapper className={'fade-in'}>
 			<ViewHeader header={language.setup} />
-			<S.BodyWrapper className={'border-wrapper-primary'}>
-				<PortalSetup type={'Header'} />
+			<S.BodyWrapper>
+				<PortalSetup type={'detail'} />
 			</S.BodyWrapper>
 		</S.Wrapper>
 	);

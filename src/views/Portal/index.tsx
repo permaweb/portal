@@ -65,7 +65,7 @@ export default function Portal() {
 							/>
 						</S.SectionHeader>
 						<S.SectionBody>
-							<PortalSetup type={'Header'} />
+							<PortalSetup type={'header'} />
 						</S.SectionBody>
 					</S.SetupSection>
 				</S.SectionWrapper>

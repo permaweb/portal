@@ -1,3 +1,5 @@
+import { ViewLayoutType } from 'helpers/types';
+
 export interface IProps {
-	type: 'Header' | 'Detail';
+	type: ViewLayoutType;
 }

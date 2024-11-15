@@ -13,10 +13,6 @@ export const Wrapper = styled.div`
 		&:not(:last-child) {
 			border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 		}
-
-		/* :first-child {
-			border-top: 1px solid ${(props) => props.theme.colors.border.primary};
-		} */
 	}
 `;
 
