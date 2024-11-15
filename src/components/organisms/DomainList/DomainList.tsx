@@ -69,7 +69,7 @@ export default function DomainList() {
 				})}
 			</S.Wrapper>
 		) : null;
-	}, [portalProvider, languageProvider, portalProvider.current?.id, portalProvider.current?.domains, language]);
+	}, [portalProvider, portalProvider.current?.id, portalProvider.current?.domains, language]);
 
 	return domains;
 }

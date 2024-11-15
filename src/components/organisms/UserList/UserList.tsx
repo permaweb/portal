@@ -49,7 +49,7 @@ export default function UserList() {
 				})}
 			</S.Wrapper>
 		) : null;
-	}, [portalProvider, languageProvider, portalProvider.current?.id, portalProvider.current?.users, language]);
+	}, [portalProvider, portalProvider.current?.id, portalProvider.current?.users, language]);
 
 	return users;
 }

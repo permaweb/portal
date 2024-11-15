@@ -89,7 +89,7 @@ export default function PostList() {
 					})}
 			</S.Wrapper>
 		) : null;
-	}, [portalProvider, languageProvider, portalProvider.current?.id, portalProvider.current?.assets, language]);
+	}, [portalProvider, portalProvider.current?.id, portalProvider.current?.assets, language]);
 
 	return posts;
 }

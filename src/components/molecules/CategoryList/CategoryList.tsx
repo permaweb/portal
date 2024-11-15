@@ -69,6 +69,8 @@ export default function CategoryList(props: IProps) {
 					arProvider.wallet
 				);
 
+				portalProvider.refreshCurrentPortal();
+
 				console.log(`Category update: ${categoryUpdateId}`);
 
 				props.setCategories([...props.categories, newCategory]);
@@ -160,6 +162,8 @@ export default function CategoryList(props: IProps) {
 						handlePress={addCategory}
 						disabled={!newCategoryName || categoryLoading}
 						loading={categoryLoading}
+						icon={ASSETS.add}
+						iconLeftAlign
 					/>
 				</S.CategoriesAddAction>
 				<FormField

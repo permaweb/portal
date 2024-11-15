@@ -23,6 +23,7 @@ export const language = {
 		createPortal: `Create a new portal`,
 		createPost: `Create a post`,
 		createProfile: `Create your profile`,
+		delete: `Delete`,
 		deleteBlock: `Delete block`,
 		design: `Design`,
 		disconnect: `Disconnect`,

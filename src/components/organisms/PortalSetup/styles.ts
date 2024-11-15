@@ -156,4 +156,25 @@ export const WrapperEmpty = styled.div`
 	}
 `;
 
+export const BodyWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	padding: 0 0 15px 0;
+`;
+
+export const BodyActionsWrapper = styled.div`
+	width: fit-content;
+	display: flex;
+	gap: 12.5px;
+	margin: 0 0 0 auto;
+`;
+
+export const CategoryModalWrapper = styled.div`
+	padding: 0 20px 5px 20px !important;
+`;
+
+export const CategoryActionsWrapper = styled(BodyActionsWrapper)`
+	margin: -20px 0 0 auto;
+`;
+
 export const LoadingWrapper = styled(WrapperEmpty)``;
