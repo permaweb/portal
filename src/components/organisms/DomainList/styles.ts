@@ -3,9 +3,10 @@ import styled from 'styled-components';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
+	width: 100%;
 	display: flex;
 	flex-direction: column;
-	padding: 0 0 5px 0;
+	padding: 5px 0;
 `;
 
 export const DomainWrapper = styled.div`

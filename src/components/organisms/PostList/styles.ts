@@ -5,6 +5,7 @@ import { STYLING } from 'helpers/config';
 import { ArticleStatusType } from 'helpers/types';
 
 export const Wrapper = styled.div`
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 
@@ -13,9 +14,9 @@ export const Wrapper = styled.div`
 			border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 		}
 
-		:first-child {
+		/* :first-child {
 			border-top: 1px solid ${(props) => props.theme.colors.border.primary};
-		}
+		} */
 	}
 `;
 
@@ -115,8 +116,9 @@ export const PostStatus = styled.div<{ status: ArticleStatusType }>`
 `;
 
 export const WrapperEmpty = styled.div`
+	width: 100%;
 	padding: 12.5px 15px;
-	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+	/* border-top: 1px solid ${(props) => props.theme.colors.border.primary}; */
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};

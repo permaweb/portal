@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
-export const Wrapper = styled.div``;
+export const Wrapper = styled.div`
+	width: 100%;
+`;
 
 export const Section = styled.div`
 	padding: 7.5px 15px;

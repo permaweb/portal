@@ -16,7 +16,7 @@ export const Wrapper = styled.div<{ warning: boolean | undefined }>`
 	align-items: center;
 	padding: 11.5px 17.5px !important;
 	gap: 45px;
-	border: none !important;
+	border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
 	border-radius: ${STYLING.dimensions.radius.primary};
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {

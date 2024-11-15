@@ -14,13 +14,13 @@ export default function UserList() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const users = React.useMemo(() => {
-		if (!portalProvider.current?.assets) {
+		if (!portalProvider.current?.users) {
 			return (
 				<S.LoadingWrapper>
 					<p>{`${language.gettingUsers}...`}</p>
 				</S.LoadingWrapper>
 			);
-		} else if (portalProvider.current?.assets.length === 0) {
+		} else if (portalProvider.current?.users.length === 0) {
 			return (
 				<S.WrapperEmpty>
 					<p>{language.noUsersFound}</p>
@@ -49,7 +49,7 @@ export default function UserList() {
 				})}
 			</S.Wrapper>
 		) : null;
-	}, [portalProvider, languageProvider, portalProvider.current?.id, portalProvider.current?.assets, language]);
+	}, [portalProvider, languageProvider, portalProvider.current?.id, portalProvider.current?.users, language]);
 
 	return users;
 }

@@ -6,22 +6,6 @@ export const Wrapper = styled.div`
 	width: 100%;
 `;
 
-export const HeaderWrapper = styled.div`
-	width: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	gap: 20px;
-`;
-
-export const HeaderActions = styled.div`
-	display: flex;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 15px;
-`;
-
 export const BodyWrapper = styled.div`
 	width: 100%;
 	display: flex;
@@ -62,18 +46,31 @@ export const SectionBody = styled.div`
 	width: 100%;
 `;
 
-export const DesignSection = styled(Section)``;
+export const DesignSection = styled(Section)`
+	> :first-child {
+		padding: 12.5px 15px 0 15px;
+	}
+`;
 
 export const SetupSection = styled(Section)``;
 
 export const PostsSection = styled(Section)`
 	> :first-child {
 		background: ${(props) => props.theme.colors.container.alt1.background};
+		border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 		border-top-left-radius: 3.5px;
 		border-top-right-radius: 3.5px;
 	}
 `;
 
-export const DomainSection = styled(Section)``;
+export const DomainSection = styled(Section)`
+	> :first-child {
+		padding: 12.5px 15px 0 15px;
+	}
+`;
 
-export const UsersSection = styled(Section)``;
+export const UsersSection = styled(Section)`
+	> :first-child {
+		padding: 12.5px 15px 0 15px;
+	}
+`;

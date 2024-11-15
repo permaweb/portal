@@ -3,7 +3,12 @@ import { Route, Routes } from 'react-router-dom';
 
 const Landing = getLazyImport('Landing');
 const Portal = getLazyImport('Portal');
+const Posts = getLazyImport('Posts');
 const PostCreate = getLazyImport('Portal/Post/Create');
+const Setup = getLazyImport('Setup');
+const Design = getLazyImport('Design');
+const Users = getLazyImport('Users');
+const Domains = getLazyImport('Domains');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
 
@@ -69,9 +74,14 @@ export default function App() {
 					<Routes>
 						{getRoute(URLS.base, <Landing />)}
 						{getRoute(`${URLS.base}:portalId`, <Portal />)}
+						{getRoute(`${URLS.base}:portalId/posts`, <Posts />)}
 						{getRoute(`${URLS.base}:portalId/post/create`, <PostCreate />)}
 						{getRoute(`${URLS.base}:portalId/post/create/article`, <ArticleEditor />)}
 						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <ArticleEditor />)}
+						{getRoute(`${URLS.base}:portalId/setup`, <Setup />)}
+						{getRoute(`${URLS.base}:portalId/design`, <Design />)}
+						{getRoute(`${URLS.base}:portalId/users`, <Users />)}
+						{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
 						{getRoute(URLS.docs, <Docs />)}
 						{getRoute(`${URLS.docs}:active/*`, <Docs />)}
 						{getRoute(URLS.notFound, <NotFound />)}

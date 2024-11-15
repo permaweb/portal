@@ -4,9 +4,10 @@ import { STYLING } from 'helpers/config';
 import { PortalUserRoleType } from 'helpers/types';
 
 export const Wrapper = styled.div`
+	width: 100%;
 	display: flex;
 	flex-direction: column;
-	padding: 0 0 5px 0;
+	padding: 5px 0;
 `;
 
 export const UserWrapper = styled.div`

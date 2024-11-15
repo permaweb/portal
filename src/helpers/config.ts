@@ -134,7 +134,7 @@ function createURLs() {
 		postEditArticle: (portalId: string) => `${postEditBase(portalId)}article/`,
 		postEditImage: (portalId: string) => `${postEditBase(portalId)}image/`,
 		postEditVideo: (portalId: string) => `${postEditBase(portalId)}video/`,
-		docs: `${base}docs/overview/`,
+		docs: `${base}docs/`,
 		notFound: `${base}404`,
 	};
 }

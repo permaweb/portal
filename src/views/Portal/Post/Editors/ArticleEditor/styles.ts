@@ -96,6 +96,7 @@ function getElementPadding(type: ArticleBlockEnum) {
 function getElementWrapper(blockEditMode: boolean, type: ArticleBlockEnum, theme: DefaultTheme) {
 	switch (type) {
 		case 'image':
+		case 'video':
 			return '';
 		case 'code':
 			return `

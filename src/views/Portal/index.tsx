@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from 'components/atoms/Button';
+import { ViewHeader } from 'components/atoms/ViewHeader';
 import { DomainList } from 'components/organisms/DomainList';
 import { PortalDesign } from 'components/organisms/PortalDesign';
 import { PortalSetup } from 'components/organisms/PortalSetup';
@@ -12,6 +13,7 @@ import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
+// TODO: Language
 // TODO: Portal auth
 export default function Portal() {
 	const navigate = useNavigate();
@@ -23,16 +25,16 @@ export default function Portal() {
 
 	return (
 		<S.Wrapper className={'fade-in'}>
-			<S.HeaderWrapper>
-				<h4>{language.portalHeader}</h4>
-				<S.HeaderActions>
+			<ViewHeader
+				header={language.portalHeader}
+				actions={[
 					<Button
 						type={'primary'}
 						label={language.goToSite}
 						handlePress={() => console.log('TODO: Go to site')}
 						disabled={!portalProvider.current}
 						iconLeftAlign
-					/>
+					/>,
 					<Button
 						type={'alt1'}
 						label={language.createPost}
@@ -40,24 +42,34 @@ export default function Portal() {
 						disabled={!portalProvider.current}
 						icon={ASSETS.add}
 						iconLeftAlign
-					/>
-				</S.HeaderActions>
-			</S.HeaderWrapper>
+					/>,
+				]}
+			/>
 			<S.BodyWrapper>
 				<S.SectionWrapper>
+					<S.PostsSection className={'border-wrapper-alt2'}>
+						<S.SectionHeader>
+							<p>{language.posts}</p>
+						</S.SectionHeader>
+						<S.SectionBody>
+							<PostList />
+						</S.SectionBody>
+					</S.PostsSection>
 					<S.SetupSection className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
 							<p>{language.setup}</p>
 							<Button
 								type={'alt3'}
 								label={'Go to full setup'}
-								handlePress={() => navigate(URLS.portalUsers(portalProvider.current.id))}
+								handlePress={() => navigate(URLS.portalSetup(portalProvider.current.id))}
 							/>
 						</S.SectionHeader>
 						<S.SectionBody>
 							<PortalSetup type={'Header'} />
 						</S.SectionBody>
 					</S.SetupSection>
+				</S.SectionWrapper>
+				<S.SectionWrapper>
 					<S.DesignSection className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
 							<p>{language.design}</p>
@@ -97,16 +109,6 @@ export default function Portal() {
 							<DomainList />
 						</S.SectionBody>
 					</S.DomainSection>
-				</S.SectionWrapper>
-				<S.SectionWrapper>
-					<S.PostsSection className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<p>{language.posts}</p>
-						</S.SectionHeader>
-						<S.SectionBody>
-							<PostList />
-						</S.SectionBody>
-					</S.PostsSection>
 				</S.SectionWrapper>
 			</S.BodyWrapper>
 		</S.Wrapper>

@@ -33,9 +33,9 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				label: language.home,
 			},
 			{
-				path: portalProvider.current ? URLS.portalDesign(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.design,
-				label: language.design,
+				path: portalProvider.current ? URLS.portalPosts(portalProvider.current.id) : URLS.base,
+				icon: ASSETS.posts,
+				label: language.posts,
 			},
 			{
 				path: portalProvider.current ? URLS.portalSetup(portalProvider.current.id) : URLS.base,
@@ -43,9 +43,9 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				label: language.setup,
 			},
 			{
-				path: portalProvider.current ? URLS.portalPosts(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.posts,
-				label: language.posts,
+				path: portalProvider.current ? URLS.portalDesign(portalProvider.current.id) : URLS.base,
+				icon: ASSETS.design,
+				label: language.design,
 			},
 			{
 				path: portalProvider.current ? URLS.portalUsers(portalProvider.current.id) : URLS.base,
@@ -110,7 +110,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						})}
 					</S.PanelContent>
 					<S.PanelFooter open={props.open} className={'fade-in'}>
-						<Link to={URLS.docs}>
+						<Link to={`${URLS.docs}overview/introduction`}>
 							<ReactSVG src={ASSETS.help} />
 							{language.helpCenter}
 						</Link>

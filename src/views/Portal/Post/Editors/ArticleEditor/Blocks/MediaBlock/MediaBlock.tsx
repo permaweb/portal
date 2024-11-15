@@ -53,7 +53,7 @@ const mediaConfig: Record<'image' | 'video', MediaConfig> = {
 // TODO: Hide align actions on tablet / mobile (840px)
 // TODO: Select from media library
 // TODO: Alignment resetting on rerender
-export default function Image(props: { type: 'image' | 'video'; content: any; data: any; onChange: any }) {
+export default function MediaBlock(props: { type: 'image' | 'video'; content: any; data: any; onChange: any }) {
 	const arProvider = useArweaveProvider();
 
 	const portalProvider = usePortalProvider();
@@ -112,7 +112,7 @@ export default function Image(props: { type: 'image' | 'video'; content: any; da
 
 					const mediaUpdateId = await updateZone(
 						{
-							[buildStoreNamespace('upload', tx)]: { src: tx, type: 'image' },
+							[buildStoreNamespace('upload', tx)]: { src: tx, type: 'image', dateUploaded: Date.now().toString() },
 						},
 						portalProvider.current.id,
 						arProvider.wallet

@@ -77,7 +77,7 @@ export const PortalsWrapper = styled.div`
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
 	}
 
 	@media (max-width: ${STYLING.cutoffs.tablet}) {
