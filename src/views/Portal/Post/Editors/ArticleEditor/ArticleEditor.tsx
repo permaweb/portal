@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
-import { aoDryRun, aoSend, createAtomicAsset } from '@permaweb/libs';
+import { aoDryRun, aoSend, createAtomicAsset, globalLog } from '@permaweb/libs';
 
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { IconButton } from 'components/atoms/IconButton';
@@ -392,7 +392,7 @@ export default function ArticleEditor() {
 						data: data,
 					});
 
-					console.log(`Asset content update: ${assetContentUpdateId}`);
+					globalLog(`Asset content update: ${assetContentUpdateId}`);
 
 					setResponse({ status: 'success', message: `${language.postUpdated}!` });
 					portalProvider.refreshCurrentPortal();
@@ -401,8 +401,6 @@ export default function ArticleEditor() {
 				}
 			} else {
 				try {
-					console.log('Creating asset...');
-
 					const assetDataFetch = await fetch(getTxEndpoint(ASSET_UPLOAD.src.data));
 					const dataSrc = await assetDataFetch.text();
 
@@ -419,10 +417,10 @@ export default function ArticleEditor() {
 							src: ASSET_UPLOAD.src.process,
 						},
 						arProvider.wallet,
-						(status) => console.log(status)
+						(status) => globalLog(status)
 					);
 
-					console.log(`Asset: ${assetId}`);
+					globalLog(`Asset: ${assetId}`);
 
 					const assetContentUpdateId = await aoSend({
 						processId: assetId,
@@ -431,7 +429,7 @@ export default function ArticleEditor() {
 						data: data,
 					});
 
-					console.log(`Asset content update: ${assetContentUpdateId}`);
+					globalLog(`Asset content update: ${assetContentUpdateId}`);
 
 					const assetHoldersUpdateId = await aoSend({
 						processId: assetId,
@@ -440,7 +438,7 @@ export default function ArticleEditor() {
 						data: { Recipients: [portalProvider.current.id] },
 					});
 
-					console.log(`Asset holders update: ${assetHoldersUpdateId}`);
+					globalLog(`Asset holders update: ${assetHoldersUpdateId}`);
 
 					setResponse({ status: 'success', message: `${language.postSaved}!` });
 					portalProvider.refreshCurrentPortal();

@@ -101,67 +101,60 @@ export const ContentWrapper = styled.div`
 `;
 
 export const Content = styled.div`
-	.portal-image-wrapper {
+	.portal-media-wrapper {
 		display: flex;
 		gap: 15px;
+
+		img {
+			height: fit-content;
+			border-radius: 10px;
+		}
+
+		p {
+			min-width: 300px;
+			color: ${(props) => props.theme.colors.font.primary};
+			font-size: ${(props) => props.theme.typography.size.small};
+			font-weight: ${(props) => props.theme.typography.weight.medium};
+			font-family: ${(props) => props.theme.typography.family.primary};
+		}
+
+		@media (max-width: 840px) {
+			flex-direction: column !important;
+
+			img {
+				width: 100% !important;
+			}
+
+			p {
+				max-width: 100% !important;
+			}
+		}
 	}
 
-	.portal-image-row {
+	.portal-media-row,
+	.portal-media-row-reverse,
+	.portal-media-column,
+	.portal-media-column-reverse {
+		img {
+			width: 100%;
+		}
 	}
 
-	.portal-image-row-reverse {
+	.portal-media-row img,
+	.portal-media-row-reverse img {
+		width: calc(100% - 312.5px);
+	}
+
+	.portal-media-row-reverse {
 		flex-direction: row-reverse;
 	}
 
-	.portal-image-column {
+	.portal-media-column {
 		flex-direction: column;
 	}
 
-	.portal-image-column-reverse {
+	.portal-media-column-reverse {
 		flex-direction: column-reverse;
-	}
-
-	.portal-image-wrapper img {
-		height: fit-content;
-		border-radius: 10px;
-	}
-
-	.portal-image-row img {
-		width: calc(100% - 312.5px);
-	}
-
-	.portal-image-row-reverse img {
-		width: calc(100% - 312.5px);
-	}
-
-	.portal-image-column img {
-		width: 100%;
-	}
-
-	.portal-image-column-reverse img {
-		width: 100%;
-	}
-
-	.portal-image-wrapper p {
-		min-width: 300px;
-		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
-		font-family: ${(props) => props.theme.typography.family.primary};
-	}
-
-	@media (max-width: 840px) {
-		.portal-image-wrapper {
-			flex-direction: column !important;
-		}
-
-		.portal-image-wrapper img {
-			width: 100% !important;
-		}
-
-		.portal-image-wrapper p {
-			max-width: 100% !important;
-		}
 	}
 `;
 
@@ -190,19 +183,19 @@ export const ModalCaptionActionWrapper = styled.div`
 
 function getContentActionPosition(alignment: string) {
 	switch (alignment) {
-		case 'portal-image-row':
+		case 'portal-media-row':
 			return `
 				top: 30px;
 			`;
-		case 'portal-image-row-reverse':
+		case 'portal-media-row-reverse':
 			return `
 				top: 30px;
 			`;
-		case 'portal-image-column':
+		case 'portal-media-column':
 			return `
 				bottom: 35px;
 			`;
-		case 'portal-image-column-reverse':
+		case 'portal-media-column-reverse':
 			return `
 				top: 35px;
 			`;
@@ -214,8 +207,7 @@ export const ContentActionsWrapper = styled.div<{ alignment: string }>`
 	max-width: 90vw;
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-	padding: 10px 15px 15px 15px;
+	gap: 12.5px;
 	display: flex;
 	${(props) => getContentActionPosition(props.alignment)};
 
@@ -226,13 +218,17 @@ export const ContentActionsWrapper = styled.div<{ alignment: string }>`
 		font-family: ${(props) => props.theme.typography.family.primary};
 		text-transform: uppercase;
 	}
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		display: none;
+	}
 `;
 
 export const ContentActions = styled.div<{ useColumn: boolean }>`
 	display: flex;
 	flex-direction: ${(props) => (props.useColumn ? 'column' : 'row')};
 	align-items: center;
-	gap: 10px;
+	gap: 12.5px;
 	flex-wrap: wrap;
 `;
 
@@ -250,15 +246,15 @@ export const CaptionWrapper = styled.div<{ editMode: boolean; useColumn: boolean
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
 	gap: 15px;
 	p {
 		cursor: text;
 		max-width: ${(props) => (props.useColumn ? '300px' : '100%')} !important;
+		padding: 0 50px 0 0;
 		${(props) =>
 			props.editMode &&
 			`
-			padding: 10px;
+			padding: 10px 50px 10px 10px;
 			background: ${props.theme.colors.container.alt1.background};
 			border: 1px solid ${props.theme.colors.border.primary};
 			border-radius: ${STYLING.dimensions.radius.alt2};
@@ -266,4 +262,14 @@ export const CaptionWrapper = styled.div<{ editMode: boolean; useColumn: boolean
 	}
 `;
 
-export const CaptionToolsAction = styled.div``;
+export const CaptionToolsAction = styled.div`
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		display: none;
+	}
+`;
+
+export const CaptionToolsInline = styled.div<{ editMode: boolean }>`
+	position: absolute;
+	top: 0;
+	right: ${(props) => (props.editMode ? '10px' : '0')};
+`;

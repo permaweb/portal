@@ -24,7 +24,7 @@ export default function Panel(props: IProps) {
 
 	const escFunction = React.useCallback(
 		(e: any) => {
-			if (e.key === 'Escape' && props.handleClose) {
+			if (e.key === 'Escape' && props.handleClose && !props.closeHandlerDisabled) {
 				props.handleClose();
 			}
 		},

@@ -133,7 +133,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		(async function () {
 			if (wallet && walletAddress) {
 				try {
-					setProfile(await getProfileByWalletAddress(walletAddress)); // TODO: Update fields in sdk
+					setProfile(await getProfileByWalletAddress(walletAddress));
 				} catch (e: any) {
 					console.error(e);
 				}

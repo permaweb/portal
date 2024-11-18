@@ -1,11 +1,12 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { buildStoreNamespace, resolveTransaction, updateZone } from '@permaweb/libs';
+import { buildStoreNamespace, globalLog, resolveTransaction, updateZone } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { FormField } from 'components/atoms/FormField';
+import { IconButton } from 'components/atoms/IconButton';
 import { Notification } from 'components/atoms/Notification';
 import { Modal } from 'components/molecules/Modal';
 import { ASSETS } from 'helpers/config';
@@ -18,10 +19,10 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import * as S from './styles';
 
 enum AlignmentEnum {
-	Row = 'portal-image-row',
-	RowReverse = 'portal-image-row-reverse',
-	Column = 'portal-image-column',
-	ColumnReverse = 'portal-image-column-reverse',
+	Row = 'portal-media-row',
+	RowReverse = 'portal-media-row-reverse',
+	Column = 'portal-media-column',
+	ColumnReverse = 'portal-media-column-reverse',
 }
 
 type AlignmentButton = {
@@ -40,7 +41,7 @@ const mediaConfig: Record<'image' | 'video', MediaConfig> = {
 	image: {
 		icon: ASSETS.image,
 		label: 'Image',
-		renderContent: (url) => <img src={url} alt="Uploaded media" />,
+		renderContent: (url) => <img src={url} alt={'Uploaded media'} />,
 	},
 	video: {
 		icon: ASSETS.video,
@@ -49,13 +50,9 @@ const mediaConfig: Record<'image' | 'video', MediaConfig> = {
 	},
 };
 
-// TODO: Language
-// TODO: Hide align actions on tablet / mobile (840px)
 // TODO: Select from media library
-// TODO: Alignment resetting on rerender
 export default function MediaBlock(props: { type: 'image' | 'video'; content: any; data: any; onChange: any }) {
 	const arProvider = useArweaveProvider();
-
 	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();
@@ -65,26 +62,31 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 
 	const inputRef = React.useRef(null);
 
-	const [mediaData, setMediaData] = React.useState<{ url: string | null; caption: string | null }>({
+	const [mediaData, setMediaData] = React.useState<{
+		url: string | null;
+		caption: string | null;
+		alignment: AlignmentEnum | null;
+	}>({
 		url: null,
 		caption: null,
+		alignment: AlignmentEnum.Column,
 	});
 	const [showCaptionEdit, setShowCaptionEdit] = React.useState<boolean>(false);
-	const [showCaptionTools, setShowCaptionTools] = React.useState<boolean>(true);
 
 	const [isValidUrl, setIsValidUrl] = React.useState(true);
 
-	const [alignment, setAlignment] = React.useState<AlignmentEnum>(AlignmentEnum.Column);
+	// const [alignment, setAlignment] = React.useState<AlignmentEnum>(AlignmentEnum.Column);
 
-	// React.useEffect(() => {
-	// 	setMediaData({
-	// 		url: 'https://7hl64x74lrd6ggjqq3xpz4myhe4vv2m37kf7skgjt6zinthif2ya.arweave.net/-dfuX_xcR-MZMIbu_PGYOTla6Zv6i_koyZ-yhszoLrA',
-	// 		caption: null,
-	// 	});
-	// 	props.onChange(buildContent());
-	// }, []);
+	React.useEffect(() => {
+		setMediaData({
+			url: 'https://7hl64x74lrd6ggjqq3xpz4myhe4vv2m37kf7skgjt6zinthif2ya.arweave.net/-dfuX_xcR-MZMIbu_PGYOTla6Zv6i_koyZ-yhszoLrA',
+			caption: null,
+			alignment: AlignmentEnum.Column,
+		});
+		// props.onChange(buildContent());
+	}, []);
 
-	// console.log(mediaData);
+	console.log(mediaData);
 
 	React.useEffect(() => {
 		if (props.data && props.data !== mediaData) {
@@ -118,7 +120,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 						arProvider.wallet
 					);
 
-					console.log(`Media update: ${mediaUpdateId}`);
+					globalLog(`Media update: ${mediaUpdateId}`);
 
 					setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(tx) }));
 					setMediaUploaded(true);
@@ -134,12 +136,12 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 
 	React.useEffect(() => {
 		if (mediaData?.url && validateUrl(mediaData.url) && mediaData.url.startsWith('https://'))
-			props.onChange(buildContent(mediaData, alignment), mediaData);
-	}, [mediaData, alignment]);
+			props.onChange(buildContent(mediaData), mediaData);
+	}, [mediaData]);
 
-	function buildContent(data: any, alignClass: string) {
+	function buildContent(data: any) {
 		return `
-			<div class="portal-image-wrapper ${alignClass}">
+			<div class="portal-media-wrapper ${data.alignment}">
 				<img src="${data.url}"/>
 				${data.caption ? `<p>${data.caption}</p>` : ''}
 			</div>
@@ -189,11 +191,10 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			key={buttonAlignment}
 			type={'alt3'}
 			label={language[label]}
-			handlePress={() => setAlignment(buttonAlignment)}
-			active={alignment === buttonAlignment}
+			handlePress={() => setMediaData((prevContent) => ({ ...prevContent, alignment: buttonAlignment }))}
+			active={mediaData.alignment === buttonAlignment}
 			icon={icon}
 			iconLeftAlign
-			width={140}
 		/>
 	);
 
@@ -219,7 +220,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 							/>
 							<Button
 								type={'primary'}
-								label={'From library'}
+								label={language.fromLibrary}
 								handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
 								height={41.5}
 								width={150}
@@ -243,7 +244,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 						</S.InputActions>
 						{mediaLoading && (
 							<S.InputOverlay className={'border-wrapper-primary'}>
-								<p>Uploading media...</p>
+								<p>{`${language.uploadingMedia}...`}</p>
 							</S.InputOverlay>
 						)}
 					</S.InputWrapper>
@@ -251,12 +252,14 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					<>
 						<S.ContentWrapper>
 							<S.Content>
-								<div className={`portal-image-wrapper ${alignment}`}>
+								<div className={`portal-media-wrapper ${mediaData.alignment}`}>
 									{mediaData.url && config.renderContent(mediaData.url)}
 									{mediaData?.caption !== null && (
 										<S.CaptionWrapper
-											editMode={showCaptionTools}
-											useColumn={alignment === AlignmentEnum.Row || alignment === AlignmentEnum.RowReverse}
+											editMode={false}
+											useColumn={
+												mediaData.alignment === AlignmentEnum.Row || mediaData.alignment === AlignmentEnum.RowReverse
+											}
 										>
 											<ContentEditable
 												element={'p'}
@@ -264,40 +267,18 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 												onChange={(value: string) => setMediaData({ ...mediaData, caption: value })}
 												autoFocus
 											/>
-											{showCaptionTools && (
-												<S.ContentActionsWrapper alignment={alignment} className={'fade-in border-wrapper-primary'}>
-													<span>{language.alignCaption}</span>
-													<S.ContentActions useColumn={true}>
-														{alignmentButtons.map(renderAlignmentButton)}
-													</S.ContentActions>
-													<S.ContentActionsEnd useColumn={true}>
-														<Button
-															type={'alt3'}
-															label={'Hide tools'}
-															handlePress={() => setShowCaptionTools(false)}
-															width={140}
-														/>
-														<Button
-															type={'alt3'}
-															label={'Delete caption'}
-															handlePress={() => {
-																setMediaData({ ...mediaData, caption: null });
-																setAlignment(AlignmentEnum.Column);
-															}}
-															width={140}
-														/>
-													</S.ContentActionsEnd>
-												</S.ContentActionsWrapper>
-											)}
-											{!showCaptionTools && (
-												<S.CaptionToolsAction>
-													<Button
-														type={'alt3'}
-														label={'Show caption tools'}
-														handlePress={() => setShowCaptionTools(true)}
-													/>
-												</S.CaptionToolsAction>
-											)}
+											<S.CaptionToolsInline editMode={false}>
+												<IconButton
+													type={'alt1'}
+													active={false}
+													src={ASSETS.write}
+													handlePress={() => setShowCaptionEdit(true)}
+													dimensions={{ wrapper: 23.5, icon: 13.5 }}
+													tooltip={language.showCaptionTools}
+													tooltipPosition={'bottom-right'}
+													noFocus
+												/>
+											</S.CaptionToolsInline>
 										</S.CaptionWrapper>
 									)}
 								</div>
@@ -309,18 +290,34 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 							)}
 						</S.ContentWrapper>
 						{showCaptionEdit && (
-							<Modal header={'Add a caption'} handleClose={() => setShowCaptionEdit(false)}>
+							<Modal header={language.editCaption} handleClose={() => setShowCaptionEdit(false)}>
 								<S.ModalCaptionWrapper className={'modal-wrapper'}>
 									<FormField
 										value={mediaData?.caption || ''}
 										onChange={(e: any) => setMediaData({ ...mediaData, caption: e.target.value })}
-										label={'Caption'}
+										label={language.caption}
 										invalid={{ status: false, message: null }}
 										disabled={false}
 										hideErrorMessage
 									/>
+									<S.ContentActionsWrapper alignment={mediaData.alignment}>
+										<span>{language.alignCaption}</span>
+										<S.ContentActions useColumn={false}>{alignmentButtons.map(renderAlignmentButton)}</S.ContentActions>
+									</S.ContentActionsWrapper>
 									<S.ModalCaptionActionWrapper>
-										<Button type={'alt1'} label={'Done'} handlePress={() => setShowCaptionEdit(false)} />
+										<Button
+											type={'primary'}
+											label={language.removeCaption}
+											handlePress={() => {
+												setMediaData((prevContent) => ({
+													...prevContent,
+													caption: null,
+													alignment: AlignmentEnum.Column,
+												}));
+												setShowCaptionEdit(false);
+											}}
+										/>
+										<Button type={'alt1'} label={language.done} handlePress={() => setShowCaptionEdit(false)} />
 									</S.ModalCaptionActionWrapper>
 								</S.ModalCaptionWrapper>
 							</Modal>

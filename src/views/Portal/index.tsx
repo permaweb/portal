@@ -13,7 +13,6 @@ import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
-// TODO: Language
 // TODO: Portal auth
 export default function Portal() {
 	const navigate = useNavigate();
@@ -60,7 +59,7 @@ export default function Portal() {
 							<p>{language.setup}</p>
 							<Button
 								type={'alt3'}
-								label={'Go to full setup'}
+								label={language.setupLink}
 								handlePress={() => navigate(URLS.portalSetup(portalProvider.current.id))}
 							/>
 						</S.SectionHeader>
@@ -75,7 +74,7 @@ export default function Portal() {
 							<p>{language.design}</p>
 							<Button
 								type={'alt3'}
-								label={'Go to full designer'}
+								label={language.designLink}
 								handlePress={() => navigate(URLS.portalDesign(portalProvider.current.id))}
 							/>
 						</S.SectionHeader>
@@ -88,7 +87,7 @@ export default function Portal() {
 							<p>{language.users}</p>
 							<Button
 								type={'alt3'}
-								label={'Manage users'}
+								label={language.usersLink}
 								handlePress={() => navigate(URLS.portalUsers(portalProvider.current.id))}
 							/>
 						</S.SectionHeader>
@@ -101,7 +100,7 @@ export default function Portal() {
 							<p>{language.domains}</p>
 							<Button
 								type={'alt3'}
-								label={'Manage domains'}
+								label={language.domainsLink}
 								handlePress={() => navigate(URLS.portalDomains(portalProvider.current.id))}
 							/>
 						</S.SectionHeader>

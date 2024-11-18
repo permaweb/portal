@@ -61,7 +61,6 @@ export const Panel = styled.div<{ open: boolean }>`
 	position: absolute;
 	right: 0;
 	z-index: 1;
-	/* transform: translateX(${(props) => (props.open ? '0' : 'calc(100% + 20px)')}); TODO */
 	display: ${(props) => (props.open ? 'block' : 'none')};
 	transition: transform ${transition2};
 	top: 75px;

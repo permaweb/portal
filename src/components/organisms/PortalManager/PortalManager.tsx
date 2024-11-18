@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
-import { buildStoreNamespace, createZone, resolveTransaction, updateZone } from '@permaweb/libs';
+import { buildStoreNamespace, createZone, globalLog, resolveTransaction, updateZone } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
@@ -66,7 +66,7 @@ export default function PortalManager(props: IProps) {
 
 			const portalUpdateId = await updateZone(data, portalId, arProvider.wallet);
 
-			console.log(`Portal update: ${portalUpdateId}`);
+			globalLog(`Portal update: ${portalUpdateId}`);
 
 			const profileUpdateId = await updateZone(
 				{
@@ -79,7 +79,7 @@ export default function PortalManager(props: IProps) {
 				arProvider.wallet
 			);
 
-			console.log(`Profile update: ${profileUpdateId}`);
+			globalLog(`Profile update: ${profileUpdateId}`);
 
 			portalProvider.refreshCurrentPortal();
 			arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
@@ -95,7 +95,7 @@ export default function PortalManager(props: IProps) {
 				status: 'success',
 			});
 		} catch (e: any) {
-			throw new Error(e);
+			throw new Error(e.message ?? 'Error updating portal');
 		}
 	}
 
@@ -107,8 +107,8 @@ export default function PortalManager(props: IProps) {
 				if (props.portal && props.portal.id) {
 					await updatePortal(props.portal.id, `${language.portalUpdated}!`);
 				} else {
-					const portalId = await createZone({}, arProvider.wallet, (status: any) => console.log(status));
-					console.log(`Portal ID: ${portalId}`);
+					const portalId = await createZone({}, arProvider.wallet, (status: any) => globalLog(status));
+					globalLog(`Portal ID: ${portalId}`);
 					await updatePortal(portalId, `${language.portalCreated}!`);
 					navigate(URLS.portalBase(portalId));
 				}

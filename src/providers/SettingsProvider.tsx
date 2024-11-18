@@ -30,6 +30,7 @@ interface Settings {
 	theme: ThemeType;
 	sidebarOpen: boolean;
 	isDesktop: boolean;
+	windowSize: { width: number; height: number };
 }
 
 interface SettingsContextState {
@@ -45,6 +46,7 @@ const defaultSettings: Settings = {
 	theme: window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark-primary' : 'light-primary',
 	sidebarOpen: true,
 	isDesktop: true,
+	windowSize: { width: window.innerWidth, height: window.innerHeight },
 };
 
 const SettingsContext = React.createContext<SettingsContextState>({
@@ -70,6 +72,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 			settings = {
 				...parsedSettings,
 				isDesktop,
+				windowSize: { width: window.innerWidth, height: window.innerHeight },
 				sidebarOpen: isDesktop ? parsedSettings.sidebarOpen : false,
 			};
 		} else {
@@ -85,14 +88,15 @@ export function SettingsProvider(props: SettingsProviderProps) {
 	};
 
 	const [settings, setSettings] = React.useState<Settings>(loadStoredSettings());
-	const [isDesktop, _setIsDesktop] = React.useState(settings.isDesktop);
 
 	const handleWindowResize = React.useCallback(() => {
 		const newIsDesktop = checkWindowCutoff(parseInt(STYLING.cutoffs.desktop));
+		const newWindowSize = { width: window.innerWidth, height: window.innerHeight };
 		setSettings((prevSettings) => {
 			const newSettings = {
 				...prevSettings,
 				isDesktop: newIsDesktop,
+				windowSize: newWindowSize,
 				sidebarOpen: newIsDesktop ? prevSettings.sidebarOpen : false,
 			};
 			localStorage.setItem('settings', JSON.stringify(newSettings));
@@ -110,20 +114,16 @@ export function SettingsProvider(props: SettingsProviderProps) {
 	}, [debouncedResize]);
 
 	React.useEffect(() => {
-		document.body.style.overflowY = !isDesktop && settings.sidebarOpen ? 'hidden' : 'auto';
+		document.body.style.overflowY = !settings.isDesktop && settings.sidebarOpen ? 'hidden' : 'auto';
 		return () => {
 			document.body.style.overflowY = 'auto';
 		};
-	}, [isDesktop, settings.sidebarOpen]);
+	}, [settings.isDesktop, settings.sidebarOpen]);
 
 	const updateSettings = <K extends keyof Settings>(key: K, value: Settings[K]) => {
 		setSettings((prevSettings) => {
 			const newSettings = { ...prevSettings, [key]: value };
-			if (key === 'theme') {
-				localStorage.setItem('settings', JSON.stringify({ ...prevSettings, theme: value }));
-			} else {
-				localStorage.setItem('settings', JSON.stringify(newSettings));
-			}
+			localStorage.setItem('settings', JSON.stringify(newSettings));
 			return newSettings;
 		});
 	};

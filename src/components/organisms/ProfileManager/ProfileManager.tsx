@@ -1,7 +1,7 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { createProfile, updateProfile } from '@permaweb/libs';
+import { createProfile, globalLog, updateProfile } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
@@ -79,14 +79,14 @@ export default function ProfileManager(props: IProps) {
 
 				if (props.profile && props.profile.id) {
 					const profileUpdateId = await updateProfile(data, props.profile.id, arProvider.wallet, (status: any) =>
-						console.log(status)
+						globalLog(status)
 					);
-					console.log(`Profile update: ${profileUpdateId}`);
+					globalLog(`Profile update: ${profileUpdateId}`);
 					handleUpdate(`${language.profileUpdated}!`);
 				} else {
-					const profileId = await createProfile(data, arProvider.wallet, (status: any) => console.log(status));
+					const profileId = await createProfile(data, arProvider.wallet, (status: any) => globalLog(status));
 
-					console.log(`Profile ID: ${profileId}`);
+					globalLog(`Profile ID: ${profileId}`);
 
 					handleUpdate(`${language.profileCreated}!`);
 				}

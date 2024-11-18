@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { buildStoreNamespace, updateZone } from '@permaweb/libs';
+import { buildStoreNamespace, globalLog, updateZone } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
@@ -44,7 +44,7 @@ export default function ArticleToolbarPost(props: IProps) {
 					arProvider.wallet
 				);
 
-				console.log(`Topic update: ${topicUpdateId}`);
+				globalLog(`Topic update: ${topicUpdateId}`);
 
 				setTopicOptions((prevOptions) => [...prevOptions, newTopic]);
 				props.setTopics([...props.topics, newTopic]);

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { updateZone } from '@permaweb/libs';
+import { globalLog, updateZone } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { Checkbox } from 'components/atoms/Checkbox';
@@ -71,7 +71,7 @@ export default function CategoryList(props: IProps) {
 
 				portalProvider.refreshCurrentPortal();
 
-				console.log(`Category update: ${categoryUpdateId}`);
+				globalLog(`Category update: ${categoryUpdateId}`);
 
 				props.setCategories([...props.categories, newCategory]);
 				setCategoryOptions(updatedCategories);

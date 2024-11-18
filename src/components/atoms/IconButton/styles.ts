@@ -1,7 +1,5 @@
 import styled from 'styled-components';
 
-import { STYLING } from 'helpers/config';
-
 export const Tooltip = styled.div<{ position: string }>`
 	position: absolute;
 	z-index: 2;
@@ -140,7 +138,6 @@ export const Alt1 = styled(Primary)`
 				: props.disabled
 				? props.theme.colors.button.primary.disabled.border
 				: props.theme.colors.button.primary.border};
-	border-radius: ${STYLING.dimensions.radius.alt3};
 	svg {
 		height: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)};
 		width: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)};
