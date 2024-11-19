@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { getAtomicAssets, getStoreNamespace, getZone, ZoneAssetType } from '@permaweb/libs';
+import { getAtomicAssets, getZone, mapFromProcessCase, ZoneAssetType } from '@permaweb/libs';
 
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/molecules/Panel';
@@ -53,7 +53,13 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		if (arProvider.profile) {
-			const portalsList: any[] = getStoreNamespace('portal', arProvider.profile);
+			const portalsList: any[] = arProvider.profile.Portals
+				? arProvider.profile.Portals.map((portal: any) => ({
+						id: portal.Id,
+						name: portal.Name,
+						logo: portal.Logo ?? null,
+				  }))
+				: [];
 			setPortals(portalsList);
 		}
 	}, [arProvider.profile]);
@@ -70,21 +76,20 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		}
 	}, [location.pathname, portals, currentId]);
 
-	// TODO: Duplicate zones being saved
-	// TODO: Hot update saves
 	React.useEffect(() => {
 		(async function () {
 			if (currentId) {
 				try {
 					const currentPortal = await getZone(currentId);
+
 					if (currentPortal) {
 						let data: PortalDetailType = {
 							id: currentId,
-							name: currentPortal.store?.name || 'None',
-							logo: currentPortal.store?.logo || 'None',
+							name: currentPortal.Store?.Name || 'None',
+							logo: currentPortal.Store?.Logo || 'None',
 							assets: [],
-							categories: currentPortal.store?.categories || [],
-							topics: getStoreNamespace('topic', currentPortal.store),
+							categories: currentPortal.Store?.Categories ? mapFromProcessCase(currentPortal.Store.Categories) : [],
+							topics: currentPortal.Store?.Topics ? mapFromProcessCase(currentPortal.Store.Topics) : [],
 							users: [
 								{ username: 'bob_crypto', displayName: 'Bob Smith', role: 'Contributor' },
 								{ username: 'carol_dev', displayName: 'Carol Williams', role: 'Admin' },

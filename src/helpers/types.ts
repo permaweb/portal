@@ -7,7 +7,7 @@ export type PortalDetailType = {
 	name: string;
 	logo: string | null;
 	assets?: AssetHeaderType[];
-	categories?: CategoryType[];
+	categories?: PortalCategoryType[];
 	topics?: PortalTopicType[];
 	users?: PortalUserType[];
 	domains?: string[];
@@ -56,11 +56,11 @@ export type PortalTopicType = { value: string };
 
 export type PortalUserRoleType = 'Admin' | 'Contributor';
 
-export type CategoryType = {
+export type PortalCategoryType = {
 	id: string;
 	name: string;
 	parent?: string;
-	children?: CategoryType[];
+	children?: PortalCategoryType[];
 };
 
 export type TagType = { name: string; value: string };

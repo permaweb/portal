@@ -143,6 +143,7 @@ export const MessageWrapper = styled.div`
 	justify-content: center;
 	align-items: center;
 	gap: 20px;
+	border: none !important;
 
 	span {
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;

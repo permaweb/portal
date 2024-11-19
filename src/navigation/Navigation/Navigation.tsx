@@ -97,7 +97,19 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	const panel = React.useMemo(() => {
 		const content = (
 			<>
-				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
+				<S.PanelHeader>
+					<IconButton
+						type={'primary'}
+						src={ASSETS.navigation}
+						handlePress={props.toggle}
+						dimensions={{
+							wrapper: 36.5,
+							icon: 23.5,
+						}}
+						tooltip={props.open ? language.sidebarClose : language.sidebarOpen}
+						tooltipPosition={props.open ? 'right' : 'bottom-left'}
+					/>
+				</S.PanelHeader>
 				<>
 					<S.PanelContent open={props.open} className={'fade-in scroll-wrapper'}>
 						{paths.map((element: { path: string; label: string; icon: string; target?: '_blank' }, index: number) => {

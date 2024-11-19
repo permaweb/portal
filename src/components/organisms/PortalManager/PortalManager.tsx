@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
-import { buildStoreNamespace, createZone, globalLog, resolveTransaction, updateZone } from '@permaweb/libs';
+import { addToZone, createZone, globalLog, resolveTransaction, updateZone } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
@@ -10,7 +10,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
 import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { NotificationType } from 'helpers/types';
+import { NotificationType, PortalHeaderType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -50,15 +50,15 @@ export default function PortalManager(props: IProps) {
 		}
 	}, [props.portal]);
 
-	async function updatePortal(portalId: string, response: string) {
+	async function updatePortal(portalId: string, response: string, initialSave: boolean) {
 		try {
 			let data: any = {
-				name: name,
+				Name: name,
 			};
 
 			if (logo) {
 				try {
-					data.logo = await resolveTransaction(logo);
+					data.Logo = await resolveTransaction(logo);
 				} catch (e: any) {
 					console.error(`Failed to resolve logo: ${e.message}`);
 				}
@@ -68,18 +68,24 @@ export default function PortalManager(props: IProps) {
 
 			globalLog(`Portal update: ${portalUpdateId}`);
 
-			const profileUpdateId = await updateZone(
-				{
-					[buildStoreNamespace('portal', portalId)]: {
-						id: portalId,
-						...data,
-					},
-				},
-				arProvider.profile.id,
-				arProvider.wallet
-			);
+			let profileUpdateId: string | null;
+			if (initialSave) {
+				profileUpdateId = await addToZone(
+					{ path: 'Portals', data: { Id: portalId, ...data } },
+					arProvider.profile.id,
+					arProvider.wallet
+				);
+			} else {
+				// TODO: Update current index
+				const portalsUpdateData = portalProvider.portals
+					.filter((portal: PortalHeaderType) => portal.id !== portalId)
+					.map((portal: PortalHeaderType) => ({ Id: portal.id, Name: portal.name, Logo: portal.logo }));
+				portalsUpdateData.push({ Id: portalId, ...data });
 
-			globalLog(`Profile update: ${profileUpdateId}`);
+				profileUpdateId = await updateZone({ Portals: portalsUpdateData }, portalId, arProvider.wallet);
+			}
+
+			if (profileUpdateId) globalLog(`Profile update: ${profileUpdateId}`);
 
 			portalProvider.refreshCurrentPortal();
 			arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
@@ -105,11 +111,11 @@ export default function PortalManager(props: IProps) {
 
 			try {
 				if (props.portal && props.portal.id) {
-					await updatePortal(props.portal.id, `${language.portalUpdated}!`);
+					await updatePortal(props.portal.id, `${language.portalUpdated}!`, false);
 				} else {
 					const portalId = await createZone({}, arProvider.wallet, (status: any) => globalLog(status));
 					globalLog(`Portal ID: ${portalId}`);
-					await updatePortal(portalId, `${language.portalCreated}!`);
+					await updatePortal(portalId, `${language.portalCreated}!`, true);
 					navigate(URLS.portalBase(portalId));
 				}
 			} catch (e: any) {

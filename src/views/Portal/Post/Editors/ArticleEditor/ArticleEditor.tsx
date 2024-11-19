@@ -11,7 +11,13 @@ import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
 import { ARTICLE_BLOCKS, ASSET_UPLOAD, ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { ArticleBlockEnum, ArticleBlockType, ArticleStatusType, CategoryType, NotificationType } from 'helpers/types';
+import {
+	ArticleBlockEnum,
+	ArticleBlockType,
+	ArticleStatusType,
+	NotificationType,
+	PortalCategoryType,
+} from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -169,7 +175,6 @@ function Block(props: {
 }
 
 // TODO: Links
-// TODO: Media upload
 export default function ArticleEditor() {
 	const navigate = useNavigate();
 	const { assetId } = useParams<{ assetId?: string }>();
@@ -182,15 +187,9 @@ export default function ArticleEditor() {
 
 	const [title, setTitle] = React.useState<string>('');
 	const [status, setStatus] = React.useState<ArticleStatusType>('draft');
-	const [categories, setCategories] = React.useState<CategoryType[]>([]);
+	const [categories, setCategories] = React.useState<PortalCategoryType[]>([]);
 	const [topics, setTopics] = React.useState<string[]>([]);
-	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([
-		{
-			id: '1',
-			type: 'image' as any,
-			content: '',
-		},
-	]);
+	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
 
 	const [focusedBlock, setFocusedBlock] = React.useState<ArticleBlockType | null>(null);
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
@@ -589,7 +588,7 @@ export default function ArticleEditor() {
 						status={status}
 						setStatus={(value: ArticleStatusType) => setStatus(value)}
 						categories={categories}
-						setCategories={(newCategories: CategoryType[]) => setCategories(newCategories)}
+						setCategories={(newCategories: PortalCategoryType[]) => setCategories(newCategories)}
 						topics={topics}
 						setTopics={(newTopics: string[]) => setTopics(newTopics)}
 						addBlock={(type: ArticleBlockEnum) => addBlock(type)}

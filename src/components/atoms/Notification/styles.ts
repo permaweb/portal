@@ -61,7 +61,7 @@ export const Message = styled.span`
 	white-space: nowrap;
 	color: ${(props) => props.theme.colors.font.light1};
 	font-weight: ${(props) => props.theme.typography.weight.bold} !important;
-	font-size: ${(props) => props.theme.typography.size.small} !important;
+	font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 `;
 
 export const Close = styled.div`

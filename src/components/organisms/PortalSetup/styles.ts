@@ -61,8 +61,8 @@ export const SectionBody = styled.div`
 export const LinksSection = styled(SectionBody)`
 	display: flex;
 	flex-wrap: wrap;
-	gap: 15px;
-	padding: 0 0 12.5px 0;
+	gap: 20px;
+	padding: 0 0 10px 0;
 `;
 
 export const LinkTooltip = styled.div`
@@ -74,10 +74,10 @@ export const LinkTooltip = styled.div`
 	top: 100%;
 	left: 50%;
 	transform: translateX(-50%);
-	margin: 5px 0 0 0;
+	margin: 1.5px 0 0 0;
 
 	span {
-		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		font-size: 10px !important;
 		display: block;
 		line-height: 1.65;
 		text-transform: uppercase;
@@ -95,31 +95,30 @@ export const LinkWrapper = styled.div`
 
 	a,
 	button {
-		height: 35px;
-		width: 35px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		position: relative;
-		background: ${(props) => props.theme.colors.container.alt1.background};
-		border: 1px solid ${(props) => props.theme.colors.border.alt1};
-		border-radius: 50%;
+		transition: all 200ms;
 
 		svg {
 			height: 17.5px;
 			width: 17.5px;
-			margin: 5.5px 0 0 0;
 			color: ${(props) => props.theme.colors.font.alt1};
 			fill: ${(props) => props.theme.colors.font.alt1};
 		}
 
 		&:hover {
-			background: ${(props) => props.theme.colors.container.primary.active};
-			border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
+			svg {
+				color: ${(props) => props.theme.colors.font.alt5};
+				fill: ${(props) => props.theme.colors.font.alt5};
+			}
 		}
 		&:focus {
-			background: ${(props) => props.theme.colors.container.primary.active};
-			border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
+			svg {
+				color: ${(props) => props.theme.colors.font.alt5};
+				fill: ${(props) => props.theme.colors.font.alt5};
+			}
 		}
 	}
 `;
@@ -162,14 +161,22 @@ export const BodyWrapper = styled.div`
 	padding: 0 0 15px 0;
 `;
 
+export const TopicsBodyWrapper = styled(BodyWrapper)`
+	margin: 10px 0 0 0;
+`;
+
 export const BodyActionsWrapper = styled.div`
 	width: fit-content;
 	display: flex;
 	gap: 12.5px;
-	margin: 0 0 0 auto;
+	margin: 20px 0 0 auto;
 `;
 
 export const CategoryModalWrapper = styled.div`
+	padding: 0 20px 5px 20px !important;
+`;
+
+export const TopicModalWrapper = styled.div`
 	padding: 0 20px 5px 20px !important;
 `;
 

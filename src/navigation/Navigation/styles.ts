@@ -37,7 +37,17 @@ export const PanelHeader = styled.div`
 	width: 100%;
 	display: flex;
 	align-items: center;
+	gap: 40px;
 	padding: 0 15px;
+`;
+
+export const Logo = styled.div`
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-family: ${(props) => props.theme.typography.family.alt1};
+	font-size: ${(props) => props.theme.typography.size.xLg};
+	font-size: 20px;
+	font-weight: ${(props) => props.theme.typography.weight.regular};
+	font-weight: 500;
 `;
 
 export const PanelContent = styled.div<{ open: boolean }>`
@@ -49,10 +59,10 @@ export const PanelContent = styled.div<{ open: boolean }>`
 		display: flex;
 		align-items: center;
 		cursor: pointer;
-		color: ${(props) => props.theme.colors.font.primary};
+		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.xBold};
 		border: 1px solid transparent;
 		border-radius: ${STYLING.dimensions.radius.primary};
 		transition: all 100ms;
@@ -172,7 +182,7 @@ export const Portal = styled.button<{ active: boolean }>`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.lg} !important;
-		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		display: block;
 		white-space: nowrap;
@@ -239,7 +249,7 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 		padding: 0 10px;
 		span {
 			color: ${(props) => props.theme.colors.font.primary} !important;
-			font-size: ${(props) => props.theme.typography.size.small} !important;
+			font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 			font-family: ${(props) => props.theme.typography.family.primary} !important;
 			display: block;
@@ -272,8 +282,8 @@ export const PIndicator = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	border: 1px solid ${(props) => props.theme.colors.font.dark2};
-	background: ${(props) => props.theme.colors.font.dark2};
+	border: 1px solid ${(props) => props.theme.colors.indicator.active};
+	background: ${(props) => props.theme.colors.indicator.active};
 	border-radius: 50%;
 
 	svg {
@@ -303,7 +313,7 @@ export const PDropdownFooter = styled.div`
 		text-overflow: ellipsis;
 		overflow: hidden;
 		color: ${(props) => props.theme.colors.font.primary} !important;
-		font-size: ${(props) => props.theme.typography.size.small} !important;
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		border-radius: ${STYLING.dimensions.radius.alt2};
@@ -340,7 +350,7 @@ export const DNavWrapper = styled.div`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.xBold};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
 	}
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		display: none;
@@ -413,7 +423,7 @@ export const LoadingWrapper = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.lg} !important;
-		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		display: block;
 		white-space: nowrap;

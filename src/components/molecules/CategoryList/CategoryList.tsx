@@ -1,12 +1,13 @@
 import React from 'react';
 
-import { globalLog, updateZone } from '@permaweb/libs';
+import { globalLog, mapToProcessCase, updateZone } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
+import { Notification } from 'components/atoms/Notification';
 import { ASSETS } from 'helpers/config';
-import { CategoryType } from 'helpers/types';
+import { NotificationType, PortalCategoryType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
@@ -21,11 +22,12 @@ export default function CategoryList(props: IProps) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [categoryOptions, setCategoryOptions] = React.useState<CategoryType[]>([]);
+	const [categoryOptions, setCategoryOptions] = React.useState<PortalCategoryType[]>([]);
 	const [newCategoryName, setNewCategoryName] = React.useState<string>('');
 	const [parentCategory, setParentCategory] = React.useState<string | null>(null);
 	const [showParentOptions, setShowParentOptions] = React.useState<boolean>(false);
 	const [categoryLoading, setCategoryLoading] = React.useState<boolean>(false);
+	const [categoryResponse, setCategoryResponse] = React.useState<NotificationType | null>(null);
 
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
@@ -33,19 +35,36 @@ export default function CategoryList(props: IProps) {
 		}
 	}, [portalProvider.current?.id]);
 
-	// TODO: Handle duplicates
 	const addCategory = async () => {
 		if (newCategoryName && portalProvider.current?.id && arProvider.wallet) {
 			setCategoryLoading(true);
 			try {
-				const newCategory: CategoryType = {
+				const newCategory: PortalCategoryType = {
 					id: Date.now().toString(),
 					name: newCategoryName,
 					parent: parentCategory,
 					children: [],
 				};
 
-				const addToParent = (categories: CategoryType[]): CategoryType[] => {
+				const isDuplicate = (categories: PortalCategoryType[], name: string): boolean => {
+					return categories.some((category) => {
+						if (category.name.toLowerCase() === name.toLowerCase()) {
+							return true;
+						}
+						if (category.children && category.children.length > 0) {
+							return isDuplicate(category.children, name);
+						}
+						return false;
+					});
+				};
+
+				if (isDuplicate(categoryOptions, newCategoryName)) {
+					setCategoryResponse({ status: 'warning', message: language.categoryDuplicateError });
+					setCategoryLoading(false);
+					return;
+				}
+
+				const addToParent = (categories: PortalCategoryType[]): PortalCategoryType[] => {
 					return categories.map((category) => {
 						if (category.id === parentCategory) {
 							return {
@@ -62,9 +81,7 @@ export default function CategoryList(props: IProps) {
 				const updatedCategories = parentCategory ? addToParent(categoryOptions) : [...categoryOptions, newCategory];
 
 				const categoryUpdateId = await updateZone(
-					{
-						categories: updatedCategories,
-					},
+					{ Categories: mapToProcessCase(updatedCategories) },
 					portalProvider.current.id,
 					arProvider.wallet
 				);
@@ -75,10 +92,11 @@ export default function CategoryList(props: IProps) {
 
 				props.setCategories([...props.categories, newCategory]);
 				setCategoryOptions(updatedCategories);
+				setCategoryResponse({ status: 'success', message: `${language.categoryAdded}!` });
 				setNewCategoryName('');
 				setParentCategory(null);
 			} catch (e: any) {
-				console.error(e);
+				setCategoryResponse({ status: 'warning', message: e.message ?? 'Error adding category' });
 			}
 			setCategoryLoading(false);
 		}
@@ -86,7 +104,7 @@ export default function CategoryList(props: IProps) {
 
 	const handleSelectCategory = (categoryId: string) => {
 		const isSelected = props.categories.some((category) => category.id === categoryId);
-		let updatedCategories: CategoryType[];
+		let updatedCategories: PortalCategoryType[];
 		if (isSelected) {
 			updatedCategories = props.categories.filter((category) => category.id !== categoryId);
 		} else {
@@ -96,13 +114,13 @@ export default function CategoryList(props: IProps) {
 		props.setCategories(updatedCategories);
 	};
 
-	const CategoryOptions = ({ categories, level = 0 }: { categories: CategoryType[]; level?: number }) => (
+	const CategoryOptions = ({ categories, level = 0 }: { categories: PortalCategoryType[]; level?: number }) => (
 		<S.CategoriesList>
 			{categories.map((category) => (
 				<React.Fragment key={category.id}>
 					<S.CategoryOption level={level}>
 						<Checkbox
-							checked={props.categories?.find((c: CategoryType) => category.id === c.id) !== undefined}
+							checked={props.categories?.find((c: PortalCategoryType) => category.id === c.id) !== undefined}
 							handleSelect={() => handleSelectCategory(category.id)}
 							disabled={categoryLoading}
 						/>
@@ -116,7 +134,7 @@ export default function CategoryList(props: IProps) {
 		</S.CategoriesList>
 	);
 
-	const renderParentCategoryOptions = (categories: CategoryType[], level = 1) =>
+	const renderParentCategoryOptions = (categories: PortalCategoryType[], level = 1) =>
 		categories.map((category) => (
 			<React.Fragment key={category.id}>
 				<S.ParentCategoryOption
@@ -132,7 +150,7 @@ export default function CategoryList(props: IProps) {
 			</React.Fragment>
 		));
 
-	function findCategoryById(categories: CategoryType[], id: string): CategoryType | undefined {
+	function findCategoryById(categories: PortalCategoryType[], id: string): PortalCategoryType | undefined {
 		for (const category of categories) {
 			if (category.id === id) {
 				return category;
@@ -153,63 +171,72 @@ export default function CategoryList(props: IProps) {
 	}
 
 	return (
-		<S.Wrapper>
-			<S.CategoriesAction>
-				<S.CategoriesAddAction>
-					<Button
-						type={'alt3'}
-						label={language.add}
-						handlePress={addCategory}
-						disabled={!newCategoryName || categoryLoading}
-						loading={categoryLoading}
-						icon={ASSETS.add}
-						iconLeftAlign
+		<>
+			<S.Wrapper>
+				<S.CategoriesAction>
+					<S.CategoriesAddAction>
+						<Button
+							type={'alt3'}
+							label={language.add}
+							handlePress={addCategory}
+							disabled={!newCategoryName || categoryLoading}
+							loading={categoryLoading}
+							icon={ASSETS.add}
+							iconLeftAlign
+						/>
+					</S.CategoriesAddAction>
+					<FormField
+						value={newCategoryName}
+						onChange={(e: any) => setNewCategoryName(e.target.value)}
+						invalid={{ status: false, message: null }}
+						disabled={categoryLoading}
+						hideErrorMessage
+						sm
 					/>
-				</S.CategoriesAddAction>
-				<FormField
-					value={newCategoryName}
-					onChange={(e: any) => setNewCategoryName(e.target.value)}
-					invalid={{ status: false, message: null }}
-					disabled={categoryLoading}
-					hideErrorMessage
-					sm
+					<S.CategoriesParentAction>
+						<CloseHandler
+							callback={() => {
+								setShowParentOptions(false);
+							}}
+							active={showParentOptions}
+							disabled={!showParentOptions}
+						>
+							<S.CategoriesParentSelectAction>
+								<Button
+									type={'primary'}
+									label={getParentDisplayLabel()}
+									handlePress={() => setShowParentOptions(!showParentOptions)}
+									disabled={!newCategoryName || !categoryOptions?.length || categoryLoading}
+									icon={ASSETS.arrow}
+									height={42.5}
+									fullWidth
+								/>
+							</S.CategoriesParentSelectAction>
+							{showParentOptions && (
+								<S.ParentCategoryDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
+									<S.ParentCategoryOptions>{renderParentCategoryOptions(categoryOptions)}</S.ParentCategoryOptions>
+								</S.ParentCategoryDropdown>
+							)}
+						</CloseHandler>
+					</S.CategoriesParentAction>
+				</S.CategoriesAction>
+				<S.CategoriesBody>
+					{categoryOptions?.length > 0 ? (
+						<CategoryOptions categories={categoryOptions} />
+					) : (
+						<S.WrapperEmpty>
+							<p>{language.addCategory}</p>
+						</S.WrapperEmpty>
+					)}
+				</S.CategoriesBody>
+			</S.Wrapper>
+			{categoryResponse && (
+				<Notification
+					type={categoryResponse.status}
+					message={categoryResponse.message}
+					callback={() => setCategoryResponse(null)}
 				/>
-				<S.CategoriesParentAction>
-					<CloseHandler
-						callback={() => {
-							setShowParentOptions(false);
-						}}
-						active={showParentOptions}
-						disabled={!showParentOptions}
-					>
-						<S.CategoriesParentSelectAction>
-							<Button
-								type={'primary'}
-								label={getParentDisplayLabel()}
-								handlePress={() => setShowParentOptions(!showParentOptions)}
-								disabled={!newCategoryName || !categoryOptions?.length || categoryLoading}
-								icon={ASSETS.arrow}
-								height={42.5}
-								fullWidth
-							/>
-						</S.CategoriesParentSelectAction>
-						{showParentOptions && (
-							<S.ParentCategoryDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
-								<S.ParentCategoryOptions>{renderParentCategoryOptions(categoryOptions)}</S.ParentCategoryOptions>
-							</S.ParentCategoryDropdown>
-						)}
-					</CloseHandler>
-				</S.CategoriesParentAction>
-			</S.CategoriesAction>
-			<S.CategoriesBody>
-				{categoryOptions?.length > 0 ? (
-					<CategoryOptions categories={categoryOptions} />
-				) : (
-					<S.WrapperEmpty>
-						<p>{language.addCategory}</p>
-					</S.WrapperEmpty>
-				)}
-			</S.CategoriesBody>
-		</S.Wrapper>
+			)}
+		</>
 	);
 }

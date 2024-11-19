@@ -249,8 +249,8 @@ export const IconAlt2 = styled(IconAlt1)`
 `;
 
 export const Alt3 = styled(Primary)`
-	min-height: 23.5px !important;
-	height: 23.5px !important;
+	min-height: 25px !important;
+	height: 25px !important;
 	padding: 0 10px !important;
 	border-radius: 20px;
 

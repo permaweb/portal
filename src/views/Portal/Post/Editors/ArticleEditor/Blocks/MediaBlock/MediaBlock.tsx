@@ -1,7 +1,7 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { buildStoreNamespace, globalLog, resolveTransaction, updateZone } from '@permaweb/libs';
+import { aoSend, globalLog, resolveTransaction } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { ContentEditable } from 'components/atoms/ContentEditable';
@@ -75,19 +75,6 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 
 	const [isValidUrl, setIsValidUrl] = React.useState(true);
 
-	// const [alignment, setAlignment] = React.useState<AlignmentEnum>(AlignmentEnum.Column);
-
-	React.useEffect(() => {
-		setMediaData({
-			url: 'https://7hl64x74lrd6ggjqq3xpz4myhe4vv2m37kf7skgjt6zinthif2ya.arweave.net/-dfuX_xcR-MZMIbu_PGYOTla6Zv6i_koyZ-yhszoLrA',
-			caption: null,
-			alignment: AlignmentEnum.Column,
-		});
-		// props.onChange(buildContent());
-	}, []);
-
-	console.log(mediaData);
-
 	React.useEffect(() => {
 		if (props.data && props.data !== mediaData) {
 			setMediaData(props.data);
@@ -112,19 +99,20 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 				try {
 					const tx = await resolveTransaction(mediaData.url);
 
-					const mediaUpdateId = await updateZone(
-						{
-							[buildStoreNamespace('upload', tx)]: { src: tx, type: 'image', dateUploaded: Date.now().toString() },
-						},
-						portalProvider.current.id,
-						arProvider.wallet
-					);
+					// TODO: SDK Function
+					const mediaUpdateId = await aoSend({
+						processId: portalProvider.current.id,
+						wallet: arProvider.wallet,
+						action: 'Zone-Append',
+						tags: [{ name: 'Path', value: 'Uploads' }],
+						data: { Tx: tx, Type: 'Image', DateUploaded: Date.now().toString() },
+					});
 
 					globalLog(`Media update: ${mediaUpdateId}`);
 
 					setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(tx) }));
 					setMediaUploaded(true);
-					setUploadResponse({ status: 'success', message: 'Media uploaded!' });
+					setUploadResponse({ status: 'success', message: `${language.mediaUploaded}!` });
 				} catch (e: any) {
 					setUploadResponse({ status: 'warning', message: e.message ?? 'Error uploading media' });
 					setMediaData((prevContent) => ({ ...prevContent, url: null }));
@@ -137,6 +125,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	React.useEffect(() => {
 		if (mediaData?.url && validateUrl(mediaData.url) && mediaData.url.startsWith('https://'))
 			props.onChange(buildContent(mediaData), mediaData);
+		// props.onChange(mediaData, mediaData);
 	}, [mediaData]);
 
 	function buildContent(data: any) {
@@ -211,20 +200,6 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 							<span>{language.mediaUploadInfo}</span>
 						</S.InputDescription>
 						<S.InputActions>
-							<Button
-								type={'alt1'}
-								label={language.upload}
-								handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
-								height={41.5}
-								width={140}
-							/>
-							<Button
-								type={'primary'}
-								label={language.fromLibrary}
-								handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
-								height={41.5}
-								width={150}
-							/>
 							<FormField
 								label={language.insertFromUrl}
 								value={mediaData?.url ?? ''}
@@ -234,6 +209,19 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 								hideErrorMessage
 								sm
 							/>
+							<S.InputActionsFlex>
+								<Button
+									type={'alt1'}
+									label={language.upload}
+									handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
+									width={140}
+								/>
+								<Button
+									type={'primary'}
+									label={language.fromLibrary}
+									handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
+								/>
+							</S.InputActionsFlex>
 							<input
 								id={'media-file-input'}
 								ref={inputRef}
@@ -316,6 +304,8 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 												}));
 												setShowCaptionEdit(false);
 											}}
+											icon={ASSETS.delete}
+											iconLeftAlign
 										/>
 										<Button type={'alt1'} label={language.done} handlePress={() => setShowCaptionEdit(false)} />
 									</S.ModalCaptionActionWrapper>

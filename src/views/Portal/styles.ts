@@ -11,7 +11,6 @@ export const BodyWrapper = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	gap: 25px;
-	margin: 20px 0 0 0;
 `;
 
 export const SectionWrapper = styled.div`

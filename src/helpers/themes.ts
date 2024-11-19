@@ -217,7 +217,7 @@ export const darkThemeHighContrast = {
 	caution1: '#EECA00',
 	negative1: '#D81E5B',
 	negative2: '#E43A72',
-	neutral1: '#151515',
+	neutral1: '#171819',
 	neutral2: '#1E1E1E',
 	neutral3: '#2A2A2A',
 	neutral4: '#606060',
@@ -549,7 +549,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 		},
 		tooltip: {
 			background: currentTheme.dark2,
-			border: currentTheme.dark2,
+			border: currentTheme.neutral9,
 			color: currentTheme.light1,
 		},
 		view: {
@@ -562,8 +562,8 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 	},
 	typography: {
 		family: {
-			primary: `'Lato', system-ui`,
-			alt1: `'Merriweather', serif`,
+			primary: `'Open Sans', sans-serif`,
+			alt1: `'Ramaraja', serif`,
 		},
 		size: {
 			xxxSmall: '12px',
@@ -573,16 +573,16 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			base: '16px',
 			lg: '18px',
 			xLg: '24px',
-			h1: 'clamp(32px, 2.85vw, 48px)',
-			h2: 'clamp(28px, 2.45vw, 44px)',
-			h4: 'clamp(24px, 2vw, 36px)',
+			h1: 'clamp(36px, 3.5vw, 56px)',
+			h2: 'clamp(32px, 3.25vw, 50px)',
+			h4: 'clamp(28px, 3vw, 42px)',
 		},
 		weight: {
 			light: '300',
+			regular: '400',
 			medium: '500',
 			bold: '600',
 			xBold: '700',
-			xxBold: '800',
 		},
 	},
 });

@@ -11,7 +11,7 @@ export const InputWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	position: relative;
-	padding: 10px 20px;
+	padding: 10px 20px 17.5px 20px;
 	border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
 `;
 
@@ -56,7 +56,7 @@ export const InputHeader = styled.div`
 `;
 
 export const InputDescription = styled.div`
-	margin: 5px 0 0 0;
+	margin: 5px 0 10px 0;
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
@@ -67,13 +67,8 @@ export const InputDescription = styled.div`
 
 export const InputActions = styled.div`
 	display: flex;
-	align-items: center;
-	gap: 20px;
-	margin: 25px 0 0 0;
-
-	button {
-		margin: 29.5px 0 0 0;
-	}
+	flex-direction: column;
+	gap: 15px;
 
 	input {
 		max-width: 400px;
@@ -87,11 +82,14 @@ export const InputActions = styled.div`
 		align-items: flex-start;
 		flex-direction: column;
 		gap: 15px;
-
-		button {
-			margin: 0;
-		}
 	}
+`;
+
+export const InputActionsFlex = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 15px 20px;
 `;
 
 export const ContentWrapper = styled.div`
@@ -272,4 +270,8 @@ export const CaptionToolsInline = styled.div<{ editMode: boolean }>`
 	position: absolute;
 	top: 0;
 	right: ${(props) => (props.editMode ? '10px' : '0')};
+
+	button {
+		padding: 3.5px 0 0 1.15px !important;
+	}
 `;

@@ -129,28 +129,15 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 	cursor: ${(props) => getElementCursor(props.type)};
 
 	p {
-		font-size: ${(props) => props.theme.typography.size.base};
+		font-size: 16px;
 	}
 
 	blockquote {
 		font-family: Georgia, serif;
 		font-style: italic;
-		font-size: 15px;
+		font-size: 16px;
 		font-weight: 500;
 		color: ${(props) => props.theme.colors.font.alt2};
-
-		/* position: relative;
-		display: flex;
-		align-items: flex-start; */
-
-		/* &::before,
-		&::after {
-			content: '"';
-			font-family: Georgia, serif;
-			font-size: 16px;
-			color: ${(props) => props.theme.colors.font.alt2};
-			
-		} */
 	}
 	ol,
 	ul {
@@ -205,6 +192,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 	h5,
 	h6 {
 		font-weight: 600;
+		font-family: 'Merriweather', serif;
 	}
 
 	h1 {
