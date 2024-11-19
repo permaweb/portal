@@ -76,52 +76,78 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		}
 	}, [location.pathname, portals, currentId]);
 
+	async function fetchPortal() {
+		if (currentId) {
+			try {
+				const portalData = await getZone(currentId);
+
+				if (portalData) {
+					let portal: PortalDetailType = {
+						id: currentId,
+						name: portalData.Store?.Name || 'None',
+						logo: portalData.Store?.Logo || 'None',
+						assets: [],
+						categories: portalData.Store?.Categories ? mapFromProcessCase(portalData.Store.Categories) : [],
+						topics: portalData.Store?.Topics ? mapFromProcessCase(portalData.Store.Topics) : [],
+						users: [
+							{ username: 'bob_crypto', displayName: 'Bob Smith', role: 'Contributor' },
+							{ username: 'carol_dev', displayName: 'Carol Williams', role: 'Admin' },
+							{ username: 'dave_builder', displayName: 'Dave Anderson', role: 'Contributor' },
+							{ username: 'eva_permaweb', displayName: 'Eva Martinez', role: 'Contributor' },
+						],
+						domains: ['stratpol', 'stratpol-staging'], // TODO
+					};
+
+					if (portalData.Assets?.length > 0) {
+						const assetsFetch = await getAtomicAssets(portalData.Assets.map((asset: ZoneAssetType) => asset.id));
+						if (assetsFetch && assetsFetch.length > 0) portal.assets = assetsFetch;
+					}
+
+					return portal;
+				}
+			} catch (e: any) {
+				console.error(e);
+				setErrorMessage(e.message ?? 'An error occurred while fetching the portal.');
+			}
+		}
+	}
+
 	React.useEffect(() => {
 		(async function () {
-			if (currentId) {
+			try {
+				if (currentId) setCurrent(await fetchPortal());
+			} catch (e: any) {
+				console.error(e);
+				setErrorMessage(e.message ?? 'An error occurred getting this portal');
+			}
+		})();
+	}, [currentId]);
+
+	React.useEffect(() => {
+		(async function () {
+			let changeDetected = false;
+			let tries = 0;
+			const maxTries = 10;
+
+			while (!changeDetected && tries < maxTries) {
 				try {
-					const currentPortal = await getZone(currentId);
+					const existingPortal = current;
+					const updatedPortal = await fetchPortal();
 
-					if (currentPortal) {
-						let data: PortalDetailType = {
-							id: currentId,
-							name: currentPortal.Store?.Name || 'None',
-							logo: currentPortal.Store?.Logo || 'None',
-							assets: [],
-							categories: currentPortal.Store?.Categories ? mapFromProcessCase(currentPortal.Store.Categories) : [],
-							topics: currentPortal.Store?.Topics ? mapFromProcessCase(currentPortal.Store.Topics) : [],
-							users: [
-								{ username: 'bob_crypto', displayName: 'Bob Smith', role: 'Contributor' },
-								{ username: 'carol_dev', displayName: 'Carol Williams', role: 'Admin' },
-								{ username: 'dave_builder', displayName: 'Dave Anderson', role: 'Contributor' },
-								{ username: 'eva_permaweb', displayName: 'Eva Martinez', role: 'Contributor' },
-							],
-							domains: ['stratpol', 'stratpol-staging'], // TODO
-						};
-
-						if (currentPortal.assets?.length > 0) {
-							const assetsFetch = await getAtomicAssets(currentPortal.assets.map((asset: ZoneAssetType) => asset.id));
-							if (assetsFetch && assetsFetch.length > 0) data.assets = assetsFetch;
-						}
-
-						setCurrent(data);
+					if (JSON.stringify(existingPortal) !== JSON.stringify(updatedPortal)) {
+						setCurrent(updatedPortal);
+						changeDetected = true;
+					} else {
+						await new Promise((resolve) => setTimeout(resolve, 1000));
+						tries++;
 					}
 				} catch (e: any) {
-					setErrorMessage(e.message ?? 'An error occurred getting your portal');
-					setCurrent({
-						id: currentId,
-						name: 'Unknown',
-						logo: null,
-						assets: [],
-						categories: [],
-						topics: [],
-						users: [],
-						domains: [],
-					});
+					console.error(e);
+					setErrorMessage(e.message ?? 'An error occurred getting this portal');
 				}
 			}
 		})();
-	}, [currentId, refreshCurrentTrigger]);
+	}, [refreshCurrentTrigger]);
 
 	function handleShowPortalManager(toggle: boolean, useNew?: boolean) {
 		setShowPortalManager(toggle);

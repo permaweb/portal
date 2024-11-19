@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
-import { aoDryRun, aoSend, createAtomicAsset, globalLog } from '@permaweb/libs';
+import { aoDryRun, aoSend, createAtomicAsset, globalLog, mapFromProcessCase, mapToProcessCase } from '@permaweb/libs';
 
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { IconButton } from 'components/atoms/IconButton';
@@ -218,11 +218,11 @@ export default function ArticleEditor() {
 						});
 
 						if (response) {
-							if (response.title) setTitle(response.title);
-							if (response.status) setStatus(response.status);
-							if (response.categories) setCategories(response.categories);
-							if (response.topics) setTopics(response.topics);
-							if (response.content?.length > 0) setBlocks(response.content);
+							if (response.Title) setTitle(response.Title);
+							if (response.Status) setStatus(response.Status);
+							if (response.Categories) setCategories(mapFromProcessCase(response.Categories));
+							if (response.Topics) setTopics(mapFromProcessCase(response.Topics));
+							if (response.Content?.length > 0) setBlocks(mapFromProcessCase(response.Content));
 						}
 					} catch (e: any) {
 						console.error(e);
@@ -340,23 +340,23 @@ export default function ArticleEditor() {
 
 		if (!title) {
 			valid = false;
-			message = 'Post title is required.';
+			message = 'Post title is required';
 		}
 		if (!status) {
 			valid = false;
-			message = 'Status is required.';
+			message = 'Status is required';
 		}
 		if (!blocks?.length) {
 			valid = false;
-			message = 'No content found in post.';
+			message = 'No content found in post';
 		}
 		if (!categories?.length) {
 			valid = false;
-			message = 'Categories are required.';
+			message = 'Categories are required';
 		}
 		if (!topics?.length) {
 			valid = false;
-			message = 'Topics are required.';
+			message = 'Topics are required';
 		}
 
 		if (!valid) {
@@ -377,9 +377,9 @@ export default function ArticleEditor() {
 			const data = {
 				Title: title,
 				Status: status,
-				Content: blocks,
-				Topics: topics,
-				Categories: categories,
+				Content: mapToProcessCase(blocks),
+				Topics: mapToProcessCase(topics),
+				Categories: mapToProcessCase(categories),
 			};
 
 			if (assetId) {

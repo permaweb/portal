@@ -77,6 +77,11 @@ export const PanelContent = styled.div<{ open: boolean }>`
 		&:hover {
 			color: ${(props) => props.theme.colors.font.primary};
 			background: ${(props) => props.theme.colors.container.alt2.background};
+
+			svg {
+				color: ${(props) => props.theme.colors.font.primary};
+				fill: ${(props) => props.theme.colors.font.primary};
+			}
 		}
 	}
 `;
@@ -91,10 +96,10 @@ export const PanelFooter = styled.div<{ open: boolean }>`
 		display: flex;
 		align-items: center;
 		cursor: pointer;
-		color: ${(props) => props.theme.colors.font.primary};
+		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.xBold};
 		border: 1px solid ${(props) => props.theme.colors.border.primary};
 		border-radius: ${STYLING.dimensions.radius.primary};
 		transition: all 100ms;
@@ -110,6 +115,11 @@ export const PanelFooter = styled.div<{ open: boolean }>`
 			color: ${(props) => props.theme.colors.font.primary};
 			background: ${(props) => props.theme.colors.container.alt2.background};
 			border: 1px solid ${(props) => props.theme.colors.border.alt2};
+
+			svg {
+				color: ${(props) => props.theme.colors.font.primary};
+				fill: ${(props) => props.theme.colors.font.primary};
+			}
 		}
 	}
 `;
