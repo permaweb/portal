@@ -89,6 +89,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						assets: [],
 						categories: portalData.Store?.Categories ? mapFromProcessCase(portalData.Store.Categories) : [],
 						topics: portalData.Store?.Topics ? mapFromProcessCase(portalData.Store.Topics) : [],
+						links: portalData.Store?.Links ? mapFromProcessCase(portalData.Store.Links) : [],
 						users: [
 							{ username: 'bob_crypto', displayName: 'Bob Smith', role: 'Contributor' },
 							{ username: 'carol_dev', displayName: 'Carol Williams', role: 'Admin' },

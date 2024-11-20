@@ -28,7 +28,7 @@ export const TWrapper = styled.div`
 
 export const Label = styled.label`
 	color: ${(props) => props.theme.colors.font.alt1};
-	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
 	font-weight: ${(props) => props.theme.typography.weight.bold};
 `;
 

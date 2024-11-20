@@ -55,6 +55,7 @@ export const SetupSection = styled(Section)``;
 
 export const PostsSection = styled(Section)`
 	> :first-child {
+		padding: 12.5px 10px 12.5px 15px;
 		background: ${(props) => props.theme.colors.container.alt1.background};
 		border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 		border-top-left-radius: 3.5px;

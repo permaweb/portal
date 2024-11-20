@@ -49,6 +49,11 @@ export default function Portal() {
 					<S.PostsSection className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
 							<p>{language.posts}</p>
+							<Button
+								type={'alt3'}
+								label={language.postsLink}
+								handlePress={() => navigate(URLS.portalPosts(portalProvider.current.id))}
+							/>
 						</S.SectionHeader>
 						<S.SectionBody>
 							<PostList />

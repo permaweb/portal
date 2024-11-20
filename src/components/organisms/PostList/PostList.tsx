@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
@@ -24,23 +23,23 @@ export default function PostList() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const posts = React.useMemo(() => {
-		if (!portalProvider.current?.assets) {
-			return (
-				<S.LoadingWrapper>
-					<p>{`${language.gettingPosts}...`}</p>
-				</S.LoadingWrapper>
-			);
-		} else if (portalProvider.current?.assets.length === 0) {
-			return (
-				<S.WrapperEmpty>
-					<p>{language.noPostsFound}</p>
-				</S.WrapperEmpty>
-			);
-		}
+	if (!portalProvider.current?.assets) {
+		return (
+			<S.LoadingWrapper>
+				<p>{`${language.gettingPosts}...`}</p>
+			</S.LoadingWrapper>
+		);
+	} else if (portalProvider.current?.assets.length === 0) {
+		return (
+			<S.WrapperEmpty>
+				<p>{language.noPostsFound}</p>
+			</S.WrapperEmpty>
+		);
+	}
 
-		return portalProvider.current?.id ? (
-			<S.Wrapper>
+	return portalProvider.current?.id ? (
+		<S.Wrapper>
+			<S.PostsWrapper>
 				{portalProvider.current.assets
 					.sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())
 					.map((asset: AssetHeaderType) => {
@@ -87,9 +86,7 @@ export default function PostList() {
 							</S.PostWrapper>
 						);
 					})}
-			</S.Wrapper>
-		) : null;
-	}, [portalProvider, portalProvider.current?.id, portalProvider.current?.assets, language]);
-
-	return posts;
+			</S.PostsWrapper>
+		</S.Wrapper>
+	) : null;
 }

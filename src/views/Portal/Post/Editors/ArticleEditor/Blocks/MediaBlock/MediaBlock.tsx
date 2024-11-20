@@ -125,7 +125,6 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	React.useEffect(() => {
 		if (mediaData?.url && validateUrl(mediaData.url) && mediaData.url.startsWith('https://'))
 			props.onChange(buildContent(mediaData), mediaData);
-		// props.onChange(mediaData, mediaData);
 	}, [mediaData]);
 
 	function buildContent(data: any) {

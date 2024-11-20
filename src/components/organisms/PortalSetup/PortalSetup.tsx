@@ -1,11 +1,11 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 
 import { mapToProcessCase } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { CategoryList } from 'components/molecules/CategoryList';
+import { LinkList } from 'components/molecules/LinkList';
 import { Modal } from 'components/molecules/Modal';
 import { TopicList } from 'components/molecules/TopicList';
 import { ASSETS } from 'helpers/config';
@@ -16,8 +16,9 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import * as S from './styles';
 import { IProps } from './types';
 
-// TODO: Topic add / save / delete
-// TODO: Category delete
+// TODO: Topic add / edit / save / delete
+// TODO: Category edit / delete
+// TODO: Dont select categories / topics on add
 // TODO: Links
 export default function PortalSetup(props: IProps) {
 	const portalProvider = usePortalProvider();
@@ -29,16 +30,7 @@ export default function PortalSetup(props: IProps) {
 	const [selectedTopics, setSelectedTopics] = React.useState<string[]>([]);
 	const [showCategoryAction, setShowCategoryAction] = React.useState<boolean>(false);
 	const [showTopicAction, setShowTopicAction] = React.useState<boolean>(false);
-
-	const links = [
-		{ id: 'facebook', href: '#', icon: ASSETS.facebook },
-		{ id: 'x', href: '#', icon: ASSETS.x },
-		{ id: 'youtube', href: '#', icon: ASSETS.youtube },
-		{ id: 'odysee', href: '#' },
-		{ id: 'linkedin', href: '#', icon: ASSETS.linkedin },
-		{ id: 'discord', href: '#', icon: ASSETS.discord },
-		{ id: 'telegram', href: '#', icon: ASSETS.telegram },
-	];
+	const [showLinkAction, setShowLinkAction] = React.useState<boolean>(false);
 
 	function handleDeleteCategories() {
 		console.log(mapToProcessCase(selectedCategories));
@@ -119,10 +111,38 @@ export default function PortalSetup(props: IProps) {
 		);
 	}
 
+	function getLinkAction() {
+		return (
+			<S.LinksBodyWrapper>
+				<LinkList type={props.type} />
+			</S.LinksBodyWrapper>
+		);
+	}
+
 	return (
 		<>
 			<S.Wrapper type={props.type}>
 				<S.SectionWrapper type={props.type}>
+					<S.Section type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
+						<S.SectionHeader>
+							<p>{`${language.siteLinks}${
+								portalProvider.current?.links ? ` (${portalProvider.current.links.length})` : ''
+							}`}</p>
+							{props.type === 'header' && (
+								<IconButton
+									type={'primary'}
+									active={false}
+									src={ASSETS.write}
+									handlePress={() => setShowLinkAction(true)}
+									dimensions={{ wrapper: 23.5, icon: 13.5 }}
+									tooltip={language.editSiteLinks}
+									tooltipPosition={'bottom-right'}
+									noFocus
+								/>
+							)}
+						</S.SectionHeader>
+						{props.type === 'detail' && getLinkAction()}
+					</S.Section>
 					<S.CategoriesSection type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
 						<S.CategoriesHeader>
 							<p>{`${language.siteCategories}${
@@ -145,38 +165,8 @@ export default function PortalSetup(props: IProps) {
 						</S.CategoriesHeader>
 						{props.type === 'detail' && getCategoryAction()}
 					</S.CategoriesSection>
-					<S.Section type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<p>{language.siteLinks}</p>
-						</S.SectionHeader>
-						<S.LinksSection>
-							{links?.length > 0 && (
-								<>
-									{links.map((link: any, index: number) => {
-										return (
-											<S.LinkWrapper key={index}>
-												<a href={link.href} target={'_blank'}>
-													<ReactSVG src={link.icon ?? ASSETS.link} />
-												</a>
-												<S.LinkTooltip className={'info'}>
-													<span>{link.id}</span>
-												</S.LinkTooltip>
-											</S.LinkWrapper>
-										);
-									})}
-								</>
-							)}
-							<S.LinkWrapper>
-								<button>
-									<ReactSVG src={ASSETS.add} />
-								</button>
-								<S.LinkTooltip className={'info'}>
-									<span>{'Add a new link'}</span>
-								</S.LinkTooltip>
-							</S.LinkWrapper>
-						</S.LinksSection>
-					</S.Section>
 				</S.SectionWrapper>
+				{props.type === 'header' && <S.Divider />}
 				<S.SectionWrapper type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
 					<S.TopicsSection type={props.type}>
 						<S.SectionHeader>
@@ -208,6 +198,11 @@ export default function PortalSetup(props: IProps) {
 			{showTopicAction && (
 				<Modal header={language.editPostTopics} handleClose={() => setShowTopicAction(false)}>
 					<S.TopicModalWrapper>{getTopicAction()}</S.TopicModalWrapper>
+				</Modal>
+			)}
+			{showLinkAction && (
+				<Modal header={language.editSiteLinks} handleClose={() => setShowLinkAction(false)}>
+					<S.LinkModalWrapper>{getLinkAction()}</S.LinkModalWrapper>
 				</Modal>
 			)}
 		</>

@@ -204,7 +204,6 @@ export const GlobalStyle = createGlobalStyle`
   .info {
     padding: 0 5px 0.5px 5px;
     background: ${(props) => props.theme.colors.tooltip.background};
-    border: 1px solid ${(props) => props.theme.colors.tooltip.border};
     border-radius: ${STYLING.dimensions.radius.alt2};
     animation: ${open} ${transition2};
     span {

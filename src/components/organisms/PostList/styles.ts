@@ -6,6 +6,16 @@ import { ArticleStatusType } from 'helpers/types';
 
 export const Wrapper = styled.div`
 	width: 100%;
+`;
+
+export const PostsHeader = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+`;
+
+export const PostsWrapper = styled.div`
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 

@@ -87,7 +87,7 @@ function getElementPadding(type: ArticleBlockEnum) {
 		case 'header-4':
 		case 'header-5':
 		case 'header-6':
-			return '10px 15px';
+			return '12.5px 15px';
 		default:
 			return '10px';
 	}

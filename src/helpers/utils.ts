@@ -126,3 +126,8 @@ export function getByteSize(input: string | Buffer): number {
 export function isMac(): boolean {
 	return navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 }
+
+export function validateUrl(url: string) {
+	const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+	return urlPattern.test(url);
+}

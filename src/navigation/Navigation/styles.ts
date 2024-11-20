@@ -61,8 +61,8 @@ export const PanelContent = styled.div<{ open: boolean }>`
 		cursor: pointer;
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.xBold};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
 		border: 1px solid transparent;
 		border-radius: ${STYLING.dimensions.radius.primary};
 		transition: all 100ms;
@@ -98,8 +98,8 @@ export const PanelFooter = styled.div<{ open: boolean }>`
 		cursor: pointer;
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.xBold};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
 		border: 1px solid ${(props) => props.theme.colors.border.primary};
 		border-radius: ${STYLING.dimensions.radius.primary};
 		transition: all 100ms;
