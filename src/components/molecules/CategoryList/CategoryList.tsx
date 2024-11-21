@@ -22,7 +22,7 @@ export default function CategoryList(props: IProps) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [categoryOptions, setCategoryOptions] = React.useState<PortalCategoryType[]>([]);
+	const [categoryOptions, setCategoryOptions] = React.useState<PortalCategoryType[] | null>(null);
 	const [newCategoryName, setNewCategoryName] = React.useState<string>('');
 	const [parentCategory, setParentCategory] = React.useState<string | null>(null);
 	const [showParentOptions, setShowParentOptions] = React.useState<boolean>(false);
@@ -170,6 +170,24 @@ export default function CategoryList(props: IProps) {
 		return language.selectParentCategory;
 	}
 
+	function getCategories() {
+		if (!categoryOptions) {
+			return (
+				<S.WrapperEmpty>
+					<p>{`${language.gettingCategories}...`}</p>
+				</S.WrapperEmpty>
+			);
+		} else if (categoryOptions.length <= 0) {
+			return (
+				<S.WrapperEmpty>
+					<p>{language.noCategoriesFound}</p>
+				</S.WrapperEmpty>
+			);
+		}
+
+		return <CategoryOptions categories={categoryOptions} />;
+	}
+
 	return (
 		<>
 			<S.Wrapper>
@@ -195,9 +213,7 @@ export default function CategoryList(props: IProps) {
 					/>
 					<S.CategoriesParentAction>
 						<CloseHandler
-							callback={() => {
-								setShowParentOptions(false);
-							}}
+							callback={() => setShowParentOptions(false)}
 							active={showParentOptions}
 							disabled={!showParentOptions}
 						>
@@ -220,15 +236,7 @@ export default function CategoryList(props: IProps) {
 						</CloseHandler>
 					</S.CategoriesParentAction>
 				</S.CategoriesAction>
-				<S.CategoriesBody>
-					{categoryOptions?.length > 0 ? (
-						<CategoryOptions categories={categoryOptions} />
-					) : (
-						<S.WrapperEmpty>
-							<p>{language.addCategory}</p>
-						</S.WrapperEmpty>
-					)}
-				</S.CategoriesBody>
+				<S.CategoriesBody>{getCategories()}</S.CategoriesBody>
 			</S.Wrapper>
 			{categoryResponse && (
 				<Notification

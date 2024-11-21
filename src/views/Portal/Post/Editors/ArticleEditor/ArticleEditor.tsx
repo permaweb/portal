@@ -235,91 +235,93 @@ export default function ArticleEditor() {
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (focusedBlock) {
-				switch (focusedBlock.type) {
-					case 'ordered-list':
-					case 'unordered-list':
-					case 'quote':
-					case 'code':
-						if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-							handleKeyAddBlock(event);
-						}
-						break;
-					case 'paragraph':
-					case 'header-1':
-					case 'header-2':
-					case 'header-3':
-					case 'header-4':
-					case 'header-5':
-					case 'header-6':
-						if (event.key === 'Enter') {
-							handleKeyAddBlock(event);
-						}
-						break;
-					default:
-						break;
-				}
-			}
-			if (event.key === 'Tab' && !event.shiftKey && !toggleBlockFocus && focusedBlock) {
-				const lastBlockIndex = blocks.length - 1;
-				if (!blocks.length || blocks[lastBlockIndex].id === focusedBlock.id) {
-					event.preventDefault();
-					setToggleBlockFocus(true);
-				}
-			}
-			if (event.key === 'Backspace' && focusedBlock) {
-				const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
-				const currentBlock = blocks[currentBlockIndex];
-				if (
-					(currentBlock &&
-						!(currentBlock.type === 'image') &&
-						(!currentBlock.content.length ||
-							(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
-							currentBlock.content === '<li><br></li>' ||
-							(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
-							currentBlock.content === '<li><br></li>')) ||
-					currentBlock.content === '<br>'
-				) {
-					event.preventDefault();
-					deleteBlock(currentBlock.id);
-					if (currentBlockIndex > 0) {
-						const previousBlock = blocks[currentBlockIndex - 1];
-						setFocusedBlock(previousBlock);
-						setLastAddedBlockId(previousBlock.id);
-					} else if (blocks.length > 1) {
-						const nextBlock = blocks[1];
-						setFocusedBlock(nextBlock);
-						setLastAddedBlockId(nextBlock.id);
+			if (portalProvider.current?.id) {
+				if (focusedBlock) {
+					switch (focusedBlock.type) {
+						case 'ordered-list':
+						case 'unordered-list':
+						case 'quote':
+						case 'code':
+							if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+								handleKeyAddBlock(event);
+							}
+							break;
+						case 'paragraph':
+						case 'header-1':
+						case 'header-2':
+						case 'header-3':
+						case 'header-4':
+						case 'header-5':
+						case 'header-6':
+							if (event.key === 'Enter') {
+								handleKeyAddBlock(event);
+							}
+							break;
+						default:
+							break;
 					}
 				}
-			}
-			if (focusedBlock && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
-				const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
-				const currentBlock = blocks[currentBlockIndex];
-
-				const disabledNavigation =
-					!currentBlock.type ||
-					currentBlock.type === 'quote' ||
-					currentBlock.type === 'ordered-list' ||
-					currentBlock.type === 'unordered-list' ||
-					currentBlock.type === 'code';
-
-				if (!disabledNavigation) {
-					if (event.key === 'ArrowDown' && currentBlockIndex < blocks.length - 1) {
+				if (event.key === 'Tab' && !event.shiftKey && !toggleBlockFocus && focusedBlock) {
+					const lastBlockIndex = blocks.length - 1;
+					if (!blocks.length || blocks[lastBlockIndex].id === focusedBlock.id) {
 						event.preventDefault();
-						const nextBlock = blocks[currentBlockIndex + 1];
-						setFocusedBlock(nextBlock);
-						setLastAddedBlockId(nextBlock.id);
-					} else if (event.key === 'ArrowUp' && currentBlockIndex > 0) {
-						event.preventDefault();
-						const previousBlock = blocks[currentBlockIndex - 1];
-						setFocusedBlock(previousBlock);
-						setLastAddedBlockId(previousBlock.id);
+						setToggleBlockFocus(true);
 					}
 				}
-			}
-			if (event.key === 'Enter' && (!blocks || blocks.length <= 0)) {
-				handleKeyAddBlock(event);
+				if (event.key === 'Backspace' && focusedBlock) {
+					const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
+					const currentBlock = blocks[currentBlockIndex];
+					if (
+						(currentBlock &&
+							!(currentBlock.type === 'image') &&
+							(!currentBlock.content.length ||
+								(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
+								currentBlock.content === '<li><br></li>' ||
+								(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
+								currentBlock.content === '<li><br></li>')) ||
+						currentBlock.content === '<br>'
+					) {
+						event.preventDefault();
+						deleteBlock(currentBlock.id);
+						if (currentBlockIndex > 0) {
+							const previousBlock = blocks[currentBlockIndex - 1];
+							setFocusedBlock(previousBlock);
+							setLastAddedBlockId(previousBlock.id);
+						} else if (blocks.length > 1) {
+							const nextBlock = blocks[1];
+							setFocusedBlock(nextBlock);
+							setLastAddedBlockId(nextBlock.id);
+						}
+					}
+				}
+				if (focusedBlock && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+					const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
+					const currentBlock = blocks[currentBlockIndex];
+
+					const disabledNavigation =
+						!currentBlock.type ||
+						currentBlock.type === 'quote' ||
+						currentBlock.type === 'ordered-list' ||
+						currentBlock.type === 'unordered-list' ||
+						currentBlock.type === 'code';
+
+					if (!disabledNavigation) {
+						if (event.key === 'ArrowDown' && currentBlockIndex < blocks.length - 1) {
+							event.preventDefault();
+							const nextBlock = blocks[currentBlockIndex + 1];
+							setFocusedBlock(nextBlock);
+							setLastAddedBlockId(nextBlock.id);
+						} else if (event.key === 'ArrowUp' && currentBlockIndex > 0) {
+							event.preventDefault();
+							const previousBlock = blocks[currentBlockIndex - 1];
+							setFocusedBlock(previousBlock);
+							setLastAddedBlockId(previousBlock.id);
+						}
+					}
+				}
+				if (event.key === 'Enter' && (!blocks || blocks.length <= 0)) {
+					handleKeyAddBlock(event);
+				}
 			}
 		};
 
@@ -328,7 +330,7 @@ export default function ArticleEditor() {
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [blocks, focusedBlock, toggleBlockFocus]);
+	}, [blocks, focusedBlock, toggleBlockFocus, portalProvider.current]);
 
 	function getSubmitDisabled() {
 		return !blocks || blocks.length <= 0 || !blocks.some((block) => block.content.length > 0);

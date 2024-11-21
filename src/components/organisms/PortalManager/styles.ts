@@ -85,11 +85,11 @@ export const FileInputWrapper = styled.div`
 
 export const LInput = styled.button<{ hasLogo: boolean }>`
 	height: 135px;
-	width: 135px;
+	width: 100%;
 	position: relative;
 	background: ${(props) => props.theme.colors.container.primary.background};
 	border: ${(props) => (props.hasLogo ? `none` : `1px dashed ${props.theme.colors.border.primary}`)};
-	border-radius: 50%;
+	border-radius: ${STYLING.dimensions.radius.alt2};
 	z-index: 1;
 	overflow: hidden;
 	span {
@@ -163,12 +163,9 @@ export const LInput = styled.button<{ hasLogo: boolean }>`
 export const PActions = styled.div`
 	margin: 20px 0 0 0;
 	display: flex;
-	justify-content: center;
+	justify-content: flex-end;
 	flex-wrap: wrap;
 	gap: 15px;
-	@media (max-width: ${STYLING.cutoffs.secondary}) {
-		margin: 80px 0 0 0;
-	}
 `;
 
 export const SAction = styled.div`

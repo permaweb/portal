@@ -46,19 +46,6 @@ export default function Portal() {
 			/>
 			<S.BodyWrapper>
 				<S.SectionWrapper>
-					<S.PostsSection className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<p>{language.posts}</p>
-							<Button
-								type={'alt3'}
-								label={language.postsLink}
-								handlePress={() => navigate(URLS.portalPosts(portalProvider.current.id))}
-							/>
-						</S.SectionHeader>
-						<S.SectionBody>
-							<PostList />
-						</S.SectionBody>
-					</S.PostsSection>
 					<S.SetupSection className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
 							<p>{language.setup}</p>
@@ -72,8 +59,6 @@ export default function Portal() {
 							<PortalSetup type={'header'} />
 						</S.SectionBody>
 					</S.SetupSection>
-				</S.SectionWrapper>
-				<S.SectionWrapper>
 					<S.DesignSection className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
 							<p>{language.design}</p>
@@ -87,6 +72,21 @@ export default function Portal() {
 							<PortalDesign />
 						</S.SectionBody>
 					</S.DesignSection>
+				</S.SectionWrapper>
+				<S.SectionWrapper>
+					<S.PostsSection className={'border-wrapper-alt2'}>
+						<S.SectionHeader>
+							<p>{language.posts}</p>
+							<Button
+								type={'alt3'}
+								label={language.postsLink}
+								handlePress={() => navigate(URLS.portalPosts(portalProvider.current.id))}
+							/>
+						</S.SectionHeader>
+						<S.SectionBody>
+							<PostList />
+						</S.SectionBody>
+					</S.PostsSection>
 					<S.UsersSection className={'border-wrapper-alt3'}>
 						<S.SectionHeader>
 							<p>{language.users}</p>

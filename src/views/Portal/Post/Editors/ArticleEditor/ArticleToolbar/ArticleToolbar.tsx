@@ -10,12 +10,14 @@ import { ARTICLE_BLOCKS, ASSETS, DOM, STYLING } from 'helpers/config';
 import { ArticleBlockEnum } from 'helpers/types';
 import { checkWindowCutoff, hideDocumentBody, showDocumentBody } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePortalProvider } from 'providers/PortalProvider';
 
 import { ArticleToolbarPost } from './ArticleToolbarPost';
 import * as S from './styles';
 import { IProps } from './types';
 
 export default function ArticleToolbar(props: IProps) {
+	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -378,7 +380,7 @@ export default function ArticleToolbar(props: IProps) {
 						value={props.postTitle}
 						onChange={(e: any) => props.setPostTitle(e.target.value)}
 						placeholder={language.untitledPost}
-						disabled={props.loading}
+						disabled={props.loading || !portalProvider.current?.id}
 					/>
 				</S.TitleWrapper>
 				<S.EndActions>

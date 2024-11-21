@@ -1,6 +1,20 @@
 import { getTxEndpoint } from './endpoints';
 import { ArticleBlockEnum } from './types';
 
+export const SOCIAL_LINK_ASSETS = {
+	dailyMotion: 'qO9Qi_WSCcZgqN-3D4eSApFyEHHSw6jZneGUGT8nLmA',
+	odysee: 'XRcs4SS78ELZ6wERYtc0Spb_wKOjwcbEzVtJdmD_VZA',
+	rumble: 'oRaYAiDVErIybil6EAbve1CGNjqK2geKWh4VgnW-7l8',
+	telegram: 'iLtB9cZW1twB8dY6xPf14HP8-fvjv2ZlMS_Wr61OqBM',
+	vk: 'LiUSQxbrRZfCsGa4fIRPrCKPA68YDupsXZNIkyDmxIg',
+	x: 'vG2CXPwOCYIyVryDWj3e3FXhsFZmgx1YagxWEXhBpb4',
+	facebook: '2znYL2CUA6KDjHY9xYrN8SuJ0EwziJ7__LN6uJBReRI',
+	linkedin: 'vZRaGjLoAJWXx3Vnvcx5UhCAgwuL6iQz6FyH5MDuCZE',
+	youtube: 'kdry-ZWvoQhcUP5ul3c3tqgNOBXWPsIIw5ssLI8_rSc',
+	patreon: '7Gqu0FSqLoD6wcBjgtB-kUZCK6fPv9Y7JFDok7e_x54',
+	rss: 'G-OvjLfhvtPwY5LAfEPf7b_EagZkmZ8eOGVTcjfaQxk',
+};
+
 export const ASSETS = {
 	add: getTxEndpoint('RLWnDhoB0Dd_X-sLnNy4w2S7ds3l9591HcHK8nc3YRw'),
 	alignBottom: getTxEndpoint('kx2grnSUx7D7Y96EJIjTy11WJB8I8rZl4T8x3IVK3wM'),

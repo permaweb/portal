@@ -128,6 +128,6 @@ export function isMac(): boolean {
 }
 
 export function validateUrl(url: string) {
-	const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+	const urlPattern = /^(https?:\/\/)?([\w\.-]+)\/?([\w\.\-@:%]*)$/;
 	return urlPattern.test(url);
 }

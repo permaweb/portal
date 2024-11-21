@@ -21,7 +21,7 @@ export default function TopicList(props: IProps) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [topicOptions, setTopicOptions] = React.useState<string[]>([]);
+	const [topicOptions, setTopicOptions] = React.useState<string[] | null>(null);
 	const [newTopic, setNewTopic] = React.useState<string>('');
 	const [topicLoading, setTopicLoading] = React.useState<boolean>(false);
 	const [topicResponse, setTopicResponse] = React.useState<NotificationType | null>(null);
@@ -63,7 +63,45 @@ export default function TopicList(props: IProps) {
 	};
 
 	const topicActionDisabled =
-		!arProvider.wallet || !portalProvider.current?.id || !newTopic || topicOptions.includes(newTopic) || topicLoading;
+		!arProvider.wallet ||
+		!portalProvider.current?.id ||
+		!newTopic ||
+		(topicOptions?.length && topicOptions.includes(newTopic)) ||
+		topicLoading;
+
+	function getTopics() {
+		if (!topicOptions) {
+			return (
+				<S.WrapperEmpty>
+					<p>{`${language.gettingTopics}...`}</p>
+				</S.WrapperEmpty>
+			);
+		} else if (topicOptions.length <= 0) {
+			return (
+				<S.WrapperEmpty>
+					<p>{language.noTopicsFound}</p>
+				</S.WrapperEmpty>
+			);
+		}
+
+		return (
+			<>
+				{topicOptions.map((topic: string) => {
+					const active = props.topics ? topicOptions?.length && topicOptions.includes(newTopic) : false;
+					return (
+						<Button
+							key={topic}
+							type={'alt3'}
+							label={topic}
+							handlePress={() => (active ? removeTopic(topic) : props.setTopics([...props.topics, topic]))}
+							active={active}
+							icon={active ? ASSETS.close : ASSETS.add}
+						/>
+					);
+				})}
+			</>
+		);
+	}
 
 	return (
 		<>
@@ -81,35 +119,13 @@ export default function TopicList(props: IProps) {
 					<FormField
 						value={newTopic}
 						onChange={(e: any) => setNewTopic(e.target.value)}
-						invalid={{ status: topicOptions.includes(newTopic), message: null }}
+						invalid={{ status: topicOptions?.length && topicOptions.includes(newTopic), message: null }}
 						disabled={topicLoading}
 						hideErrorMessage
 						sm
 					/>
 				</S.TopicsAction>
-				<S.TopicsBody>
-					{topicOptions?.length > 0 ? (
-						<>
-							{topicOptions.map((topic: string) => {
-								const active = props.topics ? props.topics.includes(topic) : false;
-								return (
-									<Button
-										key={topic}
-										type={'alt3'}
-										label={topic}
-										handlePress={() => (active ? removeTopic(topic) : props.setTopics([...props.topics, topic]))}
-										active={active}
-										icon={active ? ASSETS.close : ASSETS.add}
-									/>
-								);
-							})}
-						</>
-					) : (
-						<S.WrapperEmpty>
-							<p>{language.addTopic}</p>
-						</S.WrapperEmpty>
-					)}
-				</S.TopicsBody>
+				<S.TopicsBody>{getTopics()}</S.TopicsBody>
 			</S.Wrapper>
 			{topicResponse && (
 				<Notification

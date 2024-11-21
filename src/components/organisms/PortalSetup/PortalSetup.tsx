@@ -119,75 +119,91 @@ export default function PortalSetup(props: IProps) {
 		);
 	}
 
+	function linkSection() {
+		return (
+			<S.Section type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
+				<S.SectionHeader>
+					<p>{`${language.siteLinks}${
+						portalProvider.current?.links ? ` (${portalProvider.current.links.length})` : ''
+					}`}</p>
+					{props.type === 'header' && (
+						<IconButton
+							type={'primary'}
+							active={false}
+							src={ASSETS.write}
+							handlePress={() => setShowLinkAction(true)}
+							dimensions={{ wrapper: 23.5, icon: 13.5 }}
+							tooltip={language.editSiteLinks}
+							tooltipPosition={'bottom-right'}
+							noFocus
+						/>
+					)}
+				</S.SectionHeader>
+				{props.type === 'detail' && getLinkAction()}
+			</S.Section>
+		);
+	}
+
+	function categorySection() {
+		return (
+			<S.CategoriesSection type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
+				<S.CategoriesHeader>
+					<p>{`${language.siteCategories}${
+						portalProvider.current?.categories ? ` (${getTotalCategoryCount(portalProvider.current.categories)})` : ''
+					}`}</p>
+					{props.type === 'header' && (
+						<IconButton
+							type={'primary'}
+							active={false}
+							src={ASSETS.write}
+							handlePress={() => setShowCategoryAction(true)}
+							dimensions={{ wrapper: 23.5, icon: 13.5 }}
+							tooltip={language.editSiteCategories}
+							tooltipPosition={'bottom-right'}
+							noFocus
+						/>
+					)}
+				</S.CategoriesHeader>
+				{props.type === 'detail' && getCategoryAction()}
+			</S.CategoriesSection>
+		);
+	}
+
+	function topicSection() {
+		return (
+			<S.TopicsSection type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
+				<S.SectionHeader>
+					<p>{`${language.postTopics}${
+						portalProvider.current?.topics ? ` (${portalProvider.current.topics.length})` : ''
+					}`}</p>
+					{props.type === 'header' && (
+						<IconButton
+							type={'primary'}
+							active={false}
+							src={ASSETS.write}
+							handlePress={() => setShowTopicAction(true)}
+							dimensions={{ wrapper: 23.5, icon: 13.5 }}
+							tooltip={language.editPostTopics}
+							tooltipPosition={'bottom-right'}
+							noFocus
+						/>
+					)}
+				</S.SectionHeader>
+				{props.type === 'detail' && getTopicAction()}
+			</S.TopicsSection>
+		);
+	}
+
 	return (
 		<>
 			<S.Wrapper type={props.type}>
 				<S.SectionWrapper type={props.type}>
-					<S.Section type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<p>{`${language.siteLinks}${
-								portalProvider.current?.links ? ` (${portalProvider.current.links.length})` : ''
-							}`}</p>
-							{props.type === 'header' && (
-								<IconButton
-									type={'primary'}
-									active={false}
-									src={ASSETS.write}
-									handlePress={() => setShowLinkAction(true)}
-									dimensions={{ wrapper: 23.5, icon: 13.5 }}
-									tooltip={language.editSiteLinks}
-									tooltipPosition={'bottom-right'}
-									noFocus
-								/>
-							)}
-						</S.SectionHeader>
-						{props.type === 'detail' && getLinkAction()}
-					</S.Section>
-					<S.CategoriesSection type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
-						<S.CategoriesHeader>
-							<p>{`${language.siteCategories}${
-								portalProvider.current?.categories
-									? ` (${getTotalCategoryCount(portalProvider.current.categories)})`
-									: ''
-							}`}</p>
-							{props.type === 'header' && (
-								<IconButton
-									type={'primary'}
-									active={false}
-									src={ASSETS.write}
-									handlePress={() => setShowCategoryAction(true)}
-									dimensions={{ wrapper: 23.5, icon: 13.5 }}
-									tooltip={language.editSiteCategories}
-									tooltipPosition={'bottom-right'}
-									noFocus
-								/>
-							)}
-						</S.CategoriesHeader>
-						{props.type === 'detail' && getCategoryAction()}
-					</S.CategoriesSection>
+					{linkSection()}
+					{props.type === 'header' ? categorySection() : topicSection()}
 				</S.SectionWrapper>
 				{props.type === 'header' && <S.Divider />}
-				<S.SectionWrapper type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
-					<S.TopicsSection type={props.type}>
-						<S.SectionHeader>
-							<p>{`${language.postTopics}${
-								portalProvider.current?.topics ? ` (${portalProvider.current.topics.length})` : ''
-							}`}</p>
-							{props.type === 'header' && (
-								<IconButton
-									type={'primary'}
-									active={false}
-									src={ASSETS.write}
-									handlePress={() => setShowTopicAction(true)}
-									dimensions={{ wrapper: 23.5, icon: 13.5 }}
-									tooltip={language.editPostTopics}
-									tooltipPosition={'bottom-right'}
-									noFocus
-								/>
-							)}
-						</S.SectionHeader>
-						{props.type === 'detail' && getTopicAction()}
-					</S.TopicsSection>
+				<S.SectionWrapper type={props.type}>
+					{props.type === 'header' ? topicSection() : categorySection()}
 				</S.SectionWrapper>
 			</S.Wrapper>
 			{showCategoryAction && (
