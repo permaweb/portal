@@ -108,7 +108,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				}
 			} catch (e: any) {
 				console.error(e);
-				setErrorMessage(e.message ?? 'An error occurred while fetching the portal.');
+				setErrorMessage(e.message ?? 'An error occurred getting this portal.');
 			}
 		}
 	}

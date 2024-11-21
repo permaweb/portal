@@ -84,7 +84,7 @@ export const FileInputWrapper = styled.div`
 `;
 
 export const LInput = styled.button<{ hasLogo: boolean }>`
-	height: 135px;
+	height: 170px;
 	width: 100%;
 	position: relative;
 	background: ${(props) => props.theme.colors.container.primary.background};

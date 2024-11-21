@@ -195,6 +195,15 @@ export const ThemeSectionBody = styled.div`
 	gap: 20px;
 `;
 
+export const Indicator = styled.div<{ active: boolean }>`
+	height: 12.5px;
+	width: 12.5px;
+	border-radius: 50%;
+	background: ${(props) => (props.active ? props.theme.colors.indicator.active : 'transparent')};
+	border: 1px solid ${(props) => props.theme.colors.border.alt4};
+	transition: all 150ms;
+`;
+
 export const ThemeSectionBodyElement = styled.button`
 	width: 175px;
 
@@ -203,6 +212,12 @@ export const ThemeSectionBodyElement = styled.button`
 	gap: 10px;
 
 	border-radius: ${STYLING.dimensions.radius.alt3} !important;
+
+	&:hover {
+		${Indicator} {
+			background: ${(props) => props.theme.colors.indicator.active} !important;
+		}
+	}
 
 	div {
 		display: flex;
@@ -215,14 +230,6 @@ export const ThemeSectionBodyElement = styled.button`
 			font-family: ${(props) => props.theme.typography.family.primary} !important;
 		}
 	}
-`;
-
-export const Indicator = styled.div<{ active: boolean }>`
-	height: 12.5px;
-	width: 12.5px;
-	border-radius: 50%;
-	background: ${(props) => (props.active ? props.theme.colors.indicator.active : 'transparent')};
-	border: 1px solid ${(props) => props.theme.colors.border.alt4};
 `;
 
 export const Preview = styled.div<{ background: string; accent: string }>`
