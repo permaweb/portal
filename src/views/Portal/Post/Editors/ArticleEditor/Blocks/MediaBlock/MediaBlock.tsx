@@ -1,7 +1,7 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { aoSend, globalLog, resolveTransaction } from '@permaweb/libs';
+import { addToZone, globalLog, mapToProcessCase, resolveTransaction } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { ContentEditable } from 'components/atoms/ContentEditable';
@@ -99,14 +99,14 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 				try {
 					const tx = await resolveTransaction(mediaData.url);
 
-					// TODO: SDK Function
-					const mediaUpdateId = await aoSend({
-						processId: portalProvider.current.id,
-						wallet: arProvider.wallet,
-						action: 'Zone-Append',
-						tags: [{ name: 'Path', value: 'Uploads' }],
-						data: { Tx: tx, Type: 'Image', DateUploaded: Date.now().toString() },
-					});
+					const mediaUpdateId = await addToZone(
+						{
+							path: 'Uploads',
+							data: mapToProcessCase({ tx: tx, Type: props.type, dateUploaded: Date.now().toString() }),
+						},
+						portalProvider.current.id,
+						arProvider.wallet
+					);
 
 					globalLog(`Media update: ${mediaUpdateId}`);
 

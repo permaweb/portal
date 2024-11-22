@@ -102,7 +102,7 @@ export default function SiteColors() {
 	};
 
 	return (
-		<S.Wrapper className={'border-wrapper-alt3'}>
+		<S.Wrapper className={'border-wrapper-alt2'}>
 			<S.Header>
 				<p>Colors</p>
 			</S.Header>

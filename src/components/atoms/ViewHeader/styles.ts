@@ -1,7 +1,5 @@
 import styled from 'styled-components';
 
-import { STYLING } from 'helpers/config';
-
 export const HeaderWrapper = styled.div`
 	width: 100%;
 	display: flex;

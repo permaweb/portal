@@ -563,7 +563,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 	typography: {
 		family: {
 			primary: `'Open Sans', sans-serif`,
-			alt1: `'Ramaraja', serif`,
+			alt1: `'Crimson Pro', serif`,
 		},
 		size: {
 			xxxSmall: '12px',

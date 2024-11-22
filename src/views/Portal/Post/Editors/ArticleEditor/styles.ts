@@ -87,7 +87,7 @@ function getElementPadding(type: ArticleBlockEnum) {
 		case 'header-4':
 		case 'header-5':
 		case 'header-6':
-			return '12.5px 15px';
+			return '10px 15px';
 		default:
 			return '10px';
 	}
@@ -191,27 +191,26 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 	h4,
 	h5,
 	h6 {
-		font-weight: 600;
-		font-family: 'Merriweather', serif;
+		line-height: 1;
 	}
 
 	h1 {
-		font-size: clamp(26px, 2.3vw, 36px);
+		font-size: clamp(35.75px, 3.1625vw, 49.5px);
 	}
 	h2 {
-		font-size: clamp(22px, 2vw, 32px);
+		font-size: clamp(30.25px, 2.75vw, 44px);
 	}
 	h3 {
-		font-size: clamp(20px, 1.8vw, 28px);
+		font-size: clamp(27.5px, 2.475vw, 38.5px);
 	}
 	h4 {
-		font-size: clamp(18px, 1.6vw, 24px);
+		font-size: clamp(24.75px, 2.2vw, 33px);
 	}
 	h5 {
-		font-size: clamp(16px, 1.4vw, 20px);
+		font-size: clamp(22px, 1.925vw, 27.5px);
 	}
 	h6 {
-		font-size: clamp(14px, 1.2vw, 18px);
+		font-size: clamp(19.25px, 1.65vw, 24.75px);
 	}
 `;
 

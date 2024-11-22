@@ -14,7 +14,6 @@ import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
-// TODO: Topics config
 export default function Posts() {
 	const navigate = useNavigate();
 

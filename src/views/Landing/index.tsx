@@ -131,8 +131,7 @@ export default function Landing() {
 	return (
 		<S.Wrapper className={'fade-in'}>
 			<S.HeaderWrapper>
-				<h4>{language.portalsHeader}</h4>
-				{/* <p>{language.portalsSubheader}</p> */}
+				<h4>{`[${language.app}]`}</h4>
 			</S.HeaderWrapper>
 			<S.BodyWrapper>
 				<S.Section>{connection}</S.Section>

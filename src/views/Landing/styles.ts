@@ -17,7 +17,7 @@ export const Wrapper = styled.div`
 `;
 
 export const HeaderWrapper = styled.div`
-	max-width: 515px;
+	max-width: 450px;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -48,7 +48,7 @@ export const BodyWrapper = styled.div`
 
 export const Section = styled.div`
 	width: 100%;
-	max-width: 500px;
+	max-width: 450px;
 	display: flex;
 
 	@media (max-width: ${STYLING.cutoffs.tablet}) {
