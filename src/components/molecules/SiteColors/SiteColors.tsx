@@ -28,7 +28,7 @@ function Color(props: {
 					maxWidth={props.maxWidth}
 				/>
 				<S.ColorTooltip className={'info'}>
-					<span>{props.label}</span>
+					<span>{`${props.label} (${props.value})`}</span>
 				</S.ColorTooltip>
 			</S.ColorWrapper>
 			{showSelector && (

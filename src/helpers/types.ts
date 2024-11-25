@@ -14,6 +14,10 @@ export type PortalDetailType = {
 	domains?: string[];
 };
 
+export type PortalPermissionsType = {
+	base: boolean;
+};
+
 export enum ArticleBlockEnum {
 	Paragraph = 'paragraph',
 	Quote = 'quote',

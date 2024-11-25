@@ -223,7 +223,7 @@ export const GlobalStyle = createGlobalStyle`
     top: 0;
     left: 0;
     background: ${(props) => props.theme.colors.overlay.primary};
-    animation: ${open} ${transition2};
+		backdrop-filter: blur(3.5px);
   }
 
 	.app-loader {
@@ -287,6 +287,29 @@ export const View = styled.main<{ navigationOpen: boolean }>`
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		padding: 0 20px 20px 20px;
+	}
+`;
+
+export const CenteredWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: ${(props) => props.theme.colors.view.background};
+`;
+
+export const MessageWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 20px;
+	padding: 12.5px 30px;
+
+	p {
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		color: ${(props) => props.theme.colors.font.alt1};
 	}
 `;
 

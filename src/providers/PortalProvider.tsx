@@ -6,7 +6,7 @@ import { getAtomicAssets, getZone, mapFromProcessCase, ZoneAssetType } from '@pe
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/molecules/Panel';
 import { PortalManager } from 'components/organisms/PortalManager';
-import { PortalDetailType, PortalHeaderType } from 'helpers/types';
+import { PortalDetailType, PortalHeaderType, PortalPermissionsType } from 'helpers/types';
 
 import { useArweaveProvider } from './ArweaveProvider';
 import { useLanguageProvider } from './LanguageProvider';
@@ -14,6 +14,7 @@ import { useLanguageProvider } from './LanguageProvider';
 interface PortalContextState {
 	portals: PortalHeaderType[] | null;
 	current: PortalDetailType | null;
+	permissions: PortalPermissionsType | null;
 	showPortalManager: boolean;
 	setShowPortalManager: (toggle: boolean, useNew?: boolean) => void;
 	refreshCurrentPortal: () => void;
@@ -22,6 +23,7 @@ interface PortalContextState {
 const DEFAULT_CONTEXT = {
 	portals: null,
 	current: null,
+	permissions: null,
 	showPortalManager: false,
 	setShowPortalManager(_toggle: boolean) {},
 	refreshCurrentPortal() {},
@@ -41,8 +43,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
+
 	const [currentId, setCurrentId] = React.useState<string | null>(null);
 	const [current, setCurrent] = React.useState<PortalDetailType | null>(null);
+	const [permissions, setPermissions] = React.useState<PortalPermissionsType | null>(null);
+
 	const [refreshCurrentTrigger, setRefreshCurrentTrigger] = React.useState<boolean>(false);
 	const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
@@ -61,6 +66,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				  }))
 				: [];
 			setPortals(portalsList);
+		} else {
+			handleInitPermissionSet(false);
 		}
 	}, [arProvider.profile]);
 
@@ -72,7 +79,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					setCurrentId(currentPortal.id);
 					setCurrent(null);
 				}
+			} else {
+				setPermissions(null);
 			}
+		} else {
+			setPermissions(null);
 		}
 	}, [location.pathname, portals, currentId]);
 
@@ -116,7 +127,10 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		(async function () {
 			try {
-				if (currentId) setCurrent(await fetchPortal());
+				if (currentId) {
+					handleInitPermissionSet(true); // TODO: Fetch permissions
+					setCurrent(await fetchPortal());
+				}
 			} catch (e: any) {
 				console.error(e);
 				setErrorMessage(e.message ?? 'An error occurred getting this portal');
@@ -150,6 +164,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [refreshCurrentTrigger]);
 
+	function handleInitPermissionSet(base: boolean) {
+		const updatedPermissions = permissions ? { ...permissions, base: base } : { base: base };
+		setPermissions(updatedPermissions);
+	}
+
 	function handleShowPortalManager(toggle: boolean, useNew?: boolean) {
 		setShowPortalManager(toggle);
 		setCreateNewPortal(useNew ?? false);
@@ -161,6 +180,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				value={{
 					portals,
 					current,
+					permissions,
 					showPortalManager,
 					setShowPortalManager: handleShowPortalManager,
 					refreshCurrentPortal,
