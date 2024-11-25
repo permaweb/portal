@@ -44,7 +44,6 @@ export default function App() {
 
 	const { settings, updateSettings } = useSettingsProvider();
 
-	// TODO: Portal permissions
 	function getRoute(path: string, element: React.ReactNode) {
 		const baseRoutes = [URLS.base, URLS.docs, `URLS.docs/*`, `${URLS.docs}:active/*`, URLS.notFound, '*'];
 

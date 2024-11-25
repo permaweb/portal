@@ -56,6 +56,10 @@ export const SectionHeader = styled.div`
 
 export const CategoriesHeader = styled(SectionHeader)``;
 
+export const LinksHeader = styled(SectionHeader)<{ type: ViewLayoutType }>`
+	margin: ${(props) => (props.type === 'header' ? '0' : '0 0 20px 0')};
+`;
+
 export const SectionBody = styled.div`
 	margin: 15px 0 0 0;
 `;
@@ -116,7 +120,7 @@ export const CategoryModalWrapper = styled.div`
 `;
 
 export const CategoryActionsWrapper = styled(BodyActionsWrapper)`
-	margin: -20px 0 0 auto;
+	margin: 10px 0 0 auto;
 `;
 
 export const TopicModalWrapper = styled.div`

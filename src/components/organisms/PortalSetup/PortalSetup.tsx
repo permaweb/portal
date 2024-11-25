@@ -1,15 +1,17 @@
 import React from 'react';
 
-import { mapToProcessCase } from '@permaweb/libs';
+import { globalLog, mapToProcessCase, updateZone } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
+import { Notification } from 'components/atoms/Notification';
 import { CategoryList } from 'components/molecules/CategoryList';
 import { LinkList } from 'components/molecules/LinkList';
 import { Modal } from 'components/molecules/Modal';
 import { TopicList } from 'components/molecules/TopicList';
 import { ASSETS } from 'helpers/config';
-import { PortalCategoryType } from 'helpers/types';
+import { NotificationType, PortalCategoryType, PortalTopicType } from 'helpers/types';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
@@ -20,8 +22,8 @@ import { IProps } from './types';
 // TODO: Category edit / delete
 // TODO: Link edit / delete
 export default function PortalSetup(props: IProps) {
+	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -31,12 +33,37 @@ export default function PortalSetup(props: IProps) {
 	const [showTopicAction, setShowTopicAction] = React.useState<boolean>(false);
 	const [showLinkAction, setShowLinkAction] = React.useState<boolean>(false);
 
+	const [topicLoading, setTopicLoading] = React.useState<boolean>(false);
+	const [topicResponse, setTopicResponse] = React.useState<NotificationType | null>(null);
+
 	function handleDeleteCategories() {
 		console.log(mapToProcessCase(selectedCategories));
 	}
 
-	function handleDeleteTopics() {
-		console.log(mapToProcessCase(selectedTopics));
+	async function handleDeleteTopics() {
+		if (arProvider.wallet && portalProvider.current?.topics) {
+			setTopicLoading(true);
+			try {
+				const currentTopicOptions = portalProvider.current.topics.map((topic: PortalTopicType) => topic.value);
+				const updatedTopicOptions = currentTopicOptions.filter((topic: string) => !selectedTopics.includes(topic));
+				const topicUpdateId = await updateZone(
+					{ Topics: updatedTopicOptions.map((topic: string) => ({ Value: topic })) },
+					portalProvider.current.id,
+					arProvider.wallet
+				);
+
+				setSelectedTopics([]);
+
+				portalProvider.refreshCurrentPortal();
+
+				globalLog(`Topic update: ${topicUpdateId}`);
+
+				setTopicResponse({ status: 'success', message: `${language.topicsUpdated}!` });
+			} catch (e: any) {
+				setTopicResponse({ status: 'warning', message: e.message ?? 'Error updating topics' });
+			}
+			setTopicLoading(false);
+		}
 	}
 
 	function getTotalCategoryCount(categories: PortalCategoryType[]) {
@@ -78,6 +105,7 @@ export default function PortalSetup(props: IProps) {
 						disabled={!selectedCategories?.length}
 						icon={ASSETS.delete}
 						iconLeftAlign
+						warning
 					/>
 				</S.CategoryActionsWrapper>
 			</S.BodyWrapper>
@@ -101,9 +129,11 @@ export default function PortalSetup(props: IProps) {
 						type={'alt3'}
 						label={language.delete}
 						handlePress={() => handleDeleteTopics()}
-						disabled={!selectedTopics?.length}
+						disabled={!selectedTopics?.length || topicLoading}
+						loading={topicLoading}
 						icon={ASSETS.delete}
 						iconLeftAlign
+						warning
 					/>
 				</S.BodyActionsWrapper>
 			</S.TopicsBodyWrapper>
@@ -121,7 +151,7 @@ export default function PortalSetup(props: IProps) {
 	function linkSection() {
 		return (
 			<S.Section type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
-				<S.SectionHeader>
+				<S.LinksHeader type={props.type}>
 					<p>{`${language.siteLinks}${
 						portalProvider.current?.links ? ` (${portalProvider.current.links.length})` : ''
 					}`}</p>
@@ -137,7 +167,7 @@ export default function PortalSetup(props: IProps) {
 							noFocus
 						/>
 					)}
-				</S.SectionHeader>
+				</S.LinksHeader>
 				{props.type === 'detail' && getLinkAction()}
 			</S.Section>
 		);
@@ -219,6 +249,13 @@ export default function PortalSetup(props: IProps) {
 				<Modal header={language.editSiteLinks} handleClose={() => setShowLinkAction(false)} allowOverflow>
 					<S.LinkModalWrapper>{getLinkAction()}</S.LinkModalWrapper>
 				</Modal>
+			)}
+			{topicResponse && (
+				<Notification
+					type={topicResponse.status}
+					message={topicResponse.message}
+					callback={() => setTopicResponse(null)}
+				/>
 			)}
 		</>
 	);

@@ -58,13 +58,23 @@ export default function Button(props: IProps) {
 		return (
 			<>
 				{props.icon && props.iconLeftAlign && (
-					<StyledIcon disabled={props.disabled} active={props.active} leftAlign={props.iconLeftAlign}>
+					<StyledIcon
+						warning={props.warning || false}
+						disabled={props.disabled}
+						active={props.active}
+						leftAlign={props.iconLeftAlign}
+					>
 						<ReactSVG src={props.icon} />
 					</StyledIcon>
 				)}
 				<span>{props.loading ? `${language.loading}...` : props.label}</span>
 				{props.icon && !props.iconLeftAlign && (
-					<StyledIcon disabled={props.disabled} active={props.active} leftAlign={props.iconLeftAlign}>
+					<StyledIcon
+						warning={props.warning || false}
+						disabled={props.disabled}
+						active={props.active}
+						leftAlign={props.iconLeftAlign}
+					>
 						<ReactSVG src={props.icon} />
 					</StyledIcon>
 				)}
@@ -92,6 +102,7 @@ export default function Button(props: IProps) {
 				fullWidth={props.fullWidth}
 				width={props.width}
 				height={props.height}
+				warning={props.warning || false}
 				className={props.className || ''}
 			>
 				{getLabel()}

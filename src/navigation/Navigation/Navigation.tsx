@@ -80,36 +80,31 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 	const navigationToggle = React.useMemo(() => {
 		return (
-			<IconButton
-				type={'primary'}
-				src={ASSETS.navigation}
-				handlePress={props.toggle}
-				dimensions={{
-					wrapper: 36.5,
-					icon: 23.5,
-				}}
-				tooltip={props.open ? language.sidebarClose : language.sidebarOpen}
-				tooltipPosition={props.open ? 'right' : 'bottom-left'}
-			/>
+			<S.ToggleWrapper>
+				<IconButton
+					type={'primary'}
+					src={ASSETS.navigation}
+					handlePress={props.toggle}
+					dimensions={{
+						wrapper: 36.5,
+						icon: 23.5,
+					}}
+					tooltip={props.open ? language.sidebarClose : language.sidebarOpen}
+					tooltipPosition={'bottom-left'}
+				/>
+				{/* {(desktop || (!desktop && props.open)) && (
+					<S.Logo onClick={() => navigate(URLS.portalBase(portalProvider.current?.id ?? ''))}>
+						{`[${language.app}]`}
+					</S.Logo>
+				)} */}
+			</S.ToggleWrapper>
 		);
-	}, [props.open]);
+	}, [props.open, portalProvider.current?.id, desktop]);
 
 	const panel = React.useMemo(() => {
 		const content = (
 			<>
-				<S.PanelHeader>
-					<IconButton
-						type={'primary'}
-						src={ASSETS.navigation}
-						handlePress={props.toggle}
-						dimensions={{
-							wrapper: 36.5,
-							icon: 23.5,
-						}}
-						tooltip={props.open ? language.sidebarClose : language.sidebarOpen}
-						tooltipPosition={props.open ? 'right' : 'bottom-left'}
-					/>
-				</S.PanelHeader>
+				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
 				<>
 					<S.PanelContent open={props.open} className={'fade-in scroll-wrapper'}>
 						{paths.map((element: { path: string; label: string; icon: string; target?: '_blank' }, index: number) => {

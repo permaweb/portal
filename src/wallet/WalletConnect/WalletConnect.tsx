@@ -163,11 +163,15 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 							<S.DBodyWrapper>
 								<li onClick={() => arProvider.setShowProfileManager(true)}>
 									<ReactSVG src={ASSETS.write} />
-									{language.editProfile}
+									{language.profile}
+								</li>
+								<li onClick={() => setShowThemeSelector(true)}>
+									<ReactSVG src={ASSETS.language} />
+									{language.language}
 								</li>
 								<li onClick={() => setShowThemeSelector(true)}>
 									<ReactSVG src={ASSETS.design} />
-									{language.chooseAppAppearance}
+									{language.appearance}
 								</li>
 							</S.DBodyWrapper>
 							<S.DFooterWrapper>

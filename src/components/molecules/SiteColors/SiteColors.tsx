@@ -2,6 +2,7 @@ import React from 'react';
 import { HexColorInput, HexColorPicker } from 'react-colorful';
 
 import { Button } from 'components/atoms/Button';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import { Modal } from '../Modal';
 
@@ -15,6 +16,9 @@ function Color(props: {
 	width?: number;
 	maxWidth?: boolean;
 }) {
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
+
 	const [showSelector, setShowSelector] = React.useState<boolean>(false);
 
 	return (
@@ -32,7 +36,7 @@ function Color(props: {
 				</S.ColorTooltip>
 			</S.ColorWrapper>
 			{showSelector && (
-				<Modal header={'Color picker'} handleClose={() => setShowSelector(false)}>
+				<Modal header={language.colorPicker} handleClose={() => setShowSelector(false)}>
 					<S.SelectorWrapper>
 						<S.SelectorHeader>
 							<p>{props.label}</p>
@@ -43,7 +47,7 @@ function Color(props: {
 						</S.SelectorFlexWrapper>
 						<S.SelectorActions>
 							<HexColorInput color={props.value} onChange={props.onChange} />
-							<Button type={'primary'} label={'Save'} handlePress={() => setShowSelector(false)} />
+							<Button type={'primary'} label={language.save} handlePress={() => setShowSelector(false)} />
 						</S.SelectorActions>
 					</S.SelectorWrapper>
 				</Modal>

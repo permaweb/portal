@@ -6,14 +6,12 @@ import { ViewLayoutType } from 'helpers/types';
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 5px;
-	margin: -5px 0 0 0;
+	gap: 10px;
 	padding: 0 0 5px 0;
 `;
 
 export const LinksAction = styled.div`
 	position: relative;
-	margin: 25px 0 0 0;
 `;
 
 export const LinkDetailsWrapper = styled.div`
@@ -187,7 +185,7 @@ export const LinksBody = styled.div<{ type: ViewLayoutType }>`
 	flex-wrap: wrap;
 	gap: 15px 25px;
 	padding: 15px 15px 10px 15px;
-	margin: ${(props) => (props.type === 'header' ? '5px 0 0 0' : '20px 0 0 0')};
+	margin: 15px 0 0 0;
 `;
 
 export const LinkTooltip = styled.div`

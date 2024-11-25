@@ -157,9 +157,6 @@ export default function LinkList(props: IProps) {
 	return (
 		<>
 			<S.Wrapper>
-				<S.LinksBody type={props.type} className={'border-wrapper-alt3'}>
-					{getLinks()}
-				</S.LinksBody>
 				<S.LinksAction>
 					<S.LinksActionHeader>
 						<p>{language.addLink}</p>
@@ -240,6 +237,9 @@ export default function LinkList(props: IProps) {
 						/>
 					</S.LinksActionFlex>
 				</S.LinksAction>
+				<S.LinksBody type={props.type} className={'border-wrapper-alt3'}>
+					{getLinks()}
+				</S.LinksBody>
 			</S.Wrapper>
 			{linkResponse && (
 				<Notification

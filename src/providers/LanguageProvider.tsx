@@ -2,7 +2,7 @@ import React from 'react';
 
 import { language } from 'helpers/language';
 
-type LanguageType = 'en' | 'sp';
+type LanguageType = 'en' | 'fr';
 
 interface LanguageContextState {
 	current: LanguageType;

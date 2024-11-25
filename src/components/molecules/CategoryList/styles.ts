@@ -102,21 +102,12 @@ export const CategoriesBody = styled.div`
 	margin: 10px 0 0 0;
 `;
 
+export const CategoryOptionsWrapper = styled.div``;
+
 export const CategoriesList = styled.ul``;
 
 export const CategoryOption = styled.li<{ level: number }>`
-	display: flex;
-	align-items: center;
-	gap: 7.5px;
-	padding: ${(props) => `0 10px 0 ${(props.level * 10).toString()}px`} !important;
-	margin: 0 0 12.5px 0;
-
-	span {
-		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
-		font-family: ${(props) => props.theme.typography.family.primary} !important;
-	}
+	margin: ${(props) => `0 10px 12.5px ${(props.level * 15).toString()}px`} !important;
 `;
 
 export const WrapperEmpty = styled.div`

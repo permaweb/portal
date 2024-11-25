@@ -31,7 +31,7 @@ export default function TopicList(props: IProps) {
 			if (portalProvider.current.topics)
 				setTopicOptions(portalProvider.current.topics.map((topic: PortalTopicType) => topic.value));
 		}
-	}, [portalProvider.current?.id]);
+	}, [portalProvider.current]);
 
 	const addTopic = async () => {
 		if (newTopic && !props.topics.includes(newTopic) && portalProvider.current?.id && arProvider.wallet) {
@@ -44,6 +44,8 @@ export default function TopicList(props: IProps) {
 					portalProvider.current.id,
 					arProvider.wallet
 				);
+
+				portalProvider.refreshCurrentPortal();
 
 				globalLog(`Topic update: ${topicUpdateId}`);
 

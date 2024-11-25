@@ -13,7 +13,6 @@ import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
-// TODO: Portal auth
 export default function Portal() {
 	const navigate = useNavigate();
 

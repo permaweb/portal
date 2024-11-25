@@ -223,7 +223,6 @@ export const GlobalStyle = createGlobalStyle`
     top: 0;
     left: 0;
     background: ${(props) => props.theme.colors.overlay.primary};
-		backdrop-filter: blur(3.5px);
   }
 
 	.app-loader {
@@ -276,7 +275,6 @@ export const App = styled.div`
 
 export const View = styled.main<{ navigationOpen: boolean }>`
 	min-height: calc(100vh - ${STYLING.dimensions.nav.height} - 35px);
-	max-width: ${STYLING.cutoffs.max};
 	position: relative;
 	top: ${STYLING.dimensions.nav.height};
 	padding: 0 20px 20px ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 30px)` : '30px')};

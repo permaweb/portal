@@ -14,6 +14,30 @@ export type PortalDetailType = {
 	domains?: string[];
 };
 
+// TODO
+export type PortalUserType = {
+	username: string;
+	displayName: string;
+	role: PortalUserRoleType;
+};
+
+export type PortalTopicType = { value: string };
+
+export type PortalLinkType = {
+	title: string;
+	url: string;
+	icon?: string;
+};
+
+export type PortalUserRoleType = 'Admin' | 'Contributor';
+
+export type PortalCategoryType = {
+	id: string;
+	name: string;
+	parent?: string;
+	children?: PortalCategoryType[];
+};
+
 export type PortalPermissionsType = {
 	base: boolean;
 };
@@ -48,30 +72,6 @@ export type RegistryProfileType = {
 	avatar: string | null;
 	username: string;
 	bio?: string;
-};
-
-// TODO
-export type PortalUserType = {
-	username: string;
-	displayName: string;
-	role: PortalUserRoleType;
-};
-
-export type PortalTopicType = { value: string };
-
-export type PortalLinkType = {
-	title: string;
-	url: string;
-	icon?: string;
-};
-
-export type PortalUserRoleType = 'Admin' | 'Contributor';
-
-export type PortalCategoryType = {
-	id: string;
-	name: string;
-	parent?: string;
-	children?: PortalCategoryType[];
 };
 
 export type TagType = { name: string; value: string };

@@ -37,17 +37,28 @@ export const PanelHeader = styled.div`
 	width: 100%;
 	display: flex;
 	align-items: center;
-	gap: 40px;
 	padding: 0 15px;
 `;
 
+export const ToggleWrapper = styled.div`
+	height: ${STYLING.dimensions.nav.height};
+	display: flex;
+	align-items: center;
+	gap: 7.5px;
+`;
+
 export const Logo = styled.div`
-	color: ${(props) => props.theme.colors.font.alt1};
+	color: ${(props) => props.theme.colors.font.primary};
 	font-family: ${(props) => props.theme.typography.family.alt1};
-	font-size: ${(props) => props.theme.typography.size.xLg};
-	font-size: 20px;
-	font-weight: ${(props) => props.theme.typography.weight.regular};
-	font-weight: 500;
+	font-size: ${(props) => props.theme.typography.size.lg};
+	font-weight: ${(props) => props.theme.typography.weight.xBold};
+	margin: 0 0 1.5px 0;
+	transition: all 100ms;
+
+	&:hover {
+		cursor: pointer;
+		color: ${(props) => props.theme.colors.font.alt1};
+	}
 `;
 
 export const PanelContent = styled.div<{ open: boolean }>`

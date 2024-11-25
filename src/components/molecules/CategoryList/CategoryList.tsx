@@ -3,7 +3,6 @@ import React from 'react';
 import { globalLog, mapToProcessCase, updateZone } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
-import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
 import { Notification } from 'components/atoms/Notification';
 import { ASSETS } from 'helpers/config';
@@ -33,7 +32,7 @@ export default function CategoryList(props: IProps) {
 		if (portalProvider.current?.id) {
 			if (portalProvider.current.categories) setCategoryOptions(portalProvider.current.categories);
 		}
-	}, [portalProvider.current?.id]);
+	}, [portalProvider.current]);
 
 	const addCategory = async () => {
 		if (newCategoryName && portalProvider.current?.id && arProvider.wallet) {
@@ -117,21 +116,25 @@ export default function CategoryList(props: IProps) {
 
 	const CategoryOptions = ({ categories, level = 0 }: { categories: PortalCategoryType[]; level?: number }) => (
 		<S.CategoriesList>
-			{categories.map((category) => (
-				<React.Fragment key={category.id}>
-					<S.CategoryOption level={level}>
-						<Checkbox
-							checked={props.categories?.find((c: PortalCategoryType) => category.id === c.id) !== undefined}
-							handleSelect={() => handleSelectCategory(category.id)}
-							disabled={categoryLoading}
-						/>
-						<span>{category.name}</span>
-					</S.CategoryOption>
-					{category.children && category.children.length > 0 && (
-						<CategoryOptions categories={category.children} level={level + 1} />
-					)}
-				</React.Fragment>
-			))}
+			{categories.map((category) => {
+				const active = props.categories?.find((c: PortalCategoryType) => category.id === c.id) !== undefined;
+				return (
+					<React.Fragment key={category.id}>
+						<S.CategoryOption level={level}>
+							<Button
+								type={'alt3'}
+								label={category.name}
+								handlePress={() => handleSelectCategory(category.id)}
+								active={active}
+								icon={active ? ASSETS.close : ASSETS.add}
+							/>
+						</S.CategoryOption>
+						{category.children && category.children.length > 0 && (
+							<CategoryOptions categories={category.children} level={level + 1} />
+						)}
+					</React.Fragment>
+				);
+			})}
 		</S.CategoriesList>
 	);
 
@@ -186,7 +189,11 @@ export default function CategoryList(props: IProps) {
 			);
 		}
 
-		return <CategoryOptions categories={categoryOptions} />;
+		return (
+			<S.CategoryOptionsWrapper>
+				<CategoryOptions categories={categoryOptions} />
+			</S.CategoryOptionsWrapper>
+		);
 	}
 
 	return (

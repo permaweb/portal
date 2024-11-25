@@ -27,14 +27,9 @@ export const ToolbarWrapper = styled.div`
 export const EditorWrapper = styled.div<{ panelOpen: boolean }>`
 	padding: 0 ${(props) => (props.panelOpen ? `350px` : '0')} 0 0;
 	transition: padding-right ${transition2};
-	transition: none;
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {
 		padding: 0;
-	}
-
-	@media (min-width: ${STYLING.cutoffs.max}) {
-		transition: none;
 	}
 `;
 
