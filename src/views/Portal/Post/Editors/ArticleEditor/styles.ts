@@ -87,7 +87,7 @@ function getElementPadding(type: ArticleBlockEnum) {
 		case 'header-4':
 		case 'header-5':
 		case 'header-6':
-			return '10px 15px';
+			return '12.5px 15px';
 		default:
 			return '10px';
 	}
@@ -129,7 +129,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 	cursor: ${(props) => getElementCursor(props.type)};
 
 	p {
-		font-size: 16px;
+		font-size: 15px;
 	}
 
 	blockquote {
@@ -211,6 +211,12 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 	}
 	h6 {
 		font-size: clamp(19.25px, 1.65vw, 24.75px);
+	}
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		p {
+			font-size: 16px;
+		}
 	}
 `;
 

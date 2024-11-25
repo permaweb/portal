@@ -175,9 +175,10 @@ export default function LinkList(props: IProps) {
 								{showPrefills && (
 									<S.LinkPrefillsDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
 										<S.LinkPrefillOptions>
-											{prefills.map((prefill: { title: string; icon: string }) => {
+											{prefills.map((prefill: { title: string; icon: string }, index: number) => {
 												return (
 													<S.LinkPrefillOption
+														key={index}
 														onClick={() => {
 															setNewLinkTitle(prefill.title);
 															setNewLinkIcon(prefill.icon);

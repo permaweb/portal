@@ -47,8 +47,9 @@ export default function TopicList(props: IProps) {
 
 				globalLog(`Topic update: ${topicUpdateId}`);
 
+				if (props.selectOnAdd) props.setTopics([...props.topics, newTopic]);
+
 				setTopicOptions(updatedTopicOptions);
-				props.setTopics([...props.topics, newTopic]);
 				setTopicResponse({ status: 'success', message: `${language.topicAdded}!` });
 				setNewTopic('');
 			} catch (e: any) {
@@ -87,7 +88,8 @@ export default function TopicList(props: IProps) {
 		return (
 			<>
 				{topicOptions.map((topic: string) => {
-					const active = props.topics ? topicOptions?.length && topicOptions.includes(newTopic) : false;
+					const active = props.topics?.includes(topic);
+
 					return (
 						<Button
 							key={topic}

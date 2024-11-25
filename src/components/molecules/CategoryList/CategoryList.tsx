@@ -90,7 +90,8 @@ export default function CategoryList(props: IProps) {
 
 				globalLog(`Category update: ${categoryUpdateId}`);
 
-				props.setCategories([...props.categories, newCategory]);
+				if (props.selectOnAdd) props.setCategories([...props.categories, newCategory]);
+
 				setCategoryOptions(updatedCategories);
 				setCategoryResponse({ status: 'success', message: `${language.categoryAdded}!` });
 				setNewCategoryName('');

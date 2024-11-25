@@ -135,6 +135,7 @@ export const LinkPrefillsDropdown = styled.div`
 	top: 32.5px;
 	right: 0;
 	background: ${(props) => props.theme.colors.container.alt1.background} !important;
+	box-shadow: none !important;
 	border-radius: ${STYLING.dimensions.radius.alt2} !important;
 `;
 

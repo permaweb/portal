@@ -16,7 +16,7 @@ export default function ArticleToolbarPost(props: IProps) {
 					<p>{language.categories}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
-					<CategoryList categories={props.categories} setCategories={props.setCategories} />
+					<CategoryList categories={props.categories} setCategories={props.setCategories} selectOnAdd />
 				</S.SectionBody>
 			</S.Section>
 			<S.TopicsSection>
@@ -24,7 +24,7 @@ export default function ArticleToolbarPost(props: IProps) {
 					<p>{language.topics}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
-					<TopicList topics={props.topics} setTopics={props.setTopics} />
+					<TopicList topics={props.topics} setTopics={props.setTopics} selectOnAdd />
 				</S.SectionBody>
 			</S.TopicsSection>
 		</S.Wrapper>

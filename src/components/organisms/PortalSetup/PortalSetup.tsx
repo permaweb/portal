@@ -16,10 +16,9 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import * as S from './styles';
 import { IProps } from './types';
 
-// TODO: Topic add / edit / save / delete
+// TODO: Topic edit / delete
 // TODO: Category edit / delete
-// TODO: Dont select categories / topics on add
-// TODO: Links
+// TODO: Link edit / delete
 export default function PortalSetup(props: IProps) {
 	const portalProvider = usePortalProvider();
 
@@ -217,7 +216,7 @@ export default function PortalSetup(props: IProps) {
 				</Modal>
 			)}
 			{showLinkAction && (
-				<Modal header={language.editSiteLinks} handleClose={() => setShowLinkAction(false)}>
+				<Modal header={language.editSiteLinks} handleClose={() => setShowLinkAction(false)} allowOverflow>
 					<S.LinkModalWrapper>{getLinkAction()}</S.LinkModalWrapper>
 				</Modal>
 			)}

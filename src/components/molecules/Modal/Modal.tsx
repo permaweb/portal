@@ -63,7 +63,7 @@ export default function Modal(props: IProps) {
 							)}
 						</S.Header>
 					)}
-					<S.Body className={'scroll-wrapper'}>{props.children}</S.Body>
+					<S.Body className={props.allowOverflow ? '' : 'scroll-wrapper'}>{props.children}</S.Body>
 				</S.Container>
 			</>
 		);
