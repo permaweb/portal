@@ -66,7 +66,7 @@ export default function TopicList(props: IProps) {
 		}
 	};
 
-	async function deleteTopics() {
+	const deleteTopics = async () => {
 		if (arProvider.wallet && portalProvider.current?.topics && props.topics?.length) {
 			setTopicLoading(true);
 			try {
@@ -91,7 +91,7 @@ export default function TopicList(props: IProps) {
 			}
 			setTopicLoading(false);
 		}
-	}
+	};
 
 	const removeTopic = (topic: string) => {
 		props.setTopics(props.topics.filter((t) => t !== topic));
@@ -182,20 +182,20 @@ export default function TopicList(props: IProps) {
 			</S.Wrapper>
 			{showDeleteConfirmation && (
 				<Modal header={language.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
-					<S.TopicModalWrapper>
-						<S.TopicModalBodyWrapper>
+					<S.ModalWrapper>
+						<S.ModalBodyWrapper>
 							<p>{language.topicDeleteConfirmationInfo}</p>
-							<S.TopicModalBodyElements>
+							<S.ModalBodyElements>
 								{props.topics.map((topic: string, index: number) => {
 									return (
-										<S.TopicModalBodyElement key={index}>
+										<S.ModalBodyElement key={index}>
 											<span>{`· ${topic}`}</span>
-										</S.TopicModalBodyElement>
+										</S.ModalBodyElement>
 									);
 								})}
-							</S.TopicModalBodyElements>
-						</S.TopicModalBodyWrapper>
-						<S.TopicModalActionsWrapper>
+							</S.ModalBodyElements>
+						</S.ModalBodyWrapper>
+						<S.ModalActionsWrapper>
 							<Button
 								type={'primary'}
 								label={language.cancel}
@@ -212,8 +212,8 @@ export default function TopicList(props: IProps) {
 								iconLeftAlign
 								warning
 							/>
-						</S.TopicModalActionsWrapper>
-					</S.TopicModalWrapper>
+						</S.ModalActionsWrapper>
+					</S.ModalWrapper>
 				</Modal>
 			)}
 			{topicResponse && (

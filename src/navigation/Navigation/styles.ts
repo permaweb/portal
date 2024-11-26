@@ -70,7 +70,7 @@ export const PanelContent = styled.div<{ open: boolean }>`
 		display: flex;
 		align-items: center;
 		cursor: pointer;
-		color: ${(props) => props.theme.colors.font.alt1};
+		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
@@ -82,8 +82,8 @@ export const PanelContent = styled.div<{ open: boolean }>`
 			height: 17.5px;
 			width: 17.5px;
 			margin: 6.5px 12.5px 0 0;
-			color: ${(props) => props.theme.colors.font.alt1};
-			fill: ${(props) => props.theme.colors.font.alt1};
+			color: ${(props) => props.theme.colors.font.primary};
+			fill: ${(props) => props.theme.colors.font.primary};
 		}
 		&:hover {
 			color: ${(props) => props.theme.colors.font.primary};
@@ -107,7 +107,7 @@ export const PanelFooter = styled.div<{ open: boolean }>`
 		display: flex;
 		align-items: center;
 		cursor: pointer;
-		color: ${(props) => props.theme.colors.font.alt1};
+		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
@@ -119,8 +119,8 @@ export const PanelFooter = styled.div<{ open: boolean }>`
 			height: 17.5px;
 			width: 17.5px;
 			margin: 6.5px 12.5px 0 0;
-			color: ${(props) => props.theme.colors.font.alt1};
-			fill: ${(props) => props.theme.colors.font.alt1};
+			color: ${(props) => props.theme.colors.font.primary};
+			fill: ${(props) => props.theme.colors.font.primary};
 		}
 		&:hover {
 			color: ${(props) => props.theme.colors.font.primary};

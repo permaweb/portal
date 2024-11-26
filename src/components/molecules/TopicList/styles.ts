@@ -45,14 +45,14 @@ export const TopicsFooter = styled.div`
 	gap: 15px;
 `;
 
-export const TopicModalWrapper = styled.div`
+export const ModalWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
 	padding: 0 20px 20px 20px !important;
 `;
 
-export const TopicModalBodyWrapper = styled.div`
+export const ModalBodyWrapper = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
@@ -61,14 +61,14 @@ export const TopicModalBodyWrapper = styled.div`
 	}
 `;
 
-export const TopicModalBodyElements = styled.div`
+export const ModalBodyElements = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 1.5px;
 	margin: 15px 0 0 0;
 `;
 
-export const TopicModalBodyElement = styled.div`
+export const ModalBodyElement = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
@@ -78,7 +78,7 @@ export const TopicModalBodyElement = styled.div`
 	}
 `;
 
-export const TopicModalActionsWrapper = styled.div`
+export const ModalActionsWrapper = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;

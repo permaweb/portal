@@ -105,7 +105,7 @@ export const ParentCategoryOption = styled.button<{ level: number }>`
 `;
 
 export const CategoriesBody = styled.div`
-	margin: 10px 0 0 0;
+	margin: 0 0 -12.5px 0;
 `;
 
 export const CategoryOptionsWrapper = styled.div``;
@@ -126,4 +126,52 @@ export const WrapperEmpty = styled.div`
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
+`;
+
+export const CategoriesFooter = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 15px;
+`;
+
+export const ModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 0 20px 20px 20px !important;
+`;
+
+export const ModalBodyWrapper = styled.div`
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+`;
+
+export const ModalBodyElements = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 1.5px;
+	margin: 15px 0 0 0;
+`;
+
+export const ModalBodyElement = styled.div`
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
+`;
+
+export const ModalActionsWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 15px;
 `;

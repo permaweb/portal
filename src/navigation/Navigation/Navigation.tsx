@@ -90,7 +90,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						icon: 23.5,
 					}}
 					tooltip={props.open ? language.sidebarClose : language.sidebarOpen}
-					tooltipPosition={'bottom-left'}
+					tooltipPosition={props.open ? 'right' : 'bottom-left'}
 				/>
 				{/* {(desktop || (!desktop && props.open)) && (
 					<S.Logo onClick={() => navigate(URLS.portalBase(portalProvider.current?.id ?? ''))}>

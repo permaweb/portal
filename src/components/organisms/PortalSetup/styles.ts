@@ -32,7 +32,9 @@ export const Section = styled.div<{ type: ViewLayoutType }>`
 	padding: 15px 15px 0 15px;
 `;
 
-export const CategoriesSection = styled(Section)<{ type: ViewLayoutType }>``;
+export const CategoriesSection = styled(Section)<{ type: ViewLayoutType }>`
+	padding: ${(props) => (props.type === 'header' ? '15px 15px 0 15px' : '15px 15px 12.5px 15px')};
+`;
 
 export const TopicsSection = styled(Section)<{ type: ViewLayoutType }>`
 	padding: 15px;
@@ -112,22 +114,6 @@ export const BodyActionsWrapper = styled.div`
 	display: flex;
 	gap: 12.5px;
 	margin: 20px 0 0 auto;
-`;
-
-export const CategoryModalWrapper = styled.div`
-	padding: 0 20px 5px 20px !important;
-`;
-
-export const CategoryActionsWrapper = styled(BodyActionsWrapper)`
-	margin: 10px 0 0 auto;
-`;
-
-export const TopicModalWrapper = styled.div`
-	padding: 0 20px 5px 20px !important;
-`;
-
-export const LinkModalWrapper = styled.div`
-	padding: 0 20px !important;
 `;
 
 export const Divider = styled.div`

@@ -12,6 +12,8 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
+import { Modal } from '../Modal';
+
 import * as S from './styles';
 import { IProps } from './types';
 
@@ -25,6 +27,9 @@ export default function CategoryList(props: IProps) {
 	const [newCategoryName, setNewCategoryName] = React.useState<string>('');
 	const [parentCategory, setParentCategory] = React.useState<string | null>(null);
 	const [showParentOptions, setShowParentOptions] = React.useState<boolean>(false);
+
+	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
+
 	const [categoryLoading, setCategoryLoading] = React.useState<boolean>(false);
 	const [categoryResponse, setCategoryResponse] = React.useState<NotificationType | null>(null);
 
@@ -38,7 +43,6 @@ export default function CategoryList(props: IProps) {
 		if (newCategoryName && portalProvider.current?.id && arProvider.wallet) {
 			setCategoryLoading(true);
 			try {
-				// Create the new category without children unless explicitly needed
 				const newCategory: PortalCategoryType = {
 					id: Date.now().toString(),
 					name: newCategoryName,
@@ -63,17 +67,14 @@ export default function CategoryList(props: IProps) {
 					return;
 				}
 
-				// Recursive function to add the new category to the correct parent
 				const addToParent = (categories: PortalCategoryType[]): PortalCategoryType[] => {
 					return categories.map((category) => {
 						if (category.id === parentCategory) {
-							// Add the new category as a child of the matching parent
 							return {
 								...category,
 								children: [...(category.children || []), newCategory],
 							};
 						} else if (category.children) {
-							// Recursively process the children
 							return {
 								...category,
 								children: addToParent(category.children),
@@ -83,10 +84,8 @@ export default function CategoryList(props: IProps) {
 					});
 				};
 
-				// Determine the updated categories
 				const updatedCategories = parentCategory ? addToParent(categoryOptions) : [...categoryOptions, newCategory];
 
-				// Update the backend and UI
 				const categoryUpdateId = await updateZone(
 					{ Categories: mapToProcessCase(updatedCategories) },
 					portalProvider.current.id,
@@ -106,6 +105,76 @@ export default function CategoryList(props: IProps) {
 			}
 			setCategoryLoading(false);
 		}
+	};
+
+	const deleteCategories = async () => {
+		if (arProvider.wallet && portalProvider.current?.categories && props.categories?.length) {
+			setCategoryLoading(true);
+			try {
+				const findCategoriesToDelete = (categories: PortalCategoryType[], selectedIds: string[]): string[] => {
+					let toDelete: string[] = [];
+
+					categories.forEach((category) => {
+						if (selectedIds.includes(category.id)) {
+							toDelete.push(category.id);
+							if (category.children && category.children.length > 0) {
+								toDelete = [...toDelete, ...findCategoriesToDelete(category.children, selectedIds)];
+							}
+						} else if (category.children) {
+							toDelete = [...toDelete, ...findCategoriesToDelete(category.children, selectedIds)];
+						}
+					});
+
+					return toDelete;
+				};
+
+				const removeCategories = (categories: PortalCategoryType[], idsToDelete: string[]): PortalCategoryType[] => {
+					return categories
+						.filter((category) => !idsToDelete.includes(category.id))
+						.map((category) => ({
+							...category,
+							children: category.children ? removeCategories(category.children, idsToDelete) : [],
+						}));
+				};
+
+				const selectedIds = props.categories.map((cat: PortalCategoryType) => cat.id); // Selected categories to delete
+				const allCategories = portalProvider.current.categories;
+
+				const idsToDelete = findCategoriesToDelete(allCategories, selectedIds);
+
+				const updatedCategories = removeCategories(allCategories, idsToDelete);
+
+				const categoryUpdateId = await updateZone(
+					{ Categories: mapToProcessCase(updatedCategories) },
+					portalProvider.current.id,
+					arProvider.wallet
+				);
+
+				portalProvider.refreshCurrentPortal();
+
+				globalLog(`Category update: ${categoryUpdateId}`);
+
+				setCategoryOptions(updatedCategories);
+				setCategoryResponse({ status: 'success', message: `${language.categoriesUpdated}!` });
+				setShowDeleteConfirmation(false);
+			} catch (e: any) {
+				setCategoryResponse({ status: 'warning', message: e.message ?? 'Error deleting categories' });
+			}
+			setCategoryLoading(false);
+		}
+	};
+
+	const findParentCategory = (categories: PortalCategoryType[], childId: string): PortalCategoryType | null => {
+		for (const category of categories) {
+			if (category.children?.some((child) => child.id === childId)) {
+				return category;
+			}
+			if (category.children) {
+				const found = findParentCategory(category.children, childId);
+				if (found) return found;
+			}
+		}
+		return null;
 	};
 
 	const handleSelectCategory = (categoryId: string) => {
@@ -262,7 +331,60 @@ export default function CategoryList(props: IProps) {
 					</S.CategoriesAddAction>
 				</S.CategoriesAction>
 				<S.CategoriesBody>{getCategories()}</S.CategoriesBody>
+				{props.showActions && (
+					<S.CategoriesFooter>
+						{props.closeAction && (
+							<Button type={'alt3'} label={language.close} handlePress={() => props.closeAction()} />
+						)}
+						<Button
+							type={'alt3'}
+							label={language.delete}
+							handlePress={() => setShowDeleteConfirmation(true)}
+							disabled={!props.categories?.length || categoryLoading}
+							loading={false}
+							icon={ASSETS.delete}
+							iconLeftAlign
+							warning
+						/>
+					</S.CategoriesFooter>
+				)}
 			</S.Wrapper>
+			{showDeleteConfirmation && (
+				<Modal header={language.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
+					<S.ModalWrapper>
+						<S.ModalBodyWrapper>
+							<p>{language.categoryDeleteConfirmationInfo}</p>
+							<S.ModalBodyElements>
+								{props.categories.map((category: PortalCategoryType, index: number) => {
+									return (
+										<S.ModalBodyElement key={index}>
+											<span>{`· ${category.name}`}</span>
+										</S.ModalBodyElement>
+									);
+								})}
+							</S.ModalBodyElements>
+						</S.ModalBodyWrapper>
+						<S.ModalActionsWrapper>
+							<Button
+								type={'primary'}
+								label={language.cancel}
+								handlePress={() => setShowDeleteConfirmation(false)}
+								disabled={categoryLoading}
+							/>
+							<Button
+								type={'primary'}
+								label={language.categoryDeleteConfirmation}
+								handlePress={() => deleteCategories()}
+								disabled={!props.categories?.length || categoryLoading}
+								loading={categoryLoading}
+								icon={ASSETS.delete}
+								iconLeftAlign
+								warning
+							/>
+						</S.ModalActionsWrapper>
+					</S.ModalWrapper>
+				</Modal>
+			)}
 			{categoryResponse && (
 				<Notification
 					type={categoryResponse.status}

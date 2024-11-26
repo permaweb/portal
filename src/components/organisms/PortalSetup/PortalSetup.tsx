@@ -42,12 +42,36 @@ export default function PortalSetup(props: IProps) {
 		return count;
 	}
 
+	function handleSetCategories(categories: PortalCategoryType[]) {
+		const updatedCategories: PortalCategoryType[] = [];
+		const categoryIds = new Set<string>();
+
+		function addCategories(categories: PortalCategoryType[]) {
+			for (const category of categories) {
+				if (!categoryIds.has(category.id)) {
+					updatedCategories.push(category);
+					categoryIds.add(category.id);
+				}
+				if (category.children && category.children.length > 0) {
+					addCategories(category.children);
+				}
+			}
+		}
+
+		addCategories(categories);
+
+		setSelectedCategories(updatedCategories);
+	}
+
 	function getCategoryAction() {
 		return (
 			<S.BodyWrapper>
 				<CategoryList
 					categories={selectedCategories}
-					setCategories={(categories: PortalCategoryType[]) => setSelectedCategories(categories)}
+					setCategories={(categories: PortalCategoryType[]) => handleSetCategories(categories)}
+					includeChildrenOnSelect
+					showActions
+					closeAction={props.type === 'header' ? () => setShowCategoryAction(false) : null}
 				/>
 			</S.BodyWrapper>
 		);
