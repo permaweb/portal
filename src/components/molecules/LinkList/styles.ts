@@ -106,6 +106,7 @@ export const IconInput = styled.button<{ hasData: boolean }>`
 export const LinksHeader = styled.div`
 	width: 100%;
 	display: flex;
+	align-items: center;
 	justify-content: space-between;
 	position: relative;
 
@@ -196,11 +197,10 @@ export const LinksAddAction = styled.div`
 
 export const LinksBodyWrapper = styled.div``;
 
-export const LinksBody = styled.div<{ type: ViewLayoutType }>`
+export const LinksBody = styled.div<{ type: ViewLayoutType; editMode: boolean }>`
 	display: flex;
 	flex-wrap: wrap;
-	gap: 15px 25px;
-	padding: 15px 15px 10px 15px;
+	gap: 15px 20px;
 	margin: 10px 0 0 0;
 `;
 
@@ -213,7 +213,7 @@ export const LinkTooltip = styled.div`
 	top: 100%;
 	left: 50%;
 	transform: translateX(-50%);
-	margin: 1.5px 0 0 0;
+	margin: 4.5px 0 0 0;
 
 	border: 1px solid ${(props) => props.theme.colors.tooltip.border};
 
@@ -225,8 +225,11 @@ export const LinkTooltip = styled.div`
 	}
 `;
 
-export const LinkWrapper = styled.div`
+export const LinkWrapper = styled.div<{ editMode: boolean; active: boolean }>`
 	position: relative;
+
+	height: 40px;
+	width: 40px;
 
 	&:hover {
 		${LinkTooltip} {
@@ -236,17 +239,29 @@ export const LinkWrapper = styled.div`
 
 	a,
 	button {
+		height: 100%;
+		width: 100%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		position: relative;
-		transition: all 200ms;
+		transition: all 100ms;
+
+		background: ${(props) =>
+			props.editMode
+				? props.active
+					? props.theme.colors.button.alt1.active.background
+					: props.theme.colors.container.primary.background
+				: props.theme.colors.container.alt1.background};
+		border: 1px solid ${(props) => (props.editMode ? props.theme.colors.border.alt4 : props.theme.colors.border.alt1)};
+		border-radius: ${STYLING.dimensions.radius.alt2};
 
 		svg {
 			height: 22.5px;
 			width: 22.5px;
-			color: ${(props) => props.theme.colors.font.alt1};
-			fill: ${(props) => props.theme.colors.font.alt1};
+			margin: 5px 0 0 0;
+			color: ${(props) => (props.active ? props.theme.colors.font.light1 : props.theme.colors.font.alt1)};
+			fill: ${(props) => (props.active ? props.theme.colors.font.light1 : props.theme.colors.font.alt1)};
 		}
 
 		img {
@@ -255,15 +270,17 @@ export const LinkWrapper = styled.div`
 		}
 
 		&:hover {
+			background: ${(props) => props.theme.colors.button.alt1.active.background};
 			svg {
-				color: ${(props) => props.theme.colors.font.alt5};
-				fill: ${(props) => props.theme.colors.font.alt5};
+				color: ${(props) => props.theme.colors.font.light1};
+				fill: ${(props) => props.theme.colors.font.light1};
 			}
 		}
 		&:focus {
+			background: ${(props) => props.theme.colors.button.alt1.active.background};
 			svg {
-				color: ${(props) => props.theme.colors.font.alt5};
-				fill: ${(props) => props.theme.colors.font.alt5};
+				color: ${(props) => props.theme.colors.font.light1};
+				fill: ${(props) => props.theme.colors.font.light1};
 			}
 		}
 	}
@@ -278,4 +295,53 @@ export const WrapperEmpty = styled.div`
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
+`;
+
+export const LinksFooter = styled.div`
+	margin: 20px 0 0 0;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 15px;
+`;
+
+export const ModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 0 20px 20px 20px !important;
+`;
+
+export const ModalBodyWrapper = styled.div`
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+`;
+
+export const ModalBodyElements = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 1.5px;
+	margin: 15px 0 0 0;
+`;
+
+export const ModalBodyElement = styled.div`
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
+`;
+
+export const ModalActionsWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 15px;
 `;

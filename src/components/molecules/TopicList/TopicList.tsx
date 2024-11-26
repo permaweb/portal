@@ -25,9 +25,7 @@ export default function TopicList(props: IProps) {
 
 	const [topicOptions, setTopicOptions] = React.useState<string[] | null>(null);
 	const [newTopic, setNewTopic] = React.useState<string>('');
-
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
-
 	const [topicLoading, setTopicLoading] = React.useState<boolean>(false);
 	const [topicResponse, setTopicResponse] = React.useState<NotificationType | null>(null);
 

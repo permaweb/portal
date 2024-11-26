@@ -15,6 +15,8 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
+import { Modal } from '../Modal';
+
 import * as S from './styles';
 import { IProps } from './types';
 
@@ -33,7 +35,9 @@ export default function LinkList(props: IProps) {
 	const [linkLoading, setLinkLoading] = React.useState<boolean>(false);
 	const [linkResponse, setLinkResponse] = React.useState<NotificationType | null>(null);
 	const [showPrefills, setShowPrefills] = React.useState<boolean>(false);
-
+	const [editMode, setEditMode] = React.useState<boolean>(false);
+	const [selectedLinks, setSelectedLinks] = React.useState<PortalLinkType[]>([]);
+	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
 	const [newLinkUrl, setNewLinkUrl] = React.useState<string>('');
 	const [newLinkTitle, setNewLinkTitle] = React.useState<string>('');
 	const [newLinkIcon, setNewLinkIcon] = React.useState<any>(null);
@@ -42,7 +46,46 @@ export default function LinkList(props: IProps) {
 		if (portalProvider.current?.id) {
 			if (portalProvider.current.links) setLinkOptions(portalProvider.current.links);
 		}
-	}, [portalProvider.current?.id]);
+	}, [portalProvider.current]);
+
+	const handleSelect = (link: PortalLinkType) => {
+		const isSelected = selectedLinks.some((selectedLink) => selectedLink.url === link.url);
+		if (isSelected) {
+			setSelectedLinks(selectedLinks.filter((selectedLink) => selectedLink.url !== link.url));
+		} else {
+			setSelectedLinks([...selectedLinks, link]);
+		}
+	};
+
+	const deleteLinks = async () => {
+		if (arProvider.wallet && portalProvider.current?.links && selectedLinks?.length) {
+			setLinkLoading(true);
+			try {
+				const updatedLinks = linkOptions.filter(
+					(link) => !selectedLinks.some((selectedLink) => selectedLink.url === link.url)
+				);
+
+				const linkUpdateId = await updateZone(
+					{ Links: mapToProcessCase(updatedLinks) },
+					portalProvider.current.id,
+					arProvider.wallet
+				);
+
+				setSelectedLinks([]);
+
+				portalProvider.refreshCurrentPortal();
+
+				globalLog(`Link update: ${linkUpdateId}`);
+
+				setLinkResponse({ status: 'success', message: `${language.linksUpdated}!` });
+				setShowDeleteConfirmation(false);
+				setEditMode(false);
+			} catch (e: any) {
+				setLinkResponse({ status: 'warning', message: e.message ?? 'Error updating links' });
+			}
+			setLinkLoading(false);
+		}
+	};
 
 	const prefills = React.useMemo(() => {
 		return [
@@ -120,7 +163,7 @@ export default function LinkList(props: IProps) {
 		return <span>{'SVG'}</span>;
 	}
 
-	function getLinks() {
+	const getLinks = () => {
 		if (!linkOptions) {
 			return (
 				<S.WrapperEmpty>
@@ -138,20 +181,21 @@ export default function LinkList(props: IProps) {
 		return (
 			<>
 				{linkOptions.map((link: PortalLinkType, index: number) => {
+					const isSelected = selectedLinks.some((selectedLink) => selectedLink.url === link.url);
 					return (
-						<S.LinkWrapper key={index}>
-							<a href={link.url} target={'_blank'}>
+						<S.LinkWrapper key={index} editMode={editMode} active={isSelected}>
+							<button onClick={() => (editMode ? handleSelect(link) : window.open(link.url, '_blank'))}>
 								<ReactSVG src={link.icon ? getTxEndpoint(link.icon) : ASSETS.link} />
-							</a>
-							<S.LinkTooltip className={'info'}>
-								<span>{link.title}</span>
-							</S.LinkTooltip>
+								<S.LinkTooltip className={'info'}>
+									<span>{link.title}</span>
+								</S.LinkTooltip>
+							</button>
 						</S.LinkWrapper>
 					);
 				})}
 			</>
 		);
-	}
+	};
 
 	return (
 		<>
@@ -258,12 +302,76 @@ export default function LinkList(props: IProps) {
 				<S.LinksBodyWrapper>
 					<S.LinksHeader>
 						<p>{language.current}</p>
+						<Button
+							type={'alt3'}
+							label={editMode ? language.done : language.edit}
+							handlePress={() => {
+								setEditMode(!editMode);
+								setSelectedLinks([]);
+							}}
+							active={editMode}
+							disabled={linkOptions?.length <= 0 || linkLoading}
+							loading={false}
+							icon={editMode ? ASSETS.close : ASSETS.write}
+							iconLeftAlign
+						/>
 					</S.LinksHeader>
-					<S.LinksBody type={props.type} className={'border-wrapper-alt3'}>
+					<S.LinksBody type={props.type} editMode={editMode}>
 						{getLinks()}
 					</S.LinksBody>
+					<S.LinksFooter>
+						{props.closeAction && (
+							<Button type={'alt3'} label={language.close} handlePress={() => props.closeAction()} />
+						)}
+						<Button
+							type={'alt3'}
+							label={language.delete}
+							handlePress={() => setShowDeleteConfirmation(true)}
+							disabled={!selectedLinks?.length || linkLoading}
+							loading={false}
+							icon={ASSETS.delete}
+							iconLeftAlign
+							warning
+						/>
+					</S.LinksFooter>
 				</S.LinksBodyWrapper>
 			</S.Wrapper>
+			{showDeleteConfirmation && (
+				<Modal header={language.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
+					<S.ModalWrapper>
+						<S.ModalBodyWrapper>
+							<p>{language.linkDeleteConfirmationInfo}</p>
+							<S.ModalBodyElements>
+								{selectedLinks.map((link: PortalLinkType, index: number) => {
+									return (
+										<S.ModalBodyElement key={index}>
+											<span>{`· ${link.title.toUpperCase()}`}</span>
+										</S.ModalBodyElement>
+									);
+								})}
+							</S.ModalBodyElements>
+						</S.ModalBodyWrapper>
+						<S.ModalActionsWrapper>
+							<Button
+								type={'primary'}
+								label={language.cancel}
+								handlePress={() => setShowDeleteConfirmation(false)}
+								disabled={linkLoading}
+							/>
+							<Button
+								type={'primary'}
+								label={language.linkDeleteConfirmation}
+								handlePress={() => deleteLinks()}
+								disabled={!selectedLinks?.length || linkLoading}
+								loading={linkLoading}
+								icon={ASSETS.delete}
+								iconLeftAlign
+								warning
+							/>
+						</S.ModalActionsWrapper>
+					</S.ModalWrapper>
+				</Modal>
+			)}
 			{linkResponse && (
 				<Notification
 					type={linkResponse.status}

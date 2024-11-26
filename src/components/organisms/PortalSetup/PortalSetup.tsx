@@ -12,9 +12,6 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import * as S from './styles';
 import { IProps } from './types';
 
-// TODO: Topic edit / delete
-// TODO: Category edit / delete
-// TODO: Link edit / delete
 export default function PortalSetup(props: IProps) {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();

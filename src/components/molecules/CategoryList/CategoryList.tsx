@@ -137,7 +137,7 @@ export default function CategoryList(props: IProps) {
 						}));
 				};
 
-				const selectedIds = props.categories.map((cat: PortalCategoryType) => cat.id); // Selected categories to delete
+				const selectedIds = props.categories.map((cat: PortalCategoryType) => cat.id);
 				const allCategories = portalProvider.current.categories;
 
 				const idsToDelete = findCategoriesToDelete(allCategories, selectedIds);
@@ -149,6 +149,8 @@ export default function CategoryList(props: IProps) {
 					portalProvider.current.id,
 					arProvider.wallet
 				);
+
+				props.setCategories([]);
 
 				portalProvider.refreshCurrentPortal();
 
