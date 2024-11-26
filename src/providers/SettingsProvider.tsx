@@ -31,6 +31,9 @@ interface Settings {
 	sidebarOpen: boolean;
 	isDesktop: boolean;
 	windowSize: { width: number; height: number };
+	showCategoryAction: boolean;
+	showTopicAction: boolean;
+	showLinkAction: boolean;
 }
 
 interface SettingsContextState {
@@ -47,6 +50,9 @@ const defaultSettings: Settings = {
 	sidebarOpen: true,
 	isDesktop: true,
 	windowSize: { width: window.innerWidth, height: window.innerHeight },
+	showCategoryAction: false,
+	showTopicAction: false,
+	showLinkAction: false,
 };
 
 const SettingsContext = React.createContext<SettingsContextState>({
@@ -74,6 +80,9 @@ export function SettingsProvider(props: SettingsProviderProps) {
 				isDesktop,
 				windowSize: { width: window.innerWidth, height: window.innerHeight },
 				sidebarOpen: isDesktop ? parsedSettings.sidebarOpen : false,
+				showCategoryAction: parsedSettings.showCategoryAction ?? false,
+				showTopicAction: parsedSettings.showTopicAction ?? false,
+				showLinkAction: parsedSettings.showLinkAction ?? false,
 			};
 		} else {
 			settings = {

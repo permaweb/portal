@@ -8,6 +8,7 @@ import { ASSETS } from 'helpers/config';
 import { PortalCategoryType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
+import { useSettingsProvider } from 'providers/SettingsProvider';
 
 import * as S from './styles';
 import { IProps } from './types';
@@ -17,11 +18,22 @@ export default function PortalSetup(props: IProps) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	const { settings, updateSettings } = useSettingsProvider();
+
+	const toggleCategoryAction = () => {
+		updateSettings('showCategoryAction', !settings.showCategoryAction);
+	};
+
+	const toggleTopicAction = () => {
+		updateSettings('showTopicAction', !settings.showTopicAction);
+	};
+
+	const toggleLinkAction = () => {
+		updateSettings('showLinkAction', !settings.showLinkAction);
+	};
+
 	const [selectedCategories, setSelectedCategories] = React.useState<PortalCategoryType[]>([]);
 	const [selectedTopics, setSelectedTopics] = React.useState<string[]>([]);
-	const [showCategoryAction, setShowCategoryAction] = React.useState<boolean>(false);
-	const [showTopicAction, setShowTopicAction] = React.useState<boolean>(false);
-	const [showLinkAction, setShowLinkAction] = React.useState<boolean>(false);
 
 	function getTotalCategoryCount(categories: PortalCategoryType[]) {
 		let count = 0;
@@ -68,7 +80,6 @@ export default function PortalSetup(props: IProps) {
 					setCategories={(categories: PortalCategoryType[]) => handleSetCategories(categories)}
 					includeChildrenOnSelect
 					showActions
-					closeAction={props.type === 'header' ? () => setShowCategoryAction(false) : null}
 				/>
 			</S.BodyWrapper>
 		);
@@ -77,12 +88,7 @@ export default function PortalSetup(props: IProps) {
 	function getTopicAction() {
 		return (
 			<S.TopicsBodyWrapper>
-				<TopicList
-					topics={selectedTopics}
-					setTopics={(topics: string[]) => setSelectedTopics(topics)}
-					showActions
-					closeAction={props.type === 'header' ? () => setShowTopicAction(false) : null}
-				/>
+				<TopicList topics={selectedTopics} setTopics={(topics: string[]) => setSelectedTopics(topics)} showActions />
 			</S.TopicsBodyWrapper>
 		);
 	}
@@ -106,16 +112,16 @@ export default function PortalSetup(props: IProps) {
 						<IconButton
 							type={'primary'}
 							active={false}
-							src={showLinkAction ? ASSETS.close : ASSETS.write}
-							handlePress={() => setShowLinkAction(!showLinkAction)}
+							src={settings.showLinkAction ? ASSETS.close : ASSETS.write}
+							handlePress={() => toggleLinkAction()}
 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
-							tooltip={showLinkAction ? language.close : language.editSiteLinks}
+							tooltip={settings.showLinkAction ? language.close : language.editSiteLinks}
 							tooltipPosition={'bottom-right'}
 							noFocus
 						/>
 					)}
 				</S.LinksHeader>
-				{(props.type === 'detail' || (props.type === 'header' && showLinkAction)) && getLinkAction()}
+				{(props.type === 'detail' || (props.type === 'header' && settings.showLinkAction)) && getLinkAction()}
 			</S.LinksSection>
 		);
 	}
@@ -131,16 +137,16 @@ export default function PortalSetup(props: IProps) {
 						<IconButton
 							type={'primary'}
 							active={false}
-							src={showCategoryAction ? ASSETS.close : ASSETS.write}
-							handlePress={() => setShowCategoryAction(!showCategoryAction)}
+							src={settings.showCategoryAction ? ASSETS.close : ASSETS.write}
+							handlePress={() => toggleCategoryAction()}
 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
-							tooltip={showCategoryAction ? language.close : language.editSiteCategories}
+							tooltip={settings.showCategoryAction ? language.close : language.editSiteCategories}
 							tooltipPosition={'bottom-right'}
 							noFocus
 						/>
 					)}
 				</S.CategoriesHeader>
-				{(props.type === 'detail' || (props.type === 'header' && showCategoryAction)) && getCategoryAction()}
+				{(props.type === 'detail' || (props.type === 'header' && settings.showCategoryAction)) && getCategoryAction()}
 			</S.CategoriesSection>
 		);
 	}
@@ -156,16 +162,16 @@ export default function PortalSetup(props: IProps) {
 						<IconButton
 							type={'primary'}
 							active={false}
-							src={showTopicAction ? ASSETS.close : ASSETS.write}
-							handlePress={() => setShowTopicAction(!showTopicAction)}
+							src={settings.showTopicAction ? ASSETS.close : ASSETS.write}
+							handlePress={() => toggleTopicAction()}
 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
-							tooltip={showTopicAction ? language.close : language.editPostTopics}
+							tooltip={settings.showTopicAction ? language.close : language.editPostTopics}
 							tooltipPosition={'bottom-right'}
 							noFocus
 						/>
 					)}
 				</S.SectionHeader>
-				{(props.type === 'detail' || (props.type === 'header' && showTopicAction)) && getTopicAction()}
+				{(props.type === 'detail' || (props.type === 'header' && settings.showTopicAction)) && getTopicAction()}
 			</S.TopicsSection>
 		);
 	}

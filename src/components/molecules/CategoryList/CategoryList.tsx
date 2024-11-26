@@ -203,6 +203,7 @@ export default function CategoryList(props: IProps) {
 								label={category.name}
 								handlePress={() => handleSelectCategory(category.id)}
 								active={active}
+								disabled={categoryLoading}
 								icon={active ? ASSETS.close : ASSETS.add}
 							/>
 						</S.CategoryOption>

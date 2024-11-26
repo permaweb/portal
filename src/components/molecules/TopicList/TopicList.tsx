@@ -129,6 +129,7 @@ export default function TopicList(props: IProps) {
 							label={topic}
 							handlePress={() => (active ? removeTopic(topic) : props.setTopics([...props.topics, topic]))}
 							active={active}
+							disabled={topicLoading}
 							icon={active ? ASSETS.close : ASSETS.add}
 						/>
 					);
