@@ -169,9 +169,7 @@ export const ThemeSection = styled.div``;
 
 export const ThemeSectionHeader = styled.div`
 	display: flex;
-	padding: 0 0 3.5px 0;
-	margin: 0 0 15px 0;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+	margin: 0 0 10px 0;
 	svg {
 		height: 16.5px;
 		width: 16.5px;

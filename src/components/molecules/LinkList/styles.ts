@@ -6,8 +6,7 @@ import { ViewLayoutType } from 'helpers/types';
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-	padding: 0 0 5px 0;
+	gap: 25px;
 `;
 
 export const LinksAction = styled.div`
@@ -104,7 +103,7 @@ export const IconInput = styled.button<{ hasData: boolean }>`
 			: ''}
 `;
 
-export const LinksActionHeader = styled.div`
+export const LinksHeader = styled.div`
 	width: 100%;
 	display: flex;
 	justify-content: space-between;
@@ -117,6 +116,12 @@ export const LinksActionHeader = styled.div`
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
+`;
+
+export const LinksHeaderActions = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 15px;
 `;
 
 export const LinkPrefillWrapper = styled.div`
@@ -174,18 +179,29 @@ export const LinkPrefillOption = styled.button`
 	}
 `;
 
-export const LinksActionFlex = styled.div`
+export const LinksAddAction = styled.div`
+	position: relative;
+
 	button {
-		margin: 20px 0 0 auto;
+		position: absolute;
+		top: 34.5px;
+		right: 10px;
+		z-index: 1;
+	}
+
+	input {
+		padding: 10px 85px 10px 10px;
 	}
 `;
+
+export const LinksBodyWrapper = styled.div``;
 
 export const LinksBody = styled.div<{ type: ViewLayoutType }>`
 	display: flex;
 	flex-wrap: wrap;
 	gap: 15px 25px;
 	padding: 15px 15px 10px 15px;
-	margin: 15px 0 0 0;
+	margin: 10px 0 0 0;
 `;
 
 export const LinkTooltip = styled.div`

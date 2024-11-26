@@ -38,11 +38,11 @@ export default function CategoryList(props: IProps) {
 		if (newCategoryName && portalProvider.current?.id && arProvider.wallet) {
 			setCategoryLoading(true);
 			try {
+				// Create the new category without children unless explicitly needed
 				const newCategory: PortalCategoryType = {
 					id: Date.now().toString(),
 					name: newCategoryName,
 					parent: parentCategory,
-					children: [],
 				};
 
 				const isDuplicate = (categories: PortalCategoryType[], name: string): boolean => {
@@ -63,22 +63,30 @@ export default function CategoryList(props: IProps) {
 					return;
 				}
 
+				// Recursive function to add the new category to the correct parent
 				const addToParent = (categories: PortalCategoryType[]): PortalCategoryType[] => {
 					return categories.map((category) => {
 						if (category.id === parentCategory) {
+							// Add the new category as a child of the matching parent
 							return {
 								...category,
 								children: [...(category.children || []), newCategory],
 							};
 						} else if (category.children) {
-							return { ...category, children: addToParent(category.children) };
+							// Recursively process the children
+							return {
+								...category,
+								children: addToParent(category.children),
+							};
 						}
 						return category;
 					});
 				};
 
+				// Determine the updated categories
 				const updatedCategories = parentCategory ? addToParent(categoryOptions) : [...categoryOptions, newCategory];
 
+				// Update the backend and UI
 				const categoryUpdateId = await updateZone(
 					{ Categories: mapToProcessCase(updatedCategories) },
 					portalProvider.current.id,
@@ -88,8 +96,6 @@ export default function CategoryList(props: IProps) {
 				portalProvider.refreshCurrentPortal();
 
 				globalLog(`Category update: ${categoryUpdateId}`);
-
-				if (props.selectOnAdd) props.setCategories([...props.categories, newCategory]);
 
 				setCategoryOptions(updatedCategories);
 				setCategoryResponse({ status: 'success', message: `${language.categoryAdded}!` });
@@ -200,25 +206,6 @@ export default function CategoryList(props: IProps) {
 		<>
 			<S.Wrapper>
 				<S.CategoriesAction>
-					<S.CategoriesAddAction>
-						<Button
-							type={'alt3'}
-							label={language.add}
-							handlePress={addCategory}
-							disabled={!newCategoryName || categoryLoading}
-							loading={categoryLoading}
-							icon={ASSETS.add}
-							iconLeftAlign
-						/>
-					</S.CategoriesAddAction>
-					<FormField
-						value={newCategoryName}
-						onChange={(e: any) => setNewCategoryName(e.target.value)}
-						invalid={{ status: false, message: null }}
-						disabled={categoryLoading}
-						hideErrorMessage
-						sm
-					/>
 					<S.CategoriesParentAction>
 						<CloseHandler
 							callback={() => setShowParentOptions(false)}
@@ -230,7 +217,7 @@ export default function CategoryList(props: IProps) {
 									type={'primary'}
 									label={getParentDisplayLabel()}
 									handlePress={() => setShowParentOptions(!showParentOptions)}
-									disabled={!newCategoryName || !categoryOptions?.length || categoryLoading}
+									disabled={!categoryOptions?.length || categoryLoading}
 									icon={ASSETS.arrow}
 									height={42.5}
 									fullWidth
@@ -238,11 +225,41 @@ export default function CategoryList(props: IProps) {
 							</S.CategoriesParentSelectAction>
 							{showParentOptions && (
 								<S.ParentCategoryDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
-									<S.ParentCategoryOptions>{renderParentCategoryOptions(categoryOptions)}</S.ParentCategoryOptions>
+									<S.ParentCategoryOptions>
+										<S.ParentCategoryOption
+											level={1}
+											onClick={() => {
+												setParentCategory(null);
+												setShowParentOptions(false);
+											}}
+										>
+											<span>{language.none}</span>
+										</S.ParentCategoryOption>
+										{renderParentCategoryOptions(categoryOptions)}
+									</S.ParentCategoryOptions>
 								</S.ParentCategoryDropdown>
 							)}
 						</CloseHandler>
 					</S.CategoriesParentAction>
+					<S.CategoriesAddAction>
+						<Button
+							type={'alt3'}
+							label={language.add}
+							handlePress={addCategory}
+							disabled={!newCategoryName || categoryLoading}
+							loading={categoryLoading}
+							icon={ASSETS.add}
+							iconLeftAlign
+						/>
+						<FormField
+							value={newCategoryName}
+							onChange={(e: any) => setNewCategoryName(e.target.value)}
+							invalid={{ status: false, message: null }}
+							disabled={categoryLoading}
+							hideErrorMessage
+							sm
+						/>
+					</S.CategoriesAddAction>
 				</S.CategoriesAction>
 				<S.CategoriesBody>{getCategories()}</S.CategoriesBody>
 			</S.Wrapper>

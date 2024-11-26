@@ -51,7 +51,11 @@ export const DesignSection = styled(Section)`
 	}
 `;
 
-export const SetupSection = styled(Section)``;
+export const SetupSection = styled(Section)`
+	> :first-child {
+		padding: 12.5px 10px 0 15px;
+	}
+`;
 
 export const PostsSection = styled(Section)`
 	> :first-child {

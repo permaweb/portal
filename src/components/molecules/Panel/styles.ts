@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { open, transition1, transition2 } from 'helpers/animations';
+import { open, transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const PanelOverlay = styled.div<{ open: boolean }>`
@@ -11,7 +11,8 @@ export const PanelOverlay = styled.div<{ open: boolean }>`
 	top: 0;
 	left: 0;
 	background: ${(props) => props.theme.colors.overlay.primary};
-	animation: ${open} ${transition1};
+	backdrop-filter: blur(3.5px);
+	animation: ${open} ${transition2};
 	display: ${(props) => (props.open ? 'block' : 'none')};
 `;
 

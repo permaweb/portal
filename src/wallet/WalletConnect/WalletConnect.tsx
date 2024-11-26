@@ -89,16 +89,16 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 					accent1: lightThemeHighContrast.neutral9,
 				},
 				{
-					id: 'light-alt-2',
-					name: 'Daybreak',
-					background: lightThemeAlt2.neutral1,
-					accent1: lightThemeAlt2.primary1,
-				},
-				{
 					id: 'light-alt-1',
 					name: 'Sunlit',
 					background: lightThemeAlt1.neutral1,
 					accent1: lightThemeAlt1.primary1,
+				},
+				{
+					id: 'light-alt-2',
+					name: 'Daybreak',
+					background: lightThemeAlt2.neutral1,
+					accent1: lightThemeAlt2.primary1,
 				},
 			],
 		},

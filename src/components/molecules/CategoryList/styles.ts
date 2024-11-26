@@ -14,11 +14,17 @@ export const CategoriesAction = styled.div`
 `;
 
 export const CategoriesAddAction = styled.div`
+	position: relative;
+
 	button {
 		position: absolute;
-		top: 26.5px;
+		top: 16.5px;
 		right: 10px;
 		z-index: 1;
+	}
+
+	input {
+		padding: 10px 85px 10px 10px;
 	}
 `;
 
@@ -45,9 +51,9 @@ export const CategoriesParentSelectAction = styled.div`
 `;
 
 export const ParentCategoryDropdown = styled.div`
-	max-height: 35vh;
+	max-height: 50vh;
 	width: 100%;
-	max-width: 75vw;
+	max-width: 90vw;
 	padding: 7.5px 10px;
 	position: absolute;
 	z-index: 2;
@@ -107,7 +113,8 @@ export const CategoryOptionsWrapper = styled.div``;
 export const CategoriesList = styled.ul``;
 
 export const CategoryOption = styled.li<{ level: number }>`
-	margin: ${(props) => `0 10px 12.5px ${(props.level * 15).toString()}px`} !important;
+	position: relative;
+	margin: ${(props) => `0 10px 12.5px ${(props.level * 20).toString()}px`} !important;
 `;
 
 export const WrapperEmpty = styled.div`

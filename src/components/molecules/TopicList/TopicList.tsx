@@ -11,6 +11,8 @@ import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
+import { Modal } from '../Modal';
+
 import * as S from './styles';
 import { IProps } from './types';
 
@@ -23,6 +25,9 @@ export default function TopicList(props: IProps) {
 
 	const [topicOptions, setTopicOptions] = React.useState<string[] | null>(null);
 	const [newTopic, setNewTopic] = React.useState<string>('');
+
+	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
+
 	const [topicLoading, setTopicLoading] = React.useState<boolean>(false);
 	const [topicResponse, setTopicResponse] = React.useState<NotificationType | null>(null);
 
@@ -60,6 +65,33 @@ export default function TopicList(props: IProps) {
 			setTopicLoading(false);
 		}
 	};
+
+	async function deleteTopics() {
+		if (arProvider.wallet && portalProvider.current?.topics && props.topics?.length) {
+			setTopicLoading(true);
+			try {
+				const currentTopicOptions = portalProvider.current.topics.map((topic: PortalTopicType) => topic.value);
+				const updatedTopicOptions = currentTopicOptions.filter((topic: string) => !props.topics.includes(topic));
+				const topicUpdateId = await updateZone(
+					{ Topics: updatedTopicOptions.map((topic: string) => ({ Value: topic })) },
+					portalProvider.current.id,
+					arProvider.wallet
+				);
+
+				props.setTopics([]);
+
+				portalProvider.refreshCurrentPortal();
+
+				globalLog(`Topic update: ${topicUpdateId}`);
+
+				setTopicResponse({ status: 'success', message: `${language.topicsUpdated}!` });
+				setShowDeleteConfirmation(false);
+			} catch (e: any) {
+				setTopicResponse({ status: 'warning', message: e.message ?? 'Error updating topics' });
+			}
+			setTopicLoading(false);
+		}
+	}
 
 	const removeTopic = (topic: string) => {
 		props.setTopics(props.topics.filter((t) => t !== topic));
@@ -130,7 +162,60 @@ export default function TopicList(props: IProps) {
 					/>
 				</S.TopicsAction>
 				<S.TopicsBody>{getTopics()}</S.TopicsBody>
+				{props.showActions && (
+					<S.TopicsFooter>
+						{props.closeAction && (
+							<Button type={'alt3'} label={language.close} handlePress={() => props.closeAction()} />
+						)}
+						<Button
+							type={'alt3'}
+							label={language.delete}
+							handlePress={() => setShowDeleteConfirmation(true)}
+							disabled={!props.topics?.length || topicLoading}
+							loading={false}
+							icon={ASSETS.delete}
+							iconLeftAlign
+							warning
+						/>
+					</S.TopicsFooter>
+				)}
 			</S.Wrapper>
+			{showDeleteConfirmation && (
+				<Modal header={language.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
+					<S.TopicModalWrapper>
+						<S.TopicModalBodyWrapper>
+							<p>{language.topicDeleteConfirmationInfo}</p>
+							<S.TopicModalBodyElements>
+								{props.topics.map((topic: string, index: number) => {
+									return (
+										<S.TopicModalBodyElement key={index}>
+											<span>{`· ${topic}`}</span>
+										</S.TopicModalBodyElement>
+									);
+								})}
+							</S.TopicModalBodyElements>
+						</S.TopicModalBodyWrapper>
+						<S.TopicModalActionsWrapper>
+							<Button
+								type={'primary'}
+								label={language.cancel}
+								handlePress={() => setShowDeleteConfirmation(false)}
+								disabled={topicLoading}
+							/>
+							<Button
+								type={'primary'}
+								label={language.topicDeleteConfirmation}
+								handlePress={() => deleteTopics()}
+								disabled={!props.topics?.length || topicLoading}
+								loading={topicLoading}
+								icon={ASSETS.delete}
+								iconLeftAlign
+								warning
+							/>
+						</S.TopicModalActionsWrapper>
+					</S.TopicModalWrapper>
+				</Modal>
+			)}
 			{topicResponse && (
 				<Notification
 					type={topicResponse.status}

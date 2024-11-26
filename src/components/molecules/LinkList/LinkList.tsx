@@ -20,7 +20,6 @@ import { IProps } from './types';
 
 const ALLOWED_ICON_TYPES = 'image/svg+xml';
 
-// TODO: Clear fields option
 export default function LinkList(props: IProps) {
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
@@ -158,41 +157,60 @@ export default function LinkList(props: IProps) {
 		<>
 			<S.Wrapper>
 				<S.LinksAction>
-					<S.LinksActionHeader>
+					<S.LinksHeader>
 						<p>{language.addLink}</p>
-						<S.LinkPrefillWrapper>
-							<CloseHandler callback={() => setShowPrefills(false)} active={showPrefills} disabled={!showPrefills}>
-								<Button
-									type={'alt3'}
-									label={language.prefill}
-									handlePress={() => setShowPrefills(!showPrefills)}
-									disabled={!arProvider.wallet || !portalProvider.current?.id || linkLoading}
-									loading={false}
-								/>
-								{showPrefills && (
-									<S.LinkPrefillsDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
-										<S.LinkPrefillOptions>
-											{prefills.map((prefill: { title: string; icon: string }, index: number) => {
-												return (
-													<S.LinkPrefillOption
-														key={index}
-														onClick={() => {
-															setNewLinkTitle(prefill.title);
-															setNewLinkIcon(prefill.icon);
-															setShowPrefills(false);
-														}}
-													>
-														<ReactSVG src={getTxEndpoint(prefill.icon)} />
-														<span>{prefill.title}</span>
-													</S.LinkPrefillOption>
-												);
-											})}
-										</S.LinkPrefillOptions>
-									</S.LinkPrefillsDropdown>
-								)}
-							</CloseHandler>
-						</S.LinkPrefillWrapper>
-					</S.LinksActionHeader>
+						<S.LinksHeaderActions>
+							<Button
+								type={'alt3'}
+								label={language.clear}
+								handlePress={() => {
+									setNewLinkUrl('');
+									setNewLinkTitle('');
+									setNewLinkIcon(null);
+								}}
+								disabled={
+									!arProvider.wallet ||
+									!portalProvider.current?.id ||
+									linkLoading ||
+									(!newLinkUrl && !newLinkTitle && !newLinkIcon)
+								}
+								loading={false}
+								warning
+							/>
+							<S.LinkPrefillWrapper>
+								<CloseHandler callback={() => setShowPrefills(false)} active={showPrefills} disabled={!showPrefills}>
+									<Button
+										type={'alt3'}
+										label={language.prefill}
+										handlePress={() => setShowPrefills(!showPrefills)}
+										disabled={!arProvider.wallet || !portalProvider.current?.id || linkLoading}
+										loading={false}
+									/>
+									{showPrefills && (
+										<S.LinkPrefillsDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
+											<S.LinkPrefillOptions>
+												{prefills.map((prefill: { title: string; icon: string }, index: number) => {
+													return (
+														<S.LinkPrefillOption
+															key={index}
+															onClick={() => {
+																setNewLinkTitle(prefill.title);
+																setNewLinkIcon(prefill.icon);
+																setShowPrefills(false);
+															}}
+														>
+															<ReactSVG src={getTxEndpoint(prefill.icon)} />
+															<span>{prefill.title}</span>
+														</S.LinkPrefillOption>
+													);
+												})}
+											</S.LinkPrefillOptions>
+										</S.LinkPrefillsDropdown>
+									)}
+								</CloseHandler>
+							</S.LinkPrefillWrapper>
+						</S.LinksHeaderActions>
+					</S.LinksHeader>
 					<S.LinkDetailsWrapper>
 						<FormField
 							value={newLinkTitle}
@@ -215,17 +233,7 @@ export default function LinkList(props: IProps) {
 							accept={ALLOWED_ICON_TYPES}
 						/>
 					</S.LinkDetailsWrapper>
-					<FormField
-						value={newLinkUrl}
-						onChange={(e: any) => setNewLinkUrl(e.target.value)}
-						invalid={{ status: newLinkUrl?.length > 0 && !validateUrl(newLinkUrl), message: null }}
-						label={language.url}
-						placeholder={'https://'}
-						disabled={linkLoading}
-						hideErrorMessage
-						sm
-					/>
-					<S.LinksActionFlex>
+					<S.LinksAddAction>
 						<Button
 							type={'alt3'}
 							label={language.add}
@@ -235,11 +243,26 @@ export default function LinkList(props: IProps) {
 							icon={ASSETS.add}
 							iconLeftAlign
 						/>
-					</S.LinksActionFlex>
+						<FormField
+							value={newLinkUrl}
+							onChange={(e: any) => setNewLinkUrl(e.target.value)}
+							invalid={{ status: newLinkUrl?.length > 0 && !validateUrl(newLinkUrl), message: null }}
+							label={language.url}
+							placeholder={'https://'}
+							disabled={linkLoading}
+							hideErrorMessage
+							sm
+						/>
+					</S.LinksAddAction>
 				</S.LinksAction>
-				<S.LinksBody type={props.type} className={'border-wrapper-alt3'}>
-					{getLinks()}
-				</S.LinksBody>
+				<S.LinksBodyWrapper>
+					<S.LinksHeader>
+						<p>{language.current}</p>
+					</S.LinksHeader>
+					<S.LinksBody type={props.type} className={'border-wrapper-alt3'}>
+						{getLinks()}
+					</S.LinksBody>
+				</S.LinksBodyWrapper>
 			</S.Wrapper>
 			{linkResponse && (
 				<Notification

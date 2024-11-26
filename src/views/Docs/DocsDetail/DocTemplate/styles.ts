@@ -38,7 +38,6 @@ export const Wrapper = styled.div<{ isView: boolean }>`
 
 	h2 {
 		font-size: clamp(22px, 3.15vw, 38px) !important;
-		font-family: ${(props) => props.theme.typography.family.alt1} !important;
 		scroll-margin-top: 100px;
 		a {
 			font-size: clamp(22px, 3.05vw, 34px) !important;

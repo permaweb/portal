@@ -128,6 +128,15 @@ export function isMac(): boolean {
 }
 
 export function validateUrl(url: string) {
-	const urlPattern = /^(https?:\/\/)?([\w\.-]+)\/?([\w\.\-@:%]*)$/;
+	const urlPattern = new RegExp(
+		'^(https?:\\/\\/)?' + // Optional protocol
+			'((([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}|' + // Domain name
+			'localhost|' + // OR localhost
+			'\\d{1,3}(\\.\\d{1,3}){3})' + // OR IPv4
+			'(\\:\\d+)?(\\/[-a-zA-Z\\d%_.~+]*)*' + // Optional port and path
+			'(\\?[;&a-zA-Z\\d%_.~+=-]*)?' + // Optional query
+			'(\\#[-a-zA-Z\\d_]*)?$', // Optional fragment
+		'i'
+	);
 	return urlPattern.test(url);
 }

@@ -104,7 +104,7 @@ export const NListItem = styled.li<{ disabled: boolean; active: boolean }>`
 	display: flex;
 	align-items: center;
 	cursor: pointer;
-	font-size: ${(props) => props.theme.typography.size.small};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
 	color: ${(props) => (props.active ? props.theme.colors.font.alt5 : props.theme.colors.font.alt1)};
 	font-weight: ${(props) => props.theme.typography.weight.bold};
 	margin: 0 0 7.5px 0;
@@ -129,7 +129,7 @@ export const NSubHeader = styled(NTitle)`
 	margin: 0 0 10px 0;
 	p {
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.base} !important;
+		font-size: ${(props) => props.theme.typography.size.small} !important;
 		color: ${(props) => props.theme.colors.font.primary} !important;
 	}
 `;

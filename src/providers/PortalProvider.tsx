@@ -79,8 +79,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					setCurrentId(currentPortal.id);
 					setCurrent(null);
 				}
-			} else {
-				setPermissions(null);
 			}
 		} else {
 			setPermissions(null);

@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+import { open, transition1 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 import { ViewLayoutType } from 'helpers/types';
 
@@ -20,7 +21,7 @@ export const SectionWrapper = styled.div<{ type: ViewLayoutType }>`
 	width: ${(props) => (props.type === 'header' ? '100%' : 'calc(50% - 12.5px)')};
 	display: flex;
 	flex-direction: column;
-	gap: ${(props) => (props.type === 'header' ? '12.5px' : '25px')};
+	gap: ${(props) => (props.type === 'header' ? '0' : '25px')};
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {
 		width: 100%;
@@ -28,17 +29,17 @@ export const SectionWrapper = styled.div<{ type: ViewLayoutType }>`
 `;
 
 export const Section = styled.div<{ type: ViewLayoutType }>`
-	padding: ${(props) => (props.type === 'header' ? '0 15px' : '15px 15px 0 15px')};
+	padding: 15px 15px 0 15px;
 `;
 
 export const CategoriesSection = styled(Section)<{ type: ViewLayoutType }>``;
 
 export const TopicsSection = styled(Section)<{ type: ViewLayoutType }>`
-	padding: ${(props) => (props.type === 'header' ? '0 15px 15px 15px' : '15px 15px 0 15px')};
+	padding: 15px;
 `;
 
 export const LinksSection = styled(Section)<{ type: ViewLayoutType }>`
-	padding: ${(props) => (props.type === 'header' ? '0 15px 15px 15px' : '15px 15px 0 15px')};
+	padding: ${(props) => (props.type === 'header' ? '15px 15px 0 15px' : '15px')};
 `;
 
 export const SectionHeader = styled.div`
@@ -56,9 +57,7 @@ export const SectionHeader = styled.div`
 
 export const CategoriesHeader = styled(SectionHeader)``;
 
-export const LinksHeader = styled(SectionHeader)<{ type: ViewLayoutType }>`
-	margin: ${(props) => (props.type === 'header' ? '0' : '0 0 20px 0')};
-`;
+export const LinksHeader = styled(SectionHeader)<{ type: ViewLayoutType }>``;
 
 export const SectionBody = styled.div`
 	margin: 15px 0 0 0;
@@ -99,14 +98,14 @@ export const WrapperEmpty = styled.div`
 export const BodyWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	padding: 0 0 15px 0;
+	animation: ${open} ${transition1};
 `;
 
-export const TopicsBodyWrapper = styled(BodyWrapper)`
-	margin: 10px 0 0 0;
-`;
+export const TopicsBodyWrapper = styled(BodyWrapper)``;
 
-export const LinksBodyWrapper = styled(BodyWrapper)``;
+export const LinksBodyWrapper = styled(BodyWrapper)`
+	margin: 20px 0 0 0;
+`;
 
 export const BodyActionsWrapper = styled.div`
 	width: fit-content;
@@ -135,7 +134,7 @@ export const Divider = styled.div`
 	height: 1px;
 	width: calc(100% - 30px);
 	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
-	margin: 20px auto 15px auto;
+	margin: 15px auto 0 auto;
 `;
 
 export const LoadingWrapper = styled(WrapperEmpty)``;

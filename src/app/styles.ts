@@ -223,6 +223,7 @@ export const GlobalStyle = createGlobalStyle`
     top: 0;
     left: 0;
     background: ${(props) => props.theme.colors.overlay.primary};
+		backdrop-filter: blur(3.5px);
   }
 
 	.app-loader {

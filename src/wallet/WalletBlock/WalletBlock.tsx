@@ -9,7 +9,6 @@ import * as S from './styles';
 
 export default function WalletBlock() {
 	const arProvider = useArweaveProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 

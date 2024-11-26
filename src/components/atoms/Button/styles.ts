@@ -70,28 +70,42 @@ export const Primary = styled.button<{
 	justify-content: center;
 	border: 1px solid
 		${(props) =>
-			props.active ? props.theme.colors.button.primary.active.border : props.theme.colors.button.primary.border};
+			props.warning
+				? props.theme.colors.warning.primary
+				: props.active
+				? props.theme.colors.button.primary.active.border
+				: props.theme.colors.button.primary.border};
 	border-radius: ${STYLING.dimensions.radius.alt3};
 	&:hover {
-		background: ${(props) => props.theme.colors.button.primary.active.background};
-		border: 1px solid ${(props) => props.theme.colors.button.primary.active.border};
+		background: ${(props) =>
+			props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.primary.active.background};
+		border: 1px solid
+			${(props) => (props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.primary.active.border)};
 		span {
-			color: ${(props) => props.theme.colors.button.primary.active.color} !important;
+			color: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.primary.active.color} !important;
 		}
 		svg {
-			fill: ${(props) => props.theme.colors.button.primary.active.color} !important;
-			color: ${(props) => props.theme.colors.button.primary.active.color} !important;
+			fill: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.primary.active.color} !important;
+			color: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.primary.active.color} !important;
 		}
 	}
 	&:focus {
-		background: ${(props) => props.theme.colors.button.primary.active.background};
-		border: 1px solid ${(props) => props.theme.colors.button.primary.active.border};
+		background: ${(props) =>
+			props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.primary.active.background};
+		border: 1px solid
+			${(props) => (props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.primary.active.border)};
 		span {
-			color: ${(props) => props.theme.colors.button.primary.active.color} !important;
+			color: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.primary.active.color} !important;
 		}
 		svg {
-			fill: ${(props) => props.theme.colors.button.primary.active.color} !important;
-			color: ${(props) => props.theme.colors.button.primary.active.color} !important;
+			fill: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.primary.active.color} !important;
+			color: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.primary.active.color} !important;
 		}
 	}
 	&:disabled {
@@ -116,7 +130,9 @@ export const Primary = styled.button<{
 		text-transform: uppercase;
 		letter-spacing: 0.35px;
 		color: ${(props) =>
-			props.active
+			props.warning
+				? props.theme.colors.font.light1
+				: props.active
 				? props.theme.colors.button.primary.active.color
 				: props.theme.colors.button.primary.color} !important;
 	}
@@ -134,7 +150,9 @@ export const IconPrimary = styled.div<{
 		padding: 1.5px 0 0 0;
 		margin: ${(props) => (props.leftAlign ? '3.5px 7.5px 0 0' : '3.5px 0 0 7.5px')};
 		color: ${(props) =>
-			props.disabled
+			props.warning
+				? props.theme.colors.font.light1
+				: props.disabled
 				? props.theme.colors.button.primary.disabled.color
 				: props.active
 				? props.theme.colors.button.primary.active.color
