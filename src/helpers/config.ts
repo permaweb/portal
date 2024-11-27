@@ -82,7 +82,7 @@ export const ASSETS = {
 export const ASSET_UPLOAD = {
 	src: {
 		data: 'lBWtTMWN-jtrecImXZsQ7noVQ9pofTjGBqsfwjdVApg',
-		process: 'PbQbboxhMFiJQ-CgXIK6upn4ou93VQUJlMcXeDgxqsU',
+		process: 'tDbTac_lbP8Uq3Z3UzqaypPZFlcvWxbrtCVJX0JdQvE',
 	},
 	ansType: 'blog-post',
 	contentType: 'text/html',

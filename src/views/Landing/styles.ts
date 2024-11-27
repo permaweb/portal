@@ -65,7 +65,8 @@ export const ConnectionWrapper = styled.div`
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
 	}
 `;
 
@@ -77,7 +78,8 @@ export const PortalsWrapper = styled.div`
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
 	}
 
 	@media (max-width: ${STYLING.cutoffs.tablet}) {

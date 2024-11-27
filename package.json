@@ -20,7 +20,7 @@
 	"dependencies": {
 		"@hello-pangea/dnd": "^17.0.0",
 		"@othent/kms": "^1.0.7",
-		"@permaweb/libs": "^0.0.12",
+		"@permaweb/libs": "0.0.14",
 		"html-react-parser": "^5.1.18",
 		"jwt-decode": "^4.0.0",
 		"react": "^18.2.0",
