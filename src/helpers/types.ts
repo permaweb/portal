@@ -12,6 +12,7 @@ export type PortalDetailType = {
 	links?: PortalLinkType[];
 	users?: PortalUserType[];
 	domains?: string[];
+	uploads?: PortalUploadType[];
 };
 
 // TODO
@@ -29,7 +30,15 @@ export type PortalLinkType = {
 	icon?: string;
 };
 
-export type PortalUserRoleType = 'Admin' | 'Contributor';
+export type PortalUploadType = {
+	tx: string;
+	dateUploaded: string;
+	type: PortalUploadOptionType;
+};
+
+export type PortalUploadOptionType = 'image' | 'video';
+
+export type PortalUserRoleType = 'admin' | 'contributor';
 
 export type PortalCategoryType = {
 	id: string;
@@ -149,7 +158,7 @@ export type ValidationType = {
 	message: string | null;
 };
 
-export type ButtonType = 'primary' | 'alt1' | 'alt2' | 'alt3' | 'success' | 'warning';
+export type ButtonType = 'primary' | 'alt1' | 'alt2' | 'alt3' | 'alt4' | 'success' | 'warning';
 
 export type SelectOptionType = { id: string; label: string };
 

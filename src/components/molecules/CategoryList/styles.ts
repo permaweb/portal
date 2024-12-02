@@ -65,7 +65,7 @@ export const ParentCategoryDropdown = styled.div`
 export const ParentCategoryOptions = styled.div``;
 
 export const ParentCategoryOption = styled.button<{ level: number }>`
-	height: 35px;
+	height: 37.5px;
 	width: 100%;
 	display: flex;
 	align-items: center;
@@ -102,6 +102,13 @@ export const ParentCategoryOption = styled.button<{ level: number }>`
 	&:hover {
 		background: ${(props) => props.theme.colors.container.primary.active};
 	}
+`;
+
+export const Divider = styled.div`
+	height: 1px;
+	width: calc(100% - 10px);
+	border-top: 1px solid ${(props) => props.theme.colors.border.alt1};
+	margin: 5px auto;
 `;
 
 export const CategoriesBody = styled.div`

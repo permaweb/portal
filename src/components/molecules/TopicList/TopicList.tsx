@@ -143,7 +143,7 @@ export default function TopicList(props: IProps) {
 			<S.Wrapper>
 				<S.TopicsAction>
 					<Button
-						type={'alt3'}
+						type={'alt4'}
 						label={language.add}
 						handlePress={addTopic}
 						disabled={topicActionDisabled}

@@ -63,9 +63,9 @@ export const UserActions = styled.div`
 
 function getRoleBackground(theme: DefaultTheme, role: PortalUserRoleType) {
 	switch (role) {
-		case 'Admin':
+		case 'admin':
 			return theme.colors.roles.primary;
-		case 'Contributor':
+		case 'contributor':
 			return theme.colors.roles.alt1;
 		default:
 			return theme.colors.roles.alt2;

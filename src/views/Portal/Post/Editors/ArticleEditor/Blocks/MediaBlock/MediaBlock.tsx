@@ -9,9 +9,11 @@ import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { Notification } from 'components/atoms/Notification';
 import { Modal } from 'components/molecules/Modal';
+import { Panel } from 'components/molecules/Panel';
+import { MediaLibrary } from 'components/organisms/MediaLibrary';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { NotificationType } from 'helpers/types';
+import { NotificationType, PortalUploadOptionType, PortalUploadType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
@@ -32,18 +34,21 @@ type AlignmentButton = {
 };
 
 type MediaConfig = {
+	type: PortalUploadOptionType;
 	icon: string;
 	label: string;
 	renderContent: (url: string) => JSX.Element;
 };
 
-const mediaConfig: Record<'image' | 'video', MediaConfig> = {
+const mediaConfig: Record<PortalUploadOptionType, MediaConfig> = {
 	image: {
+		type: 'image',
 		icon: ASSETS.image,
 		label: 'Image',
-		renderContent: (url) => <img src={url} alt={'Uploaded media'} />,
+		renderContent: (url) => <img src={url} />,
 	},
 	video: {
+		type: 'video',
 		icon: ASSETS.video,
 		label: 'Video',
 		renderContent: (url) => <video controls src={url} />,
@@ -72,7 +77,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		alignment: AlignmentEnum.Column,
 	});
 	const [showCaptionEdit, setShowCaptionEdit] = React.useState<boolean>(false);
-
+	const [showMediaLibrary, setShowMediaLibrary] = React.useState<boolean>(false);
 	const [isValidUrl, setIsValidUrl] = React.useState(true);
 
 	React.useEffect(() => {
@@ -140,7 +145,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		if (url.startsWith('data:image/')) {
 			return true;
 		}
-		const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+		const urlPattern = /^(https?:\/\/)?([\w\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*[\w\/:;=\?&%+#]*)?\/?$/i;
 		return urlPattern.test(url);
 	};
 
@@ -165,6 +170,11 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			};
 			reader.readAsDataURL(file);
 		}
+	};
+
+	const handleLibraryCallback = (upload: PortalUploadType) => {
+		setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(upload.tx) }));
+		setShowMediaLibrary(false);
 	};
 
 	const alignmentButtons: AlignmentButton[] = [
@@ -215,11 +225,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 									handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
 									width={140}
 								/>
-								<Button
-									type={'primary'}
-									label={language.fromLibrary}
-									handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
-								/>
+								<Button type={'primary'} label={language.fromLibrary} handlePress={() => setShowMediaLibrary(true)} />
 							</S.InputActionsFlex>
 							<input
 								id={'media-file-input'}
@@ -272,7 +278,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 							</S.Content>
 							{mediaData?.caption === null && (
 								<S.CaptionEmpty>
-									<p onClick={() => setMediaData({ ...mediaData, caption: '' })}>Add a caption</p>
+									<p onClick={() => setMediaData({ ...mediaData, caption: '' })}>{language.addCaption}</p>
 								</S.CaptionEmpty>
 							)}
 						</S.ContentWrapper>
@@ -321,6 +327,19 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					callback={() => setUploadResponse(null)}
 				/>
 			)}
+			<Panel
+				open={showMediaLibrary}
+				header={language.mediaLibrary}
+				handleClose={() => setShowMediaLibrary(false)}
+				width={690}
+				closeHandlerDisabled={true}
+			>
+				<MediaLibrary
+					type={config.type}
+					callback={(upload: PortalUploadType) => handleLibraryCallback(upload)}
+					handleClose={() => setShowMediaLibrary(false)}
+				/>
+			</Panel>
 		</>
 	);
 }

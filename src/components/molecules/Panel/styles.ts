@@ -11,7 +11,6 @@ export const PanelOverlay = styled.div<{ open: boolean }>`
 	top: 0;
 	left: 0;
 	background: ${(props) => props.theme.colors.overlay.primary};
-	backdrop-filter: blur(3.5px);
 	animation: ${open} ${transition2};
 	display: ${(props) => (props.open ? 'block' : 'none')};
 `;

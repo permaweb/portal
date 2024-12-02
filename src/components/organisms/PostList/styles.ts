@@ -124,7 +124,6 @@ export const PostStatus = styled.div<{ status: ArticleStatusType }>`
 export const WrapperEmpty = styled.div`
 	width: 100%;
 	padding: 12.5px 15px;
-	/* border-top: 1px solid ${(props) => props.theme.colors.border.primary}; */
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};

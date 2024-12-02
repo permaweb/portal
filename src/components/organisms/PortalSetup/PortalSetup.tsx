@@ -10,6 +10,8 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { useSettingsProvider } from 'providers/SettingsProvider';
 
+import { MediaLibrary } from '../MediaLibrary';
+
 import * as S from './styles';
 import { IProps } from './types';
 
@@ -101,6 +103,14 @@ export default function PortalSetup(props: IProps) {
 		);
 	}
 
+	function getMediaAction() {
+		return (
+			<S.MediaBodyWrapper>
+				<MediaLibrary type={'all'} />
+			</S.MediaBodyWrapper>
+		);
+	}
+
 	function linkSection() {
 		return (
 			<S.LinksSection type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
@@ -176,6 +186,17 @@ export default function PortalSetup(props: IProps) {
 		);
 	}
 
+	function mediaSection() {
+		return (
+			<S.Section type={props.type} className={'border-wrapper-alt3'}>
+				<S.SectionHeader>
+					<p>{language.mediaLibrary}</p>
+				</S.SectionHeader>
+				{getMediaAction()}
+			</S.Section>
+		);
+	}
+
 	return (
 		<>
 			<S.Wrapper type={props.type}>
@@ -186,6 +207,7 @@ export default function PortalSetup(props: IProps) {
 				{props.type === 'header' && <S.Divider />}
 				<S.SectionWrapper type={props.type}>
 					{props.type === 'header' ? topicSection() : categorySection()}
+					{props.type === 'detail' && mediaSection()}
 				</S.SectionWrapper>
 			</S.Wrapper>
 		</>

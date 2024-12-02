@@ -307,6 +307,7 @@ export default function CategoryList(props: IProps) {
 										>
 											<span>{language.none}</span>
 										</S.ParentCategoryOption>
+										<S.Divider />
 										{renderParentCategoryOptions(categoryOptions)}
 									</S.ParentCategoryOptions>
 								</S.ParentCategoryDropdown>
@@ -315,7 +316,7 @@ export default function CategoryList(props: IProps) {
 					</S.CategoriesParentAction>
 					<S.CategoriesAddAction>
 						<Button
-							type={'alt3'}
+							type={'alt4'}
 							label={language.add}
 							handlePress={addCategory}
 							disabled={!newCategoryName || categoryLoading}

@@ -103,7 +103,8 @@ export const Content = styled.div`
 		display: flex;
 		gap: 15px;
 
-		img {
+		img,
+		video {
 			height: fit-content;
 			border-radius: 10px;
 		}
@@ -119,7 +120,8 @@ export const Content = styled.div`
 		@media (max-width: 840px) {
 			flex-direction: column !important;
 
-			img {
+			img,
+			video {
 				width: 100% !important;
 			}
 
@@ -133,13 +135,16 @@ export const Content = styled.div`
 	.portal-media-row-reverse,
 	.portal-media-column,
 	.portal-media-column-reverse {
-		img {
+		img,
+		video {
 			width: 100%;
 		}
 	}
 
 	.portal-media-row img,
-	.portal-media-row-reverse img {
+	.portal-media-row video,
+	.portal-media-row-reverse img,
+	.portal-media-row-reverse video {
 		width: calc(100% - 312.5px);
 	}
 

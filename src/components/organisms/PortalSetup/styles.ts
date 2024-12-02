@@ -61,10 +61,6 @@ export const CategoriesHeader = styled(SectionHeader)``;
 
 export const LinksHeader = styled(SectionHeader)<{ type: ViewLayoutType }>``;
 
-export const SectionBody = styled.div`
-	margin: 15px 0 0 0;
-`;
-
 export const TopicList = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -107,6 +103,13 @@ export const TopicsBodyWrapper = styled(BodyWrapper)``;
 
 export const LinksBodyWrapper = styled(BodyWrapper)`
 	margin: 20px 0 0 0;
+`;
+
+export const MediaBodyWrapper = styled.div`
+	margin: 15px 0 0 0;
+	> :first-child {
+		padding: 0 0 15px 0 !important;
+	}
 `;
 
 export const BodyActionsWrapper = styled.div`

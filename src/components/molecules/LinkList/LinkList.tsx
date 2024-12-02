@@ -279,7 +279,7 @@ export default function LinkList(props: IProps) {
 					</S.LinkDetailsWrapper>
 					<S.LinksAddAction>
 						<Button
-							type={'alt3'}
+							type={'alt4'}
 							label={language.add}
 							handlePress={addLink}
 							disabled={linkActionDisabled}
