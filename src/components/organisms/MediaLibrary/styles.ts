@@ -152,7 +152,7 @@ export const LoadingWrapper = styled(WrapperEmpty)``;
 export const ModalWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 40px;
 	padding: 0 20px 20px 20px !important;
 `;
 

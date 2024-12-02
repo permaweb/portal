@@ -95,6 +95,12 @@ export const DOM = {
 	overlay: 'overlay',
 };
 
+export const STORAGE = {
+	walletType: `wallet-type`,
+	portal: (id: string) => `portal-${id}`,
+	profile: (id: string) => `profile-${id}`,
+};
+
 export const STYLING = {
 	cutoffs: {
 		desktop: '1200px',

@@ -6,7 +6,7 @@ import { getProfileByWalletAddress, ProfileType } from '@permaweb/libs';
 import { Modal } from 'components/molecules/Modal';
 import { Panel } from 'components/molecules/Panel';
 import { ProfileManager } from 'components/organisms/ProfileManager';
-import { ASSETS, URLS } from 'helpers/config';
+import { ASSETS, STORAGE, URLS } from 'helpers/config';
 import { getARBalanceEndpoint } from 'helpers/endpoints';
 import { WalletEnum } from 'helpers/types';
 import Othent from 'helpers/wallet';
@@ -132,14 +132,21 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		(async function () {
 			if (wallet && walletAddress) {
-				try {
-					setProfile(await getProfileByWalletAddress(walletAddress));
-				} catch (e: any) {
-					console.error(e);
+				const cachedProfile = getCachedProfile(walletAddress);
+				if (cachedProfile) {
+					setProfile(cachedProfile);
+				} else {
+					try {
+						const fetchedProfile = await getProfileByWalletAddress(walletAddress);
+						setProfile(fetchedProfile);
+						cacheProfile(walletAddress, fetchedProfile);
+					} catch (e: any) {
+						console.error(e);
+					}
 				}
 			}
 		})();
-	}, [wallet, walletAddress, walletType]);
+	}, [wallet, walletAddress]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -156,6 +163,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 							if (JSON.stringify(existingProfile) !== JSON.stringify(newProfile)) {
 								setProfile(newProfile);
+								cacheProfile(walletAddress, newProfile);
 								changeDetected = true;
 							} else {
 								await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -177,11 +185,20 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [toggleProfileUpdate]);
 
+	function getCachedProfile(address: string) {
+		const cached = localStorage.getItem(STORAGE.profile(address));
+		return cached ? JSON.parse(cached) : null;
+	}
+
+	function cacheProfile(address: string, profileData: any) {
+		localStorage.setItem(STORAGE.profile(address), JSON.stringify(profileData));
+	}
+
 	async function handleWallet() {
-		if (localStorage.getItem('walletType')) {
+		if (localStorage.getItem(STORAGE.walletType)) {
 			try {
 				setProfile(null);
-				await handleConnect(localStorage.getItem('walletType') as any);
+				await handleConnect(localStorage.getItem(STORAGE.walletType) as any);
 			} catch (e: any) {
 				console.error(e);
 			}
@@ -216,7 +233,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					setWallet(window.arweaveWallet);
 					setWalletType(WalletEnum.arConnect);
 					setWalletModalVisible(false);
-					localStorage.setItem('walletType', WalletEnum.arConnect);
+					localStorage.setItem(STORAGE.walletType, WalletEnum.arConnect);
 				} catch (e: any) {
 					console.error(e);
 				}
@@ -230,11 +247,11 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		setWallet(window.arweaveWallet);
 		setWalletAddress(Othent.getUserInfo().walletAddress);
 		setWalletType(WalletEnum.othent);
-		localStorage.setItem('walletType', WalletEnum.othent);
+		localStorage.setItem(STORAGE.walletType, WalletEnum.othent);
 	}
 
 	async function handleDisconnect() {
-		if (localStorage.getItem('walletType')) localStorage.removeItem('walletType');
+		if (localStorage.getItem(STORAGE.walletType)) localStorage.removeItem(STORAGE.walletType);
 		await global.window?.arweaveWallet?.disconnect();
 		setWallet(null);
 		setWalletAddress(null);

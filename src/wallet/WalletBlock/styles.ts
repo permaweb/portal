@@ -10,7 +10,7 @@ export const Wrapper = styled.div`
 	padding: 20px 20px;
 	animation: ${open} ${transition3};
 	p {
-		font-size: ${(props) => props.theme.typography.size.base};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-align: center;
 	}

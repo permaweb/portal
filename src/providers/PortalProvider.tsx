@@ -1,11 +1,12 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { getAtomicAssets, getZone, mapFromProcessCase, ZoneAssetType } from '@permaweb/libs';
+import { getAtomicAssets, getZone, mapFromProcessCase } from '@permaweb/libs';
 
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/molecules/Panel';
 import { PortalManager } from 'components/organisms/PortalManager';
+import { STORAGE } from 'helpers/config';
 import { PortalDetailType, PortalHeaderType, PortalPermissionsType } from 'helpers/types';
 
 import { useArweaveProvider } from './ArweaveProvider';
@@ -67,7 +68,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				: [];
 			setPortals(portalsList);
 		} else {
-			handleInitPermissionSet(false);
+			setPermissions(null);
 		}
 	}, [arProvider.profile]);
 
@@ -85,7 +86,74 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		}
 	}, [location.pathname, portals, currentId]);
 
-	async function fetchPortal() {
+	React.useEffect(() => {
+		(async function () {
+			if (currentId) {
+				try {
+					const fetchedPortal = await fetchPortal();
+					if (fetchedPortal) {
+						setCurrent(fetchedPortal);
+						cachePortal(currentId, fetchedPortal);
+					}
+				} catch (e: any) {
+					console.error(e);
+					setErrorMessage(e.message ?? 'An error occurred fetching this portal.');
+				}
+			}
+		})();
+	}, [currentId]);
+
+	React.useEffect(() => {
+		(async function () {
+			try {
+				if (currentId) {
+					handleInitPermissionSet(true); // TODO: Fetch permissions
+					const cachedPortal = getCachedPortal(currentId);
+					if (cachedPortal) {
+						setCurrent(cachedPortal);
+					} else {
+						const fetchedPortal = await fetchPortal();
+						if (fetchedPortal) {
+							setCurrent(fetchedPortal);
+							cachePortal(currentId, fetchedPortal);
+						}
+					}
+				}
+			} catch (e: any) {
+				console.error(e);
+				setErrorMessage(e.message ?? 'An error occurred getting this portal');
+			}
+		})();
+	}, [currentId, arProvider.profile]);
+
+	React.useEffect(() => {
+		(async function () {
+			let changeDetected = false;
+			let tries = 0;
+			const maxTries = 10;
+
+			while (!changeDetected && tries < maxTries) {
+				try {
+					const existingPortal = current;
+					const updatedPortal = await fetchPortal();
+
+					if (updatedPortal && JSON.stringify(existingPortal) !== JSON.stringify(updatedPortal)) {
+						setCurrent(updatedPortal);
+						cachePortal(currentId, updatedPortal);
+						changeDetected = true;
+					} else {
+						await new Promise((resolve) => setTimeout(resolve, 1000));
+						tries++;
+					}
+				} catch (e: any) {
+					console.error(e);
+					setErrorMessage(e.message ?? 'An error occurred getting this portal');
+				}
+			}
+		})();
+	}, [refreshCurrentTrigger]);
+
+	const fetchPortal = async () => {
 		if (currentId) {
 			try {
 				const portalData = await getZone(currentId);
@@ -110,7 +178,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					};
 
 					if (portalData.Assets?.length > 0) {
-						const assetsFetch = await getAtomicAssets(portalData.Assets.map((asset: ZoneAssetType) => asset.id));
+						const assetsFetch = await getAtomicAssets(portalData.Assets.map((asset: any) => asset.Id));
 						if (assetsFetch && assetsFetch.length > 0) portal.assets = assetsFetch;
 					}
 
@@ -121,47 +189,16 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				setErrorMessage(e.message ?? 'An error occurred getting this portal.');
 			}
 		}
-	}
+	};
 
-	React.useEffect(() => {
-		(async function () {
-			try {
-				if (currentId) {
-					handleInitPermissionSet(true); // TODO: Fetch permissions
-					setCurrent(await fetchPortal());
-				}
-			} catch (e: any) {
-				console.error(e);
-				setErrorMessage(e.message ?? 'An error occurred getting this portal');
-			}
-		})();
-	}, [currentId]);
+	const getCachedPortal = (id: string) => {
+		const cached = localStorage.getItem(STORAGE.portal(id));
+		return cached ? JSON.parse(cached) : null;
+	};
 
-	React.useEffect(() => {
-		(async function () {
-			let changeDetected = false;
-			let tries = 0;
-			const maxTries = 10;
-
-			while (!changeDetected && tries < maxTries) {
-				try {
-					const existingPortal = current;
-					const updatedPortal = await fetchPortal();
-
-					if (JSON.stringify(existingPortal) !== JSON.stringify(updatedPortal)) {
-						setCurrent(updatedPortal);
-						changeDetected = true;
-					} else {
-						await new Promise((resolve) => setTimeout(resolve, 1000));
-						tries++;
-					}
-				} catch (e: any) {
-					console.error(e);
-					setErrorMessage(e.message ?? 'An error occurred getting this portal');
-				}
-			}
-		})();
-	}, [refreshCurrentTrigger]);
+	const cachePortal = (id: string, portalData: any) => {
+		localStorage.setItem(STORAGE.portal(id), JSON.stringify(portalData));
+	};
 
 	function handleInitPermissionSet(base: boolean) {
 		const updatedPermissions = permissions ? { ...permissions, base: base } : { base: base };
