@@ -87,6 +87,7 @@ export default function LinkList(props: IProps) {
 		}
 	};
 
+	// TODO: Language
 	const prefills = React.useMemo(() => {
 		return [
 			{ title: 'X', icon: SOCIAL_LINK_ASSETS.x },
@@ -325,7 +326,7 @@ export default function LinkList(props: IProps) {
 						)}
 						<Button
 							type={'alt3'}
-							label={language.delete}
+							label={language.remove}
 							handlePress={() => setShowDeleteConfirmation(true)}
 							disabled={!selectedLinks?.length || linkLoading}
 							loading={false}

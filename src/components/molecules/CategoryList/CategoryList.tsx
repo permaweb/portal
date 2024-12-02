@@ -342,7 +342,7 @@ export default function CategoryList(props: IProps) {
 						)}
 						<Button
 							type={'alt3'}
-							label={language.delete}
+							label={language.remove}
 							handlePress={() => setShowDeleteConfirmation(true)}
 							disabled={!props.categories?.length || categoryLoading}
 							loading={false}

@@ -69,6 +69,7 @@ export const ASSETS = {
 	telegram: getTxEndpoint('uerxx9yd8y3DGRIJ4F9TjF4BryagPuINo5-Jo8qmno4'),
 	time: getTxEndpoint('EDfjYP_Fq8XycJ92uVeLDCmOCUMoSoPVbAhfE1ZwCJE'),
 	tools: getTxEndpoint('ORGiGGMr6wIsjVNmWuy9m-CIH8jbY3juwoDLDdxvER8'),
+	upload: getTxEndpoint('fNHk67l-JsJMKyWvSXoO6Nmcxy1imhlKwACxSMEGKAE'),
 	user: getTxEndpoint('aOk91wDJnZ1xQbQum0MHoaOldAiumdFjdjM4LVM83NQ'),
 	users: getTxEndpoint('LfFkPVJBgBWgJwCtoceyS_EAyYa-r__AjAB5_JAx3aw'),
 	video: getTxEndpoint('T2astk8vaCBLLP8PD2rXgLKbwhNYkdHXllXvGbk-Wps'),

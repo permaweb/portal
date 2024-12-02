@@ -4,6 +4,8 @@ import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
 	width: 100%;
+	max-width: ${STYLING.cutoffs.max};
+	margin: 0 auto;
 `;
 
 export const BodyWrapper = styled.div`

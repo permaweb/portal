@@ -8,6 +8,10 @@ export const Wrapper = styled.div`
 	flex-direction: column;
 	gap: 10px;
 	padding: 0 20px;
+
+	#media-file-input {
+		display: none;
+	}
 `;
 
 export const Header = styled.div`
@@ -17,6 +21,7 @@ export const Header = styled.div`
 	gap: 20px;
 	align-items: center;
 	justify-content: space-between;
+	padding: 12.5px 15px;
 	margin: 0 0 10px 0;
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
@@ -37,7 +42,6 @@ export const HeaderActions = styled.div`
 export const UploadsWrapper = styled.div`
 	width: 100%;
 	display: flex;
-	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: 20px;
 `;
@@ -47,7 +51,7 @@ export const UploadWrapper = styled.button<{ active: boolean }>`
 	aspect-ratio: 1;
 	background: ${(props) => props.theme.colors.container.alt8.background};
 	border: 1px solid ${(props) => (props.active ? props.theme.colors.indicator.active : props.theme.colors.border.alt1)};
-	outline: 2px solid ${(props) => (props.active ? props.theme.colors.indicator.active : 'transparent')};
+	outline: 1px solid ${(props) => (props.active ? props.theme.colors.indicator.active : 'transparent')};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	overflow: hidden;
 	position: relative;
@@ -121,9 +125,18 @@ export const ActionsWrapper = styled.div`
 	margin: 15px 0 0 0;
 `;
 
+export const TabsWrapper = styled.div`
+	> :first-child {
+		padding: 0 !important;
+	}
+`;
+
+export const TabWrapper = styled.div<{ label: string; icon?: string }>``;
+
+export const TabContent = styled.div``;
+
 export const WrapperEmpty = styled.div`
 	width: 100%;
-	padding: 0 20px;
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
@@ -135,3 +148,27 @@ export const WrapperEmpty = styled.div`
 `;
 
 export const LoadingWrapper = styled(WrapperEmpty)``;
+
+export const ModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 0 20px 20px 20px !important;
+`;
+
+export const ModalBodyWrapper = styled.div`
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+`;
+
+export const ModalActionsWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 15px;
+`;

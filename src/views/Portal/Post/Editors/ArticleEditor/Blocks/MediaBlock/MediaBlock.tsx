@@ -107,7 +107,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					const mediaUpdateId = await addToZone(
 						{
 							path: 'Uploads',
-							data: mapToProcessCase({ tx: tx, Type: props.type, dateUploaded: Date.now().toString() }),
+							data: mapToProcessCase({ tx: tx, type: props.type, dateUploaded: Date.now().toString() }),
 						},
 						portalProvider.current.id,
 						arProvider.wallet
@@ -125,7 +125,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 				setMediaLoading(false);
 			}
 		})();
-	}, [mediaData]);
+	}, [mediaData, portalProvider.current?.id, arProvider.wallet]);
 
 	React.useEffect(() => {
 		if (mediaData?.url && validateUrl(mediaData.url) && mediaData.url.startsWith('https://'))

@@ -168,7 +168,7 @@ export default function TopicList(props: IProps) {
 						)}
 						<Button
 							type={'alt3'}
-							label={language.delete}
+							label={language.remove}
 							handlePress={() => setShowDeleteConfirmation(true)}
 							disabled={!props.topics?.length || topicLoading}
 							loading={false}
