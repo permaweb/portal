@@ -432,14 +432,19 @@ export default function ArticleEditor() {
 
 					globalLog(`Asset content update: ${assetContentUpdateId}`);
 
-					const assetHoldersUpdateId = await aoSend({
+					const assetIndexUpdateId = await aoSend({
 						processId: assetId,
 						wallet: arProvider.wallet,
-						action: 'Update-Post-Balance-Holders',
+						action: 'Add-Associations',
+						tags: [
+							{ name: 'AssetType', value: ASSET_UPLOAD.ansType },
+							{ name: 'ContentType', value: ASSET_UPLOAD.contentType },
+							{ name: 'DateAdded', value: new Date().getTime().toString() },
+						],
 						data: { Recipients: [portalProvider.current.id] },
 					});
 
-					globalLog(`Asset holders update: ${assetHoldersUpdateId}`);
+					globalLog(`Asset index update: ${assetIndexUpdateId}`);
 
 					setResponse({ status: 'success', message: `${language.postSaved}!` });
 					portalProvider.refreshCurrentPortal();

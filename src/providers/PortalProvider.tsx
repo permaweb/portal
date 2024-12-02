@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { getAtomicAssets, getZone, mapFromProcessCase } from '@permaweb/libs';
+import { getZone, mapFromProcessCase } from '@permaweb/libs';
 
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/molecules/Panel';
@@ -59,14 +59,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		if (arProvider.profile) {
-			const portalsList: any[] = arProvider.profile.Portals
-				? arProvider.profile.Portals.map((portal: any) => ({
-						id: portal.Id,
-						name: portal.Name,
-						logo: portal.Logo ?? null,
-				  }))
-				: [];
-			setPortals(portalsList);
+			setPortals(arProvider.profile.portals ?? []);
 		} else {
 			setPermissions(null);
 		}
@@ -163,7 +156,17 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						id: currentId,
 						name: portalData.Store?.Name || 'None',
 						logo: portalData.Store?.Logo || 'None',
-						assets: [],
+						assets: portalData.Store?.Index
+							? mapFromProcessCase(
+									portalData.Store.Index.filter(
+										(asset: any) =>
+											asset.ProcessType &&
+											asset.ProcessType === 'atomic-asset' &&
+											asset.AssetType &&
+											asset.AssetType === 'blog-post'
+									)
+							  )
+							: [],
 						categories: portalData.Store?.Categories ? mapFromProcessCase(portalData.Store.Categories) : [],
 						topics: portalData.Store?.Topics ? mapFromProcessCase(portalData.Store.Topics) : [],
 						links: portalData.Store?.Links ? mapFromProcessCase(portalData.Store.Links) : [],
@@ -176,11 +179,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						],
 						domains: ['stratpol', 'stratpol-staging'], // TODO
 					};
-
-					if (portalData.Assets?.length > 0) {
-						const assetsFetch = await getAtomicAssets(portalData.Assets.map((asset: any) => asset.Id));
-						if (assetsFetch && assetsFetch.length > 0) portal.assets = assetsFetch;
-					}
 
 					return portal;
 				}

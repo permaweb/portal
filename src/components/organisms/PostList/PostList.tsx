@@ -1,19 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
-import { AssetHeaderType, formatDate } from '@permaweb/libs';
+import { formatDate } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 // import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS, URLS } from 'helpers/config';
 import { ArticleStatusType } from 'helpers/types';
-import { getTagValue } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
 // TODO: Post index in portal process
+// TODO: Date created in asset index
 // TODO: Pagination / sorting
 export default function PostList() {
 	const navigate = useNavigate();
@@ -42,9 +42,7 @@ export default function PostList() {
 			<S.PostsWrapper>
 				{portalProvider.current.assets
 					.sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())
-					.map((asset: AssetHeaderType) => {
-						const status = asset.tags && (getTagValue(asset.tags, 'Status') as ArticleStatusType);
-
+					.map((asset: any) => {
 						return (
 							<S.PostWrapper key={asset.id} className={'fade-in'}>
 								<S.PostHeader>
@@ -76,9 +74,9 @@ export default function PostList() {
 											tooltipPosition={'bottom-right'}
 										/> */}
 									</S.PostActions>
-									{status && (
-										<S.PostStatus status={status as ArticleStatusType}>
-											<p>{status}</p>
+									{asset.status && (
+										<S.PostStatus status={asset.status as ArticleStatusType}>
+											<p>{asset.status}</p>
 											<div id={'post-status'} />
 										</S.PostStatus>
 									)}
