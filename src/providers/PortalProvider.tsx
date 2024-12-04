@@ -100,7 +100,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		(async function () {
 			try {
 				if (currentId) {
-					handleInitPermissionSet(true); // TODO: Fetch permissions
+					handleInitPermissionSet(true); // TODO: Permissions
 					const cachedPortal = getCachedPortal(currentId);
 					if (cachedPortal) {
 						setCurrent(cachedPortal);
@@ -171,13 +171,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						topics: portalData.Store?.Topics ? mapFromProcessCase(portalData.Store.Topics) : [],
 						links: portalData.Store?.Links ? mapFromProcessCase(portalData.Store.Links) : [],
 						uploads: portalData.Store?.Uploads ? mapFromProcessCase(portalData.Store.Uploads) : [],
-						users: [
-							{ username: 'bob_crypto', displayName: 'Bob Smith', role: 'contributor' },
-							{ username: 'carol_dev', displayName: 'Carol Williams', role: 'admin' },
-							{ username: 'dave_builder', displayName: 'Dave Anderson', role: 'contributor' },
-							{ username: 'eva_permaweb', displayName: 'Eva Martinez', role: 'contributor' },
-						],
-						domains: ['stratpol', 'stratpol-staging'], // TODO
+						users: [], // TODO
+						domains: [], // TODO
 					};
 
 					return portal;

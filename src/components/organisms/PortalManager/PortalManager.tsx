@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
-import { addToZone, createZone, globalLog, resolveTransaction, updateZone } from '@permaweb/libs';
+import { addToZone, createZone, globalLog, resolveTransaction, updateZone, waitForProcess } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
@@ -115,6 +115,9 @@ export default function PortalManager(props: IProps) {
 				} else {
 					const portalId = await createZone({}, arProvider.wallet, (status: any) => globalLog(status));
 					globalLog(`Portal ID: ${portalId}`);
+
+					await waitForProcess(portalId);
+
 					await updatePortal(portalId, `${language.portalCreated}!`, true);
 					navigate(URLS.portalBase(portalId));
 				}

@@ -87,7 +87,6 @@ export default function LinkList(props: IProps) {
 		}
 	};
 
-	// TODO: Language
 	const prefills = React.useMemo(() => {
 		return [
 			{ title: 'X', icon: SOCIAL_LINK_ASSETS.x },

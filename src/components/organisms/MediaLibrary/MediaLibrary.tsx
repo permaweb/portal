@@ -10,7 +10,7 @@ import { Modal } from 'components/molecules/Modal';
 import { Tabs } from 'components/molecules/Tabs';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { NotificationType, PortalUploadType } from 'helpers/types';
+import { MediaConfigType, NotificationType, PortalUploadOptionType, PortalUploadType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
@@ -18,16 +18,29 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import * as S from './styles';
 import { IProps } from './types';
 
-// TODO: Media tabs
-// TODO: Filter by type
-// TODO: Upload / delete option
-// TODO: Accept media type based on current type
 export default function MediaLibrary(props: IProps) {
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+
+	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
+		image: {
+			type: 'image',
+			icon: ASSETS.image,
+			label: language.image,
+			renderContent: (url) => <img src={url} />,
+			acceptType: 'image/*',
+		},
+		video: {
+			type: 'video',
+			icon: ASSETS.video,
+			label: language.video,
+			renderContent: (url) => <video controls src={url} />,
+			acceptType: 'video/*',
+		},
+	};
 
 	const inputRef = React.useRef(null);
 
@@ -36,6 +49,7 @@ export default function MediaLibrary(props: IProps) {
 	const [selectedUpload, setSelectedUpload] = React.useState<PortalUploadType | null>(null);
 	const [uploads, setUploads] = React.useState<PortalUploadType[] | null>(null);
 	const [currentList, setCurrentList] = React.useState<string>(TABS[0]!.label);
+	const [currentAcceptType, setCurrentAcceptType] = React.useState<string>('');
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
 	const [newUploadUrl, setNewUploadUrl] = React.useState<string | null>(null);
 	const [mediaLoading, setMediaLoading] = React.useState<boolean>(false);
@@ -47,16 +61,23 @@ export default function MediaLibrary(props: IProps) {
 			switch (currentList) {
 				case language.all:
 					setUploads(portalProvider.current.uploads);
+
+					const updatedAcceptType = Object.keys(mediaConfig)
+						.map((entry) => mediaConfig[entry].acceptType)
+						.join(', ');
+					setCurrentAcceptType(updatedAcceptType);
 					break;
 				case language.images:
 					setUploads(
 						portalProvider.current.uploads.filter((upload: PortalUploadType) => upload.type.toLowerCase() === 'image')
 					);
+					setCurrentAcceptType(mediaConfig['image'].acceptType);
 					break;
 				case language.videos:
 					setUploads(
 						portalProvider.current.uploads.filter((upload: PortalUploadType) => upload.type.toLowerCase() === 'video')
 					);
+					setCurrentAcceptType(mediaConfig['video'].acceptType);
 					break;
 				default:
 					break;
@@ -108,6 +129,7 @@ export default function MediaLibrary(props: IProps) {
 
 	const deleteUpload = async () => {
 		if (arProvider.wallet && portalProvider.current?.uploads && selectedUpload) {
+			setShowDeleteConfirmation(false);
 			setMediaLoading(true);
 			setMediaMessage(`${language.removingMedia}...`);
 			try {
@@ -128,7 +150,6 @@ export default function MediaLibrary(props: IProps) {
 				globalLog(`Media update: ${mediaUpdateId}`);
 
 				setMediaResponse({ status: 'success', message: `${language.mediaUpdated}!` });
-				setShowDeleteConfirmation(false);
 			} catch (e: any) {
 				setMediaResponse({ status: 'warning', message: e.message ?? 'Error updating media' });
 			}
@@ -247,7 +268,7 @@ export default function MediaLibrary(props: IProps) {
 					id={'media-file-input'}
 					ref={inputRef}
 					type={'file'}
-					accept={props.type === 'image' ? 'image/*' : 'video/*'}
+					accept={props.type === 'all' ? currentAcceptType : mediaConfig[props.type].acceptType}
 					onChange={handleFileChange}
 				/>
 			</S.Wrapper>

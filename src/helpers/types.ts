@@ -170,3 +170,24 @@ export type NotificationType = {
 };
 
 export type ViewLayoutType = 'header' | 'detail';
+
+export enum AlignmentEnum {
+	Row = 'portal-media-row',
+	RowReverse = 'portal-media-row-reverse',
+	Column = 'portal-media-column',
+	ColumnReverse = 'portal-media-column-reverse',
+}
+
+export type AlignmentButtonType = {
+	label: string;
+	alignment: AlignmentEnum;
+	icon: string;
+};
+
+export type MediaConfigType = {
+	type: PortalUploadOptionType;
+	icon: string;
+	label: string;
+	renderContent: (url: string) => JSX.Element;
+	acceptType: string;
+};

@@ -13,55 +13,43 @@ import { Panel } from 'components/molecules/Panel';
 import { MediaLibrary } from 'components/organisms/MediaLibrary';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { NotificationType, PortalUploadOptionType, PortalUploadType } from 'helpers/types';
+import {
+	AlignmentButtonType,
+	AlignmentEnum,
+	MediaConfigType,
+	NotificationType,
+	PortalUploadOptionType,
+	PortalUploadType,
+} from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
-enum AlignmentEnum {
-	Row = 'portal-media-row',
-	RowReverse = 'portal-media-row-reverse',
-	Column = 'portal-media-column',
-	ColumnReverse = 'portal-media-column-reverse',
-}
-
-type AlignmentButton = {
-	label: string;
-	alignment: AlignmentEnum;
-	icon: string;
-};
-
-type MediaConfig = {
-	type: PortalUploadOptionType;
-	icon: string;
-	label: string;
-	renderContent: (url: string) => JSX.Element;
-};
-
-const mediaConfig: Record<PortalUploadOptionType, MediaConfig> = {
-	image: {
-		type: 'image',
-		icon: ASSETS.image,
-		label: 'Image',
-		renderContent: (url) => <img src={url} />,
-	},
-	video: {
-		type: 'video',
-		icon: ASSETS.video,
-		label: 'Video',
-		renderContent: (url) => <video controls src={url} />,
-	},
-};
-
-// TODO: Select from media library
 export default function MediaBlock(props: { type: 'image' | 'video'; content: any; data: any; onChange: any }) {
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+
+	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
+		image: {
+			type: 'image',
+			icon: ASSETS.image,
+			label: language.image,
+			renderContent: (url) => <img src={url} />,
+			acceptType: 'image/*',
+		},
+		video: {
+			type: 'video',
+			icon: ASSETS.video,
+			label: language.video,
+			renderContent: (url) => <video controls src={url} />,
+			acceptType: 'video/*',
+		},
+	};
 
 	const config = mediaConfig[props.type];
 
@@ -177,14 +165,14 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		setShowMediaLibrary(false);
 	};
 
-	const alignmentButtons: AlignmentButton[] = [
+	const alignmentButtons: AlignmentButtonType[] = [
 		{ label: 'top', alignment: AlignmentEnum.ColumnReverse, icon: ASSETS.alignTop },
 		{ label: 'right', alignment: AlignmentEnum.Row, icon: ASSETS.alignRight },
 		{ label: 'bottom', alignment: AlignmentEnum.Column, icon: ASSETS.alignBottom },
 		{ label: 'left', alignment: AlignmentEnum.RowReverse, icon: ASSETS.alignLeft },
 	];
 
-	const renderAlignmentButton = ({ label, alignment: buttonAlignment, icon }: AlignmentButton) => (
+	const renderAlignmentButton = ({ label, alignment: buttonAlignment, icon }: AlignmentButtonType) => (
 		<Button
 			key={buttonAlignment}
 			type={'alt3'}
@@ -231,7 +219,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 								id={'media-file-input'}
 								ref={inputRef}
 								type={'file'}
-								accept={props.type === 'image' ? 'image/*' : 'video/*'}
+								accept={config.acceptType}
 								onChange={handleFileChange}
 							/>
 						</S.InputActions>

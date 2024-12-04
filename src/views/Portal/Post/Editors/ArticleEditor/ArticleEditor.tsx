@@ -3,7 +3,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
-import { aoDryRun, aoSend, createAtomicAsset, globalLog, mapFromProcessCase, mapToProcessCase } from '@permaweb/libs';
+import {
+	aoDryRun,
+	aoSend,
+	createAtomicAsset,
+	globalLog,
+	mapFromProcessCase,
+	mapToProcessCase,
+	waitForProcess,
+} from '@permaweb/libs';
 
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { IconButton } from 'components/atoms/IconButton';
@@ -203,7 +211,6 @@ export default function ArticleEditor() {
 	});
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
 
-	// TODO: Auth on post
 	React.useEffect(() => {
 		(async function () {
 			if (portalProvider.current?.id) {
@@ -214,7 +221,7 @@ export default function ArticleEditor() {
 					try {
 						const response = await aoDryRun({
 							processId: assetId,
-							action: 'Get-Post',
+							action: 'Get-Asset',
 						});
 
 						if (response) {
@@ -389,13 +396,14 @@ export default function ArticleEditor() {
 					const assetContentUpdateId = await aoSend({
 						processId: assetId,
 						wallet: arProvider.wallet,
-						action: 'Update-Post',
+						action: 'Update-Asset',
 						data: data,
 					});
 
 					globalLog(`Asset content update: ${assetContentUpdateId}`);
 
 					setResponse({ status: 'success', message: `${language.postUpdated}!` });
+
 					portalProvider.refreshCurrentPortal();
 				} catch (e: any) {
 					setResponse({ status: 'warning', message: e.message ?? language.errorUpdatingPost });
@@ -423,31 +431,48 @@ export default function ArticleEditor() {
 
 					globalLog(`Asset: ${assetId}`);
 
+					await waitForProcess(assetId);
+
 					const assetContentUpdateId = await aoSend({
 						processId: assetId,
 						wallet: arProvider.wallet,
-						action: 'Update-Post',
+						action: 'Update-Asset',
 						data: data,
 					});
 
 					globalLog(`Asset content update: ${assetContentUpdateId}`);
 
+					const indexRecipients = [portalProvider.current.id];
+
+					for (const recipient of indexRecipients) {
+						const zoneIndexUpdateId = await aoSend({
+							processId: recipient,
+							wallet: arProvider.wallet,
+							action: 'Add-Index-Id',
+							tags: [{ name: 'IndexId', value: assetId }],
+						});
+
+						globalLog(`Zone index update: ${zoneIndexUpdateId}`);
+					}
+
 					const assetIndexUpdateId = await aoSend({
 						processId: assetId,
 						wallet: arProvider.wallet,
-						action: 'Add-Associations',
+						action: 'Send-Index',
 						tags: [
 							{ name: 'AssetType', value: ASSET_UPLOAD.ansType },
 							{ name: 'ContentType', value: ASSET_UPLOAD.contentType },
 							{ name: 'DateAdded', value: new Date().getTime().toString() },
 						],
-						data: { Recipients: [portalProvider.current.id] },
+						data: { Recipients: indexRecipients },
 					});
 
 					globalLog(`Asset index update: ${assetIndexUpdateId}`);
 
-					setResponse({ status: 'success', message: `${language.postSaved}!` });
 					portalProvider.refreshCurrentPortal();
+
+					setResponse({ status: 'success', message: `${language.postSaved}!` });
+
 					navigate(`${URLS.postEditArticle(portalProvider.current.id)}${assetId}`);
 				} catch (e: any) {
 					setResponse({ status: 'warning', message: e.message ?? 'Error creating post' });

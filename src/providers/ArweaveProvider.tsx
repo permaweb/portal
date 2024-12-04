@@ -135,14 +135,14 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				const cachedProfile = getCachedProfile(walletAddress);
 				if (cachedProfile) {
 					setProfile(cachedProfile);
-				} else {
-					try {
-						const fetchedProfile = await getProfileByWalletAddress(walletAddress);
-						setProfile(fetchedProfile);
-						cacheProfile(walletAddress, fetchedProfile);
-					} catch (e: any) {
-						console.error(e);
-					}
+				}
+
+				try {
+					const fetchedProfile = await getProfileByWalletAddress(walletAddress);
+					setProfile(fetchedProfile);
+					cacheProfile(walletAddress, fetchedProfile);
+				} catch (e: any) {
+					console.error(e);
 				}
 			}
 		})();
