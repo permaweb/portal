@@ -27,9 +27,7 @@ export default function CategoryList(props: IProps) {
 	const [newCategoryName, setNewCategoryName] = React.useState<string>('');
 	const [parentCategory, setParentCategory] = React.useState<string | null>(null);
 	const [showParentOptions, setShowParentOptions] = React.useState<boolean>(false);
-
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
-
 	const [categoryLoading, setCategoryLoading] = React.useState<boolean>(false);
 	const [categoryResponse, setCategoryResponse] = React.useState<NotificationType | null>(null);
 
@@ -95,6 +93,8 @@ export default function CategoryList(props: IProps) {
 				portalProvider.refreshCurrentPortal();
 
 				globalLog(`Category update: ${categoryUpdateId}`);
+
+				if (props.selectOnAdd) props.setCategories([...props.categories, newCategory]);
 
 				setCategoryOptions(updatedCategories);
 				setCategoryResponse({ status: 'success', message: `${language.categoryAdded}!` });
@@ -255,9 +255,9 @@ export default function CategoryList(props: IProps) {
 	function getCategories() {
 		if (!categoryOptions) {
 			return (
-				<S.WrapperEmpty>
+				<S.LoadingWrapper>
 					<p>{`${language.gettingCategories}...`}</p>
-				</S.WrapperEmpty>
+				</S.LoadingWrapper>
 			);
 		} else if (categoryOptions.length <= 0) {
 			return (

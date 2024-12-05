@@ -171,6 +171,29 @@ export default function ArticleToolbar(props: IProps) {
 		};
 	}, [props.toggleBlockEditMode, props.togglePanelOpen]);
 
+	React.useEffect(() => {
+		const handleFocus = () => {
+			props.setTitleFocused(true);
+		};
+
+		const handleBlur = () => {
+			props.setTitleFocused(false);
+		};
+
+		const titleElement = titleRef.current;
+		if (titleElement) {
+			titleElement.addEventListener('focus', handleFocus);
+			titleElement.addEventListener('blur', handleBlur);
+		}
+
+		return () => {
+			if (titleElement) {
+				titleElement.removeEventListener('focus', handleFocus);
+				titleElement.removeEventListener('blur', handleBlur);
+			}
+		};
+	}, [titleRef, props.setTitleFocused]);
+
 	const handleKeyDown = React.useCallback(
 		(event: React.KeyboardEvent) => {
 			if (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Tab') {

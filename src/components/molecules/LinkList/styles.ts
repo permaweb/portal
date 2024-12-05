@@ -290,12 +290,14 @@ export const WrapperEmpty = styled.div`
 	padding: 0 0 5px 0;
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
 `;
+
+export const LoadingWrapper = styled(WrapperEmpty)``;
 
 export const LinksFooter = styled.div`
 	margin: 20px 0 0 0;

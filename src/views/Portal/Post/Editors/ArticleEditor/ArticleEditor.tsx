@@ -199,6 +199,7 @@ export default function ArticleEditor() {
 	const [topics, setTopics] = React.useState<string[]>([]);
 	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
 
+	const [titleFocused, setTitleFocused] = React.useState<boolean>(false);
 	const [focusedBlock, setFocusedBlock] = React.useState<ArticleBlockType | null>(null);
 	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
 	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
@@ -275,7 +276,7 @@ export default function ArticleEditor() {
 						setToggleBlockFocus(true);
 					}
 				}
-				if (event.key === 'Backspace' && focusedBlock) {
+				if (event.key === 'Backspace' && focusedBlock && !titleFocused) {
 					const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
 					const currentBlock = blocks[currentBlockIndex];
 					if (
@@ -305,7 +306,11 @@ export default function ArticleEditor() {
 					const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
 					const currentBlock = blocks[currentBlockIndex];
 
+					const selection = window.getSelection();
+					const isTextHighlighted = selection && !selection.isCollapsed;
+
 					const disabledNavigation =
+						isTextHighlighted ||
 						!currentBlock.type ||
 						currentBlock.type === 'quote' ||
 						currentBlock.type === 'ordered-list' ||
@@ -326,6 +331,7 @@ export default function ArticleEditor() {
 						}
 					}
 				}
+
 				if (event.key === 'Enter' && (!blocks || blocks.length <= 0)) {
 					handleKeyAddBlock(event);
 				}
@@ -337,7 +343,7 @@ export default function ArticleEditor() {
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [blocks, focusedBlock, toggleBlockFocus, portalProvider.current]);
+	}, [blocks, focusedBlock, toggleBlockFocus, titleFocused, portalProvider.current]);
 
 	function getSubmitDisabled() {
 		return !blocks || blocks.length <= 0 || !blocks.some((block) => block.content.length > 0);
@@ -429,7 +435,7 @@ export default function ArticleEditor() {
 						(status) => globalLog(status)
 					);
 
-					globalLog(`Asset: ${assetId}`);
+					globalLog(`Asset ID: ${assetId}`);
 
 					await waitForProcess(assetId);
 
@@ -617,6 +623,8 @@ export default function ArticleEditor() {
 					<ArticleToolbar
 						postTitle={title}
 						setPostTitle={(value: string) => setTitle(value)}
+						titleFocused={titleFocused}
+						setTitleFocused={(focused: boolean) => setTitleFocused(focused)}
 						status={status}
 						setStatus={(value: ArticleStatusType) => setStatus(value)}
 						categories={categories}

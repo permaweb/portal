@@ -2,13 +2,22 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
-import { addToZone, createZone, globalLog, resolveTransaction, updateZone, waitForProcess } from '@permaweb/libs';
+import {
+	addToZone,
+	createZone,
+	getBootTag,
+	globalLog,
+	mapToProcessCase,
+	resolveTransaction,
+	updateZone,
+	waitForProcess,
+} from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
-import { ASSETS, URLS } from 'helpers/config';
+import { ASSETS, DEFAULT_THEME, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { NotificationType, PortalHeaderType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
@@ -50,77 +59,82 @@ export default function PortalManager(props: IProps) {
 		}
 	}, [props.portal]);
 
-	async function updatePortal(portalId: string, response: string, initialSave: boolean) {
-		try {
-			let data: any = {
-				Name: name,
-			};
-
-			if (logo) {
-				try {
-					data.Logo = await resolveTransaction(logo);
-				} catch (e: any) {
-					console.error(`Failed to resolve logo: ${e.message}`);
-				}
-			}
-
-			const portalUpdateId = await updateZone(data, portalId, arProvider.wallet);
-
-			globalLog(`Portal update: ${portalUpdateId}`);
-
-			let profileUpdateId: string | null;
-			if (initialSave) {
-				profileUpdateId = await addToZone(
-					{ path: 'Portals', data: { Id: portalId, ...data } },
-					arProvider.profile.id,
-					arProvider.wallet
-				);
-			} else {
-				// TODO: Update current index
-				const portalsUpdateData = portalProvider.portals
-					.filter((portal: PortalHeaderType) => portal.id !== portalId)
-					.map((portal: PortalHeaderType) => ({ Id: portal.id, Name: portal.name, Logo: portal.logo }));
-				portalsUpdateData.push({ Id: portalId, ...data });
-
-				profileUpdateId = await updateZone({ Portals: portalsUpdateData }, arProvider.profile.id, arProvider.wallet);
-			}
-
-			if (profileUpdateId) globalLog(`Profile update: ${profileUpdateId}`);
-
-			portalProvider.refreshCurrentPortal();
-			arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
-
-			if (props.handleUpdate) props.handleUpdate();
-			if (props.handleClose) props.handleClose();
-
-			setName('');
-			setLogo(null);
-
-			setPortalResponse({
-				message: response,
-				status: 'success',
-			});
-		} catch (e: any) {
-			throw new Error(e.message ?? 'Error updating portal');
-		}
-	}
-
 	async function handleSubmit() {
 		if (arProvider.wallet && arProvider.profile && arProvider.profile.id) {
 			setLoading(true);
 
 			try {
+				let profileUpdateId: string | null;
+				let response: string | null;
+
+				let data: any = {
+					Name: name,
+				};
+
+				if (logo) {
+					try {
+						data.Logo = await resolveTransaction(logo);
+					} catch (e: any) {
+						console.error(`Failed to resolve logo: ${e.message}`);
+					}
+				}
+
 				if (props.portal && props.portal.id) {
-					await updatePortal(props.portal.id, `${language.portalUpdated}!`, false);
+					const portalsUpdateData = portalProvider.portals
+						.filter((portal: PortalHeaderType) => portal.id !== props.portal.id)
+						.map((portal: PortalHeaderType) => ({ Id: portal.id, Name: portal.name, Logo: portal.logo }));
+					portalsUpdateData.push({ Id: props.portal.id, ...data });
+
+					profileUpdateId = await updateZone({ Portals: portalsUpdateData }, arProvider.profile.id, arProvider.wallet);
+
+					response = `${language.portalUpdated}!`;
 				} else {
-					const portalId = await createZone({}, arProvider.wallet, (status: any) => globalLog(status));
+					const tags = [getBootTag('Name', data.Name)];
+					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
+
+					const portalId = await createZone({ tags: tags }, arProvider.wallet, (status: any) => globalLog(status));
+
 					globalLog(`Portal ID: ${portalId}`);
+
+					profileUpdateId = await addToZone(
+						{ path: 'Portals', data: { Id: portalId, ...data } },
+						arProvider.profile.id,
+						arProvider.wallet
+					);
 
 					await waitForProcess(portalId);
 
-					await updatePortal(portalId, `${language.portalCreated}!`, true);
+					const initUpdateId = await addToZone(
+						{
+							path: 'Themes',
+							data: { ...mapToProcessCase(DEFAULT_THEME) },
+						},
+						portalId,
+						arProvider.wallet
+					);
+
+					globalLog(`Init Update ID: ${initUpdateId}`);
+
+					response = `${language.portalCreated}!`;
+
 					navigate(URLS.portalBase(portalId));
 				}
+
+				if (profileUpdateId) globalLog(`Profile update: ${profileUpdateId}`);
+
+				portalProvider.refreshCurrentPortal();
+				arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
+
+				if (props.handleUpdate) props.handleUpdate();
+				if (props.handleClose) props.handleClose();
+
+				setName('');
+				setLogo(null);
+
+				setPortalResponse({
+					message: response,
+					status: 'success',
+				});
 			} catch (e: any) {
 				setPortalResponse({
 					message: e.message ?? language.errorUpdatingPortal,

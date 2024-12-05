@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
-	padding: 20px;
+	padding: 15px;
 `;
 
 export const Header = styled.div`
@@ -17,7 +17,9 @@ export const Header = styled.div`
 	}
 `;
 
-export const Body = styled.div``;
+export const Body = styled.div`
+	margin: 15px 0 0 0;
+`;
 
 export const Section = styled.div`
 	margin: 20px 0 0 0;
@@ -38,11 +40,23 @@ export const SectionBody = styled.div`
 
 export const BackgroundWrapper = styled.div``;
 
+export const MenusWrapper = styled.div`
+	margin: 5px 0 0 0;
+`;
+
+export const FlexWrapper = styled.div`
+	display: flex;
+	justify-content: space-between;
+	gap: 20px;
+	margin: 5px 0 0 0;
+`;
+
+export const SectionsWrapper = styled.div``;
+
 export const GridWrapper = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	gap: 10px 20px;
-	margin: 10px 0 0 0;
 `;
 
 export const ColorTooltip = styled.div`
@@ -67,6 +81,7 @@ export const ColorTooltip = styled.div`
 `;
 
 export const ColorWrapper = styled.div`
+	height: fit-content;
 	position: relative;
 
 	&:hover {
@@ -121,14 +136,16 @@ export const SelectorWrapper = styled.div`
 
 	.react-colorful__saturation {
 		border-radius: 0;
-		border: 1px solid ${(props) => props.theme.colors.border.primary};
-		border-radius: ${STYLING.dimensions.radius.primary};
+		border: none;
+		box-shadow: none;
+		border-top-right-radius: ${STYLING.dimensions.radius.primary};
+		border-bottom-right-radius: ${STYLING.dimensions.radius.primary};
 	}
 
 	.react-colorful__last-control {
 		width: 100%;
 		position: absolute;
-		bottom: -30px;
+		bottom: -40px;
 		left: 0;
 		border-radius: 0;
 		margin: 20px 0 0 0;
@@ -156,10 +173,12 @@ export const SelectorHeader = styled.div`
 `;
 
 export const SelectorActions = styled.div`
-	margin: 50px 0 0 0;
+	margin: 70px 0 0 0;
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-between;
+	gap: 20px;
 
 	input {
 		height: ${STYLING.dimensions.form.small};
@@ -187,9 +206,15 @@ export const SelectorActions = styled.div`
 	}
 `;
 
+export const SelectorFlexActions = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 20px;
+`;
+
 export const SelectorFlexWrapper = styled.div`
 	display: flex;
-	gap: 20px;
 	position: relative;
 `;
 
@@ -197,6 +222,19 @@ export const SelectorPreview = styled.div<{ background: string }>`
 	height: 220px;
 	min-width: 190px;
 	background: ${(props) => props.background};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
-	border-radius: ${STYLING.dimensions.radius.primary};
+	border-right: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-top-left-radius: ${STYLING.dimensions.radius.primary};
+	border-bottom-left-radius: ${STYLING.dimensions.radius.primary};
 `;
+
+export const WrapperEmpty = styled.div`
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
+`;
+
+export const LoadingWrapper = styled(WrapperEmpty)``;

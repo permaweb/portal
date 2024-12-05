@@ -12,8 +12,6 @@ import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
-// TODO: Post index in portal process
-// TODO: Date created in asset index
 // TODO: Pagination / sorting
 export default function PostList() {
 	const navigate = useNavigate();

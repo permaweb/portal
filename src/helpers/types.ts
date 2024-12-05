@@ -13,6 +13,7 @@ export type PortalDetailType = {
 	users?: PortalUserType[];
 	domains?: string[];
 	uploads?: PortalUploadType[];
+	themes?: PortalThemeType[];
 };
 
 // TODO
@@ -20,6 +21,25 @@ export type PortalUserType = {
 	username: string;
 	displayName: string;
 	role: PortalUserRoleType;
+};
+
+export type PortalThemeType = {
+	name: string;
+	active: boolean;
+	scheme: 'light' | 'dark';
+	colors: {
+		background: string;
+		primary: string;
+		secondary: string;
+		sections: string;
+		menus: string;
+		links: string;
+	};
+	preferences: {
+		gradient: boolean;
+		shadow: boolean;
+		borders: boolean;
+	};
 };
 
 export type PortalTopicType = { value: string };

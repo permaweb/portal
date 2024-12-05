@@ -3,6 +3,8 @@ import { ArticleBlockEnum, ArticleStatusType, PortalCategoryType } from 'helpers
 export interface IProps {
 	postTitle: string;
 	setPostTitle: (value: string) => void;
+	titleFocused: boolean;
+	setTitleFocused: (focused: boolean) => void;
 	status: ArticleStatusType;
 	setStatus: (value: ArticleStatusType) => void;
 	categories: PortalCategoryType[];

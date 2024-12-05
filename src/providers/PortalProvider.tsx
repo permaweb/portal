@@ -171,6 +171,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						topics: portalData.Store?.Topics ? mapFromProcessCase(portalData.Store.Topics) : [],
 						links: portalData.Store?.Links ? mapFromProcessCase(portalData.Store.Links) : [],
 						uploads: portalData.Store?.Uploads ? mapFromProcessCase(portalData.Store.Uploads) : [],
+						themes: portalData.Store?.Themes ? mapFromProcessCase(portalData.Store.Themes) : [],
 						users: [], // TODO
 						domains: [], // TODO
 					};

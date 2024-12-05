@@ -87,22 +87,6 @@ export default function LinkList(props: IProps) {
 		}
 	};
 
-	const prefills = React.useMemo(() => {
-		return [
-			{ title: 'X', icon: SOCIAL_LINK_ASSETS.x },
-			{ title: 'Odysee', icon: SOCIAL_LINK_ASSETS.odysee },
-			{ title: 'Youtube', icon: SOCIAL_LINK_ASSETS.youtube },
-			{ title: 'Telegram', icon: SOCIAL_LINK_ASSETS.telegram },
-			{ title: 'VK', icon: SOCIAL_LINK_ASSETS.vk },
-			{ title: 'LinkedIn', icon: SOCIAL_LINK_ASSETS.linkedin },
-			{ title: 'Rumble', icon: SOCIAL_LINK_ASSETS.rumble },
-			{ title: 'Facebook', icon: SOCIAL_LINK_ASSETS.facebook },
-			{ title: 'Daily Motion', icon: SOCIAL_LINK_ASSETS.dailyMotion },
-			{ title: 'Patreon', icon: SOCIAL_LINK_ASSETS.patreon },
-			{ title: 'RSS', icon: SOCIAL_LINK_ASSETS.rss },
-		];
-	}, [language]);
-
 	const addLink = async () => {
 		if (newLinkUrl && newLinkTitle && portalProvider.current?.id && arProvider.wallet) {
 			setLinkLoading(true);
@@ -157,6 +141,22 @@ export default function LinkList(props: IProps) {
 		}
 	}
 
+	const prefills = React.useMemo(() => {
+		return [
+			{ title: 'X', icon: SOCIAL_LINK_ASSETS.x },
+			{ title: 'Odysee', icon: SOCIAL_LINK_ASSETS.odysee },
+			{ title: 'Youtube', icon: SOCIAL_LINK_ASSETS.youtube },
+			{ title: 'Telegram', icon: SOCIAL_LINK_ASSETS.telegram },
+			{ title: 'VK', icon: SOCIAL_LINK_ASSETS.vk },
+			{ title: 'LinkedIn', icon: SOCIAL_LINK_ASSETS.linkedin },
+			{ title: 'Rumble', icon: SOCIAL_LINK_ASSETS.rumble },
+			{ title: 'Facebook', icon: SOCIAL_LINK_ASSETS.facebook },
+			{ title: 'Daily Motion', icon: SOCIAL_LINK_ASSETS.dailyMotion },
+			{ title: 'Patreon', icon: SOCIAL_LINK_ASSETS.patreon },
+			{ title: 'RSS', icon: SOCIAL_LINK_ASSETS.rss },
+		];
+	}, [language]);
+
 	function getIconWrapper() {
 		if (newLinkIcon)
 			return <ReactSVG src={checkValidAddress(newLinkIcon) ? getTxEndpoint(newLinkIcon) : newLinkIcon} />;
@@ -166,9 +166,9 @@ export default function LinkList(props: IProps) {
 	const getLinks = () => {
 		if (!linkOptions) {
 			return (
-				<S.WrapperEmpty>
+				<S.LoadingWrapper>
 					<p>{`${language.gettingLinks}...`}</p>
-				</S.WrapperEmpty>
+				</S.LoadingWrapper>
 			);
 		} else if (linkOptions.length <= 0) {
 			return (
