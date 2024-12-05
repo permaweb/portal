@@ -37,3 +37,16 @@ export const ActionWrapper = styled.div`
 		}
 	}
 `;
+
+export const PanelBodyWrapper = styled.div`
+	padding: 0 20px;
+`;
+
+export const PanelActionsWrapper = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 20px;
+	margin: 20px 0 0 0;
+`;

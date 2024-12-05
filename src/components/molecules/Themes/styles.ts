@@ -2,11 +2,10 @@ import styled from 'styled-components';
 
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.div`
-	padding: 15px;
-`;
+export const Wrapper = styled.div``;
 
 export const Header = styled.div`
+	margin: 0 0 15px 0;
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
@@ -18,11 +17,14 @@ export const Header = styled.div`
 `;
 
 export const Body = styled.div`
-	margin: 15px 0 0 0;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	margin: 10px 0 0 0;
 `;
 
 export const Section = styled.div`
-	margin: 20px 0 0 0;
+	padding: 15px;
 `;
 
 export const SectionHeader = styled.div`
@@ -35,23 +37,26 @@ export const SectionHeader = styled.div`
 `;
 
 export const SectionBody = styled.div`
-	margin: 5px 0 0 0;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	margin: 10px 0 0 0;
 `;
 
 export const BackgroundWrapper = styled.div``;
 
-export const MenusWrapper = styled.div`
-	margin: 5px 0 0 0;
-`;
+export const MenusWrapper = styled.div``;
 
 export const FlexWrapper = styled.div`
 	display: flex;
 	justify-content: space-between;
 	gap: 20px;
-	margin: 5px 0 0 0;
 `;
 
-export const SectionsWrapper = styled.div``;
+export const SectionsWrapper = styled.div`
+	display: flex;
+	flex: 1;
+`;
 
 export const GridWrapper = styled.div`
 	display: flex;
@@ -83,6 +88,8 @@ export const ColorTooltip = styled.div`
 export const ColorWrapper = styled.div`
 	height: fit-content;
 	position: relative;
+	display: flex;
+	flex: 1;
 
 	&:hover {
 		${ColorTooltip} {
@@ -95,11 +102,10 @@ export const ColorBody = styled.button<{ background: string; height?: number; wi
 	height: ${(props) => (props.height ? `${props.height.toString()}px` : '50px')};
 	width: ${(props) => (props.maxWidth ? '100%' : props.width ? `${props.width.toString()}px` : '50px')};
 	background: ${(props) => props.background};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	overflow: hidden;
 	position: relative;
-	margin: 7.5px 0 0 0;
+	flex: 1;
 
 	::after {
 		content: '';

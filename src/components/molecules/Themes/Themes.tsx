@@ -15,6 +15,7 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import { Modal } from '../Modal';
 
 import * as S from './styles';
+import { IProps } from './types';
 
 function Color(props: {
 	label: string;
@@ -142,7 +143,7 @@ function Section(props: {
 	}
 
 	return (
-		<S.Section>
+		<S.Section className={'border-wrapper-alt3'}>
 			<S.SectionHeader>
 				<p>{props.label}</p>
 			</S.SectionHeader>
@@ -194,7 +195,7 @@ function Section(props: {
 	);
 }
 
-export default function Themes() {
+export default function Themes(props: IProps) {
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 
@@ -267,10 +268,12 @@ export default function Themes() {
 
 	return (
 		<>
-			<S.Wrapper className={'border-wrapper-primary'}>
-				<S.Header>
-					<p>{language.themes}</p>
-				</S.Header>
+			<S.Wrapper>
+				{!props.hideHeader && (
+					<S.Header>
+						<p>{language.themes}</p>
+					</S.Header>
+				)}
 				<S.Body>{getThemes()}</S.Body>
 			</S.Wrapper>
 			{loading && <Loader message={`${language.updatingTheme}...`} />}
