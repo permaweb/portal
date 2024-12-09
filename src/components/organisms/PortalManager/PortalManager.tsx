@@ -85,6 +85,10 @@ export default function PortalManager(props: IProps) {
 						.map((portal: PortalHeaderType) => ({ Id: portal.id, Name: portal.name, Logo: portal.logo }));
 					portalsUpdateData.push({ Id: props.portal.id, ...data });
 
+					const portalUpdateId = await updateZone(data, props.portal.id, arProvider.wallet);
+
+					globalLog(`Portal update: ${portalUpdateId}`);
+
 					profileUpdateId = await updateZone({ Portals: portalsUpdateData }, arProvider.profile.id, arProvider.wallet);
 
 					response = `${language.portalUpdated}!`;

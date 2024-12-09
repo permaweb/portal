@@ -141,7 +141,7 @@ export const LInput = styled.button<{ hasLogo: boolean }>`
             right: 0;
             bottom: 0;
             background-color: ${props.theme.colors.overlay.alt1};
-			border-radius: ${STYLING.dimensions.radius.primary};
+			border-radius: ${STYLING.dimensions.radius.alt2};
             opacity: 0;
             transition: all 100ms;
         }
