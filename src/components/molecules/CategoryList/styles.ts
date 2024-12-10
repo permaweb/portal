@@ -65,7 +65,7 @@ export const ParentCategoryDropdown = styled.div`
 export const ParentCategoryOptions = styled.div``;
 
 export const ParentCategoryOption = styled.button<{ level: number }>`
-	height: 37.5px;
+	height: 40px;
 	width: 100%;
 	display: flex;
 	align-items: center;

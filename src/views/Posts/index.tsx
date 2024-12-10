@@ -46,7 +46,7 @@ export default function Posts() {
 						/>,
 					]}
 				/>
-				<S.BodyWrapper className={'border-wrapper-primary'}>
+				<S.BodyWrapper>
 					<PostList />
 				</S.BodyWrapper>
 			</S.Wrapper>

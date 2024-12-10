@@ -23,6 +23,7 @@ export const ASSETS = {
 	alignTop: getTxEndpoint('ipK9O_qhzkDCa1E0iCn_rt3g9TSxkmHZzYcywsx8tNw'),
 	arconnect: getTxEndpoint('-A1IutbyzVDJHi91QwRDQ_mpNa9Jbz-Tapu4YDVsCrc'),
 	arrow: getTxEndpoint('ghFL1fzQ2C1eEAnqSVvfAMP5Jikx7NKSPP5neoNPALw'),
+	arrows: getTxEndpoint('9WYuWYKP1eE6kcmrW6IPCCnwqFvKX4DtWD0hVn2RRPo'),
 	article: getTxEndpoint('upm3OCUmKcVpgCP6QCsMDspuUovC4WamRXql4iaFo9A'),
 	checkmark: getTxEndpoint('mVnNwxm-F6CV043zVtORE-EaMWfd2j8w6HHX70IcVbI'),
 	close: getTxEndpoint('BASlMnOWcLCcLUSrO2wUybQL_06231dLONeVkdTWs3o'),
