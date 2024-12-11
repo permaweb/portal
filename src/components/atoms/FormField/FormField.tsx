@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Modal } from 'components/molecules/Modal';
+import { Modal } from 'components/atoms/Modal';
 import { ASSETS } from 'helpers/config';
 import { formatRequiredField } from 'helpers/utils';
 

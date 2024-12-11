@@ -2,9 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from 'components/atoms/Button';
+import { Modal } from 'components/atoms/Modal';
 import { ViewHeader } from 'components/atoms/ViewHeader';
-import { Modal } from 'components/molecules/Modal';
-import { TopicList } from 'components/molecules/TopicList';
+import { Topics } from 'components/molecules/Topics';
 import { PostList } from 'components/organisms/PostList';
 import { ASSETS, URLS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -53,11 +53,7 @@ export default function Posts() {
 			{showTopicAction && (
 				<Modal header={language.editPostTopics} handleClose={() => setShowTopicAction(false)}>
 					<S.TopicModalWrapper>
-						<TopicList
-							topics={selectedTopics}
-							setTopics={(topics: string[]) => setSelectedTopics(topics)}
-							showActions
-						/>
+						<Topics topics={selectedTopics} setTopics={(topics: string[]) => setSelectedTopics(topics)} showActions />
 					</S.TopicModalWrapper>
 				</Modal>
 			)}

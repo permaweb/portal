@@ -1,3 +1,4 @@
 export interface IProps {
-	useHeader?: boolean;
+	useHeaderDetails?: boolean;
+	pageCount?: number;
 }

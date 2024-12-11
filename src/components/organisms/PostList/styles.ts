@@ -9,12 +9,17 @@ export const Wrapper = styled.div`
 `;
 
 export const PostsHeader = styled.div`
-	padding: 12.5px 15px;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+`;
+
+export const PostsHeaderDetails = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	padding: 12.5px 15px;
 	border-radius: ${STYLING.dimensions.radius.alt2} !important;
-	margin: 0 0 15px 0;
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
@@ -30,13 +35,7 @@ export const PostsActions = styled.div`
 	gap: 10px;
 	align-items: center;
 	justify-content: space-between;
-	padding: 13.5px 15px;
-	background: ${(props) => props.theme.colors.container.alt1.background};
-	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
-	border-left: 1px solid ${(props) => props.theme.colors.border.primary};
-	border-right: 1px solid ${(props) => props.theme.colors.border.primary};
-	border-top-left-radius: ${STYLING.dimensions.radius.alt2};
-	border-top-right-radius: ${STYLING.dimensions.radius.alt2};
+	margin: 0 0 20px 0;
 `;
 
 export const PostsStatusFilterWrapper = styled.div`
@@ -55,10 +54,13 @@ export const PostsWrapper = styled.div`
 
 	background: ${(props) => props.theme.colors.container.primary.background};
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
-	border-bottom-left-radius: ${STYLING.dimensions.radius.alt2};
-	border-bottom-right-radius: ${STYLING.dimensions.radius.alt2};
+	border-radius: ${STYLING.dimensions.radius.alt2};
 
 	> * {
+		&:first-child {
+			border-top-left-radius: ${STYLING.dimensions.radius.alt2};
+			border-top-right-radius: ${STYLING.dimensions.radius.alt2};
+		}
 		&:last-child {
 			border-bottom-left-radius: ${STYLING.dimensions.radius.alt2};
 			border-bottom-right-radius: ${STYLING.dimensions.radius.alt2};
@@ -163,6 +165,33 @@ export const PostStatus = styled.div<{ status: ArticleStatusType }>`
 		border: 1px solid ${(props) => props.theme.colors.border.primary};
 		border-radius: 50%;
 		background: ${(props) => getPostStatusBackground(props.status, props.theme)};
+	}
+`;
+
+export const PostsFooter = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	margin: 7.5px 0 0 0;
+`;
+
+export const PostsFooterActions = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+`;
+
+export const PostsFooterDetail = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 2.5px;
+
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;
 

@@ -75,7 +75,7 @@ export default function Portal() {
 				<S.SectionWrapper>
 					<S.PostsSection>
 						<S.SectionBody>
-							<PostList useHeader />
+							<PostList useHeaderDetails />
 						</S.SectionBody>
 					</S.PostsSection>
 					<S.UsersSection className={'border-wrapper-alt3'}>

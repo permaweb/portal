@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { getZone, mapFromProcessCase } from '@permaweb/libs';
 
 import { Notification } from 'components/atoms/Notification';
-import { Panel } from 'components/molecules/Panel';
+import { Panel } from 'components/atoms/Panel';
 import { PortalManager } from 'components/organisms/PortalManager';
 import { STORAGE } from 'helpers/config';
 import { PortalDetailType, PortalHeaderType, PortalPermissionsType } from 'helpers/types';

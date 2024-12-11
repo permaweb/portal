@@ -1,9 +1,9 @@
 import React from 'react';
 
 import { IconButton } from 'components/atoms/IconButton';
-import { CategoryList } from 'components/molecules/CategoryList';
-import { LinkList } from 'components/molecules/LinkList';
-import { TopicList } from 'components/molecules/TopicList';
+import { Categories } from 'components/molecules/Categories';
+import { Links } from 'components/molecules/Links';
+import { Topics } from 'components/molecules/Topics';
 import { ASSETS } from 'helpers/config';
 import { PortalCategoryType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -77,7 +77,7 @@ export default function PortalSetup(props: IProps) {
 	function getCategoryAction() {
 		return (
 			<S.BodyWrapper>
-				<CategoryList
+				<Categories
 					categories={selectedCategories}
 					setCategories={(categories: PortalCategoryType[]) => handleSetCategories(categories)}
 					includeChildrenOnSelect
@@ -90,7 +90,7 @@ export default function PortalSetup(props: IProps) {
 	function getTopicAction() {
 		return (
 			<S.TopicsBodyWrapper>
-				<TopicList topics={selectedTopics} setTopics={(topics: string[]) => setSelectedTopics(topics)} showActions />
+				<Topics topics={selectedTopics} setTopics={(topics: string[]) => setSelectedTopics(topics)} showActions />
 			</S.TopicsBodyWrapper>
 		);
 	}
@@ -98,7 +98,7 @@ export default function PortalSetup(props: IProps) {
 	function getLinkAction() {
 		return (
 			<S.LinksBodyWrapper>
-				<LinkList type={props.type} />
+				<Links type={props.type} />
 			</S.LinksBodyWrapper>
 		);
 	}

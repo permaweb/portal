@@ -12,12 +12,12 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
-import { Modal } from '../Modal';
+import { Modal } from '../../atoms/Modal';
 
 import * as S from './styles';
 import { IProps } from './types';
 
-export default function CategoryList(props: IProps) {
+export default function Categories(props: IProps) {
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();

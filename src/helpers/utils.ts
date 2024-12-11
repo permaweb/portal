@@ -1,3 +1,5 @@
+import { PortalAssetType } from './types';
+
 export function checkValidAddress(address: string | null) {
 	if (!address) return false;
 	return /^[a-z0-9_-]{43}$/i.test(address);
@@ -141,7 +143,7 @@ export function validateUrl(url: string) {
 	return urlPattern.test(url);
 }
 
-export function areAssetsEqual(assets1: any[], assets2: any[]): boolean {
+export function areAssetsEqual(assets1: PortalAssetType[], assets2: PortalAssetType[]): boolean {
 	if (assets1.length !== assets2.length) {
 		return false;
 	}

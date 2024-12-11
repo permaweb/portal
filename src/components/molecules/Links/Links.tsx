@@ -15,14 +15,14 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
-import { Modal } from '../Modal';
+import { Modal } from '../../atoms/Modal';
 
 import * as S from './styles';
 import { IProps } from './types';
 
 const ALLOWED_ICON_TYPES = 'image/svg+xml';
 
-export default function LinkList(props: IProps) {
+export default function Links(props: IProps) {
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 
