@@ -65,6 +65,9 @@ export const PostsWrapper = styled.div`
 			border-bottom-left-radius: ${STYLING.dimensions.radius.alt2};
 			border-bottom-right-radius: ${STYLING.dimensions.radius.alt2};
 		}
+		&:not(:last-child) {
+			border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+		}
 	}
 `;
 
