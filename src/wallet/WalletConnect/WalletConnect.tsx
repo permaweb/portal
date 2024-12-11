@@ -2,7 +2,7 @@ import React from 'react';
 import { ReactSVG } from 'react-svg';
 
 import { Avatar } from 'components/atoms/Avatar';
-import { Modal } from 'components/molecules/Modal';
+import { Panel } from 'components/atoms/Panel';
 import { ASSETS } from 'helpers/config';
 import {
 	darkTheme,
@@ -165,10 +165,10 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 									<ReactSVG src={ASSETS.write} />
 									{language.profile}
 								</li>
-								<li onClick={() => setShowThemeSelector(true)}>
+								{/* <li onClick={() => setShowThemeSelector(true)}>
 									<ReactSVG src={ASSETS.language} />
 									{language.language}
-								</li>
+								</li> */}
 								<li onClick={() => setShowThemeSelector(true)}>
 									<ReactSVG src={ASSETS.design} />
 									{language.appearance}
@@ -184,36 +184,39 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 					)}
 				</S.Wrapper>
 			</CloseHandler>
-			{showThemeSelector && (
-				<Modal header={language.chooseAppAppearance} handleClose={() => setShowThemeSelector(false)}>
-					<S.MWrapper className={'modal-wrapper'}>
-						{Object.entries(THEMES).map(([key, theme]) => (
-							<S.ThemeSection key={key}>
-								<S.ThemeSectionHeader>
-									<ReactSVG src={theme.icon} />
-									<p>{theme.label}</p>
-								</S.ThemeSectionHeader>
-								<S.ThemeSectionBody>
-									{theme.variants.map((variant) => (
-										<S.ThemeSectionBodyElement
-											key={variant.id}
-											onClick={() => updateSettings('theme', variant.id as any)}
-										>
-											<S.Preview background={variant.background} accent={variant.accent1}>
-												<div id={'preview-accent-1'} />
-											</S.Preview>
-											<div>
-												<S.Indicator active={settings.theme === variant.id} />
-												<p>{variant.name}</p>
-											</div>
-										</S.ThemeSectionBodyElement>
-									))}
-								</S.ThemeSectionBody>
-							</S.ThemeSection>
-						))}
-					</S.MWrapper>
-				</Modal>
-			)}
+			<Panel
+				open={showThemeSelector}
+				width={425}
+				header={language.chooseAppAppearance}
+				handleClose={() => setShowThemeSelector(false)}
+			>
+				<S.MWrapper className={'modal-wrapper'}>
+					{Object.entries(THEMES).map(([key, theme]) => (
+						<S.ThemeSection key={key}>
+							<S.ThemeSectionHeader>
+								<ReactSVG src={theme.icon} />
+								<p>{theme.label}</p>
+							</S.ThemeSectionHeader>
+							<S.ThemeSectionBody>
+								{theme.variants.map((variant) => (
+									<S.ThemeSectionBodyElement
+										key={variant.id}
+										onClick={() => updateSettings('theme', variant.id as any)}
+									>
+										<S.Preview background={variant.background} accent={variant.accent1}>
+											<div id={'preview-accent-1'} />
+										</S.Preview>
+										<div>
+											<S.Indicator active={settings.theme === variant.id} />
+											<p>{variant.name}</p>
+										</div>
+									</S.ThemeSectionBodyElement>
+								))}
+							</S.ThemeSectionBody>
+						</S.ThemeSection>
+					))}
+				</S.MWrapper>
+			</Panel>
 		</>
 	);
 }

@@ -410,7 +410,7 @@ export default function ArticleEditor() {
 
 					setResponse({ status: 'success', message: `${language.postUpdated}!` });
 
-					portalProvider.refreshCurrentPortal();
+					portalProvider.refreshCurrentPortal('assets');
 				} catch (e: any) {
 					setResponse({ status: 'warning', message: e.message ?? language.errorUpdatingPost });
 				}
@@ -475,7 +475,7 @@ export default function ArticleEditor() {
 
 					globalLog(`Asset index update: ${assetIndexUpdateId}`);
 
-					portalProvider.refreshCurrentPortal();
+					portalProvider.refreshCurrentPortal('assets');
 
 					setResponse({ status: 'success', message: `${language.postSaved}!` });
 

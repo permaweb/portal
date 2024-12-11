@@ -235,9 +235,19 @@ export const Alt2 = styled(Alt1)`
 		span {
 			color: ${(props) => props.theme.colors.button.alt2.active.color} !important;
 		}
+
+		svg {
+			fill: ${(props) => props.theme.colors.button.alt2.active.color} !important;
+			color: ${(props) => props.theme.colors.button.alt2.active.color} !important;
+		}
 	}
 	&:focus {
 		span {
+			color: ${(props) => props.theme.colors.button.alt2.active.color} !important;
+		}
+
+		svg {
+			fill: ${(props) => props.theme.colors.button.alt2.active.color} !important;
 			color: ${(props) => props.theme.colors.button.alt2.active.color} !important;
 		}
 	}
@@ -253,7 +263,7 @@ export const Alt2 = styled(Alt1)`
 		width: fit-content;
 		text-overflow: ellipsis;
 		overflow: hidden;
-		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		text-transform: none;
 		color: ${(props) =>

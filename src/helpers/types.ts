@@ -1,12 +1,10 @@
-import { AssetHeaderType } from '@permaweb/libs';
-
 export type PortalHeaderType = { id: string; name: string; logo: string | null };
 
 export type PortalDetailType = {
 	id: string;
 	name: string;
 	logo: string | null;
-	assets?: AssetHeaderType[];
+	assets?: PortalAssetType[];
 	categories?: PortalCategoryType[];
 	topics?: PortalTopicType[];
 	links?: PortalLinkType[];
@@ -14,6 +12,15 @@ export type PortalDetailType = {
 	domains?: string[];
 	uploads?: PortalUploadType[];
 	themes?: PortalThemeType[];
+};
+
+// TODO
+export type PortalAssetType = {
+	id: string;
+	title: string;
+	dateCreated: number;
+	creator: string;
+	status: ArticleStatusType;
 };
 
 // TODO

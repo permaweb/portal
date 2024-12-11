@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { getProfileByWalletAddress, ProfileType } from '@permaweb/libs';
 
-import { Modal } from 'components/molecules/Modal';
-import { Panel } from 'components/molecules/Panel';
+import { Modal } from 'components/atoms/Modal';
+import { Panel } from 'components/atoms/Panel';
 import { ProfileManager } from 'components/organisms/ProfileManager';
 import { ASSETS, STORAGE, URLS } from 'helpers/config';
 import { getARBalanceEndpoint } from 'helpers/endpoints';

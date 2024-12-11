@@ -1,5 +1,5 @@
-import { CategoryList } from 'components/molecules/CategoryList';
-import { TopicList } from 'components/molecules/TopicList';
+import { Categories } from 'components/molecules/Categories';
+import { Topics } from 'components/molecules/Topics';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -16,7 +16,7 @@ export default function ArticleToolbarPost(props: IProps) {
 					<p>{language.categories}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
-					<CategoryList categories={props.categories} setCategories={props.setCategories} selectOnAdd />
+					<Categories categories={props.categories} setCategories={props.setCategories} selectOnAdd />
 				</S.SectionBody>
 			</S.Section>
 			<S.TopicsSection>
@@ -24,7 +24,7 @@ export default function ArticleToolbarPost(props: IProps) {
 					<p>{language.topics}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
-					<TopicList topics={props.topics} setTopics={props.setTopics} selectOnAdd />
+					<Topics topics={props.topics} setTopics={props.setTopics} selectOnAdd />
 				</S.SectionBody>
 			</S.TopicsSection>
 		</S.Wrapper>

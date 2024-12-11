@@ -11,12 +11,12 @@ import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
-import { Modal } from '../Modal';
+import { Modal } from '../../atoms/Modal';
 
 import * as S from './styles';
 import { IProps } from './types';
 
-export default function TopicList(props: IProps) {
+export default function Topics(props: IProps) {
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 

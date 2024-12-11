@@ -5,9 +5,9 @@ import { addToZone, globalLog, mapToProcessCase, resolveTransaction, updateZone 
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
+import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
-import { Modal } from 'components/molecules/Modal';
-import { Tabs } from 'components/molecules/Tabs';
+import { Tabs } from 'components/atoms/Tabs';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { MediaConfigType, NotificationType, PortalUploadOptionType, PortalUploadType } from 'helpers/types';

@@ -184,9 +184,25 @@ export const LogoWrapper = styled.div`
 
 export const PortalWrapper = styled.div`
 	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 10px;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		max-width: calc(100% - 45px);
+	}
+`;
+
+export const PortalUpdateWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 4.5px 13.5px;
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;
 

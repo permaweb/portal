@@ -228,6 +228,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 							</S.PortalDropdown>
 						)}
 					</CloseHandler>
+					{portalProvider.updating && (
+						<S.PortalUpdateWrapper className={'border-wrapper-alt3'}>
+							<span>{`${language.updating}...`}</span>
+						</S.PortalUpdateWrapper>
+					)}
 				</S.PortalWrapper>
 			);
 		}
@@ -236,7 +241,13 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				<span>{`${language.loading}...`}</span>
 			</S.LoadingWrapper>
 		);
-	}, [showPortalDropdown, portalProvider.portals, portalProvider.current?.id, portalProvider.current?.name]);
+	}, [
+		showPortalDropdown,
+		portalProvider.portals,
+		portalProvider.current?.id,
+		portalProvider.current?.name,
+		portalProvider.updating,
+	]);
 
 	return (
 		<>

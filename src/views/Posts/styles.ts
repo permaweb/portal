@@ -13,7 +13,6 @@ export const BodyWrapper = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	gap: 25px;
-	border: 1px solid ${(props) => props.theme.colors.border.primary} !important;
 `;
 
 export const TopicModalWrapper = styled.div`

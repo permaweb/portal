@@ -5,7 +5,7 @@ import { debounce } from 'lodash';
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
-import { Tabs } from 'components/molecules/Tabs';
+import { Tabs } from 'components/atoms/Tabs';
 import { ARTICLE_BLOCKS, ASSETS, DOM, STYLING } from 'helpers/config';
 import { ArticleBlockEnum } from 'helpers/types';
 import { checkWindowCutoff, hideDocumentBody, showDocumentBody } from 'helpers/window';

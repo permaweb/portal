@@ -61,7 +61,7 @@ export const CategoriesHeader = styled(SectionHeader)``;
 
 export const LinksHeader = styled(SectionHeader)<{ type: ViewLayoutType }>``;
 
-export const TopicList = styled.div`
+export const Topics = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 12.5px;

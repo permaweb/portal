@@ -9,17 +9,62 @@ export const Wrapper = styled.div`
 `;
 
 export const PostsHeader = styled.div`
-	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+`;
+
+export const PostsHeaderDetails = styled.div`
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
+	padding: 12.5px 15px;
+	border-radius: ${STYLING.dimensions.radius.alt2} !important;
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.base};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+	}
 `;
+
+export const PostsActions = styled.div`
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	align-items: center;
+	justify-content: space-between;
+	margin: 0 0 20px 0;
+`;
+
+export const PostsStatusFilterWrapper = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
+	align-items: center;
+`;
+
+export const PostsSortingWrapper = styled.div``;
 
 export const PostsWrapper = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
 
+	background: ${(props) => props.theme.colors.container.primary.background};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.alt2};
+
 	> * {
+		&:first-child {
+			border-top-left-radius: ${STYLING.dimensions.radius.alt2};
+			border-top-right-radius: ${STYLING.dimensions.radius.alt2};
+		}
+		&:last-child {
+			border-bottom-left-radius: ${STYLING.dimensions.radius.alt2};
+			border-bottom-right-radius: ${STYLING.dimensions.radius.alt2};
+		}
 		&:not(:last-child) {
 			border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 		}
@@ -33,10 +78,15 @@ export const PostWrapper = styled.div`
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 20px;
+	transition: all 150ms;
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		flex-direction: column;
 		align-items: flex-start;
+	}
+
+	&:hover {
+		background: ${(props) => props.theme.colors.container.alt1.background};
 	}
 `;
 
@@ -121,9 +171,39 @@ export const PostStatus = styled.div<{ status: ArticleStatusType }>`
 	}
 `;
 
+export const PostsFooter = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	margin: 7.5px 0 0 0;
+`;
+
+export const PostsFooterActions = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+`;
+
+export const PostsFooterDetail = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 2.5px;
+
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+`;
+
 export const WrapperEmpty = styled.div`
 	width: 100%;
 	padding: 12.5px 15px;
+	background: ${(props) => props.theme.colors.container.primary.background};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.alt2};
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
