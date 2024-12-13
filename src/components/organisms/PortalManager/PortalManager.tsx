@@ -10,7 +10,6 @@ import {
 	mapToProcessCase,
 	resolveTransaction,
 	updateZone,
-	waitForProcess,
 } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
@@ -105,8 +104,6 @@ export default function PortalManager(props: IProps) {
 						arProvider.profile.id,
 						arProvider.wallet
 					);
-
-					await waitForProcess(portalId);
 
 					const initUpdateId = await addToZone(
 						{

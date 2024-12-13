@@ -14,6 +14,7 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import * as S from './styles';
 import { IProps } from './types';
 
+// TODO: Handle no posts
 export default function PostList(props: IProps) {
 	const navigate = useNavigate();
 
@@ -26,10 +27,10 @@ export default function PostList(props: IProps) {
 	const [currentStatusFilter, setCurrentStatusFilter] = React.useState<ArticleStatusType | 'all'>('all');
 	const [dateAscending, setDateAscending] = React.useState<boolean>(false);
 
-	const totalCount = portalProvider.current?.assets?.length || '-';
+	const totalCount = portalProvider.current?.assets?.length ?? '-';
 	const publishedCount =
-		portalProvider.current?.assets?.filter((asset: any) => asset.status === 'published').length || '-';
-	const draftCount = portalProvider.current?.assets?.filter((asset: any) => asset.status === 'draft').length || '-';
+		portalProvider.current?.assets?.filter((asset: any) => asset.status === 'published').length ?? '-';
+	const draftCount = portalProvider.current?.assets?.filter((asset: any) => asset.status === 'draft').length ?? '-';
 
 	React.useEffect(() => {
 		setCurrentPage(1);

@@ -3,15 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
-import {
-	aoDryRun,
-	aoSend,
-	createAtomicAsset,
-	globalLog,
-	mapFromProcessCase,
-	mapToProcessCase,
-	waitForProcess,
-} from '@permaweb/libs';
+import { aoDryRun, aoSend, createAtomicAsset, globalLog, mapFromProcessCase, mapToProcessCase } from '@permaweb/libs';
 
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { IconButton } from 'components/atoms/IconButton';
@@ -436,8 +428,6 @@ export default function ArticleEditor() {
 					);
 
 					globalLog(`Asset ID: ${assetId}`);
-
-					await waitForProcess(assetId);
 
 					const assetContentUpdateId = await aoSend({
 						processId: assetId,

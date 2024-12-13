@@ -119,7 +119,6 @@ export default function MediaLibrary(props: IProps) {
 	}, [newUploadUrl, portalProvider.current?.id, arProvider.wallet]);
 
 	function getMediaType(dataUrl: string): string {
-		// Extract the media type from the data URL
 		const mediaTypeMatch = dataUrl.match(/^data:(.+?);base64,/);
 
 		if (!mediaTypeMatch || mediaTypeMatch.length < 2) {
@@ -128,7 +127,6 @@ export default function MediaLibrary(props: IProps) {
 
 		const mediaType = mediaTypeMatch[1];
 
-		// Check if the media type starts with "image" or "video"
 		if (mediaType.startsWith('image/')) {
 			return 'image';
 		} else if (mediaType.startsWith('video/')) {
