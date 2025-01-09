@@ -1,183 +1,33 @@
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
-import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 
 import { aoDryRun, aoSend, createAtomicAsset, globalLog, mapFromProcessCase, mapToProcessCase } from '@permaweb/libs';
 
-import { ContentEditable } from 'components/atoms/ContentEditable';
-import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
-import { ARTICLE_BLOCKS, ASSET_UPLOAD, ASSETS, URLS } from 'helpers/config';
+import { ASSET_UPLOAD, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import {
-	ArticleBlockEnum,
-	ArticleBlockType,
-	ArticleStatusType,
-	NotificationType,
-	PortalCategoryType,
-} from 'helpers/types';
+import { ArticleBlockEnum, ArticleBlockType, NotificationType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
+import { RootState } from 'store';
+import { currentPostUpdate } from 'store/post';
 
-import { MediaBlock } from './Blocks/MediaBlock';
+import { ArticleBlock } from './ArticleBlock';
 import { ArticleToolbar } from './ArticleToolbar';
 import * as S from './styles';
 
-function Block(props: {
-	index: number;
-	block: ArticleBlockType;
-	blockEditMode: boolean;
-	onChangeBlock: (id: string, content: any, data?: any) => void;
-	onDeleteBlock: (id: string) => void;
-	autoFocus: boolean;
-	onFocus: () => void;
-}) {
-	const languageProvider = useLanguageProvider();
-	const language = languageProvider.object[languageProvider.current];
-
-	let useCustom: boolean = false;
-	let element: any = null;
-
-	switch (props.block.type) {
-		case 'paragraph':
-			element = 'p';
-			break;
-		case 'quote':
-			element = 'blockquote';
-			break;
-		case 'ordered-list':
-			element = 'ol';
-			break;
-		case 'unordered-list':
-			element = 'ul';
-			break;
-		case 'code':
-			element = 'code';
-			break;
-		case 'header-1':
-			element = 'h1';
-			break;
-		case 'header-2':
-			element = 'h2';
-			break;
-		case 'header-3':
-			element = 'h3';
-			break;
-		case 'header-4':
-			element = 'h4';
-			break;
-		case 'header-5':
-			element = 'h5';
-			break;
-		case 'header-6':
-			element = 'h6';
-			break;
-		case 'image':
-			useCustom = true;
-			element = (
-				<MediaBlock
-					type={'image'}
-					content={props.block.content}
-					data={props.block.data ?? null}
-					onChange={(newContent: any, data: any) => props.onChangeBlock(props.block.id, newContent, data)}
-				/>
-			);
-			break;
-		case 'video':
-			useCustom = true;
-			element = (
-				<MediaBlock
-					type={'video'}
-					content={props.block.content}
-					data={props.block.data ?? null}
-					onChange={(newContent: any, data: any) => props.onChangeBlock(props.block.id, newContent, data)}
-				/>
-			);
-			break;
-		default:
-			element = 'p';
-			break;
-	}
-
-	if (props.blockEditMode) {
-		return (
-			<Draggable draggableId={props.block.id} index={props.index}>
-				{(provided) => (
-					<S.ElementDragWrapper
-						ref={provided.innerRef}
-						{...provided.draggableProps}
-						{...provided.dragHandleProps}
-						onFocus={props.onFocus}
-						tabIndex={-1}
-					>
-						<S.EDragWrapper>
-							<S.EDragHandler tabIndex={-1}>
-								<ReactSVG src={ASSETS.drag} />
-							</S.EDragHandler>
-						</S.EDragWrapper>
-						<S.ElementWrapper className={'fade-in'}>
-							<S.ElementToolbar tabIndex={-1}>
-								<S.EToolbarHeader>
-									<span>{ARTICLE_BLOCKS[props.block.type].label}</span>
-								</S.EToolbarHeader>
-								<S.EToolbarDelete>
-									<IconButton
-										type={'primary'}
-										active={false}
-										src={ASSETS.delete}
-										handlePress={() => props.onDeleteBlock(props.block.id)}
-										dimensions={{ wrapper: 23.5, icon: 13.5 }}
-										tooltip={language.deleteBlock}
-										tooltipPosition={'bottom-right'}
-										noFocus
-									/>
-								</S.EToolbarDelete>
-							</S.ElementToolbar>
-							<S.Element blockEditMode={props.blockEditMode} type={props.block.type}>
-								{useCustom ? (
-									element
-								) : (
-									<ContentEditable
-										element={element}
-										value={props.block.content}
-										onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
-										autoFocus={props.autoFocus}
-									/>
-								)}
-							</S.Element>
-						</S.ElementWrapper>
-					</S.ElementDragWrapper>
-				)}
-			</Draggable>
-		);
-	}
-
-	return (
-		<S.ElementWrapper onFocus={props.onFocus} className={'fade-in'}>
-			<S.Element blockEditMode={props.blockEditMode} type={props.block.type}>
-				{useCustom ? (
-					element
-				) : (
-					<ContentEditable
-						element={element}
-						value={props.block.content}
-						onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
-						autoFocus={props.autoFocus}
-					/>
-				)}
-			</S.Element>
-		</S.ElementWrapper>
-	);
-}
-
-// TODO: Links
 export default function ArticleEditor() {
 	const navigate = useNavigate();
 	const { assetId } = useParams<{ assetId?: string }>();
+
+	const dispatch = useDispatch();
+
+	const currentPost = useSelector((state: RootState) => state.currentPost);
 
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
@@ -185,32 +35,39 @@ export default function ArticleEditor() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [title, setTitle] = React.useState<string>('');
-	const [status, setStatus] = React.useState<ArticleStatusType>('draft');
-	const [categories, setCategories] = React.useState<PortalCategoryType[]>([]);
-	const [topics, setTopics] = React.useState<string[]>([]);
+	// const [title, setTitle] = React.useState<string>('');
+	// const [status, setStatus] = React.useState<ArticleStatusType>('draft');
+	// const [categories, setCategories] = React.useState<PortalCategoryType[]>([]);
+	// const [topics, setTopics] = React.useState<string[]>([]);
 	const [blocks, setBlocks] = React.useState<ArticleBlockType[]>([]);
 
-	const [titleFocused, setTitleFocused] = React.useState<boolean>(false);
-	const [focusedBlock, setFocusedBlock] = React.useState<ArticleBlockType | null>(null);
-	const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
-	const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
-	const [blockEditMode, setBlockEditMode] = React.useState<boolean>(false);
-	const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
+	// const [titleFocused, setTitleFocused] = React.useState<boolean>(false);
+	// const [focusedBlock, setFocusedBlock] = React.useState<ArticleBlockType | null>(null);
+	// const [lastAddedBlockId, setLastAddedBlockId] = React.useState<string | null>(null);
+	// const [panelOpen, setPanelOpen] = React.useState<boolean>(true);
+	// const [blockEditMode, setBlockEditMode] = React.useState<boolean>(false);
+	// const [toggleBlockFocus, setToggleBlockFocus] = React.useState<boolean>(false);
 
-	const [loading, setLoading] = React.useState<{ active: boolean; message: string | null }>({
-		active: false,
-		message: null,
-	});
+	// const [loading, setLoading] = React.useState<{ active: boolean; message: string | null }>({
+	// 	active: false,
+	// 	message: null,
+	// });
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
 
+	const handleDispatch = (updatedField: { field: string; value: any }) => {
+		dispatch(currentPostUpdate(updatedField));
+	};
+
+	console.log(currentPost);
+
+	// TODO: Set from redux
 	React.useEffect(() => {
 		(async function () {
 			if (portalProvider.current?.id) {
 				if (assetId) {
 					if (!checkValidAddress(assetId)) navigate(URLS.postCreateArticle(portalProvider.current.id));
 
-					setLoading({ active: true, message: `${language.loadingPost}...` });
+					handleDispatch({ field: 'loading', value: { active: true, message: `${language.loadingPost}...` } });
 					try {
 						const response = await aoDryRun({
 							processId: assetId,
@@ -218,16 +75,17 @@ export default function ArticleEditor() {
 						});
 
 						if (response) {
-							if (response.Title) setTitle(response.Title);
-							if (response.Status) setStatus(response.Status);
-							if (response.Categories) setCategories(mapFromProcessCase(response.Categories));
-							if (response.Topics) setTopics(mapFromProcessCase(response.Topics));
+							if (response.Title) handleDispatch({ field: 'title', value: response.Title });
+							if (response.Status) handleDispatch({ field: 'status', value: response.Status });
+							if (response.Categories)
+								handleDispatch({ field: 'categories', value: mapFromProcessCase(response.Categories) });
+							if (response.Topics) handleDispatch({ field: 'topics', value: mapFromProcessCase(response.Topics) });
 							if (response.Content?.length > 0) setBlocks(mapFromProcessCase(response.Content));
 						}
 					} catch (e: any) {
 						console.error(e);
 					}
-					setLoading({ active: false, message: null });
+					handleDispatch({ field: 'loading', value: { active: false, message: null } });
 				}
 			}
 		})();
@@ -236,8 +94,8 @@ export default function ArticleEditor() {
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if (portalProvider.current?.id) {
-				if (focusedBlock) {
-					switch (focusedBlock.type) {
+				if (currentPost.editor.focusedBlock) {
+					switch (currentPost.editor.focusedBlock.type) {
 						case 'ordered-list':
 						case 'unordered-list':
 						case 'quote':
@@ -261,15 +119,22 @@ export default function ArticleEditor() {
 							break;
 					}
 				}
-				if (event.key === 'Tab' && !event.shiftKey && !toggleBlockFocus && focusedBlock) {
+				if (
+					event.key === 'Tab' &&
+					!event.shiftKey &&
+					!currentPost.editor.toggleBlockFocus &&
+					currentPost.editor.focusedBlock
+				) {
 					const lastBlockIndex = blocks.length - 1;
-					if (!blocks.length || blocks[lastBlockIndex].id === focusedBlock.id) {
+					if (!blocks.length || blocks[lastBlockIndex].id === currentPost.editor.focusedBlock.id) {
 						event.preventDefault();
-						setToggleBlockFocus(true);
+						handleDispatch({ field: 'toggleBlockFocus', value: true });
 					}
 				}
-				if (event.key === 'Backspace' && focusedBlock && !titleFocused) {
-					const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
+				if (event.key === 'Backspace' && currentPost.editor.focusedBlock && !currentPost.editor.titleFocused) {
+					const currentBlockIndex = blocks.findIndex(
+						(block: ArticleBlockType) => block.id === currentPost.editor.focusedBlock.id
+					);
 					const currentBlock = blocks[currentBlockIndex];
 					if (
 						(currentBlock &&
@@ -285,17 +150,19 @@ export default function ArticleEditor() {
 						deleteBlock(currentBlock.id);
 						if (currentBlockIndex > 0) {
 							const previousBlock = blocks[currentBlockIndex - 1];
-							setFocusedBlock(previousBlock);
-							setLastAddedBlockId(previousBlock.id);
+							handleDispatch({ field: 'focusedBlock', value: previousBlock });
+							handleDispatch({ field: 'lastAddedBlockId', value: previousBlock.id });
 						} else if (blocks.length > 1) {
 							const nextBlock = blocks[1];
-							setFocusedBlock(nextBlock);
-							setLastAddedBlockId(nextBlock.id);
+							handleDispatch({ field: 'focusedBlock', value: nextBlock });
+							handleDispatch({ field: 'lastAddedBlockId', value: nextBlock.id });
 						}
 					}
 				}
-				if (focusedBlock && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
-					const currentBlockIndex = blocks.findIndex((block: ArticleBlockType) => block.id === focusedBlock.id);
+				if (currentPost.editor.focusedBlock && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+					const currentBlockIndex = blocks.findIndex(
+						(block: ArticleBlockType) => block.id === currentPost.editor.focusedBlock.id
+					);
 					const currentBlock = blocks[currentBlockIndex];
 
 					const selection = window.getSelection();
@@ -313,13 +180,13 @@ export default function ArticleEditor() {
 						if (event.key === 'ArrowDown' && currentBlockIndex < blocks.length - 1) {
 							event.preventDefault();
 							const nextBlock = blocks[currentBlockIndex + 1];
-							setFocusedBlock(nextBlock);
-							setLastAddedBlockId(nextBlock.id);
+							handleDispatch({ field: 'focusedBlock', value: nextBlock });
+							handleDispatch({ field: 'lastAddedBlockId', value: nextBlock.id });
 						} else if (event.key === 'ArrowUp' && currentBlockIndex > 0) {
 							event.preventDefault();
 							const previousBlock = blocks[currentBlockIndex - 1];
-							setFocusedBlock(previousBlock);
-							setLastAddedBlockId(previousBlock.id);
+							handleDispatch({ field: 'focusedBlock', value: previousBlock });
+							handleDispatch({ field: 'lastAddedBlockId', value: previousBlock.id });
 						}
 					}
 				}
@@ -335,21 +202,23 @@ export default function ArticleEditor() {
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [blocks, focusedBlock, toggleBlockFocus, titleFocused, portalProvider.current]);
-
-	function getSubmitDisabled() {
-		return !blocks || blocks.length <= 0 || !blocks.some((block) => block.content.length > 0);
-	}
+	}, [
+		blocks,
+		currentPost.editor.focusedBlock,
+		currentPost.editor.toggleBlockFocus,
+		currentPost.editor.titleFocused,
+		portalProvider.current,
+	]);
 
 	function validateSubmit() {
 		let valid: boolean = true;
 		let message: string | null = null;
 
-		if (!title) {
+		if (!currentPost.data.title) {
 			valid = false;
 			message = 'Post title is required';
 		}
-		if (!status) {
+		if (!currentPost.data.status) {
 			valid = false;
 			message = 'Status is required';
 		}
@@ -357,11 +226,11 @@ export default function ArticleEditor() {
 			valid = false;
 			message = 'No content found in post';
 		}
-		if (!categories?.length) {
+		if (!currentPost.data.categories?.length) {
 			valid = false;
 			message = 'Categories are required';
 		}
-		if (!topics?.length) {
+		if (!currentPost.data.categories?.length) {
 			valid = false;
 			message = 'Topics are required';
 		}
@@ -375,18 +244,18 @@ export default function ArticleEditor() {
 
 	async function handleSubmit() {
 		if (arProvider.wallet && arProvider.profile?.id && portalProvider.current?.id) {
-			setLoading({ active: true, message: `${language.savingPost}...` });
+			handleDispatch({ field: 'loading', value: { active: true, message: `${language.savingPost}...` } });
 			if (!validateSubmit()) {
-				setLoading({ active: false, message: null });
+				handleDispatch({ field: 'loading', value: { active: false, message: null } });
 				return;
 			}
 
 			const data = {
-				Title: title,
-				Status: status,
+				Title: currentPost.data.title,
+				Status: currentPost.data.status,
 				Content: mapToProcessCase(blocks),
-				Topics: mapToProcessCase(topics),
-				Categories: mapToProcessCase(categories),
+				Topics: mapToProcessCase(currentPost.data.topics),
+				Categories: mapToProcessCase(currentPost.data.categories),
 			};
 
 			if (assetId) {
@@ -413,10 +282,10 @@ export default function ArticleEditor() {
 
 					const assetId = await createAtomicAsset(
 						{
-							title: title,
-							description: title,
+							title: currentPost.data.title,
+							description: currentPost.data.title,
 							type: ASSET_UPLOAD.ansType,
-							topics: topics,
+							topics: currentPost.data.topics,
 							data: dataSrc,
 							contentType: ASSET_UPLOAD.contentType,
 							creator: arProvider.profile.id,
@@ -474,14 +343,14 @@ export default function ArticleEditor() {
 					setResponse({ status: 'warning', message: e.message ?? 'Error creating post' });
 				}
 			}
-			setLoading({ active: false, message: null });
+			handleDispatch({ field: 'loading', value: { active: false, message: null } });
 		}
 	}
 
 	function handleKeyAddBlock(event: any) {
 		event.preventDefault();
 		addBlock(blocks && blocks.length > 0 ? ArticleBlockEnum.Paragraph : ArticleBlockEnum.Header1);
-		setToggleBlockFocus(false);
+		handleDispatch({ field: 'toggleBlockFocus', value: false });
 	}
 
 	const onDragEnd = (result: any) => {
@@ -503,7 +372,7 @@ export default function ArticleEditor() {
 	};
 
 	const addBlock = (type: ArticleBlockEnum) => {
-		if (loading.active) return;
+		if (currentPost.editor.loading.active) return;
 
 		let content: any = null;
 
@@ -536,7 +405,7 @@ export default function ArticleEditor() {
 		};
 
 		setBlocks((prevBlocks) => {
-			const focusedIndex = prevBlocks.findIndex((block) => block.id === focusedBlock?.id);
+			const focusedIndex = prevBlocks.findIndex((block) => block.id === currentPost.editor.focusedBlock?.id);
 			if (focusedIndex === -1) {
 				return [...prevBlocks, newBlock];
 			} else {
@@ -545,7 +414,7 @@ export default function ArticleEditor() {
 				return newBlocks;
 			}
 		});
-		setLastAddedBlockId(newBlock.id);
+		handleDispatch({ field: 'lastAddedBlockId', value: newBlock.id });
 	};
 
 	const handleBlockChange = (id: string, content: string, data?: any) => {
@@ -562,84 +431,62 @@ export default function ArticleEditor() {
 			const deletedIndex = prevBlocks.findIndex((block) => block.id === id);
 
 			if (deletedIndex > 0) {
-				setFocusedBlock(updatedBlocks[deletedIndex - 1]);
+				handleDispatch({ field: 'focusedBlock', value: updatedBlocks[deletedIndex - 1] });
 			} else if (updatedBlocks.length > 0) {
-				setFocusedBlock(updatedBlocks[0]);
+				handleDispatch({ field: 'focusedBlock', value: updatedBlocks[0] });
 			} else {
-				setFocusedBlock(null);
+				handleDispatch({ field: 'focusedBlock', value: null });
 			}
 
 			return updatedBlocks;
 		});
 	};
 
-	const editor = React.useMemo(() => {
-		if (blocks && blocks.length) {
-			return (
-				<DragDropContext onDragEnd={onDragEnd}>
-					<Droppable droppableId={'blocks'}>
-						{(provided) => (
-							<S.Editor {...provided.droppableProps} ref={provided.innerRef} blockEditMode={blockEditMode}>
-								{blocks.map((block, index) => (
-									<Block
-										index={index}
-										key={block.id}
-										block={block}
-										blockEditMode={blockEditMode}
-										onChangeBlock={handleBlockChange}
-										onDeleteBlock={deleteBlock}
-										autoFocus={block.id === lastAddedBlockId}
-										onFocus={() => setFocusedBlock(block)}
-									/>
-								))}
-								{provided.placeholder}
-							</S.Editor>
-						)}
-					</Droppable>
-				</DragDropContext>
-			);
-		}
-		return (
-			<S.BlocksEmpty className={'fade-in'}>
-				<span>{language.blocksEmpty}</span>
-			</S.BlocksEmpty>
-		);
-	}, [blocks, blockEditMode, lastAddedBlockId, focusedBlock]);
-
 	return (
 		<>
 			<S.Wrapper>
 				<S.ToolbarWrapper>
 					<ArticleToolbar
-						postTitle={title}
-						setPostTitle={(value: string) => setTitle(value)}
-						titleFocused={titleFocused}
-						setTitleFocused={(focused: boolean) => setTitleFocused(focused)}
-						status={status}
-						setStatus={(value: ArticleStatusType) => setStatus(value)}
-						categories={categories}
-						setCategories={(newCategories: PortalCategoryType[]) => setCategories(newCategories)}
-						topics={topics}
-						setTopics={(newTopics: string[]) => setTopics(newTopics)}
 						addBlock={(type: ArticleBlockEnum) => addBlock(type)}
-						blockEditMode={blockEditMode}
-						toggleBlockEditMode={() => setBlockEditMode(!blockEditMode)}
-						panelOpen={panelOpen}
-						setPanelOpen={(status: boolean) => setPanelOpen(status)}
-						togglePanelOpen={() => setPanelOpen(!panelOpen)}
-						toggleBlockFocus={toggleBlockFocus}
-						setToggleBlockFocus={() => setToggleBlockFocus(false)}
 						handleInitAddBlock={(e) => handleKeyAddBlock(e)}
 						handleSubmit={handleSubmit}
-						submitDisabled={getSubmitDisabled()}
-						loading={loading.active}
 					/>
 				</S.ToolbarWrapper>
-				<S.EditorWrapper panelOpen={panelOpen} onClick={handleEditorClick}>
-					{editor}
+				<S.EditorWrapper panelOpen={currentPost.editor.panelOpen} onClick={handleEditorClick}>
+					{blocks?.length ? (
+						<DragDropContext onDragEnd={onDragEnd}>
+							<Droppable droppableId={'blocks'}>
+								{(provided) => (
+									<S.Editor
+										{...provided.droppableProps}
+										ref={provided.innerRef}
+										blockEditMode={currentPost.editor.blockEditMode}
+									>
+										{blocks.map((block, index) => (
+											<ArticleBlock
+												index={index}
+												key={block.id}
+												block={block}
+												blockEditMode={currentPost.editor.blockEditMode}
+												onChangeBlock={handleBlockChange}
+												onDeleteBlock={deleteBlock}
+												autoFocus={block.id === currentPost.editor.lastAddedBlockId}
+												onFocus={() => handleDispatch({ field: 'focusedBlock', value: block })}
+											/>
+										))}
+										{provided.placeholder}
+									</S.Editor>
+								)}
+							</Droppable>
+						</DragDropContext>
+					) : (
+						<S.BlocksEmpty className={'fade-in'}>
+							<span>{language.blocksEmpty}</span>
+						</S.BlocksEmpty>
+					)}
 				</S.EditorWrapper>
 			</S.Wrapper>
-			{loading.active && <Loader message={loading.message} />}
+			{currentPost.editor.loading.active && <Loader message={currentPost.editor.loading.message} />}
 			{response && (
 				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
 			)}

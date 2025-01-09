@@ -16,11 +16,14 @@ export type PortalDetailType = {
 
 // TODO
 export type PortalAssetType = {
-	id: string;
+	id: string | null;
 	title: string;
-	dateCreated: number;
-	creator: string;
+	content: any;
+	creator: string | null;
 	status: ArticleStatusType;
+	categories: PortalCategoryType[];
+	topics: string[];
+	dateCreated: number | null;
 };
 
 // TODO
@@ -103,11 +106,9 @@ export type ArticleBlockType = {
 
 export type ArticleStatusType = 'draft' | 'published';
 
-export type RegistryProfileType = {
-	id: string;
-	avatar: string | null;
-	username: string;
-	bio?: string;
+export type ArticlePostType = {
+	id: string | null;
+	title: string | null;
 };
 
 export type TagType = { name: string; value: string };

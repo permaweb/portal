@@ -1,4 +1,5 @@
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { ReactSVG } from 'react-svg';
 import { debounce } from 'lodash';
 
@@ -7,17 +8,24 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
 import { Tabs } from 'components/atoms/Tabs';
 import { ARTICLE_BLOCKS, ASSETS, DOM, STYLING } from 'helpers/config';
-import { ArticleBlockEnum } from 'helpers/types';
+import { ArticleBlockEnum, PortalCategoryType } from 'helpers/types';
 import { checkWindowCutoff, hideDocumentBody, showDocumentBody } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
+import { RootState } from 'store';
+import { currentPostUpdate } from 'store/post';
 
 import { ArticleToolbarPost } from './ArticleToolbarPost';
 import * as S from './styles';
 import { IProps } from './types';
 
 export default function ArticleToolbar(props: IProps) {
+	const dispatch = useDispatch();
+
+	const currentPost = useSelector((state: RootState) => state.currentPost);
+
 	const portalProvider = usePortalProvider();
+
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -30,6 +38,10 @@ export default function ArticleToolbar(props: IProps) {
 	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.label);
 	const [totalBlockCount, setTotalBlockCount] = React.useState(0);
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.initial)));
+
+	const handleDispatch = (updatedField: { field: string; value: any }) => {
+		dispatch(currentPostUpdate(updatedField));
+	};
 
 	const BLOCK_TYPES: {
 		label: string;
@@ -85,17 +97,24 @@ export default function ArticleToolbar(props: IProps) {
 	}, [titleRef]);
 
 	React.useEffect(() => {
-		props.setPanelOpen(desktop);
+		if (!desktop) handleDispatch({ field: 'panelOpen', value: false });
 	}, [desktop]);
 
 	React.useEffect(() => {
-		if (props.panelOpen && !desktop) {
+		if (currentPost.editor.panelOpen && !desktop) {
 			hideDocumentBody();
 			return () => {
 				showDocumentBody();
 			};
 		}
-	}, [props.panelOpen, desktop]);
+	}, [currentPost.editor.panelOpen, desktop]);
+
+	// TODO Submit disabled
+	// React.useEffect(() => {
+	// 	function getSubmitDisabled() {
+	// 		return !blocks || blocks.length <= 0 || !blocks.some((block) => block.content.length > 0);
+	// 	}
+	// }, [currentPost.editor.panelOpen]);
 
 	React.useEffect(() => {
 		const count = BLOCK_TYPES.reduce((acc, section) => acc + section.blocks.length, 0);
@@ -103,10 +122,10 @@ export default function ArticleToolbar(props: IProps) {
 	}, [BLOCK_TYPES]);
 
 	React.useEffect(() => {
-		if (props.panelOpen && props.toggleBlockFocus) {
+		if (currentPost.editor.panelOpen && currentPost.editor.toggleBlockFocus) {
 			setFocusedIndex(0);
 		}
-	}, [props.toggleBlockFocus, props.panelOpen]);
+	}, [currentPost.editor.toggleBlockFocus, currentPost.editor.panelOpen]);
 
 	React.useEffect(() => {
 		const handleBlur = (event: FocusEvent) => {
@@ -115,13 +134,13 @@ export default function ArticleToolbar(props: IProps) {
 				const isStillWithinContainer = blockRefs.current.some((ref) => ref?.contains(relatedTarget));
 
 				if (!isStillWithinContainer) {
-					props.setToggleBlockFocus();
+					handleDispatch({ field: 'toggleBlockFocus', value: !currentPost.editor.toggleBlockFocus });
 				}
 			});
 		};
 
-		if (focusedIndex >= 0 && blockRefs.current[focusedIndex] && props.panelOpen) {
-			if (props.toggleBlockFocus) blockRefs.current[focusedIndex]?.focus();
+		if (focusedIndex >= 0 && blockRefs.current[focusedIndex] && currentPost.editor.panelOpen) {
+			if (currentPost.editor.toggleBlockFocus) blockRefs.current[focusedIndex]?.focus();
 		}
 
 		blockRefs.current.forEach((ref) => {
@@ -137,18 +156,18 @@ export default function ArticleToolbar(props: IProps) {
 				}
 			});
 		};
-	}, [props.toggleBlockFocus, focusedIndex, props.panelOpen, props.setToggleBlockFocus, blockRefs]);
+	}, [currentPost.editor.toggleBlockFocus, focusedIndex, currentPost.editor.panelOpen, blockRefs]);
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if (event.ctrlKey) {
 				if (event.key.toLowerCase() === 'k') {
 					event.preventDefault();
-					props.togglePanelOpen();
+					handleDispatch({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
 				}
 				if (event.key.toLowerCase() === 'l') {
 					event.preventDefault();
-					props.toggleBlockEditMode();
+					handleDispatch({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode });
 				}
 			}
 			if (
@@ -169,15 +188,15 @@ export default function ArticleToolbar(props: IProps) {
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [props.toggleBlockEditMode, props.togglePanelOpen]);
+	}, [currentPost.editor.blockEditMode, currentPost.editor.panelOpen]);
 
 	React.useEffect(() => {
 		const handleFocus = () => {
-			props.setTitleFocused(true);
+			handleDispatch({ field: 'titleFocused', value: true });
 		};
 
 		const handleBlur = () => {
-			props.setTitleFocused(false);
+			handleDispatch({ field: 'titleFocused', value: false });
 		};
 
 		const titleElement = titleRef.current;
@@ -192,7 +211,7 @@ export default function ArticleToolbar(props: IProps) {
 				titleElement.removeEventListener('blur', handleBlur);
 			}
 		};
-	}, [titleRef, props.setTitleFocused]);
+	}, [titleRef]);
 
 	const handleKeyDown = React.useCallback(
 		(event: React.KeyboardEvent) => {
@@ -332,7 +351,7 @@ export default function ArticleToolbar(props: IProps) {
 													blockRefs.current[globalBlockIndex] = el;
 												}}
 												data-block-type={block.type}
-												disabled={props.loading}
+												disabled={currentPost.editor.loading.active}
 											>
 												<ReactSVG src={block.icon} />
 												<span>{block.label}</span>
@@ -348,10 +367,12 @@ export default function ArticleToolbar(props: IProps) {
 			case 'Post':
 				return (
 					<ArticleToolbarPost
-						categories={props.categories}
-						setCategories={props.setCategories}
-						topics={props.topics}
-						setTopics={props.setTopics}
+						categories={currentPost.data.categories}
+						setCategories={(updatedCategories: PortalCategoryType[]) =>
+							handleDispatch({ field: 'categories', value: updatedCategories })
+						}
+						topics={currentPost.data.topics}
+						setTopics={(updatedTopics: string[]) => handleDispatch({ field: 'topics', value: updatedTopics })}
 					/>
 				);
 			default:
@@ -361,7 +382,7 @@ export default function ArticleToolbar(props: IProps) {
 
 	const panel = React.useMemo(() => {
 		const content = (
-			<S.Panel className={'border-wrapper-primary fade-in'} open={props.panelOpen}>
+			<S.Panel className={'border-wrapper-primary fade-in'} open={currentPost.editor.panelOpen}>
 				<Tabs onTabPropClick={(label: string) => setCurrentTab(label)} type={'alt1'}>
 					{TABS.map((tab: { label: string; icon?: string }, index: number) => {
 						return <S.TabWrapper key={index} label={tab.label} icon={tab.icon ? tab.icon : null} />;
@@ -372,7 +393,7 @@ export default function ArticleToolbar(props: IProps) {
 					<IconButton
 						type={'primary'}
 						src={ASSETS.close}
-						handlePress={() => props.togglePanelOpen()}
+						handlePress={() => handleDispatch({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
 						tooltip={language.closeToolkit}
 						tooltipPosition={'bottom-right'}
 						dimensions={{
@@ -380,19 +401,26 @@ export default function ArticleToolbar(props: IProps) {
 							wrapper: 20,
 						}}
 						noFocus
-						disabled={props.loading}
+						disabled={currentPost.editor.loading.active}
 					/>
 				</S.PanelCloseWrapper>
 			</S.Panel>
 		);
 		if (!desktop)
-			return props.panelOpen ? (
+			return currentPost.editor.panelOpen ? (
 				<Portal node={DOM.overlay}>
 					<div className={'overlay'}>{content}</div>
 				</Portal>
 			) : null;
 		return content;
-	}, [props.panelOpen, currentTab, props.addBlock, focusedIndex, desktop, props.loading]);
+	}, [
+		currentPost.editor.panelOpen,
+		currentTab,
+		props.addBlock,
+		focusedIndex,
+		desktop,
+		currentPost.editor.loading.active,
+	]);
 
 	return (
 		<>
@@ -400,31 +428,33 @@ export default function ArticleToolbar(props: IProps) {
 				<S.TitleWrapper>
 					<input
 						ref={titleRef}
-						value={props.postTitle}
-						onChange={(e: any) => props.setPostTitle(e.target.value)}
+						value={currentPost.data.title ?? ''}
+						onChange={(e: any) => handleDispatch({ field: 'title', value: e.target.value })}
 						placeholder={language.untitledPost}
-						disabled={props.loading || !portalProvider.current?.id}
+						disabled={currentPost.editor.loading.active || !portalProvider.current?.id}
 					/>
 				</S.TitleWrapper>
 				<S.EndActions>
-					<S.StatusAction status={props.status}>
+					<S.StatusAction status={currentPost.data.status}>
 						<Button
 							type={'primary'}
-							label={props.status.toUpperCase()}
-							handlePress={() => props.setStatus(props.status === 'draft' ? 'published' : 'draft')}
+							label={currentPost.data.status.toUpperCase()}
+							handlePress={() =>
+								handleDispatch({ field: 'status', value: currentPost.data.status === 'draft' ? 'published' : 'draft' })
+							}
 							active={false}
-							disabled={props.loading}
-							tooltip={`Mark as ${props.status === 'draft' ? 'published' : 'draft'}`}
+							disabled={currentPost.editor.loading.active}
+							tooltip={`Mark as ${currentPost.data.status === 'draft' ? 'published' : 'draft'}`}
 							noFocus
 						/>
 					</S.StatusAction>
 					<Button
 						type={'primary'}
 						label={language.toolkit}
-						handlePress={() => props.togglePanelOpen()}
-						active={props.panelOpen}
-						disabled={props.loading}
-						icon={props.panelOpen ? ASSETS.close : ASSETS.tools}
+						handlePress={() => handleDispatch({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
+						active={currentPost.editor.panelOpen}
+						disabled={currentPost.editor.loading.active}
+						icon={currentPost.editor.panelOpen ? ASSETS.close : ASSETS.tools}
 						iconLeftAlign
 						tooltip={'CTRL + K'}
 						noFocus
@@ -432,10 +462,10 @@ export default function ArticleToolbar(props: IProps) {
 					<Button
 						type={'primary'}
 						label={language.layout}
-						handlePress={() => props.toggleBlockEditMode()}
-						active={props.blockEditMode}
-						disabled={props.loading}
-						icon={props.blockEditMode ? ASSETS.close : ASSETS.layout}
+						handlePress={() => handleDispatch({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode })}
+						active={currentPost.editor.blockEditMode}
+						disabled={currentPost.editor.loading.active}
+						icon={currentPost.editor.blockEditMode ? ASSETS.close : ASSETS.layout}
 						iconLeftAlign
 						tooltip={'CTRL + L'}
 						noFocus
@@ -445,7 +475,7 @@ export default function ArticleToolbar(props: IProps) {
 						label={language.save}
 						handlePress={props.handleSubmit}
 						active={false}
-						disabled={props.loading || props.submitDisabled}
+						disabled={currentPost.editor.loading.active || currentPost.editor.submitDisabled}
 						noFocus
 					/>
 				</S.EndActions>

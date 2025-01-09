@@ -4,7 +4,7 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 const Landing = getLazyImport('Landing');
 const PortalView = getLazyImport('Portal');
 const Posts = getLazyImport('Posts');
-const PostCreate = getLazyImport('Portal/Post/Create');
+const PostCreate = getLazyImport('Post/Create');
 const Setup = getLazyImport('Setup');
 const Design = getLazyImport('Design');
 const Users = getLazyImport('Users');
@@ -21,7 +21,7 @@ import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { useSettingsProvider } from 'providers/SettingsProvider';
-import { ArticleEditor } from 'views/Portal/Post/Editors/ArticleEditor';
+import { ArticleEditor } from 'views/Post/Editors/ArticleEditor';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
