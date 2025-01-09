@@ -2,6 +2,8 @@ import { Dispatch } from 'redux';
 
 import { PortalAssetType, ReduxActionType } from 'helpers/types';
 
+const UPDATE_CURRENT_POST = 'UPDATE_CURRENT_POST';
+
 export const initStateCurrentPost: { data: PortalAssetType; editor: any } = {
 	data: {
 		id: null,
@@ -11,6 +13,7 @@ export const initStateCurrentPost: { data: PortalAssetType; editor: any } = {
 		status: 'draft',
 		categories: [],
 		topics: [],
+		thumbnail: null,
 		dateCreated: null,
 	},
 	editor: {
@@ -27,7 +30,7 @@ export const initStateCurrentPost: { data: PortalAssetType; editor: any } = {
 
 export function currentPostUpdate(payload: { field: string; value: any }) {
 	return (dispatch: Dispatch) => {
-		dispatch({ type: 'UPDATE_CURRENT_POST', payload: payload });
+		dispatch({ type: UPDATE_CURRENT_POST, payload: payload });
 	};
 }
 
@@ -36,7 +39,7 @@ export function currentPost(
 	action: ReduxActionType
 ) {
 	switch (action.type) {
-		case 'UPDATE_CURRENT_POST':
+		case UPDATE_CURRENT_POST:
 			const { field, value } = action.payload;
 			if (field in state.data) {
 				return {

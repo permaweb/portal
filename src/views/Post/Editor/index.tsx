@@ -14,7 +14,7 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import { RootState } from 'store';
 import { currentPostUpdate } from 'store/post';
 
-import { ArticleEditor } from '../Editors/ArticleEditor';
+import { ArticleEditor } from './ArticleEditor';
 
 export default function Editor() {
 	const navigate = useNavigate();
@@ -36,6 +36,13 @@ export default function Editor() {
 	const handleDispatch = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
+
+	// TODO: Submit disabled
+	// React.useEffect(() => {
+	// 	function getSubmitDisabled() {
+	// 		return !blocks || blocks.length <= 0 || !blocks.some((block) => block.content.length > 0);
+	// 	}
+	// }, [currentPost.editor.panelOpen]);
 
 	async function handleSubmit() {
 		if (arProvider.wallet && arProvider.profile?.id && portalProvider.current?.id) {

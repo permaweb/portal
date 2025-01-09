@@ -23,6 +23,7 @@ export type PortalAssetType = {
 	status: ArticleStatusType;
 	categories: PortalCategoryType[];
 	topics: string[];
+	thumbnail?: string;
 	dateCreated: number | null;
 };
 

@@ -29,7 +29,7 @@ export default function ArticleToolbar(props: IProps) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const TABS = [{ label: language.blocks }, { label: language.post }];
+	const TABS = [{ label: language.post }, { label: language.blocks }];
 
 	const titleRef = React.useRef<any>(null);
 	const blockRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
@@ -108,13 +108,6 @@ export default function ArticleToolbar(props: IProps) {
 			};
 		}
 	}, [currentPost.editor.panelOpen, desktop]);
-
-	// TODO Submit disabled
-	// React.useEffect(() => {
-	// 	function getSubmitDisabled() {
-	// 		return !blocks || blocks.length <= 0 || !blocks.some((block) => block.content.length > 0);
-	// 	}
-	// }, [currentPost.editor.panelOpen]);
 
 	React.useEffect(() => {
 		const count = BLOCK_TYPES.reduce((acc, section) => acc + section.blocks.length, 0);
