@@ -57,7 +57,9 @@ function getElementCursor(type: ArticleBlockEnum) {
 	}
 }
 
-export const ElementIndicator = styled.div`
+export const ElementToolbarWrapper = styled.div``;
+
+export const ElementToolbarToggle = styled.div`
 	position: absolute;
 	top: -21.5px;
 	display: none;
@@ -65,7 +67,7 @@ export const ElementIndicator = styled.div`
 	justify-content: space-between;
 `;
 
-export const ElementIndicatorDivider = styled(ElementIndicator)`
+export const ElementIndicatorDivider = styled(ElementToolbarToggle)`
 	height: 1px;
 	width: 100%;
 	top: auto;
@@ -77,7 +79,7 @@ export const ElementWrapper = styled.div<{ blockEditMode: boolean }>`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
-	gap: 5px;
+	gap: 10px;
 	position: relative;
 	cursor: default;
 
@@ -85,7 +87,7 @@ export const ElementWrapper = styled.div<{ blockEditMode: boolean }>`
 		!props.blockEditMode &&
 		`
 		&:hover {
-			${ElementIndicator} {
+			${ElementToolbarToggle} {
 				display: flex;
 			}
 		}
@@ -107,6 +109,12 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 		font-size: 15px;
 	}
 
+	a {
+		text-decoration: underline;
+		text-decoration-thickness: 1.25px;
+		cursor: pointer;
+	}
+
 	blockquote {
 		font-family: Georgia, serif;
 		font-style: italic;
@@ -114,6 +122,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 		font-weight: 500;
 		color: ${(props) => props.theme.colors.font.alt2};
 	}
+
 	ol,
 	ul {
 		padding: 0 0 0 20px;
@@ -143,12 +152,15 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 			}
 		}
 	}
+
 	ol {
 		list-style-type: decimal;
 	}
+
 	ul {
 		list-style-type: disc;
 	}
+
 	code {
 		color: ${(props) => props.theme.colors.font.primary};
 		background: ${(props) => props.theme.colors.container.alt1.background};
@@ -215,24 +227,12 @@ export const EToolbarHeader = styled.div`
 	}
 `;
 
-export const EToolbarDelete = styled.div`
+export const EToolbarActions = styled.div`
 	width: fit-content;
+	display: flex;
+	align-items: center;
+	gap: 10px;
 	margin: 0 0 0 auto;
-	button {
-		color: ${(props) => props.theme.colors.warning.primary} !important;
-		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
-		font-family: ${(props) => props.theme.typography.family.primary} !important;
-		display: block;
-		white-space: nowrap;
-		text-overflow: ellipsis;
-		max-width: 100%;
-		overflow: hidden;
-
-		&:hover {
-			color: ${(props) => props.theme.colors.warning.alt1} !important;
-		}
-	}
 `;
 
 export const EDragWrapper = styled.div`
@@ -248,4 +248,47 @@ export const EDragHandler = styled.div`
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
 	}
+`;
+
+export const SelectionWrapper = styled.div`
+	button {
+		span {
+			color: ${(props) => props.theme.colors.link.color} !important;
+			font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+			text-transform: uppercase;
+		}
+
+		svg {
+			color: ${(props) => props.theme.colors.link.color} !important;
+			fill: ${(props) => props.theme.colors.link.color} !important;
+		}
+
+		&:hover {
+			span {
+				color: ${(props) => props.theme.colors.link.active} !important;
+				text-transform: uppercase;
+			}
+
+			svg {
+				color: ${(props) => props.theme.colors.link.active} !important;
+				fill: ${(props) => props.theme.colors.link.active} !important;
+			}
+		}
+	}
+`;
+
+export const ModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	padding: 0 20px 20px 20px;
+`;
+
+export const ModalActionsWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 20px;
+	margin: 15px 0 0 0;
 `;

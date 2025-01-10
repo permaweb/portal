@@ -19,6 +19,7 @@ import { ArticleToolbar } from './ArticleToolbar';
 import * as S from './styles';
 import { IProps } from './types';
 
+// TODO: Block width exceeding wrapper
 export default function ArticleEditor(props: IProps) {
 	const navigate = useNavigate();
 	const { assetId } = useParams<{ assetId?: string }>();
@@ -310,15 +311,13 @@ export default function ArticleEditor(props: IProps) {
 										ref={provided.innerRef}
 										blockEditMode={currentPost.editor.blockEditMode}
 									>
-										{currentPost.data.content.map((block, index) => (
+										{currentPost.data.content.map((block: ArticleBlockType, index: number) => (
 											<ArticleBlock
 												index={index}
 												key={block.id}
 												block={block}
-												blockEditMode={currentPost.editor.blockEditMode}
 												onChangeBlock={handleBlockChange}
 												onDeleteBlock={deleteBlock}
-												autoFocus={block.id === currentPost.editor.lastAddedBlockId}
 												onFocus={() => handleCurrentPostUpdate({ field: 'focusedBlock', value: block })}
 											/>
 										))}

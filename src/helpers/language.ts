@@ -1,9 +1,9 @@
 export const language = {
 	en: {
 		add: `Add`,
+		addLink: `Add a link`,
 		addCaption: `Add a caption`,
 		addCategory: `Add a category`,
-		addLink: `Add a link`,
 		addTopic: `Add a topic`,
 		alignCaption: `Align caption`,
 		all: `All`,
@@ -31,6 +31,7 @@ export const language = {
 		connect: `Connect`,
 		connectWallet: `Connect your wallet`,
 		connectToContinue: `Connect your wallet to continue`,
+		convertToLink: `Convert to link`,
 		colors: `Colors`,
 		colorPicker: `Color picker`,
 		copied: `Copied`,
@@ -54,6 +55,7 @@ export const language = {
 		draft: `Draft`,
 		edit: `Edit`,
 		editCaption: `Edit caption`,
+		editLink: `Edit link`,
 		editPortal: `Edit portal`,
 		editPostTopics: `Edit post topics`,
 		editProfile: `Edit your profile`,
