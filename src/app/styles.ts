@@ -266,6 +266,16 @@ export const GlobalStyle = createGlobalStyle`
       }
     }
   }
+
+	.scroll-wrapper-hidden {
+		overflow: auto;
+		::-webkit-scrollbar {
+			display: none;
+		}
+		
+			-ms-overflow-style: none;
+			scrollbar-width: none;
+		}
 `;
 
 export const App = styled.div`

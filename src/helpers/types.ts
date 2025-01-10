@@ -18,12 +18,13 @@ export type PortalDetailType = {
 export type PortalAssetType = {
 	id: string | null;
 	title: string;
+	description: string;
 	content: any;
 	creator: string | null;
 	status: ArticleStatusType;
 	categories: PortalCategoryType[];
 	topics: string[];
-	thumbnail?: string;
+	thumbnail?: string | null;
 	dateCreated: number | null;
 };
 

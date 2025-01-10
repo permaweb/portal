@@ -1,10 +1,14 @@
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { ReactSVG } from 'react-svg';
 
+import { Button } from 'components/atoms/Button';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { RootState } from 'store';
+import { currentPostUpdate } from 'store/post';
 
 import * as S from './styles';
 
@@ -12,13 +16,20 @@ const ALLOWED_THUMBNAIL_TYPES = 'image/png, image/jpeg, image/gif';
 
 // TODO
 export default function ArticleToolbarPostThumbnail() {
+	const dispatch = useDispatch();
+
+	const currentPost = useSelector((state: RootState) => state.currentPost);
+
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
 	const inputRef = React.useRef<any>(null);
 
-	const [thumbnail, setThumbnail] = React.useState<any>(null);
 	const [loading, _setLoading] = React.useState<boolean>(false);
+
+	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
+		dispatch(currentPostUpdate(updatedField));
+	};
 
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'thumbnail') {
 		if (e.target.files && e.target.files.length) {
@@ -30,7 +41,7 @@ export default function ArticleToolbarPostThumbnail() {
 					if (event.target?.result) {
 						switch (type) {
 							case 'thumbnail':
-								setThumbnail(event.target.result);
+								handleCurrentPostUpdate({ field: 'thumbnail', value: event.target.result });
 								break;
 							default:
 								break;
@@ -45,7 +56,16 @@ export default function ArticleToolbarPostThumbnail() {
 	}
 
 	function getInputWrapper() {
-		if (thumbnail) return <img src={checkValidAddress(thumbnail) ? getTxEndpoint(thumbnail) : thumbnail} />;
+		if (currentPost?.data?.thumbnail)
+			return (
+				<img
+					src={
+						checkValidAddress(currentPost?.data?.thumbnail)
+							? getTxEndpoint(currentPost?.data?.thumbnail)
+							: currentPost?.data?.thumbnail
+					}
+				/>
+			);
 		return (
 			<>
 				<ReactSVG src={ASSETS.image} />
@@ -57,7 +77,11 @@ export default function ArticleToolbarPostThumbnail() {
 	return (
 		<S.Wrapper>
 			<S.InputWrapper>
-				<S.Input hasInput={thumbnail !== null} onClick={() => inputRef.current.click()} disabled={loading}>
+				<S.Input
+					hasInput={currentPost?.data?.thumbnail !== null}
+					onClick={() => inputRef.current.click()}
+					disabled={loading}
+				>
 					{getInputWrapper()}
 				</S.Input>
 				<input
@@ -68,6 +92,19 @@ export default function ArticleToolbarPostThumbnail() {
 					accept={ALLOWED_THUMBNAIL_TYPES}
 				/>
 			</S.InputWrapper>
+			<S.FooterWrapper>
+				<p>Max (100KB)</p>
+				<Button
+					type={'alt2'}
+					label={language.remove}
+					handlePress={() => handleCurrentPostUpdate({ field: 'thumbnail', value: null })}
+					disabled={!currentPost?.data?.thumbnail}
+					loading={false}
+					icon={ASSETS.delete}
+					iconLeftAlign
+					warning
+				/>
+			</S.FooterWrapper>
 		</S.Wrapper>
 	);
 }

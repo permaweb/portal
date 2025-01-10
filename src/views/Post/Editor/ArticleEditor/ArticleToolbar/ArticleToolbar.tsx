@@ -39,7 +39,7 @@ export default function ArticleToolbar(props: IProps) {
 	const [totalBlockCount, setTotalBlockCount] = React.useState(0);
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.initial)));
 
-	const handleDispatch = (updatedField: { field: string; value: any }) => {
+	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
 
@@ -97,7 +97,7 @@ export default function ArticleToolbar(props: IProps) {
 	}, [titleRef]);
 
 	React.useEffect(() => {
-		if (!desktop) handleDispatch({ field: 'panelOpen', value: false });
+		if (!desktop) handleCurrentPostUpdate({ field: 'panelOpen', value: false });
 	}, [desktop]);
 
 	React.useEffect(() => {
@@ -127,7 +127,7 @@ export default function ArticleToolbar(props: IProps) {
 				const isStillWithinContainer = blockRefs.current.some((ref) => ref?.contains(relatedTarget));
 
 				if (!isStillWithinContainer) {
-					handleDispatch({ field: 'toggleBlockFocus', value: !currentPost.editor.toggleBlockFocus });
+					handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: !currentPost.editor.toggleBlockFocus });
 				}
 			});
 		};
@@ -156,11 +156,11 @@ export default function ArticleToolbar(props: IProps) {
 			if (event.ctrlKey) {
 				if (event.key.toLowerCase() === 'k') {
 					event.preventDefault();
-					handleDispatch({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
+					handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
 				}
 				if (event.key.toLowerCase() === 'l') {
 					event.preventDefault();
-					handleDispatch({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode });
+					handleCurrentPostUpdate({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode });
 				}
 			}
 			if (
@@ -185,11 +185,11 @@ export default function ArticleToolbar(props: IProps) {
 
 	React.useEffect(() => {
 		const handleFocus = () => {
-			handleDispatch({ field: 'titleFocused', value: true });
+			handleCurrentPostUpdate({ field: 'titleFocused', value: true });
 		};
 
 		const handleBlur = () => {
-			handleDispatch({ field: 'titleFocused', value: false });
+			handleCurrentPostUpdate({ field: 'titleFocused', value: false });
 		};
 
 		const titleElement = titleRef.current;
@@ -362,10 +362,10 @@ export default function ArticleToolbar(props: IProps) {
 					<ArticleToolbarPost
 						categories={currentPost.data.categories}
 						setCategories={(updatedCategories: PortalCategoryType[]) =>
-							handleDispatch({ field: 'categories', value: updatedCategories })
+							handleCurrentPostUpdate({ field: 'categories', value: updatedCategories })
 						}
 						topics={currentPost.data.topics}
-						setTopics={(updatedTopics: string[]) => handleDispatch({ field: 'topics', value: updatedTopics })}
+						setTopics={(updatedTopics: string[]) => handleCurrentPostUpdate({ field: 'topics', value: updatedTopics })}
 					/>
 				);
 			default:
@@ -381,12 +381,12 @@ export default function ArticleToolbar(props: IProps) {
 						return <S.TabWrapper key={index} label={tab.label} icon={tab.icon ? tab.icon : null} />;
 					})}
 				</Tabs>
-				<S.TabContent className={'scroll-wrapper'}>{getCurrentTab()}</S.TabContent>
+				<S.TabContent className={'scroll-wrapper-hidden'}>{getCurrentTab()}</S.TabContent>
 				<S.PanelCloseWrapper>
 					<IconButton
 						type={'primary'}
 						src={ASSETS.close}
-						handlePress={() => handleDispatch({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
+						handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
 						tooltip={language.closeToolkit}
 						tooltipPosition={'bottom-right'}
 						dimensions={{
@@ -422,7 +422,7 @@ export default function ArticleToolbar(props: IProps) {
 					<input
 						ref={titleRef}
 						value={currentPost.data.title ?? ''}
-						onChange={(e: any) => handleDispatch({ field: 'title', value: e.target.value })}
+						onChange={(e: any) => handleCurrentPostUpdate({ field: 'title', value: e.target.value })}
 						placeholder={language.untitledPost}
 						disabled={currentPost.editor.loading.active || !portalProvider.current?.id}
 					/>
@@ -433,7 +433,10 @@ export default function ArticleToolbar(props: IProps) {
 							type={'primary'}
 							label={currentPost.data.status.toUpperCase()}
 							handlePress={() =>
-								handleDispatch({ field: 'status', value: currentPost.data.status === 'draft' ? 'published' : 'draft' })
+								handleCurrentPostUpdate({
+									field: 'status',
+									value: currentPost.data.status === 'draft' ? 'published' : 'draft',
+								})
 							}
 							active={false}
 							disabled={currentPost.editor.loading.active}
@@ -444,7 +447,7 @@ export default function ArticleToolbar(props: IProps) {
 					<Button
 						type={'primary'}
 						label={language.toolkit}
-						handlePress={() => handleDispatch({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
+						handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
 						active={currentPost.editor.panelOpen}
 						disabled={currentPost.editor.loading.active}
 						icon={currentPost.editor.panelOpen ? ASSETS.close : ASSETS.tools}
@@ -455,7 +458,9 @@ export default function ArticleToolbar(props: IProps) {
 					<Button
 						type={'primary'}
 						label={language.layout}
-						handlePress={() => handleDispatch({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode })}
+						handlePress={() =>
+							handleCurrentPostUpdate({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode })
+						}
 						active={currentPost.editor.blockEditMode}
 						disabled={currentPost.editor.loading.active}
 						icon={currentPost.editor.blockEditMode ? ASSETS.close : ASSETS.layout}

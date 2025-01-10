@@ -242,7 +242,7 @@ export default function MediaLibrary(props: IProps) {
 	return (
 		<>
 			<S.Wrapper>
-				<S.Header className={'border-wrapper-alt3'}>
+				<S.Header>
 					{header}
 					<S.HeaderActions>
 						<Button

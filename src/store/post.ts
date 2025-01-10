@@ -8,6 +8,7 @@ export const initStateCurrentPost: { data: PortalAssetType; editor: any } = {
 	data: {
 		id: null,
 		title: '',
+		description: '',
 		content: null,
 		creator: null,
 		status: 'draft',

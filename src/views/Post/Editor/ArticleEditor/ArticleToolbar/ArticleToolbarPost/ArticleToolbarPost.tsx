@@ -2,6 +2,7 @@ import { Categories } from 'components/molecules/Categories';
 import { Topics } from 'components/molecules/Topics';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
+import { ArticleToolbarPostDescription } from './ArticleToolbarPostDescription';
 import { ArticleToolbarPostThumbnail } from './ArticleToolbarPostThumbnail';
 import * as S from './styles';
 import { IProps } from './types';
@@ -18,6 +19,14 @@ export default function ArticleToolbarPost(props: IProps) {
 				</S.SectionHeader>
 				<S.SectionBody>
 					<ArticleToolbarPostThumbnail />
+				</S.SectionBody>
+			</S.Section>
+			<S.Section>
+				<S.SectionHeader>
+					<p>{language.summary}</p>
+				</S.SectionHeader>
+				<S.SectionBody>
+					<ArticleToolbarPostDescription />
 				</S.SectionBody>
 			</S.Section>
 			<S.Section>

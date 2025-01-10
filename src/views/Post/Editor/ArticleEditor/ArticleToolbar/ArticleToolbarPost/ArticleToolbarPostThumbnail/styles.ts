@@ -92,3 +92,17 @@ export const Input = styled.button<{ hasInput: boolean }>`
     `
 			: ''}
 `;
+
+export const FooterWrapper = styled.div`
+	width: 100%;
+	margin: 4.5px 0 0 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+`;

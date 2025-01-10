@@ -93,10 +93,12 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					if (fetchedPortal) {
 						setCurrent(fetchedPortal);
 						cachePortal(currentId, fetchedPortal);
+					} else {
+						setErrorMessage('An error occurred getting this portal.');
 					}
 				} catch (e: any) {
 					console.error(e);
-					setErrorMessage(e.message ?? 'An error occurred fetching this portal.');
+					setErrorMessage(e.message ?? 'An error occurred getting this portal.');
 				}
 				setUpdating(false);
 			}
@@ -138,7 +140,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				setUpdating(true);
 				while (!changeDetected && tries < maxTries) {
 					try {
-						console.log(`Attempt ${tries + 1} to fetch portal data...`);
+						console.log(`Attempt ${tries + 1} to get portal data...`);
 
 						const existingPortal = { ...current };
 						const updatedPortal = await fetchPortal();
@@ -165,7 +167,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 							tries++;
 						}
 					} catch (e: any) {
-						console.error('Error occurred while fetching portal:', e);
+						console.error('Error occurred while getting portal:', e);
 						setErrorMessage(e.message ?? 'An error occurred getting this portal');
 					}
 				}
@@ -216,8 +218,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					return portal;
 				}
 			} catch (e: any) {
-				console.error(e);
-				setErrorMessage(e.message ?? 'An error occurred getting this portal.');
+				throw new Error(e.message ?? 'An error occurred getting this portal.');
 			}
 		}
 	};

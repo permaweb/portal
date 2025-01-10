@@ -57,13 +57,39 @@ function getElementCursor(type: ArticleBlockEnum) {
 	}
 }
 
-export const ElementWrapper = styled.div`
+export const ElementIndicator = styled.div`
+	position: absolute;
+	top: -21.5px;
+	display: none;
+	width: 100%;
+	justify-content: space-between;
+`;
+
+export const ElementIndicatorDivider = styled(ElementIndicator)`
+	height: 1px;
+	width: 100%;
+	top: auto;
+	bottom: -5px;
+	border-top: 1px solid ${(props) => props.theme.colors.border.alt1};
+`;
+
+export const ElementWrapper = styled.div<{ blockEditMode: boolean }>`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
 	position: relative;
 	cursor: default;
+
+	${(props) =>
+		!props.blockEditMode &&
+		`
+		&:hover {
+			${ElementIndicator} {
+				display: flex;
+			}
+		}
+	`}
 `;
 
 export const ElementDragWrapper = styled.div`
@@ -170,6 +196,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 `;
 
 export const ElementToolbar = styled.div`
+	width: 100%;
 	display: flex;
 	align-items: center;
 `;

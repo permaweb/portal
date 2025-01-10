@@ -32,7 +32,7 @@ export default function ArticleEditor(props: IProps) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const handleDispatch = (updatedField: { field: string; value: any }) => {
+	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
 
@@ -42,7 +42,7 @@ export default function ArticleEditor(props: IProps) {
 				if (assetId) {
 					if (!checkValidAddress(assetId)) navigate(URLS.postCreateArticle(portalProvider.current.id));
 
-					handleDispatch({ field: 'loading', value: { active: true, message: `${language.loadingPost}...` } });
+					handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language.loadingPost}...` } });
 					try {
 						const response = await aoDryRun({
 							processId: assetId,
@@ -50,18 +50,19 @@ export default function ArticleEditor(props: IProps) {
 						});
 
 						if (response) {
-							if (response.Title) handleDispatch({ field: 'title', value: response.Title });
-							if (response.Status) handleDispatch({ field: 'status', value: response.Status });
+							if (response.Title) handleCurrentPostUpdate({ field: 'title', value: response.Title });
+							if (response.Status) handleCurrentPostUpdate({ field: 'status', value: response.Status });
 							if (response.Categories)
-								handleDispatch({ field: 'categories', value: mapFromProcessCase(response.Categories) });
-							if (response.Topics) handleDispatch({ field: 'topics', value: mapFromProcessCase(response.Topics) });
+								handleCurrentPostUpdate({ field: 'categories', value: mapFromProcessCase(response.Categories) });
+							if (response.Topics)
+								handleCurrentPostUpdate({ field: 'topics', value: mapFromProcessCase(response.Topics) });
 							if (response.Content?.length > 0)
-								handleDispatch({ field: 'content', value: mapFromProcessCase(response.Content) });
+								handleCurrentPostUpdate({ field: 'content', value: mapFromProcessCase(response.Content) });
 						}
 					} catch (e: any) {
 						console.error(e);
 					}
-					handleDispatch({ field: 'loading', value: { active: false, message: null } });
+					handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
 				}
 			}
 		})();
@@ -107,7 +108,7 @@ export default function ArticleEditor(props: IProps) {
 						currentPost.data.content[lastBlockIndex].id === currentPost.editor.focusedBlock.id
 					) {
 						event.preventDefault();
-						handleDispatch({ field: 'toggleBlockFocus', value: true });
+						handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: true });
 					}
 				}
 				if (event.key === 'Backspace' && currentPost.editor.focusedBlock && !currentPost.editor.titleFocused) {
@@ -129,12 +130,12 @@ export default function ArticleEditor(props: IProps) {
 						deleteBlock(currentBlock.id);
 						if (currentBlockIndex > 0) {
 							const previousBlock = currentPost.data.content[currentBlockIndex - 1];
-							handleDispatch({ field: 'focusedBlock', value: previousBlock });
-							handleDispatch({ field: 'lastAddedBlockId', value: previousBlock.id });
+							handleCurrentPostUpdate({ field: 'focusedBlock', value: previousBlock });
+							handleCurrentPostUpdate({ field: 'lastAddedBlockId', value: previousBlock.id });
 						} else if (currentPost.data.content.length > 1) {
 							const nextBlock = currentPost.data.content[1];
-							handleDispatch({ field: 'focusedBlock', value: nextBlock });
-							handleDispatch({ field: 'lastAddedBlockId', value: nextBlock.id });
+							handleCurrentPostUpdate({ field: 'focusedBlock', value: nextBlock });
+							handleCurrentPostUpdate({ field: 'lastAddedBlockId', value: nextBlock.id });
 						}
 					}
 				}
@@ -159,13 +160,13 @@ export default function ArticleEditor(props: IProps) {
 						if (event.key === 'ArrowDown' && currentBlockIndex < currentPost.data.content.length - 1) {
 							event.preventDefault();
 							const nextBlock = currentPost.data.content[currentBlockIndex + 1];
-							handleDispatch({ field: 'focusedBlock', value: nextBlock });
-							handleDispatch({ field: 'lastAddedBlockId', value: nextBlock.id });
+							handleCurrentPostUpdate({ field: 'focusedBlock', value: nextBlock });
+							handleCurrentPostUpdate({ field: 'lastAddedBlockId', value: nextBlock.id });
 						} else if (event.key === 'ArrowUp' && currentBlockIndex > 0) {
 							event.preventDefault();
 							const previousBlock = currentPost.data.content[currentBlockIndex - 1];
-							handleDispatch({ field: 'focusedBlock', value: previousBlock });
-							handleDispatch({ field: 'lastAddedBlockId', value: previousBlock.id });
+							handleCurrentPostUpdate({ field: 'focusedBlock', value: previousBlock });
+							handleCurrentPostUpdate({ field: 'lastAddedBlockId', value: previousBlock.id });
 						}
 					}
 				}
@@ -196,7 +197,7 @@ export default function ArticleEditor(props: IProps) {
 				? ArticleBlockEnum.Paragraph
 				: ArticleBlockEnum.Header1
 		);
-		handleDispatch({ field: 'toggleBlockFocus', value: false });
+		handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: false });
 	}
 
 	const onDragEnd = (result: any) => {
@@ -208,7 +209,7 @@ export default function ArticleEditor(props: IProps) {
 		const [reorderedItem] = items.splice(result.source.index, 1);
 		items.splice(result.destination.index, 0, reorderedItem);
 
-		handleDispatch({ field: 'content', value: items });
+		handleCurrentPostUpdate({ field: 'content', value: items });
 	};
 
 	const handleEditorClick = () => {
@@ -251,26 +252,27 @@ export default function ArticleEditor(props: IProps) {
 		};
 
 		let updatedBlocks = [];
-		const focusedIndex = [...currentPost.data.content].findIndex(
-			(block) => block.id === currentPost.editor.focusedBlock?.id
+		const currentContent = currentPost.data.content || [];
+		const focusedIndex = currentContent.findIndex(
+			(block: ArticleBlockType) => block.id === currentPost.editor.focusedBlock?.id
 		);
 		if (focusedIndex === -1) {
-			updatedBlocks = [...currentPost.data.content, newBlock];
+			updatedBlocks = [...currentContent, newBlock];
 		} else {
-			const newBlocks = [...currentPost.data.content];
+			const newBlocks = [...currentContent];
 			newBlocks.splice(focusedIndex + 1, 0, newBlock);
 			updatedBlocks = newBlocks;
 		}
 
-		handleDispatch({ field: 'content', value: updatedBlocks });
-		handleDispatch({ field: 'lastAddedBlockId', value: newBlock.id });
+		handleCurrentPostUpdate({ field: 'content', value: updatedBlocks });
+		handleCurrentPostUpdate({ field: 'lastAddedBlockId', value: newBlock.id });
 	};
 
 	const handleBlockChange = (id: string, content: string, data?: any) => {
 		const updatedBlocks = [...currentPost.data.content].map((block) =>
 			block.id === id ? (data ? { ...block, content, data } : { ...block, content }) : block
 		);
-		handleDispatch({ field: 'content', value: updatedBlocks });
+		handleCurrentPostUpdate({ field: 'content', value: updatedBlocks });
 	};
 
 	const deleteBlock = (id: string) => {
@@ -278,14 +280,14 @@ export default function ArticleEditor(props: IProps) {
 		const deletedIndex = [...currentPost.data.content].findIndex((block) => block.id === id);
 
 		if (deletedIndex > 0) {
-			handleDispatch({ field: 'focusedBlock', value: updatedBlocks[deletedIndex - 1] });
+			handleCurrentPostUpdate({ field: 'focusedBlock', value: updatedBlocks[deletedIndex - 1] });
 		} else if (updatedBlocks.length > 0) {
-			handleDispatch({ field: 'focusedBlock', value: updatedBlocks[0] });
+			handleCurrentPostUpdate({ field: 'focusedBlock', value: updatedBlocks[0] });
 		} else {
-			handleDispatch({ field: 'focusedBlock', value: null });
+			handleCurrentPostUpdate({ field: 'focusedBlock', value: null });
 		}
 
-		handleDispatch({ field: 'content', value: updatedBlocks });
+		handleCurrentPostUpdate({ field: 'content', value: updatedBlocks });
 	};
 
 	return (
@@ -317,7 +319,7 @@ export default function ArticleEditor(props: IProps) {
 												onChangeBlock={handleBlockChange}
 												onDeleteBlock={deleteBlock}
 												autoFocus={block.id === currentPost.editor.lastAddedBlockId}
-												onFocus={() => handleDispatch({ field: 'focusedBlock', value: block })}
+												onFocus={() => handleCurrentPostUpdate({ field: 'focusedBlock', value: block })}
 											/>
 										))}
 										{provided.placeholder}

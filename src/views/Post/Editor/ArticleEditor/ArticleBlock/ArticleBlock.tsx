@@ -78,6 +78,56 @@ export default function ArticleBlock(props: IProps) {
 			break;
 	}
 
+	const handleMouseUp = () => {
+		const selection = window.getSelection();
+		if (selection) {
+			console.log(selection.toString());
+		}
+	};
+
+	function getElementToolbar() {
+		return (
+			<S.ElementToolbar tabIndex={-1}>
+				<S.EToolbarHeader>
+					<span>{ARTICLE_BLOCKS[props.block.type].label}</span>
+				</S.EToolbarHeader>
+				<S.EToolbarDelete>
+					<IconButton
+						type={'primary'}
+						active={false}
+						src={ASSETS.delete}
+						handlePress={() => props.onDeleteBlock(props.block.id)}
+						dimensions={{ wrapper: 23.5, icon: 13.5 }}
+						tooltip={language.deleteBlock}
+						tooltipPosition={'bottom-right'}
+						noFocus
+					/>
+				</S.EToolbarDelete>
+			</S.ElementToolbar>
+		);
+	}
+
+	function getElement() {
+		return (
+			<S.ElementWrapper blockEditMode={props.blockEditMode} onFocus={props.onFocus} className={'fade-in'}>
+				<S.ElementIndicator className={'fade-in'}>{getElementToolbar()}</S.ElementIndicator>
+				<S.Element blockEditMode={props.blockEditMode} type={props.block.type} onMouseUp={handleMouseUp}>
+					{useCustom ? (
+						element
+					) : (
+						<ContentEditable
+							element={element}
+							value={props.block.content}
+							onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
+							autoFocus={props.autoFocus}
+						/>
+					)}
+				</S.Element>
+				<S.ElementIndicatorDivider className={'fade-in'} />
+			</S.ElementWrapper>
+		);
+	}
+
 	if (props.blockEditMode) {
 		return (
 			<Draggable draggableId={props.block.id} index={props.index}>
@@ -94,57 +144,12 @@ export default function ArticleBlock(props: IProps) {
 								<ReactSVG src={ASSETS.drag} />
 							</S.EDragHandler>
 						</S.EDragWrapper>
-						<S.ElementWrapper className={'fade-in'}>
-							<S.ElementToolbar tabIndex={-1}>
-								<S.EToolbarHeader>
-									<span>{ARTICLE_BLOCKS[props.block.type].label}</span>
-								</S.EToolbarHeader>
-								<S.EToolbarDelete>
-									<IconButton
-										type={'primary'}
-										active={false}
-										src={ASSETS.delete}
-										handlePress={() => props.onDeleteBlock(props.block.id)}
-										dimensions={{ wrapper: 23.5, icon: 13.5 }}
-										tooltip={language.deleteBlock}
-										tooltipPosition={'bottom-right'}
-										noFocus
-									/>
-								</S.EToolbarDelete>
-							</S.ElementToolbar>
-							<S.Element blockEditMode={props.blockEditMode} type={props.block.type}>
-								{useCustom ? (
-									element
-								) : (
-									<ContentEditable
-										element={element}
-										value={props.block.content}
-										onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
-										autoFocus={props.autoFocus}
-									/>
-								)}
-							</S.Element>
-						</S.ElementWrapper>
+						{getElement()}
 					</S.ElementDragWrapper>
 				)}
 			</Draggable>
 		);
 	}
 
-	return (
-		<S.ElementWrapper onFocus={props.onFocus} className={'fade-in'}>
-			<S.Element blockEditMode={props.blockEditMode} type={props.block.type}>
-				{useCustom ? (
-					element
-				) : (
-					<ContentEditable
-						element={element}
-						value={props.block.content}
-						onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
-						autoFocus={props.autoFocus}
-					/>
-				)}
-			</S.Element>
-		</S.ElementWrapper>
-	);
+	return getElement();
 }

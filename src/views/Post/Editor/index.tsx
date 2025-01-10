@@ -33,7 +33,7 @@ export default function Editor() {
 
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
 
-	const handleDispatch = (updatedField: { field: string; value: any }) => {
+	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
 
@@ -46,9 +46,9 @@ export default function Editor() {
 
 	async function handleSubmit() {
 		if (arProvider.wallet && arProvider.profile?.id && portalProvider.current?.id) {
-			handleDispatch({ field: 'loading', value: { active: true, message: `${language.savingPost}...` } });
+			handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language.savingPost}...` } });
 			if (!validateSubmit()) {
-				handleDispatch({ field: 'loading', value: { active: false, message: null } });
+				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
 				return;
 			}
 
@@ -142,7 +142,7 @@ export default function Editor() {
 					setResponse({ status: 'warning', message: e.message ?? 'Error creating post' });
 				}
 			}
-			handleDispatch({ field: 'loading', value: { active: false, message: null } });
+			handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
 		}
 	}
 

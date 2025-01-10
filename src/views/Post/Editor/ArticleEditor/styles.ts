@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
+export const ARTICLE_TOOLBAR_WIDTH = '350px';
+
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -24,7 +26,7 @@ export const ToolbarWrapper = styled.div`
 `;
 
 export const EditorWrapper = styled.div<{ panelOpen: boolean }>`
-	padding: 0 ${(props) => (props.panelOpen ? `350px` : '0')} 0 0;
+	padding: 0 ${(props) => (props.panelOpen ? `calc(${ARTICLE_TOOLBAR_WIDTH} + 20px)` : '0')} 0 0;
 	transition: padding-right ${transition2};
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {
@@ -44,7 +46,7 @@ export const Editor = styled.div<{ blockEditMode: boolean }>`
 	}
 
 	> * {
-		margin: ${(props) => (props.blockEditMode ? '0 0 30px 0' : '0 0 20px 0')};
+		margin: ${(props) => (props.blockEditMode ? '0 0 30px 0' : '0 0 30px 0')};
 	}
 `;
 
