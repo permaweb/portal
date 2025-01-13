@@ -62,8 +62,6 @@ export default function Editor() {
 				thumbnail: currentPost.data.thumbnail,
 			});
 
-			console.log(data);
-
 			if (assetId) {
 				try {
 					const assetContentUpdateId = await aoSend({

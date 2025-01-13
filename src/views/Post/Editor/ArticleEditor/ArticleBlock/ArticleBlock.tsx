@@ -225,6 +225,7 @@ export default function ArticleBlock(props: IProps) {
 			<>
 				<S.ElementWrapper
 					ref={editableRef}
+					type={props.block.type}
 					blockEditMode={currentPost?.editor.blockEditMode}
 					onFocus={props.onFocus}
 					className={'fade-in'}

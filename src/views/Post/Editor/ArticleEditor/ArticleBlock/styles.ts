@@ -27,6 +27,20 @@ function getElementPadding(type: ArticleBlockEnum) {
 	}
 }
 
+function getElementToolbarToggleDisplay(type: ArticleBlockEnum) {
+	switch (type) {
+		case 'image':
+		case 'video':
+		case 'code':
+		case 'quote':
+		case 'ordered-list':
+		case 'unordered-list':
+			return 'none';
+		default:
+			return 'block';
+	}
+}
+
 function getElementWrapper(blockEditMode: boolean, type: ArticleBlockEnum, theme: DefaultTheme) {
 	switch (type) {
 		case 'image':
@@ -61,7 +75,7 @@ export const ElementToolbarWrapper = styled.div``;
 
 export const ElementToolbarToggle = styled.div`
 	position: absolute;
-	top: -21.5px;
+	top: -22.5px;
 	display: none;
 	width: 100%;
 	justify-content: space-between;
@@ -75,8 +89,10 @@ export const ElementIndicatorDivider = styled(ElementToolbarToggle)`
 	border-top: 1px solid ${(props) => props.theme.colors.border.alt1};
 `;
 
-export const ElementWrapper = styled.div<{ blockEditMode: boolean }>`
+export const ElementWrapper = styled.div<{ blockEditMode: boolean; type: ArticleBlockEnum }>`
 	width: 100%;
+	width: calc(100% - 27.5px);
+	width: ${(props) => (props.blockEditMode ? 'calc(100% - 27.5px)' : '100%')};
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
@@ -88,7 +104,10 @@ export const ElementWrapper = styled.div<{ blockEditMode: boolean }>`
 		`
 		&:hover {
 			${ElementToolbarToggle} {
-				display: flex;
+				display: block;
+			}
+			${ElementIndicatorDivider} {
+				display: ${getElementToolbarToggleDisplay(props.type)};
 			}
 		}
 	`}
