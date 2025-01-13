@@ -1,4 +1,6 @@
+import { ViewLayoutType } from 'helpers/types';
+
 export interface IProps {
-	useHeaderDetails?: boolean;
+	type: ViewLayoutType;
 	pageCount?: number;
 }

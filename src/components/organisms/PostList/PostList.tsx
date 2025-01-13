@@ -7,14 +7,14 @@ import { formatDate } from '@permaweb/libs';
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS, URLS } from 'helpers/config';
-import { ArticleStatusType, PortalAssetType } from 'helpers/types';
+import { ArticleStatusType, ButtonType, PortalAssetType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
+import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 import { IProps } from './types';
 
-// TODO: Handle no posts
 export default function PostList(props: IProps) {
 	const navigate = useNavigate();
 
@@ -26,6 +26,7 @@ export default function PostList(props: IProps) {
 	const [pageCount, _setPageCount] = React.useState<number>(props.pageCount || 10);
 	const [currentStatusFilter, setCurrentStatusFilter] = React.useState<ArticleStatusType | 'all'>('all');
 	const [dateAscending, setDateAscending] = React.useState<boolean>(false);
+	const [showFilterActions, setShowFilterActions] = React.useState<boolean>(false);
 
 	const totalCount = portalProvider.current?.assets?.length ?? '-';
 	const publishedCount =
@@ -61,17 +62,121 @@ export default function PostList(props: IProps) {
 		return { start, end };
 	}, [currentPage, assets.length]);
 
+	function getFilterActions(dropdown: boolean) {
+		let filterOptionType: ButtonType = 'primary';
+		let sortOptionType: ButtonType = 'primary';
+
+		if (dropdown) {
+			filterOptionType = 'alt3';
+			sortOptionType = 'alt3';
+		}
+
+		function handleActionPress(fn: () => void) {
+			if (dropdown) setShowFilterActions(false);
+			fn();
+		}
+
+		return (
+			<S.PostsActions dropdown={dropdown}>
+				<S.PostsActionsSection dropdown={dropdown}>
+					{dropdown && (
+						<S.PostsActionsSectionHeader>
+							<p>{language.filterBy}</p>
+						</S.PostsActionsSectionHeader>
+					)}
+					<S.PostsStatusFilterWrapper>
+						<Button
+							type={filterOptionType}
+							label={`${language.all} (${totalCount})`}
+							handlePress={() => handleActionPress(() => setCurrentStatusFilter('all'))}
+							active={currentStatusFilter === 'all'}
+						/>
+						<Button
+							type={filterOptionType}
+							label={`${language.published} (${publishedCount})`}
+							handlePress={() => handleActionPress(() => setCurrentStatusFilter('published'))}
+							active={currentStatusFilter === 'published'}
+						/>
+						<Button
+							type={filterOptionType}
+							label={`${language.draft} (${draftCount})`}
+							handlePress={() => handleActionPress(() => setCurrentStatusFilter('draft'))}
+							active={currentStatusFilter === 'draft'}
+						/>
+					</S.PostsStatusFilterWrapper>
+				</S.PostsActionsSection>
+				<S.PostsActionsSection dropdown={dropdown}>
+					{dropdown && (
+						<S.PostsActionsSectionHeader>
+							<p>{language.sortBy}</p>
+						</S.PostsActionsSectionHeader>
+					)}
+					<S.PostsSortingWrapper>
+						<Button
+							type={sortOptionType}
+							label={dateAscending ? language.sortOldestToNewest : language.sortNewestToOldest}
+							handlePress={() => handleActionPress(() => setDateAscending(!dateAscending))}
+							icon={ASSETS.arrows}
+						/>
+					</S.PostsSortingWrapper>
+				</S.PostsActionsSection>
+			</S.PostsActions>
+		);
+	}
+
+	function getHeader() {
+		switch (props.type) {
+			case 'header':
+				return (
+					<S.PostsHeaderDetails className={'border-wrapper-alt3'}>
+						<p>{language.posts}</p>
+						<S.PostsHeaderDetailsActions>
+							<Button
+								type={'alt3'}
+								label={language.postsLink}
+								handlePress={() => navigate(URLS.portalPosts(portalProvider.current.id))}
+							/>
+							<S.PostsHeaderFilterWrapper>
+								<CloseHandler
+									callback={() => setShowFilterActions(false)}
+									active={showFilterActions}
+									disabled={!showFilterActions}
+								>
+									<Button
+										type={'alt3'}
+										label={language.filter}
+										handlePress={() => setShowFilterActions(!showFilterActions)}
+										icon={ASSETS.filter}
+										iconLeftAlign
+									/>
+									{showFilterActions && (
+										<S.PostsHeaderFilterDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
+											{getFilterActions(true)}
+										</S.PostsHeaderFilterDropdown>
+									)}
+								</CloseHandler>
+							</S.PostsHeaderFilterWrapper>
+						</S.PostsHeaderDetailsActions>
+					</S.PostsHeaderDetails>
+				);
+			case 'detail':
+				return getFilterActions(false);
+			default:
+				return null;
+		}
+	}
+
 	const posts = React.useMemo(() => {
 		if (!paginatedPosts.length) {
 			return (
-				<S.WrapperEmpty>
+				<S.WrapperEmpty type={props.type}>
 					<p>{language.noPostsFound}</p>
 				</S.WrapperEmpty>
 			);
 		}
 
 		return (
-			<S.PostsWrapper>
+			<S.PostsWrapper type={props.type}>
 				{paginatedPosts.map((asset: PortalAssetType) => (
 					<S.PostWrapper key={asset.id} className={'fade-in'}>
 						<S.PostHeader>
@@ -100,7 +205,7 @@ export default function PostList(props: IProps) {
 									handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
 									dimensions={{ wrapper: 25, icon: 15 }}
 									tooltip={language.moreActions}
-									tooltipPosition="bottom-right"
+									tooltipPosition={'bottom-right'}
 								/>
 							</S.PostActions>
 							{asset.status && (
@@ -114,70 +219,29 @@ export default function PostList(props: IProps) {
 				))}
 			</S.PostsWrapper>
 		);
-	}, [paginatedPosts, portalProvider.current?.id]);
+	}, [paginatedPosts, portalProvider.current?.id, language]);
 
 	return (
 		<S.Wrapper>
-			<S.PostsHeader>
-				{props.useHeaderDetails && (
-					<S.PostsHeaderDetails className={'border-wrapper-alt3'}>
-						<p>{language.posts}</p>
-						<Button
-							type={'alt3'}
-							label={language.postsLink}
-							handlePress={() => navigate(URLS.portalPosts(portalProvider.current.id))}
-						/>
-					</S.PostsHeaderDetails>
-				)}
-				<S.PostsActions>
-					<S.PostsStatusFilterWrapper>
-						<Button
-							type={'alt3'}
-							label={`${language.all} (${totalCount})`}
-							handlePress={() => setCurrentStatusFilter('all')}
-							active={currentStatusFilter === 'all'}
-						/>
-						<Button
-							type={'alt3'}
-							label={`${language.published} (${publishedCount})`}
-							handlePress={() => setCurrentStatusFilter('published')}
-							active={currentStatusFilter === 'published'}
-						/>
-						<Button
-							type={'alt3'}
-							label={`${language.draft} (${draftCount})`}
-							handlePress={() => setCurrentStatusFilter('draft')}
-							active={currentStatusFilter === 'draft'}
-						/>
-					</S.PostsStatusFilterWrapper>
-					<S.PostsSortingWrapper>
-						<Button
-							type={'alt2'}
-							label={dateAscending ? language.sortOldestToNewest : language.sortNewestToOldest}
-							handlePress={() => setDateAscending(!dateAscending)}
-							icon={ASSETS.arrows}
-						/>
-					</S.PostsSortingWrapper>
-				</S.PostsActions>
-			</S.PostsHeader>
+			{getHeader()}
 			{posts}
 			<S.PostsFooter>
 				<S.PostsFooterDetail>
-					<p>{`Showing ${currentRange.start} - ${currentRange.end} of ${assets.length}`}</p>
-					<p>{`Page ${currentPage}`}</p>
+					<p>{language.showingRange(assets.length > 0 ? currentRange.start : 0, currentRange.end, assets.length)}</p>
+					<p>{`${language.page} ${currentPage}`}</p>
 				</S.PostsFooterDetail>
 				<S.PostsFooterActions>
 					<Button
 						type={'alt3'}
 						label={language.previous}
 						handlePress={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-						disabled={currentPage === 1}
+						disabled={assets.length > 0 ? currentPage === 1 : true}
 					/>
 					<Button
 						type={'alt3'}
 						label={language.next}
 						handlePress={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-						disabled={currentPage === totalPages}
+						disabled={assets.length > 0 ? currentPage === totalPages : true}
 					/>
 				</S.PostsFooterActions>
 			</S.PostsFooter>

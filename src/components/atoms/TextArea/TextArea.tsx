@@ -15,7 +15,9 @@ export default function TextArea(props: IProps) {
 				placeholder={props.placeholder ? props.placeholder : ''}
 				data-testid={props.testingCtx}
 			/>
-			<S.ErrorContainer>{props.invalid.message && <S.Error>{props.invalid.message}</S.Error>}</S.ErrorContainer>
+			{!props.hideErrorMessage && (
+				<S.ErrorContainer>{props.invalid.message && <S.Error>{props.invalid.message}</S.Error>}</S.ErrorContainer>
+			)}
 		</S.Wrapper>
 	);
 }

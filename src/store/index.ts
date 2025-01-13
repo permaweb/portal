@@ -3,15 +3,17 @@ import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import thunk from 'redux-thunk';
 
+import { currentPost } from './post';
+
 declare const window: any;
 
 const persistConfig = {
 	key: 'root',
 	storage,
-	blacklist: ['streaksReducer', 'ucmReducer'],
+	blacklist: [],
 };
 
-const rootReducer = combineReducers({});
+const rootReducer = combineReducers({ currentPost });
 
 export type RootState = ReturnType<typeof store.getState>;
 const persistedReducer = persistReducer<any, any>(persistConfig, rootReducer);

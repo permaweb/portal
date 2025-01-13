@@ -47,7 +47,7 @@ export default function Posts() {
 					]}
 				/>
 				<S.BodyWrapper>
-					<PostList />
+					<PostList type={'detail'} />
 				</S.BodyWrapper>
 			</S.Wrapper>
 			{showTopicAction && (

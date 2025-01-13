@@ -4,7 +4,8 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 const Landing = getLazyImport('Landing');
 const PortalView = getLazyImport('Portal');
 const Posts = getLazyImport('Posts');
-const PostCreate = getLazyImport('Portal/Post/Create');
+const PostCreate = getLazyImport('Post/Create');
+const PostEditor = getLazyImport('Post/Editor');
 const Setup = getLazyImport('Setup');
 const Design = getLazyImport('Design');
 const Users = getLazyImport('Users');
@@ -21,7 +22,6 @@ import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { useSettingsProvider } from 'providers/SettingsProvider';
-import { ArticleEditor } from 'views/Portal/Post/Editors/ArticleEditor';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
@@ -122,8 +122,8 @@ export default function App() {
 						{getRoute(`${URLS.base}:portalId`, <PortalView />)}
 						{getRoute(`${URLS.base}:portalId/posts`, <Posts />)}
 						{getRoute(`${URLS.base}:portalId/post/create`, <PostCreate />)}
-						{getRoute(`${URLS.base}:portalId/post/create/article`, <ArticleEditor />)}
-						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <ArticleEditor />)}
+						{getRoute(`${URLS.base}:portalId/post/create/article`, <PostEditor />)}
+						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <PostEditor />)}
 						{getRoute(`${URLS.base}:portalId/setup`, <Setup />)}
 						{getRoute(`${URLS.base}:portalId/design`, <Design />)}
 						{getRoute(`${URLS.base}:portalId/users`, <Users />)}

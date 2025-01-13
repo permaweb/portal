@@ -21,7 +21,6 @@ export const Header = styled.div`
 	gap: 20px;
 	align-items: center;
 	justify-content: space-between;
-	padding: 12.5px 15px;
 	margin: 0 0 10px 0;
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};

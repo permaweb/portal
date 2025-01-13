@@ -37,6 +37,7 @@ export const ASSETS = {
 	domains: getTxEndpoint('HCp8UMAiBcJyBuMwH8PLrNM6lJqlRLGKe6iDRRBid6I'),
 	drag: getTxEndpoint('BfwMIGxk7WTqI3rYOyzM0DQXAfo_n4I4yyBbTsqe_QE'),
 	facebook: getTxEndpoint('mEcWrUwBKrp_9azlko-h2sta-UJu07UeCXPRBi8yDpA'),
+	filter: getTxEndpoint('S7PKyYrmK3EbqWBTAHG66B9rzeVXXkL3VzmyE6jU8Io'),
 	header1: getTxEndpoint('Me8rAW3kmQxPclDnl7lupTXyWg2t3vV3yfFdCzyXbNA'),
 	header2: getTxEndpoint('6U8907x3L_phk9loiiBCHIXqDBWaV5IfK19IJnH8Q4A'),
 	header3: getTxEndpoint('fBTN-aLZM0VFaLGw7VhBiGSdHuNDGcO0qGKbtXLiwnA'),

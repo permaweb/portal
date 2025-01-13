@@ -5,6 +5,8 @@ import { transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 import { ArticleStatusType } from 'helpers/types';
 
+import { ARTICLE_TOOLBAR_WIDTH } from '../styles';
+
 export const Wrapper = styled.div`
 	width: 100%;
 	display: flex;
@@ -57,7 +59,7 @@ export const StatusAction = styled.div<{ status: ArticleStatusType }>`
 `;
 
 export const Panel = styled.div<{ open: boolean }>`
-	width: 330px;
+	width: ${ARTICLE_TOOLBAR_WIDTH};
 	position: absolute;
 	right: 0;
 	z-index: 1;

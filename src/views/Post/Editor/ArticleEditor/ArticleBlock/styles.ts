@@ -1,68 +1,7 @@
 import styled, { DefaultTheme } from 'styled-components';
 
-import { transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 import { ArticleBlockEnum } from 'helpers/types';
-
-export const Wrapper = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 20px;
-	position: relative;
-`;
-
-export const ToolbarWrapper = styled.div`
-	position: sticky;
-	top: ${STYLING.dimensions.nav.height};
-	z-index: 1;
-	background: ${(props) => props.theme.colors.view.background};
-	padding: 10px 0;
-
-	@media (max-width: ${STYLING.cutoffs.initial}) {
-		position: relative;
-		top: auto;
-	}
-`;
-
-export const EditorWrapper = styled.div<{ panelOpen: boolean }>`
-	padding: 0 ${(props) => (props.panelOpen ? `350px` : '0')} 0 0;
-	transition: padding-right ${transition2};
-
-	@media (max-width: ${STYLING.cutoffs.initial}) {
-		padding: 0;
-	}
-`;
-
-export const Editor = styled.div<{ blockEditMode: boolean }>`
-	display: flex;
-	flex-direction: column;
-
-	[contenteditable] {
-		&:focus {
-			outline: 0;
-			outline: none;
-		}
-	}
-
-	> * {
-		margin: ${(props) => (props.blockEditMode ? '0 0 30px 0' : '0 0 20px 0')};
-	}
-`;
-
-export const ElementDragWrapper = styled.div`
-	display: flex;
-	gap: 10px;
-	position: relative;
-`;
-
-export const ElementWrapper = styled.div`
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	gap: 5px;
-	position: relative;
-	cursor: default;
-`;
 
 function getElementPadding(type: ArticleBlockEnum) {
 	switch (type) {
@@ -118,6 +57,49 @@ function getElementCursor(type: ArticleBlockEnum) {
 	}
 }
 
+export const ElementToolbarWrapper = styled.div``;
+
+export const ElementToolbarToggle = styled.div`
+	position: absolute;
+	top: -21.5px;
+	display: none;
+	width: 100%;
+	justify-content: space-between;
+`;
+
+export const ElementIndicatorDivider = styled(ElementToolbarToggle)`
+	height: 1px;
+	width: 100%;
+	top: auto;
+	bottom: -5px;
+	border-top: 1px solid ${(props) => props.theme.colors.border.alt1};
+`;
+
+export const ElementWrapper = styled.div<{ blockEditMode: boolean }>`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	position: relative;
+	cursor: default;
+
+	${(props) =>
+		!props.blockEditMode &&
+		`
+		&:hover {
+			${ElementToolbarToggle} {
+				display: flex;
+			}
+		}
+	`}
+`;
+
+export const ElementDragWrapper = styled.div`
+	display: flex;
+	gap: 10px;
+	position: relative;
+`;
+
 export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEnum }>`
 	${(props) => getElementWrapper(props.blockEditMode, props.type, props.theme)};
 
@@ -127,6 +109,12 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 		font-size: 15px;
 	}
 
+	a {
+		text-decoration: underline;
+		text-decoration-thickness: 1.25px;
+		cursor: pointer;
+	}
+
 	blockquote {
 		font-family: Georgia, serif;
 		font-style: italic;
@@ -134,6 +122,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 		font-weight: 500;
 		color: ${(props) => props.theme.colors.font.alt2};
 	}
+
 	ol,
 	ul {
 		padding: 0 0 0 20px;
@@ -163,12 +152,15 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 			}
 		}
 	}
+
 	ol {
 		list-style-type: decimal;
 	}
+
 	ul {
 		list-style-type: disc;
 	}
+
 	code {
 		color: ${(props) => props.theme.colors.font.primary};
 		background: ${(props) => props.theme.colors.container.alt1.background};
@@ -216,6 +208,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 `;
 
 export const ElementToolbar = styled.div`
+	width: 100%;
 	display: flex;
 	align-items: center;
 `;
@@ -234,24 +227,12 @@ export const EToolbarHeader = styled.div`
 	}
 `;
 
-export const EToolbarDelete = styled.div`
+export const EToolbarActions = styled.div`
 	width: fit-content;
+	display: flex;
+	align-items: center;
+	gap: 10px;
 	margin: 0 0 0 auto;
-	button {
-		color: ${(props) => props.theme.colors.warning.primary} !important;
-		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
-		font-family: ${(props) => props.theme.typography.family.primary} !important;
-		display: block;
-		white-space: nowrap;
-		text-overflow: ellipsis;
-		max-width: 100%;
-		overflow: hidden;
-
-		&:hover {
-			color: ${(props) => props.theme.colors.warning.alt1} !important;
-		}
-	}
 `;
 
 export const EDragWrapper = styled.div`
@@ -269,10 +250,45 @@ export const EDragHandler = styled.div`
 	}
 `;
 
-export const BlocksEmpty = styled.div`
-	span {
-		color: ${(props) => props.theme.colors.font.alt3};
-		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
+export const SelectionWrapper = styled.div`
+	button {
+		span {
+			color: ${(props) => props.theme.colors.link.color} !important;
+			font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+			text-transform: uppercase;
+		}
+
+		svg {
+			color: ${(props) => props.theme.colors.link.color} !important;
+			fill: ${(props) => props.theme.colors.link.color} !important;
+		}
+
+		&:hover {
+			span {
+				color: ${(props) => props.theme.colors.link.active} !important;
+				text-transform: uppercase;
+			}
+
+			svg {
+				color: ${(props) => props.theme.colors.link.active} !important;
+				fill: ${(props) => props.theme.colors.link.active} !important;
+			}
+		}
 	}
+`;
+
+export const ModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	padding: 0 20px 20px 20px;
+`;
+
+export const ModalActionsWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 20px;
+	margin: 15px 0 0 0;
 `;

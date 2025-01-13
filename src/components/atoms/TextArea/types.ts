@@ -13,4 +13,5 @@ export interface IProps {
 	error?: string | null;
 	testingCtx?: string;
 	required?: boolean;
+	hideErrorMessage?: boolean;
 }
