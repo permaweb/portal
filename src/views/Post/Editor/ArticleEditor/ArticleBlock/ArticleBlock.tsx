@@ -25,6 +25,7 @@ export default function ArticleBlock(props: IProps) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	const [selectionRange, setSelectionRange] = React.useState<{ start: number; end: number } | null>(null);
 	const [selectedText, setSelectedText] = React.useState<string>('');
 	const [textToConvert, setTextToConvert] = React.useState<string>('');
 	const [newLinkUrl, setNewLinkUrl] = React.useState<string>('');
@@ -73,7 +74,19 @@ export default function ArticleBlock(props: IProps) {
 	}, []);
 
 	function handleLinkModalOpen() {
-		setTextToConvert(selectedText);
+		const selection = window.getSelection();
+		if (selection && selection.rangeCount > 0) {
+			const range = selection.getRangeAt(0);
+			const start = range.startOffset;
+			const end = range.endOffset;
+			const selectedText = range.toString();
+
+			if (selectedText.length > 0) {
+				setTextToConvert(selectedText); // Save selected text
+				setSelectionRange({ start, end }); // Save the selection range
+			}
+		}
+
 		setShowLinkModal(true);
 	}
 
@@ -87,26 +100,17 @@ export default function ArticleBlock(props: IProps) {
 		const { content } = props.block;
 		const link = `<a href="${newLinkUrl}" target="_blank" rel="noopener noreferrer">${textToConvert}</a>`;
 
-		// Check if the textToConvert is already linked
-		const isAlreadyLinked = new RegExp(`<a [^>]*href="[^"]*"[^>]*>${textToConvert}</a>`, 'g').test(content);
-
-		if (isAlreadyLinked) {
-			console.warn('The selected text is already linked.');
+		if (!selectionRange) {
+			console.warn('No selection range available.');
 			handleLinkClear();
 			return;
 		}
 
-		// Locate the first occurrence of the selected text within the content
-		const selectionStartIndex = content.indexOf(textToConvert);
-		if (selectionStartIndex === -1) {
-			console.warn('Selected text not found in block content.');
-			handleLinkClear();
-			return;
-		}
+		const { start, end } = selectionRange;
 
-		// Ensure we're replacing only the selected occurrence
-		const beforeText = content.slice(0, selectionStartIndex);
-		const afterText = content.slice(selectionStartIndex + textToConvert.length);
+		// Replace only the selected range
+		const beforeText = content.slice(0, start);
+		const afterText = content.slice(end);
 		const updatedContent = `${beforeText}${link}${afterText}`;
 
 		// Save the updated content back to the block

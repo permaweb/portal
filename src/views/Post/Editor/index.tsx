@@ -54,11 +54,15 @@ export default function Editor() {
 
 			const data = mapToProcessCase({
 				title: currentPost.data.title,
+				description: currentPost.data.description,
 				status: currentPost.data.status,
 				content: currentPost.data.content,
 				topics: currentPost.data.topics,
 				categories: currentPost.data.categories,
+				thumbnail: currentPost.data.thumbnail,
 			});
+
+			console.log(data);
 
 			if (assetId) {
 				try {
