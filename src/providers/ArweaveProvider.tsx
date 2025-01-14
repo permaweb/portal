@@ -1,11 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { getProfileByWalletAddress, ProfileType } from '@permaweb/libs';
-
 import { Modal } from 'components/atoms/Modal';
-import { Panel } from 'components/atoms/Panel';
-import { ProfileManager } from 'components/organisms/ProfileManager';
 import { ASSETS, STORAGE, URLS } from 'helpers/config';
 import { getARBalanceEndpoint } from 'helpers/endpoints';
 import { WalletEnum } from 'helpers/types';
@@ -31,11 +27,6 @@ interface ArweaveContextState {
 	handleDisconnect: () => void;
 	walletModalVisible: boolean;
 	setWalletModalVisible: (open: boolean) => void;
-	profile: ProfileType;
-	showProfileManager: boolean;
-	setShowProfileManager: (toggle: boolean) => void;
-	toggleProfileUpdate: boolean;
-	setToggleProfileUpdate: (toggleUpdate: boolean) => void;
 }
 
 const DEFAULT_CONTEXT = {
@@ -48,11 +39,6 @@ const DEFAULT_CONTEXT = {
 	handleDisconnect() {},
 	walletModalVisible: false,
 	setWalletModalVisible(_open: boolean) {},
-	profile: null,
-	toggleProfileUpdate: false,
-	setToggleProfileUpdate(_toggleUpdate: boolean) {},
-	showProfileManager: false,
-	setShowProfileManager(_toggle: boolean) {},
 };
 
 const ARContext = React.createContext<ArweaveContextState>(DEFAULT_CONTEXT);
@@ -101,10 +87,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 	const [arBalance, setArBalance] = React.useState<number | null>(null);
 
-	const [profile, setProfile] = React.useState<ProfileType | null>(null);
-	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
-	const [toggleProfileUpdate, setToggleProfileUpdate] = React.useState<boolean>(false);
-
 	React.useEffect(() => {
 		handleWallet();
 
@@ -129,75 +111,9 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [walletAddress]);
 
-	React.useEffect(() => {
-		(async function () {
-			if (wallet && walletAddress) {
-				const cachedProfile = getCachedProfile(walletAddress);
-				if (cachedProfile) {
-					setProfile(cachedProfile);
-				}
-
-				try {
-					const fetchedProfile = await getProfileByWalletAddress(walletAddress);
-					setProfile(fetchedProfile);
-					cacheProfile(walletAddress, fetchedProfile);
-				} catch (e: any) {
-					console.error(e);
-				}
-			}
-		})();
-	}, [wallet, walletAddress]);
-
-	React.useEffect(() => {
-		(async function () {
-			if (wallet && walletAddress) {
-				const fetchProfileUntilChange = async () => {
-					let changeDetected = false;
-					let tries = 0;
-					const maxTries = 10;
-
-					while (!changeDetected && tries < maxTries) {
-						try {
-							const existingProfile = profile;
-							const newProfile = await getProfileByWalletAddress(walletAddress);
-
-							if (JSON.stringify(existingProfile) !== JSON.stringify(newProfile)) {
-								setProfile(newProfile);
-								cacheProfile(walletAddress, newProfile);
-								changeDetected = true;
-							} else {
-								await new Promise((resolve) => setTimeout(resolve, 1000));
-								tries++;
-							}
-						} catch (error) {
-							console.error(error);
-							break;
-						}
-					}
-
-					if (!changeDetected) {
-						console.warn(`No changes detected after ${maxTries} attempts`);
-					}
-				};
-
-				await fetchProfileUntilChange();
-			}
-		})();
-	}, [toggleProfileUpdate]);
-
-	function getCachedProfile(address: string) {
-		const cached = localStorage.getItem(STORAGE.profile(address));
-		return cached ? JSON.parse(cached) : null;
-	}
-
-	function cacheProfile(address: string, profileData: any) {
-		localStorage.setItem(STORAGE.profile(address), JSON.stringify(profileData));
-	}
-
 	async function handleWallet() {
 		if (localStorage.getItem(STORAGE.walletType)) {
 			try {
-				setProfile(null);
 				await handleConnect(localStorage.getItem(STORAGE.walletType) as any);
 			} catch (e: any) {
 				console.error(e);
@@ -255,7 +171,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		await global.window?.arweaveWallet?.disconnect();
 		setWallet(null);
 		setWalletAddress(null);
-		setProfile(null);
 		navigate(URLS.base);
 	}
 
@@ -283,27 +198,9 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					wallets,
 					walletModalVisible,
 					setWalletModalVisible,
-					profile,
-					showProfileManager,
-					setShowProfileManager,
-					toggleProfileUpdate,
-					setToggleProfileUpdate,
 				}}
 			>
 				{props.children}
-				<Panel
-					open={showProfileManager}
-					header={profile && profile.id ? language.editProfile : `${language.createProfile}!`}
-					handleClose={() => setShowProfileManager(false)}
-					width={575}
-					closeHandlerDisabled
-				>
-					<ProfileManager
-						profile={profile && profile.id ? profile : null}
-						handleClose={() => setShowProfileManager(false)}
-						handleUpdate={null}
-					/>
-				</Panel>
 			</ARContext.Provider>
 		</>
 	);

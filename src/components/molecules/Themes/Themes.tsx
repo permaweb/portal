@@ -1,8 +1,6 @@
 import React from 'react';
 import { HexColorInput, HexColorPicker } from 'react-colorful';
 
-import { globalLog, mapFromProcessCase, mapToProcessCase, updateZone } from '@permaweb/libs';
-
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
@@ -10,6 +8,7 @@ import { DEFAULT_THEME } from 'helpers/config';
 import { NotificationType, PortalThemeType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
 import { Modal } from '../../atoms/Modal';
@@ -197,8 +196,8 @@ function Section(props: {
 
 export default function Themes(props: IProps) {
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -219,17 +218,17 @@ export default function Themes(props: IProps) {
 				const updatedThemes =
 					options?.map((existingTheme) => (existingTheme.name === theme.name ? theme : existingTheme)) || [];
 
-				const themeUpdateId = await updateZone(
-					{ Themes: mapToProcessCase(updatedThemes) },
+				const themeUpdateId = await permawebProvider.libs.updateZone(
+					{ Themes: permawebProvider.libs.mapToProcessCase(updatedThemes) },
 					portalProvider.current.id,
 					arProvider.wallet
 				);
 
 				portalProvider.refreshCurrentPortal();
 
-				globalLog(`Theme update: ${themeUpdateId}`);
+				console.log(`Theme update: ${themeUpdateId}`);
 
-				setOptions(mapFromProcessCase(updatedThemes));
+				setOptions(permawebProvider.libs.mapFromProcessCase(updatedThemes));
 
 				setResponse({ status: 'success', message: `${language.themeUpdated}!` });
 			} catch (e: any) {

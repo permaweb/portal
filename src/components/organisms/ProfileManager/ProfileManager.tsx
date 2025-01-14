@@ -1,8 +1,6 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { createProfile, globalLog, updateProfile } from '@permaweb/libs';
-
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
@@ -14,6 +12,7 @@ import { NotificationType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
@@ -25,7 +24,7 @@ const ALLOWED_AVATAR_TYPES = 'image/png, image/jpeg, image/gif';
 
 export default function ProfileManager(props: IProps) {
 	const arProvider = useArweaveProvider();
-
+	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -78,15 +77,20 @@ export default function ProfileManager(props: IProps) {
 				if (banner) data.banner = banner;
 
 				if (props.profile && props.profile.id) {
-					const profileUpdateId = await updateProfile(data, props.profile.id, arProvider.wallet, (status: any) =>
-						globalLog(status)
+					const profileUpdateId = await permawebProvider.libs.updateProfile(
+						data,
+						props.profile.id,
+						arProvider.wallet,
+						(status: any) => console.log(status)
 					);
-					globalLog(`Profile update: ${profileUpdateId}`);
+					console.log(`Profile update: ${profileUpdateId}`);
 					handleUpdate(`${language.profileUpdated}!`);
 				} else {
-					const profileId = await createProfile(data, arProvider.wallet, (status: any) => globalLog(status));
+					const profileId = await permawebProvider.libs.createProfile(data, arProvider.wallet, (status: any) =>
+						console.log(status)
+					);
 
-					globalLog(`Profile ID: ${profileId}`);
+					console.log(`Profile ID: ${profileId}`);
 
 					handleUpdate(`${language.profileCreated}!`);
 				}

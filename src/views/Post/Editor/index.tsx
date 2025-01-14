@@ -2,14 +2,13 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
-import { aoSend, createAtomicAsset, globalLog, mapToProcessCase } from '@permaweb/libs';
-
 import { Notification } from 'components/atoms/Notification';
 import { ASSET_UPLOAD, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { NotificationType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { RootState } from 'store';
 import { currentPostUpdate } from 'store/post';
@@ -26,8 +25,8 @@ export default function Editor() {
 	const currentPost = useSelector((state: RootState) => state.currentPost);
 
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -45,33 +44,37 @@ export default function Editor() {
 	// }, [currentPost.editor.panelOpen]);
 
 	async function handleSubmit() {
-		if (arProvider.wallet && arProvider.profile?.id && portalProvider.current?.id) {
+		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
 			handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language.savingPost}...` } });
 			if (!validateSubmit()) {
 				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
 				return;
 			}
 
-			const data = mapToProcessCase({
+			console.log(`Process src: ${ASSET_UPLOAD.src.process}`);
+
+			const data = permawebProvider.libs.mapToProcessCase({
 				title: currentPost.data.title,
 				description: currentPost.data.description,
 				status: currentPost.data.status,
 				content: currentPost.data.content,
 				topics: currentPost.data.topics,
 				categories: currentPost.data.categories,
-				thumbnail: currentPost.data.thumbnail,
+				thumbnail: await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail),
 			});
+
+			console.log(data);
 
 			if (assetId) {
 				try {
-					const assetContentUpdateId = await aoSend({
+					const assetContentUpdateId = await permawebProvider.libs.aoSend({
 						processId: assetId,
 						wallet: arProvider.wallet,
 						action: 'Update-Asset',
 						data: data,
 					});
 
-					globalLog(`Asset content update: ${assetContentUpdateId}`);
+					console.log(`Asset content update: ${assetContentUpdateId}`);
 
 					setResponse({ status: 'success', message: `${language.postUpdated}!` });
 
@@ -84,7 +87,7 @@ export default function Editor() {
 					const assetDataFetch = await fetch(getTxEndpoint(ASSET_UPLOAD.src.data));
 					const dataSrc = await assetDataFetch.text();
 
-					const assetId = await createAtomicAsset(
+					const assetId = await permawebProvider.libs.createAtomicAsset(
 						{
 							title: currentPost.data.title,
 							description: currentPost.data.title,
@@ -92,39 +95,39 @@ export default function Editor() {
 							topics: currentPost.data.topics,
 							data: dataSrc,
 							contentType: ASSET_UPLOAD.contentType,
-							creator: arProvider.profile.id,
+							creator: permawebProvider.profile.id,
 							tags: [{ name: 'Status', value: currentPost.data.status }],
 							src: ASSET_UPLOAD.src.process,
 						},
 						arProvider.wallet,
-						(status: any) => globalLog(status)
+						(status: any) => console.log(status)
 					);
 
-					globalLog(`Asset ID: ${assetId}`);
+					console.log(`Asset ID: ${assetId}`);
 
-					const assetContentUpdateId = await aoSend({
+					const assetContentUpdateId = await permawebProvider.libs.aoSend({
 						processId: assetId,
 						wallet: arProvider.wallet,
 						action: 'Update-Asset',
 						data: data,
 					});
 
-					globalLog(`Asset content update: ${assetContentUpdateId}`);
+					console.log(`Asset content update: ${assetContentUpdateId}`);
 
 					const indexRecipients = [portalProvider.current.id];
 
 					for (const recipient of indexRecipients) {
-						const zoneIndexUpdateId = await aoSend({
+						const zoneIndexUpdateId = await permawebProvider.libs.aoSend({
 							processId: recipient,
 							wallet: arProvider.wallet,
 							action: 'Add-Index-Id',
 							tags: [{ name: 'IndexId', value: assetId }],
 						});
 
-						globalLog(`Zone index update: ${zoneIndexUpdateId}`);
+						console.log(`Zone index update: ${zoneIndexUpdateId}`);
 					}
 
-					const assetIndexUpdateId = await aoSend({
+					const assetIndexUpdateId = await permawebProvider.libs.aoSend({
 						processId: assetId,
 						wallet: arProvider.wallet,
 						action: 'Send-Index',
@@ -136,7 +139,7 @@ export default function Editor() {
 						data: { Recipients: indexRecipients },
 					});
 
-					globalLog(`Asset index update: ${assetIndexUpdateId}`);
+					console.log(`Asset index update: ${assetIndexUpdateId}`);
 					portalProvider.refreshCurrentPortal('assets');
 					setResponse({ status: 'success', message: `${language.postSaved}!` });
 					navigate(`${URLS.postEditArticle(portalProvider.current.id)}${assetId}`);

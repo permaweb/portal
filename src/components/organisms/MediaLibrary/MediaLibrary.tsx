@@ -1,8 +1,6 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { addToZone, globalLog, mapToProcessCase, resolveTransaction, updateZone } from '@permaweb/libs';
-
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
@@ -13,6 +11,7 @@ import { getTxEndpoint } from 'helpers/endpoints';
 import { MediaConfigType, NotificationType, PortalUploadOptionType, PortalUploadType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
@@ -20,8 +19,8 @@ import { IProps } from './types';
 
 export default function MediaLibrary(props: IProps) {
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -91,12 +90,16 @@ export default function MediaLibrary(props: IProps) {
 				setMediaLoading(true);
 				setMediaMessage(`${language.uploadingMedia}...`);
 				try {
-					const tx = await resolveTransaction(newUploadUrl);
+					const tx = await permawebProvider.libs.resolveTransaction(newUploadUrl);
 
-					const mediaUpdateId = await addToZone(
+					const mediaUpdateId = await permawebProvider.libs.addToZone(
 						{
 							path: 'Uploads',
-							data: mapToProcessCase({ tx: tx, type: getMediaType(newUploadUrl), dateUploaded: Date.now().toString() }),
+							data: permawebProvider.libs.mapToProcessCase({
+								tx: tx,
+								type: getMediaType(newUploadUrl),
+								dateUploaded: Date.now().toString(),
+							}),
 						},
 						portalProvider.current.id,
 						arProvider.wallet
@@ -104,7 +107,7 @@ export default function MediaLibrary(props: IProps) {
 
 					portalProvider.refreshCurrentPortal();
 
-					globalLog(`Media update: ${mediaUpdateId}`);
+					console.log(`Media update: ${mediaUpdateId}`);
 
 					setNewUploadUrl(null);
 					setMediaResponse({ status: 'success', message: `${language.mediaUploaded}!` });
@@ -155,8 +158,8 @@ export default function MediaLibrary(props: IProps) {
 					(upload: PortalUploadType) => upload.tx !== selectedUpload.tx
 				);
 
-				const mediaUpdateId = await updateZone(
-					{ Uploads: mapToProcessCase(updatedMedia) },
+				const mediaUpdateId = await permawebProvider.libs.updateZone(
+					{ Uploads: permawebProvider.libs.mapToProcessCase(updatedMedia) },
 					portalProvider.current.id,
 					arProvider.wallet
 				);
@@ -165,7 +168,7 @@ export default function MediaLibrary(props: IProps) {
 
 				portalProvider.refreshCurrentPortal();
 
-				globalLog(`Media update: ${mediaUpdateId}`);
+				console.log(`Media update: ${mediaUpdateId}`);
 
 				setMediaResponse({ status: 'success', message: `${language.mediaUpdated}!` });
 			} catch (e: any) {

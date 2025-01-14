@@ -20,6 +20,7 @@ import { DOM, URLS } from 'helpers/config';
 import { Navigation } from 'navigation/Navigation';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { useSettingsProvider } from 'providers/SettingsProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
@@ -38,6 +39,7 @@ export default function App() {
 	const navigate = useNavigate();
 
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -62,7 +64,7 @@ export default function App() {
 				);
 			}
 
-			if (!arProvider.profile) {
+			if (!permawebProvider.profile) {
 				return (
 					<Portal node={DOM.overlay}>
 						<S.CenteredWrapper className={'overlay'}>

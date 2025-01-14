@@ -10,14 +10,15 @@ import { ButtonType } from 'helpers/types';
 import { formatAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
 export default function Landing() {
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -33,19 +34,21 @@ export default function Landing() {
 			label = language.connect;
 			type = 'alt1';
 			action = () => arProvider.setWalletModalVisible(true);
-		} else if (!arProvider.profile) {
+		} else if (!permawebProvider.profile) {
 			header = `${language.gettingInfo}...`;
 			label = `${language.fetching}...`;
 			type = 'alt1';
 			action = null;
 			disabled = true;
-		} else if (!arProvider.profile.id) {
+		} else if (!permawebProvider.profile.id) {
 			header = language.createProfile;
 			label = language.create;
 			type = 'alt1';
-			action = () => arProvider.setShowProfileManager(true);
+			action = () => permawebProvider.setShowProfileManager(true);
 		} else {
-			header = `${language.welcome}, ${arProvider.profile.username ?? formatAddress(arProvider.walletAddress, false)}`;
+			header = `${language.welcome}, ${
+				permawebProvider.profile.username ?? formatAddress(arProvider.walletAddress, false)
+			}`;
 			label = language.disconnect;
 			type = 'primary';
 			action = () => arProvider.handleDisconnect();
@@ -57,14 +60,14 @@ export default function Landing() {
 				<Button type={type} label={label} handlePress={action} disabled={disabled} height={42.5} fullWidth />
 			</S.ConnectionWrapper>
 		);
-	}, [arProvider.wallet, arProvider.profile]);
+	}, [arProvider.wallet, permawebProvider.profile]);
 
 	const portals = React.useMemo(() => {
 		let content: React.ReactNode | null;
 		let disabled: boolean = false;
 		let showAction: boolean = false;
 
-		if (!arProvider.wallet || (arProvider.profile && !arProvider.profile.id)) {
+		if (!arProvider.wallet || (permawebProvider.profile && !permawebProvider.profile.id)) {
 			showAction = true;
 			disabled = true;
 			content = (
@@ -72,7 +75,7 @@ export default function Landing() {
 					<p>{language.portalsInfo}</p>
 				</>
 			);
-		} else if (!arProvider.profile) {
+		} else if (!permawebProvider.profile) {
 			showAction = false;
 			disabled = true;
 			content = (
@@ -126,7 +129,7 @@ export default function Landing() {
 				)}
 			</S.PortalsWrapper>
 		);
-	}, [arProvider.walletAddress, arProvider.profile, portalProvider.portals]);
+	}, [arProvider.walletAddress, permawebProvider.profile, portalProvider.portals]);
 
 	return (
 		<S.Wrapper className={'fade-in'}>

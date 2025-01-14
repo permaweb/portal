@@ -2,12 +2,11 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
-import { formatDate } from '@permaweb/libs';
-
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS, URLS } from 'helpers/config';
 import { ArticleStatusType, ButtonType, PortalAssetType } from 'helpers/types';
+import { formatDate } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';

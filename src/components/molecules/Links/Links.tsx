@@ -1,8 +1,6 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { globalLog, mapFromProcessCase, mapToProcessCase, resolveTransaction, updateZone } from '@permaweb/libs';
-
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Notification } from 'components/atoms/Notification';
@@ -12,6 +10,7 @@ import { NotificationType, PortalLinkType } from 'helpers/types';
 import { checkValidAddress, validateUrl } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
@@ -24,8 +23,8 @@ const ALLOWED_ICON_TYPES = 'image/svg+xml';
 
 export default function Links(props: IProps) {
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -65,8 +64,8 @@ export default function Links(props: IProps) {
 					(link) => !selectedLinks.some((selectedLink) => selectedLink.url === link.url)
 				);
 
-				const linkUpdateId = await updateZone(
-					{ Links: mapToProcessCase(updatedLinks) },
+				const linkUpdateId = await permawebProvider.libs.updateZone(
+					{ Links: permawebProvider.libs.mapToProcessCase(updatedLinks) },
 					portalProvider.current.id,
 					arProvider.wallet
 				);
@@ -75,7 +74,7 @@ export default function Links(props: IProps) {
 
 				portalProvider.refreshCurrentPortal();
 
-				globalLog(`Link update: ${linkUpdateId}`);
+				console.log(`Link update: ${linkUpdateId}`);
 
 				setLinkResponse({ status: 'success', message: `${language.linksUpdated}!` });
 				setShowDeleteConfirmation(false);
@@ -93,11 +92,11 @@ export default function Links(props: IProps) {
 			try {
 				let newLink: { Url: string; Title: string; Icon?: string } = { Url: newLinkUrl, Title: newLinkTitle };
 
-				if (newLinkIcon) newLink.Icon = await resolveTransaction(newLinkIcon);
+				if (newLinkIcon) newLink.Icon = await permawebProvider.libs.resolveTransaction(newLinkIcon);
 
-				const updatedLinkOptions = [...mapToProcessCase(linkOptions), newLink];
+				const updatedLinkOptions = [...permawebProvider.libs.mapToProcessCase(linkOptions), newLink];
 
-				const linkUpdateId = await updateZone(
+				const linkUpdateId = await permawebProvider.libs.updateZone(
 					{ Links: updatedLinkOptions },
 					portalProvider.current.id,
 					arProvider.wallet
@@ -105,9 +104,9 @@ export default function Links(props: IProps) {
 
 				portalProvider.refreshCurrentPortal();
 
-				globalLog(`Link update: ${linkUpdateId}`);
+				console.log(`Link update: ${linkUpdateId}`);
 
-				setLinkOptions(mapFromProcessCase(updatedLinkOptions));
+				setLinkOptions(permawebProvider.libs.mapFromProcessCase(updatedLinkOptions));
 				setLinkResponse({ status: 'success', message: `${language.linkAdded}!` });
 
 				setNewLinkUrl('');
