@@ -1,8 +1,6 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { addToZone, globalLog, mapToProcessCase, resolveTransaction } from '@permaweb/libs';
-
 import { Button } from 'components/atoms/Button';
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { FormField } from 'components/atoms/FormField';
@@ -23,14 +21,15 @@ import {
 } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
 
 export default function MediaBlock(props: { type: 'image' | 'video'; content: any; data: any; onChange: any }) {
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -90,18 +89,22 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			) {
 				setMediaLoading(true);
 				try {
-					const tx = await resolveTransaction(mediaData.url);
+					const tx = await permawebProvider.libs.resolveTransaction(mediaData.url);
 
-					const mediaUpdateId = await addToZone(
+					const mediaUpdateId = await permawebProvider.libs.addToZone(
 						{
 							path: 'Uploads',
-							data: mapToProcessCase({ tx: tx, type: props.type, dateUploaded: Date.now().toString() }),
+							data: permawebProvider.libs.mapToProcessCase({
+								tx: tx,
+								type: props.type,
+								dateUploaded: Date.now().toString(),
+							}),
 						},
 						portalProvider.current.id,
 						arProvider.wallet
 					);
 
-					globalLog(`Media update: ${mediaUpdateId}`);
+					console.log(`Media update: ${mediaUpdateId}`);
 
 					setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(tx) }));
 					setMediaUploaded(true);

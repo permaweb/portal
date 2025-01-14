@@ -3,13 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 
-import { aoDryRun, mapFromProcessCase } from '@permaweb/libs';
-
 import { Loader } from 'components/atoms/Loader';
 import { URLS } from 'helpers/config';
 import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { RootState } from 'store';
 import { currentPostUpdate } from 'store/post';
@@ -28,8 +27,8 @@ export default function ArticleEditor(props: IProps) {
 
 	const currentPost = useSelector((state: RootState) => state.currentPost);
 
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -45,7 +44,7 @@ export default function ArticleEditor(props: IProps) {
 
 					handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language.loadingPost}...` } });
 					try {
-						const response = await aoDryRun({
+						const response = await permawebProvider.libs.aoDryRun({
 							processId: assetId,
 							action: 'Get-Asset',
 						});
@@ -54,11 +53,20 @@ export default function ArticleEditor(props: IProps) {
 							if (response.Title) handleCurrentPostUpdate({ field: 'title', value: response.Title });
 							if (response.Status) handleCurrentPostUpdate({ field: 'status', value: response.Status });
 							if (response.Categories)
-								handleCurrentPostUpdate({ field: 'categories', value: mapFromProcessCase(response.Categories) });
+								handleCurrentPostUpdate({
+									field: 'categories',
+									value: permawebProvider.libs.mapFromProcessCase(response.Categories),
+								});
 							if (response.Topics)
-								handleCurrentPostUpdate({ field: 'topics', value: mapFromProcessCase(response.Topics) });
+								handleCurrentPostUpdate({
+									field: 'topics',
+									value: permawebProvider.libs.mapFromProcessCase(response.Topics),
+								});
 							if (response.Content?.length > 0)
-								handleCurrentPostUpdate({ field: 'content', value: mapFromProcessCase(response.Content) });
+								handleCurrentPostUpdate({
+									field: 'content',
+									value: permawebProvider.libs.mapFromProcessCase(response.Content),
+								});
 						}
 					} catch (e: any) {
 						console.error(e);

@@ -57,6 +57,60 @@ export function formatCount(count: string): string {
 	}
 }
 
+export function formatDate(dateArg: string | number | null, dateType: 'iso' | 'epoch', fullTime?: boolean) {
+	if (!dateArg) {
+		return null;
+	}
+
+	let date: Date | null = null;
+
+	switch (dateType) {
+		case 'iso':
+			date = new Date(dateArg);
+			break;
+		case 'epoch':
+			date = new Date(Number(dateArg));
+			break;
+		default:
+			date = new Date(dateArg);
+			break;
+	}
+
+	return fullTime
+		? `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getUTCFullYear()} at ${
+				date.getHours() % 12 || 12
+		  }:${date.getMinutes().toString().padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'}`
+		: `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getUTCFullYear()}`;
+}
+
+export function getRelativeDate(timestamp: number) {
+	if (!timestamp) return '-';
+	const currentDate = new Date();
+	const inputDate = new Date(timestamp);
+
+	const timeDifference: number = currentDate.getTime() - inputDate.getTime();
+	const secondsDifference = Math.floor(timeDifference / 1000);
+	const minutesDifference = Math.floor(secondsDifference / 60);
+	const hoursDifference = Math.floor(minutesDifference / 60);
+	const daysDifference = Math.floor(hoursDifference / 24);
+	const monthsDifference = Math.floor(daysDifference / 30.44); // Average days in a month
+	const yearsDifference = Math.floor(monthsDifference / 12);
+
+	if (yearsDifference > 0) {
+		return `${yearsDifference} year${yearsDifference > 1 ? 's' : ''} ago`;
+	} else if (monthsDifference > 0) {
+		return `${monthsDifference} month${monthsDifference > 1 ? 's' : ''} ago`;
+	} else if (daysDifference > 0) {
+		return `${daysDifference} day${daysDifference > 1 ? 's' : ''} ago`;
+	} else if (hoursDifference > 0) {
+		return `${hoursDifference} hour${hoursDifference > 1 ? 's' : ''} ago`;
+	} else if (minutesDifference > 0) {
+		return `${minutesDifference} minute${minutesDifference > 1 ? 's' : ''} ago`;
+	} else {
+		return `${secondsDifference} second${secondsDifference !== 1 ? 's' : ''} ago`;
+	}
+}
+
 export function formatPercentage(percentage: any) {
 	let multiplied = percentage * 100;
 	let decimalPart = multiplied.toString().split('.')[1];
@@ -181,4 +235,8 @@ export function isEqual(obj1: any, obj2: any): boolean {
 	}
 
 	return obj1 === obj2;
+}
+
+export function getBootTag(key: string, value: string) {
+	return { name: `Bootloader-${key}`, value };
 }

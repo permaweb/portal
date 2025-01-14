@@ -1,8 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { getZone, mapFromProcessCase } from '@permaweb/libs';
-
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
 import { PortalManager } from 'components/organisms/PortalManager';
@@ -12,6 +10,7 @@ import { areAssetsEqual } from 'helpers/utils';
 
 import { useArweaveProvider } from './ArweaveProvider';
 import { useLanguageProvider } from './LanguageProvider';
+import { usePermawebProvider } from './PermawebProvider';
 
 type RefreshFieldType = 'assets';
 
@@ -45,6 +44,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const location = useLocation();
 
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -63,12 +63,12 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [createNewPortal, setCreateNewPortal] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		if (arProvider.profile) {
-			setPortals(arProvider.profile.portals ?? []);
+		if (permawebProvider.profile) {
+			setPortals(permawebProvider.profile.portals ?? []);
 		} else {
 			setPermissions(null);
 		}
-	}, [arProvider.profile]);
+	}, [permawebProvider.profile]);
 
 	React.useEffect(() => {
 		if (portals?.length > 0) {
@@ -126,7 +126,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				setErrorMessage(e.message ?? 'An error occurred getting this portal');
 			}
 		})();
-	}, [currentId, arProvider.profile]);
+	}, [currentId, permawebProvider.profile]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -188,7 +188,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const fetchPortal = async () => {
 		if (currentId) {
 			try {
-				const portalData = await getZone(currentId);
+				const portalData = await permawebProvider.libs.getZone(currentId);
 
 				if (portalData) {
 					let portal: PortalDetailType = {
@@ -196,7 +196,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						name: portalData.Store?.Name || 'None',
 						logo: portalData.Store?.Logo || 'None',
 						assets: portalData.Store?.Index
-							? mapFromProcessCase(
+							? permawebProvider.libs.mapFromProcessCase(
 									portalData.Store.Index.filter(
 										(asset: any) =>
 											asset.ProcessType &&
@@ -206,11 +206,15 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									)
 							  )
 							: [],
-						categories: portalData.Store?.Categories ? mapFromProcessCase(portalData.Store.Categories) : [],
-						topics: portalData.Store?.Topics ? mapFromProcessCase(portalData.Store.Topics) : [],
-						links: portalData.Store?.Links ? mapFromProcessCase(portalData.Store.Links) : [],
-						uploads: portalData.Store?.Uploads ? mapFromProcessCase(portalData.Store.Uploads) : [],
-						themes: portalData.Store?.Themes ? mapFromProcessCase(portalData.Store.Themes) : [],
+						categories: portalData.Store?.Categories
+							? permawebProvider.libs.mapFromProcessCase(portalData.Store.Categories)
+							: [],
+						topics: portalData.Store?.Topics ? permawebProvider.libs.mapFromProcessCase(portalData.Store.Topics) : [],
+						links: portalData.Store?.Links ? permawebProvider.libs.mapFromProcessCase(portalData.Store.Links) : [],
+						uploads: portalData.Store?.Uploads
+							? permawebProvider.libs.mapFromProcessCase(portalData.Store.Uploads)
+							: [],
+						themes: portalData.Store?.Themes ? permawebProvider.libs.mapFromProcessCase(portalData.Store.Themes) : [],
 						users: [], // TODO
 						domains: [], // TODO
 					};
@@ -243,36 +247,32 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	}
 
 	return (
-		<>
-			<PortalContext.Provider
-				value={{
-					portals,
-					current,
-					permissions,
-					showPortalManager,
-					setShowPortalManager: handleShowPortalManager,
-					refreshCurrentPortal: (field?: RefreshFieldType) => refreshCurrentPortal(field),
-					updating,
-				}}
+		<PortalContext.Provider
+			value={{
+				portals,
+				current,
+				permissions,
+				showPortalManager,
+				setShowPortalManager: handleShowPortalManager,
+				refreshCurrentPortal: (field?: RefreshFieldType) => refreshCurrentPortal(field),
+				updating,
+			}}
+		>
+			{props.children}
+			<Panel
+				open={showPortalManager}
+				header={current && current.id && !createNewPortal ? language.editPortal : language.createPortal}
+				handleClose={() => setShowPortalManager(false)}
+				width={500}
+				closeHandlerDisabled={true}
 			>
-				{props.children}
-				<Panel
-					open={showPortalManager}
-					header={current && current.id && !createNewPortal ? language.editPortal : language.createPortal}
+				<PortalManager
+					portal={createNewPortal ? null : current}
 					handleClose={() => setShowPortalManager(false)}
-					width={500}
-					closeHandlerDisabled={true}
-				>
-					<PortalManager
-						portal={createNewPortal ? null : current}
-						handleClose={() => setShowPortalManager(false)}
-						handleUpdate={null}
-					/>
-				</Panel>
-				{errorMessage && (
-					<Notification type={'warning'} message={errorMessage} callback={() => setErrorMessage(null)} />
-				)}
-			</PortalContext.Provider>
-		</>
+					handleUpdate={null}
+				/>
+			</Panel>
+			{errorMessage && <Notification type={'warning'} message={errorMessage} callback={() => setErrorMessage(null)} />}
+		</PortalContext.Provider>
 	);
 }

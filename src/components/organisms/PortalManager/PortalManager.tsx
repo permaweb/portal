@@ -2,16 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
-import {
-	addToZone,
-	createZone,
-	getBootTag,
-	globalLog,
-	mapToProcessCase,
-	resolveTransaction,
-	updateZone,
-} from '@permaweb/libs';
-
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
@@ -19,9 +9,10 @@ import { Notification } from 'components/atoms/Notification';
 import { ASSETS, DEFAULT_THEME, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { NotificationType, PortalHeaderType } from 'helpers/types';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, getBootTag } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
@@ -34,9 +25,8 @@ export default function PortalManager(props: IProps) {
 	const navigate = useNavigate();
 
 	const arProvider = useArweaveProvider();
-
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -59,7 +49,7 @@ export default function PortalManager(props: IProps) {
 	}, [props.portal]);
 
 	async function handleSubmit() {
-		if (arProvider.wallet && arProvider.profile && arProvider.profile.id) {
+		if (arProvider.wallet && permawebProvider.profile && permawebProvider.profile.id) {
 			setLoading(true);
 
 			try {
@@ -72,7 +62,7 @@ export default function PortalManager(props: IProps) {
 
 				if (logo) {
 					try {
-						data.Logo = await resolveTransaction(logo);
+						data.Logo = await permawebProvider.libs.resolveTransaction(logo);
 					} catch (e: any) {
 						console.error(`Failed to resolve logo: ${e.message}`);
 					}
@@ -84,44 +74,50 @@ export default function PortalManager(props: IProps) {
 						.map((portal: PortalHeaderType) => ({ Id: portal.id, Name: portal.name, Logo: portal.logo }));
 					portalsUpdateData.push({ Id: props.portal.id, ...data });
 
-					const portalUpdateId = await updateZone(data, props.portal.id, arProvider.wallet);
+					const portalUpdateId = await permawebProvider.libs.updateZone(data, props.portal.id, arProvider.wallet);
 
-					globalLog(`Portal update: ${portalUpdateId}`);
+					console.log(`Portal update: ${portalUpdateId}`);
 
-					profileUpdateId = await updateZone({ Portals: portalsUpdateData }, arProvider.profile.id, arProvider.wallet);
+					profileUpdateId = await permawebProvider.libs.updateZone(
+						{ Portals: portalsUpdateData },
+						permawebProvider.profile.id,
+						arProvider.wallet
+					);
 
 					response = `${language.portalUpdated}!`;
 				} else {
 					const tags = [getBootTag('Name', data.Name)];
 					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
 
-					const portalId = await createZone({ tags: tags }, arProvider.wallet, (status: any) => globalLog(status));
+					const portalId = await permawebProvider.libs.createZone({ tags: tags }, arProvider.wallet, (status: any) =>
+						console.log(status)
+					);
 
-					globalLog(`Portal ID: ${portalId}`);
+					console.log(`Portal ID: ${portalId}`);
 
-					profileUpdateId = await addToZone(
+					profileUpdateId = await permawebProvider.libs.addToZone(
 						{ path: 'Portals', data: { Id: portalId, ...data } },
-						arProvider.profile.id,
+						permawebProvider.profile.id,
 						arProvider.wallet
 					);
 
-					const initUpdateId = await addToZone(
+					const initUpdateId = await permawebProvider.libs.addToZone(
 						{
 							path: 'Themes',
-							data: { ...mapToProcessCase(DEFAULT_THEME) },
+							data: { ...permawebProvider.libs.mapToProcessCase(DEFAULT_THEME) },
 						},
 						portalId,
 						arProvider.wallet
 					);
 
-					globalLog(`Init Update ID: ${initUpdateId}`);
+					console.log(`Init Update ID: ${initUpdateId}`);
 
 					response = `${language.portalCreated}!`;
 
 					navigate(URLS.portalBase(portalId));
 				}
 
-				if (profileUpdateId) globalLog(`Profile update: ${profileUpdateId}`);
+				if (profileUpdateId) console.log(`Profile update: ${profileUpdateId}`);
 
 				portalProvider.refreshCurrentPortal();
 				arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);

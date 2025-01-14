@@ -1,8 +1,6 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { globalLog, resolveTransaction, updateZone } from '@permaweb/libs';
-
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
@@ -12,6 +10,7 @@ import { NotificationType, PortalHeaderType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
@@ -22,9 +21,8 @@ const ALLOWED_LOGO_TYPES = 'image/png, image/jpeg, image/gif';
 
 export default function PortalManager(props: IProps) {
 	const arProvider = useArweaveProvider();
-
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -44,7 +42,7 @@ export default function PortalManager(props: IProps) {
 	}, [props.portal]);
 
 	async function handleSubmit() {
-		if (arProvider.wallet && arProvider.profile && arProvider.profile.id && portalProvider.current?.name) {
+		if (arProvider.wallet && permawebProvider.profile && permawebProvider.profile.id && portalProvider.current?.name) {
 			setLoading(true);
 
 			try {
@@ -57,7 +55,7 @@ export default function PortalManager(props: IProps) {
 
 				if (logo) {
 					try {
-						data.Logo = await resolveTransaction(logo);
+						data.Logo = await permawebProvider.libs.resolveTransaction(logo);
 					} catch (e: any) {
 						data.Logo = 'None';
 						console.error(`Failed to resolve logo: ${e.message}`);
@@ -70,16 +68,20 @@ export default function PortalManager(props: IProps) {
 						.map((portal: PortalHeaderType) => ({ Id: portal.id, Name: portal.name, Logo: portal.logo }));
 					portalsUpdateData.push({ Id: props.portal.id, ...data });
 
-					const portalUpdateId = await updateZone(data, props.portal.id, arProvider.wallet);
+					const portalUpdateId = await permawebProvider.libs.updateZone(data, props.portal.id, arProvider.wallet);
 
-					globalLog(`Portal update: ${portalUpdateId}`);
+					console.log(`Portal update: ${portalUpdateId}`);
 
-					profileUpdateId = await updateZone({ Portals: portalsUpdateData }, arProvider.profile.id, arProvider.wallet);
+					profileUpdateId = await permawebProvider.libs.updateZone(
+						{ Portals: portalsUpdateData },
+						permawebProvider.profile.id,
+						arProvider.wallet
+					);
 
 					response = `${language.logoUpdated}!`;
 				}
 
-				if (profileUpdateId) globalLog(`Profile update: ${profileUpdateId}`);
+				if (profileUpdateId) console.log(`Profile update: ${profileUpdateId}`);
 
 				portalProvider.refreshCurrentPortal();
 				arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);

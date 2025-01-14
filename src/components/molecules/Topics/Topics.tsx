@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { globalLog, updateZone } from '@permaweb/libs';
-
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Notification } from 'components/atoms/Notification';
@@ -9,6 +7,7 @@ import { ASSETS } from 'helpers/config';
 import { NotificationType, PortalTopicType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
 import { Modal } from '../../atoms/Modal';
@@ -18,8 +17,8 @@ import { IProps } from './types';
 
 export default function Topics(props: IProps) {
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -42,7 +41,7 @@ export default function Topics(props: IProps) {
 			try {
 				const updatedTopicOptions = [...topicOptions, newTopic];
 
-				const topicUpdateId = await updateZone(
+				const topicUpdateId = await permawebProvider.libs.updateZone(
 					{ Topics: updatedTopicOptions.map((topic: string) => ({ Value: topic })) },
 					portalProvider.current.id,
 					arProvider.wallet
@@ -50,7 +49,7 @@ export default function Topics(props: IProps) {
 
 				portalProvider.refreshCurrentPortal();
 
-				globalLog(`Topic update: ${topicUpdateId}`);
+				console.log(`Topic update: ${topicUpdateId}`);
 
 				if (props.selectOnAdd) props.setTopics([...props.topics, newTopic]);
 
@@ -70,7 +69,7 @@ export default function Topics(props: IProps) {
 			try {
 				const currentTopicOptions = portalProvider.current.topics.map((topic: PortalTopicType) => topic.value);
 				const updatedTopicOptions = currentTopicOptions.filter((topic: string) => !props.topics.includes(topic));
-				const topicUpdateId = await updateZone(
+				const topicUpdateId = await permawebProvider.libs.updateZone(
 					{ Topics: updatedTopicOptions.map((topic: string) => ({ Value: topic })) },
 					portalProvider.current.id,
 					arProvider.wallet
@@ -80,7 +79,7 @@ export default function Topics(props: IProps) {
 
 				portalProvider.refreshCurrentPortal();
 
-				globalLog(`Topic update: ${topicUpdateId}`);
+				console.log(`Topic update: ${topicUpdateId}`);
 
 				setTopicResponse({ status: 'success', message: `${language.topicsUpdated}!` });
 				setShowDeleteConfirmation(false);

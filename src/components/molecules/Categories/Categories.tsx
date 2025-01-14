@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { globalLog, mapToProcessCase, updateZone } from '@permaweb/libs';
-
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Notification } from 'components/atoms/Notification';
@@ -9,6 +7,7 @@ import { ASSETS } from 'helpers/config';
 import { NotificationType, PortalCategoryType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
@@ -19,6 +18,7 @@ import { IProps } from './types';
 
 export default function Categories(props: IProps) {
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -84,15 +84,15 @@ export default function Categories(props: IProps) {
 
 				const updatedCategories = parentCategory ? addToParent(categoryOptions) : [...categoryOptions, newCategory];
 
-				const categoryUpdateId = await updateZone(
-					{ Categories: mapToProcessCase(updatedCategories) },
+				const categoryUpdateId = await permawebProvider.libs.updateZone(
+					{ Categories: permawebProvider.libs.mapToProcessCase(updatedCategories) },
 					portalProvider.current.id,
 					arProvider.wallet
 				);
 
 				portalProvider.refreshCurrentPortal();
 
-				globalLog(`Category update: ${categoryUpdateId}`);
+				console.log(`Category update: ${categoryUpdateId}`);
 
 				if (props.selectOnAdd) props.setCategories([...props.categories, newCategory]);
 
@@ -144,8 +144,8 @@ export default function Categories(props: IProps) {
 
 				const updatedCategories = removeCategories(allCategories, idsToDelete);
 
-				const categoryUpdateId = await updateZone(
-					{ Categories: mapToProcessCase(updatedCategories) },
+				const categoryUpdateId = await permawebProvider.libs.updateZone(
+					{ Categories: permawebProvider.libs.mapToProcessCase(updatedCategories) },
 					portalProvider.current.id,
 					arProvider.wallet
 				);
@@ -154,7 +154,7 @@ export default function Categories(props: IProps) {
 
 				portalProvider.refreshCurrentPortal();
 
-				globalLog(`Category update: ${categoryUpdateId}`);
+				console.log(`Category update: ${categoryUpdateId}`);
 
 				setCategoryOptions(updatedCategories);
 				setCategoryResponse({ status: 'success', message: `${language.categoriesUpdated}!` });
