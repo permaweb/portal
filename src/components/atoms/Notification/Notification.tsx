@@ -22,14 +22,14 @@ export default function Notification(props: IProps) {
 	}
 
 	React.useEffect(() => {
-		if (show) {
+		if (show && props.type !== 'warning') {
 			const timer = setTimeout(() => {
 				handleClose();
 			}, 5000);
 
 			return () => clearTimeout(timer);
 		}
-	}, []);
+	}, [show, props.type]);
 
 	return show ? (
 		<Portal node={DOM.notification}>

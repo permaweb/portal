@@ -16,17 +16,15 @@ interface PermawebContextState {
 	profile: ProfileType;
 	showProfileManager: boolean;
 	setShowProfileManager: (toggle: boolean) => void;
-	toggleProfileUpdate: boolean;
-	setToggleProfileUpdate: (toggleUpdate: boolean) => void;
+	refreshProfile: () => void;
 }
 
 const DEFAULT_CONTEXT = {
 	libs: null,
 	profile: null,
-	toggleProfileUpdate: false,
-	setToggleProfileUpdate(_toggleUpdate: boolean) {},
 	showProfileManager: false,
 	setShowProfileManager(_toggle: boolean) {},
+	refreshProfile() {},
 };
 
 const PermawebContext = React.createContext<PermawebContextState>(DEFAULT_CONTEXT);
@@ -44,7 +42,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	const [libs, setLibs] = React.useState<any>(null);
 	const [profile, setProfile] = React.useState<ProfileType | null>(null);
 	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
-	const [toggleProfileUpdate, setToggleProfileUpdate] = React.useState<boolean>(false);
+	const [refreshProfileTrigger, setRefreshProfileTrigger] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
 		setLibs(
@@ -110,7 +108,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				await fetchProfileUntilChange();
 			}
 		})();
-	}, [toggleProfileUpdate, libs]);
+	}, [refreshProfileTrigger, libs]);
 
 	function getCachedProfile(address: string) {
 		const cached = localStorage.getItem(STORAGE.profile(address));
@@ -128,8 +126,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				profile: profile,
 				showProfileManager,
 				setShowProfileManager,
-				toggleProfileUpdate,
-				setToggleProfileUpdate,
+				refreshProfile: () => setRefreshProfileTrigger((prev) => !prev),
 			}}
 		>
 			{props.children}

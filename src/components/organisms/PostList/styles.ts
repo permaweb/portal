@@ -105,6 +105,7 @@ export const PostsWrapper = styled.div<{ type: ViewLayoutType }>`
 	border-bottom-right-radius: ${STYLING.dimensions.radius.alt2};
 
 	margin: ${(props) => (props.type === 'header' ? '0' : '20px 0 0 0')};
+	overflow: hidden;
 
 	> * {
 		&:not(:last-child) {

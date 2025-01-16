@@ -51,7 +51,7 @@ export default function ProfileManager(props: IProps) {
 	}, [props.profile]);
 
 	function handleUpdate(response: string) {
-		arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
+		permawebProvider.refreshProfile();
 
 		if (props.handleUpdate) props.handleUpdate();
 		if (props.handleClose) props.handleClose();

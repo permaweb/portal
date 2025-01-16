@@ -63,11 +63,9 @@ export default function Editor() {
 				thumbnail: await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail),
 			});
 
-			console.log(data);
-
 			if (assetId) {
 				try {
-					const assetContentUpdateId = await permawebProvider.libs.aoSend({
+					const assetContentUpdateId = await permawebProvider.libs.sendMessage({
 						processId: assetId,
 						wallet: arProvider.wallet,
 						action: 'Update-Asset',
@@ -99,13 +97,12 @@ export default function Editor() {
 							tags: [{ name: 'Status', value: currentPost.data.status }],
 							src: ASSET_UPLOAD.src.process,
 						},
-						arProvider.wallet,
 						(status: any) => console.log(status)
 					);
 
 					console.log(`Asset ID: ${assetId}`);
 
-					const assetContentUpdateId = await permawebProvider.libs.aoSend({
+					const assetContentUpdateId = await permawebProvider.libs.sendMessage({
 						processId: assetId,
 						wallet: arProvider.wallet,
 						action: 'Update-Asset',
@@ -117,7 +114,7 @@ export default function Editor() {
 					const indexRecipients = [portalProvider.current.id];
 
 					for (const recipient of indexRecipients) {
-						const zoneIndexUpdateId = await permawebProvider.libs.aoSend({
+						const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
 							processId: recipient,
 							wallet: arProvider.wallet,
 							action: 'Add-Index-Id',
@@ -127,7 +124,7 @@ export default function Editor() {
 						console.log(`Zone index update: ${zoneIndexUpdateId}`);
 					}
 
-					const assetIndexUpdateId = await permawebProvider.libs.aoSend({
+					const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
 						processId: assetId,
 						wallet: arProvider.wallet,
 						action: 'Send-Index',
