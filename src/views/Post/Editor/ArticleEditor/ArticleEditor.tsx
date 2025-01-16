@@ -18,7 +18,6 @@ import { ArticleToolbar } from './ArticleToolbar';
 import * as S from './styles';
 import { IProps } from './types';
 
-// TODO: Block width exceeding wrapper
 export default function ArticleEditor(props: IProps) {
 	const navigate = useNavigate();
 	const { assetId } = useParams<{ assetId?: string }>();
@@ -44,7 +43,7 @@ export default function ArticleEditor(props: IProps) {
 
 					handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language.loadingPost}...` } });
 					try {
-						const response = await permawebProvider.libs.aoDryRun({
+						const response = await permawebProvider.libs.readProcess({
 							processId: assetId,
 							action: 'Get-Asset',
 						});

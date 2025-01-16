@@ -8,7 +8,6 @@ import { STORAGE } from 'helpers/config';
 import { PortalDetailType, PortalHeaderType, PortalPermissionsType } from 'helpers/types';
 import { areAssetsEqual } from 'helpers/utils';
 
-import { useArweaveProvider } from './ArweaveProvider';
 import { useLanguageProvider } from './LanguageProvider';
 import { usePermawebProvider } from './PermawebProvider';
 
@@ -43,7 +42,6 @@ export function usePortalProvider(): PortalContextState {
 export function PortalProvider(props: { children: React.ReactNode }) {
 	const location = useLocation();
 
-	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -180,11 +178,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [refreshCurrentTrigger, refreshField]);
 
-	const refreshCurrentPortal = (field: RefreshFieldType) => {
-		if (field) setRefreshField(field);
-		setRefreshCurrentTrigger((prev) => !prev);
-	};
-
 	const fetchPortal = async () => {
 		if (currentId) {
 			try {
@@ -245,6 +238,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		setShowPortalManager(toggle);
 		setCreateNewPortal(useNew ?? false);
 	}
+
+	const refreshCurrentPortal = (field: RefreshFieldType) => {
+		if (field) setRefreshField(field);
+		setRefreshCurrentTrigger((prev) => !prev);
+	};
 
 	return (
 		<PortalContext.Provider

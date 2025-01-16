@@ -89,9 +89,7 @@ export default function PortalManager(props: IProps) {
 					const tags = [getBootTag('Name', data.Name)];
 					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
 
-					const portalId = await permawebProvider.libs.createZone({ tags: tags }, arProvider.wallet, (status: any) =>
-						console.log(status)
-					);
+					const portalId = await permawebProvider.libs.createZone({ tags: tags }, (status: any) => console.log(status));
 
 					console.log(`Portal ID: ${portalId}`);
 
@@ -120,7 +118,7 @@ export default function PortalManager(props: IProps) {
 				if (profileUpdateId) console.log(`Profile update: ${profileUpdateId}`);
 
 				portalProvider.refreshCurrentPortal();
-				arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
+				permawebProvider.refreshProfile();
 
 				if (props.handleUpdate) props.handleUpdate();
 				if (props.handleClose) props.handleClose();

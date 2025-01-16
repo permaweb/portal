@@ -84,7 +84,7 @@ export default function PortalManager(props: IProps) {
 				if (profileUpdateId) console.log(`Profile update: ${profileUpdateId}`);
 
 				portalProvider.refreshCurrentPortal();
-				arProvider.setToggleProfileUpdate(!arProvider.toggleProfileUpdate);
+				permawebProvider.refreshProfile();
 
 				if (props.handleUpdate) props.handleUpdate();
 				if (props.handleClose) props.handleClose();
