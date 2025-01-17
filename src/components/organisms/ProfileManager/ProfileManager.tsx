@@ -77,18 +77,13 @@ export default function ProfileManager(props: IProps) {
 				if (banner) data.banner = banner;
 
 				if (props.profile && props.profile.id) {
-					const profileUpdateId = await permawebProvider.libs.updateProfile(
-						data,
-						props.profile.id,
-						arProvider.wallet,
-						(status: any) => console.log(status)
+					const profileUpdateId = await permawebProvider.libs.updateProfile(data, props.profile.id, (status: any) =>
+						console.log(status)
 					);
 					console.log(`Profile update: ${profileUpdateId}`);
 					handleUpdate(`${language.profileUpdated}!`);
 				} else {
-					const profileId = await permawebProvider.libs.createProfile(data, arProvider.wallet, (status: any) =>
-						console.log(status)
-					);
+					const profileId = await permawebProvider.libs.createProfile(data, (status: any) => console.log(status));
 
 					console.log(`Profile ID: ${profileId}`);
 
