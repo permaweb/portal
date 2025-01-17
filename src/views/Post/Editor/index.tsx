@@ -36,12 +36,19 @@ export default function Editor() {
 		dispatch(currentPostUpdate(updatedField));
 	};
 
-	// TODO: Submit disabled
-	// React.useEffect(() => {
-	// 	function getSubmitDisabled() {
-	// 		return !blocks || blocks.length <= 0 || !blocks.some((block) => block.content.length > 0);
-	// 	}
-	// }, [currentPost.editor.panelOpen]);
+	React.useEffect(() => {
+		const handleBeforeUnload = (e: any) => {
+			if (process.env.NODE_ENV === 'development') return;
+			e.preventDefault();
+			e.returnValue = '';
+		};
+
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
+	}, []);
 
 	async function handleSubmit() {
 		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
@@ -51,17 +58,17 @@ export default function Editor() {
 				return;
 			}
 
-			console.log(`Process src: ${ASSET_UPLOAD.src.process}`);
-
-			const data = permawebProvider.libs.mapToProcessCase({
+			let data: any = permawebProvider.libs.mapToProcessCase({
 				title: currentPost.data.title,
 				description: currentPost.data.description,
 				status: currentPost.data.status,
 				content: currentPost.data.content,
 				topics: currentPost.data.topics,
 				categories: currentPost.data.categories,
-				thumbnail: await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail),
 			});
+
+			if (currentPost.data.thumbnail)
+				data.thumbnail = await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail);
 
 			if (assetId) {
 				try {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
-import { IconButton } from 'components/atoms/IconButton';
+// import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS, URLS } from 'helpers/config';
 import { ArticleStatusType, ButtonType, PortalAssetType } from 'helpers/types';
 import { formatDate } from 'helpers/utils';
@@ -165,6 +165,22 @@ export default function PostList(props: IProps) {
 		}
 	}
 
+	// TODO
+	// <Button
+	// 	type={'alt3'}
+	// 	label={language.view}
+	// 	handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
+	// />
+	// <IconButton
+	// 	type={'primary'}
+	// 	active={false}
+	// 	src={ASSETS.listUnordered}
+	// 	handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
+	// 	dimensions={{ wrapper: 25, icon: 15 }}
+	// 	tooltip={language.moreActions}
+	// 	tooltipPosition={'bottom-right'}
+	// />
+
 	const posts = React.useMemo(() => {
 		if (!paginatedPosts.length) {
 			return (
@@ -191,20 +207,6 @@ export default function PostList(props: IProps) {
 									type={'alt3'}
 									label={language.edit}
 									handlePress={() => navigate(`${URLS.postEditArticle(portalProvider.current.id)}${asset.id}`)}
-								/>
-								<Button
-									type={'alt3'}
-									label={language.view}
-									handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
-								/>
-								<IconButton
-									type={'primary'}
-									active={false}
-									src={ASSETS.listUnordered}
-									handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
-									dimensions={{ wrapper: 25, icon: 15 }}
-									tooltip={language.moreActions}
-									tooltipPosition={'bottom-right'}
 								/>
 							</S.PostActions>
 							{asset.status && (
