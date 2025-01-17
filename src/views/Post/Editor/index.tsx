@@ -58,15 +58,17 @@ export default function Editor() {
 				return;
 			}
 
-			const data = permawebProvider.libs.mapToProcessCase({
+			let data: any = permawebProvider.libs.mapToProcessCase({
 				title: currentPost.data.title,
 				description: currentPost.data.description,
 				status: currentPost.data.status,
 				content: currentPost.data.content,
 				topics: currentPost.data.topics,
 				categories: currentPost.data.categories,
-				thumbnail: await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail),
 			});
+
+			if (currentPost.data.thumbnail)
+				data.thumbnail = await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail);
 
 			if (assetId) {
 				try {

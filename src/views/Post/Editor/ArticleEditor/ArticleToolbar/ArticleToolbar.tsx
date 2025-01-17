@@ -29,7 +29,7 @@ export default function ArticleToolbar(props: IProps) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const TABS = [{ label: language.post }, { label: language.blocks }];
+	const TABS = [{ label: language.blocks }, { label: language.post }];
 
 	const titleRef = React.useRef<any>(null);
 	const blockRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
