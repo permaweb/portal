@@ -43,30 +43,14 @@ export default function ArticleEditor(props: IProps) {
 
 					handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language.loadingPost}...` } });
 					try {
-						const response = await permawebProvider.libs.readProcess({
-							processId: assetId,
-							action: 'Get-Asset',
-						});
-
-						if (response) {
-							if (response.Title) handleCurrentPostUpdate({ field: 'title', value: response.Title });
-							if (response.Status) handleCurrentPostUpdate({ field: 'status', value: response.Status });
-							if (response.Categories)
-								handleCurrentPostUpdate({
-									field: 'categories',
-									value: permawebProvider.libs.mapFromProcessCase(response.Categories),
-								});
-							if (response.Topics)
-								handleCurrentPostUpdate({
-									field: 'topics',
-									value: permawebProvider.libs.mapFromProcessCase(response.Topics),
-								});
-							if (response.Content?.length > 0)
-								handleCurrentPostUpdate({
-									field: 'content',
-									value: permawebProvider.libs.mapFromProcessCase(response.Content),
-								});
-						}
+						const response = await permawebProvider.libs.getAtomicAsset(assetId);
+						handleCurrentPostUpdate({ field: 'title', value: response?.name });
+						handleCurrentPostUpdate({ field: 'status', value: response?.metadata?.status });
+						handleCurrentPostUpdate({ field: 'categories', value: response?.metadata?.categories });
+						handleCurrentPostUpdate({ field: 'topics', value: response?.metadata?.topics });
+						handleCurrentPostUpdate({ field: 'content', value: response?.metadata?.content });
+						handleCurrentPostUpdate({ field: 'thumbnail', value: response?.metadata?.thumbnail });
+						handleCurrentPostUpdate({ field: 'description', value: response?.metadata?.description });
 					} catch (e: any) {
 						console.error(e);
 					}

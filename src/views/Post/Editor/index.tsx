@@ -59,7 +59,7 @@ export default function Editor() {
 			}
 
 			let data: any = permawebProvider.libs.mapToProcessCase({
-				title: currentPost.data.title,
+				name: currentPost.data.title,
 				description: currentPost.data.description,
 				status: currentPost.data.status,
 				content: currentPost.data.content,
@@ -67,8 +67,13 @@ export default function Editor() {
 				categories: currentPost.data.categories,
 			});
 
-			if (currentPost.data.thumbnail)
-				data.thumbnail = await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail);
+			if (currentPost.data.thumbnail) {
+				try {
+					data.Thumbnail = await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail);
+				} catch (e: any) {
+					console.error(e); // TODO: Notification
+				}
+			}
 
 			if (assetId) {
 				try {
@@ -94,15 +99,14 @@ export default function Editor() {
 
 					const assetId = await permawebProvider.libs.createAtomicAsset(
 						{
-							title: currentPost.data.title,
+							name: currentPost.data.title,
 							description: currentPost.data.title,
-							type: ASSET_UPLOAD.ansType,
 							topics: currentPost.data.topics,
+							creator: permawebProvider.profile.id,
 							data: dataSrc,
 							contentType: ASSET_UPLOAD.contentType,
-							creator: permawebProvider.profile.id,
-							tags: [{ name: 'Status', value: currentPost.data.status }],
-							src: ASSET_UPLOAD.src.process,
+							assetType: ASSET_UPLOAD.ansType,
+							metadata: { releasedDate: new Date().getTime().toString() },
 						},
 						(status: any) => console.log(status)
 					);

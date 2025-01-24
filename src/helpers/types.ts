@@ -14,18 +14,27 @@ export type PortalDetailType = {
 	themes?: PortalThemeType[];
 };
 
-// TODO
+// TODO: DateCreated / LastUpdate
+/* Zone Indexed Asset */
 export type PortalAssetType = {
-	id: string | null;
-	title: string;
-	description: string;
-	content: any;
-	creator: string | null;
-	status: ArticleStatusType;
-	categories: PortalCategoryType[];
-	topics: string[];
-	thumbnail?: string | null;
-	dateCreated: number | null;
+	id: string;
+	name: string;
+	ticker: string;
+	denomination: string;
+	totalSupply: string;
+	transferable: string;
+	creator: string;
+	balances: object;
+	assetType: string;
+	processType: string;
+	dateCreated: number;
+	metadata: {
+		description?: string;
+		topics?: string[];
+		categories?: PortalCategoryType[];
+		status?: ArticleStatusType;
+		content?: any;
+	};
 };
 
 // TODO
