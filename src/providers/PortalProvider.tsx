@@ -5,7 +5,7 @@ import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
 import { PortalManager } from 'components/organisms/PortalManager';
 import { STORAGE } from 'helpers/config';
-import { PortalDetailType, PortalHeaderType, PortalPermissionsType } from 'helpers/types';
+import { PortalAssetType, PortalDetailType, PortalHeaderType, PortalPermissionsType } from 'helpers/types';
 import { areAssetsEqual } from 'helpers/utils';
 
 import { useLanguageProvider } from './LanguageProvider';
@@ -183,37 +183,21 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			try {
 				const portalData = await permawebProvider.libs.getZone(currentId);
 
-				if (portalData) {
-					let portal: PortalDetailType = {
-						id: currentId,
-						name: portalData.Store?.Name || 'None',
-						logo: portalData.Store?.Logo || 'None',
-						assets: portalData.Store?.Index
-							? permawebProvider.libs.mapFromProcessCase(
-									portalData.Store.Index.filter(
-										(asset: any) =>
-											asset.ProcessType &&
-											asset.ProcessType === 'atomic-asset' &&
-											asset.AssetType &&
-											asset.AssetType === 'blog-post'
-									)
-							  )
-							: [],
-						categories: portalData.Store?.Categories
-							? permawebProvider.libs.mapFromProcessCase(portalData.Store.Categories)
-							: [],
-						topics: portalData.Store?.Topics ? permawebProvider.libs.mapFromProcessCase(portalData.Store.Topics) : [],
-						links: portalData.Store?.Links ? permawebProvider.libs.mapFromProcessCase(portalData.Store.Links) : [],
-						uploads: portalData.Store?.Uploads
-							? permawebProvider.libs.mapFromProcessCase(portalData.Store.Uploads)
-							: [],
-						themes: portalData.Store?.Themes ? permawebProvider.libs.mapFromProcessCase(portalData.Store.Themes) : [],
-						users: [], // TODO
-						domains: [], // TODO
-					};
+				let portal: PortalDetailType = {
+					id: currentId,
+					name: portalData.store?.name ?? 'None',
+					logo: portalData.store?.logo ?? 'None',
+					assets: getPortalAssets(portalData?.store?.index),
+					categories: portalData?.store?.categories ?? [],
+					topics: portalData?.store?.topics ?? [],
+					links: portalData?.store?.links ?? [],
+					uploads: portalData?.store?.uploads ?? [],
+					themes: portalData?.store?.themes ?? [],
+					users: [], // TODO
+					domains: [], // TODO
+				};
 
-					return portal;
-				}
+				return portal;
 			} catch (e: any) {
 				throw new Error(e.message ?? 'An error occurred getting this portal.');
 			}
@@ -228,6 +212,18 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const cachePortal = (id: string, portalData: any) => {
 		localStorage.setItem(STORAGE.portal(id), JSON.stringify(portalData));
 	};
+
+	function getPortalAssets(index: PortalAssetType[]) {
+		return permawebProvider.libs.mapFromProcessCase(
+			index?.filter(
+				(asset: any) =>
+					asset.processType &&
+					asset.processType === 'atomic-asset' &&
+					asset.assetType &&
+					asset.assetType === 'blog-post'
+			)
+		);
+	}
 
 	function handleInitPermissionSet(base: boolean) {
 		const updatedPermissions = permissions ? { ...permissions, base: base } : { base: base };

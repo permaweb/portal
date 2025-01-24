@@ -92,11 +92,6 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 					tooltip={props.open ? language.sidebarClose : language.sidebarOpen}
 					tooltipPosition={props.open ? 'right' : 'bottom-left'}
 				/>
-				{/* {(desktop || (!desktop && props.open)) && (
-					<S.Logo onClick={() => navigate(URLS.portalBase(portalProvider.current?.id ?? ''))}>
-						{`[${language.app}]`}
-					</S.Logo>
-				)} */}
 			</S.ToggleWrapper>
 		);
 	}, [props.open, portalProvider.current?.id, desktop]);

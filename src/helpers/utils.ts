@@ -198,7 +198,7 @@ export function validateUrl(url: string) {
 }
 
 export function areAssetsEqual(assets1: PortalAssetType[], assets2: PortalAssetType[]): boolean {
-	if (assets1.length !== assets2.length) {
+	if (assets1?.length !== assets2?.length) {
 		return false;
 	}
 
@@ -209,7 +209,7 @@ export function areAssetsEqual(assets1: PortalAssetType[], assets2: PortalAssetT
 		(a, b) => new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime()
 	);
 
-	for (let i = 0; i < sortedAssets1.length; i++) {
+	for (let i = 0; i < sortedAssets1?.length; i++) {
 		if (!isEqual(sortedAssets1[i], sortedAssets2[i])) {
 			return false;
 		}

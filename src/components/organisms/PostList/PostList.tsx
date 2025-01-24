@@ -195,10 +195,10 @@ export default function PostList(props: IProps) {
 				{paginatedPosts.map((asset: PortalAssetType) => (
 					<S.PostWrapper key={asset.id} className={'fade-in'}>
 						<S.PostHeader>
-							<p>{asset.title}</p>
+							<p>{asset.name}</p>
 							<span>
 								<ReactSVG src={ASSETS.time} />
-								{formatDate(asset.dateCreated, 'iso', true)}
+								{formatDate(asset.dateCreated, 'epoch', true)}
 							</span>
 						</S.PostHeader>
 						<S.PostDetail>
@@ -209,9 +209,9 @@ export default function PostList(props: IProps) {
 									handlePress={() => navigate(`${URLS.postEditArticle(portalProvider.current.id)}${asset.id}`)}
 								/>
 							</S.PostActions>
-							{asset.status && (
-								<S.PostStatus status={asset.status as ArticleStatusType}>
-									<p>{asset.status}</p>
+							{asset.metadata?.status && (
+								<S.PostStatus status={asset.metadata?.status as ArticleStatusType}>
+									<p>{asset.metadata.status}</p>
 									<div id={'post-status'} />
 								</S.PostStatus>
 							)}
