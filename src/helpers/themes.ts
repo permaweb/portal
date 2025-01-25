@@ -73,8 +73,8 @@ export const lightThemeHighContrast = {
 	light1: '#FFFFFF',
 	light2: '#F2F2F2',
 	light3: '#B0B0B0',
-	dark1: '#0D0D0D',
-	dark2: '#1A1A1A',
+	dark1: '#151515',
+	dark2: '#333333',
 	link1: '#0074E4',
 	link2: '#0074E4',
 	roles: {
@@ -444,6 +444,11 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 				background: currentTheme.primary2,
 			},
 		},
+		contrast: {
+			background: currentTheme.dark2,
+			border: currentTheme.neutral9,
+			color: currentTheme.light1,
+		},
 		font: {
 			primary: currentTheme.neutralA1,
 			alt1: currentTheme.neutralA5,
@@ -546,11 +551,6 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 				background: currentTheme.primary1,
 				color: currentTheme.neutralA1,
 			},
-		},
-		tooltip: {
-			background: currentTheme.dark2,
-			border: currentTheme.neutral9,
-			color: currentTheme.light1,
 		},
 		view: {
 			background: currentTheme.neutral1,

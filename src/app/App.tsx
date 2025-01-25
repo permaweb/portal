@@ -99,7 +99,9 @@ export default function App() {
 				<>
 					{!portalProvider.current && <Loader message={`${language.loadingPortal}...`} />}
 					<Navigation open={settings.sidebarOpen} toggle={() => updateSettings('sidebarOpen', !settings.sidebarOpen)} />
-					<S.View navigationOpen={settings.sidebarOpen}>{element}</S.View>
+					<S.View className={'max-view-wrapper'} navigationOpen={settings.sidebarOpen}>
+						{element}
+					</S.View>
 					<S.Footer navigationOpen={settings.sidebarOpen}>
 						<p>
 							{language.app} {new Date().getFullYear()}

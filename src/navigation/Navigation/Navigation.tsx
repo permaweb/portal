@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import { debounce } from 'lodash';
 
@@ -7,6 +7,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS, STYLING, URLS } from 'helpers/config';
 import { PortalHeaderType } from 'helpers/types';
 import { checkWindowCutoff } from 'helpers/window';
+import { useNavigationConfirm } from 'hooks/useNavigationConfirm';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { WalletConnect } from 'wallet/WalletConnect';
@@ -15,7 +16,8 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 import * as S from './styles';
 
 export default function Navigation(props: { open: boolean; toggle: () => void }) {
-	const navigate = useNavigate();
+	/* Confirm navigation from inside the post editor */
+	const { confirmNavigation } = useNavigationConfirm('post', 'Changes you made may not be saved.');
 
 	const portalProvider = usePortalProvider();
 
@@ -78,6 +80,12 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		};
 	}, [debouncedResize]);
 
+	const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, to: string) => {
+		e.preventDefault();
+		confirmNavigation(to);
+		if (!desktop) props.toggle();
+	};
+
 	const navigationToggle = React.useMemo(() => {
 		return (
 			<S.ToggleWrapper>
@@ -108,7 +116,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 									key={index}
 									to={element.path}
 									target={element.target || ''}
-									onClick={() => (desktop ? {} : props.toggle())}
+									onClick={(e) => handleNavigate(e, element.path)}
 								>
 									<ReactSVG src={element.icon} />
 									{element.label}
@@ -117,7 +125,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						})}
 					</S.PanelContent>
 					<S.PanelFooter open={props.open} className={'fade-in'}>
-						<Link to={`${URLS.docs}overview/introduction`}>
+						<Link to={URLS.docsIntro} onClick={(e) => handleNavigate(e, URLS.docsIntro)}>
 							<ReactSVG src={ASSETS.help} />
 							{language.helpCenter}
 						</Link>
@@ -172,9 +180,10 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 									<S.PDropdownBody>
 										{portalProvider.portals.map((portal: PortalHeaderType) => {
 											const active = portalProvider.current ? portalProvider.current.id === portal.id : false;
+											const path = `${URLS.base}${portal.id}`;
 											return (
 												<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>
-													<Link to={`${URLS.base}${portal.id}`}>
+													<Link to={path} onClick={(e) => handleNavigate(e, path)}>
 														<span>{portal.name}</span>
 														{active && (
 															<S.PIndicator>
@@ -189,8 +198,8 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 								)}
 								<S.PDropdownFooter>
 									<button
-										onClick={() => {
-											navigate(`${URLS.base}${portalProvider.current.id}`);
+										onClick={(e: any) => {
+											handleNavigate(e, `${URLS.base}${portalProvider.current.id}`);
 											setShowPortalDropdown(false);
 										}}
 									>
@@ -215,7 +224,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										<ReactSVG src={ASSETS.add} />
 										{language.createPortal}
 									</button>
-									<button onClick={() => navigate(URLS.base)}>
+									<button onClick={(e: any) => handleNavigate(e, URLS.base)}>
 										<ReactSVG src={ASSETS.disconnect} />
 										{language.portalsReturn}
 									</button>
@@ -224,7 +233,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						)}
 					</CloseHandler>
 					{portalProvider.updating && (
-						<S.PortalUpdateWrapper className={'border-wrapper-alt3'}>
+						<S.PortalUpdateWrapper>
 							<span>{`${language.updating}...`}</span>
 						</S.PortalUpdateWrapper>
 					)}

@@ -3,8 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
+import { Notification } from 'components/atoms/Notification';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
+import { NotificationType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { RootState } from 'store';
@@ -14,7 +16,6 @@ import * as S from './styles';
 
 const ALLOWED_THUMBNAIL_TYPES = 'image/png, image/jpeg, image/gif';
 
-// TODO
 export default function ArticleToolbarPostThumbnail() {
 	const dispatch = useDispatch();
 
@@ -26,9 +27,11 @@ export default function ArticleToolbarPostThumbnail() {
 	const inputRef = React.useRef<any>(null);
 
 	const [loading, _setLoading] = React.useState<boolean>(false);
+	const [response, setResponse] = React.useState<NotificationType | null>(null);
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
+		setResponse({ status: 'success', message: `${language.thumbnailUpdated}!` });
 	};
 
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'thumbnail') {
@@ -75,36 +78,41 @@ export default function ArticleToolbarPostThumbnail() {
 	}
 
 	return (
-		<S.Wrapper>
-			<S.InputWrapper>
-				<S.Input
-					hasInput={currentPost?.data?.thumbnail !== null}
-					onClick={() => inputRef.current.click()}
-					disabled={loading}
-				>
-					{getInputWrapper()}
-				</S.Input>
-				<input
-					ref={inputRef}
-					type={'file'}
-					onChange={(e: any) => handleFileChange(e, 'thumbnail')}
-					disabled={loading}
-					accept={ALLOWED_THUMBNAIL_TYPES}
-				/>
-			</S.InputWrapper>
-			<S.FooterWrapper>
-				<p>Max (100KB)</p>
-				<Button
-					type={'alt2'}
-					label={language.remove}
-					handlePress={() => handleCurrentPostUpdate({ field: 'thumbnail', value: null })}
-					disabled={!currentPost?.data?.thumbnail}
-					loading={false}
-					icon={ASSETS.delete}
-					iconLeftAlign
-					warning
-				/>
-			</S.FooterWrapper>
-		</S.Wrapper>
+		<>
+			<S.Wrapper>
+				<S.InputWrapper>
+					<S.Input
+						hasInput={currentPost?.data?.thumbnail !== null}
+						onClick={() => inputRef.current.click()}
+						disabled={loading}
+					>
+						{getInputWrapper()}
+					</S.Input>
+					<input
+						ref={inputRef}
+						type={'file'}
+						onChange={(e: any) => handleFileChange(e, 'thumbnail')}
+						disabled={loading}
+						accept={ALLOWED_THUMBNAIL_TYPES}
+					/>
+				</S.InputWrapper>
+				<S.FooterWrapper>
+					<p>Max (100KB)</p>
+					<Button
+						type={'alt2'}
+						label={language.remove}
+						handlePress={() => handleCurrentPostUpdate({ field: 'thumbnail', value: null })}
+						disabled={!currentPost?.data?.thumbnail}
+						loading={false}
+						icon={ASSETS.delete}
+						iconLeftAlign
+						warning
+					/>
+				</S.FooterWrapper>
+			</S.Wrapper>
+			{response && (
+				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
+			)}
+		</>
 	);
 }

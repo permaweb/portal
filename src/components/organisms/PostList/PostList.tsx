@@ -5,7 +5,7 @@ import { ReactSVG } from 'react-svg';
 import { Button } from 'components/atoms/Button';
 // import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS, URLS } from 'helpers/config';
-import { ArticleStatusType, ButtonType, PortalAssetType } from 'helpers/types';
+import { ArticleStatusType, PortalAssetType } from 'helpers/types';
 import { formatDate } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
@@ -62,18 +62,39 @@ export default function PostList(props: IProps) {
 	}, [currentPage, assets.length]);
 
 	function getFilterActions(dropdown: boolean) {
-		let filterOptionType: ButtonType = 'primary';
-		let sortOptionType: ButtonType = 'primary';
+		const getButtonType = (isFilter: boolean, status: string) => {
+			if (dropdown) return 'alt3';
+			if (isFilter) return currentStatusFilter === status ? 'alt1' : 'primary';
+			return 'alt1';
+		};
 
-		if (dropdown) {
-			filterOptionType = 'alt3';
-			sortOptionType = 'alt3';
-		}
-
-		function handleActionPress(fn: () => void) {
+		const handleActionPress = (fn: () => void) => {
 			if (dropdown) setShowFilterActions(false);
 			fn();
-		}
+		};
+
+		const filterButtons = [
+			{
+				label: `${language.all} (${totalCount})`,
+				status: 'all',
+			},
+			{
+				label: `${language.published} (${publishedCount})`,
+				status: 'published',
+			},
+			{
+				label: `${language.draft} (${draftCount})`,
+				status: 'draft',
+			},
+		].map((filterAction: { label: string; status: ArticleStatusType }) => (
+			<Button
+				key={filterAction.status}
+				type={getButtonType(true, filterAction.status)}
+				label={filterAction.label}
+				handlePress={() => handleActionPress(() => setCurrentStatusFilter(filterAction.status))}
+				active={currentStatusFilter === filterAction.status}
+			/>
+		));
 
 		return (
 			<S.PostsActions dropdown={dropdown}>
@@ -83,26 +104,7 @@ export default function PostList(props: IProps) {
 							<p>{language.filterBy}</p>
 						</S.PostsActionsSectionHeader>
 					)}
-					<S.PostsStatusFilterWrapper>
-						<Button
-							type={filterOptionType}
-							label={`${language.all} (${totalCount})`}
-							handlePress={() => handleActionPress(() => setCurrentStatusFilter('all'))}
-							active={currentStatusFilter === 'all'}
-						/>
-						<Button
-							type={filterOptionType}
-							label={`${language.published} (${publishedCount})`}
-							handlePress={() => handleActionPress(() => setCurrentStatusFilter('published'))}
-							active={currentStatusFilter === 'published'}
-						/>
-						<Button
-							type={filterOptionType}
-							label={`${language.draft} (${draftCount})`}
-							handlePress={() => handleActionPress(() => setCurrentStatusFilter('draft'))}
-							active={currentStatusFilter === 'draft'}
-						/>
-					</S.PostsStatusFilterWrapper>
+					<S.PostsStatusFilterWrapper>{filterButtons}</S.PostsStatusFilterWrapper>
 				</S.PostsActionsSection>
 				<S.PostsActionsSection dropdown={dropdown}>
 					{dropdown && (
@@ -112,7 +114,7 @@ export default function PostList(props: IProps) {
 					)}
 					<S.PostsSortingWrapper>
 						<Button
-							type={sortOptionType}
+							type={'primary'}
 							label={dateAscending ? language.sortOldestToNewest : language.sortNewestToOldest}
 							handlePress={() => handleActionPress(() => setDateAscending(!dateAscending))}
 							icon={ASSETS.arrows}

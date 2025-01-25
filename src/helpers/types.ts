@@ -14,7 +14,6 @@ export type PortalDetailType = {
 	themes?: PortalThemeType[];
 };
 
-// TODO: DateCreated / LastUpdate
 /* Zone Indexed Asset */
 export type PortalAssetType = {
 	id: string;
@@ -28,6 +27,7 @@ export type PortalAssetType = {
 	assetType: string;
 	processType: string;
 	dateCreated: number;
+	lastUpdate: number;
 	metadata: {
 		description?: string;
 		topics?: string[];
@@ -35,6 +35,20 @@ export type PortalAssetType = {
 		status?: ArticleStatusType;
 		content?: any;
 	};
+};
+
+export type PortalAssetPostType = {
+	id: null;
+	title: '';
+	description: '';
+	content: null;
+	creator: null;
+	status: ArticleStatusType;
+	categories: PortalCategoryType[];
+	topics: string[];
+	thumbnail: string | null;
+	dateCreated: number | null;
+	lastUpdate: number | null;
 };
 
 // TODO

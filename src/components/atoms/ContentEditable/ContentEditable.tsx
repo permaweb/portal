@@ -39,7 +39,21 @@ export default function ContentEditable(props: {
 		props.onChange(newValue);
 	};
 
+	const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+		e.preventDefault();
+		const text = e.clipboardData.getData('text/plain');
+		document.execCommand('insertText', false, text); // Insert plain text
+	};
+
 	const Element = props.element;
 
-	return <Element ref={ref} contentEditable onInput={handleInput} suppressContentEditableWarning={true} />;
+	return (
+		<Element
+			ref={ref}
+			contentEditable
+			onInput={handleInput}
+			onPaste={handlePaste}
+			suppressContentEditableWarning={true}
+		/>
+	);
 }

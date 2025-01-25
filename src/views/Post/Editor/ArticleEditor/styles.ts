@@ -26,11 +26,16 @@ export const ToolbarWrapper = styled.div`
 `;
 
 export const EditorWrapper = styled.div<{ panelOpen: boolean }>`
+	width: 100%;
 	padding: 0 ${(props) => (props.panelOpen ? `calc(${ARTICLE_TOOLBAR_WIDTH} + 20px)` : '0')} 0 0;
 	transition: padding-right ${transition2};
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {
 		padding: 0;
+	}
+
+	@media (min-width: ${STYLING.cutoffs.max}) {
+		transition: none;
 	}
 `;
 

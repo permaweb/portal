@@ -2,16 +2,17 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Button } from 'components/atoms/Button';
+import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
 import { TextArea } from 'components/atoms/TextArea';
 import { ASSETS } from 'helpers/config';
+import { NotificationType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { RootState } from 'store';
 import { currentPostUpdate } from 'store/post';
 
 import * as S from './styles';
 
-// TODO
 export default function ArticleToolbarPostDescription() {
 	const dispatch = useDispatch();
 
@@ -21,6 +22,7 @@ export default function ArticleToolbarPostDescription() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [showPanel, setShowPanel] = React.useState<boolean>(false);
+	const [response, setResponse] = React.useState<NotificationType | null>(null);
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
@@ -52,15 +54,26 @@ export default function ArticleToolbarPostDescription() {
 						label={language.summary}
 						value={currentPost?.data?.description ?? ''}
 						onChange={(e: any) => handleCurrentPostUpdate({ field: 'description', value: e.target.value })}
+						onFocus={() => handleCurrentPostUpdate({ field: 'focusedBlock', value: null })}
 						invalid={{ status: false, message: null }}
 						disabled={false}
 						hideErrorMessage
 					/>
 					<S.PanelActionsWrapper>
-						<Button type={'alt1'} label={language.done} handlePress={() => setShowPanel(false)} />
+						<Button
+							type={'alt1'}
+							label={language.done}
+							handlePress={() => {
+								setShowPanel(false);
+								setResponse({ status: 'success', message: `${language.summaryUpdated}!` });
+							}}
+						/>
 					</S.PanelActionsWrapper>
 				</S.PanelBodyWrapper>
 			</Panel>
+			{response && (
+				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
+			)}
 		</>
 	);
 }

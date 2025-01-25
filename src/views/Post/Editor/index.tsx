@@ -18,7 +18,6 @@ import { ArticleEditor } from './ArticleEditor';
 export default function Editor() {
 	const navigate = useNavigate();
 	const { assetId } = useParams<{ assetId?: string }>();
-
 	const dispatch = useDispatch();
 	const location = useLocation();
 
@@ -35,20 +34,6 @@ export default function Editor() {
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
-
-	React.useEffect(() => {
-		const handleBeforeUnload = (e: any) => {
-			if (process.env.NODE_ENV === 'development') return;
-			e.preventDefault();
-			e.returnValue = '';
-		};
-
-		window.addEventListener('beforeunload', handleBeforeUnload);
-
-		return () => {
-			window.removeEventListener('beforeunload', handleBeforeUnload);
-		};
-	}, []);
 
 	async function handleSubmit() {
 		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
@@ -71,7 +56,7 @@ export default function Editor() {
 				try {
 					data.Thumbnail = await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail);
 				} catch (e: any) {
-					console.error(e); // TODO: Notification
+					setResponse({ status: 'warning', message: e.message ?? language.errorUploadingThumbnail });
 				}
 			}
 
@@ -179,7 +164,7 @@ export default function Editor() {
 			valid = false;
 			message = 'Categories are required';
 		}
-		if (!currentPost.data.categories?.length) {
+		if (!currentPost.data.topics?.length) {
 			valid = false;
 			message = 'Topics are required';
 		}
