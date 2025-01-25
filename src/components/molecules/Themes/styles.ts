@@ -75,7 +75,7 @@ export const ColorTooltip = styled.div`
 	transform: translateX(-50%);
 	margin: 1.5px 0 0 0;
 
-	border: 1px solid ${(props) => props.theme.colors.tooltip.border};
+	border: 1px solid ${(props) => props.theme.colors.contrast.border};
 
 	span {
 		font-size: 10px !important;

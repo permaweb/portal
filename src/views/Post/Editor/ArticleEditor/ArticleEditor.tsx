@@ -143,6 +143,7 @@ export default function ArticleEditor(props: IProps) {
 					const disabledNavigation =
 						isTextHighlighted ||
 						!currentBlock.type ||
+						currentPost.editor.toggleBlockFocus ||
 						currentBlock.type === 'quote' ||
 						currentBlock.type === 'ordered-list' ||
 						currentBlock.type === 'unordered-list' ||

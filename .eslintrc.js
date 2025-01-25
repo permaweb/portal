@@ -21,6 +21,7 @@ module.exports = {
 								'^(@|app)(/.*|$)',
 								'^(@|components)(/.*|$)',
 								'^(@|helpers)(/.*|$)',
+								'^(@|hooks)(/.*|$)',
 								'^(@|navigation)(/.*|$)',
 								'^(@|providers)(/.*|$)',
 								'^(@|store)(/.*|$)',

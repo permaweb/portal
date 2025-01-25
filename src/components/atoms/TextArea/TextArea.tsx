@@ -10,6 +10,7 @@ export default function TextArea(props: IProps) {
 			<S.TextArea
 				value={props.value}
 				onChange={props.onChange}
+				onFocus={() => (props.onFocus ? props.onFocus() : {})}
 				disabled={props.disabled}
 				invalid={props.invalid.status}
 				placeholder={props.placeholder ? props.placeholder : ''}

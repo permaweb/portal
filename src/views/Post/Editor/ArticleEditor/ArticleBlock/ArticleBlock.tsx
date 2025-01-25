@@ -52,7 +52,7 @@ export default function ArticleBlock(props: IProps) {
 
 	React.useEffect(() => {
 		const handleLinkClick = (e: MouseEvent) => {
-			const target = e.target as HTMLAnchorElement; // Cast the target to an HTMLAnchorElement
+			const target = e.target as HTMLAnchorElement;
 
 			if (target.tagName === 'A') {
 				e.stopPropagation();
@@ -82,8 +82,8 @@ export default function ArticleBlock(props: IProps) {
 			const selectedText = range.toString();
 
 			if (selectedText.length > 0) {
-				setTextToConvert(selectedText); // Save selected text
-				setSelectionRange({ start, end }); // Save the selection range
+				setTextToConvert(selectedText);
+				setSelectionRange({ start, end });
 			}
 		}
 

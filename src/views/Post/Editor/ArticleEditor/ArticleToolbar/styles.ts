@@ -18,7 +18,10 @@ export const Wrapper = styled.div`
 `;
 
 export const TitleWrapper = styled.div`
+	width: 50%;
+	max-width: 90vw;
 	input {
+		width: 100%;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.base} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
@@ -75,6 +78,10 @@ export const Panel = styled.div<{ open: boolean }>`
 		transform: translate(-50%, -40%);
 		display: ${(props) => (props.open ? 'block' : 'none')};
 		border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
+	}
+
+	@media (min-width: ${STYLING.cutoffs.max}) {
+		display: ${(props) => (props.open ? 'block' : 'none')};
 	}
 `;
 

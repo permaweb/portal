@@ -194,7 +194,6 @@ export const GlobalStyle = createGlobalStyle`
     width: 100%;
     max-width: ${STYLING.cutoffs.max};
     margin: 0 auto;
-    padding: 0 20px;
   }
 
 	.modal-wrapper {
@@ -203,11 +202,11 @@ export const GlobalStyle = createGlobalStyle`
 
   .info {
     padding: 0 5px 0.5px 5px;
-    background: ${(props) => props.theme.colors.tooltip.background};
+    background: ${(props) => props.theme.colors.contrast.background};
     border-radius: ${STYLING.dimensions.radius.alt2};
     animation: ${open} ${transition2};
     span {
-      color: ${(props) => props.theme.colors.tooltip.color};
+      color: ${(props) => props.theme.colors.contrast.color};
       font-size: ${(props) => props.theme.typography.size.xxxSmall};
       font-weight: ${(props) => props.theme.typography.weight.bold};
       white-space: nowrap;
@@ -338,7 +337,7 @@ export const Footer = styled.footer<{ navigationOpen: boolean }>`
 	}
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		padding: 20px 30px 30px 30px;
+		padding: 20px;
 	}
 `;
 

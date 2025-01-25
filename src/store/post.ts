@@ -1,10 +1,10 @@
 import { Dispatch } from 'redux';
 
-import { PortalAssetType, ReduxActionType } from 'helpers/types';
+import { PortalAssetPostType, ReduxActionType } from 'helpers/types';
 
 const UPDATE_CURRENT_POST = 'UPDATE_CURRENT_POST';
 
-export const initStateCurrentPost: { data: PortalAssetType; editor: any } = {
+export const initStateCurrentPost: { data: PortalAssetPostType; editor: any } = {
 	data: {
 		id: null,
 		title: '',
@@ -16,6 +16,7 @@ export const initStateCurrentPost: { data: PortalAssetType; editor: any } = {
 		topics: [],
 		thumbnail: null,
 		dateCreated: null,
+		lastUpdate: null,
 	},
 	editor: {
 		titleFocused: false,
@@ -36,7 +37,7 @@ export function currentPostUpdate(payload: { field: string; value: any }) {
 }
 
 export function currentPost(
-	state: { data: PortalAssetType; editor: any } = initStateCurrentPost,
+	state: { data: PortalAssetPostType; editor: any } = initStateCurrentPost,
 	action: ReduxActionType
 ) {
 	switch (action.type) {

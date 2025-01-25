@@ -215,7 +215,7 @@ export const LinkTooltip = styled.div`
 	transform: translateX(-50%);
 	margin: 4.5px 0 0 0;
 
-	border: 1px solid ${(props) => props.theme.colors.tooltip.border};
+	border: 1px solid ${(props) => props.theme.colors.contrast.border};
 
 	span {
 		font-size: 10px !important;
@@ -276,13 +276,13 @@ export const LinkWrapper = styled.div<{ editMode: boolean; active: boolean }>`
 				fill: ${(props) => props.theme.colors.font.light1};
 			}
 		}
-		&:focus {
+		/* &:focus {
 			background: ${(props) => props.theme.colors.button.alt1.active.background};
 			svg {
 				color: ${(props) => props.theme.colors.font.light1};
 				fill: ${(props) => props.theme.colors.font.light1};
 			}
-		}
+		} */
 	}
 `;
 
