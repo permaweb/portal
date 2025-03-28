@@ -260,7 +260,7 @@ export const CaptionWrapper = styled.div<{ editMode: boolean; useColumn: boolean
 			padding: 10px 50px 10px 10px;
 			background: ${props.theme.colors.container.alt1.background};
 			border: 1px solid ${props.theme.colors.border.primary};
-			border-radius: ${STYLING.dimensions.radius.alt2};
+			border-radius: ${STYLING.dimensions.radius.alt4};
 		`}
 	}
 `;

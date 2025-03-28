@@ -103,6 +103,7 @@ export const ColorBody = styled.button<{ background: string; height?: number; wi
 	width: ${(props) => (props.maxWidth ? '100%' : props.width ? `${props.width.toString()}px` : '50px')};
 	background: ${(props) => props.background};
 	border-radius: ${STYLING.dimensions.radius.primary};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	overflow: hidden;
 	position: relative;
 	flex: 1;

@@ -187,7 +187,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 			</CloseHandler>
 			<Panel
 				open={showThemeSelector}
-				width={425}
+				width={430}
 				header={language.chooseAppAppearance}
 				handleClose={() => setShowThemeSelector(false)}
 			>

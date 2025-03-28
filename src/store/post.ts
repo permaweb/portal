@@ -20,7 +20,7 @@ export const initStateCurrentPost: { data: PortalAssetPostType; editor: any } = 
 	},
 	editor: {
 		titleFocused: false,
-		blockEditMode: false,
+		blockEditMode: true,
 		toggleBlockFocus: false,
 		panelOpen: true,
 		loading: { active: false, message: null },

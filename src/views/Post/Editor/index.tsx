@@ -1,7 +1,9 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
+import { Button } from 'components/atoms/Button';
+import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
 import { ASSET_UPLOAD, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
@@ -14,6 +16,7 @@ import { RootState } from 'store';
 import { currentPostUpdate } from 'store/post';
 
 import { ArticleEditor } from './ArticleEditor';
+import * as S from './styles';
 
 export default function Editor() {
 	const navigate = useNavigate();
@@ -30,10 +33,21 @@ export default function Editor() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
+	const [showReview, setShowReview] = React.useState<boolean>(false);
+	const [missingFields, setMissingFields] = React.useState<string[]>([]);
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
+
+	React.useEffect(() => {
+		const isEmpty =
+			!currentPost.data.content ||
+			currentPost.data.content.length === 0 ||
+			(currentPost.data.content.length === 1 && !currentPost.data.content[0].content);
+
+		handleCurrentPostUpdate({ field: 'submitDisabled', value: isEmpty });
+	}, [currentPost.data.content]);
 
 	async function handleSubmit() {
 		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
@@ -140,37 +154,50 @@ export default function Editor() {
 					setResponse({ status: 'warning', message: e.message ?? 'Error creating post' });
 				}
 			}
-			handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
+
+			handleSubmitUpdate();
 		}
+	}
+
+	function handleSubmitUpdate() {
+		setMissingFields([]);
+		handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
 	}
 
 	function validateSubmit() {
 		let valid: boolean = true;
 		let message: string | null = null;
+		const missingFieldsFound = [];
 
 		if (!currentPost.data.title) {
 			valid = false;
 			message = 'Post title is required';
+			missingFieldsFound.push(message);
 		}
 		if (!currentPost.data.status) {
 			valid = false;
 			message = 'Status is required';
+			missingFieldsFound.push(message);
 		}
 		if (!currentPost.data.content?.length) {
 			valid = false;
-			message = 'No content found in post';
+			message = 'Content is required';
+			missingFieldsFound.push(message);
 		}
 		if (!currentPost.data.categories?.length) {
 			valid = false;
 			message = 'Categories are required';
+			missingFieldsFound.push(message);
 		}
 		if (!currentPost.data.topics?.length) {
 			valid = false;
 			message = 'Topics are required';
+			missingFieldsFound.push(message);
 		}
 
 		if (!valid) {
-			setResponse({ status: 'warning', message: message });
+			setShowReview(true);
+			setMissingFields(missingFieldsFound);
 		}
 
 		return valid;
@@ -187,6 +214,30 @@ export default function Editor() {
 			{editor}
 			{response && (
 				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
+			)}
+			{showReview && (
+				<Modal header={language.reviewPostDetails} handleClose={() => setShowReview(false)}>
+					<S.ModalWrapper>
+						<S.ModalBodyWrapper>
+							<p>{language.missingPostFields}</p>
+							<S.ModalBodyElements>
+								{missingFields.map((topic: string, index: number) => {
+									return (
+										<S.ModalBodyElement key={index}>
+											<span>{`· ${topic}`}</span>
+										</S.ModalBodyElement>
+									);
+								})}
+							</S.ModalBodyElements>
+						</S.ModalBodyWrapper>
+						<S.ModalActionsWrapper>
+							<Link to={URLS.docsIntro} target={'_blank'}>
+								{language.learn}
+							</Link>
+							<Button type={'alt1'} label={language.close} handlePress={() => setShowReview(false)} disabled={false} />
+						</S.ModalActionsWrapper>
+					</S.ModalWrapper>
+				</Modal>
 			)}
 		</>
 	);

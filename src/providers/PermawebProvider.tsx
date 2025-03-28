@@ -56,7 +56,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		(async function () {
-			if (arProvider.wallet && arProvider.walletAddress) {
+			if (arProvider.walletAddress) {
 				const cachedProfile = getCachedProfile(arProvider.walletAddress);
 				if (cachedProfile) {
 					setProfile(cachedProfile);
@@ -71,7 +71,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				}
 			}
 		})();
-	}, [arProvider.wallet, arProvider.walletAddress, libs]);
+	}, [arProvider.walletAddress]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -108,7 +108,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				await fetchProfileUntilChange();
 			}
 		})();
-	}, [refreshProfileTrigger, libs]);
+	}, [refreshProfileTrigger]);
 
 	function getCachedProfile(address: string) {
 		const cached = localStorage.getItem(STORAGE.profile(address));

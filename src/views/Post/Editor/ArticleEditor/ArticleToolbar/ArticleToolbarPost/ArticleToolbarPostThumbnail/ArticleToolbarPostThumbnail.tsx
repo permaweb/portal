@@ -82,7 +82,7 @@ export default function ArticleToolbarPostThumbnail() {
 			<S.Wrapper>
 				<S.InputWrapper>
 					<S.Input
-						hasInput={currentPost?.data?.thumbnail !== null}
+						hasInput={!!currentPost?.data?.thumbnail}
 						onClick={() => inputRef.current.click()}
 						disabled={loading}
 					>

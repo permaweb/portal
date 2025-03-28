@@ -23,6 +23,7 @@ export const Input = styled.button<{ hasInput: boolean }>`
 	position: relative;
 	background: ${(props) => props.theme.colors.container.primary.background};
 	border: ${(props) => (props.hasInput ? `none` : `1px dashed ${props.theme.colors.border.alt1}`)};
+	/* border:  1px dashed ${(props) => props.theme.colors.border.alt1}; */
 	border-radius: ${STYLING.dimensions.radius.alt2};
 	z-index: 1;
 	overflow: hidden;
@@ -75,7 +76,7 @@ export const Input = styled.button<{ hasInput: boolean }>`
             right: 0;
             bottom: 0;
             background-color: ${props.theme.colors.overlay.alt1};
-			border-radius: ${STYLING.dimensions.radius.alt2};
+			border-radius: ${STYLING.dimensions.radius.alt4};
             opacity: 0;
             transition: all 100ms;
         }

@@ -95,7 +95,7 @@ export const TabWrapper = styled.div<{ label: string; icon?: string }>``;
 
 export const TabContent = styled.div`
 	margin: 20px 0 0 0;
-	max-height: calc(100vh - 65px - 155px);
+	max-height: calc(100vh - ${STYLING.dimensions.nav.height} - 155px);
 `;
 
 export const BADropdownBody = styled.div`
@@ -126,7 +126,7 @@ export const BADropdownAction = styled.div`
 		display: flex;
 		align-items: center;
 		background: ${(props) => props.theme.colors.container.primary.background};
-		border-radius: ${STYLING.dimensions.radius.alt2};
+		border-radius: ${STYLING.dimensions.radius.alt4};
 		transition: all 100ms;
 		padding: 0 10px;
 		span {

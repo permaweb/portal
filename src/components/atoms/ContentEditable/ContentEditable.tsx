@@ -1,59 +1,60 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
-export default function ContentEditable(props: {
-	element: any;
-	value: string;
-	onChange: (content: string) => void;
-	autoFocus?: boolean;
-}) {
-	const ref = React.useRef<HTMLDivElement>(null);
-	const isUserInput = React.useRef(false);
+const ContentEditable = forwardRef(
+	(
+		props: {
+			element: any;
+			value: string;
+			onChange: (content: string) => void;
+			autoFocus?: boolean;
+		},
+		ref
+	) => {
+		const innerRef = React.useRef<HTMLDivElement>(null);
 
-	React.useEffect(() => {
-		if (ref.current && props.value !== ref.current.innerHTML && !isUserInput.current) {
-			ref.current.innerHTML = props.value;
-		}
-		isUserInput.current = false;
-	}, [props.value]);
+		React.useImperativeHandle(ref, () => innerRef.current);
 
-	React.useEffect(() => {
-		if (props.autoFocus && ref.current) {
-			const focusElement = () => {
-				ref.current?.focus();
+		React.useEffect(() => {
+			if (innerRef.current && props.value !== innerRef.current.innerHTML) {
+				innerRef.current.innerHTML = props.value;
+			}
+		}, [props.value]);
+
+		React.useEffect(() => {
+			if (props.autoFocus && innerRef.current) {
+				innerRef.current.focus();
 				const range = document.createRange();
 				const selection = window.getSelection();
-				range.selectNodeContents(ref.current);
+				range.selectNodeContents(innerRef.current);
 				range.collapse(false);
 				selection?.removeAllRanges();
 				selection?.addRange(range);
-			};
+			}
+		}, [props.autoFocus]);
 
-			focusElement();
-			setTimeout(focusElement, 0);
-		}
-	}, [props.autoFocus]);
+		const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+			const newValue = e.currentTarget.innerHTML;
+			props.onChange(newValue);
+		};
 
-	const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-		const newValue = e.currentTarget.innerHTML;
-		isUserInput.current = true;
-		props.onChange(newValue);
-	};
+		const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+			e.preventDefault();
+			const text = e.clipboardData.getData('text/plain');
+			document.execCommand('insertText', false, text);
+		};
 
-	const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
-		e.preventDefault();
-		const text = e.clipboardData.getData('text/plain');
-		document.execCommand('insertText', false, text); // Insert plain text
-	};
+		const Element = props.element;
 
-	const Element = props.element;
+		return (
+			<Element
+				ref={innerRef}
+				contentEditable
+				onInput={handleInput}
+				onPaste={handlePaste}
+				suppressContentEditableWarning={true}
+			/>
+		);
+	}
+);
 
-	return (
-		<Element
-			ref={ref}
-			contentEditable
-			onInput={handleInput}
-			onPaste={handlePaste}
-			suppressContentEditableWarning={true}
-		/>
-	);
-}
+export default ContentEditable;

@@ -123,7 +123,7 @@ export const DBodyWrapper = styled.ul`
 		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		border: 1px solid transparent;
-		border-radius: ${STYLING.dimensions.radius.alt2};
+		border-radius: ${STYLING.dimensions.radius.alt4};
 		transition: all 100ms;
 		padding: 0 7.5px;
 
@@ -189,6 +189,7 @@ export const ThemeSectionHeader = styled.div`
 
 export const ThemeSectionBody = styled.div`
 	display: flex;
+	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: 20px;
 `;
@@ -209,7 +210,7 @@ export const ThemeSectionBodyElement = styled.button`
 	flex-direction: column;
 	gap: 10px;
 
-	border-radius: ${STYLING.dimensions.radius.alt3} !important;
+	border-radius: ${STYLING.dimensions.radius.alt4} !important;
 
 	&:hover {
 		${Indicator} {
@@ -244,7 +245,7 @@ export const Preview = styled.div<{ background: string; accent: string }>`
 		position: absolute;
 		top: 10px;
 		right: 10px;
-		border-radius: ${STYLING.dimensions.radius.alt2};
+		border-radius: ${STYLING.dimensions.radius.alt4};
 		background: ${(props) => props.accent};
 	}
 `;

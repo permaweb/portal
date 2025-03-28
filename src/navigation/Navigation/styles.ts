@@ -200,7 +200,7 @@ export const PortalUpdateWrapper = styled.div`
 	padding: 4.5px 13.5px;
 	background: ${(props) => props.theme.colors.contrast.background};
 	border: 1px solid ${(props) => props.theme.colors.contrast.border};
-	border-radius: ${STYLING.dimensions.radius.alt2};
+	border-radius: ${STYLING.dimensions.radius.alt4};
 	span {
 		color: ${(props) => props.theme.colors.contrast.color};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
@@ -216,7 +216,7 @@ export const Portal = styled.button<{ active: boolean }>`
 	cursor: pointer;
 	background: ${(props) =>
 		props.active ? props.theme.colors.container.primary.active : props.theme.colors.container.primary.background};
-	border-radius: ${STYLING.dimensions.radius.alt2};
+	border-radius: ${STYLING.dimensions.radius.alt4};
 	padding: 7.5px 16.5px;
 
 	span {
@@ -284,7 +284,7 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 		cursor: ${(props) => (props.active ? 'default' : 'pointer')};
 		pointer-events: ${(props) => (props.active ? 'none' : 'auto')};
 		background: ${(props) => props.theme.colors.container.primary.background};
-		border-radius: ${STYLING.dimensions.radius.alt2};
+		border-radius: ${STYLING.dimensions.radius.alt4};
 		transition: all 100ms;
 		padding: 0 10px;
 		span {
@@ -356,7 +356,7 @@ export const PDropdownFooter = styled.div`
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
-		border-radius: ${STYLING.dimensions.radius.alt2};
+		border-radius: ${STYLING.dimensions.radius.alt4};
 		transition: all 100ms;
 		padding: 0 10px;
 		svg {

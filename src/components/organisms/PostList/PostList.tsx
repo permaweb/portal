@@ -29,8 +29,9 @@ export default function PostList(props: IProps) {
 
 	const totalCount = portalProvider.current?.assets?.length ?? '-';
 	const publishedCount =
-		portalProvider.current?.assets?.filter((asset: any) => asset.status === 'published').length ?? '-';
-	const draftCount = portalProvider.current?.assets?.filter((asset: any) => asset.status === 'draft').length ?? '-';
+		portalProvider.current?.assets?.filter((asset: any) => asset.metadata?.status === 'published').length ?? '-';
+	const draftCount =
+		portalProvider.current?.assets?.filter((asset: any) => asset.metadata?.status === 'draft').length ?? '-';
 
 	React.useEffect(() => {
 		setCurrentPage(1);
@@ -39,10 +40,10 @@ export default function PostList(props: IProps) {
 	const assets = React.useMemo(() => {
 		if (!portalProvider.current?.assets) return [];
 		return portalProvider.current.assets
-			.filter((asset: any) => currentStatusFilter === 'all' || asset.status === currentStatusFilter)
+			.filter((asset: any) => currentStatusFilter === 'all' || asset.metadata?.status === currentStatusFilter)
 			.sort((a, b) => {
-				const dateA = new Date(a.dateCreated).getTime();
-				const dateB = new Date(b.dateCreated).getTime();
+				const dateA = new Date(Number(a.dateCreated)).getTime();
+				const dateB = new Date(Number(b.dateCreated)).getTime();
 				return dateAscending ? dateA - dateB : dateB - dateA;
 			});
 	}, [portalProvider.current?.assets, currentStatusFilter, dateAscending]);
@@ -114,7 +115,7 @@ export default function PostList(props: IProps) {
 					)}
 					<S.PostsSortingWrapper>
 						<Button
-							type={'primary'}
+							type={'alt3'}
 							label={dateAscending ? language.sortOldestToNewest : language.sortNewestToOldest}
 							handlePress={() => handleActionPress(() => setDateAscending(!dateAscending))}
 							icon={ASSETS.arrows}

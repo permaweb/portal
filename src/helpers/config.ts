@@ -122,14 +122,15 @@ export const STYLING = {
 			max: '47.5px',
 		},
 		nav: {
-			height: '65px',
+			height: '70px',
 			width: '260px',
 		},
 		radius: {
 			primary: '7.5px',
 			alt1: '15px',
-			alt2: '5px',
+			alt2: '10px',
 			alt3: '2.5px',
+			alt4: '5px',
 		},
 	},
 };

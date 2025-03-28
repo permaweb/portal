@@ -49,14 +49,14 @@ function getElementWrapper(blockEditMode: boolean, type: ArticleBlockEnum, theme
 		case 'code':
 			return `
 				border: 1px solid ${blockEditMode ? theme.colors.border.primary : 'transparent'};
-				border-radius: ${blockEditMode ? STYLING.dimensions.radius.alt2 : '0'};
+				border-radius: ${blockEditMode ? STYLING.dimensions.radius.alt4 : '0'};
 			`;
 		default:
 			return `
 				padding: ${blockEditMode ? getElementPadding(type) : '0'};
 				background: ${blockEditMode ? theme.colors.container.alt1.background : 'transparent'};
 				border: 1px solid ${blockEditMode ? theme.colors.border.primary : 'transparent'};
-				border-radius: ${blockEditMode ? STYLING.dimensions.radius.alt2 : '0'};
+				border-radius: ${blockEditMode ? STYLING.dimensions.radius.alt4 : '0'};
 			`;
 	}
 }
@@ -183,7 +183,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 	code {
 		color: ${(props) => props.theme.colors.font.primary};
 		background: ${(props) => props.theme.colors.container.alt1.background};
-		border-radius: ${STYLING.dimensions.radius.alt2};
+		border-radius: ${STYLING.dimensions.radius.alt4};
 		font-family: Monaco, Menlo, Consolas, Courier New, monospace;
 		font-size: 12px;
 		font-weight: 600;
@@ -271,27 +271,23 @@ export const EDragHandler = styled.div`
 
 export const SelectionWrapper = styled.div`
 	button {
+		min-height: 22.5px !important;
+		height: 22.5px !important;
+		border: none !important;
+		background: ${(props) => props.theme.colors.link.color} !important;
 		span {
-			color: ${(props) => props.theme.colors.link.color} !important;
+			color: ${(props) => props.theme.colors.font.light1} !important;
 			font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
 			text-transform: uppercase;
 		}
 
 		svg {
-			color: ${(props) => props.theme.colors.link.color} !important;
-			fill: ${(props) => props.theme.colors.link.color} !important;
+			color: ${(props) => props.theme.colors.font.light1} !important;
+			fill: ${(props) => props.theme.colors.font.light1} !important;
 		}
 
 		&:hover {
-			span {
-				color: ${(props) => props.theme.colors.link.active} !important;
-				text-transform: uppercase;
-			}
-
-			svg {
-				color: ${(props) => props.theme.colors.link.active} !important;
-				fill: ${(props) => props.theme.colors.link.active} !important;
-			}
+			background: ${(props) => props.theme.colors.link.active} !important;
 		}
 	}
 `;

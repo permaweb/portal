@@ -140,7 +140,7 @@ export const LinkPrefillsDropdown = styled.div`
 	right: 0;
 	background: ${(props) => props.theme.colors.container.alt1.background} !important;
 	box-shadow: none !important;
-	border-radius: ${STYLING.dimensions.radius.alt2} !important;
+	border-radius: ${STYLING.dimensions.radius.alt4} !important;
 `;
 
 export const LinkPrefillOptions = styled.div``;
@@ -154,7 +154,7 @@ export const LinkPrefillOption = styled.button`
 	cursor: pointer;
 	pointer-events: auto;
 	background: transparent;
-	border-radius: ${STYLING.dimensions.radius.alt2};
+	border-radius: ${STYLING.dimensions.radius.alt4};
 	transition: all 100ms;
 	padding: 0 10px;
 	span {
@@ -254,7 +254,7 @@ export const LinkWrapper = styled.div<{ editMode: boolean; active: boolean }>`
 					: props.theme.colors.container.primary.background
 				: props.theme.colors.container.alt1.background};
 		border: 1px solid ${(props) => (props.editMode ? props.theme.colors.border.alt4 : props.theme.colors.border.alt1)};
-		border-radius: ${STYLING.dimensions.radius.alt2};
+		border-radius: ${STYLING.dimensions.radius.alt4};
 
 		svg {
 			height: 22.5px;
@@ -334,7 +334,7 @@ export const ModalBodyElement = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
