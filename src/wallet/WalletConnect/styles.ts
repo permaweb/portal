@@ -75,6 +75,7 @@ export const DHeaderWrapper = styled.div`
 
 export const PDropdownHeader = styled.div`
 	padding: 0 7.5px;
+
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
@@ -89,7 +90,7 @@ export const DHeaderFlex = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 12.5px;
-	margin: 15px 0 0 0;
+	margin: 7.5px 0 0 0;
 	padding: 0 5px 15px 5px;
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 
@@ -105,6 +106,44 @@ export const DHeader = styled.div`
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
+	}
+`;
+
+export const DBalanceWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	padding: 15px 7.5px;
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+`;
+
+export const DBalanceHeader = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
+`;
+
+export const DBalanceBody = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;
 

@@ -67,7 +67,7 @@ export const Wrapper = styled.div`
 	li,
 	div,
 	pre {
-		font-size: ${(props) => props.theme.typography.size.base} !important;
+		font-size: ${(props) => props.theme.typography.size.small} !important;
 		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		color: ${(props) => props.theme.colors.font.alt1} !important;
@@ -75,7 +75,7 @@ export const Wrapper = styled.div`
 	}
 
 	a {
-		font-size: ${(props) => props.theme.typography.size.base} !important;
+		font-size: ${(props) => props.theme.typography.size.small} !important;
 		text-decoration: underline;
 	}
 
@@ -126,12 +126,12 @@ export const Wrapper = styled.div`
 	}
 
 	code {
-		padding: 2.5px 10px !important;
+		padding: 2.5px 7.5px !important;
 		background: ${(props) => props.theme.colors.container.alt3.background} !important;
-		border-radius: ${STYLING.dimensions.radius.primary} !important;
-		color: ${(props) => props.theme.colors.font.primary.alt1} !important;
-		font-weight: ${(props) => props.theme.typography.weight.regular} !important;
-		font-size: ${(props) => props.theme.typography.size.small} !important;
+		border-radius: ${STYLING.dimensions.radius.alt3} !important;
+		color: ${(props) => props.theme.colors.font.alt1} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 	}
 
 	pre {

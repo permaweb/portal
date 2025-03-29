@@ -1,3 +1,5 @@
+import Arweave from 'arweave';
+
 import { PortalAssetType } from './types';
 
 export function checkValidAddress(address: string | null) {
@@ -239,4 +241,17 @@ export function isEqual(obj1: any, obj2: any): boolean {
 
 export function getBootTag(key: string, value: string) {
 	return { name: `Bootloader-${key}`, value };
+}
+
+export function formatTurboAmount(amount: number) {
+	return `${amount.toFixed(4)} Credits`;
+}
+
+export function formatUSDAmount(amount: number) {
+	return `$ ${!amount || isNaN(amount) ? 0 : Number(amount).toFixed(2)}`;
+}
+
+export function getARAmountFromWinc(amount: number) {
+	const arweave = Arweave.init({});
+	return (Math.floor(+arweave.ar.winstonToAr(amount.toString()) * 1e6) / 1e6).toFixed(4);
 }

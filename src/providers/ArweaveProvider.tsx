@@ -1,10 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArconnectSigner } from '@dha-team/arbundles';
+import { randomBytes } from 'crypto-browserify';
+
+import { bufferTob64Url } from 'arweave/node/lib/utils';
 
 import { Modal } from 'components/atoms/Modal';
 import { ASSETS, STORAGE, URLS } from 'helpers/config';
-import { getARBalanceEndpoint } from 'helpers/endpoints';
+import { getARBalanceEndpoint, getTurboBalanceEndpoint } from 'helpers/endpoints';
 import { WalletEnum } from 'helpers/types';
+import { getARAmountFromWinc } from 'helpers/utils';
 import Othent from 'helpers/wallet';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -27,6 +32,8 @@ interface ArweaveContextState {
 	handleDisconnect: () => void;
 	walletModalVisible: boolean;
 	setWalletModalVisible: (open: boolean) => void;
+	turboBalance: number | string | null;
+	getTurboBalance: () => void;
 }
 
 const DEFAULT_CONTEXT = {
@@ -39,6 +46,8 @@ const DEFAULT_CONTEXT = {
 	handleDisconnect() {},
 	walletModalVisible: false,
 	setWalletModalVisible(_open: boolean) {},
+	turboBalance: null,
+	getTurboBalance() {},
 };
 
 const ARContext = React.createContext<ArweaveContextState>(DEFAULT_CONTEXT);
@@ -86,6 +95,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	const [walletAddress, setWalletAddress] = React.useState<string | null>(null);
 
 	const [arBalance, setArBalance] = React.useState<number | null>(null);
+	const [turboBalance, setTurboBalance] = React.useState<number | string | null>(null);
 
 	React.useEffect(() => {
 		handleWallet();
@@ -101,9 +111,10 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		(async function () {
-			if (walletAddress) {
+			if (wallet && walletAddress) {
 				try {
-					setArBalance(await getARBalance(walletAddress));
+					setArBalance(await getARBalance());
+					await getTurboBalance();
 				} catch (e: any) {
 					console.error(e);
 				}
@@ -174,10 +185,42 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		navigate(URLS.base);
 	}
 
-	async function getARBalance(walletAddress: string) {
+	async function getARBalance() {
 		const rawBalance = await fetch(getARBalanceEndpoint(walletAddress));
 		const jsonBalance = await rawBalance.json();
 		return jsonBalance / 1e12;
+	}
+
+	async function getTurboBalance() {
+		if (wallet) {
+			try {
+				setTurboBalance(`${language.loading}...`);
+				const publicKey = await wallet.getActivePublicKey();
+				const nonce = randomBytes(16).toString('hex');
+				const buffer = Buffer.from(nonce);
+
+				const signer = new ArconnectSigner(wallet);
+				const signature = await signer.sign(buffer);
+				const b64UrlSignature = bufferTob64Url(Buffer.from(signature));
+
+				const result = await fetch(getTurboBalanceEndpoint(), {
+					headers: {
+						'x-nonce': nonce,
+						'x-public-key': publicKey,
+						'x-signature': b64UrlSignature,
+					},
+				});
+
+				if (result.ok) {
+					setTurboBalance(getARAmountFromWinc(Number((await result.json()).winc)));
+				} else {
+					setTurboBalance(0);
+				}
+			} catch (e: any) {
+				console.error(e);
+				setTurboBalance(null);
+			}
+		}
 	}
 
 	return (
@@ -198,6 +241,8 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					wallets,
 					walletModalVisible,
 					setWalletModalVisible,
+					turboBalance,
+					getTurboBalance,
 				}}
 			>
 				{props.children}
