@@ -9,8 +9,8 @@ import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
 import { MediaLibrary } from 'components/organisms/MediaLibrary';
-import { ASSETS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
+import { ASSETS, UPLOAD } from 'helpers/config';
+import { getTurboCostWincEndpoint, getTxEndpoint } from 'helpers/endpoints';
 import {
 	AlignmentButtonType,
 	AlignmentEnum,
@@ -19,6 +19,7 @@ import {
 	PortalUploadOptionType,
 	PortalUploadType,
 } from 'helpers/types';
+import { getARAmountFromWinc, getBase64Data, getByteSize } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -33,6 +34,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	// TODO: Reuse from media library
 	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
 		image: {
 			type: 'image',
@@ -67,56 +69,54 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const [showMediaLibrary, setShowMediaLibrary] = React.useState<boolean>(false);
 	const [isValidUrl, setIsValidUrl] = React.useState(true);
 
+	const [mediaUploaded, setMediaUploaded] = React.useState<boolean>(false);
+	const [mediaLoading, setMediaLoading] = React.useState<boolean>(false);
+	const [showUploadConfirmation, setShowUploadConfirmation] = React.useState<boolean>(false);
+	const [uploadCost, setUploadCost] = React.useState<number | null>(null);
+	const [uploadResponse, setUploadResponse] = React.useState<NotificationType | null>(null);
+
 	React.useEffect(() => {
 		if (props.data && props.data !== mediaData) {
 			setMediaData(props.data);
 		}
 	}, [props.data]);
 
-	const [mediaUploaded, setMediaUploaded] = React.useState<boolean>(false);
-	const [mediaLoading, setMediaLoading] = React.useState<boolean>(false);
-	const [uploadResponse, setUploadResponse] = React.useState<NotificationType | null>(null);
-
+	/* If media is selected and it is a valid dispatch size then upload it immediately,
+		or else show the upload cost first */
 	React.useEffect(() => {
 		(async function () {
 			if (
 				mediaData?.url &&
 				validateUrl(mediaData.url) &&
-				mediaData.url.startsWith('data:image/') &&
+				mediaData.url.startsWith('data') &&
 				!mediaUploaded &&
 				portalProvider.current?.id &&
 				arProvider.wallet
 			) {
-				setMediaLoading(true);
-				try {
-					const tx = await permawebProvider.libs.resolveTransaction(mediaData.url);
+				const contentSize = getByteSize(Buffer.from(getBase64Data(mediaData.url), 'base64'));
+				if (contentSize < UPLOAD.dispatchUploadSize) {
+					await handleUpload();
+				} else {
+					try {
+						setShowUploadConfirmation(true);
 
-					const mediaUpdateId = await permawebProvider.libs.addToZone(
-						{
-							path: 'Uploads',
-							data: permawebProvider.libs.mapToProcessCase({
-								tx: tx,
-								type: props.type,
-								dateUploaded: Date.now().toString(),
-							}),
-						},
-						portalProvider.current.id,
-						arProvider.wallet
-					);
+						const uploadPriceResponse = await fetch(getTurboCostWincEndpoint(contentSize));
+						const uploadInWinc = Number((await uploadPriceResponse.json()).winc);
 
-					console.log(`Media update: ${mediaUpdateId}`);
+						setUploadCost(uploadInWinc);
 
-					setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(tx) }));
-					setMediaUploaded(true);
-					setUploadResponse({ status: 'success', message: `${language.mediaUploaded}!` });
-				} catch (e: any) {
-					setUploadResponse({ status: 'warning', message: e.message ?? 'Error uploading media' });
-					setMediaData((prevContent) => ({ ...prevContent, url: null }));
+						if (uploadInWinc > arProvider.turboBalance) {
+							setUploadResponse({ status: 'warning', message: 'Insufficient balance for upload' });
+							setMediaData((prevContent) => ({ ...prevContent, url: null }));
+						}
+					} catch (e: any) {
+						setUploadResponse({ status: 'warning', message: e.message ?? 'Error uploading media' });
+						setMediaData((prevContent) => ({ ...prevContent, url: null }));
+					}
 				}
-				setMediaLoading(false);
 			}
 		})();
-	}, [mediaData, portalProvider.current?.id, arProvider.wallet]);
+	}, [mediaData, portalProvider.current?.id, arProvider.wallet, arProvider.turboBalance]);
 
 	React.useEffect(() => {
 		if (mediaData?.url && validateUrl(mediaData.url) && mediaData.url.startsWith('https://'))
@@ -132,8 +132,47 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		`;
 	}
 
+	async function handleUpload() {
+		setMediaLoading(true);
+		try {
+			const tx = await permawebProvider.libs.resolveTransaction(mediaData.url);
+
+			const mediaUpdateId = await permawebProvider.libs.addToZone(
+				{
+					path: 'Uploads',
+					data: permawebProvider.libs.mapToProcessCase({
+						tx: tx,
+						type: props.type,
+						dateUploaded: Date.now().toString(),
+					}),
+				},
+				portalProvider.current.id,
+				arProvider.wallet
+			);
+
+			console.log(`Media update: ${mediaUpdateId}`);
+
+			setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(tx) }));
+			setMediaUploaded(true);
+			setUploadResponse({ status: 'success', message: `${language.mediaUploaded}!` });
+		} catch (e: any) {
+			handleClear('Error uploading media');
+		}
+		setMediaLoading(false);
+	}
+
+	function handleClear(message: string) {
+		setUploadResponse({ status: 'warning', message: message });
+		setMediaData((prevContent) => ({ ...prevContent, url: null }));
+		setUploadCost(null);
+		setShowUploadConfirmation(false);
+		if (inputRef.current) {
+			inputRef.current.value = '';
+		}
+	}
+
 	const validateUrl = (url: string) => {
-		if (url.startsWith('data:image/')) {
+		if (url.startsWith('data')) {
 			return true;
 		}
 		const urlPattern = /^(https?:\/\/)?([\w\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*[\w\/:;=\?&%+#]*)?\/?$/i;
@@ -202,7 +241,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 						<S.InputActions>
 							<FormField
 								label={language.insertFromUrl}
-								value={mediaData?.url ?? ''}
+								value={mediaUploaded && mediaData?.url ? mediaData.url : ''}
 								onChange={(e) => handleUrlChange(e)}
 								invalid={{ status: !isValidUrl, message: null }}
 								disabled={false}
@@ -226,6 +265,30 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 								onChange={handleFileChange}
 							/>
 						</S.InputActions>
+						{showUploadConfirmation && (
+							<S.InputOverlay className={'border-wrapper-primary'}>
+								<p>
+									<span>{`${language.costToUpload}:`}</span>
+									&nbsp;
+									{uploadCost ? `${getARAmountFromWinc(uploadCost)} ${language.credits}` : '-'}
+								</p>
+								<p>
+									<span>{`${language.yourUploadBalance}:`}</span>
+									&nbsp;
+									{arProvider.turboBalance
+										? `${getARAmountFromWinc(arProvider.turboBalance)} ${language.credits}`
+										: '-'}
+								</p>
+								<S.InputOverlayActions>
+									<Button
+										type={'primary'}
+										label={language.cancel}
+										handlePress={() => handleClear(language.uploadCancelled)}
+									/>
+									<Button type={'alt1'} label={language.upload} handlePress={handleUpload} />
+								</S.InputOverlayActions>
+							</S.InputOverlay>
+						)}
 						{mediaLoading && (
 							<S.InputOverlay className={'border-wrapper-primary'}>
 								<p>{`${language.uploadingMedia}...`}</p>
@@ -322,7 +385,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 				open={showMediaLibrary}
 				header={language.mediaLibrary}
 				handleClose={() => setShowMediaLibrary(false)}
-				width={690}
+				width={680}
 				closeHandlerDisabled={true}
 			>
 				<MediaLibrary

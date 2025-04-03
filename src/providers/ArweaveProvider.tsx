@@ -9,7 +9,6 @@ import { Modal } from 'components/atoms/Modal';
 import { ASSETS, STORAGE, URLS } from 'helpers/config';
 import { getARBalanceEndpoint, getTurboBalanceEndpoint } from 'helpers/endpoints';
 import { WalletEnum } from 'helpers/types';
-import { getARAmountFromWinc } from 'helpers/utils';
 import Othent from 'helpers/wallet';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -32,8 +31,7 @@ interface ArweaveContextState {
 	handleDisconnect: () => void;
 	walletModalVisible: boolean;
 	setWalletModalVisible: (open: boolean) => void;
-	turboBalance: number | string | null;
-	getTurboBalance: () => void;
+	turboBalance: number | null;
 }
 
 const DEFAULT_CONTEXT = {
@@ -47,7 +45,6 @@ const DEFAULT_CONTEXT = {
 	walletModalVisible: false,
 	setWalletModalVisible(_open: boolean) {},
 	turboBalance: null,
-	getTurboBalance() {},
 };
 
 const ARContext = React.createContext<ArweaveContextState>(DEFAULT_CONTEXT);
@@ -95,7 +92,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	const [walletAddress, setWalletAddress] = React.useState<string | null>(null);
 
 	const [arBalance, setArBalance] = React.useState<number | null>(null);
-	const [turboBalance, setTurboBalance] = React.useState<number | string | null>(null);
+	const [turboBalance, setTurboBalance] = React.useState<number | null>(null);
 
 	React.useEffect(() => {
 		handleWallet();
@@ -194,7 +191,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	async function getTurboBalance() {
 		if (wallet) {
 			try {
-				setTurboBalance(`${language.loading}...`);
 				const publicKey = await wallet.getActivePublicKey();
 				const nonce = randomBytes(16).toString('hex');
 				const buffer = Buffer.from(nonce);
@@ -212,7 +208,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				});
 
 				if (result.ok) {
-					setTurboBalance(getARAmountFromWinc(Number((await result.json()).winc)));
+					setTurboBalance(Number((await result.json()).winc));
 				} else {
 					setTurboBalance(0);
 				}
@@ -242,7 +238,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					walletModalVisible,
 					setWalletModalVisible,
 					turboBalance,
-					getTurboBalance,
 				}}
 			>
 				{props.children}

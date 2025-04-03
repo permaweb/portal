@@ -92,58 +92,60 @@ export default function ArticleBlock(props: IProps) {
 	}
 
 	function handleLinkSave() {
-		restoreSelection();
-		if (!editableRef.current) {
-			console.log('Editable element not found.');
-			return;
-		}
-
-		const selection = window.getSelection();
-		if (!selection || selection.rangeCount === 0) {
-			console.log('No selection available.');
-			handleLinkClear();
-			return;
-		}
-
-		const range = selection.getRangeAt(0);
-		if (range.collapsed) {
-			console.log('Selection is collapsed.');
-			handleLinkClear();
-			return;
-		}
-
-		if (!editableRef.current.contains(range.commonAncestorContainer)) {
-			console.log('Selection is outside the editable area.');
-			handleLinkClear();
-			return;
-		}
-
-		const anchor = document.createElement('a');
 		if (validateUrl(newLinkUrl)) {
-			anchor.href = newLinkUrl;
-			anchor.target = '_blank';
-			anchor.rel = 'noopener noreferrer';
-			anchor.setAttribute('data-link-id', `${Date.now()}`);
+			restoreSelection();
+			if (!editableRef.current) {
+				console.log('Editable element not found.');
+				return;
+			}
+
+			const selection = window.getSelection();
+			if (!selection || selection.rangeCount === 0) {
+				console.log('No selection available.');
+				handleLinkClear();
+				return;
+			}
+
+			const range = selection.getRangeAt(0);
+			if (range.collapsed) {
+				console.log('Selection is collapsed.');
+				handleLinkClear();
+				return;
+			}
+
+			if (!editableRef.current.contains(range.commonAncestorContainer)) {
+				console.log('Selection is outside the editable area.');
+				handleLinkClear();
+				return;
+			}
+
+			const anchor = document.createElement('a');
+			if (validateUrl(newLinkUrl)) {
+				anchor.href = newLinkUrl;
+				anchor.target = '_blank';
+				anchor.rel = 'noopener noreferrer';
+				anchor.setAttribute('data-link-id', `${Date.now()}`);
+			}
+
+			const extractedContent = range.extractContents();
+			if (textToConvert && textToConvert !== extractedContent.textContent) {
+				anchor.textContent = textToConvert;
+			} else {
+				anchor.appendChild(extractedContent);
+			}
+
+			range.insertNode(anchor);
+
+			range.setStartAfter(anchor);
+			range.collapse(true);
+			selection.removeAllRanges();
+			selection.addRange(range);
+
+			const updatedContent = editableRef.current.innerHTML;
+			console.log('Updated raw HTML content:', updatedContent);
+
+			props.onChangeBlock(props.block.id, updatedContent);
 		}
-
-		const extractedContent = range.extractContents();
-		if (textToConvert && textToConvert !== extractedContent.textContent) {
-			anchor.textContent = textToConvert;
-		} else {
-			anchor.appendChild(extractedContent);
-		}
-
-		range.insertNode(anchor);
-
-		range.setStartAfter(anchor);
-		range.collapse(true);
-		selection.removeAllRanges();
-		selection.addRange(range);
-
-		const updatedContent = editableRef.current.innerHTML;
-		console.log('Updated raw HTML content:', updatedContent);
-
-		props.onChangeBlock(props.block.id, updatedContent);
 
 		handleLinkClear();
 	}

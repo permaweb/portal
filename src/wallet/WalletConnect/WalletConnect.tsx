@@ -16,7 +16,7 @@ import {
 	lightThemeAlt2,
 	lightThemeHighContrast,
 } from 'helpers/themes';
-import { formatAddress } from 'helpers/utils';
+import { formatAddress, getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -34,7 +34,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	const { settings, updateSettings } = useSettingsProvider();
 
 	const [showWallet, setShowWallet] = React.useState<boolean>(false);
-	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(true);
+	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(false);
 	const [showThemeSelector, setShowThemeSelector] = React.useState<boolean>(false);
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 
@@ -167,7 +167,11 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 									<p>{language.uploadBalance}</p>
 								</S.DBalanceHeader>
 								<S.DBalanceBody>
-									<p>{`${arProvider.turboBalance} Credits`}</p>
+									<p>
+										{arProvider.turboBalance
+											? `${getARAmountFromWinc(arProvider.turboBalance)} ${language.credits}`
+											: `${language.loading}...`}
+									</p>
 									<Button
 										type={'alt3'}
 										label={language.add}

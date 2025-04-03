@@ -163,6 +163,7 @@ function createURLs() {
 		postEditVideo: (portalId: string) => `${postEditBase(portalId)}video/`,
 		docs: docs,
 		docsIntro: `${docs}overview/introduction`,
+		docsEditor: `${docs}posts/editor`,
 		notFound: `${base}404`,
 	};
 }
@@ -271,3 +272,11 @@ export const DEFAULT_THEME: PortalThemeType = {
 
 export const STRIPE_PUBLISHABLE_KEY =
 	'pk_live_51JUAtwC8apPOWkDLMQqNF9sPpfneNSPnwX8YZ8y1FNDl6v94hZIwzgFSYl27bWE4Oos8CLquunUswKrKcaDhDO6m002Yj9AeKj';
+
+export const UPLOAD = {
+	node1: 'https://up.arweave.net',
+	node2: 'https://turbo.ardrive.io',
+	batchSize: 1,
+	chunkSize: 7500000,
+	dispatchUploadSize: 100 * 1024,
+};

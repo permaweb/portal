@@ -231,7 +231,7 @@ export default function Editor() {
 							</S.ModalBodyElements>
 						</S.ModalBodyWrapper>
 						<S.ModalActionsWrapper>
-							<Link to={URLS.docsIntro} target={'_blank'}>
+							<Link to={URLS.docsEditor} target={'_blank'}>
 								{language.learn}
 							</Link>
 							<Button type={'alt1'} label={language.close} handlePress={() => setShowReview(false)} disabled={false} />

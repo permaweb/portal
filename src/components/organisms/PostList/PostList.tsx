@@ -93,7 +93,7 @@ export default function PostList(props: IProps) {
 				type={getButtonType(true, filterAction.status)}
 				label={filterAction.label}
 				handlePress={() => handleActionPress(() => setCurrentStatusFilter(filterAction.status))}
-				active={currentStatusFilter === filterAction.status}
+				active={false}
 			/>
 		));
 
