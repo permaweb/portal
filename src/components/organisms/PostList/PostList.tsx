@@ -145,7 +145,7 @@ export default function PostList(props: IProps) {
 									disabled={!showFilterActions}
 								>
 									<Button
-										type={'alt3'}
+										type={'alt4'}
 										label={language.filter}
 										handlePress={() => setShowFilterActions(!showFilterActions)}
 										icon={ASSETS.filter}

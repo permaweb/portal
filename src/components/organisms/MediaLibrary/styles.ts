@@ -7,7 +7,7 @@ export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	padding: 0 20px;
+	padding: 0 20px 20px 20px;
 
 	#media-file-input {
 		display: none;

@@ -19,7 +19,7 @@ import {
 	PortalUploadOptionType,
 	PortalUploadType,
 } from 'helpers/types';
-import { getARAmountFromWinc, getBase64Data, getByteSize } from 'helpers/utils';
+import { getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -57,7 +57,8 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const inputRef = React.useRef(null);
 
 	const [mediaData, setMediaData] = React.useState<{
-		url: string | null;
+		url?: string | null;
+		file?: File | null;
 		caption: string | null;
 		alignment: AlignmentEnum | null;
 	}>({
@@ -85,15 +86,9 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		or else show the upload cost first */
 	React.useEffect(() => {
 		(async function () {
-			if (
-				mediaData?.url &&
-				validateUrl(mediaData.url) &&
-				mediaData.url.startsWith('data') &&
-				!mediaUploaded &&
-				portalProvider.current?.id &&
-				arProvider.wallet
-			) {
-				const contentSize = getByteSize(Buffer.from(getBase64Data(mediaData.url), 'base64'));
+			if (mediaData?.file && !mediaUploaded && portalProvider.current?.id && arProvider.wallet) {
+				const contentSize = (mediaData.file as any).size;
+
 				if (contentSize < UPLOAD.dispatchUploadSize) {
 					await handleUpload();
 				} else {
@@ -107,11 +102,9 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 
 						if (uploadInWinc > arProvider.turboBalance) {
 							setUploadResponse({ status: 'warning', message: 'Insufficient balance for upload' });
-							setMediaData((prevContent) => ({ ...prevContent, url: null }));
 						}
 					} catch (e: any) {
 						setUploadResponse({ status: 'warning', message: e.message ?? 'Error uploading media' });
-						setMediaData((prevContent) => ({ ...prevContent, url: null }));
 					}
 				}
 			}
@@ -135,7 +128,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	async function handleUpload() {
 		setMediaLoading(true);
 		try {
-			const tx = await permawebProvider.libs.resolveTransaction(mediaData.url);
+			const tx = await permawebProvider.libs.resolveTransaction(mediaData.file);
 
 			const mediaUpdateId = await permawebProvider.libs.addToZone(
 				{
@@ -156,7 +149,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			setMediaUploaded(true);
 			setUploadResponse({ status: 'success', message: `${language.mediaUploaded}!` });
 		} catch (e: any) {
-			handleClear('Error uploading media');
+			handleClear(e.message ?? 'Error uploading media');
 		}
 		setMediaLoading(false);
 	}
@@ -192,14 +185,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = (event) => {
-				const url = event.target?.result as string;
-				setMediaData((prevContent) => ({ ...prevContent, url }));
-			};
-			reader.readAsDataURL(file);
-		}
+		if (file) setMediaData((prevContent) => ({ ...prevContent, file: file }));
 	};
 
 	const handleLibraryCallback = (upload: PortalUploadType) => {
