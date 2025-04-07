@@ -3,6 +3,7 @@ import { Dispatch } from 'redux';
 import { PortalAssetPostType, ReduxActionType } from 'helpers/types';
 
 const UPDATE_CURRENT_POST = 'UPDATE_CURRENT_POST';
+const CLEAR_CURRENT_POST = 'CLEAR_CURRENT_POST';
 
 export const initStateCurrentPost: { data: PortalAssetPostType; editor: any } = {
 	data: {
@@ -36,6 +37,12 @@ export function currentPostUpdate(payload: { field: string; value: any }) {
 	};
 }
 
+export function currentPostClear() {
+	return (dispatch: Dispatch) => {
+		dispatch({ type: CLEAR_CURRENT_POST });
+	};
+}
+
 export function currentPost(
 	state: { data: PortalAssetPostType; editor: any } = initStateCurrentPost,
 	action: ReduxActionType
@@ -61,6 +68,8 @@ export function currentPost(
 				};
 			}
 			return state;
+		case CLEAR_CURRENT_POST:
+			return { ...state, data: { ...initStateCurrentPost.data } };
 		default:
 			return state;
 	}

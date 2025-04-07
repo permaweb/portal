@@ -181,6 +181,13 @@ export function getByteSize(input: string | Buffer): number {
 	return sizeInBytes;
 }
 
+export function getByteSizeDisplay(bytes: number) {
+	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+	if (bytes === 0) return '0 Bytes';
+	const i = Math.floor(Math.log(bytes) / Math.log(1000));
+	return bytes / Math.pow(1000, i) + ' ' + sizes[i];
+}
+
 export function isMac(): boolean {
 	return navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 }

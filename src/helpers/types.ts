@@ -244,3 +244,5 @@ export type MediaConfigType = {
 	renderContent: (url: string) => JSX.Element;
 	acceptType: string;
 };
+
+export type DesignPanelType = 'themes' | 'logo';

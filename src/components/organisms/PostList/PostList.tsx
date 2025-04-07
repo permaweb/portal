@@ -93,7 +93,7 @@ export default function PostList(props: IProps) {
 				type={getButtonType(true, filterAction.status)}
 				label={filterAction.label}
 				handlePress={() => handleActionPress(() => setCurrentStatusFilter(filterAction.status))}
-				active={false}
+				active={currentStatusFilter === filterAction.status}
 			/>
 		));
 
@@ -116,7 +116,7 @@ export default function PostList(props: IProps) {
 					<S.PostsSortingWrapper>
 						<Button
 							type={'alt3'}
-							label={dateAscending ? language.sortOldestToNewest : language.sortNewestToOldest}
+							label={dateAscending ? language.sortNewestToOldest : language.sortOldestToNewest}
 							handlePress={() => handleActionPress(() => setDateAscending(!dateAscending))}
 							icon={ASSETS.arrows}
 						/>

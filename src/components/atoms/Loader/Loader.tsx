@@ -43,6 +43,14 @@ export default function Loader(props: IProps) {
 	if (props.placeholder) {
 		return <S.Placeholder />;
 	} else if (props.message) {
+		if (props.noOverlay) {
+			return (
+				<S.MessageWrapper className={'info'}>
+					{getLoader(16.5, 5.5, 1.95, true, true)}
+					<span>{props.message}</span>
+				</S.MessageWrapper>
+			);
+		}
 		return (
 			<Portal node={DOM.overlay}>
 				<div className={'overlay'}>

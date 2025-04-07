@@ -207,16 +207,18 @@ export default function TurboBalanceFund(props: IProps) {
 							</S.DHeader>
 							<S.DElements>
 								{DEFAULT_AMOUNTS.map((defaultAmount: number, index: number) => {
+									const active = Number(defaultAmount) === Number(amount);
+
 									return (
 										<Button
 											key={index}
-											type={'primary'}
+											type={active ? 'alt1' : 'primary'}
 											label={formatUSDAmount(defaultAmount)}
 											handlePress={() => {
 												setAmount(defaultAmount);
 												setCustomAmount(0);
 											}}
-											active={Number(defaultAmount) === Number(amount)}
+											active={active}
 											height={40}
 											width={125}
 										/>
@@ -280,7 +282,7 @@ export default function TurboBalanceFund(props: IProps) {
 										theme: 'stripe',
 										variables: {
 											colorBackground: theme.colors.container.primary.background,
-											colorPrimary: theme.colors.font.primary,
+											colorPrimary: theme.colors.link.color,
 											colorText: theme.colors.font.primary,
 											fontSizeBase: theme.typography.size.small,
 											fontWeightLight: theme.typography.weight.medium,

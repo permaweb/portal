@@ -181,7 +181,7 @@ export default function ArticleToolbar(props: IProps) {
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [currentPost.editor.blockEditMode, currentPost.editor.panelOpen]);
+	}, [currentPost.data, currentPost.editor.blockEditMode, currentPost.editor.panelOpen]);
 
 	React.useEffect(() => {
 		const handleFocus = () => {

@@ -5,12 +5,11 @@ import { Panel } from 'components/atoms/Panel';
 import { Logo } from 'components/molecules/Logo';
 import { Themes } from 'components/molecules/Themes';
 import { ASSETS } from 'helpers/config';
+import { DesignPanelType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
 import * as S from './styles';
-
-type PanelType = 'themes' | 'logo';
 
 // TODO
 export default function PortalDesign() {
@@ -20,9 +19,9 @@ export default function PortalDesign() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [showPanel, setShowPanel] = React.useState<boolean>(false);
-	const [panelType, setPanelType] = React.useState<PanelType | null>(null);
+	const [panelType, setPanelType] = React.useState<DesignPanelType | null>(null);
 
-	function handleOpenAction(type: PanelType) {
+	function handleOpenAction(type: DesignPanelType) {
 		setPanelType(type);
 		setShowPanel(true);
 	}

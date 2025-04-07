@@ -73,9 +73,43 @@ function getElementCursor(type: ArticleBlockEnum) {
 
 export const ElementToolbarWrapper = styled.div``;
 
-export const ElementToolbarToggle = styled.div`
+function getElementTogglePosition(type: ArticleBlockEnum) {
+	switch (type) {
+		case 'header-1':
+		case 'header-2':
+		case 'header-3':
+		case 'header-4':
+		case 'header-5':
+		case 'header-6':
+		case 'image':
+		case 'video':
+		case 'code':
+			return '-23.5px';
+		default:
+			return '-22.5px';
+	}
+}
+
+function getElementDividerPosition(type: ArticleBlockEnum) {
+	switch (type) {
+		case 'header-1':
+		case 'header-2':
+		case 'header-3':
+		case 'header-4':
+		case 'header-5':
+		case 'header-6':
+		case 'image':
+		case 'video':
+		case 'code':
+			return '-10px';
+		default:
+			return '-5px';
+	}
+}
+
+export const ElementToolbarToggle = styled.div<{ type: ArticleBlockEnum }>`
 	position: absolute;
-	top: -22.5px;
+	top: ${(props) => getElementTogglePosition(props.type)};
 	display: none;
 	width: 100%;
 	justify-content: space-between;
@@ -85,12 +119,15 @@ export const ElementIndicatorDivider = styled(ElementToolbarToggle)`
 	height: 1px;
 	width: 100%;
 	top: auto;
-	bottom: -5px;
+	bottom: ${(props) => getElementDividerPosition(props.type)};
 	border-top: 1px solid ${(props) => props.theme.colors.border.alt1};
 `;
 
+export const DefaultElementWrapper = styled.div`
+	position: relative;
+`;
+
 export const ElementWrapper = styled.div<{ blockEditMode: boolean; type: ArticleBlockEnum }>`
-	width: 100%;
 	width: calc(100% - 27.5px);
 	width: ${(props) => (props.blockEditMode ? 'calc(100% - 27.5px)' : '100%')};
 	display: flex;
@@ -99,7 +136,7 @@ export const ElementWrapper = styled.div<{ blockEditMode: boolean; type: Article
 	position: relative;
 	cursor: default;
 
-	${(props) =>
+	/* ${(props) =>
 		!props.blockEditMode &&
 		`
 		&:hover {
@@ -110,7 +147,7 @@ export const ElementWrapper = styled.div<{ blockEditMode: boolean; type: Article
 				display: ${getElementToolbarToggleDisplay(props.type)};
 			}
 		}
-	`}
+	`} */
 `;
 
 export const ElementDragWrapper = styled.div`

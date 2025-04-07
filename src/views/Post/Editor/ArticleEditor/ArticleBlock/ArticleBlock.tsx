@@ -257,7 +257,7 @@ export default function ArticleBlock(props: IProps) {
 	const invalidLink = newLinkUrl?.length > 0 && !validateUrl(newLinkUrl);
 
 	function getElement() {
-		const ToolbarWrapper = currentPost?.editor.blockEditMode ? S.ElementToolbarWrapper : S.ElementToolbarToggle;
+		const ToolbarWrapper: any = currentPost?.editor.blockEditMode ? S.ElementToolbarWrapper : S.ElementToolbarToggle;
 
 		return (
 			<>
@@ -267,7 +267,9 @@ export default function ArticleBlock(props: IProps) {
 					onFocus={props.onFocus}
 					className={'fade-in'}
 				>
-					<ToolbarWrapper className={'fade-in'}>{getElementToolbar()}</ToolbarWrapper>
+					<ToolbarWrapper className={'fade-in'} type={props.block.type}>
+						{getElementToolbar()}
+					</ToolbarWrapper>
 					<S.Element blockEditMode={currentPost?.editor.blockEditMode} type={props.block.type}>
 						{useCustom ? (
 							element
@@ -281,7 +283,9 @@ export default function ArticleBlock(props: IProps) {
 							/>
 						)}
 					</S.Element>
-					{!currentPost?.editor.blockEditMode && <S.ElementIndicatorDivider className={'fade-in'} />}
+					{!currentPost?.editor.blockEditMode && (
+						<S.ElementIndicatorDivider type={props.block.type} className={'fade-in'} />
+					)}
 				</S.ElementWrapper>
 				{showLinkModal && (
 					<Modal header={language.editLink} handleClose={() => setShowLinkModal(false)}>
@@ -339,5 +343,5 @@ export default function ArticleBlock(props: IProps) {
 		);
 	}
 
-	return getElement();
+	return <S.DefaultElementWrapper>{getElement()}</S.DefaultElementWrapper>;
 }

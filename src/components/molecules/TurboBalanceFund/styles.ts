@@ -43,6 +43,12 @@ export const DElements = styled.div`
 	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: 10px;
+
+	button {
+		span {
+			font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		}
+	}
 `;
 
 export const CWrapper = styled(DWrapper)`
@@ -55,13 +61,25 @@ export const CWrapper = styled(DWrapper)`
 export const COWrapper = styled.div`
 	padding: 10px;
 	span {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		color: ${(props) => props.theme.colors.font.primary};
+		font-weight: ${(props) => props.theme.typography.weight.xBold};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 	}
 `;
 
-export const COHeader = styled(DHeader)``;
+export const COHeader = styled(DHeader)`
+	margin: 0;
+	padding: 0 0 12.5px 0;
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+	margin: 0 0 7.5px 0;
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
+`;
 
 export const MActions = styled.div`
 	margin: 30px 0 0 0;

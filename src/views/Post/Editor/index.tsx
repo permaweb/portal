@@ -44,7 +44,7 @@ export default function Editor() {
 		const isEmpty =
 			!currentPost.data.content ||
 			currentPost.data.content.length === 0 ||
-			(currentPost.data.content.length === 1 && !currentPost.data.content[0].content);
+			currentPost.data.content.every((block) => !block.content || block.content.trim() === '');
 
 		handleCurrentPostUpdate({ field: 'submitDisabled', value: isEmpty });
 	}, [currentPost.data.content]);
@@ -234,7 +234,12 @@ export default function Editor() {
 							<Link to={URLS.docsEditor} target={'_blank'}>
 								{language.learn}
 							</Link>
-							<Button type={'alt1'} label={language.close} handlePress={() => setShowReview(false)} disabled={false} />
+							<Button
+								type={'primary'}
+								label={language.close}
+								handlePress={() => setShowReview(false)}
+								disabled={false}
+							/>
 						</S.ModalActionsWrapper>
 					</S.ModalWrapper>
 				</Modal>

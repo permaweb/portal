@@ -84,8 +84,7 @@ export const ASSETS = {
 
 export const ASSET_UPLOAD = {
 	src: {
-		data: 'lBWtTMWN-jtrecImXZsQ7noVQ9pofTjGBqsfwjdVApg',
-		process: 'E7whHaqOnLofm_571LupYCHRR1Zeo63yutyJxBd530M',
+		data: 'WdmjdPCc7OlHAE7IBwK8gHyKmQTakuwsQVst1I6kkh0',
 	},
 	ansType: 'blog-post',
 	contentType: 'text/html',
@@ -278,5 +277,5 @@ export const UPLOAD = {
 	node2: 'https://turbo.ardrive.io',
 	batchSize: 1,
 	chunkSize: 7500000,
-	dispatchUploadSize: 100 * 1024,
+	dispatchUploadSize: 100 * 1000,
 };

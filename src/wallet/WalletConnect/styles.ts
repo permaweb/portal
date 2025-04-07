@@ -142,7 +142,7 @@ export const DBalanceBody = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;

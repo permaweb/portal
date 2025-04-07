@@ -5,6 +5,7 @@ import { Button } from 'components/atoms/Button';
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
+import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
@@ -34,7 +35,6 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	// TODO: Reuse from media library
 	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
 		image: {
 			type: 'image',
@@ -156,7 +156,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 
 	function handleClear(message: string) {
 		setUploadResponse({ status: 'warning', message: message });
-		setMediaData((prevContent) => ({ ...prevContent, url: null }));
+		setMediaData((prevContent) => ({ ...prevContent, file: null }));
 		setUploadCost(null);
 		setShowUploadConfirmation(false);
 		if (inputRef.current) {
@@ -212,52 +212,20 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		/>
 	);
 
-	return (
-		<>
-			<S.Wrapper>
-				{!props.content ? (
-					<S.InputWrapper className={'border-wrapper-alt2'}>
-						<S.InputHeader>
-							<ReactSVG src={config.icon} />
-							<p>{config.label}</p>
-						</S.InputHeader>
-						<S.InputDescription>
-							<span>{language.mediaUploadInfo}</span>
-						</S.InputDescription>
-						<S.InputActions>
-							<FormField
-								label={language.insertFromUrl}
-								value={mediaUploaded && mediaData?.url ? mediaData.url : ''}
-								onChange={(e) => handleUrlChange(e)}
-								invalid={{ status: !isValidUrl, message: null }}
-								disabled={false}
-								hideErrorMessage
-								sm
-							/>
-							<S.InputActionsFlex>
-								<Button
-									type={'alt1'}
-									label={language.upload}
-									handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
-									width={140}
-								/>
-								<Button type={'primary'} label={language.fromLibrary} handlePress={() => setShowMediaLibrary(true)} />
-							</S.InputActionsFlex>
-							<input
-								id={'media-file-input'}
-								ref={inputRef}
-								type={'file'}
-								accept={config.acceptType}
-								onChange={handleFileChange}
-							/>
-						</S.InputActions>
-						{showUploadConfirmation && (
-							<S.InputOverlay className={'border-wrapper-primary'}>
-								<p>
-									<span>{`${language.costToUpload}:`}</span>
-									&nbsp;
-									{uploadCost ? `${getARAmountFromWinc(uploadCost)} ${language.credits}` : '-'}
-								</p>
+	function getInputWrapper() {
+		if (showUploadConfirmation) {
+			return (
+				<>
+					<S.InputHeader>
+						<ReactSVG src={config.icon} />
+						<p>{`${language.upload} ${config.label}`}</p>
+					</S.InputHeader>
+					<S.InputDescription>
+						<span>{language.mediaUploadCostInfo}</span>
+					</S.InputDescription>
+					<S.InputActions>
+						<S.InputActionsInfo>
+							<S.InputActionsInfoLine>
 								<p>
 									<span>{`${language.yourUploadBalance}:`}</span>
 									&nbsp;
@@ -265,19 +233,90 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 										? `${getARAmountFromWinc(arProvider.turboBalance)} ${language.credits}`
 										: '-'}
 								</p>
-								<S.InputOverlayActions>
-									<Button
-										type={'primary'}
-										label={language.cancel}
-										handlePress={() => handleClear(language.uploadCancelled)}
-									/>
-									<Button type={'alt1'} label={language.upload} handlePress={handleUpload} />
-								</S.InputOverlayActions>
-							</S.InputOverlay>
-						)}
+							</S.InputActionsInfoLine>
+							<S.InputActionsInfoLine>
+								<p>
+									<span>{`${language.costToUpload}:`}</span>
+									&nbsp;
+									{uploadCost ? `${getARAmountFromWinc(uploadCost)} ${language.credits}` : '-'}
+								</p>
+							</S.InputActionsInfoLine>
+							<S.InputActionsInfoDivider />
+							<S.InputActionsInfoLine>
+								<p>
+									<span>{`${language.remainingAfterUpload}:`}</span>
+									&nbsp;
+									{arProvider.turboBalance && uploadCost
+										? `${getARAmountFromWinc(arProvider.turboBalance - uploadCost)} ${language.credits}`
+										: '-'}
+								</p>
+							</S.InputActionsInfoLine>
+						</S.InputActionsInfo>
+						<S.InputActionsFlex>
+							<Button
+								type={'primary'}
+								label={language.cancel}
+								handlePress={() => handleClear(language.uploadCancelled)}
+								width={140}
+							/>
+							<Button type={'alt1'} label={language.upload} handlePress={handleUpload} width={140} />
+						</S.InputActionsFlex>
+					</S.InputActions>
+				</>
+			);
+		}
+
+		return (
+			<>
+				<S.InputHeader>
+					<ReactSVG src={config.icon} />
+					<p>{config.label}</p>
+				</S.InputHeader>
+				<S.InputDescription>
+					<span>{language.mediaUploadInfo}</span>
+				</S.InputDescription>
+				<S.InputActions>
+					<FormField
+						label={language.insertFromUrl}
+						value={mediaUploaded && mediaData?.url ? mediaData.url : ''}
+						onChange={(e) => handleUrlChange(e)}
+						invalid={{ status: !isValidUrl, message: null }}
+						disabled={false}
+						hideErrorMessage
+						sm
+					/>
+					<S.InputActionsFlex>
+						<Button type={'primary'} label={language.fromLibrary} handlePress={() => setShowMediaLibrary(true)} />
+						<Button
+							type={'alt1'}
+							label={language.upload}
+							handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
+							width={140}
+						/>
+					</S.InputActionsFlex>
+					<input
+						id={'media-file-input'}
+						ref={inputRef}
+						type={'file'}
+						accept={config.acceptType}
+						onChange={handleFileChange}
+					/>
+				</S.InputActions>
+			</>
+		);
+	}
+
+	return (
+		<>
+			<S.Wrapper>
+				{!props.content ? (
+					<S.InputWrapper className={'border-wrapper-alt2'}>
+						{getInputWrapper()}
 						{mediaLoading && (
 							<S.InputOverlay className={'border-wrapper-primary'}>
-								<p>{`${language.uploadingMedia}...`}</p>
+								<Loader message={`${language.uploadingMedia}...`} noOverlay />
+
+								<p>This may take some time, please stay on this screen.</p>
 							</S.InputOverlay>
 						)}
 					</S.InputWrapper>

@@ -11,7 +11,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { RootState } from 'store';
-import { currentPostUpdate } from 'store/post';
+import { currentPostClear, currentPostUpdate } from 'store/post';
 
 import { ArticleBlock } from './ArticleBlock';
 import { ArticleToolbar } from './ArticleToolbar';
@@ -44,6 +44,7 @@ export default function ArticleEditor(props: IProps) {
 					handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language.loadingPost}...` } });
 					try {
 						const response = await permawebProvider.libs.getAtomicAsset(assetId);
+
 						handleCurrentPostUpdate({ field: 'title', value: response?.name });
 						handleCurrentPostUpdate({ field: 'status', value: response?.metadata?.status });
 						handleCurrentPostUpdate({ field: 'categories', value: response?.metadata?.categories });
@@ -55,6 +56,8 @@ export default function ArticleEditor(props: IProps) {
 						console.error(e);
 					}
 					handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
+				} else {
+					dispatch(currentPostClear());
 				}
 			}
 		})();

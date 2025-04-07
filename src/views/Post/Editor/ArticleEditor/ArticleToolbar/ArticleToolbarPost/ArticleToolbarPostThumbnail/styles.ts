@@ -23,7 +23,6 @@ export const Input = styled.button<{ hasInput: boolean }>`
 	position: relative;
 	background: ${(props) => props.theme.colors.container.primary.background};
 	border: ${(props) => (props.hasInput ? `none` : `1px dashed ${props.theme.colors.border.alt1}`)};
-	/* border:  1px dashed ${(props) => props.theme.colors.border.alt1}; */
 	border-radius: ${STYLING.dimensions.radius.alt2};
 	z-index: 1;
 	overflow: hidden;
@@ -96,14 +95,20 @@ export const Input = styled.button<{ hasInput: boolean }>`
 
 export const FooterWrapper = styled.div`
 	width: 100%;
-	margin: 4.5px 0 0 0;
+	margin: 5px 0 0 0;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+
+	button {
+		span {
+			font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		}
 	}
 `;

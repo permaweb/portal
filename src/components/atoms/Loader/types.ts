@@ -5,4 +5,5 @@ export interface IProps {
 	placeholder?: boolean;
 	message?: string;
 	relative?: boolean;
+	noOverlay?: boolean;
 }

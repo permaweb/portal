@@ -51,7 +51,7 @@ export default function MediaLibrary(props: IProps) {
 
 	const [selectedUpload, setSelectedUpload] = React.useState<PortalUploadType | null>(null);
 	const [uploads, setUploads] = React.useState<PortalUploadType[] | null>(null);
-	const [currentList, setCurrentList] = React.useState<string>(TABS[0]!.type);
+	const [currentList, setCurrentList] = React.useState<string>(TABS.find((tab) => tab.type === props.type).type);
 	const [currentAcceptType, setCurrentAcceptType] = React.useState<string>('');
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
 	const [newUploadUrl, setNewUploadUrl] = React.useState<string | null>(null);
@@ -64,7 +64,6 @@ export default function MediaLibrary(props: IProps) {
 			switch (currentList) {
 				case 'all':
 					setUploads(portalProvider.current.uploads);
-
 					const updatedAcceptType = Object.keys(mediaConfig)
 						.map((entry) => mediaConfig[entry].acceptType)
 						.join(', ');
@@ -86,7 +85,7 @@ export default function MediaLibrary(props: IProps) {
 					break;
 			}
 		}
-	}, [currentList, portalProvider.current?.uploads, language]);
+	}, [currentList, portalProvider.current?.uploads]);
 
 	React.useEffect(() => {
 		(async function () {

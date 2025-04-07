@@ -4,10 +4,10 @@ import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
 import { Notification } from 'components/atoms/Notification';
-import { ASSETS } from 'helpers/config';
+import { ASSETS, UPLOAD } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { NotificationType } from 'helpers/types';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, getByteSizeDisplay } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { RootState } from 'store';
 import { currentPostUpdate } from 'store/post';
@@ -97,7 +97,7 @@ export default function ArticleToolbarPostThumbnail() {
 					/>
 				</S.InputWrapper>
 				<S.FooterWrapper>
-					<p>Max (100KB)</p>
+					<p>{`${language.max} (${getByteSizeDisplay(UPLOAD.dispatchUploadSize)})`}</p>
 					<Button
 						type={'alt2'}
 						label={language.remove}
