@@ -279,3 +279,22 @@ export const UPLOAD = {
 	chunkSize: 7500000,
 	dispatchUploadSize: 100 * 1000,
 };
+
+export const PORTAL_DATA = () => `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal</title>
+  <link rel="stylesheet" href="https://styles_portal.arweave.net">
+  <script src="https://script_portal.arweave.net"></script>
+</head>
+<body>
+  <div id="portal"></div>
+  <script>
+    window.portal.engine();
+  </script>
+</body>
+</html>
+`;

@@ -8,6 +8,7 @@ import { PortalSetup } from 'components/organisms/PortalSetup';
 import { PostList } from 'components/organisms/PostList';
 import { UserList } from 'components/organisms/UserList';
 import { ASSETS, URLS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
@@ -29,7 +30,7 @@ export default function Portal() {
 					<Button
 						type={'primary'}
 						label={language.goToSite}
-						handlePress={() => console.log('TODO: Go to site')}
+						handlePress={() => window.open(getTxEndpoint(portalProvider.current.id))}
 						disabled={!portalProvider.current}
 						iconLeftAlign
 					/>,

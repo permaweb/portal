@@ -5,6 +5,7 @@ export const language = {
 		addCaption: `Add a caption`,
 		addCategory: `Add a category`,
 		addTopic: `Add a topic`,
+		addUser: `Add a user`,
 		alignCaption: `Align caption`,
 		all: `All`,
 		amount: `Amount`,
