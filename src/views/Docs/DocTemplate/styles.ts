@@ -1,19 +1,9 @@
 import styled from 'styled-components';
 
-import { open, transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.div<{ isView: boolean }>`
-	width: ${(props) => (props.isView ? `calc(100% - ${STYLING.dimensions.nav.width})` : '100%')};
-	padding: ${(props) => (props.isView ? '20px 40px 20px 30px' : '0')};
-	animation: ${open} ${transition2};
-	margin: 0 0 0 auto;
-
-	@media (max-width: ${STYLING.cutoffs.initial}) {
-		width: 100%;
-		padding: 20px;
-		margin: 50px 0 0 0;
-	}
+export const Wrapper = styled.div`
+	width: 100%;
 
 	h1,
 	h2,
@@ -38,6 +28,7 @@ export const Wrapper = styled.div<{ isView: boolean }>`
 
 	h2 {
 		font-size: clamp(22px, 3.15vw, 38px) !important;
+		font-family: ${(props) => props.theme.typography.family.alt1} !important;
 		scroll-margin-top: 100px;
 		a {
 			font-size: clamp(22px, 3.05vw, 34px) !important;
@@ -68,7 +59,7 @@ export const Wrapper = styled.div<{ isView: boolean }>`
 
 	strong,
 	b {
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
 	}
 
 	p,
@@ -76,7 +67,7 @@ export const Wrapper = styled.div<{ isView: boolean }>`
 	li,
 	div,
 	pre {
-		font-size: ${(props) => props.theme.typography.size.base} !important;
+		font-size: ${(props) => props.theme.typography.size.small} !important;
 		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		color: ${(props) => props.theme.colors.font.alt1} !important;
@@ -84,7 +75,7 @@ export const Wrapper = styled.div<{ isView: boolean }>`
 	}
 
 	a {
-		font-size: ${(props) => props.theme.typography.size.base} !important;
+		font-size: ${(props) => props.theme.typography.size.small} !important;
 		text-decoration: underline;
 	}
 
@@ -135,12 +126,12 @@ export const Wrapper = styled.div<{ isView: boolean }>`
 	}
 
 	code {
-		padding: 2.5px 10px !important;
+		padding: 2.5px 7.5px !important;
 		background: ${(props) => props.theme.colors.container.alt3.background} !important;
-		border-radius: ${STYLING.dimensions.radius.primary} !important;
-		color: ${(props) => props.theme.colors.font.primary.alt1} !important;
-		font-weight: ${(props) => props.theme.typography.weight.regular} !important;
-		font-size: ${(props) => props.theme.typography.size.small} !important;
+		border-radius: ${STYLING.dimensions.radius.alt3} !important;
+		color: ${(props) => props.theme.colors.font.alt1} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 	}
 
 	pre {

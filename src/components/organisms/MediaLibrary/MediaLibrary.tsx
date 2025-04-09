@@ -43,11 +43,15 @@ export default function MediaLibrary(props: IProps) {
 
 	const inputRef = React.useRef(null);
 
-	const TABS = [{ label: language.all }, { label: language.images }, { label: language.videos }];
+	const TABS = [
+		{ type: 'all', label: language.all },
+		{ type: 'image', label: language.images },
+		{ type: 'video', label: language.videos },
+	];
 
 	const [selectedUpload, setSelectedUpload] = React.useState<PortalUploadType | null>(null);
 	const [uploads, setUploads] = React.useState<PortalUploadType[] | null>(null);
-	const [currentList, setCurrentList] = React.useState<string>(TABS[0]!.label);
+	const [currentList, setCurrentList] = React.useState<string>(TABS.find((tab) => tab.type === props.type).type);
 	const [currentAcceptType, setCurrentAcceptType] = React.useState<string>('');
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
 	const [newUploadUrl, setNewUploadUrl] = React.useState<string | null>(null);
@@ -58,21 +62,20 @@ export default function MediaLibrary(props: IProps) {
 	React.useEffect(() => {
 		if (portalProvider.current?.uploads) {
 			switch (currentList) {
-				case language.all:
+				case 'all':
 					setUploads(portalProvider.current.uploads);
-
 					const updatedAcceptType = Object.keys(mediaConfig)
 						.map((entry) => mediaConfig[entry].acceptType)
 						.join(', ');
 					setCurrentAcceptType(updatedAcceptType);
 					break;
-				case language.images:
+				case 'image':
 					setUploads(
 						portalProvider.current.uploads.filter((upload: PortalUploadType) => upload.type.toLowerCase() === 'image')
 					);
 					setCurrentAcceptType(mediaConfig['image'].acceptType);
 					break;
-				case language.videos:
+				case 'video':
 					setUploads(
 						portalProvider.current.uploads.filter((upload: PortalUploadType) => upload.type.toLowerCase() === 'video')
 					);
@@ -82,7 +85,7 @@ export default function MediaLibrary(props: IProps) {
 					break;
 			}
 		}
-	}, [currentList, portalProvider.current?.uploads, language]);
+	}, [currentList, portalProvider.current?.uploads]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -191,11 +194,15 @@ export default function MediaLibrary(props: IProps) {
 		}
 	};
 
+	function getCurrentList(label: string) {
+		return TABS.find((tab) => tab.label === label).type;
+	}
+
 	const header = React.useMemo(() => {
 		if (props.type === 'all') {
 			return (
 				<S.TabsWrapper>
-					<Tabs onTabPropClick={(label: string) => setCurrentList(label)} type={'alt1'}>
+					<Tabs onTabPropClick={(label: string) => setCurrentList(getCurrentList(label))} type={'alt1'}>
 						{TABS.map((tab: { label: string; icon?: string }, index: number) => {
 							return <S.TabWrapper key={index} label={tab.label} icon={tab.icon ? tab.icon : null} />;
 						})}

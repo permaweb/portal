@@ -132,14 +132,16 @@ export default function Landing() {
 	}, [arProvider.walletAddress, permawebProvider.profile, portalProvider.portals]);
 
 	return (
-		<S.Wrapper className={'fade-in'}>
-			<S.HeaderWrapper>
-				<h4>{`[${language.app}]`}</h4>
-			</S.HeaderWrapper>
-			<S.BodyWrapper>
-				<S.Section>{connection}</S.Section>
-				<S.Section>{portals}</S.Section>
-			</S.BodyWrapper>
+		<S.Wrapper>
+			<S.ContentWrapper className={'fade-in'}>
+				<S.HeaderWrapper>
+					<h4>{`[${language.app}]`}</h4>
+				</S.HeaderWrapper>
+				<S.BodyWrapper>
+					<S.Section>{connection}</S.Section>
+					<S.Section>{portals}</S.Section>
+				</S.BodyWrapper>
+			</S.ContentWrapper>
 		</S.Wrapper>
 	);
 }

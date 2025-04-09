@@ -84,8 +84,7 @@ export const ASSETS = {
 
 export const ASSET_UPLOAD = {
 	src: {
-		data: 'lBWtTMWN-jtrecImXZsQ7noVQ9pofTjGBqsfwjdVApg',
-		process: 'E7whHaqOnLofm_571LupYCHRR1Zeo63yutyJxBd530M',
+		data: 'WdmjdPCc7OlHAE7IBwK8gHyKmQTakuwsQVst1I6kkh0',
 	},
 	ansType: 'blog-post',
 	contentType: 'text/html',
@@ -122,14 +121,15 @@ export const STYLING = {
 			max: '47.5px',
 		},
 		nav: {
-			height: '65px',
+			height: '70px',
 			width: '260px',
 		},
 		radius: {
 			primary: '7.5px',
 			alt1: '15px',
-			alt2: '5px',
+			alt2: '10px',
 			alt3: '2.5px',
+			alt4: '5px',
 		},
 	},
 };
@@ -162,6 +162,7 @@ function createURLs() {
 		postEditVideo: (portalId: string) => `${postEditBase(portalId)}video/`,
 		docs: docs,
 		docsIntro: `${docs}overview/introduction`,
+		docsEditor: `${docs}posts/editor`,
 		notFound: `${base}404`,
 	};
 }
@@ -266,4 +267,15 @@ export const DEFAULT_THEME: PortalThemeType = {
 		shadow: false,
 		borders: false,
 	},
+};
+
+export const STRIPE_PUBLISHABLE_KEY =
+	'pk_live_51JUAtwC8apPOWkDLMQqNF9sPpfneNSPnwX8YZ8y1FNDl6v94hZIwzgFSYl27bWE4Oos8CLquunUswKrKcaDhDO6m002Yj9AeKj';
+
+export const UPLOAD = {
+	node1: 'https://up.arweave.net',
+	node2: 'https://turbo.ardrive.io',
+	batchSize: 1,
+	chunkSize: 7500000,
+	dispatchUploadSize: 100 * 1000,
 };

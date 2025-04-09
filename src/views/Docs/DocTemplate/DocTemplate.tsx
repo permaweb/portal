@@ -122,7 +122,7 @@ export default function DocTemplate(props: { doc?: string; id?: string }) {
 	};
 
 	return markdown ? (
-		<S.Wrapper isView={!props.doc}>
+		<S.Wrapper>
 			<ReactMarkdown
 				children={markdown}
 				components={{

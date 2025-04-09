@@ -8,7 +8,7 @@ export const ARTICLE_TOOLBAR_WIDTH = '350px';
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 25px;
 	position: relative;
 `;
 

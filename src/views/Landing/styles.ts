@@ -5,15 +5,20 @@ import { STYLING } from 'helpers/config';
 export const Wrapper = styled.div`
 	min-height: 100vh;
 	width: 100%;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	padding: 10vh 20px 20px 20px;
+	padding: 30vh 20px 40px 20px;
+	position: relative;
 
 	@media (max-width: ${STYLING.cutoffs.tablet}) {
 		padding: 20px;
 	}
+`;
+
+export const ContentWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 `;
 
 export const HeaderWrapper = styled.div`
@@ -65,7 +70,7 @@ export const ConnectionWrapper = styled.div`
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 	}
 `;
@@ -78,7 +83,7 @@ export const PortalsWrapper = styled.div`
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 	}
 

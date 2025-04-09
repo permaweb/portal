@@ -17,15 +17,12 @@ import { MediaBlock } from './CustomBlocks/MediaBlock';
 import * as S from './styles';
 import { IProps } from './types';
 
-// TODO: Duplicate text linking to wrong text
-// TODO: Modify / remove link
 export default function ArticleBlock(props: IProps) {
 	const currentPost = useSelector((state: RootState) => state.currentPost);
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [selectionRange, setSelectionRange] = React.useState<{ start: number; end: number } | null>(null);
 	const [selectedText, setSelectedText] = React.useState<string>('');
 	const [textToConvert, setTextToConvert] = React.useState<string>('');
 	const [newLinkUrl, setNewLinkUrl] = React.useState<string>('');
@@ -73,49 +70,90 @@ export default function ArticleBlock(props: IProps) {
 		};
 	}, []);
 
+	const savedRangeRef = React.useRef<Range | null>(null);
+
+	function restoreSelection() {
+		if (savedRangeRef.current) {
+			const selection = window.getSelection();
+			if (selection) {
+				selection.removeAllRanges();
+				selection.addRange(savedRangeRef.current);
+			}
+		}
+	}
+
 	function handleLinkModalOpen() {
 		const selection = window.getSelection();
 		if (selection && selection.rangeCount > 0) {
-			const range = selection.getRangeAt(0);
-			const start = range.startOffset;
-			const end = range.endOffset;
-			const selectedText = range.toString();
+			setTextToConvert(selectedText);
+			savedRangeRef.current = selection.getRangeAt(0).cloneRange();
+		}
+		setShowLinkModal(true);
+	}
 
-			if (selectedText.length > 0) {
-				setTextToConvert(selectedText);
-				setSelectionRange({ start, end });
+	function handleLinkSave() {
+		if (validateUrl(newLinkUrl)) {
+			restoreSelection();
+			if (!editableRef.current) {
+				console.log('Editable element not found.');
+				return;
 			}
+
+			const selection = window.getSelection();
+			if (!selection || selection.rangeCount === 0) {
+				console.log('No selection available.');
+				handleLinkClear();
+				return;
+			}
+
+			const range = selection.getRangeAt(0);
+			if (range.collapsed) {
+				console.log('Selection is collapsed.');
+				handleLinkClear();
+				return;
+			}
+
+			if (!editableRef.current.contains(range.commonAncestorContainer)) {
+				console.log('Selection is outside the editable area.');
+				handleLinkClear();
+				return;
+			}
+
+			const anchor = document.createElement('a');
+			if (validateUrl(newLinkUrl)) {
+				anchor.href = newLinkUrl;
+				anchor.target = '_blank';
+				anchor.rel = 'noopener noreferrer';
+				anchor.setAttribute('data-link-id', `${Date.now()}`);
+			}
+
+			const extractedContent = range.extractContents();
+			if (textToConvert && textToConvert !== extractedContent.textContent) {
+				anchor.textContent = textToConvert;
+			} else {
+				anchor.appendChild(extractedContent);
+			}
+
+			range.insertNode(anchor);
+
+			range.setStartAfter(anchor);
+			range.collapse(true);
+			selection.removeAllRanges();
+			selection.addRange(range);
+
+			const updatedContent = editableRef.current.innerHTML;
+			console.log('Updated raw HTML content:', updatedContent);
+
+			props.onChangeBlock(props.block.id, updatedContent);
 		}
 
-		setShowLinkModal(true);
+		handleLinkClear();
 	}
 
 	function handleLinkClear() {
 		setTextToConvert('');
 		setShowLinkModal(false);
 		setNewLinkUrl('');
-	}
-
-	function handleLinkSave() {
-		const { content } = props.block;
-		const link = `<a href="${newLinkUrl}" target="_blank" rel="noopener noreferrer">${textToConvert}</a>`;
-
-		if (!selectionRange) {
-			console.warn('No selection range available.');
-			handleLinkClear();
-			return;
-		}
-
-		const { start, end } = selectionRange;
-
-		// Replace only the selected range
-		const beforeText = content.slice(0, start);
-		const afterText = content.slice(end);
-		const updatedContent = `${beforeText}${link}${afterText}`;
-
-		// Save the updated content back to the block
-		props.onChangeBlock(props.block.id, updatedContent);
-		handleLinkClear();
 	}
 
 	let useCustom: boolean = false;
@@ -193,8 +231,8 @@ export default function ArticleBlock(props: IProps) {
 						(selectedText?.length || textToConvert.length) > 0 && (
 							<S.SelectionWrapper className={'fade-in'}>
 								<Button
-									type={'alt2'}
-									label={language.convertToLink}
+									type={'alt3'}
+									label={language.link}
 									handlePress={() => handleLinkModalOpen()}
 									icon={ASSETS.link}
 									iconLeftAlign
@@ -202,7 +240,7 @@ export default function ArticleBlock(props: IProps) {
 							</S.SelectionWrapper>
 						)}
 					<IconButton
-						type={'primary'}
+						type={'alt1'}
 						active={false}
 						src={ASSETS.delete}
 						handlePress={() => props.onDeleteBlock(props.block.id)}
@@ -219,23 +257,25 @@ export default function ArticleBlock(props: IProps) {
 	const invalidLink = newLinkUrl?.length > 0 && !validateUrl(newLinkUrl);
 
 	function getElement() {
-		const ToolbarWrapper = currentPost?.editor.blockEditMode ? S.ElementToolbarWrapper : S.ElementToolbarToggle;
+		const ToolbarWrapper: any = currentPost?.editor.blockEditMode ? S.ElementToolbarWrapper : S.ElementToolbarToggle;
 
 		return (
 			<>
 				<S.ElementWrapper
-					ref={editableRef}
 					type={props.block.type}
 					blockEditMode={currentPost?.editor.blockEditMode}
 					onFocus={props.onFocus}
 					className={'fade-in'}
 				>
-					<ToolbarWrapper className={'fade-in'}>{getElementToolbar()}</ToolbarWrapper>
+					<ToolbarWrapper className={'fade-in'} type={props.block.type}>
+						{getElementToolbar()}
+					</ToolbarWrapper>
 					<S.Element blockEditMode={currentPost?.editor.blockEditMode} type={props.block.type}>
 						{useCustom ? (
 							element
 						) : (
 							<ContentEditable
+								ref={editableRef}
 								element={element}
 								value={props.block.content}
 								onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
@@ -243,7 +283,9 @@ export default function ArticleBlock(props: IProps) {
 							/>
 						)}
 					</S.Element>
-					{!currentPost?.editor.blockEditMode && <S.ElementIndicatorDivider className={'fade-in'} />}
+					{!currentPost?.editor.blockEditMode && (
+						<S.ElementIndicatorDivider type={props.block.type} className={'fade-in'} />
+					)}
 				</S.ElementWrapper>
 				{showLinkModal && (
 					<Modal header={language.editLink} handleClose={() => setShowLinkModal(false)}>
@@ -253,7 +295,7 @@ export default function ArticleBlock(props: IProps) {
 								onChange={(e: any) => setTextToConvert(e.target.value)}
 								invalid={{ status: false, message: null }}
 								label={language.text}
-								disabled={true}
+								disabled={false}
 								hideErrorMessage
 								sm
 							/>
@@ -269,12 +311,7 @@ export default function ArticleBlock(props: IProps) {
 							/>
 							<S.ModalActionsWrapper>
 								<Button type={'primary'} label={language.cancel} handlePress={() => handleLinkClear()} />
-								<Button
-									type={'alt1'}
-									label={language.save}
-									handlePress={() => handleLinkSave()}
-									disabled={newLinkUrl?.length <= 0 || invalidLink}
-								/>
+								<Button type={'alt1'} label={language.save} handlePress={() => handleLinkSave()} disabled={false} />
 							</S.ModalActionsWrapper>
 						</S.ModalWrapper>
 					</Modal>
@@ -306,5 +343,5 @@ export default function ArticleBlock(props: IProps) {
 		);
 	}
 
-	return getElement();
+	return <S.DefaultElementWrapper>{getElement()}</S.DefaultElementWrapper>;
 }

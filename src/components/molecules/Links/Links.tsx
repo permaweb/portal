@@ -223,7 +223,7 @@ export default function Links(props: IProps) {
 							<S.LinkPrefillWrapper>
 								<CloseHandler callback={() => setShowPrefills(false)} active={showPrefills} disabled={!showPrefills}>
 									<Button
-										type={'alt3'}
+										type={'alt4'}
 										label={language.prefill}
 										handlePress={() => setShowPrefills(!showPrefills)}
 										disabled={!arProvider.wallet || !portalProvider.current?.id || linkLoading}
@@ -302,7 +302,7 @@ export default function Links(props: IProps) {
 					<S.LinksHeader>
 						<p>{language.current}</p>
 						<Button
-							type={'alt3'}
+							type={'alt4'}
 							label={editMode ? language.done : language.edit}
 							handlePress={() => {
 								setEditMode(!editMode);

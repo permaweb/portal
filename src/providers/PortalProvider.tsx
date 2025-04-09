@@ -8,6 +8,7 @@ import { STORAGE } from 'helpers/config';
 import { PortalAssetType, PortalDetailType, PortalHeaderType, PortalPermissionsType } from 'helpers/types';
 import { areAssetsEqual } from 'helpers/utils';
 
+import { useArweaveProvider } from './ArweaveProvider';
 import { useLanguageProvider } from './LanguageProvider';
 import { usePermawebProvider } from './PermawebProvider';
 
@@ -42,6 +43,7 @@ export function usePortalProvider(): PortalContextState {
 export function PortalProvider(props: { children: React.ReactNode }) {
 	const location = useLocation();
 
+	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -59,6 +61,12 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	const [showPortalManager, setShowPortalManager] = React.useState<boolean>(false);
 	const [createNewPortal, setCreateNewPortal] = React.useState<boolean>(false);
+
+	React.useEffect(() => {
+		setPortals(null);
+		setCurrent(null);
+		setPermissions(null);
+	}, [arProvider.walletAddress]);
 
 	React.useEffect(() => {
 		if (permawebProvider.profile) {

@@ -5,12 +5,13 @@ import { Button } from 'components/atoms/Button';
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
+import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
 import { MediaLibrary } from 'components/organisms/MediaLibrary';
-import { ASSETS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
+import { ASSETS, UPLOAD } from 'helpers/config';
+import { getTurboCostWincEndpoint, getTxEndpoint } from 'helpers/endpoints';
 import {
 	AlignmentButtonType,
 	AlignmentEnum,
@@ -19,6 +20,7 @@ import {
 	PortalUploadOptionType,
 	PortalUploadType,
 } from 'helpers/types';
+import { getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -55,7 +57,8 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const inputRef = React.useRef(null);
 
 	const [mediaData, setMediaData] = React.useState<{
-		url: string | null;
+		url?: string | null;
+		file?: File | null;
 		caption: string | null;
 		alignment: AlignmentEnum | null;
 	}>({
@@ -67,56 +70,46 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const [showMediaLibrary, setShowMediaLibrary] = React.useState<boolean>(false);
 	const [isValidUrl, setIsValidUrl] = React.useState(true);
 
+	const [mediaUploaded, setMediaUploaded] = React.useState<boolean>(false);
+	const [mediaLoading, setMediaLoading] = React.useState<boolean>(false);
+	const [showUploadConfirmation, setShowUploadConfirmation] = React.useState<boolean>(false);
+	const [uploadCost, setUploadCost] = React.useState<number | null>(null);
+	const [uploadResponse, setUploadResponse] = React.useState<NotificationType | null>(null);
+
 	React.useEffect(() => {
 		if (props.data && props.data !== mediaData) {
 			setMediaData(props.data);
 		}
 	}, [props.data]);
 
-	const [mediaUploaded, setMediaUploaded] = React.useState<boolean>(false);
-	const [mediaLoading, setMediaLoading] = React.useState<boolean>(false);
-	const [uploadResponse, setUploadResponse] = React.useState<NotificationType | null>(null);
-
+	/* If media is selected and it is a valid dispatch size then upload it immediately,
+		or else show the upload cost first */
 	React.useEffect(() => {
 		(async function () {
-			if (
-				mediaData?.url &&
-				validateUrl(mediaData.url) &&
-				mediaData.url.startsWith('data:image/') &&
-				!mediaUploaded &&
-				portalProvider.current?.id &&
-				arProvider.wallet
-			) {
-				setMediaLoading(true);
-				try {
-					const tx = await permawebProvider.libs.resolveTransaction(mediaData.url);
+			if (mediaData?.file && !mediaUploaded && portalProvider.current?.id && arProvider.wallet) {
+				const contentSize = (mediaData.file as any).size;
 
-					const mediaUpdateId = await permawebProvider.libs.addToZone(
-						{
-							path: 'Uploads',
-							data: permawebProvider.libs.mapToProcessCase({
-								tx: tx,
-								type: props.type,
-								dateUploaded: Date.now().toString(),
-							}),
-						},
-						portalProvider.current.id,
-						arProvider.wallet
-					);
+				if (contentSize < UPLOAD.dispatchUploadSize) {
+					await handleUpload();
+				} else {
+					try {
+						setShowUploadConfirmation(true);
 
-					console.log(`Media update: ${mediaUpdateId}`);
+						const uploadPriceResponse = await fetch(getTurboCostWincEndpoint(contentSize));
+						const uploadInWinc = Number((await uploadPriceResponse.json()).winc);
 
-					setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(tx) }));
-					setMediaUploaded(true);
-					setUploadResponse({ status: 'success', message: `${language.mediaUploaded}!` });
-				} catch (e: any) {
-					setUploadResponse({ status: 'warning', message: e.message ?? 'Error uploading media' });
-					setMediaData((prevContent) => ({ ...prevContent, url: null }));
+						setUploadCost(uploadInWinc);
+
+						if (uploadInWinc > arProvider.turboBalance) {
+							setUploadResponse({ status: 'warning', message: 'Insufficient balance for upload' });
+						}
+					} catch (e: any) {
+						setUploadResponse({ status: 'warning', message: e.message ?? 'Error uploading media' });
+					}
 				}
-				setMediaLoading(false);
 			}
 		})();
-	}, [mediaData, portalProvider.current?.id, arProvider.wallet]);
+	}, [mediaData, portalProvider.current?.id, arProvider.wallet, arProvider.turboBalance]);
 
 	React.useEffect(() => {
 		if (mediaData?.url && validateUrl(mediaData.url) && mediaData.url.startsWith('https://'))
@@ -132,8 +125,47 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		`;
 	}
 
+	async function handleUpload() {
+		setMediaLoading(true);
+		try {
+			const tx = await permawebProvider.libs.resolveTransaction(mediaData.file);
+
+			const mediaUpdateId = await permawebProvider.libs.addToZone(
+				{
+					path: 'Uploads',
+					data: permawebProvider.libs.mapToProcessCase({
+						tx: tx,
+						type: props.type,
+						dateUploaded: Date.now().toString(),
+					}),
+				},
+				portalProvider.current.id,
+				arProvider.wallet
+			);
+
+			console.log(`Media update: ${mediaUpdateId}`);
+
+			setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(tx) }));
+			setMediaUploaded(true);
+			setUploadResponse({ status: 'success', message: `${language.mediaUploaded}!` });
+		} catch (e: any) {
+			handleClear(e.message ?? 'Error uploading media');
+		}
+		setMediaLoading(false);
+	}
+
+	function handleClear(message: string) {
+		setUploadResponse({ status: 'warning', message: message });
+		setMediaData((prevContent) => ({ ...prevContent, file: null }));
+		setUploadCost(null);
+		setShowUploadConfirmation(false);
+		if (inputRef.current) {
+			inputRef.current.value = '';
+		}
+	}
+
 	const validateUrl = (url: string) => {
-		if (url.startsWith('data:image/')) {
+		if (url.startsWith('data')) {
 			return true;
 		}
 		const urlPattern = /^(https?:\/\/)?([\w\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*[\w\/:;=\?&%+#]*)?\/?$/i;
@@ -153,14 +185,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = (event) => {
-				const url = event.target?.result as string;
-				setMediaData((prevContent) => ({ ...prevContent, url }));
-			};
-			reader.readAsDataURL(file);
-		}
+		if (file) setMediaData((prevContent) => ({ ...prevContent, file: file }));
 	};
 
 	const handleLibraryCallback = (upload: PortalUploadType) => {
@@ -187,48 +212,111 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		/>
 	);
 
+	function getInputWrapper() {
+		if (showUploadConfirmation) {
+			return (
+				<>
+					<S.InputHeader>
+						<ReactSVG src={config.icon} />
+						<p>{`${language.upload} ${config.label}`}</p>
+					</S.InputHeader>
+					<S.InputDescription>
+						<span>{language.mediaUploadCostInfo}</span>
+					</S.InputDescription>
+					<S.InputActions>
+						<S.InputActionsInfo>
+							<S.InputActionsInfoLine>
+								<p>
+									<span>{`${language.yourUploadBalance}:`}</span>
+									&nbsp;
+									{arProvider.turboBalance
+										? `${getARAmountFromWinc(arProvider.turboBalance)} ${language.credits}`
+										: '-'}
+								</p>
+							</S.InputActionsInfoLine>
+							<S.InputActionsInfoLine>
+								<p>
+									<span>{`${language.costToUpload}:`}</span>
+									&nbsp;
+									{uploadCost ? `${getARAmountFromWinc(uploadCost)} ${language.credits}` : '-'}
+								</p>
+							</S.InputActionsInfoLine>
+							<S.InputActionsInfoDivider />
+							<S.InputActionsInfoLine>
+								<p>
+									<span>{`${language.remainingAfterUpload}:`}</span>
+									&nbsp;
+									{arProvider.turboBalance && uploadCost
+										? `${getARAmountFromWinc(arProvider.turboBalance - uploadCost)} ${language.credits}`
+										: '-'}
+								</p>
+							</S.InputActionsInfoLine>
+						</S.InputActionsInfo>
+						<S.InputActionsFlex>
+							<Button
+								type={'primary'}
+								label={language.cancel}
+								handlePress={() => handleClear(language.uploadCancelled)}
+								width={140}
+							/>
+							<Button type={'alt1'} label={language.upload} handlePress={handleUpload} width={140} />
+						</S.InputActionsFlex>
+					</S.InputActions>
+				</>
+			);
+		}
+
+		return (
+			<>
+				<S.InputHeader>
+					<ReactSVG src={config.icon} />
+					<p>{config.label}</p>
+				</S.InputHeader>
+				<S.InputDescription>
+					<span>{language.mediaUploadInfo}</span>
+				</S.InputDescription>
+				<S.InputActions>
+					<FormField
+						label={language.insertFromUrl}
+						value={mediaUploaded && mediaData?.url ? mediaData.url : ''}
+						onChange={(e) => handleUrlChange(e)}
+						invalid={{ status: !isValidUrl, message: null }}
+						disabled={false}
+						hideErrorMessage
+						sm
+					/>
+					<S.InputActionsFlex>
+						<Button type={'primary'} label={language.fromLibrary} handlePress={() => setShowMediaLibrary(true)} />
+						<Button
+							type={'alt1'}
+							label={language.upload}
+							handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
+							width={140}
+						/>
+					</S.InputActionsFlex>
+					<input
+						id={'media-file-input'}
+						ref={inputRef}
+						type={'file'}
+						accept={config.acceptType}
+						onChange={handleFileChange}
+					/>
+				</S.InputActions>
+			</>
+		);
+	}
+
 	return (
 		<>
 			<S.Wrapper>
 				{!props.content ? (
 					<S.InputWrapper className={'border-wrapper-alt2'}>
-						<S.InputHeader>
-							<ReactSVG src={config.icon} />
-							<p>{config.label}</p>
-						</S.InputHeader>
-						<S.InputDescription>
-							<span>{language.mediaUploadInfo}</span>
-						</S.InputDescription>
-						<S.InputActions>
-							<FormField
-								label={language.insertFromUrl}
-								value={mediaData?.url ?? ''}
-								onChange={(e) => handleUrlChange(e)}
-								invalid={{ status: !isValidUrl, message: null }}
-								disabled={false}
-								hideErrorMessage
-								sm
-							/>
-							<S.InputActionsFlex>
-								<Button
-									type={'alt1'}
-									label={language.upload}
-									handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
-									width={140}
-								/>
-								<Button type={'primary'} label={language.fromLibrary} handlePress={() => setShowMediaLibrary(true)} />
-							</S.InputActionsFlex>
-							<input
-								id={'media-file-input'}
-								ref={inputRef}
-								type={'file'}
-								accept={config.acceptType}
-								onChange={handleFileChange}
-							/>
-						</S.InputActions>
+						{getInputWrapper()}
 						{mediaLoading && (
 							<S.InputOverlay className={'border-wrapper-primary'}>
-								<p>{`${language.uploadingMedia}...`}</p>
+								<Loader message={`${language.uploadingMedia}...`} noOverlay />
+
+								<p>This may take some time, please stay on this screen.</p>
 							</S.InputOverlay>
 						)}
 					</S.InputWrapper>
@@ -322,7 +410,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 				open={showMediaLibrary}
 				header={language.mediaLibrary}
 				handleClose={() => setShowMediaLibrary(false)}
-				width={690}
+				width={680}
 				closeHandlerDisabled={true}
 			>
 				<MediaLibrary

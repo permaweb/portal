@@ -43,7 +43,7 @@ function renderNavItems(handleClick: any, path = '', docs: any = docsOrder) {
 	return items;
 }
 
-export default function DocsNavigation() {
+export default function DocsNavigationHeader() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -66,15 +66,22 @@ export default function DocsNavigation() {
 		const Title: any = desktop ? S.NTitle : S.NTitleMobile;
 
 		return (
-			<S.NWrapper>
-				<S.NContent>
-					<Title onClick={desktop ? () => {} : () => setOpen(!open)} open={open}>
-						<p>{`[${language.app}]`}</p>
-						{!desktop && <ReactSVG src={ASSETS.arrow} />}
-					</Title>
-					<S.NList>{open && renderNavItems(desktop ? null : () => setOpen(false))}</S.NList>
-				</S.NContent>
-			</S.NWrapper>
+			<>
+				<S.HWrapper>
+					<S.HActions>
+						<Link to={URLS.base}>{language.returnHome}</Link>
+					</S.HActions>
+				</S.HWrapper>
+				<S.NWrapper>
+					<S.NContent>
+						<Title onClick={desktop ? () => {} : () => setOpen(!open)} open={open}>
+							<p>{`${language.app}`}</p>
+							{!desktop && <ReactSVG src={ASSETS.arrow} />}
+						</Title>
+						<S.NList>{open && renderNavItems(desktop ? null : () => setOpen(false))}</S.NList>
+					</S.NContent>
+				</S.NWrapper>
+			</>
 		);
 	}
 

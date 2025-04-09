@@ -20,7 +20,6 @@ export const ActionWrapper = styled.div`
 	button {
 		justify-content: space-between;
 		border-radius: ${STYLING.dimensions.radius.primary} !important;
-		border: none !important;
 		span {
 			color: ${(props) => props.theme.colors.font.alt1};
 			font-size: ${(props) => props.theme.typography.size.xSmall} !important;

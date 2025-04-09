@@ -203,7 +203,7 @@ export const GlobalStyle = createGlobalStyle`
   .info {
     padding: 0 5px 0.5px 5px;
     background: ${(props) => props.theme.colors.contrast.background};
-    border-radius: ${STYLING.dimensions.radius.alt2};
+    border-radius: ${STYLING.dimensions.radius.alt4};
     animation: ${open} ${transition2};
     span {
       color: ${(props) => props.theme.colors.contrast.color};

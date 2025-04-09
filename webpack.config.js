@@ -137,6 +137,9 @@ module.exports = {
 			'global.setImmediate': [require.resolve('timers'), 'setImmediate'],
 		}),
 		new webpack.NoEmitOnErrorsPlugin(),
+		new webpack.NormalModuleReplacementPlugin(/^node:(.*)$/, (resource) => {
+			resource.request = resource.request.replace(/^node:/, '');
+		}),
 	],
 	resolve: {
 		extensions: ['.tsx', '.ts', '.jsx', '.js'],
@@ -161,6 +164,9 @@ module.exports = {
 			url: require.resolve('url'),
 			buffer: require.resolve('buffer'),
 			timers: require.resolve('timers-browserify'),
+			stream: require.resolve('stream-browserify'),
+			'node:stream': require.resolve('stream-browserify'),
+			'node:buffer': require.resolve('stream-browserify'),
 		},
 		alias: {
 			react: path.resolve(__dirname, 'node_modules/react'),
@@ -182,6 +188,8 @@ module.exports = {
 			wrappers: path.resolve(__dirname, 'src/wrappers/'),
 			'asn1.js': path.resolve(__dirname, 'node_modules/asn1.js'),
 			elliptic: path.resolve(__dirname, 'node_modules/elliptic'),
+			'node:stream': 'stream-browserify',
+			'node:buffer': 'buffer',
 		},
 	},
 	output: {

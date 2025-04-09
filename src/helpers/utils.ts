@@ -1,3 +1,5 @@
+import Arweave from 'arweave';
+
 import { PortalAssetType } from './types';
 
 export function checkValidAddress(address: string | null) {
@@ -179,6 +181,13 @@ export function getByteSize(input: string | Buffer): number {
 	return sizeInBytes;
 }
 
+export function getByteSizeDisplay(bytes: number) {
+	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+	if (bytes === 0) return '0 Bytes';
+	const i = Math.floor(Math.log(bytes) / Math.log(1000));
+	return bytes / Math.pow(1000, i) + ' ' + sizes[i];
+}
+
 export function isMac(): boolean {
 	return navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 }
@@ -239,4 +248,17 @@ export function isEqual(obj1: any, obj2: any): boolean {
 
 export function getBootTag(key: string, value: string) {
 	return { name: `Bootloader-${key}`, value };
+}
+
+export function formatTurboAmount(amount: number) {
+	return `${amount.toFixed(4)} Credits`;
+}
+
+export function formatUSDAmount(amount: number) {
+	return `$ ${!amount || isNaN(amount) ? 0 : Number(amount).toFixed(2)}`;
+}
+
+export function getARAmountFromWinc(amount: number) {
+	const arweave = Arweave.init({});
+	return (Math.floor(+arweave.ar.winstonToAr(amount.toString()) * 1e6) / 1e6).toFixed(4);
 }

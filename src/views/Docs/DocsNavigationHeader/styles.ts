@@ -2,6 +2,46 @@ import styled from 'styled-components';
 
 import { STYLING } from 'helpers/config';
 
+export const HWrapper = styled.div`
+	height: ${STYLING.dimensions.nav.height};
+	width: 100%;
+	position: fixed;
+	top: 0;
+	z-index: 2;
+	padding: 0 20px 0 calc(${STYLING.dimensions.nav.width} + 20px);
+	display: flex;
+	align-items: center;
+	background: ${(props) => props.theme.colors.view.background};
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		padding: 0 20px;
+	}
+`;
+
+export const HActions = styled.div`
+	width: fit-content;
+	margin: 0 0 0 auto;
+
+	a {
+		padding: 7.5px 15px;
+		background: ${(props) => props.theme.colors.button.primary.background};
+		border: 1px solid ${(props) => props.theme.colors.button.primary.border};
+		border-radius: ${STYLING.dimensions.radius.alt3};
+		color: ${(props) => props.theme.colors.font.primary} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+		letter-spacing: 0.35px;
+
+		&:hover {
+			background: ${(props) => props.theme.colors.button.primary.active.background};
+			border: 1px solid ${(props) => props.theme.colors.button.primary.active.border};
+		}
+	}
+`;
+
 export const NWrapper = styled.div`
 	height: 100vh;
 	width: ${STYLING.dimensions.nav.width};
@@ -14,9 +54,7 @@ export const NWrapper = styled.div`
 	border-right: 1px solid ${(props) => props.theme.colors.border.primary};
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {
-		height: auto;
-		width: 100%;
-		position: absolute;
+		display: none;
 	}
 `;
 
@@ -44,7 +82,7 @@ export const NTitle = styled.div`
 	margin: 0 0 20px 0;
 	p {
 		font-family: ${(props) => props.theme.typography.family.alt1};
-		font-size: 22px !important;
+		font-size: ${(props) => props.theme.typography.size.xLg} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		color: ${(props) => props.theme.colors.font.primary} !important;
 	}

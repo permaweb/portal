@@ -120,7 +120,7 @@ export default function PortalSetup(props: IProps) {
 					}`}</p>
 					{props.type === 'header' && (
 						<IconButton
-							type={'primary'}
+							type={'alt1'}
 							active={false}
 							src={settings.showLinkAction ? ASSETS.close : ASSETS.write}
 							handlePress={() => toggleLinkAction()}
@@ -145,7 +145,7 @@ export default function PortalSetup(props: IProps) {
 					}`}</p>
 					{props.type === 'header' && (
 						<IconButton
-							type={'primary'}
+							type={'alt1'}
 							active={false}
 							src={settings.showCategoryAction ? ASSETS.close : ASSETS.write}
 							handlePress={() => toggleCategoryAction()}
@@ -170,7 +170,7 @@ export default function PortalSetup(props: IProps) {
 					}`}</p>
 					{props.type === 'header' && (
 						<IconButton
-							type={'primary'}
+							type={'alt1'}
 							active={false}
 							src={settings.showTopicAction ? ASSETS.close : ASSETS.write}
 							handlePress={() => toggleTopicAction()}

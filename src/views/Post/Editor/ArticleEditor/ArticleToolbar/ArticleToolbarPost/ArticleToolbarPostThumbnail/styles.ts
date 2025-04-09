@@ -75,7 +75,7 @@ export const Input = styled.button<{ hasInput: boolean }>`
             right: 0;
             bottom: 0;
             background-color: ${props.theme.colors.overlay.alt1};
-			border-radius: ${STYLING.dimensions.radius.alt2};
+			border-radius: ${STYLING.dimensions.radius.alt4};
             opacity: 0;
             transition: all 100ms;
         }
@@ -95,14 +95,20 @@ export const Input = styled.button<{ hasInput: boolean }>`
 
 export const FooterWrapper = styled.div`
 	width: 100%;
-	margin: 4.5px 0 0 0;
+	margin: 5px 0 0 0;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+
+	button {
+		span {
+			font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		}
 	}
 `;

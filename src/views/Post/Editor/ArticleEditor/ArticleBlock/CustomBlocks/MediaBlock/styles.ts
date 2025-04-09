@@ -23,15 +23,28 @@ export const InputOverlay = styled.div`
 	left: 0;
 	border: none !important;
 	display: flex;
+	flex-direction: column;
+	gap: 10px;
 	align-items: center;
 	justify-content: center;
+	border-radius: ${STYLING.dimensions.radius.alt2} !important;
 
 	p {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		font-family: ${(props) => props.theme.typography.family.primary};
+		position: absolute;
+		bottom: 25px;
+		padding: 2.5px 10px;
+		color: ${(props) => props.theme.colors.font.alt1} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
+`;
+
+export const InputOverlayActions = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	margin: 15px 0 0 0;
 `;
 
 export const InputHeader = styled.div`
@@ -82,6 +95,38 @@ export const InputActions = styled.div`
 		align-items: flex-start;
 		flex-direction: column;
 		gap: 15px;
+	}
+`;
+
+export const InputActionsInfo = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 7.5px;
+	margin: 10px 0;
+`;
+
+export const InputActionsInfoDivider = styled.div`
+	height: 1px;
+	width: 100%;
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+`;
+
+export const InputActionsInfoLine = styled.div`
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.xBold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		display: flex;
+	}
+
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		display: flex;
+		width: 170px;
 	}
 `;
 
@@ -260,7 +305,7 @@ export const CaptionWrapper = styled.div<{ editMode: boolean; useColumn: boolean
 			padding: 10px 50px 10px 10px;
 			background: ${props.theme.colors.container.alt1.background};
 			border: 1px solid ${props.theme.colors.border.primary};
-			border-radius: ${STYLING.dimensions.radius.alt2};
+			border-radius: ${STYLING.dimensions.radius.alt4};
 		`}
 	}
 `;

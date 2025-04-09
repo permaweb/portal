@@ -2,7 +2,9 @@ import React from 'react';
 import { ReactSVG } from 'react-svg';
 
 import { Avatar } from 'components/atoms/Avatar';
+import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
+import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { ASSETS } from 'helpers/config';
 import {
 	darkTheme,
@@ -14,7 +16,7 @@ import {
 	lightThemeAlt2,
 	lightThemeHighContrast,
 } from 'helpers/themes';
-import { formatAddress } from 'helpers/utils';
+import { formatAddress, getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -34,6 +36,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	const [showWallet, setShowWallet] = React.useState<boolean>(false);
 	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(false);
 	const [showThemeSelector, setShowThemeSelector] = React.useState<boolean>(false);
+	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 
 	const [label, setLabel] = React.useState<string | null>(null);
 
@@ -45,7 +48,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 
 	React.useEffect(() => {
 		if (!showWallet) {
-			setLabel(`${language.fetching}...`);
+			setLabel(`${language.loading}...`);
 		} else {
 			if (arProvider.walletAddress) {
 				if (permawebProvider.profile && permawebProvider.profile.username) {
@@ -151,9 +154,6 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 					{showWalletDropdown && (
 						<S.Dropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
 							<S.DHeaderWrapper>
-								<S.PDropdownHeader>
-									<p>{language.profileMenu}</p>
-								</S.PDropdownHeader>
 								<S.DHeaderFlex>
 									<Avatar owner={permawebProvider.profile} dimensions={{ wrapper: 32.5, icon: 19.5 }} callback={null} />
 									<S.DHeader>
@@ -161,15 +161,36 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 									</S.DHeader>
 								</S.DHeaderFlex>
 							</S.DHeaderWrapper>
+
+							<S.DBalanceWrapper>
+								<S.DBalanceHeader>
+									<p>{language.uploadBalance}</p>
+								</S.DBalanceHeader>
+								<S.DBalanceBody>
+									<p>
+										{arProvider.turboBalance
+											? `${getARAmountFromWinc(arProvider.turboBalance)} ${language.credits}`
+											: `${language.loading}...`}
+									</p>
+									<Button
+										type={'alt3'}
+										label={language.add}
+										handlePress={() => setShowFundUpload(true)}
+										icon={ASSETS.add}
+										iconLeftAlign
+									/>
+								</S.DBalanceBody>
+							</S.DBalanceWrapper>
+
 							<S.DBodyWrapper>
 								<li onClick={() => permawebProvider.setShowProfileManager(true)}>
 									<ReactSVG src={ASSETS.write} />
 									{language.profile}
 								</li>
-								{/* <li onClick={() => setShowThemeSelector(true)}>
+								<li onClick={() => setShowThemeSelector(true)}>
 									<ReactSVG src={ASSETS.language} />
 									{language.language}
-								</li> */}
+								</li>
 								<li onClick={() => setShowThemeSelector(true)}>
 									<ReactSVG src={ASSETS.design} />
 									{language.appearance}
@@ -186,8 +207,16 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 				</S.Wrapper>
 			</CloseHandler>
 			<Panel
+				open={showFundUpload}
+				width={575}
+				header={language.fundTurboBalance}
+				handleClose={() => setShowFundUpload(false)}
+			>
+				<TurboBalanceFund handleClose={() => setShowFundUpload(false)} />
+			</Panel>
+			<Panel
 				open={showThemeSelector}
-				width={425}
+				width={430}
 				header={language.chooseAppAppearance}
 				handleClose={() => setShowThemeSelector(false)}
 			>
