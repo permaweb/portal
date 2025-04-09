@@ -6,7 +6,7 @@ import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
-import { ASSETS, DEFAULT_THEME, URLS } from 'helpers/config';
+import { ASSETS, DEFAULT_THEME, PORTAL_DATA, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { NotificationType, PortalHeaderType } from 'helpers/types';
 import { checkValidAddress, getBootTag } from 'helpers/utils';
@@ -86,10 +86,16 @@ export default function PortalManager(props: IProps) {
 
 					response = `${language.portalUpdated}!`;
 				} else {
-					const tags = [getBootTag('Name', data.Name)];
+					const tags = [getBootTag('Name', data.Name), { name: 'Content-Type', value: 'text/html' }];
 					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
 
-					const portalId = await permawebProvider.libs.createZone({ tags: tags }, (status: any) => console.log(status));
+					const portalId = await permawebProvider.libs.createZone(
+						{
+							data: PORTAL_DATA(),
+							tags: tags,
+						},
+						(status: any) => console.log(status)
+					);
 
 					console.log(`Portal ID: ${portalId}`);
 

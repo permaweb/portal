@@ -1,5 +1,5 @@
 {
-	"name": "portals-editor",
+	"name": "portal-editor",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.tsx",
@@ -13,16 +13,16 @@
 		"test:verbose": "npm test -- --verbose",
 		"test:coverage": "CI=true npm test -- --env=jsdom --coverage",
 		"build": "NODE_ENV=production webpack",
-		"deploy:main": "npm run build && permaweb-deploy --ant-process yT06Kv317hYsFbbGbbYntI7Guy6auzSLVv_HeghJmTw",
-		"deploy:staging": "npm run build && permaweb-deploy --ant-process yT06Kv317hYsFbbGbbYntI7Guy6auzSLVv_HeghJmTw --undername staging",
+		"deploy:main": "npm run build && permaweb-deploy --ant-process WAA1OV6k-HqWku3nMoPeVdhwUisz_zM99YG-MuN9yhA",
+		"deploy:staging": "npm run build && permaweb-deploy --ant-process WAA1OV6k-HqWku3nMoPeVdhwUisz_zM99YG-MuN9yhA --undername staging",
 		"prepare": "husky install"
 	},
 	"dependencies": {
-		"@dha-team/arbundles": "^1.0.1",
+		"@dha-team/arbundles": "^1.0.2",
 		"@hello-pangea/dnd": "^17.0.0",
 		"@othent/kms": "^1.0.7",
 		"@permaweb/aoconnect": "^0.0.78",
-		"@permaweb/libs": "0.0.28",
+		"@permaweb/libs": "0.0.29",
 		"@stripe/react-stripe-js": "^3.5.1",
 		"@stripe/stripe-js": "^6.1.0",
 		"arweave": "^1.15.5",
