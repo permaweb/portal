@@ -47,7 +47,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		setLibs(
 			PermawebLibs.init({
-				ao: connect(),
+				ao: connect({ MODE: 'legacy' }),
 				arweave: Arweave.init({}),
 				signer: arProvider.wallet ? createDataItemSigner(arProvider.wallet) : null,
 			})
