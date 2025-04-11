@@ -18,7 +18,6 @@
 		"prepare": "husky install"
 	},
 	"dependencies": {
-		"@arx/sdk": "file:../arx",
 		"@dha-team/arbundles": "^1.0.2",
 		"@hello-pangea/dnd": "^17.0.0",
 		"@othent/kms": "^1.0.7",
