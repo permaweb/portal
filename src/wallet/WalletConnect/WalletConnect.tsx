@@ -168,7 +168,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 								</S.DBalanceHeader>
 								<S.DBalanceBody>
 									<p>
-										{arProvider.turboBalance
+										{arProvider.turboBalance !== null
 											? `${getARAmountFromWinc(arProvider.turboBalance)} ${language.credits}`
 											: `${language.loading}...`}
 									</p>

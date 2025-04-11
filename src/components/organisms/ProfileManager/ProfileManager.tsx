@@ -88,6 +88,8 @@ export default function ProfileManager(props: IProps) {
 					console.log(`Profile ID: ${profileId}`);
 
 					handleUpdate(`${language.profileCreated}!`);
+
+					permawebProvider.handleInitialProfileCache(arProvider.walletAddress, profileId);
 				}
 			} catch (e: any) {
 				setProfileResponse({

@@ -85,6 +85,8 @@ export default function PortalManager(props: IProps) {
 					);
 
 					response = `${language.portalUpdated}!`;
+
+					portalProvider.refreshCurrentPortal();
 				} else {
 					const tags = [getBootTag('Name', data.Name), { name: 'Content-Type', value: 'text/html' }];
 					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
@@ -123,7 +125,6 @@ export default function PortalManager(props: IProps) {
 
 				if (profileUpdateId) console.log(`Profile update: ${profileUpdateId}`);
 
-				portalProvider.refreshCurrentPortal();
 				permawebProvider.refreshProfile();
 
 				if (props.handleUpdate) props.handleUpdate();
