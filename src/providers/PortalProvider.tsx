@@ -5,14 +5,18 @@ import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
 import { PortalManager } from 'components/organisms/PortalManager';
 import { STORAGE } from 'helpers/config';
-import { PortalAssetType, PortalDetailType, PortalHeaderType, PortalPermissionsType } from 'helpers/types';
+import {
+	PortalAssetType,
+	PortalDetailType,
+	PortalHeaderType,
+	PortalPermissionsType,
+	RefreshFieldType,
+} from 'helpers/types';
 import { areAssetsEqual } from 'helpers/utils';
 
 import { useArweaveProvider } from './ArweaveProvider';
 import { useLanguageProvider } from './LanguageProvider';
 import { usePermawebProvider } from './PermawebProvider';
-
-type RefreshFieldType = 'assets';
 
 interface PortalContextState {
 	portals: PortalHeaderType[] | null;
@@ -92,27 +96,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		(async function () {
-			if (currentId) {
-				setUpdating(true);
-				try {
-					const fetchedPortal = await fetchPortal();
-					if (fetchedPortal) {
-						setCurrent(fetchedPortal);
-						cachePortal(currentId, fetchedPortal);
-					} else {
-						setErrorMessage('An error occurred getting this portal.');
-					}
-				} catch (e: any) {
-					console.error(e);
-					setErrorMessage(e.message ?? 'An error occurred getting this portal.');
-				}
-				setUpdating(false);
-			}
-		})();
-	}, [currentId]);
-
-	React.useEffect(() => {
-		(async function () {
 			try {
 				if (currentId) {
 					handleInitPermissionSet(true); // TODO: Permissions
@@ -169,7 +152,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 							changeDetected = true;
 						} else {
 							console.log('No change detected. Retrying...');
-							await new Promise((resolve) => setTimeout(resolve, 1000));
+							await new Promise((resolve) => setTimeout(resolve, 2000));
 							tries++;
 						}
 					} catch (e: any) {

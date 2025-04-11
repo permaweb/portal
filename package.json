@@ -18,11 +18,12 @@
 		"prepare": "husky install"
 	},
 	"dependencies": {
+		"@arx/sdk": "file:../arx",
 		"@dha-team/arbundles": "^1.0.2",
 		"@hello-pangea/dnd": "^17.0.0",
 		"@othent/kms": "^1.0.7",
 		"@permaweb/aoconnect": "^0.0.78",
-		"@permaweb/libs": "0.0.29",
+		"@permaweb/libs": "0.0.33",
 		"@stripe/react-stripe-js": "^3.5.1",
 		"@stripe/stripe-js": "^6.1.0",
 		"arweave": "^1.15.5",

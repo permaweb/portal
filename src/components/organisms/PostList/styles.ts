@@ -246,6 +246,8 @@ export const WrapperEmpty = styled.div<{ type: ViewLayoutType }>`
 	padding: 12.5px 15px;
 	background: ${(props) => props.theme.colors.container.primary.background};
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-top-left-radius: ${(props) => (props.type === 'header' ? '0' : STYLING.dimensions.radius.alt2)};
+	border-top-right-radius: ${(props) => (props.type === 'header' ? '0' : STYLING.dimensions.radius.alt2)};
 	border-bottom-left-radius: ${STYLING.dimensions.radius.alt2};
 	border-bottom-right-radius: ${STYLING.dimensions.radius.alt2};
 	margin: ${(props) => (props.type === 'header' ? '0' : '20px 0 0 0')};

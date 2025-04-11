@@ -74,6 +74,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const [mediaLoading, setMediaLoading] = React.useState<boolean>(false);
 	const [showUploadConfirmation, setShowUploadConfirmation] = React.useState<boolean>(false);
 	const [uploadCost, setUploadCost] = React.useState<number | null>(null);
+	const [uploadDisabled, setUploadDisabled] = React.useState<boolean>(false);
 	const [uploadResponse, setUploadResponse] = React.useState<NotificationType | null>(null);
 
 	React.useEffect(() => {
@@ -102,6 +103,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 
 						if (uploadInWinc > arProvider.turboBalance) {
 							setUploadResponse({ status: 'warning', message: 'Insufficient balance for upload' });
+							setUploadDisabled(true);
 						}
 					} catch (e: any) {
 						setUploadResponse({ status: 'warning', message: e.message ?? 'Error uploading media' });
@@ -159,6 +161,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		setMediaData((prevContent) => ({ ...prevContent, file: null }));
 		setUploadCost(null);
 		setShowUploadConfirmation(false);
+		setUploadDisabled(false);
 		if (inputRef.current) {
 			inputRef.current.value = '';
 		}
@@ -259,7 +262,13 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 								handlePress={() => handleClear(language.uploadCancelled)}
 								width={140}
 							/>
-							<Button type={'alt1'} label={language.upload} handlePress={handleUpload} width={140} />
+							<Button
+								type={'alt1'}
+								label={language.upload}
+								handlePress={handleUpload}
+								disabled={uploadDisabled}
+								width={140}
+							/>
 						</S.InputActionsFlex>
 					</S.InputActions>
 				</>

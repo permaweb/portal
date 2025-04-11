@@ -246,3 +246,5 @@ export type MediaConfigType = {
 };
 
 export type DesignPanelType = 'themes' | 'logo';
+
+export type RefreshFieldType = 'assets';

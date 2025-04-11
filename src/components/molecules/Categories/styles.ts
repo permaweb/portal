@@ -59,7 +59,7 @@ export const ParentCategoryDropdown = styled.div`
 	z-index: 2;
 	top: 52.5px;
 	background: ${(props) => props.theme.colors.container.alt1.background} !important;
-	border-radius: ${STYLING.dimensions.radius.alt2} !important;
+	border-radius: ${STYLING.dimensions.radius.alt4} !important;
 `;
 
 export const ParentCategoryOptions = styled.div``;
@@ -73,7 +73,7 @@ export const ParentCategoryOption = styled.button<{ level: number }>`
 	cursor: pointer;
 	pointer-events: auto;
 	background: transparent;
-	border-radius: ${STYLING.dimensions.radius.alt2};
+	border-radius: ${STYLING.dimensions.radius.alt4};
 	transition: all 100ms;
 	padding: ${(props) => `0 10px 0 ${(props.level * 10).toString()}px`} !important;
 	span {

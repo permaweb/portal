@@ -15,7 +15,7 @@ export default function Design() {
 				<S.DesignWrapper>
 					<Themes />
 				</S.DesignWrapper>
-				<S.PreviewWrapper className={'border-wrapper-primary scroll-wrapper'}></S.PreviewWrapper>
+				{/* <S.PreviewWrapper className={'border-wrapper-primary scroll-wrapper'}></S.PreviewWrapper> */}
 			</S.BodyWrapper>
 		</S.Wrapper>
 	);

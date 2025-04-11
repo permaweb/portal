@@ -241,6 +241,7 @@ export const language = {
 		viewInfo: `View info`,
 		viewProfile: `View profile`,
 		view: `View`,
+		waitingForProfile: `Waiting for your profile`,
 		welcome: `Welcome`,
 		yourUploadBalance: `Your upload balance`,
 	},
