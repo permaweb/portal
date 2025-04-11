@@ -12,9 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
-          node-version: 22.x
+          node-version: '22.x'
+      - name: Clean lockfile (if needed)
+        run: rm -rf package-lock.json node_modules
       - run: npm install
       - run: npm run deploy:main
         env:
@@ -25,9 +27,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
-          node-version: 22.x
+          node-version: '22.x'
+      - name: Clean lockfile (if needed)
+        run: rm -rf package-lock.json node_modules
       - run: npm install
       - run: npm run deploy:staging
         env:
