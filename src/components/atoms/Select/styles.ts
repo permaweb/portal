@@ -4,6 +4,7 @@ import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
 	height: fit-content;
+	margin: 10px 0;
 	width: 100%;
 	position: relative;
 	width: 315px;
@@ -15,8 +16,8 @@ export const Label = styled.div<{ disabled: boolean }>`
 	span {
 		color: ${(props) =>
 			props.disabled ? props.theme.colors.button.primary.disabled.color : props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
 		line-height: 1.5;
 	}
 `;

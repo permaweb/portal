@@ -298,3 +298,14 @@ export const PORTAL_DATA = () => `
 </body>
 </html>
 `;
+
+export const PORTAL_ROLES = {
+	ADMIN: 'Admin',
+	CONTRIBUTOR: 'Contributor',
+	MODERATOR: 'Moderator',
+	GUEST_CONTRIBUTOR: 'GuestContributor',
+};
+
+export const getPortalRoleOptions = () => {
+	return Object.values(PORTAL_ROLES).map((role) => ({ id: role, label: role }));
+};

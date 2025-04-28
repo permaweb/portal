@@ -10,6 +10,8 @@ import {
 	PortalDetailType,
 	PortalHeaderType,
 	PortalPermissionsType,
+	PortalRolesType,
+	PortalUserRoleType,
 	RefreshFieldType,
 } from 'helpers/types';
 import { areAssetsEqual } from 'helpers/utils';
@@ -25,6 +27,8 @@ interface PortalContextState {
 	showPortalManager: boolean;
 	setShowPortalManager: (toggle: boolean, useNew?: boolean) => void;
 	refreshCurrentPortal: (field?: RefreshFieldType) => void;
+	fetchPortalUserProfile: any;
+	usersByPortalId: any;
 	updating: boolean;
 }
 
@@ -35,6 +39,8 @@ const DEFAULT_CONTEXT = {
 	showPortalManager: false,
 	setShowPortalManager(_toggle: boolean) {},
 	refreshCurrentPortal() {},
+	fetchPortalUserProfile(_thing: PortalRolesType) {},
+	usersByPortalId: {},
 	updating: false,
 };
 
@@ -53,6 +59,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
+	const [usersByPortalId, setUsersByPortalId] = React.useState<{}>({});
 
 	const [currentId, setCurrentId] = React.useState<string | null>(null);
 	const [current, setCurrent] = React.useState<PortalDetailType | null>(null);
@@ -97,10 +104,12 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		(async function () {
 			try {
+				console.log('currentId', currentId, permawebProvider.profile);
 				if (currentId) {
 					handleInitPermissionSet(true); // TODO: Permissions
 					const cachedPortal = getCachedPortal(currentId);
-					if (cachedPortal) {
+					if (cachedPortal && false) {
+						console.log('cached');
 						setCurrent(cachedPortal);
 					} else {
 						const fetchedPortal = await fetchPortal();
@@ -169,10 +178,35 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [refreshCurrentTrigger, refreshField]);
 
+	function fetchPortalUserProfile(userRoleEntry: PortalRolesType) {
+		console.log('userRoleEntry', userRoleEntry);
+		permawebProvider
+			.fetchProfileById(userRoleEntry.address)
+			.then((profile) => {
+				console.log('profile', profile);
+				if (profile && profile.id) {
+					console.log('before', usersByPortalId, profile);
+					setUsersByPortalId((prevState) => ({ ...prevState, [profile.id]: profile }));
+					console.log('after', usersByPortalId);
+					return;
+				}
+			})
+			.catch((e) => {
+				console.log('fetch error', e);
+				setUsersByPortalId((prevState) => ({ ...prevState, [userRoleEntry.address]: null }));
+			});
+	}
+
 	const fetchPortal = async () => {
+		console.log('fetch', fetch);
 		if (currentId) {
 			try {
 				const portalData = await permawebProvider.libs.getZone(currentId);
+				console.log('portalData', portalData);
+				const usersArr: PortalRolesType[] = Object.entries(portalData?.roles).map(([k, v]) => {
+					console.log('k: ', k, ' v: ', v);
+					return { address: k, roles: v as PortalUserRoleType[] };
+				});
 
 				let portal: PortalDetailType = {
 					id: currentId,
@@ -184,7 +218,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					links: portalData?.store?.links ?? [],
 					uploads: portalData?.store?.uploads ?? [],
 					themes: portalData?.store?.themes ?? [],
-					users: [], // TODO
+					users: usersArr || [], // TODO all of the users with roles in the portal process roles table: populate it
 					domains: [], // TODO
 				};
 
@@ -240,6 +274,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				showPortalManager,
 				setShowPortalManager: handleShowPortalManager,
 				refreshCurrentPortal: (field?: RefreshFieldType) => refreshCurrentPortal(field),
+				fetchPortalUserProfile: (userRole: PortalRolesType) => fetchPortalUserProfile(userRole),
+				usersByPortalId: usersByPortalId,
 				updating,
 			}}
 		>

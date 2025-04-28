@@ -1,9 +1,12 @@
 import React from 'react';
 
 import { Avatar } from 'components/atoms/Avatar';
-import { PortalUserType } from 'helpers/types';
+import { PortalRolesType, PortalUserType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
+
+import { User } from '../User';
 
 import * as S from './styles';
 
@@ -30,22 +33,8 @@ export default function UserList() {
 
 		return portalProvider.current?.id ? (
 			<S.Wrapper>
-				{portalProvider.current.users.map((user: PortalUserType) => {
-					return (
-						<S.UserWrapper key={user.username} className={'fade-in'}>
-							<S.UserHeader>
-								<Avatar owner={null} dimensions={{ wrapper: 23.5, icon: 15 }} callback={null} />
-								<p>{user.displayName}</p>
-							</S.UserHeader>
-							<S.UserDetail>
-								<S.UserActions>
-									<S.UserRole role={user.role}>
-										<span>{user.role}</span>
-									</S.UserRole>
-								</S.UserActions>
-							</S.UserDetail>
-						</S.UserWrapper>
-					);
+				{portalProvider.current.users.map((user: PortalRolesType) => {
+					return <User user={user} key={user.address} />;
 				})}
 			</S.Wrapper>
 		) : null;
