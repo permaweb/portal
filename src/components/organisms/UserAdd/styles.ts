@@ -1,19 +1,17 @@
 import styled from 'styled-components';
 
-export const FormWrapper = styled.div`
+export const Wrapper = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
-	gap: 25px;
-	padding: 25px;
-	align-items: baseline;
-	// border: 1px solid ${(props) => props.theme.colors.border.primary} !important;
+	gap: 15px;
+	padding: 0 20px;
 `;
 
-export const Left = styled.div`
-	width: 50%;
-`;
-
-export const Right = styled.div`
-	width: 50%;
+export const ActionsWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	margin: 10px 0 0 0;
 `;
