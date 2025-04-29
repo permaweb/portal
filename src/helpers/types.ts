@@ -8,7 +8,7 @@ export type PortalDetailType = {
 	categories?: PortalCategoryType[];
 	topics?: PortalTopicType[];
 	links?: PortalLinkType[];
-	users?: PortalUserType[];
+	users?: PortalRolesType[];
 	domains?: string[];
 	uploads?: PortalUploadType[];
 	themes?: PortalThemeType[];
@@ -51,11 +51,16 @@ export type PortalAssetPostType = {
 	lastUpdate: number | null;
 };
 
-// TODO
+// We get the list and each user is filled out with a profile lookup.
 export type PortalUserType = {
-	username: string;
-	displayName: string;
-	role: PortalUserRoleType;
+	username?: string;
+	avatar?: string;
+	displayName?: string;
+};
+
+export type PortalRolesType = {
+	address: string;
+	roles: PortalUserRoleType[];
 };
 
 export type PortalThemeType = {
@@ -93,7 +98,7 @@ export type PortalUploadType = {
 
 export type PortalUploadOptionType = 'image' | 'video';
 
-export type PortalUserRoleType = 'admin' | 'contributor';
+export type PortalUserRoleType = 'Admin' | 'Contributor' | 'Guest_Contributor' | 'Moderator';
 
 export type PortalCategoryType = {
 	id: string;

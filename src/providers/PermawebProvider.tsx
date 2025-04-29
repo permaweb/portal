@@ -19,6 +19,7 @@ interface PermawebContextState {
 	setShowProfileManager: (toggle: boolean) => void;
 	handleInitialProfileCache: (address: string, profileId: string) => void;
 	refreshProfile: () => void;
+	fetchProfileById: (id: string) => any;
 }
 
 const DEFAULT_CONTEXT = {
@@ -28,6 +29,7 @@ const DEFAULT_CONTEXT = {
 	setShowProfileManager(_toggle: boolean) {},
 	handleInitialProfileCache(_address: string, _profileId: string) {},
 	refreshProfile() {},
+	fetchProfileById() {},
 };
 
 const PermawebContext = React.createContext<PermawebContextState>(DEFAULT_CONTEXT);
@@ -73,7 +75,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 					setProfile(cachedProfile);
 				}
 
-				setProfile(await resolveProfile());
+				setProfile(await resolveProfile(arProvider.walletAddress));
 			}
 		})();
 	}, [arProvider.walletAddress]);
@@ -111,7 +113,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 						try {
 							const existingProfile = profile;
 							// const newProfile = await libs.getProfileByWalletAddress(arProvider.walletAddress);
-							const newProfile = await resolveProfile();
+							const newProfile = await resolveProfile(arProvider.walletAddress);
 
 							console.log(newProfile);
 
@@ -139,24 +141,40 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [refreshProfileTrigger]);
 
-	async function resolveProfile() {
+	async function resolveProfile(address: string) {
+		try {
+			let fetchedProfile: any;
+			const cachedProfile = getCachedProfile(address);
+			if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
+			else fetchedProfile = await libs.getProfileByWalletAddress(address);
+			let profileToUse = { ...fetchedProfile };
+
+			if (!fetchedProfile?.id && cachedProfile) profileToUse = cachedProfile;
+			cacheProfile(address, profileToUse);
+
+			return profileToUse;
+		} catch (e: any) {
+			console.error('fetchError', e);
+		}
+	}
+
+	async function fetchProfileForId(profileId: string) {
 		try {
 			let fetchedProfile: any;
 
-			const cachedProfile = getCachedProfile(arProvider.walletAddress);
-
+			const cachedProfile = getCachedProfile(profileId);
 			if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
-			else fetchedProfile = await libs.getProfileByWalletAddress(arProvider.walletAddress);
+			else fetchedProfile = await libs.getProfileById(profileId);
 
 			let profileToUse = { ...fetchedProfile };
 
 			if (!fetchedProfile?.id && cachedProfile) profileToUse = cachedProfile;
 
-			cacheProfile(arProvider.walletAddress, profileToUse);
+			cacheProfile(profileId, profileToUse);
 
 			return profileToUse;
 		} catch (e: any) {
-			console.error(e);
+			console.error('fetchError', e);
 		}
 	}
 
@@ -184,6 +202,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				handleInitialProfileCache: (address: string, profileId: string) =>
 					handleInitialProfileCache(address, profileId),
 				refreshProfile: () => setRefreshProfileTrigger((prev) => !prev),
+				fetchProfileById: fetchProfileForId,
 			}}
 		>
 			{props.children}
