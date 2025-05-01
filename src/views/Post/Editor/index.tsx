@@ -124,11 +124,23 @@ export default function Editor() {
 					const indexRecipients = [portalProvider.current.id];
 
 					for (const recipient of indexRecipients) {
+						// TODO: If portal owner use this / or add role to zone
+						// const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
+						// 	processId: recipient,
+						// 	wallet: arProvider.wallet,
+						// 	action: 'Add-Index-Id',
+						// 	tags: [{ name: 'IndexId', value: assetId }],
+						// });
+
 						const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
-							processId: recipient,
+							processId: permawebProvider.profile.id,
 							wallet: arProvider.wallet,
-							action: 'Add-Index-Id',
-							tags: [{ name: 'IndexId', value: assetId }],
+							action: 'Run-Action',
+							tags: [
+								{ name: 'ForwardTo', value: recipient },
+								{ name: 'ForwardAction', value: 'Add-Index-Id' },
+								{ name: 'IndexId', value: assetId },
+							],
 						});
 
 						console.log(`Zone index update: ${zoneIndexUpdateId}`);

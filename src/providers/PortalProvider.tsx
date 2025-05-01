@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useResolvedPath } from 'react-router-dom';
 
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
@@ -22,6 +22,7 @@ import { usePermawebProvider } from './PermawebProvider';
 
 interface PortalContextState {
 	portals: PortalHeaderType[] | null;
+	invites: PortalHeaderType[] | null;
 	current: PortalDetailType | null;
 	permissions: PortalPermissionsType | null;
 	showPortalManager: boolean;
@@ -34,6 +35,7 @@ interface PortalContextState {
 
 const DEFAULT_CONTEXT = {
 	portals: null,
+	invites: null,
 	current: null,
 	permissions: null,
 	showPortalManager: false,
@@ -59,6 +61,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
+	const [invites, setInvites] = React.useState<PortalHeaderType[] | null>(null);
 	const [usersByPortalId, setUsersByPortalId] = React.useState<{}>({});
 
 	const [currentId, setCurrentId] = React.useState<string | null>(null);
@@ -82,6 +85,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		if (permawebProvider.profile) {
 			setPortals(permawebProvider.profile.portals ?? []);
+			setInvites(permawebProvider.profile.invites ?? []);
 		} else {
 			setPermissions(null);
 		}
@@ -104,12 +108,10 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		(async function () {
 			try {
-				console.log('currentId', currentId, permawebProvider.profile);
 				if (currentId) {
 					handleInitPermissionSet(true); // TODO: Permissions
 					const cachedPortal = getCachedPortal(currentId);
-					if (cachedPortal && false) {
-						console.log('cached');
+					if (cachedPortal) {
 						setCurrent(cachedPortal);
 					} else {
 						const fetchedPortal = await fetchPortal();
@@ -178,33 +180,27 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [refreshCurrentTrigger, refreshField]);
 
-	function fetchPortalUserProfile(userRoleEntry: PortalRolesType) {
-		console.log('userRoleEntry', userRoleEntry);
-		permawebProvider
-			.fetchProfileById(userRoleEntry.address)
-			.then((profile) => {
-				console.log('profile', profile);
-				if (profile && profile.id) {
-					console.log('before', usersByPortalId, profile);
-					setUsersByPortalId((prevState) => ({ ...prevState, [profile.id]: profile }));
-					console.log('after', usersByPortalId);
-					return;
-				}
-			})
-			.catch((e) => {
-				console.log('fetch error', e);
-				setUsersByPortalId((prevState) => ({ ...prevState, [userRoleEntry.address]: null }));
-			});
+	async function fetchPortalUserProfile(userRoleEntry: PortalRolesType) {
+		try {
+			await new Promise((r) => setTimeout(r, 500));
+			const profile: any = await permawebProvider.fetchProfileById(userRoleEntry.address);
+			if (profile?.id) {
+				setUsersByPortalId((prev) => ({
+					...prev,
+					[profile.id]: profile,
+				}));
+			}
+		} catch (e: any) {
+			console.error(e);
+		}
 	}
 
 	const fetchPortal = async () => {
-		console.log('fetch', fetch);
 		if (currentId) {
 			try {
 				const portalData = await permawebProvider.libs.getZone(currentId);
-				console.log('portalData', portalData);
-				const usersArr: PortalRolesType[] = Object.entries(portalData?.roles).map(([k, v]) => {
-					console.log('k: ', k, ' v: ', v);
+
+				const users: PortalRolesType[] = Object.entries(portalData?.roles).map(([k, v]) => {
 					return { address: k, roles: v as PortalUserRoleType[] };
 				});
 
@@ -218,7 +214,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					links: portalData?.store?.links ?? [],
 					uploads: portalData?.store?.uploads ?? [],
 					themes: portalData?.store?.themes ?? [],
-					users: usersArr || [], // TODO all of the users with roles in the portal process roles table: populate it
+					users: users || [],
 					domains: [], // TODO
 				};
 
@@ -269,6 +265,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		<PortalContext.Provider
 			value={{
 				portals,
+				invites,
 				current,
 				permissions,
 				showPortalManager,

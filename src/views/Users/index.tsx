@@ -33,8 +33,8 @@ export default function Users() {
 					]}
 				/>
 
-				<S.BodyWrapper className={'border-wrapper-primary'}>
-					<UserList />
+				<S.BodyWrapper>
+					<UserList type={'detail'} />
 				</S.BodyWrapper>
 			</S.Wrapper>
 			<Panel
@@ -44,7 +44,7 @@ export default function Users() {
 				handleClose={() => setShowAddUser((prev) => !prev)}
 				closeHandlerDisabled
 			>
-				<UserAdd />
+				<UserAdd handleClose={() => setShowAddUser(false)} />
 			</Panel>
 		</>
 	);

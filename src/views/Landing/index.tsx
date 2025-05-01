@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
@@ -16,11 +16,37 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import * as S from './styles';
 
 export default function Landing() {
+	const navigate = useNavigate();
+
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+
+	const [loading, setLoading] = React.useState<boolean>(false);
+
+	async function joinPortal(portalId: string) {
+		if (portalId && permawebProvider.profile?.id) {
+			setLoading(true);
+			try {
+				const profileUpdateId = await permawebProvider.libs.joinZone(
+					{
+						zoneToJoinId: portalId,
+						path: 'Portals',
+					},
+					permawebProvider.profile.id
+				);
+
+				console.log(`Profile update: ${profileUpdateId}`);
+				permawebProvider.refreshProfile();
+				navigate(`${URLS.base}${portalId}`);
+			} catch (e: any) {
+				console.error(e);
+			}
+			setLoading(false);
+		}
+	}
 
 	const connection = React.useMemo(() => {
 		let header: string | null = null;
@@ -131,17 +157,48 @@ export default function Landing() {
 		);
 	}, [arProvider.walletAddress, permawebProvider.profile, portalProvider.portals]);
 
+	const invites = React.useMemo(() => {
+		let content: React.ReactNode | null;
+		if (portalProvider.invites && portalProvider.invites.length > 0) {
+			content = (
+				<>
+					<p>{'Join'}</p>
+					<S.PListWrapper className={'scroll-wrapper'}>
+						{portalProvider.invites.map((portal: any) => {
+							return (
+								<button key={portal.id} onClick={() => joinPortal(portal.id)}>
+									{portal.logo ? (
+										<img src={getTxEndpoint(portal.logo)} alt={'Portal Logo'} />
+									) : (
+										<ReactSVG src={ASSETS.portals} />
+									)}
+									{portal.name}
+								</button>
+							);
+						})}
+					</S.PListWrapper>
+				</>
+			);
+		}
+
+		return <S.PortalsWrapper>{content}</S.PortalsWrapper>;
+	}, [portalProvider.invites]);
+
 	return (
-		<S.Wrapper>
-			<S.ContentWrapper className={'fade-in'}>
-				<S.HeaderWrapper>
-					<h4>{`[${language.app}]`}</h4>
-				</S.HeaderWrapper>
-				<S.BodyWrapper>
-					<S.Section>{connection}</S.Section>
-					<S.Section>{portals}</S.Section>
-				</S.BodyWrapper>
-			</S.ContentWrapper>
-		</S.Wrapper>
+		<>
+			<S.Wrapper>
+				<S.ContentWrapper className={'fade-in'}>
+					<S.HeaderWrapper>
+						<h4>{`[${language.app}]`}</h4>
+					</S.HeaderWrapper>
+					<S.BodyWrapper>
+						<S.Section>{connection}</S.Section>
+						<S.Section>{portals}</S.Section>
+						<S.Section>{invites}</S.Section>
+					</S.BodyWrapper>
+				</S.ContentWrapper>
+			</S.Wrapper>
+			{loading && <Loader message={`${language.loading}...`} />}
+		</>
 	);
 }

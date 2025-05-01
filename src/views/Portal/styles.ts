@@ -66,8 +66,4 @@ export const DomainSection = styled(Section)`
 	}
 `;
 
-export const UsersSection = styled(Section)`
-	> :first-child {
-		padding: 12.5px 15px 0 15px;
-	}
-`;
+export const UsersSection = styled(Section)``;

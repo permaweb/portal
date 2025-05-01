@@ -229,7 +229,7 @@ export const SelectorPreview = styled.div<{ background: string }>`
 	height: 220px;
 	min-width: 190px;
 	background: ${(props) => props.background};
-	border-right: 1px solid ${(props) => props.theme.colors.border.primary};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-top-left-radius: ${STYLING.dimensions.radius.primary};
 	border-bottom-left-radius: ${STYLING.dimensions.radius.primary};
 `;

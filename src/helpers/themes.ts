@@ -36,8 +36,8 @@ export const lightTheme = {
 	link1: '#0074E4',
 	link2: '#0069CC',
 	roles: {
-		primary: '#FF8385',
-		alt1: '#46B0B7',
+		primary: '#F38284',
+		alt1: '#59b3b9',
 		alt2: '#8886D9',
 	},
 };
@@ -49,7 +49,7 @@ export const lightThemeHighContrast = {
 	caution1: '#EECA00',
 	negative1: '#F16A82',
 	negative2: '#EE4463',
-	neutral1: '#FFFFFF',
+	neutral1: '#FEFEFE',
 	neutral2: '#F0F0F0',
 	neutral3: '#E0E0E0',
 	neutral4: '#BDBDBD',
@@ -78,8 +78,8 @@ export const lightThemeHighContrast = {
 	link1: '#0074E4',
 	link2: '#0069CC',
 	roles: {
-		primary: '#FF8385',
-		alt1: '#46B0B7',
+		primary: '#f38284',
+		alt1: '#59B3B9',
 		alt2: '#8886D9',
 	},
 };
@@ -120,8 +120,8 @@ export const lightThemeAlt1 = {
 	link1: '#0074E4',
 	link2: '#0069CC',
 	roles: {
-		primary: '#FF8385',
-		alt1: '#46B0B7',
+		primary: '#f38284',
+		alt1: '#59b3b9',
 		alt2: '#8886D9',
 	},
 };
@@ -162,8 +162,8 @@ export const lightThemeAlt2 = {
 	link1: '#0C84CB',
 	link2: '#2274A5',
 	roles: {
-		primary: '#FF8385',
-		alt1: '#46B0B7',
+		primary: '#f38284',
+		alt1: '#59b3b9',
 		alt2: '#8886D9',
 	},
 };
@@ -204,8 +204,8 @@ export const darkTheme = {
 	link1: '#4DA8FF',
 	link2: '#0074E4',
 	roles: {
-		primary: '#FF8385',
-		alt1: '#46B0B7',
+		primary: '#f38284',
+		alt1: '#59b3b9',
 		alt2: '#8886D9',
 	},
 };
@@ -246,8 +246,8 @@ export const darkThemeHighContrast = {
 	link1: '#009AF7',
 	link2: '#0074E4',
 	roles: {
-		primary: '#FF8385',
-		alt1: '#46B0B7',
+		primary: '#f38284',
+		alt1: '#59b3b9',
 		alt2: '#8886D9',
 	},
 };
@@ -288,8 +288,8 @@ export const darkThemeAlt1 = {
 	link1: '#4DA8FF',
 	link2: '#0074E4',
 	roles: {
-		primary: '#FF8385',
-		alt1: '#46B0B7',
+		primary: '#f38284',
+		alt1: '#59b3b9',
 		alt2: '#8886D9',
 	},
 };
@@ -330,8 +330,8 @@ export const darkThemeAlt2 = {
 	link1: '#00B1CC',
 	link2: '#0091A8',
 	roles: {
-		primary: '#FF8385',
-		alt1: '#46B0B7',
+		primary: '#f38284',
+		alt1: '#59b3b9',
 		alt2: '#8886D9',
 	},
 };

@@ -15,7 +15,7 @@ import { Select } from '../../atoms/Select';
 
 import * as S from './styles';
 
-function UserAdd() {
+function UserAdd(props: { handleClose: () => void }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
@@ -38,7 +38,7 @@ function UserAdd() {
 				const profileLookup = await permawebProvider.libs.getProfileByWalletAddress(walletAddress);
 
 				if (!profileLookup?.id) {
-					setResponse({ status: 'warning', message: 'No associated profile found' });
+					setResponse({ status: 'warning', message: language.noProfileFound });
 					setLoading(false);
 					return;
 				}
@@ -53,10 +53,11 @@ function UserAdd() {
 					arProvider.wallet
 				);
 
-				console.log(`Portal update: ${portalUpdateId}`);
+				console.log(`Role update: ${portalUpdateId}`);
 
-				setResponse({ status: 'success', message: 'User added!' });
+				setResponse({ status: 'success', message: `${language.userAdded}!` });
 				portalProvider.refreshCurrentPortal();
+				props.handleClose();
 			} catch (e: any) {
 				console.error(e);
 			}

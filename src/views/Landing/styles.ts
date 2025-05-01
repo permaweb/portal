@@ -107,7 +107,8 @@ export const PListWrapper = styled.div`
 	gap: 15px;
 	margin: 0 0 5px 0;
 
-	a {
+	a,
+	button {
 		min-height: 47.5px;
 		height: 47.5px;
 		display: flex;

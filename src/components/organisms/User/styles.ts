@@ -7,16 +7,20 @@ export const Wrapper = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
-	padding: 5px 0;
 `;
 
 export const UserWrapper = styled.div`
 	display: flex;
-	padding: 10.5px 15px;
+	padding: 15px;
 	justify-content: space-between;
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 20px;
+	transition: all 150ms;
+
+	&:hover {
+		background: ${(props) => props.theme.colors.container.alt1.background};
+	}
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		flex-direction: column;
@@ -63,9 +67,9 @@ export const UserActions = styled.div`
 
 function getRoleBackground(theme: DefaultTheme, role: PortalUserRoleType) {
 	switch (role) {
-		case 'admin':
+		case 'Admin':
 			return theme.colors.roles.primary;
-		case 'contributor':
+		case 'Contributor':
 			return theme.colors.roles.alt1;
 		default:
 			return theme.colors.roles.alt2;
@@ -87,16 +91,3 @@ export const UserRole = styled.div<{ role: PortalUserRoleType }>`
 		text-transform: uppercase;
 	}
 `;
-
-export const WrapperEmpty = styled.div`
-	padding: 12.5px 15px;
-	p {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
-		font-family: ${(props) => props.theme.typography.family.primary} !important;
-		text-transform: uppercase;
-	}
-`;
-
-export const LoadingWrapper = styled(WrapperEmpty)``;
