@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Arweave from 'arweave';
-import PermawebLibs, { ProfileType } from '@permaweb/libs';
+import Permaweb, { Types } from '@permaweb/libs';
 import { connect, createDataItemSigner } from '@permaweb/aoconnect';
 
 import { Loader } from 'components/atoms/Loader';
@@ -14,12 +14,11 @@ import { useLanguageProvider } from './LanguageProvider';
 
 interface PermawebContextState {
 	libs: any;
-	profile: ProfileType;
+	profile: Types.ProfileType;
 	showProfileManager: boolean;
 	setShowProfileManager: (toggle: boolean) => void;
 	handleInitialProfileCache: (address: string, profileId: string) => void;
 	refreshProfile: () => void;
-	fetchProfileById: (id: string) => any;
 }
 
 const DEFAULT_CONTEXT = {
@@ -29,7 +28,6 @@ const DEFAULT_CONTEXT = {
 	setShowProfileManager(_toggle: boolean) {},
 	handleInitialProfileCache(_address: string, _profileId: string) {},
 	refreshProfile() {},
-	fetchProfileById() {},
 };
 
 const PermawebContext = React.createContext<PermawebContextState>(DEFAULT_CONTEXT);
@@ -45,14 +43,14 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [libs, setLibs] = React.useState<any>(null);
-	const [profile, setProfile] = React.useState<ProfileType | null>(null);
+	const [profile, setProfile] = React.useState<Types.ProfileType | null>(null);
 	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 	const [refreshProfileTrigger, setRefreshProfileTrigger] = React.useState<boolean>(false);
 	const [profilePending, setProfilePending] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
 		setLibs(
-			PermawebLibs.init({
+			Permaweb.init({
 				ao: connect({ MODE: 'legacy' }),
 				arweave: Arweave.init({}),
 				signer: arProvider.wallet ? createDataItemSigner(arProvider.wallet) : null,
@@ -112,10 +110,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 					while (!changeDetected && tries < maxTries) {
 						try {
 							const existingProfile = profile;
-							// const newProfile = await libs.getProfileByWalletAddress(arProvider.walletAddress);
 							const newProfile = await resolveProfile(arProvider.walletAddress);
-
-							console.log(newProfile);
 
 							if (JSON.stringify(existingProfile) !== JSON.stringify(newProfile)) {
 								setProfile(newProfile);
@@ -158,33 +153,13 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		}
 	}
 
-	async function fetchProfileForId(profileId: string) {
-		try {
-			let fetchedProfile: any;
-
-			const cachedProfile = getCachedProfile(profileId);
-			if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
-			else fetchedProfile = await libs.getProfileById(profileId);
-
-			let profileToUse = { ...fetchedProfile };
-
-			if (!fetchedProfile?.id && cachedProfile) profileToUse = cachedProfile;
-
-			cacheProfile(profileId, profileToUse);
-
-			return profileToUse;
-		} catch (e: any) {
-			console.error('fetchError', e);
-		}
-	}
-
 	function getCachedProfile(address: string) {
-		const cached = localStorage.getItem(STORAGE.profile(address));
+		const cached = localStorage.getItem(STORAGE.profileByWallet(address));
 		return cached ? JSON.parse(cached) : null;
 	}
 
 	function cacheProfile(address: string, profileData: any) {
-		localStorage.setItem(STORAGE.profile(address), JSON.stringify(profileData));
+		localStorage.setItem(STORAGE.profileByWallet(address), JSON.stringify(profileData));
 	}
 
 	function handleInitialProfileCache(address: string, profileId: string) {
@@ -202,7 +177,6 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				handleInitialProfileCache: (address: string, profileId: string) =>
 					handleInitialProfileCache(address, profileId),
 				refreshProfile: () => setRefreshProfileTrigger((prev) => !prev),
-				fetchProfileById: fetchProfileForId,
 			}}
 		>
 			{props.children}

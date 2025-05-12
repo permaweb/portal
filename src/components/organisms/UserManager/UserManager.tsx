@@ -15,7 +15,8 @@ import { Select } from '../../atoms/Select';
 
 import * as S from './styles';
 
-function UserAdd(props: { handleClose: () => void }) {
+// TODO: User prop
+export default function UserManager(props: { user?: any; handleClose: () => void }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
@@ -31,31 +32,43 @@ function UserAdd(props: { handleClose: () => void }) {
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
 
+	React.useEffect(() => {
+		if (props.user) {
+			if (props.user.owner && checkValidAddress(props.user.owner)) setWalletAddress(props.user.owner);
+			if (props.user.roles) {
+				const activeRole = props.user.roles[0];
+				setRole(roleOptions.find((role) => role.id === activeRole));
+			}
+		}
+	}, [props.user]);
+
 	async function handleSubmit() {
 		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
 			setLoading(true);
 			try {
-				const profileLookup = await permawebProvider.libs.getProfileByWalletAddress(walletAddress);
+				let profile = null;
 
-				if (!profileLookup?.id) {
+				if (props.user) profile = { id: props.user.profileId };
+				else profile = await permawebProvider.libs.getProfileByWalletAddress(walletAddress);
+
+				if (!profile?.id) {
 					setResponse({ status: 'warning', message: language.noProfileFound });
 					setLoading(false);
 					return;
 				}
 
-				console.log(profileLookup);
-				const portalUpdateId = await permawebProvider.libs.setZoneRoles(
-					{
-						granteeId: profileLookup.id,
-						roles: [role.id],
-					},
+				const rolesUpdate = await permawebProvider.libs.setZoneRoles(
+					[
+						{ granteeId: walletAddress, roles: [role.id], type: 'wallet', sendInvite: false },
+						{ granteeId: profile.id, roles: [role.id], type: 'process', sendInvite: !props.user },
+					],
 					portalProvider.current.id,
 					arProvider.wallet
 				);
 
-				console.log(`Role update: ${portalUpdateId}`);
+				console.log(`Roles update: ${rolesUpdate}`);
 
-				setResponse({ status: 'success', message: `${language.userAdded}!` });
+				setResponse({ status: 'success', message: `${props.user ? language.userUpdated : language.userAdded}!` });
 				portalProvider.refreshCurrentPortal();
 				props.handleClose();
 			} catch (e: any) {
@@ -75,7 +88,7 @@ function UserAdd(props: { handleClose: () => void }) {
 						setWalletAddress(e.target.value);
 					}}
 					invalid={{ status: walletAddress ? !checkValidAddress(walletAddress) : false, message: null }}
-					disabled={loading}
+					disabled={loading || props.user?.owner !== null}
 					sm
 					hideErrorMessage
 				/>
@@ -89,11 +102,11 @@ function UserAdd(props: { handleClose: () => void }) {
 				<S.ActionsWrapper>
 					<Button
 						type={'primary'}
-						label={language.add}
+						label={props.user ? language.save : language.add}
 						handlePress={handleSubmit}
 						disabled={loading || !walletAddress || !checkValidAddress(walletAddress)}
 						loading={loading}
-						icon={ASSETS.add}
+						icon={props.user ? null : ASSETS.add}
 						iconLeftAlign
 					/>
 				</S.ActionsWrapper>
@@ -104,5 +117,3 @@ function UserAdd(props: { handleClose: () => void }) {
 		</>
 	);
 }
-
-export default UserAdd;

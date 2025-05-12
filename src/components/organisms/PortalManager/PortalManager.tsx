@@ -101,16 +101,21 @@ export default function PortalManager(props: IProps) {
 
 					console.log(`Portal ID: ${portalId}`);
 
-					const roleUpdateId = await permawebProvider.libs.setZoneRoles(
-						{
-							granteeId: permawebProvider.profile.id,
-							roles: [PORTAL_ROLES.ADMIN],
-						},
+					const rolesUpdate = await permawebProvider.libs.setZoneRoles(
+						[
+							{ granteeId: arProvider.walletAddress, roles: [PORTAL_ROLES.ADMIN], type: 'wallet', sendInvite: false },
+							{
+								granteeId: permawebProvider.profile.id,
+								roles: [PORTAL_ROLES.ADMIN],
+								type: 'process',
+								sendInvite: false,
+							},
+						],
 						portalId,
 						arProvider.wallet
 					);
 
-					console.log(`Role update: ${roleUpdateId}`);
+					console.log(`Roles update: ${rolesUpdate}`);
 
 					profileUpdateId = await permawebProvider.libs.addToZone(
 						{ path: 'Portals', data: { Id: portalId, ...data } },

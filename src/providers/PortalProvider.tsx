@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, useResolvedPath } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
@@ -11,7 +11,6 @@ import {
 	PortalHeaderType,
 	PortalPermissionsType,
 	PortalRolesType,
-	PortalUserRoleType,
 	RefreshFieldType,
 } from 'helpers/types';
 import { areAssetsEqual } from 'helpers/utils';
@@ -41,7 +40,7 @@ const DEFAULT_CONTEXT = {
 	showPortalManager: false,
 	setShowPortalManager(_toggle: boolean) {},
 	refreshCurrentPortal() {},
-	fetchPortalUserProfile(_thing: PortalRolesType) {},
+	fetchPortalUserProfile(_id: PortalRolesType) {},
 	usersByPortalId: {},
 	updating: false,
 };
@@ -78,7 +77,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		setPortals(null);
-		setCurrent(null);
+		handlePortalSetup(null);
 		setPermissions(null);
 	}, [arProvider.walletAddress]);
 
@@ -97,7 +96,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			if (currentPortal?.id) {
 				if (currentId !== currentPortal.id) {
 					setCurrentId(currentPortal.id);
-					setCurrent(null);
+					handlePortalSetup(null);
 				}
 			}
 		} else {
@@ -108,35 +107,38 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		(async function () {
 			try {
-				if (currentId) {
-					handleInitPermissionSet(true); // TODO: Permissions
+				if (!current && currentId) {
+					handleInitPermissionSet(true);
 					const cachedPortal = getCachedPortal(currentId);
 					if (cachedPortal) {
-						setCurrent(cachedPortal);
-					} else {
-						const fetchedPortal = await fetchPortal();
-						if (fetchedPortal) {
-							setCurrent(fetchedPortal);
-							cachePortal(currentId, fetchedPortal);
-						}
+						handlePortalSetup(cachedPortal);
 					}
+
+					setUpdating(true);
+					const fetchedPortal = await fetchPortal();
+					if (fetchedPortal) {
+						handlePortalSetup(fetchedPortal);
+						cachePortal(currentId, fetchedPortal);
+					}
+					setUpdating(false);
 				}
 			} catch (e: any) {
 				console.error(e);
 				setErrorMessage(e.message ?? 'An error occurred getting this portal');
+				setUpdating(false);
 			}
 		})();
-	}, [currentId, permawebProvider.profile]);
+	}, [currentId]);
 
 	React.useEffect(() => {
 		(async function () {
-			let changeDetected = false;
-			let tries = 0;
-			const maxTries = 10;
-
-			console.log('Starting portal update check...');
-
 			if (current) {
+				let changeDetected = false;
+				let tries = 0;
+				const maxTries = 10;
+
+				console.log('Starting portal update check...');
+
 				setUpdating(true);
 				while (!changeDetected && tries < maxTries) {
 					try {
@@ -158,7 +160,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 						if (changeRuleMet) {
 							console.log('Change detected in portal data. Updating current portal...');
-							setCurrent(updatedPortal);
+							handlePortalSetup(updatedPortal);
 							cachePortal(currentId, updatedPortal);
 							changeDetected = true;
 						} else {
@@ -178,12 +180,38 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				setUpdating(false);
 			}
 		})();
-	}, [refreshCurrentTrigger, refreshField]);
+	}, [refreshCurrentTrigger]);
+
+	function handlePortalSetup(portal: PortalDetailType) {
+		setCurrent(portal);
+
+		if (permawebProvider.profile?.id && portal?.users) {
+			const user = portal.users.find((user: PortalRolesType) => user.profileId === permawebProvider.profile.id);
+
+			if (user?.roles) {
+				setPermissions({
+					base: true,
+					users: user.roles.some((role) => (portal.permissions?.['Role-Set'] ?? []).includes(role)),
+				});
+			}
+		}
+	}
 
 	async function fetchPortalUserProfile(userRoleEntry: PortalRolesType) {
 		try {
-			await new Promise((r) => setTimeout(r, 500));
-			const profile: any = await permawebProvider.fetchProfileById(userRoleEntry.address);
+			let profile: any = null;
+			if (userRoleEntry.profileId === permawebProvider.profile?.id) {
+				profile = { ...permawebProvider.profile };
+			} else {
+				profile = getCachedProfile(userRoleEntry.profileId);
+				if (!profile) {
+					profile = await permawebProvider.libs.getProfileById(userRoleEntry.profileId);
+					cacheProfile(userRoleEntry.profileId, profile);
+				}
+			}
+
+			console.log(profile);
+
 			if (profile?.id) {
 				setUsersByPortalId((prev) => ({
 					...prev,
@@ -195,14 +223,31 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		}
 	}
 
+	function getCachedProfile(address: string) {
+		const cached = localStorage.getItem(STORAGE.profile(address));
+		return cached ? JSON.parse(cached) : null;
+	}
+
+	function cacheProfile(address: string, profileData: any) {
+		localStorage.setItem(STORAGE.profile(address), JSON.stringify(profileData));
+	}
+
 	const fetchPortal = async () => {
 		if (currentId) {
 			try {
 				const portalData = await permawebProvider.libs.getZone(currentId);
 
-				const users: PortalRolesType[] = Object.entries(portalData?.roles).map(([k, v]) => {
-					return { address: k, roles: v as PortalUserRoleType[] };
-				});
+				const users: PortalRolesType[] = [];
+				if (portalData?.roles) {
+					for (const entry of Object.keys(portalData.roles)) {
+						if (portalData.roles[entry].type === 'process') {
+							users.push({
+								profileId: entry,
+								roles: portalData.roles[entry].roles,
+							});
+						}
+					}
+				}
 
 				let portal: PortalDetailType = {
 					id: currentId,
@@ -215,12 +260,13 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					uploads: portalData?.store?.uploads ?? [],
 					themes: portalData?.store?.themes ?? [],
 					users: users || [],
+					permissions: portalData.permissions ?? {},
 					domains: [], // TODO
 				};
 
 				return portal;
 			} catch (e: any) {
-				throw new Error(e.message ?? 'An error occurred getting this portal.');
+				throw new Error('An error occurred getting this portal.');
 			}
 		}
 	};
@@ -247,7 +293,12 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	}
 
 	function handleInitPermissionSet(base: boolean) {
-		const updatedPermissions = permissions ? { ...permissions, base: base } : { base: base };
+		const updatedPermissions = permissions
+			? { ...permissions, base: base }
+			: {
+					base: base,
+					users: false,
+			  };
 		setPermissions(updatedPermissions);
 	}
 

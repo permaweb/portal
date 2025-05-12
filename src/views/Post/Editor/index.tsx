@@ -77,16 +77,18 @@ export default function Editor() {
 			if (assetId) {
 				try {
 					const assetContentUpdateId = await permawebProvider.libs.sendMessage({
-						processId: assetId,
+						processId: portalProvider.current.id,
 						wallet: arProvider.wallet,
-						action: 'Update-Asset',
-						data: data,
+						action: 'Run-Action',
+						tags: [
+							{ name: 'ForwardTo', value: assetId },
+							{ name: 'ForwardAction', value: 'Update-Asset' },
+						],
+						data: { Input: data },
 					});
 
 					console.log(`Asset content update: ${assetContentUpdateId}`);
-
 					setResponse({ status: 'success', message: `${language.postUpdated}!` });
-
 					portalProvider.refreshCurrentPortal('assets');
 				} catch (e: any) {
 					setResponse({ status: 'warning', message: e.message ?? language.errorUpdatingPost });
@@ -106,6 +108,7 @@ export default function Editor() {
 							contentType: ASSET_UPLOAD.contentType,
 							assetType: ASSET_UPLOAD.ansType,
 							metadata: { releasedDate: new Date().getTime().toString() },
+							users: [portalProvider.current.id],
 						},
 						(status: any) => console.log(status)
 					);

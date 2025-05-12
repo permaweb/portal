@@ -431,7 +431,7 @@ export default function ArticleToolbar(props: IProps) {
 					<S.StatusAction status={currentPost.data.status}>
 						<Button
 							type={'primary'}
-							label={currentPost.data.status.toUpperCase()}
+							label={currentPost.data?.status?.toUpperCase() ?? '-'}
 							handlePress={() =>
 								handleCurrentPostUpdate({
 									field: 'status',
