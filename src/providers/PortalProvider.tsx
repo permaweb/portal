@@ -210,8 +210,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				}
 			}
 
-			console.log(profile);
-
 			if (profile?.id) {
 				setUsersByPortalId((prev) => ({
 					...prev,

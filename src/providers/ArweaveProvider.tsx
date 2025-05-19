@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArconnectSigner } from '@dha-team/arbundles';
 import { randomBytes } from 'crypto-browserify';
 
 import { bufferTob64Url } from 'arweave/node/lib/utils';
@@ -195,8 +194,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				const nonce = randomBytes(16).toString('hex');
 				const buffer = Buffer.from(nonce);
 
-				const signer = new ArconnectSigner(wallet);
-				const signature = await signer.sign(buffer);
+				const signature = await wallet.signature(buffer, { name: 'RSA-PSS', saltLength: 32 });
 				const b64UrlSignature = bufferTob64Url(Buffer.from(signature));
 
 				const result = await fetch(getTurboBalanceEndpoint(), {
