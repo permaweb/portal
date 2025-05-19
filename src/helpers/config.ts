@@ -98,6 +98,7 @@ export const DOM = {
 
 export const STORAGE = {
 	walletType: `wallet-type`,
+	profileByWallet: (id: string) => `profile-by-wallet-${id}`,
 	portal: (id: string) => `portal-${id}`,
 	profile: (id: string) => `profile-${id}`,
 };
@@ -303,7 +304,7 @@ export const PORTAL_ROLES = {
 	ADMIN: 'Admin',
 	CONTRIBUTOR: 'Contributor',
 	MODERATOR: 'Moderator',
-	GUEST_CONTRIBUTOR: 'GuestContributor',
+	GUEST_CONTRIBUTOR: 'Guest Contributor',
 };
 
 export const getPortalRoleOptions = () => {

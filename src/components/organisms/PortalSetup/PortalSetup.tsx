@@ -188,7 +188,7 @@ export default function PortalSetup(props: IProps) {
 
 	function mediaSection() {
 		return (
-			<S.Section type={props.type} className={'border-wrapper-alt2'}>
+			<S.Section type={props.type} className={'border-wrapper-alt3'}>
 				<S.SectionHeader>
 					<p>{language.mediaLibrary}</p>
 				</S.SectionHeader>

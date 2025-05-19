@@ -77,16 +77,18 @@ export default function Editor() {
 			if (assetId) {
 				try {
 					const assetContentUpdateId = await permawebProvider.libs.sendMessage({
-						processId: assetId,
+						processId: portalProvider.current.id,
 						wallet: arProvider.wallet,
-						action: 'Update-Asset',
-						data: data,
+						action: 'Run-Action',
+						tags: [
+							{ name: 'ForwardTo', value: assetId },
+							{ name: 'ForwardAction', value: 'Update-Asset' },
+						],
+						data: { Input: data },
 					});
 
 					console.log(`Asset content update: ${assetContentUpdateId}`);
-
 					setResponse({ status: 'success', message: `${language.postUpdated}!` });
-
 					portalProvider.refreshCurrentPortal('assets');
 				} catch (e: any) {
 					setResponse({ status: 'warning', message: e.message ?? language.errorUpdatingPost });
@@ -106,6 +108,7 @@ export default function Editor() {
 							contentType: ASSET_UPLOAD.contentType,
 							assetType: ASSET_UPLOAD.ansType,
 							metadata: { releasedDate: new Date().getTime().toString() },
+							users: [portalProvider.current.id],
 						},
 						(status: any) => console.log(status)
 					);
@@ -124,11 +127,23 @@ export default function Editor() {
 					const indexRecipients = [portalProvider.current.id];
 
 					for (const recipient of indexRecipients) {
+						// TODO: If portal owner use this / or add role to zone
+						// const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
+						// 	processId: recipient,
+						// 	wallet: arProvider.wallet,
+						// 	action: 'Add-Index-Id',
+						// 	tags: [{ name: 'IndexId', value: assetId }],
+						// });
+
 						const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
-							processId: recipient,
+							processId: permawebProvider.profile.id,
 							wallet: arProvider.wallet,
-							action: 'Add-Index-Id',
-							tags: [{ name: 'IndexId', value: assetId }],
+							action: 'Run-Action',
+							tags: [
+								{ name: 'ForwardTo', value: recipient },
+								{ name: 'ForwardAction', value: 'Add-Index-Id' },
+								{ name: 'IndexId', value: assetId },
+							],
 						});
 
 						console.log(`Zone index update: ${zoneIndexUpdateId}`);

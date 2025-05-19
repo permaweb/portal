@@ -1,5 +1,20 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npm run format
-git add -u
+# only these extensions:
+ext='\.(js|jsx|ts|tsx|css|json|md)$'
+
+# get all staged files, filter by ext, skip deletions:
+staged=$(git diff --cached --name-only --diff-filter=ACM | grep -E "$ext")
+
+if [ -n "$staged" ]; then
+  echo "✨ Formatting staged files:"
+  echo "$staged"
+
+  # run prettier (or your format script) on them:
+  # note: prettier accepts file paths as args
+  npx prettier --write $staged
+
+  # re-add any formatting changes:
+  echo "$staged" | xargs git add
+fi

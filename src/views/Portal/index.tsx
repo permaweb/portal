@@ -79,17 +79,17 @@ export default function Portal() {
 							<PostList type={'header'} />
 						</S.SectionBody>
 					</S.PostsSection>
-					<S.UsersSection className={'border-wrapper-alt3'}>
-						<S.SectionHeader>
+					<S.UsersSection>
+						{/* <S.SectionHeader>
 							<p>{language.users}</p>
 							<Button
 								type={'alt3'}
 								label={language.usersLink}
 								handlePress={() => navigate(URLS.portalUsers(portalProvider.current.id))}
 							/>
-						</S.SectionHeader>
+						</S.SectionHeader> */}
 						<S.SectionBody>
-							<UserList />
+							<UserList type={'header'} />
 						</S.SectionBody>
 					</S.UsersSection>
 					<S.DomainSection className={'border-wrapper-alt3'}>

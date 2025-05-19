@@ -187,10 +187,10 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 									<ReactSVG src={ASSETS.write} />
 									{language.profile}
 								</li>
-								<li onClick={() => setShowThemeSelector(true)}>
+								{/* <li onClick={() => setShowThemeSelector(true)}>
 									<ReactSVG src={ASSETS.language} />
 									{language.language}
-								</li>
+								</li> */}
 								<li onClick={() => setShowThemeSelector(true)}>
 									<ReactSVG src={ASSETS.design} />
 									{language.appearance}

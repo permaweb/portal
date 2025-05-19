@@ -6,7 +6,7 @@ import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
-import { ASSETS, DEFAULT_THEME, PORTAL_DATA, URLS } from 'helpers/config';
+import { ASSETS, DEFAULT_THEME, PORTAL_DATA, PORTAL_ROLES, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { NotificationType, PortalHeaderType } from 'helpers/types';
 import { checkValidAddress, getBootTag } from 'helpers/utils';
@@ -101,13 +101,29 @@ export default function PortalManager(props: IProps) {
 
 					console.log(`Portal ID: ${portalId}`);
 
+					const rolesUpdate = await permawebProvider.libs.setZoneRoles(
+						[
+							{ granteeId: arProvider.walletAddress, roles: [PORTAL_ROLES.ADMIN], type: 'wallet', sendInvite: false },
+							{
+								granteeId: permawebProvider.profile.id,
+								roles: [PORTAL_ROLES.ADMIN],
+								type: 'process',
+								sendInvite: false,
+							},
+						],
+						portalId,
+						arProvider.wallet
+					);
+
+					console.log(`Roles update: ${rolesUpdate}`);
+
 					profileUpdateId = await permawebProvider.libs.addToZone(
 						{ path: 'Portals', data: { Id: portalId, ...data } },
 						permawebProvider.profile.id,
 						arProvider.wallet
 					);
 
-					const initUpdateId = await permawebProvider.libs.addToZone(
+					const themeUpdateId = await permawebProvider.libs.addToZone(
 						{
 							path: 'Themes',
 							data: { ...permawebProvider.libs.mapToProcessCase(DEFAULT_THEME) },
@@ -116,7 +132,7 @@ export default function PortalManager(props: IProps) {
 						arProvider.wallet
 					);
 
-					console.log(`Init Update ID: ${initUpdateId}`);
+					console.log(`Theme update: ${themeUpdateId}`);
 
 					response = `${language.portalCreated}!`;
 

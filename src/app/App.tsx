@@ -1,6 +1,8 @@
 import React, { lazy, Suspense } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 
+const viewModules = (import.meta as any).glob('../views/**/index.tsx');
+
 const Landing = getLazyImport('Landing');
 const PortalView = getLazyImport('Portal');
 const Posts = getLazyImport('Posts');
@@ -28,11 +30,16 @@ import { WalletBlock } from 'wallet/WalletBlock';
 import * as S from './styles';
 
 function getLazyImport(view: string) {
-	return lazy(() =>
-		import(`../views/${view}/index.tsx`).then((module) => ({
-			default: module.default,
-		}))
-	);
+	const key = `../views/${view}/index.tsx`;
+	const loader = viewModules[key];
+	if (!loader) {
+		throw new Error(`View not found: ${view}`);
+	}
+
+	return lazy(async () => {
+		const module = await loader();
+		return { default: module.default };
+	});
 }
 
 export default function App() {

@@ -9,6 +9,7 @@ export type PortalDetailType = {
 	topics?: PortalTopicType[];
 	links?: PortalLinkType[];
 	users?: PortalRolesType[];
+	permissions?: { [key: string]: PortalUserRoleType[] };
 	domains?: string[];
 	uploads?: PortalUploadType[];
 	themes?: PortalThemeType[];
@@ -51,15 +52,15 @@ export type PortalAssetPostType = {
 	lastUpdate: number | null;
 };
 
-// We get the list and each user is filled out with a profile lookup.
 export type PortalUserType = {
+	owner?: string;
 	username?: string;
 	avatar?: string;
 	displayName?: string;
 };
 
 export type PortalRolesType = {
-	address: string;
+	profileId: string;
 	roles: PortalUserRoleType[];
 };
 
@@ -109,6 +110,7 @@ export type PortalCategoryType = {
 
 export type PortalPermissionsType = {
 	base: boolean;
+	users: boolean;
 };
 
 export enum ArticleBlockEnum {
