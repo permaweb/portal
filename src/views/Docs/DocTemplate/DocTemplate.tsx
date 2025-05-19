@@ -7,6 +7,11 @@ import { URLS } from 'helpers/config';
 
 import * as S from './styles';
 
+const mdLoaders = (import.meta as any).glob('../MD/**/*.md', {
+	query: '?raw',
+	import: 'default',
+});
+
 export default function DocTemplate(props: { doc?: string; id?: string }) {
 	const [markdown, setMarkdown] = React.useState<string>('');
 
@@ -71,20 +76,23 @@ export default function DocTemplate(props: { doc?: string; id?: string }) {
 	}, [hashState]);
 
 	React.useEffect(() => {
-		if (props.doc) {
-			import(`../MD/${props.doc}.md`)
-				.then((module) => setMarkdown(module.default))
-				.catch((error) => console.error('Error fetching markdown: ', error));
-		} else {
-			if (!active) {
-				navigate(`${URLS.docs}overview/introduction`);
-			} else {
-				import(`../MD/${active}.md`)
-					.then((module) => setMarkdown(module.default))
-					.catch((error) => console.error('Error fetching markdown: ', error));
-			}
+		const key = props.doc ? `../MD/${props.doc}.md` : active ? `../MD/${active}.md` : null;
+
+		if (!key) {
+			navigate(`${URLS.docs}overview/introduction`);
+			return;
 		}
-	}, [active]);
+
+		const loader = (mdLoaders as Record<string, () => Promise<string>>)[key];
+		if (!loader) {
+			console.error(`Unknown doc "${key}"`);
+			return;
+		}
+
+		loader()
+			.then((content) => setMarkdown(content))
+			.catch((err) => console.error('Error loading markdown:', err));
+	}, [props.doc, active]);
 
 	const renderers = {
 		h2: (props: any) => {
