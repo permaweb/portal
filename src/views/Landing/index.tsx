@@ -4,14 +4,15 @@ import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
+import { Modal } from 'components/atoms/Modal';
 import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { ButtonType } from 'helpers/types';
 import { formatAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
+import { WalletConnect } from 'wallet/WalletConnect';
 
 import * as S from './styles';
 
@@ -25,9 +26,11 @@ export default function Landing() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [loading, setLoading] = React.useState<boolean>(false);
+	const [showInvites, setShowInvites] = React.useState<boolean>(false);
 
 	async function joinPortal(portalId: string) {
 		if (portalId && permawebProvider.profile?.id) {
+			setShowInvites(false);
 			setLoading(true);
 			try {
 				const profileUpdateId = await permawebProvider.libs.joinZone(
@@ -48,156 +51,201 @@ export default function Landing() {
 		}
 	}
 
-	const connection = React.useMemo(() => {
+	const header = React.useMemo(() => {
 		let header: string | null = null;
-		let action: () => void | null = null;
-		let label: string | null = null;
-		let type: ButtonType = 'primary';
-		let disabled: boolean = false;
 
 		if (!arProvider.wallet) {
 			header = language.connectWallet;
-			label = language.connect;
-			type = 'alt1';
-			action = () => arProvider.setWalletModalVisible(true);
 		} else if (!permawebProvider.profile) {
 			header = `${language.gettingInfo}...`;
-			label = `${language.fetching}...`;
-			type = 'alt1';
-			action = null;
-			disabled = true;
 		} else if (!permawebProvider.profile.id) {
 			header = language.createProfile;
-			label = language.create;
-			type = 'alt1';
-			action = () => permawebProvider.setShowProfileManager(true);
 		} else {
 			header = `${language.welcome}, ${
 				permawebProvider.profile.username ?? formatAddress(arProvider.walletAddress, false)
 			}`;
-			label = language.disconnect;
-			type = 'primary';
-			action = () => arProvider.handleDisconnect();
 		}
 
 		return (
 			<S.ConnectionWrapper>
-				<p>{header}</p>
-				<Button type={type} label={label} handlePress={action} disabled={disabled} height={42.5} fullWidth />
+				<S.ConnectionHeaderWrapper>
+					<p>{header}</p>
+				</S.ConnectionHeaderWrapper>
 			</S.ConnectionWrapper>
 		);
 	}, [arProvider.wallet, permawebProvider.profile]);
 
 	const portals = React.useMemo(() => {
 		let content: React.ReactNode | null;
+
 		let disabled: boolean = false;
-		let showAction: boolean = false;
+		let label: string = null;
+		let icon: string = null;
+		let action: () => void | null = null;
 
 		if (!arProvider.wallet || (permawebProvider.profile && !permawebProvider.profile.id)) {
-			showAction = true;
-			disabled = true;
+			disabled = false;
+
+			label = language.connect;
+			icon = ASSETS.wallet;
+
+			action = () => arProvider.setWalletModalVisible(true);
+
+			if (permawebProvider.profile && !permawebProvider.profile.id) {
+				label = language.createProfile;
+				icon = ASSETS.user;
+				action = () => permawebProvider.setShowProfileManager(true);
+			}
+
 			content = (
-				<>
+				<S.PortalsHeaderWrapper>
 					<p>{language.portalsInfo}</p>
-				</>
+				</S.PortalsHeaderWrapper>
 			);
 		} else if (!permawebProvider.profile) {
-			showAction = false;
 			disabled = true;
+			label = `${language.loading}...`;
+			icon = ASSETS.user;
 			content = (
-				<S.PLoadingWrapper>
-					<p>{`${language.fetchingPortals}...`}</p>
+				<S.PortalsLoadingWrapper>
+					<p>{language.fetchingPortals}</p>
 					<Loader sm relative />
-				</S.PLoadingWrapper>
+				</S.PortalsLoadingWrapper>
 			);
 		} else {
-			showAction = true;
 			disabled = false;
+			label = language.createPortal;
+			icon = ASSETS.add;
+			action = () => portalProvider.setShowPortalManager(true, true);
+
 			if (portalProvider.portals && portalProvider.portals.length > 0) {
 				content = (
 					<>
-						<p>{language.selectPortal}</p>
-						<S.PListWrapper className={'scroll-wrapper'}>
+						<S.PortalsHeaderWrapper>
+							<p>{language.selectPortal}</p>
+						</S.PortalsHeaderWrapper>
+						<S.PortalsListWrapperMain className={'scroll-wrapper'}>
 							{portalProvider.portals.map((portal: any) => {
 								return (
 									<Link key={portal.id} to={`${URLS.base}${portal.id}`}>
 										{portal.logo ? (
 											<img src={getTxEndpoint(portal.logo)} alt={'Portal Logo'} />
 										) : (
-											<ReactSVG src={ASSETS.portals} />
+											<ReactSVG src={ASSETS.portal} />
 										)}
 										{portal.name}
 									</Link>
 								);
 							})}
-						</S.PListWrapper>
+						</S.PortalsListWrapperMain>
 					</>
 				);
 			} else {
-				content = <p>{language.portalCreate}</p>;
+				content = (
+					<S.PortalsHeaderWrapper>
+						<p>{language.noPortalsFound}</p>
+					</S.PortalsHeaderWrapper>
+				);
 			}
 		}
 
 		return (
 			<S.PortalsWrapper>
 				{content}
-				{showAction && (
+				<S.PortalActionWrapper>
 					<Button
 						type={'primary'}
-						label={language.createPortal}
-						handlePress={() => portalProvider.setShowPortalManager(true, true)}
+						label={label}
+						handlePress={action}
 						disabled={disabled}
-						icon={ASSETS.add}
+						icon={icon}
 						iconLeftAlign
-						height={42.5}
+						height={70}
 						fullWidth
 					/>
-				)}
+				</S.PortalActionWrapper>
 			</S.PortalsWrapper>
 		);
-	}, [arProvider.walletAddress, permawebProvider.profile, portalProvider.portals]);
+	}, [arProvider.wallet, arProvider.walletAddress, permawebProvider.profile, portalProvider.portals]);
 
 	const invites = React.useMemo(() => {
+		let header: string = language.noInvites;
+		let description: string = language.noInvitesInfo;
 		let content: React.ReactNode | null;
-		if (portalProvider.invites && portalProvider.invites.length > 0) {
-			content = (
-				<>
-					<p>{'Join'}</p>
-					<S.PListWrapper className={'scroll-wrapper'}>
-						{portalProvider.invites.map((portal: any) => {
-							return (
-								<button key={portal.id} onClick={() => joinPortal(portal.id)}>
-									{portal.logo ? (
-										<img src={getTxEndpoint(portal.logo)} alt={'Portal Logo'} />
-									) : (
-										<ReactSVG src={ASSETS.portals} />
-									)}
-									{portal.name}
-								</button>
-							);
-						})}
-					</S.PListWrapper>
-				</>
-			);
+
+		if (!arProvider.walletAddress || !permawebProvider.profile?.id) {
+			description = language.noInvitesProfileInfo;
+		} else {
+			if (portalProvider.invites?.length > 0) {
+				header = `${language.youAreInvited}!`;
+				description = language.invitesInfo;
+				content = (
+					<>
+						<S.PortalsListWrapper className={'scroll-wrapper'}>
+							{portalProvider.invites.map((portal: any) => {
+								return (
+									<button key={portal.id} onClick={() => joinPortal(portal.id)}>
+										{portal.logo ? (
+											<img src={getTxEndpoint(portal.logo)} alt={'Portal Logo'} />
+										) : (
+											<ReactSVG src={ASSETS.portal} />
+										)}
+										{portal.name}
+									</button>
+								);
+							})}
+						</S.PortalsListWrapper>
+					</>
+				);
+			}
 		}
 
-		return <S.PortalsWrapper>{content}</S.PortalsWrapper>;
-	}, [portalProvider.invites]);
+		return (
+			<Modal header={header} handleClose={() => setShowInvites((prev) => !prev)}>
+				<S.ModalWrapper>
+					<S.InvitesDescription>
+						<p>{description}</p>
+					</S.InvitesDescription>
+					{content}
+				</S.ModalWrapper>
+			</Modal>
+		);
+	}, [arProvider.walletAddress, permawebProvider.profile?.id, portalProvider.invites]);
 
 	return (
 		<>
 			<S.Wrapper>
-				<S.ContentWrapper className={'fade-in'}>
-					<S.HeaderWrapper>
+				<S.HeaderWrapper>
+					<S.HeaderContent>
+						<S.HeaderActionsWrapper>
+							<S.HeaderAction>
+								<Link to={URLS.docs}>{language.helpCenter}</Link>
+							</S.HeaderAction>
+							<S.HeaderAction>
+								<button onClick={() => setShowInvites((prev) => !prev)} disabled={loading}>
+									{language.invites}
+									{portalProvider.invites?.length > 0 && (
+										<S.HeaderIndicator>
+											<span>{portalProvider.invites.length}</span>
+										</S.HeaderIndicator>
+									)}
+								</button>
+							</S.HeaderAction>
+						</S.HeaderActionsWrapper>
+						<WalletConnect />
+					</S.HeaderContent>
+				</S.HeaderWrapper>
+				<S.ContentWrapper className={'fade-in border-wrapper-primary'}>
+					<S.ContentHeaderWrapper>
 						<h4>{`[${language.app}]`}</h4>
-					</S.HeaderWrapper>
-					<S.BodyWrapper>
-						<S.Section>{connection}</S.Section>
+					</S.ContentHeaderWrapper>
+					<S.ContentBodyWrapper>
+						<S.Section>{header}</S.Section>
 						<S.Section>{portals}</S.Section>
-						<S.Section>{invites}</S.Section>
-					</S.BodyWrapper>
+					</S.ContentBodyWrapper>
 				</S.ContentWrapper>
 			</S.Wrapper>
+			{showInvites && invites}
 			{loading && <Loader message={`${language.loading}...`} />}
 		</>
 	);

@@ -1,7 +1,9 @@
 import React, { lazy, Suspense } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 
-const viewModules = (import.meta as any).glob('../views/**/index.tsx');
+import { CurrentZoneVersion } from '@permaweb/libs';
+
+const views = (import.meta as any).glob('../views/**/index.tsx');
 
 const Landing = getLazyImport('Landing');
 const PortalView = getLazyImport('Portal');
@@ -31,7 +33,7 @@ import * as S from './styles';
 
 function getLazyImport(view: string) {
 	const key = `../views/${view}/index.tsx`;
-	const loader = viewModules[key];
+	const loader = views[key];
 	if (!loader) {
 		throw new Error(`View not found: ${view}`);
 	}
@@ -52,6 +54,28 @@ export default function App() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const { settings, updateSettings } = useSettingsProvider();
+
+	const hasCheckedProfileRef = React.useRef(false);
+
+	React.useEffect(() => {
+		(async function () {
+			if (hasCheckedProfileRef.current) return;
+			if (permawebProvider.profile) {
+				const userVersion = permawebProvider.profile.version;
+				if (!userVersion || userVersion !== CurrentZoneVersion) {
+					console.log('User profile version does match current version, updating...');
+
+					await permawebProvider.libs.updateProfileVersion({
+						profileId: permawebProvider.profile.id,
+					});
+
+					console.log('Updated profile version.');
+
+					hasCheckedProfileRef.current = true;
+				}
+			}
+		})();
+	}, [permawebProvider.profile]);
 
 	function getRoute(path: string, element: React.ReactNode) {
 		const baseRoutes = [URLS.base, URLS.docs, `URLS.docs/*`, `${URLS.docs}:active/*`, URLS.notFound, '*'];

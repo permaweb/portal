@@ -262,3 +262,7 @@ export function getARAmountFromWinc(amount: number) {
 	const arweave = Arweave.init({});
 	return (Math.floor(+arweave.ar.winstonToAr(amount.toString()) * 1e6) / 1e6).toFixed(4);
 }
+
+export function formatRoleLabel(role: string) {
+	return role.replace(/[_-]/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
+}

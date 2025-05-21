@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 
 import { Avatar } from 'components/atoms/Avatar';
 import { Button } from 'components/atoms/Button';
+import { IconButton } from 'components/atoms/IconButton';
 import { Panel } from 'components/atoms/Panel';
-import { URLS } from 'helpers/config';
+import { ASSETS, URLS } from 'helpers/config';
 import { PortalRolesType, ViewLayoutType } from 'helpers/types';
-import { formatAddress } from 'helpers/utils';
+import { formatAddress, formatRoleLabel } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 
 import { UserManager } from '../UserManager';
@@ -16,7 +16,6 @@ import { UserManager } from '../UserManager';
 import * as S from './styles';
 
 function User(props: { user: PortalRolesType }) {
-	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();
@@ -35,6 +34,7 @@ function User(props: { user: PortalRolesType }) {
 	}, [props.user, fetched]);
 
 	const userProfile = portalProvider.usersByPortalId?.[props.user.profileId] ?? { id: props.user.profileId };
+	const unauthorized = !portalProvider?.permissions?.users;
 
 	return (
 		<>
@@ -47,14 +47,19 @@ function User(props: { user: PortalRolesType }) {
 					<S.UserActions>
 						{props.user.roles.map((role) => (
 							<S.UserRole key={role} role={role}>
-								<span>{role}</span>
+								<span>{formatRoleLabel(role)}</span>
 							</S.UserRole>
 						))}
-						<Button
-							type={'alt3'}
-							label={language.manage}
+						<IconButton
+							type={'alt1'}
+							active={false}
+							src={ASSETS.write}
 							handlePress={() => setShowManageUser((prev) => !prev)}
-							disabled={!portalProvider?.permissions?.users}
+							disabled={unauthorized}
+							dimensions={{ wrapper: 23.5, icon: 13.5 }}
+							tooltip={unauthorized ? language.unauthorized : language.manage}
+							tooltipPosition={'bottom-right'}
+							noFocus
 						/>
 					</S.UserActions>
 				</S.UserDetail>
