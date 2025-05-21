@@ -9,6 +9,7 @@ export type PortalDetailType = {
 	topics?: PortalTopicType[];
 	links?: PortalLinkType[];
 	users?: PortalRolesType[];
+	roleOptions?: { [key: string]: PortalUserRoleType };
 	permissions?: { [key: string]: PortalUserRoleType[] };
 	domains?: string[];
 	uploads?: PortalUploadType[];
@@ -99,7 +100,7 @@ export type PortalUploadType = {
 
 export type PortalUploadOptionType = 'image' | 'video';
 
-export type PortalUserRoleType = 'Admin' | 'Contributor' | 'Guest_Contributor' | 'Moderator';
+export type PortalUserRoleType = 'Admin' | 'Contributor' | 'ExternalContributor' | 'Moderator';
 
 export type PortalCategoryType = {
 	id: string;
@@ -200,8 +201,7 @@ export type DefaultGQLResponseType = {
 export type BatchAGQLResponseType = { [queryKey: string]: DefaultGQLResponseType };
 
 export enum WalletEnum {
-	arConnect = 'arconnect',
-	othent = 'othent',
+	wander = 'wander',
 }
 
 export type FormFieldType = 'number' | 'password';

@@ -17,7 +17,7 @@ export const InfoWrapper = styled.div`
 	width: fit-content;
 	margin: 0 0 0 auto;
 
-	padding: 2.5px 10px 4.5px 10px;
+	padding: 0.5px 10px 2.5px 10px;
 	background: ${(props) => props.theme.colors.contrast.background};
 	border: 1px solid ${(props) => props.theme.colors.contrast.border};
 	border-radius: ${STYLING.dimensions.radius.alt4};

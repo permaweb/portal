@@ -20,9 +20,9 @@ export const WalletListItem = styled.button`
 	text-align: center;
 	padding: 15px;
 	img {
-		width: 30px;
+		width: 40px;
 		border-radius: 50%;
-		margin: 0 0 10px 0;
+		margin: 3.5px 0 15px 0;
 	}
 	span {
 		color: ${(props) => props.theme.colors.font.primary};

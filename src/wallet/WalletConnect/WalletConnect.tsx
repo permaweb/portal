@@ -140,14 +140,14 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 
 	return (
 		<>
-			<CloseHandler
-				callback={() => {
-					setShowWalletDropdown(false);
-				}}
-				active={showWalletDropdown}
-				disabled={!showWalletDropdown}
-			>
-				<S.Wrapper>
+			<S.Wrapper>
+				<CloseHandler
+					callback={() => {
+						setShowWalletDropdown(false);
+					}}
+					active={showWalletDropdown}
+					disabled={!showWalletDropdown}
+				>
 					<S.PWrapper>
 						<Avatar owner={permawebProvider.profile} dimensions={{ wrapper: 35, icon: 21.5 }} callback={handlePress} />
 					</S.PWrapper>
@@ -204,8 +204,8 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 							</S.DFooterWrapper>
 						</S.Dropdown>
 					)}
-				</S.Wrapper>
-			</CloseHandler>
+				</CloseHandler>
+			</S.Wrapper>
 			<Panel
 				open={showFundUpload}
 				width={575}

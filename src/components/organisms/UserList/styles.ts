@@ -43,12 +43,21 @@ export const UsersWrapper = styled.div<{ type: ViewLayoutType }>`
 	border-bottom-left-radius: ${STYLING.dimensions.radius.alt2};
 	border-bottom-right-radius: ${STYLING.dimensions.radius.alt2};
 
-	margin: ${(props) => (props.type === 'header' ? '0' : '20px 0 0 0')};
-	overflow: hidden;
+	/* margin: ${(props) => (props.type === 'header' ? '0' : '20px 0 0 0')}; */
 
 	> * {
 		&:not(:last-child) {
 			border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+		}
+
+		&:first-child {
+			border-top-left-radius: ${STYLING.dimensions.radius.alt2};
+			border-top-right-radius: ${STYLING.dimensions.radius.alt2};
+		}
+
+		&:last-child {
+			border-bottom-left-radius: ${STYLING.dimensions.radius.alt2};
+			border-bottom-right-radius: ${STYLING.dimensions.radius.alt2};
 		}
 	}
 `;

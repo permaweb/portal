@@ -258,6 +258,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					uploads: portalData?.store?.uploads ?? [],
 					themes: portalData?.store?.themes ?? [],
 					users: users || [],
+					roleOptions: portalData.roleOptions ?? {},
 					permissions: portalData.permissions ?? {},
 					domains: [], // TODO
 				};

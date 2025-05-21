@@ -1,9 +1,9 @@
 import React from 'react';
 
 import { Notification } from 'components/atoms/Notification';
-import { ASSETS, getPortalRoleOptions } from 'helpers/config';
+import { ASSETS } from 'helpers/config';
 import { NotificationType, SelectOptionType } from 'helpers/types';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, formatRoleLabel } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -15,7 +15,6 @@ import { Select } from '../../atoms/Select';
 
 import * as S from './styles';
 
-// TODO: User prop
 export default function UserManager(props: { user?: any; handleClose: () => void }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -24,23 +23,38 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const roleOptions = getPortalRoleOptions();
-
 	const [walletAddress, setWalletAddress] = React.useState<string>('');
-	const [role, setRole] = React.useState<SelectOptionType>(roleOptions[0]);
+
+	const [roleOptions, setRoleOptions] = React.useState<{ id: string; label: string }[] | null>(null);
+	const [role, setRole] = React.useState<SelectOptionType | null>(null);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
 
 	React.useEffect(() => {
-		if (props.user) {
+		if (portalProvider.current?.roleOptions) {
+			const options = Object.values(portalProvider.current.roleOptions).map((role) => {
+				return { id: role, label: formatRoleLabel(role) };
+			});
+			setRoleOptions(options);
+		}
+	}, [portalProvider.current?.roleOptions]);
+
+	React.useEffect(() => {
+		if (roleOptions?.length) {
+			setRole(roleOptions[0]);
+		}
+	}, [roleOptions]);
+
+	React.useEffect(() => {
+		if (props.user && roleOptions) {
 			if (props.user.owner && checkValidAddress(props.user.owner)) setWalletAddress(props.user.owner);
 			if (props.user.roles) {
 				const activeRole = props.user.roles[0];
 				setRole(roleOptions.find((role) => role.id === activeRole));
 			}
 		}
-	}, [props.user]);
+	}, [props.user, roleOptions]);
 
 	async function handleSubmit() {
 		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
@@ -88,7 +102,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 						setWalletAddress(e.target.value);
 					}}
 					invalid={{ status: walletAddress ? !checkValidAddress(walletAddress) : false, message: null }}
-					disabled={loading || props.user?.owner !== null}
+					disabled={loading || (props.user && props.user?.owner !== null)}
 					sm
 					hideErrorMessage
 				/>

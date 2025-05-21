@@ -4,7 +4,6 @@ import { open, transition3 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
-	height: 100%;
 	display: flex;
 	position: relative;
 	animation: ${open} ${transition3};
