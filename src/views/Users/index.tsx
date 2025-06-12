@@ -29,7 +29,7 @@ export default function Users() {
 							type={'alt1'}
 							label={language.addUser}
 							handlePress={() => setShowAddUser(!showAddUser)}
-							disabled={!portalProvider?.permissions?.users}
+							disabled={!portalProvider?.permissions?.addUser}
 							icon={ASSETS.add}
 							iconLeftAlign
 						/>,
@@ -38,8 +38,8 @@ export default function Users() {
 
 				<S.BodyWrapper>
 					<UserList type={'detail'} />
-					{!portalProvider?.permissions?.users && (
-						<S.InfoWrapper>
+					{!portalProvider?.permissions?.addUser && (
+						<S.InfoWrapper className={'info'}>
 							<span>{language.userPermissionBlockedInfo}</span>
 						</S.InfoWrapper>
 					)}

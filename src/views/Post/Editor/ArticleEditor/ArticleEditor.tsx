@@ -97,7 +97,7 @@ export default function ArticleEditor(props: IProps) {
 					!currentPost.editor.toggleBlockFocus &&
 					currentPost.editor.focusedBlock
 				) {
-					const lastBlockIndex = currentPost.data.content.length - 1;
+					const lastBlockIndex = currentPost.data?.content ? currentPost.data.content.length - 1 : 0;
 					if (
 						!currentPost.data.content.length ||
 						currentPost.data.content[lastBlockIndex].id === currentPost.editor.focusedBlock.id
@@ -294,6 +294,7 @@ export default function ArticleEditor(props: IProps) {
 						addBlock={(type: ArticleBlockEnum) => addBlock(type)}
 						handleInitAddBlock={(e) => handleKeyAddBlock(e)}
 						handleSubmit={props.handleSubmit}
+						handleRequestUpdate={props.handleRequestUpdate}
 					/>
 				</S.ToolbarWrapper>
 				<S.EditorWrapper panelOpen={currentPost.editor.panelOpen} onClick={handleEditorClick}>

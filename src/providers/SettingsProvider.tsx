@@ -50,9 +50,9 @@ const defaultSettings: Settings = {
 	sidebarOpen: true,
 	isDesktop: true,
 	windowSize: { width: window.innerWidth, height: window.innerHeight },
-	showCategoryAction: false,
-	showTopicAction: false,
-	showLinkAction: false,
+	showCategoryAction: true,
+	showTopicAction: true,
+	showLinkAction: true,
 };
 
 const SettingsContext = React.createContext<SettingsContextState>({

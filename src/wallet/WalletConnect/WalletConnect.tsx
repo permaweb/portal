@@ -82,13 +82,13 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 			variants: [
 				{
 					id: 'light-primary',
-					name: 'Light default',
+					name: 'Light Default',
 					background: lightTheme.neutral1,
 					accent1: lightTheme.primary1,
 				},
 				{
 					id: 'light-high-contrast',
-					name: 'Light high contrast',
+					name: 'Light High Contrast',
 					background: lightThemeHighContrast.neutral1,
 					accent1: lightThemeHighContrast.neutral9,
 				},
@@ -112,13 +112,13 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 			variants: [
 				{
 					id: 'dark-primary',
-					name: 'Dark default',
+					name: 'Dark Default',
 					background: darkTheme.neutral1,
 					accent1: darkTheme.primary1,
 				},
 				{
 					id: 'dark-high-contrast',
-					name: 'Dark high contrast',
+					name: 'Dark High Contrast',
 					background: darkThemeHighContrast.neutral1,
 					accent1: darkThemeHighContrast.neutralA1,
 				},

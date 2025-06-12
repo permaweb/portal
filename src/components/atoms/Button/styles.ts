@@ -75,7 +75,7 @@ export const Primary = styled.button<{
 				: props.active
 				? props.theme.colors.button.primary.active.border
 				: props.theme.colors.button.primary.border};
-	border-radius: ${STYLING.dimensions.radius.alt3};
+	border-radius: ${STYLING.dimensions.radius.button};
 	&:hover {
 		background: ${(props) =>
 			props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.primary.active.background};
@@ -148,7 +148,7 @@ export const IconPrimary = styled.div<{
 		height: 15.5px;
 		width: 15.5px;
 		padding: 1.5px 0 0 0;
-		margin: ${(props) => (props.leftAlign ? '3.5px 7.5px 0 0' : '3.5px 0 0 7.5px')};
+		margin: ${(props) => (props.leftAlign ? '3.25px 7.5px 0 0' : '2.25px 0 0 7.5px')};
 		color: ${(props) =>
 			props.warning
 				? props.theme.colors.font.light1
@@ -484,5 +484,119 @@ export const IconAlt4 = styled(IconPrimary)`
 				: props.active
 				? props.theme.colors.font.light1
 				: props.theme.colors.button.alt1.color};
+	}
+`;
+
+export const Indicator = styled(Alt1)`
+	background: ${(props) => (props.active ? props.theme.colors.indicator.active : props.theme.colors.indicator.base)};
+	border: 1px solid
+		${(props) => (props.active ? props.theme.colors.indicator.active : props.theme.colors.indicator.base)};
+	&:hover {
+		background: ${(props) => props.theme.colors.indicator.active};
+		border: 1px solid ${(props) => props.theme.colors.indicator.active};
+		span {
+			color: ${(props) => props.theme.colors.font.light1} !important;
+		}
+		svg {
+			fill: ${(props) => props.theme.colors.font.light1} !important;
+			color: ${(props) => props.theme.colors.font.light1} !important;
+		}
+	}
+	&:focus {
+		background: ${(props) =>
+			props.active ? props.theme.colors.indicator.active : props.theme.colors.indicator.active};
+		border: 1px solid ${(props) => props.theme.colors.indicator.active};
+		span {
+			color: ${(props) => props.theme.colors.font.light1} !important;
+		}
+		svg {
+			fill: ${(props) => props.theme.colors.font.light1} !important;
+			color: ${(props) => props.theme.colors.font.light1} !important;
+		}
+	}
+	&:disabled {
+		background: ${(props) => props.theme.colors.button.alt1.disabled.background};
+		border: 1px solid ${(props) => props.theme.colors.button.alt1.disabled.border};
+		span {
+			color: ${(props) => props.theme.colors.button.alt1.disabled.color} !important;
+		}
+		svg {
+			fill: ${(props) => props.theme.colors.button.alt1.disabled.color} !important;
+			color: ${(props) => props.theme.colors.button.alt1.disabled.color} !important;
+		}
+	}
+
+	span {
+		width: fit-content;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		color: ${(props) => props.theme.colors.font.light1} !important;
+	}
+`;
+
+export const IconIndicator = styled(IconPrimary)`
+	svg {
+		color: ${(props) =>
+			props.disabled
+				? props.theme.colors.button.alt1.disabled.color
+				: props.active
+				? props.theme.colors.font.light1
+				: props.theme.colors.font.light1};
+	}
+`;
+
+export const Warning = styled(Alt1)`
+	background: ${(props) => (props.active ? props.theme.colors.warning.primary : props.theme.colors.warning.alt1)};
+	border: 1px solid ${(props) => (props.active ? props.theme.colors.warning.primary : props.theme.colors.warning.alt1)};
+	&:hover {
+		background: ${(props) => props.theme.colors.warning.primary};
+		border: 1px solid ${(props) => props.theme.colors.warning.primary};
+		span {
+			color: ${(props) => props.theme.colors.font.light1} !important;
+		}
+		svg {
+			fill: ${(props) => props.theme.colors.font.light1} !important;
+			color: ${(props) => props.theme.colors.font.light1} !important;
+		}
+	}
+	&:focus {
+		background: ${(props) => (props.active ? props.theme.colors.warning.primary : props.theme.colors.warning.primary)};
+		border: 1px solid ${(props) => props.theme.colors.warning.primary};
+		span {
+			color: ${(props) => props.theme.colors.font.light1} !important;
+		}
+		svg {
+			fill: ${(props) => props.theme.colors.font.light1} !important;
+			color: ${(props) => props.theme.colors.font.light1} !important;
+		}
+	}
+	&:disabled {
+		background: ${(props) => props.theme.colors.button.alt1.disabled.background};
+		border: 1px solid ${(props) => props.theme.colors.button.alt1.disabled.border};
+		span {
+			color: ${(props) => props.theme.colors.button.alt1.disabled.color} !important;
+		}
+		svg {
+			fill: ${(props) => props.theme.colors.button.alt1.disabled.color} !important;
+			color: ${(props) => props.theme.colors.button.alt1.disabled.color} !important;
+		}
+	}
+
+	span {
+		width: fit-content;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		color: ${(props) => props.theme.colors.font.light1} !important;
+	}
+`;
+
+export const IconWarning = styled(IconPrimary)`
+	svg {
+		color: ${(props) =>
+			props.disabled
+				? props.theme.colors.button.alt1.disabled.color
+				: props.active
+				? props.theme.colors.font.light1
+				: props.theme.colors.font.light1};
 	}
 `;

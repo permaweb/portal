@@ -1,8 +1,7 @@
 import styled from 'styled-components';
 
-import { getPostStatusBackground } from 'app/styles';
 import { STYLING } from 'helpers/config';
-import { ArticleStatusType, ViewLayoutType } from 'helpers/types';
+import { ViewLayoutType } from 'helpers/types';
 
 export const Wrapper = styled.div`
 	width: 100%;
@@ -17,6 +16,8 @@ export const PostsHeader = styled.div`
 export const PostsHeaderDetails = styled.div`
 	display: flex;
 	align-items: center;
+	flex-wrap: wrap;
+	gap: 15px;
 	justify-content: space-between;
 	padding: 12.5px 15px;
 	border-radius: 0 !important;
@@ -34,6 +35,7 @@ export const PostsHeaderDetails = styled.div`
 export const PostsHeaderDetailsActions = styled.div`
 	display: flex;
 	align-items: center;
+	flex-wrap: wrap;
 	gap: 10px;
 `;
 
@@ -89,7 +91,103 @@ export const PostsStatusFilterWrapper = styled.div`
 	align-items: center;
 `;
 
-export const PostsSortingWrapper = styled.div``;
+export const PostsActionsEnd = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
+	align-items: center;
+`;
+
+export const PostsActionsRequestsWrapper = styled.div<{ type: ViewLayoutType }>`
+	display: flex;
+	position: relative;
+
+	.notification {
+		position: absolute;
+		top: -3.5px;
+		right: ${(props) => (props.type === 'detail' ? '0' : '-3.5px')};
+	}
+`;
+
+export const PostsActionsRequests = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+`;
+
+export const PostsActionsRequestsHeader = styled.div`
+	display: grid;
+	grid-template-columns: 1.5fr 1.25fr 0.75fr 0.75fr;
+	align-items: center;
+	padding: 0 0 7.5px 0;
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		text-transform: uppercase;
+		text-align: left;
+	}
+
+	> * {
+		&:last-child {
+			text-align: right;
+		}
+		&:nth-child(3) {
+			text-align: right;
+		}
+	}
+`;
+
+export const PostsActionsRequestsBody = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+`;
+
+export const PostActionRequest = styled.div`
+	display: grid;
+	grid-template-columns: 1.5fr 1.25fr 0.75fr 0.75fr;
+	align-items: center;
+
+	p,
+	span {
+		max-width: 150px;
+		color: ${(props) => props.theme.colors.font.primary};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		text-align: left;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	button {
+		justify-self: flex-end;
+	}
+
+	> * {
+		&:nth-child(3) {
+			text-align: right;
+		}
+	}
+`;
+
+export const PostsActionsRequestsInfo = styled.div`
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		text-transform: uppercase;
+		text-align: left;
+	}
+`;
 
 export const PostsWrapper = styled.div<{ type: ViewLayoutType }>`
 	width: 100%;
@@ -111,106 +209,6 @@ export const PostsWrapper = styled.div<{ type: ViewLayoutType }>`
 		&:not(:last-child) {
 			border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 		}
-	}
-`;
-
-export const PostWrapper = styled.div`
-	display: flex;
-	padding: 12.5px 15px;
-	justify-content: space-between;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 20px;
-	transition: all 150ms;
-
-	@media (max-width: ${STYLING.cutoffs.secondary}) {
-		flex-direction: column;
-		align-items: flex-start;
-	}
-
-	&:hover {
-		background: ${(props) => props.theme.colors.container.alt1.background};
-	}
-`;
-
-export const PostHeader = styled.div`
-	max-width: 50%;
-	display: flex;
-	flex-direction: column;
-	gap: 2.5px;
-
-	p {
-		color: ${(props) => props.theme.colors.font.primary};
-		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.base};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		white-space: nowrap;
-		overflow-x: hidden;
-		text-overflow: ellipsis;
-	}
-
-	span {
-		display: flex;
-		align-items: center;
-		gap: 5px;
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
-		white-space: nowrap;
-		overflow-x: hidden;
-		text-overflow: ellipsis;
-	}
-
-	svg {
-		height: 13.5px;
-		width: 13.5px;
-		margin: 5.5px 0 0 0;
-		color: ${(props) => props.theme.colors.font.alt1};
-		fill: ${(props) => props.theme.colors.font.alt1};
-	}
-
-	@media (max-width: ${STYLING.cutoffs.secondary}) {
-		max-width: 100%;
-	}
-`;
-
-export const PostDetail = styled.div`
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 12.5px;
-
-	@media (max-width: ${STYLING.cutoffs.secondary}) {
-		align-items: flex-start;
-	}
-`;
-
-export const PostActions = styled.div`
-	display: flex;
-	gap: 12.5px;
-	margin: 0 -4.5px 0 0;
-`;
-
-export const PostStatus = styled.div<{ status: ArticleStatusType }>`
-	display: flex;
-	align-items: center;
-	gap: 7.5px;
-
-	p {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
-		font-family: ${(props) => props.theme.typography.family.primary} !important;
-		text-transform: uppercase;
-	}
-
-	#post-status {
-		height: 12.5px;
-		width: 12.5px;
-		border: 1px solid ${(props) => props.theme.colors.border.primary};
-		border-radius: 50%;
-		background: ${(props) => getPostStatusBackground(props.status, props.theme)};
 	}
 `;
 
@@ -262,3 +260,12 @@ export const WrapperEmpty = styled.div<{ type: ViewLayoutType }>`
 `;
 
 export const LoadingWrapper = styled(WrapperEmpty)``;
+
+export const InfoWrapper = styled.div`
+	width: fit-content;
+	margin: 15px auto 0 auto;
+	padding: 0.5px 10px 2.5px 10px;
+	span {
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+	}
+`;

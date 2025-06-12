@@ -17,6 +17,8 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import * as S from './styles';
 import { IProps } from './types';
 
+// TODO: Use file type from media block
+// TODO: Get cost and show confirmation
 export default function MediaLibrary(props: IProps) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();

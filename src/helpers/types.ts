@@ -5,12 +5,13 @@ export type PortalDetailType = {
 	name: string;
 	logo: string | null;
 	assets?: PortalAssetType[];
+	requests?: PortalAssetRequestType[];
 	categories?: PortalCategoryType[];
 	topics?: PortalTopicType[];
 	links?: PortalLinkType[];
 	users?: PortalRolesType[];
 	roleOptions?: { [key: string]: PortalUserRoleType };
-	permissions?: { [key: string]: PortalUserRoleType[] };
+	permissions?: PortalPermissionsType;
 	domains?: string[];
 	uploads?: PortalUploadType[];
 	themes?: PortalThemeType[];
@@ -39,6 +40,13 @@ export type PortalAssetType = {
 	};
 };
 
+export type PortalAssetRequestType = {
+	id: string;
+	name?: string;
+	creatorId?: string;
+	dateCreated?: string;
+};
+
 export type PortalAssetPostType = {
 	id: null;
 	title: '';
@@ -62,7 +70,8 @@ export type PortalUserType = {
 
 export type PortalRolesType = {
 	profileId: string;
-	roles: PortalUserRoleType[];
+	type?: 'wallet' | 'process';
+	roles?: PortalUserRoleType[];
 };
 
 export type PortalThemeType = {
@@ -102,6 +111,8 @@ export type PortalUploadOptionType = 'image' | 'video';
 
 export type PortalUserRoleType = 'Admin' | 'Contributor' | 'ExternalContributor' | 'Moderator';
 
+export type RequestUpdateType = 'Approve' | 'Reject';
+
 export type PortalCategoryType = {
 	id: string;
 	name: string;
@@ -111,7 +122,10 @@ export type PortalCategoryType = {
 
 export type PortalPermissionsType = {
 	base: boolean;
-	users: boolean;
+	addUser?: boolean;
+	postAutoIndex?: boolean;
+	postRequestIndex?: boolean;
+	updatePostRequestStatus?: boolean;
 };
 
 export enum ArticleBlockEnum {
@@ -218,7 +232,7 @@ export type ValidationType = {
 	message: string | null;
 };
 
-export type ButtonType = 'primary' | 'alt1' | 'alt2' | 'alt3' | 'alt4' | 'success' | 'warning';
+export type ButtonType = 'primary' | 'alt1' | 'alt2' | 'alt3' | 'alt4' | 'indicator' | 'warning';
 
 export type SelectOptionType = { id: string; label: string };
 

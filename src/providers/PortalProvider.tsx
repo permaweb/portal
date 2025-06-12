@@ -1,6 +1,8 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { CurrentZoneVersion } from '@permaweb/libs';
+
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
 import { PortalManager } from 'components/organisms/PortalManager';
@@ -189,9 +191,18 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			const user = portal.users.find((user: PortalRolesType) => user.profileId === permawebProvider.profile.id);
 
 			if (user?.roles) {
+				const hasPermission = (permissonKeys: string | string[]) => {
+					const keys = Array.isArray(permissonKeys) ? permissonKeys : [permissonKeys];
+					const allowedRoles = keys.flatMap((key) => portal.permissions?.[key] ?? []);
+					return user.roles.some((role) => allowedRoles.includes(role));
+				};
+
 				setPermissions({
 					base: true,
-					users: user.roles.some((role) => (portal.permissions?.['Role-Set'] ?? []).includes(role)),
+					addUser: hasPermission('Role-Set'),
+					postAutoIndex: hasPermission('Add-Index-Id'),
+					postRequestIndex: hasPermission('Add-Index-Request'),
+					updatePostRequestStatus: hasPermission('Update-Index-Request'),
 				});
 			}
 		}
@@ -238,12 +249,22 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const users: PortalRolesType[] = [];
 				if (portalData?.roles) {
 					for (const entry of Object.keys(portalData.roles)) {
-						if (portalData.roles[entry].type === 'process') {
-							users.push({
-								profileId: entry,
-								roles: portalData.roles[entry].roles,
-							});
-						}
+						users.push({
+							profileId: entry,
+							type: portalData.roles[entry].type,
+							roles: portalData.roles[entry].roles,
+						});
+					}
+				}
+
+				/* Check and update zone version if available */
+				if (portalData.version !== CurrentZoneVersion) {
+					if (arProvider.wallet && arProvider.walletAddress === portalData.owner) {
+						console.log('Zone version does match current version, updating...');
+						await permawebProvider.libs.updateZoneVersion({
+							zoneId: currentId,
+						});
+						console.log('Updated zone version.');
 					}
 				}
 
@@ -252,6 +273,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					name: portalData.store?.name ?? 'None',
 					logo: portalData.store?.logo ?? 'None',
 					assets: getPortalAssets(portalData?.store?.index),
+					requests: portalData?.store?.indexRequests ?? [],
 					categories: portalData?.store?.categories ?? [],
 					topics: portalData?.store?.topics ?? [],
 					links: portalData?.store?.links ?? [],
@@ -280,14 +302,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	};
 
 	function getPortalAssets(index: PortalAssetType[]) {
-		return permawebProvider.libs.mapFromProcessCase(
-			index?.filter(
-				(asset: any) =>
-					asset.processType &&
-					asset.processType === 'atomic-asset' &&
-					asset.assetType &&
-					asset.assetType === 'blog-post'
-			)
+		return index?.filter(
+			(asset: any) =>
+				asset.processType && asset.processType === 'atomic-asset' && asset.assetType && asset.assetType === 'blog-post'
 		);
 	}
 
@@ -296,7 +313,10 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			? { ...permissions, base: base }
 			: {
 					base: base,
-					users: false,
+					addUser: false,
+					postAutoIndex: false,
+					postRequestIndex: false,
+					updatePostRequestState: false,
 			  };
 		setPermissions(updatedPermissions);
 	}

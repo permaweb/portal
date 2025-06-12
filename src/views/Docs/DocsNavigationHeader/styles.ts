@@ -27,7 +27,7 @@ export const HActions = styled.div`
 		padding: 7.5px 15px;
 		background: ${(props) => props.theme.colors.button.primary.background};
 		border: 1px solid ${(props) => props.theme.colors.button.primary.border};
-		border-radius: ${STYLING.dimensions.radius.alt3};
+		border-radius: ${STYLING.dimensions.radius.button};
 		color: ${(props) => props.theme.colors.font.primary} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;

@@ -1,13 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
-// import { IconButton } from 'components/atoms/IconButton';
+import { Loader } from 'components/atoms/Loader';
+import { Modal } from 'components/atoms/Modal';
+import { Post } from 'components/molecules/Post';
+import { User } from 'components/molecules/User';
 import { ASSETS, URLS } from 'helpers/config';
-import { ArticleStatusType, PortalAssetType } from 'helpers/types';
-import { formatDate } from 'helpers/utils';
+import { ArticleStatusType, GQLNodeResponseType, PortalAssetRequestType, PortalAssetType } from 'helpers/types';
+import { formatDate, getTagValue } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
@@ -18,6 +21,7 @@ export default function PostList(props: IProps) {
 	const navigate = useNavigate();
 
 	const portalProvider = usePortalProvider();
+	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -26,6 +30,9 @@ export default function PostList(props: IProps) {
 	const [currentStatusFilter, setCurrentStatusFilter] = React.useState<ArticleStatusType | 'all'>('all');
 	const [dateAscending, setDateAscending] = React.useState<boolean>(false);
 	const [showFilterActions, setShowFilterActions] = React.useState<boolean>(false);
+	const [showRequests, setShowRequests] = React.useState<boolean>(false);
+	const [loading, setLoading] = React.useState<boolean>(false);
+	const [requests, setRequests] = React.useState<PortalAssetRequestType[] | null>(null);
 
 	const totalCount = portalProvider.current?.assets?.length ?? '-';
 	const publishedCount =
@@ -36,6 +43,61 @@ export default function PostList(props: IProps) {
 	React.useEffect(() => {
 		setCurrentPage(1);
 	}, [currentStatusFilter]);
+
+	React.useEffect(() => {
+		(async function () {
+			if (requests !== null) return;
+			if (showRequests) {
+				const ids = portalProvider.current?.requests.map((asset: PortalAssetRequestType) => asset.id);
+				if (ids?.length > 0) {
+					try {
+						const gqlResponse = await permawebProvider.libs.getAggregatedGQLData({
+							ids: ids,
+						});
+
+						if (gqlResponse?.length > 0) {
+							const updatedRequests = gqlResponse.map((element: GQLNodeResponseType) => {
+								return {
+									id: element.node.id,
+									name: getTagValue(element.node.tags, 'Bootloader-Name'),
+									creatorId: getTagValue(element.node.tags, 'Creator'),
+									dateCreated: (element.node.block?.timestamp * 1000).toString() ?? '-',
+								};
+							});
+
+							setRequests(updatedRequests);
+
+							const returnedIds = gqlResponse.map((element: GQLNodeResponseType) => element.node.id);
+							const missingIds = ids.filter((id) => !returnedIds.includes(id));
+
+							if (missingIds.length > 0) {
+								setLoading(true);
+								for (const id of missingIds) {
+									const asset = await permawebProvider.libs.getAtomicAsset(id);
+									const formattedAsset = {
+										id: asset.id,
+										name: asset.name,
+										creatorId: asset.creator,
+										dateCreated: asset.dateCreated,
+									};
+
+									setRequests((prev) => [...prev, formattedAsset]);
+								}
+								setLoading(false);
+							}
+						} else {
+							setRequests([]);
+						}
+					} catch (e: any) {
+						console.error(e);
+						setRequests([]);
+					}
+				} else {
+					setRequests([]);
+				}
+			}
+		})();
+	}, [requests, showRequests, portalProvider.current?.requests]);
 
 	const assets = React.useMemo(() => {
 		if (!portalProvider.current?.assets) return [];
@@ -62,7 +124,7 @@ export default function PostList(props: IProps) {
 		return { start, end };
 	}, [currentPage, assets.length]);
 
-	function getFilterActions(dropdown: boolean) {
+	function getActions(dropdown: boolean) {
 		const getButtonType = (isFilter: boolean, status: string) => {
 			if (dropdown) return 'alt3';
 			if (isFilter) return currentStatusFilter === status ? 'alt1' : 'primary';
@@ -113,16 +175,94 @@ export default function PostList(props: IProps) {
 							<p>{language.sortBy}</p>
 						</S.PostsActionsSectionHeader>
 					)}
-					<S.PostsSortingWrapper>
+					<S.PostsActionsEnd>
 						<Button
-							type={'alt3'}
+							type={dropdown ? 'alt3' : 'primary'}
 							label={dateAscending ? language.sortNewestToOldest : language.sortOldestToNewest}
 							handlePress={() => handleActionPress(() => setDateAscending(!dateAscending))}
 							icon={ASSETS.arrows}
 						/>
-					</S.PostsSortingWrapper>
+						{props.type === 'detail' && getRequests()}
+					</S.PostsActionsEnd>
 				</S.PostsActionsSection>
 			</S.PostsActions>
+		);
+	}
+
+	function handleReviewRedirect(requestId: string) {
+		setShowRequests(false);
+		navigate(`${URLS.postEditArticle(portalProvider.current.id)}${requestId}`);
+	}
+
+	function getRequests() {
+		const unauthorized = !portalProvider?.permissions?.postAutoIndex;
+		let content = <Loader sm relative />;
+
+		if (requests !== null) {
+			if (requests.length <= 0) {
+				content = (
+					<S.PostsActionsRequestsInfo>
+						<span>{language.noRequestsFound}</span>
+					</S.PostsActionsRequestsInfo>
+				);
+			} else {
+				content = (
+					<S.PostsActionsRequests>
+						<S.PostsActionsRequestsHeader>
+							<span>{language.postTitle}</span>
+							<span>{language.author}</span>
+							<span>{language.created}</span>
+							<span>{language.review}</span>
+						</S.PostsActionsRequestsHeader>
+						<S.PostsActionsRequestsBody>
+							{requests.map((request: PortalAssetRequestType) => {
+								return (
+									<S.PostActionRequest key={request.id}>
+										<p>{request.name}</p>
+										<User user={{ profileId: request.creatorId }} />
+										<span>{formatDate(request.dateCreated, 'epoch')}</span>
+										<Button
+											type={'alt4'}
+											label={language.review}
+											disabled={unauthorized}
+											handlePress={() => handleReviewRedirect(request.id)}
+										/>
+									</S.PostActionRequest>
+								);
+							})}
+						</S.PostsActionsRequestsBody>
+						{loading && <Loader sm relative />}
+						{unauthorized && (
+							<S.InfoWrapper className={'info'}>
+								<span>{language.postReviewBlockedInfo}</span>
+							</S.InfoWrapper>
+						)}
+					</S.PostsActionsRequests>
+				);
+			}
+		}
+
+		return (
+			<>
+				<S.PostsActionsRequestsWrapper type={props.type}>
+					<Button
+						type={props.type === 'detail' ? 'primary' : 'alt3'}
+						label={language.requests}
+						handlePress={() => setShowRequests((prev) => !prev)}
+					/>
+
+					{portalProvider.current?.requests?.length > 0 && (
+						<div className={'notification'}>
+							<span>{portalProvider.current.requests.length}</span>
+						</div>
+					)}
+				</S.PostsActionsRequestsWrapper>
+				{showRequests && (
+					<Modal header={language.requests} handleClose={() => setShowRequests((prev) => !prev)}>
+						<div className={'modal-wrapper'}>{content}</div>
+					</Modal>
+				)}
+			</>
 		);
 	}
 
@@ -131,13 +271,14 @@ export default function PostList(props: IProps) {
 			case 'header':
 				return (
 					<S.PostsHeaderDetails className={'border-wrapper-alt3'}>
-						<p>{language.posts}</p>
+						<p>{`${language.posts} (${portalProvider.current?.assets.length ?? '-'})`}</p>
 						<S.PostsHeaderDetailsActions>
 							<Button
 								type={'alt3'}
 								label={language.postsLink}
 								handlePress={() => navigate(URLS.portalPosts(portalProvider.current.id))}
 							/>
+							{getRequests()}
 							<S.PostsHeaderFilterWrapper>
 								<CloseHandler
 									callback={() => setShowFilterActions(false)}
@@ -153,7 +294,7 @@ export default function PostList(props: IProps) {
 									/>
 									{showFilterActions && (
 										<S.PostsHeaderFilterDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
-											{getFilterActions(true)}
+											{getActions(true)}
 										</S.PostsHeaderFilterDropdown>
 									)}
 								</CloseHandler>
@@ -162,29 +303,13 @@ export default function PostList(props: IProps) {
 					</S.PostsHeaderDetails>
 				);
 			case 'detail':
-				return getFilterActions(false);
+				return getActions(false);
 			default:
 				return null;
 		}
 	}
 
-	// TODO
-	// <Button
-	// 	type={'alt3'}
-	// 	label={language.view}
-	// 	handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
-	// />
-	// <IconButton
-	// 	type={'primary'}
-	// 	active={false}
-	// 	src={ASSETS.listUnordered}
-	// 	handlePress={() => window.open(`https://arweave.net/${asset.id}`, 'blank')}
-	// 	dimensions={{ wrapper: 25, icon: 15 }}
-	// 	tooltip={language.moreActions}
-	// 	tooltipPosition={'bottom-right'}
-	// />
-
-	const posts = React.useMemo(() => {
+	function getPosts() {
 		if (!paginatedPosts.length) {
 			return (
 				<S.WrapperEmpty type={props.type}>
@@ -195,40 +320,17 @@ export default function PostList(props: IProps) {
 
 		return (
 			<S.PostsWrapper type={props.type}>
-				{paginatedPosts.map((asset: PortalAssetType) => (
-					<S.PostWrapper key={asset.id} className={'fade-in'}>
-						<S.PostHeader>
-							<p>{asset.name}</p>
-							<span>
-								<ReactSVG src={ASSETS.time} />
-								{formatDate(asset.dateCreated, 'epoch', true)}
-							</span>
-						</S.PostHeader>
-						<S.PostDetail>
-							<S.PostActions>
-								<Button
-									type={'alt3'}
-									label={language.edit}
-									handlePress={() => navigate(`${URLS.postEditArticle(portalProvider.current.id)}${asset.id}`)}
-								/>
-							</S.PostActions>
-							{asset.metadata?.status && (
-								<S.PostStatus status={asset.metadata?.status as ArticleStatusType}>
-									<p>{asset.metadata.status}</p>
-									<div id={'post-status'} />
-								</S.PostStatus>
-							)}
-						</S.PostDetail>
-					</S.PostWrapper>
+				{paginatedPosts.map((post: PortalAssetType) => (
+					<Post key={post.id} post={post} />
 				))}
 			</S.PostsWrapper>
 		);
-	}, [paginatedPosts, portalProvider.current?.id, language]);
+	}
 
 	return (
 		<S.Wrapper>
 			{getHeader()}
-			{posts}
+			{getPosts()}
 			<S.PostsFooter>
 				<S.PostsFooterDetail>
 					<p>{language.showingRange(assets.length > 0 ? currentRange.start : 0, currentRange.end, assets.length)}</p>

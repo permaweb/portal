@@ -58,25 +58,7 @@ export const HeaderAction = styled.div`
 	}
 `;
 
-export const HeaderIndicator = styled.div`
-	height: 12.5px;
-	width: 12.5px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	position: relative;
-	top: 0;
-	right: -17.5px;
-	right: 0;
-	background: ${(props) => props.theme.colors.indicator.alt1};
-	border-radius: 50%;
-
-	span {
-		font-size: 8px;
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		color: ${(props) => props.theme.colors.font.light1};
-	}
-`;
+export const HeaderIndicator = styled.div``;
 
 export const ContentWrapper = styled.div`
 	width: fit-content;
@@ -85,7 +67,7 @@ export const ContentWrapper = styled.div`
 	justify-content: center;
 	align-items: center;
 	padding: 60px 0 0 0;
-	margin: calc(${STYLING.dimensions.nav.height} + 40px) auto 0 auto;
+	margin: ${STYLING.dimensions.nav.height} auto;
 	border-radius: ${STYLING.dimensions.radius.alt1} !important;
 `;
 
@@ -119,12 +101,8 @@ export const ContentBodyWrapper = styled.div`
 
 export const Section = styled.div`
 	width: 425px;
+	max-width: 90vw;
 	display: flex;
-
-	@media (max-width: ${STYLING.cutoffs.tablet}) {
-		width: 100%;
-		padding: 0;
-	}
 `;
 
 export const ConnectionWrapper = styled.div`
@@ -258,6 +236,11 @@ export const PortalActionWrapper = styled.div`
 
 		&:hover {
 			border-top: 1px solid ${(props) => props.theme.colors.border.alt1} !important;
+		}
+
+		&:disabled {
+			background: ${(props) => props.theme.colors.container.alt1.background} !important;
+			border-top: none !important;
 		}
 	}
 `;

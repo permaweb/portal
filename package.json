@@ -20,7 +20,7 @@
 	"dependencies": {
 		"@hello-pangea/dnd": "^17.0.0",
 		"@permaweb/aoconnect": "^0.0.78",
-		"@permaweb/libs": "0.0.37",
+		"@permaweb/libs": "file:../permaweb-libs/sdk",
 		"@stripe/react-stripe-js": "^3.5.1",
 		"@stripe/stripe-js": "^6.1.0",
 		"arweave": "^1.15.5",
