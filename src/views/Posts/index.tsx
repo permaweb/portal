@@ -22,6 +22,12 @@ export default function Posts() {
 	const [selectedTopics, setSelectedTopics] = React.useState<string[]>([]);
 	const [showTopicAction, setShowTopicAction] = React.useState<boolean>(false);
 
+	/* User is a moderator and can only review existing posts, not create new ones */
+	const unauthorizedCreate =
+		!portalProvider.permissions?.postAutoIndex && !portalProvider.permissions?.postRequestIndex;
+
+	const unauthorizedMeta = !portalProvider.permissions?.updatePortalMeta;
+
 	return (
 		<>
 			<S.Wrapper className={'fade-in'}>
@@ -32,7 +38,7 @@ export default function Posts() {
 							type={'primary'}
 							label={language.editPostTopics}
 							handlePress={() => setShowTopicAction(true)}
-							disabled={!portalProvider.current}
+							disabled={unauthorizedMeta || !portalProvider.current}
 							icon={ASSETS.write}
 							iconLeftAlign
 						/>,
@@ -40,7 +46,7 @@ export default function Posts() {
 							type={'alt1'}
 							label={language.createPost}
 							handlePress={() => navigate(URLS.postCreateArticle(portalProvider.current.id))}
-							disabled={!portalProvider.current}
+							disabled={unauthorizedCreate || !portalProvider.current}
 							icon={ASSETS.add}
 							iconLeftAlign
 						/>,

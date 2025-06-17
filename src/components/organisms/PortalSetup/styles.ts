@@ -127,3 +127,12 @@ export const Divider = styled.div`
 `;
 
 export const LoadingWrapper = styled(WrapperEmpty)``;
+
+export const InfoWrapper = styled.div`
+	width: fit-content;
+	margin: 15px 15px 15px auto;
+	padding: 0.5px 10px 2.5px 10px;
+	span {
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+	}
+`;

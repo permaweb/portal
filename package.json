@@ -19,7 +19,7 @@
 	},
 	"dependencies": {
 		"@hello-pangea/dnd": "^17.0.0",
-		"@permaweb/aoconnect": "^0.0.78",
+		"@permaweb/aoconnect": "^0.0.85",
 		"@permaweb/libs": "file:../permaweb-libs/sdk",
 		"@stripe/react-stripe-js": "^3.5.1",
 		"@stripe/stripe-js": "^6.1.0",
@@ -49,7 +49,7 @@
 		"eslint-plugin-react-hooks": "^4.6.0",
 		"eslint-plugin-simple-import-sort": "^10.0.0",
 		"husky": "^8.0.0",
-		"permaweb-deploy": "2.1.0",
+		"permaweb-deploy": "2.0.2",
 		"prettier": "^2.8.3",
 		"rollup-plugin-polyfill-node": "^0.13.0",
 		"vite": "^6.3.5",

@@ -22,11 +22,11 @@ interface ArweaveContextState {
 	walletAddress: string | null;
 	walletType: WalletEnum | null;
 	arBalance: number | null;
+	turboBalance: number | null;
 	handleConnect: any;
 	handleDisconnect: () => void;
 	walletModalVisible: boolean;
 	setWalletModalVisible: (open: boolean) => void;
-	turboBalance: number | null;
 }
 
 const DEFAULT_CONTEXT = {
@@ -35,11 +35,11 @@ const DEFAULT_CONTEXT = {
 	walletAddress: null,
 	walletType: null,
 	arBalance: null,
+	turboBalance: null,
 	handleConnect() {},
 	handleDisconnect() {},
 	walletModalVisible: false,
 	setWalletModalVisible(_open: boolean) {},
-	turboBalance: null,
 };
 
 const ARContext = React.createContext<ArweaveContextState>(DEFAULT_CONTEXT);

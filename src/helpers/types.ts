@@ -1,4 +1,4 @@
-export type PortalHeaderType = { id: string; name: string; logo: string | null };
+export type PortalHeaderType = { id: string; name: string; logo: string | null; roles?: PortalRolesType[] };
 
 export type PortalDetailType = {
 	id: string;
@@ -56,6 +56,7 @@ export type PortalAssetPostType = {
 	status: ArticleStatusType;
 	categories: PortalCategoryType[];
 	topics: string[];
+	externalRecipients: string[];
 	thumbnail: string | null;
 	dateCreated: number | null;
 	lastUpdate: number | null;
@@ -69,7 +70,7 @@ export type PortalUserType = {
 };
 
 export type PortalRolesType = {
-	profileId: string;
+	address: string;
 	type?: 'wallet' | 'process';
 	roles?: PortalUserRoleType[];
 };
@@ -109,7 +110,7 @@ export type PortalUploadType = {
 
 export type PortalUploadOptionType = 'image' | 'video';
 
-export type PortalUserRoleType = 'Admin' | 'Contributor' | 'ExternalContributor' | 'Moderator';
+export type PortalUserRoleType = 'Admin' | 'Contributor' | 'External-Contributor' | 'Moderator';
 
 export type RequestUpdateType = 'Approve' | 'Reject';
 
@@ -122,10 +123,12 @@ export type PortalCategoryType = {
 
 export type PortalPermissionsType = {
 	base: boolean;
-	addUser?: boolean;
+	updatePortalMeta?: boolean;
+	updateUsers?: boolean;
 	postAutoIndex?: boolean;
 	postRequestIndex?: boolean;
 	updatePostRequestStatus?: boolean;
+	externalContributor?: boolean;
 };
 
 export enum ArticleBlockEnum {

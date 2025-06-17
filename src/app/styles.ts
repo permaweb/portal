@@ -333,6 +333,10 @@ export const MessageWrapper = styled.div`
 	padding: 12.5px 30px;
 
 	p {
+		width: 500px;
+		max-width: 90vw;
+		text-align: center;
+		line-height: 1.65;
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-weight: ${(props) => props.theme.typography.weight.bold};

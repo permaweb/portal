@@ -61,7 +61,7 @@ export default function UserList(props: { type: ViewLayoutType }) {
 					?.filter((user) => user.type === 'process')
 					.map((user: PortalRolesType) => {
 						return (
-							<S.UserWrapper key={user.profileId}>
+							<S.UserWrapper key={user.address}>
 								<User user={user} />
 							</S.UserWrapper>
 						);

@@ -107,16 +107,20 @@ export default function App() {
 				);
 			}
 
-			if (!portalProvider.permissions?.base) {
+			if (!portalProvider.permissions?.base || portalProvider.permissions?.externalContributor) {
 				return (
 					<Portal node={DOM.overlay}>
 						<S.CenteredWrapper className={'overlay'}>
 							<S.MessageWrapper>
 								{!portalProvider.permissions ? (
-									<p>{`${language.authenticating}...`}</p>
+									<p>{`${language.loggingIn}...`}</p>
 								) : (
 									<>
-										<p>{language.permissionBaseDenied}</p>
+										<p>
+											{portalProvider.permissions?.externalContributor
+												? language.permissionExternalContributor
+												: language.permissionBaseDenied}
+										</p>
 										<Button type={'primary'} label={language.returnHome} handlePress={() => navigate(URLS.base)} />
 									</>
 								)}

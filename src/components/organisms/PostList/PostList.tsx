@@ -219,7 +219,7 @@ export default function PostList(props: IProps) {
 								return (
 									<S.PostActionRequest key={request.id}>
 										<p>{request.name}</p>
-										<User user={{ profileId: request.creatorId }} />
+										<User user={{ address: request.creatorId }} />
 										<span>{formatDate(request.dateCreated, 'epoch')}</span>
 										<Button
 											type={'alt4'}
@@ -234,7 +234,7 @@ export default function PostList(props: IProps) {
 						{loading && <Loader sm relative />}
 						{unauthorized && (
 							<S.InfoWrapper className={'info'}>
-								<span>{language.postReviewBlockedInfo}</span>
+								<span>{language.unauthorizedPostReview}</span>
 							</S.InfoWrapper>
 						)}
 					</S.PostsActionsRequests>
@@ -271,7 +271,7 @@ export default function PostList(props: IProps) {
 			case 'header':
 				return (
 					<S.PostsHeaderDetails className={'border-wrapper-alt3'}>
-						<p>{`${language.posts} (${portalProvider.current?.assets.length ?? '-'})`}</p>
+						<p>{`${language.posts} (${portalProvider.current?.assets?.length ?? '0'})`}</p>
 						<S.PostsHeaderDetailsActions>
 							<Button
 								type={'alt3'}

@@ -15,6 +15,7 @@ export const initStateCurrentPost: { data: PortalAssetPostType; editor: any } = 
 		status: 'draft',
 		categories: [],
 		topics: [],
+		externalRecipients: [],
 		thumbnail: null,
 		dateCreated: null,
 		lastUpdate: null,

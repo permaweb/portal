@@ -30,12 +30,12 @@ export default function User(props: { user: PortalRolesType }) {
 		})();
 	}, [props.user, fetched]);
 
-	const userProfile = portalProvider.usersByPortalId?.[props.user.profileId] ?? { id: props.user.profileId };
-	const unauthorized = !portalProvider?.permissions?.addUser;
+	const userProfile = portalProvider.usersByPortalId?.[props.user.address] ?? { id: props.user.address };
+	const unauthorized = !portalProvider?.permissions?.updateUsers;
 
 	return (
 		<>
-			<S.UserWrapper key={props.user.profileId} className={'fade-in'}>
+			<S.UserWrapper key={props.user.address} className={'fade-in'}>
 				<S.UserHeader>
 					<Avatar owner={userProfile} dimensions={{ wrapper: 23.5, icon: 15 }} callback={null} />
 					<p>{userProfile.username ?? formatAddress(userProfile.id, false)}</p>

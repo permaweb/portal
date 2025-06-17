@@ -31,7 +31,7 @@ export default function ArticleToolbar(props: IProps) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const TABS = [{ label: language.blocks }, { label: language.post }];
+	const TABS = [{ label: language.post }, { label: language.blocks }];
 
 	const titleRef = React.useRef<any>(null);
 	const blockRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
@@ -375,7 +375,7 @@ export default function ArticleToolbar(props: IProps) {
 		}
 	}
 
-	// TODO: Approve / Reject
+	// TODO: If contributor visits post directly they have the ability to save, should be unauthorized
 	function getSubmit() {
 		const isCurrentRequest =
 			!!assetId && portalProvider.current?.requests?.some((request: PortalAssetRequestType) => request.id === assetId);

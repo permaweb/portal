@@ -59,6 +59,10 @@ function getRoleBackground(theme: DefaultTheme, role: PortalUserRoleType) {
 			return theme.colors.roles.primary;
 		case 'Contributor':
 			return theme.colors.roles.alt1;
+		case 'Moderator':
+			return theme.colors.roles.alt2;
+		case 'External-Contributor':
+			return theme.colors.roles.alt3;
 		default:
 			return theme.colors.roles.alt2;
 	}

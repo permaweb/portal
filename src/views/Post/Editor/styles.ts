@@ -62,3 +62,26 @@ export const ModalActionsWrapper = styled.div`
 		}
 	}
 `;
+
+export const MessageWrapper = styled.div`
+	width: fit-content;
+	max-width: 90vw;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 20px;
+	padding: 30px;
+	margin: 40px auto;
+
+	p {
+		width: 500px;
+		max-width: 90vw;
+		text-align: center;
+		line-height: 1.65;
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		color: ${(props) => props.theme.colors.font.alt1};
+	}
+`;

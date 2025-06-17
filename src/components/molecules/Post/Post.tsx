@@ -23,13 +23,15 @@ export default function Post(props: { post: PortalAssetType }) {
 	const [fetched, setFetched] = React.useState<boolean>(false);
 
 	const unauthorized =
-		!portalProvider?.permissions?.postAutoIndex && props.post?.creator !== permawebProvider.profile.id;
+		!portalProvider?.permissions?.postAutoIndex &&
+		!portalProvider?.permissions?.updatePostRequestStatus &&
+		props.post?.creator !== permawebProvider.profile.id;
 
 	React.useEffect(() => {
 		(async function () {
 			if (!fetched && props.post.creator) {
 				await portalProvider.fetchPortalUserProfile({
-					profileId: props.post.creator,
+					address: props.post.creator,
 				});
 			}
 			setFetched(true);

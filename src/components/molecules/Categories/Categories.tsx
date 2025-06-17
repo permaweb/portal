@@ -14,9 +14,17 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 import { Modal } from '../../atoms/Modal';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function Categories(props: IProps) {
+// TODO: props.skipAuthCheck not accounting for when there are no categories in the portal
+export default function Categories(props: {
+	categories: PortalCategoryType[];
+	setCategories: (categories: PortalCategoryType[]) => void;
+	includeChildrenOnSelect?: boolean;
+	selectOnAdd?: boolean;
+	showActions?: boolean;
+	closeAction?: () => void;
+	skipAuthCheck?: boolean;
+}) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
@@ -37,8 +45,10 @@ export default function Categories(props: IProps) {
 		}
 	}, [portalProvider.current]);
 
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta && !props.skipAuthCheck;
+
 	const addCategory = async () => {
-		if (newCategoryName && portalProvider.current?.id && arProvider.wallet) {
+		if (!unauthorized && newCategoryName && portalProvider.current?.id && arProvider.wallet) {
 			setCategoryLoading(true);
 			try {
 				const newCategory: PortalCategoryType = {
@@ -108,7 +118,7 @@ export default function Categories(props: IProps) {
 	};
 
 	const deleteCategories = async () => {
-		if (arProvider.wallet && portalProvider.current?.categories && props.categories?.length) {
+		if (!unauthorized && arProvider.wallet && portalProvider.current?.categories && props.categories?.length) {
 			setCategoryLoading(true);
 			try {
 				const findCategoriesToDelete = (categories: PortalCategoryType[], selectedIds: string[]): string[] => {
@@ -203,7 +213,7 @@ export default function Categories(props: IProps) {
 								label={category.name}
 								handlePress={() => handleSelectCategory(category.id)}
 								active={active}
-								disabled={categoryLoading}
+								disabled={unauthorized || categoryLoading}
 								icon={active ? ASSETS.close : ASSETS.add}
 							/>
 						</S.CategoryOption>
@@ -289,7 +299,7 @@ export default function Categories(props: IProps) {
 									type={'primary'}
 									label={getParentDisplayLabel()}
 									handlePress={() => setShowParentOptions(!showParentOptions)}
-									disabled={!categoryOptions?.length || categoryLoading}
+									disabled={unauthorized || !categoryOptions?.length || categoryLoading}
 									icon={ASSETS.arrow}
 									height={42.5}
 									fullWidth
@@ -319,7 +329,7 @@ export default function Categories(props: IProps) {
 							type={'alt4'}
 							label={language.add}
 							handlePress={addCategory}
-							disabled={!newCategoryName || categoryLoading}
+							disabled={unauthorized || !newCategoryName || categoryLoading}
 							loading={categoryLoading}
 							icon={ASSETS.add}
 							iconLeftAlign
@@ -328,7 +338,7 @@ export default function Categories(props: IProps) {
 							value={newCategoryName}
 							onChange={(e: any) => setNewCategoryName(e.target.value)}
 							invalid={{ status: false, message: null }}
-							disabled={categoryLoading}
+							disabled={unauthorized || categoryLoading}
 							hideErrorMessage
 							sm
 						/>
@@ -344,7 +354,7 @@ export default function Categories(props: IProps) {
 							type={'alt3'}
 							label={language.remove}
 							handlePress={() => setShowDeleteConfirmation(true)}
-							disabled={!props.categories?.length || categoryLoading}
+							disabled={unauthorized || !props.categories?.length || categoryLoading}
 							loading={false}
 							icon={ASSETS.delete}
 							iconLeftAlign

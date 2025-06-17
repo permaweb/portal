@@ -22,6 +22,9 @@ export default function Portal() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	/* User is a moderator and can only review existing posts, not create new ones */
+	const unauthorized = !portalProvider.permissions?.postAutoIndex && !portalProvider.permissions?.postRequestIndex;
+
 	return (
 		<S.Wrapper className={'fade-in'}>
 			<ViewHeader
@@ -38,7 +41,7 @@ export default function Portal() {
 						type={'alt1'}
 						label={language.createPost}
 						handlePress={() => navigate(URLS.postCreateArticle(portalProvider.current.id))}
-						disabled={!portalProvider.current}
+						disabled={unauthorized || !portalProvider.current}
 						icon={ASSETS.add}
 						iconLeftAlign
 					/>,
@@ -80,14 +83,6 @@ export default function Portal() {
 						</S.SectionBody>
 					</S.PostsSection>
 					<S.UsersSection>
-						{/* <S.SectionHeader>
-							<p>{language.users}</p>
-							<Button
-								type={'alt3'}
-								label={language.usersLink}
-								handlePress={() => navigate(URLS.portalUsers(portalProvider.current.id))}
-							/>
-						</S.SectionHeader> */}
 						<S.SectionBody>
 							<UserList type={'header'} />
 						</S.SectionBody>

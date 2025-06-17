@@ -7,7 +7,14 @@ import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
 import { ASSET_UPLOAD, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { NotificationType, PortalAssetRequestType, RequestUpdateType } from 'helpers/types';
+import {
+	NotificationType,
+	PortalAssetRequestType,
+	PortalHeaderType,
+	PortalRolesType,
+	RequestUpdateType,
+} from 'helpers/types';
+import { filterDuplicates } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -18,8 +25,6 @@ import { currentPostUpdate } from 'store/post';
 import { ArticleEditor } from './ArticleEditor';
 import * as S from './styles';
 
-// TODO: Show list of other portals a user belongs to on post
-// Allow indexing on other portals with contributor flow
 export default function Editor() {
 	const navigate = useNavigate();
 	const { assetId } = useParams<{ assetId?: string }>();
@@ -50,6 +55,10 @@ export default function Editor() {
 
 		handleCurrentPostUpdate({ field: 'submitDisabled', value: isEmpty });
 	}, [currentPost.data.content]);
+
+	/* User is a moderator and can only review existing posts, not create new ones */
+	const unauthorized =
+		!assetId && !portalProvider.permissions?.postAutoIndex && !portalProvider.permissions?.postRequestIndex;
 
 	async function handleRequestUpdate(updateType: RequestUpdateType) {
 		if (assetId && arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
@@ -163,8 +172,6 @@ export default function Editor() {
 		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
 			handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language.savingPost}...` } });
 
-			const indexRecipients = [portalProvider.current.id];
-
 			if (!validateSubmit()) {
 				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
 				return;
@@ -207,20 +214,6 @@ export default function Editor() {
 					const assetDataFetch = await fetch(getTxEndpoint(ASSET_UPLOAD.src.data));
 					const dataSrc = await assetDataFetch.text();
 
-					const authUsers = [portalProvider.current.id];
-
-					/* If the user is a contributor then give admins and moderators access */
-					if (!portalProvider.permissions.postAutoIndex && portalProvider.permissions.postRequestIndex) {
-						for (const user of portalProvider.current?.users) {
-							if (
-								(user.roles.includes('Admin') || user.roles.includes('Moderator')) &&
-								user.profileId !== permawebProvider.profile.id
-							) {
-								authUsers.push(user.profileId);
-							}
-						}
-					}
-
 					const assetId = await permawebProvider.libs.createAtomicAsset(
 						{
 							name: currentPost.data.title,
@@ -230,8 +223,11 @@ export default function Editor() {
 							data: dataSrc,
 							contentType: ASSET_UPLOAD.contentType,
 							assetType: ASSET_UPLOAD.ansType,
-							metadata: { releasedDate: new Date().getTime().toString() },
-							users: authUsers,
+							metadata: {
+								releasedDate: new Date().getTime().toString(),
+								originPortal: portalProvider.current.id,
+							},
+							users: getAssetAuthUsers(),
 						},
 						(status: any) => console.log(status)
 					);
@@ -247,26 +243,24 @@ export default function Editor() {
 
 					console.log(`Asset content update: ${assetContentUpdateId}`);
 
-					let indexAction = null;
-					if (portalProvider.permissions.postAutoIndex) indexAction = 'Add-Index-Id';
-					else if (portalProvider.permissions.postRequestIndex) indexAction = 'Add-Index-Request';
+					/* Index post in the current portal this user is contributing to */
+					let internalIndexAction = null;
+					if (portalProvider.permissions.postAutoIndex) internalIndexAction = 'Add-Index-Id';
+					else if (portalProvider.permissions.postRequestIndex) internalIndexAction = 'Add-Index-Request';
 
-					if (indexAction) {
-						let zoneIndexUpdateId: string;
+					if (internalIndexAction) {
+						const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
+							processId: permawebProvider.profile.id,
+							wallet: arProvider.wallet,
+							action: 'Run-Action',
+							tags: [
+								{ name: 'ForwardTo', value: portalProvider.current.id },
+								{ name: 'ForwardAction', value: internalIndexAction },
+								{ name: 'IndexId', value: assetId },
+							],
+						});
 
-						for (const recipient of indexRecipients) {
-							zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
-								processId: permawebProvider.profile.id,
-								wallet: arProvider.wallet,
-								action: 'Run-Action',
-								tags: [
-									{ name: 'ForwardTo', value: recipient },
-									{ name: 'ForwardAction', value: indexAction },
-									{ name: 'IndexId', value: assetId },
-								],
-							});
-							console.log(`Zone index update: ${zoneIndexUpdateId}`);
-						}
+						console.log(`Zone index update: ${zoneIndexUpdateId}`);
 
 						if (portalProvider.permissions.postAutoIndex) {
 							const zoneResult = await permawebProvider.deps.ao.result({
@@ -284,11 +278,65 @@ export default function Editor() {
 										{ name: 'ContentType', value: ASSET_UPLOAD.contentType },
 										{ name: 'DateAdded', value: new Date().getTime().toString() },
 									],
-									data: { Recipients: indexRecipients },
+									data: { Recipients: [portalProvider.current.id] },
 								});
 
 								console.log(`Asset index update: ${assetIndexUpdateId}`);
 								portalProvider.refreshCurrentPortal('assets');
+							}
+						}
+					}
+
+					/* If there are external recipients, also send an index request to them */
+					/* If the user is an admin in another portal then index it directly */
+					if (currentPost.data?.externalRecipients?.length > 0) {
+						for (const portalId of currentPost.data.externalRecipients) {
+							const externalPortal = portalProvider.portals.find((portal: PortalHeaderType) => portal.id === portalId);
+
+							if (externalPortal) {
+								const hasExternalAdminAccess = externalPortal.roles
+									?.find((user: PortalRolesType) => user.address === permawebProvider.profile.id)
+									?.roles?.includes('Admin');
+
+								let externalIndexAction = 'Add-Index-Request';
+								if (hasExternalAdminAccess) externalIndexAction = 'Add-Index-Id';
+
+								const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
+									processId: permawebProvider.profile.id,
+									wallet: arProvider.wallet,
+									action: 'Run-Action',
+									tags: [
+										{ name: 'ForwardTo', value: externalPortal.id },
+										{ name: 'ForwardAction', value: externalIndexAction },
+										{ name: 'IndexId', value: assetId },
+									],
+								});
+
+								console.log(`External zone index update: ${zoneIndexUpdateId}`);
+
+								if (hasExternalAdminAccess) {
+									const zoneResult = await permawebProvider.deps.ao.result({
+										process: permawebProvider.profile.id,
+										message: zoneIndexUpdateId,
+									});
+
+									if (zoneResult?.Messages?.length > 0) {
+										const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
+											processId: assetId,
+											wallet: arProvider.wallet,
+											action: 'Send-Index',
+											tags: [
+												{ name: 'AssetType', value: ASSET_UPLOAD.ansType },
+												{ name: 'ContentType', value: ASSET_UPLOAD.contentType },
+												{ name: 'DateAdded', value: new Date().getTime().toString() },
+											],
+											data: { Recipients: [externalPortal.id] },
+										});
+
+										console.log(`Asset index update: ${assetIndexUpdateId}`);
+										portalProvider.refreshCurrentPortal('assets');
+									}
+								}
 							}
 						}
 					}
@@ -302,6 +350,52 @@ export default function Editor() {
 
 			handleSubmitUpdate();
 		}
+	}
+
+	function getAssetAuthUsers() {
+		const authUsers = [portalProvider.current.id];
+
+		/* If the user is a contributor then give admins and moderators access */
+		if (!portalProvider.permissions.postAutoIndex && portalProvider.permissions.postRequestIndex) {
+			for (const user of portalProvider.current?.users) {
+				if (
+					(user.roles.includes('Admin') || user.roles.includes('Moderator')) &&
+					user.address !== permawebProvider.profile.id
+				) {
+					authUsers.push(user.address);
+				}
+			}
+		}
+
+		/* Add external admins and moderators if this user is a contributor in other portals */
+		if (currentPost.data?.externalRecipients?.length > 0) {
+			for (const portalId of currentPost.data.externalRecipients) {
+				const externalPortal = portalProvider.portals.find((portal: PortalHeaderType) => portal.id === portalId);
+
+				if (externalPortal) {
+					/* Give the external portal update access */
+					authUsers.push(externalPortal.id);
+
+					const hasExternalAdminAccess = externalPortal.roles
+						?.find((user: PortalRolesType) => user.address === permawebProvider.profile.id)
+						?.roles?.includes('Admin');
+
+					/* This user is not an admin in the external portal */
+					/* Add the external admins and moderators to the post */
+					if (!hasExternalAdminAccess) {
+						const externalAuthUsers = externalPortal.roles
+							?.filter((user: PortalRolesType) => user.roles.includes('Admin') || user.roles.includes('Moderator'))
+							.map((user: PortalRolesType) => user.address);
+
+						authUsers.push(...(externalAuthUsers ?? []));
+					}
+				}
+			}
+		}
+
+		const uniqueAuthUsers = filterDuplicates(authUsers);
+		console.log(uniqueAuthUsers);
+		return uniqueAuthUsers;
 	}
 
 	function handleSubmitUpdate() {
@@ -356,6 +450,18 @@ export default function Editor() {
 
 	return (
 		<>
+			{unauthorized && (
+				<div className={'overlay'}>
+					<S.MessageWrapper className={'border-wrapper-alt2'}>
+						<p>{language.unauthorizedPostCreate}</p>
+						<Button
+							type={'primary'}
+							label={language.returnHome}
+							handlePress={() => navigate(URLS.portalBase(portalProvider.current?.id))}
+						/>
+					</S.MessageWrapper>
+				</div>
+			)}
 			{editor}
 			{response && (
 				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
