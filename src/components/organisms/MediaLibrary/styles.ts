@@ -88,6 +88,10 @@ export const UploadWrapper = styled.button<{ active: boolean }>`
 	&:hover {
 		cursor: pointer;
 	}
+
+	&:disabled {
+		pointer-events: none;
+	}
 `;
 
 export const Indicator = styled.div`

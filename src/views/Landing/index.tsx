@@ -225,9 +225,9 @@ export default function Landing() {
 								<button onClick={() => setShowInvites((prev) => !prev)} disabled={loading}>
 									{language.invites}
 									{portalProvider.invites?.length > 0 && (
-										<S.HeaderIndicator>
+										<div className={'notification'}>
 											<span>{portalProvider.invites.length}</span>
-										</S.HeaderIndicator>
+										</div>
 									)}
 								</button>
 							</S.HeaderAction>
@@ -235,7 +235,7 @@ export default function Landing() {
 						<WalletConnect />
 					</S.HeaderContent>
 				</S.HeaderWrapper>
-				<S.ContentWrapper className={'fade-in border-wrapper-primary'}>
+				<S.ContentWrapper className={'fade-in border-wrapper-alt3'}>
 					<S.ContentHeaderWrapper>
 						<h4>{`[${language.app}]`}</h4>
 					</S.ContentHeaderWrapper>

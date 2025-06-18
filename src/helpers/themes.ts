@@ -39,6 +39,7 @@ export const lightTheme = {
 		primary: '#F38284',
 		alt1: '#59b3b9',
 		alt2: '#8886D9',
+		alt3: '#EE9339',
 	},
 };
 
@@ -81,6 +82,7 @@ export const lightThemeHighContrast = {
 		primary: '#f38284',
 		alt1: '#59B3B9',
 		alt2: '#8886D9',
+		alt3: '#EE9339',
 	},
 };
 
@@ -123,6 +125,7 @@ export const lightThemeAlt1 = {
 		primary: '#f38284',
 		alt1: '#59b3b9',
 		alt2: '#8886D9',
+		alt3: '#EE9339',
 	},
 };
 
@@ -165,6 +168,7 @@ export const lightThemeAlt2 = {
 		primary: '#f38284',
 		alt1: '#59b3b9',
 		alt2: '#8886D9',
+		alt3: '#EE9339',
 	},
 };
 
@@ -207,6 +211,7 @@ export const darkTheme = {
 		primary: '#f38284',
 		alt1: '#59b3b9',
 		alt2: '#8886D9',
+		alt3: '#EE9339',
 	},
 };
 
@@ -249,6 +254,7 @@ export const darkThemeHighContrast = {
 		primary: '#f38284',
 		alt1: '#59b3b9',
 		alt2: '#8886D9',
+		alt3: '#EE9339',
 	},
 };
 
@@ -291,6 +297,7 @@ export const darkThemeAlt1 = {
 		primary: '#f38284',
 		alt1: '#59b3b9',
 		alt2: '#8886D9',
+		alt3: '#EE9339',
 	},
 };
 
@@ -333,6 +340,7 @@ export const darkThemeAlt2 = {
 		primary: '#f38284',
 		alt1: '#59b3b9',
 		alt2: '#8886D9',
+		alt3: '#EE9339',
 	},
 };
 
@@ -507,6 +515,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			},
 		},
 		indicator: {
+			base: currentTheme.positive2,
 			active: currentTheme.positive1,
 			alt1: currentTheme.negative2,
 		},
@@ -525,6 +534,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			primary: currentTheme.roles.primary,
 			alt1: currentTheme.roles.alt1,
 			alt2: currentTheme.roles.alt2,
+			alt3: currentTheme.roles.alt3,
 		},
 		row: {
 			active: {
@@ -575,8 +585,8 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			lg: '18px',
 			xLg: '24px',
 			h1: 'clamp(36px, 3.5vw, 56px)',
-			h2: 'clamp(32px, 3.25vw, 50px)',
-			h4: 'clamp(28px, 3vw, 42px)',
+			h2: 'clamp(34px, 3.25vw, 50px)',
+			h4: 'clamp(32px, 3vw, 42px)',
 		},
 		weight: {
 			light: '300',

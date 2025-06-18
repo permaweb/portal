@@ -266,3 +266,7 @@ export function getARAmountFromWinc(amount: number) {
 export function formatRoleLabel(role: string) {
 	return role.replace(/[_-]/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
 }
+
+export function filterDuplicates(arr: string[]): string[] {
+	return arr.filter((item, idx, self) => self.indexOf(item) === idx);
+}

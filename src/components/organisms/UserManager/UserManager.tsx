@@ -62,7 +62,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 			try {
 				let profile = null;
 
-				if (props.user) profile = { id: props.user.profileId };
+				if (props.user) profile = { id: props.user.address };
 				else profile = await permawebProvider.libs.getProfileByWalletAddress(walletAddress);
 
 				if (!profile?.id) {

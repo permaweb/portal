@@ -18,7 +18,6 @@ export const Wrapper = styled.div`
 `;
 
 export const TitleWrapper = styled.div`
-	width: 50%;
 	max-width: 90vw;
 	input {
 		width: 100%;
@@ -33,6 +32,13 @@ export const TitleWrapper = styled.div`
 `;
 
 export const EndActions = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 20px;
+`;
+
+export const SubmitWrapper = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;

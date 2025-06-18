@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import { debounce } from 'lodash';
 
@@ -8,7 +9,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
 import { Tabs } from 'components/atoms/Tabs';
 import { ARTICLE_BLOCKS, ASSETS, DOM, STYLING } from 'helpers/config';
-import { ArticleBlockEnum, PortalCategoryType } from 'helpers/types';
+import { ArticleBlockEnum, PortalAssetRequestType, PortalCategoryType } from 'helpers/types';
 import { checkWindowCutoff, hideDocumentBody, showDocumentBody } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePortalProvider } from 'providers/PortalProvider';
@@ -21,6 +22,7 @@ import { IProps } from './types';
 
 export default function ArticleToolbar(props: IProps) {
 	const dispatch = useDispatch();
+	const { assetId } = useParams<{ assetId?: string }>();
 
 	const currentPost = useSelector((state: RootState) => state.currentPost);
 
@@ -29,7 +31,7 @@ export default function ArticleToolbar(props: IProps) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const TABS = [{ label: language.blocks }, { label: language.post }];
+	const TABS = [{ label: language.post }, { label: language.blocks }];
 
 	const titleRef = React.useRef<any>(null);
 	const blockRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
@@ -373,6 +375,48 @@ export default function ArticleToolbar(props: IProps) {
 		}
 	}
 
+	// TODO: If contributor visits post directly they have the ability to save, should be unauthorized
+	function getSubmit() {
+		const isCurrentRequest =
+			!!assetId && portalProvider.current?.requests?.some((request: PortalAssetRequestType) => request.id === assetId);
+		const primaryDisabled = currentPost.editor.loading.active || currentPost.editor.submitDisabled;
+		const unauthorized = !portalProvider.permissions?.updatePostRequestStatus;
+
+		if (isCurrentRequest) {
+			return (
+				<>
+					<Button
+						type={'warning'}
+						label={language.reject}
+						handlePress={() => props.handleRequestUpdate('Reject')}
+						active={false}
+						disabled={primaryDisabled || unauthorized}
+						noFocus
+					/>
+					<Button
+						type={'indicator'}
+						label={language.approve}
+						handlePress={() => props.handleRequestUpdate('Approve')}
+						active={false}
+						disabled={primaryDisabled || unauthorized}
+						noFocus
+					/>
+				</>
+			);
+		}
+
+		return (
+			<Button
+				type={'alt1'}
+				label={language.save}
+				handlePress={props.handleSubmit}
+				active={false}
+				disabled={currentPost.editor.loading.active || currentPost.editor.submitDisabled}
+				noFocus
+			/>
+		);
+	}
+
 	const panel = React.useMemo(() => {
 		const content = (
 			<S.Panel className={'border-wrapper-primary fade-in'} open={currentPost.editor.panelOpen}>
@@ -468,14 +512,7 @@ export default function ArticleToolbar(props: IProps) {
 						tooltip={'CTRL + L'}
 						noFocus
 					/>
-					<Button
-						type={'alt1'}
-						label={language.save}
-						handlePress={props.handleSubmit}
-						active={false}
-						disabled={currentPost.editor.loading.active || currentPost.editor.submitDisabled}
-						noFocus
-					/>
+					<S.SubmitWrapper>{getSubmit()}</S.SubmitWrapper>
 				</S.EndActions>
 			</S.Wrapper>
 			{panel}

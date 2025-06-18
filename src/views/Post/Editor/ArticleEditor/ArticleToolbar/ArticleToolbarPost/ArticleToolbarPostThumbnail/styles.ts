@@ -98,7 +98,7 @@ export const FooterWrapper = styled.div`
 	margin: 5px 0 0 0;
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: flex-end;
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;

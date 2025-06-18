@@ -50,6 +50,18 @@ export default function Button(props: IProps) {
 					icon: S.IconAlt4,
 				};
 				break;
+			case 'indicator':
+				buttonObj = {
+					wrapper: S.Indicator,
+					icon: S.IconIndicator,
+				};
+				break;
+			case 'warning':
+				buttonObj = {
+					wrapper: S.Warning,
+					icon: S.IconWarning,
+				};
+				break;
 			default:
 				buttonObj = {
 					wrapper: S.Primary,

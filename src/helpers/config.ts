@@ -114,7 +114,7 @@ export const STYLING = {
 	},
 	dimensions: {
 		button: {
-			height: '35px',
+			height: '33.5px',
 			width: 'fit-content',
 		},
 		form: {
@@ -128,9 +128,10 @@ export const STYLING = {
 		radius: {
 			primary: '7.5px',
 			alt1: '15px',
-			alt2: '10px',
+			alt2: '15px',
 			alt3: '2.5px',
 			alt4: '5px',
+			button: '25px',
 		},
 	},
 };

@@ -17,6 +17,8 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import * as S from './styles';
 import { IProps } from './types';
 
+// TODO: Use file type from media block
+// TODO: Get cost and show confirmation
 export default function MediaLibrary(props: IProps) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -124,6 +126,8 @@ export default function MediaLibrary(props: IProps) {
 		})();
 	}, [newUploadUrl, portalProvider.current?.id, arProvider.wallet]);
 
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+
 	function getMediaType(dataUrl: string): string {
 		const mediaTypeMatch = dataUrl.match(/^data:(.+?);base64,/);
 
@@ -152,7 +156,7 @@ export default function MediaLibrary(props: IProps) {
 	}
 
 	const deleteUpload = async () => {
-		if (arProvider.wallet && portalProvider.current?.uploads && selectedUpload) {
+		if (!unauthorized && arProvider.wallet && portalProvider.current?.uploads && selectedUpload) {
 			setShowDeleteConfirmation(false);
 			setMediaLoading(true);
 			setMediaMessage(`${language.removingMedia}...`);
@@ -235,7 +239,12 @@ export default function MediaLibrary(props: IProps) {
 					const active = selectedUpload?.tx === upload.tx;
 
 					return (
-						<S.UploadWrapper key={upload.tx} active={active} onClick={() => setSelectedUpload(active ? null : upload)}>
+						<S.UploadWrapper
+							key={upload.tx}
+							active={active}
+							disabled={unauthorized}
+							onClick={() => setSelectedUpload(active ? null : upload)}
+						>
 							{getUpload(upload)}
 							{active && (
 								<S.Indicator>
@@ -259,7 +268,7 @@ export default function MediaLibrary(props: IProps) {
 							type={'alt3'}
 							label={language.remove}
 							handlePress={() => setShowDeleteConfirmation(true)}
-							disabled={!selectedUpload}
+							disabled={unauthorized || !selectedUpload}
 							loading={false}
 							icon={ASSETS.delete}
 							iconLeftAlign
@@ -269,7 +278,7 @@ export default function MediaLibrary(props: IProps) {
 							type={'alt4'}
 							label={language.upload}
 							handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
-							disabled={false}
+							disabled={unauthorized}
 							loading={false}
 							icon={ASSETS.upload}
 							iconLeftAlign

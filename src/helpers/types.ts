@@ -1,16 +1,17 @@
-export type PortalHeaderType = { id: string; name: string; logo: string | null };
+export type PortalHeaderType = { id: string; name: string; logo: string | null; roles?: PortalRolesType[] };
 
 export type PortalDetailType = {
 	id: string;
 	name: string;
 	logo: string | null;
 	assets?: PortalAssetType[];
+	requests?: PortalAssetRequestType[];
 	categories?: PortalCategoryType[];
 	topics?: PortalTopicType[];
 	links?: PortalLinkType[];
 	users?: PortalRolesType[];
 	roleOptions?: { [key: string]: PortalUserRoleType };
-	permissions?: { [key: string]: PortalUserRoleType[] };
+	permissions?: PortalPermissionsType;
 	domains?: string[];
 	uploads?: PortalUploadType[];
 	themes?: PortalThemeType[];
@@ -39,6 +40,13 @@ export type PortalAssetType = {
 	};
 };
 
+export type PortalAssetRequestType = {
+	id: string;
+	name?: string;
+	creatorId?: string;
+	dateCreated?: string;
+};
+
 export type PortalAssetPostType = {
 	id: null;
 	title: '';
@@ -48,6 +56,7 @@ export type PortalAssetPostType = {
 	status: ArticleStatusType;
 	categories: PortalCategoryType[];
 	topics: string[];
+	externalRecipients: string[];
 	thumbnail: string | null;
 	dateCreated: number | null;
 	lastUpdate: number | null;
@@ -61,8 +70,9 @@ export type PortalUserType = {
 };
 
 export type PortalRolesType = {
-	profileId: string;
-	roles: PortalUserRoleType[];
+	address: string;
+	type?: 'wallet' | 'process';
+	roles?: PortalUserRoleType[];
 };
 
 export type PortalThemeType = {
@@ -100,7 +110,9 @@ export type PortalUploadType = {
 
 export type PortalUploadOptionType = 'image' | 'video';
 
-export type PortalUserRoleType = 'Admin' | 'Contributor' | 'ExternalContributor' | 'Moderator';
+export type PortalUserRoleType = 'Admin' | 'Contributor' | 'External-Contributor' | 'Moderator';
+
+export type RequestUpdateType = 'Approve' | 'Reject';
 
 export type PortalCategoryType = {
 	id: string;
@@ -111,7 +123,12 @@ export type PortalCategoryType = {
 
 export type PortalPermissionsType = {
 	base: boolean;
-	users: boolean;
+	updatePortalMeta?: boolean;
+	updateUsers?: boolean;
+	postAutoIndex?: boolean;
+	postRequestIndex?: boolean;
+	updatePostRequestStatus?: boolean;
+	externalContributor?: boolean;
 };
 
 export enum ArticleBlockEnum {
@@ -218,7 +235,7 @@ export type ValidationType = {
 	message: string | null;
 };
 
-export type ButtonType = 'primary' | 'alt1' | 'alt2' | 'alt3' | 'alt4' | 'success' | 'warning';
+export type ButtonType = 'primary' | 'alt1' | 'alt2' | 'alt3' | 'alt4' | 'indicator' | 'warning';
 
 export type SelectOptionType = { id: string; label: string };
 

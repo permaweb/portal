@@ -13,9 +13,16 @@ import { usePortalProvider } from 'providers/PortalProvider';
 import { Modal } from '../../atoms/Modal';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function Topics(props: IProps) {
+// TODO: props.skipAuthCheck not accounting for when there are no topics in the portal
+export default function Topics(props: {
+	topics: string[];
+	setTopics: (topics: string[]) => void;
+	selectOnAdd?: boolean;
+	showActions?: boolean;
+	closeAction?: () => void;
+	skipAuthCheck?: boolean;
+}) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
@@ -35,8 +42,16 @@ export default function Topics(props: IProps) {
 		}
 	}, [portalProvider.current]);
 
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta && !props.skipAuthCheck;
+
 	const addTopic = async () => {
-		if (newTopic && !props.topics.includes(newTopic) && portalProvider.current?.id && arProvider.wallet) {
+		if (
+			!unauthorized &&
+			newTopic &&
+			!props.topics.includes(newTopic) &&
+			portalProvider.current?.id &&
+			arProvider.wallet
+		) {
 			setTopicLoading(true);
 			try {
 				const updatedTopicOptions = [...topicOptions, newTopic];
@@ -64,7 +79,7 @@ export default function Topics(props: IProps) {
 	};
 
 	const deleteTopics = async () => {
-		if (arProvider.wallet && portalProvider.current?.topics && props.topics?.length) {
+		if (!unauthorized && arProvider.wallet && portalProvider.current?.topics && props.topics?.length) {
 			setTopicLoading(true);
 			try {
 				const currentTopicOptions = portalProvider.current.topics.map((topic: PortalTopicType) => topic.value);
@@ -95,6 +110,7 @@ export default function Topics(props: IProps) {
 	};
 
 	const topicActionDisabled =
+		unauthorized ||
 		!arProvider.wallet ||
 		!portalProvider.current?.id ||
 		!newTopic ||
@@ -128,7 +144,7 @@ export default function Topics(props: IProps) {
 							label={topic}
 							handlePress={() => (active ? removeTopic(topic) : props.setTopics([...props.topics, topic]))}
 							active={active}
-							disabled={topicLoading}
+							disabled={unauthorized || topicLoading}
 							icon={active ? ASSETS.close : ASSETS.add}
 						/>
 					);
@@ -154,7 +170,7 @@ export default function Topics(props: IProps) {
 						value={newTopic}
 						onChange={(e: any) => setNewTopic(e.target.value)}
 						invalid={{ status: topicOptions?.length && topicOptions.includes(newTopic), message: null }}
-						disabled={topicLoading}
+						disabled={unauthorized || topicLoading}
 						hideErrorMessage
 						sm
 					/>
@@ -169,7 +185,7 @@ export default function Topics(props: IProps) {
 							type={'alt3'}
 							label={language.remove}
 							handlePress={() => setShowDeleteConfirmation(true)}
-							disabled={!props.topics?.length || topicLoading}
+							disabled={unauthorized || !props.topics?.length || topicLoading}
 							loading={false}
 							icon={ASSETS.delete}
 							iconLeftAlign
@@ -205,7 +221,7 @@ export default function Topics(props: IProps) {
 								label={language.topicDeleteConfirmation}
 								handlePress={() => deleteTopics()}
 								disabled={!props.topics?.length || topicLoading}
-								loading={topicLoading}
+								loading={unauthorized || topicLoading}
 								icon={ASSETS.delete}
 								iconLeftAlign
 								warning

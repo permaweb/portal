@@ -191,6 +191,25 @@ export const GlobalStyle = createGlobalStyle`
     border-radius: ${STYLING.dimensions.radius.alt2};
   }
 
+	.notification {
+		height: 12.5px;
+		width: 12.5px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		position: relative;
+		top: 0;
+		right: 0;
+		background: ${(props) => props.theme.colors.indicator.alt1};
+		border-radius: 50%;
+
+		span {
+			font-size: 8px;
+			font-weight: ${(props) => props.theme.typography.weight.bold};
+			color: ${(props) => props.theme.colors.font.light1};
+		}
+	}
+
   .max-view-wrapper {
     width: 100%;
     max-width: ${STYLING.cutoffs.max};
@@ -314,6 +333,10 @@ export const MessageWrapper = styled.div`
 	padding: 12.5px 30px;
 
 	p {
+		width: 500px;
+		max-width: 90vw;
+		text-align: center;
+		line-height: 1.65;
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-weight: ${(props) => props.theme.typography.weight.bold};

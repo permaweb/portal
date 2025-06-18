@@ -47,6 +47,11 @@ export default function Links(props: IProps) {
 		}
 	}, [portalProvider.current]);
 
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+
+	const linkActionDisabled =
+		unauthorized || !arProvider.wallet || !portalProvider.current?.id || !newLinkUrl || !newLinkTitle || linkLoading;
+
 	const handleSelect = (link: PortalLinkType) => {
 		const isSelected = selectedLinks.some((selectedLink) => selectedLink.url === link.url);
 		if (isSelected) {
@@ -57,7 +62,7 @@ export default function Links(props: IProps) {
 	};
 
 	const deleteLinks = async () => {
-		if (arProvider.wallet && portalProvider.current?.links && selectedLinks?.length) {
+		if (!unauthorized && arProvider.wallet && portalProvider.current?.links && selectedLinks?.length) {
 			setLinkLoading(true);
 			try {
 				const updatedLinks = linkOptions.filter(
@@ -87,7 +92,7 @@ export default function Links(props: IProps) {
 	};
 
 	const addLink = async () => {
-		if (newLinkUrl && newLinkTitle && portalProvider.current?.id && arProvider.wallet) {
+		if (!unauthorized && newLinkUrl && newLinkTitle && portalProvider.current?.id && arProvider.wallet) {
 			setLinkLoading(true);
 			try {
 				let newLink: { Url: string; Title: string; Icon?: string } = { Url: newLinkUrl, Title: newLinkTitle };
@@ -118,9 +123,6 @@ export default function Links(props: IProps) {
 			setLinkLoading(false);
 		}
 	};
-
-	const linkActionDisabled =
-		!arProvider.wallet || !portalProvider.current?.id || !newLinkUrl || !newLinkTitle || linkLoading;
 
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
 		if (e.target.files && e.target.files.length) {
@@ -226,7 +228,7 @@ export default function Links(props: IProps) {
 										type={'alt4'}
 										label={language.prefill}
 										handlePress={() => setShowPrefills(!showPrefills)}
-										disabled={!arProvider.wallet || !portalProvider.current?.id || linkLoading}
+										disabled={unauthorized || !arProvider.wallet || !portalProvider.current?.id || linkLoading}
 										loading={false}
 									/>
 									{showPrefills && (
@@ -260,11 +262,15 @@ export default function Links(props: IProps) {
 							onChange={(e: any) => setNewLinkTitle(e.target.value)}
 							invalid={{ status: false, message: null }}
 							label={language.text}
-							disabled={linkLoading}
+							disabled={linkLoading || unauthorized}
 							hideErrorMessage
 							sm
 						/>
-						<S.IconInput hasData={newLinkIcon !== null} onClick={() => inputRef.current.click()} disabled={linkLoading}>
+						<S.IconInput
+							hasData={newLinkIcon !== null}
+							onClick={() => inputRef.current.click()}
+							disabled={unauthorized || linkLoading}
+						>
 							{getIconWrapper()}
 						</S.IconInput>
 						<input
@@ -292,7 +298,7 @@ export default function Links(props: IProps) {
 							invalid={{ status: newLinkUrl?.length > 0 && !validateUrl(newLinkUrl), message: null }}
 							label={language.url}
 							placeholder={'https://'}
-							disabled={linkLoading}
+							disabled={linkLoading || unauthorized}
 							hideErrorMessage
 							sm
 						/>
@@ -309,7 +315,7 @@ export default function Links(props: IProps) {
 								setSelectedLinks([]);
 							}}
 							active={editMode}
-							disabled={linkOptions?.length <= 0 || linkLoading}
+							disabled={unauthorized || linkOptions?.length <= 0 || linkLoading}
 							loading={false}
 							icon={editMode ? ASSETS.close : ASSETS.write}
 							iconLeftAlign

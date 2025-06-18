@@ -74,6 +74,14 @@ export default function PortalSetup(props: IProps) {
 		setSelectedCategories(updatedCategories);
 	}
 
+	function getLinkAction() {
+		return (
+			<S.LinksBodyWrapper>
+				<Links type={props.type} />
+			</S.LinksBodyWrapper>
+		);
+	}
+
 	function getCategoryAction() {
 		return (
 			<S.BodyWrapper>
@@ -92,14 +100,6 @@ export default function PortalSetup(props: IProps) {
 			<S.TopicsBodyWrapper>
 				<Topics topics={selectedTopics} setTopics={(topics: string[]) => setSelectedTopics(topics)} showActions />
 			</S.TopicsBodyWrapper>
-		);
-	}
-
-	function getLinkAction() {
-		return (
-			<S.LinksBodyWrapper>
-				<Links type={props.type} />
-			</S.LinksBodyWrapper>
 		);
 	}
 
@@ -209,6 +209,11 @@ export default function PortalSetup(props: IProps) {
 					{props.type === 'header' ? topicSection() : categorySection()}
 					{props.type === 'detail' && mediaSection()}
 				</S.SectionWrapper>
+				{!portalProvider?.permissions?.updateUsers && (
+					<S.InfoWrapper className={'info'}>
+						<span>{language.unauthorizedPortalUpdate}</span>
+					</S.InfoWrapper>
+				)}
 			</S.Wrapper>
 		</>
 	);

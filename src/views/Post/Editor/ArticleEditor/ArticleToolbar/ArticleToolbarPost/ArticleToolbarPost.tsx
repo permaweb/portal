@@ -2,6 +2,7 @@ import { Categories } from 'components/molecules/Categories';
 import { Topics } from 'components/molecules/Topics';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
+import { ArticleToolbarPostContribute } from './ArticleToolbarPostContribute';
 import { ArticleToolbarPostDescription } from './ArticleToolbarPostDescription';
 import { ArticleToolbarPostThumbnail } from './ArticleToolbarPostThumbnail';
 import * as S from './styles';
@@ -13,6 +14,14 @@ export default function ArticleToolbarPost(props: IProps) {
 
 	return (
 		<S.Wrapper>
+			<S.Section>
+				<S.SectionHeader>
+					<p>{language.contribute}</p>
+				</S.SectionHeader>
+				<S.SectionBody>
+					<ArticleToolbarPostContribute />
+				</S.SectionBody>
+			</S.Section>
 			<S.Section>
 				<S.SectionHeader>
 					<p>{language.thumbnail}</p>
@@ -34,7 +43,7 @@ export default function ArticleToolbarPost(props: IProps) {
 					<p>{language.categories}</p>
 				</S.SectionHeaderInput>
 				<S.SectionBody>
-					<Categories categories={props.categories} setCategories={props.setCategories} selectOnAdd />
+					<Categories categories={props.categories} setCategories={props.setCategories} selectOnAdd skipAuthCheck />
 				</S.SectionBody>
 			</S.Section>
 			<S.TopicsSection>
@@ -42,7 +51,7 @@ export default function ArticleToolbarPost(props: IProps) {
 					<p>{language.topics}</p>
 				</S.SectionHeaderInput>
 				<S.SectionBody>
-					<Topics topics={props.topics} setTopics={props.setTopics} selectOnAdd />
+					<Topics topics={props.topics} setTopics={props.setTopics} selectOnAdd skipAuthCheck />
 				</S.SectionBody>
 			</S.TopicsSection>
 		</S.Wrapper>
