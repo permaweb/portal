@@ -1,28 +1,54 @@
+import React, { lazy } from 'react';
 import ReactDOM from 'react-dom/client';
-import { HashRouter, Route, Routes, useNavigate } from 'react-router-dom';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 
 import { Footer } from 'viewer/navigation/footer';
 import { Header } from 'viewer/navigation/header';
+import { CustomThemeProvider } from 'viewer/providers/CustomThemeProvider';
 import { PortalProvider, usePortalProvider } from 'viewer/providers/PortalProvider';
 
 import { Loader } from 'components/atoms/Loader';
-import { DOM } from 'helpers/config';
+import { DOM, URLS } from 'helpers/config';
 import { GlobalStyle } from 'helpers/styles';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider } from 'providers/LanguageProvider';
 import { PermawebProvider } from 'providers/PermawebProvider';
-import { SettingsProvider } from 'providers/SettingsProvider';
+
+import * as S from './styles';
+
+const views = (import.meta as any).glob('./views/**/index.tsx');
+
+const Landing = getLazyImport('Landing');
+
+function getLazyImport(view: string) {
+	const key = `./views/${view}/index.tsx`;
+	const loader = views[key];
+
+	if (!loader) {
+		throw new Error(`View not found: ${view}`);
+	}
+
+	return lazy(async () => {
+		const module = await loader();
+		return { default: module.default };
+	});
+}
 
 function App() {
 	const portalProvider = usePortalProvider();
 
-	if (!portalProvider.current)
+	React.useEffect(() => {
+		if (portalProvider.current?.name) document.title = portalProvider.current.name;
+	}, [portalProvider.current?.name]);
+
+	if (!portalProvider.current) {
 		return (
 			<>
 				<div id={DOM.loader} />
 				<Loader />
 			</>
 		);
+	}
 
 	return (
 		<>
@@ -30,27 +56,30 @@ function App() {
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />
 			<Header />
-			<div style={{ height: 200 }}>
-
-			</div>
+			<S.View className={'max-view-wrapper'} navHeight={85}>
+				<Routes>
+					<Route path={URLS.base} element={<Landing />} />
+				</Routes>
+			</S.View>
 			<Footer />
 		</>
 	);
 }
 
+// TODO: Remove all theme usage from arweave provider
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 	<HashRouter>
-		<SettingsProvider>
-			<LanguageProvider>
-				<ArweaveProvider>
-					<PermawebProvider>
-						<PortalProvider>
+		<LanguageProvider>
+			<ArweaveProvider>
+				<PermawebProvider>
+					<PortalProvider>
+						<CustomThemeProvider>
 							<GlobalStyle />
 							<App />
-						</PortalProvider>
-					</PermawebProvider>
-				</ArweaveProvider>
-			</LanguageProvider>
-		</SettingsProvider>
+						</CustomThemeProvider>
+					</PortalProvider>
+				</PermawebProvider>
+			</ArweaveProvider>
+		</LanguageProvider>
 	</HashRouter>
 );

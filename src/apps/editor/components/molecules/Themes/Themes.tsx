@@ -194,6 +194,8 @@ function Section(props: {
 	);
 }
 
+// TODO: Only select bg (primary) and links
+// TODO: Add tooltip for how themes are generated (text opposite of primary)
 export default function Themes(props: IProps) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();

@@ -107,7 +107,7 @@ export const LInput = styled.button<{ hasLogo: boolean }>`
 	img {
 		height: 100%;
 		width: 100%;
-		object-fit: cover;
+		object-fit: contain;
 	}
 	&:hover {
 		border: 1px dashed ${(props) => props.theme.colors.border.alt2};

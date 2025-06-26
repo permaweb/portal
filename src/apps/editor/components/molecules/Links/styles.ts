@@ -276,13 +276,6 @@ export const LinkWrapper = styled.div<{ editMode: boolean; active: boolean }>`
 				fill: ${(props) => props.theme.colors.font.light1};
 			}
 		}
-		/* &:focus {
-			background: ${(props) => props.theme.colors.button.alt1.active.background};
-			svg {
-				color: ${(props) => props.theme.colors.font.light1};
-				fill: ${(props) => props.theme.colors.font.light1};
-			}
-		} */
 	}
 `;
 

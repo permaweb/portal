@@ -20,7 +20,7 @@ import { formatAddress, getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import { useSettingsProvider } from 'providers/SettingsProvider';
+import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';

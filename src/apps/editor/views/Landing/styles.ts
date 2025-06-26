@@ -209,6 +209,7 @@ export const PortalsListWrapper = styled.div`
 			width: 22.5px;
 			margin: 0 12.5px 0 0;
 			border-radius: 50%;
+			object-fit: contain;
 		}
 		&:hover {
 			background: ${(props) => props.theme.colors.button.primary.active.background};

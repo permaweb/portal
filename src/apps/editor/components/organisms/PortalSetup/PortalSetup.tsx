@@ -9,7 +9,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS } from 'helpers/config';
 import { PortalCategoryType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-import { useSettingsProvider } from 'providers/SettingsProvider';
+import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 
 import { MediaLibrary } from '../MediaLibrary';
 

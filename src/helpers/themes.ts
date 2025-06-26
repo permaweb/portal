@@ -584,6 +584,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			base: '16px',
 			lg: '18px',
 			xLg: '24px',
+			xxLg: 'clamp(26px, 2.5vw, 28px)',
 			h1: 'clamp(36px, 3.5vw, 56px)',
 			h2: 'clamp(34px, 3.25vw, 50px)',
 			h4: 'clamp(32px, 3vw, 42px)',

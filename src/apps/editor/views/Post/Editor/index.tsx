@@ -26,6 +26,9 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { ArticleEditor } from './ArticleEditor';
 import * as S from './styles';
 
+// TODO: Images under 5mb failing
+// TODO: Title length  - cutting off
+// TODO: Media block throwing error after image is uploaded
 export default function Editor() {
 	const navigate = useNavigate();
 	const { assetId } = useParams<{ assetId?: string }>();

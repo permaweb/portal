@@ -37,6 +37,7 @@ export type PortalAssetType = {
 		categories?: PortalCategoryType[];
 		status?: ArticleStatusType;
 		content?: any;
+		thumbnail?: string;
 	};
 };
 

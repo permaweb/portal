@@ -8,6 +8,7 @@ import { CurrentZoneVersion } from '@permaweb/libs';
 
 import { Navigation } from 'editor/navigation';
 import { PortalProvider, usePortalProvider } from 'editor/providers/PortalProvider';
+import { SettingsProvider, useSettingsProvider } from 'editor/providers/SettingsProvider';
 import { persistor, store } from 'editor/store';
 
 import { Button } from 'components/atoms/Button';
@@ -18,7 +19,6 @@ import { GlobalStyle } from 'helpers/styles';
 import { ArweaveProvider, useArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvider';
 import { PermawebProvider, usePermawebProvider } from 'providers/PermawebProvider';
-import { SettingsProvider, useSettingsProvider } from 'providers/SettingsProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';

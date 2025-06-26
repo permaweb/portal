@@ -52,7 +52,7 @@ export const LogoWrapper = styled.div`
 `;
 
 export const NavigationWrapper = styled(WrapperContent)`
-	height: 45px;
+	height: ${STYLING.dimensions.nav.linksHeight};
 	width: 100%;
 	background: ${(props) => props.theme.colors.container.alt1.background};
 	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
@@ -63,7 +63,7 @@ export const NavigationContent = styled.ul`
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 40px;
+	gap: 35px;
 	padding: 0 20px;
 `;
 
@@ -135,4 +135,17 @@ export const SubMenu = styled.ul`
 	a {
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
 	}
+`;
+
+export const OverflowWrapper = styled.div`
+	position: relative;
+`;
+
+export const OverflowContent = styled.div`
+	width: 300px;
+	position: absolute;
+	top: 30px;
+	display: flex;
+	flex-direction: column;
+	padding: 7.5px 15px 8.5px 15px;
 `;
