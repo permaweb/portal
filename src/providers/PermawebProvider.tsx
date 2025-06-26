@@ -4,9 +4,10 @@ import Arweave from 'arweave';
 import Permaweb, { Types } from '@permaweb/libs';
 import { connect, createDataItemSigner } from '@permaweb/aoconnect';
 
+import { ProfileManager } from 'editor/components/organisms/ProfileManager';
+
 import { Loader } from 'components/atoms/Loader';
 import { Panel } from 'components/atoms/Panel';
-import { ProfileManager } from 'components/organisms/ProfileManager';
 import { STORAGE } from 'helpers/config';
 
 import { useArweaveProvider } from './ArweaveProvider';

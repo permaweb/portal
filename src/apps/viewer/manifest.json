@@ -1,0 +1,31 @@
+{
+	"name": "Portal",
+	"short_name": "Portal",
+	"description": "Build and preview your own websites and blogs",
+	"icons": [
+		{
+			"src": "https://arweave.net/WzomcwfXZ_4hhUvDso1wsyJpNBHGeHezFZQv3V706Hw",
+			"sizes": "192x192",
+			"type": "image/svg"
+		},
+		{
+			"src": "https://arweave.net/WzomcwfXZ_4hhUvDso1wsyJpNBHGeHezFZQv3V706Hw",
+			"sizes": "512x512",
+			"type": "image/svg"
+		},
+		{
+			"src": "https://arweave.net/WzomcwfXZ_4hhUvDso1wsyJpNBHGeHezFZQv3V706Hw",
+			"sizes": "512x512",
+			"type": "image/svg",
+			"purpose": "maskable any"
+		}
+	],
+	"start_url": ".",
+	"scope": ".",
+	"display": "standalone",
+	"orientation": "portrait-primary",
+	"background_color": "#2D2D2D",
+	"theme_color": "#2D2D2D",
+	"categories": ["productivity", "blog", "cms"],
+	"lang": "en-US"
+}

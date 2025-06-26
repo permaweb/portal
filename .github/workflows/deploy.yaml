@@ -18,7 +18,7 @@ jobs:
       - name: Clean lockfile (if needed)
         run: rm -rf package-lock.json node_modules
       - run: npm install
-      - run: npm run deploy:main
+      - run: npm run deploy:editor:main
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
 
@@ -33,6 +33,6 @@ jobs:
       - name: Clean lockfile (if needed)
         run: rm -rf package-lock.json node_modules
       - run: npm install
-      - run: npm run deploy:staging
+      - run: npm run deploy:editor:staging
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}

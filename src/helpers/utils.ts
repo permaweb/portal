@@ -1,5 +1,6 @@
 import Arweave from 'arweave';
 
+import { STORAGE } from './config';
 import { PortalAssetType } from './types';
 
 export function checkValidAddress(address: string | null) {
@@ -79,9 +80,8 @@ export function formatDate(dateArg: string | number | null, dateType: 'iso' | 'e
 	}
 
 	return fullTime
-		? `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getUTCFullYear()} at ${
-				date.getHours() % 12 || 12
-		  }:${date.getMinutes().toString().padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'}`
+		? `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getUTCFullYear()} at ${date.getHours() % 12 || 12
+		}:${date.getMinutes().toString().padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'}`
 		: `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getUTCFullYear()}`;
 }
 
@@ -195,12 +195,12 @@ export function isMac(): boolean {
 export function validateUrl(url: string) {
 	const urlPattern = new RegExp(
 		'^(https?:\\/\\/)?' + // Optional protocol
-			'((([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}|' + // Domain name
-			'localhost|' + // OR localhost
-			'\\d{1,3}(\\.\\d{1,3}){3})' + // OR IPv4
-			'(\\:\\d+)?(\\/[-a-zA-Z\\d%_.~+]*)*' + // Optional port and path
-			'(\\?[;&a-zA-Z\\d%_.~+=-]*)?' + // Optional query
-			'(\\#[-a-zA-Z\\d_]*)?$', // Optional fragment
+		'((([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}|' + // Domain name
+		'localhost|' + // OR localhost
+		'\\d{1,3}(\\.\\d{1,3}){3})' + // OR IPv4
+		'(\\:\\d+)?(\\/[-a-zA-Z\\d%_.~+]*)*' + // Optional port and path
+		'(\\?[;&a-zA-Z\\d%_.~+=-]*)?' + // Optional query
+		'(\\#[-a-zA-Z\\d_]*)?$', // Optional fragment
 		'i'
 	);
 	return urlPattern.test(url);
@@ -269,4 +269,20 @@ export function formatRoleLabel(role: string) {
 
 export function filterDuplicates(arr: string[]): string[] {
 	return arr.filter((item, idx, self) => self.indexOf(item) === idx);
+}
+
+export const getCachedPortal = (id: string) => {
+	const cached = localStorage.getItem(STORAGE.portal(id));
+	return cached ? JSON.parse(cached) : null;
+};
+
+export const cachePortal = (id: string, portalData: any) => {
+	localStorage.setItem(STORAGE.portal(id), JSON.stringify(portalData));
+};
+
+export function getPortalAssets(index: PortalAssetType[]) {
+	return index?.filter(
+		(asset: any) =>
+			asset.processType && asset.processType === 'atomic-asset' && asset.assetType && asset.assetType === 'blog-post'
+	);
 }
