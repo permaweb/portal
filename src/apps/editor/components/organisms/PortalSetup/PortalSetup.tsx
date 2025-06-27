@@ -4,12 +4,12 @@ import { Categories } from 'editor/components/molecules/Categories';
 import { Links } from 'editor/components/molecules/Links';
 import { Topics } from 'editor/components/molecules/Topics';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
+import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 
 import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS } from 'helpers/config';
 import { PortalCategoryType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 
 import { MediaLibrary } from '../MediaLibrary';
 

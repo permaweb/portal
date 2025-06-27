@@ -573,8 +573,8 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 	},
 	typography: {
 		family: {
-			primary: `'Open Sans', sans-serif`,
-			alt1: `'Crimson Pro', serif`,
+			primary: currentTheme.typography?.family?.primary ?? `'Open Sans', sans-serif`,
+			alt1: currentTheme.typography?.family?.alt1 ?? `'Crimson Pro', serif`,
 		},
 		size: {
 			xxxSmall: '12px',
@@ -585,9 +585,9 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			lg: '18px',
 			xLg: '24px',
 			xxLg: 'clamp(26px, 2.5vw, 28px)',
-			h1: 'clamp(36px, 3.5vw, 56px)',
-			h2: 'clamp(34px, 3.25vw, 50px)',
-			h4: 'clamp(32px, 3vw, 42px)',
+			h1: 'clamp(28.8px, 2.8vw, 44.8px)',
+			h2: 'clamp(27.2px, 2.6vw, 40px)',
+			h4: 'clamp(25.6px, 2.4vw, 33.6px)',
 		},
 		weight: {
 			light: '300',

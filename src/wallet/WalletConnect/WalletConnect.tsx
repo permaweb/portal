@@ -1,6 +1,8 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
+import { useSettingsProvider } from 'editor/providers/SettingsProvider';
+
 import { Avatar } from 'components/atoms/Avatar';
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
@@ -20,7 +22,6 @@ import { formatAddress, getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';

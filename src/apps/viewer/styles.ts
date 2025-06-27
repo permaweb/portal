@@ -8,7 +8,7 @@ function getNavHeightOffset(navHeight?: number) {
 }
 
 export const View = styled.main<{ navHeight?: number }>`
-	min-height: calc(100vh - ${(props) =>  getNavHeightOffset(props.navHeight)} - ${STYLING.dimensions.nav.linksHeight});
+	min-height: calc(100vh - ${(props) => getNavHeightOffset(props.navHeight)} - ${STYLING.dimensions.nav.linksHeight});
 	position: relative;
 	padding: 20px;
 `;

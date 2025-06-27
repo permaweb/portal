@@ -149,12 +149,14 @@ function createURLs() {
 
 	return {
 		base: base,
+		category: (category: string) => `${base}category/${category}`,
 		portalBase: portalBase,
 		portalDesign: (portalId: string) => `${portalBase(portalId)}design/`,
 		portalPosts: (portalId: string) => `${portalBase(portalId)}posts/`,
 		portalDomains: (portalId: string) => `${portalBase(portalId)}domains/`,
 		portalUsers: (portalId: string) => `${portalBase(portalId)}users/`,
 		portalSetup: (portalId: string) => `${portalBase(portalId)}setup/`,
+		post: (postId: string) => `${base}post/${postId}`,
 		postCreate: (portalId: string) => `${postCreateBase(portalId)}`,
 		postEdit: (portalId: string) => `${postEditBase(portalId)}`,
 		postCreateArticle: (portalId: string) => `${postCreateBase(portalId)}article/`,
@@ -308,3 +310,43 @@ export const PORTAL_ROLES = {
 	MODERATOR: 'Moderator',
 	GUEST_CONTRIBUTOR: 'Guest Contributor',
 };
+
+export const FONT_OPTIONS = {
+	headers: [
+		'Crimson Pro:400,600,700',
+		'Montserrat:400,700',
+		'Poppins:400,700',
+		'Raleway:400,700',
+		'Oswald:400,700',
+		'Bebas Neue',
+		'Playfair Display:400,700',
+		'DM Serif Display',
+		'Space Grotesk:400,700',
+		'Anton',
+		'Abril Fatface',
+		'Playfair Display:400,500,700,900',
+		'DM Serif Display',
+		'Libre Baskerville:400,700',
+		'Cormorant Garamond:400,500,600,700',
+		'EB Garamond:400,500,600,700',
+		'Lora:400,500,600,700',
+		'Merriweather:400,700,900',
+		'Tinos:400,700',
+		'Spectral:400,500,600,700',
+		'Alegreya:400,500,700,800',
+	],
+	body:
+		[
+			'Open Sans:400,600,700',
+			'Inter:400,600',
+			'Roboto:400,500',
+			'Lato:400,700',
+			'Work Sans:400,500',
+			'Source Sans Pro:400,600',
+			'Merriweather:400,700',
+			'DM Sans:400,500',
+			'Nunito:400,700',
+			'Hind:400,500'
+		]
+
+}

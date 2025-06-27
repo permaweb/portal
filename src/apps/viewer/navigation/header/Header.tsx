@@ -9,6 +9,7 @@ import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalCategoryType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
@@ -36,6 +37,8 @@ function Category(props: { category: PortalCategoryType }) {
 
 export default function Header() {
 	const portalProvider = usePortalProvider();
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
 
 	const [showOverflowCategories, setShowOverflowCategories] = React.useState<boolean>(false);
 
@@ -93,9 +96,19 @@ export default function Header() {
 	return (
 		<S.Wrapper>
 			<S.WrapperContent className={'max-view-wrapper'} height={85}>
+				<S.ContentStart>
+					{portalProvider.updating && (
+						<S.PortalUpdateWrapper>
+							<span>{`${language.updating}...`}</span>
+						</S.PortalUpdateWrapper>
+					)}
+				</S.ContentStart>
 				<S.LogoWrapper className={'fade-in'}>
 					<Link to={URLS.base}>{getLogo()}</Link>
 				</S.LogoWrapper>
+				<S.ContentEnd>
+
+				</S.ContentEnd>
 			</S.WrapperContent>
 			{portalProvider.current?.categories && getCategories()}
 		</S.Wrapper>

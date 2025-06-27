@@ -1,4 +1,4 @@
-import React, { lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
@@ -19,6 +19,8 @@ import * as S from './styles';
 const views = (import.meta as any).glob('./views/**/index.tsx');
 
 const Landing = getLazyImport('Landing');
+const Post = getLazyImport('Post');
+const NotFound = getLazyImport('NotFound');
 
 function getLazyImport(view: string) {
 	const key = `./views/${view}/index.tsx`;
@@ -57,9 +59,14 @@ function App() {
 			<div id={DOM.overlay} />
 			<Header />
 			<S.View className={'max-view-wrapper'} navHeight={85}>
-				<Routes>
-					<Route path={URLS.base} element={<Landing />} />
-				</Routes>
+				<Suspense fallback={null}>
+					<Routes>
+						<Route path={URLS.base} element={<Landing />} />
+						<Route path={`${URLS.base}post/:postId`} element={<Post />} />
+						<Route path={URLS.notFound} element={<NotFound />} />
+						<Route path={'*'} element={<NotFound />} />
+					</Routes>
+				</Suspense>
 			</S.View>
 			<Footer />
 		</>

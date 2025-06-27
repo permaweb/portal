@@ -26,7 +26,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 
 	const [walletAddress, setWalletAddress] = React.useState<string>('');
 
-	const [roleOptions, setRoleOptions] = React.useState<{ id: string; label: string }[] | null>(null);
+	const [roleOptions, setRoleOptions] = React.useState<SelectOptionType[] | null>(null);
 	const [role, setRole] = React.useState<SelectOptionType | null>(null);
 
 	const [loading, setLoading] = React.useState<boolean>(false);

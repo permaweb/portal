@@ -80,8 +80,9 @@ export function formatDate(dateArg: string | number | null, dateType: 'iso' | 'e
 	}
 
 	return fullTime
-		? `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getUTCFullYear()} at ${date.getHours() % 12 || 12
-		}:${date.getMinutes().toString().padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'}`
+		? `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getUTCFullYear()} at ${
+				date.getHours() % 12 || 12
+		  }:${date.getMinutes().toString().padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'}`
 		: `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getUTCFullYear()}`;
 }
 
@@ -195,12 +196,12 @@ export function isMac(): boolean {
 export function validateUrl(url: string) {
 	const urlPattern = new RegExp(
 		'^(https?:\\/\\/)?' + // Optional protocol
-		'((([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}|' + // Domain name
-		'localhost|' + // OR localhost
-		'\\d{1,3}(\\.\\d{1,3}){3})' + // OR IPv4
-		'(\\:\\d+)?(\\/[-a-zA-Z\\d%_.~+]*)*' + // Optional port and path
-		'(\\?[;&a-zA-Z\\d%_.~+=-]*)?' + // Optional query
-		'(\\#[-a-zA-Z\\d_]*)?$', // Optional fragment
+			'((([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}|' + // Domain name
+			'localhost|' + // OR localhost
+			'\\d{1,3}(\\.\\d{1,3}){3})' + // OR IPv4
+			'(\\:\\d+)?(\\/[-a-zA-Z\\d%_.~+]*)*' + // Optional port and path
+			'(\\?[;&a-zA-Z\\d%_.~+=-]*)?' + // Optional query
+			'(\\#[-a-zA-Z\\d_]*)?$', // Optional fragment
 		'i'
 	);
 	return urlPattern.test(url);
@@ -285,4 +286,8 @@ export function getPortalAssets(index: PortalAssetType[]) {
 		(asset: any) =>
 			asset.processType && asset.processType === 'atomic-asset' && asset.assetType && asset.assetType === 'blog-post'
 	);
+}
+
+export function stripFontWeights(fontString: string) {
+  return fontString.split(':')[0];
 }

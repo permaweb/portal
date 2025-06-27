@@ -14,6 +14,7 @@ export type PortalDetailType = {
 	permissions?: PortalPermissionsType;
 	domains?: string[];
 	uploads?: PortalUploadType[];
+	fonts?: PortalFontsType;
 	themes?: PortalThemeType[];
 };
 
@@ -38,6 +39,7 @@ export type PortalAssetType = {
 		status?: ArticleStatusType;
 		content?: any;
 		thumbnail?: string;
+		releasedDate?: number;
 	};
 };
 
@@ -75,6 +77,11 @@ export type PortalRolesType = {
 	type?: 'wallet' | 'process';
 	roles?: PortalUserRoleType[];
 };
+
+export type PortalFontsType = {
+	headers: string,
+	body: string
+}
 
 export type PortalThemeType = {
 	name: string;
@@ -270,6 +277,6 @@ export type MediaConfigType = {
 	acceptType: string;
 };
 
-export type DesignPanelType = 'themes' | 'logo';
+export type DesignPanelType = 'themes' | 'fonts' | 'logo';
 
 export type RefreshFieldType = 'assets';

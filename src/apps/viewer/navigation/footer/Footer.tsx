@@ -33,7 +33,11 @@ export default function Footer() {
 				{portalProvider.current?.categories && (
 					<S.CategoriesWrapper>
 						{portalProvider.current.categories.map((category: PortalCategoryType) => {
-							return <Link key={category.id} to={category.id}>{category.name}</Link>;
+							return (
+								<Link key={category.id} to={category.id}>
+									{category.name}
+								</Link>
+							);
 						})}
 					</S.CategoriesWrapper>
 				)}

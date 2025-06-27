@@ -185,19 +185,21 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 			}}
 		>
 			{props.children}
-			<Panel
-				open={showProfileManager}
-				header={profile && profile.id ? language.editProfile : `${language.createProfile}!`}
-				handleClose={() => setShowProfileManager(false)}
-				width={575}
-				closeHandlerDisabled
-			>
-				<ProfileManager
-					profile={profile && profile.id ? profile : null}
+			{showProfileManager && (
+				<Panel
+					open={showProfileManager}
+					header={profile && profile.id ? language.editProfile : `${language.createProfile}!`}
 					handleClose={() => setShowProfileManager(false)}
-					handleUpdate={null}
-				/>
-			</Panel>
+					width={575}
+					closeHandlerDisabled
+				>
+					<ProfileManager
+						profile={profile && profile.id ? profile : null}
+						handleClose={() => setShowProfileManager(false)}
+						handleUpdate={null}
+					/>
+				</Panel>
+			)}
 			{profilePending && <Loader message={`${language.waitingForProfile}...`} />}
 		</PermawebContext.Provider>
 	);

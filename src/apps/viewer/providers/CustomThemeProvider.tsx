@@ -1,15 +1,33 @@
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import WebFont from 'webfontloader';
 
-import { lightTheme, theme } from 'helpers/themes';
+import { darkTheme, lightTheme, theme } from 'helpers/themes';
+import { stripFontWeights } from 'helpers/utils';
 
 import { usePortalProvider } from './PortalProvider';
 
 interface CustomThemeProviderProps {
 	children: React.ReactNode;
 }
-
 export function CustomThemeProvider(props: CustomThemeProviderProps) {
 	const portalProvider = usePortalProvider();
+
+	const preferredFallbackTheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? darkTheme : lightTheme;
+
+	React.useEffect(() => {
+		if (portalProvider.current?.fonts) {
+			const fonts = portalProvider.current?.fonts;
+			const families = [];
+
+			if (fonts.headers) families.push(fonts.headers);
+			if (fonts.body) families.push(fonts.body);
+
+			if (families.length > 0) {
+				WebFont.load({ google: { families: families } });
+			}
+		}
+	}, [portalProvider.current?.fonts]);
 
 	/** Compute relative luminance (0–1) */
 	function luminance(hex) {
@@ -72,7 +90,7 @@ export function CustomThemeProvider(props: CustomThemeProviderProps) {
 	}
 
 	function createThemeFromCustom(customThemes) {
-		if (!customThemes?.length) return lightTheme;
+		if (!customThemes?.length) return preferredFallbackTheme;
 
 		const active = customThemes.find((t) => t.active) || customThemes[0];
 		const { colors, scheme } = active;
@@ -92,8 +110,8 @@ export function CustomThemeProvider(props: CustomThemeProviderProps) {
 		}, {});
 
 		const accentPercents = isBgDark
-			? [95, 80, 75, 70, 65, 60, 55] // Light text on dark bg
-			: [-95, -80, -75, -70, -65, -60, -55]; // Dark text on light bg
+			? [100, 95, 90, 85, 80, 75, 70] // White-ish for dark backgrounds
+			: [-100, -95, -90, -85, -80, -75, -70]; // Black-ish for light backgrounds
 
 		const neutralsA = accentPercents.reduce((acc, pct, idx) => {
 			acc[`neutralA${idx + 1}`] = shadeColor(bgHex, pct);
@@ -103,7 +121,7 @@ export function CustomThemeProvider(props: CustomThemeProviderProps) {
 		const primaryHex = rgbArrayToHex(parseRgbString(colors.primary));
 		const linkHex = rgbArrayToHex(parseRgbString(colors.links));
 
-		const theme = {
+		const theme: any = {
 			scheme,
 			...neutrals,
 			...neutralsA,
@@ -120,22 +138,39 @@ export function CustomThemeProvider(props: CustomThemeProviderProps) {
 				alt2: rgbStringToHex(colors.secondary),
 				alt3: rgbStringToHex(colors.sections),
 			},
-			positive1: lightTheme.positive1,
-			positive2: lightTheme.positive2,
-			caution1: lightTheme.caution1,
-			negative1: lightTheme.negative1,
-			negative2: lightTheme.negative2,
-			light1: lightTheme.light1,
-			light2: lightTheme.light2,
-			light3: lightTheme.light3,
-			dark1: lightTheme.dark1,
-			dark2: lightTheme.dark2,
+			positive1: preferredFallbackTheme.positive1,
+			positive2: preferredFallbackTheme.positive2,
+			caution1: preferredFallbackTheme.caution1,
+			negative1: preferredFallbackTheme.negative1,
+			negative2: preferredFallbackTheme.negative2,
+			light1: preferredFallbackTheme.light1,
+			light2: preferredFallbackTheme.light2,
+			light3: preferredFallbackTheme.light3,
+			dark1: preferredFallbackTheme.dark1,
+			dark2: preferredFallbackTheme.dark2,
+			typography: {
+				family: {
+					primary: portalProvider.current?.fonts?.body,
+					alt1: portalProvider.current?.fonts?.headers,
+				},
+			},
 		};
+
+		if (portalProvider.current?.fonts) {
+			const { body, headers } = portalProvider.current.fonts;
+
+			theme.typography = {
+				family: {
+					...(body && { primary: stripFontWeights(body) }),
+					...(headers && { alt1: stripFontWeights(headers) }),
+				},
+			};
+		}
 
 		return theme;
 	}
 
 	const customTheme = createThemeFromCustom(portalProvider.current?.themes ?? []);
 
-	return <ThemeProvider theme={theme(customTheme)}>{props.children}</ThemeProvider>;
+	return <ThemeProvider theme={theme(customTheme ?? preferredFallbackTheme)}>{props.children}</ThemeProvider>;
 }

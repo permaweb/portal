@@ -92,6 +92,7 @@ export const GlobalStyle = createGlobalStyle`
 
   h1 {
     font-size: ${(props) => props.theme.typography.size.h1};
+		font-weight: ${(props) => props.theme.typography.weight.xBold};
   }
 
   h2 {
