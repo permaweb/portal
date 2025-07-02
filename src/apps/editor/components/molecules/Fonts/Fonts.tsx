@@ -136,7 +136,7 @@ export default function Fonts(props: { handleClose?: () => void }) {
 					/>
 				</S.SAction>
 			</S.Wrapper>
-			{loading && <Loader message={`${language.updatingTheme}...`} />}
+			{loading && <Loader message={`${language.updatingFonts}...`} />}
 			{response && (
 				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
 			)}

@@ -73,7 +73,7 @@ export default function ArticleToolbarPostThumbnail() {
 		return (
 			<>
 				<ReactSVG src={ASSETS.image} />
-				<span>{language.uploadThumbnail}</span>
+				<span>{language.uploadFeaturedImage}</span>
 			</>
 		);
 	}

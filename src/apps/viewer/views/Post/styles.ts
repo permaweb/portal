@@ -94,7 +94,6 @@ export const FeaturedImage = styled.div`
 		max-height: 100%;
 		object-fit: contain;
 		object-position: center center;
-		border: 1px solid ${(props) => props.theme.colors.border.primary};
 	}
 `;
 
@@ -278,23 +277,36 @@ export const FooterWrapper = styled.div`
 	border-top: 1px solid ${(props) => props.theme.colors.border.alt4};
 `;
 
+export const TopicsWrapper = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	gap: 25px;
+
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		text-transform: uppercase;
+
+		&:hover {
+			color: ${(props) => props.theme.colors.font.alt1};
+		}
+	}
+`;
+
 export const Topics = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	gap: 15px;
 	
 	a {
-		/* padding: 5.5px 15px; */
 		color: ${(props) => props.theme.colors.font.primary};
-		/* background: ${(props) => props.theme.colors.container.alt5.background}; */
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
-		/* border-radius: 25px; */
 		text-transform: uppercase;
 
 		&:hover {
-			color: ${(props) => props.theme.colors.font.alt1};
-			/* background: ${(props) => props.theme.colors.container.alt4.background}; */
+			color: ${(props) => props.theme.colors.link.color};
 		}
 	}
 `;

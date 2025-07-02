@@ -163,7 +163,7 @@ export default function PortalManager(props: IProps) {
 								</S.FileInputWrapper>
 								<S.PActions>
 									<Button
-										type={'primary'}
+										type={'alt3'}
 										label={language.removeLogo}
 										handlePress={() => setLogo(null)}
 										disabled={loading || !logo}

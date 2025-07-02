@@ -7,14 +7,13 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
-import { DEFAULT_THEME } from 'helpers/config';
+import { ASSETS, DEFAULT_THEME } from 'helpers/config';
 import { NotificationType, PortalThemeType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
-import { IProps } from './types';
 
 function Color(props: {
 	label: string;
@@ -115,13 +114,19 @@ function Color(props: {
 function Section(props: {
 	label: string;
 	theme: PortalThemeType;
-	onThemeChange: (theme: PortalThemeType) => void;
+	onThemeChange: (theme: PortalThemeType, publish: boolean) => void;
+	published: boolean;
 	loading: boolean;
 }) {
-	const { background, menus, sections, ...remainingTheme } = props.theme.colors;
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
+
+	const { background, ...remainingTheme } = props.theme.colors;
+
+	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
 
 	const orderedRemainingTheme = Object.keys(DEFAULT_THEME.colors)
-		.filter((key) => key !== 'background') // Exclude background
+		.filter((key) => key !== 'background')
 		.reduce((acc, key) => {
 			if (remainingTheme.hasOwnProperty(key)) {
 				acc[key] = remainingTheme[key];
@@ -131,48 +136,30 @@ function Section(props: {
 
 	function handleChange(key: string, newValue: string) {
 		const updatedTheme = {
-			...props.theme,
+			...theme,
 			colors: {
-				...props.theme.colors,
+				...theme.colors,
 				[key.toLowerCase()]: newValue,
 			},
 		};
 
-		props.onThemeChange(updatedTheme);
+		setTheme(updatedTheme);
+		if (props.published) props.onThemeChange(updatedTheme, false);
 	}
 
 	return (
-		<S.Section className={'border-wrapper-alt3'}>
+		<S.Section>
 			<S.SectionHeader>
 				<p>{props.label}</p>
+				<p>{props.theme.scheme}</p>
 			</S.SectionHeader>
 			<S.SectionBody>
-				<S.BackgroundWrapper>
-					<Color
-						label={'Background'}
-						value={background}
-						onChange={(newColor) => handleChange('background', newColor)}
-						loading={props.loading}
-						height={115}
-						maxWidth
-					/>
-				</S.BackgroundWrapper>
-				<S.MenusWrapper>
-					<Color
-						label={'Menus'}
-						value={menus}
-						onChange={(newColor) => handleChange('menus', newColor)}
-						loading={props.loading}
-						height={55}
-						maxWidth
-					/>
-				</S.MenusWrapper>
 				<S.FlexWrapper>
 					<S.SectionsWrapper>
 						<Color
-							label={'Sections'}
-							value={sections}
-							onChange={(newColor) => handleChange('sections', newColor)}
+							label={language.background}
+							value={background}
+							onChange={(newColor) => handleChange('background', newColor)}
 							loading={props.loading}
 							width={130.5}
 						/>
@@ -189,14 +176,17 @@ function Section(props: {
 						))}
 					</S.GridWrapper>
 				</S.FlexWrapper>
+				{!props.published && (
+					<S.SectionActions>
+						<Button type={'alt4'} label={language.publishTheme} handlePress={() => props.onThemeChange(theme, true)} />
+					</S.SectionActions>
+				)}
 			</S.SectionBody>
 		</S.Section>
 	);
 }
 
-// TODO: Only select bg (primary) and links
-// TODO: Add tooltip for how themes are generated (text opposite of primary)
-export default function Themes(props: IProps) {
+export default function Themes() {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
@@ -213,15 +203,29 @@ export default function Themes(props: IProps) {
 		}
 	}, [portalProvider.current]);
 
-	const handleThemeChange = async (theme: PortalThemeType) => {
-		if (theme && arProvider.wallet && portalProvider.current?.id) {
+	async function handleThemeUpdate(theme: PortalThemeType, publish: boolean) {
+		if (!theme) return;
+		const existingPublishedNames = new Set(portalProvider.current?.themes.map((t) => t.name));
+
+		const updated =
+			options
+				?.map((existing) => (existing.name === theme.name ? theme : existing))
+				.filter((t) => existingPublishedNames.has(t.name)) || [];
+		
+		if (publish && !existingPublishedNames.has(theme.name)) {
+			updated.push(theme);
+		}
+
+		await submitUpdatedThemes(updated);
+
+	}
+
+	async function submitUpdatedThemes(themes: PortalThemeType[]) {
+		if (themes && arProvider.wallet && portalProvider.current?.id) {
 			setLoading(true);
 			try {
-				const updatedThemes =
-					options?.map((existingTheme) => (existingTheme.name === theme.name ? theme : existingTheme)) || [];
-
 				const themeUpdateId = await permawebProvider.libs.updateZone(
-					{ Themes: permawebProvider.libs.mapToProcessCase(updatedThemes) },
+					{ Themes: permawebProvider.libs.mapToProcessCase(themes) },
 					portalProvider.current.id,
 					arProvider.wallet
 				);
@@ -230,7 +234,7 @@ export default function Themes(props: IProps) {
 
 				console.log(`Theme update: ${themeUpdateId}`);
 
-				setOptions(permawebProvider.libs.mapFromProcessCase(updatedThemes));
+				setOptions(permawebProvider.libs.mapFromProcessCase(themes));
 
 				setResponse({ status: 'success', message: `${language.themeUpdated}!` });
 			} catch (e: any) {
@@ -239,7 +243,31 @@ export default function Themes(props: IProps) {
 
 			setLoading(false);
 		}
-	};
+	}
+
+	function handleAddTheme() {
+		setOptions((prev) => {
+			const themes = prev ?? [];
+			const baseName = DEFAULT_THEME.name;
+			const existingNames = new Set(themes.map((t) => t.name));
+
+			let newName = baseName;
+			if (existingNames.has(baseName)) {
+				let suffix = 2;
+				while (existingNames.has(`${baseName} ${suffix}`)) {
+					suffix++;
+				}
+				newName = `${baseName} ${suffix}`;
+			}
+
+			const newTheme: PortalThemeType = {
+				...DEFAULT_THEME,
+				name: newName,
+			};
+
+			return [...themes, newTheme];
+		});
+	}
 
 	const getThemes = () => {
 		if (!options) {
@@ -259,8 +287,19 @@ export default function Themes(props: IProps) {
 		return (
 			<>
 				{options.map((theme: PortalThemeType, index: number) => {
+					const isPublished =
+						portalProvider.current?.themes.find(
+							(existingTheme: PortalThemeType) => existingTheme.name === theme.name
+						) !== undefined;
 					return (
-						<Section key={index} label={theme.name} theme={theme} onThemeChange={handleThemeChange} loading={loading} />
+						<Section
+							key={index}
+							label={theme.name}
+							theme={theme}
+							onThemeChange={(theme: PortalThemeType, publish: boolean) => handleThemeUpdate(theme, publish)}
+							published={isPublished}
+							loading={loading}
+						/>
 					);
 				})}
 			</>
@@ -270,12 +309,16 @@ export default function Themes(props: IProps) {
 	return (
 		<>
 			<S.Wrapper>
-				{!props.hideHeader && (
-					<S.Header>
-						<p>{language.themes}</p>
-					</S.Header>
-				)}
 				<S.Body>{getThemes()}</S.Body>
+				<S.EndActions>
+					<Button
+						type={'primary'}
+						label={language.addTheme}
+						handlePress={handleAddTheme}
+						icon={ASSETS.add}
+						iconLeftAlign
+					/>
+				</S.EndActions>
 			</S.Wrapper>
 			{loading && <Loader message={`${language.updatingTheme}...`} />}
 			{response && (

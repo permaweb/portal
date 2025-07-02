@@ -11,17 +11,26 @@ import { ARTICLE_TOOLBAR_WIDTH } from '../styles';
 export const Wrapper = styled.div`
 	width: 100%;
 	display: flex;
-	flex-wrap: wrap;
 	align-items: center;
-	justify-content: space-between;
+	flex-wrap: wrap;
 	gap: 20px;
+	justify-content: space-between;
 	position: relative;
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		flex-direction: column;
+	}
 `;
 
 export const TitleWrapper = styled.div`
-	max-width: 90vw;
+	width: calc(50% - 10px);
+	overflow: hidden;
 	input {
 		width: 100%;
+		display: block;
+		white-space: nowrap;
+		overflow: hidden !important;
+		text-overflow: ellipsis;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.base} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
@@ -30,13 +39,22 @@ export const TitleWrapper = styled.div`
 		outline: 0;
 		border: none;
 	}
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		width: 100%;
+	}
 `;
 
 export const EndActions = styled.div`
+	width: calc(50% - 10px);
 	display: flex;
-	flex-wrap: wrap;
 	align-items: center;
+	justify-content: flex-end;
 	gap: 20px;
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		width: 100%;
+	}
 `;
 
 export const SubmitWrapper = styled.div`

@@ -90,9 +90,6 @@ export type PortalThemeType = {
 	colors: {
 		background: string;
 		primary: string;
-		secondary: string;
-		sections: string;
-		menus: string;
 		links: string;
 	};
 	preferences: {

@@ -6,6 +6,7 @@ import { Loader } from 'components/atoms/Loader';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { ArticleBlockType, PortalAssetType, PortalCategoryType } from 'helpers/types';
 import { checkValidAddress, formatAddress, formatDate } from 'helpers/utils';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -14,6 +15,8 @@ export default function Post() {
 	const { postId } = useParams<{ postId?: string }>();
 
 	const permawebProvider = usePermawebProvider();
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
 
 	const [post, setPost] = React.useState<PortalAssetType | null>(null);
 	const [loading, setLoading] = React.useState<boolean>(false);
@@ -77,7 +80,12 @@ export default function Post() {
 				break;
 		}
 
-		if (Element) return <Element key={block.id} className={'fade-in'}>{parse(block.content)}</Element>;
+		if (Element)
+			return (
+				<Element key={block.id} className={'fade-in'}>
+					{parse(block.content)}
+				</Element>
+			);
 		return parse(block.content);
 	}
 
@@ -108,7 +116,11 @@ export default function Post() {
 					{post?.metadata?.categories && (
 						<S.Categories>
 							{post.metadata.categories.map((category: PortalCategoryType) => {
-								return <Link to={'#'} key={category.id}>{category.name}</Link>;
+								return (
+									<Link to={'#'} key={category.id}>
+										{category.name}
+									</Link>
+								);
 							})}
 						</S.Categories>
 					)}
@@ -128,11 +140,18 @@ export default function Post() {
 			)}
 			<S.FooterWrapper className={'fade-in'}>
 				{post?.metadata?.topics && (
-					<S.Topics>
-						{post.metadata.topics.map((topic: string) => {
-							return <Link to={'#'} key={topic}>{topic}</Link>;
-						})}
-					</S.Topics>
+					<S.TopicsWrapper>
+						<p>{language.topics}</p>
+						<S.Topics>
+							{post.metadata.topics.map((topic: string) => {
+								return (
+									<Link to={'#'} key={topic}>
+										{topic}
+									</Link>
+								);
+							})}
+						</S.Topics>
+					</S.TopicsWrapper>
 				)}
 			</S.FooterWrapper>
 		</S.Wrapper>

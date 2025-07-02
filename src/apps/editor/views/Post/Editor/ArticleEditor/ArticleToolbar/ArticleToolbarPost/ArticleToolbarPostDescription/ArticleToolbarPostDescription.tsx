@@ -35,7 +35,7 @@ export default function ArticleToolbarPostDescription() {
 				<S.ActionWrapper>
 					<Button
 						type={'primary'}
-						label={language.editSummary}
+						label={language.editDescription}
 						handlePress={() => setShowPanel(true)}
 						icon={ASSETS.arrow}
 						height={40}
@@ -45,14 +45,14 @@ export default function ArticleToolbarPostDescription() {
 			</S.Wrapper>
 			<Panel
 				open={showPanel}
-				header={language.editSummary}
+				header={language.editDescription}
 				handleClose={() => setShowPanel(false)}
 				width={500}
 				closeHandlerDisabled={true}
 			>
 				<S.PanelBodyWrapper>
 					<TextArea
-						label={language.summary}
+						label={language.description}
 						value={currentPost?.data?.description ?? ''}
 						onChange={(e: any) => handleCurrentPostUpdate({ field: 'description', value: e.target.value })}
 						onFocus={() => handleCurrentPostUpdate({ field: 'focusedBlock', value: null })}

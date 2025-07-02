@@ -4,30 +4,20 @@ import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div``;
 
-export const Header = styled.div`
-	margin: 0 0 15px 0;
-	p {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		text-transform: uppercase;
-		line-height: 1;
-	}
-`;
-
 export const Body = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
-	margin: 10px 0 0 0;
+	gap: 20px;
 `;
 
-export const Section = styled.div`
-	padding: 15px;
-`;
+export const Section = styled.div``;
 
 export const SectionHeader = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 2.5px;
 	p {
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
@@ -39,6 +29,15 @@ export const SectionHeader = styled.div`
 export const SectionBody = styled.div`
 	display: flex;
 	flex-direction: column;
+	gap: 15px;
+	margin: 10px 0 0 0;
+`;
+
+export const SectionActions = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
 	gap: 15px;
 	margin: 10px 0 0 0;
 `;
@@ -232,6 +231,15 @@ export const SelectorPreview = styled.div<{ background: string }>`
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-top-left-radius: ${STYLING.dimensions.radius.primary};
 	border-bottom-left-radius: ${STYLING.dimensions.radius.primary};
+`;
+
+export const EndActions = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 20px;
+	margin: 25px 0 0 0;
 `;
 
 export const WrapperEmpty = styled.div`

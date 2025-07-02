@@ -13,7 +13,6 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-// TODO
 export default function PortalDesign() {
 	const portalProvider = usePortalProvider();
 
@@ -36,7 +35,7 @@ export default function PortalDesign() {
 		switch (panelType) {
 			case 'themes':
 				header = language.themes;
-				component = <Themes hideHeader />;
+				component = <Themes />;
 				useAction = true;
 				break;
 			case 'fonts':
@@ -46,7 +45,7 @@ export default function PortalDesign() {
 			case 'logo':
 				header = language.siteLogo;
 				component = (
-					<Logo portal={portalProvider.current} handleClose={() => setShowPanel(false)} handleUpdate={null} />
+					<Logo portal={portalProvider.current} handleClose={() => setShowPanel(false)} />
 				);
 				break;
 			default:

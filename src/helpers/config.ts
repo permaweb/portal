@@ -262,10 +262,7 @@ export const DEFAULT_THEME: PortalThemeType = {
 	colors: {
 		background: '255,255,255',
 		primary: '77,77,77',
-		secondary: '50,50,50',
 		links: '69,153,232',
-		menus: '80,80,80',
-		sections: '20,20,20',
 	},
 	preferences: {
 		gradient: false,

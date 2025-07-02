@@ -68,27 +68,6 @@ export function CustomThemeProvider(props: CustomThemeProviderProps) {
 		return rgbArrayToHex([r, g, b]);
 	}
 
-	function rgbStringToHex(rgbString) {
-		// Split on commas, trim whitespace, and parse to numbers
-		const parts = rgbString.split(',').map((s) => s.trim());
-		if (parts.length !== 3) {
-			throw new Error(`Invalid RGB string: "${rgbString}"`);
-		}
-
-		const [r, g, b] = parts.map((s) => {
-			const n = Number(s);
-			if (!Number.isInteger(n) || n < 0 || n > 255) {
-				throw new Error(`RGB component out of range: "${s}"`);
-			}
-			return n;
-		});
-
-		// Convert each to a two-digit hex string
-		const toHex = (n) => n.toString(16).padStart(2, '0');
-
-		return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toLowerCase();
-	}
-
 	function createThemeFromCustom(customThemes) {
 		if (!customThemes?.length) return preferredFallbackTheme;
 
@@ -99,10 +78,9 @@ export function CustomThemeProvider(props: CustomThemeProviderProps) {
 		const bgHex = rgbArrayToHex(parseRgbString(colors.background));
 		const isBgDark = luminance(bgHex) < 0.5;
 
-		// Move toward mid-gray
 		const neutralPercents = isBgDark
-			? [5, 10, 15, 20, 25, 30, 35, 40, 45] // Lighten in steps
-			: [-5, -10, -15, -20, -25, -30, -35, -40, -45]; // Darken in steps
+			? [0, 5, 10, 15, 20, 25, 30, 35, 40] // first = 0% lighten
+			: [0, -5, -10, -15, -20, -25, -30, -35, -40]; // first = 0% darken
 
 		const neutrals = neutralPercents.reduce((acc, pct, idx) => {
 			acc[`neutral${idx + 1}`] = shadeColor(bgHex, pct);
@@ -134,9 +112,9 @@ export function CustomThemeProvider(props: CustomThemeProviderProps) {
 			link2: shadeColor(linkHex, -20),
 			roles: {
 				primary: primaryHex,
-				alt1: rgbStringToHex(colors.menus),
-				alt2: rgbStringToHex(colors.secondary),
-				alt3: rgbStringToHex(colors.sections),
+				alt1: primaryHex,
+				alt2: primaryHex,
+				alt3: primaryHex,
 			},
 			positive1: preferredFallbackTheme.positive1,
 			positive2: preferredFallbackTheme.positive2,
