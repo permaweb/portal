@@ -19,8 +19,9 @@ export default function Footer() {
 		if (logo && checkValidAddress(logo)) {
 			return <img src={getTxEndpoint(logo)} />;
 		}
-		return <ReactSVG src={ASSETS.portal} />;
+		return <h4>{portalProvider.current?.name ?? '-'}</h4>;
 	}
+	
 	return (
 		<S.Wrapper>
 			<S.Content className={'max-view-wrapper'}>
@@ -30,7 +31,7 @@ export default function Footer() {
 					</S.LogoWrapper>
 					<Button type={'alt1'} label={'Log in'} handlePress={() => {}} />
 				</S.Header>
-				{portalProvider.current?.categories && (
+				{portalProvider.current?.categories?.length > 0 && (
 					<S.CategoriesWrapper>
 						{portalProvider.current.categories.map((category: PortalCategoryType) => {
 							return (

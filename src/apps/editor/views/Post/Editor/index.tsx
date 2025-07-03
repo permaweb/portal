@@ -395,7 +395,6 @@ export default function Editor() {
 		}
 
 		const uniqueAuthUsers = filterDuplicates(authUsers);
-		console.log(uniqueAuthUsers);
 		return uniqueAuthUsers;
 	}
 

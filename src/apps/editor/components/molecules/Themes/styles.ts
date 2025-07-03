@@ -8,9 +8,20 @@ export const Body = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
+
+	> * {
+		&:not(:last-child) {
+			padding: 0 0 20px 0;
+			border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+		}
+	}
 `;
 
-export const Section = styled.div``;
+export const Section = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+`;
 
 export const SectionHeader = styled.div`
 	width: 100%;
@@ -19,7 +30,7 @@ export const SectionHeader = styled.div`
 	justify-content: space-between;
 	padding: 0 2.5px;
 	p {
-		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
@@ -29,7 +40,7 @@ export const SectionHeader = styled.div`
 export const SectionBody = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
+	gap: 25px;
 	margin: 10px 0 0 0;
 `;
 
@@ -61,6 +72,13 @@ export const GridWrapper = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	gap: 10px 20px;
+`;
+
+export const AttributesWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
 `;
 
 export const ColorTooltip = styled.div`
@@ -239,7 +257,7 @@ export const EndActions = styled.div`
 	align-items: center;
 	justify-content: flex-end;
 	gap: 20px;
-	margin: 25px 0 0 0;
+	margin: 40px 0 0 0;
 `;
 
 export const WrapperEmpty = styled.div`
@@ -253,3 +271,18 @@ export const WrapperEmpty = styled.div`
 `;
 
 export const LoadingWrapper = styled(WrapperEmpty)``;
+
+export const ModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 0 20px 20px 20px !important;
+`;
+
+export const ModalActionsWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 15px;
+`;

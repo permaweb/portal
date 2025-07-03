@@ -5,6 +5,7 @@ import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
 import { Loader } from 'components/atoms/Loader';
 import { PortalAssetType } from 'helpers/types';
+import { shuffleArray } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -19,8 +20,14 @@ export default function Landing() {
 
 	React.useEffect(() => {
 		if (portalProvider.current?.assets?.length > 0) {
-			setFeaturedPosts([...portalProvider.current.assets]);
-			setPanelPosts([...portalProvider.current.assets]);
+			const filteredFeaturedPosts = [...portalProvider.current.assets].filter(
+				(post: PortalAssetType) => post.metadata.status === 'published'
+			) ?? [];
+
+			const filteredPanelPosts = shuffleArray(filteredFeaturedPosts);
+
+			setFeaturedPosts(filteredFeaturedPosts);
+			setPanelPosts(filteredPanelPosts);
 		} else {
 			setFeaturedPosts([]);
 			setPanelPosts([]);
@@ -32,28 +39,30 @@ export default function Landing() {
 		if (featuredPosts.length > 0) {
 			return <PostList posts={featuredPosts} />;
 		} else {
-			return <p>{language.noPostsFound}</p>;
+			return null;
 		}
 	}
 
 	function getPanelPosts() {
 		if (!panelPosts) return <Loader sm relative />;
 		if (panelPosts.length > 0) {
-			return <PostList posts={panelPosts} hideImages />;
+			return (
+				<S.PanelWrapper>
+					<S.PanelHeader>
+						<p>{language.mostRead}</p>
+					</S.PanelHeader>
+					<PostList posts={panelPosts} hideImages />
+				</S.PanelWrapper>
+			);
 		} else {
-			return <p>{language.noPostsFound}</p>;
+			return null;
 		}
 	}
 
 	return (
 		<S.Wrapper>
 			<S.FeaturedWrapper>{getFeaturedPosts()}</S.FeaturedWrapper>
-			<S.PanelWrapper>
-				<S.PanelHeader>
-					<p>Opinions</p>
-				</S.PanelHeader>
-				{getPanelPosts()}
-			</S.PanelWrapper>
+			{getPanelPosts()}
 		</S.Wrapper>
 	);
 }

@@ -67,7 +67,7 @@ function App() {
 	React.useEffect(() => {
 		(async function () {
 			if (hasCheckedProfileRef.current) return;
-			if (permawebProvider.profile) {
+			if (permawebProvider.profile?.id) {
 				const userVersion = permawebProvider.profile.version;
 				if (!userVersion || userVersion !== CurrentZoneVersion) {
 					console.log('User profile version does match current version, updating...');

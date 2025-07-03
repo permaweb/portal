@@ -1,7 +1,5 @@
 import styled from 'styled-components';
 
-import { STYLING } from 'helpers/config';
-
 export const Wrapper = styled.div`
 	width: 100%;
 	display: flex;
@@ -10,7 +8,7 @@ export const Wrapper = styled.div`
 
 	> * {
 		&:not(:last-child) {
-			border-bottom: 1.5px solid ${(props) => props.theme.colors.border.alt4};
+			border-bottom: 1px solid ${(props) => props.theme.colors.border.alt4};
 		}
 	}
 `;
@@ -52,7 +50,7 @@ export const PostInfoWrapper = styled.div<{ hasImage: boolean }>`
 
 export const PostImageWrapper = styled.div`
 	width: calc(100% - 360px);
-	/* background-color: ${(props) => props.theme.colors.container.alt1.background}; */
+	max-width: 700px;
 
 	display: flex;
 	align-items: flex-start;
@@ -66,6 +64,5 @@ export const PostImageWrapper = styled.div`
 
 		object-fit: contain;
 		object-position: center center;
-		/* border-radius: ${STYLING.dimensions.radius.alt1}; */
 	}
 `;

@@ -4,11 +4,14 @@ import { HexColorInput, HexColorPicker } from 'react-colorful';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { FormField } from 'components/atoms/FormField';
+import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
+import { Toggle } from 'components/atoms/Toggle';
 import { ASSETS, DEFAULT_THEME } from 'helpers/config';
-import { NotificationType, PortalThemeType } from 'helpers/types';
+import { NotificationType, PortalSchemeType, PortalThemeType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -114,7 +117,8 @@ function Color(props: {
 function Section(props: {
 	label: string;
 	theme: PortalThemeType;
-	onThemeChange: (theme: PortalThemeType, publish: boolean) => void;
+	onThemeChange: (theme: PortalThemeType, publish: boolean, prevName?: string) => void;
+	onThemeCancel: (theme: PortalThemeType) => void;
 	published: boolean;
 	loading: boolean;
 }) {
@@ -124,8 +128,19 @@ function Section(props: {
 	const { background, ...remainingTheme } = props.theme.colors;
 
 	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
+	const [name, setName] = React.useState<string>(props.theme.name ?? '-');
+	const [scheme, setScheme] = React.useState<'light' | 'dark'>(props.theme.scheme);
+	const [showNameEdit, setShowNameEdit] = React.useState<boolean>(false);
 
-	const orderedRemainingTheme = Object.keys(DEFAULT_THEME.colors)
+	React.useEffect(() => {
+		if (props.theme.name) setName(props.theme.name);
+	}, [props.theme.name]);
+	
+	React.useEffect(() => {
+		if (props.theme.scheme) setScheme(props.theme.scheme);
+	}, [props.theme.scheme]);
+
+	const orderedRemainingTheme = Object.keys(DEFAULT_THEME.light.colors)
 		.filter((key) => key !== 'background')
 		.reduce((acc, key) => {
 			if (remainingTheme.hasOwnProperty(key)) {
@@ -134,7 +149,7 @@ function Section(props: {
 			return acc;
 		}, {} as typeof remainingTheme);
 
-	function handleChange(key: string, newValue: string) {
+	function handleThemeChange(key: string, newValue: string) {
 		const updatedTheme = {
 			...theme,
 			colors: {
@@ -147,42 +162,127 @@ function Section(props: {
 		if (props.published) props.onThemeChange(updatedTheme, false);
 	}
 
+	function handleNameChange() {
+		const updatedTheme = {
+			...theme,
+			name: name,
+		};
+
+		if (props.published) props.onThemeChange(updatedTheme, false, props.theme.name);
+
+		setTheme(updatedTheme);
+		setShowNameEdit(false);
+	}
+	
+	function handleSchemeChange(option: string) {
+		const updatedScheme = option as PortalSchemeType;
+
+		const updatedTheme = {
+			...theme,
+			scheme: updatedScheme,
+		};
+
+		if (props.published) props.onThemeChange(updatedTheme, false, props.theme.name);
+
+		setTheme(updatedTheme);
+		setScheme(updatedScheme);
+	}
+
 	return (
-		<S.Section>
-			<S.SectionHeader>
-				<p>{props.label}</p>
-				<p>{props.theme.scheme}</p>
-			</S.SectionHeader>
-			<S.SectionBody>
-				<S.FlexWrapper>
-					<S.SectionsWrapper>
-						<Color
-							label={language.background}
-							value={background}
-							onChange={(newColor) => handleChange('background', newColor)}
-							loading={props.loading}
-							width={130.5}
-						/>
-					</S.SectionsWrapper>
-					<S.GridWrapper>
-						{Object.entries(orderedRemainingTheme).map(([key, value]) => (
+		<>
+			<S.Section>
+				<S.SectionHeader>
+					<p>{props.label}</p>
+					<IconButton
+						type={'alt1'}
+						active={false}
+						src={ASSETS.write}
+						handlePress={() => setShowNameEdit(true)}
+						dimensions={{ wrapper: 23.5, icon: 13.5 }}
+						tooltip={language.editThemeName}
+						tooltipPosition={'bottom-right'}
+						noFocus
+					/>
+				</S.SectionHeader>
+				<S.SectionBody>
+					<S.FlexWrapper>
+						<S.SectionsWrapper>
 							<Color
-								key={key}
-								label={key}
-								value={value}
-								onChange={(newColor) => handleChange(key, newColor)}
+								label={language.background}
+								value={background}
+								onChange={(newColor) => handleThemeChange('background', newColor)}
 								loading={props.loading}
+								width={130.5}
 							/>
-						))}
-					</S.GridWrapper>
-				</S.FlexWrapper>
-				{!props.published && (
-					<S.SectionActions>
-						<Button type={'alt4'} label={language.publishTheme} handlePress={() => props.onThemeChange(theme, true)} />
-					</S.SectionActions>
-				)}
-			</S.SectionBody>
-		</S.Section>
+						</S.SectionsWrapper>
+						<S.GridWrapper>
+							{Object.entries(orderedRemainingTheme).map(([key, value]) => (
+								<Color
+									key={key}
+									label={key}
+									value={value}
+									onChange={(newColor) => handleThemeChange(key, newColor)}
+									loading={props.loading}
+								/>
+							))}
+						</S.GridWrapper>
+					</S.FlexWrapper>
+					<S.AttributesWrapper>
+						<Toggle
+							label={language.colorScheme}
+							options={[PortalSchemeType.Light, PortalSchemeType.Dark]}
+							activeOption={scheme}
+							handleToggle={(option: string) => handleSchemeChange(option)}
+						/>
+						{!props.published && (
+							<S.SectionActions>
+								<Button
+									type={'alt3'}
+									label={language.cancel}
+									handlePress={() => {
+										props.onThemeCancel(props.theme);
+									}}
+								/>
+								<Button
+									type={'alt4'}
+									label={language.publishTheme}
+									handlePress={() => props.onThemeChange(theme, true)}
+								/>
+							</S.SectionActions>
+						)}
+					</S.AttributesWrapper>
+				</S.SectionBody>
+			</S.Section>
+			{showNameEdit && (
+				<Modal header={language.editThemeName} handleClose={() => setShowNameEdit(false)}>
+					<S.ModalWrapper>
+						<FormField
+							value={name}
+							onChange={(e: any) => setName(e.target.value)}
+							invalid={{ status: false, message: null }}
+							disabled={false}
+							hideErrorMessage
+							sm
+						/>
+						<S.ModalActionsWrapper>
+							<Button
+								type={'primary'}
+								label={language.cancel}
+								handlePress={() => setShowNameEdit(false)}
+								disabled={false}
+							/>
+							<Button
+								type={'alt1'}
+								label={language.save}
+								handlePress={() => handleNameChange()}
+								disabled={false}
+								loading={false}
+							/>
+						</S.ModalActionsWrapper>
+					</S.ModalWrapper>
+				</Modal>
+			)}
+		</>
 	);
 }
 
@@ -203,21 +303,45 @@ export default function Themes() {
 		}
 	}, [portalProvider.current]);
 
-	async function handleThemeUpdate(theme: PortalThemeType, publish: boolean) {
+	async function handleThemeUpdate(theme: PortalThemeType, publish: boolean, prevName?: string) {
 		if (!theme) return;
-		const existingPublishedNames = new Set(portalProvider.current?.themes.map((t) => t.name));
 
-		const updated =
-			options
-				?.map((existing) => (existing.name === theme.name ? theme : existing))
-				.filter((t) => existingPublishedNames.has(t.name)) || [];
-		
-		if (publish && !existingPublishedNames.has(theme.name)) {
-			updated.push(theme);
+		const allOptionNames = new Set(options?.map((t) => t.name));
+
+		if (prevName) {
+			allOptionNames.delete(prevName);
+
+			if (allOptionNames.has(theme.name)) {
+				setResponse({ status: 'warning', message: `A theme named '${theme.name}' already exists.` });
+				return;
+			}
 		}
 
-		await submitUpdatedThemes(updated);
+		const publishedNames = new Set(portalProvider.current?.themes.map((t) => t.name));
 
+		if (prevName && publishedNames.has(prevName)) {
+			publishedNames.delete(prevName);
+			publishedNames.add(theme.name);
+		} else if (publish) {
+			publishedNames.add(theme.name);
+		}
+
+		const mapped =
+			options?.map((existing) => {
+				const matchKey = prevName ?? theme.name;
+				return existing.name === matchKey ? theme : existing;
+			}) || [];
+
+		const updated = mapped.filter((t) => publishedNames.has(t.name));
+
+		if (response) setResponse(null);
+		await submitUpdatedThemes(updated);
+	}
+
+	function handleThemeCancel(theme: PortalThemeType) {
+		if (!theme) return;
+		const updated = options.filter((option) => option.name !== theme.name);
+		setOptions(updated);
 	}
 
 	async function submitUpdatedThemes(themes: PortalThemeType[]) {
@@ -248,7 +372,7 @@ export default function Themes() {
 	function handleAddTheme() {
 		setOptions((prev) => {
 			const themes = prev ?? [];
-			const baseName = DEFAULT_THEME.name;
+			const baseName = DEFAULT_THEME.light.name;
 			const existingNames = new Set(themes.map((t) => t.name));
 
 			let newName = baseName;
@@ -261,7 +385,7 @@ export default function Themes() {
 			}
 
 			const newTheme: PortalThemeType = {
-				...DEFAULT_THEME,
+				...DEFAULT_THEME.light,
 				name: newName,
 			};
 
@@ -296,7 +420,10 @@ export default function Themes() {
 							key={index}
 							label={theme.name}
 							theme={theme}
-							onThemeChange={(theme: PortalThemeType, publish: boolean) => handleThemeUpdate(theme, publish)}
+							onThemeChange={(theme: PortalThemeType, publish: boolean, prevName?: string) =>
+								handleThemeUpdate(theme, publish, prevName)
+							}
+							onThemeCancel={(theme: PortalThemeType) => handleThemeCancel(theme)}
 							published={isPublished}
 							loading={loading}
 						/>

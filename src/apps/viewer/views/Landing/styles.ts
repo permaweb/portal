@@ -18,13 +18,15 @@ export const PanelWrapper = styled.div`
 
 export const PanelHeader = styled.div`
 	width: 100%;
-	padding: 0px 0 10px 0;
-	margin: 0 0 5px 0;
+	padding: 0px 0 15px 0;
+	margin: 0 0 10px 0;
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 
 	p {
+		line-height: 1;
 		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
+		text-transform: uppercase;
 	}
 `;

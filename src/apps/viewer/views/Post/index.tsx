@@ -3,9 +3,10 @@ import { Link, useParams } from 'react-router-dom';
 import parse from 'html-react-parser';
 
 import { Loader } from 'components/atoms/Loader';
+import { URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { ArticleBlockType, PortalAssetType, PortalCategoryType } from 'helpers/types';
-import { checkValidAddress, formatAddress, formatDate } from 'helpers/utils';
+import { checkValidAddress, formatAddress, formatDate, getPortalIdFromURL } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -23,7 +24,7 @@ export default function Post() {
 
 	React.useEffect(() => {
 		(async function () {
-			if (postId && checkValidAddress(postId) && permawebProvider.libs) {
+			if (!post && postId && checkValidAddress(postId) && permawebProvider.libs) {
 				setLoading(true);
 				try {
 					const post = await permawebProvider.libs.getAtomicAsset(postId);
@@ -35,6 +36,12 @@ export default function Post() {
 			}
 		})();
 	}, [postId, permawebProvider.libs]);
+
+	function getCategoryRedirect(categoryId: string) {
+		const portalId = getPortalIdFromURL();
+		if (portalId) return `${URLS.portalBase(portalId)}${URLS.category(categoryId)}`;
+		return URLS.category(categoryId);
+	}
 
 	if (loading) return <Loader sm relative />;
 
@@ -117,7 +124,7 @@ export default function Post() {
 						<S.Categories>
 							{post.metadata.categories.map((category: PortalCategoryType) => {
 								return (
-									<Link to={'#'} key={category.id}>
+									<Link to={getCategoryRedirect(category.id)} key={category.id}>
 										{category.name}
 									</Link>
 								);
@@ -144,11 +151,7 @@ export default function Post() {
 						<p>{language.topics}</p>
 						<S.Topics>
 							{post.metadata.topics.map((topic: string) => {
-								return (
-									<Link to={'#'} key={topic}>
-										{topic}
-									</Link>
-								);
+								return <span key={topic}>{topic}</span>;
 							})}
 						</S.Topics>
 					</S.TopicsWrapper>

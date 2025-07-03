@@ -83,10 +83,15 @@ export type PortalFontsType = {
 	body: string
 }
 
+export enum PortalSchemeType {
+	Light = 'light',
+	Dark = 'dark'
+}
+
 export type PortalThemeType = {
 	name: string;
 	active: boolean;
-	scheme: 'light' | 'dark';
+	scheme: PortalSchemeType;
 	colors: {
 		background: string;
 		primary: string;

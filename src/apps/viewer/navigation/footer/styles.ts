@@ -30,8 +30,9 @@ export const LogoWrapper = styled.div`
 	a {
 		height: 100%;
 		width: 100%;
-		display: block;
-		color: ${(props) => props.theme.colors.font.primary};
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
 
 		&:hover {
 			opacity: 0.75;
@@ -43,6 +44,16 @@ export const LogoWrapper = styled.div`
 		width: 100%;
 		object-fit: contain;
 		object-position: left;
+	}
+
+	h4 {
+		text-align: left;
+		font-size: ${(props) => props.theme.typography.size.xxLg};
+		color: ${(props) => props.theme.colors.font.primary};
+
+		&:hover {
+			color: ${(props) => props.theme.colors.font.alt1};
+		}
 	}
 
 	svg {

@@ -577,6 +577,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			alt1: currentTheme.typography?.family?.alt1 ?? `'Crimson Pro', serif`,
 		},
 		size: {
+			xxxxSmall: '11px',
 			xxxSmall: '12px',
 			xxSmall: '13px',
 			xSmall: '14px',

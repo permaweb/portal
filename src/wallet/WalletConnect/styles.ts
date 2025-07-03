@@ -63,6 +63,7 @@ export const Dropdown = styled.div`
 	max-width: 75vw;
 	padding: 11.5px 10px;
 	position: absolute;
+	z-index: 1;
 	top: 40px;
 	right: -1.5px;
 	border-radius: ${STYLING.dimensions.radius.primary};
@@ -285,5 +286,54 @@ export const Preview = styled.div<{ background: string; accent: string }>`
 		right: 10px;
 		border-radius: ${STYLING.dimensions.radius.alt4};
 		background: ${(props) => props.accent};
+	}
+`;
+
+export const WalletListContainer = styled.div`
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 20px;
+	flex-wrap: wrap;
+	padding: 20px 0;
+`;
+
+export const WalletListItem = styled.button`
+	width: 200px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 15px;
+	img {
+		width: 40px;
+		border-radius: 50%;
+		margin: 3.5px 0 15px 0;
+	}
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.base};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+	}
+	&:hover {
+		background: ${(props) => props.theme.colors.container.primary.active};
+	}
+`;
+
+export const WalletLink = styled.div`
+	margin: 10px 0;
+	padding: 0 20px;
+	text-align: center;
+	a,
+	span {
+		font-size: ${(props) => props.theme.typography.size.small};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+	}
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
 	}
 `;

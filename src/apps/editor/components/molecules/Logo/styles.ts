@@ -120,6 +120,7 @@ export const LInput = styled.button<{ hasLogo: boolean }>`
             left: 0;
             right: 0;
             bottom: 0;
+			border: 1px solid ${props.theme.colors.border.alt1};
             background-color: ${props.theme.colors.overlay.alt1};
 			border-radius: ${STYLING.dimensions.radius.alt2};
             opacity: 0;

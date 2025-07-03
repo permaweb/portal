@@ -299,12 +299,15 @@ export const Topics = styled.div`
 	flex-wrap: wrap;
 	gap: 15px;
 	
-	a {
+	a,
+	span {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		text-transform: uppercase;
+	}
 
+	a {
 		&:hover {
 			color: ${(props) => props.theme.colors.link.color};
 		}

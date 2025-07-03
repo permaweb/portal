@@ -264,7 +264,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						{portal}
 					</S.C1Wrapper>
 					<S.ActionsWrapper>
-						<WalletConnect />
+						<WalletConnect app={'editor'} />
 					</S.ActionsWrapper>
 				</S.Content>
 			</S.Header>

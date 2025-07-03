@@ -91,6 +91,8 @@ export default function PortalManager(props: IProps) {
 				} else {
 					const tags = [getBootTag('Name', data.Name), { name: 'Content-Type', value: 'text/html' }];
 					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
+						
+					console.log(PORTAL_DATA())
 
 					const portalId = await permawebProvider.libs.createZone(
 						{
@@ -124,10 +126,12 @@ export default function PortalManager(props: IProps) {
 						arProvider.wallet
 					);
 
-					const themeUpdateId = await permawebProvider.libs.addToZone(
+					const themeUpdateId = await permawebProvider.libs.updateZone(
 						{
-							path: 'Themes',
-							data: { ...permawebProvider.libs.mapToProcessCase(DEFAULT_THEME) },
+							Themes: [
+								permawebProvider.libs.mapToProcessCase(DEFAULT_THEME.light),
+								permawebProvider.libs.mapToProcessCase(DEFAULT_THEME.dark),
+							],
 						},
 						portalId,
 						arProvider.wallet

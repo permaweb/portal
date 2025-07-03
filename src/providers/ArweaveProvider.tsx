@@ -4,20 +4,13 @@ import { randomBytes } from 'crypto-browserify';
 
 import { bufferTob64Url } from 'arweave/node/lib/utils';
 
-import { Modal } from 'components/atoms/Modal';
-import { ASSETS, STORAGE, URLS } from 'helpers/config';
+import { STORAGE, URLS } from 'helpers/config';
 import { getARBalanceEndpoint, getTurboBalanceEndpoint } from 'helpers/endpoints';
 import { WalletEnum } from 'helpers/types';
-import { useLanguageProvider } from 'providers/LanguageProvider';
-
-import * as S from './styles';
 
 const WALLET_PERMISSIONS = ['ACCESS_ADDRESS', 'ACCESS_PUBLIC_KEY', 'SIGN_TRANSACTION', 'DISPATCH', 'SIGNATURE'];
 
-const AR_WALLETS = [{ type: WalletEnum.wander, label: 'Wander', logo: ASSETS.wander }];
-
 interface ArweaveContextState {
-	wallets: { type: WalletEnum; logo: string }[];
 	wallet: any;
 	walletAddress: string | null;
 	walletType: WalletEnum | null;
@@ -25,12 +18,9 @@ interface ArweaveContextState {
 	turboBalance: number | null;
 	handleConnect: any;
 	handleDisconnect: () => void;
-	walletModalVisible: boolean;
-	setWalletModalVisible: (open: boolean) => void;
 }
 
 const DEFAULT_CONTEXT = {
-	wallets: [],
 	wallet: null,
 	walletAddress: null,
 	walletType: null,
@@ -38,7 +28,6 @@ const DEFAULT_CONTEXT = {
 	turboBalance: null,
 	handleConnect() {},
 	handleDisconnect() {},
-	walletModalVisible: false,
 	setWalletModalVisible(_open: boolean) {},
 };
 
@@ -48,42 +37,11 @@ export function useArweaveProvider(): ArweaveContextState {
 	return React.useContext(ARContext);
 }
 
-function WalletList(props: { handleConnect: any }) {
-	return (
-		<S.WalletListContainer>
-			{AR_WALLETS.map((wallet: any, index: number) => (
-				<S.WalletListItem
-					key={index}
-					onClick={() => props.handleConnect(wallet.type)}
-					className={'border-wrapper-primary'}
-				>
-					<img src={wallet.logo} alt={''} />
-					<span>{wallet.label}</span>
-				</S.WalletListItem>
-			))}
-			<S.WalletLink>
-				<span>
-					Don't have an Arweave Wallet? You can create one{' '}
-					<a href={'https://arconnect.io'} target={'_blank'}>
-						here.
-					</a>
-				</span>
-			</S.WalletLink>
-		</S.WalletListContainer>
-	);
-}
-
 export function ArweaveProvider(props: { children: React.ReactNode }) {
 	const navigate = useNavigate();
 
-	const languageProvider = useLanguageProvider();
-	const language = languageProvider.object[languageProvider.current];
-
-	const wallets = AR_WALLETS;
-
 	const [wallet, setWallet] = React.useState<any>(null);
 	const [walletType, setWalletType] = React.useState<WalletEnum | null>(null);
-	const [walletModalVisible, setWalletModalVisible] = React.useState<boolean>(false);
 	const [walletAddress, setWalletAddress] = React.useState<string | null>(null);
 
 	const [arBalance, setArBalance] = React.useState<number | null>(null);
@@ -130,14 +88,12 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 			case WalletEnum.wander:
 				handleArConnect();
 				break;
-				break;
 			default:
 				if (window.arweaveWallet || walletType === WalletEnum.wander) {
 					handleArConnect();
 					break;
 				}
 		}
-		setWalletModalVisible(false);
 		return walletObj;
 	}
 
@@ -149,7 +105,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					setWalletAddress(await window.arweaveWallet.getActiveAddress());
 					setWallet(window.arweaveWallet);
 					setWalletType(WalletEnum.wander);
-					setWalletModalVisible(false);
 					localStorage.setItem(STORAGE.walletType, WalletEnum.wander);
 				} catch (e: any) {
 					console.error(e);
@@ -203,28 +158,18 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}
 
 	return (
-		<>
-			{walletModalVisible && (
-				<Modal header={language.connectWallet} handleClose={() => setWalletModalVisible(false)}>
-					<WalletList handleConnect={handleConnect} />
-				</Modal>
-			)}
-			<ARContext.Provider
-				value={{
-					wallet,
-					walletAddress,
-					walletType,
-					arBalance,
-					handleConnect,
-					handleDisconnect,
-					wallets,
-					walletModalVisible,
-					setWalletModalVisible,
-					turboBalance,
-				}}
-			>
-				{props.children}
-			</ARContext.Provider>
-		</>
+		<ARContext.Provider
+			value={{
+				wallet,
+				walletAddress,
+				walletType,
+				arBalance,
+				handleConnect,
+				handleDisconnect,
+				turboBalance,
+			}}
+		>
+			{props.children}
+		</ARContext.Provider>
 	);
 }

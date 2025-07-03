@@ -1,7 +1,8 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { PortalDetailType } from 'helpers/types';
-import { cachePortal, getCachedPortal, getPortalAssets } from 'helpers/utils';
+import { cachePortal, getCachedPortal, getPortalAssets, getPortalIdFromURL } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 interface PortalContextState {
@@ -21,13 +22,23 @@ export function usePortalProvider(): PortalContextState {
 }
 
 export function PortalProvider(props: { children: React.ReactNode }) {
+	const location = useLocation();
+
 	const permawebProvider = usePermawebProvider();
 
-	const [currentId, _setCurrentId] = React.useState<string | null>('bTAWoSpXtX5LU_2-dcLiAj7_Y6Gp3lNMPUSc3-6VnSA');
+	const [currentId, setCurrentId] = React.useState<string | null>(null);
 	const [current, setCurrent] = React.useState<PortalDetailType | null>(null);
 
 	const [updating, setUpdating] = React.useState<boolean>(false);
 	const [_errorMessage, setErrorMessage] = React.useState<string | null>(null);
+
+	React.useEffect(()=> {
+		const portalId = getPortalIdFromURL();
+		if (portalId) setCurrentId(portalId);
+		else {
+			// TODO: Get ArNS Resolved ID from Domain
+		}
+	}, [location.pathname]);
 
 	React.useEffect(() => {
 		(async function () {

@@ -38,11 +38,14 @@ export const LogoWrapper = styled.div`
 	a {
 		height: 100%;
 		width: 100%;
-		display: block;
-		color: ${(props) => props.theme.colors.font.primary};
+		display: flex;
+		justify-content: center;
+		align-items: center;
 
 		&:hover {
-			opacity: 0.75;
+			img {
+				opacity: 0.75;
+			}
 		}
 	}
 
@@ -50,6 +53,16 @@ export const LogoWrapper = styled.div`
 		height:100%;
 		width: 100%;
 		object-fit: contain;
+	}
+
+	h4 {
+		text-align: center;
+		font-size: ${(props) => props.theme.typography.size.xxLg};
+		color: ${(props) => props.theme.colors.font.primary};
+
+		&:hover {
+			color: ${(props) => props.theme.colors.font.alt1};
+		}
 	}
 
 	svg {
@@ -66,7 +79,6 @@ export const ContentEnd = styled.div``;
 export const NavigationWrapper = styled(WrapperContent)`
 	height: ${STYLING.dimensions.nav.linksHeight};
 	width: 100%;
-	background: ${(props) => props.theme.colors.container.alt1.background};
 	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
@@ -150,6 +162,7 @@ export const SubMenu = styled.ul`
 	left: 0;
 	flex-direction: column;
 	padding: 7.5px 15px 8.5px 15px;
+	border-radius: ${STYLING.dimensions.radius.primary} !important;
 
 	opacity: 0;
 	visibility: hidden;

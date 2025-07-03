@@ -90,12 +90,17 @@ export default function Landing() {
 			label = language.connect;
 			icon = ASSETS.wallet;
 
-			action = () => arProvider.setWalletModalVisible(true);
+			// TODO: Removed from ArweaveProvider
+			// action = () => arProvider.setWalletModalVisible(true);
+			action = null;
 
 			if (permawebProvider.profile && !permawebProvider.profile.id) {
 				label = language.createProfile;
 				icon = ASSETS.user;
-				action = () => permawebProvider.setShowProfileManager(true);
+
+				// TODO: Removed from PermawebProvider
+				// action = () => permawebProvider.setShowProfileManager(true);
+				action = null;
 			}
 
 			content = (
@@ -153,18 +158,20 @@ export default function Landing() {
 		return (
 			<S.PortalsWrapper>
 				{content}
-				<S.PortalActionWrapper>
-					<Button
-						type={'primary'}
-						label={label}
-						handlePress={action}
-						disabled={disabled}
-						icon={icon}
-						iconLeftAlign
-						height={70}
-						fullWidth
-					/>
-				</S.PortalActionWrapper>
+				{action && (
+					<S.PortalActionWrapper>
+						<Button
+							type={'primary'}
+							label={label}
+							handlePress={action}
+							disabled={disabled}
+							icon={icon}
+							iconLeftAlign
+							height={70}
+							fullWidth
+						/>
+					</S.PortalActionWrapper>
+				)}
 			</S.PortalsWrapper>
 		);
 	}, [arProvider.wallet, arProvider.walletAddress, permawebProvider.profile, portalProvider.portals]);
@@ -233,7 +240,7 @@ export default function Landing() {
 								</button>
 							</S.HeaderAction>
 						</S.HeaderActionsWrapper>
-						<WalletConnect />
+						<WalletConnect app={'editor'} />
 					</S.HeaderContent>
 				</S.HeaderWrapper>
 				<S.ContentWrapper className={'fade-in border-wrapper-alt3'}>
