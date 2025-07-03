@@ -3,7 +3,6 @@ import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
-import { Button } from 'components/atoms/Button';
 import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalCategoryType, PortalLinkType } from 'helpers/types';
@@ -21,7 +20,7 @@ export default function Footer() {
 		}
 		return <h4>{portalProvider.current?.name ?? '-'}</h4>;
 	}
-	
+
 	return (
 		<S.Wrapper>
 			<S.Content className={'max-view-wrapper'}>
@@ -29,7 +28,22 @@ export default function Footer() {
 					<S.LogoWrapper className={'fade-in'}>
 						<Link to={URLS.base}>{getLogo()}</Link>
 					</S.LogoWrapper>
-					<Button type={'alt1'} label={'Log in'} handlePress={() => {}} />
+					{portalProvider.current?.links?.length > 0 && (
+						<S.LinksWrapper>
+							{portalProvider.current.links.map((link: PortalLinkType, index: number) => {
+								return (
+									<S.LinkWrapper key={index}>
+										<Link to={link.url} target={'_href'}>
+											<ReactSVG src={link.icon ? getTxEndpoint(link.icon) : ASSETS.link} />
+											<S.LinkTooltip className={'info'}>
+												<span>{link.title}</span>
+											</S.LinkTooltip>
+										</Link>
+									</S.LinkWrapper>
+								);
+							})}
+						</S.LinksWrapper>
+					)}
 				</S.Header>
 				{portalProvider.current?.categories?.length > 0 && (
 					<S.CategoriesWrapper>
@@ -41,22 +55,6 @@ export default function Footer() {
 							);
 						})}
 					</S.CategoriesWrapper>
-				)}
-				{portalProvider.current?.links?.length > 0 && (
-					<S.LinksWrapper>
-						{portalProvider.current.links.map((link: PortalLinkType, index: number) => {
-							return (
-								<S.LinkWrapper key={index}>
-									<Link to={link.url} target={'_href'}>
-										<ReactSVG src={link.icon ? getTxEndpoint(link.icon) : ASSETS.link} />
-										<S.LinkTooltip className={'info'}>
-											<span>{link.title}</span>
-										</S.LinkTooltip>
-									</Link>
-								</S.LinkWrapper>
-							);
-						})}
-					</S.LinksWrapper>
 				)}
 				<S.FooterEndWrapper>
 					<S.NameWrapper>

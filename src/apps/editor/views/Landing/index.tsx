@@ -2,11 +2,13 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
+import { ProfileManager } from 'editor/components/organisms/ProfileManager';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
+import { Panel } from 'components/atoms/Panel';
 import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { formatAddress } from 'helpers/utils';
@@ -28,6 +30,7 @@ export default function Landing() {
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [showInvites, setShowInvites] = React.useState<boolean>(false);
+	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 
 	async function joinPortal(portalId: string) {
 		if (portalId && permawebProvider.profile?.id) {
@@ -90,17 +93,13 @@ export default function Landing() {
 			label = language.connect;
 			icon = ASSETS.wallet;
 
-			// TODO: Removed from ArweaveProvider
-			// action = () => arProvider.setWalletModalVisible(true);
 			action = null;
 
 			if (permawebProvider.profile && !permawebProvider.profile.id) {
 				label = language.createProfile;
 				icon = ASSETS.user;
 
-				// TODO: Removed from PermawebProvider
-				// action = () => permawebProvider.setShowProfileManager(true);
-				action = null;
+				action = () => setShowProfileManager(true);
 			}
 
 			content = (
@@ -158,8 +157,13 @@ export default function Landing() {
 		return (
 			<S.PortalsWrapper>
 				{content}
-				{action && (
-					<S.PortalActionWrapper>
+				<S.PortalActionWrapper>
+					{!arProvider.walletAddress && (
+						<S.WalletConnect>
+							<WalletConnect app={'editor'} />
+						</S.WalletConnect>
+					)}
+					{action && (
 						<Button
 							type={'primary'}
 							label={label}
@@ -170,8 +174,8 @@ export default function Landing() {
 							height={70}
 							fullWidth
 						/>
-					</S.PortalActionWrapper>
-				)}
+					)}
+				</S.PortalActionWrapper>
 			</S.PortalsWrapper>
 		);
 	}, [arProvider.wallet, arProvider.walletAddress, permawebProvider.profile, portalProvider.portals]);
@@ -253,6 +257,19 @@ export default function Landing() {
 					</S.ContentBodyWrapper>
 				</S.ContentWrapper>
 			</S.Wrapper>
+			<Panel
+				open={showProfileManager}
+				header={permawebProvider.profile?.id ? language.editProfile : `${language.createProfile}!`}
+				handleClose={() => setShowProfileManager(false)}
+				width={575}
+				closeHandlerDisabled
+			>
+				<ProfileManager
+					profile={permawebProvider.profile?.id ? permawebProvider.profile : null}
+					handleClose={() => setShowProfileManager(false)}
+					handleUpdate={null}
+				/>
+			</Panel>
 			{showInvites && invites}
 			{loading && <Loader message={`${language.loading}...`} />}
 		</>
