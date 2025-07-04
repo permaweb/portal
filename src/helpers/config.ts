@@ -1,5 +1,5 @@
 import { getTxEndpoint } from './endpoints';
-import { ArticleBlockEnum, PortalThemeType } from './types';
+import { ArticleBlockEnum, PortalSchemeType, PortalThemeType } from './types';
 
 export const SOCIAL_LINK_ASSETS = {
 	dailyMotion: 'qO9Qi_WSCcZgqN-3D4eSApFyEHHSw6jZneGUGT8nLmA',
@@ -259,7 +259,7 @@ export const DEFAULT_THEME: { light: PortalThemeType, dark: PortalThemeType } = 
 	light: {
 		name: 'Light Default',
 		active: true,
-		scheme: 'light',
+		scheme: PortalSchemeType.Light,
 		colors: {
 			background: '255,255,255',
 			primary: '77,77,77',
@@ -274,7 +274,7 @@ export const DEFAULT_THEME: { light: PortalThemeType, dark: PortalThemeType } = 
 	dark: {
 		name: 'Dark Default',
 		active: true,
-		scheme: 'dark',
+		scheme: PortalSchemeType.Dark,
 		colors: {
 			background: '20,20,20',
 			primary: '77,77,77',
