@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { usePortalProvider } from 'editor/providers/PortalProvider';
+
 import { Notification } from 'components/atoms/Notification';
 import { ASSETS } from 'helpers/config';
 import { NotificationType, SelectOptionType } from 'helpers/types';
@@ -7,7 +9,6 @@ import { checkValidAddress, formatRoleLabel } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import { usePortalProvider } from 'providers/PortalProvider';
 
 import { Button } from '../../atoms/Button';
 import { FormField } from '../../atoms/FormField';
@@ -25,7 +26,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 
 	const [walletAddress, setWalletAddress] = React.useState<string>('');
 
-	const [roleOptions, setRoleOptions] = React.useState<{ id: string; label: string }[] | null>(null);
+	const [roleOptions, setRoleOptions] = React.useState<SelectOptionType[] | null>(null);
 	const [role, setRole] = React.useState<SelectOptionType | null>(null);
 
 	const [loading, setLoading] = React.useState<boolean>(false);

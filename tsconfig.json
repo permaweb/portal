@@ -2,7 +2,15 @@
 	"compilerOptions": {
 		"baseUrl": "./src",
 		"paths": {
-			"*": ["*"]
+			"editor/*": ["apps/editor/*"],
+			"viewer/*": ["apps/viewer/*"],
+			"components/*": ["components/*"],
+			"helpers/*": ["helpers/*"],
+			"hooks/*": ["hooks/*"],
+			"providers/*": ["providers/*"],
+			"store/*": ["store/*"],
+			"wallet/*": ["wallet/*"],
+			"wrappers/*": ["wrappers/*"]
 		},
 		"target": "es5",
 		"lib": ["dom", "dom.iterable", "esnext"],

@@ -1,29 +1,27 @@
 {
-	"name": "portal-editor",
+	"name": "portal",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.tsx",
 	"author": "",
 	"license": "ISC",
 	"scripts": {
-		"start:development": "NODE_ENV=development vite",
-		"start:production": "NODE_ENV=staging vite",
 		"format": "eslint --fix . && npx prettier --write .",
-		"test": "npm test",
-		"test:verbose": "npm test -- --verbose",
-		"test:coverage": "CI=true npm test -- --env=jsdom --coverage",
-		"build": "NODE_ENV=production vite build",
-		"deploy:main": "npm run build && permaweb-deploy --arns-name portal",
-		"deploy:staging": "npm run build && permaweb-deploy --arns-name portal --undername staging",
-		"prepare": "husky install"
+		"start:editor": "NODE_ENV=development VITE_APP=editor vite",
+		"start:viewer": "NODE_ENV=development VITE_APP=viewer vite",
+		"build:editor": "NODE_ENV=production VITE_APP=editor vite build",
+		"build:viewer": "NODE_ENV=production VITE_APP=viewer vite build",
+		"deploy:editor:main": "npm run build && permaweb-deploy --arns-name portal",
+		"deploy:editor:staging": "npm run build && permaweb-deploy --arns-name portal --undername staging"
 	},
 	"dependencies": {
 		"@hello-pangea/dnd": "^17.0.0",
 		"@permaweb/aoconnect": "^0.0.85",
-		"@permaweb/libs": "0.0.43",
+		"@permaweb/libs": "0.0.45",
 		"@stripe/react-stripe-js": "^3.5.1",
 		"@stripe/stripe-js": "^6.1.0",
 		"arweave": "^1.15.5",
+		"html-react-parser": "^5.2.5",
 		"react": "^18.2.0",
 		"react-colorful": "^5.6.1",
 		"react-dom": "^18.2.0",
@@ -34,7 +32,8 @@
 		"react-svg": "^15.1.11",
 		"redux-persist": "^6.0.0",
 		"redux-thunk": "^2.4.2",
-		"styled-components": "^5.3.6"
+		"styled-components": "^5.3.6",
+		"webfontloader": "^1.6.28"
 	},
 	"devDependencies": {
 		"@types/react": "^18.0.28",
