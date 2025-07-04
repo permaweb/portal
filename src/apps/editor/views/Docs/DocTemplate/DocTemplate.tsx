@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { Loader } from 'components/atoms/Loader';
 import { URLS } from 'helpers/config';
+import { scrollTo } from 'helpers/window';
 
 import * as S from './styles';
 
@@ -90,7 +91,10 @@ export default function DocTemplate(props: { doc?: string; id?: string }) {
 		}
 
 		loader()
-			.then((content) => setMarkdown(content))
+			.then((content) => {
+				setMarkdown(content);
+				scrollTo(0, 0, 'smooth');
+			})
 			.catch((err) => console.error('Error loading markdown:', err));
 	}, [props.doc, active]);
 
