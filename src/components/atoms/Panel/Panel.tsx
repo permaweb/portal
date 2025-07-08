@@ -7,9 +7,15 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function Panel(props: IProps) {
+export default function Panel(props: {
+	header: string | null | undefined | React.ReactNode;
+	handleClose: () => void | null;
+	children: React.ReactNode;
+	open: boolean;
+	width?: number;
+	closeHandlerDisabled?: boolean;
+}) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 

@@ -47,11 +47,13 @@ src/apps/editor/views/Docs/
 **Purpose**: Dynamically loads and organizes Markdown files using Webpack's `require.context`
 
 **Functions**:
+
 - `getDocTree()` - Builds a tree structure of available docs
 - `loadDoc(docPath)` - Loads specific Markdown content
 - `readDirectory(ctx)` - Recursively processes directory structure
 
 **Example Usage**:
+
 ```typescript
 import { loadDoc, getDocTree } from './load-docs';
 
@@ -67,32 +69,29 @@ const tree = getDocTree();
 **Purpose**: Defines the hierarchical navigation structure and display order
 
 **Structure**:
+
 ```typescript
 export const docsOrder = [
-  {
-    name: 'Overview',
-    path: 'overview',
-    children: [
-      { name: 'Introduction', path: 'introduction' }
-    ]
-  },
-  {
-    name: 'Setup',
-    path: 'setup', 
-    children: [
-      { name: 'Categories', path: 'categories' },
-      { name: 'Links', path: 'links' },
-      { name: 'Topics', path: 'topics' },
-      { name: 'Media', path: 'media' }
-    ]
-  },
-  {
-    name: 'Posts',
-    path: 'posts',
-    children: [
-      { name: 'Editor', path: 'editor' }
-    ]
-  }
+	{
+		name: 'Overview',
+		path: 'overview',
+		children: [{ name: 'Introduction', path: 'introduction' }],
+	},
+	{
+		name: 'Setup',
+		path: 'setup',
+		children: [
+			{ name: 'Categories', path: 'categories' },
+			{ name: 'Links', path: 'links' },
+			{ name: 'Topics', path: 'topics' },
+			{ name: 'Media', path: 'media' },
+		],
+	},
+	{
+		name: 'Posts',
+		path: 'posts',
+		children: [{ name: 'Editor', path: 'editor' }],
+	},
 ];
 ```
 
@@ -101,6 +100,7 @@ export const docsOrder = [
 **Purpose**: Orchestrates the documentation display with navigation components
 
 **Components**:
+
 - `DocsNavigationHeader` - Top navigation with breadcrumbs and section links
 - `DocTemplate` - Renders the Markdown content
 - `DocsNavigationFooter` - Bottom navigation with prev/next links
@@ -112,18 +112,21 @@ export const docsOrder = [
 ### Current Documentation Sections
 
 #### Overview
+
 - **Introduction** (`overview/introduction.md`)
   - Welcome message and platform overview
   - Key features and capabilities
   - Dashboard navigation guide
 
 #### Setup
-- **Categories** (`setup/categories.md`) - *TODO: Content needed*
-- **Links** (`setup/links.md`) - *TODO: Content needed*
-- **Topics** (`setup/topics.md`) - *TODO: Content needed*
-- **Media** (`setup/media.md`) - *TODO: Content needed*
+
+- **Categories** (`setup/categories.md`) - _TODO: Content needed_
+- **Links** (`setup/links.md`) - _TODO: Content needed_
+- **Topics** (`setup/topics.md`) - _TODO: Content needed_
+- **Media** (`setup/media.md`) - _TODO: Content needed_
 
 #### Posts
+
 - **Editor** (`posts/editor.md`)
   - Block-based editing system
   - Content creation workflow
@@ -132,18 +135,21 @@ export const docsOrder = [
 ### Content Guidelines
 
 #### Markdown Format
+
 - Use standard Markdown syntax
 - Include clear headings (`#`, `##`, `###`)
 - Use bullet points for feature lists
 - Include code examples where relevant
 
 #### Structure Requirements
+
 - Start with main heading (`#`)
 - Use subheadings for organization
 - Include "Key Components" sections for complex topics
 - End with practical usage examples
 
 #### Example Template
+
 ```markdown
 # Section Title
 
@@ -159,6 +165,7 @@ Brief description of the section's purpose and scope.
 Step-by-step instructions for common tasks:
 
 - **Task 1**
+
   - Step-by-step instructions
   - Additional details
 
@@ -190,17 +197,17 @@ Add the new documentation to `order-docs.ts`:
 
 ```typescript
 export const docsOrder = [
-  // ... existing sections
-  {
-    name: 'New Section',
-    path: 'new-section',
-    children: [
-      {
-        name: 'Topic',
-        path: 'topic'
-      }
-    ]
-  }
+	// ... existing sections
+	{
+		name: 'New Section',
+		path: 'new-section',
+		children: [
+			{
+				name: 'Topic',
+				path: 'topic',
+			},
+		],
+	},
 ];
 ```
 
@@ -222,23 +229,24 @@ const docsContext: any = (require as any).context('./MD', true, /\.md$/);
 
 // Builds directory tree structure
 const readDirectory = (ctx: any) => {
-  const dir = {};
-  ctx.keys().forEach((key: any) => {
-    const parts = key.slice(2).split('/');
-    let currentLevel: any = dir;
-    parts.forEach((part: any) => {
-      const isFile = /\.md$/.test(part);
-      const name = isFile ? part.slice(0, -3) : part;
-      // ... tree building logic
-    });
-  });
-  return dir;
+	const dir = {};
+	ctx.keys().forEach((key: any) => {
+		const parts = key.slice(2).split('/');
+		let currentLevel: any = dir;
+		parts.forEach((part: any) => {
+			const isFile = /\.md$/.test(part);
+			const name = isFile ? part.slice(0, -3) : part;
+			// ... tree building logic
+		});
+	});
+	return dir;
 };
 ```
 
 ### Navigation System
 
 The navigation system combines:
+
 1. **Static order definition** (`order-docs.ts`) for display hierarchy
 2. **Dynamic content discovery** (`load-docs.ts`) for available files
 3. **Route-based rendering** for deep linking to specific sections
@@ -246,6 +254,7 @@ The navigation system combines:
 ### Styling Integration
 
 The documentation system uses the Portal's theme system:
+
 - Consistent typography using theme fonts
 - Theme-aware colors for light/dark mode support
 - Responsive design for different screen sizes
@@ -258,18 +267,22 @@ The documentation system uses the Portal's theme system:
 ### Potential Improvements
 
 1. **Search Functionality**
+
    - Full-text search across all documentation
    - Keyword highlighting in results
 
 2. **Interactive Elements**
+
    - Embedded demos or screenshots
    - Interactive tutorials or walkthroughs
 
 3. **Content Management**
+
    - Admin interface for editing documentation
    - Version control for content changes
 
 4. **Enhanced Navigation**
+
    - Table of contents for long documents
    - Quick jump links within sections
 
@@ -293,8 +306,9 @@ To work on the documentation system:
 The Portal documentation system provides a flexible, maintainable way to deliver in-app help content. Its dynamic loading system automatically discovers new content, while the navigation order system provides structured presentation. This design allows for easy content updates without code changes and maintains consistency with the Portal's overall design system.
 
 Key benefits:
+
 - **Automatic content discovery** - Add files and they appear in the system
-- **Hierarchical organization** - Clear structure for complex topics  
+- **Hierarchical organization** - Clear structure for complex topics
 - **Theme integration** - Consistent with Portal's design system
 - **Developer-friendly** - Markdown-based content creation
 - **Maintainable** - Separation of content, structure, and presentation

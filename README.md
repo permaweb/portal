@@ -7,6 +7,7 @@ Portal is a decentralized publishing platform that lets you build your own websi
 The project is organized into two main applications:
 
 #### Editor (`/src/apps/editor/`)
+
 - Content creation and management interface
 - Portal configuration and setup
 - User management and permissions
@@ -14,6 +15,7 @@ The project is organized into two main applications:
 - Media library management
 
 #### Viewer (`/src/apps/viewer/`)
+
 - Public-facing portal display
 - Post viewing and navigation
 - Category browsing

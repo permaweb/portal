@@ -1,9 +1,14 @@
 import { Button } from '../Button';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function Toggle(props: IProps) {
+export default function Toggle(props: {
+	label: string;
+	options: string[];
+	activeOption: string;
+	handleToggle: (option: string) => void;
+	disabled: boolean;
+}) {
 	return (
 		<S.Wrapper>
 			<S.Label>
@@ -20,9 +25,9 @@ export default function Toggle(props: IProps) {
 							disabled={props.disabled}
 							active={option.toLowerCase() === props.activeOption.toLowerCase()}
 						/>
-					)
+					);
 				})}
 			</S.Options>
 		</S.Wrapper>
-	)
+	);
 }

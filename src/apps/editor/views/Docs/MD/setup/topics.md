@@ -12,10 +12,12 @@ Topics are tags that help you organize and describe the specific subjects covere
 #### Creating Topics
 
 - **Access Topics Management**
+
   - Navigate to **Setup** in the main menu
   - Select the **Topics** section
 
 - **Add a New Topic**
+
   - Click the **Add Topic** button
   - Enter a descriptive topic name
   - Optionally add a brief description
@@ -29,12 +31,14 @@ Topics are tags that help you organize and describe the specific subjects covere
 #### Topics vs. Categories
 
 **Categories** are like broad sections of a newspaper:
+
 - Technology
-- Sports  
+- Sports
 - Politics
 - Lifestyle
 
 **Topics** are like specific story tags:
+
 - `artificial-intelligence`, `machine-learning`, `programming`
 - `basketball`, `nba-playoffs`, `team-stats`
 - `election-2024`, `local-government`, `policy-analysis`
@@ -51,18 +55,21 @@ Topics are tags that help you organize and describe the specific subjects covere
 #### Topic Examples by Portal Type
 
 **Technology Blog:**
+
 - `javascript`, `react`, `node.js`, `web-development`
 - `artificial-intelligence`, `machine-learning`, `data-science`
 - `cybersecurity`, `blockchain`, `cloud-computing`
 - `mobile-development`, `ios`, `android`
 
 **News Portal:**
+
 - `breaking-news`, `local-events`, `community-updates`
 - `sports-scores`, `game-recap`, `player-trades`
 - `weather-alert`, `traffic-update`, `school-closings`
 - `business-news`, `stock-market`, `economic-trends`
 
 **Lifestyle Blog:**
+
 - `recipe`, `quick-meals`, `vegetarian`, `gluten-free`
 - `workout-routine`, `yoga`, `running-tips`, `nutrition`
 - `travel-guide`, `budget-travel`, `family-vacation`
@@ -71,12 +78,14 @@ Topics are tags that help you organize and describe the specific subjects covere
 #### Using Topics Effectively
 
 **When Creating Posts:**
+
 - **Add 3-5 Topics**: Enough to be descriptive without overwhelming
 - **Mix Broad and Specific**: Include both general and detailed topics
 - **Consider Your Audience**: Use terms your readers would search for
 - **Be Consistent**: Use the same topic names for related content
 
 **Topic Organization:**
+
 - **Review Regularly**: Remove topics that are no longer relevant
 - **Merge Similar Topics**: Combine topics that serve the same purpose
 - **Create Topic Groups**: Mentally group related topics for better organization
@@ -91,14 +100,17 @@ Topics are tags that help you organize and describe the specific subjects covere
 #### Advanced Topic Strategies
 
 **Content Series:**
+
 - Use consistent topics for multi-part series (e.g., `beginner-guide-series`)
 - Create year-based topics for annual content (e.g., `2024-predictions`)
 
 **Event Coverage:**
+
 - Create specific topics for major events you're covering
 - Use hashtag-style topics for trending discussions
 
 **Reader Engagement:**
+
 - Ask readers what topics they want to see more of
 - Create polls about which topics interest them most
 - Use topic popularity to guide your content strategy

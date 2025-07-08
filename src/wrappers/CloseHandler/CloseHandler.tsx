@@ -1,7 +1,6 @@
 import React from 'react';
 
 import * as S from './styles';
-import { IProps } from './types';
 
 function useCloseHandler(ref: any, callback: () => void) {
 	React.useEffect(() => {
@@ -17,7 +16,12 @@ function useCloseHandler(ref: any, callback: () => void) {
 	}, [ref, callback]);
 }
 
-export default function CloseHandler(props: IProps) {
+export default function CloseHandler(props: {
+	active: boolean;
+	callback: () => void;
+	children: React.ReactNode;
+	disabled: boolean;
+}) {
 	const wrapperRef = React.useRef<any>(null);
 	useCloseHandler(wrapperRef, props.callback);
 

@@ -1,11 +1,30 @@
 import { ReactSVG } from 'react-svg';
 
+import { ButtonType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function Button(props: IProps) {
+export default function Button(props: {
+	type: ButtonType;
+	label: string | number | React.ReactNode;
+	handlePress: (e: React.MouseEvent) => void;
+	disabled?: boolean;
+	active?: boolean;
+	loading?: boolean;
+	icon?: string;
+	iconLeftAlign?: boolean;
+	formSubmit?: boolean;
+	noFocus?: boolean;
+	useMaxWidth?: boolean;
+	noMinWidth?: boolean;
+	width?: number;
+	height?: number;
+	fullWidth?: boolean;
+	tooltip?: string;
+	warning?: boolean;
+	className?: string;
+}) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 

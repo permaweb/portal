@@ -1,6 +1,8 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
+import { ProfileType } from '@permaweb/libs';
+
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
@@ -16,13 +18,16 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
-import { IProps } from './types';
 
 const MAX_BIO_LENGTH = 500;
 const ALLOWED_BANNER_TYPES = 'image/png, image/jpeg, image/gif';
 const ALLOWED_AVATAR_TYPES = 'image/png, image/jpeg, image/gif';
 
-export default function ProfileManager(props: IProps) {
+export default function ProfileManager(props: {
+	profile: ProfileType | null;
+	handleClose: () => void;
+	handleUpdate: () => void;
+}) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();

@@ -1,11 +1,20 @@
 import React from 'react';
 
+import { ValidationType } from 'helpers/types';
 import { formatCount } from 'helpers/utils';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function Slider(props: IProps) {
+export default function Slider(props: {
+	value: number;
+	maxValue: number;
+	handleChange: (e: any) => void;
+	invalid: ValidationType;
+	label?: string;
+	disabled: boolean;
+	minValue?: number;
+	useFractional?: boolean;
+}) {
 	const rangeRef = React.useRef<HTMLInputElement>(null);
 
 	React.useEffect(() => {

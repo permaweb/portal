@@ -12,10 +12,12 @@ Links allow you to create navigation menus and direct readers to important pages
 #### Creating Links
 
 - **Access Links Management**
+
   - Navigate to **Setup** in the main menu
   - Select the **Links** section
 
 - **Add a New Link**
+
   - Click the **Add Link** button
   - Enter a **Link Title** (what visitors will see in the menu)
   - Enter the **URL** (where the link should go)
@@ -30,12 +32,14 @@ Links allow you to create navigation menus and direct readers to important pages
 #### Link Types
 
 **Internal Links:**
+
 - Link to specific posts within your portal
 - Link to category pages
 - Link to your about page or other portal sections
 - Format: `/category/technology` or `/post/my-latest-article`
 
 **External Links:**
+
 - Link to your social media profiles
 - Link to your website or other projects
 - Link to resources and references
@@ -44,17 +48,20 @@ Links allow you to create navigation menus and direct readers to important pages
 #### Common Link Examples
 
 **Essential Portal Links:**
+
 - **About**: `/about` - Tell visitors about yourself or your organization
 - **Contact**: `/contact` - How readers can get in touch
 - **Archive**: `/archive` - Browse all your posts
 
 **Social Media Links:**
+
 - **Twitter**: `https://twitter.com/yourusername`
 - **GitHub**: `https://github.com/yourusername`
 - **LinkedIn**: `https://linkedin.com/in/yourusername`
 - **YouTube**: `https://youtube.com/c/yourchannel`
 
 **Category Links:**
+
 - **Technology**: `/category/technology`
 - **News**: `/category/news`
 - **Reviews**: `/category/reviews`
@@ -70,12 +77,14 @@ Links allow you to create navigation menus and direct readers to important pages
 #### Link Organization
 
 **Primary Navigation (Most Important):**
+
 1. Home
 2. About
 3. Categories (if you have main topic areas)
 4. Contact
 
 **Secondary Navigation:**
+
 - Social media profiles
 - External projects
 - Resource pages

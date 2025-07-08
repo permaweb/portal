@@ -6,9 +6,15 @@ import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function Avatar(props: IProps) {
+export default function Avatar(props: {
+	owner: any;
+	dimensions: {
+		wrapper: number;
+		icon: number;
+	};
+	callback: () => void | null;
+}) {
 	const [hasError, setHasError] = React.useState(false);
 
 	const hasImage = props.owner && props.owner.thumbnail && checkValidAddress(props.owner.thumbnail);

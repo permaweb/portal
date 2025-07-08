@@ -199,10 +199,12 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 									</S.PDropdownBody>
 								)}
 								<S.PDropdownFooter>
-									<button onClick={() =>{
-										 window.open(getTxEndpoint(portalProvider.current.id));
-										 setShowPortalDropdown(false);
-									}}>
+									<button
+										onClick={() => {
+											window.open(getTxEndpoint(portalProvider.current.id));
+											setShowPortalDropdown(false);
+										}}
+									>
 										<ReactSVG src={ASSETS.site} />
 										{language.goToSite}
 									</button>

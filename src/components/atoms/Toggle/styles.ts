@@ -30,7 +30,7 @@ export const Options = styled.div`
 	button {
 		min-width: 60px;
 		border: none !important;
-		
+
 		span {
 			font-size: ${(props) => props.theme.typography.size.xxxxSmall} !important;
 		}

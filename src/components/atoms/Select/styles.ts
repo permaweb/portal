@@ -84,7 +84,7 @@ export const Dropdown = styled.button<{ active: boolean }>`
 `;
 
 export const Options = styled.ul`
-	max-height: 65vh;
+	max-height: 40vh;
 	width: 100%;
 	position: absolute;
 	top: 80px;

@@ -84,6 +84,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		}
 	}, [props.data]);
 
+	// TODO: Permissions
 	/* If media is selected and it is a valid dispatch size then upload it immediately,
 		or else show the upload cost first */
 	React.useEffect(() => {

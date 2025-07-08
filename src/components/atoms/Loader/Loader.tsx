@@ -6,9 +6,16 @@ import * as windowUtils from 'helpers/window';
 import { Portal } from '../Portal';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function Loader(props: IProps) {
+export default function Loader(props: {
+	sm?: boolean;
+	xSm?: boolean;
+	disabled?: boolean;
+	placeholder?: boolean;
+	message?: string;
+	relative?: boolean;
+	noOverlay?: boolean;
+}) {
 	React.useEffect(() => {
 		if (!props.sm && !props.xSm && !props.placeholder) {
 			windowUtils.scrollTo(0, 0);

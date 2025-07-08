@@ -1,9 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { IProps } from './types';
-
-export default function Portal(props: IProps) {
+export default function Portal(props: { children: React.ReactNode; node: string }) {
 	const [DOM, setDOM] = React.useState<boolean>(false);
 	React.useEffect(() => {
 		setDOM(true);

@@ -1,6 +1,6 @@
 import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { Fonts } from 'editor/components/molecules/Fonts';
-import { Logo } from 'editor/components/molecules/Logo';
+import { Media } from 'editor/components/molecules/Media';
 import { Themes } from 'editor/components/molecules/Themes';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -8,7 +8,6 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-// TODO: Favicon
 export default function Design() {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
@@ -38,7 +37,10 @@ export default function Design() {
 						</S.SectionHeader>
 						<Fonts />
 					</S.Section>
-					<Logo portal={portalProvider.current} />
+					<Media portal={portalProvider.current} type="logo" />
+					<S.Section className={'border-wrapper-alt3'}>
+						<Media portal={portalProvider.current} type="icon" />
+					</S.Section>
 				</S.SectionWrapper>
 			</S.BodyWrapper>
 		</S.Wrapper>
