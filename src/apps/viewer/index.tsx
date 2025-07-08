@@ -11,6 +11,7 @@ import { Loader } from 'components/atoms/Loader';
 import { DOM, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { GlobalStyle } from 'helpers/styles';
+import { checkValidAddress } from 'helpers/utils';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider } from 'providers/LanguageProvider';
 import { PermawebProvider } from 'providers/PermawebProvider';
@@ -47,7 +48,7 @@ function App() {
 
 	React.useEffect(() => {
 		const txIcon = portalProvider.current?.icon;
-		if (!txIcon) return;
+		if (!txIcon || !checkValidAddress(txIcon)) return;
 
 		const iconUrl = getTxEndpoint(txIcon);
 		const head = document.head;

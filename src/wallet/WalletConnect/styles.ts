@@ -159,7 +159,7 @@ export const DBodyWrapper = styled.ul`
 		cursor: pointer;
 		color: ${(props) => props.theme.colors.font.primary} !important;
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		border: 1px solid transparent;
 		border-radius: ${STYLING.dimensions.radius.alt4};

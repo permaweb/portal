@@ -17,25 +17,24 @@ export const Header = styled.div`
 	}
 `;
 
-export const Body = styled.div`
+export const Body = styled.div<{ isIcon: boolean }>`
 	display: flex;
-	justify-content: center;
-	flex-wrap: wrap;
-	gap: 20px;
+	${(props) => props.isIcon ? 'gap: 20px;' : 'justify-content: center; flex-wrap: wrap; gap: 20px;'}
 `;
 
-export const PWrapper = styled.div`
+export const PWrapper = styled.div<{ isIcon: boolean }>`
 	height: fit-content;
-	width: 100%;
-	flex: 1;
+	width: ${(props) => props.isIcon ? 'fit-content' : '100%'};
 	input {
 		display: none;
 	}
-	@media (max-width: ${STYLING.cutoffs.initial}) {
-		min-width: 0;
-		width: 100%;
-		flex: none;
-	}
+	
+	${(props) => props.isIcon ? `
+		@media (max-width: ${STYLING.cutoffs.initial}) {
+			display: flex;
+			justify-content: center;
+		}
+	` : ''}
 `;
 
 export const CWrapper = styled.div`
@@ -57,29 +56,47 @@ export const CWrapper = styled.div`
 `;
 
 export const FileInputWrapper = styled.div`
-	width: 100%;
 	display: flex;
 	justify-content: center;
 	position: relative;
+	width: 100%;
 `;
 
-export const LInput = styled.button<{ hasLogo: boolean }>`
-	height: 170px;
-	width: 100%;
+export const RemoveWrapper = styled.div`
+	position: absolute;
+	z-index: 1;
+	top: 5px;
+	right: 5px;
+	display: none;
+`;
+
+export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled: boolean }>`
+	${(props) => props.isIcon ? `
+		height: 100px;
+		width: 100px;
+	` : `
+		height: ${props.hasMedia ? 'auto' : '170px'};
+		max-height: 200px;
+		width: 100%;
+	`}
 	position: relative;
 	background: ${(props) => props.theme.colors.container.primary.background};
-	border: ${(props) => (props.hasLogo ? `none` : `1px dashed ${props.theme.colors.border.primary}`)};
+	border: ${(props) => (props.hasMedia ? `none` : `1px dashed ${props.theme.colors.border.primary}`)};
 	border-radius: ${STYLING.dimensions.radius.alt2};
 	z-index: 1;
 	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		font-size: ${(props) => props.isIcon ? props.theme.typography.size.xxxxSmall : props.theme.typography.size.xxxSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 	}
 	svg {
-		height: 25px;
-		width: 25px;
+		height: 20px;
+		width: 20px;
 		margin: 0 0 5px 0;
 		color: ${(props) => props.theme.colors.icon.primary.fill};
 		fill: ${(props) => props.theme.colors.icon.primary.fill};
@@ -92,6 +109,7 @@ export const LInput = styled.button<{ hasLogo: boolean }>`
 	&:hover {
 		border: 1px dashed ${(props) => props.theme.colors.border.alt2};
 		background: ${(props) => props.theme.colors.container.primary.active};
+		cursor: pointer;
 	}
 	&:focus {
 		opacity: 1;
@@ -108,7 +126,7 @@ export const LInput = styled.button<{ hasLogo: boolean }>`
 		}
 	}
 	${(props) =>
-		props.hasLogo && !props.disabled
+		props.hasMedia && !props.disabled
 			? `
         pointer-events: all;
         ::after {
@@ -120,9 +138,13 @@ export const LInput = styled.button<{ hasLogo: boolean }>`
             left: 0;
             right: 0;
             bottom: 0;
-			border: 1px solid ${props.theme.colors.border.alt1};
-            background-color: ${props.theme.colors.overlay.alt1};
-			border-radius: ${STYLING.dimensions.radius.alt2};
+			${props.isIcon ? `
+				border: 1px solid ${props.theme.colors.border.alt1};
+				border-radius: ${STYLING.dimensions.radius.alt2};
+			` : `
+				background-color: ${props.theme.colors.overlay.alt1};
+				border-radius: ${STYLING.dimensions.radius.alt3};
+			`}
             opacity: 0;
             transition: all 100ms;
         }
@@ -135,6 +157,9 @@ export const LInput = styled.button<{ hasLogo: boolean }>`
         &:hover {
             cursor: pointer;
             border: none;
+			${RemoveWrapper} {
+				display: block
+			}
         }
     `
 			: ''}
@@ -146,6 +171,21 @@ export const PActions = styled.div`
 	justify-content: flex-end;
 	flex-wrap: wrap;
 	gap: 15px;
+`;
+
+export const SActions = styled.div`
+	min-height: 100px;
+	width: 100%;
+	display: flex;
+	gap: 20px;
+	flex-direction: column;
+	justify-content: space-between;
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		text-align: right;
+	}
 `;
 
 export const SAction = styled.div`
@@ -164,11 +204,11 @@ export const MWrapper = styled.div`
 
 export const MInfo = styled.div`
 	margin: 0 0 20px 0;
-	span {
-		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
-		line-height: 1.5;
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;
 

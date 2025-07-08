@@ -94,8 +94,8 @@ export const Primary = styled.button<{
 	disabled: boolean | undefined;
 	active: boolean | undefined;
 }>`
-	height: ${(props) => (props.dimensions ? `${props.dimensions.wrapper.toString()}px` : `42.5px`)};
-	width: ${(props) => (props.dimensions ? `${props.dimensions.wrapper.toString()}px` : `42.5px`)};
+	height: ${(props) => (props.dimensions ? `${props.dimensions.wrapper.toString()}px` : `42.5px`)} !important;
+	width: ${(props) => (props.dimensions ? `${props.dimensions.wrapper.toString()}px` : `42.5px`)} !important;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -104,8 +104,9 @@ export const Primary = styled.button<{
 	border-radius: 50%;
 
 	svg {
-		height: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)};
-		width: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)};
+		height: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)} !important;
+		width: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)} !important;
+		margin: auto !important;
 		color: ${(props) =>
 			props.disabled
 				? props.theme.colors.icon.primary.disabled

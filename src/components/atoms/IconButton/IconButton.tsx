@@ -34,6 +34,7 @@ export default function IconButton(props: IProps) {
 
 	function handlePress(e: any) {
 		e.preventDefault();
+		e.stopPropagation();
 		props.handlePress();
 	}
 
@@ -41,7 +42,7 @@ export default function IconButton(props: IProps) {
 		return (
 			<StyledButton
 				tabIndex={props.noFocus ? -1 : 0}
-				onMouseDown={handlePress}
+				onClick={handlePress}
 				disabled={props.disabled}
 				active={props.active}
 				sm={props.sm}

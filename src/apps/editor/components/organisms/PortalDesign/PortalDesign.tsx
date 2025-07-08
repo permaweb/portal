@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Fonts } from 'editor/components/molecules/Fonts';
-import { Logo } from 'editor/components/molecules/Logo';
+import { Media } from 'editor/components/molecules/Media';
 import { Themes } from 'editor/components/molecules/Themes';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -45,7 +45,7 @@ export default function PortalDesign() {
 			case 'logo':
 				header = language.siteLogo;
 				component = (
-					<Logo portal={portalProvider.current} handleClose={() => setShowPanel(false)} />
+					<Media portal={portalProvider.current} type="logo" handleClose={() => setShowPanel(false)} />
 				);
 				break;
 			default:
