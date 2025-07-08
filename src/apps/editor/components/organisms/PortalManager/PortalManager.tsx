@@ -18,11 +18,14 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
-import { IProps } from './types';
 
 const ALLOWED_LOGO_TYPES = 'image/png, image/jpeg, image/gif';
 
-export default function PortalManager(props: IProps) {
+export default function PortalManager(props: {
+	portal: PortalHeaderType | null;
+	handleClose: () => void;
+	handleUpdate: () => void;
+}) {
 	const navigate = useNavigate();
 
 	const arProvider = useArweaveProvider();

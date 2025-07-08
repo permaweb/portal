@@ -4,9 +4,22 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NotFound from 'views/NotFound';
 
 import * as S from './styles';
-import { ICProps, ITProps, IUProps } from './types';
 
-function Tab(props: ITProps) {
+type URLViewType = {
+	label: string;
+	disabled: boolean;
+	url: any;
+	view: React.ComponentType;
+};
+
+function Tab(props: {
+	label: string;
+	icon: string | null;
+	disabled: boolean;
+	active: boolean;
+	handlePress: (url: string) => void;
+	url: string;
+}) {
 	function handlePress(e: any) {
 		e.preventDefault();
 		props.handlePress(props.url);
@@ -19,7 +32,7 @@ function Tab(props: ITProps) {
 	);
 }
 
-function TabContent(props: ICProps) {
+function TabContent(props: { tabs: URLViewType[] }) {
 	const { id, active } = useParams() as { id: string; active: string };
 
 	let TabView: React.ComponentType<any> | null = null;
@@ -38,7 +51,7 @@ function TabContent(props: ICProps) {
 	return <S.View>{TabView && <TabView />}</S.View>;
 }
 
-export default function URLTabs(props: IUProps) {
+export default function URLTabs(props: { tabs: URLViewType[]; activeUrl: string; useFixed?: boolean }) {
 	const navigate = useNavigate();
 	const { id, active } = useParams() as { id: string; active: string };
 

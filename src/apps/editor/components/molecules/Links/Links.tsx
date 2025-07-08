@@ -9,7 +9,7 @@ import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
 import { ASSETS, SOCIAL_LINK_ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { NotificationType, PortalLinkType } from 'helpers/types';
+import { NotificationType, PortalLinkType, ViewLayoutType } from 'helpers/types';
 import { checkValidAddress, validateUrl } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -17,11 +17,10 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
-import { IProps } from './types';
 
 const ALLOWED_ICON_TYPES = 'image/svg+xml';
 
-export default function Links(props: IProps) {
+export default function Links(props: { type: ViewLayoutType; showActions?: boolean; closeAction?: () => void }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();

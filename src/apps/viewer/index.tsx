@@ -9,7 +9,9 @@ import { SettingsProvider } from 'viewer/providers/SettingsProvider';
 
 import { Loader } from 'components/atoms/Loader';
 import { DOM, URLS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
 import { GlobalStyle } from 'helpers/styles';
+import { checkValidAddress } from 'helpers/utils';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider } from 'providers/LanguageProvider';
 import { PermawebProvider } from 'providers/PermawebProvider';
@@ -43,6 +45,25 @@ function App() {
 	React.useEffect(() => {
 		if (portalProvider.current?.name) document.title = portalProvider.current.name;
 	}, [portalProvider.current?.name]);
+
+	React.useEffect(() => {
+		const txIcon = portalProvider.current?.icon;
+		if (!txIcon || !checkValidAddress(txIcon)) return;
+
+		const iconUrl = getTxEndpoint(txIcon);
+		const head = document.head;
+
+		head.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']").forEach((el) => head.removeChild(el));
+
+		const newLink = document.createElement('link');
+		newLink.rel = 'icon';
+		newLink.href = iconUrl;
+		head.appendChild(newLink);
+
+		return () => {
+			head.removeChild(newLink);
+		};
+	}, [portalProvider.current?.icon]);
 
 	if (!portalProvider.current) {
 		return (

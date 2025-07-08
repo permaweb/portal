@@ -16,7 +16,7 @@ export const Preview = styled.div<{ fontFamily?: string }>`
 	padding: 0 0 10px 0;
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.alt1};
 	p {
-		font-family: ${(props) => props.fontFamily ? props.fontFamily : props.theme.typography.family.primary};
+		font-family: ${(props) => (props.fontFamily ? props.fontFamily : props.theme.typography.family.primary)};
 		font-size: ${(props) => props.theme.typography.size.xLg};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		color: ${(props) => props.theme.colors.font.primary};
@@ -31,4 +31,4 @@ export const SAction = styled.div`
 	flex-wrap: wrap;
 	gap: 15px;
 	position: relative;
-`
+`;

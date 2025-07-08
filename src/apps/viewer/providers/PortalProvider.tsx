@@ -32,7 +32,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [updating, setUpdating] = React.useState<boolean>(false);
 	const [_errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-	React.useEffect(()=> {
+	React.useEffect(() => {
 		const portalId = getPortalIdFromURL();
 		if (portalId) setCurrentId(portalId);
 		else {
@@ -74,6 +74,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					id: currentId,
 					name: portalData.store?.name ?? 'None',
 					logo: portalData.store?.logo ?? 'None',
+					icon: portalData.store?.icon ?? 'None',
 					assets: getPortalAssets(portalData?.store?.index),
 					categories: portalData?.store?.categories ?? [],
 					topics: portalData?.store?.topics ?? [],

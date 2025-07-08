@@ -6,9 +6,14 @@ import { SelectOptionType } from 'helpers/types';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function Select(props: IProps) {
+export default function Select(props: {
+	label: string;
+	activeOption: SelectOptionType;
+	setActiveOption: (option: SelectOptionType) => void;
+	options: SelectOptionType[];
+	disabled: boolean;
+}) {
 	const [active, setActive] = React.useState<boolean>(false);
 
 	return props.options && props.activeOption ? (

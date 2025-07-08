@@ -4,9 +4,8 @@ import { formatAddress } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function TxAddress(props: IProps) {
+export default function TxAddress(props: { address: string; wrap: boolean; view?: boolean; viewIcon?: string }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 

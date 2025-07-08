@@ -60,5 +60,5 @@ export const docsOrder = [
 				path: 'management',
 			},
 		],
-	}
+	},
 ];

@@ -138,7 +138,7 @@ function Section(props: {
 	React.useEffect(() => {
 		if (props.theme.name) setName(props.theme.name);
 	}, [props.theme.name]);
-	
+
 	React.useEffect(() => {
 		if (props.theme.scheme) setScheme(props.theme.scheme);
 	}, [props.theme.scheme]);
@@ -178,7 +178,7 @@ function Section(props: {
 		setTheme(updatedTheme);
 		setShowNameEdit(false);
 	}
-	
+
 	function handleSchemeChange(option: string) {
 		const updatedScheme = option as PortalSchemeType;
 

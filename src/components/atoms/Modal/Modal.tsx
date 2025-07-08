@@ -6,9 +6,13 @@ import { ASSETS, DOM } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function Modal(props: IProps) {
+export default function Modal(props: {
+	header: string | null | undefined;
+	handleClose: () => void | null;
+	children: React.ReactNode;
+	allowOverflow?: boolean;
+}) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 

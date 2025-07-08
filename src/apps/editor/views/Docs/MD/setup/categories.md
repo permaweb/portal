@@ -12,10 +12,12 @@ Categories help organize your portal's content into logical sections, making it 
 #### Creating Categories
 
 - **Access Categories**
+
   - Navigate to **Setup** in the main menu
   - Select the **Categories** section
 
 - **Add a New Category**
+
   - Click the **Add Category** button
   - Enter a descriptive category name
   - Choose a parent category (optional) to create subcategories
@@ -36,6 +38,7 @@ Categories help organize your portal's content into logical sections, making it 
 #### Category Structure Examples
 
 **Blog Portal:**
+
 - Technology
   - Software
   - Hardware
@@ -46,6 +49,7 @@ Categories help organize your portal's content into logical sections, making it 
   - Food
 
 **News Portal:**
+
 - Local News
 - Sports
   - Basketball

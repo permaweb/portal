@@ -16,7 +16,7 @@ export default function Category() {
 	const portalProvider = usePortalProvider();
 
 	const [currentCategory, setCurrentCategory] = React.useState<PortalCategoryType | null>(null);
-	const [currentPosts, setCurrentPosts] =  React.useState<PortalAssetType[] | null>(null);
+	const [currentPosts, setCurrentPosts] = React.useState<PortalAssetType[] | null>(null);
 
 	React.useEffect(() => {
 		if (portalProvider.current?.categories) {
@@ -111,7 +111,11 @@ export default function Category() {
 				{currentCategory.children && (
 					<S.SubheaderWrapper className={'fade-in'}>
 						{currentCategory.children.map((child: PortalCategoryType) => {
-							return <Link key={child.id} to={getRedirect(child.id)}>{child.name}</Link>;
+							return (
+								<Link key={child.id} to={getRedirect(child.id)}>
+									{child.name}
+								</Link>
+							);
 						})}
 					</S.SubheaderWrapper>
 				)}

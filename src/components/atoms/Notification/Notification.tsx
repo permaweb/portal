@@ -8,9 +8,12 @@ import { Button } from '../Button';
 import { Portal } from '../Portal';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function Notification(props: IProps) {
+export default function Notification(props: {
+	message: string;
+	callback: () => void | null;
+	type: 'success' | 'warning';
+}) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
