@@ -8,7 +8,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { NotificationType, PortalHeaderType } from 'helpers/types';
+import { NotificationType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -18,9 +18,9 @@ import { WalletBlock } from 'wallet/WalletBlock';
 import * as S from './styles';
 import { IProps } from './types';
 
-const ALLOWED_LOGO_TYPES = 'image/png, image/jpeg, image/gif';
+const ALLOWED_LOGO_TYPES = 'image/png, image/jpeg, image/svg';
 
-export default function Logo(props: IProps) {
+export default function Icon(props: IProps) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
@@ -29,71 +29,76 @@ export default function Logo(props: IProps) {
 
 	const logoInputRef = React.useRef<any>(null);
 
-	const [logo, setLogo] = React.useState<any>(null);
+	const [icon, setIcon] = React.useState<any>(null);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [portalResponse, setPortalResponse] = React.useState<NotificationType | null>(null);
 
 	React.useEffect(() => {
 		if (props.portal) {
-			setLogo(props.portal.logo && checkValidAddress(props.portal.logo) ? props.portal.logo : null);
+			setIcon(props.portal.icon && checkValidAddress(props.portal.icon) ? props.portal.icon : null);
 		} else {
-			setLogo(null);
+			setIcon(null);
 		}
 	}, [props.portal]);
 
-	const unauthorized = !portalProvider.permissions?.updatePortalMeta
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
-	// TODO: Remove profile update - only store portal ids in profiles
 	async function handleSubmit() {
-		if (!unauthorized && arProvider.wallet && permawebProvider.profile && permawebProvider.profile.id && portalProvider.current?.name) {
+		if (
+			!unauthorized &&
+			arProvider.wallet &&
+			permawebProvider.profile &&
+			permawebProvider.profile.id &&
+			portalProvider.current?.name
+		) {
 			setLoading(true);
 
 			try {
-				let profileUpdateId: string | null;
+				// let profileUpdateId: string | null;
 				let response: string | null;
 
 				let data: any = {
 					Name: portalProvider.current.name,
 				};
 
-				if (logo) {
+				if (icon) {
 					try {
-						data.Logo = await permawebProvider.libs.resolveTransaction(logo);
+						data.Icon = await permawebProvider.libs.resolveTransaction(icon);
 					} catch (e: any) {
-						data.Logo = 'None';
-						console.error(`Failed to resolve logo: ${e.message}`);
+						data.Icon = 'None';
+						console.error(`Failed to resolve icon: ${e.message}`);
 					}
 				}
 
 				if (props.portal && props.portal.id) {
-					const portalsUpdateData = portalProvider.portals
-						.filter((portal: PortalHeaderType) => portal.id !== props.portal.id)
-						.map((portal: PortalHeaderType) => ({ Id: portal.id, Name: portal.name, Logo: portal.logo }));
-					portalsUpdateData.push({ Id: props.portal.id, ...data });
+					// const portalsUpdateData = portalProvider.portals
+					// 	.filter((portal: PortalHeaderType) => portal.id !== props.portal.id)
+					// 	.map((portal: PortalHeaderType) => ({ Id: portal.id, Name: portal.name, Icon: portal.icon }));
+					// portalsUpdateData.push({ Id: props.portal.id, ...data });
 
 					const portalUpdateId = await permawebProvider.libs.updateZone(data, props.portal.id, arProvider.wallet);
 
 					console.log(`Portal update: ${portalUpdateId}`);
 
-					profileUpdateId = await permawebProvider.libs.updateZone(
-						{ Portals: portalsUpdateData },
-						permawebProvider.profile.id,
-						arProvider.wallet
-					);
+					// profileUpdateId = await permawebProvider.libs.updateZone(
+					// 	{ Portals: portalsUpdateData },
+					// 	permawebProvider.profile.id,
+					// 	arProvider.wallet
+					// );
 
-					response = `${language.logoUpdated}!`;
+					response = `${language.iconUpdated}!`;
 				}
 
-				if (profileUpdateId) console.log(`Profile update: ${profileUpdateId}`);
+				// if (profileUpdateId) console.log(`Profile update: ${profileUpdateId}`);
 
 				portalProvider.refreshCurrentPortal();
-				permawebProvider.refreshProfile();
+				// permawebProvider.refreshProfile();
 
 				if (props.handleUpdate) props.handleUpdate();
 				if (props.handleClose) props.handleClose();
 
-				setLogo(null);
+				setIcon(null);
 
 				setPortalResponse({
 					message: response,
@@ -110,7 +115,7 @@ export default function Logo(props: IProps) {
 		}
 	}
 
-	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'logo') {
+	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'icon') {
 		if (e.target.files && e.target.files.length) {
 			const file = e.target.files[0];
 			if (file.type.startsWith('image/')) {
@@ -119,8 +124,8 @@ export default function Logo(props: IProps) {
 				reader.onload = (event: ProgressEvent<FileReader>) => {
 					if (event.target?.result) {
 						switch (type) {
-							case 'logo':
-								setLogo(event.target.result);
+							case 'icon':
+								setIcon(event.target.result);
 								break;
 							default:
 								break;
@@ -135,11 +140,11 @@ export default function Logo(props: IProps) {
 	}
 
 	function getLogoWrapper() {
-		if (logo) return <img src={checkValidAddress(logo) ? getTxEndpoint(logo) : logo} />;
+		if (icon) return <img src={checkValidAddress(icon) ? getTxEndpoint(icon) : icon} />;
 		return (
 			<>
-				<ReactSVG src={ASSETS.image} />
-				<span>{language.uploadLogo}</span>
+				<ReactSVG src={ASSETS.icon} />
+				<span>{language.uploadIcon}</span>
 			</>
 		);
 	}
@@ -153,45 +158,52 @@ export default function Logo(props: IProps) {
 						<S.Body>
 							<S.PWrapper>
 								<S.FileInputWrapper>
-									<S.LInput hasLogo={logo !== null} onClick={() => logoInputRef.current.click()} disabled={unauthorized || loading}>
+									<S.LInput
+										hasIcon={icon !== null}
+										onClick={() => logoInputRef.current.click()}
+										disabled={unauthorized || loading}
+									>
 										{getLogoWrapper()}
 									</S.LInput>
 									<input
 										ref={logoInputRef}
 										type={'file'}
-										onChange={(e: any) => handleFileChange(e, 'logo')}
+										onChange={(e: any) => handleFileChange(e, 'icon')}
 										disabled={unauthorized || loading}
 										accept={ALLOWED_LOGO_TYPES}
 									/>
 								</S.FileInputWrapper>
-								<S.PActions>
+								{/* <S.PActions>
 									<Button
 										type={'alt3'}
-										label={language.removeLogo}
-										handlePress={() => setLogo(null)}
-										disabled={unauthorized || loading || !logo}
+										label={language.removeIcon}
+										handlePress={() => setIcon(null)}
+										disabled={unauthorized || loading || !icon}
 										height={32.5}
 									/>
-								</S.PActions>
+								</S.PActions> */}
 							</S.PWrapper>
-							<S.SAction>
-								{props.handleClose && (
+							<S.SActions>
+								<p>{language.siteIconInfo}</p>
+								<S.SAction>
+									{props.handleClose && (
+										<Button
+											type={'primary'}
+											label={language.close}
+											handlePress={() => props.handleClose()}
+											disabled={loading}
+											loading={false}
+										/>
+									)}
 									<Button
-										type={'primary'}
-										label={language.close}
-										handlePress={() => props.handleClose()}
-										disabled={loading}
+										type={'alt1'}
+										label={language.save}
+										handlePress={handleSubmit}
+										disabled={unauthorized || loading || checkValidAddress(icon)}
 										loading={false}
 									/>
-								)}
-								<Button
-									type={'alt1'}
-									label={language.save}
-									handlePress={handleSubmit}
-									disabled={unauthorized || loading}
-									loading={false}
-								/>
-							</S.SAction>
+								</S.SAction>
+							</S.SActions>
 						</S.Body>
 					</S.Wrapper>
 					{loading && (

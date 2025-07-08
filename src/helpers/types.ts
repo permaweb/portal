@@ -4,6 +4,7 @@ export type PortalDetailType = {
 	id: string;
 	name: string;
 	logo: string | null;
+	icon: string | null;
 	assets?: PortalAssetType[];
 	requests?: PortalAssetRequestType[];
 	categories?: PortalCategoryType[];
@@ -116,6 +117,7 @@ export type PortalUploadType = {
 	tx: string;
 	dateUploaded: string;
 	type: PortalUploadOptionType;
+	thumbnail?: string;
 };
 
 export type PortalUploadOptionType = 'image' | 'video';

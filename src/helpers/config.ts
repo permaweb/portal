@@ -45,6 +45,7 @@ export const ASSETS = {
 	header5: getTxEndpoint('U5_VxgILAlOzUaHriKRfBWG7BaYa-_4fOdLJQNujb4U'),
 	header6: getTxEndpoint('FNHeUsqLSBi2lqkkwovy2Boba9MHoCWcCnUzfxz7Ayg'),
 	help: getTxEndpoint('827_dxZR1WAnw_hqxfwwb4jgP5m2fpkSrTMtdjRUWw4'),
+	icon: getTxEndpoint('r_kglJ9PvNP8amVl77FVbU-8A9HK0kiFtzivdB00Zm4'),
 	image: getTxEndpoint('357HeJjvG10nK28juQ8YMp6DlvHhGbmU7pOvZphEhUk'),
 	info: getTxEndpoint('QQ4EJ_wH2EY1_ElfSNKffixnzVcbnvd2547lmluvT-0'),
 	keyboard: getTxEndpoint('rMjFgHIRcEmy9P68Prpbgw9jvzWKL18m3vrJXIBwmao'),

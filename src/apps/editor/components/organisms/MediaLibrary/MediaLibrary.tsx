@@ -8,9 +8,10 @@ import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
 import { Tabs } from 'components/atoms/Tabs';
-import { ASSETS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
+import { ASSETS, UPLOAD } from 'helpers/config';
+import { getTurboCostWincEndpoint, getTxEndpoint } from 'helpers/endpoints';
 import { MediaConfigType, NotificationType, PortalUploadOptionType, PortalUploadType } from 'helpers/types';
+import { getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -18,7 +19,6 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import * as S from './styles';
 import { IProps } from './types';
 
-// TODO: Get cost and show confirmation
 export default function MediaLibrary(props: IProps) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -44,6 +44,8 @@ export default function MediaLibrary(props: IProps) {
 	};
 
 	const inputRef = React.useRef(null);
+	const videoRef = React.useRef(null);
+	const canvasRef = React.useRef(null);
 
 	const TABS = [
 		{ type: 'all', label: language.all },
@@ -56,10 +58,15 @@ export default function MediaLibrary(props: IProps) {
 	const [currentList, setCurrentList] = React.useState<string>(TABS.find((tab) => tab.type === props.type).type);
 	const [currentAcceptType, setCurrentAcceptType] = React.useState<string>('');
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
-	const [newUploadUrl, setNewUploadUrl] = React.useState<string | null>(null);
+
+	const [mediaData, setMediaData] = React.useState<File | null>(null);
+	const [showUploadConfirmation, setShowUploadConfirmation] = React.useState<boolean>(false);
+	const [uploadCost, setUploadCost] = React.useState<number | null>(null);
 	const [mediaLoading, setMediaLoading] = React.useState<boolean>(false);
 	const [mediaMessage, setMediaMessage] = React.useState<string | null>(null);
 	const [mediaResponse, setMediaResponse] = React.useState<NotificationType | null>(null);
+
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	React.useEffect(() => {
 		if (portalProvider.current?.uploads) {
@@ -89,71 +96,125 @@ export default function MediaLibrary(props: IProps) {
 		}
 	}, [currentList, portalProvider.current?.uploads]);
 
-	// TODO: Permissions on upload
 	React.useEffect(() => {
 		(async function () {
-			if (newUploadUrl && portalProvider.current?.id && arProvider.wallet) {
-				setMediaLoading(true);
-				setMediaMessage(`${language.uploadingMedia}...`);
-				try {
-					const tx = await permawebProvider.libs.resolveTransaction(newUploadUrl);
+			if (!unauthorized && mediaData && portalProvider.current?.id && arProvider.wallet) {
+				const contentSize = mediaData.size;
 
-					const mediaUpdateId = await permawebProvider.libs.addToZone(
-						{
-							path: 'Uploads',
-							data: permawebProvider.libs.mapToProcessCase({
-								tx: tx,
-								type: getMediaType(newUploadUrl),
-								dateUploaded: Date.now().toString(),
-							}),
-						},
-						portalProvider.current.id,
-						arProvider.wallet
-					);
+				console.log(mediaData);
 
-					portalProvider.refreshCurrentPortal();
+				if (contentSize < UPLOAD.dispatchUploadSize) {
+					await handleUpload();
+				} else {
+					console.log('Turbo');
+					try {
+						setShowUploadConfirmation(true);
 
-					console.log(`Media update: ${mediaUpdateId}`);
+						const uploadPriceResponse = await fetch(getTurboCostWincEndpoint(contentSize));
+						const uploadInWinc = Number((await uploadPriceResponse.json()).winc);
 
-					setNewUploadUrl(null);
-					setMediaResponse({ status: 'success', message: `${language.mediaUploaded}!` });
-				} catch (e: any) {
-					setMediaResponse({ status: 'warning', message: e.message ?? 'Error uploading media' });
-					setNewUploadUrl(null);
+						setUploadCost(uploadInWinc);
+
+						if (uploadInWinc > arProvider.turboBalance) {
+							setMediaResponse({ status: 'warning', message: 'Insufficient balance for upload' });
+						}
+					} catch (e: any) {
+						setMediaResponse({ status: 'warning', message: e.message ?? 'Error uploading media' });
+					}
 				}
-				setMediaLoading(false);
-				setMediaMessage(null);
 			}
 		})();
-	}, [newUploadUrl, portalProvider.current?.id, arProvider.wallet]);
+	}, [
+		mediaData,
+		portalProvider.current?.id,
+		portalProvider.permissions?.updatePortalMeta,
+		arProvider.wallet,
+		arProvider.turboBalance,
+	]);
 
-	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+	async function handleUpload() {
+		setMediaLoading(true);
+		try {
+			const tx = await permawebProvider.libs.resolveTransaction(mediaData);
 
-	function getMediaType(dataUrl: string): string {
-		const mediaTypeMatch = dataUrl.match(/^data:(.+?);base64,/);
+			const mediaType = getMediaType(mediaData);
 
-		if (!mediaTypeMatch || mediaTypeMatch.length < 2) {
-			throw new Error('Invalid data URL');
+			let thumbnail: string | null = null;
+			if (mediaType === 'video') {
+				thumbnail = await generateThumbnail();
+				console.log(`Video thumbnail: ${thumbnail}`);
+			}
+
+			const data: any = {
+				tx: tx,
+				type: mediaType,
+				dateUploaded: Date.now().toString(),
+			};
+
+			if (thumbnail) data.thumbnail = thumbnail;
+
+			const mediaUpdateId = await permawebProvider.libs.addToZone(
+				{
+					path: 'Uploads',
+					data: permawebProvider.libs.mapToProcessCase(data),
+				},
+				portalProvider.current.id,
+				arProvider.wallet
+			);
+
+			console.log(`Media update: ${mediaUpdateId}`);
+
+			setMediaResponse({ status: 'success', message: `${language.mediaUploaded}!` });
+			handleClear(null);
+
+			portalProvider.refreshCurrentPortal();
+		} catch (e: any) {
+			handleClear(e.message ?? 'Error uploading media');
 		}
+		setMediaLoading(false);
+	}
 
-		const mediaType = mediaTypeMatch[1];
+	async function generateThumbnail() {
+		if (!mediaData) return null;
+		const url = URL.createObjectURL(mediaData);
+		const video = videoRef.current!;
+		video.src = url;
+		
+		await new Promise<void>((res, rej) => {
+			video.onloadedmetadata = () => res();
+			video.onerror = (e) => rej(e);
+		});
+		
+		const seekTime = video.duration * 0.25;
+		video.currentTime = seekTime;
+		await new Promise<void>((res) => {
+			video.onseeked = () => res();
+		});
+		
+		const canvas = canvasRef.current!;
+		canvas.width = video.videoWidth;
+		canvas.height = video.videoHeight;
+		const ctx = canvas.getContext('2d')!;
+		ctx.drawImage(video, 0, 0);
 
-		if (mediaType.startsWith('image/')) {
+		const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+		URL.revokeObjectURL(url);
+
+		return await permawebProvider.libs.resolveTransaction(dataURL);
+	}
+
+	function getMediaType(file: File): 'image' | 'video' | 'unknown' {
+		const { type } = file;
+
+		if (!type) return 'unknown';
+
+		if (type.startsWith('image/')) {
 			return 'image';
-		} else if (mediaType.startsWith('video/')) {
+		} else if (type.startsWith('video/')) {
 			return 'video';
 		}
 
 		return 'unknown';
-	}
-
-	function getUpload(upload: PortalUploadType) {
-		switch (upload.type) {
-			case 'image':
-				return <img src={getTxEndpoint(upload.tx)} />;
-			case 'video':
-				return <video controls src={getTxEndpoint(upload.tx)} />;
-		}
 	}
 
 	const deleteUpload = async () => {
@@ -189,18 +250,38 @@ export default function MediaLibrary(props: IProps) {
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = (event) => {
-				const url = event.target?.result as string;
-				setNewUploadUrl(url);
-			};
-			reader.readAsDataURL(file);
-		}
+		if (file) setMediaData(file);
 	};
+
+	function handleClear(message: string | null) {
+		if (message) setMediaResponse({ status: 'warning', message: message });
+		setMediaData(null);
+		setUploadCost(null);
+		setShowUploadConfirmation(false);
+		if (inputRef.current) {
+			inputRef.current.value = '';
+		}
+	}
 
 	function getCurrentList(label: string) {
 		return TABS.find((tab) => tab.label === label).type;
+	}
+
+	function getUpload(upload: PortalUploadType) {
+		switch (upload.type) {
+			case 'image':
+				return <img src={getTxEndpoint(upload.tx)} />;
+			case 'video':
+				if (upload.thumbnail) return (
+					<>
+					<img src={getTxEndpoint(upload.thumbnail)} />
+					<div className={'info'}>
+						<span>{language.video}</span>
+					</div>
+					</>
+				)
+				return <video controls src={getTxEndpoint(upload.tx)} />;
+		}
 	}
 
 	const header = React.useMemo(() => {
@@ -309,6 +390,8 @@ export default function MediaLibrary(props: IProps) {
 					accept={props.type === 'all' ? currentAcceptType : mediaConfig[props.type].acceptType}
 					onChange={handleFileChange}
 				/>
+				<video id={'media-file-input'} ref={videoRef} style={{ display: 'none' }} />
+				<canvas id={'media-file-input'} ref={canvasRef} style={{ display: 'none' }} />
 			</S.Wrapper>
 			{showDeleteConfirmation && (
 				<Modal header={language.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
@@ -335,6 +418,64 @@ export default function MediaLibrary(props: IProps) {
 							/>
 						</S.ModalActionsWrapper>
 					</S.ModalWrapper>
+				</Modal>
+			)}
+			{showUploadConfirmation && (
+				<Modal
+					header={`${language.upload} ${mediaData.name}`}
+					handleClose={() => handleClear(language.uploadCancelled)}
+				>
+					<S.InputWrapper>
+						<S.InputDescription>
+							<span>{language.mediaUploadCostInfo}</span>
+						</S.InputDescription>
+						<S.InputActions>
+							<S.InputActionsInfo>
+								<S.InputActionsInfoLine>
+									<p>
+										<span>{`${language.yourUploadBalance}:`}</span>
+										&nbsp;
+										{arProvider.turboBalance
+											? `${getARAmountFromWinc(arProvider.turboBalance)} ${language.credits}`
+											: '-'}
+									</p>
+								</S.InputActionsInfoLine>
+								<S.InputActionsInfoLine>
+									<p>
+										<span>{`${language.costToUpload}:`}</span>
+										&nbsp;
+										{uploadCost ? `${getARAmountFromWinc(uploadCost)} ${language.credits}` : '-'}
+									</p>
+								</S.InputActionsInfoLine>
+								<S.InputActionsInfoDivider />
+								<S.InputActionsInfoLine>
+									<p>
+										<span>{`${language.remainingAfterUpload}:`}</span>
+										&nbsp;
+										{arProvider.turboBalance && uploadCost
+											? `${getARAmountFromWinc(arProvider.turboBalance - uploadCost)} ${language.credits}`
+											: '-'}
+									</p>
+								</S.InputActionsInfoLine>
+							</S.InputActionsInfo>
+							<S.ModalActionsWrapper>
+								<Button
+									type={'primary'}
+									label={language.cancel}
+									handlePress={() => handleClear(language.uploadCancelled)}
+									disabled={mediaLoading}
+									width={140}
+								/>
+								<Button
+									type={'alt1'}
+									label={language.upload}
+									handlePress={handleUpload}
+									disabled={unauthorized || mediaLoading}
+									width={140}
+								/>
+							</S.ModalActionsWrapper>
+						</S.InputActions>
+					</S.InputWrapper>
 				</Modal>
 			)}
 			{mediaLoading && <Loader message={mediaMessage ?? `${language.loading}...`} />}
