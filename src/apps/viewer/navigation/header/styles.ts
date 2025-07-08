@@ -12,7 +12,7 @@ export const Wrapper = styled.header`
 `;
 
 export const WrapperContent = styled.div<{ height?: number }>`
-	height: ${(props) => props.height ? `${props.height.toString()}px` : STYLING.dimensions.nav.height};
+	height: ${(props) => (props.height ? `${props.height.toString()}px` : STYLING.dimensions.nav.height)};
 	width: 100%;
 	position: relative;
 	display: flex;
@@ -21,9 +21,7 @@ export const WrapperContent = styled.div<{ height?: number }>`
 	padding: 0 20px;
 `;
 
-export const ContentStart = styled.div`
-	
-`;
+export const ContentStart = styled.div``;
 
 export const LogoWrapper = styled.div`
 	height: 100%;
@@ -50,7 +48,7 @@ export const LogoWrapper = styled.div`
 	}
 
 	img {
-		height:100%;
+		height: 100%;
 		width: 100%;
 		object-fit: contain;
 	}
@@ -106,7 +104,6 @@ export const PortalUpdateWrapper = styled.div`
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;
-
 
 export const CategoryWrapper = styled.li`
 	height: 100%;
@@ -167,8 +164,7 @@ export const SubMenu = styled.ul`
 	opacity: 0;
 	visibility: hidden;
 	pointer-events: none;
-	transition: opacity 200ms ease-in-out 0ms,
-			visibility 0ms linear 200ms;
+	transition: opacity 200ms ease-in-out 0ms, visibility 0ms linear 200ms;
 
 	& > li {
 		white-space: nowrap;

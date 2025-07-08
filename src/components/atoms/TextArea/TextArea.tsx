@@ -1,9 +1,24 @@
+import React from 'react';
+
+import { ValidationType } from 'helpers/types';
 import { formatRequiredField } from 'helpers/utils';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function TextArea(props: IProps) {
+export default function TextArea(props: {
+	label?: string;
+	value: number | string;
+	onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+	onFocus?: () => void;
+	invalid: ValidationType;
+	disabled: boolean;
+	placeholder?: string;
+	endText?: string;
+	error?: string | null;
+	testingCtx?: string;
+	required?: boolean;
+	hideErrorMessage?: boolean;
+}) {
 	return (
 		<S.Wrapper>
 			{props.label && <S.Label>{props.required ? formatRequiredField(props.label) : props.label}</S.Label>}

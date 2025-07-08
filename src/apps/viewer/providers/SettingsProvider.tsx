@@ -78,25 +78,25 @@ export function SettingsProvider(props: SettingsProviderProps) {
 			}
 		}
 	}, [portalProvider.current?.fonts]);
-	
+
 	function luminance(hex) {
 		const [r, g, b] = hexToRgbArray(hex).map((v) => v / 255);
 		return 0.299 * r + 0.587 * g + 0.114 * b;
 	}
-	
+
 	function parseRgbString(s) {
 		return s.split(',').map((v) => parseInt(v, 10));
 	}
-	
+
 	function rgbArrayToHex([r, g, b]) {
 		return '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
 	}
-	
+
 	function hexToRgbArray(hex) {
 		const n = parseInt(hex.slice(1), 16);
 		return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
 	}
-	
+
 	function shadeColor(hex, percent) {
 		let [r, g, b] = hexToRgbArray(hex);
 		if (percent > 0) {
@@ -119,18 +119,14 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		const bgHex = rgbArrayToHex(parseRgbString(colors.background));
 		const isBgDark = luminance(bgHex) < 0.5;
 
-		const neutralPercents = isBgDark
-			? [0, 5, 10, 15, 20, 25, 30, 35, 40]
-			: [0, -5, -10, -15, -20, -25, -30, -35, -40];
+		const neutralPercents = isBgDark ? [0, 5, 10, 15, 20, 25, 30, 35, 40] : [0, -5, -10, -15, -20, -25, -30, -35, -40];
 
 		const neutrals = neutralPercents.reduce((acc, pct, idx) => {
 			acc[`neutral${idx + 1}`] = shadeColor(bgHex, pct);
 			return acc;
 		}, {});
 
-		const accentPercents = isBgDark
-			? [100, 95, 90, 85, 80, 75, 70]
-			: [-100, -95, -90, -85, -80, -75, -70];
+		const accentPercents = isBgDark ? [100, 95, 90, 85, 80, 75, 70] : [-100, -95, -90, -85, -80, -75, -70];
 
 		const neutralsA = accentPercents.reduce((acc, pct, idx) => {
 			acc[`neutralA${idx + 1}`] = shadeColor(bgHex, pct);
@@ -234,7 +230,9 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		let currentTheme = portalProvider.current.themes.find((theme: PortalThemeType) => theme.name === settings.theme);
 		if (!currentTheme) {
 			const preferredScheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-			const filteredThemes = portalProvider.current.themes.filter((theme: PortalThemeType) => theme.scheme === preferredScheme);
+			const filteredThemes = portalProvider.current.themes.filter(
+				(theme: PortalThemeType) => theme.scheme === preferredScheme
+			);
 			currentTheme = filteredThemes[0];
 			updateSettings('theme', currentTheme.name);
 		}

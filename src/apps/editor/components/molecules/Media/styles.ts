@@ -19,22 +19,25 @@ export const Header = styled.div`
 
 export const Body = styled.div<{ isIcon: boolean }>`
 	display: flex;
-	${(props) => props.isIcon ? 'gap: 20px;' : 'justify-content: center; flex-wrap: wrap; gap: 20px;'}
+	${(props) => (props.isIcon ? 'gap: 20px;' : 'justify-content: center; flex-wrap: wrap; gap: 20px;')}
 `;
 
 export const PWrapper = styled.div<{ isIcon: boolean }>`
 	height: fit-content;
-	width: ${(props) => props.isIcon ? 'fit-content' : '100%'};
+	width: ${(props) => (props.isIcon ? 'fit-content' : '100%')};
 	input {
 		display: none;
 	}
-	
-	${(props) => props.isIcon ? `
+
+	${(props) =>
+		props.isIcon
+			? `
 		@media (max-width: ${STYLING.cutoffs.initial}) {
 			display: flex;
 			justify-content: center;
 		}
-	` : ''}
+	`
+			: ''}
 `;
 
 export const CWrapper = styled.div`
@@ -71,10 +74,13 @@ export const RemoveWrapper = styled.div`
 `;
 
 export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled: boolean }>`
-	${(props) => props.isIcon ? `
+	${(props) =>
+		props.isIcon
+			? `
 		height: 100px;
 		width: 100px;
-	` : `
+	`
+			: `
 		height: ${props.hasMedia ? 'auto' : '170px'};
 		max-height: 200px;
 		width: 100%;
@@ -91,7 +97,8 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 	justify-content: center;
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.isIcon ? props.theme.typography.size.xxxxSmall : props.theme.typography.size.xxxSmall};
+		font-size: ${(props) =>
+			props.isIcon ? props.theme.typography.size.xxxxSmall : props.theme.typography.size.xxxSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 	}
 	svg {
@@ -138,13 +145,17 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
             left: 0;
             right: 0;
             bottom: 0;
-			${props.isIcon ? `
+			${
+				props.isIcon
+					? `
 				border: 1px solid ${props.theme.colors.border.alt1};
 				border-radius: ${STYLING.dimensions.radius.alt2};
-			` : `
+			`
+					: `
 				background-color: ${props.theme.colors.overlay.alt1};
 				border-radius: ${STYLING.dimensions.radius.alt3};
-			`}
+			`
+			}
             opacity: 0;
             transition: all 100ms;
         }

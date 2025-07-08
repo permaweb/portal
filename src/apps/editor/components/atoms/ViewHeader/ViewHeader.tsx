@@ -1,9 +1,8 @@
 import React from 'react';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function ViewHeader(props: IProps) {
+export default function ViewHeader(props: { header: string; actions?: React.ReactNode[] }) {
 	return (
 		<S.HeaderWrapper>
 			<h4>{props.header}</h4>

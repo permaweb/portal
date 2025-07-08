@@ -2,14 +2,32 @@ import React from 'react';
 
 import { Modal } from 'components/atoms/Modal';
 import { ASSETS } from 'helpers/config';
+import { FormFieldType, ValidationType } from 'helpers/types';
 import { formatRequiredField } from 'helpers/utils';
 
 import { IconButton } from '../IconButton';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function FormField(props: IProps) {
+export default function FormField(props: {
+	value: number | string;
+	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	invalid: ValidationType;
+	disabled: boolean;
+	label?: string;
+	type?: FormFieldType;
+	step?: '1';
+	placeholder?: string;
+	endText?: string;
+	error?: string | null;
+	sm?: boolean;
+	testingCtx?: string;
+	tooltip?: string;
+	tooltipLabel?: string;
+	autoFocus?: boolean;
+	hideErrorMessage?: boolean;
+	required?: boolean;
+}) {
 	const [showTooltip, setShowTooltip] = React.useState<boolean>(false);
 
 	function getValue() {

@@ -1,9 +1,26 @@
 import { ReactSVG } from 'react-svg';
 
-import * as S from './styles';
-import { IProps } from './types';
+import { ButtonType } from 'helpers/types';
 
-export default function IconButton(props: IProps) {
+import * as S from './styles';
+
+export default function IconButton(props: {
+	src: string;
+	type: ButtonType;
+	handlePress: any;
+	active?: boolean;
+	sm?: boolean;
+	warning?: boolean;
+	disabled?: boolean;
+	dimensions?: {
+		wrapper: number;
+		icon: number;
+	};
+	tooltip?: string;
+	tooltipPosition?: 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+	className?: string;
+	noFocus?: boolean;
+}) {
 	const buttonStyle = getType();
 	const StyledButton = buttonStyle.wrapper;
 

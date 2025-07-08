@@ -10,7 +10,7 @@ import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { NotificationType } from 'helpers/types';
+import { NotificationType, PortalDetailType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -18,11 +18,15 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
-import { IProps } from './types';
 
 const ALLOWED_MEDIA_TYPES = 'image/png, image/jpeg, image/svg, image/gif';
 
-export default function Media(props: IProps) {
+export default function Media(props: {
+	portal: PortalDetailType | null;
+	type: 'icon' | 'logo';
+	handleClose?: () => void;
+	handleUpdate?: () => void;
+}) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
@@ -114,10 +118,8 @@ export default function Media(props: IProps) {
 
 	function handleRemoveMedia() {
 		setShowRemoveConfirmation(false);
-		const currentMedia = props.type === 'icon' 
-			? portalProvider.current?.icon 
-			: portalProvider.current?.logo;
-		
+		const currentMedia = props.type === 'icon' ? portalProvider.current?.icon : portalProvider.current?.logo;
+
 		if (currentMedia && checkValidAddress(currentMedia)) {
 			handleSubmit({ remove: true });
 		} else {
@@ -223,11 +225,7 @@ export default function Media(props: IProps) {
 											type={'primary'}
 											label={language.cancel}
 											handlePress={() => {
-												setMedia(
-													currentMedia && checkValidAddress(currentMedia)
-														? currentMedia
-														: null
-												);
+												setMedia(currentMedia && checkValidAddress(currentMedia) ? currentMedia : null);
 											}}
 											disabled={!media || checkValidAddress(media) || !currentMedia}
 											loading={false}
@@ -257,11 +255,7 @@ export default function Media(props: IProps) {
 										type={'primary'}
 										label={language.cancel}
 										handlePress={() => {
-											setMedia(
-												currentMedia && checkValidAddress(currentMedia)
-													? currentMedia
-													: null
-											);
+											setMedia(currentMedia && checkValidAddress(currentMedia) ? currentMedia : null);
 										}}
 										disabled={!media || checkValidAddress(media) || !currentMedia}
 										loading={false}
@@ -278,8 +272,8 @@ export default function Media(props: IProps) {
 						</S.Body>
 					</S.Wrapper>
 					{showRemoveConfirmation && (
-						<Modal 
-							header={isIcon ? language.removeIcon : language.removeLogo} 
+						<Modal
+							header={isIcon ? language.removeIcon : language.removeLogo}
 							handleClose={() => setShowRemoveConfirmation(false)}
 						>
 							<S.MWrapper>

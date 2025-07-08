@@ -26,7 +26,6 @@ export const Wrapper = styled.div`
 	h4,
 	h5,
 	h6 {
-
 	}
 
 	h2 {

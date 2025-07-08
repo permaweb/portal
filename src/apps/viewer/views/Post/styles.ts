@@ -63,7 +63,7 @@ export const Categories = styled.div`
 	flex-wrap: wrap;
 	gap: 15px;
 	margin: 15px 0 0 0;
-	
+
 	a {
 		padding: 5.5px 15px;
 		color: ${(props) => props.theme.colors.font.alt4};
@@ -298,7 +298,7 @@ export const Topics = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	gap: 15px;
-	
+
 	a,
 	span {
 		color: ${(props) => props.theme.colors.font.primary};

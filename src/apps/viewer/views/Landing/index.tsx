@@ -20,9 +20,9 @@ export default function Landing() {
 
 	React.useEffect(() => {
 		if (portalProvider.current?.assets?.length > 0) {
-			const filteredFeaturedPosts = [...portalProvider.current.assets].filter(
-				(post: PortalAssetType) => post.metadata.status === 'published'
-			) ?? [];
+			const filteredFeaturedPosts =
+				[...portalProvider.current.assets].filter((post: PortalAssetType) => post.metadata.status === 'published') ??
+				[];
 
 			const filteredPanelPosts = shuffleArray(filteredFeaturedPosts);
 

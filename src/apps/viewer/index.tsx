@@ -52,9 +52,9 @@ function App() {
 
 		const iconUrl = getTxEndpoint(txIcon);
 		const head = document.head;
-		
+
 		head.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']").forEach((el) => head.removeChild(el));
-		
+
 		const newLink = document.createElement('link');
 		newLink.rel = 'icon';
 		newLink.href = iconUrl;

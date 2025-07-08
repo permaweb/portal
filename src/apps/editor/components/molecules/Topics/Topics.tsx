@@ -169,7 +169,7 @@ export default function Topics(props: {
 						value={newTopic}
 						onChange={(e: any) => setNewTopic(e.target.value)}
 						invalid={{ status: topicOptions?.length && topicOptions.includes(newTopic), message: null }}
-						disabled={!portalProvider.permissions?.updatePortalMeta  || topicLoading}
+						disabled={!portalProvider.permissions?.updatePortalMeta || topicLoading}
 						hideErrorMessage
 						sm
 					/>

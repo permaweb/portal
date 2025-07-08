@@ -7,7 +7,7 @@ export const Wrapper = styled.div`
 export const HeaderWrapper = styled.div`
 	width: 100%;
 	padding: 0 0 20px 0;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.alt4};	
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.alt4};
 `;
 
 export const SubheaderWrapper = styled.div`

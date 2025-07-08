@@ -4,9 +4,8 @@ import { ReactSVG } from 'react-svg';
 import { ASSETS } from 'helpers/config';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function Drawer(props: IProps) {
+export default function Drawer(props: { title: string; content: React.ReactNode; icon?: string }) {
 	const [open, setOpen] = React.useState<boolean>(true);
 
 	return (

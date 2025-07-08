@@ -8,15 +8,14 @@ import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 
 import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS } from 'helpers/config';
-import { PortalCategoryType } from 'helpers/types';
+import { PortalCategoryType, ViewLayoutType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import { MediaLibrary } from '../MediaLibrary';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function PortalSetup(props: IProps) {
+export default function PortalSetup(props: { type: ViewLayoutType }) {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];

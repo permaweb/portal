@@ -257,7 +257,7 @@ export const ARTICLE_BLOCKS = {
 	},
 };
 
-export const DEFAULT_THEME: { light: PortalThemeType, dark: PortalThemeType } = {
+export const DEFAULT_THEME: { light: PortalThemeType; dark: PortalThemeType } = {
 	light: {
 		name: 'Light Default',
 		active: true,
@@ -287,7 +287,7 @@ export const DEFAULT_THEME: { light: PortalThemeType, dark: PortalThemeType } = 
 			shadow: false,
 			borders: false,
 		},
-	}
+	},
 };
 
 export const STRIPE_PUBLISHABLE_KEY =
@@ -360,7 +360,7 @@ export const FONT_OPTIONS = {
 		'Exo 2:400,600,800',
 		'Audiowide',
 		'Russo One:400,700',
-		'Share Tech Mono:400,700'
+		'Share Tech Mono:400,700',
 	],
 	body: [
 		'Open Sans:400,600,700',
@@ -377,6 +377,6 @@ export const FONT_OPTIONS = {
 		'VT323',
 		'Major Mono Display',
 		'Rajdhani:400,500,700',
-		'Titillium Web:400,600,700'
-	]
-}
+		'Titillium Web:400,600,700',
+	],
+};

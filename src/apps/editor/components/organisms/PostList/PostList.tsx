@@ -9,16 +9,21 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { ASSETS, URLS } from 'helpers/config';
-import { ArticleStatusType, GQLNodeResponseType, PortalAssetRequestType, PortalAssetType } from 'helpers/types';
+import {
+	ArticleStatusType,
+	GQLNodeResponseType,
+	PortalAssetRequestType,
+	PortalAssetType,
+	ViewLayoutType,
+} from 'helpers/types';
 import { formatDate, getTagValue } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function PostList(props: IProps) {
+export default function PostList(props: { type: ViewLayoutType; pageCount?: number }) {
 	const navigate = useNavigate();
 
 	const portalProvider = usePortalProvider();

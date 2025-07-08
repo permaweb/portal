@@ -22,9 +22,8 @@ export default defineConfig(({ mode }) => {
 				rollupOptions: {
 					input: path.resolve(root, 'index.html'),
 					plugins: [polyfillNode()],
-				}
-			}
-
+				},
+			},
 		},
 		viewer: {
 			port: 4000,
@@ -45,7 +44,7 @@ export default defineConfig(({ mode }) => {
 						format: 'es',
 					},
 				},
-			}
+			},
 		},
 	};
 

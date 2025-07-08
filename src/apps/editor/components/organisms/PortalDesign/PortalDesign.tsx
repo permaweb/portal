@@ -40,13 +40,11 @@ export default function PortalDesign() {
 				break;
 			case 'fonts':
 				header = language.fonts;
-				component = <Fonts handleClose={() => setShowPanel(false)} />
+				component = <Fonts handleClose={() => setShowPanel(false)} />;
 				break;
 			case 'logo':
 				header = language.siteLogo;
-				component = (
-					<Media portal={portalProvider.current} type="logo" handleClose={() => setShowPanel(false)} />
-				);
+				component = <Media portal={portalProvider.current} type="logo" handleClose={() => setShowPanel(false)} />;
 				break;
 			default:
 				header = 'Design panel';

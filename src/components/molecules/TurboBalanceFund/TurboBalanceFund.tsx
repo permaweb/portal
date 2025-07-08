@@ -15,7 +15,6 @@ import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
-import { IProps } from './types';
 
 const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
@@ -123,7 +122,7 @@ function CheckoutForm(props: {
 	);
 }
 
-export default function TurboBalanceFund(props: IProps) {
+export default function TurboBalanceFund(props: { handleClose: () => void }) {
 	const theme = useTheme();
 
 	const arProvider = useArweaveProvider();

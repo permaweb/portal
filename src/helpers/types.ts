@@ -80,13 +80,13 @@ export type PortalRolesType = {
 };
 
 export type PortalFontsType = {
-	headers: string,
-	body: string
-}
+	headers: string;
+	body: string;
+};
 
 export enum PortalSchemeType {
 	Light = 'light',
-	Dark = 'dark'
+	Dark = 'dark',
 }
 
 export type PortalThemeType = {

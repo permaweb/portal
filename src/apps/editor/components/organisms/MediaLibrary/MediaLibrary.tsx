@@ -17,9 +17,12 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function MediaLibrary(props: IProps) {
+export default function MediaLibrary(props: {
+	type: PortalUploadOptionType | 'all';
+	callback?: (upload: PortalUploadType) => void;
+	handleClose?: () => void;
+}) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
@@ -179,18 +182,18 @@ export default function MediaLibrary(props: IProps) {
 		const url = URL.createObjectURL(mediaData);
 		const video = videoRef.current!;
 		video.src = url;
-		
+
 		await new Promise<void>((res, rej) => {
 			video.onloadedmetadata = () => res();
 			video.onerror = (e) => rej(e);
 		});
-		
+
 		const seekTime = video.duration * 0.25;
 		video.currentTime = seekTime;
 		await new Promise<void>((res) => {
 			video.onseeked = () => res();
 		});
-		
+
 		const canvas = canvasRef.current!;
 		canvas.width = video.videoWidth;
 		canvas.height = video.videoHeight;
@@ -272,14 +275,15 @@ export default function MediaLibrary(props: IProps) {
 			case 'image':
 				return <img src={getTxEndpoint(upload.tx)} />;
 			case 'video':
-				if (upload.thumbnail) return (
-					<>
-					<img src={getTxEndpoint(upload.thumbnail)} />
-					<div className={'info'}>
-						<span>{language.video}</span>
-					</div>
-					</>
-				)
+				if (upload.thumbnail)
+					return (
+						<>
+							<img src={getTxEndpoint(upload.thumbnail)} />
+							<div className={'info'}>
+								<span>{language.video}</span>
+							</div>
+						</>
+					);
 				return <video controls src={getTxEndpoint(upload.tx)} />;
 		}
 	}

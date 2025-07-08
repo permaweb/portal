@@ -13,10 +13,12 @@ The Media Library is your central hub for managing all images, videos, and other
 #### Accessing the Media Library
 
 - **From Setup Menu**
+
   - Navigate to **Setup** in the main menu
   - Select the **Media** section
 
 - **From Post Editor**
+
   - While editing a post, click the media insert button
   - The media library opens as a popup for easy selection
 
@@ -27,6 +29,7 @@ The Media Library is your central hub for managing all images, videos, and other
 #### Uploading Media
 
 **Supported File Types:**
+
 - **Images**: JPG, JPEG, PNG, GIF, WebP
 - **Videos**: MP4, WebM, MOV
 - **Maximum File Size**: Varies by plan (typically 10MB-100MB per file)
@@ -34,6 +37,7 @@ The Media Library is your central hub for managing all images, videos, and other
 **Upload Methods:**
 
 - **Drag and Drop**
+
   - Simply drag files from your computer into the media library
   - Multiple files can be uploaded simultaneously
   - Progress indicators show upload status
@@ -46,12 +50,14 @@ The Media Library is your central hub for managing all images, videos, and other
 #### Organizing Your Media
 
 **Filter Options:**
+
 - **All Media**: View everything in your library
 - **Images**: Show only image files
 - **Videos**: Show only video files
 - **Recent**: Sort by most recently uploaded
 
 **Media Information:**
+
 - **File Name**: Original name and file extension
 - **File Size**: Shows the storage space used
 - **Upload Date**: When the file was added to your library
@@ -61,18 +67,21 @@ The Media Library is your central hub for managing all images, videos, and other
 #### Using Media in Posts
 
 **Insert Images:**
+
 - Click the image icon in the post editor
 - Select an image from your media library
 - Add alt text for accessibility
 - Choose alignment and sizing options
 
 **Embed Videos:**
+
 - Click the video icon in the post editor
 - Select a video from your library
 - Set preview image (thumbnail)
 - Configure autoplay and controls
 
 **Image Optimization:**
+
 - **Alt Text**: Always add descriptive alt text for images
 - **File Names**: Use descriptive filenames for better organization
 - **Sizing**: Choose appropriate image sizes for your content
@@ -81,12 +90,14 @@ The Media Library is your central hub for managing all images, videos, and other
 #### Media Management
 
 **Organizing Files:**
+
 - **Rename Files**: Click on any media item to edit its name
 - **Delete Unused Media**: Remove files that are no longer needed
 - **Replace Files**: Upload new versions of existing media
 - **Bulk Actions**: Select multiple files for batch operations
 
 **Storage Management:**
+
 - **Monitor Usage**: Keep track of your storage space
 - **Archive Old Media**: Remove outdated files to free up space
 - **Optimize File Sizes**: Compress images and videos before uploading
@@ -95,18 +106,21 @@ The Media Library is your central hub for managing all images, videos, and other
 #### Best Practices
 
 **File Organization:**
+
 - **Descriptive Names**: Use clear, descriptive filenames
 - **Consistent Naming**: Develop a naming convention (e.g., `post-title-image-01.jpg`)
 - **Folder Strategy**: Mentally organize files by date, topic, or post
 - **Version Control**: Keep track of different versions of the same image
 
 **Image Guidelines:**
+
 - **Web Optimization**: Use formats like JPG for photos, PNG for graphics
 - **Size Considerations**: Balance quality with file size for fast loading
 - **Responsive Images**: Consider how images will look on mobile devices
 - **Brand Consistency**: Maintain consistent styling and quality
 
 **Video Guidelines:**
+
 - **Compression**: Compress videos to reduce file size while maintaining quality
 - **Formats**: Use web-compatible formats (MP4 is recommended)
 - **Thumbnails**: Create engaging thumbnail images for video content
@@ -115,11 +129,13 @@ The Media Library is your central hub for managing all images, videos, and other
 #### Advanced Features
 
 **Media Search:**
+
 - **Quick Search**: Find specific files by name or type
 - **Filter by Date**: Locate files uploaded in specific time periods
 - **Usage Tracking**: See which posts use specific media files
 
 **Integration Features:**
+
 - **Direct Links**: Get shareable URLs for any media file
 - **Embed Codes**: Generate embed codes for external use
 - **Backup Options**: Export your media library for safekeeping
@@ -127,11 +143,13 @@ The Media Library is your central hub for managing all images, videos, and other
 #### Troubleshooting
 
 **Upload Issues:**
+
 - **File Too Large**: Compress files or upgrade your plan for larger limits
 - **Format Not Supported**: Convert files to supported formats
 - **Upload Failed**: Check your internet connection and try again
 
 **Display Issues:**
+
 - **Images Not Loading**: Verify file isn't corrupted and re-upload if needed
 - **Slow Loading**: Optimize image sizes for better performance
 - **Mobile Issues**: Test how media appears on different devices
