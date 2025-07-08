@@ -13,9 +13,10 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
 import { Tabs } from 'components/atoms/Tabs';
 import { ARTICLE_BLOCKS, ASSETS, DOM, STYLING } from 'helpers/config';
-import { ArticleBlockEnum, PortalAssetRequestType, PortalCategoryType } from 'helpers/types';
+import { ArticleBlockEnum, PortalAssetRequestType, PortalCategoryType, PortalRolesType } from 'helpers/types';
 import { checkWindowCutoff, hideDocumentBody, showDocumentBody } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import { ArticleToolbarPost } from './ArticleToolbarPost';
 import * as S from './styles';
@@ -27,6 +28,7 @@ export default function ArticleToolbar(props: IProps) {
 
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
 
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();
@@ -376,12 +378,20 @@ export default function ArticleToolbar(props: IProps) {
 		}
 	}
 
-	// TODO: If contributor visits post directly they have the ability to save, should be unauthorized
+	/* If a contributor visits a post that they did not create, unauthorize updates */
+	const currentUser = portalProvider.current?.users?.find(
+		(user: PortalRolesType) => user.address === permawebProvider.profile?.id
+	);
+	const submitUnauthorized =
+		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions.postAutoIndex;
+
 	function getSubmit() {
 		const isCurrentRequest =
 			!!assetId && portalProvider.current?.requests?.some((request: PortalAssetRequestType) => request.id === assetId);
-		const primaryDisabled = currentPost.editor.loading.active || currentPost.editor.submitDisabled;
-		const unauthorized = !portalProvider.permissions?.updatePostRequestStatus;
+
+		const primaryDisabled =
+			submitUnauthorized || currentPost.editor.loading.active || currentPost.editor.submitDisabled;
+		const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
 
 		if (isCurrentRequest) {
 			return (
@@ -391,7 +401,7 @@ export default function ArticleToolbar(props: IProps) {
 						label={language.reject}
 						handlePress={() => props.handleRequestUpdate('Reject')}
 						active={false}
-						disabled={primaryDisabled || unauthorized}
+						disabled={primaryDisabled || requestUnauthorized}
 						noFocus
 					/>
 					<Button
@@ -399,7 +409,7 @@ export default function ArticleToolbar(props: IProps) {
 						label={language.approve}
 						handlePress={() => props.handleRequestUpdate('Approve')}
 						active={false}
-						disabled={primaryDisabled || unauthorized}
+						disabled={primaryDisabled || requestUnauthorized}
 						noFocus
 					/>
 				</>
@@ -412,7 +422,7 @@ export default function ArticleToolbar(props: IProps) {
 				label={language.save}
 				handlePress={props.handleSubmit}
 				active={false}
-				disabled={currentPost.editor.loading.active || currentPost.editor.submitDisabled}
+				disabled={primaryDisabled}
 				noFocus
 			/>
 		);
@@ -484,7 +494,7 @@ export default function ArticleToolbar(props: IProps) {
 								})
 							}
 							active={false}
-							disabled={currentPost.editor.loading.active}
+							disabled={submitUnauthorized || currentPost.editor.loading.active}
 							tooltip={`Mark as ${currentPost.data.status === 'draft' ? 'published' : 'draft'}`}
 							noFocus
 						/>

@@ -37,3 +37,12 @@ export const SectionHeader = styled.div`
 		line-height: 1;
 	}
 `;
+
+export const InfoWrapper = styled.div`
+	width: fit-content;
+	margin: 0 0 0 auto;
+	padding: 0.5px 10px 2.5px 10px;
+	span {
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+	}
+`;

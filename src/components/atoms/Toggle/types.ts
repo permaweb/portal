@@ -3,4 +3,5 @@ export interface IProps {
 	options: string[];
 	activeOption: string;
 	handleToggle: (option: string) => void;
+	disabled: boolean;
 }

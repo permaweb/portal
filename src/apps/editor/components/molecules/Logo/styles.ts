@@ -21,7 +21,7 @@ export const Body = styled.div`
 	display: flex;
 	justify-content: center;
 	flex-wrap: wrap;
-	gap: 40px;
+	gap: 20px;
 `;
 
 export const PWrapper = styled.div`

@@ -147,6 +147,10 @@ export const ColorBody = styled.button<{ background: string; height?: number; wi
 	&:hover {
 		cursor: pointer;
 	}
+
+	&:disabled {
+		pointer-events: none;
+	}
 `;
 
 export const SelectorWrapper = styled.div`

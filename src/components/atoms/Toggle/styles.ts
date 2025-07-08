@@ -34,5 +34,9 @@ export const Options = styled.div`
 		span {
 			font-size: ${(props) => props.theme.typography.size.xxxxSmall} !important;
 		}
+
+		&:disabled {
+			background: transparent !important;
+		}
 	}
 `;

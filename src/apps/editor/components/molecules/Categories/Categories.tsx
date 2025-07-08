@@ -15,7 +15,6 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
-// TODO: props.skipAuthCheck not accounting for when there are no categories in the portal
 export default function Categories(props: {
 	categories: PortalCategoryType[];
 	setCategories: (categories: PortalCategoryType[]) => void;
@@ -338,7 +337,7 @@ export default function Categories(props: {
 							value={newCategoryName}
 							onChange={(e: any) => setNewCategoryName(e.target.value)}
 							invalid={{ status: false, message: null }}
-							disabled={unauthorized || categoryLoading}
+							disabled={!portalProvider.permissions?.updatePortalMeta || categoryLoading}
 							hideErrorMessage
 							sm
 						/>

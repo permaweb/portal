@@ -42,8 +42,10 @@ export default function Fonts(props: { handleClose?: () => void }) {
 		if (bodyFont?.id) loadFont(bodyFont.id);
 	}, [bodyFont]);
 
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+
 	const handleFontChange = async () => {
-		if (arProvider.wallet && portalProvider.current?.id) {
+		if (!unauthorized && arProvider.wallet && portalProvider.current?.id) {
 			setLoading(true);
 			try {
 				const updatedFonts = {
@@ -103,7 +105,7 @@ export default function Fonts(props: { handleClose?: () => void }) {
 						activeOption={headerFont ?? headerOptions[0]}
 						setActiveOption={(option) => setHeaderFont(option)}
 						options={headerOptions}
-						disabled={loading}
+						disabled={unauthorized || loading}
 					/>
 					{getPreview(headerFont.label)}
 				</S.Section>
@@ -113,7 +115,7 @@ export default function Fonts(props: { handleClose?: () => void }) {
 						activeOption={bodyFont ?? bodyOptions[0]}
 						setActiveOption={(option) => setBodyFont(option)}
 						options={bodyOptions}
-						disabled={loading}
+						disabled={unauthorized || loading}
 					/>
 					{getPreview(bodyFont.label)}
 				</S.Section>
@@ -131,7 +133,7 @@ export default function Fonts(props: { handleClose?: () => void }) {
 						type={'alt1'}
 						label={language.save}
 						handlePress={handleFontChange}
-						disabled={loading}
+						disabled={unauthorized || loading}
 						loading={false}
 					/>
 				</S.SAction>

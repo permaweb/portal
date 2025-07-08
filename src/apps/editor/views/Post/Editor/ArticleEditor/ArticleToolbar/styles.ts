@@ -59,7 +59,6 @@ export const EndActions = styled.div`
 
 export const SubmitWrapper = styled.div`
 	display: flex;
-	flex-wrap: wrap;
 	align-items: center;
 	gap: 20px;
 `;

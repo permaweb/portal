@@ -14,7 +14,6 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
-// TODO: props.skipAuthCheck not accounting for when there are no topics in the portal
 export default function Topics(props: {
 	topics: string[];
 	setTopics: (topics: string[]) => void;
@@ -170,7 +169,7 @@ export default function Topics(props: {
 						value={newTopic}
 						onChange={(e: any) => setNewTopic(e.target.value)}
 						invalid={{ status: topicOptions?.length && topicOptions.includes(newTopic), message: null }}
-						disabled={unauthorized || topicLoading}
+						disabled={!portalProvider.permissions?.updatePortalMeta  || topicLoading}
 						hideErrorMessage
 						sm
 					/>

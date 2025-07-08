@@ -91,8 +91,6 @@ export default function PortalManager(props: IProps) {
 				} else {
 					const tags = [getBootTag('Name', data.Name), { name: 'Content-Type', value: 'text/html' }];
 					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
-						
-					console.log(PORTAL_DATA())
 
 					const portalId = await permawebProvider.libs.createZone(
 						{
