@@ -14,8 +14,39 @@ export default defineConfig(({ mode }) => {
 	const root = path.resolve(__dirname, `src/apps/${app}`);
 
 	const config = {
-		editor: { port: 3000 },
-		viewer: { port: 4000 },
+		editor: {
+			port: 3000,
+			build: {
+				outDir: path.resolve(__dirname, `dist/${app}`),
+				emptyOutDir: true,
+				rollupOptions: {
+					input: path.resolve(root, 'index.html'),
+					plugins: [polyfillNode()],
+				}
+			}
+
+		},
+		viewer: {
+			port: 4000,
+			build: {
+				outDir: path.resolve(__dirname, `dist/${app}`),
+				emptyOutDir: true,
+				cssCodeSplit: false,
+				assetsInlineLimit: 10_000_000,
+				rollupOptions: {
+					input: path.resolve(root, 'index.tsx'),
+					plugins: [polyfillNode()],
+					output: {
+						inlineDynamicImports: true,
+						manualChunks: undefined,
+						entryFileNames: `bundle.js`,
+						chunkFileNames: `bundle.js`,
+						assetFileNames: `[name][extname]`,
+						format: 'es',
+					},
+				},
+			}
+		},
 	};
 
 	return {
@@ -58,45 +89,7 @@ export default defineConfig(({ mode }) => {
 		optimizeDeps: {
 			include: ['buffer', 'process', 'crypto', 'stream', 'util'],
 		},
-		build: {
-			outDir: path.resolve(__dirname, `dist/${app}`),
-			emptyOutDir: true,
-			rollupOptions: {
-				input: path.resolve(root, 'index.html'),
-				plugins: [polyfillNode()],
-			},
-		},
-		// build: {
-		// 	outDir: path.resolve(__dirname, `dist/${app}`),
-		// 	emptyOutDir: true,
-
-		// 	// 1) Inline CSS & assets so no .css or image files output
-		// 	cssCodeSplit: false,
-		// 	assetsInlineLimit: 10_000_000,
-
-		// 	rollupOptions: {
-		// 		// 2) Make your TSX entry the sole “input”
-		// 		input: path.resolve(root, 'index.tsx'),
-
-		// 		plugins: [polyfillNode()],
-
-		// 		output: {
-		// 			// 3) Inline **all** dynamic imports into the main bundle
-		// 			inlineDynamicImports: true,
-
-		// 			// 4) Never emit extra chunks
-		// 			manualChunks: undefined,
-
-		// 			// 5) Force the single file name you want
-		// 			entryFileNames: `bundle.js`,
-		// 			chunkFileNames: `bundle.js`,    // in case something slips through
-		// 			assetFileNames: `[name][extname]`,
-
-		// 			// 6) Choose your output format
-		// 			format: 'es',                   // or 'iife' if you need a <script nomodule> fallback
-		// 		},
-		// 	},
-		// },
+		build: config[app].build,
 		server: {
 			open: false,
 			strictPort: true,

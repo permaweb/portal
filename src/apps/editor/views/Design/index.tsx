@@ -8,6 +8,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
+// TODO: Favicon
 export default function Design() {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
@@ -24,6 +25,11 @@ export default function Design() {
 						</S.SectionHeader>
 						<Themes />
 					</S.Section>
+					{!portalProvider?.permissions?.updateUsers && (
+						<S.InfoWrapper className={'info'}>
+							<span>{language.unauthorizedPortalUpdate}</span>
+						</S.InfoWrapper>
+					)}
 				</S.SectionWrapper>
 				<S.SectionWrapper>
 					<S.Section className={'border-wrapper-alt2'}>

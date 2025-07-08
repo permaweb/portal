@@ -209,12 +209,12 @@ export default function PortalSetup(props: IProps) {
 				<S.SectionWrapper type={props.type}>
 					{props.type === 'header' ? topicSection() : categorySection()}
 					{props.type === 'detail' && mediaSection()}
+					{props.type === 'detail' && !portalProvider?.permissions?.updateUsers && (
+						<S.InfoWrapper className={'info'}>
+							<span>{language.unauthorizedPortalUpdate}</span>
+						</S.InfoWrapper>
+					)}
 				</S.SectionWrapper>
-				{!portalProvider?.permissions?.updateUsers && (
-					<S.InfoWrapper className={'info'}>
-						<span>{language.unauthorizedPortalUpdate}</span>
-					</S.InfoWrapper>
-				)}
 			</S.Wrapper>
 		</>
 	);

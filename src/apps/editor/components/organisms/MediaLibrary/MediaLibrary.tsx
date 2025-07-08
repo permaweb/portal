@@ -18,7 +18,6 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import * as S from './styles';
 import { IProps } from './types';
 
-// TODO: Use file type from media block
 // TODO: Get cost and show confirmation
 export default function MediaLibrary(props: IProps) {
 	const arProvider = useArweaveProvider();
@@ -90,6 +89,7 @@ export default function MediaLibrary(props: IProps) {
 		}
 	}, [currentList, portalProvider.current?.uploads]);
 
+	// TODO: Permissions on upload
 	React.useEffect(() => {
 		(async function () {
 			if (newUploadUrl && portalProvider.current?.id && arProvider.wallet) {

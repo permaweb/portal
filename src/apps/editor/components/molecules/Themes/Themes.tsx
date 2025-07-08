@@ -22,6 +22,7 @@ function Color(props: {
 	label: string;
 	value: string;
 	onChange: (newColor: string) => void;
+	disabled?: boolean;
 	loading: boolean;
 	height?: number;
 	width?: number;
@@ -64,6 +65,7 @@ function Color(props: {
 			<S.ColorWrapper>
 				<S.ColorBody
 					onClick={() => setShowSelector(true)}
+					disabled={props.disabled}
 					background={value}
 					height={props.height}
 					width={props.width}
@@ -122,6 +124,7 @@ function Section(props: {
 	published: boolean;
 	loading: boolean;
 }) {
+	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -139,6 +142,8 @@ function Section(props: {
 	React.useEffect(() => {
 		if (props.theme.scheme) setScheme(props.theme.scheme);
 	}, [props.theme.scheme]);
+
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	const orderedRemainingTheme = Object.keys(DEFAULT_THEME.light.colors)
 		.filter((key) => key !== 'background')
@@ -198,6 +203,7 @@ function Section(props: {
 						active={false}
 						src={ASSETS.write}
 						handlePress={() => setShowNameEdit(true)}
+						disabled={unauthorized}
 						dimensions={{ wrapper: 23.5, icon: 13.5 }}
 						tooltip={language.editThemeName}
 						tooltipPosition={'bottom-right'}
@@ -213,6 +219,7 @@ function Section(props: {
 								onChange={(newColor) => handleThemeChange('background', newColor)}
 								loading={props.loading}
 								width={130.5}
+								disabled={unauthorized}
 							/>
 						</S.SectionsWrapper>
 						<S.GridWrapper>
@@ -223,6 +230,7 @@ function Section(props: {
 									value={value}
 									onChange={(newColor) => handleThemeChange(key, newColor)}
 									loading={props.loading}
+									disabled={unauthorized}
 								/>
 							))}
 						</S.GridWrapper>
@@ -233,6 +241,7 @@ function Section(props: {
 							options={[PortalSchemeType.Light, PortalSchemeType.Dark]}
 							activeOption={scheme}
 							handleToggle={(option: string) => handleSchemeChange(option)}
+							disabled={unauthorized}
 						/>
 						{!props.published && (
 							<S.SectionActions>
@@ -242,11 +251,13 @@ function Section(props: {
 									handlePress={() => {
 										props.onThemeCancel(props.theme);
 									}}
+									disabled={unauthorized}
 								/>
 								<Button
 									type={'alt4'}
 									label={language.publishTheme}
 									handlePress={() => props.onThemeChange(theme, true)}
+									disabled={unauthorized}
 								/>
 							</S.SectionActions>
 						)}
@@ -260,7 +271,7 @@ function Section(props: {
 							value={name}
 							onChange={(e: any) => setName(e.target.value)}
 							invalid={{ status: false, message: null }}
-							disabled={false}
+							disabled={unauthorized}
 							hideErrorMessage
 							sm
 						/>
@@ -269,13 +280,13 @@ function Section(props: {
 								type={'primary'}
 								label={language.cancel}
 								handlePress={() => setShowNameEdit(false)}
-								disabled={false}
+								disabled={unauthorized}
 							/>
 							<Button
 								type={'alt1'}
 								label={language.save}
 								handlePress={() => handleNameChange()}
-								disabled={false}
+								disabled={unauthorized}
 								loading={false}
 							/>
 						</S.ModalActionsWrapper>
@@ -296,6 +307,8 @@ export default function Themes() {
 	const [options, setOptions] = React.useState<PortalThemeType[] | null>(null);
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
+
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
@@ -345,7 +358,7 @@ export default function Themes() {
 	}
 
 	async function submitUpdatedThemes(themes: PortalThemeType[]) {
-		if (themes && arProvider.wallet && portalProvider.current?.id) {
+		if (!unauthorized && themes && arProvider.wallet && portalProvider.current?.id) {
 			setLoading(true);
 			try {
 				const themeUpdateId = await permawebProvider.libs.updateZone(
@@ -442,6 +455,7 @@ export default function Themes() {
 						type={'primary'}
 						label={language.addTheme}
 						handlePress={handleAddTheme}
+						disabled={unauthorized}
 						icon={ASSETS.add}
 						iconLeftAlign
 					/>

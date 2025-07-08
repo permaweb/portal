@@ -17,6 +17,7 @@ export default function Toggle(props: IProps) {
 							type={'alt3'}
 							label={option}
 							handlePress={() => props.handleToggle(option)}
+							disabled={props.disabled}
 							active={option.toLowerCase() === props.activeOption.toLowerCase()}
 						/>
 					)
