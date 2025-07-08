@@ -225,6 +225,9 @@ export const PortalsListWrapperMain = styled(PortalsListWrapper)`
 export const PortalActionWrapper = styled.div`
 	width: 100%;
 	margin: 40px 0 0 0;
+	display: flex;
+    align-items: center;
+    justify-content: center;
 
 	button {
 		border: none !important;
@@ -244,6 +247,10 @@ export const PortalActionWrapper = styled.div`
 			border-top: none !important;
 		}
 	}
+`;
+
+export const WalletConnect = styled.div`
+	margin: 0 0 40px 0;
 `;
 
 export const ModalWrapper = styled.div`

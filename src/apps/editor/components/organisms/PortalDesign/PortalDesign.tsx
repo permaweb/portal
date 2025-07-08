@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Fonts } from 'editor/components/molecules/Fonts';
 import { Logo } from 'editor/components/molecules/Logo';
 import { Themes } from 'editor/components/molecules/Themes';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
@@ -12,7 +13,6 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-// TODO
 export default function PortalDesign() {
 	const portalProvider = usePortalProvider();
 
@@ -35,13 +35,17 @@ export default function PortalDesign() {
 		switch (panelType) {
 			case 'themes':
 				header = language.themes;
-				component = <Themes hideHeader />;
+				component = <Themes />;
 				useAction = true;
+				break;
+			case 'fonts':
+				header = language.fonts;
+				component = <Fonts handleClose={() => setShowPanel(false)} />
 				break;
 			case 'logo':
 				header = language.siteLogo;
 				component = (
-					<Logo portal={portalProvider.current} handleClose={() => setShowPanel(false)} handleUpdate={null} />
+					<Logo portal={portalProvider.current} handleClose={() => setShowPanel(false)} />
 				);
 				break;
 			default:
@@ -70,32 +74,27 @@ export default function PortalDesign() {
 		);
 	}, [portalProvider.current, panelType, showPanel, language]);
 
+	function getAction(label: string, action: DesignPanelType) {
+		return (
+			<S.ActionWrapper>
+				<Button
+					type={'primary'}
+					label={label}
+					handlePress={() => handleOpenAction(action)}
+					icon={ASSETS.arrow}
+					height={40}
+					fullWidth
+				/>
+			</S.ActionWrapper>
+		);
+	}
+
 	return (
 		<>
 			<S.Wrapper>
-				<S.ActionWrapper>
-					<Button
-						type={'primary'}
-						label={language.themes}
-						handlePress={() => handleOpenAction('themes')}
-						icon={ASSETS.arrow}
-						height={40}
-						fullWidth
-					/>
-				</S.ActionWrapper>
-				{/* <S.ActionWrapper>
-					<Button type={'primary'} label={'Fonts'} handlePress={() => {}} icon={ASSETS.arrow} height={40} fullWidth />
-				</S.ActionWrapper> */}
-				<S.ActionWrapper>
-					<Button
-						type={'primary'}
-						label={language.siteLogo}
-						handlePress={() => handleOpenAction('logo')}
-						icon={ASSETS.arrow}
-						height={40}
-						fullWidth
-					/>
-				</S.ActionWrapper>
+				{getAction(language.themes, 'themes')}
+				{getAction(language.fonts, 'fonts')}
+				{getAction(language.siteLogo, 'logo')}
 			</S.Wrapper>
 			{panel}
 		</>

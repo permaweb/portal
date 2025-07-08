@@ -5,7 +5,7 @@ import { STYLING } from 'helpers/config';
 export const Wrapper = styled.header`
 	width: 100%;
 	position: sticky;
-	z-index: 2;
+	z-index: 4;
 	top: 0;
 	background: ${(props) => props.theme.colors.view.background};
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
@@ -14,25 +14,38 @@ export const Wrapper = styled.header`
 export const WrapperContent = styled.div<{ height?: number }>`
 	height: ${(props) => props.height ? `${props.height.toString()}px` : STYLING.dimensions.nav.height};
 	width: 100%;
+	position: relative;
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: space-between;
 	padding: 0 20px;
+`;
+
+export const ContentStart = styled.div`
+	
 `;
 
 export const LogoWrapper = styled.div`
 	height: 100%;
+	max-height: 50%;
 	width: 250px;
 	max-width: 50%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 
 	a {
 		height: 100%;
 		width: 100%;
-		display: block;
-		color: ${(props) => props.theme.colors.font.primary};
+		display: flex;
+		justify-content: center;
+		align-items: center;
 
 		&:hover {
-			opacity: 0.75;
+			img {
+				opacity: 0.75;
+			}
 		}
 	}
 
@@ -40,6 +53,16 @@ export const LogoWrapper = styled.div`
 		height:100%;
 		width: 100%;
 		object-fit: contain;
+	}
+
+	h4 {
+		text-align: center;
+		font-size: ${(props) => props.theme.typography.size.xxLg};
+		color: ${(props) => props.theme.colors.font.primary};
+
+		&:hover {
+			color: ${(props) => props.theme.colors.font.alt1};
+		}
 	}
 
 	svg {
@@ -51,10 +74,11 @@ export const LogoWrapper = styled.div`
 	}
 `;
 
+export const ContentEnd = styled.div``;
+
 export const NavigationWrapper = styled(WrapperContent)`
 	height: ${STYLING.dimensions.nav.linksHeight};
 	width: 100%;
-	background: ${(props) => props.theme.colors.container.alt1.background};
 	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
@@ -66,6 +90,23 @@ export const NavigationContent = styled.ul`
 	gap: 35px;
 	padding: 0 20px;
 `;
+
+export const PortalUpdateWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 4.5px 13.5px;
+	background: ${(props) => props.theme.colors.contrast.background};
+	border: 1px solid ${(props) => props.theme.colors.contrast.border};
+	border-radius: ${STYLING.dimensions.radius.alt4};
+	span {
+		color: ${(props) => props.theme.colors.contrast.color};
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+`;
+
 
 export const CategoryWrapper = styled.li`
 	height: 100%;
@@ -121,6 +162,7 @@ export const SubMenu = styled.ul`
 	left: 0;
 	flex-direction: column;
 	padding: 7.5px 15px 8.5px 15px;
+	border-radius: ${STYLING.dimensions.radius.primary} !important;
 
 	opacity: 0;
 	visibility: hidden;

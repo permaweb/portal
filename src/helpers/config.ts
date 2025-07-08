@@ -1,5 +1,5 @@
 import { getTxEndpoint } from './endpoints';
-import { ArticleBlockEnum, PortalThemeType } from './types';
+import { ArticleBlockEnum, PortalSchemeType, PortalThemeType } from './types';
 
 export const SOCIAL_LINK_ASSETS = {
 	dailyMotion: 'qO9Qi_WSCcZgqN-3D4eSApFyEHHSw6jZneGUGT8nLmA',
@@ -66,6 +66,7 @@ export const ASSETS = {
 	settings: getTxEndpoint('e3jdELVw-3jNIOCbWTYCh1fuH4zIa7tDqmOqE6HyizY'),
 	setup: getTxEndpoint('dyFHmCSxONAiUPJsr6HeAdED_MSsRAL9nQDvdmGryT0'),
 	shortcuts: getTxEndpoint('RHIjV5uz9SGb9FVDdc-MAQlXFRtfpnTwQWLexcClMW0'),
+	site: getTxEndpoint('gAG4DPY73lacgyiBnXXCgaolI40yxh3CRcrS86TASoA'),
 	success: getTxEndpoint('mVnNwxm-F6CV043zVtORE-EaMWfd2j8w6HHX70IcVbI'),
 	telegram: getTxEndpoint('uerxx9yd8y3DGRIJ4F9TjF4BryagPuINo5-Jo8qmno4'),
 	time: getTxEndpoint('EDfjYP_Fq8XycJ92uVeLDCmOCUMoSoPVbAhfE1ZwCJE'),
@@ -149,12 +150,14 @@ function createURLs() {
 
 	return {
 		base: base,
+		category: (categoryId: string) => `category/${categoryId}`,
 		portalBase: portalBase,
 		portalDesign: (portalId: string) => `${portalBase(portalId)}design/`,
 		portalPosts: (portalId: string) => `${portalBase(portalId)}posts/`,
 		portalDomains: (portalId: string) => `${portalBase(portalId)}domains/`,
 		portalUsers: (portalId: string) => `${portalBase(portalId)}users/`,
 		portalSetup: (portalId: string) => `${portalBase(portalId)}setup/`,
+		post: (postId: string) => `post/${postId}`,
 		postCreate: (portalId: string) => `${postCreateBase(portalId)}`,
 		postEdit: (portalId: string) => `${postEditBase(portalId)}`,
 		postCreateArticle: (portalId: string) => `${postCreateBase(portalId)}article/`,
@@ -253,23 +256,37 @@ export const ARTICLE_BLOCKS = {
 	},
 };
 
-export const DEFAULT_THEME: PortalThemeType = {
-	name: 'Default',
-	active: true,
-	scheme: 'light',
-	colors: {
-		background: '255,255,255',
-		primary: '77,77,77',
-		secondary: '50,50,50',
-		links: '69,153,232',
-		menus: '80,80,80',
-		sections: '20,20,20',
+export const DEFAULT_THEME: { light: PortalThemeType, dark: PortalThemeType } = {
+	light: {
+		name: 'Light Default',
+		active: true,
+		scheme: PortalSchemeType.Light,
+		colors: {
+			background: '255,255,255',
+			primary: '77,77,77',
+			links: '69,153,232',
+		},
+		preferences: {
+			gradient: false,
+			shadow: false,
+			borders: false,
+		},
 	},
-	preferences: {
-		gradient: false,
-		shadow: false,
-		borders: false,
-	},
+	dark: {
+		name: 'Dark Default',
+		active: true,
+		scheme: PortalSchemeType.Dark,
+		colors: {
+			background: '20,20,20',
+			primary: '77,77,77',
+			links: '69,153,232',
+		},
+		preferences: {
+			gradient: false,
+			shadow: false,
+			borders: false,
+		},
+	}
 };
 
 export const STRIPE_PUBLISHABLE_KEY =
@@ -286,19 +303,27 @@ export const UPLOAD = {
 export const PORTAL_DATA = () => `
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal</title>
-  <link rel="stylesheet" href="https://styles_portal.arweave.net">
-  <script src="https://script_portal.arweave.net"></script>
-</head>
-<body>
-  <div id="portal"></div>
-  <script>
-    window.portal.engine();
-  </script>
-</body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+		<link rel="icon" href="https://arweave.net/WzomcwfXZ_4hhUvDso1wsyJpNBHGeHezFZQv3V706Hw" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Ramaraja&display=swap"
+			rel="stylesheet"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,200..900;1,200..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Ramaraja&display=swap"
+			rel="stylesheet"
+		/>
+		<title>Portal</title>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="module" src="https://script_portal.arweave.net"></script>
+	</body>
 </html>
 `;
 
@@ -308,3 +333,49 @@ export const PORTAL_ROLES = {
 	MODERATOR: 'Moderator',
 	GUEST_CONTRIBUTOR: 'Guest Contributor',
 };
+
+export const FONT_OPTIONS = {
+	headers: [
+		'Crimson Pro:400,600,700',
+		'Montserrat:400,700',
+		'Poppins:400,700',
+		'Raleway:400,700',
+		'Oswald:400,700',
+		'Bebas Neue',
+		'Playfair Display:400,700,900',
+		'DM Serif Display',
+		'Space Grotesk:400,700',
+		'Anton',
+		'Abril Fatface',
+		'Libre Baskerville:400,700',
+		'Cormorant Garamond:400,500,600,700',
+		'EB Garamond:400,500,600,700',
+		'Lora:400,500,600,700',
+		'Merriweather:400,700,900',
+		'Tinos:400,700',
+		'Spectral:400,500,600,700',
+		'Alegreya:400,500,700,800',
+		'Orbitron:400,500,700',
+		'Exo 2:400,600,800',
+		'Audiowide',
+		'Russo One:400,700',
+		'Share Tech Mono:400,700'
+	],
+	body: [
+		'Open Sans:400,600,700',
+		'Inter:400,600',
+		'Roboto:400,500',
+		'Lato:400,700',
+		'Work Sans:400,500',
+		'Source Sans Pro:400,600',
+		'Merriweather:400,700',
+		'DM Sans:400,500',
+		'Nunito:400,700',
+		'Hind:400,500',
+		'Space Mono:400,700',
+		'VT323',
+		'Major Mono Display',
+		'Rajdhani:400,500,700',
+		'Titillium Web:400,600,700'
+	]
+}

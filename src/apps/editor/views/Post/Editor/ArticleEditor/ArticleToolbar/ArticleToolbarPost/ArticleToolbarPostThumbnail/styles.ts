@@ -23,7 +23,7 @@ export const Input = styled.button<{ hasInput: boolean }>`
 	position: relative;
 	background: ${(props) => props.theme.colors.container.primary.background};
 	border: ${(props) => (props.hasInput ? `none` : `1px dashed ${props.theme.colors.border.alt1}`)};
-	border-radius: ${STYLING.dimensions.radius.alt2};
+	border-radius: ${STYLING.dimensions.radius.primary};
 	z-index: 1;
 	overflow: hidden;
 	span {

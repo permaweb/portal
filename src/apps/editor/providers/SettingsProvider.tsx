@@ -2,7 +2,7 @@ import React from 'react';
 import { debounce } from 'lodash';
 import { ThemeProvider } from 'styled-components';
 
-import { STYLING } from 'helpers/config';
+import { ASSETS, STYLING } from 'helpers/config';
 import {
 	darkTheme,
 	darkThemeAlt1,
@@ -39,6 +39,7 @@ interface Settings {
 interface SettingsContextState {
 	settings: Settings;
 	updateSettings: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
+	availableThemes: any;
 }
 
 interface SettingsProviderProps {
@@ -58,6 +59,7 @@ const defaultSettings: Settings = {
 const SettingsContext = React.createContext<SettingsContextState>({
 	settings: defaultSettings,
 	updateSettings: () => {},
+	availableThemes: null,
 });
 
 export function useSettingsProvider(): SettingsContextState {
@@ -137,6 +139,69 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		});
 	};
 
+	const AVAILABLE_THEMES = {
+		light: {
+			label: 'Light Themes',
+			icon: ASSETS.light,
+			variants: [
+				{
+					id: 'light-primary',
+					name: 'Light Default',
+					background: lightTheme.neutral1,
+					accent1: lightTheme.primary1,
+				},
+				{
+					id: 'light-high-contrast',
+					name: 'Light High Contrast',
+					background: lightThemeHighContrast.neutral1,
+					accent1: lightThemeHighContrast.neutral9,
+				},
+				{
+					id: 'light-alt-1',
+					name: 'Sunlit',
+					background: lightThemeAlt1.neutral1,
+					accent1: lightThemeAlt1.primary1,
+				},
+				{
+					id: 'light-alt-2',
+					name: 'Daybreak',
+					background: lightThemeAlt2.neutral1,
+					accent1: lightThemeAlt2.primary1,
+				},
+			],
+		},
+		dark: {
+			label: 'Dark Themes',
+			icon: ASSETS.dark,
+			variants: [
+				{
+					id: 'dark-primary',
+					name: 'Dark Default',
+					background: darkTheme.neutral1,
+					accent1: darkTheme.primary1,
+				},
+				{
+					id: 'dark-high-contrast',
+					name: 'Dark High Contrast',
+					background: darkThemeHighContrast.neutral1,
+					accent1: darkThemeHighContrast.neutralA1,
+				},
+				{
+					id: 'dark-alt-1',
+					name: 'Eclipse',
+					background: darkThemeAlt1.neutral1,
+					accent1: darkThemeAlt1.primary1,
+				},
+				{
+					id: 'dark-alt-2',
+					name: 'Midnight',
+					background: darkThemeAlt2.neutral1,
+					accent1: darkThemeAlt2.primary1,
+				},
+			],
+		},
+	};
+
 	function getTheme() {
 		switch (settings.theme) {
 			case 'light-primary':
@@ -161,7 +226,9 @@ export function SettingsProvider(props: SettingsProviderProps) {
 	}
 
 	return (
-		<SettingsContext.Provider value={{ settings, updateSettings }}>
+		<SettingsContext.Provider
+			value={{ settings: settings, updateSettings: updateSettings, availableThemes: AVAILABLE_THEMES }}
+		>
 			<ThemeProvider theme={getTheme()}>{props.children}</ThemeProvider>
 		</SettingsContext.Provider>
 	);

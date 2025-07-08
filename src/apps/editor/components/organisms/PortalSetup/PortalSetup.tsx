@@ -4,12 +4,12 @@ import { Categories } from 'editor/components/molecules/Categories';
 import { Links } from 'editor/components/molecules/Links';
 import { Topics } from 'editor/components/molecules/Topics';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
+import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 
 import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS } from 'helpers/config';
 import { PortalCategoryType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 
 import { MediaLibrary } from '../MediaLibrary';
 
@@ -209,12 +209,12 @@ export default function PortalSetup(props: IProps) {
 				<S.SectionWrapper type={props.type}>
 					{props.type === 'header' ? topicSection() : categorySection()}
 					{props.type === 'detail' && mediaSection()}
+					{props.type === 'detail' && !portalProvider?.permissions?.updateUsers && (
+						<S.InfoWrapper className={'info'}>
+							<span>{language.unauthorizedPortalUpdate}</span>
+						</S.InfoWrapper>
+					)}
 				</S.SectionWrapper>
-				{!portalProvider?.permissions?.updateUsers && (
-					<S.InfoWrapper className={'info'}>
-						<span>{language.unauthorizedPortalUpdate}</span>
-					</S.InfoWrapper>
-				)}
 			</S.Wrapper>
 		</>
 	);

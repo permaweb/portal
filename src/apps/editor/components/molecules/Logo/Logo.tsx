@@ -42,8 +42,10 @@ export default function PortalManager(props: IProps) {
 		}
 	}, [props.portal]);
 
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta
+
 	async function handleSubmit() {
-		if (arProvider.wallet && permawebProvider.profile && permawebProvider.profile.id && portalProvider.current?.name) {
+		if (!unauthorized && arProvider.wallet && permawebProvider.profile && permawebProvider.profile.id && portalProvider.current?.name) {
 			setLoading(true);
 
 			try {
@@ -150,23 +152,23 @@ export default function PortalManager(props: IProps) {
 						<S.Body>
 							<S.PWrapper>
 								<S.FileInputWrapper>
-									<S.LInput hasLogo={logo !== null} onClick={() => logoInputRef.current.click()} disabled={loading}>
+									<S.LInput hasLogo={logo !== null} onClick={() => logoInputRef.current.click()} disabled={unauthorized || loading}>
 										{getLogoWrapper()}
 									</S.LInput>
 									<input
 										ref={logoInputRef}
 										type={'file'}
 										onChange={(e: any) => handleFileChange(e, 'logo')}
-										disabled={loading}
+										disabled={unauthorized || loading}
 										accept={ALLOWED_LOGO_TYPES}
 									/>
 								</S.FileInputWrapper>
 								<S.PActions>
 									<Button
-										type={'primary'}
+										type={'alt3'}
 										label={language.removeLogo}
 										handlePress={() => setLogo(null)}
-										disabled={loading || !logo}
+										disabled={unauthorized || loading || !logo}
 										height={32.5}
 									/>
 								</S.PActions>
@@ -185,7 +187,7 @@ export default function PortalManager(props: IProps) {
 									type={'alt1'}
 									label={language.save}
 									handlePress={handleSubmit}
-									disabled={loading}
+									disabled={unauthorized || loading}
 									loading={false}
 								/>
 							</S.SAction>

@@ -7,6 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS, STYLING, URLS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalHeaderType } from 'helpers/types';
 import { checkWindowCutoff } from 'helpers/window';
 import { useNavigationConfirm } from 'hooks/useNavigationConfirm';
@@ -198,6 +199,13 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 									</S.PDropdownBody>
 								)}
 								<S.PDropdownFooter>
+									<button onClick={() =>{
+										 window.open(getTxEndpoint(portalProvider.current.id));
+										 setShowPortalDropdown(false);
+									}}>
+										<ReactSVG src={ASSETS.site} />
+										{language.goToSite}
+									</button>
 									<button
 										onClick={(e: any) => {
 											handleNavigate(e, `${URLS.base}${portalProvider.current.id}`);
@@ -264,7 +272,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						{portal}
 					</S.C1Wrapper>
 					<S.ActionsWrapper>
-						<WalletConnect />
+						<WalletConnect app={'editor'} />
 					</S.ActionsWrapper>
 				</S.Content>
 			</S.Header>

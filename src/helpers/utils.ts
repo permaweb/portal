@@ -286,3 +286,37 @@ export function getPortalAssets(index: PortalAssetType[]) {
 			asset.processType && asset.processType === 'atomic-asset' && asset.assetType && asset.assetType === 'blog-post'
 	);
 }
+
+export function stripFontWeights(fontString: string) {
+	return fontString.split(':')[0];
+}
+
+export function getPortalIdFromURL(): string | null {
+	const { pathname, hash } = window.location
+
+	const pathPart = pathname.split('/').filter(Boolean)[0]
+	if (pathPart && checkValidAddress(pathPart)) {
+		return pathPart
+	}
+
+	const rawHash = hash.replace(/^#\/?/, '')
+	const firstHashSegment = rawHash.split('/')[0]
+	if (firstHashSegment && checkValidAddress(firstHashSegment)) {
+		return firstHashSegment
+	}
+
+	return null
+}
+
+export function shuffleArray<T>(arr: T[]): T[] {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+export function urlify(str: string) {
+	return str.toLowerCase().split(' ').join('-');
+}

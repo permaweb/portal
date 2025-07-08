@@ -47,6 +47,7 @@ export default function ArticleEditor(props: IProps) {
 						const response = await permawebProvider.libs.getAtomicAsset(assetId);
 
 						handleCurrentPostUpdate({ field: 'title', value: response?.name });
+						handleCurrentPostUpdate({ field: 'creator', value: response?.creator });
 						handleCurrentPostUpdate({ field: 'status', value: response?.metadata?.status });
 						handleCurrentPostUpdate({ field: 'categories', value: response?.metadata?.categories });
 						handleCurrentPostUpdate({ field: 'topics', value: response?.metadata?.topics });

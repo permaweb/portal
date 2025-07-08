@@ -1,39 +1,64 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
+import { ProfileManager } from 'editor/components/organisms/ProfileManager';
+import { useSettingsProvider as useEditorSettingsProvider } from 'editor/providers/SettingsProvider';
+import { useSettingsProvider as useViewerSettingsProvider } from 'viewer/providers/SettingsProvider';
+
 import { Avatar } from 'components/atoms/Avatar';
 import { Button } from 'components/atoms/Button';
+import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { ASSETS } from 'helpers/config';
-import {
-	darkTheme,
-	darkThemeAlt1,
-	darkThemeAlt2,
-	darkThemeHighContrast,
-	lightTheme,
-	lightThemeAlt1,
-	lightThemeAlt2,
-	lightThemeHighContrast,
-} from 'helpers/themes';
+import { WalletEnum } from 'helpers/types';
 import { formatAddress, getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
-export default function WalletConnect(_props: { callback?: () => void }) {
+const AR_WALLETS = [{ type: WalletEnum.wander, label: 'Wander', logo: ASSETS.wander }];
+
+function WalletList(props: { handleConnect: any }) {
+	return (
+		<S.WalletListContainer>
+			{AR_WALLETS.map((wallet: any, index: number) => (
+				<S.WalletListItem
+					key={index}
+					onClick={() => props.handleConnect(wallet.type)}
+					className={'border-wrapper-primary'}
+				>
+					<img src={wallet.logo} alt={''} />
+					<span>{wallet.label}</span>
+				</S.WalletListItem>
+			))}
+			<S.WalletLink>
+				<span>
+					Don't have an Arweave Wallet? You can create one{' '}
+					<a href={'https://arconnect.io'} target={'_blank'}>
+						here.
+					</a>
+				</span>
+			</S.WalletLink>
+		</S.WalletListContainer>
+	);
+}
+
+export default function WalletConnect(props: { app: 'editor' | 'viewer'; callback?: () => void }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const { settings, updateSettings } = useSettingsProvider();
+	const { settings, updateSettings, availableThemes } =
+		props.app === 'editor' ? useEditorSettingsProvider() : useViewerSettingsProvider();
 
 	const [showWallet, setShowWallet] = React.useState<boolean>(false);
+	const [walletModalVisible, setWalletModalVisible] = React.useState<boolean>(false);
+	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(false);
 	const [showThemeSelector, setShowThemeSelector] = React.useState<boolean>(false);
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
@@ -66,7 +91,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		if (arProvider.walletAddress) {
 			setShowWalletDropdown(!showWalletDropdown);
 		} else {
-			arProvider.setWalletModalVisible(true);
+			setWalletModalVisible(true);
 		}
 	}
 
@@ -74,69 +99,6 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		arProvider.handleDisconnect();
 		setShowWalletDropdown(false);
 	}
-
-	const THEMES = {
-		light: {
-			label: 'Light themes',
-			icon: ASSETS.light,
-			variants: [
-				{
-					id: 'light-primary',
-					name: 'Light Default',
-					background: lightTheme.neutral1,
-					accent1: lightTheme.primary1,
-				},
-				{
-					id: 'light-high-contrast',
-					name: 'Light High Contrast',
-					background: lightThemeHighContrast.neutral1,
-					accent1: lightThemeHighContrast.neutral9,
-				},
-				{
-					id: 'light-alt-1',
-					name: 'Sunlit',
-					background: lightThemeAlt1.neutral1,
-					accent1: lightThemeAlt1.primary1,
-				},
-				{
-					id: 'light-alt-2',
-					name: 'Daybreak',
-					background: lightThemeAlt2.neutral1,
-					accent1: lightThemeAlt2.primary1,
-				},
-			],
-		},
-		dark: {
-			label: 'Dark themes',
-			icon: ASSETS.dark,
-			variants: [
-				{
-					id: 'dark-primary',
-					name: 'Dark Default',
-					background: darkTheme.neutral1,
-					accent1: darkTheme.primary1,
-				},
-				{
-					id: 'dark-high-contrast',
-					name: 'Dark High Contrast',
-					background: darkThemeHighContrast.neutral1,
-					accent1: darkThemeHighContrast.neutralA1,
-				},
-				{
-					id: 'dark-alt-1',
-					name: 'Eclipse',
-					background: darkThemeAlt1.neutral1,
-					accent1: darkThemeAlt1.primary1,
-				},
-				{
-					id: 'dark-alt-2',
-					name: 'Midnight',
-					background: darkThemeAlt2.neutral1,
-					accent1: darkThemeAlt2.primary1,
-				},
-			],
-		},
-	};
 
 	return (
 		<>
@@ -183,18 +145,16 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 							</S.DBalanceWrapper>
 
 							<S.DBodyWrapper>
-								<li onClick={() => permawebProvider.setShowProfileManager(true)}>
+								<li onClick={() => setShowProfileManager(true)}>
 									<ReactSVG src={ASSETS.write} />
 									{language.profile}
 								</li>
-								{/* <li onClick={() => setShowThemeSelector(true)}>
-									<ReactSVG src={ASSETS.language} />
-									{language.language}
-								</li> */}
-								<li onClick={() => setShowThemeSelector(true)}>
-									<ReactSVG src={ASSETS.design} />
-									{language.appearance}
-								</li>
+								{availableThemes && (
+									<li onClick={() => setShowThemeSelector(true)}>
+										<ReactSVG src={ASSETS.design} />
+										{language.appearance}
+									</li>
+								)}
 							</S.DBodyWrapper>
 							<S.DFooterWrapper>
 								<li onClick={handleDisconnect}>
@@ -207,6 +167,20 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 				</CloseHandler>
 			</S.Wrapper>
 			<Panel
+				open={showProfileManager}
+				header={permawebProvider.profile?.id ? language.editProfile : `${language.createProfile}!`}
+				handleClose={() => setShowProfileManager(false)}
+				width={575}
+				closeHandlerDisabled
+			>
+				<ProfileManager
+					profile={permawebProvider.profile?.id ? permawebProvider.profile : null}
+					handleClose={() => setShowProfileManager(false)}
+					handleUpdate={null}
+				/>
+			</Panel>
+
+			<Panel
 				open={showFundUpload}
 				width={575}
 				header={language.fundTurboBalance}
@@ -214,39 +188,51 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 			>
 				<TurboBalanceFund handleClose={() => setShowFundUpload(false)} />
 			</Panel>
-			<Panel
-				open={showThemeSelector}
-				width={430}
-				header={language.chooseAppAppearance}
-				handleClose={() => setShowThemeSelector(false)}
-			>
-				<S.MWrapper className={'modal-wrapper'}>
-					{Object.entries(THEMES).map(([key, theme]) => (
-						<S.ThemeSection key={key}>
-							<S.ThemeSectionHeader>
-								<ReactSVG src={theme.icon} />
-								<p>{theme.label}</p>
-							</S.ThemeSectionHeader>
-							<S.ThemeSectionBody>
-								{theme.variants.map((variant) => (
-									<S.ThemeSectionBodyElement
-										key={variant.id}
-										onClick={() => updateSettings('theme', variant.id as any)}
-									>
-										<S.Preview background={variant.background} accent={variant.accent1}>
-											<div id={'preview-accent-1'} />
-										</S.Preview>
-										<div>
-											<S.Indicator active={settings.theme === variant.id} />
-											<p>{variant.name}</p>
-										</div>
-									</S.ThemeSectionBodyElement>
-								))}
-							</S.ThemeSectionBody>
-						</S.ThemeSection>
-					))}
-				</S.MWrapper>
-			</Panel>
+			{availableThemes && (
+				<Panel
+					open={showThemeSelector}
+					width={430}
+					header={language.chooseAppearance}
+					handleClose={() => setShowThemeSelector(false)}
+				>
+					<S.MWrapper className={'modal-wrapper'}>
+						{Object.entries(availableThemes).map(([key, theme]: any) => (
+							<S.ThemeSection key={key}>
+								<S.ThemeSectionHeader>
+									<ReactSVG src={theme.icon} />
+									<p>{theme.label}</p>
+								</S.ThemeSectionHeader>
+								<S.ThemeSectionBody>
+									{theme.variants.map((variant: any) => (
+										<S.ThemeSectionBodyElement
+											key={variant.id}
+											onClick={() => updateSettings('theme', variant.id as any)}
+										>
+											<S.Preview background={variant.background} accent={variant.accent1}>
+												<div id={'preview-accent-1'} />
+											</S.Preview>
+											<div>
+												<S.Indicator active={settings.theme === variant.id} />
+												<p>{variant.name}</p>
+											</div>
+										</S.ThemeSectionBodyElement>
+									))}
+								</S.ThemeSectionBody>
+							</S.ThemeSection>
+						))}
+					</S.MWrapper>
+				</Panel>
+			)}
+			{walletModalVisible && (
+				<Modal header={language.connectWallet} handleClose={() => setWalletModalVisible(false)}>
+					<WalletList
+						handleConnect={(type: WalletEnum) => {
+							arProvider.handleConnect(type);
+							setWalletModalVisible(false);
+						}}
+					/>
+				</Modal>
+			)}
 		</>
 	);
 }

@@ -2,12 +2,9 @@ import React from 'react';
 
 import Arweave from 'arweave';
 import Permaweb, { Types } from '@permaweb/libs';
-import { connect, createDataItemSigner } from '@permaweb/aoconnect';
-
-import { ProfileManager } from 'editor/components/organisms/ProfileManager';
+import { connect, createSigner } from '@permaweb/aoconnect';
 
 import { Loader } from 'components/atoms/Loader';
-import { Panel } from 'components/atoms/Panel';
 import { STORAGE } from 'helpers/config';
 
 import { useArweaveProvider } from './ArweaveProvider';
@@ -17,8 +14,6 @@ interface PermawebContextState {
 	deps: any;
 	libs: any;
 	profile: Types.ProfileType;
-	showProfileManager: boolean;
-	setShowProfileManager: (toggle: boolean) => void;
 	handleInitialProfileCache: (address: string, profileId: string) => void;
 	refreshProfile: () => void;
 }
@@ -27,8 +22,6 @@ const DEFAULT_CONTEXT = {
 	deps: null,
 	libs: null,
 	profile: null,
-	showProfileManager: false,
-	setShowProfileManager(_toggle: boolean) {},
 	handleInitialProfileCache(_address: string, _profileId: string) {},
 	refreshProfile() {},
 };
@@ -47,7 +40,6 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	const [deps, setDeps] = React.useState<any>(null);
 	const [libs, setLibs] = React.useState<any>(null);
 	const [profile, setProfile] = React.useState<Types.ProfileType | null>(null);
-	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 	const [refreshProfileTrigger, setRefreshProfileTrigger] = React.useState<boolean>(false);
 	const [profilePending, setProfilePending] = React.useState<boolean>(false);
 
@@ -55,7 +47,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		const dependencies = {
 			ao: connect({ MODE: 'legacy' }),
 			arweave: Arweave.init({}),
-			signer: arProvider.wallet ? createDataItemSigner(arProvider.wallet) : null,
+			signer: arProvider.wallet ? createSigner(arProvider.wallet) : null,
 		};
 
 		setDeps(dependencies);
@@ -177,27 +169,12 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				deps: deps,
 				libs: libs,
 				profile: profile,
-				showProfileManager,
-				setShowProfileManager,
 				handleInitialProfileCache: (address: string, profileId: string) =>
 					handleInitialProfileCache(address, profileId),
 				refreshProfile: () => setRefreshProfileTrigger((prev) => !prev),
 			}}
 		>
 			{props.children}
-			<Panel
-				open={showProfileManager}
-				header={profile && profile.id ? language.editProfile : `${language.createProfile}!`}
-				handleClose={() => setShowProfileManager(false)}
-				width={575}
-				closeHandlerDisabled
-			>
-				<ProfileManager
-					profile={profile && profile.id ? profile : null}
-					handleClose={() => setShowProfileManager(false)}
-					handleUpdate={null}
-				/>
-			</Panel>
 			{profilePending && <Loader message={`${language.waitingForProfile}...`} />}
 		</PermawebContext.Provider>
 	);

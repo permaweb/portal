@@ -14,8 +14,39 @@ export default defineConfig(({ mode }) => {
 	const root = path.resolve(__dirname, `src/apps/${app}`);
 
 	const config = {
-		editor: { port: 3000 },
-		viewer: { port: 4000 },
+		editor: {
+			port: 3000,
+			build: {
+				outDir: path.resolve(__dirname, `dist/${app}`),
+				emptyOutDir: true,
+				rollupOptions: {
+					input: path.resolve(root, 'index.html'),
+					plugins: [polyfillNode()],
+				}
+			}
+
+		},
+		viewer: {
+			port: 4000,
+			build: {
+				outDir: path.resolve(__dirname, `dist/${app}`),
+				emptyOutDir: true,
+				cssCodeSplit: false,
+				assetsInlineLimit: 10_000_000,
+				rollupOptions: {
+					input: path.resolve(root, 'index.tsx'),
+					plugins: [polyfillNode()],
+					output: {
+						inlineDynamicImports: true,
+						manualChunks: undefined,
+						entryFileNames: `bundle.js`,
+						chunkFileNames: `bundle.js`,
+						assetFileNames: `[name][extname]`,
+						format: 'es',
+					},
+				},
+			}
+		},
 	};
 
 	return {
@@ -58,14 +89,7 @@ export default defineConfig(({ mode }) => {
 		optimizeDeps: {
 			include: ['buffer', 'process', 'crypto', 'stream', 'util'],
 		},
-		build: {
-			outDir: path.resolve(__dirname, `dist/${app}`),
-			emptyOutDir: true,
-			rollupOptions: {
-				input: path.resolve(root, 'index.html'),
-				plugins: [polyfillNode()],
-			},
-		},
+		build: config[app].build,
 		server: {
 			open: false,
 			strictPort: true,

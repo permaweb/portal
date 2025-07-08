@@ -17,15 +17,7 @@ export default function ArticleToolbarPost(props: IProps) {
 		<S.Wrapper>
 			<S.Section>
 				<S.SectionHeader>
-					<p>{language.contribute}</p>
-				</S.SectionHeader>
-				<S.SectionBody>
-					<ArticleToolbarPostContribute />
-				</S.SectionBody>
-			</S.Section>
-			<S.Section>
-				<S.SectionHeader>
-					<p>{language.thumbnail}</p>
+					<p>{language.featuredImage}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
 					<ArticleToolbarPostThumbnail />
@@ -33,7 +25,7 @@ export default function ArticleToolbarPost(props: IProps) {
 			</S.Section>
 			<S.Section>
 				<S.SectionHeader>
-					<p>{language.summary}</p>
+					<p>{language.description}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
 					<ArticleToolbarPostDescription />
@@ -55,6 +47,14 @@ export default function ArticleToolbarPost(props: IProps) {
 					<Topics topics={props.topics} setTopics={props.setTopics} selectOnAdd skipAuthCheck />
 				</S.SectionBody>
 			</S.TopicsSection>
+			<S.ContributeSection>
+				<S.SectionHeader>
+					<p>{language.contribute}</p>
+				</S.SectionHeader>
+				<S.SectionBody>
+					<ArticleToolbarPostContribute />
+				</S.SectionBody>
+			</S.ContributeSection>
 		</S.Wrapper>
 	);
 }

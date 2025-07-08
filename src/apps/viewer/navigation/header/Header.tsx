@@ -8,7 +8,9 @@ import { Button } from 'components/atoms/Button';
 import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalCategoryType } from 'helpers/types';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, getPortalIdFromURL } from 'helpers/utils';
+import { useLanguageProvider } from 'providers/LanguageProvider';
+import { WalletConnect } from 'wallet/WalletConnect';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
@@ -16,10 +18,16 @@ import * as S from './styles';
 function Category(props: { category: PortalCategoryType }) {
 	const hasChildren = props.category.children?.length > 0;
 
+	function getRedirect(categoryId: string) {
+		const portalId = getPortalIdFromURL();
+		if (portalId) return `${URLS.portalBase(portalId)}${URLS.category(categoryId)}`;
+		return URLS.category(categoryId);
+	}
+
 	return (
 		<S.CategoryWrapper>
 			<S.CategoryLink>
-				<Link to={'#'}>
+				<Link to={getRedirect(props.category.id)}>
 					{props.category.name} {hasChildren && <ReactSVG src={ASSETS.arrow} />}
 				</Link>
 			</S.CategoryLink>
@@ -36,15 +44,23 @@ function Category(props: { category: PortalCategoryType }) {
 
 export default function Header() {
 	const portalProvider = usePortalProvider();
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
 
 	const [showOverflowCategories, setShowOverflowCategories] = React.useState<boolean>(false);
+
+	function getBaseRedirect() {
+		const portalId = getPortalIdFromURL();
+		if (portalId) return URLS.portalBase(portalId);
+		return URLS.base;
+	}
 
 	function getLogo() {
 		const logo = portalProvider.current?.logo;
 		if (logo && checkValidAddress(logo)) {
 			return <img src={getTxEndpoint(logo)} />;
 		}
-		return <ReactSVG src={ASSETS.portal} />;
+		return <h4>{portalProvider.current?.name ?? '-'}</h4>;
 	}
 
 	function getCategories() {
@@ -70,7 +86,7 @@ export default function Header() {
 							<CloseHandler active={true} disabled={false} callback={() => setShowOverflowCategories(false)}>
 								<Button
 									type={'alt3'}
-									label={'More'}
+									label={language.more}
 									handlePress={() => setShowOverflowCategories((prev) => !prev)}
 									icon={ASSETS.arrow}
 									height={30}
@@ -93,11 +109,21 @@ export default function Header() {
 	return (
 		<S.Wrapper>
 			<S.WrapperContent className={'max-view-wrapper'} height={85}>
+				<S.ContentStart>
+					{portalProvider.updating && (
+						<S.PortalUpdateWrapper>
+							<span>{`${language.updating}...`}</span>
+						</S.PortalUpdateWrapper>
+					)}
+				</S.ContentStart>
 				<S.LogoWrapper className={'fade-in'}>
-					<Link to={URLS.base}>{getLogo()}</Link>
+					<Link to={getBaseRedirect()}>{getLogo()}</Link>
 				</S.LogoWrapper>
+				<S.ContentEnd>
+					<WalletConnect app={'viewer'} />
+				</S.ContentEnd>
 			</S.WrapperContent>
-			{portalProvider.current?.categories && getCategories()}
+			{portalProvider.current?.categories?.length > 0 && getCategories()}
 		</S.Wrapper>
 	);
 }

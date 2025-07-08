@@ -56,38 +56,34 @@ export default function PostList(props: IProps) {
 							ids: ids,
 						});
 
-						if (gqlResponse?.length > 0) {
-							const updatedRequests = gqlResponse.map((element: GQLNodeResponseType) => {
-								return {
-									id: element.node.id,
-									name: getTagValue(element.node.tags, 'Bootloader-Name'),
-									creatorId: getTagValue(element.node.tags, 'Creator'),
-									dateCreated: (element.node.block?.timestamp * 1000).toString() ?? '-',
+						const updatedRequests = (gqlResponse ?? []).map((element: GQLNodeResponseType) => {
+							return {
+								id: element.node.id,
+								name: getTagValue(element.node.tags, 'Bootloader-Name'),
+								creatorId: getTagValue(element.node.tags, 'Creator'),
+								dateCreated: (element.node.block?.timestamp * 1000).toString() ?? '-',
+							};
+						});
+
+						setRequests(updatedRequests);
+
+						const returnedIds = (gqlResponse ?? []).map((element: GQLNodeResponseType) => element.node.id);
+						const missingIds = ids.filter((id) => !returnedIds.includes(id));
+
+						if (missingIds.length > 0) {
+							setLoading(true);
+							for (const id of missingIds) {
+								const asset = await permawebProvider.libs.getAtomicAsset(id);
+								const formattedAsset = {
+									id: asset.id,
+									name: asset.name,
+									creatorId: asset.creator,
+									dateCreated: asset.dateCreated,
 								};
-							});
 
-							setRequests(updatedRequests);
-
-							const returnedIds = gqlResponse.map((element: GQLNodeResponseType) => element.node.id);
-							const missingIds = ids.filter((id) => !returnedIds.includes(id));
-
-							if (missingIds.length > 0) {
-								setLoading(true);
-								for (const id of missingIds) {
-									const asset = await permawebProvider.libs.getAtomicAsset(id);
-									const formattedAsset = {
-										id: asset.id,
-										name: asset.name,
-										creatorId: asset.creator,
-										dateCreated: asset.dateCreated,
-									};
-
-									setRequests((prev) => [...prev, formattedAsset]);
-								}
-								setLoading(false);
+								setRequests((prev) => [...prev, formattedAsset]);
 							}
-						} else {
-							setRequests([]);
+							setLoading(false);
 						}
 					} catch (e: any) {
 						console.error(e);

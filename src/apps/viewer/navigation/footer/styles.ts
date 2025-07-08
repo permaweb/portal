@@ -23,14 +23,16 @@ export const Header = styled.div`
 `;
 
 export const LogoWrapper = styled.div`
+	max-height: 45px;
 	width: 250px;
 	max-width: 50%;
 
 	a {
 		height: 100%;
 		width: 100%;
-		display: block;
-		color: ${(props) => props.theme.colors.font.primary};
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
 
 		&:hover {
 			opacity: 0.75;
@@ -38,9 +40,20 @@ export const LogoWrapper = styled.div`
 	}
 
 	img {
-		height:100%;
+		height: 100%;
 		width: 100%;
 		object-fit: contain;
+		object-position: left;
+	}
+
+	h4 {
+		text-align: left;
+		font-size: ${(props) => props.theme.typography.size.xxLg};
+		color: ${(props) => props.theme.colors.font.primary};
+
+		&:hover {
+			color: ${(props) => props.theme.colors.font.alt1};
+		}
 	}
 
 	svg {
@@ -59,8 +72,8 @@ export const CategoriesWrapper = styled.div`
 	align-items: center;
 	justify-content: center;
 	flex-wrap: wrap;
-    gap: 15px 25px;
-    margin: 15px auto;
+	gap: 15px 25px;
+	margin: 15px auto;
 
 	a {
 		color: ${(props) => props.theme.colors.font.primary};
@@ -156,11 +169,10 @@ export const LinkWrapper = styled.div`
 export const FooterEndWrapper = styled.div`
 	width: 100%;
 	padding: 20px 0 0 0;
-	border-top: 1px solid ${(props) => props.theme.colors.border.primary};	
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
 export const NameWrapper = styled.div`
-
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};

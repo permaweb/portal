@@ -2,17 +2,16 @@ import React from 'react';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
+import { Button } from 'components/atoms/Button';
+import { FormField } from 'components/atoms/FormField';
 import { Notification } from 'components/atoms/Notification';
+import { Select } from 'components/atoms/Select';
 import { ASSETS } from 'helpers/config';
 import { NotificationType, SelectOptionType } from 'helpers/types';
 import { checkValidAddress, formatRoleLabel } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-
-import { Button } from '../../atoms/Button';
-import { FormField } from '../../atoms/FormField';
-import { Select } from '../../atoms/Select';
 
 import * as S from './styles';
 

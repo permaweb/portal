@@ -28,6 +28,8 @@ export const SectionBody = styled.div`
 	padding: 0 5px 0 10px;
 `;
 
-export const TopicsSection = styled(Section)`
+export const TopicsSection = styled(Section)``;
+
+export const ContributeSection = styled(Section)`
 	padding: 0 0 7.5px 0;
 `;

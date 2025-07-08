@@ -51,4 +51,14 @@ export const docsOrder = [
 			},
 		],
 	},
+	{
+		name: 'Users',
+		path: 'users',
+		children: [
+			{
+				name: 'User Management',
+				path: 'management',
+			},
+		],
+	}
 ];

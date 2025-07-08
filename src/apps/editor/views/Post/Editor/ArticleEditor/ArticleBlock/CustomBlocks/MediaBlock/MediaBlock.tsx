@@ -88,7 +88,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		or else show the upload cost first */
 	React.useEffect(() => {
 		(async function () {
-			if (mediaData?.file && !mediaUploaded && portalProvider.current?.id && arProvider.wallet) {
+			if (mediaData?.file && !mediaData.url && !mediaUploaded && portalProvider.current?.id && arProvider.wallet) {
 				const contentSize = (mediaData.file as any).size;
 
 				if (contentSize < UPLOAD.dispatchUploadSize) {

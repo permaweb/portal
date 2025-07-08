@@ -4,32 +4,33 @@ import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div``;
 
-export const Header = styled.div`
-	margin: 0 0 15px 0;
-	p {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		text-transform: uppercase;
-		line-height: 1;
-	}
-`;
-
 export const Body = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
-	margin: 10px 0 0 0;
+	gap: 20px;
+
+	> * {
+		&:not(:last-child) {
+			padding: 0 0 20px 0;
+			border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+		}
+	}
 `;
 
 export const Section = styled.div`
-	padding: 15px;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
 `;
 
 export const SectionHeader = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 2.5px;
 	p {
-		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
@@ -39,6 +40,15 @@ export const SectionHeader = styled.div`
 export const SectionBody = styled.div`
 	display: flex;
 	flex-direction: column;
+	gap: 25px;
+	margin: 10px 0 0 0;
+`;
+
+export const SectionActions = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
 	gap: 15px;
 	margin: 10px 0 0 0;
 `;
@@ -62,6 +72,13 @@ export const GridWrapper = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	gap: 10px 20px;
+`;
+
+export const AttributesWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
 `;
 
 export const ColorTooltip = styled.div`
@@ -129,6 +146,10 @@ export const ColorBody = styled.button<{ background: string; height?: number; wi
 	}
 	&:hover {
 		cursor: pointer;
+	}
+
+	&:disabled {
+		pointer-events: none;
 	}
 `;
 
@@ -234,6 +255,15 @@ export const SelectorPreview = styled.div<{ background: string }>`
 	border-bottom-left-radius: ${STYLING.dimensions.radius.primary};
 `;
 
+export const EndActions = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 20px;
+	margin: 40px 0 0 0;
+`;
+
 export const WrapperEmpty = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
@@ -245,3 +275,18 @@ export const WrapperEmpty = styled.div`
 `;
 
 export const LoadingWrapper = styled(WrapperEmpty)``;
+
+export const ModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 0 20px 20px 20px !important;
+`;
+
+export const ModalActionsWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 15px;
+`;

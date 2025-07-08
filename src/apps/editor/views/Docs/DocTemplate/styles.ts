@@ -4,6 +4,9 @@ import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
 	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 25px;
 
 	h1,
 	h2,
@@ -23,7 +26,7 @@ export const Wrapper = styled.div`
 	h4,
 	h5,
 	h6 {
-		margin: 50px 0 10px 0;
+
 	}
 
 	h2 {
@@ -45,7 +48,6 @@ export const Wrapper = styled.div`
 		font-size: clamp(16px, 1.95vw, 22px) !important;
 		color: ${(props) => props.theme.colors.font.alt1} !important;
 		border-bottom: 1px solid transparent;
-		margin: 35px 0 0 0;
 
 		a {
 			font-size: clamp(16px, 1.95vw, 22px) !important;
@@ -59,7 +61,8 @@ export const Wrapper = styled.div`
 
 	strong,
 	b {
-		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
+		color: ${(props) => props.theme.colors.font.primary} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 	}
 
 	p,
@@ -84,13 +87,18 @@ export const Wrapper = styled.div`
 		display: flex;
 		flex-direction: column;
 		gap: 7.5px;
-		margin: 7.5px 0 0 0;
+		margin: -17.5px 0 0 0;
 
 		li {
 			list-style-type: none;
 			padding: 0 0 0 20px;
 			margin: 0 0 0 10px;
 			position: relative;
+		}
+
+		ol,
+		ul {
+			margin: 7.5px 0 0 0;
 		}
 	}
 
@@ -126,9 +134,9 @@ export const Wrapper = styled.div`
 	}
 
 	code {
-		padding: 2.5px 7.5px !important;
+		padding: 2.5px 5.5px !important;
 		background: ${(props) => props.theme.colors.container.alt3.background} !important;
-		border-radius: ${STYLING.dimensions.radius.alt3} !important;
+		border-radius: ${STYLING.dimensions.radius.alt4} !important;
 		color: ${(props) => props.theme.colors.font.alt1} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;

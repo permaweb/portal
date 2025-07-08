@@ -1,10 +1,7 @@
 import styled from 'styled-components';
 
-import { STYLING } from 'helpers/config';
-
 export const Wrapper = styled.div`
-	/* width: 100%;
-	max-width: 1000px; */
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
@@ -18,18 +15,22 @@ export const Wrapper = styled.div`
 
 export const PostWrapper = styled.div`
 	width: 100%;
-	max-width: 1065px;
 	display: flex;
 	gap: 40px;
+	justify-content: space-between;
 	padding: 0 0 20px 0;
 `;
 
-export const PostInfoWrapper = styled.div`
+export const PostInfoWrapper = styled.div<{ hasImage: boolean }>`
 	height: 100%;
-	max-width: 300px;
+	width: ${(props) => (props.hasImage ? '300px' : '100%')};
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
+
+	a {
+		width: fit-content;
+	}
 
 	h4 {
 		font-size: ${(props) => props.theme.typography.size.xxLg};
@@ -44,25 +45,24 @@ export const PostInfoWrapper = styled.div`
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 		line-height: 1.5;
-	
 	}
 `;
 
 export const PostImageWrapper = styled.div`
-	height: 450px;
-    width: calc(100% - 340px);
+	width: calc(100% - 360px);
+	max-width: 700px;
 
-	a {
-		height: 100%;
-		width: 100%;
-		display: block;
-	}
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
 
 	img {
-		height: 100%;
-		width: 100%;
-		background: red;
+		width: auto;
+		height: auto;
+		max-width: 100%;
+		max-height: 100%;
+
 		object-fit: contain;
-		border-radius: ${STYLING.dimensions.radius.alt1};
+		object-position: center center;
 	}
 `;

@@ -124,10 +124,12 @@ export default function PortalManager(props: IProps) {
 						arProvider.wallet
 					);
 
-					const themeUpdateId = await permawebProvider.libs.addToZone(
+					const themeUpdateId = await permawebProvider.libs.updateZone(
 						{
-							path: 'Themes',
-							data: { ...permawebProvider.libs.mapToProcessCase(DEFAULT_THEME) },
+							Themes: [
+								permawebProvider.libs.mapToProcessCase(DEFAULT_THEME.light),
+								permawebProvider.libs.mapToProcessCase(DEFAULT_THEME.dark),
+							],
 						},
 						portalId,
 						arProvider.wallet
