@@ -33,11 +33,16 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [_errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
-		const portalId = getPortalIdFromURL();
-		if (portalId) setCurrentId(portalId);
-		else {
-			// TODO: Get ArNS Resolved ID from Domain
-		}
+		(async function () {
+			const portalId = getPortalIdFromURL();
+			if (portalId) setCurrentId(portalId);
+			else {
+				try {
+					const resolvedId = (await fetch(window.location.host)).headers.get('X-Arns-Resolved-Id');
+					setCurrentId(resolvedId);
+				} catch (e: any) {}
+			}
+		})();
 	}, [location.pathname]);
 
 	React.useEffect(() => {

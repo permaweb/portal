@@ -1,4 +1,9 @@
-export type PortalHeaderType = { id: string; name: string; logo: string | null; roles?: PortalRolesType[] };
+export type PortalHeaderType = {
+	id: string;
+	name: string;
+	logo: string | null;
+	roles?: PortalUserType[]
+};
 
 export type PortalDetailType = {
 	id: string;
@@ -10,7 +15,7 @@ export type PortalDetailType = {
 	categories?: PortalCategoryType[];
 	topics?: PortalTopicType[];
 	links?: PortalLinkType[];
-	users?: PortalRolesType[];
+	users?: PortalUserType[];
 	roleOptions?: { [key: string]: PortalUserRoleType };
 	permissions?: PortalPermissionsType;
 	domains?: string[];
@@ -19,7 +24,6 @@ export type PortalDetailType = {
 	themes?: PortalThemeType[];
 };
 
-/* Zone Indexed Asset */
 export type PortalAssetType = {
 	id: string;
 	name: string;
@@ -67,13 +71,6 @@ export type PortalAssetPostType = {
 };
 
 export type PortalUserType = {
-	owner?: string;
-	username?: string;
-	avatar?: string;
-	displayName?: string;
-};
-
-export type PortalRolesType = {
 	address: string;
 	type?: 'wallet' | 'process';
 	roles?: PortalUserRoleType[];

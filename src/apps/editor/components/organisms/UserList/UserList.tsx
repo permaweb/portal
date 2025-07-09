@@ -6,7 +6,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { URLS } from 'helpers/config';
-import { PortalRolesType, ViewLayoutType } from 'helpers/types';
+import { PortalUserType, ViewLayoutType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -60,7 +60,7 @@ export default function UserList(props: { type: ViewLayoutType }) {
 			<S.UsersWrapper type={props.type}>
 				{portalProvider.current.users
 					?.filter((user) => user.type === 'process')
-					.map((user: PortalRolesType) => {
+					.map((user: PortalUserType) => {
 						return (
 							<S.UserWrapper key={user.address}>
 								<User user={user} />

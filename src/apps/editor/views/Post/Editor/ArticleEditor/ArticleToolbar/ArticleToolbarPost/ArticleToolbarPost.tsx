@@ -1,15 +1,20 @@
 import { Categories } from 'editor/components/molecules/Categories';
 import { Topics } from 'editor/components/molecules/Topics';
 
+import { PortalCategoryType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import { ArticleToolbarPostContribute } from './ArticleToolbarPostContribute';
 import { ArticleToolbarPostDescription } from './ArticleToolbarPostDescription';
 import { ArticleToolbarPostThumbnail } from './ArticleToolbarPostThumbnail';
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function ArticleToolbarPost(props: IProps) {
+export default function ArticleToolbarPost(props: {
+	categories: PortalCategoryType[];
+	setCategories: (categories: PortalCategoryType[]) => void;
+	topics: string[];
+	setTopics: (topics: string[]) => void;
+}) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
