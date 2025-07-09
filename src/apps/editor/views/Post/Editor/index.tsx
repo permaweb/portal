@@ -15,7 +15,7 @@ import {
 	NotificationType,
 	PortalAssetRequestType,
 	PortalHeaderType,
-	PortalRolesType,
+	PortalUserType,
 	RequestUpdateType,
 } from 'helpers/types';
 import { filterDuplicates } from 'helpers/utils';
@@ -296,7 +296,7 @@ export default function Editor() {
 
 							if (externalPortal) {
 								const hasExternalAdminAccess = externalPortal.roles
-									?.find((user: PortalRolesType) => user.address === permawebProvider.profile.id)
+									?.find((user: PortalUserType) => user.address === permawebProvider.profile.id)
 									?.roles?.includes('Admin');
 
 								let externalIndexAction = 'Add-Index-Request';
@@ -378,15 +378,15 @@ export default function Editor() {
 					authUsers.push(externalPortal.id);
 
 					const hasExternalAdminAccess = externalPortal.roles
-						?.find((user: PortalRolesType) => user.address === permawebProvider.profile.id)
+						?.find((user: PortalUserType) => user.address === permawebProvider.profile.id)
 						?.roles?.includes('Admin');
 
 					/* This user is not an admin in the external portal */
 					/* Add the external admins and moderators to the post */
 					if (!hasExternalAdminAccess) {
 						const externalAuthUsers = externalPortal.roles
-							?.filter((user: PortalRolesType) => user.roles.includes('Admin') || user.roles.includes('Moderator'))
-							.map((user: PortalRolesType) => user.address);
+							?.filter((user: PortalUserType) => user.roles.includes('Admin') || user.roles.includes('Moderator'))
+							.map((user: PortalUserType) => user.address);
 
 						authUsers.push(...(externalAuthUsers ?? []));
 					}

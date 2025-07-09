@@ -83,10 +83,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			setMediaData(props.data);
 		}
 	}, [props.data]);
-
-	// TODO: Permissions
-	/* If media is selected and it is a valid dispatch size then upload it immediately,
-		or else show the upload cost first */
+	
 	React.useEffect(() => {
 		(async function () {
 			if (mediaData?.file && !mediaData.url && !mediaUploaded && portalProvider.current?.id && arProvider.wallet) {
@@ -134,20 +131,22 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		try {
 			const tx = await permawebProvider.libs.resolveTransaction(mediaData.file);
 
-			const mediaUpdateId = await permawebProvider.libs.addToZone(
-				{
-					path: 'Uploads',
-					data: permawebProvider.libs.mapToProcessCase({
-						tx: tx,
-						type: props.type,
-						dateUploaded: Date.now().toString(),
-					}),
-				},
-				portalProvider.current.id,
-				arProvider.wallet
-			);
+			if (portalProvider.permissions?.updatePortalMeta) {
+				const mediaUpdateId = await permawebProvider.libs.addToZone(
+					{
+						path: 'Uploads',
+						data: permawebProvider.libs.mapToProcessCase({
+							tx: tx,
+							type: props.type,
+							dateUploaded: Date.now().toString(),
+						}),
+					},
+					portalProvider.current.id,
+					arProvider.wallet
+				);
 
-			console.log(`Media update: ${mediaUpdateId}`);
+				console.log(`Media update: ${mediaUpdateId}`);
+			}
 
 			setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(tx) }));
 			setMediaUploaded(true);

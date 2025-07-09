@@ -13,16 +13,26 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
 import { Tabs } from 'components/atoms/Tabs';
 import { ARTICLE_BLOCKS, ASSETS, DOM, STYLING } from 'helpers/config';
-import { ArticleBlockEnum, PortalAssetRequestType, PortalCategoryType, PortalRolesType } from 'helpers/types';
+import {
+	ArticleBlockEnum,
+	PortalAssetRequestType,
+	PortalCategoryType,
+	PortalUserType,
+	RequestUpdateType,
+} from 'helpers/types';
 import { checkWindowCutoff, hideDocumentBody, showDocumentBody } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import { ArticleToolbarPost } from './ArticleToolbarPost';
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function ArticleToolbar(props: IProps) {
+export default function ArticleToolbar(props: {
+	addBlock: (type: ArticleBlockEnum) => void;
+	handleInitAddBlock: (e: any) => void;
+	handleSubmit: () => void;
+	handleRequestUpdate: (updateType: RequestUpdateType) => void;
+}) {
 	const dispatch = useDispatch();
 	const { assetId } = useParams<{ assetId?: string }>();
 
@@ -380,19 +390,18 @@ export default function ArticleToolbar(props: IProps) {
 
 	/* If a contributor visits a post that they did not create, unauthorize updates */
 	const currentUser = portalProvider.current?.users?.find(
-		(user: PortalRolesType) => user.address === permawebProvider.profile?.id
+		(user: PortalUserType) => user.address === permawebProvider.profile?.id
 	);
 	const submitUnauthorized =
 		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions.postAutoIndex;
+	const isCurrentRequest =
+		!!assetId && portalProvider.current?.requests?.some((request: PortalAssetRequestType) => request.id === assetId);
+
+	const primaryDisabled = submitUnauthorized || currentPost.editor.loading.active || currentPost.editor.submitDisabled;
+	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
+	const statusDisabled = requestUnauthorized || submitUnauthorized || currentPost.editor.loading.active;
 
 	function getSubmit() {
-		const isCurrentRequest =
-			!!assetId && portalProvider.current?.requests?.some((request: PortalAssetRequestType) => request.id === assetId);
-
-		const primaryDisabled =
-			submitUnauthorized || currentPost.editor.loading.active || currentPost.editor.submitDisabled;
-		const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
-
 		if (isCurrentRequest) {
 			return (
 				<>
@@ -483,22 +492,6 @@ export default function ArticleToolbar(props: IProps) {
 					/>
 				</S.TitleWrapper>
 				<S.EndActions>
-					<S.StatusAction status={currentPost.data.status}>
-						<Button
-							type={'primary'}
-							label={currentPost.data?.status?.toUpperCase() ?? '-'}
-							handlePress={() =>
-								handleCurrentPostUpdate({
-									field: 'status',
-									value: currentPost.data.status === 'draft' ? 'published' : 'draft',
-								})
-							}
-							active={false}
-							disabled={submitUnauthorized || currentPost.editor.loading.active}
-							tooltip={`Mark as ${currentPost.data.status === 'draft' ? 'published' : 'draft'}`}
-							noFocus
-						/>
-					</S.StatusAction>
 					<Button
 						type={'primary'}
 						label={language.toolkit}
@@ -523,6 +516,22 @@ export default function ArticleToolbar(props: IProps) {
 						tooltip={'CTRL + L'}
 						noFocus
 					/>
+					<S.StatusAction status={currentPost.data.status}>
+						<Button
+							type={'primary'}
+							label={currentPost.data?.status?.toUpperCase() ?? '-'}
+							handlePress={() =>
+								handleCurrentPostUpdate({
+									field: 'status',
+									value: currentPost.data.status === 'draft' ? 'published' : 'draft',
+								})
+							}
+							active={false}
+							disabled={statusDisabled}
+							tooltip={statusDisabled ? null : `Mark as ${currentPost.data.status === 'draft' ? 'published' : 'draft'}`}
+							noFocus
+						/>
+					</S.StatusAction>
 					<S.SubmitWrapper>{getSubmit()}</S.SubmitWrapper>
 				</S.EndActions>
 			</S.Wrapper>

@@ -86,8 +86,8 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 		width: 100%;
 	`}
 	position: relative;
-	background: ${(props) => props.theme.colors.container.primary.background};
-	border: ${(props) => (props.hasMedia ? `none` : `1px dashed ${props.theme.colors.border.primary}`)};
+	background: ${(props) => props.hasMedia ? 'transparent' : props.disabled ? props.theme.colors.button.primary.disabled.background : props.theme.colors.container.primary.background};
+	border: ${(props) => (props.hasMedia ? `none` : props.disabled ? `1px dashed ${props.theme.colors.button.primary.disabled.border}` : `1px dashed ${props.theme.colors.border.primary}`)};
 	border-radius: ${STYLING.dimensions.radius.alt2};
 	z-index: 1;
 	overflow: hidden;
@@ -95,6 +95,7 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	pointer-events: ${(props) => props.disabled ? 'none' : 'all'};
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) =>
@@ -114,23 +115,12 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 		object-fit: contain;
 	}
 	&:hover {
-		border: 1px dashed ${(props) => props.theme.colors.border.alt2};
-		background: ${(props) => props.theme.colors.container.primary.active};
-		cursor: pointer;
+		border: 1px dashed ${(props) => props.disabled ? props.theme.colors.button.primary.disabled.border : props.theme.colors.border.alt4};
+		background: ${(props) => props.hasMedia ? 'transparent' : props.disabled ? props.theme.colors.button.primary.disabled.background : props.theme.colors.container.primary.active};
+		cursor: ${(props) => props.disabled ? 'default' : 'pointer'};
 	}
 	&:focus {
 		opacity: 1;
-	}
-	&:disabled {
-		background: ${(props) => props.theme.colors.button.primary.disabled.background};
-		border: 1px dashed ${(props) => props.theme.colors.button.primary.disabled.border};
-		span {
-			color: ${(props) => props.theme.colors.button.primary.disabled.color};
-		}
-		svg {
-			fill: ${(props) => props.theme.colors.button.primary.disabled.color};
-			color: ${(props) => props.theme.colors.button.primary.disabled.color};
-		}
 	}
 	${(props) =>
 		props.hasMedia && !props.disabled
@@ -145,17 +135,6 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
             left: 0;
             right: 0;
             bottom: 0;
-			${
-				props.isIcon
-					? `
-				border: 1px solid ${props.theme.colors.border.alt1};
-				border-radius: ${STYLING.dimensions.radius.alt2};
-			`
-					: `
-				background-color: ${props.theme.colors.overlay.alt1};
-				border-radius: ${STYLING.dimensions.radius.alt3};
-			`
-			}
             opacity: 0;
             transition: all 100ms;
         }
@@ -169,7 +148,7 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
             cursor: pointer;
             border: none;
 			${RemoveWrapper} {
-				display: block
+				display: block;
 			}
         }
     `

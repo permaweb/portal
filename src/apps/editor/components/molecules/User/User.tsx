@@ -7,13 +7,13 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Panel } from 'components/atoms/Panel';
 import { UserManager } from 'components/organisms/UserManager';
 import { ASSETS } from 'helpers/config';
-import { PortalRolesType } from 'helpers/types';
+import { PortalUserType } from 'helpers/types';
 import { formatAddress, formatRoleLabel } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-export default function User(props: { user: PortalRolesType }) {
+export default function User(props: { user: PortalUserType }) {
 	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();

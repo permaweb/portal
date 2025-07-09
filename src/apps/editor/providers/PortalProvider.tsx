@@ -12,7 +12,7 @@ import {
 	PortalDetailType,
 	PortalHeaderType,
 	PortalPermissionsType,
-	PortalRolesType,
+	PortalUserType,
 	RefreshFieldType,
 } from 'helpers/types';
 import { areAssetsEqual, cachePortal, checkValidAddress, getCachedPortal, getPortalAssets } from 'helpers/utils';
@@ -41,7 +41,7 @@ const DEFAULT_CONTEXT = {
 	showPortalManager: false,
 	setShowPortalManager(_toggle: boolean) {},
 	refreshCurrentPortal() {},
-	fetchPortalUserProfile(_id: PortalRolesType) {},
+	fetchPortalUserProfile(_id: PortalUserType) {},
 	usersByPortalId: {},
 	updating: false,
 };
@@ -226,7 +226,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	}, [refreshCurrentTrigger]);
 
 	function getUserPermissions(address: string, portal: PortalDetailType) {
-		const user = portal.users.find((user: PortalRolesType) => user.address === address);
+		const user = portal.users.find((user: PortalUserType) => user.address === address);
 
 		if (user?.roles) {
 			const hasPermission = (permissonKeys: string | string[]) => {
@@ -274,7 +274,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		setPermissions(updatedPermissions);
 	}
 
-	async function fetchPortalUserProfile(userRoleEntry: PortalRolesType) {
+	async function fetchPortalUserProfile(userRoleEntry: PortalUserType) {
 		try {
 			let profile: any = null;
 			if (userRoleEntry.address === permawebProvider.profile?.id) {
@@ -312,8 +312,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			try {
 				const portalData = await permawebProvider.libs.getZone(currentId);
 
-				// TODO - Remove roles from zone global sync state, fetch from roles key
-				const users: PortalRolesType[] = [];
+				// TODO: Remove roles from zone global sync state, fetch from roles key
+				const users: PortalUserType[] = [];
 				if (portalData?.roles) {
 					for (const entry of Object.keys(portalData.roles)) {
 						users.push({
@@ -351,7 +351,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					users: users || [],
 					roleOptions: portalData.roleOptions ?? {},
 					permissions: portalData.permissions ?? {},
-					domains: [], // TODO
+					domains: [], // TODO: Domains
 				};
 
 				return portal;
@@ -381,7 +381,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				showPortalManager,
 				setShowPortalManager: handleShowPortalManager,
 				refreshCurrentPortal: (field?: RefreshFieldType) => refreshCurrentPortal(field),
-				fetchPortalUserProfile: (userRole: PortalRolesType) => fetchPortalUserProfile(userRole),
+				fetchPortalUserProfile: (userRole: PortalUserType) => fetchPortalUserProfile(userRole),
 				usersByPortalId: usersByPortalId,
 				updating,
 			}}

@@ -11,14 +11,20 @@ import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { Modal } from 'components/atoms/Modal';
 import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
+import { ArticleBlockType } from 'helpers/types';
 import { validateUrl } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import { MediaBlock } from './CustomBlocks/MediaBlock';
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function ArticleBlock(props: IProps) {
+export default function ArticleBlock(props: {
+	index: number;
+	block: ArticleBlockType;
+	onChangeBlock: (id: string, content: any, data?: any) => void;
+	onDeleteBlock: (id: string) => void;
+	onFocus: () => void;
+}) {
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
 
 	const languageProvider = useLanguageProvider();
