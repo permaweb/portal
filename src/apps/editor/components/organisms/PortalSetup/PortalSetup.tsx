@@ -106,7 +106,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 	function getMediaAction() {
 		return (
 			<S.MediaBodyWrapper>
-				<MediaLibrary type={'all'} />
+				<MediaLibrary type={'all'} selectDisabled={!portalProvider.permissions?.updatePortalMeta} />
 			</S.MediaBodyWrapper>
 		);
 	}

@@ -22,6 +22,7 @@ export default function MediaLibrary(props: {
 	type: PortalUploadOptionType | 'all';
 	callback?: (upload: PortalUploadType) => void;
 	handleClose?: () => void;
+	selectDisabled?: boolean
 }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -104,12 +105,9 @@ export default function MediaLibrary(props: {
 			if (!unauthorized && mediaData && portalProvider.current?.id && arProvider.wallet) {
 				const contentSize = mediaData.size;
 
-				console.log(mediaData);
-
 				if (contentSize < UPLOAD.dispatchUploadSize) {
 					await handleUpload();
 				} else {
-					console.log('Turbo');
 					try {
 						setShowUploadConfirmation(true);
 
@@ -328,7 +326,7 @@ export default function MediaLibrary(props: {
 						<S.UploadWrapper
 							key={upload.tx}
 							active={active}
-							disabled={unauthorized}
+							disabled={props.selectDisabled}
 							onClick={() => setSelectedUpload(active ? null : upload)}
 						>
 							{getUpload(upload)}

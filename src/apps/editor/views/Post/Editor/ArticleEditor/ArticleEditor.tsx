@@ -9,7 +9,7 @@ import { currentPostClear, currentPostUpdate } from 'editor/store/post';
 
 import { Loader } from 'components/atoms/Loader';
 import { URLS } from 'helpers/config';
-import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
+import { ArticleBlockEnum, ArticleBlockType, RequestUpdateType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -17,9 +17,11 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { ArticleBlock } from './ArticleBlock';
 import { ArticleToolbar } from './ArticleToolbar';
 import * as S from './styles';
-import { IProps } from './types';
 
-export default function ArticleEditor(props: IProps) {
+export default function ArticleEditor(props: {
+	handleSubmit: () => void;
+	handleRequestUpdate: (updateType: RequestUpdateType) => void;
+}) {
 	const navigate = useNavigate();
 	const { assetId } = useParams<{ assetId?: string }>();
 

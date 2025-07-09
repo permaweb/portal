@@ -12,6 +12,7 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
+// TODO: Profiles
 export default function Post() {
 	const { postId } = useParams<{ postId?: string }>();
 

@@ -149,7 +149,7 @@ export default function Media(props: {
 		if (media) {
 			return (
 				<>
-					<S.RemoveWrapper>
+					<S.RemoveWrapper className={'fade-in'}>
 						<IconButton
 							type={'alt1'}
 							src={ASSETS.delete}
