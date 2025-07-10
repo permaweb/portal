@@ -8,10 +8,11 @@ import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
 import { Tabs } from 'components/atoms/Tabs';
-import { ASSETS, UPLOAD } from 'helpers/config';
-import { getTurboCostWincEndpoint, getTxEndpoint } from 'helpers/endpoints';
-import { MediaConfigType, NotificationType, PortalUploadOptionType, PortalUploadType } from 'helpers/types';
-import { getARAmountFromWinc } from 'helpers/utils';
+import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
+import { ASSETS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
+import { MediaConfigType, PortalUploadOptionType, PortalUploadType } from 'helpers/types';
+import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -22,13 +23,14 @@ export default function MediaLibrary(props: {
 	type: PortalUploadOptionType | 'all';
 	callback?: (upload: PortalUploadType) => void;
 	handleClose?: () => void;
-	selectDisabled?: boolean
+	selectDisabled?: boolean;
 }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	const { uploadCost, showUploadConfirmation, uploadResponse, setUploadResponse, calculateUploadCost, clearUploadState } = useUploadCost();
 
 	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
 		image: {
@@ -64,11 +66,8 @@ export default function MediaLibrary(props: {
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
 
 	const [mediaData, setMediaData] = React.useState<File | null>(null);
-	const [showUploadConfirmation, setShowUploadConfirmation] = React.useState<boolean>(false);
-	const [uploadCost, setUploadCost] = React.useState<number | null>(null);
 	const [mediaLoading, setMediaLoading] = React.useState<boolean>(false);
 	const [mediaMessage, setMediaMessage] = React.useState<string | null>(null);
-	const [mediaResponse, setMediaResponse] = React.useState<NotificationType | null>(null);
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
@@ -103,25 +102,10 @@ export default function MediaLibrary(props: {
 	React.useEffect(() => {
 		(async function () {
 			if (!unauthorized && mediaData && portalProvider.current?.id && arProvider.wallet) {
-				const contentSize = mediaData.size;
+				const result = await calculateUploadCost(mediaData);
 
-				if (contentSize < UPLOAD.dispatchUploadSize) {
+				if (result && !result.requiresConfirmation) {
 					await handleUpload();
-				} else {
-					try {
-						setShowUploadConfirmation(true);
-
-						const uploadPriceResponse = await fetch(getTurboCostWincEndpoint(contentSize));
-						const uploadInWinc = Number((await uploadPriceResponse.json()).winc);
-
-						setUploadCost(uploadInWinc);
-
-						if (uploadInWinc > arProvider.turboBalance) {
-							setMediaResponse({ status: 'warning', message: 'Insufficient balance for upload' });
-						}
-					} catch (e: any) {
-						setMediaResponse({ status: 'warning', message: e.message ?? 'Error uploading media' });
-					}
 				}
 			}
 		})();
@@ -130,7 +114,7 @@ export default function MediaLibrary(props: {
 		portalProvider.current?.id,
 		portalProvider.permissions?.updatePortalMeta,
 		arProvider.wallet,
-		arProvider.turboBalance,
+		calculateUploadCost,
 	]);
 
 	async function handleUpload() {
@@ -165,7 +149,7 @@ export default function MediaLibrary(props: {
 
 			console.log(`Media update: ${mediaUpdateId}`);
 
-			setMediaResponse({ status: 'success', message: `${language.mediaUploaded}!` });
+			setUploadResponse({ status: 'success', message: `${language.mediaUploaded}!` });
 			handleClear(null);
 
 			portalProvider.refreshCurrentPortal();
@@ -240,9 +224,9 @@ export default function MediaLibrary(props: {
 
 				console.log(`Media update: ${mediaUpdateId}`);
 
-				setMediaResponse({ status: 'success', message: `${language.mediaUpdated}!` });
+				setUploadResponse({ status: 'success', message: `${language.mediaUpdated}!` });
 			} catch (e: any) {
-				setMediaResponse({ status: 'warning', message: e.message ?? 'Error updating media' });
+				setUploadResponse({ status: 'warning', message: e.message ?? 'Error updating media' });
 			}
 			setMediaLoading(false);
 			setMediaMessage(null);
@@ -255,10 +239,9 @@ export default function MediaLibrary(props: {
 	};
 
 	function handleClear(message: string | null) {
-		if (message) setMediaResponse({ status: 'warning', message: message });
+		if (message) setUploadResponse({ status: 'warning', message: message });
 		setMediaData(null);
-		setUploadCost(null);
-		setShowUploadConfirmation(false);
+		clearUploadState();
 		if (inputRef.current) {
 			inputRef.current.value = '';
 		}
@@ -426,66 +409,22 @@ export default function MediaLibrary(props: {
 				<Modal
 					header={`${language.upload} ${mediaData.name}`}
 					handleClose={() => handleClear(language.uploadCancelled)}
+					className={'modal-wrapper'}
 				>
-					<S.InputWrapper>
-						<S.InputDescription>
-							<span>{language.mediaUploadCostInfo}</span>
-						</S.InputDescription>
-						<S.InputActions>
-							<S.InputActionsInfo>
-								<S.InputActionsInfoLine>
-									<p>
-										<span>{`${language.yourUploadBalance}:`}</span>
-										&nbsp;
-										{arProvider.turboBalance
-											? `${getARAmountFromWinc(arProvider.turboBalance)} ${language.credits}`
-											: '-'}
-									</p>
-								</S.InputActionsInfoLine>
-								<S.InputActionsInfoLine>
-									<p>
-										<span>{`${language.costToUpload}:`}</span>
-										&nbsp;
-										{uploadCost ? `${getARAmountFromWinc(uploadCost)} ${language.credits}` : '-'}
-									</p>
-								</S.InputActionsInfoLine>
-								<S.InputActionsInfoDivider />
-								<S.InputActionsInfoLine>
-									<p>
-										<span>{`${language.remainingAfterUpload}:`}</span>
-										&nbsp;
-										{arProvider.turboBalance && uploadCost
-											? `${getARAmountFromWinc(arProvider.turboBalance - uploadCost)} ${language.credits}`
-											: '-'}
-									</p>
-								</S.InputActionsInfoLine>
-							</S.InputActionsInfo>
-							<S.ModalActionsWrapper>
-								<Button
-									type={'primary'}
-									label={language.cancel}
-									handlePress={() => handleClear(language.uploadCancelled)}
-									disabled={mediaLoading}
-									width={140}
-								/>
-								<Button
-									type={'alt1'}
-									label={language.upload}
-									handlePress={handleUpload}
-									disabled={unauthorized || mediaLoading}
-									width={140}
-								/>
-							</S.ModalActionsWrapper>
-						</S.InputActions>
-					</S.InputWrapper>
+					<TurboUploadConfirmation
+						uploadCost={uploadCost}
+						uploadDisabled={unauthorized || mediaLoading}
+						handleUpload={handleUpload}
+						handleCancel={() => handleClear(language.uploadCancelled)}
+					/>
 				</Modal>
 			)}
 			{mediaLoading && <Loader message={mediaMessage ?? `${language.loading}...`} />}
-			{mediaResponse && (
+			{uploadResponse && (
 				<Notification
-					type={mediaResponse.status}
-					message={mediaResponse.message}
-					callback={() => setMediaResponse(null)}
+					type={uploadResponse.status}
+					message={uploadResponse.message}
+					callback={() => setUploadResponse(null)}
 				/>
 			)}
 		</>

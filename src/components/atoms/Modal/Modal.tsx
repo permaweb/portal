@@ -12,16 +12,10 @@ export default function Modal(props: {
 	handleClose: () => void | null;
 	children: React.ReactNode;
 	allowOverflow?: boolean;
+	className?: string;
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-
-	React.useEffect(() => {
-		hideDocumentBody();
-		return () => {
-			showDocumentBody();
-		};
-	}, []);
 
 	const escFunction = React.useCallback(
 		(e: any) => {
@@ -33,6 +27,13 @@ export default function Modal(props: {
 	);
 
 	React.useEffect(() => {
+		hideDocumentBody();
+		return () => {
+			showDocumentBody();
+		};
+	}, []);
+
+	React.useEffect(() => {
 		document.addEventListener('keydown', escFunction, false);
 
 		return () => {
@@ -40,9 +41,16 @@ export default function Modal(props: {
 		};
 	}, [escFunction]);
 
-	function getBody() {
-		return (
-			<>
+	function getBodyClassName() {
+		let className = '';
+		if (props.className) className += props.className;
+		if (!props.allowOverflow) className += ' scroll-wrapper';
+		return className;
+	}
+
+	return (
+		<Portal node={DOM.overlay}>
+			<S.Wrapper noHeader={!props.header} top={window ? (window as any).pageYOffset : 0}>
 				<S.Container noHeader={!props.header}>
 					{props.header && (
 						<S.Header>
@@ -67,16 +75,8 @@ export default function Modal(props: {
 							)}
 						</S.Header>
 					)}
-					<S.Body className={props.allowOverflow ? '' : 'scroll-wrapper'}>{props.children}</S.Body>
+					<S.Body className={getBodyClassName()}>{props.children}</S.Body>
 				</S.Container>
-			</>
-		);
-	}
-
-	return (
-		<Portal node={DOM.overlay}>
-			<S.Wrapper noHeader={!props.header} top={window ? (window as any).pageYOffset : 0}>
-				{getBody()}
 			</S.Wrapper>
 		</Portal>
 	);

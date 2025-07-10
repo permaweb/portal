@@ -1,17 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 
+import { Media } from 'editor/components/molecules/Media';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
-import { ASSETS, DEFAULT_THEME, PORTAL_DATA, PORTAL_ROLES, URLS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
-import { NotificationType, PortalHeaderType } from 'helpers/types';
-import { checkValidAddress, getBootTag } from 'helpers/utils';
+import { DEFAULT_THEME, PORTAL_DATA, PORTAL_ROLES, URLS } from 'helpers/config';
+import { NotificationType, PortalDetailType, PortalHeaderType } from 'helpers/types';
+import { getBootTag } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -19,10 +18,8 @@ import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
 
-const ALLOWED_LOGO_TYPES = 'image/png, image/jpeg, image/gif';
-
 export default function PortalManager(props: {
-	portal: PortalHeaderType | null;
+	portal: PortalDetailType | null;
 	handleClose: () => void;
 	handleUpdate: () => void;
 }) {
@@ -34,10 +31,9 @@ export default function PortalManager(props: {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const logoInputRef = React.useRef<any>(null);
-
 	const [name, setName] = React.useState<string>('');
-	const [logo, setLogo] = React.useState<any>(null);
+	const [logoId, setLogoId] = React.useState<string | null>(null);
+	const [iconId, setIconId] = React.useState<string | null>(null);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [portalResponse, setPortalResponse] = React.useState<NotificationType | null>(null);
@@ -45,15 +41,17 @@ export default function PortalManager(props: {
 	React.useEffect(() => {
 		if (props.portal) {
 			setName(props.portal.name ?? '');
-			setLogo(props.portal.logo && checkValidAddress(props.portal.logo) ? props.portal.logo : null);
+			setLogoId(props.portal.logo || null);
+			setIconId(props.portal.icon || null);
 		} else {
 			setName('');
-			setLogo(null);
+			setLogoId(null);
+			setIconId(null);
 		}
 	}, [props.portal]);
 
 	async function handleSubmit() {
-		if (arProvider.wallet && permawebProvider.profile && permawebProvider.profile.id) {
+		if (arProvider.wallet && permawebProvider.profile?.id) {
 			setLoading(true);
 
 			try {
@@ -64,18 +62,26 @@ export default function PortalManager(props: {
 					Name: name,
 				};
 
-				if (logo) {
+				if (logoId) {
 					try {
-						data.Logo = await permawebProvider.libs.resolveTransaction(logo);
+						data.Logo = await permawebProvider.libs.resolveTransaction(logoId);
 					} catch (e: any) {
 						console.error(`Failed to resolve logo: ${e.message}`);
+					}
+				}
+
+				if (iconId) {
+					try {
+						data.Icon = await permawebProvider.libs.resolveTransaction(iconId);
+					} catch (e: any) {
+						console.error(`Failed to resolve icon: ${e.message}`);
 					}
 				}
 
 				if (props.portal && props.portal.id) {
 					const portalsUpdateData = portalProvider.portals
 						.filter((portal: PortalHeaderType) => portal.id !== props.portal.id)
-						.map((portal: PortalHeaderType) => ({ Id: portal.id, Name: portal.name, Logo: portal.logo }));
+						.map((portal: PortalHeaderType) => ({ Id: portal.id, Name: portal.name, Logo: portal.logo, Icon: portal.icon }));
 					portalsUpdateData.push({ Id: props.portal.id, ...data });
 
 					const portalUpdateId = await permawebProvider.libs.updateZone(data, props.portal.id, arProvider.wallet);
@@ -94,6 +100,7 @@ export default function PortalManager(props: {
 				} else {
 					const tags = [getBootTag('Name', data.Name), { name: 'Content-Type', value: 'text/html' }];
 					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
+					if (data.Icon) tags.push(getBootTag('Icon', data.Icon));
 
 					const portalId = await permawebProvider.libs.createZone(
 						{
@@ -153,7 +160,8 @@ export default function PortalManager(props: {
 				if (props.handleClose) props.handleClose();
 
 				setName('');
-				setLogo(null);
+				setLogoId(null);
+				setIconId(null);
 
 				setPortalResponse({
 					message: response,
@@ -170,38 +178,24 @@ export default function PortalManager(props: {
 		}
 	}
 
-	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'logo') {
-		if (e.target.files && e.target.files.length) {
-			const file = e.target.files[0];
-			if (file.type.startsWith('image/')) {
-				const reader = new FileReader();
-
-				reader.onload = (event: ProgressEvent<FileReader>) => {
-					if (event.target?.result) {
-						switch (type) {
-							case 'logo':
-								setLogo(event.target.result);
-								break;
-							default:
-								break;
-						}
-					}
-				};
-
-				reader.readAsDataURL(file);
+	function handleMediaUpdate() {
+		// For existing portals, refresh the logo and icon from the portal data
+		if (props.portal) {
+			if (props.portal.logo) {
+				setLogoId(props.portal.logo);
 			}
-			e.target.value = '';
+			if (props.portal.icon) {
+				setIconId(props.portal.icon);
+			}
 		}
 	}
 
-	function getLogoWrapper() {
-		if (logo) return <img src={checkValidAddress(logo) ? getTxEndpoint(logo) : logo} />;
-		return (
-			<>
-				<ReactSVG src={ASSETS.image} />
-				<span>{language.uploadLogo}</span>
-			</>
-		);
+	function handleLogoUpload(mediaId: string) {
+		setLogoId(mediaId);
+	}
+
+	function handleIconUpload(mediaId: string) {
+		setIconId(mediaId);
 	}
 
 	function getConnectedView() {
@@ -212,27 +206,20 @@ export default function PortalManager(props: {
 					<S.Wrapper>
 						<S.Body>
 							<S.PWrapper>
-								<S.FileInputWrapper>
-									<S.LInput hasLogo={logo !== null} onClick={() => logoInputRef.current.click()} disabled={loading}>
-										{getLogoWrapper()}
-									</S.LInput>
-									<input
-										ref={logoInputRef}
-										type={'file'}
-										onChange={(e: any) => handleFileChange(e, 'logo')}
-										disabled={loading}
-										accept={ALLOWED_LOGO_TYPES}
-									/>
-								</S.FileInputWrapper>
-								<S.PActions>
-									<Button
-										type={'primary'}
-										label={language.removeLogo}
-										handlePress={() => setLogo(null)}
-										disabled={loading || !logo}
-										height={32.5}
-									/>
-								</S.PActions>
+								<Media
+									portal={props.portal}
+									type={'logo'}
+									handleUpdate={handleMediaUpdate}
+									onMediaUpload={handleLogoUpload}
+									hideActions={!props.portal}
+								/>
+								<Media
+									portal={props.portal}
+									type={'icon'}
+									handleUpdate={handleMediaUpdate}
+									onMediaUpload={handleIconUpload}
+									hideActions={!props.portal}
+								/>
 							</S.PWrapper>
 							<S.Form>
 								<S.TForm>

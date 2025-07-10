@@ -12,17 +12,17 @@ import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
-import { ASSETS, UPLOAD } from 'helpers/config';
-import { getTurboCostWincEndpoint, getTxEndpoint } from 'helpers/endpoints';
+import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
+import { ASSETS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
 import {
 	AlignmentButtonType,
 	AlignmentEnum,
 	MediaConfigType,
-	NotificationType,
 	PortalUploadOptionType,
 	PortalUploadType,
 } from 'helpers/types';
-import { getARAmountFromWinc } from 'helpers/utils';
+import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -35,6 +35,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	const { uploadCost, showUploadConfirmation, uploadResponse, setUploadResponse, calculateUploadCost, clearUploadState } = useUploadCost();
 
 	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
 		image: {
@@ -73,10 +74,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 
 	const [mediaUploaded, setMediaUploaded] = React.useState<boolean>(false);
 	const [mediaLoading, setMediaLoading] = React.useState<boolean>(false);
-	const [showUploadConfirmation, setShowUploadConfirmation] = React.useState<boolean>(false);
-	const [uploadCost, setUploadCost] = React.useState<number | null>(null);
 	const [uploadDisabled, setUploadDisabled] = React.useState<boolean>(false);
-	const [uploadResponse, setUploadResponse] = React.useState<NotificationType | null>(null);
 
 	React.useEffect(() => {
 		if (props.data && props.data !== mediaData) {
@@ -87,30 +85,18 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	React.useEffect(() => {
 		(async function () {
 			if (mediaData?.file && !mediaData.url && !mediaUploaded && portalProvider.current?.id && arProvider.wallet) {
-				const contentSize = (mediaData.file as any).size;
+				const result = await calculateUploadCost(mediaData.file);
 
-				if (contentSize < UPLOAD.dispatchUploadSize) {
-					await handleUpload();
-				} else {
-					try {
-						setShowUploadConfirmation(true);
-
-						const uploadPriceResponse = await fetch(getTurboCostWincEndpoint(contentSize));
-						const uploadInWinc = Number((await uploadPriceResponse.json()).winc);
-
-						setUploadCost(uploadInWinc);
-
-						if (uploadInWinc > arProvider.turboBalance) {
-							setUploadResponse({ status: 'warning', message: 'Insufficient balance for upload' });
-							setUploadDisabled(true);
-						}
-					} catch (e: any) {
-						setUploadResponse({ status: 'warning', message: e.message ?? 'Error uploading media' });
+				if (result) {
+					if (result.hasInsufficientBalance) {
+						setUploadDisabled(true);
+					} else if (!result.requiresConfirmation) {
+						await handleUpload();
 					}
 				}
 			}
 		})();
-	}, [mediaData, portalProvider.current?.id, arProvider.wallet, arProvider.turboBalance]);
+	}, [mediaData, portalProvider.current?.id, arProvider.wallet, calculateUploadCost]);
 
 	React.useEffect(() => {
 		if (mediaData?.url && validateUrl(mediaData.url) && mediaData.url.startsWith('https://'))
@@ -160,8 +146,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	function handleClear(message: string) {
 		setUploadResponse({ status: 'warning', message: message });
 		setMediaData((prevContent) => ({ ...prevContent, file: null }));
-		setUploadCost(null);
-		setShowUploadConfirmation(false);
+		clearUploadState();
 		setUploadDisabled(false);
 		if (inputRef.current) {
 			inputRef.current.value = '';
@@ -219,61 +204,13 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	function getInputWrapper() {
 		if (showUploadConfirmation) {
 			return (
-				<>
-					<S.InputHeader>
-						<ReactSVG src={config.icon} />
-						<p>{`${language.upload} ${config.label}`}</p>
-					</S.InputHeader>
-					<S.InputDescription>
-						<span>{language.mediaUploadCostInfo}</span>
-					</S.InputDescription>
-					<S.InputActions>
-						<S.InputActionsInfo>
-							<S.InputActionsInfoLine>
-								<p>
-									<span>{`${language.yourUploadBalance}:`}</span>
-									&nbsp;
-									{arProvider.turboBalance
-										? `${getARAmountFromWinc(arProvider.turboBalance)} ${language.credits}`
-										: '-'}
-								</p>
-							</S.InputActionsInfoLine>
-							<S.InputActionsInfoLine>
-								<p>
-									<span>{`${language.costToUpload}:`}</span>
-									&nbsp;
-									{uploadCost ? `${getARAmountFromWinc(uploadCost)} ${language.credits}` : '-'}
-								</p>
-							</S.InputActionsInfoLine>
-							<S.InputActionsInfoDivider />
-							<S.InputActionsInfoLine>
-								<p>
-									<span>{`${language.remainingAfterUpload}:`}</span>
-									&nbsp;
-									{arProvider.turboBalance && uploadCost
-										? `${getARAmountFromWinc(arProvider.turboBalance - uploadCost)} ${language.credits}`
-										: '-'}
-								</p>
-							</S.InputActionsInfoLine>
-						</S.InputActionsInfo>
-						<S.InputActionsFlex>
-							<Button
-								type={'primary'}
-								label={language.cancel}
-								handlePress={() => handleClear(language.uploadCancelled)}
-								width={140}
-							/>
-							<Button
-								type={'alt1'}
-								label={language.upload}
-								handlePress={handleUpload}
-								disabled={uploadDisabled}
-								width={140}
-							/>
-						</S.InputActionsFlex>
-					</S.InputActions>
-				</>
-			);
+				<TurboUploadConfirmation
+					uploadCost={uploadCost}
+					uploadDisabled={uploadDisabled}
+					handleUpload={handleUpload}
+					handleCancel={() => handleClear(language.uploadCancelled)}
+				/>
+			)
 		}
 
 		return (

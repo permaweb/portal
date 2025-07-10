@@ -24,10 +24,14 @@ export default function ArticleToolbarPostDescription() {
 
 	const [showPanel, setShowPanel] = React.useState<boolean>(false);
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
+	const [originalDescription, setOriginalDescription] = React.useState<string>('');
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
+
+	const currentDescription = currentPost?.data?.description ?? '';
+	const hasChanges = currentDescription !== originalDescription;
 
 	return (
 		<>
@@ -36,7 +40,10 @@ export default function ArticleToolbarPostDescription() {
 					<Button
 						type={'primary'}
 						label={language.editDescription}
-						handlePress={() => setShowPanel(true)}
+						handlePress={() => {
+							setOriginalDescription(currentDescription);
+							setShowPanel(true);
+						}}
 						icon={ASSETS.arrow}
 						height={40}
 						fullWidth
@@ -53,7 +60,7 @@ export default function ArticleToolbarPostDescription() {
 				<S.PanelBodyWrapper>
 					<TextArea
 						label={language.description}
-						value={currentPost?.data?.description ?? ''}
+						value={currentDescription}
 						onChange={(e: any) => handleCurrentPostUpdate({ field: 'description', value: e.target.value })}
 						onFocus={() => handleCurrentPostUpdate({ field: 'focusedBlock', value: null })}
 						invalid={{ status: false, message: null }}
@@ -64,6 +71,7 @@ export default function ArticleToolbarPostDescription() {
 						<Button
 							type={'alt1'}
 							label={language.done}
+							disabled={!hasChanges}
 							handlePress={() => {
 								setShowPanel(false);
 								setResponse({ status: 'success', message: `${language.summaryUpdated}!` });

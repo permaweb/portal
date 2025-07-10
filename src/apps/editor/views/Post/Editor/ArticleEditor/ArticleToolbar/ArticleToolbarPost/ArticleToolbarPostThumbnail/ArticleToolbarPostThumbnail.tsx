@@ -2,16 +2,23 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReactSVG } from 'react-svg';
 
+import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPostUpdate } from 'editor/store/post';
 
 import { Button } from 'components/atoms/Button';
+import { Loader } from 'components/atoms/Loader';
+import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
+import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { NotificationType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
+import { useUploadCost } from 'hooks/useUploadCost';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
@@ -19,43 +26,75 @@ const ALLOWED_THUMBNAIL_TYPES = 'image/png, image/jpeg, image/gif';
 
 export default function ArticleToolbarPostThumbnail() {
 	const dispatch = useDispatch();
+	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
+	const portalProvider = usePortalProvider();
 
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	const { uploadCost, showUploadConfirmation, uploadResponse, setUploadResponse, calculateUploadCost, clearUploadState } = useUploadCost();
 
 	const inputRef = React.useRef<any>(null);
 
-	const [loading, _setLoading] = React.useState<boolean>(false);
+	const [loading, setLoading] = React.useState<boolean>(false);
+	const [thumbnailData, setThumbnailData] = React.useState<File | null>(null);
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
+
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+
+	React.useEffect(() => {
+		(async function () {
+			if (!unauthorized && thumbnailData && portalProvider.current?.id && arProvider.wallet) {
+				const result = await calculateUploadCost(thumbnailData);
+
+				if (result && !result.requiresConfirmation) {
+					await handleUpload();
+				}
+			}
+		})();
+	}, [
+		thumbnailData,
+		portalProvider.current?.id,
+		portalProvider.permissions?.updatePortalMeta,
+		arProvider.wallet,
+		calculateUploadCost,
+	]);
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 		setResponse({ status: 'success', message: `${language.thumbnailUpdated}!` });
 	};
 
-	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'thumbnail') {
-		if (e.target.files && e.target.files.length) {
-			const file = e.target.files[0];
-			if (file.type.startsWith('image/')) {
-				const reader = new FileReader();
+	async function handleUpload() {
+		if (!thumbnailData) return;
+		
+		setLoading(true);
+		try {
+			const tx = await permawebProvider.libs.resolveTransaction(thumbnailData);
+			handleCurrentPostUpdate({ field: 'thumbnail', value: tx });
+			setUploadResponse({ status: 'success', message: `${language.thumbnailUpdated}!` });
+			handleClear(null);
+		} catch (e: any) {
+			handleClear(e.message ?? 'Error uploading thumbnail');
+		}
+		setLoading(false);
+	}
 
-				reader.onload = (event: ProgressEvent<FileReader>) => {
-					if (event.target?.result) {
-						switch (type) {
-							case 'thumbnail':
-								handleCurrentPostUpdate({ field: 'thumbnail', value: event.target.result });
-								break;
-							default:
-								break;
-						}
-					}
-				};
+	function handleClear(message: string | null) {
+		if (message) setUploadResponse({ status: 'warning', message: message });
+		setThumbnailData(null);
+		clearUploadState();
+		if (inputRef.current) {
+			inputRef.current.value = '';
+		}
+	}
 
-				reader.readAsDataURL(file);
-			}
-			e.target.value = '';
+	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		if (file && file.type.startsWith('image/')) {
+			setThumbnailData(file);
 		}
 	}
 
@@ -85,15 +124,15 @@ export default function ArticleToolbarPostThumbnail() {
 					<S.Input
 						hasInput={!!currentPost?.data?.thumbnail}
 						onClick={() => inputRef.current.click()}
-						disabled={loading}
+						disabled={loading || unauthorized}
 					>
 						{getInputWrapper()}
 					</S.Input>
 					<input
 						ref={inputRef}
 						type={'file'}
-						onChange={(e: any) => handleFileChange(e, 'thumbnail')}
-						disabled={loading}
+						onChange={handleFileChange}
+						disabled={loading || unauthorized}
 						accept={ALLOWED_THUMBNAIL_TYPES}
 					/>
 				</S.InputWrapper>
@@ -112,6 +151,28 @@ export default function ArticleToolbarPostThumbnail() {
 			</S.Wrapper>
 			{response && (
 				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
+			)}
+			{showUploadConfirmation && thumbnailData && (
+				<Modal
+					header={`${language.upload} ${thumbnailData.name}`}
+					handleClose={() => handleClear(language.uploadCancelled)}
+					className={'modal-wrapper'}
+				>
+					<TurboUploadConfirmation
+						uploadCost={uploadCost}
+						uploadDisabled={unauthorized || loading}
+						handleUpload={handleUpload}
+						handleCancel={() => handleClear(language.uploadCancelled)}
+					/>
+				</Modal>
+			)}
+			{loading && <Loader message={`${language.loading}...`} />}
+			{uploadResponse && (
+				<Notification
+					type={uploadResponse.status}
+					message={uploadResponse.message}
+					callback={() => setUploadResponse(null)}
+				/>
 			)}
 		</>
 	);
