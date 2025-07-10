@@ -1,7 +1,8 @@
 export type PortalHeaderType = {
 	id: string;
 	name: string;
-	logo: string | null;
+	logo?: string | null;
+	icon?: string | null;
 	roles?: PortalUserType[]
 };
 

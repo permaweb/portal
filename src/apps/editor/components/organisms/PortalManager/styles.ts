@@ -47,14 +47,13 @@ export const TForm = styled.div`
 export const PWrapper = styled.div`
 	height: fit-content;
 	width: 100%;
-	flex: 1;
+	
+	display: flex;
+	flex-direction: column;
+	gap: 25px;
+
 	input {
 		display: none;
-	}
-	@media (max-width: ${STYLING.cutoffs.initial}) {
-		min-width: 0;
-		width: 100%;
-		flex: none;
 	}
 `;
 

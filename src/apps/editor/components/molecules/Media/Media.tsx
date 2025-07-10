@@ -8,10 +8,12 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
+import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { NotificationType, PortalDetailType } from 'helpers/types';
+import { PortalDetailType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
+import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -24,22 +26,30 @@ const ALLOWED_MEDIA_TYPES = 'image/png, image/jpeg, image/svg, image/gif';
 export default function Media(props: {
 	portal: PortalDetailType | null;
 	type: 'icon' | 'logo';
-	handleClose?: () => void;
 	handleUpdate?: () => void;
+	onMediaUpload?: (mediaId: string) => void;
+	hideActions?: boolean;
 }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	const {
+		uploadCost,
+		showUploadConfirmation,
+		uploadResponse,
+		setUploadResponse,
+		calculateUploadCost,
+		clearUploadState,
+	} = useUploadCost();
 
 	const mediaInputRef = React.useRef<any>(null);
 
-	const [media, setMedia] = React.useState<any>(null);
+	const [media, setMedia] = React.useState<string | File | null>(null);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [showRemoveConfirmation, setShowRemoveConfirmation] = React.useState<boolean>(false);
-	const [portalResponse, setPortalResponse] = React.useState<NotificationType | null>(null);
 
 	React.useEffect(() => {
 		if (props.portal) {
@@ -50,39 +60,46 @@ export default function Media(props: {
 		}
 	}, [props.portal, props.type]);
 
-	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+	React.useEffect(() => {
+		(async function () {
+			if (media instanceof File && arProvider.wallet) {
+				const result = await calculateUploadCost(media);
+
+				if (result && !result.requiresConfirmation) {
+					const mediaValue = props.type === 'icon' ? props.portal?.icon : props.portal?.logo;
+					if (!mediaValue) await handleSubmit();
+				}
+			}
+		})();
+	}, [media, props.portal, arProvider.wallet, calculateUploadCost]);
+
+	const unauthorized = props.portal?.id && !portalProvider.permissions?.updatePortalMeta;
 
 	async function handleSubmit(opts?: { remove?: boolean }) {
-		if (
-			!unauthorized &&
-			arProvider.wallet &&
-			permawebProvider.profile &&
-			permawebProvider.profile.id &&
-			portalProvider.current?.name
-		) {
+		if (!unauthorized && arProvider.wallet && permawebProvider.profile?.id) {
 			setLoading(true);
 
 			try {
 				let response: string | null;
 
-				let data: any = {
-					Name: portalProvider.current.name,
-				};
-
-				const mediaKey = props.type === 'icon' ? 'Icon' : 'Logo';
-
-				if (media && !opts?.remove) {
-					try {
-						data[mediaKey] = await permawebProvider.libs.resolveTransaction(media);
-					} catch (e: any) {
-						data[mediaKey] = 'None';
-						console.error(`Failed to resolve ${props.type}: ${e.message}`);
-					}
-				} else {
-					data[mediaKey] = 'None';
-				}
-
 				if (props.portal?.id) {
+					let data: any = {
+						Name: portalProvider.current.name,
+					};
+
+					const mediaKey = props.type === 'icon' ? 'Icon' : 'Logo';
+
+					if (media && !opts?.remove) {
+						try {
+							data[mediaKey] = await permawebProvider.libs.resolveTransaction(media);
+						} catch (e: any) {
+							data[mediaKey] = 'None';
+							console.error(`Failed to resolve ${props.type}: ${e.message}`);
+						}
+					} else {
+						data[mediaKey] = 'None';
+					}
+
 					const portalUpdateId = await permawebProvider.libs.updateZone(data, props.portal.id, arProvider.wallet);
 
 					console.log(`Portal update: ${portalUpdateId}`);
@@ -90,23 +107,30 @@ export default function Media(props: {
 					response = props.type === 'icon' ? `${language.iconUpdated}!` : `${language.logoUpdated}!`;
 
 					if (opts?.remove) setMedia(null);
-				}
 
-				portalProvider.refreshCurrentPortal();
+					portalProvider.refreshCurrentPortal();
+				} else if (props.onMediaUpload && media && !opts?.remove) {
+					// For new portals, just upload the media and return the ID
+					try {
+						const mediaId = await permawebProvider.libs.resolveTransaction(media);
+						props.onMediaUpload(mediaId);
+						response = `${language.mediaUploaded}!`;
+					} catch (e: any) {
+						console.error(`Failed to upload ${props.type}: ${e.message}`);
+						throw e;
+					}
+				}
 
 				if (props.handleUpdate) props.handleUpdate();
-				if (props.handleClose) props.handleClose();
 
-				if (props.type === 'icon') {
-					setMedia(null);
-				}
-
-				setPortalResponse({
+				setUploadResponse({
 					message: response,
 					status: 'success',
 				});
+
+				clearUploadState();
 			} catch (e: any) {
-				setPortalResponse({
+				setUploadResponse({
 					message: e.message ?? language.errorUpdatingPortal,
 					status: 'warning',
 				});
@@ -131,22 +155,25 @@ export default function Media(props: {
 		if (e.target.files && e.target.files.length) {
 			const file = e.target.files[0];
 			if (file.type.startsWith('image/')) {
-				const reader = new FileReader();
-
-				reader.onload = (event: ProgressEvent<FileReader>) => {
-					if (event.target?.result) {
-						setMedia(event.target.result);
-					}
-				};
-
-				reader.readAsDataURL(file);
+				setMedia(file);
 			}
 			e.target.value = '';
 		}
 	}
 
+	function handleClearUpload() {
+		setMedia(null);
+		clearUploadState();
+		if (mediaInputRef.current) {
+			mediaInputRef.current.value = '';
+		}
+	}
+
 	function getMediaWrapper() {
 		if (media) {
+			const mediaSrc =
+				media instanceof File ? URL.createObjectURL(media) : checkValidAddress(media) ? getTxEndpoint(media) : media;
+
 			return (
 				<>
 					<S.RemoveWrapper className={'fade-in'}>
@@ -162,7 +189,7 @@ export default function Media(props: {
 							tooltipPosition={'bottom-right'}
 						/>
 					</S.RemoveWrapper>
-					<img src={checkValidAddress(media) ? getTxEndpoint(media) : media} />
+					<img src={mediaSrc} />
 				</>
 			);
 		}
@@ -211,66 +238,68 @@ export default function Media(props: {
 							{isIcon && (
 								<S.SActions>
 									<p>{language.siteIconInfo}</p>
-									<S.SAction>
-										{props.handleClose && (
+									{!props.hideActions && (
+										<S.SAction>
 											<Button
-												type={'primary'}
-												label={language.close}
-												handlePress={() => props.handleClose()}
-												disabled={loading}
+												type={'alt3'}
+												label={language.cancel}
+												handlePress={() => {
+													setMedia(currentMedia && checkValidAddress(currentMedia) ? currentMedia : null);
+												}}
+												disabled={!media || (typeof media === 'string' && checkValidAddress(media)) || !currentMedia}
 												loading={false}
 											/>
-										)}
-										<Button
-											type={'primary'}
-											label={language.cancel}
-											handlePress={() => {
-												setMedia(currentMedia && checkValidAddress(currentMedia) ? currentMedia : null);
-											}}
-											disabled={!media || checkValidAddress(media) || !currentMedia}
-											loading={false}
-										/>
-										<Button
-											type={'alt1'}
-											label={language.save}
-											handlePress={() => handleSubmit()}
-											disabled={unauthorized || loading || !media || checkValidAddress(media)}
-											loading={false}
-										/>
-									</S.SAction>
+											<Button
+												type={'alt4'}
+												label={language.save}
+												handlePress={() => handleSubmit()}
+												disabled={
+													unauthorized || loading || !media || (typeof media === 'string' && checkValidAddress(media))
+												}
+												loading={false}
+											/>
+										</S.SAction>
+									)}
 								</S.SActions>
 							)}
-							{!isIcon && (
+							{!isIcon && !props.hideActions && (
 								<S.SAction>
-									{props.handleClose && (
-										<Button
-											type={'primary'}
-											label={language.close}
-											handlePress={() => props.handleClose()}
-											disabled={loading}
-											loading={false}
-										/>
-									)}
 									<Button
-										type={'primary'}
+										type={'alt3'}
 										label={language.cancel}
 										handlePress={() => {
 											setMedia(currentMedia && checkValidAddress(currentMedia) ? currentMedia : null);
 										}}
-										disabled={!media || checkValidAddress(media) || !currentMedia}
+										disabled={!media || (typeof media === 'string' && checkValidAddress(media)) || !currentMedia}
 										loading={false}
 									/>
 									<Button
-										type={'alt1'}
+										type={'alt4'}
 										label={language.save}
 										handlePress={() => handleSubmit()}
-										disabled={unauthorized || loading || !media || checkValidAddress(media)}
+										disabled={
+											unauthorized || loading || !media || (typeof media === 'string' && checkValidAddress(media))
+										}
 										loading={false}
 									/>
 								</S.SAction>
 							)}
 						</S.Body>
 					</S.Wrapper>
+					{showUploadConfirmation && (
+						<Modal
+							header={`${language.upload} ${media instanceof File ? media.name : 'Media'}`}
+							handleClose={() => handleClearUpload()}
+							className={'modal-wrapper'}
+						>
+							<TurboUploadConfirmation
+								uploadCost={uploadCost}
+								uploadDisabled={unauthorized || loading}
+								handleUpload={handleSubmit}
+								handleCancel={() => handleClearUpload()}
+							/>
+						</Modal>
+					)}
 					{showRemoveConfirmation && (
 						<Modal
 							header={isIcon ? language.removeIcon : language.removeLogo}
@@ -302,20 +331,12 @@ export default function Media(props: {
 							</S.MWrapper>
 						</Modal>
 					)}
-					{loading && (
-						<Loader
-							message={
-								props.portal && props.portal.id
-									? `${language.portalUpdatingInfo}...`
-									: `${language.portalCreatingInfo}...`
-							}
-						/>
-					)}
-					{portalResponse && (
+					{loading && <Loader message={`${language.loading}...`} />}
+					{uploadResponse && (
 						<Notification
-							message={portalResponse.message}
-							type={portalResponse.status}
-							callback={() => setPortalResponse(null)}
+							message={uploadResponse.message}
+							type={uploadResponse.status}
+							callback={() => setUploadResponse(null)}
 						/>
 					)}
 				</>
