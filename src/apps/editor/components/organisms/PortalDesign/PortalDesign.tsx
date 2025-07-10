@@ -40,14 +40,14 @@ export default function PortalDesign() {
 				break;
 			case 'fonts':
 				header = language.fonts;
-				component = <Fonts handleClose={() => setShowPanel(false)} />;
+				component = <Fonts />;
 				break;
 			case 'logo':
 				header = language.siteLogo;
-				component = <Media portal={portalProvider.current} type="logo" handleClose={() => setShowPanel(false)} />;
+				component = <Media portal={portalProvider.current} type={"logo"} />;
 				break;
 			default:
-				header = 'Design panel';
+				header = null;
 				component = null;
 				break;
 		}
@@ -62,11 +62,11 @@ export default function PortalDesign() {
 			>
 				<S.PanelBodyWrapper>
 					{component}
-					{useAction && (
+					{/* {useAction && (
 						<S.PanelActionsWrapper>
 							<Button type={'primary'} label={language.close} handlePress={() => setShowPanel(false)} />
 						</S.PanelActionsWrapper>
-					)}
+					)} */}
 				</S.PanelBodyWrapper>
 			</Panel>
 		);

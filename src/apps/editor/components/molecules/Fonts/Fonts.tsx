@@ -16,7 +16,7 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
-export default function Fonts(props: { handleClose?: () => void }) {
+export default function Fonts() {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
@@ -120,15 +120,6 @@ export default function Fonts(props: { handleClose?: () => void }) {
 					{getPreview(bodyFont.label)}
 				</S.Section>
 				<S.SAction>
-					{props.handleClose && (
-						<Button
-							type={'primary'}
-							label={language.close}
-							handlePress={() => props.handleClose()}
-							disabled={loading}
-							loading={false}
-						/>
-					)}
 					<Button
 						type={'alt1'}
 						label={language.save}
