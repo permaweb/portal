@@ -6,7 +6,8 @@ import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
 import { URLS } from 'helpers/config';
 import { PortalAssetType, PortalCategoryType } from 'helpers/types';
-import { getPortalIdFromURL } from 'helpers/utils';
+import { getRedirect } from 'helpers/utils';
+import { scrollTo } from 'helpers/window';
 
 import * as S from './styles';
 
@@ -17,6 +18,10 @@ export default function Category() {
 
 	const [currentCategory, setCurrentCategory] = React.useState<PortalCategoryType | null>(null);
 	const [currentPosts, setCurrentPosts] = React.useState<PortalAssetType[] | null>(null);
+
+	React.useEffect(() => {
+		scrollTo(0, 0, 'smooth');
+	}, [categoryId]);
 
 	React.useEffect(() => {
 		if (portalProvider.current?.categories) {
@@ -35,12 +40,6 @@ export default function Category() {
 			setCurrentPosts(foundPosts);
 		}
 	}, [currentCategory, portalProvider.current?.categories, portalProvider.current?.assets]);
-
-	function getRedirect(categoryId: string) {
-		const portalId = getPortalIdFromURL();
-		if (portalId) return `${URLS.portalBase(portalId)}${URLS.category(categoryId)}`;
-		return URLS.category(categoryId);
-	}
 
 	function getCategoryById(id: string, categories: PortalCategoryType[]) {
 		for (const category of categories) {
@@ -112,7 +111,7 @@ export default function Category() {
 					<S.SubheaderWrapper className={'fade-in'}>
 						{currentCategory.children.map((child: PortalCategoryType) => {
 							return (
-								<Link key={child.id} to={getRedirect(child.id)}>
+								<Link key={child.id} to={getRedirect(URLS.category(child.id))}>
 									{child.name}
 								</Link>
 							);

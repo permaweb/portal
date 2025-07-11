@@ -10,29 +10,27 @@ jobs:
   publish:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v3
         with:
           node-version: '22.x'
-      - name: Clean lockfile (if needed)
-        run: rm -rf package-lock.json node_modules
-      - run: npm install
+      - run: npm run clean:install
       - run: npm run deploy:editor:main
-        env:
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-
+      - run: npm run deploy:viewer
+  
   publish-staging:
     if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v3
         with:
           node-version: '22.x'
-      - name: Clean lockfile (if needed)
-        run: rm -rf package-lock.json node_modules
-      - run: npm install
+      - run: npm run clean:install
       - run: npm run deploy:editor:staging
-        env:
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      - run: npm run deploy:viewer

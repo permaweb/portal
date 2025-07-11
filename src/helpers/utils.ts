@@ -1,6 +1,6 @@
 import Arweave from 'arweave';
 
-import { STORAGE } from './config';
+import { STORAGE, URLS } from './config';
 import { PortalAssetType } from './types';
 
 export function checkValidAddress(address: string | null) {
@@ -291,6 +291,19 @@ export function stripFontWeights(fontString: string) {
 	return fontString.split(':')[0];
 }
 
+export function shuffleArray<T>(arr: T[]): T[] {
+	const a = arr.slice();
+	for (let i = a.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[a[i], a[j]] = [a[j], a[i]];
+	}
+	return a;
+}
+
+export function urlify(str: string) {
+	return str.toLowerCase().split(' ').join('-');
+}
+
 export function getPortalIdFromURL(): string | null {
 	const { pathname, hash } = window.location;
 
@@ -308,15 +321,17 @@ export function getPortalIdFromURL(): string | null {
 	return null;
 }
 
-export function shuffleArray<T>(arr: T[]): T[] {
-	const a = arr.slice();
-	for (let i = a.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[a[i], a[j]] = [a[j], a[i]];
-	}
-	return a;
+export function getRedirect(path?: string): string {
+	const portalId = getPortalIdFromURL();
+	if (portalId) return `${URLS.portalBase(portalId)}${path ?? ''}`;
+	return `${URLS.base}${path ?? ''}`;
 }
 
-export function urlify(str: string) {
-	return str.toLowerCase().split(' ').join('-');
+export function getCachedProfile(address: string) {
+	const cached = localStorage.getItem(STORAGE.profile(address));
+	return cached ? JSON.parse(cached) : null;
+}
+
+export function cacheProfile(address: string, profileData: any) {
+	localStorage.setItem(STORAGE.profile(address), JSON.stringify(profileData));
 }

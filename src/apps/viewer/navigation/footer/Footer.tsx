@@ -3,10 +3,10 @@ import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
-import { ASSETS, URLS } from 'helpers/config';
+import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalCategoryType, PortalLinkType } from 'helpers/types';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, getRedirect } from 'helpers/utils';
 
 import * as S from './styles';
 
@@ -26,7 +26,7 @@ export default function Footer() {
 			<S.Content className={'max-view-wrapper'}>
 				<S.Header>
 					<S.LogoWrapper className={'fade-in'}>
-						<Link to={URLS.base}>{getLogo()}</Link>
+						<Link to={getRedirect()}>{getLogo()}</Link>
 					</S.LogoWrapper>
 					{portalProvider.current?.links?.length > 0 && (
 						<S.LinksWrapper>

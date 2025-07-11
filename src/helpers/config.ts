@@ -151,6 +151,7 @@ function createURLs() {
 
 	return {
 		base: base,
+		author: (authorId: string) => `author/${authorId}`,
 		category: (categoryId: string) => `category/${categoryId}`,
 		portalBase: portalBase,
 		portalDesign: (portalId: string) => `${portalBase(portalId)}design/`,
