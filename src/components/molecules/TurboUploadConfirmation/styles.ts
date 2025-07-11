@@ -66,6 +66,20 @@ export const InputActionsInfoLine = styled.div`
 	}
 `;
 
+export const InputActionsMessage = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	margin: 5px 0 15px 0;
+
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+	}
+`;
+
 export const InputActionsFlex = styled.div`
 	display: flex;
 	flex-wrap: wrap;
