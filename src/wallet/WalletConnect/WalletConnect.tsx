@@ -185,6 +185,7 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 				width={575}
 				header={language.fundTurboBalance}
 				handleClose={() => setShowFundUpload(false)}
+				className={'modal-wrapper'}
 			>
 				<TurboBalanceFund handleClose={() => setShowFundUpload(false)} />
 			</Panel>

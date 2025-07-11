@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 
 export const MWrapper = styled.div`
-	padding: 0 20px 20px 20px;
 	position: relative;
 `;
 
