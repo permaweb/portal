@@ -4,6 +4,7 @@ export const language = {
 		addLink: `Add a link`,
 		addCaption: `Add a caption`,
 		addCategory: `Add a category`,
+		addFunds: `Add Funds`,
 		addTheme: `Add a theme`,
 		addTopic: `Add a topic`,
 		addUser: `Add a user`,

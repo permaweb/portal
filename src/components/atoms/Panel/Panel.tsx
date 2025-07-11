@@ -15,18 +15,10 @@ export default function Panel(props: {
 	open: boolean;
 	width?: number;
 	closeHandlerDisabled?: boolean;
+	className?: string;
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-
-	React.useEffect(() => {
-		if (props.open) {
-			hideDocumentBody();
-			return () => {
-				showDocumentBody();
-			};
-		}
-	}, [props.open]);
 
 	const escFunction = React.useCallback(
 		(e: any) => {
@@ -36,6 +28,15 @@ export default function Panel(props: {
 		},
 		[props]
 	);
+
+	React.useEffect(() => {
+		if (props.open) {
+			hideDocumentBody();
+			return () => {
+				showDocumentBody();
+			};
+		}
+	}, [props.open]);
 
 	React.useEffect(() => {
 		document.addEventListener('keydown', escFunction, false);
@@ -54,62 +55,47 @@ export default function Panel(props: {
 		}
 	}
 
-	function getBody() {
-		return (
-			<>
-				<S.Container
-					open={props.open}
-					noHeader={!props.header}
-					width={props.width}
-					className={'border-wrapper-primary'}
-				>
-					<CloseHandler
-						active={props.open && !props.closeHandlerDisabled}
-						disabled={!props.open || props.closeHandlerDisabled}
-						callback={() => props.handleClose()}
-					>
-						{props.header && (
-							<S.Header>
-								<S.LT>{getHeader()}</S.LT>
-								{props.handleClose && (
-									<S.Close>
-										<IconButton
-											type={'primary'}
-											warning
-											src={ASSETS.close}
-											handlePress={() => props.handleClose()}
-											active={false}
-											dimensions={{
-												wrapper: 32.5,
-												icon: 18.5,
-											}}
-											tooltip={language.close}
-										/>
-									</S.Close>
-								)}
-							</S.Header>
-						)}
-						<S.Body className={'scroll-wrapper'}>{props.children}</S.Body>
-					</CloseHandler>
-				</S.Container>
-			</>
-		);
+	function getBodyClassName() {
+		let className = 'scroll-wrapper ';
+		if (props.className) className += props.className;
+		return className;
 	}
 
 	return (
 		<Portal node={DOM.overlay}>
-			{getBody()}
+			<S.Container open={props.open} noHeader={!props.header} width={props.width} className={'border-wrapper-primary'}>
+				<CloseHandler
+					active={props.open && !props.closeHandlerDisabled}
+					disabled={!props.open || props.closeHandlerDisabled}
+					callback={() => props.handleClose()}
+				>
+					{props.header && (
+						<S.Header>
+							<S.LT>{getHeader()}</S.LT>
+							{props.handleClose && (
+								<S.Close>
+									<IconButton
+										type={'primary'}
+										warning
+										src={ASSETS.close}
+										handlePress={() => props.handleClose()}
+										active={false}
+										dimensions={{
+											wrapper: 32.5,
+											icon: 18.5,
+										}}
+										tooltip={language.close}
+									/>
+								</S.Close>
+							)}
+						</S.Header>
+					)}
+					<S.Body className={getBodyClassName()}>{props.children}</S.Body>
+				</CloseHandler>
+			</S.Container>
 			<S.PanelOverlay open={props.open} />
 		</Portal>
 	);
-
-	// return (
-	// 	<Portal node={DOM.overlay}>
-	// 		<S.Wrapper open={true} noHeader={!props.header} top={window ? (window as any).pageYOffset : 0}>
-	// 			{getBody()}
-	// 		</S.Wrapper>
-	// 	</Portal>
-	// );
 }
 
 let panelOpenCounter = 0;

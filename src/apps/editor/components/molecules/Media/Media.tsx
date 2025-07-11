@@ -7,7 +7,6 @@ import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
-import { Notification } from 'components/atoms/Notification';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
@@ -42,6 +41,7 @@ export default function Media(props: {
 		setUploadResponse,
 		calculateUploadCost,
 		clearUploadState,
+		insufficientBalance
 	} = useUploadCost();
 
 	const mediaInputRef = React.useRef<any>(null);
@@ -65,9 +65,12 @@ export default function Media(props: {
 			if (media instanceof File && arProvider.wallet) {
 				const result = await calculateUploadCost(media);
 
-				if (result && !result.requiresConfirmation) {
-					const mediaValue = props.type === 'icon' ? props.portal?.icon : props.portal?.logo;
-					if (!mediaValue) await handleSubmit();
+				if (result) {
+					if (!result.requiresConfirmation) {
+						const mediaValue = props.type === 'icon' ? props.portal?.icon : props.portal?.logo;
+						if (!mediaValue) await handleSubmit();
+					}
+					console.log(result);
 				}
 			}
 		})();
@@ -297,6 +300,8 @@ export default function Media(props: {
 								uploadDisabled={unauthorized || loading}
 								handleUpload={handleSubmit}
 								handleCancel={() => handleClearUpload()}
+								message={uploadResponse?.message ?? '-'}
+								insufficientBalance={insufficientBalance}
 							/>
 						</Modal>
 					)}
@@ -332,13 +337,6 @@ export default function Media(props: {
 						</Modal>
 					)}
 					{loading && <Loader message={`${language.loading}...`} />}
-					{uploadResponse && (
-						<Notification
-							message={uploadResponse.message}
-							type={uploadResponse.status}
-							callback={() => setUploadResponse(null)}
-						/>
-					)}
 				</>
 			);
 		}
