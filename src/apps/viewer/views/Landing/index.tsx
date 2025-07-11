@@ -4,7 +4,7 @@ import { PostList } from 'viewer/components/organisms/PostList';
 import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
 import { Loader } from 'components/atoms/Loader';
-import { PortalAssetType } from 'helpers/types';
+import { PortalAssetType, PortalCategoryType } from 'helpers/types';
 import { shuffleArray } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -17,6 +17,7 @@ export default function Landing() {
 
 	const [featuredPosts, setFeaturedPosts] = React.useState<PortalAssetType[] | null>(null);
 	const [panelPosts, setPanelPosts] = React.useState<PortalAssetType[] | null>(null);
+	const [groupedPosts, setGroupedPosts] = React.useState<{[key: string]: PortalAssetType[]} | null>(null);
 
 	React.useEffect(() => {
 		if (portalProvider.current?.assets?.length > 0) {
@@ -26,21 +27,58 @@ export default function Landing() {
 
 			const filteredPanelPosts = shuffleArray(filteredFeaturedPosts);
 
+			const grouped = groupPostsByCategory(filteredFeaturedPosts);
+
 			setFeaturedPosts(filteredFeaturedPosts);
 			setPanelPosts(filteredPanelPosts);
+			setGroupedPosts(grouped);
 		} else {
 			setFeaturedPosts([]);
 			setPanelPosts([]);
+			setGroupedPosts({});
 		}
 	}, [portalProvider.current?.assets]);
 
+	function groupPostsByCategory(posts: PortalAssetType[]): {[key: string]: PortalAssetType[]} {
+		const grouped: {[key: string]: PortalAssetType[]} = {};
+		
+		posts.forEach((post) => {
+			if (post.metadata.categories && post.metadata.categories.length > 0) {
+				post.metadata.categories.forEach((category: PortalCategoryType) => {
+					if (!grouped[category.name]) {
+						grouped[category.name] = [];
+					}
+					grouped[category.name].push(post);
+				});
+			} else {
+				if (!grouped['Uncategorized']) {
+					grouped['Uncategorized'] = [];
+				}
+				grouped['Uncategorized'].push(post);
+			}
+		});
+		
+		return grouped;
+	}
+
 	function getFeaturedPosts() {
-		if (!featuredPosts) return <Loader sm relative />;
-		if (featuredPosts.length > 0) {
-			return <PostList posts={featuredPosts} />;
-		} else {
-			return null;
-		}
+		if (!groupedPosts) return <Loader sm relative />;
+		
+		const categoryNames = Object.keys(groupedPosts);
+		if (categoryNames.length === 0) return null;
+		
+		return (
+			<>
+				{categoryNames.map((categoryName) => (
+					<S.CategorySection key={categoryName}>
+						<S.CategoryHeader>
+							<span>{categoryName}</span>
+						</S.CategoryHeader>
+						<PostList posts={groupedPosts[categoryName]} />
+					</S.CategorySection>
+				))}
+			</>
+		);
 	}
 
 	function getPanelPosts() {
@@ -49,7 +87,7 @@ export default function Landing() {
 			return (
 				<S.PanelWrapper>
 					<S.PanelHeader>
-						<p>{language.mostRead}</p>
+						<span>{language.mostRead}</span>
 					</S.PanelHeader>
 					<PostList posts={panelPosts} hideImages />
 				</S.PanelWrapper>

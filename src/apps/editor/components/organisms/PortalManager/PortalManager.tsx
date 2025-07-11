@@ -10,7 +10,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Notification } from 'components/atoms/Notification';
 import { DEFAULT_THEME, PORTAL_DATA, PORTAL_ROLES, URLS } from 'helpers/config';
 import { NotificationType, PortalDetailType, PortalHeaderType } from 'helpers/types';
-import { getBootTag } from 'helpers/utils';
+import { checkValidAddress, getBootTag } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -62,20 +62,26 @@ export default function PortalManager(props: {
 					Name: name,
 				};
 
-				if (logoId) {
+				if (logoId && checkValidAddress(logoId)) {
 					try {
 						data.Logo = await permawebProvider.libs.resolveTransaction(logoId);
 					} catch (e: any) {
 						console.error(`Failed to resolve logo: ${e.message}`);
 					}
 				}
+				else {
+					data.Logo = 'None';
+				}
 
-				if (iconId) {
+				if (iconId && checkValidAddress(iconId)) {
 					try {
 						data.Icon = await permawebProvider.libs.resolveTransaction(iconId);
 					} catch (e: any) {
 						console.error(`Failed to resolve icon: ${e.message}`);
 					}
+				}
+				else {
+					data.Icon = 'None';
 				}
 
 				if (props.portal && props.portal.id) {

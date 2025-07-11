@@ -8,7 +8,7 @@ import { Button } from 'components/atoms/Button';
 import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalCategoryType } from 'helpers/types';
-import { checkValidAddress, getPortalIdFromURL } from 'helpers/utils';
+import { checkValidAddress, getRedirect } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { WalletConnect } from 'wallet/WalletConnect';
 import { CloseHandler } from 'wrappers/CloseHandler';
@@ -18,16 +18,10 @@ import * as S from './styles';
 function Category(props: { category: PortalCategoryType }) {
 	const hasChildren = props.category.children?.length > 0;
 
-	function getRedirect(categoryId: string) {
-		const portalId = getPortalIdFromURL();
-		if (portalId) return `${URLS.portalBase(portalId)}${URLS.category(categoryId)}`;
-		return URLS.category(categoryId);
-	}
-
 	return (
 		<S.CategoryWrapper>
 			<S.CategoryLink>
-				<Link to={getRedirect(props.category.id)}>
+				<Link to={getRedirect(URLS.category(props.category.id))}>
 					{props.category.name} {hasChildren && <ReactSVG src={ASSETS.arrow} />}
 				</Link>
 			</S.CategoryLink>
@@ -48,12 +42,6 @@ export default function Header() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [showOverflowCategories, setShowOverflowCategories] = React.useState<boolean>(false);
-
-	function getBaseRedirect() {
-		const portalId = getPortalIdFromURL();
-		if (portalId) return URLS.portalBase(portalId);
-		return URLS.base;
-	}
 
 	function getLogo() {
 		const logo = portalProvider.current?.logo;
@@ -117,7 +105,7 @@ export default function Header() {
 					)}
 				</S.ContentStart>
 				<S.LogoWrapper className={'fade-in'}>
-					<Link to={getBaseRedirect()}>{getLogo()}</Link>
+					<Link to={getRedirect()}>{getLogo()}</Link>
 				</S.LogoWrapper>
 				<S.ContentEnd>
 					<WalletConnect app={'viewer'} />
