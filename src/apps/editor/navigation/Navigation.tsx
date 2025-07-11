@@ -9,6 +9,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { ASSETS, STYLING, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalHeaderType } from 'helpers/types';
+import { formatAddress } from 'helpers/utils';
 import { checkWindowCutoff } from 'helpers/window';
 import { useNavigationConfirm } from 'hooks/useNavigationConfirm';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -186,7 +187,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 											return (
 												<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>
 													<Link to={path} onClick={(e) => handleNavigate(e, path)}>
-														<span>{portal.name}</span>
+														<span>{portal.name ?? formatAddress(portal.id, false)}</span>
 														{active && (
 															<S.PIndicator>
 																<ReactSVG src={ASSETS.checkmark} />

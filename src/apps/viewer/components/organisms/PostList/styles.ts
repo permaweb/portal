@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 
+import { STYLING } from 'helpers/config';
+
 export const Wrapper = styled.div`
 	width: 100%;
 	display: flex;
@@ -19,6 +21,10 @@ export const PostWrapper = styled.div`
 	gap: 40px;
 	justify-content: space-between;
 	padding: 0 0 20px 0;
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		flex-direction: column;
+	}
 `;
 
 export const PostInfoWrapper = styled.div<{ hasImage: boolean }>`
@@ -45,6 +51,48 @@ export const PostInfoWrapper = styled.div<{ hasImage: boolean }>`
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 		line-height: 1.5;
+
+		&:hover {
+			color: ${(props) => props.theme.colors.font.primary};
+		}
+	}
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		width: 100%;
+	}
+`;
+
+export const PostEndWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+`;
+
+export const Author = styled.div`
+	width: fit-content;
+
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+
+		&:hover {
+			color: ${(props) => props.theme.colors.font.alt1};
+			text-decoration: underline;
+			text-decoration-thickness: 1.25px;
+		}
+	}
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+	}
+`;
+
+export const ReleasedDate = styled.div`
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
 	}
 `;
 
@@ -64,5 +112,9 @@ export const PostImageWrapper = styled.div`
 
 		object-fit: contain;
 		object-position: center center;
+	}
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		width: 100%;
 	}
 `;

@@ -10,6 +10,10 @@ export const Wrapper = styled.div`
 	flex-direction: column;
 	gap: 30px;
 	padding: 20px 0 0 0;
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		padding: 0;
+	}
 `;
 
 export const HeaderWrapper = styled.div`
@@ -33,15 +37,22 @@ export const Description = styled.div`
 export const InfoWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 2.5px;
 	margin: 10px 0;
 `;
 
 export const Author = styled.div`
+	width: fit-content;
+
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
+
+		&:hover {
+			color: ${(props) => props.theme.colors.font.alt1};
+			text-decoration: underline;
+			text-decoration-thickness: 1.25px;
+		}
 	}
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
@@ -65,7 +76,7 @@ export const Categories = styled.div`
 	margin: 15px 0 0 0;
 
 	a {
-		padding: 5.5px 15px;
+		padding: 5.5px 15px 4.5px 15px;
 		color: ${(props) => props.theme.colors.font.alt4};
 		background: ${(props) => props.theme.colors.container.alt5.background};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
@@ -201,7 +212,6 @@ export const Content = styled.div`
 	img,
 	video {
 		width: 100%;
-		border: 1px solid ${(props) => props.theme.colors.border.primary};
 	}
 
 	.portal-media-wrapper {
@@ -280,7 +290,7 @@ export const FooterWrapper = styled.div`
 export const TopicsWrapper = styled.div`
 	display: flex;
 	flex-wrap: wrap;
-	gap: 25px;
+	gap: 15px;
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};

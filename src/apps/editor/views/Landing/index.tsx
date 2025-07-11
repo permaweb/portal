@@ -138,7 +138,7 @@ export default function Landing() {
 										) : (
 											<ReactSVG src={ASSETS.portal} />
 										)}
-										{portal.name}
+										{portal.name ?? formatAddress(portal.id, false)}
 									</Link>
 								);
 							})}

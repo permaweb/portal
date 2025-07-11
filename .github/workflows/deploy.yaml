@@ -15,10 +15,9 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '22.x'
-      - name: Clean lockfile (if needed)
-        run: rm -rf package-lock.json node_modules
-      - run: npm install
+      - run: npm run clean:install
       - run: npm run deploy:editor:main
+      - run: npm run deploy:viewer
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
 
@@ -30,9 +29,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '22.x'
-      - name: Clean lockfile (if needed)
-        run: rm -rf package-lock.json node_modules
-      - run: npm install
+      - run: npm run clean:install
       - run: npm run deploy:editor:staging
+      - run: npm run deploy:viewer
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}

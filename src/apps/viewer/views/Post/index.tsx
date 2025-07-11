@@ -2,11 +2,16 @@ import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import parse from 'html-react-parser';
 
+import { Types } from '@permaweb/libs';
+
+import { usePortalProvider } from 'viewer/providers/PortalProvider';
+
 import { Loader } from 'components/atoms/Loader';
 import { URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { ArticleBlockType, PortalAssetType, PortalCategoryType } from 'helpers/types';
-import { checkValidAddress, formatAddress, formatDate, getPortalIdFromURL } from 'helpers/utils';
+import { checkValidAddress, formatAddress, formatDate, getRedirect } from 'helpers/utils';
+import { scrollTo } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -16,20 +21,35 @@ import * as S from './styles';
 export default function Post() {
 	const { postId } = useParams<{ postId?: string }>();
 
+	const portalProvider = usePortalProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
 	const [post, setPost] = React.useState<PortalAssetType | null>(null);
+	const [creator, setCreator] = React.useState<Types.ProfileType | null>(null);
 	const [loading, setLoading] = React.useState<boolean>(false);
+
+	React.useEffect(() => {
+		scrollTo(0, 0, 'smooth');
+	}, [postId]);
 
 	React.useEffect(() => {
 		(async function () {
 			if (!post && postId && checkValidAddress(postId) && permawebProvider.libs) {
 				setLoading(true);
 				try {
-					const post = await permawebProvider.libs.getAtomicAsset(postId);
-					setPost(post);
+					const fetchedPost = await permawebProvider.libs.getAtomicAsset(postId);
+					setPost(fetchedPost);
+
+					if (fetchedPost?.creator) {
+						try {
+							const fetchedCreator = await portalProvider.fetchUserProfile(fetchedPost.creator);
+							setCreator(fetchedCreator);
+						} catch (e: any) {
+							console.error(e);
+						}
+					}
 				} catch (e: any) {
 					console.error(e);
 				}
@@ -37,12 +57,6 @@ export default function Post() {
 			}
 		})();
 	}, [postId, permawebProvider.libs]);
-
-	function getCategoryRedirect(categoryId: string) {
-		const portalId = getPortalIdFromURL();
-		if (portalId) return `${URLS.portalBase(portalId)}${URLS.category(categoryId)}`;
-		return URLS.category(categoryId);
-	}
 
 	if (loading) return <Loader sm relative />;
 
@@ -111,9 +125,9 @@ export default function Post() {
 				<S.InfoWrapper className={'fade-in'}>
 					{post?.creator && (
 						<S.Author>
-							<p>
-								<span>By </span> {formatAddress(post.creator, false)}
-							</p>
+							<Link to={getRedirect(URLS.author(post.creator))}>
+								<p>{creator?.displayName ?? formatAddress(post.creator, false)}</p>
+							</Link>
 						</S.Author>
 					)}
 					{post?.metadata?.releasedDate && (
@@ -125,7 +139,7 @@ export default function Post() {
 						<S.Categories>
 							{post.metadata.categories.map((category: PortalCategoryType) => {
 								return (
-									<Link to={getCategoryRedirect(category.id)} key={category.id}>
+									<Link to={getRedirect(URLS.category(category.id))} key={category.id}>
 										{category.name}
 									</Link>
 								);

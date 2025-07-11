@@ -1,18 +1,29 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { PortalDetailType } from 'helpers/types';
-import { cachePortal, getCachedPortal, getPortalAssets, getPortalIdFromURL } from 'helpers/utils';
+import { Types } from '@permaweb/libs';
+
+import { PortalDetailType, PortalUserType } from 'helpers/types';
+import {
+	cachePortal,
+	cacheProfile,
+	getCachedPortal,
+	getCachedProfile,
+	getPortalAssets,
+	getPortalIdFromURL,
+} from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 interface PortalContextState {
 	current: PortalDetailType | null;
 	updating: boolean;
+	fetchUserProfile: (address: string) => Types.ProfileType;
 }
 
 const DEFAULT_CONTEXT = {
 	current: null,
 	updating: false,
+	fetchUserProfile: (_address: string) => {},
 };
 
 const PortalContext = React.createContext<PortalContextState>(DEFAULT_CONTEXT);
@@ -75,6 +86,17 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			try {
 				const portalData = await permawebProvider.libs.getZone(currentId);
 
+				const users: PortalUserType[] = [];
+				if (portalData?.roles) {
+					for (const entry of Object.keys(portalData.roles)) {
+						users.push({
+							address: entry,
+							type: portalData.roles[entry].type,
+							roles: portalData.roles[entry].roles,
+						});
+					}
+				}
+
 				const portal: PortalDetailType = {
 					id: currentId,
 					name: portalData.store?.name ?? 'None',
@@ -86,6 +108,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					links: portalData?.store?.links ?? [],
 					fonts: portalData?.store?.fonts ?? {},
 					themes: portalData?.store?.themes ?? [],
+					users: users || [],
 				};
 
 				return portal;
@@ -96,11 +119,31 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		}
 	};
 
+	async function fetchUserProfile(address: string): Promise<Types.ProfileType> {
+		try {
+			let profile: Types.ProfileType | null = null;
+			if (address === permawebProvider.profile?.id) {
+				profile = { ...permawebProvider.profile };
+			} else {
+				profile = getCachedProfile(address);
+				if (!profile) {
+					profile = await permawebProvider.libs.getProfileById(address);
+					cacheProfile(address, profile);
+				}
+			}
+
+			return profile;
+		} catch (e: any) {
+			console.error(e);
+		}
+	}
+
 	return (
 		<PortalContext.Provider
 			value={{
 				current,
 				updating,
+				fetchUserProfile,
 			}}
 		>
 			{props.children}
