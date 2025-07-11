@@ -10,6 +10,8 @@ jobs:
   publish:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v3
@@ -18,12 +20,12 @@ jobs:
       - run: npm run clean:install
       - run: npm run deploy:editor:main
       - run: npm run deploy:viewer
-        env:
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-
+  
   publish-staging:
     if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v3
@@ -32,5 +34,3 @@ jobs:
       - run: npm run clean:install
       - run: npm run deploy:editor:staging
       - run: npm run deploy:viewer
-        env:
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
