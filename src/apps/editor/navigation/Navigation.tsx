@@ -274,8 +274,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 			</S.LoadingWrapper>
 		);
 	}, [
-		showPortalDropdown,
-    languageKey,
+		showPortalDropdown, languageKey,
 		portalProvider.portals,
 		portalProvider.current?.id,
 		portalProvider.current?.name,

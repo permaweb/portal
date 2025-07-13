@@ -2,7 +2,7 @@ import React from 'react';
 
 import { language } from 'helpers/language';
 
-// Agrega más idiomas según sea necesario
+// Add more languages as needed
 type LanguageType = 'en' | 'es' | 'fr' | 'pt';
 
 interface LanguageContextState {
@@ -30,12 +30,10 @@ export function useLanguageProvider(): LanguageContextState {
 
 export function LanguageProvider(props: LanguageProviderProps) {
   const [current, setCurrent] = React.useState<LanguageType>(() => {
-    // Intenta obtener el idioma guardado en localStorage
     const savedLanguage = localStorage.getItem('appLanguage');
     return (savedLanguage as LanguageType) || 'en'; // Fallback a inglés
   });
 
-  // Persiste el cambio de idioma en localStorage
   const handleLanguageChange = (newLanguage: LanguageType) => {
     setCurrent(newLanguage);
     localStorage.setItem('appLanguage', newLanguage);
