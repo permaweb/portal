@@ -19,143 +19,159 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 import * as S from './styles';
 
 export default function Navigation(props: { open: boolean; toggle: () => void }) {
-	/* Confirm navigation from inside the post editor */
-	const { confirmNavigation } = useNavigationConfirm('post', 'Changes you made may not be saved.');
+  const { confirmNavigation } = useNavigationConfirm('post', 'Changes you made may not be saved.');
+  const portalProvider = usePortalProvider();
+  const languageProvider = useLanguageProvider();
+  const language = languageProvider.object[languageProvider.current];
 
-	const portalProvider = usePortalProvider();
+  const [languageKey, setLanguageKey] = React.useState(0);
+  const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
+  const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
 
-	const languageProvider = useLanguageProvider();
-	const language = languageProvider.object[languageProvider.current];
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newLanguage = e.target.value as 'en' | 'es';
+    languageProvider.setCurrent(newLanguage);
+    setLanguageKey(prev => prev + 1);
+    localStorage.setItem('preferredLanguage', newLanguage);
+  };
 
-	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
-	const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
+  React.useEffect(() => {
+    const savedLanguage = localStorage.getItem('preferredLanguage');
+    if (savedLanguage && languageProvider.current !== savedLanguage) {
+      languageProvider.setCurrent(savedLanguage as 'en' | 'es');
+    }
+  }, []);
 
-	const paths = React.useMemo(() => {
-		return [
-			{
-				path: portalProvider.current ? URLS.portalBase(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.portal,
-				label: language.home,
-			},
-			{
-				path: portalProvider.current ? URLS.portalSetup(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.setup,
-				label: language.setup,
-			},
-			{
-				path: portalProvider.current ? URLS.portalDesign(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.design,
-				label: language.design,
-			},
-			{
-				path: portalProvider.current ? URLS.portalPosts(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.posts,
-				label: language.posts,
-			},
-			{
-				path: portalProvider.current ? URLS.portalUsers(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.users,
-				label: language.users,
-			},
-			{
-				path: portalProvider.current ? URLS.portalDomains(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.domains,
-				label: language.domains,
-			},
-		];
-	}, [portalProvider.current?.id]);
+  const paths = React.useMemo(() => {
+    return [
+      {
+        path: portalProvider.current ? URLS.portalBase(portalProvider.current.id) : URLS.base,
+        icon: ASSETS.portal,
+        label: language?.home,
+      },
+      {
+        path: portalProvider.current ? URLS.portalSetup(portalProvider.current.id) : URLS.base,
+        icon: ASSETS.setup,
+        label: language?.setup,
+      },
+      {
+        path: portalProvider.current ? URLS.portalDesign(portalProvider.current.id) : URLS.base,
+        icon: ASSETS.design,
+        label: language?.design,
+      },
+      {
+        path: portalProvider.current ? URLS.portalPosts(portalProvider.current.id) : URLS.base,
+        icon: ASSETS.posts,
+        label: language?.posts,
+      },
+      {
+        path: portalProvider.current ? URLS.portalUsers(portalProvider.current.id) : URLS.base,
+        icon: ASSETS.users,
+        label: language?.users,
+      },
+      {
+        path: portalProvider.current ? URLS.portalDomains(portalProvider.current.id) : URLS.base,
+        icon: ASSETS.domains,
+        label: language?.domains,
+      },
+    ];
+  }, [portalProvider.current?.id, languageKey]);
 
-	function handleWindowResize() {
-		if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {
-			setDesktop(true);
-		} else {
-			setDesktop(false);
-		}
-	}
+  function handleWindowResize() {
+    if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {
+      setDesktop(true);
+    } else {
+      setDesktop(false);
+    }
+  }
 
-	const debouncedResize = React.useCallback(debounce(handleWindowResize, 0), []);
+  const debouncedResize = React.useCallback(debounce(handleWindowResize, 0), []);
 
-	React.useEffect(() => {
-		window.addEventListener('resize', debouncedResize);
+  React.useEffect(() => {
+    window.addEventListener('resize', debouncedResize);
+    return () => window.removeEventListener('resize', debouncedResize);
+  }, [debouncedResize]);
 
-		return () => {
-			window.removeEventListener('resize', debouncedResize);
-		};
-	}, [debouncedResize]);
+  const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, to: string) => {
+    e.preventDefault();
+    confirmNavigation(to);
+    if (!desktop) props.toggle();
+  };
 
-	const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, to: string) => {
-		e.preventDefault();
-		confirmNavigation(to);
-		if (!desktop) props.toggle();
-	};
+  const navigationToggle = React.useMemo(() => {
+    return (
+      <S.ToggleWrapper>
+        <IconButton
+          type={'primary'}
+          src={ASSETS.navigation}
+          handlePress={props.toggle}
+          dimensions={{
+            wrapper: 36.5,
+            icon: 23.5,
+          }}
+          tooltip={props.open ? language?.sidebarClose : language?.sidebarOpen}
+          tooltipPosition={props.open ? 'right' : 'bottom-left'}
+        />
+      </S.ToggleWrapper>
+    );
+  }, [props.open, languageKey]);
 
-	const navigationToggle = React.useMemo(() => {
-		return (
-			<S.ToggleWrapper>
-				<IconButton
-					type={'primary'}
-					src={ASSETS.navigation}
-					handlePress={props.toggle}
-					dimensions={{
-						wrapper: 36.5,
-						icon: 23.5,
-					}}
-					tooltip={props.open ? language.sidebarClose : language.sidebarOpen}
-					tooltipPosition={props.open ? 'right' : 'bottom-left'}
-				/>
-			</S.ToggleWrapper>
-		);
-	}, [props.open, portalProvider.current?.id, desktop]);
+  const panel = React.useMemo(() => {
+    const content = (
+      <>
+        <S.PanelHeader>{navigationToggle}</S.PanelHeader>
+        <S.PanelContent open={props.open} className={'fade-in scroll-wrapper'}>
+          {paths.map((element, index) => (
+            <Link
+              key={index}
+              to={element.path}
+              onClick={(e) => handleNavigate(e, element.path)}
+            >
+              <ReactSVG src={element.icon} />
+              {element.label}
+            </Link>
+          ))}
 
-	const panel = React.useMemo(() => {
-		const content = (
-			<>
-				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
-				<>
-					<S.PanelContent open={props.open} className={'fade-in scroll-wrapper'}>
-						{paths.map((element: { path: string; label: string; icon: string; target?: '_blank' }, index: number) => {
-							return (
-								<Link
-									key={index}
-									to={element.path}
-									target={element.target || ''}
-									onClick={(e) => handleNavigate(e, element.path)}
-								>
-									<ReactSVG src={element.icon} />
-									{element.label}
-								</Link>
-							);
-						})}
-					</S.PanelContent>
-					<S.PanelFooter open={props.open} className={'fade-in'}>
-						<Link to={URLS.docsIntro} onClick={(e) => handleNavigate(e, URLS.docsIntro)}>
-							<ReactSVG src={ASSETS.help} />
-							{language.helpCenter}
-						</Link>
-					</S.PanelFooter>
-				</>
-			</>
-		);
+		  <S.LanguageDivider />
+          <S.LanguageItem>
+            <ReactSVG src={ASSETS.language} />
+            <S.LanguageSelector
+              value={languageProvider.current}
+              onChange={handleLanguageChange}
+            >
+              <option value="en">English</option>
+              <option value="es">Español</option>
+            </S.LanguageSelector>
+          </S.LanguageItem>
+        </S.PanelContent>
+        <S.PanelFooter open={props.open} className={'fade-in'}>
+          <Link to={URLS.docsIntro} onClick={(e) => handleNavigate(e, URLS.docsIntro)}>
+            <ReactSVG src={ASSETS.help} />
+            {language?.helpCenter}
+          </Link>
+        </S.PanelFooter>
+      </>
+    );
 
-		if (desktop) {
-			return (
-				<S.Panel open={props.open} className={'fade-in'}>
-					{content}
-				</S.Panel>
-			);
-		} else {
-			return (
-				<>
-					<S.Panel open={props.open} className={'fade-in'}>
-						<CloseHandler active={props.open} disabled={!props.open} callback={() => props.toggle()}>
-							{content}
-						</CloseHandler>
-					</S.Panel>
-					<S.PanelOverlay open={props.open} />
-				</>
-			);
-		}
-	}, [props.open, desktop, portalProvider.current?.id]);
+    if (desktop) {
+      return (
+        <S.Panel key={`panel-${languageKey}`} open={props.open} className={'fade-in'}>
+          {content}
+        </S.Panel>
+      );
+    } else {
+      return (
+        <>
+          <S.Panel key={`panel-${languageKey}`} open={props.open} className={'fade-in'}>
+            <CloseHandler active={props.open} disabled={!props.open} callback={() => props.toggle()}>
+              {content}
+            </CloseHandler>
+          </S.Panel>
+          <S.PanelOverlay open={props.open} />
+        </>
+      );
+    }
+  }, [props.open, desktop, languageKey]);
 
 	const portal = React.useMemo(() => {
 		if (portalProvider.current?.id) {
@@ -177,7 +193,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						{showPortalDropdown && (
 							<S.PortalDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
 								<S.PDropdownHeader>
-									<p>{language.portals}</p>
+									<p>{language?.portals}</p>
 								</S.PDropdownHeader>
 								{portalProvider.portals && portalProvider.portals.length > 0 && (
 									<S.PDropdownBody>
@@ -207,7 +223,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										}}
 									>
 										<ReactSVG src={ASSETS.site} />
-										{language.goToSite}
+										{language?.goToSite}
 									</button>
 									<button
 										onClick={(e: any) => {
@@ -216,7 +232,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										}}
 									>
 										<ReactSVG src={ASSETS.portal} />
-										{language.portalReturn}
+										{language?.portalReturn}
 									</button>
 									<button
 										onClick={() => {
@@ -225,7 +241,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										}}
 									>
 										<ReactSVG src={ASSETS.write} />
-										{language.editPortal}
+										{language?.editPortal}
 									</button>
 									<button
 										onClick={() => {
@@ -234,11 +250,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										}}
 									>
 										<ReactSVG src={ASSETS.add} />
-										{language.createPortal}
+										{language?.createPortal}
 									</button>
 									<button onClick={(e: any) => handleNavigate(e, URLS.base)}>
 										<ReactSVG src={ASSETS.disconnect} />
-										{language.portalsReturn}
+										{language?.portalsReturn}
 									</button>
 								</S.PDropdownFooter>
 							</S.PortalDropdown>
@@ -246,7 +262,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 					</CloseHandler>
 					{portalProvider.updating && (
 						<S.PortalUpdateWrapper>
-							<span>{`${language.updating}...`}</span>
+							<span>{`${language?.updating}...`}</span>
 						</S.PortalUpdateWrapper>
 					)}
 				</S.PortalWrapper>
@@ -254,31 +270,32 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		}
 		return (
 			<S.LoadingWrapper>
-				<span>{`${language.loading}...`}</span>
+				<span>{`${language?.loading}...`}</span>
 			</S.LoadingWrapper>
 		);
 	}, [
 		showPortalDropdown,
+    languageKey,
 		portalProvider.portals,
 		portalProvider.current?.id,
 		portalProvider.current?.name,
 		portalProvider.updating,
 	]);
 
-	return (
-		<>
-			{panel}
-			<S.Header navigationOpen={props.open} className={'fade-in'}>
-				<S.Content>
-					<S.C1Wrapper>
-						{!props.open && navigationToggle}
-						{portal}
-					</S.C1Wrapper>
-					<S.ActionsWrapper>
-						<WalletConnect app={'editor'} />
-					</S.ActionsWrapper>
-				</S.Content>
-			</S.Header>
-		</>
-	);
+  return (
+    <>
+      {panel}
+      <S.Header navigationOpen={props.open} className={'fade-in'}>
+        <S.Content>
+          <S.C1Wrapper>
+            {!props.open && navigationToggle}
+            {portal}
+          </S.C1Wrapper>
+          <S.ActionsWrapper>
+            <WalletConnect app={'editor'} />
+          </S.ActionsWrapper>
+        </S.Content>
+      </S.Header>
+    </>
+  );
 }

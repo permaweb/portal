@@ -29,18 +29,18 @@ export default function Portal() {
 	return (
 		<S.Wrapper className={'fade-in'}>
 			<ViewHeader
-				header={language.portalHeader}
+				header={language?.portalHeader}
 				actions={[
 					<Button
 						type={'primary'}
-						label={language.goToSite}
+						label={language?.goToSite}
 						handlePress={() => window.open(getTxEndpoint(portalProvider.current.id))}
 						disabled={!portalProvider.current}
 						iconLeftAlign
 					/>,
 					<Button
 						type={'alt1'}
-						label={language.createPost}
+						label={language?.createPost}
 						handlePress={() => navigate(URLS.postCreateArticle(portalProvider.current.id))}
 						disabled={unauthorized || !portalProvider.current}
 						icon={ASSETS.add}
@@ -52,10 +52,10 @@ export default function Portal() {
 				<S.SectionWrapper>
 					<S.SetupSection className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
-							<p>{language.setup}</p>
+							<p>{language?.setup}</p>
 							<Button
 								type={'alt3'}
-								label={language.setupLink}
+								label={language?.setupLink}
 								handlePress={() => navigate(URLS.portalSetup(portalProvider.current.id))}
 							/>
 						</S.SectionHeader>
@@ -65,10 +65,10 @@ export default function Portal() {
 					</S.SetupSection>
 					<S.DesignSection className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
-							<p>{language.design}</p>
+							<p>{language?.design}</p>
 							<Button
 								type={'alt3'}
-								label={language.designLink}
+								label={language?.designLink}
 								handlePress={() => navigate(URLS.portalDesign(portalProvider.current.id))}
 							/>
 						</S.SectionHeader>
@@ -90,10 +90,10 @@ export default function Portal() {
 					</S.UsersSection>
 					<S.DomainSection className={'border-wrapper-alt3'}>
 						<S.SectionHeader>
-							<p>{language.domains}</p>
+							<p>{language?.domains}</p>
 							<Button
 								type={'alt3'}
-								label={language.domainsLink}
+								label={language?.domainsLink}
 								handlePress={() => navigate(URLS.portalDomains(portalProvider.current.id))}
 							/>
 						</S.SectionHeader>

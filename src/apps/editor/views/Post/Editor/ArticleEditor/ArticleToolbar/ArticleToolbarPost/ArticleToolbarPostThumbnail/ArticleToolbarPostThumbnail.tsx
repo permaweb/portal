@@ -64,7 +64,7 @@ export default function ArticleToolbarPostThumbnail() {
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
-		setResponse({ status: 'success', message: `${language.thumbnailUpdated}!` });
+		setResponse({ status: 'success', message: `${language?.thumbnailUpdated}!` });
 	};
 
 	async function handleUpload() {
@@ -74,7 +74,7 @@ export default function ArticleToolbarPostThumbnail() {
 		try {
 			const tx = await permawebProvider.libs.resolveTransaction(thumbnailData);
 			handleCurrentPostUpdate({ field: 'thumbnail', value: tx });
-			setUploadResponse({ status: 'success', message: `${language.thumbnailUpdated}!` });
+			setUploadResponse({ status: 'success', message: `${language?.thumbnailUpdated}!` });
 			handleClear(null);
 		} catch (e: any) {
 			handleClear(e.message ?? 'Error uploading thumbnail');
@@ -112,7 +112,7 @@ export default function ArticleToolbarPostThumbnail() {
 		return (
 			<>
 				<ReactSVG src={ASSETS.image} />
-				<span>{language.uploadFeaturedImage}</span>
+				<span>{language?.uploadFeaturedImage}</span>
 			</>
 		);
 	}
@@ -139,7 +139,7 @@ export default function ArticleToolbarPostThumbnail() {
 				<S.FooterWrapper>
 					<Button
 						type={'alt2'}
-						label={language.remove}
+						label={language?.remove}
 						handlePress={() => handleCurrentPostUpdate({ field: 'thumbnail', value: null })}
 						disabled={!currentPost?.data?.thumbnail}
 						loading={false}
@@ -154,19 +154,19 @@ export default function ArticleToolbarPostThumbnail() {
 			)}
 			{showUploadConfirmation && thumbnailData && (
 				<Modal
-					header={`${language.upload} ${thumbnailData.name}`}
-					handleClose={() => handleClear(language.uploadCancelled)}
+					header={`${language?.upload} ${thumbnailData.name}`}
+					handleClose={() => handleClear(language?.uploadCancelled)}
 					className={'modal-wrapper'}
 				>
 					<TurboUploadConfirmation
 						uploadCost={uploadCost}
 						uploadDisabled={unauthorized || loading}
 						handleUpload={handleUpload}
-						handleCancel={() => handleClear(language.uploadCancelled)}
+						handleCancel={() => handleClear(language?.uploadCancelled)}
 					/>
 				</Modal>
 			)}
-			{loading && <Loader message={`${language.loading}...`} />}
+			{loading && <Loader message={`${language?.loading}...`} />}
 			{uploadResponse && (
 				<Notification
 					type={uploadResponse.status}

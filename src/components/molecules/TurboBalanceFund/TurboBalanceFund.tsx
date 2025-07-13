@@ -66,9 +66,9 @@ function CheckoutForm(props: {
 				} else {
 					if (paymentResponse && paymentResponse.paymentIntent && paymentResponse.paymentIntent.status) {
 						if (paymentResponse.paymentIntent.status === 'succeeded') {
-							setResult({ status: 'success', message: language.successfullyFunded });
+							setResult({ status: 'success', message: language?.successfullyFunded });
 						} else {
-							setResult({ status: 'warning', message: language.errorOccurred });
+							setResult({ status: 'warning', message: language?.errorOccurred });
 						}
 					}
 				}
@@ -86,21 +86,21 @@ function CheckoutForm(props: {
 			</S.CheckoutForm>
 			<S.COWrapperAlt className={'border-wrapper-alt3'}>
 				<S.COHeader>
-					<span>{language.amount}</span>
+					<span>{language?.amount}</span>
 				</S.COHeader>
 				<span>{`${formatUSDAmount(props.amount)} = ${formatTurboAmount(props.wincConversion)}`}</span>
 			</S.COWrapperAlt>
 			<S.MActions>
 				<Button
 					type={'primary'}
-					label={language.goBack}
+					label={language?.goBack}
 					handlePress={props.handleGoBack}
 					disabled={loading || result !== null}
 					noMinWidth
 				/>
 				<Button
 					type={'alt1'}
-					label={language.submit}
+					label={language?.submit}
 					handlePress={handleSubmit}
 					disabled={loading || result !== null}
 					loading={loading}
@@ -180,7 +180,7 @@ export default function TurboBalanceFund(props: { handleClose: () => void }) {
 	}, [arProvider.walletAddress, checkoutStep]);
 
 	function getInvalidAmount() {
-		if (amount && (amount < 5 || amount > 10000)) return { status: true, message: language.invalidAmountTurbo };
+		if (amount && (amount < 5 || amount > 10000)) return { status: true, message: language?.invalidAmountTurbo };
 		return { status: false, message: null };
 	}
 
@@ -197,12 +197,12 @@ export default function TurboBalanceFund(props: { handleClose: () => void }) {
 				return (
 					<S.MWrapper>
 						<S.MInfo>
-							<p>{language.fundTurboBalanceInfoHeader}</p>
-							<span>{language.fundTurboBalanceInfoDetail}</span>
+							<p>{language?.fundTurboBalanceInfoHeader}</p>
+							<span>{language?.fundTurboBalanceInfoDetail}</span>
 						</S.MInfo>
 						<S.DWrapper>
 							<S.DHeader>
-								<span>{language.amount}</span>
+								<span>{language?.amount}</span>
 							</S.DHeader>
 							<S.DElements>
 								{DEFAULT_AMOUNTS.map((defaultAmount: number, index: number) => {
@@ -227,7 +227,7 @@ export default function TurboBalanceFund(props: { handleClose: () => void }) {
 						</S.DWrapper>
 						<S.CWrapper>
 							<FormField
-								label={`${language.customAmount} (${language.customAmountTurboInfo})`}
+								label={`${language?.customAmount} (${language?.customAmountTurboInfo})`}
 								type={'number'}
 								value={customAmount}
 								onChange={(e: any) => setCustomAmount(e.target.value)}
@@ -237,25 +237,25 @@ export default function TurboBalanceFund(props: { handleClose: () => void }) {
 						</S.CWrapper>
 						<S.COWrapper className={'border-wrapper-alt3'}>
 							<S.COHeader>
-								<span>{language.conversion}</span>
+								<span>{language?.conversion}</span>
 							</S.COHeader>
 							<span>
 								{fetchingConversion
-									? `${language.loading}...`
+									? `${language?.loading}...`
 									: `${formatUSDAmount(amount)} = ${formatTurboAmount(wincConversion)}`}
 							</span>
 						</S.COWrapper>
 						<S.MActions>
 							<Button
 								type={'primary'}
-								label={language.cancel}
+								label={language?.cancel}
 								handlePress={props.handleClose}
 								disabled={false}
 								noMinWidth
 							/>
 							<Button
 								type={'alt1'}
-								label={language.next}
+								label={language?.next}
 								handlePress={() => setCheckoutStep('payment')}
 								disabled={amount <= 0 || getInvalidAmount().status || !currency || !arProvider.walletAddress}
 								loading={false}
@@ -270,8 +270,8 @@ export default function TurboBalanceFund(props: { handleClose: () => void }) {
 					return (
 						<S.MWrapper>
 							<S.MInfo>
-								<p>{language.fundTurboPaymentHeader}</p>
-								<span>{language.fundTurboPaymentDetail}</span>
+								<p>{language?.fundTurboPaymentHeader}</p>
+								<span>{language?.fundTurboPaymentDetail}</span>
 							</S.MInfo>
 							<Elements
 								stripe={stripePromise}

@@ -100,7 +100,7 @@ export default function PortalManager(props: {
 						arProvider.wallet
 					);
 
-					response = `${language.portalUpdated}!`;
+					response = `${language?.portalUpdated}!`;
 
 					portalProvider.refreshCurrentPortal();
 				} else {
@@ -153,7 +153,7 @@ export default function PortalManager(props: {
 
 					console.log(`Theme update: ${themeUpdateId}`);
 
-					response = `${language.portalCreated}!`;
+					response = `${language?.portalCreated}!`;
 
 					navigate(URLS.portalBase(portalId));
 				}
@@ -175,7 +175,7 @@ export default function PortalManager(props: {
 				});
 			} catch (e: any) {
 				setPortalResponse({
-					message: e.message ?? language.errorUpdatingPortal,
+					message: e.message ?? language?.errorUpdatingPortal,
 					status: 'warning',
 				});
 			}
@@ -230,7 +230,7 @@ export default function PortalManager(props: {
 							<S.Form>
 								<S.TForm>
 									<FormField
-										label={language.name}
+										label={language?.name}
 										value={name}
 										onChange={(e: any) => setName(e.target.value)}
 										disabled={loading}
@@ -244,7 +244,7 @@ export default function PortalManager(props: {
 								{props.handleClose && (
 									<Button
 										type={'primary'}
-										label={language.close}
+										label={language?.close}
 										handlePress={() => props.handleClose()}
 										disabled={loading}
 										loading={false}
@@ -252,7 +252,7 @@ export default function PortalManager(props: {
 								)}
 								<Button
 									type={'alt1'}
-									label={language.save}
+									label={language?.save}
 									handlePress={handleSubmit}
 									disabled={!name || loading}
 									loading={false}
@@ -264,8 +264,8 @@ export default function PortalManager(props: {
 						<Loader
 							message={
 								props.portal && props.portal.id
-									? `${language.portalUpdatingInfo}...`
-									: `${language.portalCreatingInfo}...`
+									? `${language?.portalUpdatingInfo}...`
+									: `${language?.portalCreatingInfo}...`
 							}
 						/>
 					)}

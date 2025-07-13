@@ -34,16 +34,16 @@ export default function PortalDesign() {
 
 		switch (panelType) {
 			case 'themes':
-				header = language.themes;
+				header = language?.themes;
 				component = <Themes />;
 				useAction = true;
 				break;
 			case 'fonts':
-				header = language.fonts;
+				header = language?.fonts;
 				component = <Fonts />;
 				break;
 			case 'logo':
-				header = language.siteLogo;
+				header = language?.siteLogo;
 				component = <Media portal={portalProvider.current} type={"logo"} />;
 				break;
 			default:
@@ -64,7 +64,7 @@ export default function PortalDesign() {
 					{component}
 					{/* {useAction && (
 						<S.PanelActionsWrapper>
-							<Button type={'primary'} label={language.close} handlePress={() => setShowPanel(false)} />
+							<Button type={'primary'} label={language?.close} handlePress={() => setShowPanel(false)} />
 						</S.PanelActionsWrapper>
 					)} */}
 				</S.PanelBodyWrapper>
@@ -90,9 +90,9 @@ export default function PortalDesign() {
 	return (
 		<>
 			<S.Wrapper>
-				{getAction(language.themes, 'themes')}
-				{getAction(language.fonts, 'fonts')}
-				{getAction(language.siteLogo, 'logo')}
+				{getAction(language?.themes, 'themes')}
+				{getAction(language?.fonts, 'fonts')}
+				{getAction(language?.siteLogo, 'logo')}
 			</S.Wrapper>
 			{panel}
 		</>

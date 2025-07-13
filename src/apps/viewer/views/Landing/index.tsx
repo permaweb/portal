@@ -87,7 +87,7 @@ export default function Landing() {
 			return (
 				<S.PanelWrapper>
 					<S.PanelHeader>
-						<span>{language.mostRead}</span>
+						<span>{language?.mostRead}</span>
 					</S.PanelHeader>
 					<PostList posts={panelPosts} hideImages />
 				</S.PanelWrapper>

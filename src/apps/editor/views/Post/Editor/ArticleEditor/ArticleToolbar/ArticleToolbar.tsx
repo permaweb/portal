@@ -44,7 +44,7 @@ export default function ArticleToolbar(props: {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const TABS = [{ label: language.post }, { label: language.blocks }];
+	const TABS = [{ label: language?.post }, { label: language?.blocks }];
 
 	const titleRef = React.useRef<any>(null);
 	const blockRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
@@ -63,7 +63,7 @@ export default function ArticleToolbar(props: {
 		blocks: { type: ArticleBlockEnum; label: string; icon: string }[];
 	}[] = [
 		{
-			label: language.text,
+			label: language?.text,
 			blocks: [
 				ARTICLE_BLOCKS[ArticleBlockEnum.Paragraph],
 				ARTICLE_BLOCKS[ArticleBlockEnum.Quote],
@@ -73,7 +73,7 @@ export default function ArticleToolbar(props: {
 			],
 		},
 		{
-			label: language.headers,
+			label: language?.headers,
 			blocks: [
 				ARTICLE_BLOCKS[ArticleBlockEnum.Header1],
 				ARTICLE_BLOCKS[ArticleBlockEnum.Header2],
@@ -84,7 +84,7 @@ export default function ArticleToolbar(props: {
 			],
 		},
 		{
-			label: language.media,
+			label: language?.media,
 			blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image], ARTICLE_BLOCKS[ArticleBlockEnum.Video]],
 		},
 	];
@@ -407,7 +407,7 @@ export default function ArticleToolbar(props: {
 				<>
 					<Button
 						type={'warning'}
-						label={language.reject}
+						label={language?.reject}
 						handlePress={() => props.handleRequestUpdate('Reject')}
 						active={false}
 						disabled={primaryDisabled || requestUnauthorized}
@@ -415,7 +415,7 @@ export default function ArticleToolbar(props: {
 					/>
 					<Button
 						type={'indicator'}
-						label={language.approve}
+						label={language?.approve}
 						handlePress={() => props.handleRequestUpdate('Approve')}
 						active={false}
 						disabled={primaryDisabled || requestUnauthorized}
@@ -428,7 +428,7 @@ export default function ArticleToolbar(props: {
 		return (
 			<Button
 				type={'alt1'}
-				label={language.save}
+				label={language?.save}
 				handlePress={props.handleSubmit}
 				active={false}
 				disabled={primaryDisabled}
@@ -451,7 +451,7 @@ export default function ArticleToolbar(props: {
 						type={'primary'}
 						src={ASSETS.close}
 						handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
-						tooltip={language.closeToolkit}
+						tooltip={language?.closeToolkit}
 						tooltipPosition={'bottom-right'}
 						dimensions={{
 							icon: 12.5,
@@ -487,14 +487,14 @@ export default function ArticleToolbar(props: {
 						ref={titleRef}
 						value={currentPost.data.title ?? ''}
 						onChange={(e: any) => handleCurrentPostUpdate({ field: 'title', value: e.target.value })}
-						placeholder={language.untitledPost}
+						placeholder={language?.untitledPost}
 						disabled={currentPost.editor.loading.active || !portalProvider.current?.id}
 					/>
 				</S.TitleWrapper>
 				<S.EndActions>
 					<Button
 						type={'primary'}
-						label={language.toolkit}
+						label={language?.toolkit}
 						handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
 						active={currentPost.editor.panelOpen}
 						disabled={currentPost.editor.loading.active}
@@ -505,7 +505,7 @@ export default function ArticleToolbar(props: {
 					/>
 					<Button
 						type={'primary'}
-						label={language.layout}
+						label={language?.layout}
 						handlePress={() =>
 							handleCurrentPostUpdate({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode })
 						}

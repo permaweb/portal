@@ -66,7 +66,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				else profile = await permawebProvider.libs.getProfileByWalletAddress(walletAddress);
 
 				if (!profile?.id) {
-					setResponse({ status: 'warning', message: language.noProfileFound });
+					setResponse({ status: 'warning', message: language?.noProfileFound });
 					setLoading(false);
 					return;
 				}
@@ -82,7 +82,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 
 				console.log(`Roles update: ${rolesUpdate}`);
 
-				setResponse({ status: 'success', message: `${props.user ? language.userUpdated : language.userAdded}!` });
+				setResponse({ status: 'success', message: `${props.user ? language?.userUpdated : language?.userAdded}!` });
 				portalProvider.refreshCurrentPortal();
 				props.handleClose();
 			} catch (e: any) {
@@ -96,7 +96,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 		<>
 			<S.Wrapper>
 				<FormField
-					label={language.walletAddress}
+					label={language?.walletAddress}
 					value={walletAddress}
 					onChange={(e) => {
 						setWalletAddress(e.target.value);
@@ -107,7 +107,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 					hideErrorMessage
 				/>
 				<Select
-					label={language.role}
+					label={language?.role}
 					activeOption={role}
 					setActiveOption={(option) => setRole(option)}
 					options={roleOptions}
@@ -116,7 +116,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				<S.ActionsWrapper>
 					<Button
 						type={'primary'}
-						label={props.user ? language.save : language.add}
+						label={props.user ? language?.save : language?.add}
 						handlePress={handleSubmit}
 						disabled={loading || !walletAddress || !checkValidAddress(walletAddress)}
 						loading={loading}

@@ -22,7 +22,7 @@ export default function ArticleToolbarPost(props: {
 		<S.Wrapper>
 			<S.Section>
 				<S.SectionHeader>
-					<p>{language.featuredImage}</p>
+					<p>{language?.featuredImage}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
 					<ArticleToolbarPostThumbnail />
@@ -30,7 +30,7 @@ export default function ArticleToolbarPost(props: {
 			</S.Section>
 			<S.Section>
 				<S.SectionHeader>
-					<p>{language.description}</p>
+					<p>{language?.description}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
 					<ArticleToolbarPostDescription />
@@ -38,7 +38,7 @@ export default function ArticleToolbarPost(props: {
 			</S.Section>
 			<S.Section>
 				<S.SectionHeaderInput>
-					<p>{language.categories}</p>
+					<p>{language?.categories}</p>
 				</S.SectionHeaderInput>
 				<S.SectionBody>
 					<Categories categories={props.categories} setCategories={props.setCategories} selectOnAdd skipAuthCheck />
@@ -46,7 +46,7 @@ export default function ArticleToolbarPost(props: {
 			</S.Section>
 			<S.TopicsSection>
 				<S.SectionHeaderInput>
-					<p>{language.topics}</p>
+					<p>{language?.topics}</p>
 				</S.SectionHeaderInput>
 				<S.SectionBody>
 					<Topics topics={props.topics} setTopics={props.setTopics} selectOnAdd skipAuthCheck />
@@ -54,7 +54,7 @@ export default function ArticleToolbarPost(props: {
 			</S.TopicsSection>
 			<S.ContributeSection>
 				<S.SectionHeader>
-					<p>{language.contribute}</p>
+					<p>{language?.contribute}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
 					<ArticleToolbarPostContribute />

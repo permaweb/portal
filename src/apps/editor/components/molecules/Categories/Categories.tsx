@@ -69,7 +69,7 @@ export default function Categories(props: {
 				};
 
 				if (isDuplicate(categoryOptions, newCategoryName)) {
-					setCategoryResponse({ status: 'warning', message: language.categoryDuplicateError });
+					setCategoryResponse({ status: 'warning', message: language?.categoryDuplicateError });
 					setCategoryLoading(false);
 					return;
 				}
@@ -106,7 +106,7 @@ export default function Categories(props: {
 				if (props.selectOnAdd) props.setCategories([...props.categories, newCategory]);
 
 				setCategoryOptions(updatedCategories);
-				setCategoryResponse({ status: 'success', message: `${language.categoryAdded}!` });
+				setCategoryResponse({ status: 'success', message: `${language?.categoryAdded}!` });
 				setNewCategoryName('');
 				setParentCategory(null);
 			} catch (e: any) {
@@ -166,7 +166,7 @@ export default function Categories(props: {
 				console.log(`Category update: ${categoryUpdateId}`);
 
 				setCategoryOptions(updatedCategories);
-				setCategoryResponse({ status: 'success', message: `${language.categoriesUpdated}!` });
+				setCategoryResponse({ status: 'success', message: `${language?.categoriesUpdated}!` });
 				setShowDeleteConfirmation(false);
 			} catch (e: any) {
 				setCategoryResponse({ status: 'warning', message: e.message ?? 'Error deleting categories' });
@@ -256,22 +256,22 @@ export default function Categories(props: {
 	function getParentDisplayLabel() {
 		if (parentCategory && categoryOptions) {
 			const parent = findCategoryById(categoryOptions, parentCategory);
-			return parent ? parent.name : language.selectParentCategory;
+			return parent ? parent.name : language?.selectParentCategory;
 		}
-		return language.selectParentCategory;
+		return language?.selectParentCategory;
 	}
 
 	function getCategories() {
 		if (!categoryOptions) {
 			return (
 				<S.LoadingWrapper>
-					<p>{`${language.gettingCategories}...`}</p>
+					<p>{`${language?.gettingCategories}...`}</p>
 				</S.LoadingWrapper>
 			);
 		} else if (categoryOptions.length <= 0) {
 			return (
 				<S.WrapperEmpty>
-					<p>{language.noCategoriesFound}</p>
+					<p>{language?.noCategoriesFound}</p>
 				</S.WrapperEmpty>
 			);
 		}
@@ -314,7 +314,7 @@ export default function Categories(props: {
 												setShowParentOptions(false);
 											}}
 										>
-											<span>{language.none}</span>
+											<span>{language?.none}</span>
 										</S.ParentCategoryOption>
 										<S.Divider />
 										{renderParentCategoryOptions(categoryOptions)}
@@ -326,7 +326,7 @@ export default function Categories(props: {
 					<S.CategoriesAddAction>
 						<Button
 							type={'alt4'}
-							label={language.add}
+							label={language?.add}
 							handlePress={addCategory}
 							disabled={unauthorized || !newCategoryName || categoryLoading}
 							loading={categoryLoading}
@@ -347,11 +347,11 @@ export default function Categories(props: {
 				{props.showActions && (
 					<S.CategoriesFooter>
 						{props.closeAction && (
-							<Button type={'alt3'} label={language.close} handlePress={() => props.closeAction()} />
+							<Button type={'alt3'} label={language?.close} handlePress={() => props.closeAction()} />
 						)}
 						<Button
 							type={'alt3'}
-							label={language.remove}
+							label={language?.remove}
 							handlePress={() => setShowDeleteConfirmation(true)}
 							disabled={unauthorized || !props.categories?.length || categoryLoading}
 							loading={false}
@@ -363,10 +363,10 @@ export default function Categories(props: {
 				)}
 			</S.Wrapper>
 			{showDeleteConfirmation && (
-				<Modal header={language.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
+				<Modal header={language?.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
 					<S.ModalWrapper>
 						<S.ModalBodyWrapper>
-							<p>{language.categoryDeleteConfirmationInfo}</p>
+							<p>{language?.categoryDeleteConfirmationInfo}</p>
 							<S.ModalBodyElements>
 								{props.categories.map((category: PortalCategoryType, index: number) => {
 									return (
@@ -380,13 +380,13 @@ export default function Categories(props: {
 						<S.ModalActionsWrapper>
 							<Button
 								type={'primary'}
-								label={language.cancel}
+								label={language?.cancel}
 								handlePress={() => setShowDeleteConfirmation(false)}
 								disabled={categoryLoading}
 							/>
 							<Button
 								type={'primary'}
-								label={language.categoryDeleteConfirmation}
+								label={language?.categoryDeleteConfirmation}
 								handlePress={() => deleteCategories()}
 								disabled={!props.categories?.length || categoryLoading}
 								loading={categoryLoading}

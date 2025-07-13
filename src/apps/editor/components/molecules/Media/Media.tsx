@@ -107,7 +107,7 @@ export default function Media(props: {
 
 					console.log(`Portal update: ${portalUpdateId}`);
 
-					response = props.type === 'icon' ? `${language.iconUpdated}!` : `${language.logoUpdated}!`;
+					response = props.type === 'icon' ? `${language?.iconUpdated}!` : `${language?.logoUpdated}!`;
 
 					if (opts?.remove) setMedia(null);
 
@@ -117,7 +117,7 @@ export default function Media(props: {
 					try {
 						const mediaId = await permawebProvider.libs.resolveTransaction(media);
 						props.onMediaUpload(mediaId);
-						response = `${language.mediaUploaded}!`;
+						response = `${language?.mediaUploaded}!`;
 					} catch (e: any) {
 						console.error(`Failed to upload ${props.type}: ${e.message}`);
 						throw e;
@@ -134,7 +134,7 @@ export default function Media(props: {
 				clearUploadState();
 			} catch (e: any) {
 				setUploadResponse({
-					message: e.message ?? language.errorUpdatingPortal,
+					message: e.message ?? language?.errorUpdatingPortal,
 					status: 'warning',
 				});
 			}
@@ -188,7 +188,7 @@ export default function Media(props: {
 								wrapper: 20,
 								icon: 11.5,
 							}}
-							tooltip={language.remove}
+							tooltip={language?.remove}
 							tooltipPosition={'bottom-right'}
 						/>
 					</S.RemoveWrapper>
@@ -198,7 +198,7 @@ export default function Media(props: {
 		}
 
 		const assetSrc = props.type === 'icon' ? ASSETS.icon : ASSETS.image;
-		const uploadText = props.type === 'icon' ? language.uploadIcon : language.uploadLogo;
+		const uploadText = props.type === 'icon' ? language?.uploadIcon : language?.uploadLogo;
 
 		return (
 			<>
@@ -240,12 +240,12 @@ export default function Media(props: {
 							</S.PWrapper>
 							{isIcon && (
 								<S.SActions>
-									<p>{language.siteIconInfo}</p>
+									<p>{language?.siteIconInfo}</p>
 									{!props.hideActions && (
 										<S.SAction>
 											<Button
 												type={'alt3'}
-												label={language.cancel}
+												label={language?.cancel}
 												handlePress={() => {
 													setMedia(currentMedia && checkValidAddress(currentMedia) ? currentMedia : null);
 												}}
@@ -254,7 +254,7 @@ export default function Media(props: {
 											/>
 											<Button
 												type={'alt4'}
-												label={language.save}
+												label={language?.save}
 												handlePress={() => handleSubmit()}
 												disabled={
 													unauthorized || loading || !media || (typeof media === 'string' && checkValidAddress(media))
@@ -269,7 +269,7 @@ export default function Media(props: {
 								<S.SAction>
 									<Button
 										type={'alt3'}
-										label={language.cancel}
+										label={language?.cancel}
 										handlePress={() => {
 											setMedia(currentMedia && checkValidAddress(currentMedia) ? currentMedia : null);
 										}}
@@ -278,7 +278,7 @@ export default function Media(props: {
 									/>
 									<Button
 										type={'alt4'}
-										label={language.save}
+										label={language?.save}
 										handlePress={() => handleSubmit()}
 										disabled={
 											unauthorized || loading || !media || (typeof media === 'string' && checkValidAddress(media))
@@ -291,7 +291,7 @@ export default function Media(props: {
 					</S.Wrapper>
 					{showUploadConfirmation && (
 						<Modal
-							header={`${language.upload} ${media instanceof File ? media.name : 'Media'}`}
+							header={`${language?.upload} ${media instanceof File ? media.name : 'Media'}`}
 							handleClose={() => handleClearUpload()}
 							className={'modal-wrapper'}
 						>
@@ -307,24 +307,24 @@ export default function Media(props: {
 					)}
 					{showRemoveConfirmation && (
 						<Modal
-							header={isIcon ? language.removeIcon : language.removeLogo}
+							header={isIcon ? language?.removeIcon : language?.removeLogo}
 							handleClose={() => setShowRemoveConfirmation(false)}
 						>
 							<S.MWrapper>
 								<S.MInfo>
-									<p>{isIcon ? language.iconDeleteConfirmationInfo : language.logoDeleteConfirmationInfo}</p>
+									<p>{isIcon ? language?.iconDeleteConfirmationInfo : language?.logoDeleteConfirmationInfo}</p>
 								</S.MInfo>
 								<S.MActions>
 									<Button
 										type={'primary'}
-										label={language.cancel}
+										label={language?.cancel}
 										handlePress={() => setShowRemoveConfirmation(false)}
 										disabled={false}
 										loading={false}
 									/>
 									<Button
 										type={'primary'}
-										label={isIcon ? language.iconDeleteConfirmation : language.logoDeleteConfirmation}
+										label={isIcon ? language?.iconDeleteConfirmation : language?.logoDeleteConfirmation}
 										handlePress={() => handleRemoveMedia()}
 										disabled={unauthorized || loading}
 										loading={false}
@@ -336,7 +336,7 @@ export default function Media(props: {
 							</S.MWrapper>
 						</Modal>
 					)}
-					{loading && <Loader message={`${language.loading}...`} />}
+					{loading && <Loader message={`${language?.loading}...`} />}
 				</>
 			);
 		}
