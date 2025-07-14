@@ -44,7 +44,7 @@ export default function ArticleEditor(props: {
 				if (assetId) {
 					if (!checkValidAddress(assetId)) navigate(URLS.postCreateArticle(portalProvider.current.id));
 
-					handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language.loadingPost}...` } });
+					handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language?.loadingPost}...` } });
 					try {
 						const response = await permawebProvider.libs.getAtomicAsset(assetId);
 
@@ -326,7 +326,7 @@ export default function ArticleEditor(props: {
 						</DragDropContext>
 					) : (
 						<S.BlocksEmpty className={'fade-in'}>
-							<span>{language.blocksEmpty}</span>
+							<span>{language?.blocksEmpty}</span>
 						</S.BlocksEmpty>
 					)}
 				</S.EditorWrapper>

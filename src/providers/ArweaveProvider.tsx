@@ -11,6 +11,7 @@ import { WalletEnum } from 'helpers/types';
 const WALLET_PERMISSIONS = ['ACCESS_ADDRESS', 'ACCESS_PUBLIC_KEY', 'SIGN_TRANSACTION', 'DISPATCH', 'SIGNATURE'];
 
 interface ArweaveContextState {
+	[x: string]: any;
 	wallet: any;
 	walletAddress: string | null;
 	walletType: WalletEnum | null;

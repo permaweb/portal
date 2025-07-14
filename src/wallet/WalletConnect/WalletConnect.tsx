@@ -73,7 +73,7 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 
 	React.useEffect(() => {
 		if (!showWallet) {
-			setLabel(`${language.loading}...`);
+			setLabel(`${language?.loading}...`);
 		} else {
 			if (arProvider.walletAddress) {
 				if (permawebProvider.profile && permawebProvider.profile.username) {
@@ -82,7 +82,7 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 					setLabel(formatAddress(arProvider.walletAddress, false));
 				}
 			} else {
-				setLabel(language.connect);
+				setLabel(language?.connect);
 			}
 		}
 	}, [showWallet, arProvider.walletAddress, permawebProvider.profile]);
@@ -126,17 +126,17 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 
 							<S.DBalanceWrapper>
 								<S.DBalanceHeader>
-									<p>{language.uploadBalance}</p>
+									<p>{language?.uploadBalance}</p>
 								</S.DBalanceHeader>
 								<S.DBalanceBody>
 									<p>
 										{arProvider.turboBalance !== null
-											? `${getARAmountFromWinc(arProvider.turboBalance)} ${language.credits}`
-											: `${language.loading}...`}
+											? `${getARAmountFromWinc(arProvider.turboBalance)} ${language?.credits}`
+											: `${language?.loading}...`}
 									</p>
 									<Button
 										type={'alt3'}
-										label={language.add}
+										label={language?.add}
 										handlePress={() => setShowFundUpload(true)}
 										icon={ASSETS.add}
 										iconLeftAlign
@@ -147,19 +147,19 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 							<S.DBodyWrapper>
 								<li onClick={() => setShowProfileManager(true)}>
 									<ReactSVG src={ASSETS.write} />
-									{language.profile}
+									{language?.profile}
 								</li>
 								{availableThemes && (
 									<li onClick={() => setShowThemeSelector(true)}>
 										<ReactSVG src={ASSETS.design} />
-										{language.appearance}
+										{language?.appearance}
 									</li>
 								)}
 							</S.DBodyWrapper>
 							<S.DFooterWrapper>
 								<li onClick={handleDisconnect}>
 									<ReactSVG src={ASSETS.disconnect} />
-									{language.disconnect}
+									{language?.disconnect}
 								</li>
 							</S.DFooterWrapper>
 						</S.Dropdown>
@@ -168,7 +168,7 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 			</S.Wrapper>
 			<Panel
 				open={showProfileManager}
-				header={permawebProvider.profile?.id ? language.editProfile : `${language.createProfile}!`}
+				header={permawebProvider.profile?.id ? language?.editProfile : `${language?.createProfile}!`}
 				handleClose={() => setShowProfileManager(false)}
 				width={575}
 				closeHandlerDisabled
@@ -183,7 +183,7 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 			<Panel
 				open={showFundUpload}
 				width={575}
-				header={language.fundTurboBalance}
+				header={language?.fundTurboBalance}
 				handleClose={() => setShowFundUpload(false)}
 				className={'modal-wrapper'}
 			>
@@ -193,7 +193,7 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 				<Panel
 					open={showThemeSelector}
 					width={430}
-					header={language.chooseAppearance}
+					header={language?.chooseAppearance}
 					handleClose={() => setShowThemeSelector(false)}
 				>
 					<S.MWrapper className={'modal-wrapper'}>
@@ -225,7 +225,7 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 				</Panel>
 			)}
 			{walletModalVisible && (
-				<Modal header={language.connectWallet} handleClose={() => setWalletModalVisible(false)}>
+				<Modal header={language?.connectWallet} handleClose={() => setWalletModalVisible(false)}>
 					<WalletList
 						handleConnect={(type: WalletEnum) => {
 							arProvider.handleConnect(type);

@@ -19,9 +19,9 @@ export default function Create() {
 	const options = React.useMemo(() => {
 		if (portalProvider.current?.id) {
 			return [
-				{ url: URLS.postCreateArticle(portalProvider.current.id), label: language.article, icon: ASSETS.article },
-				{ url: URLS.postCreateVideo(portalProvider.current.id), label: language.video, icon: ASSETS.video },
-				{ url: URLS.postCreateImage(portalProvider.current.id), label: language.image, icon: ASSETS.image },
+				{ url: URLS.postCreateArticle(portalProvider.current.id), label: language?.article, icon: ASSETS.article },
+				{ url: URLS.postCreateVideo(portalProvider.current.id), label: language?.video, icon: ASSETS.video },
+				{ url: URLS.postCreateImage(portalProvider.current.id), label: language?.image, icon: ASSETS.image },
 			];
 		}
 		return null;
@@ -30,15 +30,15 @@ export default function Create() {
 	return (
 		<S.Wrapper className={'fade-in'}>
 			<S.HeaderWrapper>
-				<h4>{language.postCreateHeader}</h4>
+				<h4>{language?.postCreateHeader}</h4>
 			</S.HeaderWrapper>
 			<S.BodyWrapper>
 				<S.Description>
 					<S.Icon>
 						<ReactSVG src={ASSETS.post} />
 					</S.Icon>
-					<p>{language.postCreateSubheader}</p>
-					<span>{language.postCreateDescription}</span>
+					<p>{language?.postCreateSubheader}</p>
+					<span>{language?.postCreateDescription}</span>
 				</S.Description>
 				<S.PostOptions>
 					{options && options.length > 0 ? (

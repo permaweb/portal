@@ -44,7 +44,7 @@ export default function ArticleToolbar(props: {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const TABS = [{ label: language.post }, { label: language.blocks }];
+	const TABS = [{ label: language?.post }, { label: language?.blocks }];
 
 	const titleRef = React.useRef<any>(null);
 	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.label);
@@ -183,7 +183,7 @@ export default function ArticleToolbar(props: {
 				<>
 					<Button
 						type={'warning'}
-						label={language.reject}
+						label={language?.reject}
 						handlePress={() => props.handleRequestUpdate('Reject')}
 						active={false}
 						disabled={primaryDisabled || requestUnauthorized}
@@ -191,7 +191,7 @@ export default function ArticleToolbar(props: {
 					/>
 					<Button
 						type={'indicator'}
-						label={language.approve}
+						label={language?.approve}
 						handlePress={() => props.handleRequestUpdate('Approve')}
 						active={false}
 						disabled={primaryDisabled || requestUnauthorized}
@@ -204,7 +204,7 @@ export default function ArticleToolbar(props: {
 		return (
 			<Button
 				type={'alt1'}
-				label={language.save}
+				label={language?.save}
 				handlePress={props.handleSubmit}
 				active={false}
 				disabled={primaryDisabled}
@@ -227,7 +227,7 @@ export default function ArticleToolbar(props: {
 						type={'primary'}
 						src={ASSETS.close}
 						handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
-						tooltip={language.closeToolkit}
+						tooltip={language?.closeToolkit}
 						tooltipPosition={'bottom-right'}
 						dimensions={{
 							icon: 12.5,
@@ -262,14 +262,14 @@ export default function ArticleToolbar(props: {
 						ref={titleRef}
 						value={currentPost.data.title ?? ''}
 						onChange={(e: any) => handleCurrentPostUpdate({ field: 'title', value: e.target.value })}
-						placeholder={language.untitledPost}
+						placeholder={language?.untitledPost}
 						disabled={currentPost.editor.loading.active || !portalProvider.current?.id}
 					/>
 				</S.TitleWrapper>
 				<S.EndActions>
 					<Button
 						type={'primary'}
-						label={language.toolkit}
+						label={language?.toolkit}
 						handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
 						active={currentPost.editor.panelOpen}
 						disabled={currentPost.editor.loading.active}
@@ -280,7 +280,7 @@ export default function ArticleToolbar(props: {
 					/>
 					<Button
 						type={'primary'}
-						label={language.layout}
+						label={language?.layout}
 						handlePress={() =>
 							handleCurrentPostUpdate({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode })
 						}

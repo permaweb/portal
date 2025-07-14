@@ -55,71 +55,68 @@ export default function Landing() {
 		}
 	}
 
-	const header = React.useMemo(() => {
+		const [languageKey, setLanguageKey] = React.useState(0);
+
+		const header = React.useMemo(() => {
 		let header: string | null = null;
 
 		if (!arProvider.wallet) {
-			header = language.connectWallet;
+			header = language?.connectWallet;
 		} else if (!permawebProvider.profile) {
-			header = `${language.gettingInfo}...`;
+			header = `${language?.gettingInfo}...`;
 		} else if (!permawebProvider.profile.id) {
-			header = language.createProfile;
+			header = language?.createProfile;
 		} else {
-			header = `${language.welcome}, ${
-				permawebProvider.profile.username ?? formatAddress(arProvider.walletAddress, false)
+			header = `${language?.welcome}, ${
+			permawebProvider.profile.username ?? formatAddress(arProvider.walletAddress, false)
 			}`;
 		}
 
 		return (
-			<S.ConnectionWrapper>
-				<S.ConnectionHeaderWrapper>
-					<p>{header}</p>
-				</S.ConnectionHeaderWrapper>
+			<S.ConnectionWrapper key={`header-${languageKey}`}>
+			<S.ConnectionHeaderWrapper>
+				<p>{header}</p>
+			</S.ConnectionHeaderWrapper>
 			</S.ConnectionWrapper>
 		);
-	}, [arProvider.wallet, permawebProvider.profile]);
+	}, [arProvider.wallet, permawebProvider.profile, languageProvider.current, languageKey]);
 
-	const portals = React.useMemo(() => {
+		const portals = React.useMemo(() => {
 		let content: React.ReactNode | null;
-
 		let disabled: boolean = false;
-		let label: string = null;
+		let label: string = language?.createPortal || 'Create Portal';
 		let icon: string = null;
 		let action: () => void | null = null;
 
 		if (!arProvider.wallet || (permawebProvider.profile && !permawebProvider.profile.id)) {
 			disabled = false;
-
-			label = language.connect;
+			label = language?.connect || 'Connect Wallet';
 			icon = ASSETS.wallet;
 
-			action = null;
-
 			if (permawebProvider.profile && !permawebProvider.profile.id) {
-				label = language.createProfile;
-				icon = ASSETS.user;
-
-				action = () => setShowProfileManager(true);
+			label = language?.createProfile || 'Create Profile';
+			icon = ASSETS.user;
+			action = () => setShowProfileManager(true);
 			}
 
 			content = (
 				<S.PortalsHeaderWrapper>
-					<p>{language.portalsInfo}</p>
+					<p>{language?.portalsInfo}</p>
 				</S.PortalsHeaderWrapper>
 			);
 		} else if (!permawebProvider.profile) {
 			disabled = true;
-			label = `${language.loading}...`;
+			label = `${language?.loading}...`;
 			icon = ASSETS.user;
 			content = (
 				<S.PortalsLoadingWrapper>
-					<p>{language.fetchingPortals}</p>
+					<p>{language?.fetchingPortals}</p>
 					<Loader sm relative />
 				</S.PortalsLoadingWrapper>
 			);
 		} else {
 			disabled = false;
-			label = language.createPortal;
+			label = language?.createPortal;
 			icon = ASSETS.add;
 			action = () => portalProvider.setShowPortalManager(true, true);
 
@@ -127,7 +124,7 @@ export default function Landing() {
 				content = (
 					<>
 						<S.PortalsHeaderWrapper>
-							<p>{language.selectPortal}</p>
+							<p>{language?.selectPortal}</p>
 						</S.PortalsHeaderWrapper>
 						<S.PortalsListWrapperMain className={'scroll-wrapper'}>
 							{portalProvider.portals.map((portal: any) => {
@@ -148,7 +145,7 @@ export default function Landing() {
 			} else {
 				content = (
 					<S.PortalsHeaderWrapper>
-						<p>{language.noPortalsFound}</p>
+						<p>{language?.noPortalsFound}</p>
 					</S.PortalsHeaderWrapper>
 				);
 			}
@@ -181,16 +178,16 @@ export default function Landing() {
 	}, [arProvider.wallet, arProvider.walletAddress, permawebProvider.profile, portalProvider.portals]);
 
 	const invites = React.useMemo(() => {
-		let header: string = language.noInvites;
-		let description: string = language.noInvitesInfo;
+		let header: string = language?.noInvites;
+		let description: string = language?.noInvitesInfo;
 		let content: React.ReactNode | null;
 
 		if (!arProvider.walletAddress || !permawebProvider.profile?.id) {
-			description = language.noInvitesProfileInfo;
+			description = language?.noInvitesProfileInfo;
 		} else {
 			if (portalProvider.invites?.length > 0) {
-				header = `${language.youAreInvited}!`;
-				description = language.invitesInfo;
+				header = `${language?.youAreInvited}!`;
+				description = language?.invitesInfo;
 				content = (
 					<>
 						<S.PortalsListWrapper className={'scroll-wrapper'}>
@@ -224,32 +221,49 @@ export default function Landing() {
 		);
 	}, [arProvider.walletAddress, permawebProvider.profile?.id, portalProvider.invites]);
 
+		function handleLanguageChange(e: React.ChangeEvent<HTMLSelectElement>) {
+		if (languageProvider?.setCurrent) {
+			languageProvider.setCurrent(e.target.value as 'en' | 'es');
+			setLanguageKey(prev => prev + 1);
+		}
+	}
+
 	return (
 		<>
 			<S.Wrapper>
 				<S.HeaderWrapper>
 					<S.HeaderContent>
-						<S.HeaderActionsWrapper>
+							<S.HeaderActionsWrapper>
 							<S.HeaderAction>
-								<Link to={URLS.docs}>{language.helpCenter}</Link>
+								<Link to={URLS.docs}>{language?.helpCenter}</Link>
 							</S.HeaderAction>
 							<S.HeaderAction>
 								<button onClick={() => setShowInvites((prev) => !prev)} disabled={loading}>
-									{language.invites}
-									{portalProvider.invites?.length > 0 && (
-										<div className={'notification'}>
-											<span>{portalProvider.invites.length}</span>
-										</div>
-									)}
+								{language?.invites}
+								{portalProvider.invites?.length > 0 && (
+									<div className={'notification'}>
+									<span>{portalProvider.invites.length}</span>
+									</div>
+								)}
 								</button>
 							</S.HeaderAction>
-						</S.HeaderActionsWrapper>
+							<S.HeaderAction>
+								<S.LanguageSelector 
+								value={languageProvider.current} 
+								onChange={handleLanguageChange}
+								key={`lang-selector-${languageKey}`}
+								>
+								<option value="en">EN</option>
+								<option value="es">ES</option>
+								</S.LanguageSelector>
+							</S.HeaderAction>
+							</S.HeaderActionsWrapper>
 						<WalletConnect app={'editor'} />
 					</S.HeaderContent>
 				</S.HeaderWrapper>
 				<S.ContentWrapper className={'fade-in border-wrapper-alt3'}>
 					<S.ContentHeaderWrapper>
-						<h4>{`[${language.app}]`}</h4>
+						<h4>{`[${language?.app}]`}</h4>
 					</S.ContentHeaderWrapper>
 					<S.ContentBodyWrapper>
 						<S.Section>{header}</S.Section>
@@ -259,7 +273,7 @@ export default function Landing() {
 			</S.Wrapper>
 			<Panel
 				open={showProfileManager}
-				header={permawebProvider.profile?.id ? language.editProfile : `${language.createProfile}!`}
+				header={permawebProvider.profile?.id ? language?.editProfile : `${language?.createProfile}!`}
 				handleClose={() => setShowProfileManager(false)}
 				width={575}
 				closeHandlerDisabled
@@ -271,7 +285,7 @@ export default function Landing() {
 				/>
 			</Panel>
 			{showInvites && invites}
-			{loading && <Loader message={`${language.loading}...`} />}
+			{loading && <Loader message={`${language?.loading}...`} />}
 		</>
 	);
 }

@@ -54,7 +54,7 @@ export default function Post(props: { post: PortalAssetType }) {
 				<S.PostActions>
 					<Button
 						type={'alt3'}
-						label={language.edit}
+						label={language?.edit}
 						handlePress={() => navigate(`${URLS.postEditArticle(portalProvider.current.id)}${props.post.id}`)}
 						disabled={unauthorized}
 					/>

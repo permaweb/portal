@@ -2,38 +2,52 @@ import React from 'react';
 
 import { language } from 'helpers/language';
 
-type LanguageType = 'en' | 'fr';
+// Add more languages as needed
+type LanguageType = 'en' | 'es' | 'fr' | 'pt';
 
 interface LanguageContextState {
-	current: LanguageType;
-	setCurrent: (current: LanguageType) => void;
-	object: any;
+  [x: string]: any;
+  current: LanguageType;
+  setCurrent: (current: LanguageType) => void;
+  object: any;
 }
 
 interface LanguageProviderProps {
-	children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 const LanguageContext = React.createContext<LanguageContextState>({
-	current: 'en',
-	setCurrent(current: LanguageType) {
-		alert(current);
-	},
-	object: null,
+  current: 'en',
+  setCurrent(current: LanguageType) {
+    console.log('Language changed to:', current);
+  },
+  object: null,
 });
 
 export function useLanguageProvider(): LanguageContextState {
-	return React.useContext(LanguageContext);
+  return React.useContext(LanguageContext);
 }
 
 export function LanguageProvider(props: LanguageProviderProps) {
-	const [current, setCurrent] = React.useState<LanguageType>('en');
+  const [current, setCurrent] = React.useState<LanguageType>(() => {
+    const savedLanguage = localStorage.getItem('appLanguage');
+    return (savedLanguage as LanguageType) || 'en'; // Fallback a inglés
+  });
 
-	return (
-		<LanguageContext.Provider
-			value={{ current, setCurrent: (current: LanguageType) => setCurrent(current), object: language }}
-		>
-			{props.children}
-		</LanguageContext.Provider>
-	);
+  const handleLanguageChange = (newLanguage: LanguageType) => {
+    setCurrent(newLanguage);
+    localStorage.setItem('appLanguage', newLanguage);
+  };
+
+  return (
+    <LanguageContext.Provider
+      value={{
+        current,
+        setCurrent: handleLanguageChange,
+        object: language
+      }}
+    >
+      {props.children}
+    </LanguageContext.Provider>
+  );
 }

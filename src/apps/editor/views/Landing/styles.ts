@@ -269,3 +269,24 @@ export const InvitesDescription = styled.div`
 		line-height: 1.65;
 	}
 `;
+
+export const LanguageSelector = styled.select`
+	background: transparent;
+	color: inherit;
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: 3px;
+	padding: 5px 8px;
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	cursor: pointer;
+	margin-left: 10px;
+	transition: all 0.2s ease;
+
+	&:hover {
+	background: ${(props) => props.theme.colors.primary};
+	}
+
+	option {
+	background: ${(props) => props.theme.colors.primary};
+	color: ${(props) => props.theme.colors.font.primary.alt1};
+	}
+`;

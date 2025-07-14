@@ -63,7 +63,7 @@ export default function Fonts() {
 
 				console.log(`Font update: ${fontUpdateId}`);
 
-				setResponse({ status: 'success', message: `${language.fontsUpdated}!` });
+				setResponse({ status: 'success', message: `${language?.fontsUpdated}!` });
 			} catch (e: any) {
 				setResponse({ status: 'warning', message: e.message ?? 'Error updating fonts' });
 			}
@@ -101,7 +101,7 @@ export default function Fonts() {
 			<S.Wrapper>
 				<S.Section>
 					<Select
-						label={language.headers}
+						label={language?.headers}
 						activeOption={headerFont ?? headerOptions[0]}
 						setActiveOption={(option) => setHeaderFont(option)}
 						options={headerOptions}
@@ -111,7 +111,7 @@ export default function Fonts() {
 				</S.Section>
 				<S.Section>
 					<Select
-						label={language.bodyText}
+						label={language?.bodyText}
 						activeOption={bodyFont ?? bodyOptions[0]}
 						setActiveOption={(option) => setBodyFont(option)}
 						options={bodyOptions}
@@ -122,14 +122,14 @@ export default function Fonts() {
 				<S.SAction>
 					<Button
 						type={'alt1'}
-						label={language.save}
+						label={language?.save}
 						handlePress={handleFontChange}
 						disabled={unauthorized || loading}
 						loading={false}
 					/>
 				</S.SAction>
 			</S.Wrapper>
-			{loading && <Loader message={`${language.updatingFonts}...`} />}
+			{loading && <Loader message={`${language?.updatingFonts}...`} />}
 			{response && (
 				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
 			)}

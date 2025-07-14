@@ -48,14 +48,14 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		image: {
 			type: 'image',
 			icon: ASSETS.image,
-			label: language.image,
+			label: language?.image,
 			renderContent: (url) => <img src={url} />,
 			acceptType: 'image/*',
 		},
 		video: {
 			type: 'video',
 			icon: ASSETS.video,
-			label: language.video,
+			label: language?.video,
 			renderContent: (url) => <video controls src={url} />,
 			acceptType: 'video/*',
 		},
@@ -143,7 +143,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 
 			setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(tx) }));
 			setMediaUploaded(true);
-			setUploadResponse({ status: 'success', message: `${language.mediaUploaded}!` });
+			setUploadResponse({ status: 'success', message: `${language?.mediaUploaded}!` });
 		} catch (e: any) {
 			handleClear(e.message ?? 'Error uploading media');
 		}
@@ -215,7 +215,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					uploadCost={uploadCost}
 					uploadDisabled={uploadDisabled}
 					handleUpload={handleUpload}
-					handleCancel={() => handleClear(language.uploadCancelled)}
+					handleCancel={() => handleClear(language?.uploadCancelled)}
 				/>
 			);
 		}
@@ -227,11 +227,11 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					<p>{config.label}</p>
 				</S.InputHeader>
 				<S.InputDescription>
-					<span>{language.mediaUploadInfo}</span>
+					<span>{language?.mediaUploadInfo}</span>
 				</S.InputDescription>
 				<S.InputActions>
 					<FormField
-						label={language.insertFromUrl}
+						label={language?.insertFromUrl}
 						value={mediaUploaded && mediaData?.url ? mediaData.url : ''}
 						onChange={(e) => handleUrlChange(e)}
 						invalid={{ status: !isValidUrl, message: null }}
@@ -240,10 +240,10 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 						sm
 					/>
 					<S.InputActionsFlex>
-						<Button type={'primary'} label={language.fromLibrary} handlePress={() => setShowMediaLibrary(true)} />
+						<Button type={'primary'} label={language?.fromLibrary} handlePress={() => setShowMediaLibrary(true)} />
 						<Button
 							type={'alt1'}
-							label={language.upload}
+							label={language?.upload}
 							handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
 							width={140}
 						/>
@@ -268,7 +268,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 						{getInputWrapper()}
 						{mediaLoading && (
 							<S.InputOverlay className={'border-wrapper-primary'}>
-								<Loader message={`${language.uploadingMedia}...`} noOverlay />
+								<Loader message={`${language?.uploadingMedia}...`} noOverlay />
 
 								<p>This may take some time, please stay on this screen.</p>
 							</S.InputOverlay>
@@ -300,7 +300,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 													src={ASSETS.write}
 													handlePress={() => setShowCaptionEdit(true)}
 													dimensions={{ wrapper: 23.5, icon: 13.5 }}
-													tooltip={language.showCaptionTools}
+													tooltip={language?.showCaptionTools}
 													tooltipPosition={'bottom-right'}
 													noFocus
 												/>
@@ -311,29 +311,29 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 							</S.Content>
 							{mediaData?.caption === null && (
 								<S.CaptionEmpty>
-									<p onClick={() => setMediaData({ ...mediaData, caption: '' })}>{language.addCaption}</p>
+									<p onClick={() => setMediaData({ ...mediaData, caption: '' })}>{language?.addCaption}</p>
 								</S.CaptionEmpty>
 							)}
 						</S.ContentWrapper>
 						{showCaptionEdit && (
-							<Modal header={language.editCaption} handleClose={() => setShowCaptionEdit(false)}>
+							<Modal header={language?.editCaption} handleClose={() => setShowCaptionEdit(false)}>
 								<S.ModalCaptionWrapper className={'modal-wrapper'}>
 									<FormField
 										value={mediaData?.caption || ''}
 										onChange={(e: any) => setMediaData({ ...mediaData, caption: e.target.value })}
-										label={language.caption}
+										label={language?.caption}
 										invalid={{ status: false, message: null }}
 										disabled={false}
 										hideErrorMessage
 									/>
 									<S.ContentActionsWrapper alignment={mediaData.alignment}>
-										<span>{language.alignCaption}</span>
+										<span>{language?.alignCaption}</span>
 										<S.ContentActions useColumn={false}>{alignmentButtons.map(renderAlignmentButton)}</S.ContentActions>
 									</S.ContentActionsWrapper>
 									<S.ModalCaptionActionWrapper>
 										<Button
 											type={'primary'}
-											label={language.removeCaption}
+											label={language?.removeCaption}
 											handlePress={() => {
 												setMediaData((prevContent) => ({
 													...prevContent,
@@ -345,7 +345,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 											icon={ASSETS.delete}
 											iconLeftAlign
 										/>
-										<Button type={'alt1'} label={language.done} handlePress={() => setShowCaptionEdit(false)} />
+										<Button type={'alt1'} label={language?.done} handlePress={() => setShowCaptionEdit(false)} />
 									</S.ModalCaptionActionWrapper>
 								</S.ModalCaptionWrapper>
 							</Modal>
@@ -362,7 +362,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			)}
 			<Panel
 				open={showMediaLibrary}
-				header={language.mediaLibrary}
+				header={language?.mediaLibrary}
 				handleClose={() => setShowMediaLibrary(false)}
 				width={680}
 				closeHandlerDisabled={true}

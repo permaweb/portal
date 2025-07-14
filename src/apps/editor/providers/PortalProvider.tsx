@@ -405,7 +405,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			{props.children}
 			<Panel
 				open={showPortalManager}
-				header={current && current.id && !createNewPortal ? language.editPortal : language.createPortal}
+				header={current && current.id && !createNewPortal ? 
+					(language?.editPortal || 'Edit Portal') : 
+					(language?.createPortal || 'Create Portal')}
 				handleClose={() => setShowPortalManager(false)}
 				width={500}
 				closeHandlerDisabled={true}

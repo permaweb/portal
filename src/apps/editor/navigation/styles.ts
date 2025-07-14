@@ -471,3 +471,58 @@ export const LoadingWrapper = styled.div`
 		overflow: hidden;
 	}
 `;
+
+export const LanguageSelector = styled.select`
+	background: transparent;
+	color: inherit;
+	border: none;
+	color: ${(props) => props.theme.colors.font.primary};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	cursor: pointer;
+	flex-grow: 1;
+	padding: 4px 0;
+	appearance: none;
+	outline: none;
+
+	option {
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	color: ${(props) => props.theme.colors.font.primary};
+	}
+`;
+
+export const LanguageDivider = styled.div`
+	height: 1px;
+	width: calc(100% - 20px);
+	margin: 10px auto;
+	background: ${(props) => props.theme.colors.border.primary};
+`;
+
+export const LanguageItem = styled.div`
+	height: 40.5px;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	color: ${(props) => props.theme.colors.font.primary};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	border: 1px solid transparent;
+	border-radius: ${STYLING.dimensions.radius.primary};
+	transition: all 100ms;
+	padding: 0 10px;
+	margin-bottom: 5px;
+
+	&:hover {
+	background: ${(props) => props.theme.colors.container.alt2.background};
+	}
+
+	svg {
+	height: 17.5px;
+	width: 17.5px;
+	margin: 6.5px 12.5px 0 0;
+	color: ${(props) => props.theme.colors.font.primary};
+	fill: ${(props) => props.theme.colors.font.primary};
+	}
+`;

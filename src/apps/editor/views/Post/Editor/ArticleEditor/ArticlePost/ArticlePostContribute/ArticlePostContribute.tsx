@@ -63,7 +63,7 @@ export default function ArticlePostContribute() {
 					})}
 				</>
 			) : (
-				<span>{language.noExternalPortals}</span>
+				<span>{language?.noExternalPortals}</span>
 			)}
 		</S.Wrapper>
 	);

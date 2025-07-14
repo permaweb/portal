@@ -74,7 +74,7 @@ export default function Header() {
 							<CloseHandler active={true} disabled={false} callback={() => setShowOverflowCategories(false)}>
 								<Button
 									type={'alt3'}
-									label={language.more}
+									label={language?.more}
 									handlePress={() => setShowOverflowCategories((prev) => !prev)}
 									icon={ASSETS.arrow}
 									height={30}
@@ -100,7 +100,7 @@ export default function Header() {
 				<S.ContentStart>
 					{portalProvider.updating && (
 						<S.PortalUpdateWrapper>
-							<span>{`${language.updating}...`}</span>
+							<span>{`${language?.updating}...`}</span>
 						</S.PortalUpdateWrapper>
 					)}
 				</S.ContentStart>

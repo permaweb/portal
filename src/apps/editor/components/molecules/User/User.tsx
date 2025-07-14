@@ -56,7 +56,7 @@ export default function User(props: { user: PortalUserType }) {
 								handlePress={() => setShowManageUser((prev) => !prev)}
 								disabled={unauthorized}
 								dimensions={{ wrapper: 23.5, icon: 13.5 }}
-								tooltip={unauthorized ? language.unauthorized : language.manage}
+								tooltip={unauthorized ? language?.unauthorized : language?.manage}
 								tooltipPosition={'bottom-right'}
 								noFocus
 							/>
@@ -68,7 +68,7 @@ export default function User(props: { user: PortalUserType }) {
 				<Panel
 					open={showManageUser}
 					width={500}
-					header={language.manageUser}
+					header={language?.manageUser}
 					handleClose={() => setShowManageUser((prev) => !prev)}
 					closeHandlerDisabled
 				>

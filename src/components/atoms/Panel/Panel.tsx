@@ -84,7 +84,7 @@ export default function Panel(props: {
 											wrapper: 32.5,
 											icon: 18.5,
 										}}
-										tooltip={language.close}
+										tooltip={language?.close ?? 'Close'}
 									/>
 								</S.Close>
 							)}
