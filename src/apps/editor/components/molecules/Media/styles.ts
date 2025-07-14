@@ -86,8 +86,18 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 		width: 100%;
 	`}
 	position: relative;
-	background: ${(props) => props.hasMedia ? 'transparent' : props.disabled ? props.theme.colors.button.primary.disabled.background : props.theme.colors.container.primary.background};
-	border: ${(props) => (props.hasMedia ? `none` : props.disabled ? `1px dashed ${props.theme.colors.button.primary.disabled.border}` : `1px dashed ${props.theme.colors.border.primary}`)};
+	background: ${(props) =>
+		props.hasMedia
+			? 'transparent'
+			: props.disabled
+			? props.theme.colors.button.primary.disabled.background
+			: props.theme.colors.container.primary.background};
+	border: ${(props) =>
+		props.hasMedia
+			? `none`
+			: props.disabled
+			? `1px dashed ${props.theme.colors.button.primary.disabled.border}`
+			: `1px dashed ${props.theme.colors.border.primary}`};
 	border-radius: ${STYLING.dimensions.radius.alt2};
 	z-index: 1;
 	overflow: hidden;
@@ -95,7 +105,7 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	pointer-events: ${(props) => props.disabled ? 'none' : 'all'};
+	pointer-events: ${(props) => (props.disabled ? 'none' : 'all')};
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) =>
@@ -115,9 +125,16 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 		object-fit: contain;
 	}
 	&:hover {
-		border: 1px dashed ${(props) => props.disabled ? props.theme.colors.button.primary.disabled.border : props.theme.colors.border.alt4};
-		background: ${(props) => props.hasMedia ? 'transparent' : props.disabled ? props.theme.colors.button.primary.disabled.background : props.theme.colors.container.primary.active};
-		cursor: ${(props) => props.disabled ? 'default' : 'pointer'};
+		border: 1px dashed
+			${(props) =>
+				props.disabled ? props.theme.colors.button.primary.disabled.border : props.theme.colors.border.alt4};
+		background: ${(props) =>
+			props.hasMedia
+				? 'transparent'
+				: props.disabled
+				? props.theme.colors.button.primary.disabled.background
+				: props.theme.colors.container.primary.active};
+		cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
 	}
 	&:focus {
 		opacity: 1;

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 import { debounce } from 'lodash';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
@@ -12,7 +11,7 @@ import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
 import { Tabs } from 'components/atoms/Tabs';
-import { ARTICLE_BLOCKS, ASSETS, DOM, STYLING } from 'helpers/config';
+import { ASSETS, DOM, STYLING } from 'helpers/config';
 import {
 	ArticleBlockEnum,
 	PortalAssetRequestType,
@@ -24,7 +23,9 @@ import { checkWindowCutoff, hideDocumentBody, showDocumentBody } from 'helpers/w
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
-import { ArticleToolbarPost } from './ArticleToolbarPost';
+import { ArticleBlocks } from '../ArticleBlocks';
+import { ArticlePost } from '../ArticlePost';
+
 import * as S from './styles';
 
 export default function ArticleToolbar(props: {
@@ -40,54 +41,18 @@ export default function ArticleToolbar(props: {
 
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
 	const TABS = [{ label: language.post }, { label: language.blocks }];
 
 	const titleRef = React.useRef<any>(null);
-	const blockRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
-
-	const [focusedIndex, setFocusedIndex] = React.useState<number>(-1);
 	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.label);
-	const [totalBlockCount, setTotalBlockCount] = React.useState(0);
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.initial)));
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
-
-	const BLOCK_TYPES: {
-		label: string;
-		blocks: { type: ArticleBlockEnum; label: string; icon: string }[];
-	}[] = [
-		{
-			label: language.text,
-			blocks: [
-				ARTICLE_BLOCKS[ArticleBlockEnum.Paragraph],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Quote],
-				ARTICLE_BLOCKS[ArticleBlockEnum.OrderedList],
-				ARTICLE_BLOCKS[ArticleBlockEnum.UnorderedList],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Code],
-			],
-		},
-		{
-			label: language.headers,
-			blocks: [
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header1],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header2],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header3],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header4],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header5],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header6],
-			],
-		},
-		{
-			label: language.media,
-			blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image], ARTICLE_BLOCKS[ArticleBlockEnum.Video]],
-		},
-	];
 
 	function handleWindowResize() {
 		if (checkWindowCutoff(parseInt(STYLING.cutoffs.initial))) {
@@ -123,48 +88,6 @@ export default function ArticleToolbar(props: {
 			};
 		}
 	}, [currentPost.editor.panelOpen, desktop]);
-
-	React.useEffect(() => {
-		const count = BLOCK_TYPES.reduce((acc, section) => acc + section.blocks.length, 0);
-		setTotalBlockCount(count);
-	}, [BLOCK_TYPES]);
-
-	React.useEffect(() => {
-		if (currentPost.editor.panelOpen && currentPost.editor.toggleBlockFocus) {
-			setFocusedIndex(0);
-		}
-	}, [currentPost.editor.toggleBlockFocus, currentPost.editor.panelOpen]);
-
-	React.useEffect(() => {
-		const handleBlur = (event: FocusEvent) => {
-			requestAnimationFrame(() => {
-				const relatedTarget = event.relatedTarget as Node | null;
-				const isStillWithinContainer = blockRefs.current.some((ref) => ref?.contains(relatedTarget));
-
-				if (!isStillWithinContainer) {
-					handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: !currentPost.editor.toggleBlockFocus });
-				}
-			});
-		};
-
-		if (focusedIndex >= 0 && blockRefs.current[focusedIndex] && currentPost.editor.panelOpen) {
-			if (currentPost.editor.toggleBlockFocus) blockRefs.current[focusedIndex]?.focus();
-		}
-
-		blockRefs.current.forEach((ref) => {
-			if (ref) {
-				ref.addEventListener('blur', handleBlur);
-			}
-		});
-
-		return () => {
-			blockRefs.current.forEach((ref) => {
-				if (ref) {
-					ref.removeEventListener('blur', handleBlur);
-				}
-			});
-		};
-	}, [currentPost.editor.toggleBlockFocus, focusedIndex, currentPost.editor.panelOpen, blockRefs]);
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -221,160 +144,13 @@ export default function ArticleToolbar(props: {
 		};
 	}, [titleRef]);
 
-	const handleKeyDown = React.useCallback(
-		(event: React.KeyboardEvent) => {
-			if (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Tab') {
-				event.preventDefault();
-				const direction = event.key === 'ArrowDown' || (event.key === 'Tab' && !event.shiftKey) ? 1 : -1;
-				setFocusedIndex((prevIndex) => {
-					let newIndex = prevIndex;
-					do {
-						newIndex += direction;
-						if (newIndex < 0) newIndex = totalBlockCount - 1;
-						if (newIndex >= totalBlockCount) newIndex = 0;
-					} while (!blockRefs.current[newIndex]);
-					return newIndex;
-				});
-			} else if (event.key === 'Enter') {
-				event.stopPropagation();
-				event.preventDefault();
-				if (focusedIndex >= 0 && focusedIndex < blockRefs.current.length) {
-					const focusedButton = blockRefs.current[focusedIndex];
-					if (focusedButton) {
-						const blockType = focusedButton.getAttribute('data-block-type');
-						if (blockType) {
-							props.addBlock(blockType as ArticleBlockEnum);
-						}
-					}
-				}
-			}
-		},
-		[focusedIndex, props.addBlock]
-	);
-
-	React.useEffect(() => {
-		let ctrlSlashPressed = false;
-
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.ctrlKey && event.key === '/') {
-				ctrlSlashPressed = true;
-				event.preventDefault();
-			} else if (ctrlSlashPressed) {
-				switch (event.key.toLowerCase()) {
-					case '1':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header1);
-						break;
-					case '2':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header2);
-						break;
-					case '3':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header3);
-						break;
-					case '4':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header4);
-						break;
-					case '5':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header5);
-						break;
-					case '6':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header6);
-						break;
-					case 'p':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Paragraph);
-						break;
-					case 'q':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Quote);
-						break;
-					case 'c':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Code);
-						break;
-					case 'n':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.OrderedList);
-						break;
-					case 'b':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.UnorderedList);
-						break;
-					case 'i':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Image);
-						break;
-					case 'v':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Video);
-						break;
-					default:
-						break;
-				}
-				ctrlSlashPressed = false;
-			}
-		};
-
-		document.addEventListener('keydown', handleKeyDown);
-
-		return () => {
-			document.removeEventListener('keydown', handleKeyDown);
-		};
-	}, [props.addBlock]);
-
-	function getShortcut(shortcut: string) {
-		const keys = shortcut.split(' ');
-		return (
-			<S.BADropdownActionShortcut>
-				{keys.map((key: string) => {
-					return <p key={key}>{key}</p>;
-				})}
-			</S.BADropdownActionShortcut>
-		);
-	}
-
 	function getCurrentTab() {
 		switch (currentTab) {
 			case 'Blocks':
-				return (
-					<S.BADropdownBody onKeyDown={handleKeyDown}>
-						{BLOCK_TYPES.map((section: any, sectionIndex: number) => (
-							<S.BADropdownSection key={section.label}>
-								<S.BADropdownSectionHeader>
-									<p>{section.label}</p>
-								</S.BADropdownSectionHeader>
-								{section.blocks.map((block: any, blockIndex: number) => {
-									const globalBlockIndex =
-										BLOCK_TYPES.slice(0, sectionIndex).reduce((acc, s) => acc + s.blocks.length, 0) + blockIndex;
-									return (
-										<S.BADropdownAction key={`${section.label}-${block.label}`}>
-											<button
-												onClick={() => props.addBlock(block.type)}
-												ref={(el) => {
-													blockRefs.current[globalBlockIndex] = el;
-												}}
-												data-block-type={block.type}
-												disabled={currentPost.editor.loading.active}
-											>
-												<ReactSVG src={block.icon} />
-												<span>{block.label}</span>
-												{block.shortcut && getShortcut(block.shortcut)}
-											</button>
-										</S.BADropdownAction>
-									);
-								})}
-							</S.BADropdownSection>
-						))}
-					</S.BADropdownBody>
-				);
+				return <ArticleBlocks addBlock={props.addBlock} context={'toolbar'} />;
 			case 'Post':
 				return (
-					<ArticleToolbarPost
+					<ArticlePost
 						categories={currentPost.data.categories}
 						setCategories={(updatedCategories: PortalCategoryType[]) =>
 							handleCurrentPostUpdate({ field: 'categories', value: updatedCategories })
@@ -388,7 +164,7 @@ export default function ArticleToolbar(props: {
 		}
 	}
 
-	/* If a contributor visits a post that they did not create, unauthorize updates */
+	/* If a contributor visits a post that they did not create, then disable updates */
 	const currentUser = portalProvider.current?.users?.find(
 		(user: PortalUserType) => user.address === permawebProvider.profile?.id
 	);
@@ -474,7 +250,6 @@ export default function ArticleToolbar(props: {
 		currentPost.editor.panelOpen,
 		currentTab,
 		props.addBlock,
-		focusedIndex,
 		desktop,
 		currentPost.editor.loading.active,
 	]);

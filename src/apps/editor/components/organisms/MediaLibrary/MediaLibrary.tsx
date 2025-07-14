@@ -30,7 +30,14 @@ export default function MediaLibrary(props: {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	const { uploadCost, showUploadConfirmation, uploadResponse, setUploadResponse, calculateUploadCost, clearUploadState } = useUploadCost();
+	const {
+		uploadCost,
+		showUploadConfirmation,
+		uploadResponse,
+		setUploadResponse,
+		calculateUploadCost,
+		clearUploadState,
+	} = useUploadCost();
 
 	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
 		image: {

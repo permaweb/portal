@@ -14,7 +14,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-export default function ArticleToolbarPostDescription() {
+export default function ArticlePostDescription() {
 	const dispatch = useDispatch();
 
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
@@ -74,7 +74,7 @@ export default function ArticleToolbarPostDescription() {
 							disabled={!hasChanges}
 							handlePress={() => {
 								setShowPanel(false);
-								setResponse({ status: 'success', message: `${language.summaryUpdated}!` });
+								setResponse({ status: 'success', message: `${language.descriptionUpdated}!` });
 							}}
 						/>
 					</S.PanelActionsWrapper>

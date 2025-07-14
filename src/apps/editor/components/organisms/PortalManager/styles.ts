@@ -47,7 +47,7 @@ export const TForm = styled.div`
 export const PWrapper = styled.div`
 	height: fit-content;
 	width: 100%;
-	
+
 	display: flex;
 	flex-direction: column;
 	gap: 25px;

@@ -329,6 +329,16 @@ export const SelectionWrapper = styled.div`
 	}
 `;
 
+export const BlockSelector = styled.div<{ blockEditMode: boolean; }>`
+	max-height: 65vh;
+	width: 300px;
+	position: absolute;
+	z-index: 1;
+	top: ${(props) => props.blockEditMode ? '67.5px' : '27.5px'};
+	left: ${(props) => props.blockEditMode ? '15px' : '0px'};;
+	padding: 15px 5px;
+`;
+
 export const ModalWrapper = styled.div`
 	display: flex;
 	flex-direction: column;

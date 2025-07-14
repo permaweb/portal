@@ -24,7 +24,7 @@ import * as S from './styles';
 
 const ALLOWED_THUMBNAIL_TYPES = 'image/png, image/jpeg, image/gif';
 
-export default function ArticleToolbarPostThumbnail() {
+export default function ArticlePostThumbnail() {
 	const dispatch = useDispatch();
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -34,7 +34,14 @@ export default function ArticleToolbarPostThumbnail() {
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	const { uploadCost, showUploadConfirmation, uploadResponse, setUploadResponse, calculateUploadCost, clearUploadState } = useUploadCost();
+	const {
+		uploadCost,
+		showUploadConfirmation,
+		uploadResponse,
+		setUploadResponse,
+		calculateUploadCost,
+		clearUploadState,
+	} = useUploadCost();
 
 	const inputRef = React.useRef<any>(null);
 
@@ -69,7 +76,7 @@ export default function ArticleToolbarPostThumbnail() {
 
 	async function handleUpload() {
 		if (!thumbnailData) return;
-		
+
 		setLoading(true);
 		try {
 			const tx = await permawebProvider.libs.resolveTransaction(thumbnailData);

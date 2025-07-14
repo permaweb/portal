@@ -4,12 +4,12 @@ import { Topics } from 'editor/components/molecules/Topics';
 import { PortalCategoryType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
-import { ArticleToolbarPostContribute } from './ArticleToolbarPostContribute';
-import { ArticleToolbarPostDescription } from './ArticleToolbarPostDescription';
-import { ArticleToolbarPostThumbnail } from './ArticleToolbarPostThumbnail';
+import { ArticlePostContribute } from './ArticlePostContribute';
+import { ArticlePostDescription } from './ArticlePostDescription';
+import { ArticlePostThumbnail } from './ArticlePostThumbnail';
 import * as S from './styles';
 
-export default function ArticleToolbarPost(props: {
+export default function ArticlePost(props: {
 	categories: PortalCategoryType[];
 	setCategories: (categories: PortalCategoryType[]) => void;
 	topics: string[];
@@ -25,7 +25,7 @@ export default function ArticleToolbarPost(props: {
 					<p>{language.featuredImage}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
-					<ArticleToolbarPostThumbnail />
+					<ArticlePostThumbnail />
 				</S.SectionBody>
 			</S.Section>
 			<S.Section>
@@ -33,7 +33,7 @@ export default function ArticleToolbarPost(props: {
 					<p>{language.description}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
-					<ArticleToolbarPostDescription />
+					<ArticlePostDescription />
 				</S.SectionBody>
 			</S.Section>
 			<S.Section>
@@ -57,7 +57,7 @@ export default function ArticleToolbarPost(props: {
 					<p>{language.contribute}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
-					<ArticleToolbarPostContribute />
+					<ArticlePostContribute />
 				</S.SectionBody>
 			</S.ContributeSection>
 		</S.Wrapper>

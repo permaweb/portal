@@ -20,7 +20,7 @@ jobs:
       - run: npm run clean:install
       - run: npm run deploy:editor:main
       - run: npm run deploy:viewer
-  
+
   publish-staging:
     if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest

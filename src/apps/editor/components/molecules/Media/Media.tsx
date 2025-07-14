@@ -41,7 +41,7 @@ export default function Media(props: {
 		setUploadResponse,
 		calculateUploadCost,
 		clearUploadState,
-		insufficientBalance
+		insufficientBalance,
 	} = useUploadCost();
 
 	const mediaInputRef = React.useRef<any>(null);

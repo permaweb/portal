@@ -13,36 +13,39 @@ export function useUploadCost() {
 	const [uploadResponse, setUploadResponse] = React.useState<NotificationType | null>(null);
 	const [insufficientBalance, setInsufficientBalance] = React.useState<boolean>(false);
 
-	const calculateUploadCost = React.useCallback(async (file: File) => {
-		if (!arProvider.wallet) return null;
+	const calculateUploadCost = React.useCallback(
+		async (file: File) => {
+			if (!arProvider.wallet) return null;
 
-		const contentSize = file.size;
+			const contentSize = file.size;
 
-		if (contentSize < UPLOAD.dispatchUploadSize) {
-			return { requiresConfirmation: false, cost: 0 };
-		}
-
-		try {
-			setShowUploadConfirmation(true);
-
-			const uploadPriceResponse = await fetch(getTurboCostWincEndpoint(contentSize));
-			const uploadInWinc = Number((await uploadPriceResponse.json()).winc);
-
-			setUploadCost(uploadInWinc);
-
-			if (uploadInWinc > arProvider.turboBalance) {
-				setUploadResponse({ status: 'warning', message: 'Insufficient balance for upload' });
-				setInsufficientBalance(true);
-				return { requiresConfirmation: true, cost: uploadInWinc, hasInsufficientBalance: true };
+			if (contentSize < UPLOAD.dispatchUploadSize) {
+				return { requiresConfirmation: false, cost: 0 };
 			}
 
-			setInsufficientBalance(false);
-			return { requiresConfirmation: true, cost: uploadInWinc, hasInsufficientBalance: false };
-		} catch (e: any) {
-			setUploadResponse({ status: 'warning', message: e.message ?? 'Error calculating upload cost' });
-			return null;
-		}
-	}, [arProvider.wallet, arProvider.turboBalance]);
+			try {
+				setShowUploadConfirmation(true);
+
+				const uploadPriceResponse = await fetch(getTurboCostWincEndpoint(contentSize));
+				const uploadInWinc = Number((await uploadPriceResponse.json()).winc);
+
+				setUploadCost(uploadInWinc);
+
+				if (uploadInWinc > arProvider.turboBalance) {
+					setUploadResponse({ status: 'warning', message: 'Insufficient balance for upload' });
+					setInsufficientBalance(true);
+					return { requiresConfirmation: true, cost: uploadInWinc, hasInsufficientBalance: true };
+				}
+
+				setInsufficientBalance(false);
+				return { requiresConfirmation: true, cost: uploadInWinc, hasInsufficientBalance: false };
+			} catch (e: any) {
+				setUploadResponse({ status: 'warning', message: e.message ?? 'Error calculating upload cost' });
+				return null;
+			}
+		},
+		[arProvider.wallet, arProvider.turboBalance]
+	);
 
 	const clearUploadState = React.useCallback(() => {
 		setUploadCost(null);
@@ -56,6 +59,6 @@ export function useUploadCost() {
 		setUploadResponse,
 		calculateUploadCost,
 		clearUploadState,
-		insufficientBalance
+		insufficientBalance,
 	};
 }

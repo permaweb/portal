@@ -35,7 +35,14 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	const { uploadCost, showUploadConfirmation, uploadResponse, setUploadResponse, calculateUploadCost, clearUploadState } = useUploadCost();
+	const {
+		uploadCost,
+		showUploadConfirmation,
+		uploadResponse,
+		setUploadResponse,
+		calculateUploadCost,
+		clearUploadState,
+	} = useUploadCost();
 
 	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
 		image: {
@@ -81,7 +88,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			setMediaData(props.data);
 		}
 	}, [props.data]);
-	
+
 	React.useEffect(() => {
 		(async function () {
 			if (mediaData?.file && !mediaData.url && !mediaUploaded && portalProvider.current?.id && arProvider.wallet) {
@@ -210,7 +217,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					handleUpload={handleUpload}
 					handleCancel={() => handleClear(language.uploadCancelled)}
 				/>
-			)
+			);
 		}
 
 		return (
