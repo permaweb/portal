@@ -1,9 +1,10 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ReactSVG } from 'react-svg';
 import { Draggable } from '@hello-pangea/dnd';
 
 import { EditorStoreRootState } from 'editor/store';
+import { currentPostUpdate } from 'editor/store/post';
 
 import { Button } from 'components/atoms/Button';
 import { ContentEditable } from 'components/atoms/ContentEditable';
@@ -11,9 +12,11 @@ import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { Modal } from 'components/atoms/Modal';
 import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
-import { ArticleBlockType } from 'helpers/types';
+import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
 import { validateUrl } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+
+import { ArticleBlocks } from '../ArticleBlocks';
 
 import { MediaBlock } from './CustomBlocks/MediaBlock';
 import * as S from './styles';
@@ -21,21 +24,50 @@ import * as S from './styles';
 export default function ArticleBlock(props: {
 	index: number;
 	block: ArticleBlockType;
-	onChangeBlock: (id: string, content: any, data?: any) => void;
+	onChangeBlock: (args: { id: string; content: string; type?: any; data?: any }) => void;
 	onDeleteBlock: (id: string) => void;
 	onFocus: () => void;
 }) {
+	const dispatch = useDispatch();
+
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	const editableRef = React.useRef<HTMLDivElement>(null);
+
 	const [selectedText, setSelectedText] = React.useState<string>('');
 	const [textToConvert, setTextToConvert] = React.useState<string>('');
 	const [newLinkUrl, setNewLinkUrl] = React.useState<string>('');
+	const [showBlockSelector, setShowBlockSelector] = React.useState<boolean>(false);
 	const [showLinkModal, setShowLinkModal] = React.useState<boolean>(false);
 
-	const editableRef = React.useRef<HTMLDivElement>(null);
+	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
+		dispatch(currentPostUpdate(updatedField));
+	};
+
+	React.useEffect(() => {
+		const currentBlockIndex = currentPost.data?.content?.findIndex(
+			(block: ArticleBlockType) => block?.id === currentPost.editor?.focusedBlock?.id
+		);
+		const currentBlock = currentPost.data?.content?.[currentBlockIndex];
+		if (currentBlock?.id === props.block?.id) {
+			if (currentBlock.content === '/') {
+				setShowBlockSelector(true);
+				handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: true });
+			} else {
+				setShowBlockSelector(false);
+				// Only set toggleBlockFocus to false if this block was the one that had it active
+				if (currentPost.editor.toggleBlockFocus) {
+					handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: false });
+				}
+			}
+		} else {
+			setShowBlockSelector(false);
+			// Don't interfere with toggleBlockFocus if this block is not the focused one
+		}
+	}, [props.block?.id, currentPost.data?.content, currentPost.editor?.focusedBlock]);
 
 	React.useEffect(() => {
 		const handleSelectionChange = () => {
@@ -76,6 +108,44 @@ export default function ArticleBlock(props: {
 			}
 		};
 	}, []);
+
+	function handleChangeBlock(type: ArticleBlockEnum) {
+		let content: string = '';
+		
+		// Set proper content for different block types
+		switch (type) {
+			case 'ordered-list':
+			case 'unordered-list':
+				content = '<li></li>';
+				break;
+			case 'paragraph':
+			case 'quote':
+			case 'code':
+			case 'header-1':
+			case 'header-2':
+			case 'header-3':
+			case 'header-4':
+			case 'header-5':
+			case 'header-6':
+			case 'image':
+			case 'video':
+			default:
+				content = '';
+				break;
+		}
+		
+		props.onChangeBlock({ id: props.block.id, type: type, content: content });
+		setShowBlockSelector(false);
+		handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: false });
+		handleCurrentPostUpdate({ field: 'lastAddedBlockId', value: props.block.id });
+		
+		// Focus the ContentEditable after block type change
+		setTimeout(() => {
+			if (editableRef.current) {
+				editableRef.current.focus();
+			}
+		}, 0);
+	}
 
 	const savedRangeRef = React.useRef<Range | null>(null);
 
@@ -151,7 +221,7 @@ export default function ArticleBlock(props: {
 			const updatedContent = editableRef.current.innerHTML;
 			console.log('Updated raw HTML content:', updatedContent);
 
-			props.onChangeBlock(props.block.id, updatedContent);
+			props.onChangeBlock({ id: props.block.id, content: updatedContent });
 		}
 
 		handleLinkClear();
@@ -207,7 +277,9 @@ export default function ArticleBlock(props: {
 					type={'image'}
 					content={props.block.content}
 					data={props.block.data ?? null}
-					onChange={(newContent: any, data: any) => props.onChangeBlock(props.block.id, newContent, data)}
+					onChange={(newContent: any, data: any) =>
+						props.onChangeBlock({ id: props.block.id, content: newContent, data: data })
+					}
 				/>
 			);
 			break;
@@ -218,7 +290,9 @@ export default function ArticleBlock(props: {
 					type={'video'}
 					content={props.block.content}
 					data={props.block.data ?? null}
-					onChange={(newContent: any, data: any) => props.onChangeBlock(props.block.id, newContent, data)}
+					onChange={(newContent: any, data: any) =>
+						props.onChangeBlock({ id: props.block.id, content: newContent, data: data })
+					}
 				/>
 			);
 			break;
@@ -285,13 +359,18 @@ export default function ArticleBlock(props: {
 								ref={editableRef}
 								element={element}
 								value={props.block.content}
-								onChange={(newContent: any) => props.onChangeBlock(props.block.id, newContent)}
+								onChange={(newContent: any) => props.onChangeBlock({ id: props.block.id, content: newContent })}
 								autoFocus={props.block?.id === currentPost?.editor.lastAddedBlockId}
 							/>
 						)}
 					</S.Element>
 					{!currentPost?.editor.blockEditMode && (
 						<S.ElementIndicatorDivider type={props.block.type} className={'fade-in'} />
+					)}
+					{showBlockSelector && (
+						<S.BlockSelector blockEditMode={currentPost.editor.blockEditMode} className={'border-wrapper-primary scroll-wrapper-hidden'}>
+							<ArticleBlocks addBlock={(type: ArticleBlockEnum) => handleChangeBlock(type)} context={'inline'} />
+						</S.BlockSelector>
 					)}
 				</S.ElementWrapper>
 				{showLinkModal && (

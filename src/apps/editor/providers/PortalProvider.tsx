@@ -15,7 +15,15 @@ import {
 	PortalUserType,
 	RefreshFieldType,
 } from 'helpers/types';
-import { areAssetsEqual, cachePortal, cacheProfile, checkValidAddress, getCachedPortal, getCachedProfile, getPortalAssets } from 'helpers/utils';
+import {
+	areAssetsEqual,
+	cachePortal,
+	cacheProfile,
+	checkValidAddress,
+	getCachedPortal,
+	getCachedProfile,
+	getPortalAssets,
+} from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -320,7 +328,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		if (currentId) {
 			try {
 				const portalData = await permawebProvider.libs.getZone(currentId);
-				
+
 				const users: PortalUserType[] = [];
 				if (portalData?.roles) {
 					for (const entry of Object.keys(portalData.roles)) {

@@ -192,11 +192,7 @@ export default function ArticleEditor(props: {
 
 	function handleKeyAddBlock(event: any) {
 		event.preventDefault();
-		addBlock(
-			currentPost.data.content && currentPost.data.content.length > 0
-				? ArticleBlockEnum.Paragraph
-				: ArticleBlockEnum.Header1
-		);
+		addBlock(ArticleBlockEnum.Paragraph);
 		handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: false });
 	}
 
@@ -214,7 +210,7 @@ export default function ArticleEditor(props: {
 
 	const handleEditorClick = () => {
 		if (!currentPost.data.content || currentPost.data.content.length <= 0) {
-			addBlock(ArticleBlockEnum.Header1);
+			addBlock(ArticleBlockEnum.Paragraph);
 		}
 	};
 
@@ -268,9 +264,11 @@ export default function ArticleEditor(props: {
 		handleCurrentPostUpdate({ field: 'lastAddedBlockId', value: newBlock.id });
 	};
 
-	const handleBlockChange = (id: string, content: string, data?: any) => {
+	const handleBlockChange = (args: { id: string; content: string; type?: any; data?: any }) => {
 		const updatedBlocks = [...currentPost.data.content].map((block) =>
-			block.id === id ? (data ? { ...block, content, data } : { ...block, content }) : block
+			block.id === args.id
+				? { ...block, content: args.content, type: args.type ?? block.type, data: args.data ?? block.data ?? null }
+				: block
 		);
 		handleCurrentPostUpdate({ field: 'content', value: updatedBlocks });
 	};

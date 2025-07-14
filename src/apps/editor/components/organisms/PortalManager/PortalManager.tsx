@@ -68,8 +68,7 @@ export default function PortalManager(props: {
 					} catch (e: any) {
 						console.error(`Failed to resolve logo: ${e.message}`);
 					}
-				}
-				else {
+				} else {
 					data.Logo = 'None';
 				}
 
@@ -79,15 +78,19 @@ export default function PortalManager(props: {
 					} catch (e: any) {
 						console.error(`Failed to resolve icon: ${e.message}`);
 					}
-				}
-				else {
+				} else {
 					data.Icon = 'None';
 				}
 
 				if (props.portal && props.portal.id) {
 					const portalsUpdateData = portalProvider.portals
 						.filter((portal: PortalHeaderType) => portal.id !== props.portal.id)
-						.map((portal: PortalHeaderType) => ({ Id: portal.id, Name: portal.name, Logo: portal.logo, Icon: portal.icon }));
+						.map((portal: PortalHeaderType) => ({
+							Id: portal.id,
+							Name: portal.name,
+							Logo: portal.logo,
+							Icon: portal.icon,
+						}));
 					portalsUpdateData.push({ Id: props.portal.id, ...data });
 
 					const portalUpdateId = await permawebProvider.libs.updateZone(data, props.portal.id, arProvider.wallet);
