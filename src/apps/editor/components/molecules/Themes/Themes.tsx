@@ -421,9 +421,15 @@ export default function Themes() {
 			);
 		}
 
+		const sortedOptions = [...options].sort((a, b) => {
+			if (a.scheme === 'light' && b.scheme === 'dark') return -1;
+			if (a.scheme === 'dark' && b.scheme === 'light') return 1;
+			return 0;
+		});
+
 		return (
 			<>
-				{options.map((theme: PortalThemeType, index: number) => {
+				{sortedOptions.map((theme: PortalThemeType, index: number) => {
 					const isPublished =
 						portalProvider.current?.themes.find(
 							(existingTheme: PortalThemeType) => existingTheme.name === theme.name

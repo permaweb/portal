@@ -10,6 +10,7 @@ import { SettingsProvider } from 'viewer/providers/SettingsProvider';
 import { Loader } from 'components/atoms/Loader';
 import { DOM, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
+import { preloadAllAssets } from 'helpers/preloader';
 import { GlobalStyle } from 'helpers/styles';
 import { checkValidAddress } from 'helpers/utils';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
@@ -41,6 +42,10 @@ function getLazyImport(view: string) {
 
 function App() {
 	const portalProvider = usePortalProvider();
+
+	React.useEffect(() => {
+		preloadAllAssets();
+	}, []);
 
 	React.useEffect(() => {
 		if (portalProvider.current?.name) document.title = portalProvider.current.name;

@@ -102,19 +102,18 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 				setPortals(profilePortals);
 
-				// if (!hasFetchedMeta.current) {
-				// 	hasFetchedMeta.current = true;
+				if (!hasFetchedMeta.current) {
+					hasFetchedMeta.current = true;
 
-				// 	for (const portal of profilePortals) {
-				// 		try {
-				// 			const portalData = await permawebProvider.libs.getZone(portal.id);
-				// 			console.log(portalData);
-				// 		}
-				// 		catch (e: any) {
-				// 			console.error(e);
-				// 		}
-				// 	}
-				// }
+					for (const portal of profilePortals) {
+						try {
+							const portalData = await permawebProvider.libs.getZone(portal.id);
+							console.log(portalData);
+						} catch (e: any) {
+							console.error(e);
+						}
+					}
+				}
 
 				// if (!hasFetchedRoles.current) {
 				// 	hasFetchedRoles.current = true;
@@ -324,6 +323,20 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		}
 	}
 
+	function getPortalUsers(roles: any) {
+		const users: PortalUserType[] = [];
+		if (roles) {
+			for (const entry of Object.keys(roles)) {
+				users.push({
+					address: entry,
+					type: roles[entry].type,
+					roles: roles[entry].roles,
+				});
+			}
+		}
+		return users;
+	}
+
 	const fetchPortal = async () => {
 		if (currentId) {
 			try {
@@ -364,7 +377,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					uploads: portalData?.store?.uploads ?? [],
 					fonts: portalData?.store?.fonts ?? {},
 					themes: portalData?.store?.themes ?? [],
-					users: users || [],
+					users: getPortalUsers(portalData?.roles),
 					roleOptions: portalData.roleOptions ?? {},
 					permissions: portalData.permissions ?? {},
 					domains: [], // TODO: Domains
