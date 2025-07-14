@@ -46,7 +46,6 @@ export const CategoryHeader = styled.div`
 	}
 `;
 
-
 export const PanelWrapper = styled.div`
 	width: calc(100% - 1090px);
 

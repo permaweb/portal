@@ -47,5 +47,5 @@ export const PanelActionsWrapper = styled.div`
 	align-items: center;
 	justify-content: flex-end;
 	gap: 20px;
-	margin: 20px 0 0 0;
+	margin: 20px 0;
 `;

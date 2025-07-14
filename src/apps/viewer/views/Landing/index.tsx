@@ -17,7 +17,7 @@ export default function Landing() {
 
 	const [featuredPosts, setFeaturedPosts] = React.useState<PortalAssetType[] | null>(null);
 	const [panelPosts, setPanelPosts] = React.useState<PortalAssetType[] | null>(null);
-	const [groupedPosts, setGroupedPosts] = React.useState<{[key: string]: PortalAssetType[]} | null>(null);
+	const [groupedPosts, setGroupedPosts] = React.useState<{ [key: string]: PortalAssetType[] } | null>(null);
 
 	React.useEffect(() => {
 		if (portalProvider.current?.assets?.length > 0) {
@@ -39,9 +39,9 @@ export default function Landing() {
 		}
 	}, [portalProvider.current?.assets]);
 
-	function groupPostsByCategory(posts: PortalAssetType[]): {[key: string]: PortalAssetType[]} {
-		const grouped: {[key: string]: PortalAssetType[]} = {};
-		
+	function groupPostsByCategory(posts: PortalAssetType[]): { [key: string]: PortalAssetType[] } {
+		const grouped: { [key: string]: PortalAssetType[] } = {};
+
 		posts.forEach((post) => {
 			if (post.metadata.categories && post.metadata.categories.length > 0) {
 				post.metadata.categories.forEach((category: PortalCategoryType) => {
@@ -57,16 +57,16 @@ export default function Landing() {
 				grouped['Uncategorized'].push(post);
 			}
 		});
-		
+
 		return grouped;
 	}
 
 	function getFeaturedPosts() {
 		if (!groupedPosts) return <Loader sm relative />;
-		
+
 		const categoryNames = Object.keys(groupedPosts);
 		if (categoryNames.length === 0) return null;
-		
+
 		return (
 			<>
 				{categoryNames.map((categoryName) => (

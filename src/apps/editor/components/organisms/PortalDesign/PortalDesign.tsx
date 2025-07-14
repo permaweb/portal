@@ -30,13 +30,11 @@ export default function PortalDesign() {
 	const panel = React.useMemo(() => {
 		let header: string | null;
 		let component: React.ReactNode | null;
-		let useAction: boolean = false;
 
 		switch (panelType) {
 			case 'themes':
 				header = language.themes;
 				component = <Themes />;
-				useAction = true;
 				break;
 			case 'fonts':
 				header = language.fonts;
@@ -44,7 +42,7 @@ export default function PortalDesign() {
 				break;
 			case 'logo':
 				header = language.siteLogo;
-				component = <Media portal={portalProvider.current} type={"logo"} />;
+				component = <Media portal={portalProvider.current} type={'logo'} />;
 				break;
 			default:
 				header = null;
@@ -62,11 +60,16 @@ export default function PortalDesign() {
 			>
 				<S.PanelBodyWrapper>
 					{component}
-					{/* {useAction && (
-						<S.PanelActionsWrapper>
-							<Button type={'primary'} label={language.close} handlePress={() => setShowPanel(false)} />
-						</S.PanelActionsWrapper>
-					)} */}
+
+					<S.PanelActionsWrapper>
+						<Button
+							type={'primary'}
+							label={language.close}
+							handlePress={() => setShowPanel(false)}
+							height={45}
+							fullWidth
+						/>
+					</S.PanelActionsWrapper>
 				</S.PanelBodyWrapper>
 			</Panel>
 		);

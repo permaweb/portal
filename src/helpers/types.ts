@@ -3,7 +3,7 @@ export type PortalHeaderType = {
 	name: string;
 	logo?: string | null;
 	icon?: string | null;
-	roles?: PortalUserType[]
+	roles?: PortalUserType[];
 };
 
 export type PortalDetailType = {
