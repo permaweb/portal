@@ -96,6 +96,13 @@ export default function Fonts() {
 		);
 	}
 
+	function hasChanges() {
+		const currentHeaderFont = portalProvider.current?.fonts?.headers || headerOptions[0].id;
+		const currentBodyFont = portalProvider.current?.fonts?.body || bodyOptions[0].id;
+		
+		return headerFont?.id !== currentHeaderFont || bodyFont?.id !== currentBodyFont;
+	}
+
 	return (
 		<>
 			<S.Wrapper>
@@ -124,7 +131,7 @@ export default function Fonts() {
 						type={'alt1'}
 						label={language?.save}
 						handlePress={handleFontChange}
-						disabled={unauthorized || loading}
+						disabled={unauthorized || loading || !hasChanges()}
 						loading={false}
 					/>
 				</S.SAction>

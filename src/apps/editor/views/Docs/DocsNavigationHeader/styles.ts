@@ -20,6 +20,9 @@ export const HWrapper = styled.div`
 `;
 
 export const HActions = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 20px;
 	width: fit-content;
 	margin: 0 0 0 auto;
 
@@ -32,6 +35,7 @@ export const HActions = styled.div`
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		white-space: nowrap;
 		text-transform: uppercase;
 		letter-spacing: 0.35px;
 
@@ -175,23 +179,4 @@ export const NSubHeader = styled(NTitle)`
 export const NSubList = styled.div`
 	padding: 0 0 0 15px;
 	border-left: 1px solid ${(props) => props.theme.colors.border.primary};
-`;
-
-export const LanguageSelector = styled.select`
-	margin-left: 15px;
-	padding: 5px 10px;
-	background: ${(props) => props.theme.colors.button.primary.background};
-	border: 1px solid ${(props) => props.theme.colors.button.primary.border};
-	border-radius: ${STYLING.dimensions.radius.button};
-	color: ${(props) => props.theme.colors.font.primary};
-	font-size: ${(props) => props.theme.typography.size.xxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	font-family: ${(props) => props.theme.typography.family.primary};
-	text-transform: uppercase;
-	cursor: pointer;
-
-	&:hover {
-	background: ${(props) => props.theme.colors.button.primary.active.background};
-	border: 1px solid ${(props) => props.theme.colors.button.primary.active.border};
-	}
 `;

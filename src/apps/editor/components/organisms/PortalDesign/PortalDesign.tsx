@@ -60,7 +60,6 @@ export default function PortalDesign() {
 			>
 				<S.PanelBodyWrapper>
 					{component}
-
 					<S.PanelActionsWrapper>
 						<Button
 							type={'primary'}

@@ -16,6 +16,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Portal } from 'components/atoms/Portal';
 import { DOM, URLS } from 'helpers/config';
 import { GlobalStyle } from 'helpers/styles';
+import { preloadAllAssets } from 'helpers/preloader';
 import { ArweaveProvider, useArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvider';
 import { PermawebProvider, usePermawebProvider } from 'providers/PermawebProvider';
@@ -63,6 +64,14 @@ function App() {
 	const { settings, updateSettings } = useSettingsProvider();
 
 	const hasCheckedProfileRef = React.useRef(false);
+	const hasInitializedPreloaderRef = React.useRef(false);
+
+	React.useEffect(() => {
+		if (!hasInitializedPreloaderRef.current) {
+			preloadAllAssets();
+			hasInitializedPreloaderRef.current = true;
+		}
+	}, []);
 
 	React.useEffect(() => {
 		(async function () {

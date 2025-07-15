@@ -19,159 +19,129 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 import * as S from './styles';
 
 export default function Navigation(props: { open: boolean; toggle: () => void }) {
-  const { confirmNavigation } = useNavigationConfirm('post', 'Changes you made may not be saved.');
-  const portalProvider = usePortalProvider();
-  const languageProvider = useLanguageProvider();
-  const language = languageProvider.object[languageProvider.current];
+	const { confirmNavigation } = useNavigationConfirm('post', 'Changes you made may not be saved.');
+	
+	const portalProvider = usePortalProvider();
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
 
-  const [languageKey, setLanguageKey] = React.useState(0);
-  const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
-  const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
+	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
+	const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
 
-  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLanguage = e.target.value as 'en' | 'es';
-    languageProvider.setCurrent(newLanguage);
-    setLanguageKey(prev => prev + 1);
-    localStorage.setItem('preferredLanguage', newLanguage);
-  };
+	const paths = React.useMemo(() => {
+		return [
+			{
+				path: portalProvider.current ? URLS.portalBase(portalProvider.current.id) : URLS.base,
+				icon: ASSETS.portal,
+				label: language?.home,
+			},
+			{
+				path: portalProvider.current ? URLS.portalSetup(portalProvider.current.id) : URLS.base,
+				icon: ASSETS.setup,
+				label: language?.setup,
+			},
+			{
+				path: portalProvider.current ? URLS.portalDesign(portalProvider.current.id) : URLS.base,
+				icon: ASSETS.design,
+				label: language?.design,
+			},
+			{
+				path: portalProvider.current ? URLS.portalPosts(portalProvider.current.id) : URLS.base,
+				icon: ASSETS.posts,
+				label: language?.posts,
+			},
+			{
+				path: portalProvider.current ? URLS.portalUsers(portalProvider.current.id) : URLS.base,
+				icon: ASSETS.users,
+				label: language?.users,
+			},
+			{
+				path: portalProvider.current ? URLS.portalDomains(portalProvider.current.id) : URLS.base,
+				icon: ASSETS.domains,
+				label: language?.domains,
+			},
+		];
+	}, [portalProvider.current?.id]);
 
-  React.useEffect(() => {
-    const savedLanguage = localStorage.getItem('preferredLanguage');
-    if (savedLanguage && languageProvider.current !== savedLanguage) {
-      languageProvider.setCurrent(savedLanguage as 'en' | 'es');
-    }
-  }, []);
+	function handleWindowResize() {
+		if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {
+			setDesktop(true);
+		} else {
+			setDesktop(false);
+		}
+	}
 
-  const paths = React.useMemo(() => {
-    return [
-      {
-        path: portalProvider.current ? URLS.portalBase(portalProvider.current.id) : URLS.base,
-        icon: ASSETS.portal,
-        label: language?.home,
-      },
-      {
-        path: portalProvider.current ? URLS.portalSetup(portalProvider.current.id) : URLS.base,
-        icon: ASSETS.setup,
-        label: language?.setup,
-      },
-      {
-        path: portalProvider.current ? URLS.portalDesign(portalProvider.current.id) : URLS.base,
-        icon: ASSETS.design,
-        label: language?.design,
-      },
-      {
-        path: portalProvider.current ? URLS.portalPosts(portalProvider.current.id) : URLS.base,
-        icon: ASSETS.posts,
-        label: language?.posts,
-      },
-      {
-        path: portalProvider.current ? URLS.portalUsers(portalProvider.current.id) : URLS.base,
-        icon: ASSETS.users,
-        label: language?.users,
-      },
-      {
-        path: portalProvider.current ? URLS.portalDomains(portalProvider.current.id) : URLS.base,
-        icon: ASSETS.domains,
-        label: language?.domains,
-      },
-    ];
-  }, [portalProvider.current?.id, languageKey]);
+	const debouncedResize = React.useCallback(debounce(handleWindowResize, 0), []);
 
-  function handleWindowResize() {
-    if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {
-      setDesktop(true);
-    } else {
-      setDesktop(false);
-    }
-  }
+	React.useEffect(() => {
+		window.addEventListener('resize', debouncedResize);
+		return () => window.removeEventListener('resize', debouncedResize);
+	}, [debouncedResize]);
 
-  const debouncedResize = React.useCallback(debounce(handleWindowResize, 0), []);
+	const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, to: string) => {
+		e.preventDefault();
+		confirmNavigation(to);
+		if (!desktop) props.toggle();
+	};
 
-  React.useEffect(() => {
-    window.addEventListener('resize', debouncedResize);
-    return () => window.removeEventListener('resize', debouncedResize);
-  }, [debouncedResize]);
+	const navigationToggle = React.useMemo(() => {
+		return (
+			<S.ToggleWrapper>
+				<IconButton
+					type={'primary'}
+					src={ASSETS.navigation}
+					handlePress={props.toggle}
+					dimensions={{
+						wrapper: 36.5,
+						icon: 23.5,
+					}}
+					tooltip={props.open ? language?.sidebarClose : language?.sidebarOpen}
+					tooltipPosition={props.open ? 'right' : 'bottom-left'}
+				/>
+			</S.ToggleWrapper>
+		);
+	}, [props.open]);
 
-  const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, to: string) => {
-    e.preventDefault();
-    confirmNavigation(to);
-    if (!desktop) props.toggle();
-  };
+	const panel = React.useMemo(() => {
+		const content = (
+			<>
+				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
+				<S.PanelContent open={props.open} className={'fade-in scroll-wrapper'}>
+					{paths.map((element, index) => (
+						<Link key={index} to={element.path} onClick={(e) => handleNavigate(e, element.path)}>
+							<ReactSVG src={element.icon} />
+							{element.label}
+						</Link>
+					))}
+				</S.PanelContent>
+				<S.PanelFooter open={props.open} className={'fade-in'}>
+					<Link to={URLS.docsIntro} onClick={(e) => handleNavigate(e, URLS.docsIntro)}>
+						<ReactSVG src={ASSETS.help} />
+						{language?.helpCenter}
+					</Link>
+				</S.PanelFooter>
+			</>
+		);
 
-  const navigationToggle = React.useMemo(() => {
-    return (
-      <S.ToggleWrapper>
-        <IconButton
-          type={'primary'}
-          src={ASSETS.navigation}
-          handlePress={props.toggle}
-          dimensions={{
-            wrapper: 36.5,
-            icon: 23.5,
-          }}
-          tooltip={props.open ? language?.sidebarClose : language?.sidebarOpen}
-          tooltipPosition={props.open ? 'right' : 'bottom-left'}
-        />
-      </S.ToggleWrapper>
-    );
-  }, [props.open, languageKey]);
-
-  const panel = React.useMemo(() => {
-    const content = (
-      <>
-        <S.PanelHeader>{navigationToggle}</S.PanelHeader>
-        <S.PanelContent open={props.open} className={'fade-in scroll-wrapper'}>
-          {paths.map((element, index) => (
-            <Link
-              key={index}
-              to={element.path}
-              onClick={(e) => handleNavigate(e, element.path)}
-            >
-              <ReactSVG src={element.icon} />
-              {element.label}
-            </Link>
-          ))}
-
-		  <S.LanguageDivider />
-          <S.LanguageItem>
-            <ReactSVG src={ASSETS.language} />
-            <S.LanguageSelector
-              value={languageProvider.current}
-              onChange={handleLanguageChange}
-            >
-              <option value="en">English</option>
-              <option value="es">Español</option>
-            </S.LanguageSelector>
-          </S.LanguageItem>
-        </S.PanelContent>
-        <S.PanelFooter open={props.open} className={'fade-in'}>
-          <Link to={URLS.docsIntro} onClick={(e) => handleNavigate(e, URLS.docsIntro)}>
-            <ReactSVG src={ASSETS.help} />
-            {language?.helpCenter}
-          </Link>
-        </S.PanelFooter>
-      </>
-    );
-
-    if (desktop) {
-      return (
-        <S.Panel key={`panel-${languageKey}`} open={props.open} className={'fade-in'}>
-          {content}
-        </S.Panel>
-      );
-    } else {
-      return (
-        <>
-          <S.Panel key={`panel-${languageKey}`} open={props.open} className={'fade-in'}>
-            <CloseHandler active={props.open} disabled={!props.open} callback={() => props.toggle()}>
-              {content}
-            </CloseHandler>
-          </S.Panel>
-          <S.PanelOverlay open={props.open} />
-        </>
-      );
-    }
-  }, [props.open, desktop, languageKey]);
+		if (desktop) {
+			return (
+				<S.Panel open={props.open} className={'fade-in'}>
+					{content}
+				</S.Panel>
+			);
+		} else {
+			return (
+				<>
+					<S.Panel open={props.open} className={'fade-in'}>
+						<CloseHandler active={props.open} disabled={!props.open} callback={() => props.toggle()}>
+							{content}
+						</CloseHandler>
+					</S.Panel>
+					<S.PanelOverlay open={props.open} />
+				</>
+			);
+		}
+	}, [props.open, desktop]);
 
 	const portal = React.useMemo(() => {
 		if (portalProvider.current?.id) {
@@ -274,27 +244,27 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 			</S.LoadingWrapper>
 		);
 	}, [
-		showPortalDropdown, languageKey,
+		showPortalDropdown,
 		portalProvider.portals,
 		portalProvider.current?.id,
 		portalProvider.current?.name,
 		portalProvider.updating,
 	]);
 
-  return (
-    <>
-      {panel}
-      <S.Header navigationOpen={props.open} className={'fade-in'}>
-        <S.Content>
-          <S.C1Wrapper>
-            {!props.open && navigationToggle}
-            {portal}
-          </S.C1Wrapper>
-          <S.ActionsWrapper>
-            <WalletConnect app={'editor'} />
-          </S.ActionsWrapper>
-        </S.Content>
-      </S.Header>
-    </>
-  );
+	return (
+		<>
+			{panel}
+			<S.Header navigationOpen={props.open} className={'fade-in'}>
+				<S.Content>
+					<S.C1Wrapper>
+						{!props.open && navigationToggle}
+						{portal}
+					</S.C1Wrapper>
+					<S.ActionsWrapper>
+						<WalletConnect app={'editor'} />
+					</S.ActionsWrapper>
+				</S.Content>
+			</S.Header>
+		</>
+	);
 }
