@@ -10,9 +10,7 @@ export const Wrapper = styled.div<{
 	min-width: ${(props) => `${props.dimensions.wrapper.toString()}px`};
 	height: ${(props) => `${props.dimensions.wrapper.toString()}px`};
 	width: ${(props) => `${props.dimensions.wrapper.toString()}px`};
-	background: ${(props) =>
-		props.hasOwner ? props.theme.colors.container.primary.background : props.theme.colors.icon.alt1.fill};
-	background: transparent;
+	background: ${(props) => props.theme.colors.icon.alt1.fill};
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-radius: 50%;
 	overflow: hidden;
@@ -31,8 +29,8 @@ export const Wrapper = styled.div<{
 		height: ${(props) => `${props.dimensions.icon.toString()}px`};
 		width: ${(props) => `${props.dimensions.icon.toString()}px`};
 		padding: 2.5px 0 0 0px;
-		color: ${(props) => props.theme.colors.font.alt1};
-		fill: ${(props) => props.theme.colors.font.alt1};
+		color: ${(props) => props.theme.colors.font.primary};
+		fill: ${(props) => props.theme.colors.font.primary};
 	}
 
 	pointer-events: none;

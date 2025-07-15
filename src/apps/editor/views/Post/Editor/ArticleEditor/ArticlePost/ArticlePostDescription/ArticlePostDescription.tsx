@@ -39,7 +39,7 @@ export default function ArticlePostDescription() {
 				<S.ActionWrapper>
 					<Button
 						type={'primary'}
-						label={language.editDescription}
+						label={language?.editDescription}
 						handlePress={() => {
 							setOriginalDescription(currentDescription);
 							setShowPanel(true);
@@ -52,14 +52,14 @@ export default function ArticlePostDescription() {
 			</S.Wrapper>
 			<Panel
 				open={showPanel}
-				header={language.editDescription}
+				header={language?.editDescription}
 				handleClose={() => setShowPanel(false)}
 				width={500}
 				closeHandlerDisabled={true}
 			>
 				<S.PanelBodyWrapper>
 					<TextArea
-						label={language.description}
+						label={language?.description}
 						value={currentDescription}
 						onChange={(e: any) => handleCurrentPostUpdate({ field: 'description', value: e.target.value })}
 						onFocus={() => handleCurrentPostUpdate({ field: 'focusedBlock', value: null })}
@@ -70,11 +70,11 @@ export default function ArticlePostDescription() {
 					<S.PanelActionsWrapper>
 						<Button
 							type={'alt1'}
-							label={language.done}
+							label={language?.done}
 							disabled={!hasChanges}
 							handlePress={() => {
 								setShowPanel(false);
-								setResponse({ status: 'success', message: `${language.descriptionUpdated}!` });
+								setResponse({ status: 'success', message: `${language?.descriptionUpdated}!` });
 							}}
 						/>
 					</S.PanelActionsWrapper>

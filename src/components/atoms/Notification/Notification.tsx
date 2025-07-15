@@ -44,7 +44,7 @@ export default function Notification(props: {
 					<S.Message>{props.message}</S.Message>
 				</S.MessageWrapper>
 				<S.Close>
-					<Button type={'alt2'} label={language.dismiss} handlePress={handleClose} />
+					<Button type={'alt2'} label={language?.dismiss} handlePress={handleClose} />
 				</S.Close>
 			</S.Wrapper>
 		</Portal>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
+import { LanguageSelect } from 'components/molecules/LanguageSelect';
 import { ASSETS, STYLING, URLS } from 'helpers/config';
 import * as windowUtils from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -10,7 +11,7 @@ import { docsOrder } from '../order-docs';
 
 import * as S from './styles';
 
-function renderNavItems(handleClick: any, path = '', docs: any = docsOrder) {
+function renderNavItems(handleClick: (() => void) | null, path: string = '', docs: any, currentLanguage: string) {
 	const location = useLocation();
 	const basePath = URLS.docs;
 	const active = location.pathname.replace(basePath, '');
@@ -20,7 +21,7 @@ function renderNavItems(handleClick: any, path = '', docs: any = docsOrder) {
 		if (docs[i].path && !docs[i].children) {
 			const fullPath = `${path ? path + '/' : path}${docs[i].path}`;
 			items.push(
-				<Link to={`${URLS.docs}${fullPath}`} key={`file-${docs[i].path}`} onClick={handleClick ? handleClick : null}>
+				<Link to={`${URLS.docs}${fullPath}`} key={`file-${docs[i].path}`} onClick={handleClick || undefined}>
 					<S.NListItem disabled={false} active={fullPath === active}>
 						{docs[i].name}
 					</S.NListItem>
@@ -33,7 +34,7 @@ function renderNavItems(handleClick: any, path = '', docs: any = docsOrder) {
 						<S.NSubHeader>
 							<p>{docs[i].name}</p>
 						</S.NSubHeader>
-						<S.NSubList>{renderNavItems(handleClick || null, docs[i].path, docs[i].children)}</S.NSubList>
+						<S.NSubList>{renderNavItems(handleClick, docs[i].path, docs[i].children, currentLanguage)}</S.NSubList>
 					</S.NGroup>
 				);
 			}
@@ -45,7 +46,13 @@ function renderNavItems(handleClick: any, path = '', docs: any = docsOrder) {
 
 export default function DocsNavigationHeader() {
 	const languageProvider = useLanguageProvider();
-	const language = languageProvider.object[languageProvider.current];
+
+	const language = languageProvider.object[languageProvider.current] || {
+		returnHome: 'Return Home',
+		app: 'Documentation',
+	};
+
+	const currentDocs = docsOrder[languageProvider.current] || docsOrder.en;
 
 	const [open, setOpen] = React.useState(windowUtils.checkWindowCutoff(parseInt(STYLING.cutoffs.initial)));
 	const [desktop, setDesktop] = React.useState(windowUtils.checkWindowCutoff(parseInt(STYLING.cutoffs.initial)));
@@ -62,6 +69,10 @@ export default function DocsNavigationHeader() {
 
 	windowUtils.checkWindowResize(handleWindowResize);
 
+	if (!languageProvider || !languageProvider.object) {
+		return <div>Loading navigation...</div>;
+	}
+
 	function getNav() {
 		const Title: any = desktop ? S.NTitle : S.NTitleMobile;
 
@@ -69,16 +80,19 @@ export default function DocsNavigationHeader() {
 			<>
 				<S.HWrapper>
 					<S.HActions>
-						<Link to={URLS.base}>{language.returnHome}</Link>
+						<LanguageSelect />
+						<Link to={URLS.base}>{language?.returnHome}</Link>
 					</S.HActions>
 				</S.HWrapper>
 				<S.NWrapper>
 					<S.NContent>
-						<Title onClick={desktop ? () => {} : () => setOpen(!open)} open={open}>
-							<p>{`${language.app}`}</p>
+						<Title onClick={desktop ? undefined : () => setOpen(!open)} open={open}>
+							<p>{language?.app}</p>
 							{!desktop && <ReactSVG src={ASSETS.arrow} />}
 						</Title>
-						<S.NList>{open && renderNavItems(desktop ? null : () => setOpen(false))}</S.NList>
+						<S.NList>
+							{open && renderNavItems(desktop ? null : () => setOpen(false), '', currentDocs, languageProvider.current)}
+						</S.NList>
 					</S.NContent>
 				</S.NWrapper>
 			</>

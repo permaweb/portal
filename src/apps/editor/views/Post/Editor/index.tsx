@@ -65,7 +65,7 @@ export default function Editor() {
 		if (assetId && arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
 			handleCurrentPostUpdate({
 				field: 'loading',
-				value: { active: true, message: `${language.updatingPostStatus}...` },
+				value: { active: true, message: `${language?.updatingPostStatus}...` },
 			});
 
 			const indexRecipients = [portalProvider.current.id];
@@ -77,7 +77,7 @@ export default function Editor() {
 
 			if (!portalProvider.permissions?.updatePostRequestStatus) {
 				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
-				setResponse({ status: 'warning', message: language.unauthorized });
+				setResponse({ status: 'warning', message: language?.unauthorized });
 				return;
 			}
 
@@ -137,7 +137,7 @@ export default function Editor() {
 									try {
 										data.Thumbnail = await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail);
 									} catch (e: any) {
-										setResponse({ status: 'warning', message: e.message ?? language.errorUploadingThumbnail });
+										setResponse({ status: 'warning', message: e.message ?? language?.errorUploadingThumbnail });
 									}
 								}
 
@@ -152,13 +152,13 @@ export default function Editor() {
 							}
 						}
 
-						setResponse({ status: 'success', message: `${language.postStatusUpdated}!` });
+						setResponse({ status: 'success', message: `${language?.postStatusUpdated}!` });
 						portalProvider.refreshCurrentPortal();
 
 						await new Promise((r) => setTimeout(r, 1000));
 						navigate(URLS.portalBase(portalProvider.current.id));
 					} else {
-						setResponse({ status: 'warning', message: language.errorUpdatingPost });
+						setResponse({ status: 'warning', message: language?.errorUpdatingPost });
 					}
 				} catch (e: any) {
 					setResponse({ status: 'warning', message: e.message ?? 'Error updating post status' });
@@ -171,7 +171,7 @@ export default function Editor() {
 
 	async function handleSubmit() {
 		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
-			handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language.savingPost}...` } });
+			handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language?.savingPost}...` } });
 
 			if (!validateSubmit()) {
 				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
@@ -191,7 +191,7 @@ export default function Editor() {
 				try {
 					data.Thumbnail = await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail);
 				} catch (e: any) {
-					setResponse({ status: 'warning', message: e.message ?? language.errorUploadingThumbnail });
+					setResponse({ status: 'warning', message: e.message ?? language?.errorUploadingThumbnail });
 				}
 			}
 
@@ -205,10 +205,10 @@ export default function Editor() {
 					});
 
 					console.log(`Asset content update: ${assetContentUpdateId}`);
-					setResponse({ status: 'success', message: `${language.postUpdated}!` });
+					setResponse({ status: 'success', message: `${language?.postUpdated}!` });
 					portalProvider.refreshCurrentPortal('assets');
 				} catch (e: any) {
-					setResponse({ status: 'warning', message: e.message ?? language.errorUpdatingPost });
+					setResponse({ status: 'warning', message: e.message ?? language?.errorUpdatingPost });
 				}
 			} else {
 				try {
@@ -342,7 +342,7 @@ export default function Editor() {
 						}
 					}
 
-					setResponse({ status: 'success', message: `${language.postSaved}!` });
+					setResponse({ status: 'success', message: `${language?.postSaved}!` });
 					navigate(`${URLS.postEditArticle(portalProvider.current.id)}${assetId}`);
 				} catch (e: any) {
 					setResponse({ status: 'warning', message: e.message ?? 'Error creating post' });
@@ -453,10 +453,10 @@ export default function Editor() {
 			{unauthorized && (
 				<div className={'overlay'}>
 					<S.MessageWrapper className={'border-wrapper-alt2'}>
-						<p>{language.unauthorizedPostCreate}</p>
+						<p>{language?.unauthorizedPostCreate}</p>
 						<Button
 							type={'primary'}
-							label={language.returnHome}
+							label={language?.returnHome}
 							handlePress={() => navigate(URLS.portalBase(portalProvider.current?.id))}
 						/>
 					</S.MessageWrapper>
@@ -467,10 +467,10 @@ export default function Editor() {
 				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
 			)}
 			{showReview && (
-				<Modal header={language.reviewPostDetails} handleClose={() => setShowReview(false)}>
+				<Modal header={language?.reviewPostDetails} handleClose={() => setShowReview(false)}>
 					<S.ModalWrapper>
 						<S.ModalBodyWrapper>
-							<p>{language.missingPostFields}</p>
+							<p>{language?.missingPostFields}</p>
 							<S.ModalBodyElements>
 								{missingFields.map((topic: string, index: number) => {
 									return (
@@ -483,11 +483,11 @@ export default function Editor() {
 						</S.ModalBodyWrapper>
 						<S.ModalActionsWrapper>
 							<Link to={URLS.docsEditor} target={'_blank'}>
-								{language.learn}
+								{language?.learn}
 							</Link>
 							<Button
 								type={'primary'}
-								label={language.close}
+								label={language?.close}
 								handlePress={() => setShowReview(false)}
 								disabled={false}
 							/>

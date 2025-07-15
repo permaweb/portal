@@ -20,13 +20,13 @@ export default function DomainList() {
 		if (!portalProvider.current?.domains) {
 			return (
 				<S.LoadingWrapper>
-					<p>{`${language.gettingDomains}...`}</p>
+					<p>{`${language?.gettingDomains}...`}</p>
 				</S.LoadingWrapper>
 			);
 		} else if (portalProvider.current?.domains.length === 0) {
 			return (
 				<S.WrapperEmpty>
-					<p>{language.noDomainsFound}</p>
+					<p>{language?.noDomainsFound}</p>
 				</S.WrapperEmpty>
 			);
 		}
@@ -46,12 +46,12 @@ export default function DomainList() {
 								<S.DomainActions>
 									<Button
 										type={'alt3'}
-										label={language.viewInfo}
+										label={language?.viewInfo}
 										handlePress={() => window.open(`https://arweave.net/${domain}`, 'blank')}
 									/>
 									{/* <Button
 											type={'alt3'}
-											label={language.edit}
+											label={language?.edit}
 											handlePress={() => navigate(`${URLS.postEditArticle(portalProvider.current.id)}${asset.id}`)}
 										/> */}
 									{/* <IconButton
@@ -60,7 +60,7 @@ export default function DomainList() {
 											src={ASSETS.listUnordered}
 											handlePress={() => window.open(`https://arweave.net/${domain}`, 'blank')}
 											dimensions={{ wrapper: 23.5, icon: 13.5 }}
-											tooltip={language.moreActions}
+											tooltip={language?.moreActions}
 											tooltipPosition={'bottom-right'}
 										/> */}
 								</S.DomainActions>

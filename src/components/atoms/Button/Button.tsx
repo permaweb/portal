@@ -104,7 +104,7 @@ export default function Button(props: {
 						<ReactSVG src={props.icon} />
 					</StyledIcon>
 				)}
-				<span>{props.loading ? `${language.loading}...` : props.label}</span>
+				<span>{props.loading ? `${language?.loading}...` : props.label}</span>
 				{props.icon && !props.iconLeftAlign && (
 					<StyledIcon
 						warning={props.warning || false}

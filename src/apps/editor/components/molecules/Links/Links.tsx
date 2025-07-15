@@ -80,7 +80,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 
 				console.log(`Link update: ${linkUpdateId}`);
 
-				setLinkResponse({ status: 'success', message: `${language.linksUpdated}!` });
+				setLinkResponse({ status: 'success', message: `${language?.linksUpdated}!` });
 				setShowDeleteConfirmation(false);
 				setEditMode(false);
 			} catch (e: any) {
@@ -111,7 +111,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 				console.log(`Link update: ${linkUpdateId}`);
 
 				setLinkOptions(permawebProvider.libs.mapFromProcessCase(updatedLinkOptions));
-				setLinkResponse({ status: 'success', message: `${language.linkAdded}!` });
+				setLinkResponse({ status: 'success', message: `${language?.linkAdded}!` });
 
 				setNewLinkUrl('');
 				setNewLinkTitle('');
@@ -167,13 +167,13 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 		if (!linkOptions) {
 			return (
 				<S.LoadingWrapper>
-					<p>{`${language.gettingLinks}...`}</p>
+					<p>{`${language?.gettingLinks}...`}</p>
 				</S.LoadingWrapper>
 			);
 		} else if (linkOptions.length <= 0) {
 			return (
 				<S.WrapperEmpty>
-					<p>{language.noLinksFound}</p>
+					<p>{language?.noLinksFound}</p>
 				</S.WrapperEmpty>
 			);
 		}
@@ -202,11 +202,11 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 			<S.Wrapper>
 				<S.LinksAction>
 					<S.LinksHeader>
-						<p>{language.addLink}</p>
+						<p>{language?.addLink}</p>
 						<S.LinksHeaderActions>
 							<Button
 								type={'alt3'}
-								label={language.clear}
+								label={language?.clear}
 								handlePress={() => {
 									setNewLinkUrl('');
 									setNewLinkTitle('');
@@ -225,7 +225,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 								<CloseHandler callback={() => setShowPrefills(false)} active={showPrefills} disabled={!showPrefills}>
 									<Button
 										type={'alt4'}
-										label={language.prefill}
+										label={language?.prefill}
 										handlePress={() => setShowPrefills(!showPrefills)}
 										disabled={unauthorized || !arProvider.wallet || !portalProvider.current?.id || linkLoading}
 										loading={false}
@@ -260,7 +260,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 							value={newLinkTitle}
 							onChange={(e: any) => setNewLinkTitle(e.target.value)}
 							invalid={{ status: false, message: null }}
-							label={language.text}
+							label={language?.text}
 							disabled={linkLoading || unauthorized}
 							hideErrorMessage
 							sm
@@ -284,7 +284,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 					<S.LinksAddAction>
 						<Button
 							type={'alt4'}
-							label={language.add}
+							label={language?.add}
 							handlePress={addLink}
 							disabled={linkActionDisabled}
 							loading={linkLoading}
@@ -295,7 +295,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 							value={newLinkUrl}
 							onChange={(e: any) => setNewLinkUrl(e.target.value)}
 							invalid={{ status: newLinkUrl?.length > 0 && !validateUrl(newLinkUrl), message: null }}
-							label={language.url}
+							label={language?.url}
 							placeholder={'https://'}
 							disabled={linkLoading || unauthorized}
 							hideErrorMessage
@@ -305,10 +305,10 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 				</S.LinksAction>
 				<S.LinksBodyWrapper>
 					<S.LinksHeader>
-						<p>{language.current}</p>
+						<p>{language?.current}</p>
 						<Button
 							type={'alt4'}
-							label={editMode ? language.done : language.edit}
+							label={editMode ? language?.done : language?.edit}
 							handlePress={() => {
 								setEditMode(!editMode);
 								setSelectedLinks([]);
@@ -325,11 +325,11 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 					</S.LinksBody>
 					<S.LinksFooter>
 						{props.closeAction && (
-							<Button type={'alt3'} label={language.close} handlePress={() => props.closeAction()} />
+							<Button type={'alt3'} label={language?.close} handlePress={() => props.closeAction()} />
 						)}
 						<Button
 							type={'alt3'}
-							label={language.remove}
+							label={language?.remove}
 							handlePress={() => setShowDeleteConfirmation(true)}
 							disabled={!selectedLinks?.length || linkLoading}
 							loading={false}
@@ -341,10 +341,10 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 				</S.LinksBodyWrapper>
 			</S.Wrapper>
 			{showDeleteConfirmation && (
-				<Modal header={language.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
+				<Modal header={language?.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
 					<S.ModalWrapper>
 						<S.ModalBodyWrapper>
-							<p>{language.linkDeleteConfirmationInfo}</p>
+							<p>{language?.linkDeleteConfirmationInfo}</p>
 							<S.ModalBodyElements>
 								{selectedLinks.map((link: PortalLinkType, index: number) => {
 									return (
@@ -358,13 +358,13 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 						<S.ModalActionsWrapper>
 							<Button
 								type={'primary'}
-								label={language.cancel}
+								label={language?.cancel}
 								handlePress={() => setShowDeleteConfirmation(false)}
 								disabled={linkLoading}
 							/>
 							<Button
 								type={'primary'}
-								label={language.linkDeleteConfirmation}
+								label={language?.linkDeleteConfirmation}
 								handlePress={() => deleteLinks()}
 								disabled={!selectedLinks?.length || linkLoading}
 								loading={linkLoading}

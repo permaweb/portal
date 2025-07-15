@@ -33,11 +33,11 @@ export default function Posts() {
 		<>
 			<S.Wrapper className={'fade-in'}>
 				<ViewHeader
-					header={language.posts}
+					header={language?.posts}
 					actions={[
 						<Button
 							type={'primary'}
-							label={language.editPostTopics}
+							label={language?.editPostTopics}
 							handlePress={() => setShowTopicAction(true)}
 							disabled={unauthorizedMeta || !portalProvider.current}
 							icon={ASSETS.write}
@@ -45,7 +45,7 @@ export default function Posts() {
 						/>,
 						<Button
 							type={'alt1'}
-							label={language.createPost}
+							label={language?.createPost}
 							handlePress={() => navigate(URLS.postCreateArticle(portalProvider.current.id))}
 							disabled={unauthorizedCreate || !portalProvider.current}
 							icon={ASSETS.add}
@@ -58,7 +58,7 @@ export default function Posts() {
 				</S.BodyWrapper>
 			</S.Wrapper>
 			{showTopicAction && (
-				<Modal header={language.editPostTopics} handleClose={() => setShowTopicAction(false)}>
+				<Modal header={language?.editPostTopics} handleClose={() => setShowTopicAction(false)}>
 					<S.TopicModalWrapper>
 						<Topics topics={selectedTopics} setTopics={(topics: string[]) => setSelectedTopics(topics)} showActions />
 					</S.TopicModalWrapper>

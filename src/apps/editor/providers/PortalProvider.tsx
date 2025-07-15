@@ -108,9 +108,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				// 	for (const portal of profilePortals) {
 				// 		try {
 				// 			const portalData = await permawebProvider.libs.getZone(portal.id);
-				// 			console.log(portalData);
-				// 		}
-				// 		catch (e: any) {
+				// 		} catch (e: any) {
 				// 			console.error(e);
 				// 		}
 				// 	}
@@ -324,6 +322,20 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		}
 	}
 
+	function getPortalUsers(roles: any) {
+		const users: PortalUserType[] = [];
+		if (roles) {
+			for (const entry of Object.keys(roles)) {
+				users.push({
+					address: entry,
+					type: roles[entry].type,
+					roles: roles[entry].roles,
+				});
+			}
+		}
+		return users;
+	}
+
 	const fetchPortal = async () => {
 		if (currentId) {
 			try {
@@ -364,7 +376,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					uploads: portalData?.store?.uploads ?? [],
 					fonts: portalData?.store?.fonts ?? {},
 					themes: portalData?.store?.themes ?? [],
-					users: users || [],
+					users: getPortalUsers(portalData?.roles),
 					roleOptions: portalData.roleOptions ?? {},
 					permissions: portalData.permissions ?? {},
 					domains: [], // TODO: Domains
@@ -405,7 +417,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			{props.children}
 			<Panel
 				open={showPortalManager}
-				header={current && current.id && !createNewPortal ? language.editPortal : language.createPortal}
+				header={current && current.id && !createNewPortal ? 
+					(language?.editPortal || 'Edit Portal') : 
+					(language?.createPortal || 'Create Portal')}
 				handleClose={() => setShowPortalManager(false)}
 				width={500}
 				closeHandlerDisabled={true}

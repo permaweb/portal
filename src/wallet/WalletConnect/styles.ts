@@ -201,10 +201,12 @@ export const DFooterWrapper = styled(DBodyWrapper)`
 export const MWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 30px;
+	gap: 20px;
 `;
 
-export const ThemeSection = styled.div``;
+export const MSection = styled.div`
+	
+`;
 
 export const ThemeSectionHeader = styled.div`
 	display: flex;
@@ -242,7 +244,7 @@ export const Indicator = styled.div<{ active: boolean }>`
 	transition: all 150ms;
 `;
 
-export const ThemeSectionBodyElement = styled.button`
+export const MSectionBodyElement = styled.button`
 	width: 175px;
 
 	display: flex;

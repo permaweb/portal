@@ -313,7 +313,7 @@ export default function ArticleBlock(props: {
 							<S.SelectionWrapper className={'fade-in'}>
 								<Button
 									type={'alt3'}
-									label={language.link}
+									label={language?.link}
 									handlePress={() => handleLinkModalOpen()}
 									icon={ASSETS.link}
 									iconLeftAlign
@@ -326,7 +326,7 @@ export default function ArticleBlock(props: {
 						src={ASSETS.delete}
 						handlePress={() => props.onDeleteBlock(props.block.id)}
 						dimensions={{ wrapper: 23.5, icon: 13.5 }}
-						tooltip={language.deleteBlock}
+						tooltip={language?.deleteBlock}
 						tooltipPosition={'bottom-right'}
 						noFocus
 					/>
@@ -374,13 +374,13 @@ export default function ArticleBlock(props: {
 					)}
 				</S.ElementWrapper>
 				{showLinkModal && (
-					<Modal header={language.editLink} handleClose={() => setShowLinkModal(false)}>
+					<Modal header={language?.editLink} handleClose={() => setShowLinkModal(false)}>
 						<S.ModalWrapper>
 							<FormField
 								value={textToConvert}
 								onChange={(e: any) => setTextToConvert(e.target.value)}
 								invalid={{ status: false, message: null }}
-								label={language.text}
+								label={language?.text}
 								disabled={false}
 								hideErrorMessage
 								sm
@@ -389,15 +389,15 @@ export default function ArticleBlock(props: {
 								value={newLinkUrl}
 								onChange={(e: any) => setNewLinkUrl(e.target.value)}
 								invalid={{ status: invalidLink, message: null }}
-								label={language.url}
+								label={language?.url}
 								placeholder={'https://'}
 								disabled={false}
 								hideErrorMessage
 								sm
 							/>
 							<S.ModalActionsWrapper>
-								<Button type={'primary'} label={language.cancel} handlePress={() => handleLinkClear()} />
-								<Button type={'alt1'} label={language.save} handlePress={() => handleLinkSave()} disabled={false} />
+								<Button type={'primary'} label={language?.cancel} handlePress={() => handleLinkClear()} />
+								<Button type={'alt1'} label={language?.save} handlePress={() => handleLinkSave()} disabled={false} />
 							</S.ModalActionsWrapper>
 						</S.ModalWrapper>
 					</Modal>

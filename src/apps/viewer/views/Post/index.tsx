@@ -163,7 +163,7 @@ export default function Post() {
 			<S.FooterWrapper className={'fade-in'}>
 				{post?.metadata?.topics && (
 					<S.TopicsWrapper>
-						<p>{language.topics}</p>
+						<p>{language?.topics}</p>
 						<S.Topics>
 							{post.metadata.topics.map((topic: string) => {
 								return <span key={topic}>{topic}</span>;

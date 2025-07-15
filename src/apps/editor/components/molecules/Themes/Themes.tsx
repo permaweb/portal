@@ -76,7 +76,7 @@ function Color(props: {
 				</S.ColorTooltip>
 			</S.ColorWrapper>
 			{showSelector && (
-				<Modal header={language.colorPicker} handleClose={() => setShowSelector(false)}>
+				<Modal header={language?.colorPicker} handleClose={() => setShowSelector(false)}>
 					<S.SelectorWrapper>
 						<S.SelectorHeader>
 							<p>{props.label}</p>
@@ -90,7 +90,7 @@ function Color(props: {
 							<S.SelectorFlexActions>
 								<Button
 									type={'primary'}
-									label={language.close}
+									label={language?.close}
 									handlePress={() => {
 										setValue(parseRgbStringToHex(props.value));
 										setShowSelector(false);
@@ -99,7 +99,7 @@ function Color(props: {
 								/>
 								<Button
 									type={'alt1'}
-									label={language.save}
+									label={language?.save}
 									handlePress={() => {
 										props.onChange(hexToRgb(value));
 										setShowSelector(false);
@@ -205,7 +205,7 @@ function Section(props: {
 						handlePress={() => setShowNameEdit(true)}
 						disabled={unauthorized}
 						dimensions={{ wrapper: 23.5, icon: 13.5 }}
-						tooltip={language.editThemeName}
+						tooltip={language?.editThemeName}
 						tooltipPosition={'bottom-right'}
 						noFocus
 					/>
@@ -214,7 +214,7 @@ function Section(props: {
 					<S.FlexWrapper>
 						<S.SectionsWrapper>
 							<Color
-								label={language.background}
+								label={language?.background}
 								value={background}
 								onChange={(newColor) => handleThemeChange('background', newColor)}
 								loading={props.loading}
@@ -237,7 +237,7 @@ function Section(props: {
 					</S.FlexWrapper>
 					<S.AttributesWrapper>
 						<Toggle
-							label={language.colorScheme}
+							label={language?.colorScheme}
 							options={[PortalSchemeType.Light, PortalSchemeType.Dark]}
 							activeOption={scheme}
 							handleToggle={(option: string) => handleSchemeChange(option)}
@@ -247,7 +247,7 @@ function Section(props: {
 							<S.SectionActions>
 								<Button
 									type={'alt3'}
-									label={language.cancel}
+									label={language?.cancel}
 									handlePress={() => {
 										props.onThemeCancel(props.theme);
 									}}
@@ -255,7 +255,7 @@ function Section(props: {
 								/>
 								<Button
 									type={'alt4'}
-									label={language.publishTheme}
+									label={language?.publishTheme}
 									handlePress={() => props.onThemeChange(theme, true)}
 									disabled={unauthorized}
 								/>
@@ -265,7 +265,7 @@ function Section(props: {
 				</S.SectionBody>
 			</S.Section>
 			{showNameEdit && (
-				<Modal header={language.editThemeName} handleClose={() => setShowNameEdit(false)}>
+				<Modal header={language?.editThemeName} handleClose={() => setShowNameEdit(false)}>
 					<S.ModalWrapper>
 						<FormField
 							value={name}
@@ -278,13 +278,13 @@ function Section(props: {
 						<S.ModalActionsWrapper>
 							<Button
 								type={'primary'}
-								label={language.cancel}
+								label={language?.cancel}
 								handlePress={() => setShowNameEdit(false)}
 								disabled={unauthorized}
 							/>
 							<Button
 								type={'alt1'}
-								label={language.save}
+								label={language?.save}
 								handlePress={() => handleNameChange()}
 								disabled={unauthorized}
 								loading={false}
@@ -373,7 +373,7 @@ export default function Themes() {
 
 				setOptions(permawebProvider.libs.mapFromProcessCase(themes));
 
-				setResponse({ status: 'success', message: `${language.themeUpdated}!` });
+				setResponse({ status: 'success', message: `${language?.themeUpdated}!` });
 			} catch (e: any) {
 				setResponse({ status: 'warning', message: e.message ?? 'Error updating theme' });
 			}
@@ -410,20 +410,26 @@ export default function Themes() {
 		if (!options) {
 			return (
 				<S.LoadingWrapper>
-					<p>{`${language.gettingThemes}...`}</p>
+					<p>{`${language?.gettingThemes}...`}</p>
 				</S.LoadingWrapper>
 			);
 		} else if (options.length <= 0) {
 			return (
 				<S.WrapperEmpty>
-					<p>{language.noThemesFound}</p>
+					<p>{language?.noThemesFound}</p>
 				</S.WrapperEmpty>
 			);
 		}
 
+		const sortedOptions = [...options].sort((a, b) => {
+			if (a.scheme === 'light' && b.scheme === 'dark') return -1;
+			if (a.scheme === 'dark' && b.scheme === 'light') return 1;
+			return 0;
+		});
+
 		return (
 			<>
-				{options.map((theme: PortalThemeType, index: number) => {
+				{sortedOptions.map((theme: PortalThemeType, index: number) => {
 					const isPublished =
 						portalProvider.current?.themes.find(
 							(existingTheme: PortalThemeType) => existingTheme.name === theme.name
@@ -453,7 +459,7 @@ export default function Themes() {
 				<S.EndActions>
 					<Button
 						type={'primary'}
-						label={language.addTheme}
+						label={language?.addTheme}
 						handlePress={handleAddTheme}
 						disabled={unauthorized}
 						icon={ASSETS.add}
@@ -461,7 +467,7 @@ export default function Themes() {
 					/>
 				</S.EndActions>
 			</S.Wrapper>
-			{loading && <Loader message={`${language.updatingTheme}...`} />}
+			{loading && <Loader message={`${language?.updatingTheme}...`} />}
 			{response && (
 				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
 			)}

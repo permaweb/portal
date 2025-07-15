@@ -25,7 +25,7 @@ export default function TxAddress(props: { address: string; wrap: boolean; view?
 		<>
 			<S.Wrapper disabled={copied}>
 				<p onClick={copied ? () => {} : copyAddress}>
-					{copied ? `${language.copied}!` : formatAddress(props.address, props.wrap)}
+					{copied ? `${language?.copied}!` : formatAddress(props.address, props.wrap)}
 				</p>
 			</S.Wrapper>
 		</>

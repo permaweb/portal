@@ -21,11 +21,12 @@ export const Label = styled.div<{ disabled: boolean }>`
 `;
 
 export const Dropdown = styled.button<{ active: boolean }>`
-	height: 40px;
+	height: 35px;
 	width: 100%;
 	text-align: left;
 	padding: 0 12.5px;
 	display: flex;
+	gap: 10px;
 	align-items: center;
 	justify-content: space-between;
 	background: ${(props) =>
@@ -83,11 +84,13 @@ export const Dropdown = styled.button<{ active: boolean }>`
 	}
 `;
 
-export const Options = styled.ul`
+export const Options = styled.ul<{ top: number }>`
 	max-height: 40vh;
+	min-width: 240px;
 	width: 100%;
 	position: absolute;
-	top: 80px;
+	top: ${(props) => `${props.top.toString()}px`};
+	right: 0;
 	z-index: 2;
 	padding: 10px 0;
 `;

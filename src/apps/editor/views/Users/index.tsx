@@ -2,11 +2,11 @@ import React from 'react';
 
 import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { UserList } from 'editor/components/organisms/UserList';
+import { UserManager } from 'editor/components/organisms/UserManager';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
-import { UserManager } from 'components/organisms/UserManager';
 import { ASSETS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -24,11 +24,11 @@ export default function Users() {
 		<>
 			<S.Wrapper className={'fade-in'}>
 				<ViewHeader
-					header={language.users}
+					header={language?.users}
 					actions={[
 						<Button
 							type={'alt1'}
-							label={language.addUser}
+							label={language?.addUser}
 							handlePress={() => setShowAddUser(!showAddUser)}
 							disabled={!portalProvider?.permissions?.updateUsers}
 							icon={ASSETS.add}
@@ -41,7 +41,7 @@ export default function Users() {
 					<UserList type={'detail'} />
 					{!portalProvider?.permissions?.updateUsers && (
 						<S.InfoWrapper className={'info'}>
-							<span>{language.unauthorizedUsersUpdate}</span>
+							<span>{language?.unauthorizedUsersUpdate}</span>
 						</S.InfoWrapper>
 					)}
 				</S.BodyWrapper>
@@ -49,7 +49,7 @@ export default function Users() {
 			<Panel
 				open={showAddUser}
 				width={500}
-				header={language.addUser}
+				header={language?.addUser}
 				handleClose={() => setShowAddUser((prev) => !prev)}
 				closeHandlerDisabled
 			>

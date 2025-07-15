@@ -68,7 +68,7 @@ export default function Topics(props: {
 				if (props.selectOnAdd) props.setTopics([...props.topics, newTopic]);
 
 				setTopicOptions(updatedTopicOptions);
-				setTopicResponse({ status: 'success', message: `${language.topicAdded}!` });
+				setTopicResponse({ status: 'success', message: `${language?.topicAdded}!` });
 				setNewTopic('');
 			} catch (e: any) {
 				setTopicResponse({ status: 'warning', message: e.message ?? 'Error adding topic' });
@@ -95,7 +95,7 @@ export default function Topics(props: {
 
 				console.log(`Topic update: ${topicUpdateId}`);
 
-				setTopicResponse({ status: 'success', message: `${language.topicsUpdated}!` });
+				setTopicResponse({ status: 'success', message: `${language?.topicsUpdated}!` });
 				setShowDeleteConfirmation(false);
 			} catch (e: any) {
 				setTopicResponse({ status: 'warning', message: e.message ?? 'Error updating topics' });
@@ -120,13 +120,13 @@ export default function Topics(props: {
 		if (!topicOptions) {
 			return (
 				<S.WrapperEmpty>
-					<p>{`${language.gettingTopics}...`}</p>
+					<p>{`${language?.gettingTopics}...`}</p>
 				</S.WrapperEmpty>
 			);
 		} else if (topicOptions.length <= 0) {
 			return (
 				<S.WrapperEmpty>
-					<p>{language.noTopicsFound}</p>
+					<p>{language?.noTopicsFound}</p>
 				</S.WrapperEmpty>
 			);
 		}
@@ -158,7 +158,7 @@ export default function Topics(props: {
 				<S.TopicsAction>
 					<Button
 						type={'alt4'}
-						label={language.add}
+						label={language?.add}
 						handlePress={addTopic}
 						disabled={topicActionDisabled}
 						loading={topicLoading}
@@ -178,11 +178,11 @@ export default function Topics(props: {
 				{props.showActions && (
 					<S.TopicsFooter>
 						{props.closeAction && (
-							<Button type={'alt3'} label={language.close} handlePress={() => props.closeAction()} />
+							<Button type={'alt3'} label={language?.close} handlePress={() => props.closeAction()} />
 						)}
 						<Button
 							type={'alt3'}
-							label={language.remove}
+							label={language?.remove}
 							handlePress={() => setShowDeleteConfirmation(true)}
 							disabled={unauthorized || !props.topics?.length || topicLoading}
 							loading={false}
@@ -194,10 +194,10 @@ export default function Topics(props: {
 				)}
 			</S.Wrapper>
 			{showDeleteConfirmation && (
-				<Modal header={language.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
+				<Modal header={language?.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
 					<S.ModalWrapper>
 						<S.ModalBodyWrapper>
-							<p>{language.topicDeleteConfirmationInfo}</p>
+							<p>{language?.topicDeleteConfirmationInfo}</p>
 							<S.ModalBodyElements>
 								{props.topics.map((topic: string, index: number) => {
 									return (
@@ -211,13 +211,13 @@ export default function Topics(props: {
 						<S.ModalActionsWrapper>
 							<Button
 								type={'primary'}
-								label={language.cancel}
+								label={language?.cancel}
 								handlePress={() => setShowDeleteConfirmation(false)}
 								disabled={topicLoading}
 							/>
 							<Button
 								type={'primary'}
-								label={language.topicDeleteConfirmation}
+								label={language?.topicDeleteConfirmation}
 								handlePress={() => deleteTopics()}
 								disabled={!props.topics?.length || topicLoading}
 								loading={unauthorized || topicLoading}

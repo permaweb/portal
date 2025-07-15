@@ -69,7 +69,7 @@ export default function Modal(props: {
 											wrapper: 35,
 											icon: 20,
 										}}
-										tooltip={language.close}
+										tooltip={language?.close}
 									/>
 								</S.Close>
 							)}
