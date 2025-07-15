@@ -58,6 +58,8 @@ export const ASSETS = {
 	listUnordered: getTxEndpoint('lSpJ-R6JoI9J814Iy2JJZWnrkvKU8iFqVIWtVsmI4Os'),
 	menu: getTxEndpoint('0La3-o2_gGMDbkfV4zVVUMjTYQ7Cn9YWQ2JO-FbjAIk'),
 	navigation: getTxEndpoint('uFsSvBhbWZak9j5QWXIdeZ97ky_s0JsaIZ45KVXmD_8'),
+	newTab: getTxEndpoint('8rHxhGbWrv_jPk3Ku_mL6BvTbdTiRLvSNPwOU-neU_I'),
+	pages: getTxEndpoint('q5_Jqu65WCd5waOk1KC6eGllxoCS8Mv40FWPzh2PUWA'),
 	paragraph: getTxEndpoint('R18ieTzflNf8U8AGo4E__ZLUOvFjBBhOmRFUFll51Do'),
 	portal: getTxEndpoint('WzomcwfXZ_4hhUvDso1wsyJpNBHGeHezFZQv3V706Hw'),
 	post: getTxEndpoint('nPknvEex1uekCo-HZ-5uzsMw4u_rJzj8wZVK5QI3WKw'),
@@ -147,30 +149,35 @@ function createURLs() {
 	const postCreateBase = (portalId: string) => `${base}${portalId}/${post}create/`;
 	const postEditBase = (portalId: string) => `${base}${portalId}/${post}edit/`;
 
-	const docs = `${base}docs/`;
+	const pageBase = (portalId: string) => `${portalBase(portalId)}page/`;
+
+	const docsBase = `${base}docs/`;
 
 	return {
 		base: base,
-		author: (authorId: string) => `author/${authorId}`,
 		category: (categoryId: string) => `category/${categoryId}`,
+		creator: (creatorId: string) => `creator/${creatorId}`,
 		portalBase: portalBase,
 		portalDesign: (portalId: string) => `${portalBase(portalId)}design/`,
 		portalPosts: (portalId: string) => `${portalBase(portalId)}posts/`,
 		portalDomains: (portalId: string) => `${portalBase(portalId)}domains/`,
 		portalUsers: (portalId: string) => `${portalBase(portalId)}users/`,
+		portalPages: (portalId: string) => `${portalBase(portalId)}pages/`,
 		portalSetup: (portalId: string) => `${portalBase(portalId)}setup/`,
 		post: (postId: string) => `post/${postId}`,
 		postCreate: (portalId: string) => `${postCreateBase(portalId)}`,
 		postEdit: (portalId: string) => `${postEditBase(portalId)}`,
+		pageCreate: (portalId: string) => `${pageBase(portalId)}create/`,
+		pageEdit: (portalId: string) => `${pageBase(portalId)}edit/`,
 		postCreateArticle: (portalId: string) => `${postCreateBase(portalId)}article/`,
 		postCreateImage: (portalId: string) => `${postCreateBase(portalId)}image/`,
 		postCreateVideo: (portalId: string) => `${postCreateBase(portalId)}video/`,
 		postEditArticle: (portalId: string) => `${postEditBase(portalId)}article/`,
 		postEditImage: (portalId: string) => `${postEditBase(portalId)}image/`,
 		postEditVideo: (portalId: string) => `${postEditBase(portalId)}video/`,
-		docs: docs,
-		docsIntro: `${docs}overview/introduction`,
-		docsEditor: `${docs}posts/editor`,
+		docs: docsBase,
+		docsIntro: `${docsBase}overview/introduction`,
+		docsEditor: `${docsBase}posts/editor`,
 		notFound: `${base}404`,
 	};
 }

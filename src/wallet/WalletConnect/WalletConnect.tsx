@@ -97,7 +97,8 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 	}
 
 	function handleDisconnect() {
-		arProvider.handleDisconnect();
+		const doRedirect = props.app === 'editor';
+		arProvider.handleDisconnect(doRedirect);
 		setShowWalletDropdown(false);
 	}
 

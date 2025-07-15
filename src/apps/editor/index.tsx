@@ -15,8 +15,8 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Portal } from 'components/atoms/Portal';
 import { DOM, URLS } from 'helpers/config';
-import { GlobalStyle } from 'helpers/styles';
 import { preloadAllAssets } from 'helpers/preloader';
+import { GlobalStyle } from 'helpers/styles';
 import { ArweaveProvider, useArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvider';
 import { PermawebProvider, usePermawebProvider } from 'providers/PermawebProvider';
@@ -29,11 +29,17 @@ const views = (import.meta as any).glob('./views/**/index.tsx');
 const Landing = getLazyImport('Landing');
 const PortalView = getLazyImport('Portal');
 const Posts = getLazyImport('Posts');
+
+const PageCreate = getLazyImport('Page/Create');
+const PageEdit = getLazyImport('Page/Edit');
+
 const PostCreate = getLazyImport('Post/Create');
-const PostEditor = getLazyImport('Post/Editor');
+const PostEdit = getLazyImport('Post/Edit');
+
 const Setup = getLazyImport('Setup');
 const Design = getLazyImport('Design');
 const Users = getLazyImport('Users');
+const Pages = getLazyImport('Pages');
 const Domains = getLazyImport('Domains');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
@@ -177,11 +183,14 @@ function App() {
 						{getRoute(`${URLS.base}:portalId`, <PortalView />)}
 						{getRoute(`${URLS.base}:portalId/posts`, <Posts />)}
 						{getRoute(`${URLS.base}:portalId/post/create`, <PostCreate />)}
-						{getRoute(`${URLS.base}:portalId/post/create/article`, <PostEditor />)}
-						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <PostEditor />)}
+						{getRoute(`${URLS.base}:portalId/post/create/article`, <PostEdit />)}
+						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <PostEdit />)}
+						{getRoute(`${URLS.base}:portalId/page/create`, <PageCreate />)}
+						{getRoute(`${URLS.base}:portalId/page/edit/:assetId`, <PageEdit />)}
 						{getRoute(`${URLS.base}:portalId/setup`, <Setup />)}
 						{getRoute(`${URLS.base}:portalId/design`, <Design />)}
 						{getRoute(`${URLS.base}:portalId/users`, <Users />)}
+						{getRoute(`${URLS.base}:portalId/pages`, <Pages />)}
 						{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
 						{getRoute(URLS.docs, <Docs />)}
 						{getRoute(`${URLS.docs}:active/*`, <Docs />)}

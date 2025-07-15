@@ -21,6 +21,7 @@ import * as S from './styles';
 export default function ArticleEditor(props: {
 	handleSubmit: () => void;
 	handleRequestUpdate: (updateType: RequestUpdateType) => void;
+	staticPage?: boolean;
 }) {
 	const navigate = useNavigate();
 	const { assetId } = useParams<{ assetId?: string }>();
@@ -44,7 +45,10 @@ export default function ArticleEditor(props: {
 				if (assetId) {
 					if (!checkValidAddress(assetId)) navigate(URLS.postCreateArticle(portalProvider.current.id));
 
-					handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language?.loadingPost}...` } });
+					handleCurrentPostUpdate({
+						field: 'loading',
+						value: { active: true, message: `${language?.loadingPost}...` },
+					});
 					try {
 						const response = await permawebProvider.libs.getAtomicAsset(assetId);
 
@@ -66,6 +70,16 @@ export default function ArticleEditor(props: {
 			}
 		})();
 	}, [assetId, portalProvider.current?.id]);
+
+	React.useEffect(() => {
+		if (props.staticPage) {
+			handleCurrentPostUpdate({
+				field: 'categories',
+				value: [{ id: Date.now().toString(), name: currentPost.data.title }],
+			});
+			handleCurrentPostUpdate({ field: 'topics', value: [currentPost.data.title] });
+		}
+	}, [props.staticPage, currentPost.data.title]);
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -297,6 +311,7 @@ export default function ArticleEditor(props: {
 						handleInitAddBlock={(e) => handleKeyAddBlock(e)}
 						handleSubmit={props.handleSubmit}
 						handleRequestUpdate={props.handleRequestUpdate}
+						staticPage={props.staticPage}
 					/>
 				</S.ToolbarWrapper>
 				<S.EditorWrapper panelOpen={currentPost.editor.panelOpen} onClick={handleEditorClick}>

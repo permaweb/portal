@@ -33,6 +33,7 @@ export default function ArticleToolbar(props: {
 	handleInitAddBlock: (e: any) => void;
 	handleSubmit: () => void;
 	handleRequestUpdate: (updateType: RequestUpdateType) => void;
+	staticPage?: boolean;
 }) {
 	const dispatch = useDispatch();
 	const { assetId } = useParams<{ assetId?: string }>();
@@ -44,7 +45,10 @@ export default function ArticleToolbar(props: {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const TABS = [{ label: language?.post }, { label: language?.blocks }];
+	const TABS = [];
+
+	if (!props.staticPage) TABS.push({ label: language?.post });
+	TABS.push({ label: language?.blocks });
 
 	const titleRef = React.useRef<any>(null);
 	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.label);
@@ -246,13 +250,7 @@ export default function ArticleToolbar(props: {
 				</Portal>
 			) : null;
 		return content;
-	}, [
-		currentPost.editor.panelOpen,
-		currentTab,
-		props.addBlock,
-		desktop,
-		currentPost.editor.loading.active,
-	]);
+	}, [currentPost.editor.panelOpen, currentTab, props.addBlock, desktop, currentPost.editor.loading.active]);
 
 	return (
 		<>
@@ -262,7 +260,7 @@ export default function ArticleToolbar(props: {
 						ref={titleRef}
 						value={currentPost.data.title ?? ''}
 						onChange={(e: any) => handleCurrentPostUpdate({ field: 'title', value: e.target.value })}
-						placeholder={language?.untitledPost}
+						placeholder={props.staticPage ? language?.pageTitle : language?.untitledPost}
 						disabled={currentPost.editor.loading.active || !portalProvider.current?.id}
 					/>
 				</S.TitleWrapper>
@@ -291,22 +289,26 @@ export default function ArticleToolbar(props: {
 						tooltip={'CTRL + L'}
 						noFocus
 					/>
-					<S.StatusAction status={currentPost.data.status}>
-						<Button
-							type={'primary'}
-							label={currentPost.data?.status?.toUpperCase() ?? '-'}
-							handlePress={() =>
-								handleCurrentPostUpdate({
-									field: 'status',
-									value: currentPost.data.status === 'draft' ? 'published' : 'draft',
-								})
-							}
-							active={false}
-							disabled={statusDisabled}
-							tooltip={statusDisabled ? null : `Mark as ${currentPost.data.status === 'draft' ? 'published' : 'draft'}`}
-							noFocus
-						/>
-					</S.StatusAction>
+					{!props.staticPage && (
+						<S.StatusAction status={currentPost.data.status}>
+							<Button
+								type={'primary'}
+								label={currentPost.data?.status?.toUpperCase() ?? '-'}
+								handlePress={() =>
+									handleCurrentPostUpdate({
+										field: 'status',
+										value: currentPost.data.status === 'draft' ? 'published' : 'draft',
+									})
+								}
+								active={false}
+								disabled={statusDisabled}
+								tooltip={
+									statusDisabled ? null : `Mark as ${currentPost.data.status === 'draft' ? 'published' : 'draft'}`
+								}
+								noFocus
+							/>
+						</S.StatusAction>
+					)}
 					<S.SubmitWrapper>{getSubmit()}</S.SubmitWrapper>
 				</S.EndActions>
 			</S.Wrapper>

@@ -13,7 +13,7 @@ export default function Avatar(props: {
 		wrapper: number;
 		icon: number;
 	};
-	callback: () => void | null;
+	callback?: () => void | null;
 }) {
 	const [hasError, setHasError] = React.useState(false);
 
@@ -29,7 +29,7 @@ export default function Avatar(props: {
 		<S.Wrapper
 			onClick={props.callback ? props.callback : () => {}}
 			dimensions={props.dimensions}
-			hasCallback={props.callback !== null}
+			hasCallback={props.callback !== null && props.callback !== undefined}
 			hasOwner={props.owner !== null}
 			className={'fade-in'}
 			hasImage={hasImage}

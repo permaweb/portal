@@ -15,7 +15,7 @@ export default function Landing() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [featuredPosts, setFeaturedPosts] = React.useState<PortalAssetType[] | null>(null);
+	const [_featuredPosts, setFeaturedPosts] = React.useState<PortalAssetType[] | null>(null);
 	const [panelPosts, setPanelPosts] = React.useState<PortalAssetType[] | null>(null);
 	const [groupedPosts, setGroupedPosts] = React.useState<{ [key: string]: PortalAssetType[] } | null>(null);
 

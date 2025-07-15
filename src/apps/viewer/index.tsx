@@ -23,6 +23,7 @@ const views = (import.meta as any).glob('./views/**/index.tsx');
 
 const Landing = getLazyImport('Landing');
 const Category = getLazyImport('Category');
+const Creator = getLazyImport('Creator');
 const Post = getLazyImport('Post');
 const NotFound = getLazyImport('NotFound');
 
@@ -84,25 +85,30 @@ function App() {
 			<div id={DOM.loader} />
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />
-			<Header />
-			<S.View className={'max-view-wrapper'} navHeight={85}>
-				<Suspense fallback={null}>
-					<Routes>
-						<Route path={URLS.base} element={<Landing />} />
-						<Route path={`${URLS.base}:portalId`} element={<Landing />} />
+			<S.GlobalWrapper>
+				<Header />
+				<S.View className={'max-view-wrapper'} navHeight={85}>
+					<Suspense fallback={null}>
+						<Routes>
+							<Route path={URLS.base} element={<Landing />} />
+							<Route path={`${URLS.base}:portalId`} element={<Landing />} />
 
-						<Route path={`${URLS.base}category/:categoryId`} element={<Category />} />
-						<Route path={`${URLS.base}:portalId/category/:categoryId`} element={<Category />} />
+							<Route path={`${URLS.base}category/:categoryId`} element={<Category />} />
+							<Route path={`${URLS.base}:portalId/category/:categoryId`} element={<Category />} />
+							
+							<Route path={`${URLS.base}creator/:creatorId`} element={<Creator />} />
+							<Route path={`${URLS.base}:portalId/creator/:creatorId`} element={<Creator />} />
 
-						<Route path={`${URLS.base}post/:postId`} element={<Post />} />
-						<Route path={`${URLS.base}:portalId/post/:postId`} element={<Post />} />
+							<Route path={`${URLS.base}post/:postId`} element={<Post />} />
+							<Route path={`${URLS.base}:portalId/post/:postId`} element={<Post />} />
 
-						<Route path={URLS.notFound} element={<NotFound />} />
-						<Route path={'*'} element={<NotFound />} />
-					</Routes>
-				</Suspense>
-			</S.View>
-			<Footer />
+							<Route path={URLS.notFound} element={<NotFound />} />
+							<Route path={'*'} element={<NotFound />} />
+						</Routes>
+					</Suspense>
+				</S.View>
+				<Footer />
+			</S.GlobalWrapper>
 		</>
 	);
 }

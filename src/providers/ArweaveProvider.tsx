@@ -18,7 +18,7 @@ interface ArweaveContextState {
 	arBalance: number | null;
 	turboBalance: number | null;
 	handleConnect: any;
-	handleDisconnect: () => void;
+	handleDisconnect: (redirect: boolean) => void;
 }
 
 const DEFAULT_CONTEXT = {
@@ -28,7 +28,7 @@ const DEFAULT_CONTEXT = {
 	arBalance: null,
 	turboBalance: null,
 	handleConnect() {},
-	handleDisconnect() {},
+	handleDisconnect(_redirect: boolean) {},
 	setWalletModalVisible(_open: boolean) {},
 };
 
@@ -114,12 +114,13 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		}
 	}
 
-	async function handleDisconnect() {
+	async function handleDisconnect(redirect: boolean) {
 		if (localStorage.getItem(STORAGE.walletType)) localStorage.removeItem(STORAGE.walletType);
 		await global.window?.arweaveWallet?.disconnect();
 		setWallet(null);
 		setWalletAddress(null);
-		navigate(URLS.base);
+		
+		if (redirect) navigate(URLS.base);
 	}
 
 	async function getARBalance() {

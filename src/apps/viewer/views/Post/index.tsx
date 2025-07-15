@@ -125,7 +125,7 @@ export default function Post() {
 				<S.InfoWrapper className={'fade-in'}>
 					{post?.creator && (
 						<S.Author>
-							<Link to={getRedirect(URLS.author(post.creator))}>
+							<Link to={getRedirect(URLS.creator(post.creator))}>
 								<p>{creator?.displayName ?? formatAddress(post.creator, false)}</p>
 							</Link>
 						</S.Author>

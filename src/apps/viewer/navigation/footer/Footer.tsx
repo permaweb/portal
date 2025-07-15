@@ -3,7 +3,7 @@ import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
-import { ASSETS } from 'helpers/config';
+import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalCategoryType, PortalLinkType } from 'helpers/types';
 import { checkValidAddress, getRedirect } from 'helpers/utils';
@@ -49,7 +49,7 @@ export default function Footer() {
 					<S.CategoriesWrapper>
 						{portalProvider.current.categories.map((category: PortalCategoryType) => {
 							return (
-								<Link key={category.id} to={category.id}>
+								<Link key={category.id} to={getRedirect(URLS.category(category.id))}>
 									{category.name}
 								</Link>
 							);

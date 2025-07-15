@@ -102,13 +102,14 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					name: portalData.store?.name ?? 'None',
 					logo: portalData.store?.logo ?? 'None',
 					icon: portalData.store?.icon ?? 'None',
+					users: users || [],
 					assets: getPortalAssets(portalData?.store?.index),
 					categories: portalData?.store?.categories ?? [],
 					topics: portalData?.store?.topics ?? [],
 					links: portalData?.store?.links ?? [],
 					fonts: portalData?.store?.fonts ?? {},
 					themes: portalData?.store?.themes ?? [],
-					users: users || [],
+					layout: portalData?.store?.layout ?? null
 				};
 
 				return portal;
@@ -118,6 +119,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			}
 		}
 	};
+
+	console.log(current)
 
 	async function fetchUserProfile(address: string): Promise<Types.ProfileType> {
 		try {

@@ -5,9 +5,9 @@ import { ReactSVG } from 'react-svg';
 import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
-import { ASSETS, URLS } from 'helpers/config';
+import { ASSETS, STYLING, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { PortalCategoryType } from 'helpers/types';
+import { PortalCategoryType, PortalLinkType } from 'helpers/types';
 import { checkValidAddress, getRedirect } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { WalletConnect } from 'wallet/WalletConnect';
@@ -65,7 +65,10 @@ export default function Header() {
 
 		return (
 			<S.NavigationWrapper>
-				<S.NavigationContent className={'max-view-wrapper'}>
+				<S.NavigationContent
+					direction={portalProvider.current?.layout?.header?.subheader?.categories?.direction ?? 'left'}
+					className={'max-view-wrapper'}
+				>
 					{initCategories.map((category: PortalCategoryType) => {
 						return <Category key={category.id} category={category} />;
 					})}
@@ -94,24 +97,54 @@ export default function Header() {
 		);
 	}
 
+	function getLinks() {
+		return (
+			<S.LinksWrapper>
+				{portalProvider.current.links.map((link: PortalLinkType, index: number) => {
+					return (
+						<S.LinkWrapper key={index}>
+							<Link to={link.url} target={'_href'}>
+								<ReactSVG src={link.icon ? getTxEndpoint(link.icon) : ASSETS.link} />
+								<S.LinkTooltip className={'info'}>
+									<span>{link.title}</span>
+								</S.LinkTooltip>
+							</Link>
+						</S.LinkWrapper>
+					);
+				})}
+			</S.LinksWrapper>
+		);
+	}
+
 	return (
 		<S.Wrapper>
-			<S.WrapperContent className={'max-view-wrapper'} height={85}>
-				<S.ContentStart>
+			<S.WrapperContent
+				className={'max-view-wrapper'}
+				height={portalProvider.current?.layout?.header?.height ?? STYLING.dimensions.nav.height}
+			>
+				{/* <S.ContentStart>
 					{portalProvider.updating && (
 						<S.PortalUpdateWrapper>
 							<span>{`${language?.updating}...`}</span>
 						</S.PortalUpdateWrapper>
 					)}
-				</S.ContentStart>
-				<S.LogoWrapper className={'fade-in'}>
+				</S.ContentStart> */}
+				<S.LogoWrapper
+					className={'fade-in'}
+					direction={portalProvider.current?.layout?.header?.logo?.direction ?? 'left'}
+				>
 					<Link to={getRedirect()}>{getLogo()}</Link>
 				</S.LogoWrapper>
-				<S.ContentEnd>
+				<S.ContentEnd linkDirection={portalProvider.current?.layout?.header?.socials?.direction ?? 'left'}>
 					<WalletConnect app={'viewer'} />
+					{portalProvider.current?.links?.length > 0 &&
+						portalProvider.current?.layout?.header?.socials &&
+						getLinks()}
 				</S.ContentEnd>
 			</S.WrapperContent>
-			{portalProvider.current?.categories?.length > 0 && getCategories()}
+			{portalProvider.current?.categories?.length > 0 &&
+				portalProvider.current?.layout?.header?.subheader?.categories &&
+				getCategories()}
 		</S.Wrapper>
 	);
 }
