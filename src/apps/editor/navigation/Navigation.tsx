@@ -61,7 +61,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				label: language?.domains,
 			},
 		];
-	}, [portalProvider.current?.id]);
+	}, [portalProvider.current?.id, languageProvider?.current]);
 
 	function handleWindowResize() {
 		if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {
@@ -141,7 +141,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				</>
 			);
 		}
-	}, [props.open, desktop]);
+	}, [props.open, desktop, languageProvider?.current]);
 
 	const portal = React.useMemo(() => {
 		if (portalProvider.current?.id) {
@@ -249,6 +249,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		portalProvider.current?.id,
 		portalProvider.current?.name,
 		portalProvider.updating,
+		languageProvider?.current
 	]);
 
 	return (
