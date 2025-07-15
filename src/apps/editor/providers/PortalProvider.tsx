@@ -7,7 +7,6 @@ import { PortalManager } from 'editor/components/organisms/PortalManager';
 
 import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
-import { STORAGE } from 'helpers/config';
 import {
 	PortalDetailType,
 	PortalHeaderType,
@@ -19,7 +18,6 @@ import {
 	areAssetsEqual,
 	cachePortal,
 	cacheProfile,
-	checkValidAddress,
 	getCachedPortal,
 	getCachedProfile,
 	getPortalAssets,
@@ -60,7 +58,6 @@ export function usePortalProvider(): PortalContextState {
 	return React.useContext(PortalContext);
 }
 
-// TODO: Remove names from external portals list, only fetch by id
 export function PortalProvider(props: { children: React.ReactNode }) {
 	const location = useLocation();
 
@@ -68,8 +65,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-
-	const hasFetchedRoles = React.useRef(false);
+	
 	const hasFetchedMeta = React.useRef(false);
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
@@ -93,68 +89,52 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		handlePortalSetup(null);
 		setPermissions(null);
 	}, [arProvider.walletAddress]);
-
-	// TODO
+	
 	React.useEffect(() => {
 		(async function () {
-			if (arProvider.walletAddress && permawebProvider.profile) {
+			if (arProvider.walletAddress && permawebProvider.profile?.portals) {
 				const profilePortals = permawebProvider.profile.portals ?? [];
 
 				setPortals(profilePortals);
 
-				// if (!hasFetchedMeta.current) {
-				// 	hasFetchedMeta.current = true;
+				if (!hasFetchedMeta.current) {
+					hasFetchedMeta.current = true;
 
-				// 	for (const portal of profilePortals) {
-				// 		try {
-				// 			const portalData = await permawebProvider.libs.getZone(portal.id);
-				// 		} catch (e: any) {
-				// 			console.error(e);
-				// 		}
-				// 	}
-				// }
+					for (const portal of profilePortals) {
+						try {
+							console.log(`Fetching Portal: ${portal.id}...`);
 
-				// if (!hasFetchedRoles.current) {
-				// 	hasFetchedRoles.current = true;
+							let portalData = null;
+							const cachedPortal = getCachedPortal(portal.id);
+							if (cachedPortal) portalData = { ...cachedPortal };
+							else portalData = await permawebProvider.libs.getZone(portal.id);
 
-				// 	const rolesByPortal = {};
+							const userPortal = {
+								id: portal.id,
+								name: portalData.name ?? portalData.store?.name ?? 'None',
+								logo: portalData.logo ?? portalData.store?.logo ?? 'None',
+								icon: portalData.icon ?? portalData.store?.icon ?? 'None',
+								users: portalData.users ?? getPortalUsers(portalData?.roles),
+							}; 
 
-				// 	if (profilePortals.length > 0) {
-				// 		for (const portal of profilePortals) {
-				// 			rolesByPortal[portal.id] = [];
-
-				// 			const roles = await permawebProvider.libs.readState({
-				// 				processId: portal.id,
-				// 				path: 'roles',
-				// 				serialize: true,
-				// 			});
-
-				// 			for (const address in roles) {
-				// 				if (checkValidAddress(address)) {
-				// 					rolesByPortal[portal.id].push({
-				// 						address: address,
-				// 						type: roles[address].type,
-				// 						roles: roles[address].roles,
-				// 					});
-				// 				}
-				// 			}
-				// 		}
-
-				// 		setPortals((prev) =>
-				// 			prev.map((portal) => ({
-				// 				...portal,
-				// 				roles: rolesByPortal[portal.id] || [],
-				// 			}))
-				// 		);
-				// 	}
-				// }
+							setPortals((prev) =>
+								prev.map((portal) => ({
+									...portal,
+									...userPortal,
+								}))
+							);
+						} catch (e: any) {
+							console.error(e);
+						}
+					}
+				}
 
 				setInvites(permawebProvider.profile.invites ?? []);
 			} else {
 				setPermissions(null);
 			}
 		})();
-	}, [permawebProvider.profile]);
+	}, [permawebProvider.profile?.portals]);
 
 	React.useEffect(() => {
 		if (portals?.length > 0) {
@@ -417,9 +397,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			{props.children}
 			<Panel
 				open={showPortalManager}
-				header={current && current.id && !createNewPortal ? 
-					(language?.editPortal || 'Edit Portal') : 
-					(language?.createPortal || 'Create Portal')}
+				header={
+					current && current.id && !createNewPortal
+						? language?.editPortal || 'Edit Portal'
+						: language?.createPortal || 'Create Portal'
+				}
 				handleClose={() => setShowPortalManager(false)}
 				width={500}
 				closeHandlerDisabled={true}
