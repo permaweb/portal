@@ -9,6 +9,7 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
+import { LanguageSelect } from 'components/molecules/LanguageSelect';
 import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { formatAddress } from 'helpers/utils';
@@ -55,9 +56,7 @@ export default function Landing() {
 		}
 	}
 
-		const [languageKey, setLanguageKey] = React.useState(0);
-
-		const header = React.useMemo(() => {
+	const header = React.useMemo(() => {
 		let header: string | null = null;
 
 		if (!arProvider.wallet) {
@@ -68,20 +67,20 @@ export default function Landing() {
 			header = language?.createProfile;
 		} else {
 			header = `${language?.welcome}, ${
-			permawebProvider.profile.username ?? formatAddress(arProvider.walletAddress, false)
+				permawebProvider.profile.username ?? formatAddress(arProvider.walletAddress, false)
 			}`;
 		}
 
 		return (
-			<S.ConnectionWrapper key={`header-${languageKey}`}>
-			<S.ConnectionHeaderWrapper>
-				<p>{header}</p>
-			</S.ConnectionHeaderWrapper>
+			<S.ConnectionWrapper>
+				<S.ConnectionHeaderWrapper>
+					<p>{header}</p>
+				</S.ConnectionHeaderWrapper>
 			</S.ConnectionWrapper>
 		);
-	}, [arProvider.wallet, permawebProvider.profile, languageProvider.current, languageKey]);
+	}, [arProvider.wallet, permawebProvider.profile, languageProvider.current, languageProvider.current]);
 
-		const portals = React.useMemo(() => {
+	const portals = React.useMemo(() => {
 		let content: React.ReactNode | null;
 		let disabled: boolean = false;
 		let label: string = language?.createPortal || 'Create Portal';
@@ -94,9 +93,9 @@ export default function Landing() {
 			icon = ASSETS.wallet;
 
 			if (permawebProvider.profile && !permawebProvider.profile.id) {
-			label = language?.createProfile || 'Create Profile';
-			icon = ASSETS.user;
-			action = () => setShowProfileManager(true);
+				label = language?.createProfile || 'Create Profile';
+				icon = ASSETS.user;
+				action = () => setShowProfileManager(true);
 			}
 
 			content = (
@@ -175,7 +174,13 @@ export default function Landing() {
 				</S.PortalActionWrapper>
 			</S.PortalsWrapper>
 		);
-	}, [arProvider.wallet, arProvider.walletAddress, permawebProvider.profile, portalProvider.portals]);
+	}, [
+		arProvider.wallet,
+		arProvider.walletAddress,
+		permawebProvider.profile,
+		portalProvider.portals,
+		languageProvider.current,
+	]);
 
 	const invites = React.useMemo(() => {
 		let header: string = language?.noInvites;
@@ -219,46 +224,32 @@ export default function Landing() {
 				</S.ModalWrapper>
 			</Modal>
 		);
-	}, [arProvider.walletAddress, permawebProvider.profile?.id, portalProvider.invites]);
-
-		function handleLanguageChange(e: React.ChangeEvent<HTMLSelectElement>) {
-		if (languageProvider?.setCurrent) {
-			languageProvider.setCurrent(e.target.value as 'en' | 'es');
-			setLanguageKey(prev => prev + 1);
-		}
-	}
+	}, [arProvider.walletAddress, permawebProvider.profile?.id, portalProvider.invites, languageProvider.current]);
 
 	return (
 		<>
 			<S.Wrapper>
 				<S.HeaderWrapper>
 					<S.HeaderContent>
-							<S.HeaderActionsWrapper>
+						<S.HeaderActionsWrapper>
 							<S.HeaderAction>
 								<Link to={URLS.docs}>{language?.helpCenter}</Link>
 							</S.HeaderAction>
 							<S.HeaderAction>
 								<button onClick={() => setShowInvites((prev) => !prev)} disabled={loading}>
-								{language?.invites}
-								{portalProvider.invites?.length > 0 && (
-									<div className={'notification'}>
-									<span>{portalProvider.invites.length}</span>
-									</div>
-								)}
+									{language?.invites}
+									{portalProvider.invites?.length > 0 && (
+										<div className={'notification'}>
+											<span>{portalProvider.invites.length}</span>
+										</div>
+									)}
 								</button>
 							</S.HeaderAction>
-							<S.HeaderAction>
-								<S.LanguageSelector 
-								value={languageProvider.current} 
-								onChange={handleLanguageChange}
-								key={`lang-selector-${languageKey}`}
-								>
-								<option value="en">EN</option>
-								<option value="es">ES</option>
-								</S.LanguageSelector>
-							</S.HeaderAction>
-							</S.HeaderActionsWrapper>
-						<WalletConnect app={'editor'} />
+						</S.HeaderActionsWrapper>
+						<S.HeaderActionsWrapper>
+							<LanguageSelect />
+							<WalletConnect app={'editor'} />
+						</S.HeaderActionsWrapper>
 					</S.HeaderContent>
 				</S.HeaderWrapper>
 				<S.ContentWrapper className={'fade-in border-wrapper-alt3'}>

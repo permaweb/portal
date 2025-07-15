@@ -21,17 +21,18 @@ export const Label = styled.div<{ disabled: boolean }>`
 `;
 
 export const Dropdown = styled.button<{ active: boolean }>`
-	height: 40px;
+	height: 35px;
 	width: 100%;
 	text-align: left;
 	padding: 0 12.5px;
 	display: flex;
+	gap: 10px;
 	align-items: center;
 	justify-content: space-between;
 	background: ${(props) =>
 		props.active ? props.theme.colors.button.primary.active.background : props.theme.colors.button.primary.background};
 	border: 1px solid ${(props) => (props.active ? props.theme.colors.border.primary : props.theme.colors.border.primary)};
-	border-radius: ${STYLING.dimensions.radius.alt3};
+	border-radius: ${STYLING.dimensions.radius.button};
 	transition: all 100ms;
 	&:hover {
 		background: ${(props) => props.theme.colors.button.primary.active.background};
@@ -85,9 +86,11 @@ export const Dropdown = styled.button<{ active: boolean }>`
 
 export const Options = styled.ul`
 	max-height: 40vh;
+	min-width: 240px;
 	width: 100%;
 	position: absolute;
-	top: 80px;
+	top: 43.5px;
+	right: 0;
 	z-index: 2;
 	padding: 10px 0;
 `;

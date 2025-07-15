@@ -11,7 +11,7 @@ import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { ASSETS } from 'helpers/config';
-import { WalletEnum } from 'helpers/types';
+import { LanguageEnum,WalletEnum  } from 'helpers/types';
 import { formatAddress, getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -61,6 +61,7 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(false);
 	const [showThemeSelector, setShowThemeSelector] = React.useState<boolean>(false);
+	const [showLanguageSelector, setShowLanguageSelector] = React.useState<boolean>(false);
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 
 	const [label, setLabel] = React.useState<string | null>(null);
@@ -143,11 +144,14 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 									/>
 								</S.DBalanceBody>
 							</S.DBalanceWrapper>
-
 							<S.DBodyWrapper>
 								<li onClick={() => setShowProfileManager(true)}>
 									<ReactSVG src={ASSETS.write} />
 									{language?.profile}
+								</li>
+								<li onClick={() => setShowLanguageSelector(true)}>
+									<ReactSVG src={ASSETS.language} />
+									{language?.language}
 								</li>
 								{availableThemes && (
 									<li onClick={() => setShowThemeSelector(true)}>
@@ -198,14 +202,14 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 				>
 					<S.MWrapper className={'modal-wrapper'}>
 						{Object.entries(availableThemes).map(([key, theme]: any) => (
-							<S.ThemeSection key={key}>
+							<S.MSection key={key}>
 								<S.ThemeSectionHeader>
 									<ReactSVG src={theme.icon} />
 									<p>{theme.label}</p>
 								</S.ThemeSectionHeader>
 								<S.ThemeSectionBody>
 									{theme.variants.map((variant: any) => (
-										<S.ThemeSectionBodyElement
+										<S.MSectionBodyElement
 											key={variant.id}
 											onClick={() => updateSettings('theme', variant.id as any)}
 										>
@@ -216,14 +220,38 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 												<S.Indicator active={settings.theme === variant.id} />
 												<p>{variant.name}</p>
 											</div>
-										</S.ThemeSectionBodyElement>
+										</S.MSectionBodyElement>
 									))}
 								</S.ThemeSectionBody>
-							</S.ThemeSection>
+							</S.MSection>
 						))}
 					</S.MWrapper>
 				</Panel>
 			)}
+			<Panel
+				open={showLanguageSelector}
+				width={430}
+				header={language?.language}
+				handleClose={() => setShowLanguageSelector(false)}
+			>
+				<S.MWrapper className={'modal-wrapper'}>
+					{Object.entries(LanguageEnum).map(([key, label]) => (
+						<S.MSection key={key}>
+							<S.MSectionBodyElement
+								onClick={() => {
+									languageProvider.setCurrent(key as any);
+									setShowLanguageSelector(false);
+								}}
+							>
+								<div>
+									<S.Indicator active={languageProvider.current === key} />
+									<p>{label}</p>
+								</div>
+							</S.MSectionBodyElement>
+						</S.MSection>
+					))}
+				</S.MWrapper>
+			</Panel>
 			{walletModalVisible && (
 				<Modal header={language?.connectWallet} handleClose={() => setWalletModalVisible(false)}>
 					<WalletList

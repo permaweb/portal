@@ -297,9 +297,6 @@ export const language = {
 		yourUploadBalance: `Your Upload Balance`,
 		youAreInvited: `You're Invited`,
 	},
-
-	// Spanish
-
 	es: {
 		add: `Agregar`,
 		addLink: `Agregar enlace`,
@@ -597,5 +594,5 @@ export const language = {
 		welcome: `Bienvenido`,
 		yourUploadBalance: `Tu saldo de subida`,
 		youAreInvited: `Estás invitado`
-		},
+	},
 };

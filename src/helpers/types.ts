@@ -282,3 +282,8 @@ export type MediaConfigType = {
 export type DesignPanelType = 'themes' | 'fonts' | 'logo';
 
 export type RefreshFieldType = 'assets';
+
+export enum LanguageEnum {
+	en = 'English',
+	es = 'Español'
+}

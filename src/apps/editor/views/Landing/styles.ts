@@ -32,7 +32,7 @@ export const HeaderContent = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 25px;
-	justify-content: flex-end;
+	justify-content: space-between;
 `;
 
 export const HeaderActionsWrapper = styled.div`
@@ -267,26 +267,5 @@ export const InvitesDescription = styled.div`
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		line-height: 1.65;
-	}
-`;
-
-export const LanguageSelector = styled.select`
-	background: transparent;
-	color: inherit;
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
-	border-radius: 3px;
-	padding: 5px 8px;
-	font-size: ${(props) => props.theme.typography.size.xSmall};
-	cursor: pointer;
-	margin-left: 10px;
-	transition: all 0.2s ease;
-
-	&:hover {
-	background: ${(props) => props.theme.colors.primary};
-	}
-
-	option {
-	background: ${(props) => props.theme.colors.primary};
-	color: ${(props) => props.theme.colors.font.primary.alt1};
 	}
 `;
