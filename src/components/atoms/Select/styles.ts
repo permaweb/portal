@@ -32,7 +32,7 @@ export const Dropdown = styled.button<{ active: boolean }>`
 	background: ${(props) =>
 		props.active ? props.theme.colors.button.primary.active.background : props.theme.colors.button.primary.background};
 	border: 1px solid ${(props) => (props.active ? props.theme.colors.border.primary : props.theme.colors.border.primary)};
-	border-radius: ${STYLING.dimensions.radius.button};
+	border-radius: ${STYLING.dimensions.radius.alt3};
 	transition: all 100ms;
 	&:hover {
 		background: ${(props) => props.theme.colors.button.primary.active.background};
@@ -84,12 +84,12 @@ export const Dropdown = styled.button<{ active: boolean }>`
 	}
 `;
 
-export const Options = styled.ul`
+export const Options = styled.ul<{ top: number }>`
 	max-height: 40vh;
 	min-width: 240px;
 	width: 100%;
 	position: absolute;
-	top: 43.5px;
+	top: ${(props) => `${props.top.toString()}px`};
 	right: 0;
 	z-index: 2;
 	padding: 10px 0;

@@ -1,11 +1,11 @@
 import React from 'react';
 
+import { UserManager } from 'editor/components/organisms/UserManager';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Avatar } from 'components/atoms/Avatar';
 import { IconButton } from 'components/atoms/IconButton';
 import { Panel } from 'components/atoms/Panel';
-import { UserManager } from 'components/organisms/UserManager';
 import { ASSETS } from 'helpers/config';
 import { PortalUserType } from 'helpers/types';
 import { formatAddress, formatRoleLabel } from 'helpers/utils';

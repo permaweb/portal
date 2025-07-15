@@ -102,18 +102,17 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 				setPortals(profilePortals);
 
-				if (!hasFetchedMeta.current) {
-					hasFetchedMeta.current = true;
+				// if (!hasFetchedMeta.current) {
+				// 	hasFetchedMeta.current = true;
 
-					for (const portal of profilePortals) {
-						try {
-							const portalData = await permawebProvider.libs.getZone(portal.id);
-							console.log(portalData);
-						} catch (e: any) {
-							console.error(e);
-						}
-					}
-				}
+				// 	for (const portal of profilePortals) {
+				// 		try {
+				// 			const portalData = await permawebProvider.libs.getZone(portal.id);
+				// 		} catch (e: any) {
+				// 			console.error(e);
+				// 		}
+				// 	}
+				// }
 
 				// if (!hasFetchedRoles.current) {
 				// 	hasFetchedRoles.current = true;
