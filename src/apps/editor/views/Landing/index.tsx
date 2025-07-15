@@ -12,7 +12,7 @@ import { Panel } from 'components/atoms/Panel';
 import { LanguageSelect } from 'components/molecules/LanguageSelect';
 import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { formatAddress } from 'helpers/utils';
+import { checkValidAddress, formatAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -129,8 +129,8 @@ export default function Landing() {
 							{portalProvider.portals.map((portal: any) => {
 								return (
 									<Link key={portal.id} to={`${URLS.base}${portal.id}`}>
-										{portal.logo ? (
-											<img src={getTxEndpoint(portal.logo)} alt={'Portal Logo'} />
+										{portal.icon && checkValidAddress(portal.icon) ? (
+											<img src={getTxEndpoint(portal.icon)} alt={'Portal Icon'} />
 										) : (
 											<ReactSVG src={ASSETS.portal} />
 										)}
@@ -199,8 +199,8 @@ export default function Landing() {
 							{portalProvider.invites.map((portal: any) => {
 								return (
 									<button key={portal.id} onClick={() => joinPortal(portal.id)}>
-										{portal.logo ? (
-											<img src={getTxEndpoint(portal.logo)} alt={'Portal Logo'} />
+										{portal.icon && checkValidAddress(portal.icon) ? (
+											<img src={getTxEndpoint(portal.icon)} alt={'Portal Icon'} />
 										) : (
 											<ReactSVG src={ASSETS.portal} />
 										)}
