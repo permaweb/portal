@@ -140,15 +140,15 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 
 		const filterButtons = [
 			{
-				label: `${language.all} (${totalCount})`,
+				label: `${language?.all} (${totalCount})`,
 				status: 'all',
 			},
 			{
-				label: `${language.published} (${publishedCount})`,
+				label: `${language?.published} (${publishedCount})`,
 				status: 'published',
 			},
 			{
-				label: `${language.draft} (${draftCount})`,
+				label: `${language?.draft} (${draftCount})`,
 				status: 'draft',
 			},
 		].map((filterAction: { label: string; status: ArticleStatusType }) => (
@@ -166,7 +166,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 				<S.PostsActionsSection dropdown={dropdown}>
 					{dropdown && (
 						<S.PostsActionsSectionHeader>
-							<p>{language.filterBy}</p>
+							<p>{language?.filterBy}</p>
 						</S.PostsActionsSectionHeader>
 					)}
 					<S.PostsStatusFilterWrapper>{filterButtons}</S.PostsStatusFilterWrapper>
@@ -174,13 +174,13 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 				<S.PostsActionsSection dropdown={dropdown}>
 					{dropdown && (
 						<S.PostsActionsSectionHeader>
-							<p>{language.sortBy}</p>
+							<p>{language?.sortBy}</p>
 						</S.PostsActionsSectionHeader>
 					)}
 					<S.PostsActionsEnd>
 						<Button
 							type={dropdown ? 'alt3' : 'primary'}
-							label={dateAscending ? language.sortNewestToOldest : language.sortOldestToNewest}
+							label={dateAscending ? language?.sortNewestToOldest : language?.sortOldestToNewest}
 							handlePress={() => handleActionPress(() => setDateAscending(!dateAscending))}
 							icon={ASSETS.arrows}
 						/>
@@ -204,17 +204,17 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 			if (requests.length <= 0) {
 				content = (
 					<S.PostsActionsRequestsInfo>
-						<span>{language.noRequestsFound}</span>
+						<span>{language?.noRequestsFound}</span>
 					</S.PostsActionsRequestsInfo>
 				);
 			} else {
 				content = (
 					<S.PostsActionsRequests>
 						<S.PostsActionsRequestsHeader>
-							<span>{language.postTitle}</span>
-							<span>{language.author}</span>
-							<span>{language.created}</span>
-							<span>{language.review}</span>
+							<span>{language?.postTitle}</span>
+							<span>{language?.author}</span>
+							<span>{language?.created}</span>
+							<span>{language?.review}</span>
 						</S.PostsActionsRequestsHeader>
 						<S.PostsActionsRequestsBody>
 							{requests.map((request: PortalAssetRequestType) => {
@@ -225,7 +225,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 										<span>{formatDate(request.dateCreated, 'epoch')}</span>
 										<Button
 											type={'alt4'}
-											label={language.review}
+											label={language?.review}
 											disabled={unauthorized}
 											handlePress={() => handleReviewRedirect(request.id)}
 										/>
@@ -236,7 +236,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 						{loading && <Loader sm relative />}
 						{unauthorized && (
 							<S.InfoWrapper className={'info'}>
-								<span>{language.unauthorizedPostReview}</span>
+								<span>{language?.unauthorizedPostReview}</span>
 							</S.InfoWrapper>
 						)}
 					</S.PostsActionsRequests>
@@ -249,7 +249,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 				<S.PostsActionsRequestsWrapper type={props.type}>
 					<Button
 						type={props.type === 'detail' ? 'primary' : 'alt3'}
-						label={language.requests}
+						label={language?.requests}
 						handlePress={() => setShowRequests((prev) => !prev)}
 					/>
 
@@ -260,7 +260,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 					)}
 				</S.PostsActionsRequestsWrapper>
 				{showRequests && (
-					<Modal header={language.requests} handleClose={() => setShowRequests((prev) => !prev)}>
+					<Modal header={language?.requests} handleClose={() => setShowRequests((prev) => !prev)}>
 						<div className={'modal-wrapper'}>{content}</div>
 					</Modal>
 				)}
@@ -273,11 +273,11 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 			case 'header':
 				return (
 					<S.PostsHeaderDetails className={'border-wrapper-alt3'}>
-						<p>{`${language.posts} (${portalProvider.current?.assets?.length ?? '0'})`}</p>
+						<p>{`${language?.posts} (${portalProvider.current?.assets?.length ?? '0'})`}</p>
 						<S.PostsHeaderDetailsActions>
 							<Button
 								type={'alt3'}
-								label={language.postsLink}
+								label={language?.postsLink}
 								handlePress={() => navigate(URLS.portalPosts(portalProvider.current.id))}
 							/>
 							{getRequests()}
@@ -289,7 +289,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 								>
 									<Button
 										type={'alt4'}
-										label={language.filter}
+										label={language?.filter}
 										handlePress={() => setShowFilterActions(!showFilterActions)}
 										icon={ASSETS.filter}
 										iconLeftAlign
@@ -315,7 +315,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 		if (!paginatedPosts.length) {
 			return (
 				<S.WrapperEmpty type={props.type}>
-					<p>{language.noPostsFound}</p>
+					<p>{language?.noPostsFound}</p>
 				</S.WrapperEmpty>
 			);
 		}
@@ -335,19 +335,19 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 			{getPosts()}
 			<S.PostsFooter>
 				<S.PostsFooterDetail>
-					<p>{language.showingRange(assets.length > 0 ? currentRange.start : 0, currentRange.end, assets.length)}</p>
-					<p>{`${language.page} ${currentPage}`}</p>
+					<p>{language?.showingRange(assets.length > 0 ? currentRange.start : 0, currentRange.end, assets.length)}</p>
+					<p>{`${language?.page} ${currentPage}`}</p>
 				</S.PostsFooterDetail>
 				<S.PostsFooterActions>
 					<Button
 						type={'alt3'}
-						label={language.previous}
+						label={language?.previous}
 						handlePress={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
 						disabled={assets.length > 0 ? currentPage === 1 : true}
 					/>
 					<Button
 						type={'alt3'}
-						label={language.next}
+						label={language?.next}
 						handlePress={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
 						disabled={assets.length > 0 ? currentPage === totalPages : true}
 					/>

@@ -1,12 +1,11 @@
 import React from 'react';
 
 import { language } from 'helpers/language';
-
-type LanguageType = 'en' | 'fr';
+import { LanguageEnum } from 'helpers/types';
 
 interface LanguageContextState {
-	current: LanguageType;
-	setCurrent: (current: LanguageType) => void;
+	current: LanguageEnum;
+	setCurrent: (current: LanguageEnum) => void;
 	object: any;
 }
 
@@ -15,9 +14,9 @@ interface LanguageProviderProps {
 }
 
 const LanguageContext = React.createContext<LanguageContextState>({
-	current: 'en',
-	setCurrent(current: LanguageType) {
-		alert(current);
+	current: LanguageEnum.en,
+	setCurrent(current: LanguageEnum) {
+		console.log('Language changed to:', current);
 	},
 	object: null,
 });
@@ -27,11 +26,26 @@ export function useLanguageProvider(): LanguageContextState {
 }
 
 export function LanguageProvider(props: LanguageProviderProps) {
-	const [current, setCurrent] = React.useState<LanguageType>('en');
+	const defaultLanguage = Object.keys(LanguageEnum)[0];
+
+	const [current, setCurrent] = React.useState<LanguageEnum>(() => {
+		const savedLanguage = localStorage.getItem('appLanguage');
+		return (savedLanguage as LanguageEnum) || defaultLanguage as any;
+	});
+
+	const handleLanguageChange = (newLanguage: LanguageEnum) => {
+		console.log(newLanguage)
+		setCurrent(newLanguage);
+		localStorage.setItem('appLanguage', newLanguage);
+	};
 
 	return (
 		<LanguageContext.Provider
-			value={{ current, setCurrent: (current: LanguageType) => setCurrent(current), object: language }}
+			value={{
+				current,
+				setCurrent: handleLanguageChange,
+				object: language,
+			}}
 		>
 			{props.children}
 		</LanguageContext.Provider>

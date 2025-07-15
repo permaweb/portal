@@ -8,11 +8,13 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 import * as S from './styles';
 
 export default function Select(props: {
-	label: string;
+	label?: string;
 	activeOption: SelectOptionType;
 	setActiveOption: (option: SelectOptionType) => void;
 	options: SelectOptionType[];
 	disabled: boolean;
+	icon?: string;
+	hideActiveOption?: boolean;
 }) {
 	const [active, setActive] = React.useState<boolean>(false);
 
@@ -25,11 +27,12 @@ export default function Select(props: {
 					</S.Label>
 				)}
 				<S.Dropdown active={active} disabled={props.disabled} onClick={() => setActive(!active)}>
-					<span>{props.activeOption.label}</span>
+					{props.icon && <ReactSVG src={props.icon} />}
+					{!props.hideActiveOption && <span>{props.activeOption.label}</span>}
 					<ReactSVG src={ASSETS.arrow} />
 				</S.Dropdown>
 				{active && (
-					<S.Options className={'border-wrapper-primary scroll-wrapper'}>
+					<S.Options className={'border-wrapper-primary scroll-wrapper-hidden'}>
 						{props.options.map((option: SelectOptionType, index: number) => {
 							return (
 								<S.Option

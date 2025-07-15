@@ -20,6 +20,9 @@ export const HWrapper = styled.div`
 `;
 
 export const HActions = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 20px;
 	width: fit-content;
 	margin: 0 0 0 auto;
 
@@ -32,6 +35,7 @@ export const HActions = styled.div`
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		white-space: nowrap;
 		text-transform: uppercase;
 		letter-spacing: 0.35px;
 

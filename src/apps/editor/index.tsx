@@ -116,7 +116,7 @@ function App() {
 					<Portal node={DOM.overlay}>
 						<S.CenteredWrapper className={'overlay'}>
 							<S.MessageWrapper>
-								<p>{`${language.gettingProfile}...`}</p>
+								<p>{`${language?.gettingProfile}...`}</p>
 							</S.MessageWrapper>
 						</S.CenteredWrapper>
 					</Portal>
@@ -129,15 +129,15 @@ function App() {
 						<S.CenteredWrapper className={'overlay'}>
 							<S.MessageWrapper>
 								{!portalProvider.permissions ? (
-									<p>{`${language.loggingIn}...`}</p>
+									<p>{`${language?.loggingIn}...`}</p>
 								) : (
 									<>
 										<p>
 											{portalProvider.permissions?.externalContributor
-												? language.permissionExternalContributor
-												: language.permissionBaseDenied}
+												? language?.permissionExternalContributor
+												: language?.permissionBaseDenied}
 										</p>
-										<Button type={'primary'} label={language.returnHome} handlePress={() => navigate(URLS.base)} />
+										<Button type={'primary'} label={language?.returnHome} handlePress={() => navigate(URLS.base)} />
 									</>
 								)}
 							</S.MessageWrapper>
@@ -148,14 +148,14 @@ function App() {
 
 			return (
 				<>
-					{!portalProvider.current && <Loader message={`${language.loadingPortal}...`} />}
+					{!portalProvider.current && <Loader message={`${language?.loadingPortal}...`} />}
 					<Navigation open={settings.sidebarOpen} toggle={() => updateSettings('sidebarOpen', !settings.sidebarOpen)} />
 					<S.View className={'max-view-wrapper'} navigationOpen={settings.sidebarOpen}>
 						{element}
 					</S.View>
 					<S.Footer navigationOpen={settings.sidebarOpen}>
 						<p>
-							{language.app} {new Date().getFullYear()}
+							{language?.app} {new Date().getFullYear()}
 						</p>
 					</S.Footer>
 				</>

@@ -24,11 +24,11 @@ export default function UserList(props: { type: ViewLayoutType }) {
 			case 'header':
 				return (
 					<S.UsersHeaderDetails className={'border-wrapper-alt3'}>
-						<p>{language.users}</p>
+						<p>{language?.users}</p>
 						<S.PostsHeaderDetailsActions>
 							<Button
 								type={'alt3'}
-								label={language.usersLink}
+								label={language?.usersLink}
 								handlePress={() => navigate(URLS.portalUsers(portalProvider.current.id))}
 							/>
 						</S.PostsHeaderDetailsActions>
@@ -45,13 +45,13 @@ export default function UserList(props: { type: ViewLayoutType }) {
 		if (!portalProvider.current?.users) {
 			return (
 				<S.LoadingWrapper type={props.type}>
-					<p>{`${language.gettingUsers}...`}</p>
+					<p>{`${language?.gettingUsers}...`}</p>
 				</S.LoadingWrapper>
 			);
 		} else if (portalProvider.current?.users.length === 0) {
 			return (
 				<S.WrapperEmpty type={props.type}>
-					<p>{language.noUsersFound}</p>
+					<p>{language?.noUsersFound}</p>
 				</S.WrapperEmpty>
 			);
 		}

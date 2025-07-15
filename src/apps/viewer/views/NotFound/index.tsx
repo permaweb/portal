@@ -16,9 +16,9 @@ export default function NotFound() {
 			<S.Content>
 				<S.Header>404</S.Header>
 				<S.Divider />
-				<S.Message>{language.pageNotFound}</S.Message>
+				<S.Message>{language?.pageNotFound}</S.Message>
 			</S.Content>
-			<Button type={'primary'} label={language.goBack} handlePress={() => navigate(-1)} height={40} width={150} />
+			<Button type={'primary'} label={language?.goBack} handlePress={() => navigate(-1)} height={40} width={150} />
 		</S.Wrapper>
 	);
 }

@@ -32,7 +32,7 @@ export const HeaderContent = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 25px;
-	justify-content: flex-end;
+	justify-content: space-between;
 `;
 
 export const HeaderActionsWrapper = styled.div`

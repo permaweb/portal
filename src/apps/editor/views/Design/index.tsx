@@ -15,25 +15,25 @@ export default function Design() {
 
 	return (
 		<S.Wrapper className={'fade-in'}>
-			<ViewHeader header={language.design} />
+			<ViewHeader header={language?.design} />
 			<S.BodyWrapper>
 				<S.SectionWrapper>
 					<S.Section className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
-							<p>{language.themes}</p>
+							<p>{language?.themes}</p>
 						</S.SectionHeader>
 						<Themes />
 					</S.Section>
 					{!portalProvider?.permissions?.updateUsers && (
 						<S.InfoWrapper className={'info'}>
-							<span>{language.unauthorizedPortalUpdate}</span>
+							<span>{language?.unauthorizedPortalUpdate}</span>
 						</S.InfoWrapper>
 					)}
 				</S.SectionWrapper>
 				<S.SectionWrapper>
 					<S.Section className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
-							<p>{language.fonts}</p>
+							<p>{language?.fonts}</p>
 						</S.SectionHeader>
 						<Fonts />
 					</S.Section>

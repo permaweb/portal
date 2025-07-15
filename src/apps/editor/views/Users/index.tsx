@@ -24,11 +24,11 @@ export default function Users() {
 		<>
 			<S.Wrapper className={'fade-in'}>
 				<ViewHeader
-					header={language.users}
+					header={language?.users}
 					actions={[
 						<Button
 							type={'alt1'}
-							label={language.addUser}
+							label={language?.addUser}
 							handlePress={() => setShowAddUser(!showAddUser)}
 							disabled={!portalProvider?.permissions?.updateUsers}
 							icon={ASSETS.add}
@@ -41,7 +41,7 @@ export default function Users() {
 					<UserList type={'detail'} />
 					{!portalProvider?.permissions?.updateUsers && (
 						<S.InfoWrapper className={'info'}>
-							<span>{language.unauthorizedUsersUpdate}</span>
+							<span>{language?.unauthorizedUsersUpdate}</span>
 						</S.InfoWrapper>
 					)}
 				</S.BodyWrapper>
@@ -49,7 +49,7 @@ export default function Users() {
 			<Panel
 				open={showAddUser}
 				width={500}
-				header={language.addUser}
+				header={language?.addUser}
 				handleClose={() => setShowAddUser((prev) => !prev)}
 				closeHandlerDisabled
 			>

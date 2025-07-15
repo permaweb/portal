@@ -115,7 +115,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 		return (
 			<S.LinksSection type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
 				<S.LinksHeader type={props.type}>
-					<p>{`${language.siteLinks}${
+					<p>{`${language?.siteLinks}${
 						portalProvider.current?.links ? ` (${portalProvider.current.links.length})` : ''
 					}`}</p>
 					{props.type === 'header' && (
@@ -125,7 +125,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 							src={settings.showLinkAction ? ASSETS.close : ASSETS.write}
 							handlePress={() => toggleLinkAction()}
 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
-							tooltip={settings.showLinkAction ? language.close : language.editSiteLinks}
+							tooltip={settings.showLinkAction ? language?.close : language?.editSiteLinks}
 							tooltipPosition={'bottom-right'}
 							noFocus
 						/>
@@ -140,7 +140,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 		return (
 			<S.CategoriesSection type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
 				<S.CategoriesHeader>
-					<p>{`${language.siteCategories}${
+					<p>{`${language?.siteCategories}${
 						portalProvider.current?.categories ? ` (${getTotalCategoryCount(portalProvider.current.categories)})` : ''
 					}`}</p>
 					{props.type === 'header' && (
@@ -150,7 +150,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 							src={settings.showCategoryAction ? ASSETS.close : ASSETS.write}
 							handlePress={() => toggleCategoryAction()}
 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
-							tooltip={settings.showCategoryAction ? language.close : language.editSiteCategories}
+							tooltip={settings.showCategoryAction ? language?.close : language?.editSiteCategories}
 							tooltipPosition={'bottom-right'}
 							noFocus
 						/>
@@ -165,7 +165,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 		return (
 			<S.TopicsSection type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
 				<S.SectionHeader>
-					<p>{`${language.postTopics}${
+					<p>{`${language?.postTopics}${
 						portalProvider.current?.topics ? ` (${portalProvider.current.topics.length})` : ''
 					}`}</p>
 					{props.type === 'header' && (
@@ -175,7 +175,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 							src={settings.showTopicAction ? ASSETS.close : ASSETS.write}
 							handlePress={() => toggleTopicAction()}
 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
-							tooltip={settings.showTopicAction ? language.close : language.editPostTopics}
+							tooltip={settings.showTopicAction ? language?.close : language?.editPostTopics}
 							tooltipPosition={'bottom-right'}
 							noFocus
 						/>
@@ -190,7 +190,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 		return (
 			<S.Section type={props.type} className={'border-wrapper-alt3'}>
 				<S.SectionHeader>
-					<p>{language.mediaLibrary}</p>
+					<p>{language?.mediaLibrary}</p>
 				</S.SectionHeader>
 				{getMediaAction()}
 			</S.Section>
@@ -210,7 +210,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 					{props.type === 'detail' && mediaSection()}
 					{props.type === 'detail' && !portalProvider?.permissions?.updateUsers && (
 						<S.InfoWrapper className={'info'}>
-							<span>{language.unauthorizedPortalUpdate}</span>
+							<span>{language?.unauthorizedPortalUpdate}</span>
 						</S.InfoWrapper>
 					)}
 				</S.SectionWrapper>

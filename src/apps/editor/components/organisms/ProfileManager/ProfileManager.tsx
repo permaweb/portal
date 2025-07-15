@@ -86,19 +86,19 @@ export default function ProfileManager(props: {
 						console.log(status)
 					);
 					console.log(`Profile update: ${profileUpdateId}`);
-					handleUpdate(`${language.profileUpdated}!`);
+					handleUpdate(`${language?.profileUpdated}!`);
 				} else {
 					const profileId = await permawebProvider.libs.createProfile(data, (status: any) => console.log(status));
 
 					console.log(`Profile ID: ${profileId}`);
 
-					handleUpdate(`${language.profileCreated}!`);
+					handleUpdate(`${language?.profileCreated}!`);
 
 					permawebProvider.handleInitialProfileCache(arProvider.walletAddress, profileId);
 				}
 			} catch (e: any) {
 				setProfileResponse({
-					message: e.message ?? language.errorUpdatingProfile,
+					message: e.message ?? language?.errorUpdatingProfile,
 					status: 'warning',
 				});
 			}
@@ -111,7 +111,7 @@ export default function ProfileManager(props: {
 		if (description && description.length > MAX_BIO_LENGTH) {
 			return {
 				status: true,
-				message: `${language.maxCharsReached} (${description.length} / ${MAX_BIO_LENGTH})`,
+				message: `${language?.maxCharsReached} (${description.length} / ${MAX_BIO_LENGTH})`,
 			};
 		}
 		return { status: false, message: null };
@@ -149,7 +149,7 @@ export default function ProfileManager(props: {
 		return (
 			<>
 				<ReactSVG src={ASSETS.image} />
-				<span>{language.uploadBanner}</span>
+				<span>{language?.uploadBanner}</span>
 			</>
 		);
 	}
@@ -159,7 +159,7 @@ export default function ProfileManager(props: {
 		return (
 			<>
 				<ReactSVG src={ASSETS.user} />
-				<span>{language.uploadAvatar}</span>
+				<span>{language?.uploadAvatar}</span>
 			</>
 		);
 	}
@@ -205,13 +205,13 @@ export default function ProfileManager(props: {
 								<S.PActions>
 									<Button
 										type={'primary'}
-										label={language.removeAvatar}
+										label={language?.removeAvatar}
 										handlePress={() => setThumbnail(null)}
 										disabled={loading || !thumbnail}
 									/>
 									<Button
 										type={'primary'}
-										label={language.removeBanner}
+										label={language?.removeBanner}
 										handlePress={() => setBanner(null)}
 										disabled={loading || !banner}
 									/>
@@ -220,7 +220,7 @@ export default function ProfileManager(props: {
 							<S.Form>
 								<S.TForm>
 									<FormField
-										label={language.name}
+										label={language?.name}
 										value={name}
 										onChange={(e: any) => setName(e.target.value)}
 										disabled={loading}
@@ -229,7 +229,7 @@ export default function ProfileManager(props: {
 										hideErrorMessage
 									/>
 									<FormField
-										label={language.handle}
+										label={language?.handle}
 										value={username}
 										onChange={(e: any) => setUsername(e.target.value)}
 										disabled={loading}
@@ -239,7 +239,7 @@ export default function ProfileManager(props: {
 									/>
 								</S.TForm>
 								<TextArea
-									label={language.bio}
+									label={language?.bio}
 									value={description}
 									onChange={(e: any) => setDescription(e.target.value)}
 									disabled={loading}
@@ -250,7 +250,7 @@ export default function ProfileManager(props: {
 								{props.handleClose && (
 									<Button
 										type={'primary'}
-										label={language.close}
+										label={language?.close}
 										handlePress={() => props.handleClose()}
 										disabled={loading}
 										loading={false}
@@ -258,7 +258,7 @@ export default function ProfileManager(props: {
 								)}
 								<Button
 									type={'alt1'}
-									label={language.save}
+									label={language?.save}
 									handlePress={handleSubmit}
 									disabled={!username || !name || loading}
 									loading={false}
@@ -270,8 +270,8 @@ export default function ProfileManager(props: {
 						<Loader
 							message={
 								props.profile && props.profile.id
-									? `${language.profileUpdatingInfo}...`
-									: `${language.profileCreatingInfo}...`
+									? `${language?.profileUpdatingInfo}...`
+									: `${language?.profileCreatingInfo}...`
 							}
 						/>
 					)}

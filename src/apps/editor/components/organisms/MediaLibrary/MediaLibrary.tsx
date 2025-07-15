@@ -43,14 +43,14 @@ export default function MediaLibrary(props: {
 		image: {
 			type: 'image',
 			icon: ASSETS.image,
-			label: language.image,
+			label: language?.image,
 			renderContent: (url) => <img src={url} />,
 			acceptType: 'image/*',
 		},
 		video: {
 			type: 'video',
 			icon: ASSETS.video,
-			label: language.video,
+			label: language?.video,
 			renderContent: (url) => <video controls src={url} />,
 			acceptType: 'video/*',
 		},
@@ -61,9 +61,9 @@ export default function MediaLibrary(props: {
 	const canvasRef = React.useRef(null);
 
 	const TABS = [
-		{ type: 'all', label: language.all },
-		{ type: 'image', label: language.images },
-		{ type: 'video', label: language.videos },
+		{ type: 'all', label: language?.all },
+		{ type: 'image', label: language?.images },
+		{ type: 'video', label: language?.videos },
 	];
 
 	const [selectedUpload, setSelectedUpload] = React.useState<PortalUploadType | null>(null);
@@ -156,7 +156,7 @@ export default function MediaLibrary(props: {
 
 			console.log(`Media update: ${mediaUpdateId}`);
 
-			setUploadResponse({ status: 'success', message: `${language.mediaUploaded}!` });
+			setUploadResponse({ status: 'success', message: `${language?.mediaUploaded}!` });
 			handleClear(null);
 
 			portalProvider.refreshCurrentPortal();
@@ -213,7 +213,7 @@ export default function MediaLibrary(props: {
 		if (!unauthorized && arProvider.wallet && portalProvider.current?.uploads && selectedUpload) {
 			setShowDeleteConfirmation(false);
 			setMediaLoading(true);
-			setMediaMessage(`${language.removingMedia}...`);
+			setMediaMessage(`${language?.removingMedia}...`);
 			try {
 				const updatedMedia = portalProvider.current?.uploads.filter(
 					(upload: PortalUploadType) => upload.tx !== selectedUpload.tx
@@ -231,7 +231,7 @@ export default function MediaLibrary(props: {
 
 				console.log(`Media update: ${mediaUpdateId}`);
 
-				setUploadResponse({ status: 'success', message: `${language.mediaUpdated}!` });
+				setUploadResponse({ status: 'success', message: `${language?.mediaUpdated}!` });
 			} catch (e: any) {
 				setUploadResponse({ status: 'warning', message: e.message ?? 'Error updating media' });
 			}
@@ -268,7 +268,7 @@ export default function MediaLibrary(props: {
 						<>
 							<img src={getTxEndpoint(upload.thumbnail)} />
 							<div className={'info'}>
-								<span>{language.video}</span>
+								<span>{language?.video}</span>
 							</div>
 						</>
 					);
@@ -296,13 +296,13 @@ export default function MediaLibrary(props: {
 		if (!uploads) {
 			return (
 				<S.LoadingWrapper>
-					<p>{`${language.gettingUploads}...`}</p>
+					<p>{`${language?.gettingUploads}...`}</p>
 				</S.LoadingWrapper>
 			);
 		} else if (uploads.length === 0) {
 			return (
 				<S.WrapperEmpty>
-					<p>{language.noUploadsFound}</p>
+					<p>{language?.noUploadsFound}</p>
 				</S.WrapperEmpty>
 			);
 		}
@@ -340,7 +340,7 @@ export default function MediaLibrary(props: {
 					<S.HeaderActions>
 						<Button
 							type={'alt3'}
-							label={language.remove}
+							label={language?.remove}
 							handlePress={() => setShowDeleteConfirmation(true)}
 							disabled={unauthorized || !selectedUpload}
 							loading={false}
@@ -350,7 +350,7 @@ export default function MediaLibrary(props: {
 						/>
 						<Button
 							type={'alt4'}
-							label={language.upload}
+							label={language?.upload}
 							handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
 							disabled={unauthorized}
 							loading={false}
@@ -363,12 +363,12 @@ export default function MediaLibrary(props: {
 				{(props.callback || props.handleClose) && (
 					<S.ActionsWrapper>
 						{props.handleClose && (
-							<Button type={'primary'} label={language.close} handlePress={() => props.handleClose()} />
+							<Button type={'primary'} label={language?.close} handlePress={() => props.handleClose()} />
 						)}
 						{props.callback && (
 							<Button
 								type={'alt1'}
-								label={language.select}
+								label={language?.select}
 								handlePress={() => props.callback(selectedUpload)}
 								disabled={!selectedUpload}
 							/>
@@ -386,21 +386,21 @@ export default function MediaLibrary(props: {
 				<canvas id={'media-file-input'} ref={canvasRef} style={{ display: 'none' }} />
 			</S.Wrapper>
 			{showDeleteConfirmation && (
-				<Modal header={language.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
+				<Modal header={language?.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
 					<S.ModalWrapper>
 						<S.ModalBodyWrapper>
-							<p>{language.mediaDeleteConfirmationInfo}</p>
+							<p>{language?.mediaDeleteConfirmationInfo}</p>
 						</S.ModalBodyWrapper>
 						<S.ModalActionsWrapper>
 							<Button
 								type={'primary'}
-								label={language.cancel}
+								label={language?.cancel}
 								handlePress={() => setShowDeleteConfirmation(false)}
 								disabled={mediaLoading}
 							/>
 							<Button
 								type={'primary'}
-								label={language.mediaDeleteConfirmation}
+								label={language?.mediaDeleteConfirmation}
 								handlePress={() => deleteUpload()}
 								disabled={!selectedUpload || mediaLoading}
 								loading={mediaLoading}
@@ -414,19 +414,19 @@ export default function MediaLibrary(props: {
 			)}
 			{showUploadConfirmation && (
 				<Modal
-					header={`${language.upload} ${mediaData.name}`}
-					handleClose={() => handleClear(language.uploadCancelled)}
+					header={`${language?.upload} ${mediaData.name}`}
+					handleClose={() => handleClear(language?.uploadCancelled)}
 					className={'modal-wrapper'}
 				>
 					<TurboUploadConfirmation
 						uploadCost={uploadCost}
 						uploadDisabled={unauthorized || mediaLoading}
 						handleUpload={handleUpload}
-						handleCancel={() => handleClear(language.uploadCancelled)}
+						handleCancel={() => handleClear(language?.uploadCancelled)}
 					/>
 				</Modal>
 			)}
-			{mediaLoading && <Loader message={mediaMessage ?? `${language.loading}...`} />}
+			{mediaLoading && <Loader message={mediaMessage ?? `${language?.loading}...`} />}
 			{uploadResponse && (
 				<Notification
 					type={uploadResponse.status}
