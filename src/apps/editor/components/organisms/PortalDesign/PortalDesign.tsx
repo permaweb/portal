@@ -63,7 +63,7 @@ export default function PortalDesign() {
 					<S.PanelActionsWrapper>
 						<Button
 							type={'primary'}
-							label={language.close}
+							label={language?.close}
 							handlePress={() => setShowPanel(false)}
 							height={45}
 							fullWidth

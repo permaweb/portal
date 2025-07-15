@@ -74,7 +74,7 @@ export default function ArticlePostDescription() {
 							disabled={!hasChanges}
 							handlePress={() => {
 								setShowPanel(false);
-								setResponse({ status: 'success', message: `${language.descriptionUpdated}!` });
+								setResponse({ status: 'success', message: `${language?.descriptionUpdated}!` });
 							}}
 						/>
 					</S.PanelActionsWrapper>
