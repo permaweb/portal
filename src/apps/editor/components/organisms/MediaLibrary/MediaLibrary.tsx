@@ -4,6 +4,7 @@ import { ReactSVG } from 'react-svg';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Notification } from 'components/atoms/Notification';
@@ -24,6 +25,7 @@ export default function MediaLibrary(props: {
 	callback?: (upload: PortalUploadType) => void;
 	handleClose?: () => void;
 	selectDisabled?: boolean;
+	columns?: number;
 }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -67,6 +69,7 @@ export default function MediaLibrary(props: {
 	];
 
 	const [selectedUpload, setSelectedUpload] = React.useState<PortalUploadType | null>(null);
+	const [columns, setColumns] = React.useState<number>(props.columns ?? 4);
 	const [uploads, setUploads] = React.useState<PortalUploadType[] | null>(null);
 	const [currentList, setCurrentList] = React.useState<string>(TABS.find((tab) => tab.type === props.type).type);
 	const [currentAcceptType, setCurrentAcceptType] = React.useState<string>('');
@@ -318,6 +321,7 @@ export default function MediaLibrary(props: {
 							active={active}
 							disabled={props.selectDisabled}
 							onClick={() => setSelectedUpload(active ? null : upload)}
+							columns={columns}
 						>
 							{getUpload(upload)}
 							{active && (
@@ -330,7 +334,7 @@ export default function MediaLibrary(props: {
 				})}
 			</S.UploadsWrapper>
 		);
-	}, [uploads, selectedUpload]);
+	}, [uploads, selectedUpload, columns]);
 
 	return (
 		<>
@@ -338,6 +342,28 @@ export default function MediaLibrary(props: {
 				<S.Header>
 					{header}
 					<S.HeaderActions>
+						<S.ColumnActions>
+							<IconButton
+								type={'alt1'}
+								active={false}
+								src={ASSETS.minus}
+								handlePress={() => setColumns((prev) => prev + 1)}
+								disabled={columns >= 8}
+								dimensions={{ wrapper: 23.5, icon: 13.5 }}
+								tooltip={language.smaller}
+								noFocus
+							/>
+							<IconButton
+								type={'alt1'}
+								active={false}
+								src={ASSETS.plus}
+								handlePress={() => setColumns((prev) => prev - 1)}
+								disabled={columns <= 2}
+								dimensions={{ wrapper: 23.5, icon: 13.5 }}
+								tooltip={language.larger}
+								noFocus
+							/>
+						</S.ColumnActions>
 						<Button
 							type={'alt3'}
 							label={language?.remove}

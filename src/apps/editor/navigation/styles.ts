@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { open, openRight, transition2 } from 'helpers/animations';
+import { open, openRight, transition1, transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const PanelOverlay = styled.div<{ open: boolean }>`
@@ -19,17 +19,32 @@ export const PanelOverlay = styled.div<{ open: boolean }>`
 	}
 `;
 
-export const Panel = styled.nav<{ open: boolean }>`
+export const Panel = styled.nav<{ open: boolean; width?: number }>`
 	height: 100vh;
-	width: ${STYLING.dimensions.nav.width};
+	width: ${(props) => (props.width ? `${props.width}px` : STYLING.dimensions.nav.width)};
 	position: fixed;
 	top: 0;
 	left: 0;
 	z-index: 4;
 	transform: translateX(${(props) => (props.open ? '0' : '-100%')});
-	transition: transform ${transition2};
+	transition: transform ${transition2}, width ${transition1};
 	background: ${(props) => props.theme.colors.container.alt1.background};
 	border-right: 1px solid ${(props) => props.theme.colors.border.primary};
+`;
+
+export const ResizeHandle = styled.div`
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 4px;
+	height: 100%;
+	cursor: col-resize;
+	background: transparent;
+	transition: background 200ms ease;
+
+	&:hover {
+		background: ${(props) => props.theme.colors.border.alt2};
+	}
 `;
 
 export const PanelHeader = styled.div`
@@ -61,7 +76,23 @@ export const Logo = styled.div`
 	}
 `;
 
-export const PanelContent = styled.div<{ open: boolean }>`
+export const LinkTooltip = styled.div`
+	position: absolute;
+	z-index: 2;
+	display: none;
+	white-space: nowrap;
+	left: 100%;
+	top: 50%;
+	transform: translateY(-50%);
+	margin-left: 5px;
+
+	span {
+		display: block;
+		line-height: 1.65;
+	}
+`;
+
+export const PanelContent = styled.div<{ open: boolean; showText?: boolean }>`
 	height: calc(100vh - (${STYLING.dimensions.nav.height} + 70px));
 	padding: 0 15px 15px 15px;
 
@@ -69,6 +100,8 @@ export const PanelContent = styled.div<{ open: boolean }>`
 		height: 40.5px;
 		display: flex;
 		align-items: center;
+		justify-content: flex-start;
+		position: relative;
 		cursor: pointer;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
@@ -77,11 +110,11 @@ export const PanelContent = styled.div<{ open: boolean }>`
 		border: 1px solid transparent;
 		border-radius: ${STYLING.dimensions.radius.primary};
 		transition: all 100ms;
-		padding: 0 10px;
+		padding: 0 8.5px;
 		svg {
 			height: 17.5px;
 			width: 17.5px;
-			margin: 6.5px 12.5px 0 0;
+			margin: ${(props) => (props.showText ? '6.5px 12.5px 0 0' : '4.5px 0 0 0')};
 			color: ${(props) => props.theme.colors.font.primary};
 			fill: ${(props) => props.theme.colors.font.primary};
 		}
@@ -93,11 +126,13 @@ export const PanelContent = styled.div<{ open: boolean }>`
 				color: ${(props) => props.theme.colors.font.primary};
 				fill: ${(props) => props.theme.colors.font.primary};
 			}
+
+			${(props) => !props.showText && `${LinkTooltip} { display: block; }`}
 		}
 	}
 `;
 
-export const PanelFooter = styled.div<{ open: boolean }>`
+export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 	height: 70px;
 	width: 100%;
 	padding: 15px;
@@ -106,6 +141,8 @@ export const PanelFooter = styled.div<{ open: boolean }>`
 		height: 40.5px;
 		display: flex;
 		align-items: center;
+		justify-content: flex-start;
+		position: relative;
 		cursor: pointer;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
@@ -114,11 +151,11 @@ export const PanelFooter = styled.div<{ open: boolean }>`
 		border: 1px solid ${(props) => props.theme.colors.border.primary};
 		border-radius: ${STYLING.dimensions.radius.primary};
 		transition: all 100ms;
-		padding: 0 10px;
+		padding: 0 8.5px;
 		svg {
 			height: 17.5px;
 			width: 17.5px;
-			margin: 6.5px 12.5px 0 0;
+			margin: ${(props) => (props.showText ? '4.5px 10.5px 0 0' : '4.5px 0 0 0')};
 			color: ${(props) => props.theme.colors.font.primary};
 			fill: ${(props) => props.theme.colors.font.primary};
 		}
@@ -131,14 +168,20 @@ export const PanelFooter = styled.div<{ open: boolean }>`
 				color: ${(props) => props.theme.colors.font.primary};
 				fill: ${(props) => props.theme.colors.font.primary};
 			}
+
+			${(props) => !props.showText && `${LinkTooltip} { display: block; }`}
 		}
 	}
 `;
 
-export const Header = styled.header<{ navigationOpen: boolean }>`
+export const Header = styled.header<{ navigationOpen: boolean; navWidth?: number }>`
 	height: ${STYLING.dimensions.nav.height};
 	width: 100%;
-	padding: 0 20px 0 ${(props) => (props.navigationOpen ? `calc(${STYLING.dimensions.nav.width} + 10px)` : '20px')};
+	padding: 0 20px 0
+		${(props) =>
+			props.navigationOpen
+				? `calc(${props.navWidth ? `${props.navWidth}px` : STYLING.dimensions.nav.width} + 10px)`
+				: '20px'};
 	transition: padding-left ${transition2};
 	position: fixed;
 	top: 0;

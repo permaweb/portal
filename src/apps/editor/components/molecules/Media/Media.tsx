@@ -20,7 +20,7 @@ import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
 
-const ALLOWED_MEDIA_TYPES = 'image/png, image/jpeg, image/svg, image/gif';
+const ALLOWED_MEDIA_TYPES = 'image/png, image/jpeg, image/svg+xml, image/gif';
 
 export default function Media(props: {
 	portal: PortalDetailType | null;

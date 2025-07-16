@@ -34,6 +34,7 @@ interface Settings {
 	showCategoryAction: boolean;
 	showTopicAction: boolean;
 	showLinkAction: boolean;
+	navWidth: number;
 }
 
 interface SettingsContextState {
@@ -54,6 +55,7 @@ const defaultSettings: Settings = {
 	showCategoryAction: true,
 	showTopicAction: true,
 	showLinkAction: true,
+	navWidth: parseInt(STYLING.dimensions.nav.width),
 };
 
 const SettingsContext = React.createContext<SettingsContextState>({
@@ -85,6 +87,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 				showCategoryAction: parsedSettings.showCategoryAction ?? false,
 				showTopicAction: parsedSettings.showTopicAction ?? false,
 				showLinkAction: parsedSettings.showLinkAction ?? false,
+				navWidth: parsedSettings.navWidth ?? parseInt(STYLING.dimensions.nav.width),
 			};
 		} else {
 			settings = {

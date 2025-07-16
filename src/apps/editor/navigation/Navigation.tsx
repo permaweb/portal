@@ -16,17 +16,20 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { WalletConnect } from 'wallet/WalletConnect';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
+import { useNavigation } from './NavigationContext';
 import * as S from './styles';
 
 export default function Navigation(props: { open: boolean; toggle: () => void }) {
 	const { confirmNavigation } = useNavigationConfirm('post', 'Changes you made may not be saved.');
-	
+
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	const { navWidth, setNavWidth } = useNavigation();
 
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
 	const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
+	const [isResizing, setIsResizing] = React.useState<boolean>(false);
 
 	const paths = React.useMemo(() => {
 		return [
@@ -44,6 +47,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				path: portalProvider.current ? URLS.portalDesign(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.design,
 				label: language?.design,
+			},
+			{
+				path: portalProvider.current ? URLS.portalMedia(portalProvider.current.id) : URLS.base,
+				icon: ASSETS.media,
+				label: language?.media,
 			},
 			{
 				path: portalProvider.current ? URLS.portalSetup(portalProvider.current.id) : URLS.base,
@@ -83,6 +91,48 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		return () => window.removeEventListener('resize', debouncedResize);
 	}, [debouncedResize]);
 
+	const handleResizeStart = React.useCallback((e: React.MouseEvent) => {
+		e.preventDefault();
+		setIsResizing(true);
+		document.body.style.cursor = 'col-resize';
+		document.body.style.userSelect = 'none';
+	}, []);
+
+	const handleResizeMove = React.useCallback(
+		(e: MouseEvent) => {
+			if (!isResizing) return;
+
+			const newWidth = Math.max(67.5, Math.min(260, e.clientX));
+			const finalWidth = newWidth < 140 ? 67.5 : newWidth;
+
+			setNavWidth(finalWidth);
+
+			document.documentElement.style.setProperty('--nav-width', `${finalWidth}px`);
+		},
+		[isResizing, setNavWidth]
+	);
+
+	const handleResizeEnd = React.useCallback(() => {
+		setIsResizing(false);
+		document.body.style.cursor = '';
+		document.body.style.userSelect = '';
+	}, []);
+
+	React.useEffect(() => {
+		if (isResizing) {
+			document.addEventListener('mousemove', handleResizeMove);
+			document.addEventListener('mouseup', handleResizeEnd);
+			return () => {
+				document.removeEventListener('mousemove', handleResizeMove);
+				document.removeEventListener('mouseup', handleResizeEnd);
+			};
+		}
+	}, [isResizing, handleResizeMove, handleResizeEnd]);
+
+	React.useEffect(() => {
+		document.documentElement.style.setProperty('--nav-width', `${navWidth}px`);
+	}, [navWidth]);
+
 	const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, to: string) => {
 		e.preventDefault();
 		confirmNavigation(to);
@@ -108,21 +158,32 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	}, [props.open]);
 
 	const panel = React.useMemo(() => {
+		const showText = navWidth > 120;
 		const content = (
 			<>
 				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
-				<S.PanelContent open={props.open} className={'fade-in scroll-wrapper'}>
+				<S.PanelContent open={props.open} showText={showText} className={'fade-in'}>
 					{paths.map((element, index) => (
 						<Link key={index} to={element.path} onClick={(e) => handleNavigate(e, element.path)}>
 							<ReactSVG src={element.icon} />
-							{element.label}
+							{showText && element.label}
+							{!showText && (
+								<S.LinkTooltip className={'info'}>
+									<span>{element.label}</span>
+								</S.LinkTooltip>
+							)}
 						</Link>
 					))}
 				</S.PanelContent>
-				<S.PanelFooter open={props.open} className={'fade-in'}>
+				<S.PanelFooter open={props.open} showText={showText} className={'fade-in'}>
 					<Link to={URLS.docsIntro} onClick={(e) => handleNavigate(e, URLS.docsIntro)}>
 						<ReactSVG src={ASSETS.help} />
-						{language?.helpCenter}
+						{showText && language?.helpCenter}
+						{!showText && (
+							<S.LinkTooltip className={'info'}>
+								<span>{language?.helpCenter}</span>
+							</S.LinkTooltip>
+						)}
 					</Link>
 				</S.PanelFooter>
 			</>
@@ -130,14 +191,15 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 		if (desktop) {
 			return (
-				<S.Panel open={props.open} className={'fade-in'}>
+				<S.Panel open={props.open} className={'fade-in'} width={navWidth}>
 					{content}
+					<S.ResizeHandle onMouseDown={handleResizeStart} />
 				</S.Panel>
 			);
 		} else {
 			return (
 				<>
-					<S.Panel open={props.open} className={'fade-in'}>
+					<S.Panel open={props.open} className={'fade-in'} width={navWidth}>
 						<CloseHandler active={props.open} disabled={!props.open} callback={() => props.toggle()}>
 							{content}
 						</CloseHandler>
@@ -146,7 +208,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				</>
 			);
 		}
-	}, [props.open, desktop, languageProvider?.current]);
+	}, [navWidth, props.open, desktop, languageProvider?.current]);
 
 	const portal = React.useMemo(() => {
 		if (portalProvider.current?.id) {
@@ -254,13 +316,13 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		portalProvider.current?.id,
 		portalProvider.current?.name,
 		portalProvider.updating,
-		languageProvider?.current
+		languageProvider?.current,
 	]);
 
 	return (
 		<>
 			{panel}
-			<S.Header navigationOpen={props.open} className={'fade-in'}>
+			<S.Header navigationOpen={props.open} navWidth={navWidth} className={'fade-in'}>
 				<S.Content>
 					<S.C1Wrapper>
 						{!props.open && navigationToggle}

@@ -11,7 +11,7 @@ import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { ASSETS } from 'helpers/config';
-import { LanguageEnum,WalletEnum  } from 'helpers/types';
+import { LanguageEnum, WalletEnum } from 'helpers/types';
 import { formatAddress, getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -128,7 +128,7 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 
 							<S.DBalanceWrapper>
 								<S.DBalanceHeader>
-									<p>{language?.uploadBalance}</p>
+									<p>{language?.creditBalance}</p>
 								</S.DBalanceHeader>
 								<S.DBalanceBody>
 									<p>
@@ -210,10 +210,7 @@ export default function WalletConnect(props: { app: 'editor' | 'viewer'; callbac
 								</S.ThemeSectionHeader>
 								<S.ThemeSectionBody>
 									{theme.variants.map((variant: any) => (
-										<S.MSectionBodyElement
-											key={variant.id}
-											onClick={() => updateSettings('theme', variant.id as any)}
-										>
+										<S.MSectionBodyElement key={variant.id} onClick={() => updateSettings('theme', variant.id as any)}>
 											<S.Preview background={variant.background} accent={variant.accent1}>
 												<div id={'preview-accent-1'} />
 											</S.Preview>
