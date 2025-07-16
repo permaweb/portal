@@ -6,7 +6,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 
 import { CurrentZoneVersion } from '@permaweb/libs';
 
-import { Navigation } from 'editor/navigation';
+import { Navigation, NavigationProvider, useNavigation } from 'editor/navigation';
 import { PortalProvider, usePortalProvider } from 'editor/providers/PortalProvider';
 import { SettingsProvider, useSettingsProvider } from 'editor/providers/SettingsProvider';
 import { persistor, store } from 'editor/store';
@@ -29,15 +29,13 @@ const views = (import.meta as any).glob('./views/**/index.tsx');
 const Landing = getLazyImport('Landing');
 const PortalView = getLazyImport('Portal');
 const Posts = getLazyImport('Posts');
-
 const PageCreate = getLazyImport('Page/Create');
 const PageEdit = getLazyImport('Page/Edit');
-
 const PostCreate = getLazyImport('Post/Create');
 const PostEdit = getLazyImport('Post/Edit');
-
 const Setup = getLazyImport('Setup');
 const Design = getLazyImport('Design');
+const Media = getLazyImport('Media');
 const Users = getLazyImport('Users');
 const Pages = getLazyImport('Pages');
 const Domains = getLazyImport('Domains');
@@ -58,7 +56,7 @@ function getLazyImport(view: string) {
 	});
 }
 
-function App() {
+function AppContent() {
 	const navigate = useNavigate();
 
 	const arProvider = useArweaveProvider();
@@ -66,6 +64,7 @@ function App() {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	const { navWidth } = useNavigation();
 
 	const { settings, updateSettings } = useSettingsProvider();
 
@@ -156,10 +155,10 @@ function App() {
 				<>
 					{!portalProvider.current && <Loader message={`${language?.loadingPortal}...`} />}
 					<Navigation open={settings.sidebarOpen} toggle={() => updateSettings('sidebarOpen', !settings.sidebarOpen)} />
-					<S.View className={'max-view-wrapper'} navigationOpen={settings.sidebarOpen}>
+					<S.View className={'max-view-wrapper'} navigationOpen={settings.sidebarOpen} navWidth={navWidth}>
 						{element}
 					</S.View>
-					<S.Footer navigationOpen={settings.sidebarOpen}>
+					<S.Footer navigationOpen={settings.sidebarOpen} navWidth={navWidth}>
 						<p>
 							{language?.app} {new Date().getFullYear()}
 						</p>
@@ -189,6 +188,7 @@ function App() {
 						{getRoute(`${URLS.base}:portalId/page/edit/:assetId`, <PageEdit />)}
 						{getRoute(`${URLS.base}:portalId/setup`, <Setup />)}
 						{getRoute(`${URLS.base}:portalId/design`, <Design />)}
+						{getRoute(`${URLS.base}:portalId/media`, <Media />)}
 						{getRoute(`${URLS.base}:portalId/users`, <Users />)}
 						{getRoute(`${URLS.base}:portalId/pages`, <Pages />)}
 						{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
@@ -200,6 +200,14 @@ function App() {
 				</S.App>
 			</Suspense>
 		</>
+	);
+}
+
+function App() {
+	return (
+		<NavigationProvider>
+			<AppContent />
+		</NavigationProvider>
 	);
 }
 

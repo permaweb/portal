@@ -452,6 +452,9 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			alt10: {
 				background: currentTheme.primary2,
 			},
+			alt11: {
+				background: currentTheme.dark2,
+			},
 		},
 		contrast: {
 			background: currentTheme.dark2,

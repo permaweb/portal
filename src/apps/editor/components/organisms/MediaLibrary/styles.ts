@@ -7,7 +7,6 @@ export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	padding: 0 20px 20px 20px;
 
 	#media-file-input {
 		display: none;
@@ -35,7 +34,14 @@ export const HeaderActions = styled.div`
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
-	gap: 15px;
+	gap: 20px;
+`;
+
+export const ColumnActions = styled.div`
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
 `;
 
 export const UploadsWrapper = styled.div`
@@ -45,8 +51,9 @@ export const UploadsWrapper = styled.div`
 	gap: 20px;
 `;
 
-export const UploadWrapper = styled.button<{ active: boolean }>`
+export const UploadWrapper = styled.button<{ active: boolean; columns: number }>`
 	width: calc((100% - (3 * 20px)) / 4);
+	width: ${(props) => `calc((100% - ${(props.columns - 1) * 20}px) / ${props.columns})`};
 	aspect-ratio: 1;
 	background: ${(props) => props.theme.colors.container.alt8.background};
 	border: 1px solid ${(props) => (props.active ? props.theme.colors.indicator.active : props.theme.colors.border.alt1)};

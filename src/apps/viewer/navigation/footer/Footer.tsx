@@ -62,7 +62,7 @@ export default function Footer() {
 							<S.PageLinksWrapper>
 								{portalProvider.current.pages.map((page: PortalPageType) => {
 									return (
-										<Link key={page.id} to={getRedirect(urlify(page.name))}>
+										<Link key={page.id} to={getRedirect(URLS.info(urlify(page.name)))}>
 											{page.name}
 										</Link>
 									);
