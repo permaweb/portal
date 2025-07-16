@@ -42,7 +42,7 @@ export default function PortalDesign() {
 				break;
 			case 'logo':
 				header = language?.siteLogo;
-				component = <Media portal={portalProvider.current} type={"logo"} />;
+				component = <Media portal={portalProvider.current} type={'logo'} />;
 				break;
 			default:
 				header = null;

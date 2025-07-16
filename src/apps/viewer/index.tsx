@@ -103,8 +103,8 @@ function App() {
 							<Route path={`${URLS.base}post/:postId`} element={<Post />} />
 							<Route path={`${URLS.base}:portalId/post/:postId`} element={<Post />} />
 
-							<Route path={`${URLS.base}:page`} element={<Page />} />
-							<Route path={`${URLS.base}:portalId/:page`} element={<Page />} />
+							<Route path={`${URLS.base}info/:page`} element={<Page />} />
+							<Route path={`${URLS.base}:portalId/info/:page`} element={<Page />} />
 
 							<Route path={URLS.notFound} element={<NotFound />} />
 							<Route path={'*'} element={<NotFound />} />

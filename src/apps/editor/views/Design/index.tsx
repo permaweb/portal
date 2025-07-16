@@ -37,9 +37,9 @@ export default function Design() {
 						</S.SectionHeader>
 						<Fonts />
 					</S.Section>
-					<Media portal={portalProvider.current} type="logo" />
-					<S.Section className={'border-wrapper-alt3'}>
-						<Media portal={portalProvider.current} type="icon" />
+					<Media portal={portalProvider.current} type={'logo'} />
+					<S.Section className={'border-wrapper-alt2'}>
+						<Media portal={portalProvider.current} type={'icon'} />
 					</S.Section>
 				</S.SectionWrapper>
 			</S.BodyWrapper>
