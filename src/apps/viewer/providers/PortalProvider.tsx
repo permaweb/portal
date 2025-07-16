@@ -102,13 +102,15 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					name: portalData.store?.name ?? 'None',
 					logo: portalData.store?.logo ?? 'None',
 					icon: portalData.store?.icon ?? 'None',
+					users: users || [],
+					pages: portalData?.store?.pages ?? [],
 					assets: getPortalAssets(portalData?.store?.index),
 					categories: portalData?.store?.categories ?? [],
 					topics: portalData?.store?.topics ?? [],
 					links: portalData?.store?.links ?? [],
 					fonts: portalData?.store?.fonts ?? {},
 					themes: portalData?.store?.themes ?? [],
-					users: users || [],
+					layout: portalData?.store?.layout ?? null,
 				};
 
 				return portal;

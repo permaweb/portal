@@ -12,7 +12,7 @@ export default function Domains() {
 	return (
 		<S.Wrapper className={'fade-in'}>
 			<ViewHeader header={language?.domains} />
-			<S.BodyWrapper className={'border-wrapper-primary'}>
+			<S.BodyWrapper className={'border-wrapper-alt1'}>
 				<DomainList />
 			</S.BodyWrapper>
 		</S.Wrapper>

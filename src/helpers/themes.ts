@@ -360,6 +360,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			alt4: currentTheme.neutral9,
 			alt5: currentTheme.primary1,
 			alt6: currentTheme.primary2,
+			alt7: currentTheme.neutralA5,
 		},
 		button: {
 			primary: {
@@ -588,7 +589,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			xxLg: 'clamp(26px, 2.5vw, 28px)',
 			h1: 'clamp(28.8px, 2.8vw, 44.8px)',
 			h2: 'clamp(27.2px, 2.6vw, 40px)',
-			h4: 'clamp(25.6px, 2.4vw, 33.6px)',
+			h4: 'clamp(25.6px, 2.5vw, 38.6px)',
 		},
 		weight: {
 			light: '300',

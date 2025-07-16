@@ -12,7 +12,6 @@ import * as S from './styles';
 
 export default function DomainList() {
 	const portalProvider = usePortalProvider();
-
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 

@@ -48,7 +48,7 @@ export const LogoWrapper = styled.div`
 
 	h4 {
 		text-align: left;
-		font-size: ${(props) => props.theme.typography.size.xxLg};
+		font-size: ${(props) => props.theme.typography.size.xLg};
 		color: ${(props) => props.theme.colors.font.primary};
 
 		&:hover {
@@ -65,28 +65,39 @@ export const LogoWrapper = styled.div`
 	}
 `;
 
+export const NavigationWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+`;
+
 export const CategoriesWrapper = styled.div`
 	width: 600px;
 	max-width: 90vw;
 	display: flex;
-	align-items: center;
 	justify-content: center;
 	flex-wrap: wrap;
-	gap: 15px 25px;
-	margin: 15px auto;
+	gap: 15px;
 
 	a {
-		color: ${(props) => props.theme.colors.font.primary};
+		color: ${(props) => props.theme.colors.font.alt2};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		text-align: center;
 
 		&:hover {
-			color: ${(props) => props.theme.colors.font.alt1};
+			color: ${(props) => props.theme.colors.font.primary};
+			text-decoration: underline;
+			text-decoration-thickness: 1.25px;
 		}
 	}
 `;
+
+export const PageLinksWrapper = styled(CategoriesWrapper)``;
 
 export const LinksWrapper = styled.div`
 	display: flex;
@@ -168,7 +179,8 @@ export const LinkWrapper = styled.div`
 
 export const FooterEndWrapper = styled.div`
 	width: 100%;
-	padding: 20px 0 0 0;
+	padding: 25px 0 0 0;
+	margin: 5px 0 0 0;
 	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 

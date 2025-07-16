@@ -65,7 +65,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	
+
 	const hasFetchedMeta = React.useRef(false);
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
@@ -89,52 +89,33 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		handlePortalSetup(null);
 		setPermissions(null);
 	}, [arProvider.walletAddress]);
-	
+
 	React.useEffect(() => {
-		(async function () {
-			if (arProvider.walletAddress && permawebProvider.profile?.portals) {
-				const profilePortals = permawebProvider.profile.portals ?? [];
+		const profilePortals = permawebProvider.profile?.portals ?? [];
+		setPortals(profilePortals);
+		setInvites(permawebProvider.profile?.invites ?? []);
 
-				setPortals(profilePortals);
+		if (!hasFetchedMeta.current) {
+			hasFetchedMeta.current = true;
 
-				if (!hasFetchedMeta.current) {
-					hasFetchedMeta.current = true;
-
-					for (const portal of profilePortals) {
-						try {
-							console.log(`Fetching Portal: ${portal.id}...`);
-
-							let portalData = null;
-							const cachedPortal = getCachedPortal(portal.id);
-							if (cachedPortal) portalData = { ...cachedPortal };
-							else portalData = await permawebProvider.libs.getZone(portal.id);
-
-							const userPortal = {
-								id: portal.id,
-								name: portalData.name ?? portalData.store?.name ?? 'None',
-								logo: portalData.logo ?? portalData.store?.logo ?? 'None',
-								icon: portalData.icon ?? portalData.store?.icon ?? 'None',
-								users: portalData.users ?? getPortalUsers(portalData?.roles),
-							}; 
-
-							setPortals((prev) =>
-								prev.map((portal) => ({
-									...portal,
-									...userPortal,
-								}))
-							);
-						} catch (e: any) {
-							console.error(e);
-						}
-					}
-				}
-
-				setInvites(permawebProvider.profile.invites ?? []);
-			} else {
-				setPermissions(null);
-			}
-		})();
-	}, [permawebProvider.profile?.portals]);
+			(async () => {
+				const updated = await Promise.all(
+					profilePortals.map(async (p) => {
+						const cached = getCachedPortal(p.id);
+						const data = cached ?? (await permawebProvider.libs.getZone(p.id));
+						return {
+							...p,
+							name: data.name ?? data.store?.name ?? 'None',
+							logo: data.logo ?? data.store?.logo ?? 'None',
+							icon: data.icon ?? data.store?.icon ?? 'None',
+							users: data.users ?? getPortalUsers(data.roles),
+						};
+					})
+				);
+				setPortals(updated);
+			})();
+		}
+	}, [arProvider.walletAddress, permawebProvider.profile?.portals]);
 
 	React.useEffect(() => {
 		if (portals?.length > 0) {
@@ -357,6 +338,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					fonts: portalData?.store?.fonts ?? {},
 					themes: portalData?.store?.themes ?? [],
 					users: getPortalUsers(portalData?.roles),
+					pages: portalData?.store?.pages ?? [],
 					roleOptions: portalData.roleOptions ?? {},
 					permissions: portalData.permissions ?? {},
 					domains: [], // TODO: Domains
