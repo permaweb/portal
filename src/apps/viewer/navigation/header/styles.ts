@@ -9,16 +9,26 @@ export const Wrapper = styled.header`
 	z-index: 4;
 	top: 0;
 	background: ${(props) => props.theme.colors.view.background};
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.alt7};
 `;
 
 export const WrapperContent = styled.div<{ height?: string }>`
-	height: ${(props) => (props.height ?? STYLING.dimensions.nav.height)};
+	height: ${(props) => props.height ?? STYLING.dimensions.nav.height};
 	width: 100%;
 	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+`;
+
+export const NavigationWrapper = styled(WrapperContent)`
+	height: ${STYLING.dimensions.nav.linksHeight};
+	width: 100%;
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.alt7};
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	position: sticky;
+	z-index: 1;
+	top: 0;
 `;
 
 export const ContentStart = styled.div``;
@@ -30,19 +40,19 @@ function getLogoAlignment(opts: { direction?: BasicAlignmentType }) {
 				return `
 				left: 20px;
 				transform: translate(0, -50%);
-			`
+			`;
 			case 'center':
 				return `
 				left: 50%;
 				transform: translate(-50%, -50%);
-			`
+			`;
 		}
 	}
 
 	return `
 		left: 50%;
 		transform: translate(-50%, -50%);
-	`
+	`;
 }
 
 export const LogoWrapper = styled.div<{ direction?: BasicAlignmentType }>`
@@ -93,6 +103,24 @@ export const LogoWrapper = styled.div<{ direction?: BasicAlignmentType }>`
 	}
 `;
 
+export const IconWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	img {
+		height: 25px;
+		width: 25px;
+		border-radius: ${STYLING.dimensions.radius.alt3};
+	}
+	svg {
+		height: 20px;
+		width: 20px;
+		color: ${(props) => props.theme.colors.font.primary};
+		fill: ${(props) => props.theme.colors.font.primary};
+	}
+`;
+
 function getContentAlignment(opts: { linkDirection?: BasicAlignmentType }) {
 	if (opts.linkDirection) {
 		switch (opts.linkDirection) {
@@ -100,33 +128,33 @@ function getContentAlignment(opts: { linkDirection?: BasicAlignmentType }) {
 				return `
 					flex-direction: row-reverse;
 					align-items: center;
-				`
+				`;
 			case 'right':
 				return `
 					flex-direction: row;
 					align-items: center;
-				`
+				`;
 			case 'top':
 				return `
 					flex-direction: column-reverse;
 					align-items: flex-end;
-				`
+				`;
 			case 'bottom':
 				return `
 					flex-direction: column;
 					align-items: flex-end;
-				`
+				`;
 			default:
 				return `
 					flex-direction: row-reverse;
 					align-items: center;
-				`
+				`;
 		}
 	}
 	return `
 			flex-direction: row-reverse;
 			align-items: center;
-		`
+		`;
 }
 
 export const ContentEnd = styled.div<{ linkDirection?: BasicAlignmentType }>`
@@ -137,7 +165,7 @@ export const ContentEnd = styled.div<{ linkDirection?: BasicAlignmentType }>`
 	right: 20px;
 	transform: translate(0, -50%);
 	display: flex;
-    gap: 25px;
+	gap: 25px;
 	padding: 20px 0;
 	${(props) => getContentAlignment({ linkDirection: props.linkDirection })};
 `;
@@ -211,25 +239,27 @@ export const LinkWrapper = styled.div`
 	}
 `;
 
-export const NavigationWrapper = styled(WrapperContent)`
-	height: ${STYLING.dimensions.nav.linksHeight};
-	width: 100%;
-	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
-`;
-
 function getNavContentAlignment(opts: { direction?: BasicAlignmentType }) {
 	if (opts.direction) {
 		switch (opts.direction) {
 			case 'left':
-				return `justify-content: flex-start;`
+				return `justify-content: flex-start;`;
 			case 'center':
-				return `justify-content: center;`
+				return `justify-content: center;`;
 		}
 	}
 	return `justify-content: center;`;
 }
 
 export const NavigationContent = styled.ul<{ direction?: BasicAlignmentType }>`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 35px;
+	${(props) => getNavContentAlignment({ direction: props.direction })};
+`;
+
+export const NavigationLinks = styled.ul<{ direction?: BasicAlignmentType }>`
 	width: 100%;
 	display: flex;
 	align-items: center;

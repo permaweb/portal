@@ -51,7 +51,15 @@ export default function Header() {
 		return <h4>{portalProvider.current?.name ?? '-'}</h4>;
 	}
 
-	function getCategories() {
+	function getIcon() {
+		const icon = portalProvider.current?.icon;
+		if (icon && checkValidAddress(icon)) {
+			return <img src={getTxEndpoint(icon)} />;
+		}
+		return <ReactSVG src={ASSETS.portal} />;
+	}
+
+	function getNavigation() {
 		const overflowCount = 7;
 
 		const hasOverflow = portalProvider.current.categories.length > overflowCount;
@@ -65,33 +73,35 @@ export default function Header() {
 
 		return (
 			<S.NavigationWrapper>
-				<S.NavigationContent
-					direction={portalProvider.current?.layout?.header?.subheader?.categories?.direction ?? 'left'}
-					className={'max-view-wrapper'}
-				>
-					{initCategories.map((category: PortalCategoryType) => {
-						return <Category key={category.id} category={category} />;
-					})}
-					{hasOverflow && (
-						<S.OverflowWrapper>
-							<CloseHandler active={true} disabled={false} callback={() => setShowOverflowCategories(false)}>
-								<Button
-									type={'alt3'}
-									label={language?.more}
-									handlePress={() => setShowOverflowCategories((prev) => !prev)}
-									icon={ASSETS.arrow}
-									height={30}
-								/>
-								{showOverflowCategories && overflowCategories && (
-									<S.OverflowContent className={'border-wrapper-alt3 fade-in'}>
-										{overflowCategories.map((category: PortalCategoryType) => {
-											return <Category key={category.id} category={category} />;
-										})}
-									</S.OverflowContent>
-								)}
-							</CloseHandler>
-						</S.OverflowWrapper>
-					)}
+				<S.NavigationContent className={'max-view-wrapper'}>
+					<S.NavigationLinks
+						direction={portalProvider.current?.layout?.header?.subheader?.categories?.direction ?? 'left'}
+					>
+						{initCategories.map((category: PortalCategoryType) => {
+							return <Category key={category.id} category={category} />;
+						})}
+						{hasOverflow && (
+							<S.OverflowWrapper>
+								<CloseHandler active={true} disabled={false} callback={() => setShowOverflowCategories(false)}>
+									<Button
+										type={'alt3'}
+										label={language?.more}
+										handlePress={() => setShowOverflowCategories((prev) => !prev)}
+										icon={ASSETS.arrow}
+										height={30}
+									/>
+									{showOverflowCategories && overflowCategories && (
+										<S.OverflowContent className={'border-wrapper-alt3 fade-in'}>
+											{overflowCategories.map((category: PortalCategoryType) => {
+												return <Category key={category.id} category={category} />;
+											})}
+										</S.OverflowContent>
+									)}
+								</CloseHandler>
+							</S.OverflowWrapper>
+						)}
+					</S.NavigationLinks>
+					{/* <S.IconWrapper>{getIcon()}</S.IconWrapper> */}
 				</S.NavigationContent>
 			</S.NavigationWrapper>
 		);
@@ -117,34 +127,34 @@ export default function Header() {
 	}
 
 	return (
-		<S.Wrapper>
-			<S.WrapperContent
-				className={'max-view-wrapper'}
-				height={portalProvider.current?.layout?.header?.height ?? STYLING.dimensions.nav.height}
-			>
-				{/* <S.ContentStart>
+		<>
+			<S.Wrapper>
+				<S.WrapperContent
+					className={'max-view-wrapper'}
+					height={portalProvider.current?.layout?.header?.height ?? STYLING.dimensions.nav.height}
+				>
+					{/* <S.ContentStart>
 					{portalProvider.updating && (
 						<S.PortalUpdateWrapper>
 							<span>{`${language?.updating}...`}</span>
 						</S.PortalUpdateWrapper>
 					)}
 				</S.ContentStart> */}
-				<S.LogoWrapper
-					className={'fade-in'}
-					direction={portalProvider.current?.layout?.header?.logo?.direction ?? 'left'}
-				>
-					<Link to={getRedirect()}>{getLogo()}</Link>
-				</S.LogoWrapper>
-				<S.ContentEnd linkDirection={portalProvider.current?.layout?.header?.socials?.direction ?? 'left'}>
-					<WalletConnect app={'viewer'} />
-					{portalProvider.current?.links?.length > 0 &&
-						portalProvider.current?.layout?.header?.socials &&
-						getLinks()}
-				</S.ContentEnd>
-			</S.WrapperContent>
+					<S.LogoWrapper
+						className={'fade-in'}
+						direction={portalProvider.current?.layout?.header?.logo?.direction ?? 'left'}
+					>
+						<Link to={getRedirect()}>{getLogo()}</Link>
+					</S.LogoWrapper>
+					<S.ContentEnd linkDirection={portalProvider.current?.layout?.header?.socials?.direction ?? 'left'}>
+						<WalletConnect app={'viewer'} />
+						{portalProvider.current?.links?.length > 0 && portalProvider.current?.layout?.header?.socials && getLinks()}
+					</S.ContentEnd>
+				</S.WrapperContent>
+			</S.Wrapper>
 			{portalProvider.current?.categories?.length > 0 &&
 				portalProvider.current?.layout?.header?.subheader?.categories &&
-				getCategories()}
-		</S.Wrapper>
+				getNavigation()}
+		</>
 	);
 }

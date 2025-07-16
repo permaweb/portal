@@ -1,15 +1,15 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
-import parse from 'html-react-parser';
 
 import { Types } from '@permaweb/libs';
 
+import { AssetContent } from 'viewer/components/molecules/AssetContent';
 import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
 import { Loader } from 'components/atoms/Loader';
 import { URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { ArticleBlockType, PortalAssetType, PortalCategoryType } from 'helpers/types';
+import { PortalAssetType, PortalCategoryType } from 'helpers/types';
 import { checkValidAddress, formatAddress, formatDate, getRedirect } from 'helpers/utils';
 import { scrollTo } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -17,7 +17,6 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
-// TODO: Profiles
 export default function Post() {
 	const { postId } = useParams<{ postId?: string }>();
 
@@ -59,58 +58,6 @@ export default function Post() {
 	}, [postId, permawebProvider.libs]);
 
 	if (loading) return <Loader sm relative />;
-
-	function getArticleBlock(block: ArticleBlockType) {
-		let Element: any = null;
-
-		switch (block.type) {
-			case 'paragraph':
-				Element = 'p';
-				break;
-			case 'quote':
-				Element = 'blockquote';
-				break;
-			case 'ordered-list':
-				Element = 'ol';
-				break;
-			case 'unordered-list':
-				Element = 'ul';
-				break;
-			case 'code':
-				Element = 'code';
-				break;
-			case 'header-1':
-				Element = 'h1';
-				break;
-			case 'header-2':
-				Element = 'h2';
-				break;
-			case 'header-3':
-				Element = 'h3';
-				break;
-			case 'header-4':
-				Element = 'h4';
-				break;
-			case 'header-5':
-				Element = 'h5';
-				break;
-			case 'header-6':
-				Element = 'h6';
-				break;
-			default:
-				Element = null;
-				break;
-		}
-
-		if (Element)
-			return (
-				<Element key={block.id} className={'fade-in'}>
-					{parse(block.content)}
-				</Element>
-			);
-		return parse(block.content);
-	}
-
 	return (
 		<S.Wrapper>
 			<S.HeaderWrapper>
@@ -153,13 +100,7 @@ export default function Post() {
 					</S.FeaturedImage>
 				)}
 			</S.HeaderWrapper>
-			{post?.metadata?.content && (
-				<S.Content>
-					{post.metadata.content.map((block: ArticleBlockType) => {
-						return getArticleBlock(block);
-					})}
-				</S.Content>
-			)}
+			{post?.metadata?.content && <AssetContent content={post.metadata.content} />}
 			<S.FooterWrapper className={'fade-in'}>
 				{post?.metadata?.topics && (
 					<S.TopicsWrapper>

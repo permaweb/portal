@@ -5,7 +5,6 @@ import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
 import { Loader } from 'components/atoms/Loader';
 import { PortalAssetType, PortalCategoryType } from 'helpers/types';
-import { shuffleArray } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -25,7 +24,9 @@ export default function Landing() {
 				[...portalProvider.current.assets].filter((post: PortalAssetType) => post.metadata.status === 'published') ??
 				[];
 
-			const filteredPanelPosts = shuffleArray(filteredFeaturedPosts);
+			const filteredPanelPosts = [...filteredFeaturedPosts].sort(
+				(a, b) => (b.metadata.releasedDate ?? 0) - (a.metadata.releasedDate ?? 0)
+			);
 
 			const grouped = groupPostsByCategory(filteredFeaturedPosts);
 
@@ -63,20 +64,31 @@ export default function Landing() {
 
 	function getFeaturedPosts() {
 		if (!groupedPosts) return <Loader sm relative />;
-
 		const categoryNames = Object.keys(groupedPosts);
 		if (categoryNames.length === 0) return null;
 
+		const seen = new Set<string>();
+
 		return (
 			<>
-				{categoryNames.map((categoryName) => (
-					<S.CategorySection key={categoryName}>
-						<S.CategoryHeader>
-							<span>{categoryName}</span>
-						</S.CategoryHeader>
-						<PostList posts={groupedPosts[categoryName]} />
-					</S.CategorySection>
-				))}
+				{categoryNames.map((categoryName) => {
+					const uniquePosts = groupedPosts[categoryName].filter((post) => {
+						if (seen.has(post.id)) return false;
+						seen.add(post.id);
+						return true;
+					});
+
+					if (uniquePosts.length === 0) return null;
+
+					return (
+						<S.CategorySection key={categoryName}>
+							<S.CategoryHeader>
+								<span>{categoryName}</span>
+							</S.CategoryHeader>
+							<PostList posts={uniquePosts} />
+						</S.CategorySection>
+					);
+				})}
 			</>
 		);
 	}
@@ -87,7 +99,7 @@ export default function Landing() {
 			return (
 				<S.PanelWrapper>
 					<S.PanelHeader>
-						<span>{language?.mostRead}</span>
+						<span>{language?.recentPosts}</span>
 					</S.PanelHeader>
 					<PostList posts={panelPosts} hideImages />
 				</S.PanelWrapper>

@@ -127,7 +127,7 @@ export const STYLING = {
 		},
 		nav: {
 			height: '70px',
-			linksHeight: '45px',
+			linksHeight: '50px',
 			width: '260px',
 		},
 		radius: {

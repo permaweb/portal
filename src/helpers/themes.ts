@@ -360,6 +360,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			alt4: currentTheme.neutral9,
 			alt5: currentTheme.primary1,
 			alt6: currentTheme.primary2,
+			alt7: currentTheme.neutralA5,
 		},
 		button: {
 			primary: {

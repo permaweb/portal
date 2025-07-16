@@ -24,7 +24,7 @@ export type PortalDetailType = {
 	uploads?: PortalUploadType[];
 	fonts?: PortalFontsType;
 	themes?: PortalThemeType[];
-	layout?: any; // TODO: Type
+	layout?: any;
 };
 
 export type PortalAssetType = {
@@ -80,9 +80,9 @@ export type PortalUserType = {
 };
 
 export type PortalPageType = {
-	id: string,
+	id: string;
 	name: string;
-}
+};
 
 export type PortalFontsType = {
 	headers: string;
@@ -294,5 +294,5 @@ export type BasicAlignmentType = 'left' | 'center' | 'right' | 'top' | 'bottom';
 
 export enum LanguageEnum {
 	en = 'English',
-	es = 'Español'
+	es = 'Español',
 }
