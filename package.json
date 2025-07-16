@@ -12,9 +12,9 @@
 		"start:viewer": "NODE_ENV=development VITE_APP=viewer vite",
 		"build:editor": "NODE_ENV=production VITE_APP=editor vite build",
 		"build:viewer": "NODE_ENV=production VITE_APP=viewer vite build",
-		"deploy:editor:main": "VITE_APP=editor npm run build:editor && permaweb-deploy --arns-name portal --deploy-folder ./dist/editor",
-		"deploy:editor:staging": "VITE_APP=editor npm run build:editor && permaweb-deploy --arns-name portal --undername staging --deploy-folder ./dist/editor",
-		"deploy:viewer": "VITE_APP=viewer npm run build:viewer && permaweb-deploy --arns-name portal --undername script --deploy-file ./dist/viewer/bundle.js"
+		"deploy:editor:main": "VITE_APP=editor npm run build:editor && permaweb-deploy --arns-name portal --ttl-seconds 60 --deploy-folder ./dist/editor",
+		"deploy:editor:staging": "VITE_APP=editor npm run build:editor && permaweb-deploy --arns-name portal --ttl-seconds 60 --undername staging --deploy-folder ./dist/editor",
+		"deploy:viewer": "VITE_APP=viewer npm run build:viewer && permaweb-deploy --arns-name portal --ttl-seconds 60 --undername script --deploy-file ./dist/viewer/bundle.js"
 	},
 	"dependencies": {
 		"@hello-pangea/dnd": "^17.0.0",
@@ -50,7 +50,7 @@
 		"eslint-plugin-react-hooks": "^4.6.0",
 		"eslint-plugin-simple-import-sort": "^10.0.0",
 		"husky": "^8.0.0",
-		"permaweb-deploy": "2.2.0",
+		"permaweb-deploy": "2.3.0",
 		"prettier": "^2.8.3",
 		"rollup-plugin-polyfill-node": "^0.13.0",
 		"vite": "^6.3.5",
