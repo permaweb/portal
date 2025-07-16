@@ -49,7 +49,7 @@ function Post(props: { post: PortalAssetType; hideImage?: boolean }) {
 				<S.PostEndWrapper>
 					{props.post?.creator && (
 						<S.Author>
-							<Link to={getRedirect(URLS.author(props.post.creator))}>
+							<Link to={getRedirect(URLS.creator(props.post.creator))}>
 								<p>{creator?.displayName ?? formatAddress(props.post.creator, false)}</p>
 							</Link>
 						</S.Author>

@@ -3,10 +3,10 @@ import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
-import { ASSETS } from 'helpers/config';
+import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { PortalCategoryType, PortalLinkType } from 'helpers/types';
-import { checkValidAddress, getRedirect } from 'helpers/utils';
+import { PortalCategoryType, PortalLinkType, PortalPageType } from 'helpers/types';
+import { checkValidAddress, getRedirect, urlify } from 'helpers/utils';
 
 import * as S from './styles';
 
@@ -45,16 +45,31 @@ export default function Footer() {
 						</S.LinksWrapper>
 					)}
 				</S.Header>
-				{portalProvider.current?.categories?.length > 0 && (
-					<S.CategoriesWrapper>
-						{portalProvider.current.categories.map((category: PortalCategoryType) => {
-							return (
-								<Link key={category.id} to={category.id}>
-									{category.name}
-								</Link>
-							);
-						})}
-					</S.CategoriesWrapper>
+				{(portalProvider.current?.categories?.length > 0 || portalProvider.current?.pages?.length > 0) && (
+					<S.NavigationWrapper>
+						{portalProvider.current?.categories?.length > 0 && (
+							<S.CategoriesWrapper>
+								{portalProvider.current.categories.map((category: PortalCategoryType) => {
+									return (
+										<Link key={category.id} to={getRedirect(URLS.category(category.id))}>
+											{category.name}
+										</Link>
+									);
+								})}
+							</S.CategoriesWrapper>
+						)}
+						{portalProvider.current?.pages?.length > 0 && (
+							<S.PageLinksWrapper>
+								{portalProvider.current.pages.map((page: PortalPageType) => {
+									return (
+										<Link key={page.id} to={getRedirect(urlify(page.name))}>
+											{page.name}
+										</Link>
+									);
+								})}
+							</S.PageLinksWrapper>
+						)}
+					</S.NavigationWrapper>
 				)}
 				<S.FooterEndWrapper>
 					<S.NameWrapper>

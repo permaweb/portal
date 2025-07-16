@@ -32,7 +32,7 @@ export const CategorySection = styled.div``;
 export const CategoryHeader = styled.div`
 	width: 100%;
 	margin: 0 0 20px 0;
-	border-top: 2px solid ${(props) => props.theme.colors.container.alt5.background};
+	border-top: 2px solid ${(props) => props.theme.colors.border.alt7};
 
 	span {
 		width: fit-content;

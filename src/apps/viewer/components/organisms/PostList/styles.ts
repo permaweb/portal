@@ -29,7 +29,9 @@ export const PostWrapper = styled.div`
 
 export const PostInfoWrapper = styled.div<{ hasImage: boolean }>`
 	height: 100%;
-	width: ${(props) => (props.hasImage ? '300px' : '100%')};
+	min-width: 300px;
+	width: ${(props) => (props.hasImage ? '40%' : '100%')};
+	max-width: 100%;
 	display: flex;
 	flex-direction: column;
 	gap: 15px;

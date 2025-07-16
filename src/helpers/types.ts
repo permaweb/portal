@@ -11,18 +11,20 @@ export type PortalDetailType = {
 	name: string;
 	logo: string | null;
 	icon: string | null;
+	users?: PortalUserType[];
+	pages?: PortalPageType[];
 	assets?: PortalAssetType[];
 	requests?: PortalAssetRequestType[];
 	categories?: PortalCategoryType[];
 	topics?: PortalTopicType[];
 	links?: PortalLinkType[];
-	users?: PortalUserType[];
 	roleOptions?: { [key: string]: PortalUserRoleType };
 	permissions?: PortalPermissionsType;
 	domains?: string[];
 	uploads?: PortalUploadType[];
 	fonts?: PortalFontsType;
 	themes?: PortalThemeType[];
+	layout?: any;
 };
 
 export type PortalAssetType = {
@@ -75,6 +77,11 @@ export type PortalUserType = {
 	address: string;
 	type?: 'wallet' | 'process';
 	roles?: PortalUserRoleType[];
+};
+
+export type PortalPageType = {
+	id: string;
+	name: string;
 };
 
 export type PortalFontsType = {
@@ -283,7 +290,9 @@ export type DesignPanelType = 'themes' | 'fonts' | 'logo';
 
 export type RefreshFieldType = 'assets';
 
+export type BasicAlignmentType = 'left' | 'center' | 'right' | 'top' | 'bottom';
+
 export enum LanguageEnum {
 	en = 'English',
-	es = 'Español'
+	es = 'Español',
 }

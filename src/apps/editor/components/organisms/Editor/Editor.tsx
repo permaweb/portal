@@ -15,6 +15,7 @@ import {
 	NotificationType,
 	PortalAssetRequestType,
 	PortalHeaderType,
+	PortalPageType,
 	PortalUserType,
 	RequestUpdateType,
 } from 'helpers/types';
@@ -28,9 +29,9 @@ import * as S from './styles';
 
 export default function Editor() {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { assetId } = useParams<{ assetId?: string }>();
 	const dispatch = useDispatch();
-	const location = useLocation();
 
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
 
@@ -43,6 +44,8 @@ export default function Editor() {
 	const [response, setResponse] = React.useState<NotificationType | null>(null);
 	const [showReview, setShowReview] = React.useState<boolean>(false);
 	const [missingFields, setMissingFields] = React.useState<string[]>([]);
+
+	const isStaticPage = location.pathname.includes('page');
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
@@ -204,6 +207,23 @@ export default function Editor() {
 						data: data,
 					});
 
+					if (isStaticPage) {
+						const updatedPages = [
+							...(portalProvider.current?.pages?.filter((page: PortalPageType) => page.id !== assetId) ?? []),
+							{ name: currentPost.data.title, id: assetId },
+						];
+
+						const pagesUpdateId = await permawebProvider.libs.updateZone(
+							{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
+							portalProvider.current.id,
+							arProvider.wallet
+						);
+
+						portalProvider.refreshCurrentPortal();
+
+						console.log(`Pages update: ${pagesUpdateId}`);
+					}
+
 					console.log(`Asset content update: ${assetContentUpdateId}`);
 					setResponse({ status: 'success', message: `${language?.postUpdated}!` });
 					portalProvider.refreshCurrentPortal('assets');
@@ -218,7 +238,7 @@ export default function Editor() {
 					const assetId = await permawebProvider.libs.createAtomicAsset(
 						{
 							name: currentPost.data.title,
-							description: currentPost.data.title,
+							description: currentPost.data.description,
 							topics: currentPost.data.topics,
 							creator: permawebProvider.profile.id,
 							data: dataSrc,
@@ -243,6 +263,23 @@ export default function Editor() {
 					});
 
 					console.log(`Asset content update: ${assetContentUpdateId}`);
+
+					/* Add static pages assets directly to the portal process */
+					if (isStaticPage && portalProvider.permissions?.updatePortalMeta) {
+						const updatedPages = [...portalProvider.current?.pages, { name: currentPost.data.title, id: assetId }];
+						const pagesUpdateId = await permawebProvider.libs.updateZone(
+							{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
+							portalProvider.current.id,
+							arProvider.wallet
+						);
+
+						portalProvider.refreshCurrentPortal();
+
+						console.log(`Pages update: ${pagesUpdateId}`);
+
+						navigate(URLS.portalPages(portalProvider.current?.id));
+						return;
+					}
 
 					/* Index post in the current portal this user is contributing to */
 					let internalIndexAction = null;
@@ -356,15 +393,13 @@ export default function Editor() {
 	function getAssetAuthUsers() {
 		const authUsers = [portalProvider.current.id];
 
-		/* If the user is a contributor then give admins and moderators access */
-		if (!portalProvider.permissions.postAutoIndex && portalProvider.permissions.postRequestIndex) {
-			for (const user of portalProvider.current?.users) {
-				if (
-					(user.roles.includes('Admin') || user.roles.includes('Moderator')) &&
-					user.address !== permawebProvider.profile.id
-				) {
-					authUsers.push(user.address);
-				}
+		/* Give all admins and moderators access to the post */
+		for (const user of portalProvider.current?.users) {
+			if (
+				(user.roles.includes('Admin') || user.roles.includes('Moderator')) &&
+				user.address !== permawebProvider.profile.id
+			) {
+				authUsers.push(user.address);
 			}
 		}
 
@@ -442,12 +477,6 @@ export default function Editor() {
 		return valid;
 	}
 
-	let editor = null;
-
-	if (location.pathname.includes('article')) {
-		editor = <ArticleEditor handleSubmit={handleSubmit} handleRequestUpdate={handleRequestUpdate} />;
-	}
-
 	return (
 		<>
 			{unauthorized && (
@@ -462,7 +491,7 @@ export default function Editor() {
 					</S.MessageWrapper>
 				</div>
 			)}
-			{editor}
+			<ArticleEditor handleSubmit={handleSubmit} handleRequestUpdate={handleRequestUpdate} staticPage={isStaticPage} />
 			{response && (
 				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
 			)}
@@ -485,12 +514,7 @@ export default function Editor() {
 							<Link to={URLS.docsEditor} target={'_blank'}>
 								{language?.learn}
 							</Link>
-							<Button
-								type={'primary'}
-								label={language?.close}
-								handlePress={() => setShowReview(false)}
-								disabled={false}
-							/>
+							<Button type={'alt1'} label={language?.close} handlePress={() => setShowReview(false)} disabled={false} />
 						</S.ModalActionsWrapper>
 					</S.ModalWrapper>
 				</Modal>
