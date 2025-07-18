@@ -6,11 +6,7 @@ import { STYLING } from 'helpers/config';
 export const Wrapper = styled.div<{ warning: boolean | undefined }>`
 	min-width: 375px;
 	max-width: 50vw;
-	position: fixed;
-	left: 50%;
-	bottom: 20px;
-	transform: translate(-50%, 0);
-	z-index: 20;
+	position: relative;
 	animation: ${open} ${transition1};
 	display: flex;
 	align-items: center;
@@ -18,6 +14,8 @@ export const Wrapper = styled.div<{ warning: boolean | undefined }>`
 	gap: 45px;
 	border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
 	border-radius: ${STYLING.dimensions.radius.alt3};
+	background: ${(props) => props.theme.colors.container.primary.background};
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		min-width: 0;

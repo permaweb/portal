@@ -90,6 +90,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 					setCategories={(categories: PortalCategoryType[]) => handleSetCategories(categories)}
 					includeChildrenOnSelect
 					showActions
+					allowReorder
 				/>
 			</S.BodyWrapper>
 		);
@@ -115,7 +116,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 		return (
 			<S.LinksSection type={props.type} className={props.type === 'header' ? '' : 'border-wrapper-alt2'}>
 				<S.LinksHeader type={props.type}>
-					<p>{`${language?.siteLinks}${
+					<p>{`${language?.socialLinks}${
 						portalProvider.current?.links ? ` (${portalProvider.current.links.length})` : ''
 					}`}</p>
 					{props.type === 'header' && (

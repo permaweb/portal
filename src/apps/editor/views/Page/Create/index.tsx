@@ -7,5 +7,5 @@ export default function Create() {
 		<S.Wrapper>
 			<Editor />
 		</S.Wrapper>
-	)
+	);
 }

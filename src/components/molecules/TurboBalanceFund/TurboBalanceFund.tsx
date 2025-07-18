@@ -6,13 +6,12 @@ import { useTheme } from 'styled-components';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
-import { Notification } from 'components/atoms/Notification';
 import { STRIPE_PUBLISHABLE_KEY, STYLING } from 'helpers/config';
 import { getTurboCheckoutEndpoint, getTurboPriceWincEndpoint } from 'helpers/endpoints';
-import { NotificationType } from 'helpers/types';
 import { formatTurboAmount, formatUSDAmount, getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 
 import * as S from './styles';
 
@@ -34,7 +33,7 @@ function CheckoutForm(props: {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [loading, setLoading] = React.useState<boolean>(false);
-	const [result, setResult] = React.useState<NotificationType | null>(null);
+	const { addNotification } = useNotifications();
 
 	const [mounting, setMounting] = React.useState<boolean>(true);
 
@@ -66,9 +65,10 @@ function CheckoutForm(props: {
 				} else {
 					if (paymentResponse && paymentResponse.paymentIntent && paymentResponse.paymentIntent.status) {
 						if (paymentResponse.paymentIntent.status === 'succeeded') {
-							setResult({ status: 'success', message: language?.successfullyFunded });
+							addNotification(language?.successfullyFunded, 'success');
+							props.handleClose();
 						} else {
-							setResult({ status: 'warning', message: language?.errorOccurred });
+							addNotification(language?.errorOccurred, 'warning');
 						}
 					}
 				}
@@ -81,7 +81,7 @@ function CheckoutForm(props: {
 
 	return (
 		<>
-			<S.CheckoutForm disabled={loading || result !== null}>
+			<S.CheckoutForm disabled={loading}>
 				{mounting ? <Loader sm relative /> : <PaymentElement options={{ layout: 'accordion' }} />}
 			</S.CheckoutForm>
 			<S.COWrapperAlt className={'border-wrapper-alt3'}>
@@ -95,29 +95,19 @@ function CheckoutForm(props: {
 					type={'primary'}
 					label={language?.goBack}
 					handlePress={props.handleGoBack}
-					disabled={loading || result !== null}
+					disabled={loading}
 					noMinWidth
 				/>
 				<Button
 					type={'alt1'}
 					label={language?.submit}
 					handlePress={handleSubmit}
-					disabled={loading || result !== null}
+					disabled={loading}
 					loading={loading}
 					formSubmit
 					noMinWidth
 				/>
 			</S.MActions>
-			{result && (
-				<Notification
-					type={result.status}
-					message={result.message!}
-					callback={() => {
-						setResult(null);
-						props.handleClose();
-					}}
-				/>
-			)}
 		</>
 	);
 }

@@ -42,7 +42,7 @@ export class AssetPreloader {
 
 		const promise = new Promise<void>((resolve, reject) => {
 			fetch(url)
-				.then(response => {
+				.then((response) => {
 					if (!response.ok) {
 						throw new Error(`HTTP error! status: ${response.status}`);
 					}
@@ -53,7 +53,7 @@ export class AssetPreloader {
 					this.loadingPromises.delete(url);
 					resolve();
 				})
-				.catch(error => {
+				.catch((error) => {
 					this.loadingPromises.delete(url);
 					reject(new Error(`Failed to preload SVG: ${url} - ${error.message}`));
 				});
@@ -79,13 +79,10 @@ export class AssetPreloader {
 	}
 
 	async preloadAllAssets(): Promise<void> {
-		const allAssets = [
-			...Object.values(ASSETS),
-			...Object.values(SOCIAL_LINK_ASSETS)
-		];
+		const allAssets = [...Object.values(ASSETS), ...Object.values(SOCIAL_LINK_ASSETS)];
 
-		const preloadPromises = allAssets.map(url => this.preloadAsset(url));
-		
+		const preloadPromises = allAssets.map((url) => this.preloadAsset(url));
+
 		try {
 			await Promise.allSettled(preloadPromises);
 		} catch (error) {
@@ -95,11 +92,11 @@ export class AssetPreloader {
 
 	async preloadSpecificAssets(assetKeys: string[]): Promise<void> {
 		const urlsToPreload = assetKeys
-			.map(key => (ASSETS as any)[key] || (SOCIAL_LINK_ASSETS as any)[key])
+			.map((key) => (ASSETS as any)[key] || (SOCIAL_LINK_ASSETS as any)[key])
 			.filter(Boolean);
 
-		const preloadPromises = urlsToPreload.map(url => this.preloadAsset(url));
-		
+		const preloadPromises = urlsToPreload.map((url) => this.preloadAsset(url));
+
 		try {
 			await Promise.allSettled(preloadPromises);
 		} catch (error) {

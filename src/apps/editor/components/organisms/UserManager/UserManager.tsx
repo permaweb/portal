@@ -4,13 +4,13 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
-import { Notification } from 'components/atoms/Notification';
 import { Select } from 'components/atoms/Select';
 import { ASSETS } from 'helpers/config';
-import { NotificationType, SelectOptionType } from 'helpers/types';
+import { SelectOptionType } from 'helpers/types';
 import { checkValidAddress, formatRoleLabel } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -29,7 +29,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 	const [role, setRole] = React.useState<SelectOptionType | null>(null);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
-	const [response, setResponse] = React.useState<NotificationType | null>(null);
+	const { addNotification } = useNotifications();
 
 	React.useEffect(() => {
 		if (portalProvider.current?.roleOptions) {
@@ -66,7 +66,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				else profile = await permawebProvider.libs.getProfileByWalletAddress(walletAddress);
 
 				if (!profile?.id) {
-					setResponse({ status: 'warning', message: language?.noProfileFound });
+					addNotification(language?.noProfileFound, 'warning');
 					setLoading(false);
 					return;
 				}
@@ -82,7 +82,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 
 				console.log(`Roles update: ${rolesUpdate}`);
 
-				setResponse({ status: 'success', message: `${props.user ? language?.userUpdated : language?.userAdded}!` });
+				addNotification(`${props.user ? language?.userUpdated : language?.userAdded}!`, 'success');
 				portalProvider.refreshCurrentPortal();
 				props.handleClose();
 			} catch (e: any) {
@@ -125,9 +125,6 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 					/>
 				</S.ActionsWrapper>
 			</S.Wrapper>
-			{response && (
-				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
-			)}
 		</>
 	);
 }

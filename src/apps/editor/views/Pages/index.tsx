@@ -16,7 +16,7 @@ export default function Pages() {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	
+
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	return (

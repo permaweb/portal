@@ -9,15 +9,14 @@ import { currentPostUpdate } from 'editor/store/post';
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
-import { Notification } from 'components/atoms/Notification';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { NotificationType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -34,26 +33,17 @@ export default function ArticlePostThumbnail() {
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	const {
-		uploadCost,
-		showUploadConfirmation,
-		uploadResponse,
-		setUploadResponse,
-		calculateUploadCost,
-		clearUploadState,
-	} = useUploadCost();
+	const { uploadCost, showUploadConfirmation, calculateUploadCost, clearUploadState } = useUploadCost();
 
 	const inputRef = React.useRef<any>(null);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [thumbnailData, setThumbnailData] = React.useState<File | null>(null);
-	const [response, setResponse] = React.useState<NotificationType | null>(null);
-
-	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+	const { addNotification } = useNotifications();
 
 	React.useEffect(() => {
 		(async function () {
-			if (!unauthorized && thumbnailData && portalProvider.current?.id && arProvider.wallet) {
+			if (thumbnailData && portalProvider.current?.id && arProvider.wallet) {
 				const result = await calculateUploadCost(thumbnailData);
 
 				if (result && !result.requiresConfirmation) {
@@ -71,7 +61,7 @@ export default function ArticlePostThumbnail() {
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
-		setResponse({ status: 'success', message: `${language?.thumbnailUpdated}!` });
+		addNotification(`${language?.thumbnailUpdated}!`, 'success');
 	};
 
 	async function handleUpload() {
@@ -131,7 +121,7 @@ export default function ArticlePostThumbnail() {
 					<S.Input
 						hasInput={!!currentPost?.data?.thumbnail}
 						onClick={() => inputRef.current.click()}
-						disabled={loading || unauthorized}
+						disabled={loading}
 					>
 						{getInputWrapper()}
 					</S.Input>
@@ -139,7 +129,7 @@ export default function ArticlePostThumbnail() {
 						ref={inputRef}
 						type={'file'}
 						onChange={handleFileChange}
-						disabled={loading || unauthorized}
+						disabled={loading}
 						accept={ALLOWED_THUMBNAIL_TYPES}
 					/>
 				</S.InputWrapper>
@@ -156,9 +146,6 @@ export default function ArticlePostThumbnail() {
 					/>
 				</S.FooterWrapper>
 			</S.Wrapper>
-			{response && (
-				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
-			)}
 			{showUploadConfirmation && thumbnailData && (
 				<Modal
 					header={`${language?.upload} ${thumbnailData.name}`}
@@ -167,20 +154,13 @@ export default function ArticlePostThumbnail() {
 				>
 					<TurboUploadConfirmation
 						uploadCost={uploadCost}
-						uploadDisabled={unauthorized || loading}
+						uploadDisabled={loading}
 						handleUpload={handleUpload}
 						handleCancel={() => handleClear(language?.uploadCancelled)}
 					/>
 				</Modal>
 			)}
 			{loading && <Loader message={`${language?.loading}...`} />}
-			{uploadResponse && (
-				<Notification
-					type={uploadResponse.status}
-					message={uploadResponse.message}
-					callback={() => setUploadResponse(null)}
-				/>
-			)}
 		</>
 	);
 }

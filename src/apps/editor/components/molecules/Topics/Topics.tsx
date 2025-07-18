@@ -5,11 +5,11 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
-import { Notification } from 'components/atoms/Notification';
 import { ASSETS } from 'helpers/config';
-import { NotificationType, PortalTopicType } from 'helpers/types';
+import { PortalTopicType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -32,7 +32,7 @@ export default function Topics(props: {
 	const [newTopic, setNewTopic] = React.useState<string>('');
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
 	const [topicLoading, setTopicLoading] = React.useState<boolean>(false);
-	const [topicResponse, setTopicResponse] = React.useState<NotificationType | null>(null);
+	const { addNotification } = useNotifications();
 
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
@@ -68,10 +68,10 @@ export default function Topics(props: {
 				if (props.selectOnAdd) props.setTopics([...props.topics, newTopic]);
 
 				setTopicOptions(updatedTopicOptions);
-				setTopicResponse({ status: 'success', message: `${language?.topicAdded}!` });
+				addNotification(`${language?.topicAdded}!`, 'success');
 				setNewTopic('');
 			} catch (e: any) {
-				setTopicResponse({ status: 'warning', message: e.message ?? 'Error adding topic' });
+				addNotification(e.message ?? 'Error adding topic', 'warning');
 			}
 			setTopicLoading(false);
 		}
@@ -95,10 +95,10 @@ export default function Topics(props: {
 
 				console.log(`Topic update: ${topicUpdateId}`);
 
-				setTopicResponse({ status: 'success', message: `${language?.topicsUpdated}!` });
+				addNotification(`${language?.topicsUpdated}!`, 'success');
 				setShowDeleteConfirmation(false);
 			} catch (e: any) {
-				setTopicResponse({ status: 'warning', message: e.message ?? 'Error updating topics' });
+				addNotification(e.message ?? 'Error updating topics', 'warning');
 			}
 			setTopicLoading(false);
 		}
@@ -228,13 +228,6 @@ export default function Topics(props: {
 						</S.ModalActionsWrapper>
 					</S.ModalWrapper>
 				</Modal>
-			)}
-			{topicResponse && (
-				<Notification
-					type={topicResponse.status}
-					message={topicResponse.message}
-					callback={() => setTopicResponse(null)}
-				/>
 			)}
 		</>
 	);

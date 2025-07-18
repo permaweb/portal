@@ -6,13 +6,13 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
-import { Notification } from 'components/atoms/Notification';
 import { ASSETS, SOCIAL_LINK_ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { NotificationType, PortalLinkType, ViewLayoutType } from 'helpers/types';
+import { PortalLinkType, ViewLayoutType } from 'helpers/types';
 import { checkValidAddress, validateUrl } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
@@ -31,7 +31,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 
 	const [linkOptions, setLinkOptions] = React.useState<PortalLinkType[] | null>(null);
 	const [linkLoading, setLinkLoading] = React.useState<boolean>(false);
-	const [linkResponse, setLinkResponse] = React.useState<NotificationType | null>(null);
+	const { addNotification } = useNotifications();
 	const [showPrefills, setShowPrefills] = React.useState<boolean>(false);
 	const [editMode, setEditMode] = React.useState<boolean>(false);
 	const [selectedLinks, setSelectedLinks] = React.useState<PortalLinkType[]>([]);
@@ -80,11 +80,11 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 
 				console.log(`Link update: ${linkUpdateId}`);
 
-				setLinkResponse({ status: 'success', message: `${language?.linksUpdated}!` });
+				addNotification(`${language?.linksUpdated}!`, 'success');
 				setShowDeleteConfirmation(false);
 				setEditMode(false);
 			} catch (e: any) {
-				setLinkResponse({ status: 'warning', message: e.message ?? 'Error updating links' });
+				addNotification(e.message ?? 'Error updating links', 'warning');
 			}
 			setLinkLoading(false);
 		}
@@ -111,13 +111,13 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 				console.log(`Link update: ${linkUpdateId}`);
 
 				setLinkOptions(permawebProvider.libs.mapFromProcessCase(updatedLinkOptions));
-				setLinkResponse({ status: 'success', message: `${language?.linkAdded}!` });
+				addNotification(`${language?.linkAdded}!`, 'success');
 
 				setNewLinkUrl('');
 				setNewLinkTitle('');
 				setNewLinkIcon(null);
 			} catch (e: any) {
-				setLinkResponse({ status: 'warning', message: e.message ?? 'Error adding link' });
+				addNotification(e.message ?? 'Error adding link', 'warning');
 			}
 			setLinkLoading(false);
 		}
@@ -375,13 +375,6 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 						</S.ModalActionsWrapper>
 					</S.ModalWrapper>
 				</Modal>
-			)}
-			{linkResponse && (
-				<Notification
-					type={linkResponse.status}
-					message={linkResponse.message}
-					callback={() => setLinkResponse(null)}
-				/>
 			)}
 		</>
 	);

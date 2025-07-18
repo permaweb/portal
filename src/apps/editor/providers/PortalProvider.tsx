@@ -5,7 +5,6 @@ import { CurrentZoneVersion } from '@permaweb/libs';
 
 import { PortalManager } from 'editor/components/organisms/PortalManager';
 
-import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
 import {
 	PortalDetailType,
@@ -24,6 +23,7 @@ import {
 } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 interface PortalContextState {
@@ -79,7 +79,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [refreshCurrentTrigger, setRefreshCurrentTrigger] = React.useState<boolean>(false);
 	const [refreshField, setRefreshField] = React.useState<RefreshFieldType | null>(null);
 	const [updating, setUpdating] = React.useState<boolean>(false);
-	const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+	const { addNotification } = useNotifications();
 
 	const [showPortalManager, setShowPortalManager] = React.useState<boolean>(false);
 	const [createNewPortal, setCreateNewPortal] = React.useState<boolean>(false);
@@ -152,7 +152,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				}
 			} catch (e: any) {
 				console.error(e);
-				setErrorMessage(e.message ?? 'An error occurred getting this portal');
+				addNotification(e.message ?? 'An error occurred getting this portal', 'warning');
 				setUpdating(false);
 			}
 		})();
@@ -198,7 +198,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						}
 					} catch (e: any) {
 						console.error('Error occurred while getting portal:', e);
-						setErrorMessage(e.message ?? 'An error occurred getting this portal');
+						addNotification(e.message ?? 'An error occurred getting this portal', 'warning');
 					}
 				}
 
@@ -394,7 +394,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					handleUpdate={null}
 				/>
 			</Panel>
-			{errorMessage && <Notification type={'warning'} message={errorMessage} callback={() => setErrorMessage(null)} />}
 		</PortalContext.Provider>
 	);
 }

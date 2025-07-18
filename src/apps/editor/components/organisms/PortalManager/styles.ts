@@ -25,6 +25,10 @@ export const Body = styled.div`
 	padding: 20px;
 `;
 
+export const IconWrapper = styled.div`
+	padding: 15px;
+`;
+
 export const Form = styled.div`
 	height: fit-content;
 	width: 100%;

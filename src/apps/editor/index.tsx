@@ -19,6 +19,7 @@ import { preloadAllAssets } from 'helpers/preloader';
 import { GlobalStyle } from 'helpers/styles';
 import { ArweaveProvider, useArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvider';
+import { NotificationProvider } from 'providers/NotificationProvider';
 import { PermawebProvider, usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
@@ -219,10 +220,12 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 					<LanguageProvider>
 						<ArweaveProvider>
 							<PermawebProvider>
-								<PortalProvider>
-									<GlobalStyle />
-									<App />
-								</PortalProvider>
+								<NotificationProvider>
+									<PortalProvider>
+										<GlobalStyle />
+										<App />
+									</PortalProvider>
+								</NotificationProvider>
 							</PermawebProvider>
 						</ArweaveProvider>
 					</LanguageProvider>
