@@ -4,11 +4,11 @@ import { Loader } from 'components/atoms/Loader';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 export function LanguageLoader({ children }: { children: React.ReactNode }) {
-  const languageProvider = useLanguageProvider();
+	const languageProvider = useLanguageProvider();
 
-  if (!languageProvider || !languageProvider.object) {
-    return <Loader />;
-  }
+	if (!languageProvider || !languageProvider.object) {
+		return <Loader />;
+	}
 
-  return <>{children}</>;
+	return <>{children}</>;
 }

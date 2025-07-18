@@ -5,13 +5,16 @@ El editor de Portal utiliza un enfoque **basado en bloques** para la creación d
 #### Componentes principales
 
 - **Título y estado**
+
   - Arriba puedes establecer el **Título** y cambiar entre estado **Borrador** o **Publicado**
 
 - **Bloques de contenido**
+
   - Cada elemento es un "bloque": Encabezados, Párrafos, Citas, Listas, Imágenes, Videos
   - Añade nuevos bloques desde el **Panel de herramientas** (derecha) o con atajos (ej. `Ctrl + / + P` para Párrafo)
 
 - **Panel de herramientas**
+
   - Contiene todos los bloques disponibles y sus atajos de teclado
   - Úsalo para insertar rápidamente elementos o consultar métodos rápidos
 
@@ -22,22 +25,27 @@ El editor de Portal utiliza un enfoque **basado en bloques** para la creación d
 #### Uso básico
 
 1. **Añadir bloque nuevo**
+
    - Selecciona un tipo desde el panel o usa atajos (`Ctrl + P` para párrafo)
    - Escribe tu contenido o inserta medios
 
 2. **Aplicar estilos**
+
    - Usa bloques de **Encabezado** (H1-H6) para estructura
    - **Párrafos** para texto normal, **Citas** para destacados
 
 3. **Insertar multimedia**
+
    - Bloques de **Imagen** para subir o enlazar gráficos
    - Bloques de **Video** para contenido embebido
 
 4. **Editar bloques**
+
    - Haz clic dentro para modificar texto o medios
    - Usa el menú contextual (...) para **Eliminar** o **Duplicar**
 
 5. **Reorganizar**
+
    - Arrastra bloques usando el asa lateral
    - Reordena para mejorar el flujo de contenido
 

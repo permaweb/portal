@@ -5,13 +5,13 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
-import { Notification } from 'components/atoms/Notification';
 import { Select } from 'components/atoms/Select';
 import { FONT_OPTIONS } from 'helpers/config';
-import { NotificationType, SelectOptionType } from 'helpers/types';
+import { SelectOptionType } from 'helpers/types';
 import { stripFontWeights } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -32,7 +32,7 @@ export default function Fonts() {
 	const [bodyFont, setBodyFont] = React.useState<SelectOptionType | null>(getDefaultOption('body', bodyOptions));
 
 	const [loading, setLoading] = React.useState<boolean>(false);
-	const [response, setResponse] = React.useState<NotificationType | null>(null);
+	const { addNotification } = useNotifications();
 
 	React.useEffect(() => {
 		if (headerFont?.id) loadFont(headerFont.id);
@@ -63,9 +63,9 @@ export default function Fonts() {
 
 				console.log(`Font update: ${fontUpdateId}`);
 
-				setResponse({ status: 'success', message: `${language?.fontsUpdated}!` });
+				addNotification(`${language?.fontsUpdated}!`, 'success');
 			} catch (e: any) {
-				setResponse({ status: 'warning', message: e.message ?? 'Error updating fonts' });
+				addNotification(e.message ?? 'Error updating fonts', 'warning');
 			}
 
 			setLoading(false);
@@ -99,7 +99,7 @@ export default function Fonts() {
 	function hasChanges() {
 		const currentHeaderFont = portalProvider.current?.fonts?.headers || headerOptions[0].id;
 		const currentBodyFont = portalProvider.current?.fonts?.body || bodyOptions[0].id;
-		
+
 		return headerFont?.id !== currentHeaderFont || bodyFont?.id !== currentBodyFont;
 	}
 
@@ -137,9 +137,6 @@ export default function Fonts() {
 				</S.SAction>
 			</S.Wrapper>
 			{loading && <Loader message={`${language?.updatingFonts}...`} />}
-			{response && (
-				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
-			)}
 		</>
 	);
 }

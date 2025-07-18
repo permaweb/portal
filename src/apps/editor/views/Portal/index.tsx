@@ -50,19 +50,11 @@ export default function Portal() {
 			/>
 			<S.BodyWrapper>
 				<S.SectionWrapper>
-					<S.SetupSection className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<p>{language?.setup}</p>
-							<Button
-								type={'alt3'}
-								label={language?.setupLink}
-								handlePress={() => navigate(URLS.portalSetup(portalProvider.current.id))}
-							/>
-						</S.SectionHeader>
+					<S.PostsSection>
 						<S.SectionBody>
-							<PortalSetup type={'header'} />
+							<PostList type={'header'} />
 						</S.SectionBody>
-					</S.SetupSection>
+					</S.PostsSection>
 					<S.DesignSection className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
 							<p>{language?.design}</p>
@@ -76,18 +68,6 @@ export default function Portal() {
 							<PortalDesign />
 						</S.SectionBody>
 					</S.DesignSection>
-				</S.SectionWrapper>
-				<S.SectionWrapper>
-					<S.PostsSection>
-						<S.SectionBody>
-							<PostList type={'header'} />
-						</S.SectionBody>
-					</S.PostsSection>
-					<S.UsersSection>
-						<S.SectionBody>
-							<UserList type={'header'} />
-						</S.SectionBody>
-					</S.UsersSection>
 					<S.DomainSection className={'border-wrapper-alt3'}>
 						<S.SectionHeader>
 							<p>{language?.domains}</p>
@@ -101,6 +81,26 @@ export default function Portal() {
 							<DomainList />
 						</S.SectionBody>
 					</S.DomainSection>
+				</S.SectionWrapper>
+				<S.SectionWrapper>
+					<S.SetupSection className={'border-wrapper-alt2'}>
+						<S.SectionHeader>
+							<p>{language?.setup}</p>
+							<Button
+								type={'alt3'}
+								label={language?.setupLink}
+								handlePress={() => navigate(URLS.portalSetup(portalProvider.current.id))}
+							/>
+						</S.SectionHeader>
+						<S.SectionBody>
+							<PortalSetup type={'header'} />
+						</S.SectionBody>
+					</S.SetupSection>
+					<S.UsersSection>
+						<S.SectionBody>
+							<UserList type={'header'} />
+						</S.SectionBody>
+					</S.UsersSection>
 				</S.SectionWrapper>
 			</S.BodyWrapper>
 		</S.Wrapper>

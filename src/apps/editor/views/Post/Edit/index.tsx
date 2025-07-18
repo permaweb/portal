@@ -7,5 +7,5 @@ export default function Edit() {
 		<S.Wrapper>
 			<Editor />
 		</S.Wrapper>
-	)
+	);
 }

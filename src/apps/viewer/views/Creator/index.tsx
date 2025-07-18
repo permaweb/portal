@@ -42,9 +42,7 @@ export default function Creator() {
 
 	React.useEffect(() => {
 		if (creatorId && portalProvider.current.assets) {
-			const filteredPosts = portalProvider.current.assets.filter(
-				(post: PortalAssetType) => post.creator === creatorId
-			);
+			const filteredPosts = portalProvider.current.assets.filter((post: PortalAssetType) => post.creator === creatorId);
 			setCreatorPosts(filteredPosts);
 		}
 	}, [creatorId, portalProvider.current.assets]);
@@ -55,13 +53,13 @@ export default function Creator() {
 		<S.Wrapper className={'fade-in'}>
 			<S.HeaderWrapper>
 				<S.HeaderAvatarWrapper>
-				<Avatar
-					owner={creator}
-					dimensions={{
-						wrapper: 175,
-						icon: 85,
-					}}
-				/>
+					<Avatar
+						owner={creator}
+						dimensions={{
+							wrapper: 175,
+							icon: 85,
+						}}
+					/>
 				</S.HeaderAvatarWrapper>
 				<S.HeaderInfoWrapper>
 					<h4>{creator.displayName ?? '-'}</h4>

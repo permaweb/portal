@@ -37,6 +37,12 @@ export const SectionHeader = styled.div`
 	}
 `;
 
+export const SectionHeaderActions = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 7.5px;
+`;
+
 export const SectionBody = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -281,6 +287,32 @@ export const ModalWrapper = styled.div`
 	flex-direction: column;
 	gap: 20px;
 	padding: 0 20px 20px 20px !important;
+`;
+
+export const ModalBodyWrapper = styled.div`
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+`;
+
+export const ModalBodyElements = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 1.5px;
+	margin: 15px 0 0 0;
+`;
+
+export const ModalBodyElement = styled.div`
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
 `;
 
 export const ModalActionsWrapper = styled.div`

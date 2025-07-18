@@ -8,12 +8,12 @@ import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
-import { Notification } from 'components/atoms/Notification';
 import { Toggle } from 'components/atoms/Toggle';
 import { ASSETS, DEFAULT_THEME } from 'helpers/config';
-import { NotificationType, PortalSchemeType, PortalThemeType } from 'helpers/types';
+import { PortalSchemeType, PortalThemeType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -120,7 +120,10 @@ function Section(props: {
 	label: string;
 	theme: PortalThemeType;
 	onThemeChange: (theme: PortalThemeType, publish: boolean, prevName?: string) => void;
+	onThemePublish: (theme: PortalThemeType) => void;
 	onThemeCancel: (theme: PortalThemeType) => void;
+	handleThemeRemove: (theme: PortalThemeType) => void;
+	removeDisabled: boolean;
 	published: boolean;
 	loading: boolean;
 }) {
@@ -134,14 +137,13 @@ function Section(props: {
 	const [name, setName] = React.useState<string>(props.theme.name ?? '-');
 	const [scheme, setScheme] = React.useState<'light' | 'dark'>(props.theme.scheme);
 	const [showNameEdit, setShowNameEdit] = React.useState<boolean>(false);
+	const [showRemoveConfirmation, setShowRemoveConfirmation] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		if (props.theme.name) setName(props.theme.name);
-	}, [props.theme.name]);
-
-	React.useEffect(() => {
-		if (props.theme.scheme) setScheme(props.theme.scheme);
-	}, [props.theme.scheme]);
+		setTheme(props.theme);
+		setName(props.theme.name);
+		setScheme(props.theme.scheme);
+	}, [props.theme]);
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
@@ -197,18 +199,31 @@ function Section(props: {
 		<>
 			<S.Section>
 				<S.SectionHeader>
-					<p>{props.label}</p>
-					<IconButton
-						type={'alt1'}
-						active={false}
-						src={ASSETS.write}
-						handlePress={() => setShowNameEdit(true)}
-						disabled={unauthorized}
-						dimensions={{ wrapper: 23.5, icon: 13.5 }}
-						tooltip={language?.editThemeName}
-						tooltipPosition={'bottom-right'}
-						noFocus
-					/>
+					<p>{name}</p>
+					<S.SectionHeaderActions>
+						<IconButton
+							type={'alt1'}
+							active={false}
+							src={ASSETS.write}
+							handlePress={() => setShowNameEdit(true)}
+							disabled={unauthorized}
+							dimensions={{ wrapper: 23.5, icon: 13.5 }}
+							tooltip={language?.editThemeName}
+							tooltipPosition={'bottom-right'}
+							noFocus
+						/>
+						<IconButton
+							type={'alt1'}
+							active={false}
+							src={ASSETS.delete}
+							handlePress={() => setShowRemoveConfirmation(true)}
+							disabled={unauthorized || props.removeDisabled}
+							dimensions={{ wrapper: 23.5, icon: 13.5 }}
+							tooltip={language?.remove}
+							tooltipPosition={'bottom-right'}
+							noFocus
+						/>
+					</S.SectionHeaderActions>
 				</S.SectionHeader>
 				<S.SectionBody>
 					<S.FlexWrapper>
@@ -256,7 +271,7 @@ function Section(props: {
 								<Button
 									type={'alt4'}
 									label={language?.publishTheme}
-									handlePress={() => props.onThemeChange(theme, true)}
+									handlePress={() => props.onThemePublish(theme)}
 									disabled={unauthorized}
 								/>
 							</S.SectionActions>
@@ -293,6 +308,41 @@ function Section(props: {
 					</S.ModalWrapper>
 				</Modal>
 			)}
+			{showRemoveConfirmation && (
+				<Modal header={language?.confirmDeletion} handleClose={() => setShowNameEdit(false)}>
+					<S.ModalWrapper>
+						<S.ModalBodyWrapper>
+							<p>{language?.themeDeleteConfirmationInfo}</p>
+							<S.ModalBodyElements>
+								<S.ModalBodyElement>
+									<span>{name}</span>
+								</S.ModalBodyElement>
+							</S.ModalBodyElements>
+						</S.ModalBodyWrapper>
+						<S.ModalActionsWrapper>
+							<Button
+								type={'primary'}
+								label={language?.cancel}
+								handlePress={() => setShowRemoveConfirmation(false)}
+								disabled={false}
+							/>
+							<Button
+								type={'primary'}
+								label={language?.themeDeleteConfirmation}
+								handlePress={() => {
+									props.handleThemeRemove(theme);
+									setShowRemoveConfirmation(false);
+								}}
+								disabled={unauthorized}
+								loading={false}
+								icon={ASSETS.delete}
+								iconLeftAlign
+								warning
+							/>
+						</S.ModalActionsWrapper>
+					</S.ModalWrapper>
+				</Modal>
+			)}
 		</>
 	);
 }
@@ -306,7 +356,7 @@ export default function Themes() {
 
 	const [options, setOptions] = React.useState<PortalThemeType[] | null>(null);
 	const [loading, setLoading] = React.useState<boolean>(false);
-	const [response, setResponse] = React.useState<NotificationType | null>(null);
+	const { addNotification } = useNotifications();
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
@@ -321,13 +371,13 @@ export default function Themes() {
 
 		const allOptionNames = new Set(options?.map((t) => t.name));
 
+		if (allOptionNames.has(theme.name)) {
+			addNotification(`A theme '${theme.name}' already exists.`, 'warning');
+			return;
+		}
+
 		if (prevName) {
 			allOptionNames.delete(prevName);
-
-			if (allOptionNames.has(theme.name)) {
-				setResponse({ status: 'warning', message: `A theme named '${theme.name}' already exists.` });
-				return;
-			}
 		}
 
 		const publishedNames = new Set(portalProvider.current?.themes.map((t) => t.name));
@@ -347,14 +397,24 @@ export default function Themes() {
 
 		const updated = mapped.filter((t) => publishedNames.has(t.name));
 
-		if (response) setResponse(null);
 		await submitUpdatedThemes(updated);
 	}
 
-	function handleThemeCancel(theme: PortalThemeType) {
+	async function handleThemePublish(theme: PortalThemeType) {
 		if (!theme) return;
-		const updated = options.filter((option) => option.name !== theme.name);
-		setOptions(updated);
+
+		const themeExists = portalProvider.current?.themes?.find(
+			(existingTheme: PortalThemeType) => existingTheme.name === theme.name
+		);
+
+		if (themeExists) {
+			addNotification(`A theme '${theme.name}' already exists.`, 'warning');
+			return;
+		}
+
+		const updatedThemes = [...(portalProvider.current?.themes ?? []), theme];
+
+		await submitUpdatedThemes(updatedThemes);
 	}
 
 	async function submitUpdatedThemes(themes: PortalThemeType[]) {
@@ -373,37 +433,50 @@ export default function Themes() {
 
 				setOptions(permawebProvider.libs.mapFromProcessCase(themes));
 
-				setResponse({ status: 'success', message: `${language?.themeUpdated}!` });
+				addNotification(`${language?.themesUpdated}!`, 'success');
 			} catch (e: any) {
-				setResponse({ status: 'warning', message: e.message ?? 'Error updating theme' });
+				addNotification(e.message ?? 'Error updating theme', 'warning');
 			}
 
 			setLoading(false);
 		}
 	}
 
-	function handleAddTheme() {
-		setOptions((prev) => {
-			const themes = prev ?? [];
-			const baseName = DEFAULT_THEME.light.name;
-			const existingNames = new Set(themes.map((t) => t.name));
+	async function handleAddTheme() {
+		const themes = options;
 
-			let newName = baseName;
-			if (existingNames.has(baseName)) {
-				let suffix = 2;
-				while (existingNames.has(`${baseName} ${suffix}`)) {
-					suffix++;
-				}
-				newName = `${baseName} ${suffix}`;
+		const baseName = DEFAULT_THEME.light.name;
+		const existingNames = new Set(themes.map((t) => t.name));
+		let newName = baseName;
+		if (existingNames.has(baseName)) {
+			let suffix = 2;
+			while (existingNames.has(`${baseName} ${suffix}`)) {
+				suffix++;
 			}
+			newName = `${baseName} ${suffix}`;
+		}
 
-			const newTheme: PortalThemeType = {
-				...DEFAULT_THEME.light,
-				name: newName,
-			};
+		const newTheme: PortalThemeType = {
+			...DEFAULT_THEME.light,
+			name: newName,
+		};
 
-			return [...themes, newTheme];
-		});
+		const updatedThemes = [...themes, newTheme];
+
+		setOptions(updatedThemes);
+	}
+
+	async function handleRemoveTheme(themeToRemove: PortalThemeType) {
+		const updatedThemes = portalProvider.current?.themes?.filter(
+			(theme: PortalThemeType) => theme.name !== themeToRemove.name
+		);
+		await submitUpdatedThemes(updatedThemes);
+	}
+
+	function handleCancelTheme(theme: PortalThemeType) {
+		if (!theme) return;
+		const updated = options.filter((option) => option.name !== theme.name);
+		setOptions(updated);
 	}
 
 	const getThemes = () => {
@@ -429,20 +502,25 @@ export default function Themes() {
 
 		return (
 			<>
-				{sortedOptions.map((theme: PortalThemeType, index: number) => {
+				{sortedOptions.map((theme: PortalThemeType) => {
 					const isPublished =
-						portalProvider.current?.themes.find(
-							(existingTheme: PortalThemeType) => existingTheme.name === theme.name
-						) !== undefined;
+						loading || portalProvider.updating
+							? true
+							: portalProvider.current?.themes.find(
+									(existingTheme: PortalThemeType) => existingTheme.name === theme.name
+							  ) !== undefined;
 					return (
 						<Section
-							key={index}
+							key={theme.name}
 							label={theme.name}
 							theme={theme}
 							onThemeChange={(theme: PortalThemeType, publish: boolean, prevName?: string) =>
 								handleThemeUpdate(theme, publish, prevName)
 							}
-							onThemeCancel={(theme: PortalThemeType) => handleThemeCancel(theme)}
+							onThemePublish={(theme: PortalThemeType) => handleThemePublish(theme)}
+							onThemeCancel={(theme: PortalThemeType) => handleCancelTheme(theme)}
+							handleThemeRemove={(theme: PortalThemeType) => handleRemoveTheme(theme)}
+							removeDisabled={portalProvider.current?.themes?.length === 1}
 							published={isPublished}
 							loading={loading}
 						/>
@@ -468,9 +546,6 @@ export default function Themes() {
 				</S.EndActions>
 			</S.Wrapper>
 			{loading && <Loader message={`${language?.updatingTheme}...`} />}
-			{response && (
-				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
-			)}
 		</>
 	);
 }

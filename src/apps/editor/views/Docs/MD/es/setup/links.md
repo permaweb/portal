@@ -12,9 +12,11 @@ Los enlaces te permiten crear menús de navegación y dirigir a los lectores tan
 #### Creación de enlaces
 
 1. **Accede a la gestión**
+
    - Ve a **Configuración** → **Enlaces**
 
 2. **Añade nuevo enlace**
+
    - Haz clic en **Añadir enlace**
    - Completa:
      - **Título**: Lo que verán los visitantes
@@ -30,11 +32,13 @@ Los enlaces te permiten crear menús de navegación y dirigir a los lectores tan
 #### Tipos de enlaces
 
 **Internos:**
+
 - Publicaciones específicas (`/post/titulo`)
 - Categorías (`/category/tecnologia`)
 - Secciones especiales (`/acerca-de`)
 
 **Externos:**
+
 - Redes sociales (`https://twitter.com/usuario`)
 - Sitios web relacionados
 - Recursos de referencia
@@ -42,15 +46,18 @@ Los enlaces te permiten crear menús de navegación y dirigir a los lectores tan
 #### Ejemplos prácticos
 
 **Esenciales:**
+
 - Inicio → `/`
 - Acerca de → `/acerca-de`
 - Contacto → `/contacto`
 
 **Redes sociales:**
+
 - Twitter → `https://twitter.com/usuario`
 - LinkedIn → `https://linkedin.com/in/usuario`
 
 **Categorías principales:**
+
 - Tecnología → `/category/tecnologia`
 - Noticias → `/category/noticias`
 
@@ -60,17 +67,19 @@ Los enlaces te permiten crear menús de navegación y dirigir a los lectores tan
 🔹 **Usa títulos claros** y descriptivos  
 🔹 **Orden lógico**: De más a menos relevante  
 🔹 **Verifica periódicamente** que funcionen  
-🔹 **Optimiza para móviles**  
+🔹 **Optimiza para móviles**
 
 #### Organización recomendada
 
 **Navegación principal:**
+
 1. Inicio
 2. Categorías
 3. Acerca de
 4. Contacto
 
 **Navegación secundaria:**
+
 - Redes sociales
 - Proyectos externos
 - Archivo de publicaciones

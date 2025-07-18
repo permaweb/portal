@@ -10,7 +10,6 @@ import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
-import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
 import { ASSETS } from 'helpers/config';
@@ -25,6 +24,7 @@ import {
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -35,14 +35,8 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	const {
-		uploadCost,
-		showUploadConfirmation,
-		uploadResponse,
-		setUploadResponse,
-		calculateUploadCost,
-		clearUploadState,
-	} = useUploadCost();
+	const { addNotification } = useNotifications();
+	const { uploadCost, showUploadConfirmation, calculateUploadCost, clearUploadState } = useUploadCost();
 
 	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
 		image: {
@@ -143,7 +137,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 
 			setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(tx) }));
 			setMediaUploaded(true);
-			setUploadResponse({ status: 'success', message: `${language?.mediaUploaded}!` });
+			addNotification(`${language?.mediaUploaded}!`, 'success');
 		} catch (e: any) {
 			handleClear(e.message ?? 'Error uploading media');
 		}
@@ -151,7 +145,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	}
 
 	function handleClear(message: string) {
-		setUploadResponse({ status: 'warning', message: message });
+		addNotification(message, 'warning');
 		setMediaData((prevContent) => ({ ...prevContent, file: null }));
 		clearUploadState();
 		setUploadDisabled(false);
@@ -353,19 +347,13 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					</>
 				)}
 			</S.Wrapper>
-			{uploadResponse && (
-				<Notification
-					type={uploadResponse.status}
-					message={uploadResponse.message}
-					callback={() => setUploadResponse(null)}
-				/>
-			)}
 			<Panel
 				open={showMediaLibrary}
 				header={language?.mediaLibrary}
 				handleClose={() => setShowMediaLibrary(false)}
 				width={680}
 				closeHandlerDisabled={true}
+				className={'modal-wrapper'}
 			>
 				<MediaLibrary
 					type={config.type}

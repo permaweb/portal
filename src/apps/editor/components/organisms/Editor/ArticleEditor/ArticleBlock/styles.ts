@@ -297,12 +297,23 @@ export const EDragWrapper = styled.div`
 `;
 
 export const EDragHandler = styled.div`
+	height: 26.75px;
 	cursor: grab;
+	border-radius: ${STYLING.dimensions.radius.alt4};
+	transition: all 200ms;
+	&:active {
+		cursor: grabbing;
+	}
+
 	svg {
 		width: 17.5px;
 		margin: 5px 0 0 0;
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
+	}
+
+	&:hover {
+		background: ${(props) => props.theme.colors.container.primary.active};
 	}
 `;
 
@@ -329,13 +340,13 @@ export const SelectionWrapper = styled.div`
 	}
 `;
 
-export const BlockSelector = styled.div<{ blockEditMode: boolean; }>`
+export const BlockSelector = styled.div<{ blockEditMode: boolean }>`
 	max-height: 65vh;
 	width: 300px;
 	position: absolute;
 	z-index: 1;
-	top: ${(props) => props.blockEditMode ? '67.5px' : '27.5px'};
-	left: ${(props) => props.blockEditMode ? '15px' : '0px'};;
+	top: ${(props) => (props.blockEditMode ? '67.5px' : '27.5px')};
+	left: ${(props) => (props.blockEditMode ? '15px' : '0px')};
 	padding: 15px 5px;
 `;
 

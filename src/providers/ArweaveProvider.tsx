@@ -119,7 +119,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		await global.window?.arweaveWallet?.disconnect();
 		setWallet(null);
 		setWalletAddress(null);
-		
+
 		if (redirect) navigate(URLS.base);
 	}
 
