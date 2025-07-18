@@ -15,6 +15,7 @@ import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
 import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
 import { validateUrl } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { CloseHandler } from 'wrappers/CloseHandler';
 
 import { ArticleBlocks } from '../ArticleBlocks';
 
@@ -111,7 +112,7 @@ export default function ArticleBlock(props: {
 
 	function handleChangeBlock(type: ArticleBlockEnum) {
 		let content: string = '';
-		
+
 		// Set proper content for different block types
 		switch (type) {
 			case 'ordered-list':
@@ -133,12 +134,12 @@ export default function ArticleBlock(props: {
 				content = '';
 				break;
 		}
-		
+
 		props.onChangeBlock({ id: props.block.id, type: type, content: content });
 		setShowBlockSelector(false);
 		handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: false });
 		handleCurrentPostUpdate({ field: 'lastAddedBlockId', value: props.block.id });
-		
+
 		// Focus the ContentEditable after block type change
 		setTimeout(() => {
 			if (editableRef.current) {
@@ -231,6 +232,11 @@ export default function ArticleBlock(props: {
 		setTextToConvert('');
 		setShowLinkModal(false);
 		setNewLinkUrl('');
+	}
+
+	function handleSelectorClose() {
+		setShowBlockSelector(false);
+		props.onChangeBlock({ id: props.block.id, content: '' });
 	}
 
 	let useCustom: boolean = false;
@@ -368,9 +374,18 @@ export default function ArticleBlock(props: {
 						<S.ElementIndicatorDivider type={props.block.type} className={'fade-in'} />
 					)}
 					{showBlockSelector && (
-						<S.BlockSelector blockEditMode={currentPost.editor.blockEditMode} className={'border-wrapper-primary scroll-wrapper-hidden'}>
-							<ArticleBlocks addBlock={(type: ArticleBlockEnum) => handleChangeBlock(type)} context={'inline'} />
-						</S.BlockSelector>
+						<CloseHandler active={true} disabled={false} callback={handleSelectorClose}>
+							<S.BlockSelector
+								blockEditMode={currentPost.editor.blockEditMode}
+								className={'border-wrapper-primary scroll-wrapper-hidden'}
+							>
+								<ArticleBlocks
+									addBlock={(type: ArticleBlockEnum) => handleChangeBlock(type)}
+									handleClose={handleSelectorClose}
+									context={'inline'}
+								/>
+							</S.BlockSelector>
+						</CloseHandler>
 					)}
 				</S.ElementWrapper>
 				{showLinkModal && (

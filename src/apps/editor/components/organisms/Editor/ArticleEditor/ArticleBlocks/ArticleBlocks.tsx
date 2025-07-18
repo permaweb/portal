@@ -11,8 +11,9 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-export default function ArticleBlocks(props: { 
+export default function ArticleBlocks(props: {
 	addBlock: (type: ArticleBlockEnum) => void;
+	handleClose?: () => void;
 	context?: 'toolbar' | 'inline';
 }) {
 	const dispatch = useDispatch();
@@ -62,6 +63,23 @@ export default function ArticleBlocks(props: {
 		},
 	];
 
+	const escFunction = React.useCallback(
+		(e: any) => {
+			if (e.key === 'Escape' && props.context === 'inline' && props.handleClose) {
+				props.handleClose();
+			}
+		},
+		[props.context, props.handleClose]
+	);
+
+	React.useEffect(() => {
+		document.addEventListener('keydown', escFunction, false);
+
+		return () => {
+			document.removeEventListener('keydown', escFunction, false);
+		};
+	}, [escFunction]);
+
 	React.useEffect(() => {
 		const count = BLOCK_TYPES.reduce((acc, section) => acc + section.blocks.length, 0);
 		setTotalBlockCount(count);
@@ -94,9 +112,7 @@ export default function ArticleBlocks(props: {
 
 		if (focusedIndex >= 0 && blockRefs.current[focusedIndex]) {
 			if (currentPost.editor.toggleBlockFocus) {
-				const shouldFocus = props.context === 'toolbar' 
-					? currentPost.editor.panelOpen 
-					: props.context === 'inline';
+				const shouldFocus = props.context === 'toolbar' ? currentPost.editor.panelOpen : props.context === 'inline';
 				if (shouldFocus) blockRefs.current[focusedIndex]?.focus();
 			}
 		}

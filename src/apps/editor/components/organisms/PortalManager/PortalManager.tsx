@@ -7,12 +7,12 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
-import { Notification } from 'components/atoms/Notification';
 import { DEFAULT_THEME, PORTAL_DATA, PORTAL_ROLES, URLS } from 'helpers/config';
-import { NotificationType, PortalDetailType, PortalHeaderType } from 'helpers/types';
+import { PortalDetailType, PortalHeaderType } from 'helpers/types';
 import { checkValidAddress, getBootTag } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
@@ -36,7 +36,7 @@ export default function PortalManager(props: {
 	const [iconId, setIconId] = React.useState<string | null>(null);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
-	const [portalResponse, setPortalResponse] = React.useState<NotificationType | null>(null);
+	const { addNotification } = useNotifications();
 
 	React.useEffect(() => {
 		if (props.portal) {
@@ -172,15 +172,9 @@ export default function PortalManager(props: {
 				setLogoId(null);
 				setIconId(null);
 
-				setPortalResponse({
-					message: response,
-					status: 'success',
-				});
+				addNotification(response, 'success');
 			} catch (e: any) {
-				setPortalResponse({
-					message: e.message ?? language?.errorUpdatingPortal,
-					status: 'warning',
-				});
+				addNotification(e.message ?? language?.errorUpdatingPortal, 'warning');
 			}
 
 			setLoading(false);
@@ -222,13 +216,15 @@ export default function PortalManager(props: {
 									onMediaUpload={handleLogoUpload}
 									hideActions={!props.portal}
 								/>
-								<Media
-									portal={props.portal}
-									type={'icon'}
-									handleUpdate={handleMediaUpdate}
-									onMediaUpload={handleIconUpload}
-									hideActions={!props.portal}
-								/>
+								<S.IconWrapper className={'border-wrapper-alt2'}>
+									<Media
+										portal={props.portal}
+										type={'icon'}
+										handleUpdate={handleMediaUpdate}
+										onMediaUpload={handleIconUpload}
+										hideActions={!props.portal}
+									/>
+								</S.IconWrapper>
 							</S.PWrapper>
 							<S.Form>
 								<S.TForm>
@@ -270,13 +266,6 @@ export default function PortalManager(props: {
 									? `${language?.portalUpdatingInfo}...`
 									: `${language?.portalCreatingInfo}...`
 							}
-						/>
-					)}
-					{portalResponse && (
-						<Notification
-							message={portalResponse.message}
-							type={portalResponse.status}
-							callback={() => setPortalResponse(null)}
 						/>
 					)}
 				</>

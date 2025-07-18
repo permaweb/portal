@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 
 interface NavigationContextType {

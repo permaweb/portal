@@ -15,6 +15,7 @@ import { checkValidAddress } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
@@ -34,15 +35,9 @@ export default function Media(props: {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	const {
-		uploadCost,
-		showUploadConfirmation,
-		uploadResponse,
-		setUploadResponse,
-		calculateUploadCost,
-		clearUploadState,
-		insufficientBalance,
-	} = useUploadCost();
+	const { uploadCost, showUploadConfirmation, calculateUploadCost, clearUploadState, insufficientBalance } =
+		useUploadCost();
+	const { addNotification } = useNotifications();
 
 	const mediaInputRef = React.useRef<any>(null);
 
@@ -126,17 +121,11 @@ export default function Media(props: {
 
 				if (props.handleUpdate) props.handleUpdate();
 
-				setUploadResponse({
-					message: response,
-					status: 'success',
-				});
+				addNotification(response, 'success');
 
 				clearUploadState();
 			} catch (e: any) {
-				setUploadResponse({
-					message: e.message ?? language?.errorUpdatingPortal,
-					status: 'warning',
-				});
+				addNotification(e.message ?? language?.errorUpdatingPortal, 'warning');
 			}
 
 			setLoading(false);
@@ -300,7 +289,7 @@ export default function Media(props: {
 								uploadDisabled={unauthorized || loading}
 								handleUpload={handleSubmit}
 								handleCancel={() => handleClearUpload()}
-								message={uploadResponse?.message ?? '-'}
+								message={'-'}
 								insufficientBalance={insufficientBalance}
 							/>
 						</Modal>

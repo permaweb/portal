@@ -8,11 +8,9 @@ import { currentPostUpdate } from 'editor/store/post';
 
 import { Button } from 'components/atoms/Button';
 import { Modal } from 'components/atoms/Modal';
-import { Notification } from 'components/atoms/Notification';
 import { ASSET_UPLOAD, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import {
-	NotificationType,
 	PortalAssetRequestType,
 	PortalHeaderType,
 	PortalPageType,
@@ -22,6 +20,7 @@ import {
 import { filterDuplicates } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import { ArticleEditor } from './ArticleEditor';
@@ -41,7 +40,7 @@ export default function Editor() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [response, setResponse] = React.useState<NotificationType | null>(null);
+	const { addNotification } = useNotifications();
 	const [showReview, setShowReview] = React.useState<boolean>(false);
 	const [missingFields, setMissingFields] = React.useState<string[]>([]);
 
@@ -80,7 +79,7 @@ export default function Editor() {
 
 			if (!portalProvider.permissions?.updatePostRequestStatus) {
 				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
-				setResponse({ status: 'warning', message: language?.unauthorized });
+				addNotification(language?.unauthorized, 'warning');
 				return;
 			}
 
@@ -140,7 +139,7 @@ export default function Editor() {
 									try {
 										data.Thumbnail = await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail);
 									} catch (e: any) {
-										setResponse({ status: 'warning', message: e.message ?? language?.errorUploadingThumbnail });
+										addNotification(e.message ?? language?.errorUploadingThumbnail, 'warning');
 									}
 								}
 
@@ -155,16 +154,16 @@ export default function Editor() {
 							}
 						}
 
-						setResponse({ status: 'success', message: `${language?.postStatusUpdated}!` });
+						addNotification(`${language?.postStatusUpdated}!`, 'success');
 						portalProvider.refreshCurrentPortal();
 
 						await new Promise((r) => setTimeout(r, 1000));
 						navigate(URLS.portalBase(portalProvider.current.id));
 					} else {
-						setResponse({ status: 'warning', message: language?.errorUpdatingPost });
+						addNotification(language?.errorUpdatingPost, 'warning');
 					}
 				} catch (e: any) {
-					setResponse({ status: 'warning', message: e.message ?? 'Error updating post status' });
+					addNotification(e.message ?? 'Error updating post status', 'warning');
 				}
 			}
 
@@ -194,7 +193,7 @@ export default function Editor() {
 				try {
 					data.Thumbnail = await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail);
 				} catch (e: any) {
-					setResponse({ status: 'warning', message: e.message ?? language?.errorUploadingThumbnail });
+					addNotification(e.message ?? language?.errorUploadingThumbnail, 'warning');
 				}
 			}
 
@@ -225,10 +224,10 @@ export default function Editor() {
 					}
 
 					console.log(`Asset content update: ${assetContentUpdateId}`);
-					setResponse({ status: 'success', message: `${language?.postUpdated}!` });
+					addNotification(`${language?.postUpdated}!`, 'success');
 					portalProvider.refreshCurrentPortal('assets');
 				} catch (e: any) {
-					setResponse({ status: 'warning', message: e.message ?? language?.errorUpdatingPost });
+					addNotification(e.message ?? language?.errorUpdatingPost, 'warning');
 				}
 			} else {
 				try {
@@ -379,10 +378,10 @@ export default function Editor() {
 						}
 					}
 
-					setResponse({ status: 'success', message: `${language?.postSaved}!` });
+					addNotification(`${language?.postSaved}!`, 'success');
 					navigate(`${URLS.postEditArticle(portalProvider.current.id)}${assetId}`);
 				} catch (e: any) {
-					setResponse({ status: 'warning', message: e.message ?? 'Error creating post' });
+					addNotification(e.message ?? 'Error creating post', 'warning');
 				}
 			}
 
@@ -492,9 +491,6 @@ export default function Editor() {
 				</div>
 			)}
 			<ArticleEditor handleSubmit={handleSubmit} handleRequestUpdate={handleRequestUpdate} staticPage={isStaticPage} />
-			{response && (
-				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
-			)}
 			{showReview && (
 				<Modal header={language?.reviewPostDetails} handleClose={() => setShowReview(false)}>
 					<S.ModalWrapper>

@@ -185,3 +185,48 @@ export const ModalActionsWrapper = styled.div`
 	flex-wrap: wrap;
 	gap: 15px;
 `;
+
+export const CategoryDragWrapper = styled.div<{ level: number; isDragging: boolean; parentDragging: boolean }>``;
+
+export const CategoryDrag = styled.div<{ level: number; isDragging: boolean }>`
+	width: fit-content;
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 7.5px;
+	margin: ${(props) => `0 10px 12.5px ${(props.level * 20).toString()}px`} !important;
+	transition: all 200ms;
+`;
+
+export const CategoryDragHandle = styled.div`
+	height: 24.5px;
+	cursor: grab;
+	border-radius: ${STYLING.dimensions.radius.alt4};
+	transition: all 200ms;
+
+	&:hover {
+		background: ${(props) => props.theme.colors.container.primary.active};
+	}
+
+	&:active {
+		cursor: grabbing;
+	}
+
+	svg {
+		height: 12.5px;
+		width: 12.5px;
+		color: ${(props) => props.theme.colors.font.alt1};
+		fill: ${(props) => props.theme.colors.font.alt1};
+	}
+`;
+
+export const CategoryContent = styled.div`
+	display: flex;
+	flex-direction: column;
+
+	.notification {
+		position: absolute;
+		top: -3.5px;
+		right: -3.5px;
+	}
+`;

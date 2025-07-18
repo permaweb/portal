@@ -204,9 +204,7 @@ export const MWrapper = styled.div`
 	gap: 20px;
 `;
 
-export const MSection = styled.div`
-	
-`;
+export const MSection = styled.div``;
 
 export const ThemeSectionHeader = styled.div`
 	display: flex;

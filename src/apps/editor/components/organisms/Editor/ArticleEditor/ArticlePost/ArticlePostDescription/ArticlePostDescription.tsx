@@ -5,12 +5,11 @@ import { EditorStoreRootState } from 'editor/store';
 import { currentPostUpdate } from 'editor/store/post';
 
 import { Button } from 'components/atoms/Button';
-import { Notification } from 'components/atoms/Notification';
 import { Panel } from 'components/atoms/Panel';
 import { TextArea } from 'components/atoms/TextArea';
 import { ASSETS } from 'helpers/config';
-import { NotificationType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 
 import * as S from './styles';
 
@@ -23,8 +22,8 @@ export default function ArticlePostDescription() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [showPanel, setShowPanel] = React.useState<boolean>(false);
-	const [response, setResponse] = React.useState<NotificationType | null>(null);
 	const [originalDescription, setOriginalDescription] = React.useState<string>('');
+	const { addNotification } = useNotifications();
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
@@ -74,15 +73,12 @@ export default function ArticlePostDescription() {
 							disabled={!hasChanges}
 							handlePress={() => {
 								setShowPanel(false);
-								setResponse({ status: 'success', message: `${language?.descriptionUpdated}!` });
+								addNotification(`${language?.descriptionUpdated}!`, 'success');
 							}}
 						/>
 					</S.PanelActionsWrapper>
 				</S.PanelBodyWrapper>
 			</Panel>
-			{response && (
-				<Notification type={response.status} message={response.message} callback={() => setResponse(null)} />
-			)}
 		</>
 	);
 }

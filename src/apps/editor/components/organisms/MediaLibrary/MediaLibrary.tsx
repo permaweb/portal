@@ -7,7 +7,6 @@ import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
-import { Notification } from 'components/atoms/Notification';
 import { Tabs } from 'components/atoms/Tabs';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
 import { ASSETS } from 'helpers/config';
@@ -16,6 +15,7 @@ import { MediaConfigType, PortalUploadOptionType, PortalUploadType } from 'helpe
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -32,14 +32,8 @@ export default function MediaLibrary(props: {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	const {
-		uploadCost,
-		showUploadConfirmation,
-		uploadResponse,
-		setUploadResponse,
-		calculateUploadCost,
-		clearUploadState,
-	} = useUploadCost();
+	const { addNotification } = useNotifications();
+	const { uploadCost, showUploadConfirmation, calculateUploadCost, clearUploadState } = useUploadCost();
 
 	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
 		image: {
@@ -159,7 +153,7 @@ export default function MediaLibrary(props: {
 
 			console.log(`Media update: ${mediaUpdateId}`);
 
-			setUploadResponse({ status: 'success', message: `${language?.mediaUploaded}!` });
+			addNotification(`${language?.mediaUploaded}!`, 'success');
 			handleClear(null);
 
 			portalProvider.refreshCurrentPortal();
@@ -234,9 +228,9 @@ export default function MediaLibrary(props: {
 
 				console.log(`Media update: ${mediaUpdateId}`);
 
-				setUploadResponse({ status: 'success', message: `${language?.mediaUpdated}!` });
+				addNotification(`${language?.mediaUpdated}!`, 'success');
 			} catch (e: any) {
-				setUploadResponse({ status: 'warning', message: e.message ?? 'Error updating media' });
+				addNotification(e.message ?? 'Error updating media', 'warning');
 			}
 			setMediaLoading(false);
 			setMediaMessage(null);
@@ -249,7 +243,7 @@ export default function MediaLibrary(props: {
 	};
 
 	function handleClear(message: string | null) {
-		if (message) setUploadResponse({ status: 'warning', message: message });
+		if (message) addNotification(message, 'warning');
 		setMediaData(null);
 		clearUploadState();
 		if (inputRef.current) {
@@ -453,13 +447,6 @@ export default function MediaLibrary(props: {
 				</Modal>
 			)}
 			{mediaLoading && <Loader message={mediaMessage ?? `${language?.loading}...`} />}
-			{uploadResponse && (
-				<Notification
-					type={uploadResponse.status}
-					message={uploadResponse.message}
-					callback={() => setUploadResponse(null)}
-				/>
-			)}
 		</>
 	);
 }

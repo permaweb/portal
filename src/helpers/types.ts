@@ -258,11 +258,6 @@ export type SelectOptionType = { id: string; label: string };
 
 export type UploadMethodType = 'default' | 'turbo';
 
-export type NotificationType = {
-	message: string;
-	status: 'success' | 'warning';
-};
-
 export type ViewLayoutType = 'header' | 'detail';
 
 export enum AlignmentEnum {

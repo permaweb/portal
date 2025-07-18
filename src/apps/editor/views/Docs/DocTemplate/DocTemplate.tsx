@@ -10,24 +10,23 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import * as S from './styles';
 
 const mdLoaders = (import.meta as any).glob('../MD/**/*.md', {
-  query: '?raw',
-  import: 'default',
+	query: '?raw',
+	import: 'default',
 });
 
-
 export default function DocTemplate(props: { doc?: string; id?: string }) {
-  const [markdown, setMarkdown] = React.useState<string>('');
-  const languageProvider = useLanguageProvider();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const basePath = URLS.docs;
-  const active = location.pathname.replace(basePath, '');
+	const [markdown, setMarkdown] = React.useState<string>('');
+	const languageProvider = useLanguageProvider();
+	const navigate = useNavigate();
+	const location = useLocation();
+	const basePath = URLS.docs;
+	const active = location.pathname.replace(basePath, '');
 
-  if (!languageProvider || !languageProvider.object) {
-    return <Loader />;
-  }
+	if (!languageProvider || !languageProvider.object) {
+		return <Loader />;
+	}
 
-  const [hashState, setHashState] = React.useState(window.location.href);
+	const [hashState, setHashState] = React.useState(window.location.href);
 
 	React.useEffect(() => {
 		const handleHashChange = () => {
@@ -82,51 +81,47 @@ export default function DocTemplate(props: { doc?: string; id?: string }) {
 		}
 	}, [hashState]);
 
-  React.useEffect(() => {
-    const key = props.doc 
-      ? `../MD/${languageProvider.current}/${props.doc}.md` 
-      : active 
-        ? `../MD/${languageProvider.current}/${active}.md` 
-        : null;
+	React.useEffect(() => {
+		const key = props.doc
+			? `../MD/${languageProvider.current}/${props.doc}.md`
+			: active
+			? `../MD/${languageProvider.current}/${active}.md`
+			: null;
 
-    if (!key) {
-      navigate(`${URLS.docs}overview/introduction`);
-      return;
-    }
+		if (!key) {
+			navigate(`${URLS.docs}overview/introduction`);
+			return;
+		}
 
-    const loader = (mdLoaders as Record<string, () => Promise<string>>)[key];
-    if (!loader) {
-      console.error(`Unknown doc "${key}"`);
-      const fallbackKey = props.doc 
-        ? `../MD/en/${props.doc}.md` 
-        : active 
-          ? `../MD/en/${active}.md` 
-          : null;
-          
-      if (fallbackKey) {
-        const fallbackLoader = (mdLoaders as Record<string, () => Promise<string>>)[fallbackKey];
-        if (fallbackLoader) {
-          fallbackLoader()
-            .then((content) => {
-              setMarkdown(content);
-              scrollTo(0, 0, 'smooth');
-            })
-            .catch((err) => console.error('Error loading fallback markdown:', err));
-          return;
-        }
-      }
-      
-      navigate(`${URLS.docs}overview/introduction`);
-      return;
-    }
+		const loader = (mdLoaders as Record<string, () => Promise<string>>)[key];
+		if (!loader) {
+			console.error(`Unknown doc "${key}"`);
+			const fallbackKey = props.doc ? `../MD/en/${props.doc}.md` : active ? `../MD/en/${active}.md` : null;
 
-    loader()
-      .then((content) => {
-        setMarkdown(content);
-        scrollTo(0, 0, 'smooth');
-      })
-      .catch((err) => console.error('Error loading markdown:', err));
-  }, [props.doc, active, languageProvider.current, navigate]);
+			if (fallbackKey) {
+				const fallbackLoader = (mdLoaders as Record<string, () => Promise<string>>)[fallbackKey];
+				if (fallbackLoader) {
+					fallbackLoader()
+						.then((content) => {
+							setMarkdown(content);
+							scrollTo(0, 0, 'smooth');
+						})
+						.catch((err) => console.error('Error loading fallback markdown:', err));
+					return;
+				}
+			}
+
+			navigate(`${URLS.docs}overview/introduction`);
+			return;
+		}
+
+		loader()
+			.then((content) => {
+				setMarkdown(content);
+				scrollTo(0, 0, 'smooth');
+			})
+			.catch((err) => console.error('Error loading markdown:', err));
+	}, [props.doc, active, languageProvider.current, navigate]);
 
 	const renderers = {
 		h2: (props: any) => {

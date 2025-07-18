@@ -30,11 +30,11 @@ export function LanguageProvider(props: LanguageProviderProps) {
 
 	const [current, setCurrent] = React.useState<LanguageEnum>(() => {
 		const savedLanguage = localStorage.getItem('appLanguage');
-		return (savedLanguage as LanguageEnum) || defaultLanguage as any;
+		return (savedLanguage as LanguageEnum) || (defaultLanguage as any);
 	});
 
 	const handleLanguageChange = (newLanguage: LanguageEnum) => {
-		console.log(newLanguage)
+		console.log(newLanguage);
 		setCurrent(newLanguage);
 		localStorage.setItem('appLanguage', newLanguage);
 	};

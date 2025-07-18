@@ -12,10 +12,12 @@ Las categorías ayudan a organizar el contenido de tu portal en secciones lógic
 #### Creando categorías
 
 1. **Accede a Categorías**
+
    - Ve a **Configuración** en el menú principal
    - Selecciona la sección **Categorías**
 
 2. **Añade nueva categoría**
+
    - Haz clic en **Añadir categoría**
    - Ingresa un nombre descriptivo
    - Selecciona categoría padre (opcional)
@@ -31,11 +33,12 @@ Las categorías ayudan a organizar el contenido de tu portal en secciones lógic
 **Sencillez**: Comienza con 3-7 categorías principales  
 **Nombres claros**: Que los lectores entiendan fácilmente  
 **Estructura lógica**: Agrupa contenido relacionado  
-**Subcategorías**: Solo cuando tengas suficiente contenido  
+**Subcategorías**: Solo cuando tengas suficiente contenido
 
 #### Ejemplos de estructura
 
 **Blog personal:**
+
 - Tecnología
   - Desarrollo web
   - Inteligencia Artificial
@@ -44,6 +47,7 @@ Las categorías ayudan a organizar el contenido de tu portal en secciones lógic
   - América Latina
 
 **Portal educativo:**
+
 - Cursos
   - Programación
   - Diseño
@@ -54,6 +58,7 @@ Las categorías ayudan a organizar el contenido de tu portal en secciones lógic
 #### Asignando categorías
 
 Al crear o editar publicaciones:
+
 - Selecciona en el desplegable de categorías
 - Puedes asignar múltiples categorías
 - Cada publicación debe tener al menos una
