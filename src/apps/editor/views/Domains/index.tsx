@@ -20,7 +20,7 @@ export default function Domains() {
 				actions={[
 					<Button
 						type={'alt1'}
-						label={language.register}
+						label={language.registerDomain}
 						link={URLS.portalDomainsRegister(portalProvider.current?.id)}
 						icon={ASSETS.domains}
 						iconLeftAlign

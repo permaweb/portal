@@ -230,7 +230,7 @@ export const language = {
 		published: `Published`,
 		publishTheme: `Publish Theme`,
 		recentPosts: `Recent Posts`,
-		register: `Register`,
+		registerDomain: `Register Domain`,
 		reject: `Reject`,
 		remainingAfterUpload: `Remaining After Upload`,
 		remove: `Remove`,

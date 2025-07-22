@@ -8,6 +8,7 @@ export const BodyWrapper = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
+	gap: 40px;
 `;
 
 export const SectionWrapper = styled.div`
@@ -66,7 +67,7 @@ export const SearchInputWrapper = styled.div`
 		fill: ${(props) => props.theme.colors.font.alt1};
 		position: absolute;
 		z-index: 1;
-		top: 23.5px;
+		top: 24.5px;
 		left: 13.5px;
 	}
 `;
@@ -119,12 +120,114 @@ export const Indicator = styled.div<{ status: null | 'valid' | 'invalid' }>`
 	}
 `;
 
-export const ActionsWrapper = styled.div`
-	width: fit-content;
+export const PurchaseActionsWrapper = styled.div`
+	width: 100%;
 	display: flex;
-	align-items: center;
+	gap: 25px;
+	margin: 15px 0 0 0;
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		flex-direction: column;
+	}
+`;
+
+export const PurchaseActionWrapper = styled.div`
+	flex: 1;
+	display: flex;
+	flex-direction: column;
 	gap: 15px;
-	margin: 0 0 12.5px auto;
+`;
+
+export const PurchaseAction = styled.button`
+	width: 100%;
+	padding: 15px;
+	text-align: left;
+	display: flex;
+	flex-direction: column;
+	gap: 30px;
+
+	background: ${(props) => props.theme.colors.button.primary.background};
+	border: 1px solid ${(props) => props.theme.colors.button.primary.border};
+	border-radius: ${STYLING.dimensions.radius.primary};
+
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.base};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		line-height: 1.5;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		line-height: 1.5;
+		text-transform: uppercase;
+		letter-spacing: 0.15px;
+		white-space: nowrap;
+	}
+
+	&:hover {
+		background: ${(props) => props.theme.colors.button.primary.active.background};
+		border: 1px solid ${(props) => props.theme.colors.button.primary.active.border};
+	}
+`;
+
+export const PurchaseActionLine = styled.div`
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
+	justify-content: space-between;
+`;
+
+export const CheckoutWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 7.5px 0 40px 0;
+`;
+
+export const CheckoutLine = styled.div`
+	width: 100%;
+	display: flex;
+	gap: 7.5px;
+	align-items: center;
+	justify-content: space-between;
+
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		display: flex;
+	}
+
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.xBold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		display: flex;
+	}
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: flex-start;
+	}
+`;
+
+export const CheckoutDivider = styled.div`
+	flex: 1;
+	margin: 10px 0 0 0;
+	border-bottom: 1px dotted ${(props) => props.theme.colors.border.alt4};
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		display: none;
+	}
 `;
 
 export const UpdateWrapper = styled.div`
@@ -134,9 +237,18 @@ export const UpdateWrapper = styled.div`
 	background: ${(props) => props.theme.colors.container.alt11.background};
 
 	p {
-		color: ${(props) => props.theme.colors.font.light1};
+		color: ${(props) => props.theme.colors.font.light1} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: none !important;
 	}
+`;
+
+export const ActionsWrapper = styled.div`
+	width: fit-content;
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	margin: 0 0 12.5px auto;
 `;

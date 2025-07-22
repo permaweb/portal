@@ -23,35 +23,33 @@ export default function Domains() {
 	const [isSearching, setIsSearching] = React.useState<boolean>(false);
 	const [availabilityStatus, setAvailabilityStatus] = React.useState<'available' | 'unavailable' | null>(null);
 
-	// Debounced API call for domain availability
 	React.useEffect(() => {
 		if (!searchValue.trim()) {
-			setIsSearching(false);
 			setAvailabilityStatus(null);
 			return;
 		}
 
-		setIsSearching(true);
 		setAvailabilityStatus(null);
 
 		const timeoutId = setTimeout(async () => {
+			setIsSearching(true);
 			try {
-				// Mock API call - replace with actual API endpoint
-				const response = await mockCheckDomainAvailability(searchValue.trim());
+				const response = await checkDomainAvailability(searchValue.trim());
 				setAvailabilityStatus(response.available ? 'available' : 'unavailable');
-			} catch (error) {
-				console.error('Error checking domain availability:', error);
+			} catch {
 				setAvailabilityStatus(null);
 			} finally {
 				setIsSearching(false);
 			}
-		}, 500);
+		}, 750);
 
-		return () => clearTimeout(timeoutId);
+		return () => {
+			clearTimeout(timeoutId);
+			setIsSearching(false);
+		};
 	}, [searchValue]);
 
-	// Mock API function
-	const mockCheckDomainAvailability = async (domain: string): Promise<{ available: boolean }> => {
+	const checkDomainAvailability = async (domain: string): Promise<{ available: boolean }> => {
 		// Simulate API delay
 		await new Promise((resolve) => setTimeout(resolve, 800));
 
@@ -172,15 +170,6 @@ export default function Domains() {
 								<span>{language.available}</span>
 							</S.IndicatorLine>
 						</S.IndicatorWrapper>
-						<S.ActionsWrapper>
-							<Button
-								type={'primary'}
-								label={language.clear}
-								handlePress={() => setSearchValue('')}
-								disabled={!searchValue}
-							/>
-							<Button type={'alt1'} label={language.continue} handlePress={() => {}} disabled={true} />
-						</S.ActionsWrapper>
 					</S.SectionBody>
 				</S.SectionWrapper>
 				<S.SectionWrapper>
@@ -188,7 +177,76 @@ export default function Domains() {
 						<p>Step 2: Registration Period</p>
 						<S.SectionDivider />
 					</S.SectionHeader>
-					<S.SectionBody></S.SectionBody>
+					<S.SectionBody>
+						<S.PurchaseActionsWrapper>
+							<S.PurchaseActionWrapper>
+								<S.PurchaseAction onClick={() => {}}>
+									<S.PurchaseActionLine>
+										<p>Buy</p>
+										<S.UpdateWrapper>
+											<p>$26.95 USD (3.57 Credits)</p>
+										</S.UpdateWrapper>
+									</S.PurchaseActionLine>
+									<S.PurchaseActionLine>
+										<span>Register permanently</span>
+									</S.PurchaseActionLine>
+								</S.PurchaseAction>
+							</S.PurchaseActionWrapper>
+
+							<S.PurchaseActionWrapper>
+								<S.PurchaseAction onClick={() => {}}>
+									<S.PurchaseActionLine>
+										<p>Lease</p>
+										<S.UpdateWrapper>
+											<p>$17.34 USD (2.94 Credits)</p>
+										</S.UpdateWrapper>
+									</S.PurchaseActionLine>
+									<S.PurchaseActionLine>
+										<span>Register for 1-5 years</span>
+									</S.PurchaseActionLine>
+								</S.PurchaseAction>
+							</S.PurchaseActionWrapper>
+						</S.PurchaseActionsWrapper>
+					</S.SectionBody>
+				</S.SectionWrapper>
+				<S.SectionWrapper>
+					<S.SectionHeader>
+						<p>Step 3: Checkout</p>
+						<S.SectionDivider />
+					</S.SectionHeader>
+					<S.SectionBody>
+						<S.CheckoutWrapper>
+							<S.CheckoutLine>
+								<span>Domain Name:</span>
+								<S.CheckoutDivider />
+								<p>portal_demo_123</p>
+							</S.CheckoutLine>
+							<S.CheckoutLine>
+								<span>Registration Period:</span>
+								<S.CheckoutDivider />
+								<p>Lease (3 Years)</p>
+							</S.CheckoutLine>
+							<S.CheckoutLine>
+								<span>Total Due:</span>
+								<S.CheckoutDivider />
+								<p>2.94 Credits</p>
+							</S.CheckoutLine>
+							<S.CheckoutLine>
+								<span>Current Balance:</span>
+								<S.CheckoutDivider />
+								<p>1.34 Credits</p>
+							</S.CheckoutLine>
+						</S.CheckoutWrapper>
+						<S.ActionsWrapper>
+							<Button
+								type={'primary'}
+								label={language.clear}
+								handlePress={() => setSearchValue('')}
+								disabled={!searchValue}
+							/>
+							<Button type={'alt1'} label={language.registerDomain} handlePress={() => {}} disabled={true} />
+						</S.ActionsWrapper>
+					</S.SectionBody>
 				</S.SectionWrapper>
 			</S.BodyWrapper>
 		</S.Wrapper>
