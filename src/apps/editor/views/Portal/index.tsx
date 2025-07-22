@@ -41,7 +41,7 @@ export default function Portal() {
 					<Button
 						type={'alt1'}
 						label={language?.createPost}
-						handlePress={() => navigate(URLS.postCreateArticle(portalProvider.current.id))}
+						link={URLS.postCreateArticle(portalProvider.current.id)}
 						disabled={unauthorized || !portalProvider.current}
 						icon={ASSETS.add}
 						iconLeftAlign

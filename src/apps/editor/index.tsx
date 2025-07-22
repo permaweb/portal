@@ -40,6 +40,7 @@ const Media = getLazyImport('Media');
 const Users = getLazyImport('Users');
 const Pages = getLazyImport('Pages');
 const Domains = getLazyImport('Domains');
+const DomainsRegister = getLazyImport('Domains/Register');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
 
@@ -193,6 +194,7 @@ function AppContent() {
 						{getRoute(`${URLS.base}:portalId/users`, <Users />)}
 						{getRoute(`${URLS.base}:portalId/pages`, <Pages />)}
 						{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
+						{getRoute(`${URLS.base}:portalId/domains/register`, <DomainsRegister />)}
 						{getRoute(URLS.docs, <Docs />)}
 						{getRoute(`${URLS.docs}:active/*`, <Docs />)}
 						{getRoute(URLS.notFound, <NotFound />)}

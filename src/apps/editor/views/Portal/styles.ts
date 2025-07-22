@@ -62,7 +62,8 @@ export const PostsSection = styled(Section)``;
 
 export const DomainSection = styled(Section)`
 	> :first-child {
-		padding: 12.5px 15px 0 15px;
+		padding: 12.5px 15px 15px 15px;
+		border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 	}
 `;
 

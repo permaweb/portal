@@ -51,6 +51,8 @@ export const Primary = styled.button<{
 	warning: boolean | undefined;
 }>`
 	position: relative;
+	text-decoration: none;
+	cursor: pointer;
 	background: ${(props) =>
 		props.warning
 			? props.theme.colors.warning.primary

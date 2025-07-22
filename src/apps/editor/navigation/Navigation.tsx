@@ -162,7 +162,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		const content = (
 			<>
 				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
-				<S.PanelContent open={props.open} showText={showText} className={'fade-in'}>
+				<S.PanelContent open={props.open} showText={showText} className={'fade-in scroll-wrapper-hidden'}>
 					{paths.map((element, index) => (
 						<Link key={index} to={element.path} onClick={(e) => handleNavigate(e, element.path)}>
 							<ReactSVG src={element.icon} />
@@ -180,9 +180,9 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						<ReactSVG src={ASSETS.help} />
 						{showText && language?.helpCenter}
 						{!showText && (
-							<S.LinkTooltip className={'info'}>
-								<span>{language?.helpCenter}</span>
-							</S.LinkTooltip>
+							<S.HelpCenterTooltip className={'info'}>
+								<span>{language?.help}</span>
+							</S.HelpCenterTooltip>
 						)}
 					</Link>
 				</S.PanelFooter>

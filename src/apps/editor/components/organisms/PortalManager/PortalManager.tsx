@@ -208,6 +208,19 @@ export default function PortalManager(props: {
 				<>
 					<S.Wrapper>
 						<S.Body>
+							<S.Form>
+								<S.TForm>
+									<FormField
+										label={language?.name}
+										value={name}
+										onChange={(e: any) => setName(e.target.value)}
+										disabled={loading}
+										invalid={{ status: false, message: null }}
+										required
+										hideErrorMessage
+									/>
+								</S.TForm>
+							</S.Form>
 							<S.PWrapper>
 								<Media
 									portal={props.portal}
@@ -226,19 +239,6 @@ export default function PortalManager(props: {
 									/>
 								</S.IconWrapper>
 							</S.PWrapper>
-							<S.Form>
-								<S.TForm>
-									<FormField
-										label={language?.name}
-										value={name}
-										onChange={(e: any) => setName(e.target.value)}
-										disabled={loading}
-										invalid={{ status: false, message: null }}
-										required
-										hideErrorMessage
-									/>
-								</S.TForm>
-							</S.Form>
 							<S.SAction>
 								{props.handleClose && (
 									<Button

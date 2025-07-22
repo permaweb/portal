@@ -25,25 +25,6 @@ export const HActions = styled.div`
 	gap: 20px;
 	width: fit-content;
 	margin: 0 0 0 auto;
-
-	a {
-		padding: 7.5px 15px;
-		background: ${(props) => props.theme.colors.button.primary.background};
-		border: 1px solid ${(props) => props.theme.colors.button.primary.border};
-		border-radius: ${STYLING.dimensions.radius.button};
-		color: ${(props) => props.theme.colors.font.primary} !important;
-		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
-		font-family: ${(props) => props.theme.typography.family.primary} !important;
-		white-space: nowrap;
-		text-transform: uppercase;
-		letter-spacing: 0.35px;
-
-		&:hover {
-			background: ${(props) => props.theme.colors.button.primary.active.background};
-			border: 1px solid ${(props) => props.theme.colors.button.primary.active.border};
-		}
-	}
 `;
 
 export const NWrapper = styled.div`
