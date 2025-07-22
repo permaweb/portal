@@ -21,7 +21,7 @@ export const SectionHeader = styled.div`
 `;
 
 export const SectionHeaderInput = styled(SectionHeader)`
-	margin: 0 0 -10px 0;
+	margin: 0 0 12.5px 0;
 `;
 
 export const SectionBody = styled.div`

@@ -84,22 +84,28 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 
 	function getCategoryAction() {
 		return (
-			<S.BodyWrapper>
+			<S.CategoriesBodyWrapper>
 				<Categories
 					categories={selectedCategories}
 					setCategories={(categories: PortalCategoryType[]) => handleSetCategories(categories)}
 					includeChildrenOnSelect
 					showActions
 					allowReorder
+					inlineAdd
 				/>
-			</S.BodyWrapper>
+			</S.CategoriesBodyWrapper>
 		);
 	}
 
 	function getTopicAction() {
 		return (
 			<S.TopicsBodyWrapper>
-				<Topics topics={selectedTopics} setTopics={(topics: string[]) => setSelectedTopics(topics)} showActions />
+				<Topics
+					topics={selectedTopics}
+					setTopics={(topics: string[]) => setSelectedTopics(topics)}
+					showActions
+					inlineAdd
+				/>
 			</S.TopicsBodyWrapper>
 		);
 	}
