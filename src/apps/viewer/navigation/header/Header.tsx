@@ -51,13 +51,13 @@ export default function Header() {
 		return <h4>{portalProvider.current?.name ?? '-'}</h4>;
 	}
 
-	function getIcon() {
-		const icon = portalProvider.current?.icon;
-		if (icon && checkValidAddress(icon)) {
-			return <img src={getTxEndpoint(icon)} />;
-		}
-		return <ReactSVG src={ASSETS.portal} />;
-	}
+	// function getIcon() {
+	// 	const icon = portalProvider.current?.icon;
+	// 	if (icon && checkValidAddress(icon)) {
+	// 		return <img src={getTxEndpoint(icon)} />;
+	// 	}
+	// 	return <ReactSVG src={ASSETS.portal} />;
+	// }
 
 	function getNavigation() {
 		const overflowCount = 7;
@@ -152,9 +152,7 @@ export default function Header() {
 					</S.ContentEnd>
 				</S.WrapperContent>
 			</S.Wrapper>
-			{portalProvider.current?.categories?.length > 0 &&
-				portalProvider.current?.layout?.header?.subheader?.categories &&
-				getNavigation()}
+			{portalProvider.current?.categories?.length > 0 && getNavigation()}
 		</>
 	);
 }

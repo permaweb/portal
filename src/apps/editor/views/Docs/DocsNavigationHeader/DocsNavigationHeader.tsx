@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
+import { Button } from 'components/atoms/Button';
 import { LanguageSelect } from 'components/molecules/LanguageSelect';
 import { ASSETS, STYLING, URLS } from 'helpers/config';
 import * as windowUtils from 'helpers/window';
@@ -81,7 +82,7 @@ export default function DocsNavigationHeader() {
 				<S.HWrapper>
 					<S.HActions>
 						<LanguageSelect />
-						<Link to={URLS.base}>{language?.returnHome}</Link>
+						<Button type={'primary'} label={language?.returnHome} link={URLS.base} />
 					</S.HActions>
 				</S.HWrapper>
 				<S.NWrapper>

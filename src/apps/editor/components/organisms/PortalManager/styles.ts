@@ -40,7 +40,7 @@ export const Form = styled.div`
 `;
 
 export const TForm = styled.div`
-	margin: 40px 0 30px 0;
+	margin: -40px 0 30px 0;
 	> * {
 		&:last-child {
 			margin: 20px 0 0 0;
@@ -177,6 +177,7 @@ export const SAction = styled.div`
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 15px;
+	margin: 20px 0 0 0;
 	position: relative;
 `;
 

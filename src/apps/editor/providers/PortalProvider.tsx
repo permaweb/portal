@@ -341,7 +341,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					pages: portalData?.store?.pages ?? [],
 					roleOptions: portalData.roleOptions ?? {},
 					permissions: portalData.permissions ?? {},
-					domains: [], // TODO: Domains
+					domains: ['demo_portal', 'demo_portal_1'], // TODO: Domains
 				};
 
 				return portal;

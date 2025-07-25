@@ -6,12 +6,17 @@ export const Wrapper = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
-	padding: 5px 0;
+
+	> * {
+		&:not(:last-child) {
+			border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+		}
+	}
 `;
 
 export const DomainWrapper = styled.div`
 	display: flex;
-	padding: 7.5px 15px;
+	padding: 12.5px 15px;
 	justify-content: space-between;
 	align-items: center;
 	flex-wrap: wrap;
@@ -29,12 +34,28 @@ export const DomainHeader = styled.div`
 	a {
 		display: flex;
 		align-items: center;
-		gap: 6.5px;
+		gap: 5px;
+
+		&:hover {
+			svg {
+				color: ${(props) => props.theme.colors.font.alt1};
+				fill: ${(props) => props.theme.colors.font.alt1};
+			}
+			p {
+				color: ${(props) => props.theme.colors.font.alt1};
+			}
+		}
+
+		svg {
+			color: ${(props) => props.theme.colors.font.primary};
+			fill: ${(props) => props.theme.colors.font.primary};
+		}
 	}
 
 	p {
+		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		white-space: nowrap;
 		overflow-x: hidden;

@@ -48,14 +48,6 @@ export const InputActionsInfoDivider = styled.div`
 `;
 
 export const InputActionsInfoLine = styled.div`
-	p {
-		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.xBold};
-		font-family: ${(props) => props.theme.typography.family.primary};
-		display: flex;
-	}
-
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
@@ -63,6 +55,14 @@ export const InputActionsInfoLine = styled.div`
 		font-family: ${(props) => props.theme.typography.family.primary};
 		display: flex;
 		width: 170px;
+	}
+
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.xBold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		display: flex;
 	}
 `;
 

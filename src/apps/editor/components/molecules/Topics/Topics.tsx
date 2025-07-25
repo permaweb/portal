@@ -21,6 +21,7 @@ export default function Topics(props: {
 	showActions?: boolean;
 	closeAction?: () => void;
 	skipAuthCheck?: boolean;
+	inlineAdd?: boolean;
 }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -29,6 +30,7 @@ export default function Topics(props: {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [topicOptions, setTopicOptions] = React.useState<string[] | null>(null);
+	const [showTopicAdd, setShowTopicAdd] = React.useState<boolean>(false);
 	const [newTopic, setNewTopic] = React.useState<string>('');
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
 	const [topicLoading, setTopicLoading] = React.useState<boolean>(false);
@@ -152,29 +154,77 @@ export default function Topics(props: {
 		);
 	}
 
+	function getTopicAdd() {
+		return (
+			<S.TopicsAction
+				onSubmit={addTopic}
+				onKeyDownCapture={(e) => {
+					if (e.key === 'Enter') {
+						e.nativeEvent.stopImmediatePropagation();
+					}
+				}}
+				addToggled={showTopicAdd}
+			>
+				<Button
+					type={'alt4'}
+					label={language?.add}
+					handlePress={addTopic}
+					disabled={topicActionDisabled}
+					loading={topicLoading}
+					icon={ASSETS.add}
+					iconLeftAlign
+					formSubmit
+				/>
+				<FormField
+					value={newTopic}
+					onChange={(e: any) => setNewTopic(e.target.value)}
+					invalid={{ status: topicOptions?.length && topicOptions.includes(newTopic), message: null }}
+					disabled={!portalProvider.permissions?.updatePortalMeta || topicLoading}
+					autoFocus={showTopicAdd}
+					hideErrorMessage
+					sm
+				/>
+			</S.TopicsAction>
+		);
+	}
+
 	return (
 		<>
 			<S.Wrapper>
-				<S.TopicsAction>
-					<Button
-						type={'alt4'}
-						label={language?.add}
-						handlePress={addTopic}
-						disabled={topicActionDisabled}
-						loading={topicLoading}
-						icon={ASSETS.add}
-						iconLeftAlign
-					/>
-					<FormField
-						value={newTopic}
-						onChange={(e: any) => setNewTopic(e.target.value)}
-						invalid={{ status: topicOptions?.length && topicOptions.includes(newTopic), message: null }}
-						disabled={!portalProvider.permissions?.updatePortalMeta || topicLoading}
-						hideErrorMessage
-						sm
-					/>
-				</S.TopicsAction>
+				{props.inlineAdd && getTopicAdd()}
 				<S.TopicsBody>{getTopics()}</S.TopicsBody>
+				{!props.inlineAdd && (
+					<S.TopicsAdd>
+						{showTopicAdd ? (
+							<>
+								{getTopicAdd()}
+								<S.TopicsToggle>
+									<Button
+										type={'primary'}
+										label={language.close}
+										handlePress={() => setShowTopicAdd(false)}
+										icon={ASSETS.close}
+										iconLeftAlign
+										height={40}
+										fullWidth
+									/>
+								</S.TopicsToggle>
+							</>
+						) : (
+							<S.TopicsToggle>
+								<Button
+									type={'primary'}
+									label={language.addTopic}
+									handlePress={() => setShowTopicAdd(true)}
+									icon={ASSETS.add}
+									iconLeftAlign
+									height={40}
+									fullWidth
+								/>
+							</S.TopicsToggle>
+						)}
+					</S.TopicsAdd>
+				)}
 				{props.showActions && (
 					<S.TopicsFooter>
 						{props.closeAction && (

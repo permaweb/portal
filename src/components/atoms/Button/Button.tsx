@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
 import { ButtonType } from 'helpers/types';
@@ -8,7 +9,7 @@ import * as S from './styles';
 export default function Button(props: {
 	type: ButtonType;
 	label: string | number | React.ReactNode;
-	handlePress: (e: React.MouseEvent) => void;
+	handlePress?: (e: React.MouseEvent) => void;
 	disabled?: boolean;
 	active?: boolean;
 	loading?: boolean;
@@ -24,6 +25,8 @@ export default function Button(props: {
 	tooltip?: string;
 	warning?: boolean;
 	className?: string;
+	link?: string;
+	target?: '_blank';
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -126,25 +129,45 @@ export default function Button(props: {
 	}
 
 	function getAction() {
-		return (
-			<StyledButton
-				tabIndex={props.noFocus ? -1 : 0}
-				type={props.formSubmit ? 'submit' : 'button'}
-				onClick={props.handlePress}
-				onKeyPress={handlePress}
-				disabled={props.disabled}
-				active={props.active}
-				useMaxWidth={props.useMaxWidth}
-				noMinWidth={props.noMinWidth}
-				fullWidth={props.fullWidth}
-				width={props.width}
-				height={props.height}
-				warning={props.warning || false}
-				className={props.className || ''}
-			>
-				{getLabel()}
-			</StyledButton>
-		);
+		if (props.link) {
+			return (
+				<StyledButton
+					as={Link}
+					to={props.link}
+					tabIndex={props.noFocus ? -1 : 0}
+					onClick={props.handlePress}
+					onKeyPress={handlePress}
+					active={props.active}
+					width={props.width}
+					height={props.height}
+					className={props.className || ''}
+					target={props.target ?? ''}
+					style={{ pointerEvents: props.disabled ? 'none' : 'auto', opacity: props.disabled ? 0.6 : 1 }}
+				>
+					{getLabel()}
+				</StyledButton>
+			);
+		} else {
+			return (
+				<StyledButton
+					tabIndex={props.noFocus ? -1 : 0}
+					type={props.formSubmit ? 'submit' : 'button'}
+					onClick={props.handlePress}
+					onKeyPress={handlePress}
+					disabled={props.disabled}
+					active={props.active}
+					useMaxWidth={props.useMaxWidth}
+					noMinWidth={props.noMinWidth}
+					fullWidth={props.fullWidth}
+					width={props.width}
+					height={props.height}
+					warning={props.warning || false}
+					className={props.className || ''}
+				>
+					{getLabel()}
+				</StyledButton>
+			);
+		}
 	}
 
 	function getButton() {

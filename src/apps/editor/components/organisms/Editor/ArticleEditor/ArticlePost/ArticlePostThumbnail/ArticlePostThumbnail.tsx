@@ -61,7 +61,6 @@ export default function ArticlePostThumbnail() {
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
-		addNotification(`${language?.thumbnailUpdated}!`, 'success');
 	};
 
 	async function handleUpload() {
@@ -71,7 +70,7 @@ export default function ArticlePostThumbnail() {
 		try {
 			const tx = await permawebProvider.libs.resolveTransaction(thumbnailData);
 			handleCurrentPostUpdate({ field: 'thumbnail', value: tx });
-			setUploadResponse({ status: 'success', message: `${language?.thumbnailUpdated}!` });
+			addNotification(`${language?.thumbnailUpdated}!`, 'success');
 			handleClear(null);
 		} catch (e: any) {
 			handleClear(e.message ?? 'Error uploading thumbnail');
@@ -80,7 +79,7 @@ export default function ArticlePostThumbnail() {
 	}
 
 	function handleClear(message: string | null) {
-		if (message) setUploadResponse({ status: 'warning', message: message });
+		if (message) addNotification(message, 'warning');
 		setThumbnailData(null);
 		clearUploadState();
 		if (inputRef.current) {

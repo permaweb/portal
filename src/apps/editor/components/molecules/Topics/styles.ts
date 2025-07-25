@@ -6,12 +6,12 @@ export const Wrapper = styled.div`
 	gap: 5px;
 `;
 
-export const TopicsAction = styled.div`
+export const TopicsAction = styled.form<{ addToggled: boolean }>`
 	position: relative;
 
 	button {
 		position: absolute;
-		top: 26.5px;
+		top: ${(props) => (props.addToggled ? '16.5px' : '26.5px')};
 		right: 10px;
 		z-index: 1;
 	}
@@ -19,6 +19,16 @@ export const TopicsAction = styled.div`
 	input {
 		padding: 10px 85px 10px 10px;
 	}
+`;
+
+export const TopicsAdd = styled.div`
+	margin: 15px 0 0 0;
+	position: relative;
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+`;
+
+export const TopicsToggle = styled.div`
+	margin: 17.5px 0 0 0;
 `;
 
 export const TopicsBody = styled.div`

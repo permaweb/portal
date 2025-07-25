@@ -44,10 +44,10 @@ export default function Media() {
 				/>
 				<S.BodyWrapper>
 					<S.MediaWrapper className={'border-wrapper-alt2'}>
-						<MediaLibrary type={'image'} columns={5} />
+						<MediaLibrary type={'image'} columns={6} />
 					</S.MediaWrapper>
 					<S.MediaWrapper className={'border-wrapper-alt2'}>
-						<MediaLibrary type={'video'} columns={5} />
+						<MediaLibrary type={'video'} columns={6} />
 					</S.MediaWrapper>
 				</S.BodyWrapper>
 			</S.Wrapper>
