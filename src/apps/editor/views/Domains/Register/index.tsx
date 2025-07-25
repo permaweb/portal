@@ -152,7 +152,7 @@ export default function Domains() {
 								</S.Indicator>
 								<span>{language.arnsNameValidation}</span>
 							</S.IndicatorLine>
-							<S.SectionDivider />
+							{/* <S.SectionDivider />
 							<S.IndicatorLine>
 								<S.Indicator
 									status={
@@ -168,7 +168,7 @@ export default function Domains() {
 									)}
 								</S.Indicator>
 								<span>{language.available}</span>
-							</S.IndicatorLine>
+							</S.IndicatorLine> */}
 						</S.IndicatorWrapper>
 					</S.SectionBody>
 				</S.SectionWrapper>

@@ -34,42 +34,42 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	const paths = React.useMemo(() => {
 		return [
 			{
-				path: portalProvider.current ? URLS.portalBase(portalProvider.current.id) : URLS.base,
+				path: portalProvider.current?.id ? URLS.portalBase(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.portal,
 				label: language?.home,
 			},
 			{
-				path: portalProvider.current ? URLS.portalPosts(portalProvider.current.id) : URLS.base,
+				path: portalProvider.current?.id ? URLS.portalPosts(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.posts,
 				label: language?.posts,
 			},
 			{
-				path: portalProvider.current ? URLS.portalDesign(portalProvider.current.id) : URLS.base,
+				path: portalProvider.current?.id ? URLS.portalDesign(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.design,
 				label: language?.design,
 			},
 			{
-				path: portalProvider.current ? URLS.portalMedia(portalProvider.current.id) : URLS.base,
+				path: portalProvider.current?.id ? URLS.portalMedia(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.media,
 				label: language?.media,
 			},
 			{
-				path: portalProvider.current ? URLS.portalSetup(portalProvider.current.id) : URLS.base,
+				path: portalProvider.current?.id ? URLS.portalSetup(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.setup,
 				label: language?.setup,
 			},
 			{
-				path: portalProvider.current ? URLS.portalUsers(portalProvider.current.id) : URLS.base,
+				path: portalProvider.current?.id ? URLS.portalUsers(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.users,
 				label: language?.users,
 			},
 			{
-				path: portalProvider.current ? URLS.portalPages(portalProvider.current.id) : URLS.base,
+				path: portalProvider.current?.id ? URLS.portalPages(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.pages,
 				label: language?.pages,
 			},
 			{
-				path: portalProvider.current ? URLS.portalDomains(portalProvider.current.id) : URLS.base,
+				path: portalProvider.current?.id ? URLS.portalDomains(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.domains,
 				label: language?.domains,
 			},

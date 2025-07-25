@@ -15,6 +15,7 @@ import { GlobalStyle } from 'helpers/styles';
 import { checkValidAddress } from 'helpers/utils';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider } from 'providers/LanguageProvider';
+import { NotificationProvider } from 'providers/NotificationProvider';
 import { PermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -122,12 +123,14 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 		<LanguageProvider>
 			<ArweaveProvider>
 				<PermawebProvider>
-					<PortalProvider>
-						<SettingsProvider>
-							<GlobalStyle />
-							<App />
-						</SettingsProvider>
-					</PortalProvider>
+					<NotificationProvider>
+						<PortalProvider>
+							<SettingsProvider>
+								<GlobalStyle />
+								<App />
+							</SettingsProvider>
+						</PortalProvider>
+					</NotificationProvider>
 				</PermawebProvider>
 			</ArweaveProvider>
 		</LanguageProvider>
