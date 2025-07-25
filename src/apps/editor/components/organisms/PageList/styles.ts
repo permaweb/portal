@@ -60,8 +60,6 @@ export const PageHeader = styled.div`
 		white-space: nowrap;
 		overflow-x: hidden;
 		text-overflow: ellipsis;
-		text-decoration: underline;
-		text-decoration-thickness: 1.25px;
 	}
 
 	svg {

@@ -13,7 +13,17 @@ export const CategoriesAction = styled.div`
 	position: relative;
 `;
 
-export const CategoriesAddAction = styled.div`
+export const CategoriesAdd = styled.div`
+	margin: 2.5px 0 0 0;
+	padding: 20px 0 0 0;
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+`;
+
+export const CategoriesClose = styled.div`
+	margin: 17.5px 0 0 0;
+`;
+
+export const CategoriesAddAction = styled.form`
 	position: relative;
 
 	button {
@@ -30,7 +40,6 @@ export const CategoriesAddAction = styled.div`
 
 export const CategoriesParentAction = styled.div`
 	position: relative;
-	margin: 20px 0 0 0;
 `;
 
 export const CategoriesParentSelectAction = styled.div`
@@ -112,9 +121,7 @@ export const Divider = styled.div`
 	margin: 5px auto;
 `;
 
-export const CategoriesBody = styled.div`
-	margin: 0 0 -12.5px 0;
-`;
+export const CategoriesBody = styled.div``;
 
 export const CategoryOptionsWrapper = styled.div``;
 
@@ -186,7 +193,11 @@ export const ModalActionsWrapper = styled.div`
 	gap: 15px;
 `;
 
-export const CategoryDragWrapper = styled.div<{ level: number; isDragging: boolean; parentDragging: boolean }>``;
+export const CategoryDragWrapper = styled.div<{ level: number; isDragging: boolean; parentDragging: boolean }>`
+	&:hover .child-drop-indicator {
+		opacity: 0.3;
+	}
+`;
 
 export const CategoryDrag = styled.div<{ level: number; isDragging: boolean }>`
 	width: fit-content;
@@ -196,6 +207,32 @@ export const CategoryDrag = styled.div<{ level: number; isDragging: boolean }>`
 	gap: 7.5px;
 	margin: ${(props) => `0 10px 12.5px ${(props.level * 20).toString()}px`} !important;
 	transition: all 200ms;
+
+	&::after {
+		height: fit-content;
+		content: '';
+		position: absolute;
+		top: -5px;
+		right: -32.5px;
+		bottom: 0;
+		border-radius: 20px;
+		padding: 1.5px 5px;
+		background: transparent;
+		transition: all 200ms ease;
+		opacity: 0;
+		pointer-events: none;
+		font-size: 8px;
+		text-transform: uppercase;
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		color: ${(props) => props.theme.colors.font.light1};
+	}
+
+	&.can-be-parent::after {
+		background: ${(props) => props.theme.colors.indicator.alt1};
+		opacity: 1;
+		content: 'Parent';
+		white-space: nowrap;
+	}
 `;
 
 export const CategoryDragHandle = styled.div`
@@ -228,5 +265,29 @@ export const CategoryContent = styled.div`
 		position: absolute;
 		top: -3.5px;
 		right: -3.5px;
+	}
+`;
+
+export const ChildDropZone = styled.div<{ visible: boolean; level: number }>`
+	height: ${(props) => (props.visible ? '25px' : '0px')};
+	margin-left: ${(props) => `${((props.level + 1) * 20 + 32).toString()}px`};
+	background: ${(props) => props.theme.colors.container.primary.active};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.alt2};
+	transition: all 200ms ease;
+	opacity: ${(props) => (props.visible ? 1 : 0)};
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	text-transform: uppercase;
+	padding: 2.5px 15.5px;
+
+	&::before {
+		content: 'Drop to make child category';
+		white-space: nowrap;
 	}
 `;

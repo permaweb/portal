@@ -106,11 +106,16 @@ export const PostImageWrapper = styled.div`
 	align-items: flex-start;
 	justify-content: center;
 
+	a {
+		display: block;
+		width: 100%;
+	}
+
 	img {
 		width: auto;
 		height: auto;
-		max-width: 100%;
-		max-height: 100%;
+		width: 100%;
+		height: 100%;
 
 		object-fit: contain;
 		object-position: center center;

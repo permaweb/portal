@@ -27,6 +27,7 @@ export default function Categories(props: {
 	closeAction?: () => void;
 	skipAuthCheck?: boolean;
 	allowReorder?: boolean;
+	inlineAdd?: boolean;
 }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -37,6 +38,7 @@ export default function Categories(props: {
 	const theme = useTheme();
 
 	const [categoryOptions, setCategoryOptions] = React.useState<PortalCategoryType[] | null>(null);
+	const [showCategoryAdd, setShowCategoryAdd] = React.useState<boolean>(false);
 	const [newCategoryName, setNewCategoryName] = React.useState<string>('');
 	const [parentCategory, setParentCategory] = React.useState<string | null>(null);
 	const [showParentOptions, setShowParentOptions] = React.useState<boolean>(false);
@@ -44,6 +46,11 @@ export default function Categories(props: {
 	const [categoryLoading, setCategoryLoading] = React.useState<boolean>(false);
 	const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
 	const [isDragging, setIsDragging] = React.useState<boolean>(false);
+	const [dragOverId, setDragOverId] = React.useState<string | null>(null);
+	const [showChildDropZone, setShowChildDropZone] = React.useState<boolean>(false);
+	const [mouseX, setMouseX] = React.useState<number>(0);
+	const [categoryElementRects, setCategoryElementRects] = React.useState<Map<string, DOMRect>>(new Map());
+	const categoryElementRefs = React.useRef<Map<string, HTMLElement>>(new Map());
 	const draggedElementRef = React.useRef<HTMLElement | null>(null);
 
 	React.useEffect(() => {
@@ -51,6 +58,39 @@ export default function Categories(props: {
 			if (portalProvider.current.categories) setCategoryOptions(portalProvider.current.categories);
 		}
 	}, [portalProvider.current]);
+
+	// Capture category element positions using refs
+	const updateElementRects = React.useCallback(() => {
+		const rects = new Map<string, DOMRect>();
+		if (props.allowReorder) {
+			categoryElementRefs.current.forEach((element, id) => {
+				if (element) {
+					rects.set(id, element.getBoundingClientRect());
+				}
+			});
+			console.log('Updated element rects:', rects.size, 'elements from refs');
+		}
+		setCategoryElementRects(rects);
+	}, [props.allowReorder]);
+
+	// Mouse tracking during drag
+	React.useEffect(() => {
+		const handleMouseMove = (event: MouseEvent) => {
+			if (isDragging) {
+				setMouseX(event.clientX);
+				// console.log('Mouse tracking:', event.clientX);
+			}
+		};
+
+		if (isDragging) {
+			console.log('Starting mouse tracking');
+			document.addEventListener('mousemove', handleMouseMove);
+			return () => {
+				console.log('Stopping mouse tracking');
+				document.removeEventListener('mousemove', handleMouseMove);
+			};
+		}
+	}, [isDragging]);
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta && !props.skipAuthCheck;
 
@@ -257,31 +297,143 @@ export default function Categories(props: {
 	};
 
 	const handleDragEnd = async (result: any) => {
+		console.log('Drag ended - cleaning up states');
+
+		// Store dragOverId before clearing it for logic use
+		const activeDragOverId = dragOverId;
+
+		// Clean up all drag states immediately
 		setIsDragging(false);
 		setSelectedIds(new Set());
+		setDragOverId(null);
+		setShowChildDropZone(false);
+		setMouseX(0);
 		draggedElementRef.current = null;
+
+		console.log('Drag result:', result);
+		console.log('Active dragOverId was:', activeDragOverId);
 
 		if (!result.destination || unauthorized) return;
 		const { source, destination } = result;
 		if (source.index === destination.index) return;
 
 		const flattened = flattenCategories(categoryOptions);
-
 		const dragged = flattened[source.index];
-		const subtree = flattened.filter((item) => item.path === dragged.path || item.path.startsWith(dragged.path + '.'));
 
-		const remaining = flattened.filter(
-			(item) => !(item.path === dragged.path || item.path.startsWith(dragged.path + '.'))
-		);
+		// Check if we're trying to make a category a child of itself or its descendants
+		const draggedTarget = destination.index < flattened.length ? flattened[destination.index] : null;
+		const isDraggedIntoDescendant =
+			draggedTarget && (draggedTarget.path === dragged.path || draggedTarget.path.startsWith(dragged.path + '.'));
 
-		let insertIdx = destination.index;
-		if (destination.index > source.index) {
-			insertIdx = destination.index + 1;
+		if (isDraggedIntoDescendant) {
+			addNotification('Cannot make a category a child of itself or its descendants', 'warning');
+			return;
 		}
 
-		const newFlattened = [...remaining.slice(0, insertIdx), ...subtree, ...remaining.slice(insertIdx)];
+		// Determine if this should be a child relationship based on:
+		// 1. Position relative to potential parent
+		// 2. Mouse position being to the right of the parent (tracked via dragOverId)
+		let shouldMakeChild = false;
+		let newParent = null;
 
-		const reordered = reconstructHierarchy(newFlattened);
+		console.log('handleDragEnd - activeDragOverId:', activeDragOverId, 'destination.index:', destination.index);
+
+		if (activeDragOverId) {
+			// Find the parent based on activeDragOverId (which was set during drag update)
+			const potentialParent = flattened.find((item) => item.category.id === activeDragOverId);
+
+			// Check if we can make this a child relationship
+			const canBeChild =
+				potentialParent &&
+				!potentialParent.path.startsWith(dragged.path + '.') && // Not dragging into own descendant
+				potentialParent.category.id !== dragged.category.id; // Not same category
+
+			if (canBeChild) {
+				console.log(
+					'Making child relationship - parent:',
+					potentialParent.category.name,
+					'child:',
+					dragged.category.name
+				);
+				shouldMakeChild = true;
+				newParent = potentialParent;
+			}
+		}
+
+		let reordered: PortalCategoryType[];
+
+		console.log(shouldMakeChild);
+		console.log(newParent);
+
+		if (shouldMakeChild && newParent) {
+			console.log('Creating child relationship...');
+			// Make the dragged item a child of the new parent
+			const subtree = flattened.filter(
+				(item) => item.path === dragged.path || item.path.startsWith(dragged.path + '.')
+			);
+			const remaining = flattened.filter(
+				(item) => !(item.path === dragged.path || item.path.startsWith(dragged.path + '.'))
+			);
+
+			console.log(
+				'Subtree to move:',
+				subtree.map((item) => item.category.name)
+			);
+			console.log(
+				'Remaining items:',
+				remaining.map((item) => item.category.name)
+			);
+
+			// Update the dragged item's level to be child of new parent
+			const updatedSubtree = subtree.map((item) => ({
+				...item,
+				level: item.level - dragged.level + newParent.level + 1,
+			}));
+
+			console.log(
+				'Updated subtree levels:',
+				updatedSubtree.map((item) => `${item.category.name} (level ${item.level})`)
+			);
+
+			// Find insertion point after the new parent and its existing children
+			let insertIdx = 0;
+			for (let i = 0; i < remaining.length; i++) {
+				if (remaining[i].path === newParent.path) {
+					insertIdx = i + 1;
+					// Skip existing children of the new parent
+					while (insertIdx < remaining.length && remaining[insertIdx].level > newParent.level) {
+						insertIdx++;
+					}
+					break;
+				}
+			}
+
+			console.log('Insertion index:', insertIdx);
+			const newFlattened = [...remaining.slice(0, insertIdx), ...updatedSubtree, ...remaining.slice(insertIdx)];
+			console.log(
+				'New flattened structure:',
+				newFlattened.map((item) => `${item.category.name} (level ${item.level})`)
+			);
+
+			reordered = reconstructHierarchy(newFlattened);
+			console.log('Reconstructed hierarchy:', reordered);
+		} else {
+			// Regular reordering logic
+			const subtree = flattened.filter(
+				(item) => item.path === dragged.path || item.path.startsWith(dragged.path + '.')
+			);
+			const remaining = flattened.filter(
+				(item) => !(item.path === dragged.path || item.path.startsWith(dragged.path + '.'))
+			);
+
+			let insertIdx = destination.index;
+			if (destination.index > source.index) {
+				insertIdx = destination.index + 1;
+			}
+
+			const newFlattened = [...remaining.slice(0, insertIdx), ...subtree, ...remaining.slice(insertIdx)];
+			reordered = reconstructHierarchy(newFlattened);
+		}
 
 		setCategoryOptions(reordered);
 
@@ -312,8 +464,84 @@ export default function Categories(props: {
 			.filter((item) => item.path === dragged.path || item.path.startsWith(dragged.path + '.'))
 			.map((item) => item.category.id);
 
+		// Reset all drag-related state
+		setDragOverId(null);
+		setShowChildDropZone(false);
 		setSelectedIds(new Set(subtreeIds));
 		setIsDragging(true);
+		setMouseX(0);
+
+		console.log('Drag started - reset all states');
+
+		// Update element rects immediately when drag starts
+		setTimeout(() => {
+			updateElementRects();
+		}, 50);
+	}
+
+	function handleDragUpdate(update: any) {
+		if (!update.destination) {
+			setDragOverId(null);
+			setShowChildDropZone(false);
+			return;
+		}
+
+		const { destination } = update;
+		const flattened = flattenCategories(categoryOptions);
+		const dragged = flattened.find((item) => item.category.id === update.draggableId);
+
+		console.log('Drag update:', {
+			destinationIndex: destination.index,
+			mouseX,
+			draggedId: update.draggableId,
+			elementRectsSize: categoryElementRects.size,
+		});
+
+		// Use the destination index to find which category we're near
+		let bestParentCandidate = null;
+
+		if (mouseX > 850 && destination.index > 0) {
+			// Look at the category just before the drop destination
+			const potentialParent = flattened[destination.index - 1];
+
+			if (potentialParent && dragged) {
+				const canBeChild =
+					!potentialParent.path.startsWith(dragged.path + '.') && potentialParent.category.id !== dragged.category.id;
+
+				if (canBeChild) {
+					console.log('Checking destination-based parent:', potentialParent.category.name);
+					bestParentCandidate = potentialParent;
+				}
+			}
+		}
+
+		// If no destination-based parent, fall back to checking all categories
+		if (!bestParentCandidate && mouseX > 850) {
+			for (let i = 0; i < flattened.length; i++) {
+				const potentialParent = flattened[i];
+
+				if (!dragged || !potentialParent) continue;
+
+				const canBeChild =
+					!potentialParent.path.startsWith(dragged.path + '.') && potentialParent.category.id !== dragged.category.id;
+
+				if (canBeChild) {
+					console.log('Fallback check for:', potentialParent.category.name);
+					bestParentCandidate = potentialParent;
+					break; // Take the first valid one
+				}
+			}
+		}
+
+		if (bestParentCandidate) {
+			console.log('Setting dragOverId to:', bestParentCandidate.category.name);
+			setDragOverId(bestParentCandidate.category.id);
+			setShowChildDropZone(true);
+		} else {
+			console.log('Clearing dragOverId');
+			setDragOverId(null);
+			setShowChildDropZone(false);
+		}
 	}
 
 	const CategoryItem = ({
@@ -466,56 +694,74 @@ export default function Categories(props: {
 										const isSelected = selectedIds.has(item.category.id);
 
 										return (
-											<Draggable key={item.category.id} draggableId={item.category.id} index={index}>
-												{(provided, snapshot) => {
-													const dragging = snapshot.isDragging || isSelected;
+											<React.Fragment key={item.category.id}>
+												<Draggable draggableId={item.category.id} index={index}>
+													{(provided, snapshot) => {
+														const dragging = snapshot.isDragging || isSelected;
 
-													return (
-														<S.CategoryDragWrapper
-															ref={provided.innerRef}
-															{...provided.draggableProps}
-															{...(snapshot.isDragging && provided.dragHandleProps)}
-															level={item.level}
-															isDragging={dragging}
-															parentDragging={isSelected && !snapshot.isDragging && isDragging}
-															style={{
-																...provided.draggableProps.style,
-																...(isSelected && !snapshot.isDragging && isDragging
-																	? {
-																			transform: 'scale(1)',
-																			backgroundColor: theme.colors.container.primary.active,
-																			borderRadius: STYLING.dimensions.radius.alt2,
-																			transition: 'all 200ms ease',
-																			zIndex: 999,
-																			pointerEvents: 'none',
-																	  }
-																	: {}),
-															}}
-														>
-															<S.CategoryDrag level={item.level} isDragging={snapshot.isDragging}>
-																<S.CategoryDragHandle {...provided.dragHandleProps}>
-																	<ReactSVG src={ASSETS.drag} />
-																</S.CategoryDragHandle>
-																<S.CategoryContent>
-																	<Button
-																		type={'alt3'}
-																		label={item.category.name}
-																		handlePress={() => handleSelectCategory(item.category.id)}
-																		active={active}
-																		disabled={unauthorized || categoryLoading || isDragging}
-																		icon={active ? ASSETS.close : ASSETS.add}
-																	/>
-																	{snapshot.isDragging && selectedIds.size > 1 && (
-																		<div className={'notification'}>
-																			<span>{selectedIds.size}</span>
-																		</div>
-																	)}
-																</S.CategoryContent>
-															</S.CategoryDrag>
-														</S.CategoryDragWrapper>
-													);
-												}}
-											</Draggable>
+														return (
+															<S.CategoryDragWrapper
+																ref={(el) => {
+																	provided.innerRef(el);
+																	if (el) {
+																		categoryElementRefs.current.set(item.category.id, el);
+																	}
+																}}
+																{...provided.draggableProps}
+																{...(snapshot.isDragging && provided.dragHandleProps)}
+																level={item.level}
+																isDragging={dragging}
+																parentDragging={isSelected && !snapshot.isDragging && isDragging}
+																style={{
+																	...provided.draggableProps.style,
+																	...(isSelected && !snapshot.isDragging && isDragging
+																		? {
+																				// transform: 'scale(1)',
+																				backgroundColor: theme.colors.container.primary.active,
+																				borderRadius: STYLING.dimensions.radius.alt2,
+																				transition: 'all 200ms ease',
+																				zIndex: 999,
+																				pointerEvents: 'none',
+																		  }
+																		: {}),
+																}}
+															>
+																<S.CategoryDrag
+																	level={item.level}
+																	isDragging={snapshot.isDragging}
+																	className={dragOverId === item.category.id ? 'can-be-parent' : ''}
+																>
+																	<S.CategoryDragHandle {...provided.dragHandleProps}>
+																		<ReactSVG src={ASSETS.drag} />
+																	</S.CategoryDragHandle>
+																	<S.CategoryContent>
+																		<Button
+																			type={'alt3'}
+																			label={item.category.name}
+																			handlePress={() => handleSelectCategory(item.category.id)}
+																			active={active}
+																			disabled={unauthorized || categoryLoading || isDragging}
+																			icon={active ? ASSETS.close : ASSETS.add}
+																		/>
+																		{snapshot.isDragging && selectedIds.size > 1 && (
+																			<div className={'notification'}>
+																				<span>{selectedIds.size}</span>
+																			</div>
+																		)}
+																	</S.CategoryContent>
+																</S.CategoryDrag>
+															</S.CategoryDragWrapper>
+														);
+													}}
+												</Draggable>
+												{(() => {
+													const shouldShow = showChildDropZone && dragOverId === item.category.id;
+													if (shouldShow) {
+														console.log('Showing ChildDropZone for:', item.category.name);
+													}
+													return shouldShow ? <S.ChildDropZone visible={true} level={item.level} /> : null;
+												})()}
+											</React.Fragment>
 										);
 									})}
 								</S.CategoriesList>
@@ -534,67 +780,112 @@ export default function Categories(props: {
 		);
 	}
 
+	function getCategoryAdd() {
+		return (
+			<S.CategoriesAction>
+				<S.CategoriesParentAction>
+					<CloseHandler
+						callback={() => setShowParentOptions(false)}
+						active={showParentOptions}
+						disabled={!showParentOptions}
+					>
+						<S.CategoriesParentSelectAction>
+							<Button
+								type={'primary'}
+								label={getParentDisplayLabel()}
+								handlePress={() => setShowParentOptions(!showParentOptions)}
+								disabled={unauthorized || !categoryOptions?.length || categoryLoading}
+								icon={ASSETS.arrow}
+								height={42.5}
+								fullWidth
+							/>
+						</S.CategoriesParentSelectAction>
+						{showParentOptions && (
+							<S.ParentCategoryDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper-hidden'}>
+								<S.ParentCategoryOptions>
+									<S.ParentCategoryOption
+										level={1}
+										onClick={() => {
+											setParentCategory(null);
+											setShowParentOptions(false);
+										}}
+									>
+										<span>{language?.none}</span>
+									</S.ParentCategoryOption>
+									<S.Divider />
+									{renderParentCategoryOptions(categoryOptions)}
+								</S.ParentCategoryOptions>
+							</S.ParentCategoryDropdown>
+						)}
+					</CloseHandler>
+				</S.CategoriesParentAction>
+				<S.CategoriesAddAction
+					onSubmit={addCategory}
+					onKeyDownCapture={(e) => {
+						if (e.key === 'Enter') {
+							e.nativeEvent.stopImmediatePropagation();
+						}
+					}}
+				>
+					<Button
+						type={'alt4'}
+						label={language?.add}
+						handlePress={addCategory}
+						disabled={unauthorized || !newCategoryName || categoryLoading}
+						loading={categoryLoading}
+						icon={ASSETS.add}
+						iconLeftAlign
+						formSubmit
+					/>
+					<FormField
+						value={newCategoryName}
+						onChange={(e: any) => setNewCategoryName(e.target.value)}
+						invalid={{ status: false, message: null }}
+						disabled={!portalProvider.permissions?.updatePortalMeta || categoryLoading}
+						autoFocus={showCategoryAdd}
+						hideErrorMessage
+						sm
+					/>
+				</S.CategoriesAddAction>
+			</S.CategoriesAction>
+		);
+	}
+
 	const content = (
 		<>
 			<S.Wrapper>
-				<S.CategoriesAction>
-					<S.CategoriesParentAction>
-						<CloseHandler
-							callback={() => setShowParentOptions(false)}
-							active={showParentOptions}
-							disabled={!showParentOptions}
-						>
-							<S.CategoriesParentSelectAction>
-								<Button
-									type={'primary'}
-									label={getParentDisplayLabel()}
-									handlePress={() => setShowParentOptions(!showParentOptions)}
-									disabled={unauthorized || !categoryOptions?.length || categoryLoading}
-									icon={ASSETS.arrow}
-									height={42.5}
-									fullWidth
-								/>
-							</S.CategoriesParentSelectAction>
-							{showParentOptions && (
-								<S.ParentCategoryDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper-hidden'}>
-									<S.ParentCategoryOptions>
-										<S.ParentCategoryOption
-											level={1}
-											onClick={() => {
-												setParentCategory(null);
-												setShowParentOptions(false);
-											}}
-										>
-											<span>{language?.none}</span>
-										</S.ParentCategoryOption>
-										<S.Divider />
-										{renderParentCategoryOptions(categoryOptions)}
-									</S.ParentCategoryOptions>
-								</S.ParentCategoryDropdown>
-							)}
-						</CloseHandler>
-					</S.CategoriesParentAction>
-					<S.CategoriesAddAction>
-						<Button
-							type={'alt4'}
-							label={language?.add}
-							handlePress={addCategory}
-							disabled={unauthorized || !newCategoryName || categoryLoading}
-							loading={categoryLoading}
-							icon={ASSETS.add}
-							iconLeftAlign
-						/>
-						<FormField
-							value={newCategoryName}
-							onChange={(e: any) => setNewCategoryName(e.target.value)}
-							invalid={{ status: false, message: null }}
-							disabled={!portalProvider.permissions?.updatePortalMeta || categoryLoading}
-							hideErrorMessage
-							sm
-						/>
-					</S.CategoriesAddAction>
-				</S.CategoriesAction>
+				{props.inlineAdd && getCategoryAdd()}
 				<S.CategoriesBody>{getCategories()}</S.CategoriesBody>
+				{!props.inlineAdd && (
+					<S.CategoriesAdd>
+						{showCategoryAdd ? (
+							<>
+								{getCategoryAdd()}
+								<S.CategoriesClose>
+									<Button
+										type={'primary'}
+										label={language.close}
+										handlePress={() => setShowCategoryAdd(false)}
+										icon={ASSETS.close}
+										iconLeftAlign
+										height={40}
+										fullWidth
+									/>
+								</S.CategoriesClose>
+							</>
+						) : (
+							<Button
+								type={'primary'}
+								label={language.addCategory}
+								handlePress={() => setShowCategoryAdd(true)}
+								icon={ASSETS.add}
+								iconLeftAlign
+								height={40}
+								fullWidth
+							/>
+						)}
+					</S.CategoriesAdd>
+				)}
 				{props.showActions && (
 					<S.CategoriesFooter>
 						{props.closeAction && (
@@ -654,7 +945,7 @@ export default function Categories(props: {
 
 	if (props.allowReorder) {
 		return (
-			<DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+			<DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
 				{content}
 			</DragDropContext>
 		);

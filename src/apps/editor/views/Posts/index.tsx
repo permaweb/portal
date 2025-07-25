@@ -60,7 +60,12 @@ export default function Posts() {
 			{showTopicAction && (
 				<Modal header={language?.editPostTopics} handleClose={() => setShowTopicAction(false)}>
 					<S.TopicModalWrapper>
-						<Topics topics={selectedTopics} setTopics={(topics: string[]) => setSelectedTopics(topics)} showActions />
+						<Topics
+							topics={selectedTopics}
+							setTopics={(topics: string[]) => setSelectedTopics(topics)}
+							showActions
+							inlineAdd
+						/>
 					</S.TopicModalWrapper>
 				</Modal>
 			)}

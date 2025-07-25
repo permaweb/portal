@@ -228,16 +228,18 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		if (!portalProvider.current?.themes) return theme(preferredFallbackTheme);
 
 		let currentTheme = portalProvider.current.themes.find((theme: PortalThemeType) => theme.name === settings.theme);
+
+		const preferredScheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
 		if (!currentTheme) {
-			const preferredScheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 			const filteredThemes = portalProvider.current.themes.filter(
 				(theme: PortalThemeType) => theme.scheme === preferredScheme
 			);
 			currentTheme = filteredThemes[0];
-			updateSettings('theme', currentTheme.name);
+			if (currentTheme) updateSettings('theme', currentTheme.name);
 		}
 
-		return theme(createThemeFromCustom(currentTheme));
+		return theme(currentTheme ? createThemeFromCustom(currentTheme) : preferredFallbackTheme);
 	}
 
 	return (

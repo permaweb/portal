@@ -99,6 +99,10 @@ export const BodyWrapper = styled.div`
 	animation: ${open} ${transition1};
 `;
 
+export const CategoriesBodyWrapper = styled(BodyWrapper)`
+	margin: 20px 0 0 0;
+`;
+
 export const TopicsBodyWrapper = styled(BodyWrapper)``;
 
 export const LinksBodyWrapper = styled(BodyWrapper)`

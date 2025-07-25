@@ -81,15 +81,21 @@ export const LinkTooltip = styled.div`
 	z-index: 2;
 	display: none;
 	white-space: nowrap;
-	left: 100%;
-	top: 50%;
-	transform: translateY(-50%);
-	margin-left: 5px;
+	top: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	margin: 5px 0 0 0;
 
 	span {
 		display: block;
 		line-height: 1.65;
 	}
+`;
+
+export const HelpCenterTooltip = styled(LinkTooltip)`
+	top: auto;
+	bottom: 100%;
+	margin: 0 0 5px 0;
 `;
 
 export const PanelContent = styled.div<{ open: boolean; showText?: boolean }>`
@@ -169,7 +175,7 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 				fill: ${(props) => props.theme.colors.font.primary};
 			}
 
-			${(props) => !props.showText && `${LinkTooltip} { display: block; }`}
+			${(props) => !props.showText && `${HelpCenterTooltip} { display: block; }`}
 		}
 	}
 `;

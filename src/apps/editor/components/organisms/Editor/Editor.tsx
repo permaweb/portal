@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
@@ -507,9 +507,13 @@ export default function Editor() {
 							</S.ModalBodyElements>
 						</S.ModalBodyWrapper>
 						<S.ModalActionsWrapper>
-							<Link to={URLS.docsEditor} target={'_blank'}>
-								{language?.learn}
-							</Link>
+							<Button
+								type={'primary'}
+								label={language?.learn}
+								link={URLS.docsEditor}
+								target={'_blank'}
+								disabled={false}
+							/>
 							<Button type={'alt1'} label={language?.close} handlePress={() => setShowReview(false)} disabled={false} />
 						</S.ModalActionsWrapper>
 					</S.ModalWrapper>

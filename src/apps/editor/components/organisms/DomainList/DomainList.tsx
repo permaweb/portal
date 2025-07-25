@@ -37,8 +37,8 @@ export default function DomainList() {
 						<S.DomainWrapper key={domain} className={'fade-in'}>
 							<S.DomainHeader>
 								<Link to={`https://${domain}.arweave.net`} target={'_blank'}>
-									<ReactSVG src={ASSETS.link} />
 									<p>{domain}</p>
+									<ReactSVG src={ASSETS.newTab} />
 								</Link>
 							</S.DomainHeader>
 							<S.DomainDetail>
@@ -48,20 +48,6 @@ export default function DomainList() {
 										label={language?.viewInfo}
 										handlePress={() => window.open(`https://arweave.net/${domain}`, 'blank')}
 									/>
-									{/* <Button
-											type={'alt3'}
-											label={language?.edit}
-											handlePress={() => navigate(`${URLS.postEditArticle(portalProvider.current.id)}${asset.id}`)}
-										/> */}
-									{/* <IconButton
-											type={'primary'}
-											active={false}
-											src={ASSETS.listUnordered}
-											handlePress={() => window.open(`https://arweave.net/${domain}`, 'blank')}
-											dimensions={{ wrapper: 23.5, icon: 13.5 }}
-											tooltip={language?.moreActions}
-											tooltipPosition={'bottom-right'}
-										/> */}
 								</S.DomainActions>
 							</S.DomainDetail>
 						</S.DomainWrapper>
@@ -69,7 +55,7 @@ export default function DomainList() {
 				})}
 			</S.Wrapper>
 		) : null;
-	}, [portalProvider, portalProvider.current?.id, portalProvider.current?.domains, language]);
+	}, [portalProvider.current?.id, portalProvider.current?.domains, language?.current]);
 
 	return domains;
 }
