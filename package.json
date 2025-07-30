@@ -17,6 +17,7 @@
 		"deploy:viewer": "VITE_APP=viewer npm run build:viewer && permaweb-deploy --arns-name portal --ttl-seconds 60 --undername script --deploy-file ./dist/viewer/bundle.js"
 	},
 	"dependencies": {
+		"@ar.io/sdk": "^3.15.0",
 		"@hello-pangea/dnd": "^17.0.0",
 		"@permaweb/aoconnect": "^0.0.85",
 		"@permaweb/libs": "0.0.45",

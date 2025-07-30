@@ -138,20 +138,23 @@ export const PurchaseActionWrapper = styled.div`
 	gap: 15px;
 `;
 
-export const PurchaseAction = styled.button`
+export const PurchaseAction = styled.button<{ active: boolean }>`
+	height: 115px;
 	width: 100%;
-	padding: 15px;
+	padding: 16.5px 15px 15px 15px;
 	text-align: left;
 	display: flex;
 	flex-direction: column;
 	gap: 30px;
 
-	background: ${(props) => props.theme.colors.button.primary.background};
-	border: 1px solid ${(props) => props.theme.colors.button.primary.border};
+	background: ${(props) =>
+		props.active ? props.theme.colors.button.alt1.background : props.theme.colors.button.primary.background};
+	border: 1px solid
+		${(props) => (props.active ? props.theme.colors.button.alt1.background : props.theme.colors.button.primary.border)};
 	border-radius: ${STYLING.dimensions.radius.primary};
 
 	p {
-		color: ${(props) => props.theme.colors.font.primary};
+		color: ${(props) => (props.active ? props.theme.colors.button.alt1.color : props.theme.colors.font.primary)};
 		font-size: ${(props) => props.theme.typography.size.base};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		line-height: 1.5;
@@ -160,7 +163,7 @@ export const PurchaseAction = styled.button`
 	}
 
 	span {
-		color: ${(props) => props.theme.colors.font.alt1};
+		color: ${(props) => (props.active ? props.theme.colors.button.alt1.color : props.theme.colors.font.alt1)};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		line-height: 1.5;
@@ -170,8 +173,21 @@ export const PurchaseAction = styled.button`
 	}
 
 	&:hover {
-		background: ${(props) => props.theme.colors.button.primary.active.background};
-		border: 1px solid ${(props) => props.theme.colors.button.primary.active.border};
+		background: ${(props) =>
+			props.active ? props.theme.colors.button.alt1.background : props.theme.colors.button.primary.active.background};
+		border: 1px solid
+			${(props) =>
+				props.active ? props.theme.colors.button.alt1.background : props.theme.colors.button.primary.active.border};
+	}
+
+	&:disabled {
+		background: ${(props) => props.theme.colors.button.primary.disabled.background};
+		border: 1px solid ${(props) => props.theme.colors.button.primary.disabled.border};
+
+		p,
+		span {
+			color: ${(props) => props.theme.colors.button.primary.disabled.color};
+		}
 	}
 `;
 
@@ -183,6 +199,20 @@ export const PurchaseActionLine = styled.div`
 	justify-content: space-between;
 `;
 
+export const LeaseDuration = styled.div<{ active: boolean }>`
+	display: flex;
+	align-items: center;
+	gap: 15px;
+
+	span {
+		color: ${(props) => (props.active ? props.theme.colors.font.light1 : props.theme.colors.font.primary)} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: none !important;
+	}
+`;
+
 export const CheckoutWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -190,7 +220,7 @@ export const CheckoutWrapper = styled.div`
 	margin: 7.5px 0 40px 0;
 `;
 
-export const CheckoutLine = styled.div`
+export const CheckoutLine = styled.div<{ insufficientBalance?: boolean }>`
 	width: 100%;
 	display: flex;
 	gap: 7.5px;
@@ -206,7 +236,8 @@ export const CheckoutLine = styled.div`
 	}
 
 	p {
-		color: ${(props) => props.theme.colors.font.primary};
+		color: ${(props) =>
+			props.insufficientBalance ? props.theme.colors.warning.primary : props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.xBold};
 		font-family: ${(props) => props.theme.typography.family.primary};
@@ -233,16 +264,25 @@ export const CheckoutDivider = styled.div`
 export const UpdateWrapper = styled.div`
 	height: fit-content;
 	padding: 5px 15px;
+	display: flex;
+	align-items: center;
+	gap: 7.5px;
 	border-radius: ${STYLING.dimensions.radius.primary} !important;
 	background: ${(props) => props.theme.colors.container.alt11.background};
 
 	p {
 		color: ${(props) => props.theme.colors.font.light1} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: none !important;
 	}
+`;
+
+export const InsufficientBalance = styled(UpdateWrapper)`
+	width: fit-content;
+	margin: 20px 0 0 auto;
+	background: ${(props) => props.theme.colors.warning.primary};
 `;
 
 export const ActionsWrapper = styled.div`
