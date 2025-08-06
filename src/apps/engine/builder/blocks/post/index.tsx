@@ -1,0 +1,93 @@
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { useUI } from 'engine/hooks/portal';
+import { usePost } from 'engine/hooks/posts';
+import { useProfile } from 'engine/hooks/profiles';
+import Tag from 'engine/components/tag';
+import Placeholder from 'engine/components/placeholder';
+import Comments from '../comments';
+import * as S from './styles';
+
+export default function Post(props: any) {
+  const { postId } = useParams();
+  const { Name } = useUI();
+  const { post, isLoading: isLoadingPost, error } = usePost(postId || '');
+  const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || '');
+
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  },[])
+
+  React.useEffect(() => {
+    if(Name && post && !document.title.includes(post.name)){
+      // @ts-ignore
+      document.title = `${post.name} - ${Name}`;
+    }
+  },[Name, post])
+
+  return (
+    <S.Wrapper>
+      <S.Post>
+        <h1>{isLoadingPost ? <Placeholder width="180" /> : post.name}</h1>
+        {post?.metadata.description && <S.Description>{post?.metadata.description}</S.Description>}
+        <S.Meta>
+          <img
+            className="loadingAvatar"
+            onLoad={e => e.currentTarget.classList.remove('loadingAvatar')}
+            src={!isLoadingProfile ? `https://arweave.net/${profile?.thumbnail}` : ''} />
+          <span>{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}</span>&nbsp;
+          <span>• {isLoadingPost ? <Placeholder width="40" /> : new Date(Number(post?.dateCreated)).toLocaleDateString()} {isLoadingPost ? <Placeholder width="30" /> : new Date(Number(post?.dateCreated)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        </S.Meta>
+        <S.Thumbnail
+          className="loadingThumbnail"
+          onLoad={e => e.currentTarget.classList.remove('loadingThumbnail')}
+          src={!isLoadingPost ? `https://arweave.net/${post?.metadata?.thumbnail}` : ''}
+        />
+        <S.Tags>
+        {post && post?.metadata?.topics && post?.metadata?.topics.map((topic: any, index: number) => {
+          return <Tag key={index} tag={topic} />
+        })}
+        </S.Tags>
+        {post?.metadata.content.map((entry) => {
+          switch(entry.type) {
+            case 'header-1': 
+              return <h1 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+            case 'header-2': 
+              return <h2 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+            case 'header-3': 
+              return <h3 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+            case 'header-4': 
+              return <h4 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+            case 'header-5': 
+              return <h5 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+            case 'header-6':
+              return <h6 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+            case 'image':
+              return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+            case 'video':
+              console.log('Vid: ', entry)
+              return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+            case 'paragraph':              
+              return <p key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+            case 'quote':
+              return <blockquote key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+            case 'code':
+              return <code key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+            case 'unordered-list':
+              return (
+                <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />
+              );  
+            case 'ordered-list':
+              return (
+                <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />
+              );  
+            default:
+              return <b key={entry.id}>{JSON.stringify(entry)}</b>;
+          }
+        })}
+      </S.Post>
+      <Comments assetId={postId} />
+    </S.Wrapper>
+  );
+    
+};

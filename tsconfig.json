@@ -4,6 +4,7 @@
 		"paths": {
 			"editor/*": ["apps/editor/*"],
 			"viewer/*": ["apps/viewer/*"],
+			"engine/*": ["apps/engine/*"],
 			"components/*": ["components/*"],
 			"helpers/*": ["helpers/*"],
 			"hooks/*": ["hooks/*"],

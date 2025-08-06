@@ -48,6 +48,27 @@ export default defineConfig(({ mode }) => {
 				},
 			},
 		},
+		engine: {
+			port: 5000,
+			build: {
+				outDir: path.resolve(__dirname, `dist/${app}`),
+				emptyOutDir: true,
+				cssCodeSplit: false,
+				assetsInlineLimit: 10_000_000,
+				rollupOptions: {
+					input: path.resolve(root, 'index.tsx'),
+					plugins: [polyfillNode()],
+					output: {
+						inlineDynamicImports: true,
+						manualChunks: undefined,
+						entryFileNames: `bundle.js`,
+						chunkFileNames: `bundle.js`,
+						assetFileNames: `[name][extname]`,
+						format: 'es',
+					},
+				},
+			},
+		},
 	};
 
 	return {
@@ -64,6 +85,7 @@ export default defineConfig(({ mode }) => {
 			alias: {
 				editor: path.resolve(__dirname, 'src/apps/editor'),
 				viewer: path.resolve(__dirname, 'src/apps/viewer'),
+				engine: path.resolve(__dirname, 'src/apps/engine'),
 				components: path.resolve(__dirname, 'src/components'),
 				helpers: path.resolve(__dirname, 'src/helpers'),
 				hooks: path.resolve(__dirname, 'src/hooks'),
@@ -85,10 +107,11 @@ export default defineConfig(({ mode }) => {
 				assert: 'vite-plugin-node-polyfills/polyfills/assert',
 				zlib: 'vite-plugin-node-polyfills/polyfills/zlib',
 				constants: 'vite-plugin-node-polyfills/polyfills/constants',
+				'@tanstack/react-query': path.resolve('./node_modules/@tanstack/react-query'),
 			},
 		},
 		optimizeDeps: {
-			include: ['buffer', 'process', 'crypto', 'stream', 'util'],
+			include: ['buffer', 'process', 'crypto', 'stream', 'util', '@tanstack/react-query', '@tanstack/react-query-persist-client'],
 		},
 		build: config[app].build,
 		server: {
