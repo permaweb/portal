@@ -72,6 +72,12 @@ export const SearchInputWrapper = styled.div`
 	}
 `;
 
+export const SearchOutputWrapper = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
+`;
+
 export const IndicatorWrapper = styled.div`
 	width: fit-content;
 	display: flex;
@@ -138,23 +144,40 @@ export const PurchaseActionWrapper = styled.div`
 	gap: 15px;
 `;
 
-export const PurchaseAction = styled.button<{ active: boolean }>`
-	height: 115px;
+export const PurchaseAction = styled.div<{ disabled: boolean; active: boolean }>`
+	height: 125px;
 	width: 100%;
-	padding: 16.5px 15px 15px 15px;
+	padding: 15px;
 	text-align: left;
 	display: flex;
 	flex-direction: column;
+	justify-content: space-between;
 	gap: 30px;
+	cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
+	pointer-events: ${(props) => (props.disabled ? 'none' : 'all')};
 
 	background: ${(props) =>
-		props.active ? props.theme.colors.button.alt1.background : props.theme.colors.button.primary.background};
+		props.active
+			? props.theme.colors.button.alt1.background
+			: props.disabled
+			? props.theme.colors.button.primary.disabled.background
+			: props.theme.colors.button.primary.background};
 	border: 1px solid
-		${(props) => (props.active ? props.theme.colors.button.alt1.background : props.theme.colors.button.primary.border)};
+		${(props) =>
+			props.active
+				? props.theme.colors.button.alt1.background
+				: props.disabled
+				? props.theme.colors.button.primary.disabled.border
+				: props.theme.colors.button.primary.border};
 	border-radius: ${STYLING.dimensions.radius.primary};
 
 	p {
-		color: ${(props) => (props.active ? props.theme.colors.button.alt1.color : props.theme.colors.font.primary)};
+		color: ${(props) =>
+			props.active
+				? props.theme.colors.button.alt1.color
+				: props.disabled
+				? props.theme.colors.button.primary.disabled.color
+				: props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.base};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		line-height: 1.5;
@@ -163,7 +186,12 @@ export const PurchaseAction = styled.button<{ active: boolean }>`
 	}
 
 	span {
-		color: ${(props) => (props.active ? props.theme.colors.button.alt1.color : props.theme.colors.font.alt1)};
+		color: ${(props) =>
+			props.active
+				? props.theme.colors.button.alt1.color
+				: props.disabled
+				? props.theme.colors.button.primary.disabled.color
+				: props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		line-height: 1.5;
@@ -174,20 +202,18 @@ export const PurchaseAction = styled.button<{ active: boolean }>`
 
 	&:hover {
 		background: ${(props) =>
-			props.active ? props.theme.colors.button.alt1.background : props.theme.colors.button.primary.active.background};
+			props.active
+				? props.theme.colors.button.alt1.background
+				: props.disabled
+				? props.theme.colors.button.primary.disabled.background
+				: props.theme.colors.button.primary.active.background};
 		border: 1px solid
 			${(props) =>
-				props.active ? props.theme.colors.button.alt1.background : props.theme.colors.button.primary.active.border};
-	}
-
-	&:disabled {
-		background: ${(props) => props.theme.colors.button.primary.disabled.background};
-		border: 1px solid ${(props) => props.theme.colors.button.primary.disabled.border};
-
-		p,
-		span {
-			color: ${(props) => props.theme.colors.button.primary.disabled.color};
-		}
+				props.active
+					? props.theme.colors.button.alt1.background
+					: props.disabled
+					? props.theme.colors.button.primary.disabled.border
+					: props.theme.colors.button.primary.active.border};
 	}
 `;
 

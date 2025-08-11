@@ -138,7 +138,7 @@ TTL: 300
 
 - **Blog Subdomain**: Use `blog.yourdomain.com` for content
 - **Portal Subdomain**: Use `portal.yourdomain.com` for the full portal
-- **Topic Subdomains**: Consider topic-specific subdomains
+- **Content Subdomains**: Consider content-specific subdomains
 
 #### Troubleshooting Domain Issues
 

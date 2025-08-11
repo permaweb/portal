@@ -80,7 +80,7 @@ Links allow you to create navigation menus and direct readers to important pages
 
 1. Home
 2. About
-3. Categories (if you have main topic areas)
+3. Categories (if you have main content areas)
 4. Contact
 
 **Secondary Navigation:**

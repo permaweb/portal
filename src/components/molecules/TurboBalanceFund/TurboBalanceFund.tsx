@@ -66,6 +66,7 @@ function CheckoutForm(props: {
 					if (paymentResponse && paymentResponse.paymentIntent && paymentResponse.paymentIntent.status) {
 						if (paymentResponse.paymentIntent.status === 'succeeded') {
 							addNotification(language?.successfullyFunded, 'success');
+							arProvider.refreshTurboBalance();
 							props.handleClose();
 						} else {
 							addNotification(language?.errorOccurred, 'warning');
