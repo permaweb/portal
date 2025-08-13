@@ -2,9 +2,7 @@ name: publish
 
 on:
   push:
-    branches:
-      - 'main'
-      - 'staging'
+    branches: ['main', 'staging']
 
 jobs:
   publish:
@@ -12,11 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      NODE_OPTIONS: --max-old-space-size=6144
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: '22.x'
+          cache: 'npm'
       - run: npm run clean:install
       - run: npm run deploy:editor:main
       - run: npm run deploy:viewer
@@ -26,11 +26,13 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      NODE_OPTIONS: --max-old-space-size=6144
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: '22.x'
+          cache: 'npm'
       - run: npm run clean:install
       - run: npm run deploy:editor:staging
       - run: npm run deploy:viewer
