@@ -20,7 +20,7 @@ export const PostWrapper = styled.div`
 	}
 
 	&:hover {
-		background: ${(props) => props.theme.colors.container.alt1.background};
+		background: ${(props) => props.theme.colors.container.alt2.background};
 	}
 `;
 

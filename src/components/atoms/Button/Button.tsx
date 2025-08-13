@@ -142,7 +142,7 @@ export default function Button(props: {
 					height={props.height}
 					className={props.className || ''}
 					target={props.target ?? ''}
-					style={{ pointerEvents: props.disabled ? 'none' : 'auto', opacity: props.disabled ? 0.6 : 1 }}
+					style={{ pointerEvents: props.disabled ? 'none' : 'auto' }}
 				>
 					{getLabel()}
 				</StyledButton>

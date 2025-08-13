@@ -109,7 +109,7 @@ The Media Library is your central hub for managing all images, videos, and other
 
 - **Descriptive Names**: Use clear, descriptive filenames
 - **Consistent Naming**: Develop a naming convention (e.g., `post-title-image-01.jpg`)
-- **Folder Strategy**: Mentally organize files by date, topic, or post
+- **Folder Strategy**: Mentally organize files by date, content type, or post
 - **Version Control**: Keep track of different versions of the same image
 
 **Image Guidelines:**

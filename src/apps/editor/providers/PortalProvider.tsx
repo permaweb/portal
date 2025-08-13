@@ -97,25 +97,28 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 		if (!hasFetchedMeta.current) {
 			hasFetchedMeta.current = true;
-
-			(async () => {
-				const updated = await Promise.all(
-					profilePortals.map(async (p) => {
-						const cached = getCachedPortal(p.id);
-						const data = cached ?? (await permawebProvider.libs.getZone(p.id));
-						return {
-							...p,
-							name: data.name ?? data.store?.name ?? 'None',
-							logo: data.logo ?? data.store?.logo ?? 'None',
-							icon: data.icon ?? data.store?.icon ?? 'None',
-							users: data.users ?? getPortalUsers(data.roles),
-						};
-					})
-				);
-				setPortals(updated);
-			})();
+			if (profilePortals.length > 0) {
+				(async () => {
+					const updated = await Promise.all(
+						profilePortals.map(async (portal: PortalHeaderType) => {
+							const cached = getCachedPortal(portal.id);
+							const data = cached ?? (await permawebProvider.libs.getZone(portal.id));
+							return {
+								...portal,
+								name: data.name ?? data.store?.name ?? 'None',
+								logo: data.logo ?? data.store?.logo ?? 'None',
+								icon: data.icon ?? data.store?.icon ?? 'None',
+								users: data.users ?? getPortalUsers(data.roles),
+							};
+						})
+					);
+					setPortals(updated);
+				})();
+			} else {
+				setPermissions(null);
+			}
 		}
-	}, [arProvider.walletAddress, permawebProvider.profile?.portals]);
+	}, [arProvider.walletAddress, permawebProvider.profile?.portals, permawebProvider.profile?.invites]);
 
 	React.useEffect(() => {
 		if (portals?.length > 0) {
@@ -127,8 +130,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					handlePortalSetup(null);
 				}
 			}
-		} else {
-			setPermissions(null);
 		}
 	}, [location.pathname, portals, currentId]);
 
@@ -213,6 +214,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	function getUserPermissions(address: string, portal: PortalDetailType) {
 		const user = portal.users.find((user: PortalUserType) => user.address === address);
 
+		if (!user) return { base: false };
+
 		if (user?.roles) {
 			const hasPermission = (permissonKeys: string | string[]) => {
 				const keys = Array.isArray(permissonKeys) ? permissonKeys : [permissonKeys];
@@ -220,7 +223,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				return user.roles.some((role) => allowedRoles.includes(role));
 			};
 
-			const isExternalContributor = user.roles.length === 1 && user.roles[0] === 'External-Contributor';
+			const isExternalContributor = user.roles.length === 1 && user.roles[0] === 'ExternalContributor';
 
 			return {
 				base: true,
@@ -238,7 +241,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	function handlePortalSetup(portal: PortalDetailType) {
 		setCurrent(portal);
-
 		if (permawebProvider.profile?.id && portal?.users) {
 			setPermissions(getUserPermissions(permawebProvider.profile.id, portal));
 		}
@@ -265,10 +267,24 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			if (user.address === permawebProvider.profile?.id) {
 				profile = { ...permawebProvider.profile };
 			} else {
-				profile = getCachedProfile(user.address);
-				if (!profile) {
-					profile = await permawebProvider.libs.getProfileById(user.address);
-					cacheProfile(user.address, profile);
+				const cachedProfile = getCachedProfile(user.address);
+				if (cachedProfile) profile = cachedProfile;
+
+				if (profile?.id) {
+					setUsersByPortalId((prev) => ({
+						...prev,
+						[profile.id]: profile,
+					}));
+				}
+
+				try {
+					const freshProfile = await permawebProvider.libs.getProfileById(user.address);
+					if (freshProfile) {
+						profile = freshProfile;
+						cacheProfile(user.address, profile);
+					}
+				} catch (e: any) {
+					console.error(e);
 				}
 			}
 

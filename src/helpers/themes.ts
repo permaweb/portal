@@ -521,6 +521,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 		indicator: {
 			base: currentTheme.positive2,
 			active: currentTheme.positive1,
+			neutral: currentTheme.caution1,
 			alt1: currentTheme.negative2,
 		},
 		link: {

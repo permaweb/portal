@@ -21,7 +21,7 @@ export const Label = styled.div<{ disabled: boolean }>`
 `;
 
 export const Dropdown = styled.button<{ active: boolean }>`
-	height: 35px;
+	height: ${STYLING.dimensions.form.small};
 	width: 100%;
 	text-align: left;
 	padding: 0 12.5px;

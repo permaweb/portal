@@ -878,6 +878,7 @@ export default function Categories(props: {
 								type={'primary'}
 								label={language.addCategory}
 								handlePress={() => setShowCategoryAdd(true)}
+								disabled={!portalProvider.permissions?.updatePortalMeta}
 								icon={ASSETS.add}
 								iconLeftAlign
 								height={40}

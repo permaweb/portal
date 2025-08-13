@@ -31,7 +31,7 @@ This documentation will guide you through every aspect of the Portal platform. Y
 **Portal Setup:**
 
 - Set up your portal and configure initial settings
-- Create categories and topics for content organization
+- Create categories and tags for content organization
 - Manage navigation links and portal structure
 - Upload and organize media assets
 
@@ -40,7 +40,7 @@ This documentation will guide you through every aspect of the Portal platform. Y
 - Use the block-based editor to create rich content
 - Publish articles, images, and multimedia content
 - Manage drafts and publication schedules
-- Organize content with categories and topics
+- Organize content with categories and tags
 
 **Design Customization:**
 
@@ -69,7 +69,7 @@ This documentation will guide you through every aspect of the Portal platform. Y
 
 1. **Connect Your Wallet**: Portal uses Arweave wallets for authentication and content ownership
 2. **Create Your Portal**: Set up your portal with basic information and preferences
-3. **Configure Settings**: Add categories, topics, and navigation links
+3. **Configure Settings**: Add categories, tags, and navigation links
 4. **Customize Design**: Choose colors, themes, and branding elements
 5. **Create Content**: Start publishing with the block-based editor
 
@@ -87,7 +87,7 @@ The Portal dashboard is organized into six main sections:
 
 - Categories: Organize your content into logical sections
 - Links: Manage navigation and external links
-- Topics: Create tags for detailed content organization
+- Tags: Create tags for detailed content organization
 - Media: Upload and manage images and videos
 
 **Design:**

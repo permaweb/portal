@@ -16,7 +16,7 @@ module.exports = {
 					{
 						groups: [
 							['^react', '^@?\\w'],
-							['arweave', '@permaweb/libs', '^@permaweb/aoconnect', '^@permaweb/stampjs', '^@?\\w'],
+							['arweave', '@ar.io/sdk', '@permaweb/libs', '^@permaweb/aoconnect', '^@permaweb/stampjs', '^@?\\w'],
 							['^(@|editor)(/.*|$)', '^(@|viewer)(/.*|$)'],
 							[
 								'^(@|components)(/.*|$)',
