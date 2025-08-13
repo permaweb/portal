@@ -5,7 +5,7 @@ import Permaweb, { Types } from '@permaweb/libs';
 import { connect, createSigner } from '@permaweb/aoconnect';
 
 import { Loader } from 'components/atoms/Loader';
-import { STORAGE } from 'helpers/config';
+import { AO_NODE_URL, STORAGE } from 'helpers/config';
 
 import { useArweaveProvider } from './ArweaveProvider';
 import { useLanguageProvider } from './LanguageProvider';
@@ -48,6 +48,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 			ao: connect({ MODE: 'legacy' }),
 			arweave: Arweave.init({}),
 			signer: arProvider.wallet ? createSigner(arProvider.wallet) : null,
+			node: AO_NODE_URL,
 		};
 
 		setDeps(dependencies);
@@ -56,20 +57,27 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		(async function () {
-			if (arProvider.walletAddress) {
-				const cachedProfile = getCachedProfile(arProvider.walletAddress);
+			if (!arProvider.walletAddress) return;
 
-				if (cachedProfile) {
-					if (cachedProfile.status && cachedProfile.status === 'pending') {
-						setProfilePending(true);
-						setProfile(cachedProfile);
-						return;
-					}
+			const cachedProfile = getCachedProfile(arProvider.walletAddress);
 
-					setProfile(cachedProfile);
+			if (cachedProfile) {
+				if (cachedProfile.status === 'pending') {
+					setProfilePending(true);
+				} else {
+					setProfilePending(false);
 				}
+				setProfile(cachedProfile);
+			}
 
-				setProfile(await resolveProfile(arProvider.walletAddress));
+			try {
+				const freshProfile = await resolveProfile(arProvider.walletAddress);
+				if (freshProfile) {
+					setProfile(freshProfile);
+					if (profilePending) setProfilePending(false);
+				}
+			} catch (e: any) {
+				console.error('Failed to fetch fresh profile:', e);
 			}
 		})();
 	}, [arProvider.walletAddress]);
@@ -85,11 +93,10 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 						setProfile(fetchedProfile);
 						cacheProfile(arProvider.walletAddress, fetchedProfile);
+						setProfilePending(false);
 					} catch (e: any) {
 						console.error(e);
 					}
-
-					setProfilePending(false);
 				}
 			}
 		})();
@@ -145,7 +152,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 			return profileToUse;
 		} catch (e: any) {
-			console.error('fetchError', e);
+			console.error(e);
 		}
 	}
 

@@ -216,6 +216,7 @@ export default function Topics(props: {
 									type={'primary'}
 									label={language.addTopic}
 									handlePress={() => setShowTopicAdd(true)}
+									disabled={!portalProvider.permissions?.updatePortalMeta}
 									icon={ASSETS.add}
 									iconLeftAlign
 									height={40}

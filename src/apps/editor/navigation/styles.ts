@@ -115,6 +115,7 @@ export const PanelContent = styled.div<{ open: boolean; showText?: boolean }>`
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		border: 1px solid transparent;
 		border-radius: ${STYLING.dimensions.radius.primary};
+		white-space: nowrap;
 		transition: all 100ms;
 		padding: 0 8.5px;
 		svg {
@@ -156,6 +157,7 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		border: 1px solid ${(props) => props.theme.colors.border.primary};
 		border-radius: ${STYLING.dimensions.radius.primary};
+		white-space: nowrap;
 		transition: all 100ms;
 		padding: 0 8.5px;
 		svg {

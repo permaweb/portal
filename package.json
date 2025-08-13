@@ -20,7 +20,7 @@
 		"@ar.io/sdk": "^3.15.0",
 		"@hello-pangea/dnd": "^17.0.0",
 		"@permaweb/aoconnect": "^0.0.85",
-		"@permaweb/libs": "0.0.45",
+		"@permaweb/libs": "0.0.50",
 		"@stripe/react-stripe-js": "^3.5.1",
 		"@stripe/stripe-js": "^6.1.0",
 		"arweave": "^1.15.5",

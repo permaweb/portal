@@ -36,12 +36,13 @@ export default function Portal() {
 						label={language?.goToSite}
 						handlePress={() => window.open(getTxEndpoint(portalProvider.current.id))}
 						disabled={!portalProvider.current}
+						icon={ASSETS.site}
 						iconLeftAlign
 					/>,
 					<Button
 						type={'alt1'}
 						label={language?.createPost}
-						link={URLS.postCreateArticle(portalProvider.current.id)}
+						handlePress={() => navigate(URLS.postCreateArticle(portalProvider.current.id))}
 						disabled={unauthorized || !portalProvider.current}
 						icon={ASSETS.add}
 						iconLeftAlign

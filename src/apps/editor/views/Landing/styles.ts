@@ -242,6 +242,14 @@ export const PortalActionWrapper = styled.div`
 			border-top: 1px solid ${(props) => props.theme.colors.border.alt1} !important;
 		}
 
+		&:focus {
+			border-top: 1px solid ${(props) => props.theme.colors.border.alt1} !important;
+		}
+
+		&:hover {
+			border-top: 1px solid ${(props) => props.theme.colors.border.alt1} !important;
+		}
+
 		&:disabled {
 			background: ${(props) => props.theme.colors.container.alt1.background} !important;
 			border-top: none !important;
@@ -257,10 +265,11 @@ export const ModalWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
-	padding: 0 20px 20px 20px;
+	padding: 0 0 20px 0;
 `;
 
 export const InvitesDescription = styled.div`
+	padding: 0 20px;
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};

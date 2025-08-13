@@ -31,7 +31,7 @@ export default function Post(props: { post: PortalAssetType }) {
 	React.useEffect(() => {
 		(async function () {
 			if (!fetched && props.post.creator) {
-				await portalProvider.fetchPortalUserProfile({
+				portalProvider.fetchPortalUserProfile({
 					address: props.post.creator,
 				});
 			}

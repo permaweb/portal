@@ -49,8 +49,8 @@ export const UsersWrapper = styled.div<{ type: ViewLayoutType }>`
 		}
 
 		&:first-child {
-			border-top-left-radius: ${STYLING.dimensions.radius.alt2};
-			border-top-right-radius: ${STYLING.dimensions.radius.alt2};
+			border-top-left-radius: ${(props) => (props.type === 'detail' ? STYLING.dimensions.radius.alt2 : '0')};
+			border-top-right-radius: ${(props) => (props.type === 'detail' ? STYLING.dimensions.radius.alt2 : '0')};
 		}
 
 		&:last-child {
@@ -61,7 +61,7 @@ export const UsersWrapper = styled.div<{ type: ViewLayoutType }>`
 `;
 
 export const UserWrapper = styled.div`
-	padding: 15px;
+	overflow: hidden;
 `;
 
 export const WrapperEmpty = styled.div<{ type: ViewLayoutType }>`
