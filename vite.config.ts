@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
 		editor: {
 			port: 3000,
 			build: {
+				sourcemap: false,
 				outDir: path.resolve(__dirname, `dist/${app}`),
 				emptyOutDir: true,
 				rollupOptions: {
@@ -28,6 +29,7 @@ export default defineConfig(({ mode }) => {
 		viewer: {
 			port: 4000,
 			build: {
+				sourcemap: false,
 				outDir: path.resolve(__dirname, `dist/${app}`),
 				emptyOutDir: true,
 				cssCodeSplit: false,
@@ -56,7 +58,7 @@ export default defineConfig(({ mode }) => {
 				protocolImports: true,
 			}),
 			react(),
-			viteSingleFile(),
+			...(app === 'viewer' ? [viteSingleFile()] : []),
 		],
 		resolve: {
 			alias: {

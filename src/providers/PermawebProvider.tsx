@@ -1,8 +1,8 @@
 import React from 'react';
 
 import Arweave from 'arweave';
-import Permaweb, { Types } from '@permaweb/libs';
-import { connect, createSigner } from '@permaweb/aoconnect';
+import Permaweb, { Types } from '@permaweb/libs/browser';
+import { connect, createSigner } from '@permaweb/aoconnect/browser';
 
 import { Loader } from 'components/atoms/Loader';
 import { AO_NODE_URL, STORAGE } from 'helpers/config';
