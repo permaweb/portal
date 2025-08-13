@@ -107,7 +107,13 @@ export default function PortalManager(props: {
 
 					portalProvider.refreshCurrentPortal();
 				} else {
-					const tags = [getBootTag('Name', data.Name), { name: 'Content-Type', value: 'text/html' }];
+					const tags = [
+						getBootTag('Name', data.Name),
+						{ name: 'Content-Type', value: 'text/html' },
+						{ name: 'Data-Protocol', value: 'Permaweb-Zone' },
+						{ name: 'Zone-Type', value: 'Portal' },
+					];
+
 					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
 					if (data.Icon) tags.push(getBootTag('Icon', data.Icon));
 

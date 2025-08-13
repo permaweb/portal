@@ -28,8 +28,8 @@ const en: DocItem[] = [
 				path: 'links',
 			},
 			{
-				name: 'Topics',
-				path: 'topics',
+				name: 'Tags',
+				path: 'tags',
 			},
 			{
 				name: 'Media',
@@ -93,8 +93,8 @@ const es: DocItem[] = [
 				path: 'links',
 			},
 			{
-				name: 'Temas',
-				path: 'topics',
+				name: 'Etiquetas',
+				path: 'Tags',
 			},
 			{
 				name: 'Medios',
@@ -134,10 +134,7 @@ const es: DocItem[] = [
 	},
 ];
 
-// Add more languages as needed (fr, pt, etc.)
-
 export const docsOrder: { [lang: string]: DocItem[] } = {
 	en,
 	es,
-	// Add other languages here
 };

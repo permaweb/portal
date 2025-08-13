@@ -17,6 +17,7 @@ interface ArweaveContextState {
 	walletType: WalletEnum | null;
 	arBalance: number | null;
 	turboBalance: number | null;
+	refreshTurboBalance: () => void;
 	handleConnect: any;
 	handleDisconnect: (redirect: boolean) => void;
 }
@@ -27,6 +28,7 @@ const DEFAULT_CONTEXT = {
 	walletType: null,
 	arBalance: null,
 	turboBalance: null,
+	refreshTurboBalance() {},
 	handleConnect() {},
 	handleDisconnect(_redirect: boolean) {},
 	setWalletModalVisible(_open: boolean) {},
@@ -129,34 +131,57 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		return jsonBalance / 1e12;
 	}
 
-	async function getTurboBalance() {
-		if (wallet) {
-			try {
-				const publicKey = await wallet.getActivePublicKey();
-				const nonce = randomBytes(16).toString('hex');
-				const buffer = Buffer.from(nonce);
+	async function getTurboBalance(): Promise<number | null> {
+		if (!wallet) return null;
 
-				const signature = await wallet.signature(buffer, { name: 'RSA-PSS', saltLength: 32 });
-				const b64UrlSignature = bufferTob64Url(Buffer.from(signature));
+		try {
+			const publicKey = await wallet.getActivePublicKey();
+			const nonce = randomBytes(16).toString('hex');
+			const buffer = Buffer.from(nonce);
 
-				const result = await fetch(getTurboBalanceEndpoint(), {
-					headers: {
-						'x-nonce': nonce,
-						'x-public-key': publicKey,
-						'x-signature': b64UrlSignature,
-					},
-				});
+			const signature = await wallet.signature(buffer, { name: 'RSA-PSS', saltLength: 32 });
+			const b64UrlSignature = bufferTob64Url(Buffer.from(signature));
 
-				if (result.ok) {
-					setTurboBalance(Number((await result.json()).winc));
-				} else {
-					setTurboBalance(0);
-				}
-			} catch (e: any) {
-				console.error(e);
-				setTurboBalance(null);
+			const result = await fetch(getTurboBalanceEndpoint(), {
+				headers: {
+					'x-nonce': nonce,
+					'x-public-key': publicKey,
+					'x-signature': b64UrlSignature,
+				},
+			});
+
+			if (!result.ok) {
+				setTurboBalance(0);
+				return 0;
 			}
+
+			const { winc } = await result.json();
+			const newBal = Number(winc);
+			setTurboBalance(newBal);
+			return newBal;
+		} catch (e: any) {
+			console.error(e);
+			setTurboBalance(null);
+			return null;
 		}
+	}
+
+	async function refreshTurboBalance(maxTries = 10): Promise<number | null> {
+		const initial = turboBalance;
+		let current: number | null = initial;
+
+		for (let attempt = 1; attempt <= maxTries; attempt++) {
+			current = await getTurboBalance();
+			console.log(current);
+
+			if (current !== null && current !== initial) {
+				return current;
+			}
+
+			await new Promise((resolve) => setTimeout(resolve, 500));
+		}
+
+		return current;
 	}
 
 	return (
@@ -169,6 +194,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				handleConnect,
 				handleDisconnect,
 				turboBalance,
+				refreshTurboBalance,
 			}}
 		>
 			{props.children}

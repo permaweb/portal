@@ -15,6 +15,8 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
+// TODO: Run a pre flight check to see if the profile exists
+// Show pending status if not yet on the gateway
 export default function UserManager(props: { user?: any; handleClose: () => void }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -31,11 +33,21 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
 
+	const roleDescriptions = {
+		Admin: language?.roleDescriptionAdmin || [],
+		Moderator: language?.roleDescriptionModerator || [],
+		Contributor: language?.roleDescriptionContributor || [],
+		ExternalContributor: language?.roleDescriptionExternalContributor || [],
+	};
+
 	React.useEffect(() => {
 		if (portalProvider.current?.roleOptions) {
-			const options = Object.values(portalProvider.current.roleOptions).map((role) => {
-				return { id: role, label: formatRoleLabel(role) };
-			});
+			const roleOrder = Object.keys(roleDescriptions);
+
+			const options = Object.values(portalProvider.current.roleOptions)
+				.map((role) => ({ id: role, label: formatRoleLabel(role) }))
+				.sort((a, b) => roleOrder.indexOf(a.id) - roleOrder.indexOf(b.id));
+
 			setRoleOptions(options);
 		}
 	}, [portalProvider.current?.roleOptions]);
@@ -85,8 +97,11 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				addNotification(`${props.user ? language?.userUpdated : language?.userAdded}!`, 'success');
 				portalProvider.refreshCurrentPortal();
 				props.handleClose();
+				setWalletAddress('');
+				setRole(null);
 			} catch (e: any) {
 				console.error(e);
+				addNotification(e.message ?? 'Error adding user', 'warning');
 			}
 			setLoading(false);
 		}
@@ -113,15 +128,28 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 					options={roleOptions}
 					disabled={loading}
 				/>
+				{role && (
+					<S.InfoWrapper className={'border-wrapper-alt3'}>
+						<span>{`${formatRoleLabel(role.label)} ${language.permissions}`}</span>
+						{roleDescriptions[role.id].map((description: string) => {
+							return <p key={description}>{`· ${description}`}</p>;
+						})}
+					</S.InfoWrapper>
+				)}
+				<S.InfoWrapper className={'border-wrapper-alt3'}>
+					<p>{language.userInviteInfo}</p>
+				</S.InfoWrapper>
 				<S.ActionsWrapper>
 					<Button
-						type={'primary'}
+						type={'alt1'}
 						label={props.user ? language?.save : language?.add}
 						handlePress={handleSubmit}
 						disabled={loading || !walletAddress || !checkValidAddress(walletAddress)}
 						loading={loading}
 						icon={props.user ? null : ASSETS.add}
 						iconLeftAlign
+						height={45}
+						fullWidth
 					/>
 				</S.ActionsWrapper>
 			</S.Wrapper>

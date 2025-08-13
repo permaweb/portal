@@ -3,16 +3,26 @@ import styled, { DefaultTheme } from 'styled-components';
 import { STYLING } from 'helpers/config';
 import { PortalUserRoleType } from 'helpers/types';
 
-export const UserWrapper = styled.div`
+export const UserWrapper = styled.button`
+	width: 100%;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 20px;
+	padding: 15px;
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		flex-direction: column;
 		align-items: flex-start;
+	}
+
+	&:hover {
+		background: ${(props) => props.theme.colors.container.alt2.background};
+	}
+
+	&:disabled {
+		background: ${(props) => props.theme.colors.view.background};
 	}
 `;
 
@@ -39,13 +49,34 @@ export const UserHeader = styled.div`
 
 export const UserDetail = styled.div`
 	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 12.5px;
+	gap: 15px;
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		align-items: flex-start;
 	}
+`;
+
+export const PendingInvite = styled.div`
+	height: 23.5px;
+	display: flex;
+	align-items: center;
+	gap: 7.5px;
+	padding: 1.5px 10px;
+	border-radius: 20px !important;
+
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+`;
+
+export const Indicator = styled.div`
+	height: 10px;
+	width: 10px;
+	background: ${(props) => props.theme.colors.indicator.neutral};
+	border-radius: 50%;
 `;
 
 export const UserActions = styled.div`
@@ -61,7 +92,7 @@ function getRoleBackground(theme: DefaultTheme, role: PortalUserRoleType) {
 			return theme.colors.roles.alt1;
 		case 'Moderator':
 			return theme.colors.roles.alt2;
-		case 'External-Contributor':
+		case 'ExternalContributor':
 			return theme.colors.roles.alt3;
 		default:
 			return theme.colors.roles.alt2;
@@ -69,6 +100,7 @@ function getRoleBackground(theme: DefaultTheme, role: PortalUserRoleType) {
 }
 
 export const UserRole = styled.div<{ role: PortalUserRoleType }>`
+	height: 23.5px;
 	display: flex;
 	align-items: center;
 	justify-content: center;

@@ -34,7 +34,6 @@ export function LanguageProvider(props: LanguageProviderProps) {
 	});
 
 	const handleLanguageChange = (newLanguage: LanguageEnum) => {
-		console.log(newLanguage);
 		setCurrent(newLanguage);
 		localStorage.setItem('appLanguage', newLanguage);
 	};

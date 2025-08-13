@@ -12,6 +12,7 @@ import { Panel } from 'components/atoms/Panel';
 import { LanguageSelect } from 'components/molecules/LanguageSelect';
 import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
+import { PortalHeaderType } from 'helpers/types';
 import { checkValidAddress, formatAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -32,6 +33,21 @@ export default function Landing() {
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [showInvites, setShowInvites] = React.useState<boolean>(false);
 	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
+	const [pendingPortalId, setPendingPortalId] = React.useState<string | null>(null);
+
+	React.useEffect(() => {
+		if (pendingPortalId && permawebProvider.profile?.portals) {
+			const hasJoinedPortal = permawebProvider.profile.portals.find(
+				(portal: PortalHeaderType) => portal.id === pendingPortalId
+			);
+
+			if (hasJoinedPortal) {
+				navigate(`${URLS.base}${pendingPortalId}`);
+				setLoading(false);
+				setPendingPortalId(null);
+			}
+		}
+	}, [pendingPortalId, permawebProvider.profile?.portals, navigate]);
 
 	async function joinPortal(portalId: string) {
 		if (portalId && permawebProvider.profile?.id) {
@@ -47,12 +63,14 @@ export default function Landing() {
 				);
 
 				console.log(`Profile update: ${profileUpdateId}`);
+
+				setPendingPortalId(portalId);
 				permawebProvider.refreshProfile();
-				navigate(`${URLS.base}${portalId}`);
 			} catch (e: any) {
 				console.error(e);
+				setLoading(false);
+				setPendingPortalId(null);
 			}
-			setLoading(false);
 		}
 	}
 
@@ -182,7 +200,7 @@ export default function Landing() {
 		languageProvider.current,
 	]);
 
-	const invites = React.useMemo(() => {
+	function getInvites() {
 		let header: string = language?.noInvites;
 		let description: string = language?.noInvitesInfo;
 		let content: React.ReactNode | null;
@@ -224,7 +242,7 @@ export default function Landing() {
 				</S.ModalWrapper>
 			</Modal>
 		);
-	}, [arProvider.walletAddress, permawebProvider.profile?.id, portalProvider.invites, languageProvider.current]);
+	}
 
 	return (
 		<>
@@ -275,7 +293,7 @@ export default function Landing() {
 					handleUpdate={null}
 				/>
 			</Panel>
-			{showInvites && invites}
+			{showInvites && getInvites()}
 			{loading && <Loader message={`${language?.loading}...`} />}
 		</>
 	);
