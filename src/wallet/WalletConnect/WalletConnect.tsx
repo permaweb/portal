@@ -47,7 +47,7 @@ function WalletList(props: { handleConnect: any }) {
 	);
 }
 
-export default function WalletConnect(props: { app: 'editor' | 'viewer'; callback?: () => void }) {
+export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callback?: () => void }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();

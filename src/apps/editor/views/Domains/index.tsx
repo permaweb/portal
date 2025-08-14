@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { DomainList } from 'editor/components/organisms/DomainList';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
@@ -9,6 +11,8 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import * as S from './styles';
 
 export default function Domains() {
+	const navigate = useNavigate();
+
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -21,7 +25,7 @@ export default function Domains() {
 					<Button
 						type={'alt1'}
 						label={language.registerDomain}
-						link={URLS.portalDomainsRegister(portalProvider.current?.id)}
+						handlePress={() => navigate(URLS.portalDomainsRegister(portalProvider.current?.id))}
 						icon={ASSETS.domains}
 						iconLeftAlign
 					/>,

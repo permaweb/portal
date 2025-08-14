@@ -118,7 +118,7 @@ export const PostsActionsRequests = styled.div`
 
 export const PostsActionsRequestsHeader = styled.div`
 	display: grid;
-	grid-template-columns: 1.5fr 1.25fr 0.75fr 0.75fr;
+	grid-template-columns: 1.5fr 1fr 1fr 0.5fr;
 	align-items: center;
 	padding: 0 0 7.5px 0;
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
@@ -137,7 +137,7 @@ export const PostsActionsRequestsHeader = styled.div`
 			text-align: right;
 		}
 		&:nth-child(3) {
-			text-align: right;
+			text-align: left;
 		}
 	}
 `;
@@ -151,7 +151,7 @@ export const PostsActionsRequestsBody = styled.div`
 
 export const PostActionRequest = styled.div`
 	display: grid;
-	grid-template-columns: 1.5fr 1.25fr 0.75fr 0.75fr;
+	grid-template-columns: 1.5fr 1fr 1fr 0.5fr;
 	align-items: center;
 
 	p,
@@ -167,13 +167,13 @@ export const PostActionRequest = styled.div`
 		text-overflow: ellipsis;
 	}
 
-	button {
+	#post-request-action {
 		justify-self: flex-end;
 	}
 
 	> * {
 		&:nth-child(3) {
-			text-align: right;
+			text-align: left;
 		}
 	}
 `;
