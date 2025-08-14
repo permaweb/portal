@@ -14,9 +14,10 @@ export const Wrapper = styled.div`
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-align: center;
 	}
-	button {
-		margin: 25px 0 0 0;
-	}
+`;
+
+export const WalletConnect = styled.div`
+	margin: 25px 0 0 0;
 `;
 
 export const Icon = styled.div`

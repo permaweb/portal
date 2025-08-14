@@ -6,8 +6,9 @@ import { User } from 'editor/components/molecules/User';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
-import { Modal } from 'components/atoms/Modal';
+import { Panel } from 'components/atoms/Panel';
 import { ASSETS, URLS } from 'helpers/config';
 import {
 	ArticleStatusType,
@@ -53,50 +54,69 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 	React.useEffect(() => {
 		(async function () {
 			if (requests !== null) return;
-			if (showRequests) {
-				const ids = portalProvider.current?.requests.map((asset: PortalAssetRequestType) => asset.id);
-				if (ids?.length > 0) {
-					try {
-						const gqlResponse = await permawebProvider.libs.getAggregatedGQLData({
-							ids: ids,
-						});
+			if (!showRequests) return;
 
-						const updatedRequests = (gqlResponse ?? []).map((element: GQLNodeResponseType) => {
-							return {
-								id: element.node.id,
-								name: getTagValue(element.node.tags, 'Bootloader-Name'),
-								creatorId: getTagValue(element.node.tags, 'Creator'),
-								dateCreated: (element.node.block?.timestamp * 1000).toString() ?? '-',
+			const ids = portalProvider.current?.requests.map((asset: PortalAssetRequestType) => asset.id);
+
+			if (!ids?.length) {
+				setRequests([]);
+				return;
+			}
+
+			try {
+				const gqlResponse = await permawebProvider.libs.getAggregatedGQLData({ ids });
+
+				const seeded = (gqlResponse ?? []).map((el: GQLNodeResponseType) => ({
+					id: el.node.id,
+					name: getTagValue(el.node.tags, 'Bootloader-Name'),
+					creatorId: getTagValue(el.node.tags, 'Creator'),
+					dateCreated: (el.node.block?.timestamp * 1000).toString() ?? '-',
+				}));
+
+				setRequests(seeded);
+
+				const returnedIds = new Set((gqlResponse ?? []).map((el: GQLNodeResponseType) => el.node.id));
+				const missingIds = ids.filter((id) => !returnedIds.has(id));
+
+				if (missingIds.length > 0) {
+					setLoading(true);
+					let cancelled = false;
+					let remaining = missingIds.length;
+
+					missingIds.forEach(async (id) => {
+						try {
+							const asset = await permawebProvider.libs.getAtomicAsset(id);
+							if (cancelled) return;
+
+							const formatted = {
+								id: asset.id,
+								name: asset.name,
+								creatorId: asset.creator,
+								dateCreated: asset.dateCreated,
 							};
-						});
 
-						setRequests(updatedRequests);
-
-						const returnedIds = (gqlResponse ?? []).map((element: GQLNodeResponseType) => element.node.id);
-						const missingIds = ids.filter((id) => !returnedIds.includes(id));
-
-						if (missingIds.length > 0) {
-							setLoading(true);
-							for (const id of missingIds) {
-								const asset = await permawebProvider.libs.getAtomicAsset(id);
-								const formattedAsset = {
-									id: asset.id,
-									name: asset.name,
-									creatorId: asset.creator,
-									dateCreated: asset.dateCreated,
-								};
-
-								setRequests((prev) => [...prev, formattedAsset]);
+							setRequests((prev) => {
+								const base = prev ?? [];
+								return base.some((r) => r.id === formatted.id) ? base : [...base, formatted];
+							});
+						} catch (e) {
+							console.error('fetch asset failed', id, e);
+						} finally {
+							if (!cancelled && --remaining === 0) {
+								setLoading(false);
 							}
-							setLoading(false);
 						}
-					} catch (e: any) {
-						console.error(e);
-						setRequests([]);
-					}
-				} else {
-					setRequests([]);
+					});
+
+					return () => {
+						cancelled = true;
+						setLoading(false);
+					};
 				}
+			} catch (e: any) {
+				console.error(e);
+				setLoading(false);
+				setRequests((prev) => prev ?? []);
 			}
 		})();
 	}, [requests, showRequests, portalProvider.current?.requests]);
@@ -221,14 +241,21 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 								return (
 									<S.PostActionRequest key={request.id}>
 										<p>{request.name}</p>
-										<User user={{ address: request.creatorId }} />
+										<User user={{ address: request.creatorId }} hideAction />
 										<span>{formatDate(request.dateCreated, 'epoch')}</span>
-										<Button
-											type={'alt4'}
-											label={language?.review}
-											disabled={unauthorized}
-											handlePress={() => handleReviewRedirect(request.id)}
-										/>
+										<div id={'post-request-action'}>
+											<IconButton
+												type={'alt1'}
+												active={false}
+												src={ASSETS.newTab}
+												handlePress={() => handleReviewRedirect(request.id)}
+												disabled={unauthorized}
+												dimensions={{ wrapper: 23.5, icon: 13.5 }}
+												tooltip={'Review Post'}
+												tooltipPosition={'bottom-right'}
+												noFocus
+											/>
+										</div>
 									</S.PostActionRequest>
 								);
 							})}
@@ -259,11 +286,14 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 						</div>
 					)}
 				</S.PostsActionsRequestsWrapper>
-				{showRequests && (
-					<Modal header={language?.requests} handleClose={() => setShowRequests((prev) => !prev)}>
-						<div className={'modal-wrapper'}>{content}</div>
-					</Modal>
-				)}
+				<Panel
+					open={showRequests}
+					header={language?.requests}
+					width={550}
+					handleClose={() => setShowRequests((prev) => !prev)}
+				>
+					<div className={'modal-wrapper'}>{content}</div>
+				</Panel>
 			</>
 		);
 	}

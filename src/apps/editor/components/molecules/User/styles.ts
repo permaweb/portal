@@ -3,14 +3,15 @@ import styled, { DefaultTheme } from 'styled-components';
 import { STYLING } from 'helpers/config';
 import { PortalUserRoleType } from 'helpers/types';
 
-export const UserWrapper = styled.button`
+export const UserWrapper = styled.button<{ hideAction: boolean }>`
 	width: 100%;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 20px;
-	padding: 15px;
+	padding: ${(props) => (props.hideAction ? '0' : '15px')};
+	pointer-events: ${(props) => (props.hideAction ? 'none' : 'all')};
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		flex-direction: column;
@@ -18,7 +19,8 @@ export const UserWrapper = styled.button`
 	}
 
 	&:hover {
-		background: ${(props) => props.theme.colors.container.alt2.background};
+		background: ${(props) =>
+			props.hideAction ? props.theme.colors.view.background : props.theme.colors.container.alt2.background};
 	}
 
 	&:disabled {

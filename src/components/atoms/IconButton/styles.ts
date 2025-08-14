@@ -71,8 +71,12 @@ export const Tooltip = styled.div<{ position: string }>`
 	}}
 
 	span {
-		display: block;
-		line-height: 1.65;
+		display: block !important;
+		line-height: 1.65 !important;
+		color: ${(props) => props.theme.colors.contrast.color} !important;
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		white-space: nowrap !important;
 	}
 `;
 

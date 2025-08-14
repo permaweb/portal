@@ -1,7 +1,7 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { ProfileType } from '@permaweb/libs';
+import { Types } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
@@ -23,7 +23,7 @@ const ALLOWED_BANNER_TYPES = 'image/png, image/jpeg, image/gif';
 const ALLOWED_AVATAR_TYPES = 'image/png, image/jpeg, image/gif';
 
 export default function ProfileManager(props: {
-	profile: ProfileType | null;
+	profile: Types.ProfileType | null;
 	handleClose: () => void;
 	handleUpdate: () => void;
 }) {
@@ -40,6 +40,8 @@ export default function ProfileManager(props: {
 	const [description, setDescription] = React.useState<string>('');
 	const [banner, setBanner] = React.useState<any>(null);
 	const [thumbnail, setThumbnail] = React.useState<any>(null);
+	const [bannerRemoved, setBannerRemoved] = React.useState<boolean>(false);
+	const [thumbnailRemoved, setThumbnailRemoved] = React.useState<boolean>(false);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
@@ -48,14 +50,22 @@ export default function ProfileManager(props: {
 		setUsername(props.profile?.username ?? '');
 		setName(props.profile?.displayName ?? '');
 		setDescription(props.profile?.description ?? '');
-		setBanner(props.profile?.banner && checkValidAddress(props.profile.banner) ? props.profile.banner : null);
-		setThumbnail(
-			props.profile?.thumbnail && checkValidAddress(props.profile.thumbnail) ? props.profile.thumbnail : null
-		);
-	}, [props.profile]);
+
+		if (!bannerRemoved) {
+			setBanner(props.profile?.banner && checkValidAddress(props.profile.banner) ? props.profile.banner : null);
+		}
+		if (!thumbnailRemoved) {
+			setThumbnail(
+				props.profile?.thumbnail && checkValidAddress(props.profile.thumbnail) ? props.profile.thumbnail : null
+			);
+		}
+	}, [props.profile, bannerRemoved, thumbnailRemoved]);
 
 	function handleUpdate(response: string) {
 		permawebProvider.refreshProfile();
+
+		setBannerRemoved(false);
+		setThumbnailRemoved(false);
 
 		if (props.handleUpdate) props.handleUpdate();
 		if (props.handleClose) props.handleClose();
@@ -72,10 +82,9 @@ export default function ProfileManager(props: {
 					username: username,
 					displayName: name,
 					description: description,
+					thumbnail: thumbnailRemoved || thumbnail === null ? 'None' : thumbnail,
+					banner: bannerRemoved || banner === null ? 'None' : banner,
 				};
-
-				if (thumbnail) data.thumbnail = thumbnail;
-				if (banner) data.banner = banner;
 
 				if (props.profile && props.profile.id) {
 					const profileUpdateId = await permawebProvider.libs.updateProfile(data, props.profile.id, (status: any) =>
@@ -121,9 +130,11 @@ export default function ProfileManager(props: {
 						switch (type) {
 							case 'banner':
 								setBanner(event.target.result);
+								setBannerRemoved(false);
 								break;
 							case 'thumbnail':
 								setThumbnail(event.target.result);
+								setThumbnailRemoved(false);
 								break;
 							default:
 								break;
@@ -199,13 +210,19 @@ export default function ProfileManager(props: {
 									<Button
 										type={'primary'}
 										label={language?.removeAvatar}
-										handlePress={() => setThumbnail(null)}
+										handlePress={() => {
+											setThumbnail(null);
+											setThumbnailRemoved(true);
+										}}
 										disabled={loading || !thumbnail}
 									/>
 									<Button
 										type={'primary'}
 										label={language?.removeBanner}
-										handlePress={() => setBanner(null)}
+										handlePress={() => {
+											setBanner(null);
+											setBannerRemoved(true);
+										}}
 										disabled={loading || !banner}
 									/>
 								</S.PActions>

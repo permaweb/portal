@@ -14,6 +14,7 @@ import * as S from './styles';
 export default function User(props: {
 	user: PortalUserType;
 	onInviteDetected?: (userAddress: string, hasPendingInvite: boolean) => void;
+	hideAction?: boolean;
 }) {
 	const portalProvider = usePortalProvider();
 
@@ -36,18 +37,19 @@ export default function User(props: {
 		userProfile?.invites?.find((invite: PortalHeaderType) => invite.id === portalProvider.current?.id) !== undefined;
 
 	React.useEffect(() => {
-		if (props.onInviteDetected) {
+		if (props.onInviteDetected && !props.hideAction) {
 			props.onInviteDetected(props.user.address, invitePending);
 		}
-	}, [props.onInviteDetected, props.user.address, invitePending]);
+	}, [props.onInviteDetected, props.user.address, props.hideAction, invitePending]);
 
 	return (
 		<>
 			<S.UserWrapper
 				key={props.user.address}
 				className={'fade-in'}
-				onClick={() => setShowManageUser((prev) => !prev)}
+				onClick={() => (props.hideAction ? {} : setShowManageUser((prev) => !prev))}
 				disabled={unauthorized}
+				hideAction={props.hideAction}
 			>
 				<S.UserHeader>
 					<Avatar owner={userProfile} dimensions={{ wrapper: 23.5, icon: 15 }} callback={null} />
