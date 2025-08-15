@@ -1,3 +1,14 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Ensure language.ts keys are sorted before commit
+npm run fix:lang
+
+# Optionally run format/lint
+npm run format --silent || true
+
+echo "pre-commit checks complete"
+
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 

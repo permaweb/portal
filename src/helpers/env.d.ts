@@ -4,6 +4,7 @@ import 'styled-components';
 
 interface ImportMetaEnv {
 	readonly VITE_APP: string;
+	readonly VITE_TESTNET?: string;
 }
 
 declare module 'styled-components' {
