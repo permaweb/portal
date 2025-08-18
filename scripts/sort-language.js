@@ -60,9 +60,9 @@ function escapeRegExp(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function findLanguageRawBlock(src) {
-  // Locate the main language object: const languageRaw = { ... }
-  const decl = src.match(/languageRaw\s*=\s*\{/);
+function findlanguageBlock(src) {
+  // Locate the main language object: const language = { ... }
+  const decl = src.match(/language\s*=\s*\{/);
   if (!decl) return null;
   const braceIdx = src.indexOf('{', decl.index);
   const bal = findBalancedBlock(src, braceIdx);
@@ -128,10 +128,10 @@ function run() {
   const original = readFileSafe(FILE);
   let output = original;
 
-  // Identify languageRaw block and locale keys
-  const lang = findLanguageRawBlock(output);
+  // Identify language block and locale keys
+  const lang = findlanguageBlock(output);
   if (!lang) {
-    console.error('Could not locate languageRaw object in language.ts');
+    console.error('Could not locate language object in language.ts');
   } else {
     const langBlock = output.slice(lang.start, lang.end + 1);
     const localeRe = /\n[ \t]*([a-zA-Z_\-]+):\s*\{/g;
@@ -177,7 +177,7 @@ function run() {
     // Now process all other locales present
     for (const locale of others) {
       // Re-find block fresh in the latest output each iteration
-      const langNow = findLanguageRawBlock(output);
+      const langNow = findlanguageBlock(output);
       if (!langNow) break;
       const sectionRe = new RegExp(`\n[ \t]*${escapeRegExp(locale)}:\\s*\\{`);
       const sectionMatch = output.slice(langNow.start, langNow.end + 1).match(sectionRe);
