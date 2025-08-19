@@ -5,6 +5,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
+import { Checkbox } from 'components/atoms/Checkbox';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
@@ -17,10 +18,14 @@ import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
+import { Slider } from 'components/atoms/Slider';
+import { Select } from 'components/atoms/Select';
 
 function Color(props: {
 	label: string;
 	value: string;
+	basics: any;
+	scheme: string;
 	onChange: (newColor: string) => void;
 	disabled?: boolean;
 	loading: boolean;
@@ -34,9 +39,21 @@ function Color(props: {
 	const [value, setValue] = React.useState<string | null>(null);
 	const [showSelector, setShowSelector] = React.useState<boolean>(false);
 
+	function getColor(basics: any, value: string) {
+    switch(value) {
+      case 'primary': return basics.primary[props.scheme];
+      case 'secondary': return basics.secondary[props.scheme];
+      case 'background': return basics.background[props.scheme];
+      case 'text': return basics.text[props.scheme];
+      case 'border': return basics.border[props.scheme];
+      default: return value;
+    }
+  }
+
 	React.useEffect(() => {
 		if (props.value) {
-			setValue(parseRgbStringToHex(props.value));
+			const absoluteValue = getColor(props.basics, props.value);
+			setValue(parseRgbStringToHex(absoluteValue));
 		}
 	}, [props.value]);
 
@@ -60,6 +77,15 @@ function Color(props: {
 		return `${r},${g},${b}`;
 	}
 
+	function getColorContrast(hexString: string){
+		const num = parseInt(hexString.replace('#',''), 16)
+		const r = (num >> 16) & 255
+		const g = (num >> 18) & 255
+		const b = num & 255
+		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+		return luminance > 0.5 ? 'black' : 'white'
+	}
+
 	return (
 		<>
 			<S.ColorWrapper>
@@ -70,10 +96,10 @@ function Color(props: {
 					height={props.height}
 					width={props.width}
 					maxWidth={props.maxWidth}
-				/>
-				<S.ColorTooltip className={'info'}>
-					<span>{`${props.label} (${value})`}</span>
-				</S.ColorTooltip>
+					text={value && getColorContrast(value)}
+				>
+					<span>{`${value}`}</span>
+				</S.ColorBody>
 			</S.ColorWrapper>
 			{showSelector && (
 				<Modal header={language?.colorPicker} handleClose={() => setShowSelector(false)}>
@@ -116,6 +142,214 @@ function Color(props: {
 	);
 }
 
+function ThemeSection(props) {
+	const { theme, setTheme, name, setName, section, loading } = props;
+
+	const order = ['text', 'hover', 'background', 'primary', 'secondary']
+	const sortedSection = Object.fromEntries([
+		...(order.map(k => [k, theme[section]?.colors?.[k]]).filter(([_, v]) => v !== undefined)),
+		...Object.entries(theme[section]?.colors || {}).filter(([k]) => !order.includes(k))
+	])
+
+	function handleThemeChange(section: string, type: string, scheme: string | null, key: string, newValue: string) {
+		const updatedTheme = {
+			...props.theme,
+			[section]: {
+				...props.theme[section],
+				[type]: {
+					...props.theme[section][type],
+					[key.toLowerCase()]: {
+						...props.theme[section][type][key.toLowerCase()],
+						...(scheme ? { [scheme]: newValue } : newValue)
+					}
+				}
+			}
+		}
+
+		setTheme(updatedTheme);
+		// if (props.published) props.onThemeChange(updatedTheme, false);
+	}
+
+	return (
+		<S.ThemeSection colors={theme.basics.colors} preferences={theme.basics.preferences}>
+			<span>{section.toUpperCase()}</span>
+			{/* JSON.stringify(theme.basics.preferences) */}
+				{section === 'basics' && (
+					<S.GridWrapper id="GridWrapper">
+						<S.GridRows>
+							<S.GridRow>
+								<S.ThemeKey style={{ flex: 1}}>Name</S.ThemeKey>
+								<S.ThemeValue style={{ flex: 2.5, padding:0 }}>
+									<FormField 
+										value={theme.name}
+										onChange={() => setName(name)}
+										invalid={false}
+										hideErrorMessage={true}
+									/>
+								</S.ThemeValue>
+							</S.GridRow>
+							{/*
+							<S.GridRow id="GridRow">
+								<S.ThemeKey style={{ flex: 1}}>Border radius</S.ThemeKey>
+								<S.ThemeValue style={{ flex: 2.5, padding:0 }}>
+									<Slider 
+										value={theme.basics.preferences.borderRadius}
+										minValue={0}
+										maxValue={12}											
+										handleChange={() => handleThemeChange('basics', 'preferences', null, 'borderRadius', theme.basics.preferences.borderRadius)}
+										disabled={false}
+										invalid={false}
+										label={'0'}
+									/>
+								</S.ThemeValue>
+							</S.GridRow>
+							*/}
+						</S.GridRows>
+					</S.GridWrapper>
+				)}
+			<S.ThemeRowHeader>
+				<S.ThemeLight colors={theme.basics.colors}>
+					<S.ThemeKey />
+					<S.ThemeValue></S.ThemeValue>
+				</S.ThemeLight>
+				<S.ThemeDark colors={theme.basics.colors}>
+					<S.ThemeKey />
+					<S.ThemeValue />
+				</S.ThemeDark>
+			</S.ThemeRowHeader>
+			{Object.entries(sortedSection).map(([key, value]) => {
+
+				return (			
+					<>					
+					<S.ThemeRow>
+						<S.ThemeLight colors={theme.basics.colors}>
+							<S.ThemeKey>
+								{key.charAt(0).toUpperCase() + key.slice(1)}
+							</S.ThemeKey>
+							<S.ThemeValue>
+								<Color
+									key={key}
+									label={key}
+									value={value.light}
+									basics={theme.basics.colors}
+									scheme="light"
+									onChange={(newColor) => handleThemeChange('basics', 'colors', 'light', key, newColor)}
+									loading={loading}
+									// disabled={unauthorized}
+								/>
+							</S.ThemeValue>
+						</S.ThemeLight>
+						<S.ThemeDark colors={theme.basics.colors}>
+							<S.ThemeKey>
+								{key.charAt(0).toUpperCase() + key.slice(1)}
+							</S.ThemeKey>
+							<S.ThemeValue>
+								<Color
+									key={key}
+									label={key}
+									value={value.dark}
+									basics={theme.basics.colors}
+									scheme="dark"
+									// onChange={(newColor) => handleThemeChange(key, newColor)}
+									loading={loading}
+									// disabled={unauthorized}
+								/>
+							</S.ThemeValue>
+						</S.ThemeDark>
+					</S.ThemeRow>
+					</>
+				)	
+							
+			})
+			}
+			
+			<S.ThemeRowFooter>
+				<S.ThemeLight colors={theme.basics.colors}>
+					<S.ThemeKey />
+					<S.ThemeValue />
+				</S.ThemeLight>
+				<S.ThemeDark colors={theme.basics.colors}>
+					<S.ThemeKey />
+					<S.ThemeValue />
+				</S.ThemeDark>
+			</S.ThemeRowFooter>
+			<S.ThemePreview>
+			
+			</S.ThemePreview>
+		</S.ThemeSection>		
+	)
+}
+
+function Theme(props: {
+	theme: any,
+	published: any,
+	loading: boolean
+}) {
+	const portalProvider = usePortalProvider();
+	// const { theme, published, loading } = props;
+	const [showExpertMode, setShowExpertMode] = React.useState(false);
+	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme[0]);
+	const [name, setName] = React.useState<string>(props.theme.name ?? '-');
+
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+
+	React.useEffect(() => {
+		setTheme(props.theme[0]);
+		setName(props.theme.name);
+		// setScheme(props.theme.scheme);
+	}, [props.theme]);
+
+	const order = ['basics', 'header', 'navigation', 'content', 'footer', 'card']
+	const sortedTheme = Object.fromEntries([
+		...(order.map(k => [k, theme[k]]).filter(([_, v]) => v !== undefined)),
+		...Object.entries(theme || {}).filter(([k]) => !order.includes(k))
+	])
+
+
+	return (
+		<S.ThemeWrapper id="ThemeWrapper">
+			<Select 
+				activeOption={{ id: sortedTheme.name, label: sortedTheme.name }}
+				setActiveOption={() => {}}
+				options={[{ id: sortedTheme.name, label: sortedTheme.name }]}
+				disabled={false}
+			/>
+			<S.Theme>
+				<ThemeSection
+					theme={theme}
+					setTheme={setTheme}
+					section="basics"
+					loading={props.loading}
+				/>
+				{/*
+				Expert mode 
+					<Checkbox
+						checked={showExpertMode}
+						handleSelect={() => setShowExpertMode(!showExpertMode)}
+						// disabled={currentPost.editor?.loading?.active}
+					/>
+				*/}
+				<S.ThemeSectionWrapper $show={showExpertMode}>					
+					{Object.entries(sortedTheme).map(([key]) => {
+						if (key === 'basics' || key === 'name' || key === 'active') return null
+						return (
+							<ThemeSection
+								key={key}
+								theme={sortedTheme}
+								setTheme={setTheme}
+								section={key}
+								loading={props.loading}
+							/>
+						)
+					})}
+				</S.ThemeSectionWrapper>
+
+			</S.Theme>
+			{/* <pre>{JSON.stringify(theme, null, 2)}</pre> */}
+		</S.ThemeWrapper>
+	)
+}
+
 function Section(props: {
 	label: string;
 	theme: PortalThemeType;
@@ -127,28 +361,24 @@ function Section(props: {
 	published: boolean;
 	loading: boolean;
 }) {
-	const portalProvider = usePortalProvider();
+	
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const { background, ...remainingTheme } = props.theme.colors;
+	// const { background, ...remainingTheme } = props.theme.basics.colors;
+	const remainingTheme = props.theme.basics.colors;
 
-	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
-	const [name, setName] = React.useState<string>(props.theme.name ?? '-');
+	
+	
 	const [scheme, setScheme] = React.useState<'light' | 'dark'>(props.theme.scheme);
 	const [showNameEdit, setShowNameEdit] = React.useState<boolean>(false);
 	const [showRemoveConfirmation, setShowRemoveConfirmation] = React.useState<boolean>(false);
 
-	React.useEffect(() => {
-		setTheme(props.theme);
-		setName(props.theme.name);
-		setScheme(props.theme.scheme);
-	}, [props.theme]);
 
-	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+	
 
-	const orderedRemainingTheme = Object.keys(DEFAULT_THEME.light.colors)
-		.filter((key) => key !== 'background')
+	const orderedRemainingTheme = Object.keys(DEFAULT_THEME.light.basics.colors)
+		// .filter((key) => key !== 'background')
 		.reduce((acc, key) => {
 			if (remainingTheme.hasOwnProperty(key)) {
 				acc[key] = remainingTheme[key];
@@ -156,18 +386,6 @@ function Section(props: {
 			return acc;
 		}, {} as typeof remainingTheme);
 
-	function handleThemeChange(key: string, newValue: string) {
-		const updatedTheme = {
-			...theme,
-			colors: {
-				...theme.colors,
-				[key.toLowerCase()]: newValue,
-			},
-		};
-
-		setTheme(updatedTheme);
-		if (props.published) props.onThemeChange(updatedTheme, false);
-	}
 
 	function handleNameChange() {
 		const updatedTheme = {
@@ -197,9 +415,10 @@ function Section(props: {
 
 	return (
 		<>
-			<S.Section>
+			<S.Section id="Section">
 				<S.SectionHeader>
 					<p>{name}</p>
+					{/*
 					<S.SectionHeaderActions>
 						<IconButton
 							type={'alt1'}
@@ -224,10 +443,13 @@ function Section(props: {
 							noFocus
 						/>
 					</S.SectionHeaderActions>
+					*/}
 				</S.SectionHeader>
 				<S.SectionBody>
+					{/*
 					<S.FlexWrapper>
 						<S.SectionsWrapper>
+							Background
 							<Color
 								label={language?.background}
 								value={background}
@@ -237,20 +459,67 @@ function Section(props: {
 								disabled={unauthorized}
 							/>
 						</S.SectionsWrapper>
-						<S.GridWrapper>
-							{Object.entries(orderedRemainingTheme).map(([key, value]) => (
-								<Color
-									key={key}
-									label={key}
-									value={value}
-									onChange={(newColor) => handleThemeChange(key, newColor)}
-									loading={props.loading}
-									disabled={unauthorized}
-								/>
-							))}
-						</S.GridWrapper>
+						
 					</S.FlexWrapper>
-					<S.AttributesWrapper>
+					*/}
+					<S.AttributesWrapper
+						className="border-wrapper-alt2"
+						style={{ 
+							color: `rgba(${theme.basics.colors.text},1)`,
+							background: `rgba(${theme.basics.colors.background},1)` 
+						}}
+					>						
+						<S.GridWrapper id="GridWrapper">
+							<S.GridRows id="GridRows">
+							{Object.entries(orderedRemainingTheme).map(([key, value]) => (								
+								<S.GridRow id="GridRow" key={key}>
+									<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+									<Color
+										key={key}
+										label={key}
+										value={value}
+										onChange={(newColor) => handleThemeChange(key, newColor)}
+										loading={props.loading}
+										disabled={unauthorized}
+									/>
+								</S.GridRow>
+							))}
+							</S.GridRows>
+						</S.GridWrapper>
+					</S.AttributesWrapper>
+
+					<S.AttributesWrapper
+						className="border-wrapper-alt2"
+						style={{ 
+							color: `rgba(${theme.basics.colors.text},1)`,
+							background: `rgba(${theme.basics.colors.background},1)` 
+						}}
+					>		
+						Default Button 
+						<S.ButtonPreview
+							theme={theme.buttons.default}
+						>Preview</S.ButtonPreview>
+						<S.GridWrapper id="GridWrapper">
+							
+							<S.GridRows id="GridRows">
+								{Object.entries(theme.buttons.default.default.colors).map(([key, value]) => (								
+									<S.GridRow id="GridRow" key={key}>
+										<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+										<Color
+											key={key}
+											label={key}
+											value={value}
+											onChange={(newColor) => handleThemeChange(key, newColor)}
+											loading={props.loading}
+											disabled={unauthorized}
+										/>
+									</S.GridRow>
+								))}
+							</S.GridRows>
+						</S.GridWrapper>
+					</S.AttributesWrapper>
+					{/*
+					
 						<Toggle
 							label={language?.colorScheme}
 							options={[PortalSchemeType.Light, PortalSchemeType.Dark]}
@@ -277,6 +546,7 @@ function Section(props: {
 							</S.SectionActions>
 						)}
 					</S.AttributesWrapper>
+					*/}
 				</S.SectionBody>
 			</S.Section>
 			{showNameEdit && (
@@ -500,9 +770,20 @@ export default function Themes() {
 			return 0;
 		});
 
+		const isPublished =
+			loading || portalProvider.updating
+				? true
+				: portalProvider.current?.themes.find(
+						(existingTheme: PortalThemeType) => existingTheme.name === options.name
+					) !== undefined;
 		return (
 			<>
-				{sortedOptions.map((theme: PortalThemeType) => {
+				<Theme
+					theme={options} 
+					published={isPublished}
+					loading={loading}
+				/>
+				{/* sortedOptions.map((theme: PortalThemeType) => {
 					const isPublished =
 						loading || portalProvider.updating
 							? true
@@ -525,7 +806,7 @@ export default function Themes() {
 							loading={loading}
 						/>
 					);
-				})}
+				}) */}
 			</>
 		);
 	};
@@ -533,7 +814,7 @@ export default function Themes() {
 	return (
 		<>
 			<S.Wrapper>
-				<S.Body>{getThemes()}</S.Body>
+				{getThemes()}
 				<S.EndActions>
 					<Button
 						type={'primary'}

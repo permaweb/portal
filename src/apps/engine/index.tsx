@@ -25,6 +25,7 @@ import { NotificationProvider } from 'providers/NotificationProvider';
 import { PermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './global-styles';
+import ZoneEditor from './components/zoneEditor';
 
 // import * as S from './styles';
 
@@ -57,7 +58,7 @@ function getLazyImport(view: string) {
 function App() {
 	const portalProvider = usePortalProvider();
 	const { Name, Categories, Layout, Pages, Themes } = useUI();
-	const [theme, setTheme] = React.useState<any>(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light');
+	const [theme, setTheme] = React.useState<any>(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
 	React.useEffect(() => {
 		preloadAllAssets();
@@ -65,13 +66,14 @@ function App() {
 
 
   React.useEffect(() => {
-    if(Layout && Themes){
+    if(Themes){
       const activeTheme = Themes.find((e: any) => e.active)
-      setTheme(activeTheme?.name)
+			const systemScheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      setTheme(systemScheme);
       document.documentElement.setAttribute('theme', theme);
-      initThemes(Themes, Layout)
+      initThemes(Themes)
     }
-  },[Layout, Themes])
+  },[Themes])
 
 	const SetPortalIdComponent = () => {
     useSetPortalId('r-5yMlWFOZ_LpSHXeHwXGkkit-2BsL-0nmhDbUiQAv8');
@@ -127,6 +129,7 @@ function App() {
 					<Footer layout={Layout?.footer.layout} content={Layout?.footer.content} theme={theme} />      
 				</S.FooterWrapper>
 				</S.Page>
+				<ZoneEditor />
 			</S.PageWrapper>
 		</>
 	);

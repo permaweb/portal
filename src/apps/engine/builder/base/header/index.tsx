@@ -13,10 +13,10 @@ import * as S from './styles';
 
 export default function Header(props:any) {  
   const { name, layout, content, preview } = props;
-  const { Layout, Themes } = useUI(preview);
+  const { Themes } = useUI(preview);
   const { settings, updateSetting } = preview
     ? (() => {
-        const [localSettings, setLocalSettings] = React.useState({ theme: 'Dark' });
+        const [localSettings, setLocalSettings] = React.useState({ theme: 'dark' });
         const updateSetting = (key: string, value: any) => {
           setLocalSettings(prev => ({ ...prev, [key]: value }));
         };
@@ -25,21 +25,20 @@ export default function Header(props:any) {
     : useSettings();
 
   function setTheme(){
-    const newTheme = settings?.theme === 'Dark' || !settings?.theme ? 'Light' : 'Dark'
+    const newTheme = settings?.theme === 'dark' || !settings?.theme ? 'light' : 'dark'
     
-    if(!preview){
+    if(!preview){      
       updateSetting('theme', newTheme);
       document.documentElement.setAttribute('theme', newTheme);
     } else {
-      updateSetting('theme', newTheme);
+      updateSetting('theme', newTheme);      
       document.getElementById('preview')?.setAttribute('data-theme', settings?.theme)
     }
   }
 
   React.useEffect(() => {
     if(preview && settings){      
-      initThemes(Themes, Layout)
-      document.getElementById('preview')?.setAttribute('data-theme', settings.theme)
+      initThemes(Themes)
     }    
   },[settings])
 
@@ -64,7 +63,7 @@ export default function Header(props:any) {
           <S.Actions>
             <WalletConnect />
             <S.ThemeToggle>          
-              <Toggle theme state={settings?.theme === 'Dark' ? true : false} setState={() => setTheme()} />
+              <Toggle theme state={settings?.theme === 'dark' ? true : false} setState={() => setTheme()} />
             </S.ThemeToggle>
           </S.Actions>      
           {content.links && (

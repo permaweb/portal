@@ -18,7 +18,7 @@ export default function Navigation(props: any) {
   React.useEffect(() => {
     if(preview){
       initThemes(Themes, Layout)
-      document.getElementById('preview')?.setAttribute('data-theme', 'Dark')
+      document.getElementById('preview')?.setAttribute('data-theme', 'dark')
     }    
   },[preview])
 

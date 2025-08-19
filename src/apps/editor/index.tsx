@@ -24,6 +24,7 @@ import { PermawebProvider, usePermawebProvider } from 'providers/PermawebProvide
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
+import { WalletConnect } from 'wallet/WalletConnect';
 
 const views = (import.meta as any).glob('./views/**/index.tsx');
 
@@ -131,7 +132,7 @@ function AppContent() {
 			}
 			if (!portalProvider.permissions?.base || portalProvider.permissions?.externalContributor) {
 				return (
-					<Portal node={DOM.overlay}>
+					<Portal node={DOM.overlay}>						
 						<S.CenteredWrapper className={'overlay'}>
 							<S.MessageWrapper>
 								{portalProvider.isPermissionsLoading ? (
@@ -176,7 +177,7 @@ function AppContent() {
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />
 			<Suspense fallback={null}>
-				<S.App>
+				<S.App>					
 					<Routes>
 						{getRoute(URLS.base, <Landing />)}
 						{getRoute(`${URLS.base}:portalId`, <PortalView />)}
@@ -222,8 +223,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 							<PermawebProvider>
 								<NotificationProvider>
 									<PortalProvider>
-										<GlobalStyle />
+										<GlobalStyle />										
 										<App />
+										<WalletConnect app="editor" />
 									</PortalProvider>
 								</NotificationProvider>
 							</PermawebProvider>

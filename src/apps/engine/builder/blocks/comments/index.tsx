@@ -10,14 +10,14 @@ import * as S from './styles';
 
 export default function Comments(props: any) {  
   const { preview, assetId } = props;
-  const { Layout, Themes } = useUI(true);
+  const { Themes } = useUI(true);
   const { libs } = usePermawebProvider();
   const [comments, setComments] = React.useState(null)
 
   React.useEffect(() => {
     if(preview){      
-      initThemes(Themes, Layout)
-      document.getElementById('preview')?.setAttribute('data-theme', 'Dark')
+      initThemes(Themes)
+      document.getElementById('preview')?.setAttribute('data-theme', 'dark')
     }    
   },[])
 

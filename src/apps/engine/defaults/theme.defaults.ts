@@ -1,215 +1,232 @@
 import type { Portal } from './layout.types';
 
-export const defaultThemes: Portal = [{
-  name: 'Dark',
-  active: true,
-  basics: {
-    colors: {
-      primary: '222,0,80',
-      primaryContrast: '255,255,255',
-      secondary: '239,102,152',
-      background: '27, 26, 21',
-      text: '255,255,255',
-      textContrast: '0,0,0',
-      border: '155,155,155',
-    }
-  },
-  header: {
-    colors: {
-      background: '0,0,0',
-      border: 'border',
-      shadow: 'rgba(0, 0, 0, 0.4)',
-    },
-    preferences: {
-      opacity: 0.4,
-      gradient: true,
-      shadow: '0 4px 10px',
-    }
-  },
-  navigation: {
-    colors: {
-      background: '0,0,0',
-      border: 'border',
-      text: 'text',
-      hover: 'primary',
-    },
-    preferences: {
-      opacity: 1,
-      shadow: '0 2px 2px',
-    }
-  },
-  footer: {
-    colors: {
-      background: '0,0,0',
-    },
-    preferences: {
-      opacity: 1,
-    }
-  },
-  content: {
-    colors: {
-      background: '0,0,0',
-    },
-    preferences: {
-      opacity: 1,
-    }
-  },
-  posts: {
-    colors: {
-      background: '0,0,0'
-    },
-    preferences: {
-      opacity: 0.6,
-    }
-  },
-  buttons: {
-    default: {
-      default: {
-        colors: {
-          color: '255,255,255',
-          background: '33,33,33',
-          border: '33,33,33',
+export const defaultThemes: Portal = [
+  {
+    "name": "Default",
+    "active": true,    
+    "basics": {
+      "colors": {
+        "text": {
+          "light": "0,0,0",
+          "dark": "255,255,255"
         },
-        preferences: {
-          opacity: 1,
+        "background": {
+          "light": "235, 235, 235",
+          "dark": "27, 26, 21"
+        },
+        "primary": {
+          "light": "80,154,176",
+          "dark": "80,154,176"
+        },
+        "secondary": {
+          "light": "51,105,125",
+          "dark": "51,105,125"
+        },
+        "border": {
+          "light": "155,155,155",
+          "dark": "155,155,155"
         }
-        
       },
-      hover: {
-        colors: {
-          color: '255,255,255',
-          background: '50,50,50',
-          border: '50,50,50',
+      "preferences": {
+        "borderRadius": 0,
+        "wallpaper": "BBbg_l-3_Z6UPH_9PG-Ad2ntHLwe9HhdMdEsbk8r_DU"
+      }
+    },
+    "header": {
+      "colors": {
+        "background": {
+          "light": "255,255,255",
+          "dark": "0,0,0"
         },
-        preferences: {
-          opacity: 1,
+        "border": {
+          "light": "border",
+          "dark": "border"
+        },
+        "shadow": {
+          "light": "rgba(0, 0, 0, 0.4)",
+          "dark": "rgba(0, 0, 0, 0.4)"
+        }
+      },
+      "preferences": {
+        "opacity": {
+          "light": 1,
+          "dark": 0.4
+        },
+        "shadow": {
+          "light": "0 4px 10px",
+          "dark": "0 4px 10px"
+        },
+        "gradient": {
+          "light": true,
+          "dark": true
         }
       }
     },
-    primary: {
-      default: {
-        colors: {
-          color: '255,255,255',
-          background: 'primary',
-          border: 'primary',
+    "navigation": {
+      "colors": {
+        "background": {
+          "light": "0,0,0",
+          "dark": "0,0,0"
         },
-        preferences: {
-          opacity: 1,
+        "text": {
+          "light": "255,255,255",
+          "dark": "text"
+        },
+        "border": {
+          "light": "border",
+          "dark": "border"
+        },
+        "hover": {
+          "light": "primary",
+          "dark": "primary"
         }
       },
-      hover: {
-        colors: {
-          color: '255,255,255',
-          background: 'primary',
-          border: 'primary',
+      "preferences": {
+        "opacity": {
+          "light": 1,
+          "dark": 1
         },
-        preferences: {
-          opacity: 1,
+        "shadow": {
+          "light": "unset",
+          "dark": "0 2px 2px"
         }
-      }      
-    }
-  }
-},
-{
-  name: 'Light',
-  active: false,
-  basics: {
-    colors: {
-      primary: '222,0,80',
-      primaryContrast: '255,255,255',
-      secondary: '239,102,152',
-      background: '235, 235, 235',
-      text: '0,0,0',
-      textContrast: '255,255,255',
-    }
-  },
-  header: {
-    colors: {
-      background: '255,255,255',
-      border: 'border',
-      shadow: 'rgba(0, 0, 0, 0.4)',
-    },
-    preferences: {
-      opacity: 1,
-      shadow: '0 4px 10px',
-    }
-  },
-  navigation: {
-    colors: {
-      background: '0,0,0',
-      text: '255,255,255',
-      border: 'border',
-      hover: 'primary',      
-    },
-    preferences: {
-      opacity: 1,
-    }
-  },
-  footer: {
-    colors: {
-
-    }
-  },
-  content: {
-    colors: {
-      background: '255,255,255',
-    },
-    preferences: {
-      opacity: 1,
-    }
-  },
-  posts: {
-    colors: {
-      background: '255,255,255'
-    },
-    preferences: {
-      opacity: 1,
-    }
-  },
-  buttons: {
-    default: {
-      default: {
-        colors: {
-          color: '255,255,255',
-          background: '0,0,0',
-          border: '0,0,0',
-        },
-        preferences: {
-          opacity: 1,
-        }        
-      },
-      hover: {
-        colors: {
-          color: '255,255,255',
-          background: '50,50,50',
-          border: '0,0,0',
-        },
-        preferences: {
-          opacity: 1,
-        }      
       }
     },
-    primary: {
-      default: {
-        colors: {
-          color: '255,255,255',
-          background: 'primary',
-          border: 'primary',
-        },
-        preferences: {
-          opacity: 1,
-        }         
+    "content": {
+      "colors": {
+        "background": {
+          "light": "255,255,255",
+          "dark": "0,0,0"
+        }
       },
-      hover: {
-        colors: {
-          color: '255,255,255',
-          background: 'primary',
-          border: 'primary',
-        },
-        preferences: {
-          opacity: 1,
-        } 
+      "preferences": {
+        "opacity": {
+          "light": 1,
+          "dark": 1
+        }
+      }
+    },
+    "footer": {
+      "colors": {
+        "background": {
+          "light": "0,0,0",
+          "dark": "0,0,0"
+        }
+      },
+      "preferences": {
+        "opacity": {
+          "light": 1,
+          "dark": 1
+        }
       }      
+    },
+    "card": {
+      "colors": {
+        "background": {
+          "light": "255,255,255",
+          "dark": "0,0,0"
+        }
+      },
+      "preferences": {
+        "opacity": {
+          "light": 1,
+          "dark": 0.6
+        }
+      }
+    },
+    "buttons": {
+      "default": {
+        "default": {
+          "colors": {
+            "color": {
+              "light": "255,255,255",
+              "dark": "255,255,255"
+            },
+            "background": {
+              "light": "0,0,0",
+              "dark": "33,33,33"
+            },
+            "border": {
+              "light": "0,0,0",
+              "dark": "33,33,33"
+            }
+          },
+          "preferences": {
+            "opacity": {
+              "light": 1,
+              "dark": 1
+            }
+          }
+        },
+        "hover": {
+          "colors": {
+            "color": {
+              "light": "255,255,255",
+              "dark": "255,255,255"
+            },
+            "background": {
+              "light": "50,50,50",
+              "dark": "50,50,50"
+            },
+            "border": {
+              "light": "0,0,0",
+              "dark": "50,50,50"
+            }
+          },
+          "preferences": {
+            "opacity": {
+              "light": 1,
+              "dark": 1
+            }
+          }
+        }
+      },
+      "primary": {
+        "default": {
+          "colors": {
+            "color": {
+              "light": "255,255,255",
+              "dark": "255,255,255"
+            },
+            "background": {
+              "light": "primary",
+              "dark": "primary"
+            },
+            "border": {
+              "light": "primary",
+              "dark": "primary"
+            }
+          },
+          "preferences": {
+            "opacity": {
+              "light": 1,
+              "dark": 1
+            }
+          }
+        },
+        "hover": {
+          "colors": {
+            "color": {
+              "light": "255,255,255",
+              "dark": "255,255,255"
+            },
+            "background": {
+              "light": "primary",
+              "dark": "primary"
+            },
+            "border": {
+              "light": "primary",
+              "dark": "primary"
+            }
+          },
+          "preferences": {
+            "opacity": {
+              "light": 1,
+              "dark": 1
+            }
+          }
+        }
+      }
     }
   }
-}]
+]

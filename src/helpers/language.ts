@@ -428,6 +428,12 @@ export const language = {
 		years: `Years`,
 		youAreInvited: `You're Invited`,
 		yourUploadBalance: `Your Upload Balance`,
+
+		// Engine only
+		myProfile: `My Profile`,
+		myPosts: `My Posts`,
+		myComments: `My Comments`,
+		myWallet: `My Wallet`,
 	},
 	es: {
 		// === UNTRANSLATED START ===

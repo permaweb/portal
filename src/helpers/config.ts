@@ -286,6 +286,217 @@ export const ARTICLE_BLOCKS = {
 	},
 };
 
+export const DEFAULT_THEME: PortalThemeType = {
+	name: 'Default',
+	active: true,
+	light: {
+		basics: {
+			colors: {
+				text: '0,0,0',
+				background: '235, 235, 235',
+				primary: '222,0,80',
+				secondary: '239,102,152',
+				border: '155,155,155',
+			}
+		},
+		header: {
+			colors: {
+				background: '255,255,255',
+				border: 'border',
+				shadow: 'rgba(0, 0, 0, 0.4)',
+			},
+			preferences: {
+				opacity: 1,
+				shadow: '0 4px 10px',
+			}
+		},
+		navigation: {
+			colors: {
+				background: '0,0,0',
+				text: '255,255,255',
+				border: 'border',
+				hover: 'primary',      
+			},
+			preferences: {
+				opacity: 1,
+			}
+		},
+		footer: {
+			colors: {
+
+			}
+		},
+		content: {
+			colors: {
+				background: '255,255,255',
+			},
+			preferences: {
+				opacity: 1,
+			}
+		},
+		card: {
+			colors: {
+				background: '255,255,255'
+			},
+			preferences: {
+				opacity: 1,
+			}
+		},
+		buttons: {
+			default: {
+				default: {
+					colors: {
+						color: '255,255,255',
+						background: '0,0,0',
+						border: '0,0,0',
+					},
+					preferences: {
+						opacity: 1,
+					}        
+				},
+				hover: {
+					colors: {
+						color: '255,255,255',
+						background: '50,50,50',
+						border: '0,0,0',
+					},
+					preferences: {
+						opacity: 1,
+					}      
+				}
+			},
+			primary: {
+				default: {
+					colors: {
+						color: '255,255,255',
+						background: 'primary',
+						border: 'primary',
+					},
+					preferences: {
+						opacity: 1,
+					}         
+				},
+				hover: {
+					colors: {
+						color: '255,255,255',
+						background: 'primary',
+						border: 'primary',
+					},
+					preferences: {
+						opacity: 1,
+					} 
+				}      
+			}
+		}
+	},
+	dark: {
+		basics: {
+			colors: {
+				primary: '222,0,80',
+				secondary: '239,102,152',
+				background: '27, 26, 21',
+				text: '255,255,255',
+				border: '155,155,155',
+			}
+		},
+		header: {
+			colors: {
+				background: '0,0,0',
+				border: 'border',
+				shadow: 'rgba(0, 0, 0, 0.4)',
+			},
+			preferences: {
+				opacity: 0.4,
+				gradient: true,
+				shadow: '0 4px 10px',
+			}
+		},
+		navigation: {
+			colors: {
+				background: '0,0,0',
+				border: 'border',
+				text: 'text',
+				hover: 'primary',
+			},
+			preferences: {
+				opacity: 1,
+				shadow: '0 2px 2px',
+			}
+		},
+		footer: {
+			colors: {
+				background: '0,0,0',
+			},
+			preferences: {
+				opacity: 1,
+			}
+		},
+		content: {
+			colors: {
+				background: '0,0,0',
+			},
+			preferences: {
+				opacity: 1,
+			}
+		},
+		card: {
+			colors: {
+				background: '0,0,0'
+			},
+			preferences: {
+				opacity: 0.6,
+			}
+		},
+		buttons: {
+			default: {
+				default: {
+					colors: {
+						color: '255,255,255',
+						background: '33,33,33',
+						border: '33,33,33',
+					},
+					preferences: {
+						opacity: 1,
+					}
+					
+				},
+				hover: {
+					colors: {
+						color: '255,255,255',
+						background: '50,50,50',
+						border: '50,50,50',
+					},
+					preferences: {
+						opacity: 1,
+					}
+				}
+			},
+			primary: {
+				default: {
+					colors: {
+						color: '255,255,255',
+						background: 'primary',
+						border: 'primary',
+					},
+					preferences: {
+						opacity: 1,
+					}
+				},
+				hover: {
+					colors: {
+						color: '255,255,255',
+						background: 'primary',
+						border: 'primary',
+					},
+					preferences: {
+						opacity: 1,
+					}
+				}      
+			}
+		}
+	},
+};
+/*
 export const DEFAULT_THEME: { light: PortalThemeType; dark: PortalThemeType } = {
 	light: {
 		name: 'Light Default',
@@ -318,6 +529,7 @@ export const DEFAULT_THEME: { light: PortalThemeType; dark: PortalThemeType } = 
 		},
 	},
 };
+*/
 
 export const STRIPE_PUBLISHABLE_KEY =
 	'pk_live_51JUAtwC8apPOWkDLMQqNF9sPpfneNSPnwX8YZ8y1FNDl6v94hZIwzgFSYl27bWE4Oos8CLquunUswKrKcaDhDO6m002Yj9AeKj';

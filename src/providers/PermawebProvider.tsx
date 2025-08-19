@@ -163,7 +163,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		if (libs) {
 			try {
 				let fetchedProfile: any;
-				const cachedProfile = getCachedProfile(address);
+				const cachedProfile = getCachedProfile(address);			
 				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
 				else fetchedProfile = await libs.getProfileByWalletAddress(address);
 				let profileToUse = { ...fetchedProfile };

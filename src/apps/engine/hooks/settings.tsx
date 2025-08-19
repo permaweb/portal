@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 const getSettings = async () => {
   return {
     portal: 'ima',
-    theme: 'Dark',
+    theme: 'dark',
   };
 };
 
@@ -14,8 +14,8 @@ const updateSettings = async (newSettings: any) => {
 
 // tmp
 const switchTheme = (theme: string) => {
-  const colorHeaderBorder = theme === 'Dark' ? '255,255,255' : '0,0,0'
-  const colorNavigationBorder = theme === 'Dark' ? '255,255,255' : '0,0,0'  
+  const colorHeaderBorder = theme === 'dark' ? '255,255,255' : '0,0,0'
+  const colorNavigationBorder = theme === 'dark' ? '255,255,255' : '0,0,0'  
   document.documentElement.style.setProperty('--color-header-border', colorHeaderBorder);  
   document.documentElement.style.setProperty('--color-navigation-border', colorNavigationBorder);
 }
@@ -39,7 +39,7 @@ export const initSettings = async () => {
 initSettings();
 
 export const useSettings = (preview: boolean = false) => {
-  if(preview) return { theme: 'Dark' };
+  if(preview) return { theme: 'dark' };
 
   const queryClient = useQueryClient();
 

@@ -20,7 +20,6 @@ export default function Feed() {
   React.useEffect(() => {
     if(Title){
       // @ts-ignore
-      console.log('set')
       document.title = `${Title} - ${Name}`;
     }
   },[Title])

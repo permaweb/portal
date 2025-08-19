@@ -1,27 +1,34 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
+import { WanderConnect } from "@wanderapp/connect";
+import { STORAGE } from 'helpers/config';
 
 import { ProfileManager } from 'editor/components/organisms/ProfileManager';
 import { useSettingsProvider as useEditorSettingsProvider } from 'editor/providers/SettingsProvider';
 import { useSettingsProvider as useViewerSettingsProvider } from 'viewer/providers/SettingsProvider';
+import { checkValidAddress } from 'helpers/utils';
+
+import { useArweaveProvider } from 'providers/ArweaveProvider';
+import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
+
+import { ASSETS } from 'helpers/config';
+import { LanguageEnum, WalletEnum } from 'helpers/types';
+import { formatAddress, getARAmountFromWinc } from 'helpers/utils';
 
 import { Avatar } from 'components/atoms/Avatar';
 import { Button } from 'components/atoms/Button';
 import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
-import { ASSETS } from 'helpers/config';
-import { LanguageEnum, WalletEnum } from 'helpers/types';
-import { formatAddress, getARAmountFromWinc } from 'helpers/utils';
-import { useArweaveProvider } from 'providers/ArweaveProvider';
-import { useLanguageProvider } from 'providers/LanguageProvider';
-import { usePermawebProvider } from 'providers/PermawebProvider';
+
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
 const AR_WALLETS = [{ type: WalletEnum.wander, label: 'Wander', logo: ASSETS.wander }];
 
+/*
 function WalletList(props: { handleConnect: any }) {
 	return (
 		<S.WalletListContainer>
@@ -46,12 +53,15 @@ function WalletList(props: { handleConnect: any }) {
 		</S.WalletListContainer>
 	);
 }
+*/
 
-export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callback?: () => void }) {
+export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engine'; callback?: () => void }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	const { auth } = arProvider;
+	const { profile } = permawebProvider;
 
 	const { settings, updateSettings, availableThemes } =
 		props.app === 'editor' ? useEditorSettingsProvider() : useViewerSettingsProvider();
@@ -63,9 +73,12 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 	const [showThemeSelector, setShowThemeSelector] = React.useState<boolean>(false);
 	const [showLanguageSelector, setShowLanguageSelector] = React.useState<boolean>(false);
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
-
+	const [instance, setInstance] = React.useState(null);
+	const [avatar, setAvatar] = React.useState<string>('');
+	const [banner, setBanner] = React.useState<string>('');
 	const [label, setLabel] = React.useState<string | null>(null);
 	const hasInitializedRef = React.useRef<boolean>(false);
+	const wrapperRef = React.useRef();
 
 	React.useEffect(() => {
 		if (!hasInitializedRef.current) {
@@ -78,18 +91,76 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 	}, []);
 
 	React.useEffect(() => {
-		if (!showWallet) {
-			setLabel(`${language?.loading}...`);
-		} else {
-			if (arProvider.walletAddress) {
-				if (permawebProvider.profile && permawebProvider.profile.username) {
-					setLabel(permawebProvider.profile.username);
-				} else {
-					setLabel(formatAddress(arProvider.walletAddress, false));
-				}
-			} else {
-				setLabel(language?.connect);
+		if(!instance){
+			try {
+				const wanderInstance = new WanderConnect({
+					clientId: 'FREE_TRIAL',
+					theme: 'Dark',				
+					button: {
+						parent: wrapperRef.current,
+						label: false,
+						customStyles: `
+							#wanderConnectButtonHost {
+								display:none;
+							}`,
+					},
+					iframe: {
+						routeLayout: {
+							default: {
+								type: 'modal',
+							},
+							auth: {
+								type: 'modal',
+							},
+							'auth-request': {
+								type: 'modal',
+							},
+						},
+						cssVars: {
+							light: {
+							},
+							dark: {
+								boxShadow: 'none',
+							},
+						},
+						customStyles: ``,
+					},
+				});
+
+				setInstance(wanderInstance);
+				window.wanderInstance = wanderInstance;
+			} catch (e) {
+				console.error(e);
 			}
+		}		
+
+		return () => {
+			try {
+				window.wanderInstance.destroy();
+				// if(instance) instance.destroy();
+			} catch {}
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+
+	}, []);
+
+	React.useEffect(() => {
+		if(auth){
+			const status = auth.authStatus
+			if(status === 'loading') setLabel('Signing in') 
+			else if((status === 'authenticated' || auth.authType === 'NATIVE_WALLET') && profile){
+				setLabel(profile.displayName || 'My Profile')
+				setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : '');
+				// setBanner(profile?.banner && checkValidAddress(profile.banner) ? `https://arweave.net/${profile?.banner}` : '');
+			} 
+		} else if (localStorage.getItem(STORAGE.walletType) === 'NATIVE_WALLET' && profile) {
+			setLabel(profile.displayName || 'My Profile')
+			setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : '');
+			// setBanner(profile?.banner && checkValidAddress(profile.banner) ? `https://arweave.net/${profile?.banner}` : '');
+		} else {
+			setLabel('Log in')
+			setAvatar('');
+			// setBanner('');
 		}
 	}, [showWallet, arProvider.walletAddress, permawebProvider.profile, language]);
 
@@ -119,6 +190,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 				>
 					<S.PWrapper>
 						<Avatar owner={permawebProvider.profile} dimensions={{ wrapper: 35, icon: 21.5 }} callback={handlePress} />
+						<div ref={wrapperRef} />
 					</S.PWrapper>
 					{showWalletDropdown && (
 						<S.Dropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
@@ -255,7 +327,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 					))}
 				</S.MWrapper>
 			</Panel>
-			{walletModalVisible && (
+			{/* walletModalVisible && (
 				<Modal header={language?.connectWallet} handleClose={() => setWalletModalVisible(false)}>
 					<WalletList
 						handleConnect={(type: WalletEnum) => {
@@ -264,7 +336,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 						}}
 					/>
 				</Modal>
-			)}
+			) */}
 		</>
 	);
 }

@@ -8,22 +8,22 @@ import { GlobalStyles } from '../../../global-styles';
 
 export default function Footer(props: any) {
   const { preview, layout, content } = props;
-  const { Layout, Themes } = useUI(preview);
+  const { Themes } = useUI(preview);
   const { settings } = preview
-    ? { settings: { theme: 'Dark' }}
+    ? { settings: { theme: 'dark' }}
     : useSettings();
 
   React.useEffect(() => {
     if(preview){
-      initThemes(Themes, Layout)
-      document.getElementById('preview')?.setAttribute('data-theme', 'Dark')
+      initThemes(Themes)
+      document.getElementById('preview')?.setAttribute('data-theme', 'dark')
     }    
   },[preview])
 
   return (
     <>
       {preview && <GlobalStyles />}
-      <S.Footer $layout={layout} $theme={settings?.theme || 'Dark'} id="Footer">
+      <S.Footer $layout={layout} $theme={settings?.theme || 'dark'} id="Footer">
         <S.FooterWrapper $layout={layout}>
           <Builder layout={content} preview={preview} />
         </S.FooterWrapper>

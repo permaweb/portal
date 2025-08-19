@@ -3,6 +3,7 @@ import useNavigate from 'engine/services/preview';
 import Icon from 'engine/components/icon';
 import * as ICONS from 'engine/constants/icons';
 import { Panel } from 'engine/components/panel';
+import { STORAGE } from 'helpers/config';
 import ProfileEditor from 'engine/components/profileEditor';
 import { checkValidAddress } from 'engine/services/utils';
 import { getTxEndpoint } from 'engine/services/endpoints';
@@ -30,7 +31,6 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	const [banner, setBanner] = React.useState<string>('');
 	const [avatar, setAvatar] = React.useState<string>('');
 	const wrapperRef = React.useRef();
-
 
 	React.useEffect(() => {
 		if(!instance){
@@ -96,6 +96,10 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 				setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : '');
 				setBanner(profile?.banner && checkValidAddress(profile.banner) ? `https://arweave.net/${profile?.banner}` : '');
 			} 
+		} else if (localStorage.getItem(STORAGE.walletType) === 'NATIVE_WALLET' && profile) {
+			setLabel(profile.displayName || 'My Profile')
+			setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : '');
+			setBanner(profile?.banner && checkValidAddress(profile.banner) ? `https://arweave.net/${profile?.banner}` : '');
 		} else {
 			setLabel('Log in')
 			setAvatar('');
