@@ -44,15 +44,25 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	const [profilePending, setProfilePending] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		const dependencies = {
-			ao: connect({ MODE: 'legacy' }),
-			arweave: Arweave.init({}),
-			signer: arProvider.wallet ? createSigner(arProvider.wallet) : null,
-			node: AO_NODE_URL,
-		};
+		if (arProvider.wallet) {
+			const signer = arProvider.wallet ? createSigner(arProvider.wallet) : null;
 
-		setDeps(dependencies);
-		setLibs(Permaweb.init(dependencies));
+			const dependencies = {
+				// ao: connect({ MODE: 'legacy' }), // TODO
+				ao: connect({
+					MODE: 'mainnet',
+					URL: AO_NODE_URL,
+					SCHEDULER: 'mYJTM8VpIibDLuyGLQTcbcPy-LeOY48qzECADTUYfWc',
+					signer: signer,
+				}),
+				arweave: Arweave.init({}),
+				signer: signer,
+				node: AO_NODE_URL,
+			};
+
+			setDeps(dependencies);
+			setLibs(Permaweb.init(dependencies));
+		}
 	}, [arProvider.wallet]);
 
 	React.useEffect(() => {
@@ -80,7 +90,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				console.error('Failed to fetch fresh profile:', e);
 			}
 		})();
-	}, [arProvider.walletAddress]);
+	}, [arProvider.walletAddress, libs?.getProfileByWalletAddress]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -140,19 +150,21 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	}, [refreshProfileTrigger]);
 
 	async function resolveProfile(address: string) {
-		try {
-			let fetchedProfile: any;
-			const cachedProfile = getCachedProfile(address);
-			if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
-			else fetchedProfile = await libs.getProfileByWalletAddress(address);
-			let profileToUse = { ...fetchedProfile };
+		if (libs) {
+			try {
+				let fetchedProfile: any;
+				const cachedProfile = getCachedProfile(address);
+				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
+				else fetchedProfile = await libs.getProfileByWalletAddress(address);
+				let profileToUse = { ...fetchedProfile };
 
-			if (!fetchedProfile?.id && cachedProfile) profileToUse = cachedProfile;
-			cacheProfile(address, profileToUse);
+				if (!fetchedProfile?.id && cachedProfile) profileToUse = cachedProfile;
+				cacheProfile(address, profileToUse);
 
-			return profileToUse;
-		} catch (e: any) {
-			console.error(e);
+				return profileToUse;
+			} catch (e: any) {
+				console.error(e);
+			}
 		}
 	}
 

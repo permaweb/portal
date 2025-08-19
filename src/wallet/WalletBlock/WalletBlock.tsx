@@ -2,10 +2,10 @@ import { ReactSVG } from 'react-svg';
 
 import { ASSETS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-import { WalletConnect } from 'wallet/WalletConnect';
 
 import * as S from './styles';
 
+// TODO: Wallet Connect
 export default function WalletBlock() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -16,9 +16,9 @@ export default function WalletBlock() {
 				<ReactSVG src={ASSETS.wallet} />
 			</S.Icon>
 			<p>{language?.connectToContinue}</p>
-			<S.WalletConnect>
+			{/* <S.WalletConnect>
 				<WalletConnect />
-			</S.WalletConnect>
+			</S.WalletConnect> */}
 		</S.Wrapper>
 	);
 }

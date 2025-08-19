@@ -143,11 +143,28 @@ export default function PortalManager(props: {
 
 					console.log(`Roles update: ${rolesUpdate}`);
 
-					profileUpdateId = await permawebProvider.libs.addToZone(
-						{ path: 'Portals', data: { Id: portalId, ...data } },
+					console.log({ path: 'Portals', data: { Id: portalId, ...data } });
+
+					const currentPortals = Array.isArray(permawebProvider.profile?.portals)
+						? permawebProvider.profile.portals
+						: [];
+
+					const updatedPortals = [...currentPortals, { Id: portalId, ...data }];
+
+					profileUpdateId = await permawebProvider.libs.updateZone(
+						{ Portals: permawebProvider.libs.mapToProcessCase(updatedPortals) },
 						permawebProvider.profile.id,
 						arProvider.wallet
 					);
+
+					// TODO: Original - addToZone
+					// "Error": "\u001b[31mError\u001b[90m handling message with Action = Zone-Append\u001b[0m\n\u001b[32m[string \".handlers\"]:723: [string \"json\"]:83: invalid table: mixed or invalid key types\u001b[0m\n\n\u001b[90mstack traceback:\n\t[string \".process\"]:905: in function '.process.handle'\u001b[0m\n\n\u001b[31merror:\n\u001b[0m[string \".handlers\"]:723: [string \"json\"]:83: invalid table: mixed or invalid key types",
+
+					// profileUpdateId = await permawebProvider.libs.addToZone(
+					// 	{ path: 'Portals', data: { Id: portalId, ...data } },
+					// 	permawebProvider.profile.id,
+					// 	arProvider.wallet
+					// );
 
 					const themeUpdateId = await permawebProvider.libs.updateZone(
 						{

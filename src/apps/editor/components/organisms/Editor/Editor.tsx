@@ -300,27 +300,36 @@ export default function Editor() {
 						console.log(`Zone index update: ${zoneIndexUpdateId}`);
 
 						if (portalProvider.permissions.postAutoIndex) {
+							console.log({
+								process: permawebProvider.profile.id,
+								message: zoneIndexUpdateId,
+							});
+
+							// TODO: Results not working - web signer failing with httpsig
 							const zoneResult = await permawebProvider.deps.ao.result({
 								process: permawebProvider.profile.id,
 								message: zoneIndexUpdateId,
 							});
 
-							if (zoneResult?.Messages?.length > 0) {
-								const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
-									processId: assetId,
-									wallet: arProvider.wallet,
-									action: 'Send-Index',
-									tags: [
-										{ name: 'AssetType', value: ASSET_UPLOAD.ansType },
-										{ name: 'ContentType', value: ASSET_UPLOAD.contentType },
-										{ name: 'DateAdded', value: new Date().getTime().toString() },
-									],
-									data: { Recipients: [portalProvider.current.id] },
-								});
+							console.log(zoneResult);
 
-								console.log(`Asset index update: ${assetIndexUpdateId}`);
-								portalProvider.refreshCurrentPortal('assets');
-							}
+							// if (zoneResult?.Messages?.length > 0) {
+							const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
+								processId: assetId,
+								wallet: arProvider.wallet,
+								action: 'Send-Index',
+								tags: [
+									{ name: 'AssetType', value: ASSET_UPLOAD.ansType },
+									{ name: 'ContentType', value: ASSET_UPLOAD.contentType },
+									{ name: 'DateAdded', value: new Date().getTime().toString() },
+								],
+								data: { Recipients: [portalProvider.current.id] },
+							});
+
+							console.log(`Asset index update: ${assetIndexUpdateId}`);
+							// portalProvider.refreshCurrentPortal('assets'); // TODO
+							portalProvider.refreshCurrentPortal();
+							// }
 						}
 					}
 

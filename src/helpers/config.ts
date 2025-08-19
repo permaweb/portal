@@ -305,7 +305,8 @@ export const DEFAULT_THEME: { light: PortalThemeType; dark: PortalThemeType } = 
 	},
 };
 
-export const AO_NODE_URL = 'https://dev-router.forward.computer';
+// TODO
+export const AO_NODE_URL = 'http://localhost:8734';
 
 export const STRIPE_PUBLISHABLE_KEY =
 	'pk_live_51JUAtwC8apPOWkDLMQqNF9sPpfneNSPnwX8YZ8y1FNDl6v94hZIwzgFSYl27bWE4Oos8CLquunUswKrKcaDhDO6m002Yj9AeKj';
