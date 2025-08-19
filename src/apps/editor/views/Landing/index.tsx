@@ -105,8 +105,6 @@ export default function Landing() {
 		let icon: string = null;
 		let action: () => void | null = null;
 
-		console.log(portalProvider);
-
 		if (!arProvider.wallet || (permawebProvider.profile && !permawebProvider.profile.id)) {
 			disabled = false;
 			label = language?.connect || 'Connect Wallet';

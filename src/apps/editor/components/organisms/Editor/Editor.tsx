@@ -94,8 +94,8 @@ export default function Editor() {
 						wallet: arProvider.wallet,
 						action: 'Update-Index-Request',
 						tags: [
-							{ name: 'IndexId', value: assetId },
-							{ name: 'UpdateType', value: updateType },
+							{ name: 'Index-Id', value: assetId },
+							{ name: 'Update-Type', value: updateType },
 						],
 					});
 
@@ -113,9 +113,9 @@ export default function Editor() {
 								wallet: arProvider.wallet,
 								action: 'Send-Index',
 								tags: [
-									{ name: 'AssetType', value: ASSET_UPLOAD.ansType },
-									{ name: 'ContentType', value: ASSET_UPLOAD.contentType },
-									{ name: 'DateAdded', value: new Date().getTime().toString() },
+									{ name: 'Asset-Type', value: ASSET_UPLOAD.ansType },
+									{ name: 'Content-Type', value: ASSET_UPLOAD.contentType },
+									{ name: 'Date-Added', value: new Date().getTime().toString() },
 								],
 								data: { Recipients: indexRecipients },
 							});
@@ -291,21 +291,15 @@ export default function Editor() {
 							wallet: arProvider.wallet,
 							action: 'Run-Action',
 							tags: [
-								{ name: 'ForwardTo', value: portalProvider.current.id },
-								{ name: 'ForwardAction', value: internalIndexAction },
-								{ name: 'IndexId', value: assetId },
+								{ name: 'Forward-To', value: portalProvider.current.id },
+								{ name: 'Forward-Action', value: internalIndexAction },
+								{ name: 'Index-Id', value: assetId },
 							],
 						});
 
-						console.log(`Zone index update: ${zoneIndexUpdateId}`);
+						console.log(`Zone (profile) index update: ${zoneIndexUpdateId}`);
 
 						if (portalProvider.permissions.postAutoIndex) {
-							console.log({
-								process: permawebProvider.profile.id,
-								message: zoneIndexUpdateId,
-							});
-
-							// TODO: Results not working - web signer failing with httpsig
 							const zoneResult = await permawebProvider.deps.ao.result({
 								process: permawebProvider.profile.id,
 								message: zoneIndexUpdateId,
@@ -313,23 +307,23 @@ export default function Editor() {
 
 							console.log(zoneResult);
 
-							// if (zoneResult?.Messages?.length > 0) {
-							const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
-								processId: assetId,
-								wallet: arProvider.wallet,
-								action: 'Send-Index',
-								tags: [
-									{ name: 'AssetType', value: ASSET_UPLOAD.ansType },
-									{ name: 'ContentType', value: ASSET_UPLOAD.contentType },
-									{ name: 'DateAdded', value: new Date().getTime().toString() },
-								],
-								data: { Recipients: [portalProvider.current.id] },
-							});
+							if (zoneResult?.Messages?.length > 0) {
+								const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
+									processId: assetId,
+									wallet: arProvider.wallet,
+									action: 'Send-Index',
+									tags: [
+										{ name: 'Asset-Type', value: ASSET_UPLOAD.ansType },
+										{ name: 'Content-Type', value: ASSET_UPLOAD.contentType },
+										{ name: 'Date-Added', value: new Date().getTime().toString() },
+									],
+									data: { Recipients: [portalProvider.current.id] },
+								});
 
-							console.log(`Asset index update: ${assetIndexUpdateId}`);
-							// portalProvider.refreshCurrentPortal('assets'); // TODO
-							portalProvider.refreshCurrentPortal();
-							// }
+								console.log(`Asset index update: ${assetIndexUpdateId}`);
+
+								portalProvider.refreshCurrentPortal();
+							}
 						}
 					}
 
@@ -352,9 +346,9 @@ export default function Editor() {
 									wallet: arProvider.wallet,
 									action: 'Run-Action',
 									tags: [
-										{ name: 'ForwardTo', value: externalPortal.id },
-										{ name: 'ForwardAction', value: externalIndexAction },
-										{ name: 'IndexId', value: assetId },
+										{ name: 'Forward-To', value: externalPortal.id },
+										{ name: 'Forward-Action', value: externalIndexAction },
+										{ name: 'Index-Id', value: assetId },
 									],
 								});
 
@@ -372,9 +366,9 @@ export default function Editor() {
 											wallet: arProvider.wallet,
 											action: 'Send-Index',
 											tags: [
-												{ name: 'AssetType', value: ASSET_UPLOAD.ansType },
-												{ name: 'ContentType', value: ASSET_UPLOAD.contentType },
-												{ name: 'DateAdded', value: new Date().getTime().toString() },
+												{ name: 'Asset-Type', value: ASSET_UPLOAD.ansType },
+												{ name: 'Content-Type', value: ASSET_UPLOAD.contentType },
+												{ name: 'Date-Added', value: new Date().getTime().toString() },
 											],
 											data: { Recipients: [externalPortal.id] },
 										});

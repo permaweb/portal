@@ -180,7 +180,7 @@ export const LinkPrefillOption = styled.button`
 	}
 `;
 
-export const LinksAddAction = styled.div`
+export const LinksAddAction = styled.form`
 	position: relative;
 
 	button {
