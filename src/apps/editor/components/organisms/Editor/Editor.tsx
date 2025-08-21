@@ -180,6 +180,15 @@ export default function Editor() {
 				return;
 			}
 
+			const excludeFromIndex = JSON.stringify([
+				'Balances',
+				'Ticker',
+				'Process-Type',
+				'Total-Supply',
+				'Transferable',
+				'Metadata.Content',
+			]);
+
 			let data: any = permawebProvider.libs.mapToProcessCase({
 				name: currentPost.data.title,
 				description: currentPost.data.description,
@@ -258,6 +267,7 @@ export default function Editor() {
 						processId: assetId,
 						wallet: arProvider.wallet,
 						action: 'Update-Asset',
+						tags: [{ name: 'Exclude-Index', value: excludeFromIndex }],
 						data: data,
 					});
 
@@ -316,6 +326,7 @@ export default function Editor() {
 										{ name: 'Asset-Type', value: ASSET_UPLOAD.ansType },
 										{ name: 'Content-Type', value: ASSET_UPLOAD.contentType },
 										{ name: 'Date-Added', value: new Date().getTime().toString() },
+										{ name: 'Exclude', value: excludeFromIndex },
 									],
 									data: { Recipients: [portalProvider.current.id] },
 								});
