@@ -133,16 +133,16 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 			try {
 				const nonce = crypto.randomUUID();
 				const msg = new TextEncoder().encode(nonce);
-				
+
 				// Use the modern signMessage method
 				const sigAB = await (window.arweaveWallet as any).signMessage(msg);
-				
-				const toB64Url = (buf: ArrayBuffer) => 
+
+				const toB64Url = (buf: ArrayBuffer) =>
 					btoa(String.fromCharCode(...new Uint8Array(buf)))
 						.replace(/\+/g, '-')
 						.replace(/\//g, '_')
 						.replace(/=+$/, '');
-				
+
 				const signature = toB64Url(sigAB);
 				const publicKey = await window.arweaveWallet.getActivePublicKey();
 
@@ -190,8 +190,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 		return current;
 	}
-
-
 
 	return (
 		<ARContext.Provider

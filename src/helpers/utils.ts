@@ -1,5 +1,5 @@
 import Arweave from 'arweave';
-import { mARIOToken, ARIOToken } from '@ar.io/sdk';
+import { ARIOToken, mARIOToken } from '@ar.io/sdk';
 
 import { STORAGE, URLS } from './config';
 import { PortalAssetType } from './types';
@@ -267,24 +267,24 @@ export function getARAmountFromWinc(amount: number) {
 
 // Preferred: use SDK conversion classes; fallback to denom 6
 export function toReadableARIO(amountInMARIO: number): string {
-    try {
-        const token: unknown = new mARIOToken(amountInMARIO);
-        // Some SDK builds type this loosely; cast defensively
-        const arioVal = (token as { toARIO: () => number | string }).toARIO();
-        return Number(arioVal).toFixed(4);
-    } catch {
-        return (Math.floor((amountInMARIO / 1e6) * 1e4) / 1e4).toFixed(4);
-    }
+	try {
+		const token: unknown = new mARIOToken(amountInMARIO);
+		// Some SDK builds type this loosely; cast defensively
+		const arioVal = (token as { toARIO: () => number | string }).toARIO();
+		return Number(arioVal).toFixed(4);
+	} catch {
+		return (Math.floor((amountInMARIO / 1e6) * 1e4) / 1e4).toFixed(4);
+	}
 }
 
 export function toMARIOFromARIO(amountInARIO: number): number {
-    try {
-        const ar = new ARIOToken(amountInARIO);
-        // Defensive cast for differing SDK typings
-        return (ar as unknown as { toMARIO: () => number }).toMARIO();
-    } catch {
-        return Math.round(amountInARIO * 1e6);
-    }
+	try {
+		const ar = new ARIOToken(amountInARIO);
+		// Defensive cast for differing SDK typings
+		return (ar as unknown as { toMARIO: () => number }).toMARIO();
+	} catch {
+		return Math.round(amountInARIO * 1e6);
+	}
 }
 
 export function formatRoleLabel(role: string) {

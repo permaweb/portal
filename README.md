@@ -115,6 +115,7 @@ The application supports testnet mode for development and testing:
 ### Using Testnet Mode
 
 1. **Start in testnet mode:**
+
    ```bash
    npm run start:editor:testnet
    ```

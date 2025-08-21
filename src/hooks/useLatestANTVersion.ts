@@ -1,5 +1,7 @@
 import * as React from 'react';
+
 import { ARIO } from '@ar.io/sdk';
+
 import { IS_TESTNET } from 'helpers/config';
 
 export interface AntVersionInfo {
@@ -45,5 +47,3 @@ export function useLatestANTVersion() {
 
 	return { data, loading, error } as const;
 }
-
-
