@@ -212,6 +212,7 @@ export default function Editor() {
 						processId: assetId,
 						wallet: arProvider.wallet,
 						action: 'Update-Asset',
+						tags: [{ name: 'Exclude-Index', value: excludeFromIndex }],
 						data: data,
 					});
 
@@ -314,8 +315,6 @@ export default function Editor() {
 								process: permawebProvider.profile.id,
 								message: zoneIndexUpdateId,
 							});
-
-							console.log(zoneResult);
 
 							if (zoneResult?.Messages?.length > 0) {
 								const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
