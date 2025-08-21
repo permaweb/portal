@@ -15,51 +15,54 @@ export const Wrapper = styled.div`
 `;
 
 export const LoadingBanner = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 15px;
-    color: ${(props) => props.theme.colors.font.alt1};
-    font-family: ${(props) => props.theme.typography.family.primary};
-    font-size: ${(props) => props.theme.typography.size.xxSmall};
-    opacity: 0.95;
-    border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12.5px 15px;
 
-    .label {
-        color: ${(props) => props.theme.colors.font.primary};
-        font-weight: ${(props) => props.theme.typography.weight.bold};
-        font-size: ${(props) => props.theme.typography.size.small};
-        margin-right: 4px;
-        white-space: nowrap;
-    }
+	.label {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		margin-right: 4px;
+		white-space: nowrap;
+	}
 
-    .chips {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
+	.chips {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
 
-    .chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        height: 22px;
-        padding: 2px 8px;
-        border: 1px solid ${(props) => props.theme.colors.border.primary};
-        border-radius: 16px;
-        color: ${(props) => props.theme.colors.font.primary};
-        background: rgba(255, 255, 255, 0.04);
-    }
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		height: 23.5px;
+		padding: 2px 8px;
+		border-radius: 16px;
+		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		color: ${(props) => props.theme.colors.font.light1};
+		background: ${(props) => props.theme.colors.roles.alt3};
+	}
 `;
 
-export const DomainWrapper = styled.div`
+export const DomainWrapper = styled.div<{ isOpen: boolean }>`
+	width: 100%;
 	display: flex;
-	padding: 12.5px 15px;
+	padding: 15px;
 	justify-content: space-between;
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 20px;
+	background: ${(props) =>
+		props.isOpen
+			? props.theme.colors.button.primary.active.background
+			: props.theme.colors.container.primary.background};
+	cursor: pointer;
+	transition: all 100ms;
 
 	.validating-dot {
 		display: inline-flex;
@@ -67,6 +70,10 @@ export const DomainWrapper = styled.div`
 		gap: 6px;
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
 		opacity: 0.8;
+	}
+
+	&:hover {
+		background: ${(props) => props.theme.colors.button.primary.active.background};
 	}
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
@@ -134,24 +141,25 @@ export const DomainHeader = styled.div`
 		background: transparent;
 		transition: background 120ms ease-in-out, opacity 120ms ease-in-out;
 		vertical-align: middle;
-		margin-left: 6px; /* bring closer but avoid touching text */
 		position: relative;
-		top: -1px; /* slight nudge to center with text baseline */
 		opacity: 0.95;
 
 		&.is-open {
 			transform: rotate(180deg);
 		}
 	}
-    .expand-btn:hover { background: rgba(255, 255, 255, 0.06); opacity: 1; }
+	.expand-btn:hover {
+		background: rgba(255, 255, 255, 0.06);
+		opacity: 1;
+	}
 	.expand-btn img,
 	.expand-btn svg {
 		width: 14px;
 		height: 14px;
-        margin: 0;
-        padding: 0;
-        display: block;
-    }
+		margin: 0;
+		padding: 0;
+		display: block;
+	}
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		max-width: 100%;
@@ -171,7 +179,10 @@ export const DomainDetail = styled.div`
 
 export const DomainActions = styled.div`
 	display: flex;
-	gap: 12.5px;
+	align-items: center;
+	column-gap: 12px;
+	row-gap: 8px;
+	flex-wrap: wrap;
 `;
 
 export const WrapperEmpty = styled.div`
@@ -196,8 +207,8 @@ export const LoadingWrapper = styled(WrapperEmpty)`
 
 export const SectionHeader = styled.div`
 	padding: 20px 15px 15px 15px;
-	border-bottom: 2px solid ${(props) => props.theme.colors.border.primary};
-	margin-bottom: 0;
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 
 	h3 {
 		color: ${(props) => props.theme.colors.font.primary};
@@ -215,14 +226,26 @@ export const SectionHeader = styled.div`
 		margin: 0;
 		text-transform: none;
 	}
-    .inline-progress {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        margin-left: 8px;
-        opacity: 0.8;
-        font-size: ${(props) => props.theme.typography.size.xxSmall};
-    }
+	.inline-progress {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		margin-left: 8px;
+		opacity: 0.8;
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+	}
+`;
+
+export const SectionWrapper = styled.div`
+	overflow: hidden;
+`;
+
+export const SectionBody = styled.div`
+	> * {
+		&:not(:last-child) {
+			border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+		}
+	}
 `;
 
 export const StatusBadge = styled.span`
@@ -234,56 +257,27 @@ export const StatusBadge = styled.span`
 	font-family: ${(props) => props.theme.typography.family.primary};
 	text-transform: uppercase;
 	margin-top: 5px;
-
-	&.redirected {
-		background-color: #22c55e20;
-		color: #22c55e;
-		border: 1px solid #22c55e;
-	}
-
-	&.other-target {
-		background-color: #3b82f620;
-		color: #3b82f6;
-		border: 1px solid #3b82f6;
-	}
 `;
 
 export const DomainDetails = styled.div`
-	margin-top: 12px;
-	padding: 12px;
-	background-color: rgba(255, 255, 255, 0.05);
-	border-radius: 6px;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	/* Ensure details appear on their own row under the name */
-	flex-basis: 100%;
-	order: 2;
+	padding: 15px;
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 
 	.details-grid {
-		display: grid;
-		grid-template-columns: 120px 1fr;
-		row-gap: 8px;
-		column-gap: 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 15px;
 
 		.label {
-			opacity: 0.7;
-			font-size: 13px;
-			font-weight: 500;
+			font-size: ${(props) => props.theme.typography.size.xSmall};
 			color: ${(props) => props.theme.colors.font.alt1};
 		}
 
 		.value {
-			font-size: 13px;
+			font-size: ${(props) => props.theme.typography.size.xSmall};
+			font-weight: ${(props) => props.theme.typography.weight.xBold};
 			color: ${(props) => props.theme.colors.font.primary};
-		}
-
-		.code {
-			font-family: 'Courier New', monospace;
-			font-size: 11px;
-			padding: 2px 6px;
-			background-color: rgba(255, 255, 255, 0.1);
-			border-radius: 3px;
-			word-break: break-all;
-			user-select: all;
 		}
 
 		.badge {
@@ -292,16 +286,218 @@ export const DomainDetails = styled.div`
 			font-size: 11px;
 			font-weight: 600;
 			text-transform: uppercase;
-			
+
 			&.permanent {
-				background-color: rgba(34, 197, 94, 0.2);
-				color: #22c55e;
+				background-color: ${(props) => props.theme.colors.roles.alt2};
+				color: ${(props) => props.theme.colors.font.light1};
 			}
-			
+
 			&.lease {
-				background-color: rgba(59, 130, 246, 0.2);
-				color: #3b82f6;
+				background-color: ${(props) => props.theme.colors.roles.primary};
+				color: ${(props) => props.theme.colors.font.light1};
 			}
 		}
+	}
+`;
+
+export const DomainCosts = styled.div`
+	margin: 15px 0 0 0;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+`;
+
+export const DomainCostActions = styled.div`
+	width: 100%;
+	display: flex;
+	justify-content: flex-end;
+	gap: 15px;
+	margin: 10px 0 0 0;
+`;
+
+export const ModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+`;
+
+export const ModalSection = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 2.5px;
+`;
+
+export const ModalSectionTitle = styled.div`
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	color: ${(props) => props.theme.colors.font.primary};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-size: ${(props) => props.theme.typography.size.small};
+`;
+
+export const ModalSectionContent = styled.div`
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+`;
+
+export const ModalYearSelector = styled.div`
+	display: flex;
+	gap: 12.5px;
+	align-items: center;
+	margin: 7.5px 0 0 0;
+
+	button {
+		flex: 1;
+	}
+`;
+
+export const ModalCostSection = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 7.5px;
+
+	> div {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+`;
+
+export const ModalCostGrid = styled.div`
+	display: grid;
+	grid-template-columns: 140px 1fr;
+	row-gap: 10px;
+	column-gap: 16px;
+	align-items: center;
+`;
+
+export const ModalCostLabel = styled.div`
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
+`;
+
+export const ModalCostValue = styled.div`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.xBold};
+`;
+
+export const LoadingIndicator = styled.span`
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+`;
+
+export const PaymentSelectorWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+`;
+
+export const PaymentSummaryWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 7.5px;
+`;
+
+export const InsufficientBalanceWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+`;
+
+export const ModalActions = styled.div`
+	display: flex;
+	gap: 7.5px;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	margin: 15px 0 0 0;
+`;
+
+export const UpgradeModalActions = styled(ModalActions)``;
+
+export const LoadingBannerWrapper = styled.div`
+	width: 100%;
+	padding: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+
+	p {
+		margin: 0;
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+	}
+`;
+
+export const DomainHeaderContent = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 12.5px;
+`;
+
+export const DomainArrow = styled.div<{ isOpen: boolean }>`
+	svg {
+		height: 15px;
+		width: 15px;
+		margin: 5px 0 0 0;
+		color: ${(props) => props.theme.colors.font.primary};
+		fill: ${(props) => props.theme.colors.font.primary};
+		transform: rotate(${(props) => (props.isOpen ? '0' : '270deg')});
+	}
+`;
+
+export const DomainName = styled.h4`
+	margin: 0;
+`;
+
+export const EmptyStateWrapper = styled.div`
+	padding: 15px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+	p {
+		margin: 0;
+		color: ${(props) => props.theme.colors.font.primary};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+	}
+
+	span {
+		margin: 0;
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+	}
+`;
+
+export const DomainDetailLine = styled.div`
+	width: 100%;
+	display: flex;
+	gap: 7.5px;
+	align-items: center;
+	justify-content: space-between;
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: flex-start;
+	}
+`;
+
+export const DomainDetailDivider = styled.div`
+	flex: 1;
+	margin: 10px 0 0 0;
+	border-bottom: 1px dotted ${(props) => props.theme.colors.border.alt4};
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		display: none;
 	}
 `;

@@ -6,6 +6,7 @@ import { WalletConnect } from 'wallet/WalletConnect';
 
 import * as S from './styles';
 
+// TODO: Remove wallet connect
 export default function WalletBlock() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];

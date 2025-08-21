@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { Loader } from 'components/atoms/Loader';
 import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+
+import * as S from './styles';
 
 export type PayMethod = 'turbo' | 'ario';
 
@@ -21,11 +22,14 @@ export function PaymentSummary(props: {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const language: any = languageProvider.object[languageProvider.current];
 
-	const fmt = React.useCallback((val?: number | null) => {
-		if (formatOverride) return formatOverride(val);
-		if (val == null) return '—';
-		return method === 'ario' ? `${toReadableARIO(val)} ${unitLabel}` : `${getARAmountFromWinc(val)} ${unitLabel}`;
-	}, [method, unitLabel, formatOverride]);
+	const fmt = React.useCallback(
+		(val?: number | null) => {
+			if (formatOverride) return formatOverride(val);
+			if (val == null) return '—';
+			return method === 'ario' ? `${toReadableARIO(val)} ${unitLabel}` : `${getARAmountFromWinc(val)} ${unitLabel}`;
+		},
+		[method, unitLabel, formatOverride]
+	);
 
 	const finalBalance = React.useMemo(() => {
 		if (balance == null || cost == null) return null;
@@ -33,21 +37,28 @@ export function PaymentSummary(props: {
 	}, [balance, cost]);
 
 	return (
-		<div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', rowGap: 6, ...(style || {}) }}>
-			<div style={{ opacity: 0.75 }}>{language.checkoutTotalDue}</div>
-			<div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-				{loadingCost ? <><Loader xSm /> <span>{language.fetching}…</span></> : <span>{fmt(cost)}</span>}
-			</div>
-			<div style={{ opacity: 0.75 }}>{language.checkoutCurrentBalance}</div>
-			<div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-				{loadingBalance ? <><Loader xSm /> <span>{language.fetching}…</span></> : <span>{fmt(balance)}</span>}
-			</div>
-			<div style={{ opacity: 0.75 }}>{language.checkoutFinalBalance}</div>
-			<div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-				{loadingCost || loadingBalance ? <><Loader xSm /> <span>{language.calculating}…</span></> : <span>{fmt(finalBalance)}</span>}
-			</div>
-		</div>
+		<S.PaymentSummaryWrapper style={style}>
+			<S.PaymentSummaryLine>
+				<S.PaymentSummaryLabel>{language.checkoutTotalDue}</S.PaymentSummaryLabel>
+				<S.PaymentSummaryDivider />
+				<S.PaymentSummaryValue>
+					{loadingCost ? <span>{language.fetching}…</span> : <span>{fmt(cost)}</span>}
+				</S.PaymentSummaryValue>
+			</S.PaymentSummaryLine>
+			<S.PaymentSummaryLine>
+				<S.PaymentSummaryLabel>{language.checkoutCurrentBalance}</S.PaymentSummaryLabel>
+				<S.PaymentSummaryDivider />
+				<S.PaymentSummaryValue>
+					{loadingBalance ? <span>{language.fetching}…</span> : <span>{fmt(balance)}</span>}
+				</S.PaymentSummaryValue>
+			</S.PaymentSummaryLine>
+			<S.PaymentSummaryLine>
+				<S.PaymentSummaryLabel>{language.checkoutFinalBalance}</S.PaymentSummaryLabel>
+				<S.PaymentSummaryDivider />
+				<S.PaymentSummaryValue>
+					{loadingCost || loadingBalance ? <span>{language.calculating}…</span> : <span>{fmt(finalBalance)}</span>}
+				</S.PaymentSummaryValue>
+			</S.PaymentSummaryLine>
+		</S.PaymentSummaryWrapper>
 	);
 }
-
-

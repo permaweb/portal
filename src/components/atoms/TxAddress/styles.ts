@@ -5,7 +5,7 @@ export const Wrapper = styled.div<{ disabled: boolean }>`
 	align-items: center;
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.base};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		text-decoration: ${(props) => (props.disabled ? 'none' : 'underline')};

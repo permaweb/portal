@@ -3,6 +3,8 @@ import React from 'react';
 import { Button } from 'components/atoms/Button';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
+import * as S from './styles';
+
 export type PayMethod = 'turbo' | 'ario';
 
 export function PayWithSelector(props: {
@@ -18,8 +20,8 @@ export function PayWithSelector(props: {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const language: any = languageProvider.object[languageProvider.current];
 	return (
-		<div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', ...(style || {}) }}>
-			<span style={{ opacity: 0.8 }}>{labels?.title ?? language.fundTurboPaymentHeader}</span>
+		<S.PayWithSelectorWrapper style={style}>
+			<S.PayWithSelectorLabel>{labels?.title ?? language.fundTurboPaymentHeader}</S.PayWithSelectorLabel>
 			{showCredits && (
 				<Button
 					type={method === 'turbo' ? 'alt1' : 'primary'}
@@ -34,8 +36,6 @@ export function PayWithSelector(props: {
 					handlePress={() => onChange('ario')}
 				/>
 			)}
-		</div>
+		</S.PayWithSelectorWrapper>
 	);
 }
-
-

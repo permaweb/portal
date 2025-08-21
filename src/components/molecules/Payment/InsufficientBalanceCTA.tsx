@@ -3,6 +3,8 @@ import React from 'react';
 import { Button } from 'components/atoms/Button';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
+import * as S from './styles';
+
 export type PayMethod = 'turbo' | 'ario';
 
 export function InsufficientBalanceCTA(props: {
@@ -19,14 +21,12 @@ export function InsufficientBalanceCTA(props: {
 	const language: any = languageProvider.object[languageProvider.current];
 	if (!insufficient || isLoading) return null;
 	return (
-		<div style={{ display: 'flex', gap: 8, ...(style || {}) }}>
+		<S.InsufficientBalanceWrapper style={style}>
 			{method === 'ario' ? (
 				<Button type={'primary'} label={language.getTokens} handlePress={onGetTokens} />
 			) : (
 				<Button type={'primary'} label={language.addCredits} handlePress={onAddCredits} />
 			)}
-		</div>
+		</S.InsufficientBalanceWrapper>
 	);
 }
-
-

@@ -30,26 +30,22 @@ function keyFor(walletAddress: string, network: NetworkLabel): string {
 export function loadCachedDomains(
 	walletAddress: string,
 	network: NetworkLabel,
-	maxAgeMs: number = DEFAULT_TTL_MS
+	_maxAgeMs: number = DEFAULT_TTL_MS
 ): CachedUserDomain[] | null {
 	try {
 		const raw = localStorage.getItem(keyFor(walletAddress, network));
 		if (!raw) return null;
 		const env: DomainCacheEnvelope = JSON.parse(raw);
 		if (!env || typeof env.ts !== 'number' || !Array.isArray(env.domains)) return null;
-		const age = Date.now() - env.ts;
-		if (age > maxAgeMs) return null;
+		// const age = Date.now() - env.ts;
+		// if (age > maxAgeMs) return null; // TODO
 		return env.domains;
 	} catch {
 		return null;
 	}
 }
 
-export function saveCachedDomains(
-	walletAddress: string,
-	network: NetworkLabel,
-	domains: CachedUserDomain[]
-): void {
+export function saveCachedDomains(walletAddress: string, network: NetworkLabel, domains: CachedUserDomain[]): void {
 	try {
 		const env: DomainCacheEnvelope = { v: VERSION, ts: Date.now(), domains };
 		localStorage.setItem(keyFor(walletAddress, network), JSON.stringify(env));
@@ -57,5 +53,3 @@ export function saveCachedDomains(
 		// ignore storage errors
 	}
 }
-
-
