@@ -7,6 +7,7 @@ import { PortalContext } from 'engine/providers/portalProvider';
 import { defaultThemes } from 'engine/defaults/theme.defaults';
 import { defaultLayout } from 'engine/defaults/layout.defaults';
 import { defaultPages } from 'engine/defaults/pages.defaults';
+import WebFont from 'webfontloader';
 
 const persister = createAsyncStoragePersister({
   storage: window.localStorage,
@@ -41,9 +42,9 @@ export const useUI = (preview: boolean = false) => {
       console.log('portalData: ', portalData)
       const Store = portalData.store;
       const posts = Store.index && Store.index.reverse();
-      return {
-        ...defaultPortal,
+      return {        
         ...Store,
+        ...defaultPortal,
         posts
       };
     },
@@ -61,12 +62,41 @@ export const useUI = (preview: boolean = false) => {
     }
   });
 
+  if(portal?.fonts) {
+    const fonts = portal?.fonts;
+		const families = [];
+
+    if (fonts.headers) families.push(fonts.headers);
+    if (fonts.body) families.push(fonts.body);
+
+    if (families.length > 0) {
+      WebFont.load({
+        google: { families: families },
+        active: () => {
+          const [bodyFont, bodyWeight] = fonts.body.trim().split(":");
+          const bodyWeights = bodyWeight.split(",");
+          document.documentElement.style.setProperty('--font-body', bodyFont);
+          document.documentElement.style.setProperty('--font-body-weight', bodyWeights[0]);
+          document.documentElement.style.setProperty('--font-body-weight-bold', bodyWeights[1]);
+          
+          const [headerFont, headerWeight] = fonts.headers.trim().split(":");
+          const headerWeights = headerWeight.split(",");
+          document.documentElement.style.setProperty('--font-header', headerFont);
+          document.documentElement.style.setProperty('--font-header-weight', headerWeights[0]);
+          document.documentElement.style.setProperty('--font-header-weight-bold', headerWeights[1]);
+          
+        }
+      });
+    }
+  }
+
   const Name = portal?.name;
   const Categories = portal?.categories;
   const Layout = portal?.layout;
   const Pages = portal?.pages;
   const Posts = portal?.posts;
   const Themes = portal?.themes;
+  const Logo = portal?.logo;
 
-  return { Name, Categories, Layout, Pages, Themes, Posts, updateZone, isLoading, error };
+  return { Name, Categories, Layout, Pages, Themes, Posts, Logo, updateZone, isLoading, error };
 };

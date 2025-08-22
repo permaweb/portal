@@ -2,11 +2,12 @@ import { Routes, Route } from 'react-router-dom';
 import Page from '../page';
 import * as S from './styles';
 
-export default function Content() {
+export default function Content(props: any) {
+  const { layout } = props;
 
   return (
-    <S.Content id="Content">
-      <S.FeedWrapper>
+    <S.ContentWrapper id="ContentWrapper">
+      <S.Content $layout={layout.content} maxWidth={layout?.basics?.maxWidth}>
         <Routes>                    
           <Route path=":post/:postId" element={<Page />} />
           
@@ -24,7 +25,7 @@ export default function Content() {
           <Route path="static/:pageId" element={<Page />} />
           <Route path="*" element={<Page />} />
         </Routes>
-      </S.FeedWrapper>
-    </S.Content>
+      </S.Content>
+    </S.ContentWrapper>
   )
 }

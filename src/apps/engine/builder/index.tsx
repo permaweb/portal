@@ -31,7 +31,7 @@ export default function Builder(props: any) {
       case 'post':
         return <Post key={index} txId={element.txId} title={element.title} gap={element.gap}  preview={preview} />;
       case 'feed':
-        return <Feed key={index} preview={preview} />;
+        return <Feed key={index} category={element?.category ? element?.category : null} width={element?.width} layout={element?.layout} preview={preview} />;
       case 'sidebar':
         return <Sidebar key={index} layout={Layout.Base} content={element.content} gap={element.gap} preview={preview} />;
       case 'postSpotlight':

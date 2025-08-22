@@ -11,32 +11,32 @@ export const defaultThemes: Portal = [
           "dark": "255,255,255"
         },
         "background": {
-          "light": "235, 235, 235",
-          "dark": "27, 26, 21"
+          "light": "250,250,250",
+          "dark": "20,20,20"
         },
         "primary": {
-          "light": "80,154,176",
-          "dark": "80,154,176"
+          "light": "151,151,151",
+          "dark": "77,77,77"
         },
         "secondary": {
-          "light": "51,105,125",
-          "dark": "51,105,125"
+          "light": "69,153,232",
+          "dark": "69,153,232"
         },
         "border": {
-          "light": "155,155,155",
-          "dark": "155,155,155"
+          "light": "50, 50, 50",
+          "dark": "208, 208, 208"
         }
       },
       "preferences": {
         "borderRadius": 0,
-        "wallpaper": "BBbg_l-3_Z6UPH_9PG-Ad2ntHLwe9HhdMdEsbk8r_DU"
+        "wallpaper": undefined
       }
     },
     "header": {
       "colors": {
         "background": {
-          "light": "255,255,255",
-          "dark": "0,0,0"
+          "light": "background",
+          "dark": "background"
         },
         "border": {
           "light": "border",
@@ -65,11 +65,11 @@ export const defaultThemes: Portal = [
     "navigation": {
       "colors": {
         "background": {
-          "light": "0,0,0",
-          "dark": "0,0,0"
+          "light": "238, 238, 238",
+          "dark": "32, 32, 32"
         },
         "text": {
-          "light": "255,255,255",
+          "light": "text",
           "dark": "text"
         },
         "border": {
@@ -77,8 +77,8 @@ export const defaultThemes: Portal = [
           "dark": "border"
         },
         "hover": {
-          "light": "primary",
-          "dark": "primary"
+          "light": "50,50,50",
+          "dark": "208,208,208"
         }
       },
       "preferences": {
@@ -109,8 +109,8 @@ export const defaultThemes: Portal = [
     "footer": {
       "colors": {
         "background": {
-          "light": "0,0,0",
-          "dark": "0,0,0"
+          "light": "background",
+          "dark": "background"
         }
       },
       "preferences": {
@@ -123,8 +123,12 @@ export const defaultThemes: Portal = [
     "card": {
       "colors": {
         "background": {
-          "light": "255,255,255",
-          "dark": "0,0,0"
+          "light": undefined,
+          "dark": undefined
+        },
+        "border": {
+          "light": "border",
+          "dark": "border"
         }
       },
       "preferences": {

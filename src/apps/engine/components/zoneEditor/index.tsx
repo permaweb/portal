@@ -6,8 +6,8 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 import Icon from 'engine/components/icon';
 import * as ICONS from 'engine/constants/icons';
 import JsonGuiEditor from './gui';
-import * as S from './styles';
 import { IProps } from './types';
+import * as S from './styles';
 
 function colorizeJson(json) {
   const stringRegex = /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?)/g;
@@ -121,7 +121,7 @@ export default function ZoneEditor(props: IProps) {
 	const isValid = output !== 'Invalid JSON';
 
 	return (
-		<S.Wrapper $mode={portalProvider?.editorMode}>
+		<S.Wrapper $mode={portalProvider?.editorMode} id="ZoneEditor">
 			<S.Actions $mode={portalProvider?.editorMode}>
 				<div onClick={() => portalProvider?.setEditorMode(portalProvider?.editorMode === 'mini' ? 'full' : 'mini')}><Icon icon={ICONS.ARROW_UP} /></div>
 				<div onClick={() => portalProvider?.setEditorMode('hidden')}><Icon icon={ICONS.CLOSE} /></div>

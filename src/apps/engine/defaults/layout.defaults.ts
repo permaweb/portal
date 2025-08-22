@@ -4,13 +4,14 @@ export const defaultLayout: PortalLayout = {
   basics: {
     gradient: true,
     wallpaper: '',
-    borderRadius: 0 
+    borderRadius: 0,
+    maxWidth: 1600,
   },
   header: {
     layout: {
       width: "page",
-      height: "120px",
-      padding: "0",
+      height: "100px",
+      padding: "0 20px",
       border: {
         top: false,
         sides: false,
@@ -27,118 +28,18 @@ export const defaultLayout: PortalLayout = {
     },
     "links": [
       {
-        "title": "Odysee",
-        "icon": "odysee",
-        "uri": ""
-      },
-      {
-        "title": "Telegram",
-        "icon": "telegram",
-        "uri": ""
-      },
-      {
-        "title": "Mastodon",
-        "icon": "mastodon",
-        "uri": ""
-      },
-      {
-        "title": "VK",
-        "icon": "vk",
-        "uri": ""
-      },
-      {
         "title": "X",
         "icon": "x",
-        "uri": ""
+        "uri": "https://x.com/permawebjournal"
       },
-      {
-        "title": "LinkedIn",
-        "icon": "linkedin",
-        "uri": ""
-      },
-      {
-        "title": "Patreon",
-        "icon": "patreon",
-        "uri": ""
-      },
-      {
-        "title": "RSS Feed",
-        "icon": "rss",
-        "uri": ""
-      },
-      {
-        "title": "Facebook",
-        "icon": "facebook",
-        "uri": ""
-      },
-      {
-        "title": "Dailymotion",
-        "icon": "dailymotion",
-        "uri": ""
-      },
-      {
-        "title": "Rumble",
-        "icon": "rumble",
-        "uri": ""
-      },
-      {
-        "title": "YouTube",
-        "icon": "youtube",
-        "uri": ""
-      },
-      {
-        "title": "GitHub",
-        "icon": "github",
-        "uri": ""
-      },
-      {
-        "title": "Discord",
-        "icon": "discord",
-        "uri": ""
-      },
-      {
-        "title": "WhatsApp",
-        "icon": "whatsapp",
-        "uri": ""
-      },
-      {
-        "title": "Reddit",
-        "icon": "reddit",
-        "uri": ""
-      },
-      {
-        "title": "Instagram",
-        "icon": "instagram",
-        "uri": ""
-      },
-      {
-        "title": "TikTok",
-        "icon": "tiktok",
-        "uri": ""
-      },
-      {
-        "title": "WeChat",
-        "icon": "wechat",
-        "uri": ""
-      },
-      {
-        "title": "Apple Podcasts",
-        "icon": "apple",
-        "uri": ""
-      },
-      {
-        "title": "Spotify",
-        "icon": "spotify",
-        "uri": ""
-      }
     ]
     },
   },
   navigation: {
     layout: {
       width: "page",
-      height: "40px",
-      padding: "0",
+      height: 50,
+      padding: "0 20px",
       gradient: false,
       shadow: true,
       border: {
@@ -150,14 +51,20 @@ export const defaultLayout: PortalLayout = {
     },
     content: {},
   },
+  content: {
+    layout: {
+      width: "page",
+      padding: "0 20px",
+    }
+  },
   footer: {
     layout: {
       width: "page",
-      height: "46px",
+      height: "230px",
       padding: "14px",
       verticalAlign: "center",
       border: {
-        top: false,
+        top: true,
         sides: false,
         bottom: false
       },
@@ -175,25 +82,42 @@ export const defaultLayout: PortalLayout = {
           content: [
             {
               type: "link",
-              text: "Contact",
-              uri: "abc",
-            },
-            {
-              type: "label",
-              text: "|",
+              text: "Arweave",
+              uri: "feed/category/1752687205671",
             },
             {
               type: "link",
-              text: "Impressum",
-              uri: "abc",
+              text: "AO",
+              uri: "feed/category/1752687208638",
+            },
+            {
+              type: "link",
+              text: "Newsletter",
+              uri: "feed/category/1752687217653",
             }
+          ]
+        },
+        {
+          type: "row",
+          layout: {
+            width: 1,
+            margin: "0",
+          },
+          content: [
+            {
+              type: "link",
+              text: "About",
+              uri: "feed/category/1752687205671",
+            },
           ]
         }
       ]
     }
   },
   card: {
-    flow: "column",
+    flow: "row",
+    comments: false,
+    layout: "journal"
   },
   comments: {}
 };

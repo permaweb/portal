@@ -1,15 +1,16 @@
 import styled from 'styled-components';
 import { BREAKPOINTS } from 'engine/constants/breakpoints';
 
-export const Navigation = styled.div<{ $layout: any }>`
+export const Navigation = styled.div<{ $layout: any, maxWidth: number }>`
   position:relative;
   position:sticky;
   display: flex;
   align-items: center;
   top:0px;  
-  height:40px;
+  height:${(props) => props.$layout.height ? `${props.$layout.height}px` : `40px`};
+  min-height:${(props) => props.$layout.height ? `${props.$layout.height}px` : `40px`};
   width:100%;
-  max-width:${(props) => props.$layout.width === 'content' ? `1200px` : `100%`};
+  max-width:${(props) => props.$layout.width === 'content' ? `${props.maxWidth}px` : `100%`};
   background: var(--color-navigation-background);  
   margin-left:auto;
   margin-right:auto;
@@ -56,16 +57,17 @@ export const Navigation = styled.div<{ $layout: any }>`
   `};
 `;
 
-export const NavigationEntries = styled.div<{ $layout: any }>`
+export const NavigationEntries = styled.div<{ $layout: any, maxWidth: number }>`
   display: flex;
   align-items: center;
-  height:40px;
+  height:100%;
   width:100%;
-  width:100%;
-  max-width: 1200px;
+  padding: ${(props) => props.$layout.padding ? props.$layout.padding : 0 };
+  max-width: ${(props) => props?.maxWidth ? `${props.maxWidth}px` : '1200px'};
   margin-left:${(props) => props.$layout.width === 'page' ? `auto` : `10px` };
   margin-right:auto;
   gap:20px;
+  box-sizing: border-box;
 
   > div > a {
     height:${(props) => props.$layout.height};
@@ -107,7 +109,6 @@ export const NavigationEntry = styled.div`
 
     font-size:var(--font-size-default);
     font-weight:600;
-    font-family: Franklin, arial, sans-serif;
 
     svg{
       width:20px;

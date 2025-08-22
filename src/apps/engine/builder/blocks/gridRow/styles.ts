@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-
+import { BREAKPOINTS } from 'engine/constants/breakpoints';
 
 export const GridRow = styled.div<{ $layout?: any }>`  
 	position:relative;
@@ -27,15 +27,25 @@ export const GridRow = styled.div<{ $layout?: any }>`
 `;
 
 
-export const GridRowWrapper = styled.div<{ $layout?: any }>`
+export const GridRowWrapper = styled.div<{ $layout?: any, maxWidth?: number }>`
   display:flex;
   width: 100%;
   background:${(props) => props?.$layout?.width === 'content' ? `rgba(${props.$layout.background}, 1)` : 'unset'};
   padding:${(props) => props?.$layout?.padding ? props?.$layout?.padding : 'unset'};
-  max-width: 1200px;
+  // max-width: ${(props) => props?.maxWidth ? `${props.maxWidth}px` : '1200px'};
   margin-left:auto;
   margin-right:auto;  
   gap:20px;  
 	box-sizing:border-box;
 	z-index:1;
+
+  @media (max-width: ${BREAKPOINTS["breakpoint-small"]}) {
+    flex-direction: column;
+  }
 `;
+
+export const Separation = styled.div`
+  background: rgba(var(--color-border),1);
+  width:1px;
+  opacity: .3;
+`

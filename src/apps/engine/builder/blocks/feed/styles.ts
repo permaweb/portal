@@ -1,11 +1,12 @@
 import styled from 'styled-components';
 import { BREAKPOINTS } from 'engine/constants/breakpoints';
 
-export const Feed = styled.div`
+export const Feed = styled.div<{ width: number }>`
 	display:flex;
 	flex-direction: column;	
 	width: 100%;
   gap:20px;
+	flex: ${(props) => props.width ? props.width : undefined};
 
 	@media (max-width: ${BREAKPOINTS["breakpoint-small"]}) {
 		margin:var(--spacing-xxs);

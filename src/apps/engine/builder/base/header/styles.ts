@@ -18,8 +18,7 @@ export const Header = styled.div<{ $layout: any, theme: any }>`
   border-top: ${(props) => props.$layout.border.top ? `1px solid rgba(var(--color-header-border),1)`: `unset` };
   border-left: ${(props) => props.$layout.border.sides ? `1px solid rgba(var(--color-header-border),1)`: `unset` };
   border-right: ${(props) => props.$layout.border.sides ? `1px solid rgba(var(--color-header-border),1)`: `unset` };
-  box-shadow: ${(props) => props.$layout.shadow ? props.$layout.shadow : `unset` };
-  padding:${(props) => props.$layout.padding ? props.$layout.padding : `0`};
+  box-shadow: ${(props) => props.$layout.shadow ? props.$layout.shadow : `unset` };  
   z-index:3;
   user-select:none;
   box-sizing:border-box;
@@ -29,14 +28,22 @@ export const Header = styled.div<{ $layout: any, theme: any }>`
   }
 `;
 
-export const HeaderContent = styled.div<{ $layout: any }>`
+export const HeaderContentWrapper = styled.div<{ $layout: any, maxWidth: number }>`
   position:relative;
   width:100%;
-  max-width:${(props) => props.$layout.width === 'page' ? `1200px` : `100%`};
+  max-width:${(props) => props.$layout.width === 'page' ? `${props.maxWidth}px` : `100%`};
   margin-left:auto;
   margin-right:auto;  
   min-height:100%;
   max-height:100%;  
+  padding:${(props) => props.$layout.padding ? props.$layout.padding : `0`};
+  box-sizing: border-box;
+`;
+
+export const HeaderContent = styled.div<{ $layout: any, maxWidth: number }>`
+  position:relative;
+  width:100%;
+  height:100%;
 `;
 
 
@@ -58,7 +65,7 @@ export const Logo = styled.div<{ $layout: any }>`
       height:100%;
     }
   }
-  svg {
+  svg, img {
     display: ${(props) => props.$layout?.display ? 'inline-block' : 'none'};
     height:100%;
     width: fit-content;
@@ -84,7 +91,7 @@ export const Actions = styled.div`
   position:absolute;
   display:flex;
   top:10px;
-  right:0;
+  right: 0;
   z-index:2;
 `;
 
@@ -96,7 +103,7 @@ export const ThemeToggle = styled.div`
 export const Links = styled.div`
   position:absolute;
   top:0;
-  right:0;
+  right: 0;
   display:flex;
   width:fit-content;
   height:100%;  

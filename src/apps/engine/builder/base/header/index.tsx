@@ -13,7 +13,7 @@ import * as S from './styles';
 
 export default function Header(props:any) {  
   const { name, layout, content, preview } = props;
-  const { Themes } = useUI(preview);
+  const { Themes, Layout, Logo } = useUI(preview);
   const { settings, updateSetting } = preview
     ? (() => {
         const [localSettings, setLocalSettings] = React.useState({ theme: 'dark' });
@@ -47,14 +47,18 @@ export default function Header(props:any) {
     <>
       {preview && <GlobalStyles />}
       <S.Header $layout={layout} theme={settings?.theme} id="Header">
-        <S.HeaderContent $layout={layout}>
+        <S.HeaderContentWrapper $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
+          <S.HeaderContent>
           {content.logo ? (
             <S.Logo $layout={content.logo}>
-              {content.logo.txId 
+              {content.logo.txId || Logo 
                 ? preview 
                   ? <a href=""><ReactSVG src={`https://arweave.net/${content.logo.txId}`} /></a>
                   : <NavLink to={'/'}>
-                      <ReactSVG src={`https://arweave.net/${content.logo.txId}`} />
+                    {Logo 
+                      ? <img src={`https://arweave.net/${Logo}`} />
+                      : <ReactSVG src={`https://arweave.net/${content.logo.txId}`} />
+                    }                      
                     </NavLink>
                 : <h1>{name}</h1>
               }
@@ -77,7 +81,8 @@ export default function Header(props:any) {
               </S.LinksList>
             </S.Links>      
           )}
-        </S.HeaderContent>
+          </S.HeaderContent>
+        </S.HeaderContentWrapper>
       </S.Header>
     </>
   )

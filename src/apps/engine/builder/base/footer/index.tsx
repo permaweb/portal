@@ -8,7 +8,8 @@ import { GlobalStyles } from '../../../global-styles';
 
 export default function Footer(props: any) {
   const { preview, layout, content } = props;
-  const { Themes } = useUI(preview);
+  const { Themes, Name } = useUI(preview);
+  
   const { settings } = preview
     ? { settings: { theme: 'dark' }}
     : useSettings();
@@ -23,11 +24,12 @@ export default function Footer(props: any) {
   return (
     <>
       {preview && <GlobalStyles />}
-      <S.Footer $layout={layout} $theme={settings?.theme || 'dark'} id="Footer">
-        <S.FooterWrapper $layout={layout}>
-          <Builder layout={content} preview={preview} />
-        </S.FooterWrapper>
-      </S.Footer>
+      <S.FooterWrapper $layout={layout} $theme={settings?.theme} id="Footer">
+        <S.Footer $layout={layout}>
+          <Builder layout={content} preview={preview} />          
+          {Name} 2025
+        </S.Footer>        
+      </S.FooterWrapper>
     </>
   )
 }

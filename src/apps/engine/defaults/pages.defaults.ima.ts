@@ -7,21 +7,24 @@ export const defaultPages = {
       {
         type: "row",
         width: 1,
-        layout: {
-          separation: true,
-        },
         content: [
           {
-            width: 2,
-            type: "feed",
-            layout: "journal"
-          },{
-            width: 1,
-            type: "feed",
-            category: "AO",
-            layout: "minimal"
+            type: "postSpotlight",
+            txId: "zEST8VQpxCLZMPWcj1bK2MSDw6CLjOeSaXnGODapvdo"
           }
         ]
+      },{
+        type: "row",
+        width: 1,
+        content: [{
+          type: "categorySpotlight",
+          category: "Category A"
+        }],
+        layout: {
+          width: "page",
+          padding: "0 0",
+          background: "0,0,0"
+        }
       }
     ]
   },
@@ -33,8 +36,11 @@ export const defaultPages = {
       content: [
         { 
           type: 'feed',
-          layout: "journal",
           width: 3
+        },{
+          type: 'sidebar',
+          width: 1,
+          content: ["date", "authors", "sources", "podcasts"]
         }
       ]
     }]    

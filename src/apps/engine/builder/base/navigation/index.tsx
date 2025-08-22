@@ -11,9 +11,7 @@ import Search from './search';
 
 export default function Navigation(props: any) {
   const { preview, layout, content } = props;
-  const { Layout, Themes } = useUI(true);
-  const [useSearch, setUseSearch] = React.useState(false);
-  const searchRef = React.useRef(null);
+  const { Layout, Themes } = useUI(preview);
 
   React.useEffect(() => {
     if(preview){
@@ -22,21 +20,7 @@ export default function Navigation(props: any) {
     }    
   },[preview])
 
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      // @ts-ignore
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setUseSearch(false);
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, []);
-
-  const NavigationEntry = ({ index, entry }: any) => {
+  const NavigationEntry = ({ index, entry }: any) => {    
     const [showMenu, setShowMenu] = React.useState(false);
 
     return (
@@ -72,8 +56,8 @@ export default function Navigation(props: any) {
   };
   
   return layout && (
-    <S.Navigation $layout={layout}>
-      <S.NavigationEntries $layout={layout}>
+    <S.Navigation $layout={layout} maxWidth={Layout?.basics?.maxWidth} id="Navigation">
+      <S.NavigationEntries $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
         {content &&
           Object.entries(content).map(([key, entry]) => (
             <NavigationEntry key={key} index={key} entry={entry} />

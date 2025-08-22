@@ -16,7 +16,7 @@ export default function Page() {
   React.useEffect(() => {
     if(Name && pageId === 'home' && !document.title.includes('Home')){
       // @ts-ignore
-      document.title = `Home - ${Name}`;
+      document.title = `${Name}`;
     }
   },[pageId, Name])
 

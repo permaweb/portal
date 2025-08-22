@@ -5,27 +5,14 @@ import { useProfile } from 'engine/hooks/profiles';
 import { useComments } from 'engine/hooks/comments';
 import Placeholder from 'engine/components/placeholder';
 import * as S from './styles';
-import PostPreview_Journal from './journal';
-import PostPreview_Default from './default';
-import PostPreview_Minimal from './minimal';
 
-export default function PostPreview(props: any) {
+export default function PostPreview_Default(props: any) {
   const navigate = useNavigate();
   const { Layout } = useUI();
   const { preview, post, loading } = props;  
-  // const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || null);
-  // const { comments, isLoading: isLoadingComments, error: errorComments } = useComments(post?.id || null, true);
+  const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || null);
+  const { comments, isLoading: isLoadingComments, error: errorComments } = useComments(post?.id || null, true);
 
-  switch (props?.layout) {
-    case 'journal': 
-      return <PostPreview_Journal layout={Layout} post={post} />
-    case 'minimal': 
-      return <PostPreview_Minimal layout={Layout} post={post} />
-    default:
-      return <PostPreview_Default layout={Layout} post={post} />
-  }
-
-  /*
   const Comment = (data: any) => {    
     const { data: comment } = data;
     const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(comment.creator || null);
@@ -46,7 +33,6 @@ export default function PostPreview(props: any) {
     )
   }
 
-  console.log('Layout.card: ', Layout.card)
   return (    
     <S.Post $layout={Layout && Layout.card}>
       <S.Categories>{
@@ -100,6 +86,5 @@ export default function PostPreview(props: any) {
       )}
     </S.Post>
   )
-    */
 }
 

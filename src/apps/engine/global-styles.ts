@@ -7,9 +7,10 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   :root {
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
+    // font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family: var(--font-body);
+    font-weight: var(--font-body-weight);
+    line-height: 1.5;    
 
     color-scheme: light dark;
     background-color: #242424;
@@ -74,18 +75,24 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   h1 {
+    font-family: var(--font-header);
+    font-weight: var(--font-header-weight-bold);
     font-size: var(--font-size-xxxlarge);
     color: rgba(var(--color-primary), 1);
     line-height: 1.1;
   }
 
   h2 {
+    font-family: var(--font-header);
+    font-weight: var(--font-header-weight-bold);
     margin: 0 0 4px 0;
     font-size: var(--font-size-xlarge);
     color: rgba(var(--color-primary), 1);
   }
 
   h3 {
+    font-family: var(--font-header);
+    font-weight: var(--font-header-weight-bold);
     margin: 0;
     font-size: var(--font-size-large);
   }
@@ -164,7 +171,7 @@ export const GlobalStyles = createGlobalStyle`
 
 export const PageWrapper = styled.div`
   display:flex;
-  min-height:100%;  
+  min-height:100%;
 `;
 
 export const Page = styled.div<{ $layout: any }>`
@@ -175,7 +182,7 @@ export const Page = styled.div<{ $layout: any }>`
   min-height:100%;
 	background-color:rgba(var(--color-background),1);
   // background-image: ${(props: any) => props.$layout?.wallpaper ? `url('img/wallpapers/wp${props.$layout.wallpaper}.jpg')` : `unset` };
-  background-image: url('https://arweave.net/BBbg_l-3_Z6UPH_9PG-Ad2ntHLwe9HhdMdEsbk8r_DU');
+  // background-image: url('https://arweave.net/BBbg_l-3_Z6UPH_9PG-Ad2ntHLwe9HhdMdEsbk8r_DU');
   background-attachment: fixed;
   background-size: cover;
   color:rgba(var(--color-text),1);

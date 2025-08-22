@@ -2,7 +2,6 @@ import styled from 'styled-components';
 
 export const Wrapper = styled.div<{ $mode: string }>`
 	position: fixed;
-	bottom: 0;
 	bottom: ${(props) => props.$mode === 'hidden' ? '-100px' : 0};
 	max-height: ${(props) => props.$mode === 'hidden' ? 0 : props.$mode === 'mini' ? '40vh' : 'calc(100vh - 41px)'};
 	min-height: ${(props) => props.$mode === 'hidden' ? 0 : props.$mode === 'mini' ? '40vh' : 'calc(100vh - 41px)'};

@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 
-export const Content = styled.div`
+export const ContentWrapper = styled.div`
   display:flex;
   justify-content: center;
   width:100%;    
@@ -10,11 +10,15 @@ export const Content = styled.div`
   box-sizing: border-box;
   gap: 20px;
   z-index:1;
+  
 `;
 
-export const FeedWrapper = styled.div`
+export const Content = styled.div<{ $layout: any, maxWidth: number }>`
   position: relative;
   display:flex;
   flex-direction: column;
   width:100%;
+  max-width: ${(props) => props.maxWidth ? `${props.maxWidth}px` : undefined };
+  padding: 0 20px;
+  box-sizing: border-box;
 `;

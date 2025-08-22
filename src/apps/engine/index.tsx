@@ -76,7 +76,8 @@ function App() {
   },[Themes])
 
 	const SetPortalIdComponent = () => {
-    useSetPortalId('r-5yMlWFOZ_LpSHXeHwXGkkit-2BsL-0nmhDbUiQAv8');
+    // useSetPortalId('r-5yMlWFOZ_LpSHXeHwXGkkit-2BsL-0nmhDbUiQAv8');
+		useSetPortalId('dc6W1Lz5V8-KV44B6qonM7pS5x5UC1lsRzCK-CiMotQ');
     return null;
   };
 
@@ -103,31 +104,18 @@ function App() {
 		};
 	}, [portalProvider.current?.icon]);
 
-	/*
-	if (!portalProvider.current) {
-		return (
-			<>
-				<div id={DOM.loader} />
-				<Loader />
-			</>
-		);
-	}
-		*/
-
-	return (
+	return Layout && Layout.footer && (
 		<>
 			<div id={DOM.loader} />
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />
 			<S.PageWrapper>
 				<S.Page $layout={Layout?.basics} id="Page">
-				<SetPortalIdComponent />
-				<Header name={Name} layout={Layout?.header.layout} content={Layout?.header.content} theme={theme} setTheme={setTheme} />
-				<Navigation layout={Layout?.navigation.layout} content={Categories} theme={theme} />
-				<Content/>
-				<S.FooterWrapper $layout={Layout?.footer}>
-					<Footer layout={Layout?.footer.layout} content={Layout?.footer.content} theme={theme} />      
-				</S.FooterWrapper>
+					<SetPortalIdComponent />
+					<Header name={Name} layout={Layout?.header.layout} content={Layout?.header.content} theme={theme} setTheme={setTheme} />
+					<Navigation layout={Layout?.navigation.layout} content={Categories} theme={theme} />
+					<Content layout={Layout} />
+					<Footer layout={Layout?.footer.layout} content={Layout?.footer.content} theme={theme} />
 				</S.Page>
 				<ZoneEditor />
 			</S.PageWrapper>

@@ -5,11 +5,11 @@ import { usePosts } from 'engine/hooks/posts';
 import PostPreview from './postPreview';
 import * as S from './styles';
 
-export default function Feed() {  
+export default function Feed(props?: any) {  
   const params = useParams();
   const { Name } = useUI();
   const filters = {
-    category: params.category ?? null,
+    category: params.category ?? props.category ?? null,
     tags: params.tag ? [params.tag] : null,
     author: (params.author ?? params.user) ?? null,
     search: params.search ?? null,
@@ -25,7 +25,7 @@ export default function Feed() {
   },[Title])
 
   return (
-    <S.Feed>
+    <S.Feed width={props?.width}>
       {params.search && (
         <S.FeedHeader>
           <span>Search results</span>
@@ -34,7 +34,7 @@ export default function Feed() {
         </S.FeedHeader>
       )}
       {Posts 
-        ? Object.keys(Posts).map((key) => <PostPreview key={Posts[key].Id} post={Posts[key]} />) 
+        ? Object.keys(Posts).map((key) => <PostPreview key={Posts[key].Id} post={Posts[key]} layout={props?.layout} />) 
         : <>
             <PostPreview loading key={0} />
             <PostPreview loading key={1} />
