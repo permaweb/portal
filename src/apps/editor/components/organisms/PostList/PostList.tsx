@@ -262,7 +262,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 						</S.PostsActionsRequestsBody>
 						{loading && <Loader sm relative />}
 						{unauthorized && (
-							<S.InfoWrapper className={'info'}>
+							<S.InfoWrapper className={'warning'}>
 								<span>{language?.unauthorizedPostReview}</span>
 							</S.InfoWrapper>
 						)}

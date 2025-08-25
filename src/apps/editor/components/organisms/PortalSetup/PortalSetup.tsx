@@ -216,7 +216,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 					{props.type === 'header' ? topicSection() : categorySection()}
 					{props.type === 'detail' && mediaSection()}
 					{props.type === 'detail' && !portalProvider?.permissions?.updateUsers && (
-						<S.InfoWrapper className={'info'}>
+						<S.InfoWrapper className={'warning'}>
 							<span>{language?.unauthorizedPortalUpdate}</span>
 						</S.InfoWrapper>
 					)}

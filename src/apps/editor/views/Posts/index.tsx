@@ -35,14 +35,14 @@ export default function Posts() {
 				<ViewHeader
 					header={language?.posts}
 					actions={[
-						<Button
-							type={'primary'}
-							label={language?.editPostTopics}
-							handlePress={() => setShowTopicAction(true)}
-							disabled={unauthorizedMeta || !portalProvider.current}
-							icon={ASSETS.write}
-							iconLeftAlign
-						/>,
+						// <Button
+						// 	type={'primary'}
+						// 	label={language?.editPostTopics}
+						// 	handlePress={() => setShowTopicAction(true)}
+						// 	disabled={unauthorizedMeta || !portalProvider.current}
+						// 	icon={ASSETS.write}
+						// 	iconLeftAlign
+						// />,
 						<Button
 							type={'alt1'}
 							label={language?.createPost}

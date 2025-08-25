@@ -20,19 +20,6 @@ export default function Design() {
 				<S.SectionWrapper>
 					<S.Section className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
-							<p>{language?.themes}</p>
-						</S.SectionHeader>
-						<Themes />
-					</S.Section>
-					{!portalProvider?.permissions?.updateUsers && (
-						<S.InfoWrapper className={'info'}>
-							<span>{language?.unauthorizedPortalUpdate}</span>
-						</S.InfoWrapper>
-					)}
-				</S.SectionWrapper>
-				<S.SectionWrapper>
-					<S.Section className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
 							<p>{language?.fonts}</p>
 						</S.SectionHeader>
 						<Fonts />
@@ -41,6 +28,19 @@ export default function Design() {
 					<S.Section className={'border-wrapper-alt2'}>
 						<Media portal={portalProvider.current} type={'icon'} />
 					</S.Section>
+				</S.SectionWrapper>
+				<S.SectionWrapper>
+					<S.Section className={'border-wrapper-alt2'}>
+						<S.SectionHeader>
+							<p>{language?.themes}</p>
+						</S.SectionHeader>
+						<Themes />
+					</S.Section>
+					{!portalProvider?.permissions?.updateUsers && (
+						<S.InfoWrapper className={'warning'}>
+							<span>{language?.unauthorizedPortalUpdate}</span>
+						</S.InfoWrapper>
+					)}
 				</S.SectionWrapper>
 			</S.BodyWrapper>
 		</S.Wrapper>

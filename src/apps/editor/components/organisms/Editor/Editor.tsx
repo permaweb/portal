@@ -464,7 +464,7 @@ export default function Editor() {
 		}
 		if (!currentPost.data.topics?.length) {
 			valid = false;
-			message = 'Topics are required';
+			message = 'Tags are required';
 			missingFieldsFound.push(message);
 		}
 
