@@ -59,6 +59,12 @@ export default function Categories(props: {
 		}
 	}, [portalProvider.current]);
 
+	const getEffectiveParentId = () => {
+		if (parentCategory) return parentCategory;
+		if (props.categories?.length > 0) return props.categories[0].id;
+		return null;
+	};
+
 	// Capture category element positions using refs
 	const updateElementRects = React.useCallback(() => {
 		const rects = new Map<string, DOMRect>();
@@ -98,10 +104,12 @@ export default function Categories(props: {
 		if (!unauthorized && newCategoryName && portalProvider.current?.id && arProvider.wallet) {
 			setCategoryLoading(true);
 			try {
+				const effectiveParent = getEffectiveParentId();
+				console.log('Adding new category under parent ID:', effectiveParent);
 				const newCategory: PortalCategoryType = {
 					id: Date.now().toString(),
 					name: newCategoryName,
-					parent: parentCategory,
+					parent: effectiveParent,
 				};
 
 				const isDuplicate = (categories: PortalCategoryType[], name: string): boolean => {
@@ -124,7 +132,7 @@ export default function Categories(props: {
 
 				const addToParent = (categories: PortalCategoryType[]): PortalCategoryType[] => {
 					return categories.map((category) => {
-						if (category.id === parentCategory) {
+						if (category.id === effectiveParent) {
 							return {
 								...category,
 								children: [...(category.children || []), newCategory],
@@ -139,7 +147,7 @@ export default function Categories(props: {
 					});
 				};
 
-				const updatedCategories = parentCategory ? addToParent(categoryOptions) : [...categoryOptions, newCategory];
+				const updatedCategories = effectiveParent ? addToParent(categoryOptions) : [...categoryOptions, newCategory];
 
 				const categoryUpdateId = await permawebProvider.libs.updateZone(
 					{ Categories: permawebProvider.libs.mapToProcessCase(updatedCategories) },
@@ -656,14 +664,6 @@ export default function Categories(props: {
 		return undefined;
 	}
 
-	function getParentDisplayLabel() {
-		if (parentCategory && categoryOptions) {
-			const parent = findCategoryById(categoryOptions, parentCategory);
-			return parent ? parent.name : language?.selectParentCategory;
-		}
-		return language?.selectParentCategory;
-	}
-
 	function getCategories() {
 		if (!categoryOptions) {
 			return (
@@ -783,7 +783,8 @@ export default function Categories(props: {
 	function getCategoryAdd() {
 		return (
 			<S.CategoriesAction>
-				<S.CategoriesParentAction>
+				{/* 
+					<S.CategoriesParentAction>
 					<CloseHandler
 						callback={() => setShowParentOptions(false)}
 						active={showParentOptions}
@@ -819,6 +820,7 @@ export default function Categories(props: {
 						)}
 					</CloseHandler>
 				</S.CategoriesParentAction>
+				*/}
 				<S.CategoriesAddAction
 					onSubmit={addCategory}
 					onKeyDownCapture={(e) => {
@@ -829,7 +831,13 @@ export default function Categories(props: {
 				>
 					<Button
 						type={'alt4'}
-						label={language?.add}
+						label={
+							getEffectiveParentId()
+								? `${language?.addTo ?? 'Add to'} ${
+										findCategoryById(categoryOptions ?? [], getEffectiveParentId())?.name ?? ''
+								  }`
+								: language?.add
+						}
 						handlePress={addCategory}
 						disabled={unauthorized || !newCategoryName || categoryLoading}
 						loading={categoryLoading}
