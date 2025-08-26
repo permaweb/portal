@@ -14,7 +14,6 @@ import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
@@ -40,8 +39,6 @@ export default function Categories(props: {
 	const [categoryOptions, setCategoryOptions] = React.useState<PortalCategoryType[] | null>(null);
 	const [showCategoryAdd, setShowCategoryAdd] = React.useState<boolean>(false);
 	const [newCategoryName, setNewCategoryName] = React.useState<string>('');
-	const [parentCategory, setParentCategory] = React.useState<string | null>(null);
-	const [showParentOptions, setShowParentOptions] = React.useState<boolean>(false);
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
 	const [categoryLoading, setCategoryLoading] = React.useState<boolean>(false);
 	const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
@@ -59,12 +56,22 @@ export default function Categories(props: {
 		}
 	}, [portalProvider.current]);
 
+<<<<<<< Updated upstream
 	const getEffectiveParentId = () => {
 		if (parentCategory) return parentCategory;
+=======
+<<<<<<< Updated upstream
+=======
+	const getEffectiveParentId = () => {
+>>>>>>> Stashed changes
 		if (props.categories?.length > 0) return props.categories[0].id;
 		return null;
 	};
 
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 	// Capture category element positions using refs
 	const updateElementRects = React.useCallback(() => {
 		const rects = new Map<string, DOMRect>();
@@ -164,7 +171,6 @@ export default function Categories(props: {
 				setCategoryOptions(updatedCategories);
 				addNotification(`${language?.categoryAdded}!`, 'success');
 				setNewCategoryName('');
-				setParentCategory(null);
 			} catch (e: any) {
 				addNotification(e.message ?? 'Error adding category', 'warning');
 			}
@@ -636,22 +642,6 @@ export default function Categories(props: {
 		);
 	};
 
-	const renderParentCategoryOptions = (categories: PortalCategoryType[], level = 1) =>
-		categories.map((category) => (
-			<React.Fragment key={category.id}>
-				<S.ParentCategoryOption
-					level={level}
-					onClick={() => {
-						setParentCategory(category.id);
-						setShowParentOptions(false);
-					}}
-				>
-					<span>{category.name}</span>
-				</S.ParentCategoryOption>
-				{category.children && renderParentCategoryOptions(category.children, level + 1)}
-			</React.Fragment>
-		));
-
 	function findCategoryById(categories: PortalCategoryType[], id: string): PortalCategoryType | undefined {
 		for (const category of categories) {
 			if (category.id === id) {
@@ -783,8 +773,13 @@ export default function Categories(props: {
 	function getCategoryAdd() {
 		return (
 			<S.CategoriesAction>
+<<<<<<< Updated upstream
 				{/* 
 					<S.CategoriesParentAction>
+=======
+<<<<<<< Updated upstream
+				<S.CategoriesParentAction>
+>>>>>>> Stashed changes
 					<CloseHandler
 						callback={() => setShowParentOptions(false)}
 						active={showParentOptions}
@@ -820,7 +815,12 @@ export default function Categories(props: {
 						)}
 					</CloseHandler>
 				</S.CategoriesParentAction>
+<<<<<<< Updated upstream
 				*/}
+=======
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 				<S.CategoriesAddAction
 					onSubmit={addCategory}
 					onKeyDownCapture={(e) => {
@@ -831,6 +831,7 @@ export default function Categories(props: {
 				>
 					<Button
 						type={'alt4'}
+<<<<<<< Updated upstream
 						label={
 							getEffectiveParentId()
 								? `${language?.addTo ?? 'Add to'} ${
@@ -838,6 +839,17 @@ export default function Categories(props: {
 								  }`
 								: language?.add
 						}
+=======
+<<<<<<< Updated upstream
+						label={language?.add}
+=======
+						label={
+							getEffectiveParentId()
+								? `${language?.addTo} ${findCategoryById(categoryOptions ?? [], getEffectiveParentId())?.name ?? ''}`
+								: language?.add
+						}
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 						handlePress={addCategory}
 						disabled={unauthorized || !newCategoryName || categoryLoading}
 						loading={categoryLoading}
