@@ -478,7 +478,7 @@ export default function Editor() {
 		}
 		if (!currentPost.data.topics?.length) {
 			valid = false;
-			message = 'Topics are required';
+			message = 'Tags are required';
 			missingFieldsFound.push(message);
 		}
 
@@ -494,7 +494,7 @@ export default function Editor() {
 		<>
 			{unauthorized && (
 				<div className={'overlay'}>
-					<S.MessageWrapper className={'border-wrapper-alt2'}>
+					<S.MessageWrapper className={'border-wrapper-alt2 warning'}>
 						<p>{language?.unauthorizedPostCreate}</p>
 						<Button
 							type={'primary'}

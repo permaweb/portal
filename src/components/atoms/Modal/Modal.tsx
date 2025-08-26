@@ -1,4 +1,5 @@
 import React from 'react';
+import { ReactSVG } from 'react-svg';
 
 import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
@@ -12,6 +13,7 @@ export default function Modal(props: {
 	handleClose: () => void | null;
 	children: React.ReactNode;
 	allowOverflow?: boolean;
+	status?: 'success' | 'warning';
 	className?: string;
 }) {
 	const languageProvider = useLanguageProvider();
@@ -55,6 +57,11 @@ export default function Modal(props: {
 					{props.header && (
 						<S.Header>
 							<S.LT>
+								{props.status && (
+									<S.Indicator status={props.status}>
+										<ReactSVG src={props.status === 'success' ? ASSETS.checkmark : ASSETS.warning} />
+									</S.Indicator>
+								)}
 								<S.Title>{props.header}</S.Title>
 							</S.LT>
 							{props.handleClose && (

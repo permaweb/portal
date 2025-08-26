@@ -239,6 +239,10 @@ export const LeaseDuration = styled.div<{ active: boolean }>`
 	}
 `;
 
+export const PaymentMethodWrapper = styled.div`
+	margin: 0 0 12px 0;
+`;
+
 export const CheckoutWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -317,4 +321,208 @@ export const ActionsWrapper = styled.div`
 	align-items: center;
 	gap: 15px;
 	margin: 0 0 12.5px auto;
+`;
+
+export const SuccessWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+`;
+
+export const SuccessLine = styled.div`
+	width: 100%;
+	display: flex;
+	gap: 7.5px;
+	align-items: center;
+	justify-content: space-between;
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: flex-start;
+	}
+`;
+
+export const SuccessLabel = styled.span`
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	display: flex;
+`;
+
+export const SuccessDivider = styled.div`
+	flex: 1;
+	margin: 10px 0 0 0;
+	border-bottom: 1px dotted ${(props) => props.theme.colors.border.alt4};
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		display: none;
+	}
+`;
+
+export const SuccessValue = styled.span`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	display: flex;
+`;
+
+export const SuccessActions = styled.div`
+	margin: 15px 0 0 0;
+	display: flex;
+	gap: 15px;
+	justify-content: flex-end;
+`;
+
+export const ErrorWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+`;
+
+export const ErrorLine = styled.div`
+	width: 100%;
+	display: flex;
+	gap: 7.5px;
+	align-items: center;
+	justify-content: space-between;
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: flex-start;
+	}
+`;
+
+export const ErrorLabel = styled.span`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	display: flex;
+`;
+
+export const ErrorDivider = styled.div`
+	flex: 1;
+	margin: 10px 0 0 0;
+	border-bottom: 1px dotted ${(props) => props.theme.colors.border.alt4};
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		display: none;
+	}
+`;
+
+export const ErrorValue = styled.span`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	display: flex;
+`;
+
+export const ErrorActions = styled.div`
+	margin: 15px 0 0 0;
+	display: flex;
+	justify-content: flex-end;
+`;
+
+export const ModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 12.5px;
+`;
+
+export const ModalHeader = styled.div`
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-size: ${(props) => props.theme.typography.size.base};
+	color: ${(props) => props.theme.colors.font.primary};
+	font-family: ${(props) => props.theme.typography.family.primary};
+`;
+
+export const ModalGrid = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+`;
+
+export const ModalLine = styled.div`
+	width: 100%;
+	display: flex;
+	gap: 7.5px;
+	align-items: center;
+	justify-content: space-between;
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: flex-start;
+	}
+`;
+
+export const ModalLabel = styled.span`
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	display: flex;
+`;
+
+export const ModalDivider = styled.div`
+	flex: 1;
+	margin: 10px 0 0 0;
+	border-bottom: 1px dotted ${(props) => props.theme.colors.border.alt4};
+
+	@media (max-width: ${STYLING.cutoffs.tablet}) {
+		display: none;
+	}
+`;
+
+export const ModalValue = styled.span`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.xBold};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	display: flex;
+	text-transform: lowercase;
+
+	&.uppercase {
+		text-transform: none;
+	}
+`;
+
+export const ModalActions = styled.div`
+	display: flex;
+	gap: 15px;
+	margin: 15px 0 0 0;
+	justify-content: flex-end;
+	align-items: center;
+	flex-wrap: wrap;
+`;
+
+export const PaymentSummaryWrapper = styled.div`
+	grid-column: 1 / -1;
+`;
+
+export const TestnetInfo = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+
+	a {
+		width: fit-content;
+		display: block;
+		margin: 0 0 15px 0;
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+	}
+
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+	}
 `;

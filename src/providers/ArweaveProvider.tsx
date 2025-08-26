@@ -1,8 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { randomBytes } from 'crypto-browserify';
-
-import { bufferTob64Url } from 'arweave/node/lib/utils';
 
 import { STORAGE, URLS } from 'helpers/config';
 import { getARBalanceEndpoint, getTurboBalanceEndpoint } from 'helpers/endpoints';
@@ -132,38 +129,48 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}
 
 	async function getTurboBalance(): Promise<number | null> {
-		if (!wallet) return null;
+		if (wallet && window.arweaveWallet) {
+			try {
+				const nonce = crypto.randomUUID();
+				const msg = new TextEncoder().encode(nonce);
 
-		try {
-			const publicKey = await wallet.getActivePublicKey();
-			const nonce = randomBytes(16).toString('hex');
-			const buffer = Buffer.from(nonce);
+				// Use the modern signMessage method
+				const sigAB = await (window.arweaveWallet as any).signMessage(msg);
 
-			const signature = await wallet.signature(buffer, { name: 'RSA-PSS', saltLength: 32 });
-			const b64UrlSignature = bufferTob64Url(Buffer.from(signature));
+				const toB64Url = (buf: ArrayBuffer) =>
+					btoa(String.fromCharCode(...new Uint8Array(buf)))
+						.replace(/\+/g, '-')
+						.replace(/\//g, '_')
+						.replace(/=+$/, '');
 
-			const result = await fetch(getTurboBalanceEndpoint(), {
-				headers: {
-					'x-nonce': nonce,
-					'x-public-key': publicKey,
-					'x-signature': b64UrlSignature,
-				},
-			});
+				const signature = toB64Url(sigAB);
+				const publicKey = await window.arweaveWallet.getActivePublicKey();
 
-			if (!result.ok) {
-				setTurboBalance(0);
-				return 0;
+				const result = await fetch(getTurboBalanceEndpoint(), {
+					headers: {
+						'x-nonce': nonce,
+						'x-signature': signature,
+						'x-public-key': publicKey,
+					},
+				});
+
+				if (result.ok) {
+					const response = await result.json();
+					const next = Number(response.winc);
+					setTurboBalance(next);
+					return next;
+				} else {
+					console.error(`Turbo balance fetch failed: HTTP ${result.status} – ${await result.text()}`);
+					setTurboBalance(0);
+					return 0;
+				}
+			} catch (e: any) {
+				console.error('Error fetching turbo balance:', e);
+				setTurboBalance(null);
+				return null;
 			}
-
-			const { winc } = await result.json();
-			const newBal = Number(winc);
-			setTurboBalance(newBal);
-			return newBal;
-		} catch (e: any) {
-			console.error(e);
-			setTurboBalance(null);
-			return null;
 		}
+		return null;
 	}
 
 	async function refreshTurboBalance(maxTries = 10): Promise<number | null> {

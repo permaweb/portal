@@ -39,6 +39,29 @@ export const LT = styled.div`
 	max-width: 75%;
 	display: flex;
 	align-items: center;
+	gap: 12.5px;
+`;
+
+export const Indicator = styled.div<{ status: 'success' | 'warning' }>`
+	height: 20px;
+	width: 20px;
+	border-radius: 50%;
+	margin: 5px 0 0 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: ${(props) => {
+		if (props.status === 'success') return props.theme.colors.indicator.active;
+		if (props.status === 'warning') return props.theme.colors.warning.primary;
+	}};
+
+	svg {
+		height: 13.5px;
+		width: 13.5px;
+		margin: 6.5px 0 0 0;
+		color: ${(props) => props.theme.colors.font.light1};
+		fill: ${(props) => props.theme.colors.font.light1};
+	}
 `;
 
 export const Title = styled.p`

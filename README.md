@@ -38,6 +38,12 @@ npm run start:editor
 
 # Start viewer application (port 4000)
 npm run start:viewer
+
+# Start editor in testnet mode (uses tario tokens)
+npm run start:editor:testnet
+
+# Start viewer in testnet mode
+npm run start:viewer:testnet
 ```
 
 ## Building
@@ -50,6 +56,10 @@ npm run build:editor
 
 # Build viewer application
 npm run build:viewer
+
+# Build for testnet
+npm run build:editor:testnet
+npm run build:viewer:testnet
 ```
 
 ## Deployment
@@ -92,7 +102,27 @@ src/
 
 ## Environment Variables
 
-Set `VITE_APP` to either `editor` or `viewer` to specify which application to build/serve.
+- `VITE_APP` - Set to either `editor` or `viewer` to specify which application to build/serve
+- `VITE_TESTNET` - Set to `true` to enable testnet mode (uses tario tokens instead of turbo credits)
+
+## Testnet Mode
+
+The application supports testnet mode for development and testing:
+
+- **Mainnet**: Uses turbo credits, and ario token (if balance available) for domain purchases
+- **Testnet**: Uses tario tokens for domain purchases
+
+### Using Testnet Mode
+
+1. **Start in testnet mode:**
+
+   ```bash
+   npm run start:editor:testnet
+   ```
+
+2. **Get tario tokens** - Use the https://faucet.arweave.net/ faucet to get test tokens
+
+3. **Purchase domains** - Domain registration will use tario tokens instead of turbo credits
 
 ## License
 

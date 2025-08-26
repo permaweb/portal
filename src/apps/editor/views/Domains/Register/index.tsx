@@ -1,9 +1,7 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
-import { AoARIOWrite, AOProcess, ARIO, ARIO_TESTNET_PROCESS_ID, fetchAllArNSRecords } from '@ar.io/sdk';
-import { connect } from '@permaweb/aoconnect';
+import { ANT, ArconnectSigner, ARIO, fetchAllArNSRecords } from '@ar.io/sdk';
 
 import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
@@ -11,22 +9,29 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
+import { Loader } from 'components/atoms/Loader';
+import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
+import { TxAddress } from 'components/atoms/TxAddress';
+import { InsufficientBalanceCTA, PaymentSummary, PayWithSelector } from 'components/molecules/Payment';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
-import { ASSETS, PAYMENT_URL, URLS } from 'helpers/config';
-import { getARAmountFromWinc } from 'helpers/utils';
+import { getArnsCost } from 'helpers/arnsCosts';
+import { ASSETS, IS_TESTNET, URLS } from 'helpers/config';
+import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
+import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
 export default function Domains() {
-	const navigate = useNavigate();
-
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+
+	// Use the ARIO balance hook for testnet/mainnet balance
+	const { balance: arIOBalance, loading: arIOBalanceLoading, refetch: refetchArIOBalance } = useArIOBalance();
 
 	const [domain, setDomain] = React.useState<string>('');
 
@@ -36,18 +41,83 @@ export default function Domains() {
 	const [purchaseType, setPurchaseType] = React.useState<'buy' | 'lease' | null>(null);
 	const [leaseDuration, setLeaseDuration] = React.useState<number | null>(1);
 
+	// Payment method: default to turbo on mainnet; ARIO on testnet
+	const [paymentMethod, setPaymentMethod] = React.useState<'turbo' | 'ario'>(IS_TESTNET ? 'ario' : 'turbo');
+
 	const [turboFiatBuyAmount, setTurboFiatBuyAmount] = React.useState<string | null>(null);
 	const [turboFiatLeaseAmount, setTurboFiatLeaseAmount] = React.useState<string | null>(null);
 	const [turboCreditBuyAmount, setTurboCreditBuyAmount] = React.useState<number | null>(null);
 	const [turboCreditLeaseAmount, setTurboCreditLeaseAmount] = React.useState<number | null>(null);
+	// ARIO (mARIO) costs for both networks (testnet always, mainnet when paying with ARIO)
+	const [arioCostBuyAmount, setArioCostBuyAmount] = React.useState<number | null>(null);
+	const [arioCostLeaseAmount, setArioCostLeaseAmount] = React.useState<number | null>(null);
 
 	const [insufficientBalance, setInsufficientBalance] = React.useState<boolean>(false);
 	const [showFund, setShowFund] = React.useState<boolean>(false);
 
+	// Success/error states for domain registration
+	const [purchaseSuccess, setPurchaseSuccess] = React.useState<{
+		domain: string;
+		transactionId: string;
+		type: string;
+		years?: number;
+	} | null>(null);
+	const [purchaseError, setPurchaseError] = React.useState<string | null>(null);
+	const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
+
+	// Confirmation state and computed readiness
+	const [showConfirm, setShowConfirm] = React.useState<boolean>(false);
+	const [confirmPaymentMethod, setConfirmPaymentMethod] = React.useState<'turbo' | 'ario'>(
+		IS_TESTNET ? 'ario' : 'turbo'
+	);
+
+	React.useEffect(() => {
+		if (showConfirm) {
+			// Default to credits on mainnet; allow ARIO if user has some and previously chose it
+			if (!IS_TESTNET && arIOBalance && arIOBalance > 0 && paymentMethod === 'ario') {
+				setConfirmPaymentMethod('ario');
+			} else {
+				setConfirmPaymentMethod(IS_TESTNET ? 'ario' : 'turbo');
+			}
+		}
+	}, [showConfirm, paymentMethod, arIOBalance]);
+
+	// If ARIO balance becomes zero on mainnet, force payment method back to credits to avoid showing ARIO costs
+	React.useEffect(() => {
+		if (!IS_TESTNET && (arIOBalance == null || arIOBalance <= 0) && paymentMethod === 'ario') {
+			setPaymentMethod('turbo');
+		}
+	}, [arIOBalance, paymentMethod]);
+
+	const isCostReady = React.useMemo(() => {
+		if (!purchaseType) return false;
+		const payingWithTokens = IS_TESTNET || paymentMethod === 'ario';
+		if (purchaseType === 'buy') {
+			return payingWithTokens ? arioCostBuyAmount != null : turboCreditBuyAmount != null;
+		}
+		return payingWithTokens ? arioCostLeaseAmount != null : turboCreditLeaseAmount != null;
+	}, [
+		purchaseType,
+		paymentMethod,
+		arioCostBuyAmount,
+		arioCostLeaseAmount,
+		turboCreditBuyAmount,
+		turboCreditLeaseAmount,
+	]);
+
+	function getUnitLabelForMethod(method: 'turbo' | 'ario'): 'ARIO' | 'tario' | 'Credits' {
+		if (IS_TESTNET) return 'tario';
+		return method === 'ario' ? 'ARIO' : 'Credits';
+	}
+
 	React.useEffect(() => {
 		(async function () {
 			try {
-				const domains = await fetchAllArNSRecords({});
+				// Create ARIO instance for the appropriate network to configure the contract
+				const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
+
+				// Use fetchAllArNSRecords with the configured contract
+				const domains = await fetchAllArNSRecords({ contract: ario });
 				setRegisteredDomains(domains);
 			} catch (e: any) {
 				console.error(e);
@@ -88,9 +158,11 @@ export default function Domains() {
 				try {
 					setTurboFiatBuyAmount(null);
 					setTurboCreditBuyAmount(null);
+					setArioCostBuyAmount(null);
 					const buyEstimate = await getPriceEstimate({ type: 'buy' });
 					setTurboFiatBuyAmount(buyEstimate.fiat);
 					setTurboCreditBuyAmount(buyEstimate.credits);
+					setArioCostBuyAmount(buyEstimate.mario);
 				} catch (e: any) {
 					console.error(e);
 				}
@@ -104,9 +176,11 @@ export default function Domains() {
 				try {
 					setTurboFiatLeaseAmount(null);
 					setTurboCreditLeaseAmount(null);
+					setArioCostLeaseAmount(null);
 					const leaseEstimate = await getPriceEstimate({ type: 'lease', duration: leaseDuration });
 					setTurboFiatLeaseAmount(leaseEstimate.fiat);
 					setTurboCreditLeaseAmount(leaseEstimate.credits);
+					setArioCostLeaseAmount(leaseEstimate.mario);
 				} catch (e: any) {
 					console.error(e);
 				}
@@ -121,90 +195,232 @@ export default function Domains() {
 
 		switch (purchaseType) {
 			case 'buy':
-				purchaseAmount = turboCreditBuyAmount;
+				purchaseAmount = IS_TESTNET || paymentMethod === 'ario' ? arioCostBuyAmount : turboCreditBuyAmount;
 				break;
 			case 'lease':
-				purchaseAmount = turboCreditLeaseAmount;
+				purchaseAmount = IS_TESTNET || paymentMethod === 'ario' ? arioCostLeaseAmount : turboCreditLeaseAmount;
 				break;
 		}
 
-		setInsufficientBalance(arProvider.turboBalance < purchaseAmount);
-	}, [arProvider.turboBalance, turboCreditBuyAmount, turboCreditLeaseAmount, purchaseType]);
+		// Choose balance based on selected payment method / network
+		const currentBalance = IS_TESTNET || paymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+		setInsufficientBalance((currentBalance ?? 0) < (purchaseAmount ?? 0));
+	}, [
+		arIOBalance,
+		arProvider.turboBalance,
+		turboCreditBuyAmount,
+		turboCreditLeaseAmount,
+		arioCostBuyAmount,
+		arioCostLeaseAmount,
+		purchaseType,
+		paymentMethod,
+	]);
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
-	async function handleSubmit() {
-		if (!unauthorized) {
-			const name = domain.trim().toLowerCase();
-			const type = purchaseType === 'buy' ? 'permabuy' : 'lease';
+	async function handleSubmit(methodOverride?: 'turbo' | 'ario') {
+		if (!purchaseType || !domain.trim() || !domainAvailable) {
+			console.error('Invalid purchase parameters');
+			return;
+		}
 
-			const arIO = ARIO.init({
-				paymentUrl: PAYMENT_URL,
-				process: new AOProcess({
-					processId: ARIO_TESTNET_PROCESS_ID,
-					ao: connect({
-						CU_URL: 'https://cu.ardrive.io',
-						MODE: 'legacy',
-					}),
-				}),
+		setIsSubmitting(true);
+		setPurchaseError(null);
+		setPurchaseSuccess(null);
+
+		try {
+			console.log(`Purchasing domain: ${domain.trim()} with type: ${purchaseType}`);
+
+			// Check if wallet is connected
+			if (!window.arweaveWallet) {
+				throw new Error('ArConnect wallet not detected. Please install and connect ArConnect.');
+			}
+
+			if (!arProvider.walletAddress) {
+				throw new Error('Wallet not connected. Please connect your wallet first.');
+			}
+
+			// Ensure the user has the required permissions including DISPATCH for AO operations
+			try {
+				await window.arweaveWallet.connect(['SIGN_TRANSACTION', 'ACCESS_ADDRESS', 'ACCESS_PUBLIC_KEY']);
+			} catch (permError) {
+				console.warn('Permission request failed, proceeding with existing permissions');
+			}
+
+			// Use simplified SDK initialization as per documentation
+			let arIO;
+			try {
+				// Initialize signer with just the wallet (simpler approach)
+				const signer = new ArconnectSigner(window.arweaveWallet);
+
+				// Use the simplified ARIO initialization based on testnet/mainnet
+				if (IS_TESTNET) {
+					arIO = ARIO.testnet({ signer });
+				} else {
+					arIO = ARIO.mainnet({ signer });
+				}
+			} catch (signerError) {
+				console.error('Error initializing ArconnectSigner:', signerError);
+				throw new Error('Failed to initialize wallet signer. Please ensure ArConnect is properly connected.');
+			}
+
+			const name = domain.trim().toLowerCase();
+
+			console.log('Attempting to purchase domain:', {
+				name,
+				type: purchaseType,
+				years: purchaseType === 'lease' ? leaseDuration : undefined,
 			});
 
-			// const buyRecordResult = await (arIO as AoARIOWrite).buyRecord({
-			// 	name: name,
-			// 	type: type,
-			// 	years: leaseDuration,
-			// 	processId: ARIO_TESTNET_PROCESS_ID,
-			// 	fundFrom: 'turbo',
-			// 	referrer: 'Portal',
-			// });
+			// Use the correct buyRecord API according to ar.io SDK documentation
+			let result;
+			try {
+				console.log('Calling buyRecord with parameters:', {
+					name,
+					type: purchaseType,
+					years: purchaseType === 'lease' ? leaseDuration : undefined,
+					referrer: 'portal.arweave.net',
+				});
 
-			// console.log(buyRecordResult);
+				const payWith: 'turbo' | 'ario' = IS_TESTNET ? 'ario' : methodOverride ?? paymentMethod;
+				const baseArgs: any = {
+					name,
+					referrer: 'portal.arweave.net',
+				};
+				if (purchaseType === 'lease') {
+					result = await arIO.buyRecord({
+						...baseArgs,
+						type: 'lease',
+						years: leaseDuration,
+						...(payWith === 'turbo' ? { fundFrom: 'turbo' } : {}),
+					});
+				} else {
+					result = await arIO.buyRecord({
+						...baseArgs,
+						type: 'permabuy',
+						...(payWith === 'turbo' ? { fundFrom: 'turbo' } : {}),
+					});
+				}
+			} catch (buyRecordError) {
+				console.error('buyRecord failed:', buyRecordError);
+				console.error('Error stack:', buyRecordError.stack);
 
-			// const sharedOptions: any = {
-			// 	intent: intent,
-			// 	name: name,
-			// };
+				// Check if this is the ArrayBuffer error specifically
+				if (buyRecordError.message?.includes('ArrayBuffer')) {
+					throw new Error(`ANT creation failed: ${buyRecordError.message}`);
+				}
 
-			// const [leasePrice, buyPrice] = await Promise.all([
-			// 	arIO.getCostDetails({
-			// 		...sharedOptions,
-			// 		years: 1,
-			// 		type: 'lease',
-			// 	}),
-			// 	arIO.getCostDetails({
-			// 		...sharedOptions,
-			// 		type: 'permabuy',
-			// 	}),
-			// ]);
+				throw buyRecordError;
+			}
 
-			// console.log(leasePrice);
-			// console.log(buyPrice);
+			console.log('Purchase result:', result);
+
+			// Refresh the ARIO balance after purchase
+			refetchArIOBalance();
+
+			// Automatically set '@' base record to current portal id after successful registration
+			try {
+				// Resolve the ANT process id for the purchased name with targeted polling
+				const resolveProcessId = async (nameToResolve: string): Promise<string | null> => {
+					const arioClient = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
+					for (let attempt = 0; attempt < 10; attempt++) {
+						try {
+							// Prefer direct record lookup (faster than fetching all)
+							const record: any = await arioClient.getArNSRecord({ name: nameToResolve });
+							if (record && typeof record.processId === 'string' && record.processId.length > 10) {
+								return record.processId;
+							}
+						} catch {
+							// ignore and retry
+						}
+
+						// Fallback to a broad scan if direct lookup fails to materialize
+						try {
+							const all = await fetchAllArNSRecords({ contract: arioClient });
+							const entry = all?.[nameToResolve];
+							if (entry) {
+								if (typeof entry === 'string') return entry;
+								if (typeof entry === 'object' && 'processId' in entry) return (entry as any).processId || null;
+							}
+						} catch {}
+
+						// wait before next attempt (3s x 10 = 30s total)
+						await new Promise((r) => setTimeout(r, 3000));
+					}
+					return null;
+				};
+
+				const purchasedName = domain.trim().toLowerCase();
+				const antProcessId = await resolveProcessId(purchasedName);
+				if (antProcessId && portalProvider.current?.id) {
+					const ant = ANT.init({ processId: antProcessId, signer: new ArconnectSigner(window.arweaveWallet) });
+					// Update base name record ("@") using the dedicated API
+					await ant.setBaseNameRecord({
+						transactionId: portalProvider.current.id,
+						ttlSeconds: 60,
+					});
+					console.log(`Set '@' record for ${purchasedName} to portal ${portalProvider.current.id}`);
+				} else {
+					console.warn('Unable to resolve ANT process id or missing portal id. Skipping auto-redirect.');
+				}
+			} catch (redirectErr) {
+				console.error('Auto-redirect after purchase failed:', redirectErr);
+			}
+
+			// Set success state
+			setPurchaseSuccess({
+				domain: name,
+				transactionId: result.id || language.pending,
+				type: purchaseType,
+				years: purchaseType === 'lease' ? leaseDuration : undefined,
+			});
+
+			// Clear form
+			setDomain('');
+			setPurchaseType(null);
+		} catch (error: any) {
+			console.error('Error purchasing domain:', error);
+
+			// Provide more helpful error messages for common issues
+			let errorMessage = error.message || 'Unknown error';
+			if (errorMessage.includes('insufficient')) {
+				errorMessage = 'Insufficient balance to complete the purchase.';
+			} else if (errorMessage.includes('already')) {
+				errorMessage = 'This domain is already registered.';
+			} else if (errorMessage.includes('ArrayBuffer')) {
+				errorMessage = 'Transaction signing failed. Please ensure ArConnect is updated and try again.';
+			} else if (errorMessage.includes('User denied')) {
+				errorMessage = 'Transaction was cancelled by user.';
+			} else if (errorMessage.includes('not connected')) {
+				errorMessage = 'Wallet not connected. Please connect your ArConnect wallet and try again.';
+			}
+
+			setPurchaseError(errorMessage);
+		} finally {
+			setIsSubmitting(false);
 		}
 	}
 
 	async function getPriceEstimate(args: { type: 'lease' | 'buy'; duration?: number }) {
 		const name = domain.trim().toLowerCase();
-		const intent = 'Buy-Name';
-
-		let params = '';
-		switch (args.type) {
-			case 'lease':
-				params += 'lease';
-				if (args.duration) params += `&years=${args.duration}`;
-				break;
-			case 'buy':
-				params += 'permabuy';
-				break;
+		const isLease = args.type === 'lease';
+		const years = isLease && args.duration ? args.duration : undefined;
+		try {
+			const res = await getArnsCost({
+				intent: 'Buy-Name',
+				name,
+				type: isLease ? 'lease' : 'permabuy',
+				years,
+			});
+			return {
+				fiat: res.fiatUSD ?? 'N/A',
+				credits: res.winc ?? 0,
+				mario: res.mario ?? 0,
+			};
+		} catch (error) {
+			console.error('Error getting price via helper:', error);
+			return { fiat: 'N/A', credits: 0, mario: 0 };
 		}
-
-		const url = `${PAYMENT_URL}/v1/arns/price/${intent}/${name}?type=${params}&currency=usd&userAddress=${arProvider.walletAddress}`;
-		const response = await fetch(url);
-		const json = await response.json();
-
-		return {
-			fiat: (json.fiatEstimate.paymentAmount / 100).toFixed(2),
-			credits: json.winc,
-		};
 	}
 
 	const validateDomainName = React.useMemo(() => {
@@ -245,8 +461,25 @@ export default function Domains() {
 		setInsufficientBalance(false);
 	}
 
+	// Compute Total Due display string for checkout
+	function getTotalDueText(): string {
+		if (!purchaseType) return '-';
+		const isBuy = purchaseType === 'buy';
+		if (IS_TESTNET) {
+			const mario = isBuy ? arioCostBuyAmount : arioCostLeaseAmount;
+			return mario != null ? `${toReadableARIO(mario)} tario` : '-';
+		}
+		if (paymentMethod === 'ario') {
+			const mario = isBuy ? arioCostBuyAmount : arioCostLeaseAmount;
+			return mario != null ? `${toReadableARIO(mario)} ARIO` : '-';
+		}
+		const credits = isBuy ? turboCreditBuyAmount : turboCreditLeaseAmount;
+		return credits != null ? `${getARAmountFromWinc(credits)} Credits` : '-';
+	}
+
 	return (
 		<>
+			{isSubmitting && <Loader message={language.registeringProgress} />}
 			<S.Wrapper className={'fade-in'}>
 				<ViewHeader
 					header={language?.domainRegistration}
@@ -289,7 +522,7 @@ export default function Domains() {
 										</S.UpdateWrapper>
 									)}
 									{unauthorized && (
-										<S.UpdateWrapper className={'border-wrapper-alt3'}>
+										<S.UpdateWrapper className={'border-wrapper-alt3 warning'}>
 											<p>{language.unauthorizedDomainRegister}</p>
 										</S.UpdateWrapper>
 									)}
@@ -350,9 +583,13 @@ export default function Domains() {
 												<S.UpdateWrapper>
 													<p>
 														{turboFiatBuyAmount
-															? `$${turboFiatBuyAmount ?? '-'} ${language.usd} (${getARAmountFromWinc(
-																	turboCreditBuyAmount
-															  )} ${language.credits})`
+															? IS_TESTNET
+																? `${toReadableARIO(arioCostBuyAmount)} tario`
+																: paymentMethod === 'ario'
+																? `${toReadableARIO(arioCostBuyAmount)} ARIO`
+																: `$${turboFiatBuyAmount ?? '-'} USD (${getARAmountFromWinc(
+																		turboCreditBuyAmount
+																  )} Credits)`
 															: `${language.fetchingPrices}...`}
 													</p>
 												</S.UpdateWrapper>
@@ -375,9 +612,13 @@ export default function Domains() {
 												<S.UpdateWrapper>
 													<p>
 														{turboFiatLeaseAmount
-															? `$${turboFiatLeaseAmount ?? '-'} ${language.usd} (${getARAmountFromWinc(
-																	turboCreditLeaseAmount
-															  )} ${language.credits})`
+															? IS_TESTNET
+																? `${toReadableARIO(arioCostLeaseAmount)} tario`
+																: paymentMethod === 'ario'
+																? `${toReadableARIO(arioCostLeaseAmount)} ARIO`
+																: `$${turboFiatLeaseAmount ?? '-'} USD (${getARAmountFromWinc(
+																		turboCreditLeaseAmount
+																  )} Credits)`
 															: `${language.fetchingPrices}...`}
 													</p>
 												</S.UpdateWrapper>
@@ -416,47 +657,54 @@ export default function Domains() {
 							<S.SectionDivider />
 						</S.SectionHeader>
 						<S.SectionBody>
+							{/* Payment method selection (mainnet only) */}
+							{!IS_TESTNET && (
+								<S.PaymentMethodWrapper>
+									<PayWithSelector
+										method={paymentMethod}
+										onChange={setPaymentMethod}
+										arioSelectable={!!(arIOBalance && arIOBalance > 0)}
+										labels={{
+											title: language.choosePayment,
+											credits: `${language.credits}${turboFiatBuyAmount || turboFiatLeaseAmount ? ' (USD)' : ''}`,
+											ario: language.arioToken,
+										}}
+									/>
+								</S.PaymentMethodWrapper>
+							)}
 							<S.CheckoutWrapper>
 								<S.CheckoutLine>
-									<span>{language.domainNameLabel}</span>
+									<span>{language.domainName}</span>
 									<S.CheckoutDivider />
 									<p>{domain && domainAvailable ? domain : '-'}</p>
 								</S.CheckoutLine>
 								<S.CheckoutLine>
-									<span>{language.registrationPeriodLabel}</span>
+									<span>{language.registrationPeriod}</span>
 									<S.CheckoutDivider />
 									<p>
 										{purchaseType
-											? `${language[purchaseType]}${
-													purchaseType === 'lease'
-														? ` (${leaseDuration} ${leaseDuration === 1 ? language.year : language.years})`
-														: ''
-											  }`
+											? `${language[purchaseType]}${purchaseType === 'lease' ? ` (${leaseDuration} Years)` : ''}`
 											: '-'}
 									</p>
 								</S.CheckoutLine>
 								<S.CheckoutLine>
-									<span>{language.totalDueLabel}</span>
+									<span>{language.checkoutTotalDue}</span>
 									<S.CheckoutDivider />
-									<p>
-										{purchaseType
-											? `${
-													purchaseType === 'buy'
-														? turboCreditBuyAmount
-															? getARAmountFromWinc(turboCreditBuyAmount)
-															: '-'
-														: turboCreditLeaseAmount
-														? getARAmountFromWinc(turboCreditLeaseAmount)
-														: '-'
-											  } ${language.credits}`
-											: '-'}
-									</p>
+									<p>{getTotalDueText()}</p>
 								</S.CheckoutLine>
 								<S.CheckoutLine insufficientBalance={insufficientBalance}>
-									<span>{language.currentBalanceLabel}</span>
+									<span>{language.checkoutCurrentBalance}</span>
 									<S.CheckoutDivider />
 									<p>
-										{arProvider.turboBalance !== null
+										{IS_TESTNET
+											? arIOBalance !== null && !arIOBalanceLoading
+												? `${toReadableARIO(arIOBalance)} tario`
+												: `${language?.loading}...`
+											: paymentMethod === 'ario'
+											? arIOBalance !== null && !arIOBalanceLoading
+												? `${toReadableARIO(arIOBalance)} ARIO`
+												: `${language?.loading}...`
+											: arProvider.turboBalance !== null
 											? `${getARAmountFromWinc(arProvider.turboBalance)} ${language?.credits}`
 											: `${language?.loading}...`}
 									</p>
@@ -471,35 +719,279 @@ export default function Domains() {
 								/>
 								<Button
 									type={'alt1'}
-									label={insufficientBalance ? language.addCredits : language.registerDomain}
-									handlePress={() => (insufficientBalance ? setShowFund(true) : handleSubmit())}
-									disabled={
-										!domainAvailable ||
-										!purchaseType ||
-										(insufficientBalance
-											? false
-											: (purchaseType === 'buy' && arProvider.turboBalance < turboCreditBuyAmount) ||
-											  (purchaseType === 'lease' && arProvider.turboBalance < turboCreditLeaseAmount))
+									label={
+										isSubmitting
+											? language.registeringProgress
+											: IS_TESTNET
+											? insufficientBalance
+												? language.getTestnetTokens
+												: language.registerDomain
+											: paymentMethod === 'turbo'
+											? insufficientBalance
+												? language.addCredits
+												: language.registerDomain
+											: insufficientBalance
+											? language.getTokens
+											: language.registerDomain
 									}
+									handlePress={() => {
+										if (IS_TESTNET) {
+											return insufficientBalance ? setShowFund(true) : setShowConfirm(true);
+										}
+										if (paymentMethod === 'turbo') {
+											return insufficientBalance ? setShowFund(true) : setShowConfirm(true);
+										}
+										if (paymentMethod === 'ario') {
+											if (insufficientBalance) {
+												window.open(
+													'https://botega.arweave.net/#/swap?to=qNvAoz0TgcH7DMg8BCVn8jF32QH5L6T29VjHxhHqqGE',
+													'_blank'
+												);
+												return;
+											}
+											return setShowConfirm(true);
+										}
+									}}
+									disabled={!domainAvailable || !purchaseType || isSubmitting || !isCostReady}
 								/>
 							</S.ActionsWrapper>
 							{insufficientBalance && (
 								<S.InsufficientBalance className={'border-wrapper-alt3'}>
-									<p>{language.insufficientBalanceMessage}</p>
+									<p>{IS_TESTNET ? language.insufficientTarioBalance : language.insufficientBalance}</p>
 								</S.InsufficientBalance>
+							)}
+							{purchaseSuccess && (
+								<Modal
+									header={language.domainRegistrationSuccessful}
+									handleClose={() => setPurchaseSuccess(null)}
+									status={'success'}
+									className={'modal-wrapper'}
+								>
+									<S.SuccessWrapper>
+										<S.SuccessLine>
+											<S.SuccessLabel>Domain:</S.SuccessLabel>
+											<S.SuccessDivider />
+											<S.SuccessValue>{purchaseSuccess?.domain ?? '-'}</S.SuccessValue>
+										</S.SuccessLine>
+										<S.SuccessLine>
+											<S.SuccessLabel>Type:</S.SuccessLabel>
+											<S.SuccessDivider />
+											<S.SuccessValue>
+												{purchaseSuccess.type === 'lease'
+													? `Lease (${purchaseSuccess.years} year${purchaseSuccess.years !== 1 ? 's' : ''})`
+													: 'Permanent'}
+											</S.SuccessValue>
+										</S.SuccessLine>
+										<S.SuccessLine>
+											<S.SuccessLabel>{language.transactionId}:</S.SuccessLabel>
+											<S.SuccessDivider />
+											<S.SuccessValue>
+												<TxAddress address={purchaseSuccess.transactionId} wrap={false} />
+											</S.SuccessValue>
+										</S.SuccessLine>
+										<S.SuccessActions>
+											<Button type={'primary'} label={language.close} handlePress={() => setPurchaseSuccess(null)} />
+											<Button
+												type={'alt1'}
+												label={language.goToDomain}
+												handlePress={() => window.open(`https://${purchaseSuccess.domain}.arweave.net`)}
+											/>
+										</S.SuccessActions>
+									</S.SuccessWrapper>
+								</Modal>
+							)}
+							{purchaseError && (
+								<Modal
+									header={language.registrationFailed}
+									handleClose={() => setPurchaseSuccess(null)}
+									status={'warning'}
+									className={'modal-wrapper'}
+								>
+									<S.ErrorWrapper>
+										<S.ErrorValue>{purchaseError ?? '-'}</S.ErrorValue>
+									</S.ErrorWrapper>
+									<S.ErrorActions>
+										<Button
+											type={'primary'}
+											label={language.registerErrorRetry}
+											handlePress={() => setPurchaseError(null)}
+										/>
+									</S.ErrorActions>
+								</Modal>
 							)}
 						</S.SectionBody>
 					</S.SectionWrapper>
 				</S.BodyWrapper>
 			</S.Wrapper>
+			{showConfirm && (
+				<Modal
+					header={language.confirmRegistration}
+					handleClose={() => setShowConfirm(false)}
+					className={'modal-wrapper'}
+				>
+					<S.ModalWrapper>
+						<S.ModalGrid>
+							<S.ModalLine>
+								<S.ModalLabel>{language.checkoutDomainName}</S.ModalLabel>
+								<S.ModalDivider />
+								<S.ModalValue>{domain?.trim() || '-'}</S.ModalValue>
+							</S.ModalLine>
+							<S.ModalLine>
+								<S.ModalLabel>{language.checkoutRegistrationPeriod}</S.ModalLabel>
+								<S.ModalDivider />
+								<S.ModalValue className={'uppercase'}>
+									{purchaseType === 'lease'
+										? `${language.lease} (${leaseDuration} ${leaseDuration === 1 ? language.year : language.years})`
+										: language.permanent}
+								</S.ModalValue>
+							</S.ModalLine>
+							{!IS_TESTNET && (
+								<S.ModalLine>
+									<S.ModalLabel>{language.fundTurboPaymentHeader}</S.ModalLabel>
+									<S.ModalDivider />
+									<S.ModalValue>
+										<PayWithSelector
+											method={confirmPaymentMethod}
+											onChange={setConfirmPaymentMethod}
+											arioSelectable={!!(arIOBalance && arIOBalance > 0)}
+										/>
+									</S.ModalValue>
+								</S.ModalLine>
+							)}
+							<S.PaymentSummaryWrapper>
+								{(() => {
+									const payTokens = IS_TESTNET || confirmPaymentMethod === 'ario';
+									const due = !purchaseType
+										? null
+										: purchaseType === 'buy'
+										? payTokens
+											? arioCostBuyAmount
+											: turboCreditBuyAmount
+										: payTokens
+										? arioCostLeaseAmount
+										: turboCreditLeaseAmount;
+									const loadingCost =
+										!purchaseType ||
+										(purchaseType === 'buy'
+											? payTokens
+												? arioCostBuyAmount == null
+												: turboCreditBuyAmount == null
+											: payTokens
+											? arioCostLeaseAmount == null
+											: turboCreditLeaseAmount == null);
+									const bal = confirmPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+									const loadingBal = IS_TESTNET
+										? arIOBalance == null || arIOBalanceLoading
+										: confirmPaymentMethod === 'ario'
+										? arIOBalance == null || arIOBalanceLoading
+										: arProvider.turboBalance == null;
+
+									return (
+										<PaymentSummary
+											method={IS_TESTNET ? 'ario' : confirmPaymentMethod}
+											unitLabel={getUnitLabelForMethod(confirmPaymentMethod)}
+											loadingCost={!!loadingCost}
+											loadingBalance={!!loadingBal}
+											cost={due}
+											balance={bal}
+										/>
+									);
+								})()}
+							</S.PaymentSummaryWrapper>
+						</S.ModalGrid>
+						<S.ModalActions>
+							<InsufficientBalanceCTA
+								method={IS_TESTNET ? 'ario' : confirmPaymentMethod}
+								insufficient={(() => {
+									const bal = confirmPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+									const due =
+										confirmPaymentMethod === 'ario'
+											? purchaseType === 'buy'
+												? arioCostBuyAmount
+												: arioCostLeaseAmount
+											: purchaseType === 'buy'
+											? turboCreditBuyAmount
+											: turboCreditLeaseAmount;
+									return !(due != null && bal != null && bal >= due);
+								})()}
+								isLoading={(() => {
+									const payTokens = IS_TESTNET || confirmPaymentMethod === 'ario';
+									const loadingCost =
+										!purchaseType ||
+										(purchaseType === 'buy'
+											? payTokens
+												? arioCostBuyAmount == null
+												: turboCreditBuyAmount == null
+											: payTokens
+											? arioCostLeaseAmount == null
+											: turboCreditLeaseAmount == null);
+									const loadingBal = IS_TESTNET
+										? arIOBalance == null || arIOBalanceLoading
+										: confirmPaymentMethod === 'ario'
+										? arIOBalance == null || arIOBalanceLoading
+										: arProvider.turboBalance == null;
+									return loadingCost || loadingBal;
+								})()}
+								onGetTokens={() =>
+									window.open(
+										'https://botega.arweave.net/#/swap?to=qNvAoz0TgcH7DMg8BCVn8jF32QH5L6T29VjHxhHqqGE',
+										'_blank'
+									)
+								}
+								onAddCredits={() => setShowFund(true)}
+							/>
+							<Button type={'primary'} label={language?.cancel} handlePress={() => setShowConfirm(false)} />
+							<Button
+								type={'alt1'}
+								label={isSubmitting ? language.registeringProgress : language.registerDomain}
+								handlePress={() => {
+									setShowConfirm(false);
+									handleSubmit(confirmPaymentMethod);
+								}}
+								disabled={(() => {
+									if (isSubmitting) return true;
+									if (!purchaseType) return true;
+									const due =
+										confirmPaymentMethod === 'ario'
+											? purchaseType === 'buy'
+												? arioCostBuyAmount
+												: arioCostLeaseAmount
+											: purchaseType === 'buy'
+											? turboCreditBuyAmount
+											: turboCreditLeaseAmount;
+									const bal = confirmPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+									if (due == null || bal == null) return true;
+									return bal < due;
+								})()}
+							/>
+						</S.ModalActions>
+					</S.ModalWrapper>
+				</Modal>
+			)}
 			<Panel
 				open={showFund}
 				width={575}
-				header={language?.fundTurboBalance}
+				header={IS_TESTNET ? language.getTestnetTokens : language?.fundTurboBalance}
 				handleClose={() => setShowFund(false)}
 				className={'modal-wrapper'}
 			>
-				<TurboBalanceFund handleClose={() => setShowFund(false)} />
+				{IS_TESTNET ? (
+					<S.TestnetInfo>
+						<p>{language.testnetMode}</p>
+						<a href={'https://faucet.arweave.net'} target={'_blank'}>
+							{language.visitFaucet}
+						</a>
+						<Button
+							type={'primary'}
+							label={language.close}
+							handlePress={() => setShowFund(false)}
+							height={45}
+							fullWidth
+						/>
+					</S.TestnetInfo>
+				) : (
+					<TurboBalanceFund handleClose={() => setShowFund(false)} />
+				)}
 			</Panel>
 		</>
 	);
