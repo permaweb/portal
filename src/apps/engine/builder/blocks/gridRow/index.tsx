@@ -2,8 +2,8 @@ import { useUI } from 'engine/hooks/portal';
 import * as S from './styles';
 
 export default function GridRow(props: any) {
-  const { Layout } = useUI(false);
   const { getContent, content, layout, preview } = props;  
+  const { Layout } = useUI(preview);  
   
   return (
     <S.GridRow $layout={layout}>

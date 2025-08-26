@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
@@ -17,7 +17,7 @@ const persister = createAsyncStoragePersister({
 let hasPersisted = false;
 
 export const useUI = (preview: boolean = false) => {
-  if (preview) return { Themes: defaultThemes, Data: defaultLayout };
+  if (preview) return { Themes: defaultThemes, Data: defaultLayout, Posts: [] };
   const { libs } = usePermawebProvider();
   const { portalId } = useContext<any>(PortalContext);  
   const defaultPortal = { themes: defaultThemes, layout: defaultLayout, pages: defaultPages };

@@ -44,7 +44,6 @@ export default function PageList() {
 		return portalProvider.current?.id ? (
 			<S.Wrapper>
 				{Object.entries(sortedPages).map(([key, index]) => {
-					const page = sortedPages[key]
 					return (
 						<S.PageWrapper key={index} className={'fade-in'}>
 							<S.PageHeader>
@@ -58,7 +57,7 @@ export default function PageList() {
 									<Button
 										type={'alt3'}
 										label={language?.edit}
-										handlePress={() => navigate(`${URLS.pageEdit(portalProvider.current.id)}${page.id}`)}
+										handlePress={() => navigate(`${URLS.pageEdit(portalProvider.current.id)}${key}`)}
 									/>
 								</S.PageActions>
 							</S.PageDetail>

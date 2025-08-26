@@ -1,68 +1,36 @@
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Header from './builder/base/header';
 import Navigation from './builder/base/navigation';
 import { PortalProvider, usePortalProvider, useSetPortalId } from 'engine/providers/portalProvider';
-// import { SettingsProvider } from 'engine/providers/settingsProvider';
-
-import { useUI } from './hooks/portal';
 import { initThemes } from 'engine/services/themes';
-// import Page from './builder/base/page';
 import Content from './builder/base/content';
 import Footer from './builder/base/footer';
-// import { Loader } from 'components/atoms/Loader';
 import { DOM, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { preloadAllAssets } from 'helpers/preloader';
-// import { GlobalStyle } from 'helpers/styles';
 import { GlobalStyles } from './global-styles';
 import { checkValidAddress } from 'helpers/utils';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider } from 'providers/LanguageProvider';
 import { NotificationProvider } from 'providers/NotificationProvider';
 import { PermawebProvider } from 'providers/PermawebProvider';
+import ZoneEditor from './components/zoneEditor';
 
 import * as S from './global-styles';
-import ZoneEditor from './components/zoneEditor';
 
 // import * as S from './styles';
 
 const queryClient = new QueryClient();
-const views = (import.meta as any).glob('./views/**/index.tsx');
-
-/*
-const Landing = getLazyImport('Landing');
-const Category = getLazyImport('Category');
-const Creator = getLazyImport('Creator');
-const Page = getLazyImport('Page');
-const Post = getLazyImport('Post');
-const NotFound = getLazyImport('NotFound');
-
-function getLazyImport(view: string) {
-	const key = `./views/${view}/index.tsx`;
-	const loader = views[key];
-
-	if (!loader) {
-		throw new Error(`View not found: ${view}`);
-	}
-
-	return lazy(async () => {
-		const module = await loader();
-		return { default: module.default };
-	});
-}
-*/
 
 function App() {
 	const portalProvider = usePortalProvider();
-	const { Name, Categories, Layout, Pages, Themes } = useUI();
+	const { Name, Categories, Layout, Themes } = portalProvider?.portal || {};
 	const [theme, setTheme] = React.useState<any>(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
-	React.useEffect(() => {
-		preloadAllAssets();
-	}, []);
+	console.log('portalProvider: ', portalProvider)
 
 
   React.useEffect(() => {
@@ -77,16 +45,17 @@ function App() {
 
 	const SetPortalIdComponent = () => {
     // useSetPortalId('r-5yMlWFOZ_LpSHXeHwXGkkit-2BsL-0nmhDbUiQAv8');
-		useSetPortalId('dc6W1Lz5V8-KV44B6qonM7pS5x5UC1lsRzCK-CiMotQ');
+		
     return null;
   };
+	useSetPortalId('dc6W1Lz5V8-KV44B6qonM7pS5x5UC1lsRzCK-CiMotQ');
 
 	React.useEffect(() => {
-		if (portalProvider.current?.name) document.title = portalProvider.current.name;
-	}, [portalProvider.current?.name]);
+		if (portalProvider.portal?.Name) document.title = portalProvider.portal.Name;
+	}, [portalProvider.portal?.Name]);
 
 	React.useEffect(() => {
-		const txIcon = portalProvider.current?.icon;
+		const txIcon = portalProvider.portal?.icon;
 		if (!txIcon || !checkValidAddress(txIcon)) return;
 
 		const iconUrl = getTxEndpoint(txIcon);
@@ -102,9 +71,18 @@ function App() {
 		return () => {
 			head.removeChild(newLink);
 		};
-	}, [portalProvider.current?.icon]);
+	}, [portalProvider.portal?.icon]);
 
-	return Layout && Layout.footer && (
+	if (!portalProvider.portal) {
+		return (
+			<>
+				<div id={DOM.loader} />
+				sdd
+			</>
+		);
+	}
+
+	return portalProvider?.portal ? (
 		<>
 			<div id={DOM.loader} />
 			<div id={DOM.notification} />
@@ -120,7 +98,7 @@ function App() {
 				<ZoneEditor />
 			</S.PageWrapper>
 		</>
-	);
+	) : <>Loading</>;
 }
 
 ReactDOM.createRoot(document.getElementById('portal') as HTMLElement).render(

@@ -9,8 +9,9 @@ import Comments from '../comments';
 import * as S from './styles';
 
 export default function Post(props: any) {
+  const { preview } = props;
   const { postId } = useParams();
-  const { Name } = useUI();
+  const { Name } = useUI(preview);
   const { post, isLoading: isLoadingPost, error } = usePost(postId || '');
   const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || '');
 

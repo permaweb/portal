@@ -14,9 +14,8 @@ import MediaSpotlight from './blocks/mediaSpotlight';
 import Link from './blocks/link';
 
 export default function Builder(props: any) {    
-  const { preview } = props;
+  const { preview, layout } = props;
   const { Layout } = useUI(preview);
-  const { layout } = props;
 
   const getContent = (element: any, preview: boolean, index: number) => {
     switch (element?.type) {
@@ -33,13 +32,13 @@ export default function Builder(props: any) {
       case 'feed':
         return <Feed key={index} category={element?.category ? element?.category : null} width={element?.width} layout={element?.layout} preview={preview} />;
       case 'sidebar':
-        return <Sidebar key={index} layout={Layout.Base} content={element.content} gap={element.gap} preview={preview} />;
+        return <Sidebar key={index} content={element.content} gap={element.gap} preview={preview} />;
       case 'postSpotlight':
         return <PostSpotlight key={index} txId={element.txId} preview={preview} />;
       case 'categorySpotlight':
         return <CategorySpotlight key={index} layout={Layout.Base} category={element.category} tag={element.tag} gap={element.gap} preview={preview} />;
       case 'mediaSpotlight':
-        return <MediaSpotlight key={index} preview={preview} category={element.category} />
+        return <MediaSpotlight key={index} category={element.category} preview={preview} />
       
       // Post
       case 'iframe':

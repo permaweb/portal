@@ -162,6 +162,7 @@ export const STYLING = {
 function createURLs() {
 	const base = `/`;
 	const post = `post/`;
+	const page = `page/`;
 
 	const portalBase = (portalId: string) => `${base}${portalId}/`;
 	const postCreateBase = (portalId: string) => `${base}${portalId}/${post}create/`;
@@ -188,7 +189,7 @@ function createURLs() {
 		post: (postId: string) => `post/${postId}`,
 		postCreate: (portalId: string) => `${postCreateBase(portalId)}`,
 		postEdit: (portalId: string) => `${postEditBase(portalId)}`,
-		pageCreate: (portalId: string) => `${pageBase(portalId)}create/`,
+		// pageCreate: (portalId: string) => `${pageBase(portalId)}create/`,
 		pageEdit: (portalId: string) => `${pageBase(portalId)}edit/`,
 		postCreateArticle: (portalId: string) => `${postCreateBase(portalId)}article/`,
 		postCreateImage: (portalId: string) => `${postCreateBase(portalId)}image/`,

@@ -5,11 +5,10 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
-import { Checkbox } from 'components/atoms/Checkbox';
 import { IconButton } from 'components/atoms/IconButton';
+import { Select } from 'components/atoms/Select';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
-import { Toggle } from 'components/atoms/Toggle';
 import { ASSETS, DEFAULT_THEME } from 'helpers/config';
 import { PortalSchemeType, PortalThemeType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -18,8 +17,7 @@ import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
-import { Slider } from 'components/atoms/Slider';
-import { Select } from 'components/atoms/Select';
+
 
 function Color(props: {
 	label: string;
@@ -143,7 +141,9 @@ function Color(props: {
 }
 
 function ThemeSection(props) {
+	const portalProvider = usePortalProvider();
 	const { theme, setTheme, name, setName, section, loading } = props;
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	const order = ['text', 'hover', 'background', 'primary', 'secondary']
 	const sortedSection = Object.fromEntries([
@@ -171,7 +171,7 @@ function ThemeSection(props) {
 	}
 
 	return (
-		<S.ThemeSection colors={theme.basics.colors} preferences={theme.basics.preferences}>
+		<S.ThemeSection key={theme.name} colors={theme.basics.colors} preferences={theme.basics.preferences}>
 			<span>{section.toUpperCase()}</span>
 			{/* JSON.stringify(theme.basics.preferences) */}
 				{section === 'basics' && (
@@ -188,22 +188,6 @@ function ThemeSection(props) {
 									/>
 								</S.ThemeValue>
 							</S.GridRow>
-							{/*
-							<S.GridRow id="GridRow">
-								<S.ThemeKey style={{ flex: 1}}>Border radius</S.ThemeKey>
-								<S.ThemeValue style={{ flex: 2.5, padding:0 }}>
-									<Slider 
-										value={theme.basics.preferences.borderRadius}
-										minValue={0}
-										maxValue={12}											
-										handleChange={() => handleThemeChange('basics', 'preferences', null, 'borderRadius', theme.basics.preferences.borderRadius)}
-										disabled={false}
-										invalid={false}
-										label={'0'}
-									/>
-								</S.ThemeValue>
-							</S.GridRow>
-							*/}
 						</S.GridRows>
 					</S.GridWrapper>
 				)}
@@ -235,7 +219,7 @@ function ThemeSection(props) {
 									scheme="light"
 									onChange={(newColor) => handleThemeChange('basics', 'colors', 'light', key, newColor)}
 									loading={loading}
-									// disabled={unauthorized}
+									disabled={unauthorized}
 								/>
 							</S.ThemeValue>
 						</S.ThemeLight>
@@ -250,9 +234,9 @@ function ThemeSection(props) {
 									value={value.dark}
 									basics={theme.basics.colors}
 									scheme="dark"
-									// onChange={(newColor) => handleThemeChange(key, newColor)}
+									onChange={(newColor) => handleThemeChange('basics', 'colors', 'dark', key, newColor)}
 									loading={loading}
-									// disabled={unauthorized}
+									disabled={unauthorized}
 								/>
 							</S.ThemeValue>
 						</S.ThemeDark>
@@ -285,13 +269,11 @@ function Theme(props: {
 	published: any,
 	loading: boolean
 }) {
-	const portalProvider = usePortalProvider();
+	
 	// const { theme, published, loading } = props;
 	const [showExpertMode, setShowExpertMode] = React.useState(false);
 	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme[0]);
 	const [name, setName] = React.useState<string>(props.theme.name ?? '-');
-
-	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	React.useEffect(() => {
 		setTheme(props.theme[0]);
@@ -321,14 +303,6 @@ function Theme(props: {
 					section="basics"
 					loading={props.loading}
 				/>
-				{/*
-				Expert mode 
-					<Checkbox
-						checked={showExpertMode}
-						handleSelect={() => setShowExpertMode(!showExpertMode)}
-						// disabled={currentPost.editor?.loading?.active}
-					/>
-				*/}
 				<S.ThemeSectionWrapper $show={showExpertMode}>					
 					{Object.entries(sortedTheme).map(([key]) => {
 						if (key === 'basics' || key === 'name' || key === 'active') return null
@@ -712,6 +686,7 @@ export default function Themes() {
 		}
 	}
 
+	/*
 	async function handleAddTheme() {
 		const themes = options;
 
@@ -748,6 +723,7 @@ export default function Themes() {
 		const updated = options.filter((option) => option.name !== theme.name);
 		setOptions(updated);
 	}
+		*/
 
 	const getThemes = () => {
 		if (!options) {
@@ -764,12 +740,6 @@ export default function Themes() {
 			);
 		}
 
-		const sortedOptions = [...options].sort((a, b) => {
-			if (a.scheme === 'light' && b.scheme === 'dark') return -1;
-			if (a.scheme === 'dark' && b.scheme === 'light') return 1;
-			return 0;
-		});
-
 		const isPublished =
 			loading || portalProvider.updating
 				? true
@@ -783,30 +753,6 @@ export default function Themes() {
 					published={isPublished}
 					loading={loading}
 				/>
-				{/* sortedOptions.map((theme: PortalThemeType) => {
-					const isPublished =
-						loading || portalProvider.updating
-							? true
-							: portalProvider.current?.themes.find(
-									(existingTheme: PortalThemeType) => existingTheme.name === theme.name
-							  ) !== undefined;
-					return (
-						<Section
-							key={theme.name}
-							label={theme.name}
-							theme={theme}
-							onThemeChange={(theme: PortalThemeType, publish: boolean, prevName?: string) =>
-								handleThemeUpdate(theme, publish, prevName)
-							}
-							onThemePublish={(theme: PortalThemeType) => handleThemePublish(theme)}
-							onThemeCancel={(theme: PortalThemeType) => handleCancelTheme(theme)}
-							handleThemeRemove={(theme: PortalThemeType) => handleRemoveTheme(theme)}
-							removeDisabled={portalProvider.current?.themes?.length === 1}
-							published={isPublished}
-							loading={loading}
-						/>
-					);
-				}) */}
 			</>
 		);
 	};
@@ -815,6 +761,7 @@ export default function Themes() {
 		<>
 			<S.Wrapper>
 				{getThemes()}
+				{/*
 				<S.EndActions>
 					<Button
 						type={'primary'}
@@ -825,6 +772,7 @@ export default function Themes() {
 						iconLeftAlign
 					/>
 				</S.EndActions>
+				*/}
 			</S.Wrapper>
 			{loading && <Loader message={`${language?.updatingTheme}...`} />}
 		</>

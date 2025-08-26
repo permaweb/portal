@@ -1,6 +1,24 @@
 import React from 'react';
+import WebFont from 'webfontloader';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
+import {
+	areAssetsEqual,
+	cachePortal,
+	cacheProfile,
+	getCachedPortal,
+	getCachedProfile,
+	getPortalAssets,
+} from 'helpers/utils';
+
+// Temp
+import { defaultThemes } from 'engine/defaults/theme.defaults';
+import { defaultLayout } from 'engine/defaults/layout.defaults';
+import { defaultPages } from 'engine/defaults/pages.defaults';
+
 export interface PortalContextState {
 	portalId: string | null;
+	portal: any;
 	setPortalId: (portalId: string) => void;
 	editorMode: string;
 	setEditorMode: (mode: string) => void;
@@ -8,6 +26,7 @@ export interface PortalContextState {
 
 const DEFAULT_CONTEXT = {
 	portalId: null,
+	portal: null,
 	setPortalId(_portalId: string) {},
 	editorMode: 'hidden',
 	setEditorMode(_mode: string) {}
@@ -30,14 +49,96 @@ export function usePortalProvider(): PortalContextState {
 }
 
 export function PortalProvider(props: { children: React.ReactNode }) {
+	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
+	const defaultPortal = { themes: defaultThemes, layout: defaultLayout, pages: defaultPages };
+
 	const [portalId, setPortalId] = React.useState<string | null>(null);
+	const [portal, setPortal] = React.useState(null);
 	const [editorMode, setEditorMode] = React.useState('hidden');
+	const [updating, setUpdating] = React.useState<boolean>(false);
+
+	React.useEffect(() => {
+		if (!portalId) return;
+
+		(async () => {
+			try {				
+				const cached = getCachedPortal(portalId);
+				const res = await permawebProvider.libs.getZone(portalId); // always fetch
+				console.log('res: ', res)
+
+				const zone = {
+					...cached,
+					...res.store,
+					posts: res.store?.index ? [...res.store.index].reverse() : [],
+					...defaultPortal					
+				};				
+
+				// structurePortal(zone);
+				const Store = zone?.store ?? {};
+				const posts = Store.index ? [...Store.index].reverse() : [];
+				console.log('Zonre: ', zone)
+
+				const Name = zone?.name;
+				const Categories = zone?.categories;
+				const Layout = zone?.layout;
+				const Pages = zone?.pages;
+				const Posts = posts;
+				const Themes = zone?.themes;
+				const Logo = zone?.logo;
+				const Fonts = zone?.fonts
+
+				const portalData = { Name, Categories, Layout, Pages, Themes, Posts, Logo, Fonts }
+				console.log('data: ', portalData);
+				setPortal(portalData);
+				if (portalId && portalData) cachePortal(portalId, portalData);
+
+			} catch (err) {
+				console.error('Failed to fetch zone:', err);
+				const cached = getCachedPortal(portalId);
+				const zone = {
+					...cached,
+					defaultPortal
+				}
+				setPortal(zone);
+			}
+		})();
+	}, [portalId]);
+
+	if(portal?.Fonts) {
+		const fonts = portal?.Fonts;
+		const families = [];
+
+		if (fonts.headers) families.push(fonts.headers);
+		if (fonts.body) families.push(fonts.body);
+
+		if (families.length > 0) {
+			WebFont.load({
+				google: { families: families },
+				active: () => {
+					const [bodyFont, bodyWeight] = fonts.body.trim().split(":");
+					const bodyWeights = bodyWeight.split(",");
+					document.documentElement.style.setProperty('--font-body', bodyFont);
+					document.documentElement.style.setProperty('--font-body-weight', bodyWeights[0]);
+					document.documentElement.style.setProperty('--font-body-weight-bold', bodyWeights[1]);
+					
+					const [headerFont, headerWeight] = fonts.headers.trim().split(":");
+					const headerWeights = headerWeight.split(",");
+					document.documentElement.style.setProperty('--font-header', headerFont);
+					document.documentElement.style.setProperty('--font-header-weight', headerWeights[0]);
+					document.documentElement.style.setProperty('--font-header-weight-bold', headerWeights[1]);
+					
+				}
+			});
+		}
+	}
 
 	return (
 		<>
 			<PortalContext.Provider
 				value={{
 					portalId,
+					portal,
 					setPortalId,
 					editorMode, 
 					setEditorMode, 

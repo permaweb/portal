@@ -5,9 +5,10 @@ import { usePosts } from 'engine/hooks/posts';
 import PostPreview from './postPreview';
 import * as S from './styles';
 
-export default function Feed(props?: any) {  
+export default function Feed(props?: any) {
+  const { preview } = props;
   const params = useParams();
-  const { Name } = useUI();
+  const { Name } = useUI(preview);
   const filters = {
     category: params.category ?? props.category ?? null,
     tags: params.tag ? [params.tag] : null,
@@ -15,7 +16,7 @@ export default function Feed(props?: any) {
     search: params.search ?? null,
     date: params.year ? { year: +params.year, month: +params.month } : null
   };
-  const { Posts, Title } = Object.values(filters).some(Boolean) ? usePosts(filters) : usePosts();
+  const { Posts, Title } = Object.values(filters).some(Boolean) ? usePosts(filters) : usePosts({ preview });
 
   React.useEffect(() => {
     if(Title){

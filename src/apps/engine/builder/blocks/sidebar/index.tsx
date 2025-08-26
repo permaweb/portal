@@ -6,7 +6,7 @@ import SidebarArchive from './blocks/archive';
 import SidebarAuthors from './blocks/authors';
 
 export default function Sidebar(props: any) {
-  const { content } = props;
+  const { content, preview } = props;
   const navigate = useNavigate();  
   // const { podcasts } = usePodcasts();
 

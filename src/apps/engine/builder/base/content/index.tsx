@@ -6,7 +6,7 @@ export default function Content(props: any) {
   const { layout } = props;
 
   return (
-    <S.ContentWrapper id="ContentWrapper">
+    <S.ContentWrapper id="Content">
       <S.Content $layout={layout.content} maxWidth={layout?.basics?.maxWidth}>
         <Routes>                    
           <Route path=":post/:postId" element={<Page />} />

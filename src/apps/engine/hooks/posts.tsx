@@ -3,7 +3,8 @@ import { useProfile } from 'engine/hooks/profiles';
 import { useUI } from './portal';
 
 export const usePosts = (props?: any) => {
-  const { Posts, isLoading, error } = useUI();  
+  const { preview = false } = props || {};
+  const { Posts, isLoading, error } = useUI(preview);
   let filtered = Posts ? Object.values(Posts) : Posts;  
 
   if (filtered) {
