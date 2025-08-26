@@ -180,7 +180,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						if (refreshField) {
 							switch (refreshField) {
 								case 'assets':
-									changeRuleMet = !areAssetsEqual(existingPortal.assets, updatedPortal.assets);
+									changeRuleMet = !areAssetsEqual(existingPortal.assets ?? [], updatedPortal.assets ?? []);
 									break;
 								default:
 									break;
@@ -357,7 +357,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					pages: portalData?.store?.pages ?? [],
 					roleOptions: portalData.roleOptions ?? {},
 					permissions: portalData.permissions ?? {},
-					domains: [], // TODO: Domains
+					domains: [],
 				};
 
 				return portal;
