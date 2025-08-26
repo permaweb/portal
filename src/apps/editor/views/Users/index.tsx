@@ -40,7 +40,7 @@ export default function Users() {
 				<S.BodyWrapper>
 					<UserList type={'detail'} />
 					{!portalProvider?.permissions?.updateUsers && (
-						<S.InfoWrapper className={'info'}>
+						<S.InfoWrapper className={'warning'}>
 							<span>{language?.unauthorizedUsersUpdate}</span>
 						</S.InfoWrapper>
 					)}

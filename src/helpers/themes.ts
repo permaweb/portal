@@ -573,6 +573,7 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 		},
 		warning: {
 			primary: currentTheme.negative1,
+			background: currentTheme.primary1,
 			alt1: currentTheme.negative2,
 		},
 	},
