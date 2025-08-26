@@ -63,6 +63,7 @@ npm run deploy:editor:staging
 ```
 
 ## Project Structure
+Development Guide to follow while working on the Project - https://github.com/permaweb/portal/blob/main/docs/styleguide.md
 
 ```
 src/
