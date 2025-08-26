@@ -15,7 +15,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
-import { usePostsList } from './usePostList';
+import { usePostsList } from 'hooks/usePostList';
 
 export const Posts = (props: { paginatedPosts?: PortalAssetType[]; type?: ViewLayoutType }) => {
 	const laguageProvider = useLanguageProvider();
