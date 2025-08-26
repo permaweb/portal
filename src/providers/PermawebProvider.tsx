@@ -46,7 +46,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		if (!arProvider.wallet) return;
 
-		const aoConnection = import.meta.env.VITE_AO;
+		const aoConnection = import.meta.env.VITE_AO ?? 'legacy';
 		console.log(`AO Connection: [${aoConnection}]`);
 		console.log(`AO Node URL: ${AO_NODE.url}`);
 
