@@ -8,7 +8,9 @@
 	"scripts": {
 		"clean:install": "rm -rf node_modules package-lock.json || true && npm cache clean --force && npm install",
 		"format": "eslint --fix . && npx prettier --write .",
-		"start:editor": "NODE_ENV=development VITE_APP=editor vite",
+		"start:editor": "NODE_ENV=development VITE_APP=editor VITE_AO=legacy vite",
+		"start:editor:ao-legacy": "NODE_ENV=development VITE_APP=editor VITE_AO=legacy vite",
+		"start:editor:ao-mainnet": "NODE_ENV=development VITE_APP=editor VITE_AO=mainnet vite",
 		"start:viewer": "NODE_ENV=development VITE_APP=viewer vite",
 		"build:editor": "NODE_ENV=production VITE_APP=editor vite build",
 		"build:viewer": "NODE_ENV=production VITE_APP=viewer vite build",

@@ -72,4 +72,5 @@ export const Body = styled.div`
 	overflow-y: auto;
 	scrollbar-color: transparent transparent;
 	position: relative;
+	overflow-x: hidden;
 `;

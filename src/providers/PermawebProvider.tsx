@@ -5,7 +5,7 @@ import Permaweb, { Types } from '@permaweb/libs/browser';
 import { connect, createSigner } from '@permaweb/aoconnect/browser';
 
 import { Loader } from 'components/atoms/Loader';
-import { AO_NODE_URL, STORAGE } from 'helpers/config';
+import { AO_NODE, STORAGE } from 'helpers/config';
 
 import { useArweaveProvider } from './ArweaveProvider';
 import { useLanguageProvider } from './LanguageProvider';
@@ -44,25 +44,35 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	const [profilePending, setProfilePending] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		if (arProvider.wallet) {
-			const signer = arProvider.wallet ? createSigner(arProvider.wallet) : null;
+		if (!arProvider.wallet) return;
 
-			const dependencies = {
-				// ao: connect({ MODE: 'legacy' }), // TODO
-				ao: connect({
-					MODE: 'mainnet',
-					URL: AO_NODE_URL,
-					SCHEDULER: 'mYJTM8VpIibDLuyGLQTcbcPy-LeOY48qzECADTUYfWc',
-					signer: signer,
-				}),
-				arweave: Arweave.init({}),
-				signer: signer,
-				node: AO_NODE_URL,
-			};
+		const aoConnection = import.meta.env.VITE_AO;
+		console.log(`AO Connection: [${aoConnection}]`);
+		console.log(`AO Node URL: ${AO_NODE.url}`);
 
-			setDeps(dependencies);
-			setLibs(Permaweb.init(dependencies));
+		const signer = createSigner(arProvider.wallet);
+
+		let ao: any;
+		if (aoConnection === 'mainnet') {
+			ao = connect({
+				MODE: 'mainnet',
+				URL: AO_NODE.url,
+				SCHEDULER: AO_NODE.scheduler,
+				signer,
+			});
+		} else if (import.meta.env.VITE_AO === 'legacy') {
+			ao = connect({ MODE: 'legacy' });
 		}
+
+		const dependencies = {
+			ao: ao,
+			arweave: Arweave.init({}),
+			signer: signer,
+			node: AO_NODE,
+		};
+
+		setDeps(dependencies);
+		setLibs(Permaweb.init(dependencies));
 	}, [arProvider.wallet]);
 
 	React.useEffect(() => {

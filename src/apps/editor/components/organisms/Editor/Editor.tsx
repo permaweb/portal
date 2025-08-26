@@ -258,6 +258,7 @@ export default function Editor() {
 								originPortal: portalProvider.current.id,
 							},
 							users: getAssetAuthUsers(),
+							spawnComments: true,
 						},
 						(status: any) => console.log(status)
 					);
