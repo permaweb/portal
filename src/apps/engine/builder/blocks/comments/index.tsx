@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useUI } from 'engine/hooks/portal';
-import { initThemes } from 'engine/services/themes'
+import { initThemes } from 'engine/helpers/themes'
 import Comment from './comment';
 import CommentAdd from './commentAdd';
 import { usePermawebProvider } from 'providers/PermawebProvider';

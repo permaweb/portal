@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import useNavigate from 'engine/services/preview';
+import useNavigate from 'engine/helpers/preview';
 import { useUI } from 'engine/hooks/portal';
 import { useProfile } from 'engine/hooks/profiles';
 import { useComments } from 'engine/hooks/comments';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSettings } from 'engine/hooks/settings';
 import { useUI } from 'engine/hooks/portal';
-import { initThemes } from 'engine/services/themes'
+import { initThemes } from 'engine/helpers/themes'
 import Builder from 'engine/builder';
 import * as S from './styles';
 import { GlobalStyles } from '../../../global-styles';

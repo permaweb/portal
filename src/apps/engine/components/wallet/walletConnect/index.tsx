@@ -1,12 +1,12 @@
 import React from 'react';
-import useNavigate from 'engine/services/preview';
+import useNavigate from 'engine/helpers/preview';
 import Icon from 'engine/components/icon';
 import * as ICONS from 'engine/constants/icons';
 import { Panel } from 'engine/components/panel';
 import { STORAGE } from 'helpers/config';
 import ProfileEditor from 'engine/components/profileEditor';
-import { checkValidAddress } from 'engine/services/utils';
-import { getTxEndpoint } from 'engine/services/endpoints';
+import { checkValidAddress } from 'helpers/utils';
+import { getTxEndpoint } from 'helpers/endpoints';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';

@@ -1,8 +1,6 @@
 import React from 'react';
 import Icon from 'engine/components/icon';
 import * as ICONS from 'engine/constants/icons';
-import { Portal } from '../Portal';
-import { DOM } from 'engine/services/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'engine/components/wrappers/closeHandler';
 

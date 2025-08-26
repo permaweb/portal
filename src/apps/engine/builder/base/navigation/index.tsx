@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useUI } from 'engine/hooks/portal';
-import { initThemes } from 'engine/services/themes'
+import { initThemes } from 'engine/helpers/themes'
 import Icon from 'engine/components/icon';
 import * as ICONS from 'engine/constants/icons';
 import * as S from './styles';

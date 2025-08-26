@@ -5,7 +5,7 @@ import * as ICONS from 'engine/constants/icons';
 import { ReactSVG } from 'react-svg';
 import { useSettings } from 'engine/hooks/settings';
 import { useUI } from 'engine/hooks/portal';
-import { initThemes } from 'engine/services/themes'
+import { initThemes } from 'engine/helpers/themes'
 import Toggle from 'engine/components/toggle';
 import WalletConnect from 'engine/components/wallet/walletConnect';
 import { GlobalStyles } from '../../../global-styles';

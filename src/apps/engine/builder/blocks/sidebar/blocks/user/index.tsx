@@ -1,8 +1,8 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useProfile } from 'engine/hooks/profiles';
-import { checkValidAddress } from 'engine/services/utils';
-import { getTxEndpoint } from 'engine/services/endpoints';
+import { checkValidAddress } from 'helpers/utils';
+import { getTxEndpoint } from 'helpers/endpoints';
 import SidebarArchive from '../archive';
 
 import * as S from './styles';

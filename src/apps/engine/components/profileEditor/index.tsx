@@ -6,8 +6,8 @@ import Arweave from 'arweave';
 import { connect, createDataItemSigner } from '@permaweb/aoconnect';
 import AOProfile from '@permaweb/aoprofile';
 
-import { getTxEndpoint } from 'engine/services/endpoints';
-import { checkValidAddress } from 'engine/services/utils';
+import { getTxEndpoint } from 'helpers/endpoints';
+import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';

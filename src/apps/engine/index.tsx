@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Header from './builder/base/header';
 import Navigation from './builder/base/navigation';
 import { PortalProvider, usePortalProvider, useSetPortalId } from 'engine/providers/portalProvider';
-import { initThemes } from 'engine/services/themes';
+import { initThemes } from 'engine/helpers/themes';
 import Content from './builder/base/content';
 import Footer from './builder/base/footer';
 import { DOM, URLS } from 'helpers/config';

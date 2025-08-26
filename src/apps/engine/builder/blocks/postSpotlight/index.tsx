@@ -2,9 +2,9 @@
 import { NavLink } from 'react-router-dom';
 import { usePost } from 'engine/hooks/posts';
 import { useProfile } from 'engine/hooks/profiles';
-import { getTxEndpoint } from 'engine/services/endpoints';
-import { checkValidAddress } from 'engine/services/utils';
+import { checkValidAddress } from 'helpers/utils';
 import Placeholder from 'engine/components/placeholder';
+import { getTxEndpoint } from 'helpers/endpoints';
 import * as S from './styles';
 
 export default function PostSpotlight(props: any) {  
