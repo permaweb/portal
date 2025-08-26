@@ -4,7 +4,6 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import React from 'react';
-import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
 export function useCategoriesWithReorder(props: {
 	categories: PortalCategoryType[];
@@ -13,9 +12,11 @@ export function useCategoriesWithReorder(props: {
 	skipAuthCheck?: boolean;
 	selectOnAdd?: boolean;
 	unauthorized?: boolean;
+	portalId: string;
+	portalCategories: PortalCategoryType[] | null;
+	refreshCurrentPortal: () => void;
 }) {
 	const arProvider = useArweaveProvider();
-	const portalProvider = usePortalProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const { addNotification } = useNotifications();
@@ -35,12 +36,6 @@ export function useCategoriesWithReorder(props: {
 	const [showChildDropZone, setShowChildDropZone] = React.useState<boolean>(false);
 	const [mouseX, setMouseX] = React.useState<number>(0);
 	const [categoryElementRects, setCategoryElementRects] = React.useState<Map<string, DOMRect>>(new Map());
-
-	React.useEffect(() => {
-		if (portalProvider.current?.id) {
-			if (portalProvider.current.categories) setCategoryOptions(portalProvider.current.categories);
-		}
-	}, [portalProvider.current]);
 
 	const getEffectiveParentId = () => {
 		if (props.categories?.length > 0) return props.categories[0].id;
@@ -80,7 +75,7 @@ export function useCategoriesWithReorder(props: {
 	}, [isDragging]);
 
 	const addCategory = async () => {
-		if (!props.unauthorized && newCategoryName && portalProvider.current?.id && arProvider.wallet) {
+		if (!props.unauthorized && newCategoryName && props.portalId && arProvider.wallet) {
 			setCategoryLoading(true);
 			try {
 				const effectiveParent = getEffectiveParentId();
@@ -130,11 +125,11 @@ export function useCategoriesWithReorder(props: {
 
 				const categoryUpdateId = await permawebProvider.libs.updateZone(
 					{ Categories: permawebProvider.libs.mapToProcessCase(updatedCategories) },
-					portalProvider.current.id,
+					props.portalId,
 					arProvider.wallet
 				);
 
-				portalProvider.refreshCurrentPortal();
+				props.refreshCurrentPortal();
 
 				console.log(`Category update: ${categoryUpdateId}`);
 
@@ -151,7 +146,7 @@ export function useCategoriesWithReorder(props: {
 	};
 
 	const deleteCategories = async () => {
-		if (!props.unauthorized && arProvider.wallet && portalProvider.current?.categories && props.categories?.length) {
+		if (!props.unauthorized && arProvider.wallet && props.portalCategories && props.categories?.length) {
 			setCategoryLoading(true);
 			try {
 				const findCategoriesToDelete = (categories: PortalCategoryType[], selectedIds: string[]): string[] => {
@@ -181,7 +176,7 @@ export function useCategoriesWithReorder(props: {
 				};
 
 				const selectedIds = props.categories.map((cat: PortalCategoryType) => cat.id);
-				const allCategories = portalProvider.current.categories;
+				const allCategories = props.portalCategories;
 
 				const idsToDelete = findCategoriesToDelete(allCategories, selectedIds);
 
@@ -189,13 +184,13 @@ export function useCategoriesWithReorder(props: {
 
 				const categoryUpdateId = await permawebProvider.libs.updateZone(
 					{ Categories: permawebProvider.libs.mapToProcessCase(updatedCategories) },
-					portalProvider.current.id,
+					props.portalId,
 					arProvider.wallet
 				);
 
 				props.setCategories([]);
 
-				portalProvider.refreshCurrentPortal();
+				props.refreshCurrentPortal();
 
 				console.log(`Category update: ${categoryUpdateId}`);
 
@@ -435,17 +430,17 @@ export function useCategoriesWithReorder(props: {
 
 		setCategoryOptions(reordered);
 
-		if (arProvider.wallet && portalProvider.current?.id) {
+		if (arProvider.wallet && props.portalId) {
 			try {
 				const categoryUpdateId = await permawebProvider.libs.updateZone(
 					{ Categories: permawebProvider.libs.mapToProcessCase(reordered) },
-					portalProvider.current.id,
+					props.portalId,
 					arProvider.wallet
 				);
 
 				console.log(`Categories update: ${categoryUpdateId}`);
 
-				portalProvider.refreshCurrentPortal();
+				props.refreshCurrentPortal();
 				addNotification(`${language?.categoriesUpdated}!`, 'success');
 			} catch (e: any) {
 				addNotification(e.message ?? 'Error reordering categories', 'warning');

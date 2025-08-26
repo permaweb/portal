@@ -35,6 +35,7 @@ export default function Categories(props: {
 	const {
 		addCategory,
 		categoryOptions,
+		setCategoryOptions,
 		showCategoryAdd,
 		setShowCategoryAdd,
 		newCategoryName,
@@ -61,8 +62,15 @@ export default function Categories(props: {
 		skipAuthCheck: props.skipAuthCheck,
 		allowReorder: props.allowReorder,
 		unauthorized,
+		portalId: portalProvider.current?.id || null,
+		portalCategories: portalProvider.current?.categories || [],
+		refreshCurrentPortal: portalProvider.refreshCurrentPortal,
 	});
-
+	React.useEffect(() => {
+		if (portalProvider.current?.id) {
+			if (portalProvider.current.categories) setCategoryOptions(portalProvider.current.categories);
+		}
+	}, [portalProvider.current]);
 	const CategoryItem = ({
 		category,
 		index,
