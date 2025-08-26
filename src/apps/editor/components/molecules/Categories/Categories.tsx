@@ -56,22 +56,10 @@ export default function Categories(props: {
 		}
 	}, [portalProvider.current]);
 
-<<<<<<< Updated upstream
 	const getEffectiveParentId = () => {
-		if (parentCategory) return parentCategory;
-=======
-<<<<<<< Updated upstream
-=======
-	const getEffectiveParentId = () => {
->>>>>>> Stashed changes
 		if (props.categories?.length > 0) return props.categories[0].id;
 		return null;
 	};
-
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 	// Capture category element positions using refs
 	const updateElementRects = React.useCallback(() => {
 		const rects = new Map<string, DOMRect>();
@@ -773,54 +761,6 @@ export default function Categories(props: {
 	function getCategoryAdd() {
 		return (
 			<S.CategoriesAction>
-<<<<<<< Updated upstream
-				{/* 
-					<S.CategoriesParentAction>
-=======
-<<<<<<< Updated upstream
-				<S.CategoriesParentAction>
->>>>>>> Stashed changes
-					<CloseHandler
-						callback={() => setShowParentOptions(false)}
-						active={showParentOptions}
-						disabled={!showParentOptions}
-					>
-						<S.CategoriesParentSelectAction>
-							<Button
-								type={'primary'}
-								label={getParentDisplayLabel()}
-								handlePress={() => setShowParentOptions(!showParentOptions)}
-								disabled={unauthorized || !categoryOptions?.length || categoryLoading}
-								icon={ASSETS.arrow}
-								height={42.5}
-								fullWidth
-							/>
-						</S.CategoriesParentSelectAction>
-						{showParentOptions && (
-							<S.ParentCategoryDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper-hidden'}>
-								<S.ParentCategoryOptions>
-									<S.ParentCategoryOption
-										level={1}
-										onClick={() => {
-											setParentCategory(null);
-											setShowParentOptions(false);
-										}}
-									>
-										<span>{language?.none}</span>
-									</S.ParentCategoryOption>
-									<S.Divider />
-									{renderParentCategoryOptions(categoryOptions)}
-								</S.ParentCategoryOptions>
-							</S.ParentCategoryDropdown>
-						)}
-					</CloseHandler>
-				</S.CategoriesParentAction>
-<<<<<<< Updated upstream
-				*/}
-=======
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 				<S.CategoriesAddAction
 					onSubmit={addCategory}
 					onKeyDownCapture={(e) => {
@@ -831,7 +771,6 @@ export default function Categories(props: {
 				>
 					<Button
 						type={'alt4'}
-<<<<<<< Updated upstream
 						label={
 							getEffectiveParentId()
 								? `${language?.addTo ?? 'Add to'} ${
@@ -839,17 +778,6 @@ export default function Categories(props: {
 								  }`
 								: language?.add
 						}
-=======
-<<<<<<< Updated upstream
-						label={language?.add}
-=======
-						label={
-							getEffectiveParentId()
-								? `${language?.addTo} ${findCategoryById(categoryOptions ?? [], getEffectiveParentId())?.name ?? ''}`
-								: language?.add
-						}
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 						handlePress={addCategory}
 						disabled={unauthorized || !newCategoryName || categoryLoading}
 						loading={categoryLoading}
