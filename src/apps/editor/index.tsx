@@ -129,14 +129,16 @@ function AppContent() {
 					</Portal>
 				);
 			}
-
 			if (!portalProvider.permissions?.base || portalProvider.permissions?.externalContributor) {
 				return (
 					<Portal node={DOM.overlay}>
 						<S.CenteredWrapper className={'overlay'}>
 							<S.MessageWrapper>
 								{!portalProvider.permissions ? (
-									<p>{`${language?.loggingIn}...`}</p>
+									<>
+										<p>{language?.permissionBaseDenied}</p>
+										<Button type={'primary'} label={language?.returnHome} handlePress={() => navigate(URLS.base)} />
+									</>
 								) : (
 									<>
 										<p>

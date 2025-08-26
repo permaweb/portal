@@ -56,7 +56,7 @@ export default function Panel(props: {
 	}
 
 	function getBodyClassName() {
-		let className = 'scroll-wrapper';
+		let className = 'scroll-wrapper ';
 		if (props.className) className += props.className;
 		return className;
 	}
