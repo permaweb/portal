@@ -17,21 +17,21 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 import * as S from './styles';
 import { usePostsList } from './usePostList';
 
-export const Posts = ({ type, paginatedPosts = [] }: { paginatedPosts?: PortalAssetType[]; type?: ViewLayoutType }) => {
+export const Posts = (props: { paginatedPosts?: PortalAssetType[]; type?: ViewLayoutType }) => {
 	const laguageProvider = useLanguageProvider();
 	const language = laguageProvider.object[laguageProvider.current];
 
-	if (!paginatedPosts.length) {
+	if (!props.paginatedPosts.length) {
 		return (
-			<S.WrapperEmpty type={type}>
+			<S.WrapperEmpty type={props.type}>
 				<p>{language?.noPostsFound}</p>
 			</S.WrapperEmpty>
 		);
 	}
 
 	return (
-		<S.PostsWrapper type={type}>
-			{paginatedPosts.map((post: PortalAssetType) => (
+		<S.PostsWrapper type={props.type}>
+			{props.paginatedPosts.map((post: PortalAssetType) => (
 				<Post key={post.id} post={post} />
 			))}
 		</S.PostsWrapper>

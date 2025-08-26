@@ -11,12 +11,12 @@ type RequestRow = {
 	dateCreated: string; // keep as string to match your existing UI (formatDate handles it)
 };
 
-export function usePostsList({ pageSize = 10 }: { pageSize?: number }) {
+export function usePostsList(props: { pageSize?: number }) {
 	const portalProvider = usePortalProvider();
 	const permawebProvider = usePermawebProvider();
 
 	const [currentPage, setCurrentPage] = React.useState<number>(1);
-	const [pageCount, setPageCount] = React.useState<number>(pageSize);
+	const [pageCount, setPageCount] = React.useState<number>(props.pageSize);
 	const [currentStatusFilter, setCurrentStatusFilter] = React.useState<ArticleStatusType | 'all'>('all');
 	const [dateAscending, setDateAscending] = React.useState<boolean>(false);
 	const [showFilterActions, setShowFilterActions] = React.useState<boolean>(false);

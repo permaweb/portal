@@ -235,10 +235,10 @@ export const GlobalStyle = createGlobalStyle`
   }
   
   .warning {
-  color: #000;
-  background-color: #fff3cd;
-  border: 1px solid #ffecb5;
-  border-radius: 4px;
+  	color: ${(props) => props.theme.colors.warning.color}; 
+  	background-color: ${(props) => props.theme.colors.warning.primary}; 
+  	border: 1px solid ${(props) => props.theme.colors.warning.alt1};
+  	border-radius: 4px;
   }
   
   .overlay {
