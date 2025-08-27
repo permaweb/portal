@@ -71,6 +71,7 @@ export default function Categories(props: {
 			if (portalProvider.current.categories) setCategoryOptions(portalProvider.current.categories);
 		}
 	}, [portalProvider.current]);
+
 	const CategoryItem = ({
 		category,
 		index,
@@ -117,7 +118,6 @@ export default function Categories(props: {
 				</Draggable>
 			);
 		}
-
 		return (
 			<React.Fragment key={category.id}>
 				<S.CategoryOption level={level}>
@@ -183,7 +183,6 @@ export default function Categories(props: {
 										const active =
 											props.categories?.find((c: PortalCategoryType) => item.category.id === c.id) !== undefined;
 										const isSelected = selectedIds.has(item.category.id);
-
 										return (
 											<React.Fragment key={item.category.id}>
 												<Draggable draggableId={item.category.id} index={index}>
