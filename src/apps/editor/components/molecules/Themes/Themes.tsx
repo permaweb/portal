@@ -140,10 +140,20 @@ function Color(props: {
 	);
 }
 
-function ThemeSection(props) {
+const ThemeSection = React.memo(function ThemeSection(props) {
 	const portalProvider = usePortalProvider();
 	const { theme, setTheme, name, setName, section, loading } = props;
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+	
+	// Local state for name editing to prevent re-renders
+	const [localName, setLocalName] = React.useState(theme.name || '');
+	
+	// Update local name when theme changes from outside
+	React.useEffect(() => {
+		if (theme.name !== localName) {
+			setLocalName(theme.name || '');
+		}
+	}, [theme.name]);
 
 	const order = ['text', 'hover', 'background', 'primary', 'secondary']
 	const sortedSection = Object.fromEntries([
@@ -181,8 +191,23 @@ function ThemeSection(props) {
 								<S.ThemeKey style={{ flex: 1}}>Name</S.ThemeKey>
 								<S.ThemeValue style={{ flex: 2.5, padding:0 }}>
 									<FormField 
-										value={theme.name}
-										onChange={() => setName(name)}
+										key="theme-name-field"
+										value={localName}
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											// Only update local state while typing
+											setLocalName(e.target.value);
+											// Notify parent that there are pending changes
+											if (props.onNameChange) {
+												props.onNameChange(e.target.value);
+											}
+										}}
+										onBlur={() => {
+											// Only update parent when done editing
+											if (localName !== props.theme.name) {
+												const updatedTheme = { ...props.theme, name: localName };
+												props.setTheme(updatedTheme);
+											}
+										}}
 										invalid={false}
 										hideErrorMessage={true}
 									/>
@@ -192,11 +217,11 @@ function ThemeSection(props) {
 					</S.GridWrapper>
 				)}
 			<S.ThemeRowHeader>
-				<S.ThemeLight colors={theme.basics.colors}>
+				<S.ThemeLight colors={props.theme.basics?.colors}>
 					<S.ThemeKey />
 					<S.ThemeValue></S.ThemeValue>
 				</S.ThemeLight>
-				<S.ThemeDark colors={theme.basics.colors}>
+				<S.ThemeDark colors={props.theme.basics?.colors}>
 					<S.ThemeKey />
 					<S.ThemeValue />
 				</S.ThemeDark>
@@ -206,7 +231,7 @@ function ThemeSection(props) {
 				return (			
 					<>					
 					<S.ThemeRow>
-						<S.ThemeLight colors={theme.basics.colors}>
+						<S.ThemeLight colors={props.theme.basics?.colors}>
 							<S.ThemeKey>
 								{key.charAt(0).toUpperCase() + key.slice(1)}
 							</S.ThemeKey>
@@ -215,7 +240,7 @@ function ThemeSection(props) {
 									key={key}
 									label={key}
 									value={value.light}
-									basics={theme.basics.colors}
+									basics={props.theme.basics?.colors}
 									scheme="light"
 									onChange={(newColor) => handleThemeChange('basics', 'colors', 'light', key, newColor)}
 									loading={loading}
@@ -223,7 +248,7 @@ function ThemeSection(props) {
 								/>
 							</S.ThemeValue>
 						</S.ThemeLight>
-						<S.ThemeDark colors={theme.basics.colors}>
+						<S.ThemeDark colors={props.theme.basics?.colors}>
 							<S.ThemeKey>
 								{key.charAt(0).toUpperCase() + key.slice(1)}
 							</S.ThemeKey>
@@ -232,7 +257,7 @@ function ThemeSection(props) {
 									key={key}
 									label={key}
 									value={value.dark}
-									basics={theme.basics.colors}
+									basics={props.theme.basics?.colors}
 									scheme="dark"
 									onChange={(newColor) => handleThemeChange('basics', 'colors', 'dark', key, newColor)}
 									loading={loading}
@@ -248,11 +273,11 @@ function ThemeSection(props) {
 			}
 			
 			<S.ThemeRowFooter>
-				<S.ThemeLight colors={theme.basics.colors}>
+				<S.ThemeLight colors={props.theme.basics?.colors}>
 					<S.ThemeKey />
 					<S.ThemeValue />
 				</S.ThemeLight>
-				<S.ThemeDark colors={theme.basics.colors}>
+				<S.ThemeDark colors={props.theme.basics?.colors}>
 					<S.ThemeKey />
 					<S.ThemeValue />
 				</S.ThemeDark>
@@ -262,24 +287,43 @@ function ThemeSection(props) {
 			</S.ThemePreview>
 		</S.ThemeSection>		
 	)
-}
+});
 
 function Theme(props: {
 	theme: any,
 	published: any,
-	loading: boolean
+	loading: boolean,
+	onThemeUpdate: (theme: any) => void
 }) {
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
 	
 	// const { theme, published, loading } = props;
 	const [showExpertMode, setShowExpertMode] = React.useState(false);
-	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme[0]);
-	const [name, setName] = React.useState<string>(props.theme.name ?? '-');
+	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
+	const [originalTheme] = React.useState<PortalThemeType>(props.theme); // Store original for comparison
+	const [pendingNameChange, setPendingNameChange] = React.useState<string | null>(null);
 
+	// Only update if props.theme actually changes from external source
+	// Don't update if the only change is the name (which we're editing locally)
 	React.useEffect(() => {
-		setTheme(props.theme[0]);
-		setName(props.theme.name);
-		// setScheme(props.theme.scheme);
+		const propsWithoutName = { ...props.theme };
+		delete propsWithoutName.name;
+		const themeWithoutName = { ...theme };
+		delete themeWithoutName.name;
+		
+		if (JSON.stringify(propsWithoutName) !== JSON.stringify(themeWithoutName)) {
+			setTheme(props.theme);
+		}
 	}, [props.theme]);
+
+	// Check if theme has changes
+	const hasChanges = React.useMemo(() => {
+		// Check if there's a pending name change or if theme has changed
+		const nameChanged = pendingNameChange !== null && pendingNameChange !== originalTheme.name;
+		const themeChanged = JSON.stringify(originalTheme) !== JSON.stringify(theme);
+		return nameChanged || themeChanged;
+	}, [originalTheme, theme, pendingNameChange]);
 
 	const order = ['basics', 'header', 'navigation', 'content', 'footer', 'card']
 	const sortedTheme = Object.fromEntries([
@@ -291,9 +335,9 @@ function Theme(props: {
 	return (
 		<S.ThemeWrapper id="ThemeWrapper">
 			<Select 
-				activeOption={{ id: sortedTheme.name, label: sortedTheme.name }}
+				activeOption={{ id: theme?.name || 'Default', label: theme?.name || 'Default' }}
 				setActiveOption={() => {}}
-				options={[{ id: sortedTheme.name, label: sortedTheme.name }]}
+				options={[{ id: theme?.name || 'Default', label: theme?.name || 'Default' }]}
 				disabled={false}
 			/>
 			<S.Theme>
@@ -302,6 +346,7 @@ function Theme(props: {
 					setTheme={setTheme}
 					section="basics"
 					loading={props.loading}
+					onNameChange={setPendingNameChange}
 				/>
 				<S.ThemeSectionWrapper $show={showExpertMode}>					
 					{Object.entries(sortedTheme).map(([key]) => {
@@ -319,6 +364,23 @@ function Theme(props: {
 				</S.ThemeSectionWrapper>
 
 			</S.Theme>
+			
+			<S.EndActions>
+				<Button
+					type={'alt1'}
+					label={language?.save || 'Save'}
+					handlePress={() => {
+						// Include pending name change if exists
+						const finalTheme = pendingNameChange !== null 
+							? { ...theme, name: pendingNameChange }
+							: theme;
+						props.onThemeUpdate(finalTheme);
+						setPendingNameChange(null); // Clear pending change after save
+					}}
+					loading={props.loading}
+					disabled={props.loading || !hasChanges}
+				/>
+			</S.EndActions>
 			{/* <pre>{JSON.stringify(theme, null, 2)}</pre> */}
 		</S.ThemeWrapper>
 	)
@@ -335,6 +397,30 @@ function Section(props: {
 	published: boolean;
 	loading: boolean;
 }) {
+	const portalProvider = usePortalProvider();
+	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
+	const [name, setName] = React.useState<string>(props.theme.name ?? '-');
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+
+	React.useEffect(() => {
+		setTheme(props.theme);
+		setName(props.theme.name ?? '-');
+	}, [props.theme]);
+
+	function handleThemeChange(key: string, newColor: string) {
+		const updatedTheme = {
+			...theme,
+			basics: {
+				...theme.basics,
+				colors: {
+					...theme.basics.colors,
+					[key]: newColor
+				}
+			}
+		};
+		setTheme(updatedTheme);
+		if (props.published) props.onThemeChange(updatedTheme, false);
+	}
 	
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -606,7 +692,9 @@ export default function Themes() {
 
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
-			if (portalProvider.current.themes) setOptions(portalProvider.current.themes);
+			if (portalProvider.current.themes) {
+				setOptions(portalProvider.current.themes);
+			}
 		}
 	}, [portalProvider.current]);
 
@@ -740,18 +828,33 @@ export default function Themes() {
 			);
 		}
 
+		// Use the first theme if available, or create a default one
+		const currentTheme = options[0] || {
+			name: 'Default',
+			basics: {
+				colors: {
+					primary: { light: '0,0,0', dark: '255,255,255' },
+					secondary: { light: '128,128,128', dark: '128,128,128' },
+					background: { light: '255,255,255', dark: '0,0,0' },
+					text: { light: '0,0,0', dark: '255,255,255' },
+					border: { light: '200,200,200', dark: '55,55,55' }
+				}
+			}
+		};
+
 		const isPublished =
 			loading || portalProvider.updating
 				? true
 				: portalProvider.current?.themes.find(
-						(existingTheme: PortalThemeType) => existingTheme.name === options.name
+						(existingTheme: PortalThemeType) => existingTheme.name === currentTheme.name
 					) !== undefined;
 		return (
 			<>
 				<Theme
-					theme={options} 
+					theme={currentTheme} 
 					published={isPublished}
 					loading={loading}
+					onThemeUpdate={(updatedTheme) => submitUpdatedThemes([updatedTheme])}
 				/>
 			</>
 		);

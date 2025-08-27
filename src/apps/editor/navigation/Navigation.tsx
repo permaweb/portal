@@ -255,7 +255,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 								<S.PDropdownFooter>
 									<button
 										onClick={() => {
-											window.open(getTxEndpoint(portalProvider.current.id));
+											// In development, redirect to local engine on port 5000
+											const siteUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+												? `http://localhost:5000/${portalProvider.current.id}`
+												: getTxEndpoint(portalProvider.current.id);
+											window.open(siteUrl);
 											setShowPortalDropdown(false);
 										}}
 									>

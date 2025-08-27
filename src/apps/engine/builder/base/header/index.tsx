@@ -4,8 +4,10 @@ import Icon from 'engine/components/icon';
 import * as ICONS from 'engine/constants/icons';
 import { ReactSVG } from 'react-svg';
 import { useSettings } from 'engine/hooks/settings';
-import { useUI } from 'engine/hooks/portal';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 import { initThemes } from 'engine/helpers/themes'
+import { defaultThemes } from 'engine/defaults/theme.defaults';
+import { defaultLayout } from 'engine/defaults/layout.defaults';
 import Toggle from 'engine/components/toggle';
 import WalletConnect from 'engine/components/wallet/walletConnect';
 import { GlobalStyles } from '../../../global-styles';
@@ -13,7 +15,10 @@ import * as S from './styles';
 
 export default function Header(props:any) {  
   const { name, layout, content, preview } = props;
-  const { Themes, Layout, Logo } = useUI(preview);
+  const { portal } = usePortalProvider();
+  const Themes = preview ? defaultThemes : portal?.Themes;
+  const Layout = preview ? defaultLayout : portal?.Layout;
+  const Logo = portal?.Logo;
   const { settings, updateSetting } = preview
     ? (() => {
         const [localSettings, setLocalSettings] = React.useState({ theme: 'dark' });

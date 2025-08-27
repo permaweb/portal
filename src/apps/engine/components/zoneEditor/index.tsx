@@ -36,7 +36,8 @@ function colorizeJson(json) {
 
 
 export default function ZoneEditor(props: IProps) {
-	const zone = useUI();
+	const { portal } = usePortalProvider();
+	const zone = portal || {};
 	const arProvider = useArweaveProvider();		
 	const permawebProvider = usePermawebProvider();	
 	const portalProvider = usePortalProvider();

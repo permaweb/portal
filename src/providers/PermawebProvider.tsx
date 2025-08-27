@@ -160,10 +160,13 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	}, [refreshProfileTrigger]);
 
 	async function resolveProfile(address: string) {
+		const cachedProfile = getCachedProfile(address);
+		
 		if (libs) {
 			try {
 				let fetchedProfile: any;
-				const cachedProfile = getCachedProfile(address);			
+				console.log('cachedProfile: ', cachedProfile)
+				console.log('address: ', address)
 				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
 				else fetchedProfile = await libs.getProfileByWalletAddress(address);
 				let profileToUse = { ...fetchedProfile };
@@ -173,7 +176,9 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 				return profileToUse;
 			} catch (e: any) {
-				console.error(e);
+				console.error('Profile fetch error, using cached profile:', e);
+				// Return cached profile if fetch fails
+				return cachedProfile || null;
 			}
 		}
 	}

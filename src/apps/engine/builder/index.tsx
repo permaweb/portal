@@ -1,4 +1,5 @@
-import { useUI } from '../hooks/portal';
+import { usePortalProvider } from '../providers/portalProvider';
+import { defaultLayout } from '../defaults/layout.defaults';
 import Grid from './blocks/grid';
 import GridRow from './blocks/gridRow';
 import Post from './blocks/post';
@@ -15,7 +16,8 @@ import Link from './blocks/link';
 
 export default function Builder(props: any) {    
   const { preview, layout } = props;
-  const { Layout } = useUI(preview);
+  const { portal } = usePortalProvider();
+  const Layout = preview ? defaultLayout : portal?.Layout;
 
   const getContent = (element: any, preview: boolean, index: number) => {
     switch (element?.type) {

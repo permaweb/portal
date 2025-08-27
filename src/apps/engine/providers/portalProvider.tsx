@@ -65,31 +65,26 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			try {				
 				const cached = getCachedPortal(portalId);
 				const res = await permawebProvider.libs.getZone(portalId); // always fetch
-				console.log('res: ', res)
+				console.log('Zone: ', res)
 
 				const zone = {
 					...cached,
 					...res.store,
 					posts: res.store?.index ? [...res.store.index].reverse() : [],
 					...defaultPortal					
-				};				
-
-				// structurePortal(zone);
-				const Store = zone?.store ?? {};
-				const posts = Store.index ? [...Store.index].reverse() : [];
-				console.log('Zonre: ', zone)
+				};
 
 				const Name = zone?.name;
 				const Categories = zone?.categories;
 				const Layout = zone?.layout;
 				const Pages = zone?.pages;
-				const Posts = posts;
+				const Posts = zone?.posts;
 				const Themes = zone?.themes;
 				const Logo = zone?.logo;
 				const Fonts = zone?.fonts
 
 				const portalData = { Name, Categories, Layout, Pages, Themes, Posts, Logo, Fonts }
-				console.log('data: ', portalData);
+				console.log('portalData: ', portalData);
 				setPortal(portalData);
 				if (portalId && portalData) cachePortal(portalId, portalData);
 

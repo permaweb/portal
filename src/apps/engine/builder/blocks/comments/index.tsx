@@ -1,8 +1,9 @@
 
 
 import React from 'react';
-import { useUI } from 'engine/hooks/portal';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 import { initThemes } from 'engine/helpers/themes'
+import { defaultThemes } from 'engine/defaults/theme.defaults';
 import Comment from './comment';
 import CommentAdd from './commentAdd';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -10,7 +11,8 @@ import * as S from './styles';
 
 export default function Comments(props: any) {  
   const { preview, assetId } = props;
-  const { Themes } = useUI(true);
+  const { portal } = usePortalProvider();
+  const Themes = preview ? defaultThemes : portal?.Themes;
   const { libs } = usePermawebProvider();
   const [comments, setComments] = React.useState(null)
 

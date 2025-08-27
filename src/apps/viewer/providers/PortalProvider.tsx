@@ -49,7 +49,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			if (portalId) setCurrentId(portalId);
 			else {
 				try {
-					const resolvedId = (await fetch(window.location.host)).headers.get('X-Arns-Resolved-Id');
+					// Fix: Use proper URL format for fetching ArNS headers
+					const resolvedId = (await fetch(`${window.location.protocol}//${window.location.host}`)).headers.get('X-Arns-Resolved-Id');
 					setCurrentId(resolvedId);
 				} catch (e: any) {}
 			}

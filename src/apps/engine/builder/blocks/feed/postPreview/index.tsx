@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import useNavigate from 'engine/helpers/preview';
-import { useUI } from 'engine/hooks/portal';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 import { useProfile } from 'engine/hooks/profiles';
 import { useComments } from 'engine/hooks/comments';
 import Placeholder from 'engine/components/placeholder';
@@ -11,7 +11,8 @@ import PostPreview_Minimal from './minimal';
 
 export default function PostPreview(props: any) {
   const navigate = useNavigate();
-  const { Layout } = useUI();
+  const { portal } = usePortalProvider();
+  const Layout = portal?.Layout;
   const { preview, post, loading } = props;  
   // const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || null);
   // const { comments, isLoading: isLoadingComments, error: errorComments } = useComments(post?.id || null, true);

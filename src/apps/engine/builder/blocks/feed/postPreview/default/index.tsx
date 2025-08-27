@@ -1,16 +1,17 @@
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import useNavigate from 'engine/helpers/preview';
-import { useUI } from 'engine/hooks/portal';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 import { useProfile } from 'engine/hooks/profiles';
 import { useComments } from 'engine/hooks/comments';
-import Placeholder from 'engine/components/placeholder';
 import * as S from './styles';
 
 export default function PostPreview_Default(props: any) {
   const navigate = useNavigate();
-  const { Layout } = useUI();
+  const { portal } = usePortalProvider();
+  const Layout = portal?.Layout;
   const { preview, post, loading } = props;  
-  const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || null);
+  const { profile } = useProfile(post?.creator || null);
   const { comments, isLoading: isLoadingComments, error: errorComments } = useComments(post?.id || null, true);
 
   const Comment = (data: any) => {    
@@ -38,10 +39,10 @@ export default function PostPreview_Default(props: any) {
       <S.Categories>{
         post ? post?.metadata?.categories.map((category: any, index: number) => {
           return (
-            <>
-            <NavLink to={`/feed/category/${category.id}`}><S.Category key={index}>{category.name}</S.Category></NavLink>
+            <React.Fragment key={index}>
+            <NavLink to={`/feed/category/${category.id}`}><S.Category>{category.name}</S.Category></NavLink>
               {index < post.metadata.categories.length - 1 && <>,&nbsp;</>}
-            </>
+            </React.Fragment>
           )
         }) : <Placeholder />}
       </S.Categories>
@@ -62,12 +63,12 @@ export default function PostPreview_Default(props: any) {
           <S.SourceIcon
             className="loadingAvatar"
             onLoad={e => e.currentTarget.classList.remove('loadingAvatar')}
-            src={!isLoadingProfile ? `https://arweave.net/${profile?.thumbnail}` : ''}
+            src={profile?.thumbnail ? `https://arweave.net/${profile.thumbnail}` : ''}
           />
           <S.Author
             onClick={() => navigate(`/user/${profile.id}`)}
           >
-            {isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}
+            {profile?.displayName}
           </S.Author>
           <S.Date>
             {isLoadingProfile ? <Placeholder width="120" /> : `${new Date(Number(post.dateCreated)).toLocaleDateString()} ${new Date(Number(post.dateCreated)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useUI } from 'engine/hooks/portal';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 import { usePosts } from 'engine/hooks/posts';
 import PostPreview from './postPreview';
 import * as S from './styles';
@@ -8,7 +8,8 @@ import * as S from './styles';
 export default function Feed(props?: any) {
   const { preview } = props;
   const params = useParams();
-  const { Name } = useUI(preview);
+  const { portal } = usePortalProvider();
+  const Name = portal?.Name;
   const filters = {
     category: params.category ?? props.category ?? null,
     tags: params.tag ? [params.tag] : null,
@@ -35,7 +36,7 @@ export default function Feed(props?: any) {
         </S.FeedHeader>
       )}
       {Posts 
-        ? Object.keys(Posts).map((key) => <PostPreview key={Posts[key].Id} post={Posts[key]} layout={props?.layout} />) 
+        ? Object.keys(Posts).map((key) => <PostPreview key={Posts[key].id || key} post={Posts[key]} layout={props?.layout} />) 
         : <>
             <PostPreview loading key={0} />
             <PostPreview loading key={1} />

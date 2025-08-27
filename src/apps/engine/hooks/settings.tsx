@@ -1,5 +1,5 @@
+import React from 'react';
 import { dryrun } from '@permaweb/aoconnect';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const getSettings = async () => {
   return {
@@ -39,31 +39,40 @@ export const initSettings = async () => {
 initSettings();
 
 export const useSettings = (preview: boolean = false) => {
-  if(preview) return { theme: 'dark' };
+  if(preview) return { settings: { theme: 'dark' }, updateSetting: () => {} };
 
-  const queryClient = useQueryClient();
+  const [settings, setSettings] = React.useState({ portal: 'ima', theme: 'dark' });
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  const settingsQuery = useQuery({
-    queryKey: ['settings'],
-    queryFn: getSettings,
-  });
-
-  const mutation = useMutation({
-    mutationFn: updateSettings,
-    onSuccess: (newSettings) => {
-      queryClient.setQueryData(['settings'], newSettings);
-    },
-  });
+  React.useEffect(() => {
+    getSettings()
+      .then((fetchedSettings) => {
+        setSettings(fetchedSettings);
+      })
+      .catch((error) => {
+        console.error('Error loading settings:', error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   const updateSetting = (key: string, value: any) => {
-    if(key === 'theme') switchTheme(value)
-    const newSettings = { ...settingsQuery.data, [key]: value };
-    mutation.mutate(newSettings);
+    if(key === 'theme') switchTheme(value);
+    const newSettings = { ...settings, [key]: value };
+    
+    updateSettings(newSettings)
+      .then(() => {
+        setSettings(newSettings);
+      })
+      .catch((error) => {
+        console.error('Error updating settings:', error);
+      });
   };
 
   return {
-    settings: settingsQuery.data,
-    isLoading: settingsQuery.isLoading,
+    settings,
+    isLoading,
     updateSetting,
   };
 };

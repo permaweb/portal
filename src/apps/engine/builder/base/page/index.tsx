@@ -1,11 +1,13 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useUI } from 'engine/hooks/portal';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 import Builder from '../../';
 import * as S from './styles';
 
 export default function Page() {
-  const { Pages, Name } = useUI();
+  const { portal } = usePortalProvider();
+  const Pages = portal?.Pages;
+  const Name = portal?.Name;
   const params = useParams();
   const pageId = Object.keys(params)[0] && Object.keys(params)[0] !== '*' 
     ? Object.keys(params)[0] 

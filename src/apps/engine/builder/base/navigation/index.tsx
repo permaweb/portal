@@ -1,7 +1,9 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useUI } from 'engine/hooks/portal';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 import { initThemes } from 'engine/helpers/themes'
+import { defaultThemes } from 'engine/defaults/theme.defaults';
+import { defaultLayout } from 'engine/defaults/layout.defaults';
 import Icon from 'engine/components/icon';
 import * as ICONS from 'engine/constants/icons';
 import * as S from './styles';
@@ -11,7 +13,9 @@ import Search from './search';
 
 export default function Navigation(props: any) {
   const { preview, layout, content } = props;
-  const { Layout, Themes } = useUI(preview);
+  const { portal } = usePortalProvider();
+  const Layout = preview ? defaultLayout : portal?.Layout;
+  const Themes = preview ? defaultThemes : portal?.Themes;
 
   React.useEffect(() => {
     if(preview){

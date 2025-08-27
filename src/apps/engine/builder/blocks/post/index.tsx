@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useUI } from 'engine/hooks/portal';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 import { usePost } from 'engine/hooks/posts';
 import { useProfile } from 'engine/hooks/profiles';
 import Tag from 'engine/components/tag';
@@ -11,7 +11,8 @@ import * as S from './styles';
 export default function Post(props: any) {
   const { preview } = props;
   const { postId } = useParams();
-  const { Name } = useUI(preview);
+  const { portal } = usePortalProvider();
+  const Name = portal?.Name;
   const { post, isLoading: isLoadingPost, error } = usePost(postId || '');
   const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || '');
 

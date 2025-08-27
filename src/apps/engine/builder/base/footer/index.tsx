@@ -1,14 +1,17 @@
 import React from 'react';
 import { useSettings } from 'engine/hooks/settings';
-import { useUI } from 'engine/hooks/portal';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 import { initThemes } from 'engine/helpers/themes'
+import { defaultThemes } from 'engine/defaults/theme.defaults';
 import Builder from 'engine/builder';
 import * as S from './styles';
 import { GlobalStyles } from '../../../global-styles';
 
 export default function Footer(props: any) {
   const { preview, layout, content } = props;
-  const { Themes, Name } = useUI(preview);
+  const { portal } = usePortalProvider();
+  const Themes = preview ? defaultThemes : portal?.Themes;
+  const Name = portal?.Name;
   
   const { settings } = preview
     ? { settings: { theme: 'dark' }}

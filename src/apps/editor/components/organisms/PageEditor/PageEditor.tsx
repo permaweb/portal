@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import Builder from 'engine/builder';
 import * as S from './styles';
 
@@ -33,17 +35,20 @@ function colorizeJson(json) {
 
 export default function PageEditor() {
   const navigate = useNavigate();
+	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();	
   const { pageId } = useParams<{ pageId?: string }>();
   const portalProvider = usePortalProvider();
   const languageProvider = useLanguageProvider();
   const language = languageProvider.object[languageProvider.current];
+  const { addNotification } = useNotifications();
   const pageLayout = portalProvider.current.pages[pageId];
 
 	console.log('pageLayout: ', pageLayout)
 
 	const [input, setInput] = React.useState('');
 	const [output, setOutput] = React.useState('');
+	const [loading, setLoading] = React.useState(false);
 
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 	const preRef = React.useRef<HTMLPreElement>(null);
@@ -93,31 +98,59 @@ export default function PageEditor() {
 	};
 
 	const handleSubmit = async () => {
-		/*
+		if (!arProvider.wallet) {
+			addNotification('Please connect your wallet to save changes', 'warning');
+			return;
+		}
+
+		if (!portalProvider.current?.id) {
+			addNotification('No portal ID found', 'warning');
+			return;
+		}
+
+		if (!pageId) {
+			addNotification('No page ID found', 'warning');
+			return;
+		}
+
 		try {
+			setLoading(true);
 			const parsed = JSON.parse(input);
-			if (!selected) return;
+			
+			// Create an update that only modifies this specific page
+			// We need to send the full Pages object to preserve other pages
+			const currentPages = portalProvider.current.pages || {};
+			const updatedPages = {
+				...currentPages,
+				[pageId]: parsed
+			};
 
-			let updateValue = parsed;
-			if (typeof zone[selected] !== 'object') {
-				updateValue = parsed.value !== undefined ? parsed.value : parsed;
-			} else if (Array.isArray(parsed)) {
-				updateValue = permawebProvider.libs.mapToProcessCase(parsed);
-			}
+			// Format for the process
+			const updateValue = permawebProvider.libs.mapToProcessCase(updatedPages);
 
-			const updateData = { [selected]: updateValue };
+			const updateData = { Pages: updateValue };
 
 			const updateId = await permawebProvider.libs.updateZone(
 				updateData,
-				portalProvider.portalId,
+				portalProvider.current.id,
 				arProvider.wallet
 			);
 
-			console.log(`${selected} update:`, updateId);
-		} catch {
-			console.log('Invalid JSON, not saved');
+			console.log('Page update:', updateId);
+			addNotification('Page saved successfully!', 'success');
+			
+			// Refresh the portal data
+			portalProvider.refreshCurrentPortal();
+		} catch (error) {
+			console.error('Error saving page:', error);
+			if (output === 'Invalid JSON') {
+				addNotification('Invalid JSON format', 'warning');
+			} else {
+				addNotification('Error saving page', 'warning');
+			}
+		} finally {
+			setLoading(false);
 		}
-			*/
 	};
 	const isValid = output !== 'Invalid JSON';
 
@@ -142,7 +175,16 @@ export default function PageEditor() {
 						onScroll={() => syncScroll('pre')}
 					/>
 				</S.Code>
-				<button onClick={handleSubmit}>Save</button>
+				<button 
+					onClick={handleSubmit} 
+					disabled={loading || !isValid}
+					style={{ 
+						opacity: loading || !isValid ? 0.5 : 1,
+						cursor: loading || !isValid ? 'not-allowed' : 'pointer'
+					}}
+				>
+					{loading ? 'Saving...' : 'Save'}
+				</button>
 			</S.Editor>
 			<S.Preview className="border-wrapper-alt1">
 				Preview...

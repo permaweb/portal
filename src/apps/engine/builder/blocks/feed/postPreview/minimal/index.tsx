@@ -1,6 +1,6 @@
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import useNavigate from 'engine/helpers/preview';
-import { useUI } from 'engine/hooks/portal';
 import { useProfile } from 'engine/hooks/profiles';
 import { useComments } from 'engine/hooks/comments';
 import Placeholder from 'engine/components/placeholder';
@@ -17,10 +17,10 @@ export default function PostPreview_Minimal(props: any) {
       <S.Categories>{
         post ? post?.metadata?.categories.map((category: any, index: number) => {
           return (
-            <>
-              <NavLink to={`/feed/category/${category.id}`}><S.Category key={index}>{category.name}</S.Category></NavLink>
+            <React.Fragment key={index}>
+              <NavLink to={`/feed/category/${category.id}`}><S.Category>{category.name}</S.Category></NavLink>
               {index < post.metadata.categories.length - 1 && <>,&nbsp;</>}
-            </>
+            </React.Fragment>
           )
         }) : <Placeholder />}
       </S.Categories>

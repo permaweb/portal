@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { HashRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Header from './builder/base/header';
 import Navigation from './builder/base/navigation';
@@ -12,7 +12,7 @@ import { DOM, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { preloadAllAssets } from 'helpers/preloader';
 import { GlobalStyles } from './global-styles';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, getPortalIdFromURL } from 'helpers/utils';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider } from 'providers/LanguageProvider';
 import { NotificationProvider } from 'providers/NotificationProvider';
@@ -26,12 +26,40 @@ import * as S from './global-styles';
 const queryClient = new QueryClient();
 
 function App() {
+	const location = useLocation();
 	const portalProvider = usePortalProvider();
 	const { Name, Categories, Layout, Themes } = portalProvider?.portal || {};
 	const [theme, setTheme] = React.useState<any>(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+	const [portalId, setPortalId] = React.useState<string | null>(null);
 
-	console.log('portalProvider: ', portalProvider)
+	// Get portal ID from URL or domain
+	React.useEffect(() => {
+		(async function () {
+			// First check if there's a portal ID in the URL
+			const urlPortalId = getPortalIdFromURL();
+			if (urlPortalId) {
+				setPortalId(urlPortalId);
+			} else {
+				// Try to resolve from ArNS domain
+				try {
+					// Make a request to the current origin to get ArNS headers
+					// This works when the site is served through an ArNS gateway
+					const response = await fetch(`${window.location.protocol}//${window.location.host}`);
+					const resolvedId = response.headers.get('X-Arns-Resolved-Id');
+					if (resolvedId) {
+						setPortalId(resolvedId);
+					} else {
+						console.warn('No portal ID found in URL or ArNS headers');
+					}
+				} catch (e: any) {
+					console.error('Failed to resolve portal ID from ArNS:', e);
+				}
+			}
+		})();
+	}, [location.pathname]);
 
+	// Set the portal ID in the provider
+	useSetPortalId(portalId || '');
 
   React.useEffect(() => {
     if(Themes){
@@ -42,13 +70,6 @@ function App() {
       initThemes(Themes)
     }
   },[Themes])
-
-	const SetPortalIdComponent = () => {
-    // useSetPortalId('r-5yMlWFOZ_LpSHXeHwXGkkit-2BsL-0nmhDbUiQAv8');
-		
-    return null;
-  };
-	useSetPortalId('dc6W1Lz5V8-KV44B6qonM7pS5x5UC1lsRzCK-CiMotQ');
 
 	React.useEffect(() => {
 		if (portalProvider.portal?.Name) document.title = portalProvider.portal.Name;
@@ -77,7 +98,7 @@ function App() {
 		return (
 			<>
 				<div id={DOM.loader} />
-				sdd
+				Loading page placeholder...
 			</>
 		);
 	}
@@ -89,7 +110,6 @@ function App() {
 			<div id={DOM.overlay} />
 			<S.PageWrapper>
 				<S.Page $layout={Layout?.basics} id="Page">
-					<SetPortalIdComponent />
 					<Header name={Name} layout={Layout?.header.layout} content={Layout?.header.content} theme={theme} setTheme={setTheme} />
 					<Navigation layout={Layout?.navigation.layout} content={Categories} theme={theme} />
 					<Content layout={Layout} />

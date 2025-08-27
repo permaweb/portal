@@ -1,10 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
 import { useProfile } from 'engine/hooks/profiles';
-import { useUI } from './portal';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 
 export const usePosts = (props?: any) => {
   const { preview = false } = props || {};
-  const { Posts, isLoading, error } = useUI(preview);
+  const { portal } = usePortalProvider();
+  const Posts = portal?.Posts || [];
+  const isLoading = false;
+  const error = null;
   let filtered = Posts ? Object.values(Posts) : Posts;  
 
   if (filtered) {
@@ -98,19 +100,13 @@ export const usePost = (txId: any) => {
   if(!txId) return { post: undefined, isLoading: true, error: undefined };
 
   const { Posts, isLoading: postsLoading, error: postsError } = usePosts();
-
-  const { data: post, isLoading: postLoading, error: postError } = useQuery({
-    queryKey: [`asset-${txId}`],
-    queryFn: async () => {
-      return Posts.find((post: any) => post.id === txId);
-    },
-    enabled: !!Posts,
-  });
+  
+  const post = Posts ? Posts.find((post: any) => post.id === txId) : undefined;
 
   return {
     post,
-    isLoading: postsLoading || postLoading,
-    error: postsError || postError,
+    isLoading: postsLoading,
+    error: postsError,
   };
 };
 
