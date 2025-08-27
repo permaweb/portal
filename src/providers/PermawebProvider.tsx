@@ -5,7 +5,7 @@ import Permaweb, { Types } from '@permaweb/libs/browser';
 import { connect, createSigner } from '@permaweb/aoconnect/browser';
 
 import { Loader } from 'components/atoms/Loader';
-import { AO_NODE_URL, STORAGE } from 'helpers/config';
+import { AO_NODE, STORAGE } from 'helpers/config';
 
 import { useArweaveProvider } from './ArweaveProvider';
 import { useLanguageProvider } from './LanguageProvider';
@@ -44,11 +44,31 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	const [profilePending, setProfilePending] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
+		if (!arProvider.wallet) return;
+
+		const aoConnection = import.meta.env.VITE_AO ?? 'legacy';
+		console.log(`AO Connection: [${aoConnection}]`);
+		console.log(`AO Node URL: ${AO_NODE.url}`);
+
+		const signer = createSigner(arProvider.wallet);
+
+		let ao: any;
+		if (aoConnection === 'mainnet') {
+			ao = connect({
+				MODE: 'mainnet',
+				URL: AO_NODE.url,
+				SCHEDULER: AO_NODE.scheduler,
+				signer,
+			});
+		} else if (import.meta.env.VITE_AO === 'legacy') {
+			ao = connect({ MODE: 'legacy' });
+		}
+
 		const dependencies = {
-			ao: connect({ MODE: 'legacy' }),
+			ao: ao,
 			arweave: Arweave.init({}),
-			signer: arProvider.wallet ? createSigner(arProvider.wallet) : null,
-			node: AO_NODE_URL,
+			signer: signer,
+			node: AO_NODE,
 		};
 
 		setDeps(dependencies);
@@ -80,7 +100,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				console.error('Failed to fetch fresh profile:', e);
 			}
 		})();
-	}, [arProvider.walletAddress]);
+	}, [arProvider.walletAddress, libs?.getProfileByWalletAddress]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -140,19 +160,21 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	}, [refreshProfileTrigger]);
 
 	async function resolveProfile(address: string) {
-		try {
-			let fetchedProfile: any;
-			const cachedProfile = getCachedProfile(address);
-			if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
-			else fetchedProfile = await libs.getProfileByWalletAddress(address);
-			let profileToUse = { ...fetchedProfile };
+		if (libs) {
+			try {
+				let fetchedProfile: any;
+				const cachedProfile = getCachedProfile(address);
+				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
+				else fetchedProfile = await libs.getProfileByWalletAddress(address);
+				let profileToUse = { ...fetchedProfile };
 
-			if (!fetchedProfile?.id && cachedProfile) profileToUse = cachedProfile;
-			cacheProfile(address, profileToUse);
+				if (!fetchedProfile?.id && cachedProfile) profileToUse = cachedProfile;
+				cacheProfile(address, profileToUse);
 
-			return profileToUse;
-		} catch (e: any) {
-			console.error(e);
+				return profileToUse;
+			} catch (e: any) {
+				console.error(e);
+			}
 		}
 	}
 

@@ -11,11 +11,11 @@ import { Panel } from 'components/atoms/Panel';
 import { ASSETS, URLS } from 'helpers/config';
 import { ArticleStatusType, PortalAssetRequestType, PortalAssetType, ViewLayoutType } from 'helpers/types';
 import { formatDate } from 'helpers/utils';
+import { usePostsList } from 'hooks/usePostList';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
-import { usePostsList } from 'hooks/usePostList';
 
 export const Posts = (props: { paginatedPosts?: PortalAssetType[]; type?: ViewLayoutType }) => {
 	const laguageProvider = useLanguageProvider();

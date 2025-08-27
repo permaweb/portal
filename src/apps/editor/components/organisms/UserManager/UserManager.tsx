@@ -15,8 +15,6 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
-// TODO: Run a pre flight check to see if the profile exists
-// Show pending status if not yet on the gateway
 export default function UserManager(props: { user?: any; handleClose: () => void }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();

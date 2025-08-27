@@ -1,8 +1,10 @@
 import * as React from 'react';
+
 import { usePortalProvider } from 'editor/providers/PortalProvider';
-import { usePermawebProvider } from 'providers/PermawebProvider';
-import { getTagValue } from 'helpers/utils';
+
 import { ArticleStatusType, GQLNodeResponseType, PortalAssetRequestType } from 'helpers/types';
+import { getTagValue } from 'helpers/utils';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 type RequestRow = {
 	id: string;

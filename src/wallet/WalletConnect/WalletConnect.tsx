@@ -65,12 +65,17 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 
 	const [label, setLabel] = React.useState<string | null>(null);
+	const hasInitializedRef = React.useRef<boolean>(false);
 
 	React.useEffect(() => {
-		setTimeout(() => {
-			setShowWallet(true);
-		}, 200);
-	}, [arProvider.walletAddress]);
+		if (!hasInitializedRef.current) {
+			const timer = setTimeout(() => {
+				setShowWallet(true);
+				hasInitializedRef.current = true;
+			}, 200);
+			return () => clearTimeout(timer);
+		}
+	}, []);
 
 	React.useEffect(() => {
 		if (!showWallet) {
@@ -86,7 +91,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 				setLabel(language?.connect);
 			}
 		}
-	}, [showWallet, arProvider.walletAddress, permawebProvider.profile]);
+	}, [showWallet, arProvider.walletAddress, permawebProvider.profile, language]);
 
 	function handlePress() {
 		if (arProvider.walletAddress) {
