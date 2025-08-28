@@ -3,7 +3,7 @@ import { Button } from '../Button';
 import * as S from './styles';
 
 export default function Toggle(props: {
-	label: string;
+	label?: string;
 	options: string[];
 	activeOption: string;
 	handleToggle: (option: string) => void;
@@ -11,9 +11,11 @@ export default function Toggle(props: {
 }) {
 	return (
 		<S.Wrapper>
-			<S.Label>
-				<p>{props.label}</p>
-			</S.Label>
+			{props.label && (
+				<S.Label>
+					<p>{props.label}</p>
+				</S.Label>
+			)}
 			<S.Options>
 				{props.options.map((option: string, index: number) => {
 					return (

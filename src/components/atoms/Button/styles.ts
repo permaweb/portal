@@ -78,6 +78,12 @@ export const Primary = styled.button<{
 				? props.theme.colors.button.primary.active.border
 				: props.theme.colors.button.primary.border};
 	border-radius: ${STYLING.dimensions.radius.button};
+	svg {
+		fill: ${(props) =>
+			props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.primary.color} !important;
+		color: ${(props) =>
+			props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.primary.color} !important;
+	}
 	&:hover {
 		background: ${(props) =>
 			props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.primary.active.background};
@@ -418,6 +424,13 @@ export const Alt4 = styled(Primary)`
 				: props.active
 				? props.theme.colors.font.light1
 				: props.theme.colors.button.alt1.color} !important;
+	}
+
+	svg {
+		fill: ${(props) =>
+			props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
+		color: ${(props) =>
+			props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
 	}
 
 	&:hover {

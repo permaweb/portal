@@ -17,14 +17,13 @@ export const Wrapper = styled.div`
 export const LoadingBanner = styled.div`
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: 7.5px;
 	padding: 12.5px 15px;
 
 	.label {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
-		font-size: ${(props) => props.theme.typography.size.xSmall};
-		margin-right: 4px;
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
 		white-space: nowrap;
 	}
 

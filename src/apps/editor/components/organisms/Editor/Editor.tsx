@@ -254,7 +254,7 @@ export default function Editor() {
 							contentType: ASSET_UPLOAD.contentType,
 							assetType: ASSET_UPLOAD.ansType,
 							metadata: {
-								releasedDate: new Date().getTime().toString(),
+								releaseDate: currentPost.data.releaseDate ?? new Date().getTime().toString(),
 								originPortal: portalProvider.current.id,
 							},
 							users: getAssetAuthUsers(),

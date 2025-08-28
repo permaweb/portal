@@ -71,6 +71,7 @@ export type PortalAssetPostType = {
 	thumbnail: string | null;
 	dateCreated: number | null;
 	lastUpdate: number | null;
+	releaseDate: number | null;
 };
 
 export type PortalUserType = {

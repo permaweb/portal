@@ -6,6 +6,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import { ArticlePostContribute } from './ArticlePostContribute';
 import { ArticlePostDescription } from './ArticlePostDescription';
+import { ArticlePostReleaseDate } from './ArticlePostReleaseDate';
 import { ArticlePostThumbnail } from './ArticlePostThumbnail';
 import * as S from './styles';
 
@@ -20,6 +21,14 @@ export default function ArticlePost(props: {
 
 	return (
 		<S.Wrapper>
+			<S.Section>
+				<S.SectionHeader>
+					<p>{language?.releaseDate}</p>
+				</S.SectionHeader>
+				<S.SectionBody>
+					<ArticlePostReleaseDate />
+				</S.SectionBody>
+			</S.Section>
 			<S.Section>
 				<S.SectionHeader>
 					<p>{language?.featuredImage}</p>

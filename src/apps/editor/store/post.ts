@@ -19,6 +19,7 @@ export const initStateCurrentPost: { data: PortalAssetPostType; editor: any } = 
 		thumbnail: null,
 		dateCreated: null,
 		lastUpdate: null,
+		releaseDate: null,
 	},
 	editor: {
 		titleFocused: false,
