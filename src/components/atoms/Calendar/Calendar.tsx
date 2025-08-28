@@ -38,7 +38,7 @@ export default function Calendar({ selectedDate, onDateSelect, minDate, viewDate
 	];
 
 	const getDaysInMonth = (month: number, year: number): number => {
-		return new Date(year, month - 1, 0).getDate();
+		return new Date(year, month, 0).getDate();
 	};
 
 	const getFirstDayOfMonth = (month: number, year: number): number => {
