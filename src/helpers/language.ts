@@ -1,5 +1,6 @@
 export const language = {
 	en: {
+		shareCredits: `Share Credits`,
 		add: `Add`,
 		addCaption: `Add a caption`,
 		addCategory: `Add a category`,
@@ -432,7 +433,7 @@ export const language = {
 	es: {
 		// === UNTRANSLATED START ===
 		// TODO: translate
-
+		shareCredits: `Share Credits`,
 		addCredits: `Add Credits`,
 		arioToken: `AR.IO Token`,
 		arnsBuyDescription: `Register permanently`,
