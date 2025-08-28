@@ -48,18 +48,20 @@ export default function FormField(props: {
 				</Modal>
 			)}
 			<S.Wrapper sm={props.sm}>
-				<S.TWrapper>
-					{props.label && <S.Label>{props.required ? formatRequiredField(props.label) : props.label}</S.Label>}
-					{props.tooltip && (
-						<IconButton
-							type={'primary'}
-							active={false}
-							src={ASSETS.info}
-							handlePress={() => setShowTooltip(!showTooltip)}
-							dimensions={{ wrapper: 22.5, icon: 13.5 }}
-						/>
-					)}
-				</S.TWrapper>
+				{(props.label || props.tooltip) && (
+					<S.TWrapper>
+						{props.label && <S.Label>{props.required ? formatRequiredField(props.label) : props.label}</S.Label>}
+						{props.tooltip && (
+							<IconButton
+								type={'primary'}
+								active={false}
+								src={ASSETS.info}
+								handlePress={() => setShowTooltip(!showTooltip)}
+								dimensions={{ wrapper: 22.5, icon: 13.5 }}
+							/>
+						)}
+					</S.TWrapper>
+				)}
 				<S.Input
 					type={props.type ? props.type : 'text'}
 					step={props.step ? props.step : '1'}

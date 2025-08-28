@@ -10,6 +10,10 @@ export const Section = styled.div``;
 
 export const SectionHeader = styled.div`
 	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 15px;
 	padding: 0 5px 0 10px;
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
@@ -17,6 +21,13 @@ export const SectionHeader = styled.div`
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
+	}
+
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;
 
