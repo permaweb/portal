@@ -170,24 +170,27 @@ export const GlobalStyles = createGlobalStyle`
 `;
 
 export const PageWrapper = styled.div`
-  display:flex;
-  min-height:100%;
+	display: flex;
+	min-height: 100%;
 `;
 
 export const Page = styled.div<{ $layout: any }>`
-  position:relative;
-	display:flex;
-	flex-direction: column;	
+	position: relative;
+	display: flex;
+	flex-direction: column;
 	width: 100%;
-  min-height:100%;
-	background-color:rgba(var(--color-background),1);
-  // background-image: ${(props: any) => props.$layout?.wallpaper ? `url('img/wallpapers/wp${props.$layout.wallpaper}.jpg')` : `unset` };
-  // background-image: url('https://arweave.net/BBbg_l-3_Z6UPH_9PG-Ad2ntHLwe9HhdMdEsbk8r_DU');
-  background-attachment: fixed;
-  background-size: cover;
-  color:rgba(var(--color-text),1);
+	min-height: 100%;
+	background-color: rgba(var(--color-background), 1);
+	// background-image: ${(props: any) =>
+		props.$layout?.wallpaper ? `url('img/wallpapers/wp${props.$layout.wallpaper}.jpg')` : `unset`};
+	// background-image: url('https://arweave.net/BBbg_l-3_Z6UPH_9PG-Ad2ntHLwe9HhdMdEsbk8r_DU');
+	background-attachment: fixed;
+	background-size: cover;
+	color: rgba(var(--color-text), 1);
 
-  ${(props: any) => props.$layout?.gradient && `
+	${(props: any) =>
+		props.$layout?.gradient &&
+		`
     &:before{
         z-index: 0;
         content: "";
@@ -195,53 +198,53 @@ export const Page = styled.div<{ $layout: any }>`
         background: linear-gradient(90deg, rgba(var(--color-background),.8) 0%, rgba(var(--color-background),.98) 20%, rgba(var(--color-background),.98) 80%, rgba(var(--color-background),.8) 100%);
         width: 100%;
         height: 100%;
-        display: ${(props: any) => props.$layout.wallpaper !== 'none' ? `block` : `none` };
+        display: ${(props: any) => (props.$layout.wallpaper !== 'none' ? `block` : `none`)};
       }
-  `};  
+  `};
 `;
 
 export const Settings = styled.div<{ $show: boolean }>`
-  position:sticky;
-  top:0; 
-  width:fit-content;
-  max-height:100vh;
-  z-index:99;
-  transition: width .4s;
-  width: ${(props) => props.$show ? `600px` : 0};    
+	position: sticky;
+	top: 0;
+	width: fit-content;
+	max-height: 100vh;
+	z-index: 99;
+	transition: width 0.4s;
+	width: ${(props) => (props.$show ? `600px` : 0)};
 `;
 
 export const Top = styled.div<{ $order: string }>`
-  display:flex;
-  flex-direction: ${(props) => props.$order === 'bottom' ? `column` : `column-reverse` };
+	display: flex;
+	flex-direction: ${(props) => (props.$order === 'bottom' ? `column` : `column-reverse`)};
 `;
 
 export const FooterWrapper = styled.div<{ $layout: any }>`
-  display: ${(props) => props.$layout?.Fixed ? `fixed` : `flex` };
-  display:flex;
-  bottom:0;  
-  width:100%; 
-  z-index:0;
+	display: ${(props) => (props.$layout?.Fixed ? `fixed` : `flex`)};
+	display: flex;
+	bottom: 0;
+	width: 100%;
+	z-index: 0;
 `;
 
 export const SettingsButton = styled.div`
-  position:absolute;
-  right:-40px;
-  top:6px;
-  z-index:9;
+	position: absolute;
+	right: -40px;
+	top: 6px;
+	z-index: 9;
 
-  svg{
-    width:20px;
-    fill:rgba(var(--color-text),1);
-    border:2px solid rgba(var(--color-text),1);
-    border-radius:8px;
-    padding:2px;
-  }
+	svg {
+		width: 20px;
+		fill: rgba(var(--color-text), 1);
+		border: 2px solid rgba(var(--color-text), 1);
+		border-radius: 8px;
+		padding: 2px;
+	}
 
-  &:hover{
-    cursor:pointer;
-    svg{
-      background: rgba(var(--color-text),1);
-      fill: rgba(var(--color-text-contrast),1);
-    }
-  }
+	&:hover {
+		cursor: pointer;
+		svg {
+			background: rgba(var(--color-text), 1);
+			fill: rgba(var(--color-text-contrast), 1);
+		}
+	}
 `;

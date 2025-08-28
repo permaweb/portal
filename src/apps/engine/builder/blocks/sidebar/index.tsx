@@ -1,27 +1,23 @@
 import { useNavigate } from 'react-router-dom';
-// import { usePodcasts } from '../../../mock/podcasts/hook';
-import * as S from './styles';
-import SidebarUser from './blocks/user';
+
 import SidebarArchive from './blocks/archive';
 import SidebarAuthors from './blocks/authors';
+import SidebarUser from './blocks/user';
+// import { usePodcasts } from '../../../mock/podcasts/hook';
+import * as S from './styles';
 
 export default function Sidebar(props: any) {
-  const { content, preview } = props;
-  const navigate = useNavigate();  
-  // const { podcasts } = usePodcasts();
+	const { content, preview } = props;
+	const navigate = useNavigate();
+	// const { podcasts } = usePodcasts();
 
-  return (
-    <S.Sidebar id="Sidebar">
-      
-      {Array.isArray(content) && content.includes('date') && (
-        <SidebarArchive />
-      )}      
+	return (
+		<S.Sidebar id="Sidebar">
+			{Array.isArray(content) && content.includes('date') && <SidebarArchive />}
 
-      {Array.isArray(content) && content.includes('authors') && (
-        <SidebarAuthors />
-      )}
+			{Array.isArray(content) && content.includes('authors') && <SidebarAuthors />}
 
-      {/* Array.isArray(content) && content.includes('sources') && (
+			{/* Array.isArray(content) && content.includes('sources') && (
         <S.SidebarCategory>
           <h2>Sources</h2>
           <S.FNCategory>
@@ -31,11 +27,11 @@ export default function Sidebar(props: any) {
           </S.FNCategory>
         </S.SidebarCategory>
       ) */}
-      
-      {Array.isArray(content) && content.includes('podcasts') && (
-        <S.SidebarCategory>
-          <h2>Podcasts</h2>
-          {/* podcasts && podcasts.slice(0, 3).map((podcast, index) => {
+
+			{Array.isArray(content) && content.includes('podcasts') && (
+				<S.SidebarCategory>
+					<h2>Podcasts</h2>
+					{/* podcasts && podcasts.slice(0, 3).map((podcast, index) => {
             return (
               <S.Podcast key={index}>
                 <S.PodcastThumbnail>
@@ -45,12 +41,10 @@ export default function Sidebar(props: any) {
               </S.Podcast>       
             )
           }) */}
-        </S.SidebarCategory>
-      )}        
+				</S.SidebarCategory>
+			)}
 
-      {Array.isArray(content) && content.includes('user') && (
-        <SidebarUser />
-      )}
-    </S.Sidebar>
-  )
+			{Array.isArray(content) && content.includes('user') && <SidebarUser />}
+		</S.Sidebar>
+	);
 }

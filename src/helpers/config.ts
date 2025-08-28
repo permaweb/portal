@@ -185,6 +185,7 @@ function createURLs() {
 		portalDomainsRegister: (portalId: string) => `${portalBase(portalId)}domains/register`,
 		portalUsers: (portalId: string) => `${portalBase(portalId)}users/`,
 		portalPages: (portalId: string) => `${portalBase(portalId)}pages/`,
+		portalLayout: (portalId: string) => `${portalBase(portalId)}layout/`,
 		portalSetup: (portalId: string) => `${portalBase(portalId)}setup/`,
 		post: (postId: string) => `post/${postId}`,
 		postCreate: (portalId: string) => `${postCreateBase(portalId)}`,
@@ -298,7 +299,7 @@ export const DEFAULT_THEME: PortalThemeType = {
 				primary: '222,0,80',
 				secondary: '239,102,152',
 				border: '155,155,155',
-			}
+			},
 		},
 		header: {
 			colors: {
@@ -309,23 +310,21 @@ export const DEFAULT_THEME: PortalThemeType = {
 			preferences: {
 				opacity: 1,
 				shadow: '0 4px 10px',
-			}
+			},
 		},
 		navigation: {
 			colors: {
 				background: '0,0,0',
 				text: '255,255,255',
 				border: 'border',
-				hover: 'primary',      
+				hover: 'primary',
 			},
 			preferences: {
 				opacity: 1,
-			}
+			},
 		},
 		footer: {
-			colors: {
-
-			}
+			colors: {},
 		},
 		content: {
 			colors: {
@@ -333,15 +332,15 @@ export const DEFAULT_THEME: PortalThemeType = {
 			},
 			preferences: {
 				opacity: 1,
-			}
+			},
 		},
 		card: {
 			colors: {
-				background: '255,255,255'
+				background: '255,255,255',
 			},
 			preferences: {
 				opacity: 1,
-			}
+			},
 		},
 		buttons: {
 			default: {
@@ -353,7 +352,7 @@ export const DEFAULT_THEME: PortalThemeType = {
 					},
 					preferences: {
 						opacity: 1,
-					}        
+					},
 				},
 				hover: {
 					colors: {
@@ -363,8 +362,8 @@ export const DEFAULT_THEME: PortalThemeType = {
 					},
 					preferences: {
 						opacity: 1,
-					}      
-				}
+					},
+				},
 			},
 			primary: {
 				default: {
@@ -375,7 +374,7 @@ export const DEFAULT_THEME: PortalThemeType = {
 					},
 					preferences: {
 						opacity: 1,
-					}         
+					},
 				},
 				hover: {
 					colors: {
@@ -385,10 +384,10 @@ export const DEFAULT_THEME: PortalThemeType = {
 					},
 					preferences: {
 						opacity: 1,
-					} 
-				}      
-			}
-		}
+					},
+				},
+			},
+		},
 	},
 	dark: {
 		basics: {
@@ -398,7 +397,7 @@ export const DEFAULT_THEME: PortalThemeType = {
 				background: '27, 26, 21',
 				text: '255,255,255',
 				border: '155,155,155',
-			}
+			},
 		},
 		header: {
 			colors: {
@@ -410,7 +409,7 @@ export const DEFAULT_THEME: PortalThemeType = {
 				opacity: 0.4,
 				gradient: true,
 				shadow: '0 4px 10px',
-			}
+			},
 		},
 		navigation: {
 			colors: {
@@ -422,7 +421,7 @@ export const DEFAULT_THEME: PortalThemeType = {
 			preferences: {
 				opacity: 1,
 				shadow: '0 2px 2px',
-			}
+			},
 		},
 		footer: {
 			colors: {
@@ -430,7 +429,7 @@ export const DEFAULT_THEME: PortalThemeType = {
 			},
 			preferences: {
 				opacity: 1,
-			}
+			},
 		},
 		content: {
 			colors: {
@@ -438,15 +437,15 @@ export const DEFAULT_THEME: PortalThemeType = {
 			},
 			preferences: {
 				opacity: 1,
-			}
+			},
 		},
 		card: {
 			colors: {
-				background: '0,0,0'
+				background: '0,0,0',
 			},
 			preferences: {
 				opacity: 0.6,
-			}
+			},
 		},
 		buttons: {
 			default: {
@@ -458,8 +457,7 @@ export const DEFAULT_THEME: PortalThemeType = {
 					},
 					preferences: {
 						opacity: 1,
-					}
-					
+					},
 				},
 				hover: {
 					colors: {
@@ -469,8 +467,8 @@ export const DEFAULT_THEME: PortalThemeType = {
 					},
 					preferences: {
 						opacity: 1,
-					}
-				}
+					},
+				},
 			},
 			primary: {
 				default: {
@@ -481,7 +479,7 @@ export const DEFAULT_THEME: PortalThemeType = {
 					},
 					preferences: {
 						opacity: 1,
-					}
+					},
 				},
 				hover: {
 					colors: {
@@ -491,10 +489,10 @@ export const DEFAULT_THEME: PortalThemeType = {
 					},
 					preferences: {
 						opacity: 1,
-					}
-				}      
-			}
-		}
+					},
+				},
+			},
+		},
 	},
 };
 /*

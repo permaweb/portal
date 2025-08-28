@@ -1,7 +1,6 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import Builder from 'engine/builder';
 
+import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { JsonEditor } from 'editor/components/molecules/JsonEditor';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -12,20 +11,25 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
-export default function PageEditor() {
-	const navigate = useNavigate();
+export default function Layout() {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
-	const { pageId } = useParams<{ pageId?: string }>();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const { addNotification } = useNotifications();
-	const pageLayout = portalProvider.current.pages[pageId];
 
 	const [loading, setLoading] = React.useState(false);
 
+	// Get the current layout from the portal
+	const currentLayout = portalProvider.current?.layout;
+	
+	console.log('Portal data:', portalProvider.current);
+	console.log('Current layout:', currentLayout);
+
 	const handleSubmit = async (parsedValue: any) => {
+		console.log('Attempting to save layout:', parsedValue);
+		
 		if (!arProvider.wallet) {
 			addNotification('Please connect your wallet to save changes', 'warning');
 			throw new Error('Wallet not connected');
@@ -36,37 +40,26 @@ export default function PageEditor() {
 			throw new Error('No portal ID');
 		}
 
-		if (!pageId) {
-			addNotification('No page ID found', 'warning');
-			throw new Error('No page ID');
-		}
-
 		try {
 			setLoading(true);
 
-			// Create an update that only modifies this specific page
-			// We need to send the full Pages object to preserve other pages
-			const currentPages = portalProvider.current.pages || {};
-			const updatedPages = {
-				...currentPages,
-				[pageId]: parsedValue,
-			};
-
 			// Format for the process
-			const updateValue = permawebProvider.libs.mapToProcessCase(updatedPages);
-
-			const updateData = { Pages: updateValue };
+			const updateValue = permawebProvider.libs.mapToProcessCase(parsedValue);
+			console.log('Update value after mapToProcessCase:', updateValue);
+			
+			const updateData = { Layout: updateValue };
+			console.log('Final update data:', updateData);
 
 			const updateId = await permawebProvider.libs.updateZone(updateData, portalProvider.current.id, arProvider.wallet);
 
-			console.log('Page update:', updateId);
-			addNotification('Page saved successfully!', 'success');
+			console.log('Layout update transaction ID:', updateId);
+			addNotification('Layout saved successfully!', 'success');
 
 			// Refresh the portal data
 			portalProvider.refreshCurrentPortal();
 		} catch (error) {
-			console.error('Error saving page:', error);
-			addNotification('Error saving page', 'warning');
+			console.error('Error saving layout:', error);
+			addNotification('Error saving layout', 'warning');
 			throw error;
 		} finally {
 			setLoading(false);
@@ -74,15 +67,16 @@ export default function PageEditor() {
 	};
 
 	return (
-		<S.Wrapper>
+		<S.Wrapper className={'fade-in'}>
+			<ViewHeader header={language?.layout} />
 			<JsonEditor
-				title={pageId ? pageId.charAt(0).toUpperCase() + pageId.slice(1) : ''}
-				initialValue={pageLayout}
+				initialValue={currentLayout}
 				onSave={handleSubmit}
 				loading={loading}
 			/>
-			<S.Preview className="border-wrapper-alt1">Preview...</S.Preview>
-			{/* <Builder layout={pageLayout} preview={true} /> */}
+			<S.Preview className="border-wrapper-alt1">
+				Preview...
+			</S.Preview>
 		</S.Wrapper>
 	);
 }

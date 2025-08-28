@@ -1,50 +1,50 @@
-import styled from 'styled-components';
 import { BREAKPOINTS } from 'engine/constants/breakpoints';
+import styled from 'styled-components';
 
-export const Wrapper = styled.div`	
-	width:100%;
-	@media (max-width: ${BREAKPOINTS["breakpoint-small"]}) {
-		padding:var(--spacing-xxs);
+export const Wrapper = styled.div`
+	width: 100%;
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		padding: var(--spacing-xxs);
 
 		h1 {
-			font-size:26px;
-			margin-top:0;
+			font-size: 26px;
+			margin-top: 0;
 		}
 	}
 `;
 
 export const Podcasts = styled.div`
-	display:flex;
-	gap:20px;
+	display: flex;
+	gap: 20px;
 
-	@media (max-width: ${BREAKPOINTS["breakpoint-small"]}) {
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
 		flex-direction: column;
 	}
 `;
 
 export const Podcast = styled.div`
-	flex:1;
+	flex: 1;
 
 	img {
 		width: 100%;
 		aspect-ratio: 16/9;
-		object-fit: cover;		
+		object-fit: cover;
 		transform: scale(1);
-		transition: transform .4s;
-	}
-	
-	h3{
-		margin-top:6px;
+		transition: transform 0.4s;
 	}
 
-	&:hover{
-		cursor:pointer;
+	h3 {
+		margin-top: 6px;
+	}
 
-		img{
+	&:hover {
+		cursor: pointer;
+
+		img {
 			transform: scale(1.1);
 		}
-		h3{			
-			color: rgba(var(--color-primary),1);
+		h3 {
+			color: rgba(var(--color-primary), 1);
 		}
 	}
 `;
@@ -52,13 +52,13 @@ export const Podcast = styled.div`
 export const Thumbnail = styled.div`
 	width: 100%;
 	aspect-ratio: 16/9;
-	overflow:hidden;
+	overflow: hidden;
 `;
 
 export const Meta = styled.div`
-	display:flex;
-	background: rgba(var(--color-secondary),1);
-	color: rgba(var(--color-primary-contrast),1);
+	display: flex;
+	background: rgba(var(--color-secondary), 1);
+	color: rgba(var(--color-primary-contrast), 1);
 	width: fit-content;
 	padding: 2px 4px;
 	font-weight: 700;

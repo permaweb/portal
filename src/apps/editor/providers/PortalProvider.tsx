@@ -318,6 +318,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		if (currentId) {
 			try {
 				const portalData = await permawebProvider.libs.getZone(currentId);
+				// console.log('portalData:', JSON.stringify(portalData, null, 2));
 
 				const users: PortalUserType[] = [];
 				if (portalData?.roles) {
@@ -356,6 +357,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					themes: portalData?.store?.themes ?? [],
 					users: getPortalUsers(portalData?.roles),
 					pages: portalData?.store?.pages ?? [],
+					layout: portalData?.store?.layout,
 					roleOptions: portalData.roleOptions ?? {},
 					permissions: portalData.permissions ?? {},
 					domains: [],

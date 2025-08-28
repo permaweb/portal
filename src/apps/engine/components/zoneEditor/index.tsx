@@ -1,54 +1,55 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useArweaveProvider } from 'providers/ArweaveProvider';
-import { usePermawebProvider } from 'providers/PermawebProvider';
-import { useUI } from 'engine/hooks/portal';
-import { usePortalProvider } from 'engine/providers/portalProvider';
+import React, { useEffect, useRef, useState } from 'react';
 import Icon from 'engine/components/icon';
 import * as ICONS from 'engine/constants/icons';
+import { useUI } from 'engine/hooks/portal';
+import { usePortalProvider } from 'engine/providers/portalProvider';
+
+import { useArweaveProvider } from 'providers/ArweaveProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
+
 import JsonGuiEditor from './gui';
-import { IProps } from './types';
 import * as S from './styles';
+import { IProps } from './types';
 
 function colorizeJson(json) {
-  const stringRegex = /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?)/g;
-  const strings = [];
-  const placeholder = '___STRING_PLACEHOLDER___';
+	const stringRegex = /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?)/g;
+	const strings = [];
+	const placeholder = '___STRING_PLACEHOLDER___';
 
-  json = json.replace(stringRegex, (match) => {
-    strings.push(match);
-    return placeholder;
-  });
+	json = json.replace(stringRegex, (match) => {
+		strings.push(match);
+		return placeholder;
+	});
 
-  json = json
-    .replace(/\b(true|false|null)\b/g, '<span style="color:#ff6200">$&</span>')
-    .replace(/\b-?\d+(\.\d+)?([eE][+-]?\d+)?\b/g, '<span style="color:#e11dff">$&</span>');
+	json = json
+		.replace(/\b(true|false|null)\b/g, '<span style="color:#ff6200">$&</span>')
+		.replace(/\b-?\d+(\.\d+)?([eE][+-]?\d+)?\b/g, '<span style="color:#e11dff">$&</span>');
 
-  let i = 0;
-  json = json.replace(new RegExp(placeholder, 'g'), () => {
-    const str = strings[i++];
-    const isKey = /:$/.test(str);
-    const color = isKey ? '#39FF14' : '#ffe100';
-    return `<span style="color:${color}">${str}</span>`;
-  });
+	let i = 0;
+	json = json.replace(new RegExp(placeholder, 'g'), () => {
+		const str = strings[i++];
+		const isKey = /:$/.test(str);
+		const color = isKey ? '#39FF14' : '#ffe100';
+		return `<span style="color:${color}">${str}</span>`;
+	});
 
-  return json;
+	return json;
 }
-
 
 export default function ZoneEditor(props: IProps) {
 	const { portal } = usePortalProvider();
 	const zone = portal || {};
-	const arProvider = useArweaveProvider();		
-	const permawebProvider = usePermawebProvider();	
+	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 	const [input, setInput] = useState('');
 	const [output, setOutput] = useState('');
 	const [selected, setSelected] = useState('Layout');
 	const [editorMode, setEditorMode] = useState('json');
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const preRef = useRef<HTMLPreElement>(null);
-  const isSyncingScroll = useRef(false);
-	const keys = Object.keys(zone).filter(k => /^[A-Z]/.test(k));
+	const preRef = useRef<HTMLPreElement>(null);
+	const isSyncingScroll = useRef(false);
+	const keys = Object.keys(zone).filter((k) => /^[A-Z]/.test(k));
 
 	useEffect(() => {
 		if (selected in zone) {
@@ -66,21 +67,21 @@ export default function ZoneEditor(props: IProps) {
 	}, [selected]);
 
 	const syncScroll = (source: 'textarea' | 'pre') => {
-    if (isSyncingScroll.current) return;
-    isSyncingScroll.current = true;
+		if (isSyncingScroll.current) return;
+		isSyncingScroll.current = true;
 
-    if (textareaRef.current && preRef.current) {
-      if (source === 'textarea') {
-        preRef.current.scrollTop = textareaRef.current.scrollTop;
-      } else {
-        textareaRef.current.scrollTop = preRef.current.scrollTop;
-      }
-    }
+		if (textareaRef.current && preRef.current) {
+			if (source === 'textarea') {
+				preRef.current.scrollTop = textareaRef.current.scrollTop;
+			} else {
+				textareaRef.current.scrollTop = preRef.current.scrollTop;
+			}
+		}
 
-    setTimeout(() => {
-      isSyncingScroll.current = false;
-    }, 10);
-  };
+		setTimeout(() => {
+			isSyncingScroll.current = false;
+		}, 10);
+	};
 
 	const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		const val = e.target.value;
@@ -107,11 +108,7 @@ export default function ZoneEditor(props: IProps) {
 
 			const updateData = { [selected]: updateValue };
 
-			const updateId = await permawebProvider.libs.updateZone(
-				updateData,
-				portalProvider.portalId,
-				arProvider.wallet
-			);
+			const updateId = await permawebProvider.libs.updateZone(updateData, portalProvider.portalId, arProvider.wallet);
 
 			console.log(`${selected} update:`, updateId);
 		} catch {
@@ -124,26 +121,30 @@ export default function ZoneEditor(props: IProps) {
 	return (
 		<S.Wrapper $mode={portalProvider?.editorMode} id="ZoneEditor">
 			<S.Actions $mode={portalProvider?.editorMode}>
-				<div onClick={() => portalProvider?.setEditorMode(portalProvider?.editorMode === 'mini' ? 'full' : 'mini')}><Icon icon={ICONS.ARROW_UP} /></div>
-				<div onClick={() => portalProvider?.setEditorMode('hidden')}><Icon icon={ICONS.CLOSE} /></div>
+				<div onClick={() => portalProvider?.setEditorMode(portalProvider?.editorMode === 'mini' ? 'full' : 'mini')}>
+					<Icon icon={ICONS.ARROW_UP} />
+				</div>
+				<div onClick={() => portalProvider?.setEditorMode('hidden')}>
+					<Icon icon={ICONS.CLOSE} />
+				</div>
 			</S.Actions>
 			<S.Editor>
-				<select value={selected} onChange={e => setSelected(e.target.value)}>
+				<select value={selected} onChange={(e) => setSelected(e.target.value)}>
 					<option value="">Select</option>
-					{keys.map(k => (
-						<option key={k} value={k}>{k}</option>
+					{keys.map((k) => (
+						<option key={k} value={k}>
+							{k}
+						</option>
 					))}
 				</select>
 				<S.Code>
 					<S.EditorModes>
-						<S.EditorMode
-							$active={editorMode === 'gui'}
-							onClick={() => setEditorMode('gui')}
-						>GUI</S.EditorMode>
-						<S.EditorMode
-							$active={editorMode === 'json'}
-							onClick={() => setEditorMode('json')}
-						>JSON</S.EditorMode>
+						<S.EditorMode $active={editorMode === 'gui'} onClick={() => setEditorMode('gui')}>
+							GUI
+						</S.EditorMode>
+						<S.EditorMode $active={editorMode === 'json'} onClick={() => setEditorMode('json')}>
+							JSON
+						</S.EditorMode>
 					</S.EditorModes>
 					{editorMode === 'json' ? (
 						<textarea
@@ -156,13 +157,13 @@ export default function ZoneEditor(props: IProps) {
 					) : (
 						<JsonGuiEditor
 							value={JSON.parse(input)}
-							onChange={val => {
+							onChange={(val) => {
 								const str = JSON.stringify(val, null, 2);
 								setInput(str);
 								setOutput(str);
 							}}
 						/>
-					)}					
+					)}
 					<S.Pre
 						ref={preRef}
 						dangerouslySetInnerHTML={{

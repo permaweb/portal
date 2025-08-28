@@ -6,9 +6,9 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
-import { Select } from 'components/atoms/Select';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
+import { Select } from 'components/atoms/Select';
 import { ASSETS, DEFAULT_THEME } from 'helpers/config';
 import { PortalSchemeType, PortalThemeType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -17,7 +17,6 @@ import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
-
 
 function Color(props: {
 	label: string;
@@ -38,15 +37,21 @@ function Color(props: {
 	const [showSelector, setShowSelector] = React.useState<boolean>(false);
 
 	function getColor(basics: any, value: string) {
-    switch(value) {
-      case 'primary': return basics.primary[props.scheme];
-      case 'secondary': return basics.secondary[props.scheme];
-      case 'background': return basics.background[props.scheme];
-      case 'text': return basics.text[props.scheme];
-      case 'border': return basics.border[props.scheme];
-      default: return value;
-    }
-  }
+		switch (value) {
+			case 'primary':
+				return basics.primary[props.scheme];
+			case 'secondary':
+				return basics.secondary[props.scheme];
+			case 'background':
+				return basics.background[props.scheme];
+			case 'text':
+				return basics.text[props.scheme];
+			case 'border':
+				return basics.border[props.scheme];
+			default:
+				return value;
+		}
+	}
 
 	React.useEffect(() => {
 		if (props.value) {
@@ -75,13 +80,13 @@ function Color(props: {
 		return `${r},${g},${b}`;
 	}
 
-	function getColorContrast(hexString: string){
-		const num = parseInt(hexString.replace('#',''), 16)
-		const r = (num >> 16) & 255
-		const g = (num >> 18) & 255
-		const b = num & 255
-		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-		return luminance > 0.5 ? 'black' : 'white'
+	function getColorContrast(hexString: string) {
+		const num = parseInt(hexString.replace('#', ''), 16);
+		const r = (num >> 16) & 255;
+		const g = (num >> 18) & 255;
+		const b = num & 255;
+		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+		return luminance > 0.5 ? 'black' : 'white';
 	}
 
 	return (
@@ -144,10 +149,10 @@ const ThemeSection = React.memo(function ThemeSection(props) {
 	const portalProvider = usePortalProvider();
 	const { theme, setTheme, name, setName, section, loading } = props;
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
-	
+
 	// Local state for name editing to prevent re-renders
 	const [localName, setLocalName] = React.useState(theme.name || '');
-	
+
 	// Update local name when theme changes from outside
 	React.useEffect(() => {
 		if (theme.name !== localName) {
@@ -155,11 +160,11 @@ const ThemeSection = React.memo(function ThemeSection(props) {
 		}
 	}, [theme.name]);
 
-	const order = ['text', 'hover', 'background', 'primary', 'secondary']
+	const order = ['text', 'hover', 'background', 'primary', 'secondary'];
 	const sortedSection = Object.fromEntries([
-		...(order.map(k => [k, theme[section]?.colors?.[k]]).filter(([_, v]) => v !== undefined)),
-		...Object.entries(theme[section]?.colors || {}).filter(([k]) => !order.includes(k))
-	])
+		...order.map((k) => [k, theme[section]?.colors?.[k]]).filter(([_, v]) => v !== undefined),
+		...Object.entries(theme[section]?.colors || {}).filter(([k]) => !order.includes(k)),
+	]);
 
 	function handleThemeChange(section: string, type: string, scheme: string | null, key: string, newValue: string) {
 		const updatedTheme = {
@@ -170,11 +175,11 @@ const ThemeSection = React.memo(function ThemeSection(props) {
 					...props.theme[section][type],
 					[key.toLowerCase()]: {
 						...props.theme[section][type][key.toLowerCase()],
-						...(scheme ? { [scheme]: newValue } : newValue)
-					}
-				}
-			}
-		}
+						...(scheme ? { [scheme]: newValue } : newValue),
+					},
+				},
+			},
+		};
 
 		setTheme(updatedTheme);
 		// if (props.published) props.onThemeChange(updatedTheme, false);
@@ -184,38 +189,38 @@ const ThemeSection = React.memo(function ThemeSection(props) {
 		<S.ThemeSection key={theme.name} colors={theme.basics.colors} preferences={theme.basics.preferences}>
 			<span>{section.toUpperCase()}</span>
 			{/* JSON.stringify(theme.basics.preferences) */}
-				{section === 'basics' && (
-					<S.GridWrapper id="GridWrapper">
-						<S.GridRows>
-							<S.GridRow>
-								<S.ThemeKey style={{ flex: 1}}>Name</S.ThemeKey>
-								<S.ThemeValue style={{ flex: 2.5, padding:0 }}>
-									<FormField 
-										key="theme-name-field"
-										value={localName}
-										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-											// Only update local state while typing
-											setLocalName(e.target.value);
-											// Notify parent that there are pending changes
-											if (props.onNameChange) {
-												props.onNameChange(e.target.value);
-											}
-										}}
-										onBlur={() => {
-											// Only update parent when done editing
-											if (localName !== props.theme.name) {
-												const updatedTheme = { ...props.theme, name: localName };
-												props.setTheme(updatedTheme);
-											}
-										}}
-										invalid={false}
-										hideErrorMessage={true}
-									/>
-								</S.ThemeValue>
-							</S.GridRow>
-						</S.GridRows>
-					</S.GridWrapper>
-				)}
+			{section === 'basics' && (
+				<S.GridWrapper id="GridWrapper">
+					<S.GridRows>
+						<S.GridRow>
+							<S.ThemeKey style={{ flex: 1 }}>Name</S.ThemeKey>
+							<S.ThemeValue style={{ flex: 2.5, padding: 0 }}>
+								<FormField
+									key="theme-name-field"
+									value={localName}
+									onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+										// Only update local state while typing
+										setLocalName(e.target.value);
+										// Notify parent that there are pending changes
+										if (props.onNameChange) {
+											props.onNameChange(e.target.value);
+										}
+									}}
+									onBlur={() => {
+										// Only update parent when done editing
+										if (localName !== props.theme.name) {
+											const updatedTheme = { ...props.theme, name: localName };
+											props.setTheme(updatedTheme);
+										}
+									}}
+									invalid={false}
+									hideErrorMessage={true}
+								/>
+							</S.ThemeValue>
+						</S.GridRow>
+					</S.GridRows>
+				</S.GridWrapper>
+			)}
 			<S.ThemeRowHeader>
 				<S.ThemeLight colors={props.theme.basics?.colors}>
 					<S.ThemeKey />
@@ -227,51 +232,44 @@ const ThemeSection = React.memo(function ThemeSection(props) {
 				</S.ThemeDark>
 			</S.ThemeRowHeader>
 			{Object.entries(sortedSection).map(([key, value]) => {
-
-				return (			
-					<>					
-					<S.ThemeRow>
-						<S.ThemeLight colors={props.theme.basics?.colors}>
-							<S.ThemeKey>
-								{key.charAt(0).toUpperCase() + key.slice(1)}
-							</S.ThemeKey>
-							<S.ThemeValue>
-								<Color
-									key={key}
-									label={key}
-									value={value.light}
-									basics={props.theme.basics?.colors}
-									scheme="light"
-									onChange={(newColor) => handleThemeChange('basics', 'colors', 'light', key, newColor)}
-									loading={loading}
-									disabled={unauthorized}
-								/>
-							</S.ThemeValue>
-						</S.ThemeLight>
-						<S.ThemeDark colors={props.theme.basics?.colors}>
-							<S.ThemeKey>
-								{key.charAt(0).toUpperCase() + key.slice(1)}
-							</S.ThemeKey>
-							<S.ThemeValue>
-								<Color
-									key={key}
-									label={key}
-									value={value.dark}
-									basics={props.theme.basics?.colors}
-									scheme="dark"
-									onChange={(newColor) => handleThemeChange('basics', 'colors', 'dark', key, newColor)}
-									loading={loading}
-									disabled={unauthorized}
-								/>
-							</S.ThemeValue>
-						</S.ThemeDark>
-					</S.ThemeRow>
+				return (
+					<>
+						<S.ThemeRow>
+							<S.ThemeLight colors={props.theme.basics?.colors}>
+								<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
+								<S.ThemeValue>
+									<Color
+										key={key}
+										label={key}
+										value={value.light}
+										basics={props.theme.basics?.colors}
+										scheme="light"
+										onChange={(newColor) => handleThemeChange('basics', 'colors', 'light', key, newColor)}
+										loading={loading}
+										disabled={unauthorized}
+									/>
+								</S.ThemeValue>
+							</S.ThemeLight>
+							<S.ThemeDark colors={props.theme.basics?.colors}>
+								<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
+								<S.ThemeValue>
+									<Color
+										key={key}
+										label={key}
+										value={value.dark}
+										basics={props.theme.basics?.colors}
+										scheme="dark"
+										onChange={(newColor) => handleThemeChange('basics', 'colors', 'dark', key, newColor)}
+										loading={loading}
+										disabled={unauthorized}
+									/>
+								</S.ThemeValue>
+							</S.ThemeDark>
+						</S.ThemeRow>
 					</>
-				)	
-							
-			})
-			}
-			
+				);
+			})}
+
 			<S.ThemeRowFooter>
 				<S.ThemeLight colors={props.theme.basics?.colors}>
 					<S.ThemeKey />
@@ -282,22 +280,15 @@ const ThemeSection = React.memo(function ThemeSection(props) {
 					<S.ThemeValue />
 				</S.ThemeDark>
 			</S.ThemeRowFooter>
-			<S.ThemePreview>
-			
-			</S.ThemePreview>
-		</S.ThemeSection>		
-	)
+			<S.ThemePreview></S.ThemePreview>
+		</S.ThemeSection>
+	);
 });
 
-function Theme(props: {
-	theme: any,
-	published: any,
-	loading: boolean,
-	onThemeUpdate: (theme: any) => void
-}) {
+function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpdate: (theme: any) => void }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	
+
 	// const { theme, published, loading } = props;
 	const [showExpertMode, setShowExpertMode] = React.useState(false);
 	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
@@ -311,7 +302,7 @@ function Theme(props: {
 		delete propsWithoutName.name;
 		const themeWithoutName = { ...theme };
 		delete themeWithoutName.name;
-		
+
 		if (JSON.stringify(propsWithoutName) !== JSON.stringify(themeWithoutName)) {
 			setTheme(props.theme);
 		}
@@ -325,16 +316,15 @@ function Theme(props: {
 		return nameChanged || themeChanged;
 	}, [originalTheme, theme, pendingNameChange]);
 
-	const order = ['basics', 'header', 'navigation', 'content', 'footer', 'card']
+	const order = ['basics', 'header', 'navigation', 'content', 'footer', 'card'];
 	const sortedTheme = Object.fromEntries([
-		...(order.map(k => [k, theme[k]]).filter(([_, v]) => v !== undefined)),
-		...Object.entries(theme || {}).filter(([k]) => !order.includes(k))
-	])
-
+		...order.map((k) => [k, theme[k]]).filter(([_, v]) => v !== undefined),
+		...Object.entries(theme || {}).filter(([k]) => !order.includes(k)),
+	]);
 
 	return (
 		<S.ThemeWrapper id="ThemeWrapper">
-			<Select 
+			<Select
 				activeOption={{ id: theme?.name || 'Default', label: theme?.name || 'Default' }}
 				setActiveOption={() => {}}
 				options={[{ id: theme?.name || 'Default', label: theme?.name || 'Default' }]}
@@ -348,32 +338,23 @@ function Theme(props: {
 					loading={props.loading}
 					onNameChange={setPendingNameChange}
 				/>
-				<S.ThemeSectionWrapper $show={showExpertMode}>					
+				<S.ThemeSectionWrapper $show={showExpertMode}>
 					{Object.entries(sortedTheme).map(([key]) => {
-						if (key === 'basics' || key === 'name' || key === 'active') return null
+						if (key === 'basics' || key === 'name' || key === 'active') return null;
 						return (
-							<ThemeSection
-								key={key}
-								theme={sortedTheme}
-								setTheme={setTheme}
-								section={key}
-								loading={props.loading}
-							/>
-						)
+							<ThemeSection key={key} theme={sortedTheme} setTheme={setTheme} section={key} loading={props.loading} />
+						);
 					})}
 				</S.ThemeSectionWrapper>
-
 			</S.Theme>
-			
+
 			<S.EndActions>
 				<Button
 					type={'alt1'}
 					label={language?.save || 'Save'}
 					handlePress={() => {
 						// Include pending name change if exists
-						const finalTheme = pendingNameChange !== null 
-							? { ...theme, name: pendingNameChange }
-							: theme;
+						const finalTheme = pendingNameChange !== null ? { ...theme, name: pendingNameChange } : theme;
 						props.onThemeUpdate(finalTheme);
 						setPendingNameChange(null); // Clear pending change after save
 					}}
@@ -383,7 +364,7 @@ function Theme(props: {
 			</S.EndActions>
 			{/* <pre>{JSON.stringify(theme, null, 2)}</pre> */}
 		</S.ThemeWrapper>
-	)
+	);
 }
 
 function Section(props: {
@@ -414,28 +395,23 @@ function Section(props: {
 				...theme.basics,
 				colors: {
 					...theme.basics.colors,
-					[key]: newColor
-				}
-			}
+					[key]: newColor,
+				},
+			},
 		};
 		setTheme(updatedTheme);
 		if (props.published) props.onThemeChange(updatedTheme, false);
 	}
-	
+
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
 	// const { background, ...remainingTheme } = props.theme.basics.colors;
 	const remainingTheme = props.theme.basics.colors;
 
-	
-	
 	const [scheme, setScheme] = React.useState<'light' | 'dark'>(props.theme.scheme);
 	const [showNameEdit, setShowNameEdit] = React.useState<boolean>(false);
 	const [showRemoveConfirmation, setShowRemoveConfirmation] = React.useState<boolean>(false);
-
-
-	
 
 	const orderedRemainingTheme = Object.keys(DEFAULT_THEME.light.basics.colors)
 		// .filter((key) => key !== 'background')
@@ -445,7 +421,6 @@ function Section(props: {
 			}
 			return acc;
 		}, {} as typeof remainingTheme);
-
 
 	function handleNameChange() {
 		const updatedTheme = {
@@ -524,45 +499,42 @@ function Section(props: {
 					*/}
 					<S.AttributesWrapper
 						className="border-wrapper-alt2"
-						style={{ 
+						style={{
 							color: `rgba(${theme.basics.colors.text},1)`,
-							background: `rgba(${theme.basics.colors.background},1)` 
+							background: `rgba(${theme.basics.colors.background},1)`,
 						}}
-					>						
+					>
 						<S.GridWrapper id="GridWrapper">
 							<S.GridRows id="GridRows">
-							{Object.entries(orderedRemainingTheme).map(([key, value]) => (								
-								<S.GridRow id="GridRow" key={key}>
-									<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-									<Color
-										key={key}
-										label={key}
-										value={value}
-										onChange={(newColor) => handleThemeChange(key, newColor)}
-										loading={props.loading}
-										disabled={unauthorized}
-									/>
-								</S.GridRow>
-							))}
+								{Object.entries(orderedRemainingTheme).map(([key, value]) => (
+									<S.GridRow id="GridRow" key={key}>
+										<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+										<Color
+											key={key}
+											label={key}
+											value={value}
+											onChange={(newColor) => handleThemeChange(key, newColor)}
+											loading={props.loading}
+											disabled={unauthorized}
+										/>
+									</S.GridRow>
+								))}
 							</S.GridRows>
 						</S.GridWrapper>
 					</S.AttributesWrapper>
 
 					<S.AttributesWrapper
 						className="border-wrapper-alt2"
-						style={{ 
+						style={{
 							color: `rgba(${theme.basics.colors.text},1)`,
-							background: `rgba(${theme.basics.colors.background},1)` 
+							background: `rgba(${theme.basics.colors.background},1)`,
 						}}
-					>		
-						Default Button 
-						<S.ButtonPreview
-							theme={theme.buttons.default}
-						>Preview</S.ButtonPreview>
+					>
+						Default Button
+						<S.ButtonPreview theme={theme.buttons.default}>Preview</S.ButtonPreview>
 						<S.GridWrapper id="GridWrapper">
-							
 							<S.GridRows id="GridRows">
-								{Object.entries(theme.buttons.default.default.colors).map(([key, value]) => (								
+								{Object.entries(theme.buttons.default.default.colors).map(([key, value]) => (
 									<S.GridRow id="GridRow" key={key}>
 										<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
 										<Color
@@ -837,9 +809,9 @@ export default function Themes() {
 					secondary: { light: '128,128,128', dark: '128,128,128' },
 					background: { light: '255,255,255', dark: '0,0,0' },
 					text: { light: '0,0,0', dark: '255,255,255' },
-					border: { light: '200,200,200', dark: '55,55,55' }
-				}
-			}
+					border: { light: '200,200,200', dark: '55,55,55' },
+				},
+			},
 		};
 
 		const isPublished =
@@ -847,11 +819,11 @@ export default function Themes() {
 				? true
 				: portalProvider.current?.themes.find(
 						(existingTheme: PortalThemeType) => existingTheme.name === currentTheme.name
-					) !== undefined;
+				  ) !== undefined;
 		return (
 			<>
 				<Theme
-					theme={currentTheme} 
+					theme={currentTheme}
 					published={isPublished}
 					loading={loading}
 					onThemeUpdate={(updatedTheme) => submitUpdatedThemes([updatedTheme])}

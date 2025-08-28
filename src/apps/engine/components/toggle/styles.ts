@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const Marker = styled.div<{ $state: boolean }>`
-	background-color: rgba(var(--color-text),1);
+	background-color: rgba(var(--color-text), 1);
 	width: 20px;
 	height: 20px;
 	border-radius: 50%;

@@ -1,5 +1,6 @@
 import Icon from 'engine/components/icon';
 import * as ICONS from 'engine/constants/icons';
+
 import * as S from './styles';
 
 export default function Toggle(props: any) {

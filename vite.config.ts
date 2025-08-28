@@ -107,11 +107,16 @@ export default defineConfig(({ mode }) => {
 				assert: 'vite-plugin-node-polyfills/polyfills/assert',
 				zlib: 'vite-plugin-node-polyfills/polyfills/zlib',
 				constants: 'vite-plugin-node-polyfills/polyfills/constants',
-				'@tanstack/react-query': path.resolve('./node_modules/@tanstack/react-query'),
 			},
 		},
 		optimizeDeps: {
-			include: ['buffer', 'process', 'crypto', 'stream', 'util', '@tanstack/react-query', '@tanstack/react-query-persist-client'],
+			include: [
+				'buffer',
+				'process',
+				'crypto',
+				'stream',
+				'util'
+			],
 		},
 		build: config[app].build,
 		server: {

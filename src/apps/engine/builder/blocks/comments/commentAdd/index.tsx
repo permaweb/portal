@@ -9,17 +9,20 @@ import {
 	Modifier,
 	RichUtils,
 } from 'draft-js';
-import 'draft-js/dist/Draft.css';
 import EmojiPicker from 'emoji-picker-react';
 import Icon from 'engine/components/icon';
 import * as ICONS from 'engine/constants/icons';
+
 import { usePermawebProvider } from 'providers/PermawebProvider';
+
+import 'draft-js/dist/Draft.css';
+
 // import { useArweaveProvider } from 'providers/ArweaveProvider';
 import * as S from './styles';
 
 export default function CommentAdd(props: any) {
-	const { assetId, parentId } = props;	
-  const { hasCommandModifier } = KeyBindingUtil;
+	const { commentsId, parentId } = props;
+	const { hasCommandModifier } = KeyBindingUtil;
 	const { profile, libs } = usePermawebProvider();
 	// const arProvider = useArweaveProvider();
 	const MAX_EDITOR_LENGTH = 500;
@@ -39,7 +42,7 @@ export default function CommentAdd(props: any) {
 		};
 	}, []);
 
-  const findLinkEntities = (contentBlock: any, callback: any, contentState: any) => {
+	const findLinkEntities = (contentBlock: any, callback: any, contentState: any) => {
 		contentBlock.findEntityRanges((character: any) => {
 			const entityKey = character.getEntity();
 			return entityKey !== null && contentState.getEntity(entityKey).getType() === 'LINK';
@@ -47,7 +50,7 @@ export default function CommentAdd(props: any) {
 	};
 
 	// @ts-ignore
-  const Link = ({ contentState, entityKey, children }) => {
+	const Link = ({ contentState, entityKey, children }) => {
 		const { url } = contentState.getEntity(entityKey).getData();
 		return (
 			<a href={url} target={'_blank'} rel={'noopener noreferrer'}>
@@ -56,19 +59,19 @@ export default function CommentAdd(props: any) {
 		);
 	};
 
-  const linkDecorator = new CompositeDecorator([
+	const linkDecorator = new CompositeDecorator([
 		{
 			strategy: findLinkEntities,
 			component: Link,
 		},
 	]);
 
-  const [editorState, setEditorState] = React.useState(() => EditorState.createEmpty(linkDecorator));
+	const [editorState, setEditorState] = React.useState(() => EditorState.createEmpty(linkDecorator));
 	// @ts-ignore
 	const [messageActive, setMessageActive] = React.useState<boolean>(false);
 	// @ts-ignore
 	const [files, setFiles] = React.useState<any[]>([]);
-  const [boldModeActive, setBoldModeActive] = React.useState<boolean>(false);
+	const [boldModeActive, setBoldModeActive] = React.useState<boolean>(false);
 	const [italicModeActive, setItalicModeActive] = React.useState<boolean>(false);
 	const [underlineModeActive, setUnderlineModeActive] = React.useState<boolean>(false);
 	const [codeModeActive, setCodeModeActive] = React.useState<boolean>(false);
@@ -76,11 +79,9 @@ export default function CommentAdd(props: any) {
 
 	const [emojiDropdownActive, setEmojiDropdownActive] = React.useState<boolean>(false);
 
+	const editorRef = React.useRef<Editor | null>(null);
 
-  const editorRef = React.useRef<Editor | null>(null);
-	
-
-  const mapKeyToEditorCommand = (e: React.KeyboardEvent) => {
+	const mapKeyToEditorCommand = (e: React.KeyboardEvent) => {
 		if (e.keyCode === 83 && hasCommandModifier(e)) {
 			return 'myeditor-save';
 		}
@@ -96,7 +97,7 @@ export default function CommentAdd(props: any) {
 		return getDefaultKeyBinding(e);
 	};
 
-  const handleKeyCommand = (command: string, editorState: EditorState) => {
+	const handleKeyCommand = (command: string, editorState: EditorState) => {
 		if (command === 'submit-message' && !getSubmitDisabled(editorState)) {
 			handleSubmit();
 			return 'handled';
@@ -150,28 +151,35 @@ export default function CommentAdd(props: any) {
 	const resetEditor = () => {
 		const emptyState = EditorState.createEmpty();
 		setEditorState(emptyState);
-	}
+	};
 
-  const handleSubmit = async () => {
-		console.log('Submit')
+	const handleSubmit = async () => {
+		console.log('Submit');
 		const rawContent = convertToRaw(editorState.getCurrentContent());
-		const plainText = rawContent.blocks.map(block => block.text).join('\n');
+		const plainText = rawContent.blocks.map((block) => block.text).join('\n');
 
+		/*
 		const commentId = await libs.createComment({
 			content: plainText,
 			creator: profile.id,
 			parentId: assetId,
 		});
+		*/
+		const comment = await libs.createComment({ 			
+			commentsId,
+			content: plainText,
+		});
+		
 
-		if(commentId) resetEditor()
+		if (comment) resetEditor();
 	};
 
-  function checkEmptyEditor(editorState: EditorState) {
+	function checkEmptyEditor(editorState: EditorState) {
 		const plainText = editorState.getCurrentContent().getPlainText();
 		return !plainText.trim().length;
 	}
 
-  const handleCode = () => {
+	const handleCode = () => {
 		const newState = RichUtils.toggleInlineStyle(editorState, 'CODE');
 		setCodeModeActive(!codeModeActive);
 		setEditorState(newState);
@@ -186,58 +194,58 @@ export default function CommentAdd(props: any) {
 		setEditorState(newEditorState);
 	};
 
-  function checkInvalidEditorLength(editorState: EditorState) {
+	function checkInvalidEditorLength(editorState: EditorState) {
 		return editorState.getCurrentContent().getPlainText().length >= MAX_EDITOR_LENGTH;
 	}
 
-  function getSubmitDisabled(editorState: EditorState) {
+	function getSubmitDisabled(editorState: EditorState) {
 		if (files && files.length) return false;
 		return checkEmptyEditor(editorState) || checkInvalidEditorLength(editorState);
 	}
 
-  function handleEditorChange(newEditorState: EditorState) {
+	function handleEditorChange(newEditorState: EditorState) {
 		setEditorState(newEditorState);
 		const rawContent = convertToRaw(editorState.getCurrentContent());
-		const plainText = rawContent.blocks.map(block => block.text).join('\n');
-		setCanSend(plainText.length>0)
+		const plainText = rawContent.blocks.map((block) => block.text).join('\n');
+		setCanSend(plainText.length > 0);
 	}
 
-  function getPlaceholder() {
+	function getPlaceholder() {
 		// if (!profile || !profile.walletAddress) return language.connectToPost;
 		// return props.placeholder ? props.placeholder : language.postPlaceholder;
 		return '';
 	}
 
-  const customStyleMap = {
-    default: { backgroundColor: 'white', color: 'black' },
-    BOLD: { fontWeight: 'bold' },
-    ITALIC: { fontStyle: 'italic' },
-    UNDERLINE: { textDecoration: 'underline' },
-    RED: { color: 'red' },
-    HIGHLIGHT: { backgroundColor: 'yellow' }
-  };
+	const customStyleMap = {
+		default: { backgroundColor: 'white', color: 'black' },
+		BOLD: { fontWeight: 'bold' },
+		ITALIC: { fontStyle: 'italic' },
+		UNDERLINE: { textDecoration: 'underline' },
+		RED: { color: 'red' },
+		HIGHLIGHT: { backgroundColor: 'yellow' },
+	};
 
-  return (
-    <S.CommentAdd $active={Boolean(profile)}>
-      <S.Editor>
-        <Editor
-          ref={editorRef}
-          // customStyleMap={EDITOR_STYLE_MAP(theme)}
-          customStyleMap={customStyleMap}
-          editorState={editorState}
+	return (
+		<S.CommentAdd $active={Boolean(profile)}>
+			<S.Editor>
+				<Editor
+					ref={editorRef}
+					// customStyleMap={EDITOR_STYLE_MAP(theme)}
+					customStyleMap={customStyleMap}
+					editorState={editorState}
 					// @ts-ignore
-          handleKeyCommand={handleKeyCommand}
-          onChange={handleEditorChange}
-          onFocus={() => setMessageActive(true)}
-          onBlur={() => setMessageActive(false)}
-          keyBindingFn={mapKeyToEditorCommand}
-          placeholder={profile ? !parentId ? 'Write a comment...' : 'Write a reply...' : 'Login to write a comment...'}
-        />
+					handleKeyCommand={handleKeyCommand}
+					onChange={handleEditorChange}
+					onFocus={() => setMessageActive(true)}
+					onBlur={() => setMessageActive(false)}
+					keyBindingFn={mapKeyToEditorCommand}
+					placeholder={
+						profile ? (!parentId ? 'Write a comment...' : 'Write a reply...') : 'Login to write a comment...'
+					}
+				/>
 				<S.Actions>
 					<S.Emojis>
-						<S.EmojisIcon
-							onClick={() => setEmojiDropdownActive(!emojiDropdownActive)}
-						>
+						<S.EmojisIcon onClick={() => setEmojiDropdownActive(!emojiDropdownActive)}>
 							<Icon icon={ICONS.EMOJI} />
 						</S.EmojisIcon>
 						{emojiDropdownActive && (
@@ -251,13 +259,13 @@ export default function CommentAdd(props: any) {
 									onEmojiClick={(emojiData: any, e: any) => handleEmoji(emojiData, e)}
 								/>
 							</S.EmojiPicker>
-						)}  
+						)}
 					</S.Emojis>
 					<S.Send onClick={() => handleSubmit()} $active={canSend}>
 						<Icon icon={ICONS.SEND} />
 					</S.Send>
 				</S.Actions>
-      </S.Editor>                
-    </S.CommentAdd>    
-  )
+			</S.Editor>
+		</S.CommentAdd>
+	);
 }

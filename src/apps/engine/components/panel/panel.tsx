@@ -1,8 +1,9 @@
 import React from 'react';
 import Icon from 'engine/components/icon';
-import * as ICONS from 'engine/constants/icons';
-import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'engine/components/wrappers/closeHandler';
+import * as ICONS from 'engine/constants/icons';
+
+import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 import { IProps } from './types';
@@ -46,9 +47,7 @@ export default function Panel(props: IProps) {
 									<S.Title>{props.header}</S.Title>
 								</S.LT>
 								{props.handleClose && (
-									<S.Close
-										onClick={() => props.handleClose()}
-									>
+									<S.Close onClick={() => props.handleClose()}>
 										<Icon icon={ICONS.CLOSE} />
 									</S.Close>
 								)}
@@ -61,11 +60,7 @@ export default function Panel(props: IProps) {
 		);
 	}
 
-	return (
-		<S.Wrapper>
-			{getBody()}
-		</S.Wrapper>
-	);
+	return <S.Wrapper>{getBody()}</S.Wrapper>;
 }
 
 let panelOpenCounter = 0;

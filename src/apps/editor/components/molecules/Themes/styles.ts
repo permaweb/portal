@@ -70,11 +70,11 @@ export const GridWrapper = styled.div`
 `;
 
 export const GridRows = styled.div`
-	display:flex;
+	display: flex;
 	flex-direction: column;
 	flex: 1;
-	gap:5px;
-	margin-bottom:20px;
+	gap: 5px;
+	margin-bottom: 20px;
 
 	span {
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
@@ -84,7 +84,7 @@ export const GridRows = styled.div`
 `;
 
 export const GridRow = styled.div`
-	display:flex;
+	display: flex;
 	flex: 1;
 `;
 
@@ -121,7 +121,7 @@ export const ColorWrapper = styled.div`
 	position: relative;
 	display: flex;
 	// flex: 1;
-	padding:2px;
+	padding: 2px;
 
 	&:hover {
 		${ColorTooltip} {
@@ -130,7 +130,13 @@ export const ColorWrapper = styled.div`
 	}
 `;
 
-export const ColorBody = styled.button<{ background: string; text: string, height?: number; width?: number; maxWidth?: boolean }>`
+export const ColorBody = styled.button<{
+	background: string;
+	text: string;
+	height?: number;
+	width?: number;
+	maxWidth?: boolean;
+}>`
 	height: ${(props) => (props.height ? `${props.height.toString()}px` : '40px')};
 	width: ${(props) => (props.maxWidth ? '100%' : props.width ? `${props.width.toString()}px` : '50px')};
 	background: ${(props) => props.background};
@@ -142,10 +148,10 @@ export const ColorBody = styled.button<{ background: string; text: string, heigh
 	transform: scale(1);
 
 	span {
-		color:${(props) => props.text};
+		color: ${(props) => props.text};
 	}
 
-	&:hover{
+	&:hover {
 		transform: scale(1.02);
 	}
 
@@ -341,103 +347,98 @@ export const ModalActionsWrapper = styled.div`
 	gap: 15px;
 `;
 
-
-
 // New
 export const ThemeWrapper = styled.div`
 	// width:100%;
 `;
 
 export const Theme = styled.div`
-	display:flex;
+	display: flex;
 	flex-direction: column;
 	// width:100%;
 `;
 
-
-
 export const ThemeRow = styled.div`
-	display:flex;
-	width:100%;
-	gap:15px;
+	display: flex;
+	width: 100%;
+	gap: 15px;
 `;
 
 export const ThemeRowHeader = styled.div`
-	display:flex;
-	width:100%;
-	height:15px;
-	gap:15px;	
+	display: flex;
+	width: 100%;
+	height: 15px;
+	gap: 15px;
 `;
 
 export const ThemeRowFooter = styled.div`
-	display:flex;
-	width:100%;
-	height:15px;
-	gap:15px;		
+	display: flex;
+	width: 100%;
+	height: 15px;
+	gap: 15px;
 `;
 
 export const ThemeKey = styled.div`
-	display:flex;
+	display: flex;
 	align-items: center;
-	width:100%;	
-	padding:0 15px;
+	width: 100%;
+	padding: 0 15px;
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
 	font-weight: ${(props) => props.theme.typography.weight.bold};
 	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 
 export const ThemeValue = styled.div`
-	width:100%;
-	padding:0 15px;
+	width: 100%;
+	padding: 0 15px;
 	// box-sizing: border-box;
 `;
 
 export const ThemeLight = styled.div<{ colors: any }>`
-	display:flex;
-	width:100%;
+	display: flex;
+	width: 100%;
 	// background: white;
 	// color: ${(props) => `rgba(${props.colors.text.light},1)`};
 	color: ${(props) => props.theme.colors.font.primary};
 	// border-left: ${(props) => `1px solid rgba(${props.colors.border.light},1)`};
-	border-right: ${(props) => `1px solid rgba(${props.colors.border.light},1)`};	
-	flex:1;
+	border-right: ${(props) => `1px solid rgba(${props.colors.border.light},1)`};
+	flex: 1;
 
-	${ThemeKey}{
-		flex:1;
+	${ThemeKey} {
+		flex: 1;
 		border-top: unset !important;
 	}
-	${ThemeValue}{
-		flex:1;
+	${ThemeValue} {
+		flex: 1;
 		background: white;
 	}
 `;
 
 export const ThemeDark = styled.div<{ colors: any }>`
-	display:flex;
-	width:100%;
+	display: flex;
+	width: 100%;
 	background: black;
 	border-left: ${(props) => `1px solid rgba(${props.colors.border.dark},1)`};
-	border-right: ${(props) => `1px solid rgba(${props.colors.border.dark},1)`};	
-	flex:.5;
+	border-right: ${(props) => `1px solid rgba(${props.colors.border.dark},1)`};
+	flex: 0.5;
 
-	${ThemeKey}{
-		display:none;
+	${ThemeKey} {
+		display: none;
 	}
 	${ThemeValue} {
 		background: black;
 	}
-	
 `;
 
 export const ThemeSectionWrapper = styled.div<{ $show: boolean }>`
-	display: ${(props) => props.$show ? 'flex' : 'none'};
+	display: ${(props) => (props.$show ? 'flex' : 'none')};
 	flex-direction: column;
 `;
 
-export const ThemeSection = styled.div<{ colors: any, preferences: any }>`
-	display:flex;
+export const ThemeSection = styled.div<{ colors: any; preferences: any }>`
+	display: flex;
 	flex-direction: column;
-	width:100%;
+	width: 100%;
 
 	span {
 		margin-top: 30px;
@@ -447,32 +448,32 @@ export const ThemeSection = styled.div<{ colors: any, preferences: any }>`
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 
-	${ThemeRowHeader} > ${ThemeLight}{
+	${ThemeRowHeader} > ${ThemeLight} {
 		border-top-left-radius: ${STYLING.dimensions.radius.primary};
 		border-top-right-radius: ${STYLING.dimensions.radius.primary};
 		// border-top: ${(props) => `1px solid rgba(${props.colors.border.light},1)`};
 
 		${ThemeValue} {
-				background: white;
-				border-top-left-radius: ${STYLING.dimensions.radius.primary};
-				border-top-right-radius: ${STYLING.dimensions.radius.primary};
-				border-top: ${(props) => `1px solid rgba(${props.colors.border.light},1)`};
-			}
+			background: white;
+			border-top-left-radius: ${STYLING.dimensions.radius.primary};
+			border-top-right-radius: ${STYLING.dimensions.radius.primary};
+			border-top: ${(props) => `1px solid rgba(${props.colors.border.light},1)`};
+		}
 	}
 
-	${ThemeRowFooter} > ${ThemeLight}{
+	${ThemeRowFooter} > ${ThemeLight} {
 		border-bottom-left-radius: ${STYLING.dimensions.radius.primary};
 		border-bottom-right-radius: ${STYLING.dimensions.radius.primary};
 		// border-bottom: ${(props) => `1px solid rgba(${props.colors.border.light},1)`};
 		${ThemeValue} {
-				background: white;
-				border-bottom-left-radius: ${STYLING.dimensions.radius.primary};
-				border-bottom-right-radius: ${STYLING.dimensions.radius.primary};
-				border-bottom: ${(props) => `1px solid rgba(${props.colors.border.light},1)`};
-			}
+			background: white;
+			border-bottom-left-radius: ${STYLING.dimensions.radius.primary};
+			border-bottom-right-radius: ${STYLING.dimensions.radius.primary};
+			border-bottom: ${(props) => `1px solid rgba(${props.colors.border.light},1)`};
+		}
 	}
 
-	${ThemeRowHeader} > ${ThemeDark}{
+	${ThemeRowHeader} > ${ThemeDark} {
 		border-top-left-radius: ${STYLING.dimensions.radius.primary};
 		border-top-right-radius: ${STYLING.dimensions.radius.primary};
 		border-top: ${(props) => `1px solid rgba(${props.colors.border.dark},1)`};
@@ -483,7 +484,7 @@ export const ThemeSection = styled.div<{ colors: any, preferences: any }>`
 		}
 	}
 
-	${ThemeRowFooter} > ${ThemeDark}{
+	${ThemeRowFooter} > ${ThemeDark} {
 		border-bottom-left-radius: ${STYLING.dimensions.radius.primary};
 		border-bottom-right-radius: ${STYLING.dimensions.radius.primary};
 		border-bottom: ${(props) => `1px solid rgba(${props.colors.border.dark},1)`};
@@ -494,8 +495,7 @@ export const ThemeSection = styled.div<{ colors: any, preferences: any }>`
 	}
 `;
 
-
-export const ButtonPreview = styled.button<{ theme: any;}>`
+export const ButtonPreview = styled.button<{ theme: any }>`
 	color: ${(props) => `rgba(${props.theme.default.colors.color},1)`};
 	background: ${(props) => `rgba(${props.theme.default.colors.background},1)`};
 	border: ${(props) => `1px solid rgba(${props.theme.default.colors.border},1)`};
@@ -508,6 +508,5 @@ export const ButtonPreview = styled.button<{ theme: any;}>`
 		border: ${(props) => `1px solid rgba(${props.theme.hover.colors.border},1)`};
 	}
 `;
-
 
 export const ThemePreview = styled.div``;

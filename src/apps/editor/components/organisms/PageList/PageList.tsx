@@ -20,11 +20,11 @@ export default function PageList() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const order = ['home', 'post', 'feed']
+	const order = ['home', 'post', 'feed'];
 	const sortedPages = Object.fromEntries([
-		...(order.map(k => [k, portalProvider?.current?.pages[k]]).filter(([_, v]) => v !== undefined)),
-		...Object.entries(portalProvider?.current?.pages || {}).filter(([k]) => !order.includes(k))
-	])
+		...order.map((k) => [k, portalProvider?.current?.pages[k]]).filter(([_, v]) => v !== undefined),
+		...Object.entries(portalProvider?.current?.pages || {}).filter(([k]) => !order.includes(k)),
+	]);
 
 	const pages = React.useMemo(() => {
 		if (!portalProvider.current?.pages) {

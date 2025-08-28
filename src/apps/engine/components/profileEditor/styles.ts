@@ -1,8 +1,6 @@
 import styled from 'styled-components';
 
-export const Wrapper = styled.div`
-
-`;
+export const Wrapper = styled.div``;
 
 export const Header = styled.div`
 	display: flex;
@@ -24,48 +22,47 @@ export const Body = styled.div`
 `;
 
 export const Form = styled.div`
-  display:flex;
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
 	height: fit-content;
 	width: 100%;
 
-  label{
-    margin-top:10px;
-    font-size:12px;
-    font-weight: 600;
-  }
+	label {
+		margin-top: 10px;
+		font-size: 12px;
+		font-weight: 600;
+	}
 
-  input{
-    font-size:16px;
-    padding:4px 6px;
+	input {
+		font-size: 16px;
+		padding: 4px 6px;
 		outline: none;
-		border:1px solid transparent;
+		border: 1px solid transparent;
 
-		&:focus{
-			border: 1px solid rgba(var(--color-primary),1);			
+		&:focus {
+			border: 1px solid rgba(var(--color-primary), 1);
 		}
-  }
+	}
 
 	textarea {
 		height: 240px !important;
-    width:100%;
-    font-size:16px;
-    padding:4px 6px;
-    box-sizing: border-box;
+		width: 100%;
+		font-size: 16px;
+		padding: 4px 6px;
+		box-sizing: border-box;
 		outline: none;
-		border:1px solid transparent;
+		border: 1px solid transparent;
 
-		&:focus{
-			border: 1px solid rgba(var(--color-primary),1);			
+		&:focus {
+			border: 1px solid rgba(var(--color-primary), 1);
 		}
 	}
 `;
 
 export const TForm = styled.div`
-  display:flex;
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
 	margin: 20px 0 30px 0;
-
 `;
 
 export const PWrapper = styled.div`
@@ -100,7 +97,7 @@ export const BWrapper = styled.div`
 `;
 
 export const BannerInput = styled.button<{ $hasBanner: boolean }>`
-	display:flex;
+	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
@@ -108,8 +105,9 @@ export const BannerInput = styled.button<{ $hasBanner: boolean }>`
 	width: 100%;
 	// border: ${(props) => (props.$hasBanner ? `none` : `1px dashed rgba(var(--color-primary), 1)`)};
 	overflow: hidden;
-  padding:0;
-	span {}
+	padding: 0;
+	span {
+	}
 	svg {
 		height: 35px;
 		width: 35px;
@@ -123,7 +121,7 @@ export const BannerInput = styled.button<{ $hasBanner: boolean }>`
 	&:hover {
 		outline: 1px dashed rgba(var(--color-primary), 1);
 		outline-offset: -1px;
-		color: rgba(var(--color-primary),1);
+		color: rgba(var(--color-primary), 1);
 	}
 	&:focus {
 		opacity: 1;
@@ -163,7 +161,7 @@ export const BannerInput = styled.button<{ $hasBanner: boolean }>`
 `;
 
 export const AvatarInput = styled.button<{ $hasAvatar: boolean }>`
-	display:flex;
+	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
@@ -175,7 +173,7 @@ export const AvatarInput = styled.button<{ $hasAvatar: boolean }>`
 	left: 20px;
 	z-index: 1;
 	overflow: hidden;
-  padding:0;
+	padding: 0;
 	// border: ${(props) => (props.$hasAvatar ? `none` : `1px dashed rgba(var(--color-primary), 1)`)};
 
 	span {
@@ -191,10 +189,10 @@ export const AvatarInput = styled.button<{ $hasAvatar: boolean }>`
 		border-radius: 50%;
 		object-fit: cover;
 	}
-	&:hover {		
+	&:hover {
 		outline: 1px dashed rgba(var(--color-primary), 1);
 		outline-offset: -1px;
-		color: rgba(var(--color-primary),1);
+		color: rgba(var(--color-primary), 1);
 	}
 	&:focus {
 		opacity: 1;
@@ -237,7 +235,6 @@ export const ImageActions = styled.div`
 	flex-wrap: wrap;
 	gap: 10px;
 	margin-top: 10px;
-
 `;
 
 export const PInfoMessage = styled.div`

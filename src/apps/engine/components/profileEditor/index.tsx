@@ -1,17 +1,17 @@
 import React from 'react';
+import AOProfile from '@permaweb/aoprofile';
+import Button from 'engine/components/form/button';
 import Icon from 'engine/components/icon';
 import * as ICONS from 'engine/constants/icons';
 
 import Arweave from 'arweave';
 import { connect, createDataItemSigner } from '@permaweb/aoconnect';
-import AOProfile from '@permaweb/aoprofile';
 
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import Button from 'engine/components/form/button';
 
 import * as S from './styles';
 import { IProps } from './types';
@@ -96,7 +96,7 @@ export default function ProfileEditor(props: IProps) {
 					}
 
 					if (updateResponse) {
-						console.log('updateResponse: ', updateResponse)
+						console.log('updateResponse: ', updateResponse);
 						handleUpdate();
 					} else {
 						console.log(updateResponse);
@@ -245,26 +245,26 @@ export default function ProfileEditor(props: IProps) {
 							</S.PWrapper>
 							<S.Form>
 								<S.TForm>
-                  <label htmlFor="name">{language.name} *</label>
+									<label htmlFor="name">{language.name} *</label>
 									<input
-                    id="name"
+										id="name"
 										value={displayName}
 										onChange={(e: any) => setName(e.target.value)}
 										disabled={loading}
 										// invalid={{ status: false, message: null }}
 									/>
-                  <label htmlFor="username">{language.username} *</label>
+									<label htmlFor="username">{language.username} *</label>
 									<input
-                    id="username"
+										id="username"
 										value={username}
 										onChange={(e: any) => setUsername(e.target.value)}
 										disabled={loading}
 										// invalid={{ status: false, message: null }}
 									/>
 								</S.TForm>
-                <label htmlFor="bio">{language.bio}</label>                
+								<label htmlFor="bio">{language.bio}</label>
 								<textarea
-                  id="bio"
+									id="bio"
 									value={bio || ''}
 									onChange={(e: any) => setBio(e.target.value)}
 									disabled={loading}

@@ -4,6 +4,7 @@ import useNavigate from 'engine/helpers/preview';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 import { useProfile } from 'engine/hooks/profiles';
 import { useComments } from 'engine/hooks/comments';
+import { getRedirect } from 'helpers/utils';
 import * as S from './styles';
 
 export default function PostPreview_Default(props: any) {
@@ -11,7 +12,7 @@ export default function PostPreview_Default(props: any) {
   const { portal } = usePortalProvider();
   const Layout = portal?.Layout;
   const { preview, post, loading } = props;  
-  const { profile } = useProfile(post?.creator || null);
+  const { profile, isLoading: isLoadingProfile } = useProfile(post?.creator || null);
   const { comments, isLoading: isLoadingComments, error: errorComments } = useComments(post?.id || null, true);
 
   const Comment = (data: any) => {    
@@ -40,7 +41,7 @@ export default function PostPreview_Default(props: any) {
         post ? post?.metadata?.categories.map((category: any, index: number) => {
           return (
             <React.Fragment key={index}>
-            <NavLink to={`/feed/category/${category.id}`}><S.Category>{category.name}</S.Category></NavLink>
+            <NavLink to={getRedirect(`feed/category/${category.id}`)}><S.Category>{category.name}</S.Category></NavLink>
               {index < post.metadata.categories.length - 1 && <>,&nbsp;</>}
             </React.Fragment>
           )
@@ -50,12 +51,12 @@ export default function PostPreview_Default(props: any) {
         <img
           className="loadingThumbnail"
           onLoad={e => e.currentTarget.classList.remove('loadingThumbnail')}
-          onClick={() => navigate(`/post/${post?.id}`)}
+          onClick={() => navigate(getRedirect(`post/${post?.id}`))}
           src={post ? `https://arweave.net/${post?.metadata?.thumbnail}` : ''} 
         />
         <h2
           className={!post ? 'loadingPlaceholder' : ''}
-          onClick={(e) => navigate(`/post/${post?.id}`)}
+          onClick={(e) => navigate(getRedirect(`post/${post?.id}`))}
         >
           <span>{post ? post?.name : <Placeholder width="180" />}</span>
         </h2>
@@ -66,7 +67,7 @@ export default function PostPreview_Default(props: any) {
             src={profile?.thumbnail ? `https://arweave.net/${profile.thumbnail}` : ''}
           />
           <S.Author
-            onClick={() => navigate(`/user/${profile.id}`)}
+            onClick={() => navigate(getRedirect(`user/${profile.id}`))}
           >
             {profile?.displayName}
           </S.Author>

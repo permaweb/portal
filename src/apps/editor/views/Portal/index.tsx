@@ -36,9 +36,10 @@ export default function Portal() {
 						label={language?.goToSite}
 						handlePress={() => {
 							// In development, redirect to local engine on port 5000
-							const siteUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-								? `http://localhost:5000/${portalProvider.current.id}`
-								: getTxEndpoint(portalProvider.current.id);
+							const siteUrl =
+								window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+									? `http://localhost:5000/${portalProvider.current.id}`
+									: getTxEndpoint(portalProvider.current.id);
 							window.open(siteUrl);
 						}}
 						disabled={!portalProvider.current}

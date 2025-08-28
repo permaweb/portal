@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import * as S from './styles';
 
 export default function JsonGuiEditor(props) {
@@ -14,7 +15,7 @@ export default function JsonGuiEditor(props) {
 			const fullPath = [...path, k];
 			const key = fullPath.join('.');
 
-			const handleChange = val => {
+			const handleChange = (val) => {
 				const updated = structuredClone(data);
 				let cur = updated;
 				for (let i = 0; i < path.length; i++) cur = cur[path[i]];
@@ -27,11 +28,7 @@ export default function JsonGuiEditor(props) {
 				return (
 					<label key={key}>
 						{k}
-						<input
-							type="checkbox"
-							checked={v}
-							onChange={e => handleChange(e.target.checked)}
-						/>
+						<input type="checkbox" checked={v} onChange={(e) => handleChange(e.target.checked)} />
 					</label>
 				);
 			}
@@ -40,11 +37,7 @@ export default function JsonGuiEditor(props) {
 				return (
 					<label key={key}>
 						{k}
-						<input
-							type="text"
-							value={v}
-							onChange={e => handleChange(e.target.value)}
-						/>
+						<input type="text" value={v} onChange={(e) => handleChange(e.target.value)} />
 					</label>
 				);
 			}

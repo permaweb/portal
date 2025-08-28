@@ -1,13 +1,13 @@
-import { useNavigate as realUseNavigate } from 'react-router-dom'
+import { useNavigate as realUseNavigate } from 'react-router-dom';
 
-let safeNavigate = () => {}
+let safeNavigate = () => {};
 
 export function useNavigate() {
-  try {
-    return realUseNavigate()
-  } catch {
-    return safeNavigate
-  }
+	try {
+		return realUseNavigate();
+	} catch {
+		return safeNavigate;
+	}
 }
 
-export default useNavigate
+export default useNavigate;

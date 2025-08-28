@@ -1,8 +1,8 @@
 export const BREAKPOINTS = {
-  "breakpoint-xxsmall": "450px",
-  "breakpoint-xsmall": "600px",
-  "breakpoint-small": "900px",
-  "breakpoint-medium": "1150px",
-  "breakpoint-large": "1600px",
-  "breakpoint-xlarge": "2500px",
+	'breakpoint-xxsmall': '450px',
+	'breakpoint-xsmall': '600px',
+	'breakpoint-small': '900px',
+	'breakpoint-medium': '1150px',
+	'breakpoint-large': '1600px',
+	'breakpoint-xlarge': '2500px',
 };

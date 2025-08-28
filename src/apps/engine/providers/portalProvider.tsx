@@ -1,7 +1,10 @@
 import React from 'react';
+import { defaultLayout } from 'engine/defaults/layout.defaults';
+import { defaultPages } from 'engine/defaults/pages.defaults';
+// Temp
+import { defaultThemes } from 'engine/defaults/theme.defaults';
 import WebFont from 'webfontloader';
-import { useArweaveProvider } from 'providers/ArweaveProvider';
-import { usePermawebProvider } from 'providers/PermawebProvider';
+
 import {
 	areAssetsEqual,
 	cachePortal,
@@ -10,11 +13,8 @@ import {
 	getCachedProfile,
 	getPortalAssets,
 } from 'helpers/utils';
-
-// Temp
-import { defaultThemes } from 'engine/defaults/theme.defaults';
-import { defaultLayout } from 'engine/defaults/layout.defaults';
-import { defaultPages } from 'engine/defaults/pages.defaults';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 export interface PortalContextState {
 	portalId: string | null;
@@ -29,19 +29,19 @@ const DEFAULT_CONTEXT = {
 	portal: null,
 	setPortalId(_portalId: string) {},
 	editorMode: 'hidden',
-	setEditorMode(_mode: string) {}
+	setEditorMode(_mode: string) {},
 };
 
 export const PortalContext = React.createContext<PortalContextState>(DEFAULT_CONTEXT);
 
 export function useSetPortalId(id: string) {
-  const context = React.useContext(PortalContext);
+	const context = React.useContext(PortalContext);
 
-  React.useEffect(() => {
-    if (context) {
-      context.setPortalId(id);
-    }
-  }, [id, context]);
+	React.useEffect(() => {
+		if (context) {
+			context.setPortalId(id);
+		}
+	}, [id, context]);
 }
 
 export function usePortalProvider(): PortalContextState {
@@ -49,7 +49,6 @@ export function usePortalProvider(): PortalContextState {
 }
 
 export function PortalProvider(props: { children: React.ReactNode }) {
-	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const defaultPortal = { themes: defaultThemes, layout: defaultLayout, pages: defaultPages };
 
@@ -59,19 +58,21 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [updating, setUpdating] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		if (!portalId) return;
+		if (!portalId || !permawebProvider.libs) return;
 
 		(async () => {
-			try {				
+			try {
+				console.log('getZone: ', portalId)
 				const cached = getCachedPortal(portalId);
-				const res = await permawebProvider.libs.getZone(portalId); // always fetch
-				console.log('Zone: ', res)
+				console.log('cached: ', cached);
+				const res = await permawebProvider.libs.getZone(portalId);
+				console.log('Zone: ', res);
 
 				const zone = {
+					...defaultPortal,
 					...cached,
 					...res.store,
-					posts: res.store?.index ? [...res.store.index].reverse() : [],
-					...defaultPortal					
+					posts: res.store?.index ? [...res.store.index].reverse() : [],					
 				};
 
 				const Name = zone?.name;
@@ -81,26 +82,25 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const Posts = zone?.posts;
 				const Themes = zone?.themes;
 				const Logo = zone?.logo;
-				const Fonts = zone?.fonts
+				const Fonts = zone?.fonts;
 
-				const portalData = { Name, Categories, Layout, Pages, Themes, Posts, Logo, Fonts }
+				const portalData = { Name, Categories, Layout, Pages, Themes, Posts, Logo, Fonts };
 				console.log('portalData: ', portalData);
 				setPortal(portalData);
 				if (portalId && portalData) cachePortal(portalId, portalData);
-
 			} catch (err) {
 				console.error('Failed to fetch zone:', err);
 				const cached = getCachedPortal(portalId);
 				const zone = {
-					...cached,
-					defaultPortal
-				}
+					defaultPortal,
+					...cached,					
+				};
 				setPortal(zone);
 			}
 		})();
-	}, [portalId]);
+	}, [portalId, permawebProvider.libs]);
 
-	if(portal?.Fonts) {
+	if (portal?.Fonts) {
 		const fonts = portal?.Fonts;
 		const families = [];
 
@@ -111,19 +111,18 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			WebFont.load({
 				google: { families: families },
 				active: () => {
-					const [bodyFont, bodyWeight] = fonts.body.trim().split(":");
-					const bodyWeights = bodyWeight.split(",");
+					const [bodyFont, bodyWeight] = fonts.body.trim().split(':');
+					const bodyWeights = bodyWeight.split(',');
 					document.documentElement.style.setProperty('--font-body', bodyFont);
 					document.documentElement.style.setProperty('--font-body-weight', bodyWeights[0]);
 					document.documentElement.style.setProperty('--font-body-weight-bold', bodyWeights[1]);
-					
-					const [headerFont, headerWeight] = fonts.headers.trim().split(":");
-					const headerWeights = headerWeight.split(",");
+
+					const [headerFont, headerWeight] = fonts.headers.trim().split(':');
+					const headerWeights = headerWeight.split(',');
 					document.documentElement.style.setProperty('--font-header', headerFont);
 					document.documentElement.style.setProperty('--font-header-weight', headerWeights[0]);
 					document.documentElement.style.setProperty('--font-header-weight-bold', headerWeights[1]);
-					
-				}
+				},
 			});
 		}
 	}
@@ -135,8 +134,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					portalId,
 					portal,
 					setPortalId,
-					editorMode, 
-					setEditorMode, 
+					editorMode,
+					setEditorMode,
 				}}
 			>
 				{props.children}

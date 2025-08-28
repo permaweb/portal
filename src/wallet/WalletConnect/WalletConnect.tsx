@@ -1,27 +1,22 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
-import { WanderConnect } from "@wanderapp/connect";
-import { STORAGE } from 'helpers/config';
+import { WanderConnect } from '@wanderapp/connect';
 
 import { ProfileManager } from 'editor/components/organisms/ProfileManager';
 import { useSettingsProvider as useEditorSettingsProvider } from 'editor/providers/SettingsProvider';
 import { useSettingsProvider as useViewerSettingsProvider } from 'viewer/providers/SettingsProvider';
-import { checkValidAddress } from 'helpers/utils';
-
-import { useArweaveProvider } from 'providers/ArweaveProvider';
-import { useLanguageProvider } from 'providers/LanguageProvider';
-import { usePermawebProvider } from 'providers/PermawebProvider';
-
-import { ASSETS } from 'helpers/config';
-import { LanguageEnum, WalletEnum } from 'helpers/types';
-import { formatAddress, getARAmountFromWinc } from 'helpers/utils';
 
 import { Avatar } from 'components/atoms/Avatar';
 import { Button } from 'components/atoms/Button';
 import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
-
+import { ASSETS, STORAGE } from 'helpers/config';
+import { LanguageEnum, WalletEnum } from 'helpers/types';
+import { checkValidAddress, formatAddress, getARAmountFromWinc } from 'helpers/utils';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
+import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
@@ -91,11 +86,11 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 	}, []);
 
 	React.useEffect(() => {
-		if(!instance){
+		if (!instance) {
 			try {
 				const wanderInstance = new WanderConnect({
 					clientId: 'FREE_TRIAL',
-					theme: 'Dark',				
+					theme: 'Dark',
 					button: {
 						parent: wrapperRef.current,
 						label: false,
@@ -117,8 +112,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 							},
 						},
 						cssVars: {
-							light: {
-							},
+							light: {},
 							dark: {
 								boxShadow: 'none',
 							},
@@ -132,7 +126,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 			} catch (e) {
 				console.error(e);
 			}
-		}		
+		}
 
 		return () => {
 			try {
@@ -141,24 +135,27 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 			} catch {}
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-
 	}, []);
 
 	React.useEffect(() => {
-		if(auth){
-			const status = auth.authStatus
-			if(status === 'loading') setLabel('Signing in') 
-			else if((status === 'authenticated' || auth.authType === 'NATIVE_WALLET') && profile){
-				setLabel(profile.displayName || 'My Profile')
-				setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : '');
+		if (auth) {
+			const status = auth.authStatus;
+			if (status === 'loading') setLabel('Signing in');
+			else if ((status === 'authenticated' || auth.authType === 'NATIVE_WALLET') && profile) {
+				setLabel(profile.displayName || 'My Profile');
+				setAvatar(
+					profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : ''
+				);
 				// setBanner(profile?.banner && checkValidAddress(profile.banner) ? `https://arweave.net/${profile?.banner}` : '');
-			} 
+			}
 		} else if (localStorage.getItem(STORAGE.walletType) === 'NATIVE_WALLET' && profile) {
-			setLabel(profile.displayName || 'My Profile')
-			setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : '');
+			setLabel(profile.displayName || 'My Profile');
+			setAvatar(
+				profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : ''
+			);
 			// setBanner(profile?.banner && checkValidAddress(profile.banner) ? `https://arweave.net/${profile?.banner}` : '');
 		} else {
-			setLabel('Log in')
+			setLabel('Log in');
 			setAvatar('');
 			// setBanner('');
 		}

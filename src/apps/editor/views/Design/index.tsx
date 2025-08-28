@@ -16,9 +16,8 @@ export default function Design() {
 	return (
 		<S.Wrapper className={'fade-in'}>
 			<ViewHeader header={language?.design} />
-			<S.BodyWrapper>				
+			<S.BodyWrapper>
 				<S.SectionWrapper>
-					
 					<S.Section className={'border-wrapper-alt2'}>
 						<S.SectionHeader>
 							<p>{language?.fonts}</p>

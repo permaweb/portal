@@ -9,7 +9,7 @@ export const Wrapper = styled.div`
 	animation: ${open} ${transition3};
 
 	#wanderConnectButtonHost {
-		display:none;
+		display: none;
 	}
 `;
 

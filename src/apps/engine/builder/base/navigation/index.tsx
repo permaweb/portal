@@ -10,6 +10,7 @@ import * as S from './styles';
 import { ReactSVG } from 'react-svg';
 import { GlobalStyles } from '../../../global-styles';
 import Search from './search';
+import { getRedirect } from 'helpers/utils';
 
 export default function Navigation(props: any) {
   const { preview, layout, content } = props;
@@ -35,7 +36,7 @@ export default function Navigation(props: any) {
           onPointerEnter={() => entry.children && entry.children.length > 0 ? setShowMenu(true) : {}}
           onPointerLeave={() => setShowMenu(false)}
         >
-          <NavLink to={`/feed/category/${entry.id}`}>
+          <NavLink to={getRedirect(`feed/category/${entry.id}`)}>
             {entry.icon && <S.Icon><ReactSVG src={`/img/icons/${entry.Icon}.svg`} /></S.Icon>}
             {entry.name}
             {entry.children && entry.children.length > 0 && <Icon icon={ICONS.ARROW_DOWN} />}
@@ -44,7 +45,7 @@ export default function Navigation(props: any) {
               <S.NavigationEntryMenu $layout={layout}>
                 {entry.children.map((entry: any, key: any) => {
                   return (
-                    <NavLink to={`/feed/category/${entry.id}`} key={key}>
+                    <NavLink to={getRedirect(`feed/category/${entry.id}`)} key={key}>
                       <S.NavigationSubEntry>{entry.name}</S.NavigationSubEntry>
                     </NavLink>
                   )                

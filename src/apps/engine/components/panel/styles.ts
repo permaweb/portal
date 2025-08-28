@@ -1,5 +1,5 @@
-import styled from 'styled-components';
 import { fadeIn1, open, openRight } from 'engine/constants/animations';
+import styled from 'styled-components';
 
 export const Wrapper = styled.div`
 	min-height: 100vh;
@@ -18,7 +18,7 @@ export const Container = styled.div<{
 	width?: number;
 }>`
 	// height: calc(100dvh - 20px);
-	
+
 	min-width: ${(props) => (props.width ? `${props.width.toString()}px` : '425px')};
 	width: fit-content;
 	max-width: calc(100vw - 30px);
@@ -28,7 +28,7 @@ export const Container = styled.div<{
 	right: 10px;
 	transition: width 50ms ease-out;
 	animation: ${openRight} 200ms;
-	background: var(--color-post-background);
+	background: var(--color-card-background);
 	border-radius: var(--border-radius);
 `;
 
@@ -56,8 +56,8 @@ export const Title = styled.h2`
 
 export const Close = styled.div`
 	position: absolute;
-	top:10px;
-	right:10px;
+	top: 10px;
+	right: 10px;
 	padding: 2px 0 0 0;
 `;
 

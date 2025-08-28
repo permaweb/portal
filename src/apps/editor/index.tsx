@@ -22,9 +22,9 @@ import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvide
 import { NotificationProvider } from 'providers/NotificationProvider';
 import { PermawebProvider, usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
+import { WalletConnect } from 'wallet/WalletConnect';
 
 import * as S from './styles';
-import { WalletConnect } from 'wallet/WalletConnect';
 
 const views = (import.meta as any).glob('./views/**/index.tsx');
 
@@ -40,6 +40,7 @@ const Design = getLazyImport('Design');
 const Media = getLazyImport('Media');
 const Users = getLazyImport('Users');
 const Pages = getLazyImport('Pages');
+const Layout = getLazyImport('Layout');
 const Domains = getLazyImport('Domains');
 const DomainsRegister = getLazyImport('Domains/Register');
 const Docs = getLazyImport('Docs');
@@ -132,7 +133,7 @@ function AppContent() {
 			}
 			if (!portalProvider.permissions?.base || portalProvider.permissions?.externalContributor) {
 				return (
-					<Portal node={DOM.overlay}>						
+					<Portal node={DOM.overlay}>
 						<S.CenteredWrapper className={'overlay'}>
 							<S.MessageWrapper>
 								{portalProvider.isPermissionsLoading ? (
@@ -177,7 +178,7 @@ function AppContent() {
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />
 			<Suspense fallback={null}>
-				<S.App>					
+				<S.App>
 					<Routes>
 						{getRoute(URLS.base, <Landing />)}
 						{getRoute(`${URLS.base}:portalId`, <PortalView />)}
@@ -192,6 +193,7 @@ function AppContent() {
 						{getRoute(`${URLS.base}:portalId/media`, <Media />)}
 						{getRoute(`${URLS.base}:portalId/users`, <Users />)}
 						{getRoute(`${URLS.base}:portalId/pages`, <Pages />)}
+						{getRoute(`${URLS.base}:portalId/layout`, <Layout />)}
 						{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
 						{getRoute(`${URLS.base}:portalId/domains/register`, <DomainsRegister />)}
 						{getRoute(URLS.docs, <Docs />)}
@@ -223,7 +225,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 							<PermawebProvider>
 								<NotificationProvider>
 									<PortalProvider>
-										<GlobalStyle />										
+										<GlobalStyle />
 										<App />
 										<WalletConnect app="editor" />
 									</PortalProvider>

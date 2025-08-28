@@ -112,8 +112,9 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					await window.arweaveWallet.connect(WALLET_PERMISSIONS as any);
 					setWalletAddress(await window.arweaveWallet.getActiveAddress());
 					setWallet(window.arweaveWallet);
-					if(window?.wanderInstance) setWalletType(window.wanderInstance.authInfo.authType);				
-					if(window?.wanderInstance.authInfo.authType) localStorage.setItem(STORAGE.walletType, window.wanderInstance.authInfo.authType)
+					if (window?.wanderInstance) setWalletType(window.wanderInstance.authInfo.authType);
+					if (window?.wanderInstance.authInfo.authType)
+						localStorage.setItem(STORAGE.walletType, window.wanderInstance.authInfo.authType);
 					else {
 						setAuth({ ...window.wanderInstance.authInfo, authType: localStorage.getItem(STORAGE.walletType) });
 					}
@@ -209,18 +210,16 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 			if (data.type === 'embedded_auth') {
 				if (
 					data.data.authType ||
-					(data.data.authStatus === 'not-authenticated' &&
-						data.data.authType !== 'null' &&
-						data.data.authType !== null)
+					(data.data.authStatus === 'not-authenticated' && data.data.authType !== 'null' && data.data.authType !== null)
 				) {
 					if (data.data.authStatus !== 'loading') {
 						window.wanderInstance.close();
 						setAuth(data.data);
-						if(data.data.authStatus === 'authenticated' || data.data.authType === 'NATIVE_WALLET'){
+						if (data.data.authStatus === 'authenticated' || data.data.authType === 'NATIVE_WALLET') {
 							setAuth(data.data);
-							handleArConnect()
+							handleArConnect();
 						}
-					}else{
+					} else {
 						setAuth(data.data);
 					}
 				} else if (data.data.authStatus === 'not-authenticated') {
@@ -235,9 +234,10 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					window.wanderInstance.close();
 				}
 			} else if (data.type === 'embedded_balance') {
-			} else if (data.type === 'embedded_close') {}
+			} else if (data.type === 'embedded_close') {
+			}
 		}
-	};
+	}
 
 	return (
 		<ARContext.Provider

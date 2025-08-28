@@ -1,35 +1,34 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Header from './builder/base/header';
-import Navigation from './builder/base/navigation';
-import { PortalProvider, usePortalProvider, useSetPortalId } from 'engine/providers/portalProvider';
 import { initThemes } from 'engine/helpers/themes';
-import Content from './builder/base/content';
-import Footer from './builder/base/footer';
+import { PortalProvider, usePortalProvider, useSetPortalId } from 'engine/providers/portalProvider';
+
 import { DOM, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { preloadAllAssets } from 'helpers/preloader';
-import { GlobalStyles } from './global-styles';
 import { checkValidAddress, getPortalIdFromURL } from 'helpers/utils';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider } from 'providers/LanguageProvider';
 import { NotificationProvider } from 'providers/NotificationProvider';
 import { PermawebProvider } from 'providers/PermawebProvider';
-import ZoneEditor from './components/zoneEditor';
 
+import Content from './builder/base/content';
+import Footer from './builder/base/footer';
+import Header from './builder/base/header';
+import Navigation from './builder/base/navigation';
+import ZoneEditor from './components/zoneEditor';
+import { GlobalStyles } from './global-styles';
 import * as S from './global-styles';
 
-// import * as S from './styles';
-
-const queryClient = new QueryClient();
 
 function App() {
 	const location = useLocation();
 	const portalProvider = usePortalProvider();
 	const { Name, Categories, Layout, Themes } = portalProvider?.portal || {};
-	const [theme, setTheme] = React.useState<any>(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+	const [theme, setTheme] = React.useState<any>(
+		window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+	);
 	const [portalId, setPortalId] = React.useState<string | null>(null);
 
 	// Get portal ID from URL or domain
@@ -61,15 +60,15 @@ function App() {
 	// Set the portal ID in the provider
 	useSetPortalId(portalId || '');
 
-  React.useEffect(() => {
-    if(Themes){
-      const activeTheme = Themes.find((e: any) => e.active)
-			const systemScheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      setTheme(systemScheme);
-      document.documentElement.setAttribute('theme', theme);
-      initThemes(Themes)
-    }
-  },[Themes])
+	React.useEffect(() => {
+		if (Themes) {
+			const activeTheme = Themes.find((e: any) => e.active);
+			const systemScheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+			setTheme(systemScheme);
+			document.documentElement.setAttribute('theme', theme);
+			initThemes(Themes);
+		}
+	}, [Themes]);
 
 	React.useEffect(() => {
 		if (portalProvider.portal?.Name) document.title = portalProvider.portal.Name;
@@ -110,7 +109,13 @@ function App() {
 			<div id={DOM.overlay} />
 			<S.PageWrapper>
 				<S.Page $layout={Layout?.basics} id="Page">
-					<Header name={Name} layout={Layout?.header.layout} content={Layout?.header.content} theme={theme} setTheme={setTheme} />
+					<Header
+						name={Name}
+						layout={Layout?.header.layout}
+						content={Layout?.header.content}
+						theme={theme}
+						setTheme={setTheme}
+					/>
 					<Navigation layout={Layout?.navigation.layout} content={Categories} theme={theme} />
 					<Content layout={Layout} />
 					<Footer layout={Layout?.footer.layout} content={Layout?.footer.content} theme={theme} />
@@ -118,24 +123,24 @@ function App() {
 				<ZoneEditor />
 			</S.PageWrapper>
 		</>
-	) : <>Loading</>;
+	) : (
+		<>Loading</>
+	);
 }
 
 ReactDOM.createRoot(document.getElementById('portal') as HTMLElement).render(
-	<QueryClientProvider client={queryClient}>
-		<HashRouter>
-			<LanguageProvider>
-				<ArweaveProvider>
-					<PermawebProvider>
-						<NotificationProvider>
-							<PortalProvider>
-								<GlobalStyles />								
-								<App />
-							</PortalProvider>
-						</NotificationProvider>
-					</PermawebProvider>
-				</ArweaveProvider>
-			</LanguageProvider>
-		</HashRouter>
-	</QueryClientProvider>
+	<HashRouter>
+		<LanguageProvider>
+			<ArweaveProvider>
+				<PermawebProvider>
+					<NotificationProvider>
+						<PortalProvider>
+							<GlobalStyles />
+							<App />
+						</PortalProvider>
+					</NotificationProvider>
+				</PermawebProvider>
+			</ArweaveProvider>
+		</LanguageProvider>
+	</HashRouter>
 );
