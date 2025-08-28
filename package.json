@@ -27,7 +27,7 @@
 	"dependencies": {
 		"@ar.io/sdk": "^3.16.0-alpha.1",
 		"@hello-pangea/dnd": "^17.0.0",
-		"@permaweb/aoconnect": "file:../ao/connect",
+		"@permaweb/aoconnect": "0.0.90",
 		"@permaweb/libs": "0.0.53",
 		"@stripe/react-stripe-js": "^3.5.1",
 		"@stripe/stripe-js": "^6.1.0",
