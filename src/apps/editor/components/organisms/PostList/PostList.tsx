@@ -66,7 +66,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 		totalPages,
 		currentRange,
 	} = usePostsList({
-		pageSize: props.pageCount,
+		pageSize: props.pageCount || 10,
 	});
 
 	function handleReviewRedirect(requestId: string) {
