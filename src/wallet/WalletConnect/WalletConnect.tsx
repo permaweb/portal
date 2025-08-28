@@ -21,6 +21,12 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
+declare global {
+	interface Window {
+		wanderInstance: any;
+	}
+}
+
 const AR_WALLETS = [{ type: WalletEnum.wander, label: 'Wander', logo: ASSETS.wander }];
 
 /*
@@ -86,7 +92,9 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 	}, []);
 
 	React.useEffect(() => {
-		if (!instance) {
+		if (window.wanderInstance && !instance) {
+			setInstance(window.wanderInstance);
+		} else if (!instance && !window.wanderInstance) {
 			try {
 				const wanderInstance = new WanderConnect({
 					clientId: 'FREE_TRIAL',
@@ -130,9 +138,17 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 
 		return () => {
 			try {
-				window.wanderInstance.destroy();
-				// if(instance) instance.destroy();
-			} catch {}
+				if (window.wanderInstance) {
+					window.wanderInstance.destroy();
+					window.wanderInstance = null;
+				}
+				if (instance) {
+					instance.destroy();
+					setInstance(null);
+				}
+			} catch (e) {
+				console.error('Error destroying WanderConnect instance:', e);
+			}
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
