@@ -1,6 +1,9 @@
 import { getTxEndpoint } from './endpoints';
 import { ArticleBlockEnum, PortalSchemeType, PortalThemeType } from './types';
 
+// Testnet configuration
+export const IS_TESTNET = import.meta.env.VITE_TESTNET === 'true';
+
 export const SOCIAL_LINK_ASSETS = {
 	dailyMotion: 'qO9Qi_WSCcZgqN-3D4eSApFyEHHSw6jZneGUGT8nLmA',
 	odysee: 'XRcs4SS78ELZ6wERYtc0Spb_wKOjwcbEzVtJdmD_VZA',
