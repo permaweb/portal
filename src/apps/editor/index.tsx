@@ -134,11 +134,8 @@ function AppContent() {
 					<Portal node={DOM.overlay}>
 						<S.CenteredWrapper className={'overlay'}>
 							<S.MessageWrapper>
-								{!portalProvider.permissions ? (
-									<>
-										<p>{language?.permissionBaseDenied}</p>
-										<Button type={'primary'} label={language?.returnHome} handlePress={() => navigate(URLS.base)} />
-									</>
+								{portalProvider.isPermissionsLoading ? (
+									<p>{`${language?.loggingIn}...`}</p>
 								) : (
 									<>
 										<p>
@@ -146,7 +143,7 @@ function AppContent() {
 												? language?.permissionExternalContributor
 												: language?.permissionBaseDenied}
 										</p>
-										<Button type={'primary'} label={language?.returnHome} handlePress={() => navigate(URLS.base)} />
+										<Button type="primary" label={language?.returnHome} handlePress={() => navigate(URLS.base)} />
 									</>
 								)}
 							</S.MessageWrapper>
@@ -154,7 +151,6 @@ function AppContent() {
 					</Portal>
 				);
 			}
-
 			return (
 				<>
 					{!portalProvider.current && <Loader message={`${language?.loadingPortal}...`} />}

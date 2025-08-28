@@ -37,6 +37,7 @@ interface PortalContextState {
 	fetchPortalUserProfile: (user: PortalUserType) => void;
 	usersByPortalId: any;
 	updating: boolean;
+	isPermissionsLoading: boolean;
 }
 
 const DEFAULT_CONTEXT = {
@@ -50,6 +51,7 @@ const DEFAULT_CONTEXT = {
 	fetchPortalUserProfile(_user: PortalUserType) {},
 	usersByPortalId: {},
 	updating: false,
+	isPermissionsLoading: false,
 };
 
 const PortalContext = React.createContext<PortalContextState>(DEFAULT_CONTEXT);
@@ -94,7 +96,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		const profilePortals = permawebProvider.profile?.portals ?? [];
 		setPortals(profilePortals);
 		setInvites(permawebProvider.profile?.invites ?? []);
-
 		if (!hasFetchedMeta.current) {
 			hasFetchedMeta.current = true;
 			if (profilePortals.length > 0) {
@@ -377,6 +378,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		setRefreshCurrentTrigger((prev) => !prev);
 	};
 
+	const isPermissionsLoading = React.useMemo(() => {
+		if (!currentId) return false; // no portal selected → nothing to load
+		return permissions === null || updating; // waiting for permissions or actively fetching
+	}, [currentId, permissions, updating]);
+
 	return (
 		<PortalContext.Provider
 			value={{
@@ -390,6 +396,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				fetchPortalUserProfile: (userRole: PortalUserType) => fetchPortalUserProfile(userRole),
 				usersByPortalId: usersByPortalId,
 				updating,
+				isPermissionsLoading,
 			}}
 		>
 			{props.children}
