@@ -1379,7 +1379,6 @@ export default function DomainList() {
 				{!IS_TESTNET && <TurboBalanceFund handleClose={() => setShowFund(false)} />}
 			</Panel>
 
-			{/* While validating, show which domains are still loading as compact chips */}
 			{listReady && validating.length > 0 && (
 				<S.LoadingBanner>
 					<span className={'label'}>{language.loadingDataFor}</span>
