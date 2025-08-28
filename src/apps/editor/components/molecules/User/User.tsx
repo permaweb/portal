@@ -5,26 +5,22 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Avatar } from 'components/atoms/Avatar';
 import { Panel } from 'components/atoms/Panel';
-import { PortalHeaderType, PortalUserType, SelectOptionType } from 'helpers/types';
+import { PortalHeaderType, PortalUserType } from 'helpers/types';
 import { checkValidAddress, formatAddress, formatRoleLabel, getARAmountFromWinc } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-import { TurboFactory } from '@ardrive/turbo-sdk';
+import { TurboFactory, ArconnectSigner } from '@ardrive/turbo-sdk/web';
 import * as S from './styles';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
-import { usePermawebProvider } from 'providers/PermawebProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { FormField } from 'components/atoms/FormField';
-import { Select } from 'components/atoms/Select';
 import { Button } from 'components/atoms/Button';
 import { ASSETS } from 'helpers/config';
-import { ArweaveSigner } from '@ar.io/sdk';
 
 export default function User(props: {
 	user: PortalUserType;
 	onInviteDetected?: (userAddress: string, hasPendingInvite: boolean) => void;
 	hideAction?: boolean;
 }) {
-	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();
@@ -33,9 +29,6 @@ export default function User(props: {
 	const [showManageUser, setShowManageUser] = React.useState<boolean>(false);
 	const [showShareCredits, setShowShareCredits] = React.useState<boolean>(false);
 	const canShareCredits = portalProvider?.permissions?.updateUsers;
-	const turboBalance = arProvider.turboBalance ? getARAmountFromWinc(arProvider.turboBalance) : 0;
-
-	const turbo = TurboFactory.unauthenticated();
 
 	React.useEffect(() => {
 		(async function () {
@@ -138,8 +131,8 @@ export default function User(props: {
 
 export function ShareCredits(props: { user?: any; handleClose: () => void }) {
 	const arProvider = useArweaveProvider();
-
-	const turbo = TurboFactory.authenticated({ signer: arProvider.wallet as ArweaveSigner });
+	const signer = new ArconnectSigner(arProvider.wallet);
+	const turbo = TurboFactory.authenticated({ signer });
 	const turboBalance = arProvider.turboBalance ? getARAmountFromWinc(arProvider.turboBalance) : 0;
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -151,11 +144,29 @@ export function ShareCredits(props: { user?: any; handleClose: () => void }) {
 	const { addNotification } = useNotifications();
 
 	async function handleSubmit() {
-		const { approvalDataItemId, approvedWincAmount } = await turbo.shareCredits({
-			approvedAddress: walletAddress,
-			approvedWincAmount: approvedWincAmount as BigNumber.,
-			expiresBySeconds: 3600,
-		});
+		setLoading(true);
+		try {
+			const { approvalDataItemId, approvedWincAmount } = await turbo.shareCredits({
+				approvedAddress: walletAddress,
+				approvedWincAmount: 0.00315565032,
+				expiresBySeconds: 3600,
+			});
+
+			if (!approvalDataItemId) {
+				addNotification(language?.errorOccurred ?? 'Could not share credits.', 'warning');
+				return;
+			}
+
+			console.log('Credits shared:', { approvalDataItemId, approvedWincAmount });
+			arProvider?.refreshTurboBalance();
+			props?.handleClose?.();
+		} catch (err: unknown) {
+			console.error('turbo.shareCredits failed:', err);
+			const msg = err instanceof Error ? err.message : 'Unexpected error';
+			addNotification(`${language?.errorOccurred ?? 'Error occurred'}: ${msg}`, 'warning');
+		} finally {
+			setLoading(false);
+		}
 	}
 
 	return (
