@@ -177,7 +177,7 @@ export default function Landing() {
 							<WalletConnect app={'editor'} />
 						</S.WalletConnect>
 					)}
-					{action && (
+					{action && arProvider.walletAddress && (
 						<Button
 							type={'primary'}
 							label={label}

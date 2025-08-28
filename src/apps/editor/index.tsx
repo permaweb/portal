@@ -129,13 +129,12 @@ function AppContent() {
 					</Portal>
 				);
 			}
-
 			if (!portalProvider.permissions?.base || portalProvider.permissions?.externalContributor) {
 				return (
 					<Portal node={DOM.overlay}>
 						<S.CenteredWrapper className={'overlay'}>
 							<S.MessageWrapper>
-								{!portalProvider.permissions ? (
+								{portalProvider.isPermissionsLoading ? (
 									<p>{`${language?.loggingIn}...`}</p>
 								) : (
 									<>
@@ -144,7 +143,7 @@ function AppContent() {
 												? language?.permissionExternalContributor
 												: language?.permissionBaseDenied}
 										</p>
-										<Button type={'primary'} label={language?.returnHome} handlePress={() => navigate(URLS.base)} />
+										<Button type="primary" label={language?.returnHome} handlePress={() => navigate(URLS.base)} />
 									</>
 								)}
 							</S.MessageWrapper>
@@ -152,7 +151,6 @@ function AppContent() {
 					</Portal>
 				);
 			}
-
 			return (
 				<>
 					{!portalProvider.current && <Loader message={`${language?.loadingPortal}...`} />}

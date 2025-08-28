@@ -55,23 +55,25 @@ export default function User(props: {
 					<Avatar owner={userProfile} dimensions={{ wrapper: 23.5, icon: 15 }} callback={null} />
 					<p>{userProfile.username ?? formatAddress(userProfile.id, false)}</p>
 				</S.UserHeader>
-				<S.UserDetail>
-					{invitePending && (
-						<S.PendingInvite className={'border-wrapper-alt3'}>
-							<span>{language.invitePending}</span>
-							<S.Indicator />
-						</S.PendingInvite>
-					)}
-					{props.user.roles && (
-						<S.UserActions>
-							{props.user.roles.map((role) => (
-								<S.UserRole key={role} role={role}>
-									<span>{formatRoleLabel(role)}</span>
-								</S.UserRole>
-							))}
-						</S.UserActions>
-					)}
-				</S.UserDetail>
+				{!props.hideAction && (
+					<S.UserDetail>
+						{invitePending && (
+							<S.PendingInvite className={'border-wrapper-alt3'}>
+								<span>{language.invitePending}</span>
+								<S.Indicator />
+							</S.PendingInvite>
+						)}
+						{props.user.roles && (
+							<S.UserActions>
+								{props.user.roles.map((role) => (
+									<S.UserRole key={role} role={role}>
+										<span>{formatRoleLabel(role)}</span>
+									</S.UserRole>
+								))}
+							</S.UserActions>
+						)}
+					</S.UserDetail>
+				)}
 			</S.UserWrapper>
 			{props.user.roles && (
 				<Panel

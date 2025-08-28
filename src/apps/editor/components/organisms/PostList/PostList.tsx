@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Post } from 'editor/components/molecules/Post';
@@ -10,141 +9,70 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Panel } from 'components/atoms/Panel';
 import { ASSETS, URLS } from 'helpers/config';
-import {
-	ArticleStatusType,
-	GQLNodeResponseType,
-	PortalAssetRequestType,
-	PortalAssetType,
-	ViewLayoutType,
-} from 'helpers/types';
-import { formatDate, getTagValue } from 'helpers/utils';
+import { ArticleStatusType, PortalAssetRequestType, PortalAssetType, ViewLayoutType } from 'helpers/types';
+import { formatDate } from 'helpers/utils';
+import { usePostsList } from 'hooks/usePostList';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-import { usePermawebProvider } from 'providers/PermawebProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
+
+export const Posts = (props: { paginatedPosts?: PortalAssetType[]; type?: ViewLayoutType }) => {
+	const laguageProvider = useLanguageProvider();
+	const language = laguageProvider.object[laguageProvider.current];
+
+	if (!props.paginatedPosts.length) {
+		return (
+			<S.WrapperEmpty type={props.type}>
+				<p>{language?.noPostsFound}</p>
+			</S.WrapperEmpty>
+		);
+	}
+
+	return (
+		<S.PostsWrapper type={props.type}>
+			{props.paginatedPosts.map((post: PortalAssetType) => (
+				<Post key={post.id} post={post} />
+			))}
+		</S.PostsWrapper>
+	);
+};
 
 export default function PostList(props: { type: ViewLayoutType; pageCount?: number }) {
 	const navigate = useNavigate();
 
 	const portalProvider = usePortalProvider();
-	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [currentPage, setCurrentPage] = React.useState<number>(1);
-	const [pageCount, _setPageCount] = React.useState<number>(props.pageCount || 10);
-	const [currentStatusFilter, setCurrentStatusFilter] = React.useState<ArticleStatusType | 'all'>('all');
-	const [dateAscending, setDateAscending] = React.useState<boolean>(false);
-	const [showFilterActions, setShowFilterActions] = React.useState<boolean>(false);
-	const [showRequests, setShowRequests] = React.useState<boolean>(false);
-	const [loading, setLoading] = React.useState<boolean>(false);
-	const [requests, setRequests] = React.useState<PortalAssetRequestType[] | null>(null);
+	const {
+		assets,
+		loading,
+		showFilterActions,
+		setShowFilterActions,
+		showRequests,
+		setShowRequests,
+		requests,
+		totalCount,
+		publishedCount,
+		draftCount,
+		currentStatusFilter,
+		setCurrentStatusFilter,
+		dateAscending,
+		setDateAscending,
+		paginatedPosts,
+		currentPage,
+		setCurrentPage,
+		totalPages,
+		currentRange,
+	} = usePostsList({
+		pageSize: props.pageCount || 10,
+	});
 
-	const totalCount = portalProvider.current?.assets?.length ?? '-';
-	const publishedCount =
-		portalProvider.current?.assets?.filter((asset: any) => asset.metadata?.status === 'published').length ?? '-';
-	const draftCount =
-		portalProvider.current?.assets?.filter((asset: any) => asset.metadata?.status === 'draft').length ?? '-';
-
-	React.useEffect(() => {
-		setCurrentPage(1);
-	}, [currentStatusFilter]);
-
-	React.useEffect(() => {
-		(async function () {
-			if (requests !== null) return;
-			if (!showRequests) return;
-
-			const ids = portalProvider.current?.requests.map((asset: PortalAssetRequestType) => asset.id);
-
-			if (!ids?.length) {
-				setRequests([]);
-				return;
-			}
-
-			try {
-				const gqlResponse = await permawebProvider.libs.getAggregatedGQLData({ ids });
-
-				const seeded = (gqlResponse ?? []).map((el: GQLNodeResponseType) => ({
-					id: el.node.id,
-					name: getTagValue(el.node.tags, 'Bootloader-Name'),
-					creatorId: getTagValue(el.node.tags, 'Creator'),
-					dateCreated: (el.node.block?.timestamp * 1000).toString() ?? '-',
-				}));
-
-				setRequests(seeded);
-
-				const returnedIds = new Set((gqlResponse ?? []).map((el: GQLNodeResponseType) => el.node.id));
-				const missingIds = ids.filter((id) => !returnedIds.has(id));
-
-				if (missingIds.length > 0) {
-					setLoading(true);
-					let cancelled = false;
-					let remaining = missingIds.length;
-
-					missingIds.forEach(async (id) => {
-						try {
-							const asset = await permawebProvider.libs.getAtomicAsset(id);
-							if (cancelled) return;
-
-							const formatted = {
-								id: asset.id,
-								name: asset.name,
-								creatorId: asset.creator,
-								dateCreated: asset.dateCreated,
-							};
-
-							setRequests((prev) => {
-								const base = prev ?? [];
-								return base.some((r) => r.id === formatted.id) ? base : [...base, formatted];
-							});
-						} catch (e) {
-							console.error('fetch asset failed', id, e);
-						} finally {
-							if (!cancelled && --remaining === 0) {
-								setLoading(false);
-							}
-						}
-					});
-
-					return () => {
-						cancelled = true;
-						setLoading(false);
-					};
-				}
-			} catch (e: any) {
-				console.error(e);
-				setLoading(false);
-				setRequests((prev) => prev ?? []);
-			}
-		})();
-	}, [requests, showRequests, portalProvider.current?.requests]);
-
-	const assets = React.useMemo(() => {
-		if (!portalProvider.current?.assets) return [];
-		return portalProvider.current.assets
-			.filter((asset: any) => currentStatusFilter === 'all' || asset.metadata?.status === currentStatusFilter)
-			.sort((a, b) => {
-				const dateA = new Date(Number(a.dateCreated)).getTime();
-				const dateB = new Date(Number(b.dateCreated)).getTime();
-				return dateAscending ? dateA - dateB : dateB - dateA;
-			});
-	}, [portalProvider.current?.assets, currentStatusFilter, dateAscending]);
-
-	const totalPages = Math.ceil(assets.length / pageCount);
-
-	const paginatedPosts = React.useMemo(() => {
-		const startIndex = (currentPage - 1) * pageCount;
-		const endIndex = startIndex + pageCount;
-		return assets.slice(startIndex, endIndex);
-	}, [assets, currentPage]);
-
-	const currentRange = React.useMemo(() => {
-		const start = (currentPage - 1) * pageCount + 1;
-		const end = Math.min(currentPage * pageCount, assets.length);
-		return { start, end };
-	}, [currentPage, assets.length]);
+	function handleReviewRedirect(requestId: string) {
+		setShowRequests(false);
+		navigate(`${URLS.postEditArticle(portalProvider.current.id)}${requestId}`);
+	}
 
 	function getActions(dropdown: boolean) {
 		const getButtonType = (isFilter: boolean, status: string) => {
@@ -211,11 +139,6 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 		);
 	}
 
-	function handleReviewRedirect(requestId: string) {
-		setShowRequests(false);
-		navigate(`${URLS.postEditArticle(portalProvider.current.id)}${requestId}`);
-	}
-
 	function getRequests() {
 		const unauthorized = !portalProvider?.permissions?.postAutoIndex;
 		let content = <Loader sm relative />;
@@ -262,7 +185,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 						</S.PostsActionsRequestsBody>
 						{loading && <Loader sm relative />}
 						{unauthorized && (
-							<S.InfoWrapper className={'info'}>
+							<S.InfoWrapper className={'warning'}>
 								<span>{language?.unauthorizedPostReview}</span>
 							</S.InfoWrapper>
 						)}
@@ -341,28 +264,10 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 		}
 	}
 
-	function getPosts() {
-		if (!paginatedPosts.length) {
-			return (
-				<S.WrapperEmpty type={props.type}>
-					<p>{language?.noPostsFound}</p>
-				</S.WrapperEmpty>
-			);
-		}
-
-		return (
-			<S.PostsWrapper type={props.type}>
-				{paginatedPosts.map((post: PortalAssetType) => (
-					<Post key={post.id} post={post} />
-				))}
-			</S.PostsWrapper>
-		);
-	}
-
 	return (
 		<S.Wrapper>
 			{getHeader()}
-			{getPosts()}
+			<Posts paginatedPosts={paginatedPosts} type={props.type} />
 			<S.PostsFooter>
 				<S.PostsFooterDetail>
 					<p>{language?.showingRange(assets.length > 0 ? currentRange.start : 0, currentRange.end, assets.length)}</p>

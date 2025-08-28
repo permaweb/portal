@@ -94,8 +94,8 @@ export default function Editor() {
 						wallet: arProvider.wallet,
 						action: 'Update-Index-Request',
 						tags: [
-							{ name: 'IndexId', value: assetId },
-							{ name: 'UpdateType', value: updateType },
+							{ name: 'Index-Id', value: assetId },
+							{ name: 'Update-Type', value: updateType },
 						],
 					});
 
@@ -113,9 +113,9 @@ export default function Editor() {
 								wallet: arProvider.wallet,
 								action: 'Send-Index',
 								tags: [
-									{ name: 'AssetType', value: ASSET_UPLOAD.ansType },
-									{ name: 'ContentType', value: ASSET_UPLOAD.contentType },
-									{ name: 'DateAdded', value: new Date().getTime().toString() },
+									{ name: 'Asset-Type', value: ASSET_UPLOAD.ansType },
+									{ name: 'Content-Type', value: ASSET_UPLOAD.contentType },
+									{ name: 'Date-Added', value: new Date().getTime().toString() },
 								],
 								data: { Recipients: indexRecipients },
 							});
@@ -180,6 +180,15 @@ export default function Editor() {
 				return;
 			}
 
+			const excludeFromIndex = JSON.stringify([
+				'Balances',
+				'Ticker',
+				'Process-Type',
+				'Total-Supply',
+				'Transferable',
+				'Metadata.Content',
+			]);
+
 			let data: any = permawebProvider.libs.mapToProcessCase({
 				name: currentPost.data.title,
 				description: currentPost.data.description,
@@ -203,6 +212,7 @@ export default function Editor() {
 						processId: assetId,
 						wallet: arProvider.wallet,
 						action: 'Update-Asset',
+						tags: [{ name: 'Exclude-Index', value: excludeFromIndex }],
 						data: data,
 					});
 
@@ -244,10 +254,11 @@ export default function Editor() {
 							contentType: ASSET_UPLOAD.contentType,
 							assetType: ASSET_UPLOAD.ansType,
 							metadata: {
-								releasedDate: new Date().getTime().toString(),
+								releaseDate: currentPost.data.releaseDate ?? new Date().getTime().toString(),
 								originPortal: portalProvider.current.id,
 							},
 							users: getAssetAuthUsers(),
+							spawnComments: true,
 						},
 						(status: any) => console.log(status)
 					);
@@ -258,6 +269,7 @@ export default function Editor() {
 						processId: assetId,
 						wallet: arProvider.wallet,
 						action: 'Update-Asset',
+						tags: [{ name: 'Exclude-Index', value: excludeFromIndex }],
 						data: data,
 					});
 
@@ -291,13 +303,13 @@ export default function Editor() {
 							wallet: arProvider.wallet,
 							action: 'Run-Action',
 							tags: [
-								{ name: 'ForwardTo', value: portalProvider.current.id },
-								{ name: 'ForwardAction', value: internalIndexAction },
-								{ name: 'IndexId', value: assetId },
+								{ name: 'Forward-To', value: portalProvider.current.id },
+								{ name: 'Forward-Action', value: internalIndexAction },
+								{ name: 'Index-Id', value: assetId },
 							],
 						});
 
-						console.log(`Zone index update: ${zoneIndexUpdateId}`);
+						console.log(`Zone (profile) index update: ${zoneIndexUpdateId}`);
 
 						if (portalProvider.permissions.postAutoIndex) {
 							const zoneResult = await permawebProvider.deps.ao.result({
@@ -311,15 +323,17 @@ export default function Editor() {
 									wallet: arProvider.wallet,
 									action: 'Send-Index',
 									tags: [
-										{ name: 'AssetType', value: ASSET_UPLOAD.ansType },
-										{ name: 'ContentType', value: ASSET_UPLOAD.contentType },
-										{ name: 'DateAdded', value: new Date().getTime().toString() },
+										{ name: 'Asset-Type', value: ASSET_UPLOAD.ansType },
+										{ name: 'Content-Type', value: ASSET_UPLOAD.contentType },
+										{ name: 'Date-Added', value: new Date().getTime().toString() },
+										{ name: 'Exclude', value: excludeFromIndex },
 									],
 									data: { Recipients: [portalProvider.current.id] },
 								});
 
 								console.log(`Asset index update: ${assetIndexUpdateId}`);
-								portalProvider.refreshCurrentPortal('assets');
+
+								portalProvider.refreshCurrentPortal();
 							}
 						}
 					}
@@ -343,9 +357,9 @@ export default function Editor() {
 									wallet: arProvider.wallet,
 									action: 'Run-Action',
 									tags: [
-										{ name: 'ForwardTo', value: externalPortal.id },
-										{ name: 'ForwardAction', value: externalIndexAction },
-										{ name: 'IndexId', value: assetId },
+										{ name: 'Forward-To', value: externalPortal.id },
+										{ name: 'Forward-Action', value: externalIndexAction },
+										{ name: 'Index-Id', value: assetId },
 									],
 								});
 
@@ -363,9 +377,9 @@ export default function Editor() {
 											wallet: arProvider.wallet,
 											action: 'Send-Index',
 											tags: [
-												{ name: 'AssetType', value: ASSET_UPLOAD.ansType },
-												{ name: 'ContentType', value: ASSET_UPLOAD.contentType },
-												{ name: 'DateAdded', value: new Date().getTime().toString() },
+												{ name: 'Asset-Type', value: ASSET_UPLOAD.ansType },
+												{ name: 'Content-Type', value: ASSET_UPLOAD.contentType },
+												{ name: 'Date-Added', value: new Date().getTime().toString() },
 											],
 											data: { Recipients: [externalPortal.id] },
 										});
@@ -464,7 +478,7 @@ export default function Editor() {
 		}
 		if (!currentPost.data.topics?.length) {
 			valid = false;
-			message = 'Topics are required';
+			message = 'Tags are required';
 			missingFieldsFound.push(message);
 		}
 
@@ -480,7 +494,7 @@ export default function Editor() {
 		<>
 			{unauthorized && (
 				<div className={'overlay'}>
-					<S.MessageWrapper className={'border-wrapper-alt2'}>
+					<S.MessageWrapper className={'border-wrapper-alt2 warning'}>
 						<p>{language?.unauthorizedPostCreate}</p>
 						<Button
 							type={'primary'}

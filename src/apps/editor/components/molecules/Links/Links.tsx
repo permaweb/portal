@@ -281,7 +281,14 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 							accept={ALLOWED_ICON_TYPES}
 						/>
 					</S.LinkDetailsWrapper>
-					<S.LinksAddAction>
+					<S.LinksAddAction
+						onSubmit={addLink}
+						onKeyDownCapture={(e) => {
+							if (e.key === 'Enter') {
+								e.nativeEvent.stopImmediatePropagation();
+							}
+						}}
+					>
 						<Button
 							type={'alt4'}
 							label={language?.add}
@@ -290,6 +297,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 							loading={linkLoading}
 							icon={ASSETS.add}
 							iconLeftAlign
+							formSubmit
 						/>
 						<FormField
 							value={newLinkUrl}

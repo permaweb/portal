@@ -143,8 +143,14 @@ export default function PortalManager(props: {
 
 					console.log(`Roles update: ${rolesUpdate}`);
 
-					profileUpdateId = await permawebProvider.libs.addToZone(
-						{ path: 'Portals', data: { Id: portalId, ...data } },
+					const currentPortals = Array.isArray(permawebProvider.profile?.portals)
+						? permawebProvider.profile.portals
+						: [];
+
+					const updatedPortals = [...currentPortals, { Id: portalId, ...data }];
+
+					profileUpdateId = await permawebProvider.libs.updateZone(
+						{ Portals: permawebProvider.libs.mapToProcessCase(updatedPortals) },
 						permawebProvider.profile.id,
 						arProvider.wallet
 					);

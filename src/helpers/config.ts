@@ -1,6 +1,16 @@
 import { getTxEndpoint } from './endpoints';
 import { ArticleBlockEnum, PortalSchemeType, PortalThemeType } from './types';
 
+// export const AO_NODE = {
+// 	url: 'http://localhost:8734',
+// 	scheduler: 'mYJTM8VpIibDLuyGLQTcbcPy-LeOY48qzECADTUYfWc',
+// };
+
+export const AO_NODE = {
+	url: 'https://forward.computer',
+	scheduler: 'NoZH3pueH0Cih6zjSNu_KRAcmg4ZJV1aGHKi0Pi5_Hc',
+};
+
 // Testnet configuration
 export const IS_TESTNET = import.meta.env.VITE_TESTNET === 'true';
 
@@ -32,6 +42,7 @@ export const ASSETS = {
 	close: getTxEndpoint('BASlMnOWcLCcLUSrO2wUybQL_06231dLONeVkdTWs3o'),
 	code: getTxEndpoint('Nv6GexQXf2PpTv8zYoLzysv0DzOiUK_aguqjnNraqDg'),
 	dark: getTxEndpoint('frDBQmgmo9MLraz4dcGqknHOeUVj9Yx8XNfSozJd4Uo'),
+	date: getTxEndpoint('zEaGL41CNpoN2qsdcvfPCV4TrH2WZrbF6wKDLW7m5Vg'),
 	delete: getTxEndpoint('aKjWuVXkSeYOKzGP0MnnhHwoYUXqTHFMJfVCbqzYEo0'),
 	design: getTxEndpoint('UUvx4WWSyuNC8fOQ5OsYudP77Reae8wmvHh1PDB196c'),
 	disconnect: getTxEndpoint('eWncZs2hH5oNSsWTIImJhqdZ4-n0P4CfZbduK2ae4L4'),
@@ -307,8 +318,6 @@ export const DEFAULT_THEME: { light: PortalThemeType; dark: PortalThemeType } = 
 		},
 	},
 };
-
-export const AO_NODE_URL = 'https://dev-router.forward.computer';
 
 export const STRIPE_PUBLISHABLE_KEY =
 	'pk_live_51JUAtwC8apPOWkDLMQqNF9sPpfneNSPnwX8YZ8y1FNDl6v94hZIwzgFSYl27bWE4Oos8CLquunUswKrKcaDhDO6m002Yj9AeKj';

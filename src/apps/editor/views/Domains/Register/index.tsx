@@ -522,7 +522,7 @@ export default function Domains() {
 										</S.UpdateWrapper>
 									)}
 									{unauthorized && (
-										<S.UpdateWrapper className={'border-wrapper-alt3'}>
+										<S.UpdateWrapper className={'border-wrapper-alt3 warning'}>
 											<p>{language.unauthorizedDomainRegister}</p>
 										</S.UpdateWrapper>
 									)}

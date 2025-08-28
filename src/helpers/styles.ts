@@ -194,8 +194,8 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   .notification {
-    height: 12.5px;
-    width: 12.5px;
+    height: 14.5px;
+    width: 14.5px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -233,7 +233,13 @@ export const GlobalStyle = createGlobalStyle`
       white-space: nowrap;
     }
   }
-
+  
+  .warning {
+  	color: ${(props) => props.theme.colors.font.light1};
+  	background: ${(props) => props.theme.colors.warning.primary}; 
+  	border-radius: ${STYLING.dimensions.radius.primary};
+  }
+  
   .overlay {
     position: fixed;
     top: 0;
