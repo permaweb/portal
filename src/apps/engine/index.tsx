@@ -111,14 +111,14 @@ function App() {
 				<S.Page $layout={Layout?.basics} id="Page">
 					<Header
 						name={Name}
-						layout={Layout?.header.layout}
-						content={Layout?.header.content}
+						layout={Layout?.header?.layout}
+						content={Layout?.header?.content}
 						theme={theme}
 						setTheme={setTheme}
 					/>
-					<Navigation layout={Layout?.navigation.layout} content={Categories} theme={theme} />
+					<Navigation layout={Layout?.navigation?.layout} content={Categories} theme={theme} />
 					<Content layout={Layout} />
-					<Footer layout={Layout?.footer.layout} content={Layout?.footer.content} theme={theme} />
+					<Footer layout={Layout?.footer?.layout} content={Layout?.footer?.content} theme={theme} />
 				</S.Page>
 				<ZoneEditor />
 			</S.PageWrapper>

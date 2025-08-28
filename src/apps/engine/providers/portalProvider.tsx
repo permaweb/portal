@@ -92,7 +92,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				console.error('Failed to fetch zone:', err);
 				const cached = getCachedPortal(portalId);
 				const zone = {
-					defaultPortal,
+					...defaultPortal,
 					...cached,					
 				};
 				setPortal(zone);
