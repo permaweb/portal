@@ -1,6 +1,7 @@
 export const language = {
 	en: {
 		add: `Add`,
+		addTo: `Add To `,
 		addCaption: `Add a caption`,
 		addCategory: `Add a category`,
 		addCredits: `Add Credits`,
@@ -432,7 +433,6 @@ export const language = {
 	es: {
 		// === UNTRANSLATED START ===
 		// TODO: translate
-
 		addCredits: `Add Credits`,
 		arioToken: `AR.IO Token`,
 		arnsBuyDescription: `Register permanently`,
@@ -514,6 +514,7 @@ export const language = {
 		visitFaucet: `Visit Faucet.`,
 		// === UNTRANSLATED END ===
 		add: `Agregar`,
+		addTo: `Agregar a `,
 		addCaption: `Agregar descripción`,
 		addCategory: `Agregar categoría`,
 		addFunds: `Agregar fondos`,
