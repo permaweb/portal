@@ -28,7 +28,7 @@ export const UserWrapper = styled.button<{ hideAction: boolean; isCurrent: boole
 	}
 
   background: ${(props) =>
-		props.isCurrent ? props.theme.colors.container.alt2.background : props.theme.colors.view.background};
+		props.isCurrent ? props.theme.colors.container.primary.active : props.theme.colors.view.background};
   }
 `;
 
