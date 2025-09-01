@@ -24,7 +24,8 @@ export const UserWrapper = styled.button<{ hideAction: boolean; isCurrent: boole
 	}
 
 	&:disabled {
-		background: ${(props) => props.theme.colors.view.background};
+		background: ${(props) =>
+			props.isCurrent ? props.theme.colors.container.primary.active : props.theme.colors.view.background};
 	}
 
   background: ${(props) =>

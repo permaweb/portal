@@ -8,6 +8,7 @@ import { useNotifications } from 'providers/NotificationProvider';
 import { FormField } from 'components/atoms/FormField';
 import { Button } from 'components/atoms/Button';
 import { ASSETS } from 'helpers/config';
+import { JSONViewer } from 'components/atoms/JSONViewer';
 
 export default function ShareCredits(props: { user?: any; handleClose: () => void }) {
 	const arProvider = useArweaveProvider();
@@ -16,7 +17,7 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 	const turboBalance = arProvider.turboBalance ? getARAmountFromWinc(arProvider.turboBalance) : 0;
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-
+	console.log(arProvider.turboBalanceObj);
 	const [walletAddress, setWalletAddress] = React.useState<string>(props.user?.owner ?? '');
 	const [approvedWincAmountInput, setApprovedWincAmount] = React.useState(0);
 
@@ -74,7 +75,18 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 					sm
 					hideErrorMessage
 				/>
-
+				<JSONViewer
+					title={'Your Turbo Balance Details'}
+					data={{
+						currentBalance: Number(arProvider.turboBalanceObj.effectiveBalance) / 1e12,
+						controlledBalance: Number(arProvider.turboBalanceObj.controlledWinc) / 1e12,
+						givenApprovals:
+							arProvider.turboBalanceObj.givenApprovals?.map((a: any) => ({
+								approvedAddress: a.approvedAddress,
+								approvedWincAmount: a.approvedWincAmount / 1e12,
+							})) ?? [],
+					}}
+				/>
 				<S.ActionsWrapper>
 					<Button
 						type={'alt1'}
