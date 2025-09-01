@@ -2,6 +2,7 @@ export const language = {
 	en: {
 		shareCredits: `Share Credits`,
 		add: `Add`,
+		addTo: `Add To `,
 		addCaption: `Add a caption`,
 		addCategory: `Add a category`,
 		addCredits: `Add Credits`,
@@ -515,6 +516,7 @@ export const language = {
 		visitFaucet: `Visit Faucet.`,
 		// === UNTRANSLATED END ===
 		add: `Agregar`,
+		addTo: `Agregar a `,
 		addCaption: `Agregar descripción`,
 		addCategory: `Agregar categoría`,
 		addFunds: `Agregar fondos`,
