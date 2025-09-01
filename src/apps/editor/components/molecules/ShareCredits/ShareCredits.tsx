@@ -17,7 +17,6 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 	const turboBalance = arProvider.turboBalance ? getARAmountFromWinc(arProvider.turboBalance) : 0;
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	console.log(arProvider.turboBalanceObj);
 	const [walletAddress, setWalletAddress] = React.useState<string>(props.user?.owner ?? '');
 	const [approvedWincAmountInput, setApprovedWincAmount] = React.useState(0);
 
@@ -38,7 +37,7 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 			}
 			addNotification(language?.creditsSharedSuccessfully ?? 'Credits shared successfully.', 'success');
 			arProvider?.refreshTurboBalance();
-			props?.handleClose?.();
+			props?.handleClose();
 		} catch (err: unknown) {
 			console.error('turbo.shareCredits failed:', err);
 			const msg = err instanceof Error ? err.message : 'Unexpected error';

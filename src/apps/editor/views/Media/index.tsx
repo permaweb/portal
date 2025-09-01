@@ -17,7 +17,6 @@ export default function Media() {
 	const arProvider = useArweaveProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	console.log(arProvider);
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 
 	return (
