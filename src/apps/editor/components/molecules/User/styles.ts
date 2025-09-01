@@ -3,7 +3,7 @@ import styled, { DefaultTheme } from 'styled-components';
 import { STYLING } from 'helpers/config';
 import { PortalUserRoleType } from 'helpers/types';
 
-export const UserWrapper = styled.button<{ hideAction: boolean }>`
+export const UserWrapper = styled.button<{ hideAction: boolean; isCurrent: boolean }>`
 	width: 100%;
 	display: flex;
 	justify-content: space-between;
@@ -26,6 +26,10 @@ export const UserWrapper = styled.button<{ hideAction: boolean }>`
 	&:disabled {
 		background: ${(props) => props.theme.colors.view.background};
 	}
+
+  background: ${(props) =>
+		props.isCurrent ? props.theme.colors.container.alt2.background : props.theme.colors.view.background};
+  }
 `;
 
 export const UserHeader = styled.div`

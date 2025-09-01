@@ -1,7 +1,7 @@
 import React from 'react';
 import { checkValidAddress, getARAmountFromWinc } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-import { TurboFactory, ArconnectSigner } from '@ardrive/turbo-sdk/web';
+import { TurboFactory, ArconnectSigner, type TurboCreateCreditShareApprovalParams } from '@ardrive/turbo-sdk/web';
 import * as S from './styles';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -18,7 +18,7 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 	const language = languageProvider.object[languageProvider.current];
 
 	const [walletAddress, setWalletAddress] = React.useState<string>(props.user?.owner ?? '');
-	const [approvedWincAmount, setApprovedWincAmount] = React.useState<any>(turboBalance);
+	const [approvedWincAmountInput, setApprovedWincAmount] = React.useState(0);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
@@ -26,17 +26,16 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 	async function handleSubmit() {
 		setLoading(true);
 		try {
-			const { approvalDataItemId, approvedWincAmount } = await turbo.shareCredits({
+			const { approvalDataItemId } = await turbo.shareCredits({
 				approvedAddress: walletAddress,
-				approvedWincAmount: 165612630192,
-			});
+				approvedWincAmount: approvedWincAmountInput * 1e12,
+			} as TurboCreateCreditShareApprovalParams);
 
 			if (!approvalDataItemId) {
 				addNotification(language?.errorOccurred ?? 'Could not share credits.', 'warning');
 				return;
 			}
-
-			console.log('Credits shared:', { approvalDataItemId, approvedWincAmount });
+			addNotification(language?.creditsSharedSuccessfully ?? 'Credits shared successfully.', 'success');
 			arProvider?.refreshTurboBalance();
 			props?.handleClose?.();
 		} catch (err: unknown) {
@@ -61,12 +60,13 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 					hideErrorMessage
 				/>
 				<FormField
+					type={'number'}
 					label={'Amount to Share'}
-					value={approvedWincAmount}
+					value={approvedWincAmountInput}
 					onChange={(e) => setApprovedWincAmount(Number(e.target.value))}
 					invalid={{
-						status: approvedWincAmount
-							? approvedWincAmount <= 0 || approvedWincAmount > arProvider.turboBalance
+						status: approvedWincAmountInput
+							? approvedWincAmountInput <= 0 || approvedWincAmountInput > arProvider.turboBalance
 							: false,
 						message: null,
 					}}

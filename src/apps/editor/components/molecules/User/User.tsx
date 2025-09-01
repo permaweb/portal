@@ -11,12 +11,14 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import * as S from './styles';
 import { ShareCredits } from '../ShareCredits';
 import { Button } from 'components/atoms/Button';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 
 export default function User(props: {
 	user: PortalUserType;
 	onInviteDetected?: (userAddress: string, hasPendingInvite: boolean) => void;
 	hideAction?: boolean;
 }) {
+	const arweaveProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();
@@ -24,7 +26,15 @@ export default function User(props: {
 	const [fetched, setFetched] = React.useState<boolean>(false);
 	const [showManageUser, setShowManageUser] = React.useState<boolean>(false);
 	const [showShareCredits, setShowShareCredits] = React.useState<boolean>(false);
-	const canShareCredits = portalProvider?.permissions?.updateUsers;
+	const currentLoggedInUser =
+		arweaveProvider?.walletAddress === portalProvider.usersByPortalId?.[props.user.address]?.owner;
+	console.log(
+		'Current logged in user:',
+		currentLoggedInUser,
+		arweaveProvider?.walletAddress,
+		portalProvider.usersByPortalId?.[props.user.address]
+	);
+	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser;
 
 	React.useEffect(() => {
 		(async function () {
@@ -52,6 +62,7 @@ export default function User(props: {
 				onClick={() => (props.hideAction ? {} : setShowManageUser((prev) => !prev))}
 				disabled={unauthorized}
 				hideAction={props.hideAction}
+				isCurrent={currentLoggedInUser}
 			>
 				<S.UserHeader>
 					<Avatar owner={userProfile} dimensions={{ wrapper: 23.5, icon: 15 }} callback={null} />
