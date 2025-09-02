@@ -1,5 +1,7 @@
 export const language = {
 	en: {
+		creditsSharedSuccessfully: `Credits Shared Successfully`,
+		errorSharingCredits: `Error Sharing Credits`,
 		shareCredits: `Share Credits`,
 		add: `Add`,
 		addTo: `Add To `,
@@ -434,6 +436,8 @@ export const language = {
 	es: {
 		// === UNTRANSLATED START ===
 		// TODO: translate
+		errorSharingCredits: `Error Sharing Credits`,
+		creditsSharedSuccessfully: `Credits Shared Successfully`,
 		shareCredits: `Share Credits`,
 		addCredits: `Add Credits`,
 		arioToken: `AR.IO Token`,

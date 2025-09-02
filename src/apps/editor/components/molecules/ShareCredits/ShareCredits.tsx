@@ -32,16 +32,16 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 			} as TurboCreateCreditShareApprovalParams);
 
 			if (!approvalDataItemId) {
-				addNotification(language?.errorOccurred ?? 'Could not share credits.', 'warning');
+				addNotification(language?.errorSharingCredits, 'warning');
 				return;
 			}
-			addNotification(language?.creditsSharedSuccessfully ?? 'Credits shared successfully.', 'success');
+			addNotification(language?.creditsSharedSuccessfully, 'success');
 			arProvider?.refreshTurboBalance();
 			props?.handleClose();
 		} catch (err: unknown) {
 			console.error('turbo.shareCredits failed:', err);
 			const msg = err instanceof Error ? err.message : 'Unexpected error';
-			addNotification(`${language?.errorOccurred ?? 'Error occurred'}: ${msg}`, 'warning');
+			addNotification(`${language?.errorSharingCredits}: ${msg}`, 'warning');
 		} finally {
 			setLoading(false);
 		}
