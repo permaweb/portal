@@ -8,21 +8,27 @@ import { Panel } from 'components/atoms/Panel';
 import { PortalHeaderType, PortalUserType } from 'helpers/types';
 import { formatAddress, formatRoleLabel } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-
 import * as S from './styles';
+import { ShareCredits } from '../ShareCredits';
+import { Button } from 'components/atoms/Button';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 
 export default function User(props: {
 	user: PortalUserType;
 	onInviteDetected?: (userAddress: string, hasPendingInvite: boolean) => void;
 	hideAction?: boolean;
 }) {
+	const arweaveProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-
 	const [fetched, setFetched] = React.useState<boolean>(false);
 	const [showManageUser, setShowManageUser] = React.useState<boolean>(false);
+	const [showShareCredits, setShowShareCredits] = React.useState<boolean>(false);
+	const currentLoggedInUser =
+		arweaveProvider?.walletAddress === portalProvider.usersByPortalId?.[props.user.address]?.owner;
+	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser;
 
 	React.useEffect(() => {
 		(async function () {
@@ -50,6 +56,7 @@ export default function User(props: {
 				onClick={() => (props.hideAction ? {} : setShowManageUser((prev) => !prev))}
 				disabled={unauthorized}
 				hideAction={props.hideAction}
+				isCurrent={currentLoggedInUser}
 			>
 				<S.UserHeader>
 					<Avatar owner={userProfile} dimensions={{ wrapper: 23.5, icon: 15 }} callback={null} />
@@ -63,6 +70,20 @@ export default function User(props: {
 								<S.Indicator />
 							</S.PendingInvite>
 						)}
+						{canShareCredits && (
+							<S.UserActions>
+								<Button
+									type={'alt3'}
+									label={language?.shareCredits}
+									handlePress={(e) => {
+										e.stopPropagation();
+										setShowShareCredits((prev) => !prev);
+									}}
+									disabled={unauthorized}
+									loading={false}
+								/>
+							</S.UserActions>
+						)}
 						{props.user.roles && (
 							<S.UserActions>
 								{props.user.roles.map((role) => (
@@ -75,6 +96,23 @@ export default function User(props: {
 					</S.UserDetail>
 				)}
 			</S.UserWrapper>
+			{showShareCredits && (
+				<Panel
+					open={showShareCredits}
+					width={500}
+					header={'Share Credits'}
+					handleClose={() => setShowShareCredits((prev) => !prev)}
+					closeHandlerDisabled
+				>
+					<ShareCredits
+						user={{
+							...props.user,
+							owner: userProfile?.owner,
+						}}
+						handleClose={() => setShowManageUser(false)}
+					/>
+				</Panel>
+			)}
 			{props.user.roles && (
 				<Panel
 					open={showManageUser}
