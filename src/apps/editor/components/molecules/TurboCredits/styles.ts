@@ -270,3 +270,56 @@ export const MetaRow = styled.div`
 		font-weight: ${(p) => p.theme.typography.weight.semiBold};
 	}
 `;
+
+export const ApprovalsWrapper = styled.div`
+	margin-top: 8px;
+	padding: 8px 10px;
+	border: 1px solid ${(p) => p.theme.colors.border.primary};
+	border-radius: 8px;
+	background: ${(p) => p.theme.colors.container.alt2.background};
+`;
+
+export const ApprovalsHeaderRow = styled.div`
+	display: grid;
+	grid-template-columns: 1fr 1.2fr 1.2fr 0.6fr auto;
+	gap: 8px;
+	font-weight: 600;
+	font-size: ${(p) => p.theme.typography.size.xSmall};
+	opacity: 0.8;
+	padding: 4px 0;
+`;
+
+export const ApprovalRow = styled.div`
+	display: grid;
+	grid-template-columns: 1.6fr 0.6fr 1fr auto;
+	gap: 8px;
+	align-items: center;
+	padding: 8px 0;
+	border-top: 1px solid ${(p) => p.theme.colors.border.primary};
+`;
+
+export const ApprovalAddress = styled.div`
+	font-family: monospace;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
+
+export const HeaderRow = styled(Row)`
+	font-weight: 600;
+	font-size: ${(p) => p.theme.typography.size.xSmall};
+	opacity: 0.85;
+	padding: 4px 0 6px;
+`;
+
+export const Address = styled.div`
+	min-width: 0; /* allow ellipsis in grid */
+	font-family: monospace;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+`;
+
+export const Num = styled.div`
+	justify-self: end; /* right-align within the grid cell */
+	white-space: nowrap; /* keep "0.1688 Credits" on one line */
+`;

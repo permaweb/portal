@@ -8,6 +8,8 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import * as S from './styles';
+import { TurboFactory, ArconnectSigner } from '@ardrive/turbo-sdk/web';
+import { useNotifications } from 'providers/NotificationProvider';
 
 type Props = {
 	showBorderBottom?: boolean;
@@ -69,6 +71,10 @@ export default function TurboCredits(props: Props) {
 	const [expanded, setExpanded] = React.useState<boolean>(false);
 	const [showGivenBreakdown, setShowGivenBreakdown] = React.useState<boolean>(false);
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
+	const { addNotification } = useNotifications();
+
+	const signer = new ArconnectSigner(arProvider.wallet);
+	const turbo = TurboFactory.authenticated({ signer });
 
 	const totalGivenBig = React.useMemo(
 		() => sumApprovals(arProvider?.turboBalanceObj.givenApprovals),
@@ -92,7 +98,19 @@ export default function TurboCredits(props: Props) {
 		setExpanded(!expanded);
 	}
 
-	function handleRevoke(address: string) {}
+	async function handleRevoke(address: string) {
+		const revokedApprovals = await turbo.revokeCredits({
+			approvedAddress: address,
+		});
+		if (!revokedApprovals) {
+			addNotification(language?.errorRevokingCredits, 'warning');
+			return;
+		}
+		if (revokedApprovals) {
+			addNotification(language?.successfulyRevokedCredits, 'success');
+			arProvider.refreshTurboBalance();
+		}
+	}
 
 	return (
 		<S.DBalanceWrapper showBorderBottom={props.showBorderBottom}>
@@ -160,66 +178,27 @@ export default function TurboCredits(props: Props) {
 							</p>
 						</S.MetaRow>
 						{props.allowExpandApprovals && showGivenBreakdown && (
-							<div
-								style={{
-									marginTop: 8,
-									padding: '8px 10px',
-									border: `1px solid ${
-										/* @ts-ignore theme available in styles */ (S as any).theme?.colors?.border?.primary ??
-										'rgba(0,0,0,0.1)'
-									}`,
-									borderRadius: 8,
-									background: (S as any).theme?.colors?.container?.alt2?.background ?? 'transparent',
-								}}
-							>
-								{/* Header row */}
-								<div
-									style={{
-										display: 'grid',
-										gridTemplateColumns: '1.6fr 0.6fr 1fr 1fr 1fr auto',
-										gap: 8,
-										fontWeight: 600,
-										fontSize: 12,
-										opacity: 0.8,
-										padding: '4px 0',
-									}}
-								>
+							<S.ApprovalsWrapper>
+								<S.ApprovalsHeaderRow>
 									<div>Address</div>
-									<div>Count</div>
 									<div>Approved</div>
-									<div>Used</div>
 									<div>Remaining</div>
 									<div></div>
-								</div>
-								{/* Items */}
+								</S.ApprovalsHeaderRow>
 								{givenAggregated.map((g) => {
 									const remaining = g.totalApproved - g.totalUsed;
 									return (
-										<div
-											key={g.address}
-											style={{
-												display: 'grid',
-												gridTemplateColumns: '1.6fr 0.6fr 1fr 1fr 1fr auto',
-												gap: 8,
-												alignItems: 'center',
-												padding: '8px 0',
-												borderTop: '1px solid rgba(0,0,0,0.06)',
-											}}
-										>
-											<div style={{ fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-												{g.address}
-											</div>
-											<div>{g.count}</div>
-											<div>{getARAmountFromWinc(Number(g.totalApproved))} Credits</div>
-											<div>{getARAmountFromWinc(Number(g.totalUsed))} Credits</div>
-											<div>{getARAmountFromWinc(Number(remaining))} Credits</div>
-											<div>
-												<Button type="alt3" label="Revoke" handlePress={() => handleRevoke(g.address)} />
-											</div>
-										</div>
+										<S.ApprovalRow key={g.address}>
+											<S.Address>{g.address}</S.Address>
+											<S.Num>{getARAmountFromWinc(Number(g.totalApproved))}&nbsp;Credits</S.Num>
+											<S.Num>{getARAmountFromWinc(Number(remaining))}&nbsp;Credits</S.Num>
+											<S.Actions>
+												<Button type="warning" label="Revoke" handlePress={() => handleRevoke(g.address)} />
+											</S.Actions>
+										</S.ApprovalRow>
 									);
 								})}
-							</div>
+							</S.ApprovalsWrapper>
 						)}
 					</S.AccordionContent>
 				</Accordion>
