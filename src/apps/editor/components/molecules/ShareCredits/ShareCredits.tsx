@@ -9,6 +9,7 @@ import { FormField } from 'components/atoms/FormField';
 import { Button } from 'components/atoms/Button';
 import { ASSETS } from 'helpers/config';
 import { JSONViewer } from 'components/atoms/JSONViewer';
+import TurboCredits from '../TurboCredits/TurboCredits';
 
 export default function ShareCredits(props: { user?: any; handleClose: () => void }) {
 	const arProvider = useArweaveProvider();
@@ -74,6 +75,8 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 					sm
 					hideErrorMessage
 				/>
+				<TurboCredits showBorderBottom={false} allowExpandApprovals={true} />
+				{/* 
 				<JSONViewer
 					title={'Your Turbo Balance Details'}
 					data={{
@@ -86,6 +89,7 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 							})) ?? [],
 					}}
 				/>
+				*/}
 				<S.ActionsWrapper>
 					<Button
 						type={'alt1'}

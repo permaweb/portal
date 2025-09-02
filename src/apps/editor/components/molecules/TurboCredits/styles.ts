@@ -1,13 +1,13 @@
 import styled from 'styled-components';
 import { STYLING } from 'helpers/config';
 
-export const DBalanceWrapper = styled.div`
+export const DBalanceWrapper = styled.div<{ showBorderBottom: boolean }>`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
 	padding: 15px 7.5px;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-bottom: ${(props) => (props.showBorderBottom ? `1px solid ${props.theme.colors.border.primary}` : 'none')};
 `;
 
 export const DBalanceHeader = styled.div`

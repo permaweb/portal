@@ -60,7 +60,6 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 	const [showThemeSelector, setShowThemeSelector] = React.useState<boolean>(false);
 	const [showLanguageSelector, setShowLanguageSelector] = React.useState<boolean>(false);
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
-	const [expanded, setExpanded] = React.useState(false);
 	const [label, setLabel] = React.useState<string | null>(null);
 	const hasInitializedRef = React.useRef<boolean>(false);
 
@@ -127,7 +126,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 									</S.DHeader>
 								</S.DHeaderFlex>
 							</S.DHeaderWrapper>
-							<TurboCredits />
+							<TurboCredits showBorderBottom />
 							<S.DBodyWrapper>
 								<li onClick={() => setShowProfileManager(true)}>
 									<ReactSVG src={ASSETS.write} />
