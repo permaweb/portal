@@ -7,6 +7,26 @@ import { WalletEnum } from 'helpers/types';
 
 const WALLET_PERMISSIONS = ['ACCESS_ADDRESS', 'ACCESS_PUBLIC_KEY', 'SIGN_TRANSACTION', 'DISPATCH', 'SIGNATURE'];
 
+export type BigIntString = `${bigint}`;
+
+export interface TurboApproval {
+	approvalDataItemId: string;
+	approvedAddress: string;
+	approvedWincAmount: BigIntString;
+	creationDate: string; // ISO 8601 string
+	payingAddress: string;
+	usedWincAmount: BigIntString;
+}
+
+export interface TurboBalance {
+	winc: BigIntString;
+	balance: BigIntString;
+	controlledWinc: BigIntString;
+	effectiveBalance: BigIntString;
+	givenApprovals: TurboApproval[];
+	receivedApprovals: TurboApproval[];
+}
+
 interface ArweaveContextState {
 	[x: string]: any;
 	wallet: any;
@@ -17,7 +37,7 @@ interface ArweaveContextState {
 	refreshTurboBalance: () => void;
 	handleConnect: any;
 	handleDisconnect: (redirect: boolean) => void;
-	turboBalanceObj: { [key: string]: any };
+	turboBalanceObj: TurboBalance;
 }
 
 const DEFAULT_CONTEXT = {
