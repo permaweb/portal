@@ -20,6 +20,7 @@ import Navigation from './builder/base/navigation';
 import ZoneEditor from './components/zoneEditor';
 import { GlobalStyles } from './global-styles';
 import * as S from './global-styles';
+import Loader from './components/loader';
 
 
 function App() {
@@ -97,7 +98,7 @@ function App() {
 		return (
 			<>
 				<div id={DOM.loader} />
-				Loading page placeholder...
+				<Loader />
 			</>
 		);
 	}

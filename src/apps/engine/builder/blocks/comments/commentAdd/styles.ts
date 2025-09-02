@@ -3,22 +3,89 @@ import styled from 'styled-components';
 export const CommentAdd = styled.div<{ $active: boolean }>`
 	display: flex;
 	flex-direction: column;
+	position: relative;
 	width: 100%;
 	gap: 6px;
 	opacity: ${(props) => (props.$active ? 1 : 0.6)};
 	pointer-events: ${(props) => (props.$active ? 'default' : 'none')};
 	user-select: ${(props) => (props.$active ? 'default' : 'none')};
+
+	.editor-placeholder{
+		position: absolute;
+		top:0;
+		bottom:0;
+		padding: 10px;
+		font-size: var(--font-size-large);
+    font-weight: 400;
+		user-select: none;
+		pointer-events: none;
+		opacity:.4;
+	}
 `;
 
 export const Editor = styled.div`
 	position: relative;
-
-	.DraftEditor-root {
-		padding: 10px;
-		background: var(--color-card-background);
-		border-radius: var(--border-radius);
-		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+	background: var(--color-card-background);
+	border-radius: var(--border-radius);
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+	padding: 10px;
+	padding-right: 80px;
+	min-height: 24px;
+	
+	> div[data-lexical-placeholder] {
+		position: absolute;
+		top: 10px;
+		left: 10px;
+		color: rgba(var(--color-text), 0.5);
+		pointer-events: none;
+		font-size: 14px;
+		user-select: none;
+		z-index: 1;
 	}
+
+	.editor-input {
+		outline: none;
+		min-height: 24px;
+		color: rgba(var(--color-text), 1);
+		font-size: 14px;
+		line-height: 1.5;
+		position: relative;
+	}
+
+	.editor-paragraph {
+		margin: 0;
+	}
+
+	.editor-text-bold {
+		font-weight: bold;
+	}
+
+	.editor-text-italic {
+		font-style: italic;
+	}
+
+	.editor-text-underline {
+		text-decoration: underline;
+	}
+
+	.editor-text-code {
+		background-color: rgba(var(--color-text), 0.1);
+		padding: 1px 4px;
+		border-radius: 3px;
+		font-family: monospace;
+		font-size: 0.9em;
+	}
+`;
+
+export const EditorPlaceholder = styled.div`
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	color: rgba(var(--color-text), 0.5);
+	pointer-events: none;
+	font-size: 14px;
+	user-select: none;
+	z-index: 1;
 `;
 
 export const Actions = styled.div`
@@ -35,33 +102,6 @@ export const Actions = styled.div`
 	z-index: 1;
 `;
 
-export const Emojis = styled.div``;
-
-export const EmojisIcon = styled.div`
-	display: flex;
-	justify-content: center;
-	height: 100%;
-
-	svg {
-		width: 24px;
-		height: 24px;
-		stroke: rgba(var(--color-text), 0.6);
-	}
-
-	&:hover {
-		cursor: pointer;
-
-		svg {
-			stroke: rgba(var(--color-text), 1);
-		}
-	}
-`;
-
-export const EmojiPicker = styled.div`
-	position: absolute;
-	margin-top: 28px;
-	right: -8px;
-`;
 
 export const Send = styled.div<{ $active: boolean }>`
 	display: flex;
@@ -77,7 +117,6 @@ export const Send = styled.div<{ $active: boolean }>`
 		width: 18px;
 		height: 18px;
 		color: white;
-		// color:rgba(var(--color-text),1);
 	}
 
 	&:hover {

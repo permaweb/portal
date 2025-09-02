@@ -23,18 +23,30 @@ export default function Comments(props: any) {
 		}
 	}, []);
 
-	React.useEffect(() => {
-		(async function () {
-			if (libs && commentsId) {
-				try {
-					const comments = await libs.getComments({ commentsId });
-					setComments(comments);
-				} catch (e) {
-					console.error(e);
-				}
+	const fetchComments = React.useCallback(async () => {
+		if (libs && commentsId) {
+			try {
+				const comments = await libs.getComments({ commentsId });
+				setComments(comments.reverse());
+			} catch (e) {
+				console.error(e);
 			}
-		})();
+		}
 	}, [libs, commentsId]);
+
+	React.useEffect(() => {
+		fetchComments();
+	}, [fetchComments]);
+
+	React.useEffect(() => {
+		const handleCommentAdded = (e: any) => {
+			if (e.detail.commentsId === commentsId) {
+				fetchComments();
+			}
+		};
+		window.addEventListener('commentAdded', handleCommentAdded);
+		return () => window.removeEventListener('commentAdded', handleCommentAdded);
+	}, [commentsId, fetchComments]);
 
 	return (
 		<S.Comments>
