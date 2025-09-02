@@ -136,7 +136,7 @@ export const DBalanceHeader = styled.div`
 export const DBalanceBody = styled.div`
 	width: 100%;
 	display: flex;
-	align-items: center;
+	flex-direction: column;
 	justify-content: space-between;
 
 	p {
@@ -335,5 +335,46 @@ export const WalletLink = styled.div`
 	}
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
+	}
+`;
+
+export const Row = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+`;
+
+export const Actions = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 8px;
+`;
+
+export const AccordionContent = styled.div`
+	padding-top: 12px;
+	padding-bottom: 4px;
+	color: ${(p) => p.theme.colors.font.primary};
+	font-family: ${(p) => p.theme.typography.family.primary};
+	font-size: ${(p) => p.theme.typography.size.xSmall};
+`;
+
+export const MetaRow = styled.div`
+	display: flex;
+	justify-content: space-between;
+	padding: 6px 0;
+	border-bottom: 1px dashed ${(p) => p.theme.colors.border.primary};
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	span:first-child {
+		color: ${(p) => p.theme.colors.font.alt1};
+	}
+
+	span:last-child {
+		color: ${(p) => p.theme.colors.font.primary};
+		font-weight: ${(p) => p.theme.typography.weight.semiBold};
 	}
 `;
