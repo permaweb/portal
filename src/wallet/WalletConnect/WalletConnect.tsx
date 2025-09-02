@@ -20,6 +20,15 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
+export interface TurboApproval {
+	approvalDataItemId: string;
+	approvedAddress: string;
+	approvedWincAmount: string;
+	creationDate: string; // ISO 8601 string
+	payingAddress: string;
+	usedWincAmount: string;
+}
+
 const AR_WALLETS = [{ type: WalletEnum.wander, label: 'Wander', logo: ASSETS.wander }];
 
 function WalletList(props: { handleConnect: any }) {
@@ -121,7 +130,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 		setShowWalletDropdown(false);
 	}
 
-	function sumApprovals(approvals: (typeof arProvider.turboBalanceObj)['givenApprovals']): bigint {
+	function sumApprovals(approvals: TurboApproval[] = []) {
 		return approvals.reduce((acc, a) => acc + BigInt(a.approvedWincAmount), 0n);
 	}
 
