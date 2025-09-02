@@ -4,30 +4,19 @@ import { ReactSVG } from 'react-svg';
 import { ProfileManager } from 'editor/components/organisms/ProfileManager';
 import { useSettingsProvider as useEditorSettingsProvider } from 'editor/providers/SettingsProvider';
 import { useSettingsProvider as useViewerSettingsProvider } from 'viewer/providers/SettingsProvider';
-import { Accordion } from 'components/atoms/Accordion';
 import { Avatar } from 'components/atoms/Avatar';
-import { Button } from 'components/atoms/Button';
 import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { ASSETS } from 'helpers/config';
 import { LanguageEnum, WalletEnum } from 'helpers/types';
-import { formatAddress, getARAmountFromWinc } from 'helpers/utils';
+import { formatAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
-
+import TurboCredits from 'editor/components/molecules/TurboCredits/TurboCredits';
 import * as S from './styles';
-
-export interface TurboApproval {
-	approvalDataItemId: string;
-	approvedAddress: string;
-	approvedWincAmount: string;
-	creationDate: string; // ISO 8601 string
-	payingAddress: string;
-	usedWincAmount: string;
-}
 
 const AR_WALLETS = [{ type: WalletEnum.wander, label: 'Wander', logo: ASSETS.wander }];
 
@@ -75,18 +64,6 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 	const [label, setLabel] = React.useState<string | null>(null);
 	const hasInitializedRef = React.useRef<boolean>(false);
 
-	const totalGivenBig = React.useMemo(
-		() => sumApprovals(arProvider?.turboBalanceObj.givenApprovals),
-		[arProvider?.turboBalanceObj.givenApprovals]
-	);
-	const totalReceivedBig = React.useMemo(
-		() => sumApprovals(arProvider?.turboBalanceObj.receivedApprovals),
-		[arProvider?.turboBalanceObj.receivedApprovals]
-	);
-
-	const givenApprovalsCount = arProvider?.turboBalanceObj.givenApprovals?.length ?? 0;
-	const receivedApprovalsCount = arProvider?.turboBalanceObj.receivedApprovals?.length ?? 0;
-
 	React.useEffect(() => {
 		if (!hasInitializedRef.current) {
 			const timer = setTimeout(() => {
@@ -113,9 +90,6 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 		}
 	}, [showWallet, arProvider.walletAddress, permawebProvider.profile, language]);
 
-	function toggleExpand() {
-		setExpanded(!expanded);
-	}
 	function handlePress() {
 		if (arProvider.walletAddress) {
 			setShowWalletDropdown(!showWalletDropdown);
@@ -128,10 +102,6 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 		const doRedirect = props.app === 'editor';
 		arProvider.handleDisconnect(doRedirect);
 		setShowWalletDropdown(false);
-	}
-
-	function sumApprovals(approvals: TurboApproval[] = []) {
-		return approvals.reduce((acc, a) => acc + BigInt(a.approvedWincAmount), 0n);
 	}
 
 	return (
@@ -157,69 +127,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer'; callba
 									</S.DHeader>
 								</S.DHeaderFlex>
 							</S.DHeaderWrapper>
-
-							<S.DBalanceWrapper>
-								<S.DBalanceHeader>
-									<p>{language?.creditBalance}</p>
-								</S.DBalanceHeader>
-								<S.DBalanceBody>
-									<Accordion
-										showTopDivider={false}
-										expanded={expanded}
-										onExpandedChange={setExpanded}
-										title={
-											<p>
-												{arProvider.turboBalance !== null
-													? `${getARAmountFromWinc(arProvider.turboBalance)} ${language?.credits}`
-													: `${language?.loading}...`}
-											</p>
-										}
-										renderActions={({ expanded }) => (
-											<>
-												<Button
-													type="alt3"
-													label={language?.add}
-													handlePress={() => setShowFundUpload(true)}
-													icon={ASSETS.add}
-													iconLeftAlign
-												/>
-												<Button
-													type="alt3"
-													label={expanded ? language?.seeLess ?? 'See less' : language?.seeMore ?? 'See more'}
-													handlePress={toggleExpand}
-												/>
-											</>
-										)}
-									>
-										<S.AccordionContent>
-											<S.MetaRow>
-												<span>Controlled</span>
-												<p>{getARAmountFromWinc(arProvider?.turboBalanceObj.controlledWinc)} Credits</p>
-											</S.MetaRow>
-
-											<S.MetaRow>
-												<span>Effective balance</span>
-												<p>{getARAmountFromWinc(arProvider?.turboBalanceObj.effectiveBalance)} Credits</p>
-											</S.MetaRow>
-
-											<S.MetaRow>
-												<span>Given approvals</span>
-												<p>
-													{getARAmountFromWinc(Number(totalGivenBig))} Credits{' '}
-													<small style={{ opacity: 0.7 }}>({givenApprovalsCount})</small>
-												</p>
-											</S.MetaRow>
-											<S.MetaRow>
-												<span>Received approvals</span>
-												<p>
-													{getARAmountFromWinc(Number(totalReceivedBig))} Credits{' '}
-													<small style={{ opacity: 0.7 }}>({receivedApprovalsCount})</small>
-												</p>
-											</S.MetaRow>
-										</S.AccordionContent>
-									</Accordion>
-								</S.DBalanceBody>
-							</S.DBalanceWrapper>
+							<TurboCredits />
 							<S.DBodyWrapper>
 								<li onClick={() => setShowProfileManager(true)}>
 									<ReactSVG src={ASSETS.write} />
