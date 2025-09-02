@@ -56,7 +56,7 @@ export default function User(props: {
 				onClick={() => (props.hideAction ? {} : setShowManageUser((prev) => !prev))}
 				disabled={unauthorized}
 				hideAction={props.hideAction}
-				isCurrent={currentLoggedInUser}
+				isCurrent={currentLoggedInUser && !props.hideAction}
 			>
 				<S.UserHeader>
 					<Avatar owner={userProfile} dimensions={{ wrapper: 23.5, icon: 15 }} callback={null} />
