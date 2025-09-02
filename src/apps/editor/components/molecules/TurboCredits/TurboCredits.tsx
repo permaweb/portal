@@ -167,22 +167,22 @@ export default function TurboCredits(props: Props) {
 							<span>Given approvals</span>
 							<p>
 								{getARAmountFromWinc(Number(totalGivenBig))} Credits{' '}
-								<small
-									style={{ opacity: 0.7 }}
+								<S.ApprovalsCount
+									clickable={props.allowExpandApprovals}
 									onClick={() => {
 										if (props.allowExpandApprovals) setShowGivenBreakdown((s) => !s);
 									}}
 								>
 									({givenApprovalsCount})
-								</small>
+								</S.ApprovalsCount>
 							</p>
 						</S.MetaRow>
 						{props.allowExpandApprovals && showGivenBreakdown && (
 							<S.ApprovalsWrapper>
 								<S.ApprovalsHeaderRow>
-									<div>Address</div>
-									<div>Approved</div>
-									<div>Remaining</div>
+									<p>Address</p>
+									<p>Approved</p>
+									<p>Remaining</p>
 									<div></div>
 								</S.ApprovalsHeaderRow>
 								{givenAggregated.map((g) => {

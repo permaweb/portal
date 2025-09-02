@@ -323,3 +323,14 @@ export const Num = styled.div`
 	justify-self: end; /* right-align within the grid cell */
 	white-space: nowrap; /* keep "0.1688 Credits" on one line */
 `;
+
+export const ApprovalsCount = styled.small<{ clickable?: boolean }>`
+	opacity: 0.7;
+	${(p) =>
+		p.clickable &&
+		`
+      cursor: pointer;
+      color: ${p.theme.colors.link};
+      text-decoration: underline;
+    `}
+`;
