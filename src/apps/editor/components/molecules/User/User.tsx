@@ -28,7 +28,6 @@ export default function User(props: {
 	const [showShareCredits, setShowShareCredits] = React.useState<boolean>(false);
 	const currentLoggedInUser =
 		arweaveProvider?.walletAddress === portalProvider.usersByPortalId?.[props.user.address]?.owner;
-	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser && !props.onInviteDetected;
 
 	React.useEffect(() => {
 		(async function () {
@@ -41,7 +40,7 @@ export default function User(props: {
 	const unauthorized = !portalProvider?.permissions?.updateUsers;
 	const invitePending =
 		userProfile?.invites?.find((invite: PortalHeaderType) => invite.id === portalProvider.current?.id) !== undefined;
-
+	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser && !invitePending;
 	React.useEffect(() => {
 		if (props.onInviteDetected && !props.hideAction) {
 			props.onInviteDetected(props.user.address, invitePending);
