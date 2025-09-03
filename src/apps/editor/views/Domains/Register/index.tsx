@@ -522,9 +522,9 @@ export default function Domains() {
 										</S.UpdateWrapper>
 									)}
 									{unauthorized && (
-										<S.UpdateWrapper className={'border-wrapper-alt3 warning'}>
-											<p>{language.unauthorizedDomainRegister}</p>
-										</S.UpdateWrapper>
+										<S.UnauthorizedWrapper className={'warning'}>
+											<span>{language.unauthorizedDomainRegister}</span>
+										</S.UnauthorizedWrapper>
 									)}
 								</S.SearchOutputWrapper>
 							</S.SearchWrapper>
@@ -658,7 +658,7 @@ export default function Domains() {
 						</S.SectionHeader>
 						<S.SectionBody>
 							{/* Payment method selection (mainnet only) */}
-							{!IS_TESTNET && (
+							{/* {!IS_TESTNET && (
 								<S.PaymentMethodWrapper>
 									<PayWithSelector
 										method={paymentMethod}
@@ -671,7 +671,7 @@ export default function Domains() {
 										}}
 									/>
 								</S.PaymentMethodWrapper>
-							)}
+							)} */}
 							<S.CheckoutWrapper>
 								<S.CheckoutLine>
 									<span>{language.domainName}</span>

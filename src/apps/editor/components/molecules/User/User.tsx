@@ -4,14 +4,16 @@ import { UserManager } from 'editor/components/organisms/UserManager';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Avatar } from 'components/atoms/Avatar';
+import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
 import { PortalHeaderType, PortalUserType } from 'helpers/types';
 import { formatAddress, formatRoleLabel } from 'helpers/utils';
-import { useLanguageProvider } from 'providers/LanguageProvider';
-import * as S from './styles';
-import { ShareCredits } from '../ShareCredits';
-import { Button } from 'components/atoms/Button';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
+import { useLanguageProvider } from 'providers/LanguageProvider';
+
+import { ShareCredits } from '../ShareCredits';
+
+import * as S from './styles';
 
 export default function User(props: {
 	user: PortalUserType;
@@ -95,23 +97,23 @@ export default function User(props: {
 					</S.UserDetail>
 				)}
 			</S.UserWrapper>
-			{showShareCredits && (
-				<Panel
-					open={showShareCredits}
-					width={500}
-					header={'Share Credits'}
-					handleClose={() => setShowShareCredits((prev) => !prev)}
-					closeHandlerDisabled
-				>
-					<ShareCredits
-						user={{
-							...props.user,
-							owner: userProfile?.owner,
-						}}
-						handleClose={() => setShowManageUser(false)}
-					/>
-				</Panel>
-			)}
+
+			<Panel
+				open={showShareCredits}
+				width={500}
+				header={'Share Credits'}
+				handleClose={() => setShowShareCredits((prev) => !prev)}
+				closeHandlerDisabled
+			>
+				<ShareCredits
+					user={{
+						...props.user,
+						owner: userProfile?.owner,
+					}}
+					handleClose={() => setShowManageUser(false)}
+				/>
+			</Panel>
+
 			{props.user.roles && (
 				<Panel
 					open={showManageUser}
