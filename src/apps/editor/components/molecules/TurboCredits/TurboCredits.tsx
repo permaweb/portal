@@ -54,7 +54,7 @@ function aggregateByAddress(approvals: TurboApproval[] = []): AggregatedApproval
 		entry.approvals.push(a);
 		map.set(key, entry);
 	}
-	// Sort by highest remaining first (optional, feels nice)
+	// Sort by highest remaining first
 	return Array.from(map.values()).sort((a, b) => {
 		const ra = a.totalApproved - a.totalUsed;
 		const rb = b.totalApproved - b.totalUsed;
@@ -100,7 +100,7 @@ export default function TurboCredits(props: Props) {
 
 	async function handleRevoke(address: string) {
 		const revokedApprovals = await turbo.revokeCredits({
-			approvedAddress: address,
+			revokedAddress: address,
 		});
 		if (!revokedApprovals) {
 			addNotification(language?.errorRevokingCredits, 'warning');
