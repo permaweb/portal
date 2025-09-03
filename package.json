@@ -43,7 +43,6 @@
 		"@stripe/stripe-js": "^6.1.0",
 		"@wanderapp/connect": "^0.1.11",
 		"arweave": "^1.15.5",
-		"draft-js": "^0.11.7",
 		"html-react-parser": "^5.2.5",
 		"lexical": "^0.34.0",
 		"react": "^18.2.0",

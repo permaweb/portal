@@ -288,247 +288,309 @@ export const ARTICLE_BLOCKS = {
 	},
 };
 
-export const DEFAULT_THEME: PortalThemeType = {
+export const DEFAULT_LAYOUT = {
+	basics: {
+		gradient: true,
+		wallpaper: '',
+		borderRadius: 0,
+		maxWidth: 1600,
+		padding: "0 20px"
+	},
+	header: {
+		layout: {
+			width: 'page',
+			height: '100px',
+			padding: '0 20px',
+			border: {
+				top: false,
+				sides: false,
+				bottom: true,
+			},
+		},
+		content: {
+			logo: {
+				display: true,
+				positionX: 'left',
+				positionY: 'bottom',
+				txId: null,
+				size: '80%',
+			},
+			links: [],
+		},
+	},
+	navigation: {
+		layout: {
+			width: 'page',
+			height: 50,
+			padding: '0 20px',
+			gradient: false,
+			shadow: true,
+			border: {
+				top: false,
+				sides: false,
+				bottom: true,
+			},
+		},
+		content: {
+			links: [],
+		},
+	},
+	footer: {
+		layout: {
+			width: 'page',
+			height: 'auto',
+			padding: '20px',
+			gradient: false,
+			border: {
+				top: true,
+				sides: false,
+				bottom: false,
+			},
+		},
+		content: {
+			links: [],
+		},
+	},
+	page: {
+		layout: {
+			structure: 'single-column',
+			padding: '40px 20px',
+		},
+	},
+};
+
+export const DEFAULT_THEME = {
 	name: 'Default',
 	active: true,
-	light: {
-		basics: {
-			colors: {
-				text: '0,0,0',
-				background: '235, 235, 235',
-				primary: '222,0,80',
-				secondary: '239,102,152',
-				border: '155,155,155',
+	basics: {
+		colors: {
+			text: {
+				light: '0,0,0',
+				dark: '255,255,255',
 			},
-		},
-		header: {
-			colors: {
-				background: '255,255,255',
-				border: 'border',
-				shadow: 'rgba(0, 0, 0, 0.4)',
-			},
-			preferences: {
-				opacity: 1,
-				shadow: '0 4px 10px',
-			},
-		},
-		navigation: {
-			colors: {
-				background: '0,0,0',
-				text: '255,255,255',
-				border: 'border',
-				hover: 'primary',
-			},
-			preferences: {
-				opacity: 1,
-			},
-		},
-		footer: {
-			colors: {},
-		},
-		content: {
-			colors: {
-				background: '255,255,255',
-			},
-			preferences: {
-				opacity: 1,
-			},
-		},
-		card: {
-			colors: {
-				background: '255,255,255',
-			},
-			preferences: {
-				opacity: 1,
-			},
-		},
-		buttons: {
-			default: {
-				default: {
-					colors: {
-						color: '255,255,255',
-						background: '0,0,0',
-						border: '0,0,0',
-					},
-					preferences: {
-						opacity: 1,
-					},
-				},
-				hover: {
-					colors: {
-						color: '255,255,255',
-						background: '50,50,50',
-						border: '0,0,0',
-					},
-					preferences: {
-						opacity: 1,
-					},
-				},
+			background: {
+				light: '250,250,250',
+				dark: '20,20,20',
 			},
 			primary: {
-				default: {
-					colors: {
-						color: '255,255,255',
-						background: 'primary',
-						border: 'primary',
-					},
-					preferences: {
-						opacity: 1,
-					},
-				},
-				hover: {
-					colors: {
-						color: '255,255,255',
-						background: 'primary',
-						border: 'primary',
-					},
-					preferences: {
-						opacity: 1,
-					},
-				},
+				light: '151,151,151',
+				dark: '77,77,77',
+			},
+			secondary: {
+				light: '69,153,232',
+				dark: '69,153,232',
+			},
+			border: {
+				light: '50, 50, 50',
+				dark: '208, 208, 208',
+			},
+		},
+		preferences: {
+			borderRadius: 0,
+			wallpaper: undefined,
+		},
+	},
+	header: {
+		colors: {
+			background: {
+				light: 'background',
+				dark: 'background',
+			},
+			border: {
+				light: 'border',
+				dark: 'border',
+			},
+			shadow: {
+				light: 'rgba(0, 0, 0, 0.4)',
+				dark: 'rgba(0, 0, 0, 0.4)',
+			},
+		},
+		preferences: {
+			opacity: {
+				light: 1,
+				dark: 0.4,
+			},
+			shadow: {
+				light: '0 4px 10px',
+				dark: '0 4px 10px',
+			},
+			gradient: {
+				light: true,
+				dark: true,
 			},
 		},
 	},
-	dark: {
-		basics: {
-			colors: {
-				primary: '222,0,80',
-				secondary: '239,102,152',
-				background: '27, 26, 21',
-				text: '255,255,255',
-				border: '155,155,155',
+	navigation: {
+		colors: {
+			background: {
+				light: '238, 238, 238',
+				dark: '32, 32, 32',
+			},
+			text: {
+				light: 'text',
+				dark: 'text',
+			},
+			border: {
+				light: 'border',
+				dark: 'border',
+			},
+			hover: {
+				light: '50,50,50',
+				dark: '208,208,208',
 			},
 		},
-		header: {
-			colors: {
-				background: '0,0,0',
-				border: 'border',
-				shadow: 'rgba(0, 0, 0, 0.4)',
+		preferences: {
+			opacity: {
+				light: 1,
+				dark: 1,
 			},
-			preferences: {
-				opacity: 0.4,
-				gradient: true,
-				shadow: '0 4px 10px',
+			shadow: {
+				light: 'unset',
+				dark: '0 2px 2px',
 			},
 		},
-		navigation: {
-			colors: {
-				background: '0,0,0',
-				border: 'border',
-				text: 'text',
-				hover: 'primary',
-			},
-			preferences: {
-				opacity: 1,
-				shadow: '0 2px 2px',
+	},
+	content: {
+		colors: {
+			background: {
+				light: '255,255,255',
+				dark: '0,0,0',
 			},
 		},
-		footer: {
-			colors: {
-				background: '0,0,0',
-			},
-			preferences: {
-				opacity: 1,
+		preferences: {
+			opacity: {
+				light: 1,
+				dark: 1,
 			},
 		},
-		content: {
-			colors: {
-				background: '0,0,0',
-			},
-			preferences: {
-				opacity: 1,
-			},
-		},
-		card: {
-			colors: {
-				background: '0,0,0',
-			},
-			preferences: {
-				opacity: 0.6,
+	},
+	footer: {
+		colors: {
+			background: {
+				light: 'background',
+				dark: 'background',
 			},
 		},
-		buttons: {
+		preferences: {
+			opacity: {
+				light: 1,
+				dark: 1,
+			},
+		},
+	},
+	card: {
+		colors: {
+			background: {
+				light: undefined,
+				dark: undefined,
+			},
+			border: {
+				light: 'border',
+				dark: 'border',
+			},
+		},
+		preferences: {
+			opacity: {
+				light: 1,
+				dark: 0.6,
+			},
+		},
+	},
+	buttons: {
+		default: {
 			default: {
-				default: {
-					colors: {
-						color: '255,255,255',
-						background: '33,33,33',
-						border: '33,33,33',
+				colors: {
+					color: {
+						light: '255,255,255',
+						dark: '255,255,255',
 					},
-					preferences: {
-						opacity: 1,
+					background: {
+						light: '0,0,0',
+						dark: '33,33,33',
+					},
+					border: {
+						light: '0,0,0',
+						dark: '33,33,33',
 					},
 				},
-				hover: {
-					colors: {
-						color: '255,255,255',
-						background: '50,50,50',
-						border: '50,50,50',
-					},
-					preferences: {
-						opacity: 1,
+				preferences: {
+					opacity: {
+						light: 1,
+						dark: 1,
 					},
 				},
 			},
-			primary: {
-				default: {
-					colors: {
-						color: '255,255,255',
-						background: 'primary',
-						border: 'primary',
+			hover: {
+				colors: {
+					color: {
+						light: '255,255,255',
+						dark: '255,255,255',
 					},
-					preferences: {
-						opacity: 1,
+					background: {
+						light: '50,50,50',
+						dark: '50,50,50',
+					},
+					border: {
+						light: '0,0,0',
+						dark: '50,50,50',
 					},
 				},
-				hover: {
-					colors: {
-						color: '255,255,255',
-						background: 'primary',
-						border: 'primary',
+				preferences: {
+					opacity: {
+						light: 1,
+						dark: 1,
 					},
-					preferences: {
-						opacity: 1,
+				},
+			},
+		},
+		primary: {
+			default: {
+				colors: {
+					color: {
+						light: '255,255,255',
+						dark: '255,255,255',
+					},
+					background: {
+						light: 'primary',
+						dark: 'primary',
+					},
+					border: {
+						light: 'primary',
+						dark: 'primary',
+					},
+				},
+				preferences: {
+					opacity: {
+						light: 1,
+						dark: 1,
+					},
+				},
+			},
+			hover: {
+				colors: {
+					color: {
+						light: '255,255,255',
+						dark: '255,255,255',
+					},
+					background: {
+						light: 'primary',
+						dark: 'primary',
+					},
+					border: {
+						light: 'primary',
+						dark: 'primary',
+					},
+				},
+				preferences: {
+					opacity: {
+						light: 1,
+						dark: 1,
 					},
 				},
 			},
 		},
 	},
 };
-/*
-export const DEFAULT_THEME: { light: PortalThemeType; dark: PortalThemeType } = {
-	light: {
-		name: 'Light Default',
-		active: true,
-		scheme: PortalSchemeType.Light,
-		colors: {
-			background: '255,255,255',
-			primary: '77,77,77',
-			links: '69,153,232',
-		},
-		preferences: {
-			gradient: false,
-			shadow: false,
-			borders: false,
-		},
-	},
-	dark: {
-		name: 'Dark Default',
-		active: true,
-		scheme: PortalSchemeType.Dark,
-		colors: {
-			background: '20,20,20',
-			primary: '77,77,77',
-			links: '69,153,232',
-		},
-		preferences: {
-			gradient: false,
-			shadow: false,
-			borders: false,
-		},
-	},
-};
-*/
 
 export const STRIPE_PUBLISHABLE_KEY =
 	'pk_live_51JUAtwC8apPOWkDLMQqNF9sPpfneNSPnwX8YZ8y1FNDl6v94hZIwzgFSYl27bWE4Oos8CLquunUswKrKcaDhDO6m002Yj9AeKj';
@@ -541,6 +603,84 @@ export const UPLOAD = {
 	batchSize: 1,
 	chunkSize: 7500000,
 	dispatchUploadSize: 100 * 1000,
+};
+
+export const DEFAULT_PAGES = {
+	home: {
+		type: 'grid',
+		content: [
+			{
+				type: 'row',
+				width: 1,
+				layout: {
+					separation: true,
+				},
+				content: [
+					{
+						width: 2,
+						type: 'feed',
+						layout: 'journal',
+					},
+					{
+						width: 1,
+						type: 'feed',
+						category: 'AO',
+						layout: 'minimal',
+					},
+				],
+			},
+		],
+	},
+	feed: {
+		type: 'grid',
+		content: [
+			{
+				type: 'row',
+				width: 'page',
+				content: [
+					{
+						type: 'feed',
+						layout: 'journal',
+						width: 3,
+					},
+				],
+			},
+		],
+	},
+	user: {
+		type: 'grid',
+		content: [
+			{
+				type: 'row',
+				width: 3,
+				content: [
+					{
+						type: 'sidebar',
+						width: 1,
+						content: ['user'],
+					},
+					{
+						type: 'feed',
+						width: 3,
+					},
+				],
+			},
+		],
+	},
+	post: {
+		type: 'grid',
+		content: [
+			{
+				type: 'row',
+				width: 'page',
+				content: [
+					{
+						type: 'post',
+					},
+				],
+			},
+		],
+	},
 };
 
 export const PORTAL_DATA = () => `
