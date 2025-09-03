@@ -170,7 +170,7 @@ export default function TurboCredits(props: Props) {
 								<S.ApprovalsCount
 									clickable={props.allowExpandApprovals}
 									onClick={() => {
-										if (props.allowExpandApprovals) setShowGivenBreakdown((s) => !s);
+										if (props.allowExpandApprovals && totalGivenBig > 0) setShowGivenBreakdown((s) => !s);
 									}}
 								>
 									({givenApprovalsCount})
