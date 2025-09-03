@@ -8,7 +8,7 @@ import { useNotifications } from 'providers/NotificationProvider';
 import { FormField } from 'components/atoms/FormField';
 import { Button } from 'components/atoms/Button';
 import { ASSETS } from 'helpers/config';
-import { JSONViewer } from 'components/atoms/JSONViewer';
+import TurboCredits from '../TurboCredits/TurboCredits';
 
 export default function ShareCredits(props: { user?: any; handleClose: () => void }) {
 	const arProvider = useArweaveProvider();
@@ -50,6 +50,7 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 	return (
 		<>
 			<S.Wrapper>
+				<TurboCredits showBorderBottom={false} allowExpandApprovals={true} />
 				<FormField
 					label={language?.walletAddress}
 					value={walletAddress}
@@ -73,18 +74,6 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 					disabled={loading || turboBalance === 0}
 					sm
 					hideErrorMessage
-				/>
-				<JSONViewer
-					title={'Your Turbo Balance Details'}
-					data={{
-						currentBalance: Number(arProvider.turboBalanceObj.effectiveBalance) / 1e12,
-						controlledBalance: Number(arProvider.turboBalanceObj.controlledWinc) / 1e12,
-						givenApprovals:
-							arProvider.turboBalanceObj.givenApprovals?.map((a: any) => ({
-								approvedAddress: a.approvedAddress,
-								approvedWincAmount: a.approvedWincAmount / 1e12,
-							})) ?? [],
-					}}
 				/>
 				<S.ActionsWrapper>
 					<Button
