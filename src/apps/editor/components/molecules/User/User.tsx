@@ -28,7 +28,7 @@ export default function User(props: {
 	const [showShareCredits, setShowShareCredits] = React.useState<boolean>(false);
 	const currentLoggedInUser =
 		arweaveProvider?.walletAddress === portalProvider.usersByPortalId?.[props.user.address]?.owner;
-	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser;
+	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser && !props.onInviteDetected;
 
 	React.useEffect(() => {
 		(async function () {
