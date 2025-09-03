@@ -235,9 +235,15 @@ export const GlobalStyle = createGlobalStyle`
   }
   
   .warning {
-  	color: ${(props) => props.theme.colors.font.light1};
   	background: ${(props) => props.theme.colors.warning.primary}; 
   	border-radius: ${STYLING.dimensions.radius.primary};
+
+		span {
+			color: ${(props) => props.theme.colors.font.light1};
+			font-size: ${(props) => props.theme.typography.size.xxxSmall};
+      font-weight: ${(props) => props.theme.typography.weight.bold};
+      white-space: nowrap;
+		}
   }
   
   .overlay {
