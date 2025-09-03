@@ -28,9 +28,8 @@ export const UserWrapper = styled.button<{ hideAction: boolean; isCurrent: boole
 			props.isCurrent ? props.theme.colors.container.primary.active : props.theme.colors.view.background};
 	}
 
-  background: ${(props) =>
-		props.isCurrent ? props.theme.colors.container.primary.active : props.theme.colors.view.background};
-  }
+	background: ${(props) =>
+		props.isCurrent ? props.theme.colors.container.alt1.background : props.theme.colors.view.background};
 `;
 
 export const UserHeader = styled.div`

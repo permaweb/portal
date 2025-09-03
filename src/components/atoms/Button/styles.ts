@@ -173,6 +173,14 @@ export const Alt1 = styled(Primary)`
 		props.active ? props.theme.colors.button.alt1.active.background : props.theme.colors.button.alt1.background};
 	border: 1px solid
 		${(props) => (props.active ? props.theme.colors.button.alt1.active.border : props.theme.colors.button.alt1.border)};
+
+	svg {
+		fill: ${(props) =>
+			props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
+		color: ${(props) =>
+			props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
+	}
+
 	&:hover {
 		background: ${(props) => props.theme.colors.button.alt1.active.background};
 		border: 1px solid ${(props) => props.theme.colors.button.alt1.active.border};
