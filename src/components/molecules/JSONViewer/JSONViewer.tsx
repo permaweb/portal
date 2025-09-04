@@ -9,7 +9,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-export default function _JSONTree(props: {
+export default function JSONViewer(props: {
 	data: any;
 	header?: string;
 	placeholder?: string;

@@ -40,6 +40,7 @@ export const ASSETS = {
 	article: getTxEndpoint('upm3OCUmKcVpgCP6QCsMDspuUovC4WamRXql4iaFo9A'),
 	checkmark: getTxEndpoint('mVnNwxm-F6CV043zVtORE-EaMWfd2j8w6HHX70IcVbI'),
 	close: getTxEndpoint('BASlMnOWcLCcLUSrO2wUybQL_06231dLONeVkdTWs3o'),
+	copy: getTxEndpoint('-Qc2PsDF3sVDiT56iaYMfGWttrjI8eRg-1U3WeQmKu0'),
 	code: getTxEndpoint('Nv6GexQXf2PpTv8zYoLzysv0DzOiUK_aguqjnNraqDg'),
 	dark: getTxEndpoint('frDBQmgmo9MLraz4dcGqknHOeUVj9Yx8XNfSozJd4Uo'),
 	date: getTxEndpoint('zEaGL41CNpoN2qsdcvfPCV4TrH2WZrbF6wKDLW7m5Vg'),
@@ -51,6 +52,7 @@ export const ASSETS = {
 	domains: getTxEndpoint('HCp8UMAiBcJyBuMwH8PLrNM6lJqlRLGKe6iDRRBid6I'),
 	drag: getTxEndpoint('BfwMIGxk7WTqI3rYOyzM0DQXAfo_n4I4yyBbTsqe_QE'),
 	facebook: getTxEndpoint('mEcWrUwBKrp_9azlko-h2sta-UJu07UeCXPRBi8yDpA'),
+	fullscreen: getTxEndpoint('eW1yhAoA__WirNKXh6uykdz0DmU033qkUS2fqiZjsok'),
 	filter: getTxEndpoint('S7PKyYrmK3EbqWBTAHG66B9rzeVXXkL3VzmyE6jU8Io'),
 	header1: getTxEndpoint('Me8rAW3kmQxPclDnl7lupTXyWg2t3vV3yfFdCzyXbNA'),
 	header2: getTxEndpoint('6U8907x3L_phk9loiiBCHIXqDBWaV5IfK19IJnH8Q4A'),
@@ -294,7 +296,7 @@ export const DEFAULT_LAYOUT = {
 		wallpaper: '',
 		borderRadius: 0,
 		maxWidth: 1600,
-		padding: "0 20px"
+		padding: '0 20px',
 	},
 	header: {
 		layout: {
