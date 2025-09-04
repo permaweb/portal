@@ -504,7 +504,7 @@ export default function Editor() {
 					</S.MessageWrapper>
 				</div>
 			)}
-			{/* <ArticleEditor handleSubmit={handleSubmit} handleRequestUpdate={handleRequestUpdate} staticPage={isStaticPage} /> */}
+			<ArticleEditor handleSubmit={handleSubmit} handleRequestUpdate={handleRequestUpdate} staticPage={isStaticPage} />
 			{showReview && (
 				<Modal header={language?.reviewPostDetails} handleClose={() => setShowReview(false)}>
 					<S.ModalWrapper>

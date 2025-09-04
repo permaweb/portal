@@ -87,9 +87,14 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [createNewPortal, setCreateNewPortal] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		setPortals(null);
-		handlePortalSetup(null);
-		setPermissions(null);
+		if (!arProvider.walletAddress) {
+			setPortals(null);
+			handlePortalSetup(null);
+			setPermissions(null);
+		} else {
+			setPortals(null);
+			handlePortalSetup(null);
+		}
 	}, [arProvider.walletAddress]);
 
 	React.useEffect(() => {
