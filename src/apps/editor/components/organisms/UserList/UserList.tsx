@@ -10,6 +10,7 @@ import { PortalUserType, ViewLayoutType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import * as S from './styles';
+import Pagination from 'components/atoms/Pagination/Pagination';
 
 const PAGE_SIZE = 10;
 
@@ -49,13 +50,13 @@ export default function UserList(props: { type: ViewLayoutType }) {
 				return (
 					<S.UsersHeaderDetails className={'border-wrapper-alt3'}>
 						<p>{language?.users}</p>
-						<S.PostsHeaderDetailsActions>
+						<S.UsersHeaderDetailsActions>
 							<Button
 								type={'alt3'}
 								label={language?.usersLink}
 								handlePress={() => navigate(URLS.portalUsers(portalProvider.current.id))}
 							/>
-						</S.PostsHeaderDetailsActions>
+						</S.UsersHeaderDetailsActions>
 					</S.UsersHeaderDetails>
 				);
 			case 'detail':
@@ -157,31 +158,16 @@ export default function UserList(props: { type: ViewLayoutType }) {
 			{getHeader()}
 			{users}
 			<S.UsersFooter>
-				<S.UsersFooterDetail>
-					<p>
-						{language?.showingRange(
-							currentRange.total > 0 ? currentRange.start : 0,
-							currentRange.end,
-							currentRange.total
-						)}
-					</p>
-					<p>{`${language?.page} ${currentPage}`}</p>
-				</S.UsersFooterDetail>
-				<S.UsersFooterActions>
-					<Button
-						type={'alt3'}
-						label={language?.previous}
-						handlePress={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-						disabled={currentPage === 1 || processedUsers.length === 0}
-					/>
-					<Button
-						type={'alt3'}
-						label={language?.next}
-						handlePress={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-						disabled={currentPage === totalPages || processedUsers.length === 0}
-					/>
-				</S.UsersFooterActions>
-			</S.UsersFooter>{' '}
+				<Pagination
+					totalItems={processedUsers.length}
+					totalPages={totalPages}
+					currentPage={currentPage}
+					currentRange={currentRange}
+					setCurrentPage={setCurrentPage}
+					showRange={true}
+					showControls={true}
+				/>
+			</S.UsersFooter>
 		</S.Wrapper>
 	);
 }

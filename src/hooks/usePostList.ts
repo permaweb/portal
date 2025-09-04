@@ -127,7 +127,8 @@ export function usePostsList(props: { pageSize?: number }) {
 	const currentRange = React.useMemo(() => {
 		const start = (currentPage - 1) * pageCount + 1;
 		const end = Math.min(currentPage * pageCount, assets.length);
-		return { start, end };
+		const total = assets.length;
+		return { start, end, total };
 	}, [currentPage, assets.length]);
 	return {
 		loading,
