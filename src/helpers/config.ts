@@ -377,8 +377,8 @@ export const DEFAULT_THEME = {
 				dark: '77,77,77',
 			},
 			secondary: {
-				light: '69,153,232',
-				dark: '69,153,232',
+				light: '161,161,161',
+				dark: '88,88,88',
 			},
 			border: {
 				light: '50, 50, 50',
@@ -624,7 +624,6 @@ export const DEFAULT_PAGES = {
 					{
 						width: 1,
 						type: 'feed',
-						category: 'AO',
 						layout: 'minimal',
 					},
 				],
