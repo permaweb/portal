@@ -5,20 +5,17 @@ import { WanderConnect } from '@wanderapp/connect';
 import { ProfileManager } from 'editor/components/organisms/ProfileManager';
 import { useSettingsProvider as useEditorSettingsProvider } from 'editor/providers/SettingsProvider';
 import { useSettingsProvider as useViewerSettingsProvider } from 'viewer/providers/SettingsProvider';
-
 import { Avatar } from 'components/atoms/Avatar';
-import { Button } from 'components/atoms/Button';
-import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { ASSETS, STORAGE } from 'helpers/config';
 import { LanguageEnum, WalletEnum } from 'helpers/types';
-import { checkValidAddress, formatAddress, getARAmountFromWinc } from 'helpers/utils';
+import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
-
+import TurboCredits from 'editor/components/molecules/TurboCredits/TurboCredits';
 import * as S from './styles';
 
 declare global {
@@ -215,26 +212,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 									</S.DHeader>
 								</S.DHeaderFlex>
 							</S.DHeaderWrapper>
-
-							<S.DBalanceWrapper>
-								<S.DBalanceHeader>
-									<p>{language?.creditBalance}</p>
-								</S.DBalanceHeader>
-								<S.DBalanceBody>
-									<p>
-										{arProvider.turboBalance !== null
-											? `${getARAmountFromWinc(arProvider.turboBalance)} ${language?.credits}`
-											: `${language?.loading}...`}
-									</p>
-									<Button
-										type={'alt3'}
-										label={language?.add}
-										handlePress={() => setShowFundUpload(true)}
-										icon={ASSETS.add}
-										iconLeftAlign
-									/>
-								</S.DBalanceBody>
-							</S.DBalanceWrapper>
+							<TurboCredits showBorderBottom />
 							<S.DBodyWrapper>
 								<li onClick={() => setShowProfileManager(true)}>
 									<ReactSVG src={ASSETS.write} />

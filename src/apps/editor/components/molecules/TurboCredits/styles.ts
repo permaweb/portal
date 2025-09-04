@@ -1,125 +1,13 @@
 import styled from 'styled-components';
-
-import { open, transition3 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.div`
-	display: flex;
-	position: relative;
-	animation: ${open} ${transition3};
-
-	#wanderConnectButtonHost {
-		display: none;
-	}
-`;
-
-export const PWrapper = styled.div`
-	display: flex;
-	align-items: center;
-
-	svg {
-		padding: 2.5px 0 0 0;
-		margin: 2.5px 0 0 0;
-	}
-`;
-
-export const CAction = styled.div`
-	margin: 0 15px 0 0;
-
-	@media (max-width: ${STYLING.cutoffs.initial}) {
-		display: none;
-	}
-`;
-
-export const LAction = styled.button`
-	height: 35px;
-	padding: 0 17.5px;
-	margin: 0 15px 0 0;
-	display: none;
-	span {
-		color: ${(props) => props.theme.colors.font.primary};
-		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.base};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		display: block;
-	}
-	&:hover {
-		background: ${(props) => props.theme.colors.container.primary.active};
-	}
-	@media (max-width: ${STYLING.cutoffs.initial}) {
-		display: none;
-	}
-`;
-
-export const FlexAction = styled.div`
-	display: flex;
-	align-items: center;
-	svg {
-		height: 25px;
-		width: 20px;
-		margin: 0 -2.5px 0 11.5px;
-	}
-`;
-
-export const Dropdown = styled.div`
-	max-height: 65vh;
-	width: 325px;
-	max-width: 75vw;
-	padding: 11.5px 10px;
-	position: absolute;
-	z-index: 1;
-	top: 40px;
-	right: -1.5px;
-	border-radius: ${STYLING.dimensions.radius.primary};
-`;
-
-export const DHeaderWrapper = styled.div`
-	width: 100%;
-`;
-
-export const PDropdownHeader = styled.div`
-	padding: 0 7.5px;
-
-	p {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
-		font-family: ${(props) => props.theme.typography.family.primary} !important;
-		text-transform: uppercase;
-	}
-`;
-
-export const DHeaderFlex = styled.div`
-	width: 100%;
-	display: flex;
-	align-items: center;
-	gap: 12.5px;
-	margin: 7.5px 0 0 0;
-	padding: 0 5px 15px 5px;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
-
-	svg {
-		padding: 2.5px 0 0 0;
-		margin: 2.5px 0 0 0;
-	}
-`;
-
-export const DHeader = styled.div`
-	p {
-		color: ${(props) => props.theme.colors.font.primary};
-		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-	}
-`;
-
-export const DBalanceWrapper = styled.div`
+export const DBalanceWrapper = styled.div<{ showBorderBottom: boolean }>`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
 	padding: 15px 7.5px;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-bottom: ${(props) => (props.showBorderBottom ? `1px solid ${props.theme.colors.border.primary}` : 'none')};
 `;
 
 export const DBalanceHeader = styled.div`
@@ -381,4 +269,68 @@ export const MetaRow = styled.div`
 		color: ${(p) => p.theme.colors.font.primary};
 		font-weight: ${(p) => p.theme.typography.weight.semiBold};
 	}
+`;
+
+export const ApprovalsWrapper = styled.div`
+	margin-top: 8px;
+	padding: 8px 10px;
+	border: 1px solid ${(p) => p.theme.colors.border.primary};
+	border-radius: 8px;
+	background: ${(p) => p.theme.colors.container.alt2.background};
+`;
+
+export const ApprovalsHeaderRow = styled.div`
+	display: grid;
+	grid-template-columns: 1fr 1.2fr 1.2fr 0.6fr auto;
+	gap: 8px;
+	font-weight: 600;
+	font-size: ${(p) => p.theme.typography.size.xSmall};
+	opacity: 0.8;
+	padding: 4px 0;
+`;
+
+export const ApprovalRow = styled.div`
+	display: grid;
+	grid-template-columns: 1.6fr 0.6fr 1fr auto;
+	gap: 8px;
+	align-items: center;
+	padding: 8px 0;
+	border-top: 1px solid ${(p) => p.theme.colors.border.primary};
+`;
+
+export const ApprovalAddress = styled.div`
+	font-family: monospace;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
+
+export const HeaderRow = styled(Row)`
+	font-weight: 600;
+	font-size: ${(p) => p.theme.typography.size.xSmall};
+	opacity: 0.85;
+	padding: 4px 0 6px;
+`;
+
+export const Address = styled.div`
+	min-width: 0; /* allow ellipsis in grid */
+	font-family: monospace;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+`;
+
+export const Num = styled.div`
+	justify-self: end; /* right-align within the grid cell */
+	white-space: nowrap; /* keep "0.1688 Credits" on one line */
+`;
+
+export const ApprovalsCount = styled.small<{ clickable?: boolean }>`
+	opacity: 0.7;
+	${(p) =>
+		p.clickable &&
+		`
+      cursor: pointer;
+      color: ${p.theme.colors.link};
+      text-decoration: underline;
+    `}
 `;

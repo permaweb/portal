@@ -58,9 +58,7 @@ export default function PortalManager(props: {
 				let profileUpdateId: string | null;
 				let response: string | null;
 
-				let data: any = {
-					Name: name,
-				};
+				let data: any = { Name: name };
 
 				if (logoId && checkValidAddress(logoId)) {
 					try {
@@ -110,7 +108,6 @@ export default function PortalManager(props: {
 					const tags = [
 						getBootTag('Name', data.Name),
 						{ name: 'Content-Type', value: 'text/html' },
-						{ name: 'Data-Protocol', value: 'Permaweb-Zone' },
 						{ name: 'Zone-Type', value: 'Portal' },
 					];
 

@@ -57,7 +57,7 @@ export default function Landing() {
 				const profileUpdateId = await permawebProvider.libs.joinZone(
 					{
 						zoneToJoinId: portalId,
-						path: 'Portals',
+						storePath: 'Portals',
 					},
 					permawebProvider.profile.id
 				);

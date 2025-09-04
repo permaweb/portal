@@ -1,6 +1,10 @@
 export const language = {
 	en: {
+		creditsSharedSuccessfully: `Credits Shared Successfully`,
+		errorSharingCredits: `Error Sharing Credits`,
+		shareCredits: `Share Credits`,
 		add: `Add`,
+		addTo: `Add To `,
 		addCaption: `Add a caption`,
 		addCategory: `Add a category`,
 		addCredits: `Add Credits`,
@@ -438,7 +442,9 @@ export const language = {
 	es: {
 		// === UNTRANSLATED START ===
 		// TODO: translate
-
+		errorSharingCredits: `Error Sharing Credits`,
+		creditsSharedSuccessfully: `Credits Shared Successfully`,
+		shareCredits: `Share Credits`,
 		addCredits: `Add Credits`,
 		arioToken: `AR.IO Token`,
 		arnsBuyDescription: `Register permanently`,
@@ -520,6 +526,7 @@ export const language = {
 		visitFaucet: `Visit Faucet.`,
 		// === UNTRANSLATED END ===
 		add: `Agregar`,
+		addTo: `Agregar a `,
 		addCaption: `Agregar descripción`,
 		addCategory: `Agregar categoría`,
 		addFunds: `Agregar fondos`,

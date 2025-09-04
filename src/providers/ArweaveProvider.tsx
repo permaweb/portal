@@ -7,6 +7,26 @@ import { WalletEnum } from 'helpers/types';
 
 const WALLET_PERMISSIONS = ['ACCESS_ADDRESS', 'ACCESS_PUBLIC_KEY', 'SIGN_TRANSACTION', 'DISPATCH', 'SIGNATURE'];
 
+export type BigIntString = `${bigint}`;
+
+export interface TurboApproval {
+	approvalDataItemId: string;
+	approvedAddress: string;
+	approvedWincAmount: BigIntString;
+	creationDate: string; // ISO 8601 string
+	payingAddress: string;
+	usedWincAmount: BigIntString;
+}
+
+export interface TurboBalance {
+	winc: BigIntString;
+	balance: BigIntString;
+	controlledWinc: BigIntString;
+	effectiveBalance: BigIntString;
+	givenApprovals: TurboApproval[];
+	receivedApprovals: TurboApproval[];
+}
+
 interface ArweaveContextState {
 	[x: string]: any;
 	auth: any;
@@ -18,6 +38,7 @@ interface ArweaveContextState {
 	refreshTurboBalance: () => void;
 	handleConnect: any;
 	handleDisconnect: (redirect: boolean) => void;
+	turboBalanceObj: TurboBalance;
 }
 
 const DEFAULT_CONTEXT = {
@@ -31,6 +52,7 @@ const DEFAULT_CONTEXT = {
 	handleConnect() {},
 	handleDisconnect(_redirect: boolean) {},
 	setWalletModalVisible(_open: boolean) {},
+	turboBalanceObj: {},
 };
 
 const ARContext = React.createContext<ArweaveContextState>(DEFAULT_CONTEXT);
@@ -46,7 +68,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	const [wallet, setWallet] = React.useState<any>(null);
 	const [walletType, setWalletType] = React.useState<WalletEnum | null>(null);
 	const [walletAddress, setWalletAddress] = React.useState<string | null>(null);
-
+	const [turboBalanceObj, setTurboBalanceObj] = React.useState<{ [key: string]: any }>({});
 	const [arBalance, setArBalance] = React.useState<number | null>(null);
 	const [turboBalance, setTurboBalance] = React.useState<number | null>(null);
 
@@ -169,6 +191,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 				if (result.ok) {
 					const response = await result.json();
+					setTurboBalanceObj(response);
 					const next = Number(response.winc);
 					setTurboBalance(next);
 					return next;
@@ -251,6 +274,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				handleDisconnect,
 				turboBalance,
 				refreshTurboBalance,
+				turboBalanceObj,
 			}}
 		>
 			{props.children}

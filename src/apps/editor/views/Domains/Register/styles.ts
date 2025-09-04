@@ -309,6 +309,19 @@ export const UpdateWrapper = styled.div`
 	}
 `;
 
+export const UnauthorizedWrapper = styled(UpdateWrapper)`
+	background: ${(props) => props.theme.colors.warning.primary} !important;
+	border: 1px solid ${(props) => props.theme.colors.warning.primary} !important;
+
+	span {
+		color: ${(props) => props.theme.colors.font.light1} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: none !important;
+	}
+`;
+
 export const InsufficientBalance = styled(UpdateWrapper)`
 	width: fit-content;
 	margin: 20px 0 0 auto;
