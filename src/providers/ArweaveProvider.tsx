@@ -52,7 +52,14 @@ const DEFAULT_CONTEXT = {
 	handleConnect() {},
 	handleDisconnect(_redirect: boolean) {},
 	setWalletModalVisible(_open: boolean) {},
-	turboBalanceObj: {},
+	turboBalanceObj: {
+		winc: '0',
+		balance: '0',
+		controlledWinc: '0',
+		effectiveBalance: '0',
+		givenApprovals: [],
+		receivedApprovals: [],
+	},
 };
 
 const ARContext = React.createContext<ArweaveContextState>(DEFAULT_CONTEXT);
@@ -233,6 +240,14 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				} else {
 					console.error(`Turbo balance fetch failed: HTTP ${result.status} – ${await result.text()}`);
 					setTurboBalance(0);
+					setTurboBalanceObj({
+						winc: '0',
+						balance: '0',
+						controlledWinc: '0',
+						effectiveBalance: '0',
+						givenApprovals: [],
+						receivedApprovals: [],
+					});
 					return 0;
 				}
 			} catch (e: any) {
