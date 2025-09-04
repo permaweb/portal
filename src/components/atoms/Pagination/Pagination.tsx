@@ -11,6 +11,7 @@ type Props = {
 	setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 	showRange: boolean;
 	showControls: boolean;
+	iconButtons?: boolean;
 };
 
 export default function Pagination(props: Props) {
@@ -30,7 +31,7 @@ export default function Pagination(props: Props) {
 					<p>{`${language?.page} ${props.currentPage}`}</p>
 				</S.PaginationRangeDetails>
 			)}
-			{props.showControls && (
+			{props.showControls && props.iconButtons && (
 				<S.PaginationActions>
 					<Button
 						type={'alt3'}
@@ -47,6 +48,22 @@ export default function Pagination(props: Props) {
 						handlePress={() => props.setCurrentPage((prev) => Math.min(prev + 1, props.totalPages))}
 						disabled={props.currentPage === props.totalPages || props.totalItems === 0}
 						direction={'right'}
+					/>
+				</S.PaginationActions>
+			)}
+			{props.showControls && !props.iconButtons && (
+				<S.PaginationActions>
+					<Button
+						type={'alt3'}
+						label={language?.previous}
+						handlePress={() => props.setCurrentPage((prev) => Math.max(prev - 1, 1))}
+						disabled={props.currentPage === 1 || props.totalItems === 0}
+					/>
+					<Button
+						type={'alt3'}
+						label={language?.next}
+						handlePress={() => props.setCurrentPage((prev) => Math.min(prev + 1, props.totalPages))}
+						disabled={props.currentPage === props.totalPages || props.totalItems === 0}
 					/>
 				</S.PaginationActions>
 			)}
