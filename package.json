@@ -5,9 +5,15 @@
 	"main": "index.tsx",
 	"author": "",
 	"license": "ISC",
+	"lint-staged": {
+		"*.{js,jsx,ts,tsx,css,json,md}": [
+			"prettier --write --log-level warn --ignore-unknown --plugin-search-dir=.",
+			"git add"
+		]
+	},
 	"scripts": {
 		"clean:install": "rm -rf node_modules package-lock.json || true && npm cache clean --force && npm install",
-		"format": "eslint --fix . && npx prettier --write .",
+		"format": "prettier --write .",
 		"lint:lang": "node ./scripts/sort-language.js --check",
 		"fix:lang": "node ./scripts/sort-language.js",
 		"start:editor": "NODE_ENV=development VITE_APP=editor VITE_AO=legacy vite",

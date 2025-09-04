@@ -12,22 +12,14 @@ echo "pre-commit checks complete"
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Only these extensions get formatted
-ext='\.(js|jsx|ts|tsx|css|json|md)$'
+set -euo pipefail
+# Make sure we’re at repo root
+cd -P "$(git rev-parse --show-toplevel)"
 
-# Get all staged files, filter by ext, skip deletions
-# Use || true so grep doesn't exit with non-zero when no matches
-staged=$(git diff --cached --name-only --diff-filter=ACM | grep -E "$ext" || true)
+# Your custom step first (fail fast if it must pass)
+npm run fix:lang
 
-if [ -n "$staged" ]; then
-  echo "✨ Formatting staged files..."
-  echo "$staged"
+# Format only staged files, chunked & safe
+npx lint-staged --quiet
 
-  # Run prettier on them
-  npx prettier --write $staged
-
-  # Re-add any formatting changes
-  echo "$staged" | xargs git add
-else
-  echo "✅ No staged files to format."
-fi
+echo "✅ pre-commit checks complete"
