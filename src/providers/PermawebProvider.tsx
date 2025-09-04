@@ -85,7 +85,12 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		(async function () {
-			if (!arProvider.walletAddress) return;
+			if (!arProvider.walletAddress) {
+				// Clear profile when wallet disconnects
+				setProfile(null);
+				setProfilePending(false);
+				return;
+			}
 
 			const cachedProfile = getCachedProfile(arProvider.walletAddress);
 
@@ -112,7 +117,13 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		(async function () {
-			if (arProvider.walletAddress && profilePending) {
+			if (!arProvider.walletAddress) {
+				// Clear pending state when wallet disconnects
+				setProfilePending(false);
+				return;
+			}
+			
+			if (profilePending) {
 				const cachedProfile = getCachedProfile(arProvider.walletAddress);
 
 				if (cachedProfile?.id) {

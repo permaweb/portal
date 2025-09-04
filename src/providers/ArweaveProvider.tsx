@@ -110,6 +110,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}
 
 	async function handleConnect(walletType: string) {
+		console.log('handleConnect: ', walletType)
 		let walletObj: any = null;
 		switch (walletType) {
 			case WalletEnum.wander:
@@ -138,7 +139,14 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 						setWalletType(window.wanderInstance.authInfo.authType);
 						localStorage.setItem(STORAGE.walletType, window.wanderInstance.authInfo.authType);
 					} else if (window?.wanderInstance?.authInfo) {
-						setAuth({ ...window.wanderInstance.authInfo, authType: localStorage.getItem(STORAGE.walletType) });
+						const storedWalletType = localStorage.getItem(STORAGE.walletType) || WalletEnum.wander;
+						setWalletType(storedWalletType as WalletEnum);
+						setAuth({ ...window.wanderInstance.authInfo, authType: storedWalletType });
+					} else {
+						// Default to wander if no auth info available
+						const defaultType = WalletEnum.wander;
+						setWalletType(defaultType);
+						localStorage.setItem(STORAGE.walletType, defaultType);
 					}
 				} catch (e: any) {
 					console.error(e);
@@ -148,11 +156,38 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}
 
 	async function handleDisconnect(redirect: boolean) {
-		if (localStorage.getItem(STORAGE.walletType)) localStorage.removeItem(STORAGE.walletType);
-		if (window?.wanderInstance?.authInfo?.authType !== 'NATIVE_WALLET') window?.wanderInstance?.signOut();
-		await global.window?.arweaveWallet?.disconnect();
+		console.log('handleDisconnect')
+		// Clear storage
+		if (localStorage.getItem(STORAGE.walletType)) {
+			localStorage.removeItem(STORAGE.walletType);
+		}
+		
+		// Sign out from Wander if it's not a native wallet
+		if (window?.wanderInstance && walletType !== 'NATIVE_WALLET') {
+			try {
+				window.wanderInstance.signOut();
+			} catch (e) {
+				console.error('Error signing out from Wander:', e);
+			}
+		}
+		
+		// Disconnect from ArConnect/native wallet
+		if (window?.arweaveWallet) {
+			try {
+				await window.arweaveWallet.disconnect();
+			} catch (e) {
+				console.error('Error disconnecting wallet:', e);
+			}
+		}
+		
+		// Clear all state
+		setAuth(null);
 		setWallet(null);
 		setWalletAddress(null);
+		setWalletType(null);
+		setArBalance(null);
+		setTurboBalance(null);
+		setTurboBalanceObj({});
 
 		if (redirect) navigate(URLS.base);
 	}

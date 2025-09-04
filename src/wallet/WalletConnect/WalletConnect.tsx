@@ -24,35 +24,6 @@ declare global {
 	}
 }
 
-const AR_WALLETS = [{ type: WalletEnum.wander, label: 'Wander', logo: ASSETS.wander }];
-
-/*
-function WalletList(props: { handleConnect: any }) {
-	return (
-		<S.WalletListContainer>
-			{AR_WALLETS.map((wallet: any, index: number) => (
-				<S.WalletListItem
-					key={index}
-					onClick={() => props.handleConnect(wallet.type)}
-					className={'border-wrapper-primary'}
-				>
-					<img src={wallet.logo} alt={''} />
-					<span>{wallet.label}</span>
-				</S.WalletListItem>
-			))}
-			<S.WalletLink>
-				<span>
-					Don't have an Arweave Wallet? You can create one{' '}
-					<a href={'https://arconnect.io'} target={'_blank'}>
-						here.
-					</a>
-				</span>
-			</S.WalletLink>
-		</S.WalletListContainer>
-	);
-}
-*/
-
 export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engine'; callback?: () => void }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -65,7 +36,6 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 		props.app === 'editor' ? useEditorSettingsProvider() : useViewerSettingsProvider();
 
 	const [showWallet, setShowWallet] = React.useState<boolean>(false);
-	const [walletModalVisible, setWalletModalVisible] = React.useState<boolean>(false);
 	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(false);
 	const [showThemeSelector, setShowThemeSelector] = React.useState<boolean>(false);
@@ -73,7 +43,6 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 	const [instance, setInstance] = React.useState(null);
 	const [avatar, setAvatar] = React.useState<string>('');
-	const [banner, setBanner] = React.useState<string>('');
 	const [label, setLabel] = React.useState<string | null>(null);
 	const hasInitializedRef = React.useRef<boolean>(false);
 	const wrapperRef = React.useRef();
@@ -151,41 +120,49 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 	}, []);
 
 	React.useEffect(() => {
-		if (auth) {
-			const status = auth.authStatus;
-			if (status === 'loading') setLabel('Signing in');
-			else if ((status === 'authenticated' || auth.authType === 'NATIVE_WALLET') && profile) {
+		// Check if user is authenticated based on wallet address
+		if (arProvider.walletAddress) {
+			if (auth?.authStatus === 'loading') {
+				setLabel('Signing in');
+			} else if (profile) {
 				setLabel(profile.displayName || 'My Profile');
 				setAvatar(
 					profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : ''
 				);
-				// setBanner(profile?.banner && checkValidAddress(profile.banner) ? `https://arweave.net/${profile?.banner}` : '');
+			} else {
+				// Wallet connected but no profile
+				setLabel('My Wallet');
+				setAvatar('');
 			}
-		} else if (localStorage.getItem(STORAGE.walletType) === 'NATIVE_WALLET' && profile) {
-			setLabel(profile.displayName || 'My Profile');
-			setAvatar(
-				profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : ''
-			);
-			// setBanner(profile?.banner && checkValidAddress(profile.banner) ? `https://arweave.net/${profile?.banner}` : '');
 		} else {
+			// Not connected
 			setLabel('Log in');
 			setAvatar('');
-			// setBanner('');
 		}
-	}, [showWallet, arProvider.walletAddress, permawebProvider.profile, language]);
+	}, [showWallet, arProvider.walletAddress, permawebProvider.profile, language, auth]);
 
 	function handlePress() {
-		if (arProvider.walletAddress) {
+		console.log('auth: ', auth)
+		// Check if user is authenticated or has a wallet address
+		if ((auth?.authStatus === 'authenticated' || arProvider.walletAddress) && arProvider.walletAddress) {
 			setShowWalletDropdown(!showWalletDropdown);
+		} else if (window.wanderInstance) {
+			window.wanderInstance.open();
 		} else {
-			setWalletModalVisible(true);
+			console.error('WanderInstance not initialized');
 		}
 	}
 
 	function handleDisconnect() {
 		const doRedirect = props.app === 'editor';
+		console.log('doRedirect: ', doRedirect)
 		arProvider.handleDisconnect(doRedirect);
+		setAvatar('');
+		setLabel('Log in');
 		setShowWalletDropdown(false);
+		if (props.callback) {
+			props.callback();
+		}
 	}
 
 	return (
