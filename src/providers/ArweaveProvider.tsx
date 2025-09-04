@@ -29,6 +29,7 @@ export interface TurboBalance {
 
 interface ArweaveContextState {
 	[x: string]: any;
+	auth: any;
 	wallet: any;
 	walletAddress: string | null;
 	walletType: WalletEnum | null;
@@ -41,6 +42,7 @@ interface ArweaveContextState {
 }
 
 const DEFAULT_CONTEXT = {
+	auth: null,
 	wallet: null,
 	walletAddress: null,
 	walletType: null,
@@ -62,6 +64,7 @@ export function useArweaveProvider(): ArweaveContextState {
 export function ArweaveProvider(props: { children: React.ReactNode }) {
 	const navigate = useNavigate();
 
+	const [auth, setAuth] = React.useState(null);
 	const [wallet, setWallet] = React.useState<any>(null);
 	const [walletType, setWalletType] = React.useState<WalletEnum | null>(null);
 	const [walletAddress, setWalletAddress] = React.useState<string | null>(null);
@@ -74,10 +77,12 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 		window.addEventListener('arweaveWalletLoaded', handleWallet);
 		window.addEventListener('walletSwitch', handleWallet);
+		window.addEventListener('message', onMessage);
 
 		return () => {
 			window.removeEventListener('arweaveWalletLoaded', handleWallet);
 			window.removeEventListener('walletSwitch', handleWallet);
+			window.removeEventListener('message', onMessage);
 		};
 	}, []);
 
@@ -104,10 +109,13 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		}
 	}
 
-	async function handleConnect(walletType: WalletEnum.wander) {
+	async function handleConnect(walletType: string) {
 		let walletObj: any = null;
 		switch (walletType) {
 			case WalletEnum.wander:
+				handleArConnect();
+				break;
+			case 'NATIVE_WALLET':
 				handleArConnect();
 				break;
 			default:
@@ -126,8 +134,12 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					await window.arweaveWallet.connect(WALLET_PERMISSIONS as any);
 					setWalletAddress(await window.arweaveWallet.getActiveAddress());
 					setWallet(window.arweaveWallet);
-					setWalletType(WalletEnum.wander);
-					localStorage.setItem(STORAGE.walletType, WalletEnum.wander);
+					if (window?.wanderInstance?.authInfo?.authType) {
+						setWalletType(window.wanderInstance.authInfo.authType);
+						localStorage.setItem(STORAGE.walletType, window.wanderInstance.authInfo.authType);
+					} else if (window?.wanderInstance?.authInfo) {
+						setAuth({ ...window.wanderInstance.authInfo, authType: localStorage.getItem(STORAGE.walletType) });
+					}
 				} catch (e: any) {
 					console.error(e);
 				}
@@ -137,6 +149,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 	async function handleDisconnect(redirect: boolean) {
 		if (localStorage.getItem(STORAGE.walletType)) localStorage.removeItem(STORAGE.walletType);
+		if (window?.wanderInstance?.authInfo?.authType !== 'NATIVE_WALLET') window?.wanderInstance?.signOut();
 		await global.window?.arweaveWallet?.disconnect();
 		setWallet(null);
 		setWalletAddress(null);
@@ -214,9 +227,45 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		return current;
 	}
 
+	function onMessage(event: any) {
+		const data = event.data;
+		if (data && data.id && !data.id.includes('react')) {
+			if (data.type === 'embedded_auth') {
+				if (
+					data.data.authType ||
+					(data.data.authStatus === 'not-authenticated' && data.data.authType !== 'null' && data.data.authType !== null)
+				) {
+					if (data.data.authStatus !== 'loading') {
+						window.wanderInstance.close();
+						setAuth(data.data);
+						if (data.data.authStatus === 'authenticated' || data.data.authType === 'NATIVE_WALLET') {
+							setAuth(data.data);
+							handleArConnect();
+						}
+					} else {
+						setAuth(data.data);
+					}
+				} else if (data.data.authStatus === 'not-authenticated') {
+					setAuth(data.data);
+					if (localStorage.getItem(STORAGE.walletType)) handleArConnect();
+				}
+			} else if (data.type === 'embedded_request') {
+				if (window.wanderInstance.pendingRequests !== 0) {
+					window.wanderInstance.close();
+					window.wanderInstance.open();
+				} else {
+					window.wanderInstance.close();
+				}
+			} else if (data.type === 'embedded_balance') {
+			} else if (data.type === 'embedded_close') {
+			}
+		}
+	}
+
 	return (
 		<ARContext.Provider
 			value={{
+				auth,
 				wallet,
 				walletAddress,
 				walletType,

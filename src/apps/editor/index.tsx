@@ -22,6 +22,7 @@ import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvide
 import { NotificationProvider } from 'providers/NotificationProvider';
 import { PermawebProvider, usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
+import { WalletConnect } from 'wallet/WalletConnect';
 
 import * as S from './styles';
 
@@ -39,6 +40,7 @@ const Design = getLazyImport('Design');
 const Media = getLazyImport('Media');
 const Users = getLazyImport('Users');
 const Pages = getLazyImport('Pages');
+const Layout = getLazyImport('Layout');
 const Domains = getLazyImport('Domains');
 const DomainsRegister = getLazyImport('Domains/Register');
 const Docs = getLazyImport('Docs');
@@ -185,12 +187,13 @@ function AppContent() {
 						{getRoute(`${URLS.base}:portalId/post/create/article`, <PostEdit />)}
 						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <PostEdit />)}
 						{getRoute(`${URLS.base}:portalId/page/create`, <PageCreate />)}
-						{getRoute(`${URLS.base}:portalId/page/edit/:assetId`, <PageEdit />)}
+						{getRoute(`${URLS.base}:portalId/page/edit/:pageId`, <PageEdit />)}
 						{getRoute(`${URLS.base}:portalId/setup`, <Setup />)}
 						{getRoute(`${URLS.base}:portalId/design`, <Design />)}
 						{getRoute(`${URLS.base}:portalId/media`, <Media />)}
 						{getRoute(`${URLS.base}:portalId/users`, <Users />)}
 						{getRoute(`${URLS.base}:portalId/pages`, <Pages />)}
+						{getRoute(`${URLS.base}:portalId/layout`, <Layout />)}
 						{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
 						{getRoute(`${URLS.base}:portalId/domains/register`, <DomainsRegister />)}
 						{getRoute(URLS.docs, <Docs />)}
@@ -224,6 +227,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 									<PortalProvider>
 										<GlobalStyle />
 										<App />
+										<WalletConnect app="editor" />
 									</PortalProvider>
 								</NotificationProvider>
 							</PermawebProvider>

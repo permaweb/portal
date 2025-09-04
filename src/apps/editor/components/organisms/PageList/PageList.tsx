@@ -20,6 +20,12 @@ export default function PageList() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	const order = ['home', 'post', 'feed'];
+	const sortedPages = Object.fromEntries([
+		...order.map((k) => [k, portalProvider?.current?.pages[k]]).filter(([_, v]) => v !== undefined),
+		...Object.entries(portalProvider?.current?.pages || {}).filter(([k]) => !order.includes(k)),
+	]);
+
 	const pages = React.useMemo(() => {
 		if (!portalProvider.current?.pages) {
 			return (
@@ -37,12 +43,12 @@ export default function PageList() {
 
 		return portalProvider.current?.id ? (
 			<S.Wrapper>
-				{portalProvider.current.pages.map((page: PortalPageType) => {
+				{Object.entries(sortedPages).map(([key, index]) => {
 					return (
-						<S.PageWrapper key={page.id} className={'fade-in'}>
+						<S.PageWrapper key={index} className={'fade-in'}>
 							<S.PageHeader>
-								<Link to={`${getTxEndpoint(portalProvider.current.id)}/#/${urlify(page.name)}`} target={'_blank'}>
-									<p>{page.name}</p>
+								<Link to={`${getTxEndpoint(portalProvider.current.id)}/#/${urlify(key)}`} target={'_blank'}>
+									<p>{key.charAt(0).toUpperCase() + key.slice(1)}</p>
 									<ReactSVG src={ASSETS.newTab} />
 								</Link>
 							</S.PageHeader>
@@ -51,7 +57,7 @@ export default function PageList() {
 									<Button
 										type={'alt3'}
 										label={language?.edit}
-										handlePress={() => navigate(`${URLS.pageEdit(portalProvider.current.id)}${page.id}`)}
+										handlePress={() => navigate(`${URLS.pageEdit(portalProvider.current.id)}${key}`)}
 									/>
 								</S.PageActions>
 							</S.PageDetail>
