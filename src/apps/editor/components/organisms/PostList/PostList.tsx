@@ -7,6 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
+import { Pagination } from 'components/atoms/Pagination';
 import { Panel } from 'components/atoms/Panel';
 import { ASSETS, URLS } from 'helpers/config';
 import { ArticleStatusType, PortalAssetRequestType, PortalAssetType, ViewLayoutType } from 'helpers/types';
@@ -269,24 +270,16 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 			{getHeader()}
 			<Posts paginatedPosts={paginatedPosts} type={props.type} />
 			<S.PostsFooter>
-				<S.PostsFooterDetail>
-					<p>{language?.showingRange(assets.length > 0 ? currentRange.start : 0, currentRange.end, assets.length)}</p>
-					<p>{`${language?.page} ${currentPage}`}</p>
-				</S.PostsFooterDetail>
-				<S.PostsFooterActions>
-					<Button
-						type={'alt3'}
-						label={language?.previous}
-						handlePress={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-						disabled={assets.length > 0 ? currentPage === 1 : true}
-					/>
-					<Button
-						type={'alt3'}
-						label={language?.next}
-						handlePress={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-						disabled={assets.length > 0 ? currentPage === totalPages : true}
-					/>
-				</S.PostsFooterActions>
+				<Pagination
+					totalItems={assets.length}
+					totalPages={totalPages}
+					currentPage={currentPage}
+					currentRange={currentRange}
+					setCurrentPage={setCurrentPage}
+					showRange={true}
+					showControls={true}
+					iconButtons={true}
+				/>
 			</S.PostsFooter>
 		</S.Wrapper>
 	);

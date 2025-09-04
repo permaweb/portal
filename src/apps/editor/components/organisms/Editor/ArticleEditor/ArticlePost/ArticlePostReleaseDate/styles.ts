@@ -57,8 +57,6 @@ export const Section = styled.div`
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
-		/* padding: 0 0 7.5px 0;
-		border-bottom: 1px solid ${(props) => props.theme.colors.border.primary}; */
 	}
 `;
 

@@ -24,7 +24,9 @@ export const UsersHeaderDetails = styled.div`
 	}
 `;
 
-export const PostsHeaderDetailsActions = styled.div`
+export const UsersFooter = styled.div``;
+
+export const UsersHeaderDetailsActions = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 10px;
