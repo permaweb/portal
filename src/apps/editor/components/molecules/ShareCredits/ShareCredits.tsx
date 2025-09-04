@@ -80,7 +80,13 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 						type={'alt1'}
 						label={language?.shareCredits}
 						handlePress={handleSubmit}
-						disabled={loading || !walletAddress || !checkValidAddress(walletAddress)}
+						disabled={
+							loading ||
+							!walletAddress ||
+							!checkValidAddress(walletAddress) ||
+							!approvedWincAmountInput ||
+							approvedWincAmountInput <= 0
+						}
 						loading={loading}
 						icon={props.user ? null : ASSETS.add}
 						iconLeftAlign
