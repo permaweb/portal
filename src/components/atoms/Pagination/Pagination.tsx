@@ -1,6 +1,7 @@
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import * as S from './styles';
 import { Button } from '../Button';
+import { ASSETS } from 'helpers/config';
 
 type Props = {
 	totalItems: number;
@@ -33,15 +34,19 @@ export default function Pagination(props: Props) {
 				<S.PaginationActions>
 					<Button
 						type={'alt3'}
-						label={language?.previous}
+						icon={ASSETS.arrow}
+						label={''}
 						handlePress={() => props.setCurrentPage((prev) => Math.max(prev - 1, 1))}
 						disabled={props.currentPage === 1 || props.totalItems === 0}
+						direction={'left'}
 					/>
 					<Button
 						type={'alt3'}
-						label={language?.next}
+						icon={ASSETS.arrow}
+						label={''}
 						handlePress={() => props.setCurrentPage((prev) => Math.min(prev + 1, props.totalPages))}
 						disabled={props.currentPage === props.totalPages || props.totalItems === 0}
+						direction={'right'}
 					/>
 				</S.PaginationActions>
 			)}

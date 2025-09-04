@@ -27,6 +27,7 @@ export default function Button(props: {
 	className?: string;
 	link?: string;
 	target?: '_blank';
+	direction?: 'left' | 'right' | 'up' | 'down';
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -104,7 +105,7 @@ export default function Button(props: {
 						active={props.active}
 						leftAlign={props.iconLeftAlign}
 					>
-						<ReactSVG src={props.icon} />
+						<ReactSVG src={props.icon} direction={props.direction} />
 					</StyledIcon>
 				)}
 				<span>{props.loading ? `${language?.loading}...` : props.label}</span>
@@ -115,7 +116,9 @@ export default function Button(props: {
 						active={props.active}
 						leftAlign={props.iconLeftAlign}
 					>
-						<ReactSVG src={props.icon} />
+						<S.IconDirection direction={props.direction}>
+							<ReactSVG src={props.icon} />
+						</S.IconDirection>
 					</StyledIcon>
 				)}
 			</>
