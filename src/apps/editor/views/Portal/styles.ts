@@ -12,6 +12,10 @@ export const BodyWrapper = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	gap: 25px;
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		flex-direction: column;
+	}
 `;
 
 export const SectionWrapper = styled.div`
@@ -20,7 +24,7 @@ export const SectionWrapper = styled.div`
 	flex-direction: column;
 	gap: 25px;
 
-	@media (max-width: ${STYLING.cutoffs.tablet}) {
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		width: 100%;
 	}
 `;

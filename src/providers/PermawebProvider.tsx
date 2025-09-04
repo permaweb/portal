@@ -44,15 +44,12 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	const [profilePending, setProfilePending] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		console.log('Starting PermawebProvider initialization...');
-
 		try {
 			const aoConnection = import.meta.env.VITE_AO ?? 'legacy';
 			console.log(`AO Connection: [${aoConnection}]`);
 			console.log(`AO Node URL: ${AO_NODE.url}`);
 
 			const signer = createSigner(arProvider.wallet);
-			console.log('Signer created:', signer);
 
 			let ao: any;
 			if (aoConnection === 'mainnet') {
@@ -64,7 +61,6 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 			} else if (import.meta.env.VITE_AO === 'legacy') {
 				ao = connect({ MODE: 'legacy' });
 			}
-			console.log('AO connection:', ao);
 
 			const dependencies = {
 				ao: ao,
@@ -74,8 +70,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 			};
 
 			setDeps(dependencies);
-			console.log('dependencies:', dependencies);
-			
+
 			const initializedLibs = Permaweb.init(dependencies);
 			setLibs(initializedLibs);
 		} catch (error) {
@@ -122,7 +117,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				setProfilePending(false);
 				return;
 			}
-			
+
 			if (profilePending) {
 				const cachedProfile = getCachedProfile(arProvider.walletAddress);
 
@@ -179,13 +174,11 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	}, [refreshProfileTrigger]);
 
 	async function resolveProfile(address: string) {
-		const cachedProfile = getCachedProfile(address);
-
 		if (libs) {
 			try {
 				let fetchedProfile: any;
-				
-				if (cachedProfile?.id) fetchedProfile = cachedProfile;
+				const cachedProfile = getCachedProfile(address);
+				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
 				else fetchedProfile = await libs.getProfileByWalletAddress(address);
 				let profileToUse = { ...fetchedProfile };
 
@@ -194,8 +187,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 				return profileToUse;
 			} catch (e: any) {
-				console.error('Profile fetch error, using cached profile:', e);
-				return cachedProfile || null;
+				console.error(e);
 			}
 		}
 	}

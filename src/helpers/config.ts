@@ -1,14 +1,9 @@
 import { getTxEndpoint } from './endpoints';
-import { ArticleBlockEnum, PortalSchemeType, PortalThemeType } from './types';
-
-// export const AO_NODE = {
-// 	url: 'http://localhost:8734',
-// 	scheduler: 'mYJTM8VpIibDLuyGLQTcbcPy-LeOY48qzECADTUYfWc',
-// };
+import { ArticleBlockEnum } from './types';
 
 export const AO_NODE = {
-	url: 'https://forward.computer',
-	scheduler: 'NoZH3pueH0Cih6zjSNu_KRAcmg4ZJV1aGHKi0Pi5_Hc',
+	url: 'https://hb.portalinto.com',
+	scheduler: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
 };
 
 // Testnet configuration
@@ -127,7 +122,7 @@ export const STORAGE = {
 
 export const STYLING = {
 	cutoffs: {
-		desktop: '1200px',
+		desktop: '1250px',
 		initial: '1024px',
 		max: '1600px',
 		tablet: '840px',
@@ -162,7 +157,6 @@ export const STYLING = {
 function createURLs() {
 	const base = `/`;
 	const post = `post/`;
-	const page = `page/`;
 
 	const portalBase = (portalId: string) => `${base}${portalId}/`;
 	const postCreateBase = (portalId: string) => `${base}${portalId}/${post}create/`;
@@ -294,7 +288,7 @@ export const DEFAULT_LAYOUT = {
 		wallpaper: '',
 		borderRadius: 0,
 		maxWidth: 1600,
-		padding: "0 20px"
+		padding: '0 20px',
 	},
 	header: {
 		layout: {

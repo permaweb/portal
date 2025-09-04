@@ -7,7 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
-import { DEFAULT_THEME, DEFAULT_LAYOUT, DEFAULT_PAGES, PORTAL_DATA, PORTAL_ROLES, URLS } from 'helpers/config';
+import { DEFAULT_LAYOUT, DEFAULT_PAGES, DEFAULT_THEME, PORTAL_DATA, PORTAL_ROLES, URLS } from 'helpers/config';
 import { PortalDetailType, PortalHeaderType } from 'helpers/types';
 import { checkValidAddress, getBootTag } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -152,37 +152,17 @@ export default function PortalManager(props: {
 						arProvider.wallet
 					);
 
-					const themeUpdateId = await permawebProvider.libs.updateZone(
+					const portalUpdateId = await permawebProvider.libs.updateZone(
 						{
-							Themes: [
-								permawebProvider.libs.mapToProcessCase(DEFAULT_THEME)
-							],
-						},
-						portalId,
-						arProvider.wallet
-					);
-
-					console.log(`Theme update: ${themeUpdateId}`);
-
-					const layoutUpdateId = await permawebProvider.libs.updateZone(
-						{
+							Themes: [permawebProvider.libs.mapToProcessCase(DEFAULT_THEME)],
 							Layout: permawebProvider.libs.mapToProcessCase(DEFAULT_LAYOUT),
-						},
-						portalId,
-						arProvider.wallet
-					);
-
-					console.log(`Layout update: ${layoutUpdateId}`);
-
-					const pagesUpdateId = await permawebProvider.libs.updateZone(
-						{
 							Pages: permawebProvider.libs.mapToProcessCase(DEFAULT_PAGES),
 						},
 						portalId,
 						arProvider.wallet
 					);
 
-					console.log(`Pages update: ${pagesUpdateId}`);
+					console.log(`Portal update: ${portalUpdateId}`);
 
 					response = `${language?.portalCreated}!`;
 
