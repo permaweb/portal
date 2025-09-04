@@ -112,10 +112,10 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					await window.arweaveWallet.connect(WALLET_PERMISSIONS as any);
 					setWalletAddress(await window.arweaveWallet.getActiveAddress());
 					setWallet(window.arweaveWallet);
-					if (window?.wanderInstance) setWalletType(window.wanderInstance.authInfo.authType);
-					if (window?.wanderInstance.authInfo.authType)
+					if (window?.wanderInstance?.authInfo?.authType) {
+						setWalletType(window.wanderInstance.authInfo.authType);
 						localStorage.setItem(STORAGE.walletType, window.wanderInstance.authInfo.authType);
-					else {
+					} else if (window?.wanderInstance?.authInfo) {
 						setAuth({ ...window.wanderInstance.authInfo, authType: localStorage.getItem(STORAGE.walletType) });
 					}
 				} catch (e: any) {
