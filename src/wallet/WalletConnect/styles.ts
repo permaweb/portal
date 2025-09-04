@@ -7,6 +7,10 @@ export const Wrapper = styled.div`
 	display: flex;
 	position: relative;
 	animation: ${open} ${transition3};
+
+	#wanderConnectButtonHost {
+		display: none;
+	}
 `;
 
 export const PWrapper = styled.div`

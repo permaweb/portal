@@ -64,6 +64,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				label: language?.users,
 			},
 			{
+				path: portalProvider.current?.id ? URLS.portalLayout(portalProvider.current.id) : URLS.base,
+				icon: ASSETS.layout,
+				label: language?.layout,
+			},
+			{
 				path: portalProvider.current?.id ? URLS.portalPages(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.pages,
 				label: language?.pages,
@@ -255,7 +260,12 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 								<S.PDropdownFooter>
 									<button
 										onClick={() => {
-											window.open(getTxEndpoint(portalProvider.current.id));
+											// In development, redirect to local engine on port 5000
+											const siteUrl =
+												window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+													? `http://localhost:5000/${portalProvider.current.id}`
+													: getTxEndpoint(portalProvider.current.id);
+											window.open(siteUrl);
 											setShowPortalDropdown(false);
 										}}
 									>

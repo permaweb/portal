@@ -8,7 +8,7 @@ import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
-import { Toggle } from 'components/atoms/Toggle';
+import { Select } from 'components/atoms/Select';
 import { ASSETS, DEFAULT_THEME } from 'helpers/config';
 import { PortalSchemeType, PortalThemeType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -21,6 +21,8 @@ import * as S from './styles';
 function Color(props: {
 	label: string;
 	value: string;
+	basics: any;
+	scheme: string;
 	onChange: (newColor: string) => void;
 	disabled?: boolean;
 	loading: boolean;
@@ -34,9 +36,27 @@ function Color(props: {
 	const [value, setValue] = React.useState<string | null>(null);
 	const [showSelector, setShowSelector] = React.useState<boolean>(false);
 
+	function getColor(basics: any, value: string) {
+		switch (value) {
+			case 'primary':
+				return basics.primary[props.scheme];
+			case 'secondary':
+				return basics.secondary[props.scheme];
+			case 'background':
+				return basics.background[props.scheme];
+			case 'text':
+				return basics.text[props.scheme];
+			case 'border':
+				return basics.border[props.scheme];
+			default:
+				return value;
+		}
+	}
+
 	React.useEffect(() => {
 		if (props.value) {
-			setValue(parseRgbStringToHex(props.value));
+			const absoluteValue = getColor(props.basics, props.value);
+			setValue(parseRgbStringToHex(absoluteValue));
 		}
 	}, [props.value]);
 
@@ -60,6 +80,15 @@ function Color(props: {
 		return `${r},${g},${b}`;
 	}
 
+	function getColorContrast(hexString: string) {
+		const num = parseInt(hexString.replace('#', ''), 16);
+		const r = (num >> 16) & 255;
+		const g = (num >> 18) & 255;
+		const b = num & 255;
+		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+		return luminance > 0.5 ? 'black' : 'white';
+	}
+
 	return (
 		<>
 			<S.ColorWrapper>
@@ -70,10 +99,10 @@ function Color(props: {
 					height={props.height}
 					width={props.width}
 					maxWidth={props.maxWidth}
-				/>
-				<S.ColorTooltip className={'info'}>
-					<span>{`${props.label} (${value})`}</span>
-				</S.ColorTooltip>
+					text={value && getColorContrast(value)}
+				>
+					<span>{`${value}`}</span>
+				</S.ColorBody>
 			</S.ColorWrapper>
 			{showSelector && (
 				<Modal header={language?.colorPicker} handleClose={() => setShowSelector(false)}>
@@ -116,6 +145,228 @@ function Color(props: {
 	);
 }
 
+const ThemeSection = React.memo(function ThemeSection(props) {
+	const portalProvider = usePortalProvider();
+	const { theme, setTheme, name, setName, section, loading } = props;
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+
+	// Local state for name editing to prevent re-renders
+	const [localName, setLocalName] = React.useState(theme.name || '');
+
+	// Update local name when theme changes from outside
+	React.useEffect(() => {
+		if (theme.name !== localName) {
+			setLocalName(theme.name || '');
+		}
+	}, [theme.name]);
+
+	const order = ['text', 'hover', 'background', 'primary', 'secondary'];
+	const sortedSection = Object.fromEntries([
+		...order.map((k) => [k, theme[section]?.colors?.[k]]).filter(([_, v]) => v !== undefined),
+		...Object.entries(theme[section]?.colors || {}).filter(([k]) => !order.includes(k)),
+	]);
+
+	function handleThemeChange(section: string, type: string, scheme: string | null, key: string, newValue: string) {
+		const updatedTheme = {
+			...props.theme,
+			[section]: {
+				...props.theme[section],
+				[type]: {
+					...props.theme[section][type],
+					[key.toLowerCase()]: {
+						...props.theme[section][type][key.toLowerCase()],
+						...(scheme ? { [scheme]: newValue } : newValue),
+					},
+				},
+			},
+		};
+
+		setTheme(updatedTheme);
+		// if (props.published) props.onThemeChange(updatedTheme, false);
+	}
+
+	return (
+		<S.ThemeSection key={theme.name} colors={theme.basics.colors} preferences={theme.basics.preferences}>
+			<span>{section.toUpperCase()}</span>
+			{/* JSON.stringify(theme.basics.preferences) */}
+			{section === 'basics' && (
+				<S.GridWrapper id="GridWrapper">
+					<S.GridRows>
+						<S.GridRow>
+							<S.ThemeKey style={{ flex: 1 }}>Name</S.ThemeKey>
+							<S.ThemeValue style={{ flex: 2.5, padding: 0 }}>
+								<FormField
+									key="theme-name-field"
+									value={localName}
+									onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+										// Only update local state while typing
+										setLocalName(e.target.value);
+										// Notify parent that there are pending changes
+										if (props.onNameChange) {
+											props.onNameChange(e.target.value);
+										}
+									}}
+									onBlur={() => {
+										// Only update parent when done editing
+										if (localName !== props.theme.name) {
+											const updatedTheme = { ...props.theme, name: localName };
+											props.setTheme(updatedTheme);
+										}
+									}}
+									invalid={false}
+									hideErrorMessage={true}
+								/>
+							</S.ThemeValue>
+						</S.GridRow>
+					</S.GridRows>
+				</S.GridWrapper>
+			)}
+			<S.ThemeRowHeader>
+				<S.ThemeLight colors={props.theme.basics?.colors}>
+					<S.ThemeKey />
+					<S.ThemeValue></S.ThemeValue>
+				</S.ThemeLight>
+				<S.ThemeDark colors={props.theme.basics?.colors}>
+					<S.ThemeKey />
+					<S.ThemeValue />
+				</S.ThemeDark>
+			</S.ThemeRowHeader>
+			{Object.entries(sortedSection).map(([key, value]) => {
+				return (
+					<>
+						<S.ThemeRow>
+							<S.ThemeLight colors={props.theme.basics?.colors}>
+								<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
+								<S.ThemeValue>
+									<Color
+										key={key}
+										label={key}
+										value={value.light}
+										basics={props.theme.basics?.colors}
+										scheme="light"
+										onChange={(newColor) => handleThemeChange('basics', 'colors', 'light', key, newColor)}
+										loading={loading}
+										disabled={unauthorized}
+									/>
+								</S.ThemeValue>
+							</S.ThemeLight>
+							<S.ThemeDark colors={props.theme.basics?.colors}>
+								<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
+								<S.ThemeValue>
+									<Color
+										key={key}
+										label={key}
+										value={value.dark}
+										basics={props.theme.basics?.colors}
+										scheme="dark"
+										onChange={(newColor) => handleThemeChange('basics', 'colors', 'dark', key, newColor)}
+										loading={loading}
+										disabled={unauthorized}
+									/>
+								</S.ThemeValue>
+							</S.ThemeDark>
+						</S.ThemeRow>
+					</>
+				);
+			})}
+
+			<S.ThemeRowFooter>
+				<S.ThemeLight colors={props.theme.basics?.colors}>
+					<S.ThemeKey />
+					<S.ThemeValue />
+				</S.ThemeLight>
+				<S.ThemeDark colors={props.theme.basics?.colors}>
+					<S.ThemeKey />
+					<S.ThemeValue />
+				</S.ThemeDark>
+			</S.ThemeRowFooter>
+			<S.ThemePreview></S.ThemePreview>
+		</S.ThemeSection>
+	);
+});
+
+function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpdate: (theme: any) => void }) {
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
+
+	// const { theme, published, loading } = props;
+	const [showExpertMode, setShowExpertMode] = React.useState(false);
+	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
+	const [originalTheme] = React.useState<PortalThemeType>(props.theme); // Store original for comparison
+	const [pendingNameChange, setPendingNameChange] = React.useState<string | null>(null);
+
+	// Only update if props.theme actually changes from external source
+	// Don't update if the only change is the name (which we're editing locally)
+	React.useEffect(() => {
+		const propsWithoutName = { ...props.theme };
+		delete propsWithoutName.name;
+		const themeWithoutName = { ...theme };
+		delete themeWithoutName.name;
+
+		if (JSON.stringify(propsWithoutName) !== JSON.stringify(themeWithoutName)) {
+			setTheme(props.theme);
+		}
+	}, [props.theme]);
+
+	// Check if theme has changes
+	const hasChanges = React.useMemo(() => {
+		// Check if there's a pending name change or if theme has changed
+		const nameChanged = pendingNameChange !== null && pendingNameChange !== originalTheme.name;
+		const themeChanged = JSON.stringify(originalTheme) !== JSON.stringify(theme);
+		return nameChanged || themeChanged;
+	}, [originalTheme, theme, pendingNameChange]);
+
+	const order = ['basics', 'header', 'navigation', 'content', 'footer', 'card'];
+	const sortedTheme = Object.fromEntries([
+		...order.map((k) => [k, theme[k]]).filter(([_, v]) => v !== undefined),
+		...Object.entries(theme || {}).filter(([k]) => !order.includes(k)),
+	]);
+
+	return (
+		<S.ThemeWrapper id="ThemeWrapper">
+			<Select
+				activeOption={{ id: theme?.name || 'Default', label: theme?.name || 'Default' }}
+				setActiveOption={() => {}}
+				options={[{ id: theme?.name || 'Default', label: theme?.name || 'Default' }]}
+				disabled={false}
+			/>
+			<S.Theme>
+				<ThemeSection
+					theme={theme}
+					setTheme={setTheme}
+					section="basics"
+					loading={props.loading}
+					onNameChange={setPendingNameChange}
+				/>
+				<S.ThemeSectionWrapper $show={showExpertMode}>
+					{Object.entries(sortedTheme).map(([key]) => {
+						if (key === 'basics' || key === 'name' || key === 'active') return null;
+						return (
+							<ThemeSection key={key} theme={sortedTheme} setTheme={setTheme} section={key} loading={props.loading} />
+						);
+					})}
+				</S.ThemeSectionWrapper>
+			</S.Theme>
+
+			<S.EndActions>
+				<Button
+					type={'alt1'}
+					label={language?.save || 'Save'}
+					handlePress={() => {
+						// Include pending name change if exists
+						const finalTheme = pendingNameChange !== null ? { ...theme, name: pendingNameChange } : theme;
+						props.onThemeUpdate(finalTheme);
+						setPendingNameChange(null); // Clear pending change after save
+					}}
+					loading={props.loading}
+					disabled={props.loading || !hasChanges}
+				/>
+			</S.EndActions>
+			{/* <pre>{JSON.stringify(theme, null, 2)}</pre> */}
+		</S.ThemeWrapper>
+	);
+}
+
 function Section(props: {
 	label: string;
 	theme: PortalThemeType;
@@ -128,46 +379,48 @@ function Section(props: {
 	loading: boolean;
 }) {
 	const portalProvider = usePortalProvider();
+	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
+	const [name, setName] = React.useState<string>(props.theme.name ?? '-');
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+
+	React.useEffect(() => {
+		setTheme(props.theme);
+		setName(props.theme.name ?? '-');
+	}, [props.theme]);
+
+	function handleThemeChange(key: string, newColor: string) {
+		const updatedTheme = {
+			...theme,
+			basics: {
+				...theme.basics,
+				colors: {
+					...theme.basics.colors,
+					[key]: newColor,
+				},
+			},
+		};
+		setTheme(updatedTheme);
+		if (props.published) props.onThemeChange(updatedTheme, false);
+	}
+
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const { background, ...remainingTheme } = props.theme.colors;
+	// const { background, ...remainingTheme } = props.theme.basics.colors;
+	const remainingTheme = props.theme.basics.colors;
 
-	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
-	const [name, setName] = React.useState<string>(props.theme.name ?? '-');
 	const [scheme, setScheme] = React.useState<'light' | 'dark'>(props.theme.scheme);
 	const [showNameEdit, setShowNameEdit] = React.useState<boolean>(false);
 	const [showRemoveConfirmation, setShowRemoveConfirmation] = React.useState<boolean>(false);
 
-	React.useEffect(() => {
-		setTheme(props.theme);
-		setName(props.theme.name);
-		setScheme(props.theme.scheme);
-	}, [props.theme]);
-
-	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
-
-	const orderedRemainingTheme = Object.keys(DEFAULT_THEME.light.colors)
-		.filter((key) => key !== 'background')
+	const orderedRemainingTheme = Object.keys(DEFAULT_THEME.light.basics.colors)
+		// .filter((key) => key !== 'background')
 		.reduce((acc, key) => {
 			if (remainingTheme.hasOwnProperty(key)) {
 				acc[key] = remainingTheme[key];
 			}
 			return acc;
 		}, {} as typeof remainingTheme);
-
-	function handleThemeChange(key: string, newValue: string) {
-		const updatedTheme = {
-			...theme,
-			colors: {
-				...theme.colors,
-				[key.toLowerCase()]: newValue,
-			},
-		};
-
-		setTheme(updatedTheme);
-		if (props.published) props.onThemeChange(updatedTheme, false);
-	}
 
 	function handleNameChange() {
 		const updatedTheme = {
@@ -197,9 +450,10 @@ function Section(props: {
 
 	return (
 		<>
-			<S.Section>
+			<S.Section id="Section">
 				<S.SectionHeader>
 					<p>{name}</p>
+					{/*
 					<S.SectionHeaderActions>
 						<IconButton
 							type={'alt1'}
@@ -224,10 +478,13 @@ function Section(props: {
 							noFocus
 						/>
 					</S.SectionHeaderActions>
+					*/}
 				</S.SectionHeader>
 				<S.SectionBody>
+					{/*
 					<S.FlexWrapper>
 						<S.SectionsWrapper>
+							Background
 							<Color
 								label={language?.background}
 								value={background}
@@ -237,20 +494,64 @@ function Section(props: {
 								disabled={unauthorized}
 							/>
 						</S.SectionsWrapper>
-						<S.GridWrapper>
-							{Object.entries(orderedRemainingTheme).map(([key, value]) => (
-								<Color
-									key={key}
-									label={key}
-									value={value}
-									onChange={(newColor) => handleThemeChange(key, newColor)}
-									loading={props.loading}
-									disabled={unauthorized}
-								/>
-							))}
-						</S.GridWrapper>
+						
 					</S.FlexWrapper>
-					<S.AttributesWrapper>
+					*/}
+					<S.AttributesWrapper
+						className="border-wrapper-alt2"
+						style={{
+							color: `rgba(${theme.basics.colors.text},1)`,
+							background: `rgba(${theme.basics.colors.background},1)`,
+						}}
+					>
+						<S.GridWrapper id="GridWrapper">
+							<S.GridRows id="GridRows">
+								{Object.entries(orderedRemainingTheme).map(([key, value]) => (
+									<S.GridRow id="GridRow" key={key}>
+										<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+										<Color
+											key={key}
+											label={key}
+											value={value}
+											onChange={(newColor) => handleThemeChange(key, newColor)}
+											loading={props.loading}
+											disabled={unauthorized}
+										/>
+									</S.GridRow>
+								))}
+							</S.GridRows>
+						</S.GridWrapper>
+					</S.AttributesWrapper>
+
+					<S.AttributesWrapper
+						className="border-wrapper-alt2"
+						style={{
+							color: `rgba(${theme.basics.colors.text},1)`,
+							background: `rgba(${theme.basics.colors.background},1)`,
+						}}
+					>
+						Default Button
+						<S.ButtonPreview theme={theme.buttons.default}>Preview</S.ButtonPreview>
+						<S.GridWrapper id="GridWrapper">
+							<S.GridRows id="GridRows">
+								{Object.entries(theme.buttons.default.default.colors).map(([key, value]) => (
+									<S.GridRow id="GridRow" key={key}>
+										<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+										<Color
+											key={key}
+											label={key}
+											value={value}
+											onChange={(newColor) => handleThemeChange(key, newColor)}
+											loading={props.loading}
+											disabled={unauthorized}
+										/>
+									</S.GridRow>
+								))}
+							</S.GridRows>
+						</S.GridWrapper>
+					</S.AttributesWrapper>
+					{/*
+					
 						<Toggle
 							label={language?.colorScheme}
 							options={[PortalSchemeType.Light, PortalSchemeType.Dark]}
@@ -277,6 +578,7 @@ function Section(props: {
 							</S.SectionActions>
 						)}
 					</S.AttributesWrapper>
+					*/}
 				</S.SectionBody>
 			</S.Section>
 			{showNameEdit && (
@@ -362,7 +664,9 @@ export default function Themes() {
 
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
-			if (portalProvider.current.themes) setOptions(portalProvider.current.themes);
+			if (portalProvider.current.themes) {
+				setOptions(portalProvider.current.themes);
+			}
 		}
 	}, [portalProvider.current]);
 
@@ -442,6 +746,7 @@ export default function Themes() {
 		}
 	}
 
+	/*
 	async function handleAddTheme() {
 		const themes = options;
 
@@ -478,6 +783,7 @@ export default function Themes() {
 		const updated = options.filter((option) => option.name !== theme.name);
 		setOptions(updated);
 	}
+		*/
 
 	const getThemes = () => {
 		if (!options) {
@@ -494,38 +800,34 @@ export default function Themes() {
 			);
 		}
 
-		const sortedOptions = [...options].sort((a, b) => {
-			if (a.scheme === 'light' && b.scheme === 'dark') return -1;
-			if (a.scheme === 'dark' && b.scheme === 'light') return 1;
-			return 0;
-		});
+		// Use the first theme if available, or create a default one
+		const currentTheme = options[0] || {
+			name: 'Default',
+			basics: {
+				colors: {
+					primary: { light: '0,0,0', dark: '255,255,255' },
+					secondary: { light: '128,128,128', dark: '128,128,128' },
+					background: { light: '255,255,255', dark: '0,0,0' },
+					text: { light: '0,0,0', dark: '255,255,255' },
+					border: { light: '200,200,200', dark: '55,55,55' },
+				},
+			},
+		};
 
+		const isPublished =
+			loading || portalProvider.updating
+				? true
+				: portalProvider.current?.themes.find(
+						(existingTheme: PortalThemeType) => existingTheme.name === currentTheme.name
+				  ) !== undefined;
 		return (
 			<>
-				{sortedOptions.map((theme: PortalThemeType) => {
-					const isPublished =
-						loading || portalProvider.updating
-							? true
-							: portalProvider.current?.themes.find(
-									(existingTheme: PortalThemeType) => existingTheme.name === theme.name
-							  ) !== undefined;
-					return (
-						<Section
-							key={theme.name}
-							label={theme.name}
-							theme={theme}
-							onThemeChange={(theme: PortalThemeType, publish: boolean, prevName?: string) =>
-								handleThemeUpdate(theme, publish, prevName)
-							}
-							onThemePublish={(theme: PortalThemeType) => handleThemePublish(theme)}
-							onThemeCancel={(theme: PortalThemeType) => handleCancelTheme(theme)}
-							handleThemeRemove={(theme: PortalThemeType) => handleRemoveTheme(theme)}
-							removeDisabled={portalProvider.current?.themes?.length === 1}
-							published={isPublished}
-							loading={loading}
-						/>
-					);
-				})}
+				<Theme
+					theme={currentTheme}
+					published={isPublished}
+					loading={loading}
+					onThemeUpdate={(updatedTheme) => submitUpdatedThemes([updatedTheme])}
+				/>
 			</>
 		);
 	};
@@ -533,7 +835,8 @@ export default function Themes() {
 	return (
 		<>
 			<S.Wrapper>
-				<S.Body>{getThemes()}</S.Body>
+				{getThemes()}
+				{/*
 				<S.EndActions>
 					<Button
 						type={'primary'}
@@ -544,6 +847,7 @@ export default function Themes() {
 						iconLeftAlign
 					/>
 				</S.EndActions>
+				*/}
 			</S.Wrapper>
 			{loading && <Loader message={`${language?.updatingTheme}...`} />}
 		</>

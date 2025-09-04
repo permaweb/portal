@@ -1,0 +1,166 @@
+import styled from 'styled-components';
+
+export const Wrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	// background:rgba(var(--color-background),1);
+	z-index: 1;
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-weight: 600;
+		&:not(:first-of-type) {
+			margin-top: 40px;
+		}
+	}
+
+	h1 {
+		padding-top: 10px;
+		margin-bottom: 10px;
+		width: fit-content;
+		margin-bottom: 20px;
+
+		&:first-of-type {
+			margin-top: 0;
+		}
+	}
+	h2 {
+		margin-top: 30px;
+		font-size: clamp(22px, 2vw, 32px);
+	}
+	h3 {
+		font-size: clamp(20px, 1.8vw, 28px);
+	}
+	h4 {
+		font-size: clamp(18px, 1.6vw, 24px);
+	}
+	h5 {
+		font-size: clamp(16px, 1.4vw, 20px);
+	}
+	h6 {
+		font-size: clamp(14px, 1.2vw, 18px);
+		opacity: 0.4;
+		margin-top: 0;
+	}
+
+	p {
+		font-size: var(--font-size-large);
+		font-weight: 400;
+	}
+
+	blockquote {
+		position: relative;
+		font-family: Georgia, serif;
+		font-style: italic;
+		font-size: 15px;
+		font-weight: 500;
+		padding: 8px;
+		background: rgba(var(--color-primary), 0.1);
+
+		&::before,
+		&::after {
+			color: var(--color-text);
+			content: '"';
+			font-family: Georgia, serif;
+			font-size: 16px;
+		}
+	}
+
+	code {
+		color: rgba(var(--color-primary));
+		background: rgba(var(--color-primary), 0.1);
+		border-radius: var(--border-radius);
+		font-family: Monaco, Menlo, Consolas, Courier New, monospace;
+		font-size: 12px;
+		font-weight: 600;
+		display: block;
+		padding: 12px 15px;
+	}
+
+	.portal-media-wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+
+		p {
+			width: 100%;
+			text-align: center;
+			margin-top: 0;
+			color: rgba(var(--color-primary), 1);
+		}
+
+		img {
+			width: 100%;
+			border-radius: 10px;
+		}
+
+		video {
+			width: 100%;
+		}
+	}
+
+	.portal-image-row {
+		/* Default Flex */
+	}
+	.portal-image-row-reverse {
+		flex-direction: row-reverse;
+	}
+	.portal-image-column {
+		flex-direction: column;
+	}
+	.portal-image-column-reverse {
+		flex-direction: column-reverse;
+	}
+`;
+
+export const Post = styled.div`
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	max-width: 1200px;
+	margin-left: auto;
+	margin-right: auto;
+	z-index: 1;
+`;
+
+export const Description = styled.p`
+	font-size: var(--font-size-large);
+	font-weight: 600 !important;
+	opacity: 0.6;
+	margin-bottom: var(--spacing-l);
+`;
+
+export const Meta = styled.div`
+	display: flex;
+	align-items: center;
+	margin-bottom: 10px;
+
+	img {
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		margin-right: 6px;
+	}
+
+	span {
+		font-size: var(--font-size-default);
+		font-weight: 600;
+		opacity: 0.6;
+	}
+`;
+
+export const Thumbnail = styled.img``;
+
+export const Tags = styled.div`
+	display: flex;
+	gap: 6px;
+	max-width: 100%;
+	flex-wrap: wrap;
+	margin-top: 10px;
+	margin-bottom: 20px;
+`;
