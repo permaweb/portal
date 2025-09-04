@@ -18,29 +18,6 @@ function getWidth(_noMinWidth: boolean | undefined, width: number | undefined, f
 	} else return 'fit-content';
 }
 
-export const IconDirection = styled.div<{ direction: 'left' | 'right' | 'up' | 'down' }>`
-	svg {
-		height: 15px;
-		width: 15px;
-		margin: 5px 0 0 0;
-		color: ${(props) => props.theme.colors.font.primary};
-		fill: ${(props) => props.theme.colors.font.primary};
-transform: ${(props) => {
-	switch (props.direction) {
-		case 'left':
-			return 'rotate(90deg)';
-		case 'right':
-			return 'rotate(270deg)';
-		case 'up':
-			return 'rotate(180deg)';
-		case 'down':
-			return 'rotate(0deg)';
-		default:
-			return 'rotate(0deg)';
-	}
-}}
-`;
-
 export const Tooltip = styled.div<{ useBottom: boolean }>`
 	position: absolute;
 	top: ${(props) => (props.useBottom ? 'auto' : '-32.5px')};

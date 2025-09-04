@@ -1,7 +1,10 @@
-import { useLanguageProvider } from 'providers/LanguageProvider';
-import * as S from './styles';
-import { Button } from '../Button';
 import { ASSETS } from 'helpers/config';
+import { useLanguageProvider } from 'providers/LanguageProvider';
+
+import { Button } from '../Button';
+import { IconButton } from '../IconButton';
+
+import * as S from './styles';
 
 type Props = {
 	totalItems: number;
@@ -18,7 +21,7 @@ export default function Pagination(props: Props) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	return (
-		<>
+		<S.Wrapper>
 			{props.showRange && (
 				<S.PaginationRangeDetails>
 					<p>
@@ -33,21 +36,27 @@ export default function Pagination(props: Props) {
 			)}
 			{props.showControls && props.iconButtons && (
 				<S.PaginationActions>
-					<Button
-						type={'alt3'}
-						icon={ASSETS.arrow}
-						label={''}
+					<IconButton
+						type={'alt1'}
+						src={ASSETS.arrow}
 						handlePress={() => props.setCurrentPage((prev) => Math.max(prev - 1, 1))}
 						disabled={props.currentPage === 1 || props.totalItems === 0}
-						direction={'left'}
+						dimensions={{
+							wrapper: 25,
+							icon: 15,
+						}}
+						tooltip={language?.previous}
 					/>
-					<Button
-						type={'alt3'}
-						icon={ASSETS.arrow}
-						label={''}
+					<IconButton
+						type={'alt1'}
+						src={ASSETS.arrow}
 						handlePress={() => props.setCurrentPage((prev) => Math.min(prev + 1, props.totalPages))}
 						disabled={props.currentPage === props.totalPages || props.totalItems === 0}
-						direction={'right'}
+						dimensions={{
+							wrapper: 25,
+							icon: 15,
+						}}
+						tooltip={language?.next}
 					/>
 				</S.PaginationActions>
 			)}
@@ -67,6 +76,6 @@ export default function Pagination(props: Props) {
 					/>
 				</S.PaginationActions>
 			)}
-		</>
+		</S.Wrapper>
 	);
 }

@@ -7,6 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
+import { Pagination } from 'components/atoms/Pagination';
 import { Panel } from 'components/atoms/Panel';
 import { ASSETS, URLS } from 'helpers/config';
 import { ArticleStatusType, PortalAssetRequestType, PortalAssetType, ViewLayoutType } from 'helpers/types';
@@ -16,7 +17,6 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
-import { Pagination } from 'components/atoms/Pagination';
 
 export const Posts = (props: { paginatedPosts?: PortalAssetType[]; type?: ViewLayoutType }) => {
 	const laguageProvider = useLanguageProvider();
@@ -278,6 +278,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 					setCurrentPage={setCurrentPage}
 					showRange={true}
 					showControls={true}
+					iconButtons={true}
 				/>
 			</S.PostsFooter>
 		</S.Wrapper>

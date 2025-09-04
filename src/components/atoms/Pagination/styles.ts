@@ -1,9 +1,28 @@
 import styled from 'styled-components';
 
+export const Wrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 7.5px 0 0 0;
+`;
+
 export const PaginationActions = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+
+	> *:first-child {
+		svg {
+			transform: rotate(90deg);
+		}
+	}
+
+	> *:nth-child(2) {
+		svg {
+			transform: rotate(270deg);
+		}
+	}
 `;
 
 export const PaginationRangeDetails = styled.div`

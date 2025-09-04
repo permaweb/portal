@@ -212,12 +212,7 @@ export const PostsWrapper = styled.div<{ type: ViewLayoutType }>`
 	}
 `;
 
-export const PostsFooter = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 15px;
-	margin: 7.5px 0 0 0;
-`;
+export const PostsFooter = styled.div``;
 
 export const WrapperEmpty = styled.div<{ type: ViewLayoutType }>`
 	width: 100%;

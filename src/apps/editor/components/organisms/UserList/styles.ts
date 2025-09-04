@@ -24,12 +24,7 @@ export const UsersHeaderDetails = styled.div`
 	}
 `;
 
-export const UsersFooter = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 15px;
-	margin: 7.5px 0 0 0;
-`;
+export const UsersFooter = styled.div``;
 
 export const UsersHeaderDetailsActions = styled.div`
 	display: flex;

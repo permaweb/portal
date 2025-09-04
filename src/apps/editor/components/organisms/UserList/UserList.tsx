@@ -5,12 +5,13 @@ import { User } from 'editor/components/molecules/User';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { Pagination } from 'components/atoms/Pagination';
 import { URLS } from 'helpers/config';
 import { PortalUserType, ViewLayoutType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
+
 import * as S from './styles';
-import Pagination from 'components/atoms/Pagination/Pagination';
 
 const PAGE_SIZE = 10;
 
@@ -150,7 +151,7 @@ export default function UserList(props: { type: ViewLayoutType }) {
 		processedUsers.length,
 		pageUsers,
 		handleInviteDetected,
-		usersWithPendingInvites, // kept in deps in case UI reacts to this later
+		usersWithPendingInvites, // Kept in deps in case UI reacts to this later
 	]);
 
 	return (
@@ -166,6 +167,7 @@ export default function UserList(props: { type: ViewLayoutType }) {
 					setCurrentPage={setCurrentPage}
 					showRange={true}
 					showControls={true}
+					iconButtons={true}
 				/>
 			</S.UsersFooter>
 		</S.Wrapper>
