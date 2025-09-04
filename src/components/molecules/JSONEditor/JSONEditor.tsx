@@ -121,6 +121,11 @@ export default function JSONWriter(props: {
 		}
 	}
 
+	React.useEffect(() => {
+		setJsonString(JSON.stringify(props.initialData, null, 4));
+		setError(null);
+	}, [props.initialData]);
+
 	return (
 		<S.Wrapper>
 			<S.EditorWrapper className={'border-wrapper-alt2 scroll-wrapper'}>
@@ -163,7 +168,7 @@ export default function JSONWriter(props: {
 					)}
 					<Button
 						type={'alt1'}
-						label={`${language.run} (⌘ + ⏎)`}
+						label={`${language.save}`}
 						handlePress={submitHandler}
 						disabled={props.loading || Boolean(error)}
 						loading={props.loading}
