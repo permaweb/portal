@@ -2,7 +2,7 @@ name: Deploy Editor / Engine
 
 on:
   push:
-    branches: ['main', 'staging']
+    branches: ['main']
   workflow_dispatch:
     inputs:
       environment:
@@ -44,5 +44,5 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_editor == 'true'
         run: npm run deploy:editor:main
       - name: Deploy engine
-        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_engine == 'true')
+        if: (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_engine == 'true')
         run: npm run deploy:engine
