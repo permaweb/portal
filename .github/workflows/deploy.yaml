@@ -3,10 +3,30 @@ name: publish
 on:
   push:
     branches: ['main', 'staging']
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment Environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - main
+      deploy_editor:
+        description: 'Deploy Editor'
+        required: false
+        default: true
+        type: boolean
+      deploy_engine:
+        description: 'Deploy Engine'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   publish:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     env:
       DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
@@ -18,23 +38,12 @@ jobs:
           node-version: '22.x'
           cache: 'npm'
       - run: npm run clean:install
-      - run: npm run deploy:editor:main
-      - run: npm run deploy:viewer
-      - run: npm run deploy:engine
-
-  publish-staging:
-    if: github.ref == 'refs/heads/staging'
-    runs-on: ubuntu-latest
-    env:
-      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-      NODE_OPTIONS: --max-old-space-size=6144
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '22.x'
-          cache: 'npm'
-      - run: npm run clean:install
-      - run: npm run deploy:editor:staging
-      - run: npm run deploy:viewer
-      - run: npm run deploy:engine
+      - name: Deploy editor to staging
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_editor == 'true' && github.event.inputs.environment == 'staging')
+        run: npm run deploy:editor:staging
+      - name: Deploy editor to main
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_editor == 'true' && github.event.inputs.environment == 'main'
+        run: npm run deploy:editor:main
+      - name: Deploy engine
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_engine == 'true')
+        run: npm run deploy:engine

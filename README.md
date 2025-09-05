@@ -129,7 +129,7 @@ src/
 ## Environment Variables
 
 - `VITE_APP` - Set to `editor`, `viewer`, or `engine` to specify which application to build/serve
-- `VITE_TESTNET` - Set to `true` to enable testnet mode (uses tario tokens instead of turbo credits)
+- `VITE_ARIO_TESTNET` - Set to `true` to enable testnet mode (uses tario tokens instead of turbo credits)
 
 ## Testnet Mode
 

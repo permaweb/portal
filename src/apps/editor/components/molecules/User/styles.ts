@@ -3,7 +3,7 @@ import styled, { DefaultTheme } from 'styled-components';
 import { STYLING } from 'helpers/config';
 import { PortalUserRoleType } from 'helpers/types';
 
-export const UserWrapper = styled.button<{ hideAction: boolean; isCurrent: boolean }>`
+export const UserWrapper = styled.div<{ hideAction: boolean; isCurrent: boolean; disabled: boolean }>`
 	width: 100%;
 	display: flex;
 	justify-content: space-between;
@@ -12,15 +12,14 @@ export const UserWrapper = styled.button<{ hideAction: boolean; isCurrent: boole
 	gap: 20px;
 	padding: ${(props) => (props.hideAction ? '0' : '15px')};
 	pointer-events: ${(props) => (props.hideAction ? 'none' : 'all')};
-
-	@media (max-width: ${STYLING.cutoffs.secondary}) {
-		flex-direction: column;
-		align-items: flex-start;
-	}
+	transition: all 100ms;
 
 	&:hover {
+		cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
 		background: ${(props) =>
-			props.hideAction ? props.theme.colors.view.background : props.theme.colors.container.alt2.background};
+			props.hideAction || props.disabled
+				? props.theme.colors.view.background
+				: props.theme.colors.container.alt2.background};
 	}
 
 	&:disabled {
@@ -30,6 +29,11 @@ export const UserWrapper = styled.button<{ hideAction: boolean; isCurrent: boole
 
 	background: ${(props) =>
 		props.isCurrent ? props.theme.colors.container.alt1.background : props.theme.colors.view.background};
+
+	@media (max-width: ${STYLING.cutoffs.secondary}) {
+		flex-direction: column;
+		align-items: flex-start;
+	}
 `;
 
 export const UserHeader = styled.div`

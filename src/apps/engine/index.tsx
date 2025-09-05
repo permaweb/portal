@@ -1,12 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { HashRouter, useLocation } from 'react-router-dom';
 import { initThemes } from 'engine/helpers/themes';
 import { PortalProvider, usePortalProvider, useSetPortalId } from 'engine/providers/portalProvider';
 
-import { DOM, URLS } from 'helpers/config';
+import { DOM } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { preloadAllAssets } from 'helpers/preloader';
 import { checkValidAddress, getPortalIdFromURL } from 'helpers/utils';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider } from 'providers/LanguageProvider';
@@ -17,11 +16,10 @@ import Content from './builder/base/content';
 import Footer from './builder/base/footer';
 import Header from './builder/base/header';
 import Navigation from './builder/base/navigation';
+import Loader from './components/loader';
 import ZoneEditor from './components/zoneEditor';
 import { GlobalStyles } from './global-styles';
 import * as S from './global-styles';
-import Loader from './components/loader';
-
 
 function App() {
 	const location = useLocation();
@@ -63,7 +61,6 @@ function App() {
 
 	React.useEffect(() => {
 		if (Themes) {
-			const activeTheme = Themes.find((e: any) => e.active);
 			const systemScheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 			setTheme(systemScheme);
 			document.documentElement.setAttribute('theme', theme);
