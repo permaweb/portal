@@ -20,7 +20,6 @@ export function updateThemeStyles(theme: string, styles: Record<string, string>)
 }
 
 export function initThemes(Themes: any[]) {
-	console.log('initThemes');
 	const activeTheme = Themes.find((e: any) => e.active);
 
 	function getColor(theme: any, scheme: string, value: string) {
@@ -80,7 +79,9 @@ export function initThemes(Themes: any[]) {
 			// Cards
 			'--color-card-background': `rgba(${theme.card.colors.background[scheme]},${theme.card.preferences.opacity[scheme]})`,
 			'--color-card-border': `rgba(${getColor(theme, scheme, theme.card.colors.border[scheme])},1)`,
-			'--color-card-border-contrast': `rgba(${getContrastColor(getColor(theme, scheme, theme.card.colors.border[scheme]))},1)`,
+			'--color-card-border-contrast': `rgba(${getContrastColor(
+				getColor(theme, scheme, theme.card.colors.border[scheme])
+			)},1)`,
 
 			// Buttons
 			'--color-button-default': `rgba(${getColor(

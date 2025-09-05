@@ -113,7 +113,6 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	}, [auth, profile]);
 
 	function handlePress() {
-		console.log('handlePress')
 		if (auth?.authStatus === 'authenticated' || auth?.authType === 'NATIVE_WALLET') {
 			setShowUserMenu(!showUserMenu);
 		} else {

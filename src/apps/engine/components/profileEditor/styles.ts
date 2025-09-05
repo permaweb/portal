@@ -293,3 +293,22 @@ export const MInfoWrapper = styled.div`
 		margin: 0 0 7.5px 0;
 	}
 `;
+
+export const LoadingMessage = styled.div`
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: rgba(var(--color-background), 0.95);
+	padding: 20px 30px;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+
+	span {
+		display: block;
+		font-size: 16px;
+		font-weight: 500;
+		color: rgba(var(--color-font), 1);
+	}
+`;

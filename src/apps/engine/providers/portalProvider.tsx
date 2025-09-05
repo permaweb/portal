@@ -62,9 +62,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 		(async () => {
 			try {
-				console.log('getZone: ', portalId)
 				const cached = getCachedPortal(portalId);
-				console.log('cached: ', cached);
 				const res = await permawebProvider.libs.getZone(portalId);
 				console.log('Zone: ', res);
 
@@ -72,7 +70,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					...defaultPortal,
 					...cached,
 					...res.store,
-					posts: res.store?.index ? [...res.store.index].reverse() : [],					
+					posts: res.store?.index ? [...res.store.index].reverse() : [],
 				};
 
 				const Name = zone?.name;
@@ -93,7 +91,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const cached = getCachedPortal(portalId);
 				const zone = {
 					...defaultPortal,
-					...cached,					
+					...cached,
 				};
 				setPortal(zone);
 			}
