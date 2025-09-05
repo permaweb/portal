@@ -226,12 +226,7 @@ export default function ProfileEditor(props: {
 							<S.Form>
 								<S.TForm>
 									<label htmlFor="name">{language?.name} *</label>
-									<input
-										id="name"
-										value={name}
-										onChange={(e: any) => setName(e.target.value)}
-										disabled={loading}
-									/>
+									<input id="name" value={name} onChange={(e: any) => setName(e.target.value)} disabled={loading} />
 									<label htmlFor="username">{language?.handle || language?.username} *</label>
 									<input
 										id="username"

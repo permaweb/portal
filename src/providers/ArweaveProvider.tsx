@@ -162,12 +162,12 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}
 
 	async function handleDisconnect(redirect: boolean) {
-		console.log('handleDisconnect')
+		console.log('handleDisconnect');
 		// Clear storage
 		if (localStorage.getItem(STORAGE.walletType)) {
 			localStorage.removeItem(STORAGE.walletType);
 		}
-		
+
 		// Sign out from Wander if it's not a native wallet
 		if (window?.wanderInstance && walletType !== 'NATIVE_WALLET') {
 			try {
@@ -176,7 +176,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				console.error('Error signing out from Wander:', e);
 			}
 		}
-		
+
 		// Disconnect from ArConnect/native wallet
 		if (window?.arweaveWallet) {
 			try {
@@ -185,7 +185,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				console.error('Error disconnecting wallet:', e);
 			}
 		}
-		
+
 		// Clear all state
 		setAuth(null);
 		setWallet(null);

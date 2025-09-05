@@ -70,7 +70,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					...defaultPortal,
 					...cached,
 					...res.store,
-					posts: res.store?.index ? [...res.store.index].reverse() : [],					
+					posts: res.store?.index ? [...res.store.index].reverse() : [],
 				};
 
 				const Name = zone?.name;
@@ -91,7 +91,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const cached = getCachedPortal(portalId);
 				const zone = {
 					...defaultPortal,
-					...cached,					
+					...cached,
 				};
 				setPortal(zone);
 			}

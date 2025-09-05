@@ -1,18 +1,13 @@
 import { getTxEndpoint } from './endpoints';
-import { ArticleBlockEnum, PortalSchemeType, PortalThemeType } from './types';
-
-// export const AO_NODE = {
-// 	url: 'http://localhost:8734',
-// 	scheduler: 'mYJTM8VpIibDLuyGLQTcbcPy-LeOY48qzECADTUYfWc',
-// };
+import { ArticleBlockEnum } from './types';
 
 export const AO_NODE = {
-	url: 'https://forward.computer',
-	scheduler: 'NoZH3pueH0Cih6zjSNu_KRAcmg4ZJV1aGHKi0Pi5_Hc',
+	url: 'https://hb.portalinto.com',
+	scheduler: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
 };
 
 // Testnet configuration
-export const IS_TESTNET = import.meta.env.VITE_TESTNET === 'true';
+export const IS_TESTNET = import.meta.env.VITE_ARIO_TESTNET === 'true';
 
 export const SOCIAL_LINK_ASSETS = {
 	dailyMotion: 'qO9Qi_WSCcZgqN-3D4eSApFyEHHSw6jZneGUGT8nLmA',
@@ -129,7 +124,7 @@ export const STORAGE = {
 
 export const STYLING = {
 	cutoffs: {
-		desktop: '1200px',
+		desktop: '1250px',
 		initial: '1024px',
 		max: '1600px',
 		tablet: '840px',
@@ -164,7 +159,6 @@ export const STYLING = {
 function createURLs() {
 	const base = `/`;
 	const post = `post/`;
-	const page = `page/`;
 
 	const portalBase = (portalId: string) => `${base}${portalId}/`;
 	const postCreateBase = (portalId: string) => `${base}${portalId}/${post}create/`;

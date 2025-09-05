@@ -304,7 +304,7 @@ export const LoadingMessage = styled.div`
 	border-radius: 8px;
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 	z-index: 1000;
-	
+
 	span {
 		display: block;
 		font-size: 16px;
