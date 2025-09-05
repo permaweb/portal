@@ -1,0 +1,23 @@
+name: Deploy Engine
+
+on:
+  push:
+    branches: ['main']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      NODE_OPTIONS: --max-old-space-size=6144
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+      - run: npm run clean:install
+      - name: Deploy engine to (script_portal.arweave.net)
+        run: npm run deploy:engine

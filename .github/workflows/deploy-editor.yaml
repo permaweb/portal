@@ -1,4 +1,4 @@
-name: Deploy Editor / Engine
+name: Deploy Editor
 
 on:
   push:
@@ -12,16 +12,6 @@ on:
         type: choice
         options:
         - main
-      deploy_editor:
-        description: 'Deploy Editor (portal.arweave.net)'
-        required: false
-        default: true
-        type: boolean
-      deploy_engine:
-        description: 'Deploy Engine (script_portal.arweave.net)'
-        required: false
-        default: false
-        type: boolean
 
 jobs:
   deploy:
@@ -37,12 +27,9 @@ jobs:
           node-version: '22.x'
           cache: 'npm'
       - run: npm run clean:install
-      - name: Deploy editor to staging
+      - name: Deploy editor to (staging_portal.arweave.net)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: npm run deploy:editor:staging
-      - name: Deploy editor to main
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_editor == 'true'
+      - name: Deploy editor to (portal.arweave.net)
+        if: github.event_name == 'workflow_dispatch'
         run: npm run deploy:editor:main
-      - name: Deploy engine
-        if: (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_engine == 'true')
-        run: npm run deploy:engine
