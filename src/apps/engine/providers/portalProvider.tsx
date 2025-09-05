@@ -62,9 +62,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 		(async () => {
 			try {
-				console.log('getZone: ', portalId)
 				const cached = getCachedPortal(portalId);
-				console.log('cached: ', cached);
 				const res = await permawebProvider.libs.getZone(portalId);
 				console.log('Zone: ', res);
 

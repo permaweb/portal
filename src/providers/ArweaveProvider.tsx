@@ -117,7 +117,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}
 
 	async function handleConnect(walletType: string) {
-		console.log('handleConnect: ', walletType)
 		let walletObj: any = null;
 		switch (walletType) {
 			case WalletEnum.wander:

@@ -1,146 +1,121 @@
 import React from 'react';
-import AOProfile from '@permaweb/aoprofile';
+import { Types } from '@permaweb/libs';
+
 import Button from 'engine/components/form/button';
 import Icon from 'engine/components/icon';
 import * as ICONS from 'engine/constants/icons';
-
-import Arweave from 'arweave';
-import { connect, createDataItemSigner } from '@permaweb/aoconnect';
 
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
-import { IProps } from './types';
 
 const MAX_BIO_LENGTH = 500;
-const MAX_IMAGE_SIZE = 100000;
 const ALLOWED_BANNER_TYPES = 'image/png, image/jpeg, image/gif';
 const ALLOWED_AVATAR_TYPES = 'image/png, image/jpeg, image/gif';
 
-export default function ProfileEditor(props: IProps) {
-	const permawebProvider = usePermawebProvider();
+export default function ProfileEditor(props: {
+	profile: Types.ProfileType | null;
+	handleClose?: (update?: boolean) => void;
+	handleUpdate?: () => void;
+}) {
 	const arProvider = useArweaveProvider();
-
+	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
 	const bannerInputRef = React.useRef<any>(null);
 	const avatarInputRef = React.useRef<any>(null);
 
-	const [displayName, setDisplayName] = React.useState<string>('');
+	const [name, setName] = React.useState<string>('');
 	const [username, setUsername] = React.useState<string>('');
-	const [bio, setBio] = React.useState<string | null>('');
-	const [banner, setBanner] = React.useState<string | null>(null);
-	const [avatar, setAvatar] = React.useState<string | null>(null);
+	const [description, setDescription] = React.useState<string>('');
+	const [banner, setBanner] = React.useState<any>(null);
+	const [thumbnail, setThumbnail] = React.useState<any>(null);
+	const [bannerRemoved, setBannerRemoved] = React.useState<boolean>(false);
+	const [thumbnailRemoved, setThumbnailRemoved] = React.useState<boolean>(false);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
+	const { addNotification } = useNotifications();
 
 	React.useEffect(() => {
-		if (props.profile) {
-			setUsername(props.profile.username || '');
-			setDisplayName(props.profile.displayName || '');
-			setBio(props.profile.description || '');
-			setBanner(props.profile.banner && checkValidAddress(props.profile.banner) ? props.profile.banner : null);
-			setAvatar(props.profile.thumbnail && checkValidAddress(props.profile.thumbnail) ? props.profile.thumbnail : null);
-		}
-	}, [props.profile]);
+		setUsername(props.profile?.username ?? '');
+		setName(props.profile?.displayName ?? '');
+		setDescription(props.profile?.description ?? '');
 
-	function handleUpdate() {
+		if (!bannerRemoved) {
+			setBanner(props.profile?.banner && checkValidAddress(props.profile.banner) ? props.profile.banner : null);
+		}
+		if (!thumbnailRemoved) {
+			setThumbnail(
+				props.profile?.thumbnail && checkValidAddress(props.profile.thumbnail) ? props.profile.thumbnail : null
+			);
+		}
+	}, [props.profile, bannerRemoved, thumbnailRemoved]);
+
+	function handleUpdate(response: string) {
+		permawebProvider.refreshProfile();
+
+		setBannerRemoved(false);
+		setThumbnailRemoved(false);
+
 		if (props.handleUpdate) props.handleUpdate();
+		if (props.handleClose) props.handleClose(true);
+
+		addNotification(response, 'success');
 	}
 
 	async function handleSubmit() {
 		if (arProvider.wallet) {
 			setLoading(true);
 
-			const ao = connect({ MODE: 'legacy' });
-			const signer = createDataItemSigner(arProvider.wallet);
-
-			const { updateProfile } = AOProfile.init({
-				ao,
-				signer,
-				arweave: Arweave.init({}),
-			});
-
-			let data: any = {
-				username: username,
-				displayName: displayName,
-				description: bio,
-			};
-
-			if (avatar) data.thumbnail = avatar;
-			if (banner) data.banner = banner;
-
 			try {
-				if (props.profile && props.profile.id) {
-					let updateResponse = null;
-					if (props.profile.isLegacyProfile) {
-						updateResponse = await updateProfile({
-							profileId: props.profile.id,
-							data: {
-								userName: username,
-								displayName: displayName,
-								description: bio,
-								thumbnail: avatar,
-								banner: banner,
-							},
-						});
-					} else {
-						updateResponse = await permawebProvider.libs.updateProfile(data, props.profile.id, (status: any) =>
-							console.log(status)
-						);
-					}
+				let data: any = {
+					username: username,
+					displayName: name,
+					description: description,
+					thumbnail: thumbnailRemoved || thumbnail === null ? 'None' : thumbnail,
+					banner: bannerRemoved || banner === null ? 'None' : banner,
+				};
 
-					if (updateResponse) {
-						console.log('updateResponse: ', updateResponse);
-						handleUpdate();
-					} else {
-						console.log(updateResponse);
-					}
+				if (props.profile && props.profile.id) {
+					const profileUpdateId = await permawebProvider.libs.updateProfile(data, props.profile.id, (status: any) =>
+						console.log(status)
+					);
+					console.log(`Profile update: ${profileUpdateId}`);
+					handleUpdate(`${language?.profileUpdated}!`);
 				} else {
 					const profileId = await permawebProvider.libs.createProfile(data, (status: any) => console.log(status));
 
 					console.log(`Profile ID: ${profileId}`);
 
-					if (profileId) {
-						permawebProvider.handleInitialProfileCache(arProvider.walletAddress, profileId);
-						handleUpdate();
-					}
+					handleUpdate(`${language?.profileCreated}!`);
+
+					permawebProvider.handleInitialProfileCache(arProvider.walletAddress, profileId);
 				}
 			} catch (e: any) {
-				console.log(e);
+				addNotification(e.message ?? language?.errorUpdatingProfile, 'warning');
 			}
+
 			setLoading(false);
 		}
 	}
 
-	function getImageSizeMessage() {
-		if (!avatar && !banner) return null;
-		if (checkValidAddress(avatar) && checkValidAddress(banner)) return null;
-
-		const avatarSize = avatar ? (avatar.length * 3) / 4 : 0;
-		const bannerSize = banner ? (banner.length * 3) / 4 : 0;
-
-		if (avatarSize > MAX_IMAGE_SIZE || bannerSize > MAX_IMAGE_SIZE)
-			return <span>One or more images exceeds max size of 100KB</span>;
-		return null;
-	}
-
 	function getInvalidBio() {
-		if (bio && bio.length > MAX_BIO_LENGTH) {
+		if (description && description.length > MAX_BIO_LENGTH) {
 			return {
 				status: true,
-				message: `${language.maxCharsReached} (${bio.length} / ${MAX_BIO_LENGTH})`,
+				message: `${language?.maxCharsReached} (${description.length} / ${MAX_BIO_LENGTH})`,
 			};
 		}
 		return { status: false, message: null };
 	}
 
-	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'avatar') {
+	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'thumbnail') {
 		if (e.target.files && e.target.files.length) {
 			const file = e.target.files[0];
 			if (file.type.startsWith('image/')) {
@@ -150,10 +125,12 @@ export default function ProfileEditor(props: IProps) {
 					if (event.target?.result) {
 						switch (type) {
 							case 'banner':
-								setBanner(event.target.result as any);
+								setBanner(event.target.result);
+								setBannerRemoved(false);
 								break;
-							case 'avatar':
-								setAvatar(event.target.result as any);
+							case 'thumbnail':
+								setThumbnail(event.target.result);
+								setThumbnailRemoved(false);
 								break;
 							default:
 								break;
@@ -172,17 +149,17 @@ export default function ProfileEditor(props: IProps) {
 		return (
 			<>
 				<Icon icon={ICONS.BANNER} />
-				<span>{language.uploadBanner}</span>
+				<span>{language?.uploadBanner}</span>
 			</>
 		);
 	}
 
 	function getAvatarWrapper() {
-		if (avatar) return <img src={checkValidAddress(avatar) ? getTxEndpoint(avatar) : avatar} />;
+		if (thumbnail) return <img src={checkValidAddress(thumbnail) ? getTxEndpoint(thumbnail) : thumbnail} />;
 		return (
 			<>
 				<Icon icon={ICONS.USER} />
-				<span>{language.uploadAvatar}</span>
+				<span>{language?.uploadAvatar}</span>
 			</>
 		);
 	}
@@ -211,7 +188,7 @@ export default function ProfileEditor(props: IProps) {
 										accept={ALLOWED_BANNER_TYPES}
 									/>
 									<S.AvatarInput
-										$hasAvatar={avatar !== null}
+										$hasAvatar={thumbnail !== null}
 										onClick={() => avatarInputRef.current.click()}
 										disabled={loading}
 									>
@@ -220,76 +197,89 @@ export default function ProfileEditor(props: IProps) {
 									<input
 										ref={avatarInputRef}
 										type={'file'}
-										onChange={(e: any) => handleFileChange(e, 'avatar')}
+										onChange={(e: any) => handleFileChange(e, 'thumbnail')}
 										disabled={loading}
 										accept={ALLOWED_AVATAR_TYPES}
 									/>
 								</S.BWrapper>
 								<S.ImageActions>
 									<Button
-										label={language.removeAvatar}
+										label={language?.removeAvatar}
 										type="default"
-										onClick={() => setAvatar(null)}
-										disabled={loading || !avatar}
+										onClick={() => {
+											setThumbnail(null);
+											setThumbnailRemoved(true);
+										}}
+										disabled={loading || !thumbnail}
 									/>
 									<Button
-										label={language.removeBanner}
+										label={language?.removeBanner}
 										type="default"
-										onClick={() => setBanner(null)}
+										onClick={() => {
+											setBanner(null);
+											setBannerRemoved(true);
+										}}
 										disabled={loading || !banner}
 									/>
 								</S.ImageActions>
-								<S.PInfoMessage>
-									<span>Images have a max size of 100KB</span>
-								</S.PInfoMessage>
 							</S.PWrapper>
 							<S.Form>
 								<S.TForm>
-									<label htmlFor="name">{language.name} *</label>
+									<label htmlFor="name">{language?.name} *</label>
 									<input
 										id="name"
-										value={displayName}
+										value={name}
 										onChange={(e: any) => setName(e.target.value)}
 										disabled={loading}
-										// invalid={{ status: false, message: null }}
 									/>
-									<label htmlFor="username">{language.username} *</label>
+									<label htmlFor="username">{language?.handle || language?.username} *</label>
 									<input
 										id="username"
 										value={username}
 										onChange={(e: any) => setUsername(e.target.value)}
 										disabled={loading}
-										// invalid={{ status: false, message: null }}
 									/>
 								</S.TForm>
-								<label htmlFor="bio">{language.bio}</label>
+								<label htmlFor="bio">{language?.bio}</label>
 								<textarea
 									id="bio"
-									value={bio || ''}
-									onChange={(e: any) => setBio(e.target.value)}
+									value={description}
+									onChange={(e: any) => setDescription(e.target.value)}
 									disabled={loading}
-									// invalid={getInvalidBio()}
 								/>
+								{getInvalidBio().status && (
+									<S.PInfoMessage>
+										<span>{getInvalidBio().message}</span>
+									</S.PInfoMessage>
+								)}
 							</S.Form>
 							<S.SAction>
 								{props.handleClose && (
 									<Button
-										label={language.close}
+										label={language?.close}
 										type="default"
 										disabled={loading}
-										onClick={() => props.handleClose(true)}
+										onClick={() => props.handleClose()}
 									/>
 								)}
 								<Button
-									label={language.save}
+									label={language?.save}
 									type="primary"
-									disabled={!username || !displayName || loading || getImageSizeMessage() !== null}
+									disabled={!username || !name || loading || getInvalidBio().status}
 									onClick={handleSubmit}
 								/>
 							</S.SAction>
-							<S.MInfoWrapper>{getImageSizeMessage()}</S.MInfoWrapper>
 						</S.Body>
 					</S.Wrapper>
+					{loading && (
+						<S.LoadingMessage>
+							<span>
+								{props.profile && props.profile.id
+									? `${language?.profileUpdatingInfo}...`
+									: `${language?.profileCreatingInfo}...`}
+							</span>
+						</S.LoadingMessage>
+					)}
 				</>
 			);
 		}

@@ -20,7 +20,6 @@ export function updateThemeStyles(theme: string, styles: Record<string, string>)
 }
 
 export function initThemes(Themes: any[]) {
-	console.log('initThemes');
 	const activeTheme = Themes.find((e: any) => e.active);
 
 	function getColor(theme: any, scheme: string, value: string) {
