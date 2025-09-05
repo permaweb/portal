@@ -6,19 +6,19 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deployment Environment'
+        description: 'Deployment Target'
         required: true
         default: 'main'
         type: choice
         options:
         - main
       deploy_editor:
-        description: 'Deploy Editor'
+        description: 'Deploy Editor (portal.arweave.net)'
         required: false
         default: true
         type: boolean
       deploy_engine:
-        description: 'Deploy Engine'
+        description: 'Deploy Engine (script_portal.arweave.net)'
         required: false
         default: false
         type: boolean
