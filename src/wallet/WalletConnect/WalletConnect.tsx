@@ -8,9 +8,9 @@ import { useSettingsProvider as useViewerSettingsProvider } from 'viewer/provide
 import { Avatar } from 'components/atoms/Avatar';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
-import { ASSETS, STORAGE } from 'helpers/config';
-import { LanguageEnum, WalletEnum } from 'helpers/types';
-import { checkValidAddress } from 'helpers/utils';
+import { ASSETS } from 'helpers/config';
+import { LanguageEnum } from 'helpers/types';
+// import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -35,25 +35,20 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 	const { settings, updateSettings, availableThemes } =
 		props.app === 'editor' ? useEditorSettingsProvider() : useViewerSettingsProvider();
 
-	const [showWallet, setShowWallet] = React.useState<boolean>(false);
+	const [showWallet, setShowWallet] = React.useState<boolean>(true);
 	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(false);
 	const [showThemeSelector, setShowThemeSelector] = React.useState<boolean>(false);
 	const [showLanguageSelector, setShowLanguageSelector] = React.useState<boolean>(false);
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 	const [instance, setInstance] = React.useState(null);
-	const [avatar, setAvatar] = React.useState<string>('');
 	const [label, setLabel] = React.useState<string | null>(null);
 	const hasInitializedRef = React.useRef<boolean>(false);
 	const wrapperRef = React.useRef();
 
 	React.useEffect(() => {
 		if (!hasInitializedRef.current) {
-			const timer = setTimeout(() => {
-				setShowWallet(true);
-				hasInitializedRef.current = true;
-			}, 200);
-			return () => clearTimeout(timer);
+			hasInitializedRef.current = true;
 		}
 	}, []);
 
@@ -64,7 +59,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 			try {
 				const wanderInstance = new WanderConnect({
 					clientId: 'FREE_TRIAL',
-					theme: 'Dark',
+					theme: 'dark',
 					button: {
 						parent: wrapperRef.current,
 						label: false,
@@ -104,11 +99,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 
 		return () => {
 			try {
-				if (window.wanderInstance) {
-					window.wanderInstance.destroy();
-					window.wanderInstance = null;
-				}
-				if (instance) {
+				if (instance && instance !== window.wanderInstance) {
 					instance.destroy();
 					setInstance(null);
 				}
@@ -120,30 +111,22 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 	}, []);
 
 	React.useEffect(() => {
-		// Check if user is authenticated based on wallet address
 		if (arProvider.walletAddress) {
 			if (auth?.authStatus === 'loading') {
 				setLabel('Signing in');
 			} else if (profile) {
 				setLabel(profile.displayName || 'My Profile');
-				setAvatar(
-					profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : ''
-				);
 			} else {
 				// Wallet connected but no profile
 				setLabel('My Wallet');
-				setAvatar('');
 			}
 		} else {
 			// Not connected
 			setLabel('Log in');
-			setAvatar('');
 		}
 	}, [showWallet, arProvider.walletAddress, permawebProvider.profile, language, auth]);
 
 	function handlePress() {
-		console.log('auth: ', auth)
-		// Check if user is authenticated or has a wallet address
 		if ((auth?.authStatus === 'authenticated' || arProvider.walletAddress) && arProvider.walletAddress) {
 			setShowWalletDropdown(!showWalletDropdown);
 		} else if (window.wanderInstance) {
@@ -155,9 +138,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 
 	function handleDisconnect() {
 		const doRedirect = props.app === 'editor';
-		console.log('doRedirect: ', doRedirect)
 		arProvider.handleDisconnect(doRedirect);
-		setAvatar('');
 		setLabel('Log in');
 		setShowWalletDropdown(false);
 		if (props.callback) {
@@ -195,6 +176,12 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 									<ReactSVG src={ASSETS.write} />
 									{language?.profile}
 								</li>
+								{auth?.authType !== 'NATIVE_WALLET' && window.wanderInstance && (
+									<li onClick={() => window.wanderInstance.open()}>
+										<ReactSVG src={ASSETS.wallet} />
+										{language?.wallet}
+									</li>
+								)}
 								<li onClick={() => setShowLanguageSelector(true)}>
 									<ReactSVG src={ASSETS.language} />
 									{language?.language}
@@ -295,16 +282,6 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 					))}
 				</S.MWrapper>
 			</Panel>
-			{/* walletModalVisible && (
-				<Modal header={language?.connectWallet} handleClose={() => setWalletModalVisible(false)}>
-					<WalletList
-						handleConnect={(type: WalletEnum) => {
-							arProvider.handleConnect(type);
-							setWalletModalVisible(false);
-						}}
-					/>
-				</Modal>
-			) */}
 		</>
 	);
 }

@@ -22,7 +22,6 @@ import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvide
 import { NotificationProvider } from 'providers/NotificationProvider';
 import { PermawebProvider, usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
-import { WalletConnect } from 'wallet/WalletConnect';
 
 import * as S from './styles';
 
@@ -227,7 +226,6 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 									<PortalProvider>
 										<GlobalStyle />
 										<App />
-										<WalletConnect app="editor" />
 									</PortalProvider>
 								</NotificationProvider>
 							</PermawebProvider>
