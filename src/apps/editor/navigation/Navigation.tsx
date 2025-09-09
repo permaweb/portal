@@ -64,11 +64,6 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				label: language?.users,
 			},
 			{
-				path: portalProvider.current?.id ? URLS.portalLayout(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.layout,
-				label: language?.layout,
-			},
-			{
 				path: portalProvider.current?.id ? URLS.portalPages(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.pages,
 				label: language?.pages,

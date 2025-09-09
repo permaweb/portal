@@ -64,7 +64,7 @@ export const FlexAction = styled.div`
 
 export const Dropdown = styled.div`
 	max-height: 65vh;
-	width: 325px;
+	width: 350px;
 	max-width: 75vw;
 	padding: 11.5px 10px;
 	position: absolute;
@@ -117,7 +117,7 @@ export const DHeader = styled.div`
 export const MenuBadge = styled.span`
 	position: absolute;
 	right: 10px;
-	background: #8B0000;
+	background: #8b0000;
 	color: white;
 	border-radius: 10px;
 	padding: 2px 6px;
@@ -134,7 +134,7 @@ export const BackupWarning = styled.div`
 	width: 16px;
 	height: 16px;
 	border-radius: 50%;
-	background: #8B0000;
+	background: #8b0000;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -161,7 +161,7 @@ export const BackupNotice = styled.div`
 	width: 100%;
 	padding: 10px;
 	margin: 10px 0;
-	background: ${(props) => props.theme.colors.warning ? `${props.theme.colors.warning}20` : '#ff980020'};
+	background: ${(props) => (props.theme.colors.warning ? `${props.theme.colors.warning}20` : '#ff980020')};
 	border: 1px solid ${(props) => props.theme.colors.warning || '#ff9800'};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	display: flex;
@@ -171,7 +171,7 @@ export const BackupNotice = styled.div`
 	transition: all 200ms;
 
 	&:hover {
-		background: ${(props) => props.theme.colors.warning ? `${props.theme.colors.warning}30` : '#ff980030'};
+		background: ${(props) => (props.theme.colors.warning ? `${props.theme.colors.warning}30` : '#ff980030')};
 	}
 
 	svg {

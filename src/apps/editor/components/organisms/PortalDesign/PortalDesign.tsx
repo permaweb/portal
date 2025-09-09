@@ -81,6 +81,7 @@ export default function PortalDesign() {
 					type={'primary'}
 					label={label}
 					handlePress={() => handleOpenAction(action)}
+					disabled={!portalProvider?.permissions?.updatePortalMeta}
 					icon={ASSETS.arrow}
 					height={40}
 					fullWidth

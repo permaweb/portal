@@ -40,7 +40,6 @@ const Design = getLazyImport('Design');
 const Media = getLazyImport('Media');
 const Users = getLazyImport('Users');
 const Pages = getLazyImport('Pages');
-const Layout = getLazyImport('Layout');
 const Domains = getLazyImport('Domains');
 const DomainsRegister = getLazyImport('Domains/Register');
 const Docs = getLazyImport('Docs');
@@ -145,7 +144,7 @@ function AppContent() {
 												? language?.permissionExternalContributor
 												: language?.permissionBaseDenied}
 										</p>
-										<Button type="primary" label={language?.returnHome} handlePress={() => navigate(URLS.base)} />
+										<Button type={'primary'} label={language?.returnHome} handlePress={() => navigate(URLS.base)} />
 									</>
 								)}
 							</S.MessageWrapper>
@@ -178,7 +177,7 @@ function AppContent() {
 			<div id={DOM.loader} />
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />
-			<Suspense fallback={null}>
+			<Suspense fallback={<Loader />}>
 				<S.App>
 					<Routes>
 						{getRoute(URLS.base, <Landing />)}
@@ -191,10 +190,10 @@ function AppContent() {
 						{getRoute(`${URLS.base}:portalId/page/edit/:pageId`, <PageEdit />)}
 						{getRoute(`${URLS.base}:portalId/setup`, <Setup />)}
 						{getRoute(`${URLS.base}:portalId/design`, <Design />)}
+						{getRoute(`${URLS.base}:portalId/design/:active`, <Design />)}
 						{getRoute(`${URLS.base}:portalId/media`, <Media />)}
 						{getRoute(`${URLS.base}:portalId/users`, <Users />)}
 						{getRoute(`${URLS.base}:portalId/pages`, <Pages />)}
-						{getRoute(`${URLS.base}:portalId/layout`, <Layout />)}
 						{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
 						{getRoute(`${URLS.base}:portalId/domains/register`, <DomainsRegister />)}
 						{getRoute(URLS.docs, <Docs />)}
@@ -228,7 +227,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 									<PortalProvider>
 										<GlobalStyle />
 										<App />
-S									</PortalProvider>
+									</PortalProvider>
 								</NotificationProvider>
 							</PermawebProvider>
 						</ArweaveProvider>

@@ -119,15 +119,16 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			const tx = await permawebProvider.libs.resolveTransaction(mediaData.file);
 
 			if (portalProvider.permissions?.updatePortalMeta) {
-				const mediaUpdateId = await permawebProvider.libs.addToZone(
-					{
-						path: 'Uploads',
-						data: permawebProvider.libs.mapToProcessCase({
-							tx: tx,
-							type: props.type,
-							dateUploaded: Date.now().toString(),
-						}),
-					},
+				const data: any = {
+					tx: tx,
+					type: props.type,
+					dateUploaded: Date.now().toString(),
+				};
+
+				const updatedMedia = [...portalProvider.current.uploads, data];
+
+				const mediaUpdateId = await permawebProvider.libs.updateZone(
+					{ Uploads: permawebProvider.libs.mapToProcessCase(updatedMedia) },
 					portalProvider.current.id,
 					arProvider.wallet
 				);

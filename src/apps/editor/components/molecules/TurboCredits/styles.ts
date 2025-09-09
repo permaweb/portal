@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 import { STYLING } from 'helpers/config';
 
 export const DBalanceWrapper = styled.div<{ showBorderBottom: boolean }>`
@@ -244,11 +245,10 @@ export const Actions = styled.div`
 `;
 
 export const AccordionContent = styled.div`
-	padding-top: 12px;
-	padding-bottom: 4px;
 	color: ${(p) => p.theme.colors.font.primary};
 	font-family: ${(p) => p.theme.typography.family.primary};
-	font-size: ${(p) => p.theme.typography.size.xSmall};
+	font-size: ${(p) => p.theme.typography.size.xxSmall};
+	margin: 5px 0 0 0;
 `;
 
 export const MetaRow = styled.div`

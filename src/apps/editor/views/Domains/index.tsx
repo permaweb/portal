@@ -26,6 +26,7 @@ export default function Domains() {
 						type={'alt1'}
 						label={language.registerDomain}
 						handlePress={() => navigate(URLS.portalDomainsRegister(portalProvider.current?.id))}
+						disabled={!portalProvider.permissions.updatePortalMeta}
 						icon={ASSETS.domains}
 						iconLeftAlign
 					/>,
@@ -34,6 +35,11 @@ export default function Domains() {
 			<S.BodyWrapper className={'border-wrapper-alt1'}>
 				<DomainList />
 			</S.BodyWrapper>
+			{!portalProvider.permissions?.updatePortalMeta && (
+				<S.InfoWrapper className={'warning'}>
+					<span>{language?.unauthorizedDomainManage}</span>
+				</S.InfoWrapper>
+			)}
 		</S.Wrapper>
 	);
 }

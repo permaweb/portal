@@ -40,10 +40,17 @@ export const PostHeader = styled.div`
 		text-overflow: ellipsis;
 	}
 
+	@media (max-width: ${STYLING.cutoffs.secondary}) {
+		max-width: 100%;
+	}
+`;
+
+export const PostHeaderDetail = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 10px;
+
 	span {
-		display: flex;
-		align-items: center;
-		gap: 5px;
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
@@ -56,13 +63,9 @@ export const PostHeader = styled.div`
 	svg {
 		height: 13.5px;
 		width: 13.5px;
-		margin: 5.5px 0 0 0;
+		margin: 8.5px 0 0 0;
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
-	}
-
-	@media (max-width: ${STYLING.cutoffs.secondary}) {
-		max-width: 100%;
 	}
 `;
 

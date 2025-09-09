@@ -13,3 +13,14 @@ export const BodyWrapper = styled.div`
 	overflow: hidden;
 	border: 1px solid ${(props) => props.theme.colors.border.primary} !important;
 `;
+
+export const InfoWrapper = styled.div`
+	width: fit-content;
+	margin: 15px 0 0 auto;
+	padding: 2.5px 10px 2.5px 10px;
+	display: flex;
+	justify-content: center;
+	span {
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+	}
+`;

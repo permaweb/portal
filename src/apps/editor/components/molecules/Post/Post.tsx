@@ -43,12 +43,14 @@ export default function Post(props: { post: PortalAssetType }) {
 		<S.PostWrapper className={'fade-in'}>
 			<S.PostHeader>
 				<p>{props.post.name}</p>
-				<span>
+				<S.PostHeaderDetail>
 					<ReactSVG src={ASSETS.time} />
-					{`${formatDate(props.post.dateCreated, 'epoch', true)} · ${
-						portalProvider.usersByPortalId?.[props.post.creator]?.username ?? formatAddress(props.post.creator, false)
-					}`}
-				</span>
+					<span>
+						{`${formatDate(props.post.dateCreated, 'epoch', true)} · ${
+							portalProvider.usersByPortalId?.[props.post.creator]?.username ?? formatAddress(props.post.creator, false)
+						}`}
+					</span>
+				</S.PostHeaderDetail>
 			</S.PostHeader>
 			<S.PostDetail>
 				<S.PostActions>
