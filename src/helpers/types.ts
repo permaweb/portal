@@ -237,6 +237,7 @@ export type BatchAGQLResponseType = { [queryKey: string]: DefaultGQLResponseType
 
 export enum WalletEnum {
 	wander = 'wander',
+	nativeWallet = 'NATIVE_WALLET',
 }
 
 export type FormFieldType = 'number' | 'password';

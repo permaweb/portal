@@ -22,6 +22,7 @@ import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvide
 import { NotificationProvider } from 'providers/NotificationProvider';
 import { PermawebProvider, usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
+import { WanderInit } from 'wallet/WanderInit';
 
 import * as S from './styles';
 
@@ -173,6 +174,7 @@ function AppContent() {
 
 	return (
 		<>
+			<WanderInit />
 			<div id={DOM.loader} />
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />
@@ -226,7 +228,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 									<PortalProvider>
 										<GlobalStyle />
 										<App />
-									</PortalProvider>
+S									</PortalProvider>
 								</NotificationProvider>
 							</PermawebProvider>
 						</ArweaveProvider>
