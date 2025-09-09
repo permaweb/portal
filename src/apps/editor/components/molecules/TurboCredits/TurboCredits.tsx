@@ -1,15 +1,18 @@
 import React from 'react';
+// @ts-ignore
+import { ArconnectSigner, TurboFactory } from '@ardrive/turbo-sdk/web';
+
 import { Accordion } from 'components/atoms/Accordion';
 import { Button } from 'components/atoms/Button';
+import { Panel } from 'components/atoms/Panel';
+import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { ASSETS } from 'helpers/config';
 import { getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-import { Panel } from 'components/atoms/Panel';
-import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
-import * as S from './styles';
-import { TurboFactory, ArconnectSigner } from '@ardrive/turbo-sdk/web';
 import { useNotifications } from 'providers/NotificationProvider';
+
+import * as S from './styles';
 
 type Props = {
 	showBorderBottom?: boolean;
@@ -26,7 +29,7 @@ interface TurboApproval {
 }
 
 function sumApprovals(approvals: TurboApproval[] = []) {
-	return approvals.reduce((acc, a) => acc + BigInt(a.approvedWincAmount), 0n);
+	return approvals.reduce((acc, a) => acc + BigInt(a.approvedWincAmount), BigInt(0));
 }
 
 type AggregatedApproval = {
@@ -44,8 +47,8 @@ function aggregateByAddress(approvals: TurboApproval[] = []): AggregatedApproval
 		const entry = map.get(key) ?? {
 			address: key,
 			count: 0,
-			totalApproved: 0n,
-			totalUsed: 0n,
+			totalApproved: BigInt(0),
+			totalUsed: BigInt(0),
 			approvals: [],
 		};
 		entry.count += 1;
@@ -132,14 +135,14 @@ export default function TurboCredits(props: Props) {
 					renderActions={({ expanded }) => (
 						<>
 							<Button
-								type="alt3"
+								type={'alt3'}
 								label={language?.add}
 								handlePress={() => setShowFundUpload(true)}
 								icon={ASSETS.add}
 								iconLeftAlign
 							/>
 							<Button
-								type="alt3"
+								type={'alt3'}
 								label={expanded ? language?.seeLess ?? 'See less' : language?.seeMore ?? 'See more'}
 								handlePress={toggleExpand}
 							/>
@@ -153,18 +156,18 @@ export default function TurboCredits(props: Props) {
 						</S.MetaRow>
 
 						<S.MetaRow>
-							<span>Effective balance</span>
+							<span>Effective Balance</span>
 							<p>{getARAmountFromWinc(Number(arProvider?.turboBalanceObj.effectiveBalance))} Credits</p>
 						</S.MetaRow>
 						<S.MetaRow>
-							<span>Received approvals</span>
+							<span>Received Approvals</span>
 							<p>
 								{getARAmountFromWinc(Number(totalReceivedBig))} Credits{' '}
 								<small style={{ opacity: 0.7 }}>({receivedApprovalsCount})</small>
 							</p>
 						</S.MetaRow>
 						<S.MetaRow>
-							<span>Given approvals</span>
+							<span>Given Approvals</span>
 							<p>
 								{getARAmountFromWinc(Number(totalGivenBig))} Credits{' '}
 								<S.ApprovalsCount

@@ -81,3 +81,8 @@ export const InfoWrapper = styled.div`
 		text-align: center;
 	}
 `;
+
+export const Preview = styled.div`
+	margin-top: 20px;
+	padding: 15px;
+`;

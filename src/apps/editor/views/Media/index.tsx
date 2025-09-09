@@ -2,6 +2,7 @@ import React from 'react';
 
 import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { MediaLibrary } from 'editor/components/organisms/MediaLibrary';
+import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
@@ -15,8 +16,10 @@ import * as S from './styles';
 
 export default function Media() {
 	const arProvider = useArweaveProvider();
+	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 
 	return (
@@ -49,6 +52,11 @@ export default function Media() {
 						<MediaLibrary type={'video'} columns={6} />
 					</S.MediaWrapper>
 				</S.BodyWrapper>
+				{!portalProvider?.permissions?.updatePortalMeta && (
+					<S.InfoWrapper className={'warning'}>
+						<span>{language?.unauthorizedPortalUpdateMedia}</span>
+					</S.InfoWrapper>
+				)}
 			</S.Wrapper>
 			<Panel
 				open={showFundUpload}

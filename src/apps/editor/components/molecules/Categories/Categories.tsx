@@ -10,10 +10,10 @@ import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
 import { ASSETS, STYLING } from 'helpers/config';
 import { PortalCategoryType } from 'helpers/types';
+import { useCategoriesWithReorder } from 'hooks/useCategoriesWithReorder';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
-import { useCategoriesWithReorder } from 'hooks/useCategoriesWithReorder';
 
 export default function Categories(props: {
 	categories: PortalCategoryType[];

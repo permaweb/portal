@@ -18,13 +18,10 @@ export const UserWrapper = styled.div<{ hideAction: boolean; isCurrent: boolean;
 		cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
 		background: ${(props) =>
 			props.hideAction || props.disabled
-				? props.theme.colors.view.background
+				? props.isCurrent
+					? props.theme.colors.container.alt1.background
+					: props.theme.colors.view.background
 				: props.theme.colors.container.alt2.background};
-	}
-
-	&:disabled {
-		background: ${(props) =>
-			props.isCurrent ? props.theme.colors.container.primary.active : props.theme.colors.view.background};
 	}
 
 	background: ${(props) =>

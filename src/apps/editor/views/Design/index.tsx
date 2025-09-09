@@ -1,11 +1,12 @@
 import { ViewHeader } from 'editor/components/atoms/ViewHeader';
-import { Fonts } from 'editor/components/molecules/Fonts';
-import { Media } from 'editor/components/molecules/Media';
-import { Themes } from 'editor/components/molecules/Themes';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
+import { URLTabs } from 'components/atoms/URLTabs';
+import { URLS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
+import DesignTab from './DesignTab';
+import LayoutTab from './LayoutTab';
 import * as S from './styles';
 
 export default function Design() {
@@ -13,36 +14,25 @@ export default function Design() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	const tabs = [
+		{
+			label: language?.appearance || 'Appearance',
+			disabled: false,
+			url: (portalId: string) => `${URLS.portalDesign(portalId)}appearance`,
+			view: DesignTab,
+		},
+		{
+			label: language?.layout || 'Layout',
+			disabled: false,
+			url: (portalId: string) => `${URLS.portalDesign(portalId)}layout`,
+			view: LayoutTab,
+		},
+	];
+
 	return (
 		<S.Wrapper className={'fade-in'}>
 			<ViewHeader header={language?.design} />
-			<S.BodyWrapper>
-				<S.SectionWrapper>
-					<S.Section className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<p>{language?.fonts}</p>
-						</S.SectionHeader>
-						<Fonts />
-					</S.Section>
-					<Media portal={portalProvider.current} type={'logo'} />
-					<S.Section className={'border-wrapper-alt2'}>
-						<Media portal={portalProvider.current} type={'icon'} />
-					</S.Section>
-				</S.SectionWrapper>
-				<S.SectionWrapper>
-					<S.Section className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<p>{language?.themes}</p>
-						</S.SectionHeader>
-						<Themes />
-					</S.Section>
-					{!portalProvider?.permissions?.updateUsers && (
-						<S.InfoWrapper className={'warning'}>
-							<span>{language?.unauthorizedPortalUpdate}</span>
-						</S.InfoWrapper>
-					)}
-				</S.SectionWrapper>
-			</S.BodyWrapper>
+			<URLTabs tabs={tabs} activeUrl={`${URLS.portalDesign(portalProvider.current?.id)}appearance`} />
 		</S.Wrapper>
 	);
 }

@@ -334,6 +334,21 @@ export const Alt3 = styled(Primary)`
 				: props.theme.colors.button.primary.color} !important;
 	}
 
+	svg {
+		color: ${(props) =>
+			props.warning
+				? props.theme.colors.font.light1
+				: props.active
+				? props.theme.colors.font.light1
+				: props.theme.colors.button.primary.color} !important;
+		fill: ${(props) =>
+			props.warning
+				? props.theme.colors.font.light1
+				: props.active
+				? props.theme.colors.font.light1
+				: props.theme.colors.button.primary.color} !important;
+	}
+
 	&:hover {
 		background: ${(props) =>
 			props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.alt1.background};
