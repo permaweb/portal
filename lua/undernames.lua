@@ -376,7 +376,7 @@ Handlers.add('PortalRegistry.AddReserved', function(Msg)
 		return
 	end
 	local name = assert(Msg.Name, 'name required')
-	local to = Msg.to
+	local to = Msg.To
 	local r = Reserved.add(Msg.From, name, to, Msg)
 	reply(Msg, true, r)
 end)
