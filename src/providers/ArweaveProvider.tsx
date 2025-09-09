@@ -39,6 +39,7 @@ interface ArweaveContextState {
 	handleConnect: any;
 	handleDisconnect: (redirect: boolean) => void;
 	turboBalanceObj: TurboBalance;
+	backupsNeeded: number;
 }
 
 const DEFAULT_CONTEXT = {
@@ -60,6 +61,7 @@ const DEFAULT_CONTEXT = {
 		givenApprovals: [],
 		receivedApprovals: [],
 	},
+	backupsNeeded: 0,
 };
 
 const ARContext = React.createContext<ArweaveContextState>(DEFAULT_CONTEXT);
@@ -78,6 +80,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	const [turboBalanceObj, setTurboBalanceObj] = React.useState<{ [key: string]: any }>({});
 	const [arBalance, setArBalance] = React.useState<number | null>(null);
 	const [turboBalance, setTurboBalance] = React.useState<number | null>(null);
+	const [backupsNeeded, setBackupsNeeded] = React.useState<number>(0);
 
 	React.useEffect(() => {
 		handleWallet();
@@ -105,6 +108,19 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 			}
 		})();
 	}, [walletAddress]);
+
+	React.useEffect(() => {
+		const checkBackupStatus = () => {
+			if (window?.wanderInstance?.backupInfo?.backupsNeeded) {
+				setBackupsNeeded(window.wanderInstance.backupInfo.backupsNeeded);
+			}
+		};
+		
+		checkBackupStatus();
+		const interval = setInterval(checkBackupStatus, 10000);
+		
+		return () => clearInterval(interval);
+	}, []);
 
 	async function handleWallet() {
 		if (localStorage.getItem(STORAGE.walletType)) {
@@ -149,7 +165,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 						setWalletType(storedWalletType as WalletEnum);
 						setAuth({ ...window.wanderInstance.authInfo, authType: storedWalletType });
 					} else {
-						// Default to wander if no auth info available
 						const defaultType = WalletEnum.wander;
 						setWalletType(defaultType);
 						localStorage.setItem(STORAGE.walletType, defaultType);
@@ -163,12 +178,10 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 	async function handleDisconnect(redirect: boolean) {
 		console.log('handleDisconnect');
-		// Clear storage
 		if (localStorage.getItem(STORAGE.walletType)) {
 			localStorage.removeItem(STORAGE.walletType);
 		}
 
-		// Sign out from Wander if it's not a native wallet
 		if (window?.wanderInstance && walletType !== 'NATIVE_WALLET') {
 			try {
 				window.wanderInstance.signOut();
@@ -177,7 +190,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 			}
 		}
 
-		// Disconnect from ArConnect/native wallet
 		if (window?.arweaveWallet) {
 			try {
 				await window.arweaveWallet.disconnect();
@@ -186,7 +198,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 			}
 		}
 
-		// Clear all state
 		setAuth(null);
 		setWallet(null);
 		setWalletAddress(null);
@@ -210,7 +221,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				const nonce = crypto.randomUUID();
 				const msg = new TextEncoder().encode(nonce);
 
-				// Use the modern signMessage method
 				const sigAB = await (window.arweaveWallet as any).signMessage(msg);
 
 				const toB64Url = (buf: ArrayBuffer) =>
@@ -324,6 +334,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				turboBalance,
 				refreshTurboBalance,
 				turboBalanceObj,
+				backupsNeeded,
 			}}
 		>
 			{props.children}

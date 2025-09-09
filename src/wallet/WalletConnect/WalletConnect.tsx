@@ -29,7 +29,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	const { auth } = arProvider;
+	const { auth, backupsNeeded } = arProvider;
 	const { profile } = permawebProvider;
 
 	const { settings, updateSettings, availableThemes } =
@@ -158,6 +158,11 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 				>
 					<S.PWrapper>
 						<Avatar owner={permawebProvider.profile} dimensions={{ wrapper: 35, icon: 21.5 }} callback={handlePress} />
+						{backupsNeeded > 0 && arProvider.walletAddress && (
+							<S.BackupWarning>
+								{backupsNeeded}
+							</S.BackupWarning>
+						)}
 						<div ref={wrapperRef} />
 					</S.PWrapper>
 					{showWalletDropdown && (
@@ -177,9 +182,12 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 									{language?.profile}
 								</li>
 								{auth?.authType !== 'NATIVE_WALLET' && window.wanderInstance && (
-									<li onClick={() => window.wanderInstance.open()}>
+									<li onClick={() => window.wanderInstance.open(backupsNeeded > 0 ? 'backup' : undefined)} style={{ position: 'relative' }}>
 										<ReactSVG src={ASSETS.wallet} />
 										{language?.wallet}
+										{backupsNeeded > 0 && (
+											<S.MenuBadge>{backupsNeeded}</S.MenuBadge>
+										)}
 									</li>
 								)}
 								<li onClick={() => setShowLanguageSelector(true)}>

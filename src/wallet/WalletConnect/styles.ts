@@ -16,6 +16,7 @@ export const Wrapper = styled.div`
 export const PWrapper = styled.div`
 	display: flex;
 	align-items: center;
+	position: relative;
 
 	svg {
 		padding: 2.5px 0 0 0;
@@ -110,6 +111,83 @@ export const DHeader = styled.div`
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
+	}
+`;
+
+export const MenuBadge = styled.span`
+	position: absolute;
+	right: 10px;
+	background: #8B0000;
+	color: white;
+	border-radius: 10px;
+	padding: 2px 6px;
+	font-size: 11px;
+	font-weight: bold;
+	min-width: 18px;
+	text-align: center;
+`;
+
+export const BackupWarning = styled.div`
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #8B0000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	animation: pulse 2s infinite;
+	color: white;
+	font-size: 10px;
+	font-weight: bold;
+	font-family: ${(props) => props.theme.typography.family.primary};
+
+	@keyframes pulse {
+		0% {
+			box-shadow: 0 0 0 0 rgba(139, 0, 0, 0.7);
+		}
+		70% {
+			box-shadow: 0 0 0 8px rgba(139, 0, 0, 0);
+		}
+		100% {
+			box-shadow: 0 0 0 0 rgba(139, 0, 0, 0);
+		}
+	}
+`;
+
+export const BackupNotice = styled.div`
+	width: 100%;
+	padding: 10px;
+	margin: 10px 0;
+	background: ${(props) => props.theme.colors.warning ? `${props.theme.colors.warning}20` : '#ff980020'};
+	border: 1px solid ${(props) => props.theme.colors.warning || '#ff9800'};
+	border-radius: ${STYLING.dimensions.radius.primary};
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	cursor: pointer;
+	transition: all 200ms;
+
+	&:hover {
+		background: ${(props) => props.theme.colors.warning ? `${props.theme.colors.warning}30` : '#ff980030'};
+	}
+
+	svg {
+		height: 18px;
+		width: 18px;
+		color: ${(props) => props.theme.colors.warning || '#ff9800'};
+		fill: ${(props) => props.theme.colors.warning || '#ff9800'};
+		flex-shrink: 0;
+	}
+
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		line-height: 1.4;
 	}
 `;
 
