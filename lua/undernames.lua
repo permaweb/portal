@@ -353,7 +353,8 @@ Handlers.add('PortalRegistry.AddController', function(Msg)
 	end
 	local new_controller = Msg.Addr
 	if not new_controller or #new_controller == 0 then
-		return reply(Msg, false, { error = 'Addr tag required' })
+		reply(Msg, false, { error = 'Addr tag required' })
+		return
 	end
 	local r = Controllers.add(Msg.From, new_controller, Msg)
 	reply(Msg, true, r)
@@ -365,7 +366,8 @@ Handlers.add('PortalRegistry.RemoveController', function(Msg)
 	end
 	local remove_controller = Msg.Addr
 	if not remove_controller or #remove_controller == 0 then
-		return reply(Msg, false, { error = 'Addr tag required' })
+		reply(Msg, false, { error = 'Addr tag required' })
+		return
 	end
 	local r = Controllers.remove(Msg.From, remove_controller, Msg)
 	reply(Msg, true, r)
@@ -382,11 +384,13 @@ Handlers.add('PortalRegistry.AddReserved', function(Msg)
 	end
 	local name = Msg.Name
 	if not name or #name == 0 then
-		return reply(Msg, false, { error = 'Name tag required' })
+		reply(Msg, false, { error = 'Name tag required' })
+		return
 	end
 	local to = Msg.To
 	if not to or #to == 0 then
-		return reply(Msg, false, { error = 'To tag required' })
+		reply(Msg, false, { error = 'To tag required' })
+		return
 	end
 	local r = Reserved.add(Msg.From, name, to, Msg)
 	reply(Msg, true, r)
@@ -398,7 +402,8 @@ Handlers.add('PortalRegistry.RemoveReserved', function(Msg)
 	end
 	local name = Msg.Name
 	if not name or #name == 0 then
-		return reply(Msg, false, { error = 'Name tag required' })
+		reply(Msg, false, { error = 'Name tag required' })
+		return
 	end
 	local r = Reserved.remove(Msg.From, name, Msg)
 	reply(Msg, true, r)
@@ -413,7 +418,8 @@ end)
 Handlers.add('PortalRegistry.CheckAvailability', function(Msg)
 	local name = Msg.Name
 	if not name or #name == 0 then
-		return reply(Msg, false, { error = 'Name tag required' })
+		reply(Msg, false, { error = 'Name tag required' })
+		return
 	end
 	local n = Utils.normalize(name)
 	local ok, reason = can_claim(Msg.From, n)
@@ -439,7 +445,8 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 	end
 	local name_requested = Msg.Name
 	if not name_requested or #name_requested == 0 then
-		return reply(Msg, false, { error = 'Name tag required' })
+		reply(Msg, false, { error = 'Name tag required' })
+		return
 	end
 	local nRequested = Utils.normalize(name_requested)
 
@@ -448,7 +455,8 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 	if rinfo and rinfo.to and rinfo.to == Msg.From then
 		local ok, err = can_claim(Msg.From, nRequested)
 		if not ok then
-			error(err)
+			reply(Msg, false, { error = err })
+			return
 		end
 		State.Owners[nRequested] = Msg.From
 		State.Reserved[nRequested] = nil
@@ -457,10 +465,11 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 		return
 	end
 
-	if not State.Policy.requireApproval then
+	if not State.Policy.RequireApproval then
 		local ok, err = can_claim(Msg.From, nRequested)
 		if not ok then
-			error(err)
+			reply(Msg, false, { error = err })
+			return
 		end
 		State.Owners[nRequested] = Msg.From
 		if rinfo then
@@ -473,7 +482,8 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 
 	local ok, err = can_claim(Msg.From, nRequested)
 	if not ok then
-		error(err)
+		reply(Msg, false, { error = err })
+		return
 	end
 	local res = Requests.create(Msg.From, nRequested, Msg)
 	reply(Msg, true, { status = 'pending', id = res.id, name = nRequested })
@@ -485,9 +495,10 @@ Handlers.add('PortalRegistry.Cancel', function(Msg)
 	end
 	local cancel_id = Msg.Id
 	if not cancel_id then
-		return reply(Msg, false, { error = 'cancel id tag required Msg.Id' })
+		reply(Msg, false, { error = 'cancel id tag required Msg.Id' })
+		return
 	end
-	local r = Requests.cancel(Msg.From, cancel_id, Msg)
+	local r = Requests.cancel(Msg.From, tonumber(cancel_id), Msg)
 	reply(Msg, true, r)
 end)
 
@@ -497,9 +508,10 @@ Handlers.add('PortalRegistry.Approve', function(Msg)
 	end
 	local approve_id = Msg.Id
 	if not approve_id then
-		return reply(Msg, false, { error = 'request id tag required Msg.Id' })
+		reply(Msg, false, { error = 'request id tag required Msg.Id' })
+		return
 	end
-	local r = Requests.approve(Msg.From, approve_id, Msg)
+	local r = Requests.approve(Msg.From, tonumber(approve_id), Msg)
 	reply(Msg, true, r)
 end)
 
@@ -509,10 +521,11 @@ Handlers.add('PortalRegistry.Reject', function(Msg)
 	end
 	local reject_id = Msg.Id
 	if not reject_id then
-		return reply(Msg, false, { error = 'request id tag required Msg.Id' })
+		reply(Msg, false, { error = 'request id tag required Msg.Id' })
+		return
 	end
 	local reject_reason = Msg.Reason or 'unspecified'
-	local r = Requests.reject(Msg.From, reject_id, reject_reason, Msg)
+	local r = Requests.reject(Msg.From, tonumber(reject_id), reject_reason, Msg)
 	reply(Msg, true, r)
 end)
 
@@ -524,7 +537,8 @@ end)
 Handlers.add('PortalRegistry.OwnerOf', function(Msg)
 	local name = Msg.Name
 	if not name or #name == 0 then
-		return reply(Msg, false, { error = 'Name tag required' })
+		reply(Msg, false, { error = 'Name tag required' })
+		return
 	end
 	reply(Msg, true, { owner = Ownership.owner_of(name) })
 end)
@@ -535,7 +549,8 @@ Handlers.add('PortalRegistry.ForceRelease', function(Msg)
 	end
 	local release_name = Msg.Name
 	if not release_name or #release_name == 0 then
-		return reply(Msg, false, { error = 'Name tag required' })
+		reply(Msg, false, { error = 'Name tag required' })
+		return
 	end
 	local reason = Msg.Reason or 'unspecified'
 	local r = Ownership.force_release(Msg.From, release_name, reason, Msg)
@@ -555,7 +570,8 @@ Handlers.add('PortalRegistry.SetPolicy', function(Msg)
 	if Msg.MaxPerAddr ~= nil then
 		local new_max_per_addr = tonumber(Msg.MaxPerAddr)
 		if not new_max_per_addr or new_max_per_addr <= 0 then
-			return reply(Msg, false, { error = 'MaxPerAddr must be a positive number' })
+			reply(Msg, false, { error = 'MaxPerAddr must be a positive number' })
+			return
 		end
 		State.Policy.MaxPerAddr = new_max_per_addr
 		updates.MaxPerAddr = new_max_per_addr
@@ -570,7 +586,8 @@ Handlers.add('PortalRegistry.SetPolicy', function(Msg)
 		elseif string_require_approval == 'false' then
 			new_require_approval = false
 		else
-			return reply(Msg, false, { error = 'RequireApproval must be true or false' })
+			reply(Msg, false, { error = 'RequireApproval must be true or false' })
+			return
 		end
 		State.Policy.RequireApproval = new_require_approval
 		updates.RequireApproval = new_require_approval
@@ -604,7 +621,8 @@ Handlers.add('PortalRegistry.TransferSuperAdmin', function(Msg)
 	Utils.require_super_admin(Msg.From)
 	local newAdmin = Msg.NewAdmin
 	if not newAdmin or #newAdmin == 0 then
-		return reply(Msg, false, { error = 'NewAdmin tag required' })
+		reply(Msg, false, { error = 'NewAdmin tag required' })
+		return
 	end
 	State.SuperAdmin = newAdmin
 	Utils.audit(Msg.From, 'transfer_super_admin', { new_super_admin = newAdmin }, Msg)
