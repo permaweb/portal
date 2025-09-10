@@ -294,7 +294,13 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					data.data.authType ||
 					(data.data.authStatus === 'not-authenticated' && data.data.authType !== 'null' && data.data.authType !== null)
 				) {
-					if (data.data.authStatus !== 'loading') {
+					if (data.data.authStatus === 'onboarding') {
+						// Keep modal open during onboarding
+						setAuth(data.data);
+						if (!window.wanderInstance.isOpen) {
+							window.wanderInstance.open();
+						}
+					} else if (data.data.authStatus !== 'loading') {
 						window.wanderInstance.close();
 						setAuth(data.data);
 						if (data.data.authStatus === 'authenticated' || data.data.authType === 'NATIVE_WALLET') {

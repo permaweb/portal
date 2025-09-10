@@ -10,7 +10,6 @@ import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { ASSETS } from 'helpers/config';
 import { LanguageEnum } from 'helpers/types';
-// import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -43,6 +42,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 	const [instance, setInstance] = React.useState(null);
 	const [label, setLabel] = React.useState<string | null>(null);
+	const [isLoading, setIsLoading] = React.useState<boolean>(false);
 	const hasInitializedRef = React.useRef<boolean>(false);
 	const wrapperRef = React.useRef();
 
@@ -111,13 +111,16 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 	}, []);
 
 	React.useEffect(() => {
-		if (arProvider.walletAddress) {
-			if (auth?.authStatus === 'loading') {
-				setLabel('Signing in');
-			} else if (profile) {
+		if (auth?.authStatus === 'loading') {
+			setIsLoading(true);
+			setLabel('Signing in');
+		} else if (arProvider.walletAddress) {
+			if (profile) {
+				setIsLoading(false);
 				setLabel(profile.displayName || 'My Profile');
 			} else {
 				// Wallet connected but no profile
+				setIsLoading(false);
 				setLabel('My Wallet');
 			}
 		} else {
@@ -157,7 +160,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 					disabled={!showWalletDropdown}
 				>
 					<S.PWrapper>
-						<Avatar owner={permawebProvider.profile} dimensions={{ wrapper: 35, icon: 21.5 }} callback={handlePress} />
+						<Avatar owner={permawebProvider.profile} loading={isLoading} dimensions={{ wrapper: 35, icon: 21.5 }} callback={handlePress} />
 						{backupsNeeded > 0 && arProvider.walletAddress && (
 							<S.BackupWarning>
 								{backupsNeeded}

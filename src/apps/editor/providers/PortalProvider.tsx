@@ -323,7 +323,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		if (currentId) {
 			try {
 				const portalData = await permawebProvider.libs.getZone(currentId);
-				// console.log('portalData:', JSON.stringify(portalData, null, 2));
+				console.log('portalData:', JSON.stringify(portalData, null, 2));
 
 				const users: PortalUserType[] = [];
 				if (portalData?.roles) {

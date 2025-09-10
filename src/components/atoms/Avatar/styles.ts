@@ -70,3 +70,7 @@ export const Wrapper = styled.div<{
     `
 			: ''}
 `;
+
+export const LoaderWrapper = styled.div`
+	margin-top: 1.5px;
+`;

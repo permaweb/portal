@@ -12,6 +12,7 @@ export default function WalletBlock() {
 	const arProvider = useArweaveProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	const { auth } = arProvider;
 
 	return (
 		<S.Wrapper>
@@ -22,8 +23,9 @@ export default function WalletBlock() {
 			<S.WalletConnect>
 				<Button
 					type={'alt1'}
-					label={language.connect}
+					label={auth?.authStatus === 'loading' ? language.loading : language.connect}
 					handlePress={() => arProvider.handleConnect(WalletEnum.wander)}
+					disabled={auth?.authStatus === 'loading'}
 				/>
 			</S.WalletConnect>
 		</S.Wrapper>

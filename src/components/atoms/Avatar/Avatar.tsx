@@ -4,11 +4,13 @@ import { ReactSVG } from 'react-svg';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
+import { Loader } from '../Loader';
 
 import * as S from './styles';
 
 export default function Avatar(props: {
 	owner: any;
+	loading?: boolean;
 	dimensions: {
 		wrapper: number;
 		icon: number;
@@ -22,8 +24,10 @@ export default function Avatar(props: {
 	const thumbnail = React.useMemo(() => {
 		if (!hasError && props.owner && props.owner.thumbnail && checkValidAddress(props.owner.thumbnail)) {
 			return <img src={getTxEndpoint(props.owner.thumbnail)} onError={() => setHasError(true)} />;
+		} else if(props.loading) {
+			return <S.LoaderWrapper><Loader sm relative /></S.LoaderWrapper>
 		} else return <ReactSVG src={ASSETS.user} />;
-	}, [props.owner, hasError]);
+	}, [props.loading, props.owner, hasError]);
 
 	return (
 		<S.Wrapper

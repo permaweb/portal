@@ -477,8 +477,8 @@ export const DEFAULT_THEME = {
 	card: {
 		colors: {
 			background: {
-				light: undefined,
-				dark: undefined,
+				light: '205,205,205',
+				dark: '55,55,55',
 			},
 			border: {
 				light: 'border',
@@ -699,7 +699,7 @@ export const PORTAL_DATA = () => `
 		<title>Portal</title>
 	</head>
 	<body>
-		<div id="root"></div>
+		<div id="portal"></div>
 		<script type="module" src="https://script_portal.arweave.net"></script>
 	</body>
 </html>
