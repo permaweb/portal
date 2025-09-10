@@ -11,6 +11,7 @@ import { ASSETS, URLS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
+import { PortalFlowDemo } from 'editor/components/organisms/PortalFlowDemo';
 
 export default function Domains() {
 	const navigate = useNavigate();
