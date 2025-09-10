@@ -1,6 +1,13 @@
 import * as React from 'react';
-import AdminUndernamesReq, { UndernameRequest } from '../AdminUndernamesReq/AdminUndernamesReq';
-import { UserReqUndernames } from '../UserReqUndernames';
+import { UndernameRequest } from '../AdminUndernamesReq/AdminUndernamesReq';
+import { UndernamesList } from '../UndernamesList';
+import { UndernameRequestList } from '../UndernameRequestList';
+
+const all = [
+	{ name: 'tom_portal', owner: 'NfbCSc_O61Mvzoq94_FLGk8WS8cuyxaiX1NAuumUVxM' },
+	{ name: 'alice_portal', owner: '0xAlice' },
+	{ name: 'bhavya', owner: 'GvK2GjHWF_4F3DjuzdoGR_DGyTjMAks1k04lGyJPAOc' },
+];
 
 export default function PortalFlowDemo() {
 	// Mock state
@@ -101,20 +108,14 @@ export default function PortalFlowDemo() {
 
 	return (
 		<div style={{ display: 'grid', gap: '32px', padding: '32px' }}>
-			<UserReqUndernames
+			<UndernameRequestList
 				requests={userRequests}
-				isSubmitting={false}
-				maxLen={20}
-				validateName={(n) => (/^[a-z0-9_.-]+$/.test(n) ? null : 'Invalid characters')}
-				handleSubmit={handleUserSubmit}
-				handleCancel={handleUserCancel}
+				filterByRequester="0xAlice"
+				onApprove={handleAdminApprove}
+				onReject={handleAdminReject}
 			/>
-
-			<AdminUndernamesReq
-				requests={adminRequests}
-				handleApprove={handleAdminApprove}
-				handleReject={handleAdminReject}
-			/>
+			<UndernamesList owners={all} filterAddress="0xAlice" />
+			<UndernamesList owners={all} />
 		</div>
 	);
 }

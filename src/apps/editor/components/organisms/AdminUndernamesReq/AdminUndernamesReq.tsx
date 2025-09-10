@@ -2,7 +2,7 @@ import React from 'react';
 import * as S from './styles';
 import { StatusBadge } from 'editor/components/molecules/StatusBadge';
 import { Button } from 'components/atoms/Button';
-import { language } from 'helpers/language';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
@@ -19,12 +19,14 @@ export type UndernameRequest = {
 
 export default function AdminUndernamesReq(props: {
 	requests: UndernameRequest[];
-	busyIds?: number[]; // show loading state per-row if desired
+	busyIds?: number[];
 	handleApprove: (id: number) => void;
-	handleReject: (id: number, reason: string) => void; // now includes reason
+	handleReject: (id: number, reason: string) => void;
 }) {
 	const busy = React.useMemo(() => new Set(props.busyIds || []), [props.busyIds]);
 	const [reasons, setReasons] = React.useState<Record<number, string>>({});
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
 
 	const handleReasonChange = React.useCallback((id: number, value: string) => {
 		setReasons((prev) => ({ ...prev, [id]: value }));

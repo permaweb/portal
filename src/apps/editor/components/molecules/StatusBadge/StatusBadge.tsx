@@ -11,6 +11,6 @@ export default function StatusBadge(props: { status: RequestStatus }) {
 			? 'danger'
 			: 'neutral';
 
-	const label = props.status.charAt(0).toUpperCase() + props.status.slice(1);
+	const label = props?.status.charAt(0).toUpperCase() + props?.status.slice(1);
 	return <S.Badge tone={tone}>{label}</S.Badge>;
 }

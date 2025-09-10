@@ -1,6 +1,7 @@
 import React from 'react';
 import * as S from './styles';
 import { StatusBadge } from 'editor/components/molecules/StatusBadge';
+import { Button } from 'components/atoms/Button';
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 export type UndernameRequest = {
@@ -76,14 +77,15 @@ export default function UserReqUndernames(props: {
 						maxLength={props.maxLen}
 						disabled={props.isSubmitting}
 					/>
-					<S.PrimaryButton onClick={handleRequest} disabled={props.isSubmitting || !name.trim()}>
-						{props.isSubmitting ? 'Requesting…' : 'Request'}
-					</S.PrimaryButton>
+					<Button
+						type={'alt1'}
+						label={'Request'}
+						handlePress={handleRequest}
+						disabled={props.isSubmitting || !name.trim()}
+					/>
 				</S.Row>
 				{error && <S.Error>{error}</S.Error>}
-				<S.Helper>
-					Use lowercase letters, digits, `_ . -`. Example: <code>tom_portal</code>
-				</S.Helper>
+				<S.Helper>Max: 51 Characters No Special Characters No Leading or Trailing Dashes Cannot be WWW</S.Helper>
 			</S.Card>
 
 			<S.Card>
