@@ -21,9 +21,14 @@ export default function AdminUndernamesReq(props: {
 	requests: UndernameRequest[];
 	busyIds?: number[]; // show loading state per-row if desired
 	handleApprove: (id: number) => void;
-	handleReject: (id: number) => void;
+	handleReject: (id: number, reason: string) => void; // now includes reason
 }) {
 	const busy = React.useMemo(() => new Set(props.busyIds || []), [props.busyIds]);
+	const [reasons, setReasons] = React.useState<Record<number, string>>({});
+
+	const handleReasonChange = React.useCallback((id: number, value: string) => {
+		setReasons((prev) => ({ ...prev, [id]: value }));
+	}, []);
 
 	return (
 		<S.Card>
@@ -62,18 +67,25 @@ export default function AdminUndernamesReq(props: {
 									<S.Td>{r.decidedAt ? new Date(r.decidedAt).toLocaleString() : '—'}</S.Td>
 									<S.Td>
 										{r.status === 'pending' ? (
-											<S.ActionRow>
-												<Button
-													type={'alt1'}
-													label={language?.approve || 'approve'}
-													handlePress={() => props.handleApprove(r.id)}
+											<S.Wrapper>
+												<S.ReasonInput
+													placeholder="Reason"
+													value={reasons[r.id] || ''}
+													onChange={(e) => handleReasonChange(r.id, e.target.value)}
 												/>
-												<Button
-													type={'warning'}
-													label={language?.reject || 'reject'}
-													handlePress={() => props.handleReject(r.id)}
-												/>
-											</S.ActionRow>
+												<S.ActionRow>
+													<Button
+														type={'alt1'}
+														label={language?.approve || 'approve'}
+														handlePress={() => props.handleApprove(r.id)}
+													/>
+													<Button
+														type="warning"
+														label={language?.reject || 'reject'}
+														handlePress={() => props.handleReject(r.id, reasons[r.id] || '')}
+													/>
+												</S.ActionRow>
+											</S.Wrapper>
 										) : r.status === 'rejected' && r.reason ? (
 											<S.Note>Reason: {r.reason}</S.Note>
 										) : (

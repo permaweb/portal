@@ -81,3 +81,26 @@ export const EmptyRow = styled.div`
 	padding: 12px 0;
 	color: ${(p) => p.theme.colors.font.secondary};
 `;
+
+export const Wrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	align-items: center;
+	width: 100%;
+`;
+
+export const ReasonInput = styled.input`
+	flex: 1;
+	min-width: 120px;
+	padding: 6px 8px;
+	border: 1px solid ${(p) => p.theme.colors.border.primary};
+	border-radius: ${(p) => p.theme.dimensions?.radius?.primary || '6px'};
+	background: ${(p) => p.theme.colors.container.primary.background};
+	color: ${(p) => p.theme.colors.font.primary};
+	font-size: ${(p) => p.theme.typography.size.small};
+
+	&:focus-visible {
+		outline: 2px solid ${(p) => p.theme.colors.primary1};
+	}
+`;

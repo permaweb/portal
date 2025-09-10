@@ -86,19 +86,15 @@ export default function PortalFlowDemo() {
 	};
 
 	// Simulate admin reject
-	const handleAdminReject = (id: number) => {
+	const handleAdminReject = (id: number, reason: string) => {
 		setAdminRequests((prev) =>
 			prev.map((r) =>
-				r.id === id
-					? { ...r, status: 'rejected', reason: 'Manual rejection', decidedAt: Date.now(), decidedBy: '0xController' }
-					: r
+				r.id === id ? { ...r, status: 'rejected', reason: reason, decidedAt: Date.now(), decidedBy: '0xController' } : r
 			)
 		);
 		setUserRequests((prev) =>
 			prev.map((r) =>
-				r.id === id
-					? { ...r, status: 'rejected', reason: 'Manual rejection', decidedAt: Date.now(), decidedBy: '0xController' }
-					: r
+				r.id === id ? { ...r, status: 'rejected', reason: reason, decidedAt: Date.now(), decidedBy: '0xController' } : r
 			)
 		);
 	};
