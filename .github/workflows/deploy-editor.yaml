@@ -27,7 +27,7 @@ jobs:
           node-version: '22.x'
           cache: 'npm'
       - run: npm run clean:install
-      - name: Deploy editor to (staging_portal.arweave.net)
+      - name: Deploy editor to (staging_portalenv.arweave.net)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: npm run deploy:editor:staging
       - name: Deploy editor to (portal.arweave.net)
