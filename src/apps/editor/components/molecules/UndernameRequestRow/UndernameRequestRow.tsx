@@ -30,11 +30,11 @@ export default function UndernameRequestRow(props: {
 				<S.Cell mono>#{props.row.id}</S.Cell>
 				<S.Cell mono>{props.row.name}</S.Cell>
 				<S.Cell mono>{props.row.requester}</S.Cell>
-				<S.Cell>
+				<S.Cell mono>
 					<StatusBadge status={props.row.status} />
 				</S.Cell>
-				<S.Cell>{ts(props.row.createdAt)}</S.Cell>
-				<S.Cell>{ts(props.row.decidedAt)}</S.Cell>
+				<S.Cell mono>{ts(props.row.createdAt)}</S.Cell>
+				<S.Cell mono>{ts(props.row.decidedAt)}</S.Cell>
 			</S.Row>
 
 			<Panel open={open} width={560} header={'Manage Request'} handleClose={() => setOpen(false)} closeHandlerDisabled>

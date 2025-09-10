@@ -38,7 +38,7 @@ export const ListWrapper = styled.div`
 export const HeaderRow = styled.div`
 	width: 100%;
 	display: grid;
-	grid-template-columns: 0.5fr 1fr 1.6fr 0.9fr 1fr 1fr 0.9fr;
+	grid-template-columns: 0.5fr 1fr 1.6fr 0.9fr 1fr 1fr; /* 6 columns */
 	gap: 8px;
 	align-items: center;
 	padding: 12.5px 15px;
@@ -75,4 +75,56 @@ export const WrapperEmpty = styled.div`
 		font-family: ${(p) => p.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
+`;
+
+export const Toolbar = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 12px 12px 12px;
+`;
+
+export const ClaimCard = styled.div`
+	background: ${(p) => p.theme.colors.container.primary.background};
+	padding: 16px;
+	display: grid;
+	gap: 12px;
+`;
+
+export const Title = styled.h3`
+	margin: 0;
+	font-family: ${(p) => p.theme.typography.family.primary};
+	font-size: ${(p) => p.theme.typography.size.large};
+	color: ${(p) => p.theme.colors.font.primary};
+`;
+
+export const Row = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 10px;
+`;
+
+export const Input = styled.input`
+	flex: 1;
+	min-width: 180px;
+	padding: 10px 12px;
+	border: 1px solid ${(p) => p.theme.colors.border.primary};
+	border-radius: 8px;
+	background: ${(p) => p.theme.colors.container.primary.background};
+	color: ${(p) => p.theme.colors.font.primary};
+	font-size: ${(p) => p.theme.typography.size.base};
+	&:focus-visible {
+		outline: 2px solid ${(p) => p.theme.colors.primary1};
+	}
+`;
+
+export const Error = styled.div`
+	color: ${(p) => p.theme.colors.negative1};
+	font-size: ${(p) => p.theme.typography.size.small};
+`;
+
+export const Helper = styled.div`
+	color: ${(p) => p.theme.colors.font.secondary};
+	font-size: ${(p) => p.theme.typography.size.xxSmall};
 `;

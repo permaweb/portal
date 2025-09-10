@@ -1,6 +1,8 @@
 import React from 'react';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { Pagination } from 'components/atoms/Pagination';
+import { Button } from 'components/atoms/Button';
+import { Panel } from 'components/atoms/Panel';
 import * as S from './styles';
 import { UndernameRequestRow } from 'editor/components/molecules/UndernameRequestRow';
 
@@ -18,19 +20,53 @@ export type UndernameRequest = {
 };
 
 const PAGE_SIZE = 10;
+const MAX_UNDERNAME = 51;
+
+function validateUndername(raw: string) {
+	const name = (raw || '').toLowerCase();
+	if (!name) return 'Name is required';
+	if (name.length > MAX_UNDERNAME) return `Max ${MAX_UNDERNAME} characters`;
+	if (name === 'www') return 'Cannot be "www"';
+	if (!/^[a-z0-9_.-]+$/.test(name)) return 'Only a–z, 0–9, underscore (_), dot (.), and dash (-) allowed';
+	if (/^-|-$/.test(name)) return 'No leading or trailing dashes';
+	return null;
+}
 
 export default function UndernameRequestsList(props: {
 	requests: UndernameRequest[];
-	filterByRequester?: string; // optional filter
+	filterByRequester?: string;
 	busyIds?: number[];
 	onApprove: (id: number) => void;
 	onReject: (id: number, reason: string) => void;
+	onRequest: (name: string) => void; // NEW: create request
+	isRequesting?: boolean; // NEW: disables submit while sending
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+
+	// pagination
 	const [currentPage, setCurrentPage] = React.useState(1);
 
-	// Filter + sort (newest first by id / createdAt)
+	// claim panel state
+	const [openClaim, setOpenClaim] = React.useState(false);
+	const [name, setName] = React.useState('');
+	const [error, setError] = React.useState<string | null>(null);
+
+	const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+		const next = e.target.value.toLowerCase();
+		setName(next);
+		setError(validateUndername(next));
+	}, []);
+
+	const handleRequest = React.useCallback(() => {
+		const err = validateUndername(name);
+		setError(err);
+		if (err) return;
+		props.onRequest(name.trim());
+		// leave panel open; if you want to close on submit success, close it in parent after refresh
+	}, [name, props]);
+
+	// data shaping
 	const processed = React.useMemo(() => {
 		let rows = props.requests;
 		if (props.filterByRequester) rows = rows.filter((r) => r.requester === props.filterByRequester);
@@ -44,22 +80,19 @@ export default function UndernameRequestsList(props: {
 	}, [totalPages]);
 
 	const startIndex = (currentPage - 1) * PAGE_SIZE;
-	const endIndexExclusive = Math.min(startIndex + PAGE_SIZE, processed.length);
-	const pageRows = React.useMemo(
-		() => processed.slice(startIndex, endIndexExclusive),
-		[processed, startIndex, endIndexExclusive]
-	);
+	const endIndex = Math.min(startIndex + PAGE_SIZE, processed.length);
+	const pageRows = React.useMemo(() => processed.slice(startIndex, endIndex), [processed, startIndex, endIndex]);
 
 	const currentRange = React.useMemo(
 		() => ({
-			start: processed.length > 0 ? startIndex + 1 : 0,
-			end: processed.length > 0 ? endIndexExclusive : 0,
+			start: processed.length ? startIndex + 1 : 0,
+			end: processed.length ? endIndex : 0,
 			total: processed.length,
 		}),
-		[processed.length, startIndex, endIndexExclusive]
+		[processed.length, startIndex, endIndex]
 	);
 
-	const rows = React.useMemo(() => {
+	const content = React.useMemo(() => {
 		if (processed.length === 0) {
 			return (
 				<S.WrapperEmpty>
@@ -68,33 +101,45 @@ export default function UndernameRequestsList(props: {
 			);
 		}
 		return (
-			<S.ListWrapper>
-				<S.HeaderRow>
-					<S.HeaderCell>Id</S.HeaderCell>
-					<S.HeaderCell>Undername</S.HeaderCell>
-					<S.HeaderCell>Requester</S.HeaderCell>
-					<S.HeaderCell>Status</S.HeaderCell>
-					<S.HeaderCell>Created</S.HeaderCell>
-					<S.HeaderCell>Decision</S.HeaderCell>
-				</S.HeaderRow>
+			<>
+				<S.Toolbar>
+					<div />
+					<Button
+						type={'alt1'}
+						label={language?.claimUndername || 'Claim undername'}
+						handlePress={() => setOpenClaim(true)}
+					/>
+				</S.Toolbar>
 
-				{pageRows.map((r) => (
-					<S.RowWrapper key={r.id}>
-						<UndernameRequestRow
-							row={r}
-							busy={!!props.busyIds?.includes(r.id)}
-							onApprove={props.onApprove}
-							onReject={props.onReject}
-						/>
-					</S.RowWrapper>
-				))}
-			</S.ListWrapper>
+				<S.ListWrapper>
+					<S.HeaderRow>
+						<S.HeaderCell>Id</S.HeaderCell>
+						<S.HeaderCell>Undername</S.HeaderCell>
+						<S.HeaderCell>Requester</S.HeaderCell>
+						<S.HeaderCell>Status</S.HeaderCell>
+						<S.HeaderCell>Created</S.HeaderCell>
+						<S.HeaderCell>Decision</S.HeaderCell>
+					</S.HeaderRow>
+
+					{pageRows.map((r) => (
+						<S.RowWrapper key={r.id}>
+							<UndernameRequestRow
+								row={r}
+								busy={!!props.busyIds?.includes(r.id)}
+								onApprove={props.onApprove}
+								onReject={props.onReject}
+							/>
+						</S.RowWrapper>
+					))}
+				</S.ListWrapper>
+			</>
 		);
 	}, [processed.length, pageRows, language, props.busyIds, props.onApprove, props.onReject]);
 
 	return (
 		<S.Wrapper>
-			{rows}
+			{content}
+
 			<S.Footer>
 				<Pagination
 					totalItems={processed.length}
@@ -107,6 +152,40 @@ export default function UndernameRequestsList(props: {
 					iconButtons
 				/>
 			</S.Footer>
+
+			<Panel
+				open={openClaim}
+				width={560}
+				header={language?.claimUndername || 'Claim an undername'}
+				handleClose={() => {
+					setOpenClaim(false);
+					setName('');
+					setError(null);
+				}}
+				closeHandlerDisabled
+			>
+				<S.ClaimCard>
+					<S.Row>
+						<S.Input
+							placeholder="e.g. tom_portal"
+							value={name}
+							onChange={handleChange}
+							maxLength={MAX_UNDERNAME}
+							disabled={!!props.isRequesting}
+						/>
+						<Button
+							type={'alt1'}
+							label={language?.request || 'Request'}
+							handlePress={handleRequest}
+							disabled={!!props.isRequesting || !name.trim() || !!error}
+						/>
+					</S.Row>
+					{error && <S.Error>{error}</S.Error>}
+					<S.Helper>
+						Max: 51 Characters · Allowed: a–z, 0–9, `_ . -` · No leading/trailing dashes · Cannot be “www”
+					</S.Helper>
+				</S.ClaimCard>
+			</Panel>
 		</S.Wrapper>
 	);
 }
