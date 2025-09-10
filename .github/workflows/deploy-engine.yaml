@@ -19,5 +19,5 @@ jobs:
           node-version: '22.x'
           cache: 'npm'
       - run: npm run clean:install
-      - name: Deploy engine to (script_portal.arweave.net)
+      - name: Deploy engine to (engine_portalenv.arweave.net)
         run: npm run deploy:engine

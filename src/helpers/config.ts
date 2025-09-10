@@ -700,7 +700,7 @@ export const PORTAL_DATA = () => `
 	</head>
 	<body>
 		<div id="portal"></div>
-		<script type="module" src="https://script_portal.arweave.net"></script>
+		<script type="module" src="https://engine_portalenv.arweave.net"></script>
 	</body>
 </html>
 `;
