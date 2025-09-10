@@ -146,18 +146,25 @@ export const PostsActionsRequestsBody = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 15px;
 `;
 
 export const PostActionRequest = styled.div`
-	display: grid;
-	grid-template-columns: 1.5fr 1fr 1fr 0.5fr;
-	align-items: center;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	padding: 15px;
+`;
+
+export const PostActionRequestLine = styled.div`
+	display: flex;
+	justify-content: space-between;
+	gap: 15px;
 
 	p,
 	span {
-		max-width: 150px;
-		color: ${(props) => props.theme.colors.font.primary};
+		max-width: 85%;
+		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
@@ -167,13 +174,18 @@ export const PostActionRequest = styled.div`
 		text-overflow: ellipsis;
 	}
 
-	#post-request-action {
-		justify-self: flex-end;
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.small};
 	}
 
-	> * {
-		&:nth-child(3) {
-			text-align: left;
+	.user-line {
+		width: fit-content;
+	}
+
+	button {
+		span {
+			max-width: none !important;
 		}
 	}
 `;
@@ -237,10 +249,17 @@ export const WrapperEmpty = styled.div<{ type: ViewLayoutType }>`
 export const LoadingWrapper = styled(WrapperEmpty)``;
 
 export const InfoWrapper = styled.div`
-	width: fit-content;
-	margin: 15px auto 0 auto;
-	padding: 0.5px 10px 2.5px 10px;
+	width: 100%;
+	margin: 5px auto 0 auto;
+	padding: 2.5px 10px 2.5px 10px;
+	display: flex;
+	justify-content: center;
 	span {
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 	}
+`;
+
+export const ActionWrapper = styled.div`
+	width: 100%;
+	margin: 5px 0 0 0;
 `;

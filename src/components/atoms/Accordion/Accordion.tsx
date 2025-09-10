@@ -1,5 +1,6 @@
 import React from 'react';
-import * as S from './styles'; // styles below
+
+import * as S from './styles';
 
 type AccordionProps = {
 	title: React.ReactNode;

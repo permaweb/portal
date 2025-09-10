@@ -585,6 +585,9 @@ export default function DomainList() {
 
 	function renderUpgradeandCosts(domain: UserOwnedDomain) {
 		if (domain.recordType !== 'lease') return null;
+		const canModifyDomains = portalProvider.permissions?.updatePortalMeta;
+		if (!canModifyDomains) return null;
+
 		const entry = costsByAntId[domain.antId];
 		const valueText = (c?: { winc: number; mario: number; fiatUSD: string | null }) => {
 			if (IS_TESTNET) return c ? `${toReadableARIO(c.mario)} tario` : '…';
@@ -629,6 +632,8 @@ export default function DomainList() {
 		domain: UserOwnedDomain,
 		sectionId: 'expiring' | 'failed' | 'assignedHere' | 'unassigned' | 'assignedElsewhere'
 	) {
+		const canModifyDomains = portalProvider.permissions?.updatePortalMeta;
+
 		return (
 			<S.DomainActions>
 				<Button
@@ -639,7 +644,7 @@ export default function DomainList() {
 						window.open(`https://${domain.name}.arweave.net`, '_blank');
 					}}
 				/>
-				{sectionId === 'assignedHere' && (
+				{sectionId === 'assignedHere' && canModifyDomains && (
 					<Button
 						type={'alt3'}
 						label={language.removeFromPortal}
@@ -679,7 +684,7 @@ export default function DomainList() {
 						}}
 					/>
 				)}
-				{domain.requiresAntUpdate && (
+				{domain.requiresAntUpdate && canModifyDomains && (
 					<Button
 						type={'alt4'}
 						label={updatingAnts.has(domain.name) ? 'Updating…' : 'Update Available'}
@@ -735,14 +740,15 @@ export default function DomainList() {
 						}}
 					/>
 				)}
-				{(sectionId === 'failed' || sectionId === 'unassigned' || sectionId === 'assignedElsewhere') && (
-					<Button
-						type={'alt3'}
-						label={redirectingDomains.has(domain.name) ? language.assigning : language.assignToThisPortal}
-						handlePress={() => redirectDomainToPortal(domain)}
-						disabled={redirectingDomains.has(domain.name)}
-					/>
-				)}
+				{(sectionId === 'failed' || sectionId === 'unassigned' || sectionId === 'assignedElsewhere') &&
+					canModifyDomains && (
+						<Button
+							type={'alt3'}
+							label={redirectingDomains.has(domain.name) ? language.assigning : language.assignToThisPortal}
+							handlePress={() => redirectDomainToPortal(domain)}
+							disabled={redirectingDomains.has(domain.name)}
+						/>
+					)}
 			</S.DomainActions>
 		);
 	}
@@ -865,6 +871,11 @@ export default function DomainList() {
 
 	// Redirect domain to current portal
 	async function redirectDomainToPortal(domain: UserOwnedDomain) {
+		if (!portalProvider.permissions?.updatePortalMeta) {
+			addNotification('You do not have permission to modify domains for this portal.', 'warning');
+			return;
+		}
+
 		if (!arProvider.wallet || !window.arweaveWallet || !portalProvider.current?.id) {
 			addNotification(language.walletOrPortalUnavailable, 'warning');
 			return;
@@ -986,13 +997,13 @@ export default function DomainList() {
 				</S.LoadingBannerWrapper>
 			)}
 			<Panel
-				open={extendModal.open}
+				open={extendModal.open && portalProvider.permissions?.updatePortalMeta}
 				width={520}
 				header={'Extend Lease'}
 				handleClose={() => setExtendModal({ open: false, years: 1 })}
 				className={'modal-wrapper'}
 			>
-				{extendModal.domain && (
+				{extendModal.domain && portalProvider.permissions?.updatePortalMeta && (
 					<S.ModalWrapper>
 						<S.ModalSection>
 							<S.ModalSectionTitle>Domain</S.ModalSectionTitle>
@@ -1183,13 +1194,13 @@ export default function DomainList() {
 
 			{/* Upgrade to Permanent Modal with live costs */}
 			<Panel
-				open={upgradeModal.open}
+				open={upgradeModal.open && portalProvider.permissions?.updatePortalMeta}
 				width={520}
 				header={'Go Permanent'}
 				handleClose={() => setUpgradeModal({ open: false })}
 				className={'modal-wrapper'}
 			>
-				{upgradeModal.domain && (
+				{upgradeModal.domain && portalProvider.permissions?.updatePortalMeta && (
 					<S.ModalWrapper>
 						<S.ModalSection>
 							<S.ModalSectionTitle>Domain</S.ModalSectionTitle>

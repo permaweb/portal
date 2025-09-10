@@ -37,8 +37,6 @@ export function loadCachedDomains(
 		if (!raw) return null;
 		const env: DomainCacheEnvelope = JSON.parse(raw);
 		if (!env || typeof env.ts !== 'number' || !Array.isArray(env.domains)) return null;
-		// const age = Date.now() - env.ts;
-		// if (age > maxAgeMs) return null; // TODO
 		return env.domains;
 	} catch {
 		return null;
@@ -49,7 +47,5 @@ export function saveCachedDomains(walletAddress: string, network: NetworkLabel, 
 	try {
 		const env: DomainCacheEnvelope = { v: VERSION, ts: Date.now(), domains };
 		localStorage.setItem(keyFor(walletAddress, network), JSON.stringify(env));
-	} catch {
-		// ignore storage errors
-	}
+	} catch {}
 }

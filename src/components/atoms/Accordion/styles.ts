@@ -47,8 +47,4 @@ export const EAccordion = styled.div<{ isOpen: boolean }>`
 
 export const EAccordionInner = styled.div`
 	overflow: hidden;
-	background: ${(p) => p.theme.colors.container.alt2.background};
-	border: 1px solid ${(p) => p.theme.colors.border.primary};
-	border-radius: 8px;
-	padding: 10px 12px;
 `;

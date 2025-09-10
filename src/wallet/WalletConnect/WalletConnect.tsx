@@ -2,9 +2,11 @@ import React from 'react';
 import { ReactSVG } from 'react-svg';
 import { WanderConnect } from '@wanderapp/connect';
 
+import { TurboCredits } from 'editor/components/molecules/TurboCredits';
 import { ProfileManager } from 'editor/components/organisms/ProfileManager';
 import { useSettingsProvider as useEditorSettingsProvider } from 'editor/providers/SettingsProvider';
 import { useSettingsProvider as useViewerSettingsProvider } from 'viewer/providers/SettingsProvider';
+
 import { Avatar } from 'components/atoms/Avatar';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
@@ -14,7 +16,7 @@ import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
-import TurboCredits from 'editor/components/molecules/TurboCredits/TurboCredits';
+
 import * as S from './styles';
 
 declare global {
@@ -34,7 +36,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 	const { settings, updateSettings, availableThemes } =
 		props.app === 'editor' ? useEditorSettingsProvider() : useViewerSettingsProvider();
 
-	const [showWallet, setShowWallet] = React.useState<boolean>(true);
+	const [showWallet, _setShowWallet] = React.useState<boolean>(true);
 	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(false);
 	const [showThemeSelector, setShowThemeSelector] = React.useState<boolean>(false);
@@ -185,12 +187,13 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 									{language?.profile}
 								</li>
 								{auth?.authType !== 'NATIVE_WALLET' && window.wanderInstance && (
-									<li onClick={() => window.wanderInstance.open(backupsNeeded > 0 ? 'backup' : undefined)} style={{ position: 'relative' }}>
+									<li
+										onClick={() => window.wanderInstance.open(backupsNeeded > 0 ? 'backup' : undefined)}
+										style={{ position: 'relative' }}
+									>
 										<ReactSVG src={ASSETS.wallet} />
 										{language?.wallet}
-										{backupsNeeded > 0 && (
-											<S.MenuBadge>{backupsNeeded}</S.MenuBadge>
-										)}
+										{backupsNeeded > 0 && <S.MenuBadge>{backupsNeeded}</S.MenuBadge>}
 									</li>
 								)}
 								<li onClick={() => setShowLanguageSelector(true)}>

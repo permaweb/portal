@@ -1,14 +1,13 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import NotFound from 'views/NotFound';
-
 import * as S from './styles';
 
 type URLViewType = {
 	label: string;
 	disabled: boolean;
 	url: any;
+	icon?: string;
 	view: React.ComponentType;
 };
 
@@ -42,10 +41,6 @@ function TabContent(props: { tabs: URLViewType[] }) {
 			TabView = props.tabs[i].view;
 			break;
 		}
-	}
-
-	if (!TabView) {
-		TabView = NotFound;
 	}
 
 	return <S.View>{TabView && <TabView />}</S.View>;

@@ -18,7 +18,6 @@ import { useNotifications } from 'providers/NotificationProvider';
 
 import * as S from './styles';
 
-// TODO: Permissions
 export default function ArticlePostReleaseDate() {
 	const dispatch = useDispatch();
 

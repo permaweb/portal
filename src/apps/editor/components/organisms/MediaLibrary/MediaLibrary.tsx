@@ -142,11 +142,10 @@ export default function MediaLibrary(props: {
 
 			if (thumbnail) data.thumbnail = thumbnail;
 
-			const mediaUpdateId = await permawebProvider.libs.addToZone(
-				{
-					path: 'Uploads',
-					data: permawebProvider.libs.mapToProcessCase(data),
-				},
+			const updatedMedia = [...portalProvider.current.uploads, data];
+
+			const mediaUpdateId = await permawebProvider.libs.updateZone(
+				{ Uploads: permawebProvider.libs.mapToProcessCase(updatedMedia) },
 				portalProvider.current.id,
 				arProvider.wallet
 			);

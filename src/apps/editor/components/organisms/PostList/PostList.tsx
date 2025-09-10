@@ -5,7 +5,6 @@ import { User } from 'editor/components/molecules/User';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
-import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
 import { Panel } from 'components/atoms/Panel';
@@ -154,37 +153,41 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 			} else {
 				content = (
 					<S.PostsActionsRequests>
-						<S.PostsActionsRequestsHeader>
-							<span>{language?.postTitle}</span>
-							<span>{language?.author}</span>
-							<span>{language?.created}</span>
-							<span>{language?.review}</span>
-						</S.PostsActionsRequestsHeader>
 						<S.PostsActionsRequestsBody>
 							{requests.map((request: PortalAssetRequestType) => {
 								return (
-									<S.PostActionRequest key={request.id}>
-										<p>{request.name}</p>
-										<User user={{ address: request.creatorId }} hideAction />
-										<span>{formatDate(request.dateCreated, 'epoch')}</span>
-										<div id={'post-request-action'}>
-											<IconButton
-												type={'alt1'}
-												active={false}
-												src={ASSETS.newTab}
+									<S.PostActionRequest key={request.id} className={'border-wrapper-primary'}>
+										<S.PostActionRequestLine>
+											<p>{request.name}</p>
+											<Button
+												type={'alt3'}
+												label={language.reviewPost}
 												handlePress={() => handleReviewRedirect(request.id)}
 												disabled={unauthorized}
-												dimensions={{ wrapper: 23.5, icon: 13.5 }}
-												tooltip={'Review Post'}
-												tooltipPosition={'bottom-right'}
-												noFocus
+												icon={ASSETS.newTab}
 											/>
-										</div>
+										</S.PostActionRequestLine>
+										<S.PostActionRequestLine>
+											<div className={'user-line'}>
+												<User user={{ address: request.creatorId }} hideAction />
+											</div>
+											<span>{formatDate(request.dateCreated, 'epoch')}</span>
+										</S.PostActionRequestLine>
 									</S.PostActionRequest>
 								);
 							})}
 						</S.PostsActionsRequestsBody>
 						{loading && <Loader sm relative />}
+						<S.ActionWrapper>
+							<Button
+								type={'primary'}
+								label={language.close}
+								handlePress={() => setShowRequests(false)}
+								disabled={!portalProvider?.permissions?.updatePortalMeta}
+								height={40}
+								fullWidth
+							/>
+						</S.ActionWrapper>
 						{unauthorized && (
 							<S.InfoWrapper className={'warning'}>
 								<span>{language?.unauthorizedPostReview}</span>
