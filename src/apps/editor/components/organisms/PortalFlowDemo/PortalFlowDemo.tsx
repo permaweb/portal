@@ -9,7 +9,7 @@ export default function PortalFlowDemo() {
 			id: 1,
 			name: 'alice_portal',
 			requester: '0xAlice',
-			status: 'pending',
+			status: 'cancelled',
 			createdAt: Date.now() - 1000 * 60 * 60,
 		},
 		{
