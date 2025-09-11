@@ -3,25 +3,22 @@ import { STYLING } from 'helpers/config';
 
 export const RowWrapper = styled.div`
 	width: 100%;
-	display: flex;
-	justify-content: space-between;
+	display: grid;
+	grid-template-columns: 0.5fr 1fr 1.6fr 0.9fr 1fr 1fr;
+	gap: 8px;
 	align-items: center;
-	flex-wrap: wrap;
-	gap: 20px;
-	padding: 15px;
-	transition: all 100ms;
+	padding: 12.5px 15px;
+	cursor: pointer;
+	background: ${(p) => p.theme.colors.view.background};
 
 	&:hover {
-		cursor: pointer;
-		background: ${(props) => props.theme.colors.container.alt2.background};
+		background: ${(p) => p.theme.colors.container.alt2.background};
 	}
-
-	background: ${(props) => props.theme.colors.view.background};
-
-	@media (max-width: ${STYLING.cutoffs.secondary}) {
-		flex-direction: column;
-		align-items: flex-start;
+	&[data-busy='1'] {
+		opacity: 0.6;
+		pointer-events: none;
 	}
+	border-top: 1px solid ${(p) => p.theme.colors.border.primary};
 `;
 
 export const RowHeader = styled.div`
@@ -58,7 +55,15 @@ export const Address = styled.code`
 	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
 `;
-
+export const Cell = styled.div<{ mono?: boolean }>`
+	font-family: ${(p) =>
+		p.mono ? 'ui-monospace, SFMono-Regular, Menlo, monospace' : p.theme.typography.family.primary};
+	font-size: ${(p) => p.theme.typography.size.small};
+	color: ${(p) => p.theme.colors.font.primary};
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
 export const Actions = styled.div`
 	display: flex;
 	gap: 12.5px;
@@ -91,4 +96,23 @@ export const ActionsWrapper = styled.div`
 	display: flex;
 	justify-content: flex-end;
 	margin-top: 10px;
+`;
+
+export const KV = styled.div`
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	border-bottom: 1px solid ${(p) => p.theme.colors.border.primary};
+	padding-bottom: 8px;
+	span {
+		color: ${(p) => p.theme.colors.font.alt1};
+		font-size: ${(p) => p.theme.typography.size.xSmall};
+		font-weight: ${(p) => p.theme.typography.weight.bold};
+		text-transform: uppercase;
+	}
+	p,
+	code {
+		color: ${(p) => p.theme.colors.font.primary};
+		font-size: ${(p) => p.theme.typography.size.xxSmall};
+	}
 `;

@@ -4,21 +4,49 @@ import { Pagination } from 'components/atoms/Pagination';
 import * as S from './styles';
 import { UndernameRow } from 'editor/components/molecules/UndernameRow';
 
-type UndernameOwnerMap = Record<string, string>; // key: undername, value: owner
-type OwnerRow = { name: string; owner: string };
+/** Backend record for a single undername */
+type OwnerRecord = {
+	owner: string;
+	requestedAt?: number;
+	approvedAt?: number;
+	approvedBy?: string;
+	requestId?: number | null;
+	source?: 'approval' | 'reserved' | 'self';
+	auto?: boolean;
+};
+
+/** Row shape passed to <UndernameRow /> and used for list rendering */
+export type TypeUndernameOwnerRow = {
+	name: string;
+} & OwnerRecord;
 
 const PAGE_SIZE = 10;
 
-export default function UndernamesList(props: { owners: UndernameOwnerMap; filterAddress?: string }) {
+export default function UndernamesList(props: {
+	/** Map from undername -> owner record */
+	owners: Record<string, OwnerRecord>;
+	filterAddress?: string;
+}) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const [currentPage, setCurrentPage] = React.useState(1);
 
-	// Normalize + filter + sort
-	const processedOwners: OwnerRow[] = React.useMemo(() => {
-		let rows: OwnerRow[] = Object.entries(props.owners || {}).map(([name, owner]) => ({ name, owner }));
-		if (props.filterAddress) rows = rows.filter((o) => o.owner === props.filterAddress);
-		return rows.sort((a, b) => a.name.localeCompare(b.name));
+	// Normalize map -> array, then filter + sort
+	const processedOwners: TypeUndernameOwnerRow[] = React.useMemo(() => {
+		const rows: TypeUndernameOwnerRow[] = Object.entries(props.owners || {}).map(([name, rec]) => ({
+			name,
+			owner: rec.owner,
+			requestedAt: rec.requestedAt,
+			approvedAt: rec.approvedAt,
+			approvedBy: rec.approvedBy,
+			requestId: rec.requestId ?? null,
+			source: rec.source,
+			auto: !!rec.auto,
+		}));
+
+		const filtered = props.filterAddress ? rows.filter((o) => o.owner === props.filterAddress) : rows;
+
+		return filtered.sort((a, b) => a.name.localeCompare(b.name));
 	}, [props.owners, props.filterAddress]);
 
 	const totalPages = React.useMemo(
@@ -64,6 +92,9 @@ export default function UndernamesList(props: { owners: UndernameOwnerMap; filte
 				<S.HeaderRow>
 					<S.HeaderCell>{language?.undername || 'Undername'}</S.HeaderCell>
 					<S.HeaderCell>{language?.owner || 'Owner'}</S.HeaderCell>
+					<S.HeaderCell>{language?.requestedAt || 'Requested'}</S.HeaderCell>
+					<S.HeaderCell>{language?.approvedAt || 'Approved'}</S.HeaderCell>
+					<S.HeaderCell>{language?.grantSource || 'Source'}</S.HeaderCell>
 				</S.HeaderRow>
 				{pageOwners.map((row) => (
 					<S.OwnerWrapper key={row.name}>
@@ -84,9 +115,9 @@ export default function UndernamesList(props: { owners: UndernameOwnerMap; filte
 					currentPage={currentPage}
 					currentRange={currentRange}
 					setCurrentPage={setCurrentPage}
-					showRange={true}
-					showControls={true}
-					iconButtons={true}
+					showRange
+					showControls
+					iconButtons
 				/>
 			</S.OwnersFooter>
 		</S.Wrapper>

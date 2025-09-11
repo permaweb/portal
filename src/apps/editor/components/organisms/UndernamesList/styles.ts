@@ -61,25 +61,18 @@ export const WrapperEmpty = styled.div`
 
 export const HeaderRow = styled.div`
 	width: 100%;
-	display: flex;
-	justify-content: space-between;
+	display: grid;
+	grid-template-columns: 0.5fr 1fr 1.6fr 0.9fr 1fr 1fr;
+	gap: 8px;
 	align-items: center;
 	padding: 12.5px 15px;
-	background: ${(props) => props.theme.colors.container.alt1.background};
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+	background: ${(p) => p.theme.colors.container.alt1.background};
+	border-bottom: 1px solid ${(p) => p.theme.colors.border.primary};
 `;
 
 export const HeaderCell = styled.div`
-	flex: 1;
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.small};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	color: ${(props) => props.theme.colors.font.primary};
-
-	&:first-child {
-		text-align: left;
-	}
-	&:last-child {
-		text-align: right;
-	}
+	font-family: ${(p) => p.theme.typography.family.primary};
+	font-size: ${(p) => p.theme.typography.size.small};
+	font-weight: ${(p) => p.theme.typography.weight.bold};
+	color: ${(p) => p.theme.colors.font.primary};
 `;

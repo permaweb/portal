@@ -5,6 +5,7 @@ import type { UndernameRequest } from 'editor/components/organisms/UndernameRequ
 import { StatusBadge } from '../StatusBadge';
 import { Button } from 'components/atoms/Button';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { shortAddr } from '../UndernameRow/UndernameRow';
 
 function ts(ts?: number) {
 	return ts ? new Date(ts).toLocaleString() : '—';
@@ -35,7 +36,11 @@ export default function UndernameRequestRow(props: {
 			>
 				<S.Cell mono>#{props.row.id}</S.Cell>
 				<S.Cell mono>{props.row.name}</S.Cell>
-				{props.showRequester ? <S.Cell mono>{props.row.requester}</S.Cell> : null}
+				{props.showRequester ? (
+					<S.Cell mono>
+						<S.Address title={props.row.requester}>{shortAddr(props.row.requester)}</S.Address>
+					</S.Cell>
+				) : null}
 				<S.Cell mono>
 					<StatusBadge status={props.row.status} />
 				</S.Cell>

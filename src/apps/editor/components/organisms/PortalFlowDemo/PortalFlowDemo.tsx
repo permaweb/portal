@@ -4,8 +4,38 @@ import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { ARIO, ANT, ArconnectSigner } from '@ar.io/sdk';
 import { IS_TESTNET } from 'helpers/config';
 
+const owners = {
+	helloworld: {
+		owner: 'QOOdRA37tOkge37z80UlvyvMEv3E5p_cb4uJ12lSTuw',
+		requestedAt: 1757435959985,
+		approvedAt: 1757437301912,
+		approvedBy: 'jAZKAHOGeus7CUJlJqAAqn3Aj8GjdZOnIfb8qHwBOM0',
+		requestId: 1,
+		source: 'approval',
+		auto: false,
+	},
+	gor: {
+		owner: 'QOOdRA37tOkge37z80UlvyvMEv3E5p_cb4uJ12lSTuw',
+		requestedAt: 1757438000000,
+		approvedAt: 1757438000000,
+		approvedBy: 'QOOdRA37tOkge37z80UlvyvMEv3E5p_cb4uJ12lSTuw',
+		requestId: null,
+		source: 'reserved',
+		auto: true,
+	},
+	bhavya: {
+		owner: 'YKuKb41Mi6ccb-NmgZwjxnBA42DGCUYDvqIGYjLMve4',
+		requestedAt: 1757440000000,
+		approvedAt: 1757440000000,
+		approvedBy: 'YKuKb41Mi6ccb-NmgZwjxnBA42DGCUYDvqIGYjLMve4',
+		requestId: null,
+		source: 'self',
+		auto: true,
+	},
+} as const;
+
 export default function PortalFlowDemo() {
-	const { requests, owners, approve, reject, request } = useUndernamesProvider();
+	const { requests, approve, reject, request } = useUndernamesProvider();
 	// Mock state
 
 	const handleUserSubmit = async (name: string) => {

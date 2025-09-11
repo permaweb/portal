@@ -208,3 +208,9 @@ export const TextArea = styled.textarea`
 		outline: 2px solid ${(p) => p.theme.colors.primary1};
 	}
 `;
+
+export const Address = styled.code`
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: ${(props) => props.theme.typography.size.xxSmall};
+`;
