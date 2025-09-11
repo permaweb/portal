@@ -49,6 +49,7 @@ declare module '*.svg' {
 declare global {
 	interface Window {
 		arweaveWallet: any;
+		wanderInstance: any;
 	}
 }
 

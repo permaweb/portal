@@ -117,10 +117,10 @@ export const DHeader = styled.div`
 export const MenuBadge = styled.span`
 	position: absolute;
 	right: 10px;
-	background: #8b0000;
-	color: white;
+	background: ${(props) => props.theme.colors.warning.primary};
+	color: ${(props) => props.theme.colors.font.light1};
 	border-radius: 10px;
-	padding: 2px 6px;
+	padding: 1px 6px;
 	font-size: 11px;
 	font-weight: bold;
 	min-width: 18px;
@@ -134,25 +134,25 @@ export const BackupWarning = styled.div`
 	width: 16px;
 	height: 16px;
 	border-radius: 50%;
-	background: #8b0000;
+	background: ${(props) => props.theme.colors.warning.primary};
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	animation: pulse 2s infinite;
-	color: white;
+	color: ${(props) => props.theme.colors.font.light1};
 	font-size: 10px;
 	font-weight: bold;
 	font-family: ${(props) => props.theme.typography.family.primary};
 
 	@keyframes pulse {
 		0% {
-			box-shadow: 0 0 0 0 rgba(139, 0, 0, 0.7);
+			box-shadow: 0 0 0 0 ${(props) => props.theme.colors.warning.primary};
 		}
 		70% {
-			box-shadow: 0 0 0 8px rgba(139, 0, 0, 0);
+			box-shadow: 0 0 0 8px ${(props) => props.theme.colors.shadow.primary};
 		}
 		100% {
-			box-shadow: 0 0 0 0 rgba(139, 0, 0, 0);
+			box-shadow: 0 0 0 0 ${(props) => props.theme.colors.shadow.primary};
 		}
 	}
 `;
@@ -161,8 +161,8 @@ export const BackupNotice = styled.div`
 	width: 100%;
 	padding: 10px;
 	margin: 10px 0;
-	background: ${(props) => (props.theme.colors.warning ? `${props.theme.colors.warning}20` : '#ff980020')};
-	border: 1px solid ${(props) => props.theme.colors.warning || '#ff9800'};
+	background: ${(props) => `${props.theme.colors.indicator.neutral}20`};
+	border: 1px solid ${(props) => props.theme.colors.indicator.neutral};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	display: flex;
 	align-items: center;
@@ -170,15 +170,11 @@ export const BackupNotice = styled.div`
 	cursor: pointer;
 	transition: all 200ms;
 
-	&:hover {
-		background: ${(props) => (props.theme.colors.warning ? `${props.theme.colors.warning}30` : '#ff980030')};
-	}
-
 	svg {
 		height: 18px;
 		width: 18px;
-		color: ${(props) => props.theme.colors.warning || '#ff9800'};
-		fill: ${(props) => props.theme.colors.warning || '#ff9800'};
+		color: ${(props) => props.theme.colors.indicator.neutral};
+		fill: ${(props) => props.theme.colors.indicator.neutral};
 		flex-shrink: 0;
 	}
 

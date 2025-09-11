@@ -73,6 +73,7 @@ function AppContent() {
 
 	const hasCheckedProfileRef = React.useRef(false);
 	const hasInitializedPreloaderRef = React.useRef(false);
+	const hasHiddenLoaderRef = React.useRef(false);
 
 	React.useEffect(() => {
 		if (!hasInitializedPreloaderRef.current) {
@@ -80,6 +81,17 @@ function AppContent() {
 			hasInitializedPreloaderRef.current = true;
 		}
 	}, []);
+
+	React.useEffect(() => {
+		// Hide the HTML loader when the app is ready
+		if (!hasHiddenLoaderRef.current && settings) {
+			hasHiddenLoaderRef.current = true;
+			const loader = document.getElementById('app-loader');
+			if (loader) {
+				loader.style.display = 'none';
+			}
+		}
+	}, [settings]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -109,16 +121,6 @@ function AppContent() {
 		}
 
 		const view = (() => {
-			if (!arProvider.wallet) {
-				return (
-					<Portal node={DOM.overlay}>
-						<S.CenteredWrapper className={'overlay'}>
-							<WalletBlock />
-						</S.CenteredWrapper>
-					</Portal>
-				);
-			}
-
 			if (!permawebProvider.profile) {
 				return (
 					<Portal node={DOM.overlay}>
@@ -130,28 +132,36 @@ function AppContent() {
 					</Portal>
 				);
 			}
-			if (!portalProvider.permissions?.base || portalProvider.permissions?.externalContributor) {
+
+			if (portalProvider.isPermissionsLoading) {
 				return (
 					<Portal node={DOM.overlay}>
 						<S.CenteredWrapper className={'overlay'}>
 							<S.MessageWrapper>
-								{portalProvider.isPermissionsLoading ? (
-									<p>{`${language?.loggingIn}...`}</p>
-								) : (
-									<>
-										<p>
-											{portalProvider.permissions?.externalContributor
-												? language?.permissionExternalContributor
-												: language?.permissionBaseDenied}
-										</p>
-										<Button type={'primary'} label={language?.returnHome} handlePress={() => navigate(URLS.base)} />
-									</>
-								)}
+								<p>{`${language?.loggingIn}...`}</p>
 							</S.MessageWrapper>
 						</S.CenteredWrapper>
 					</Portal>
 				);
 			}
+
+			if (!portalProvider.permissions?.base || portalProvider.permissions?.externalContributor) {
+				return (
+					<Portal node={DOM.overlay}>
+						<S.CenteredWrapper className={'overlay'}>
+							<S.MessageWrapper>
+								<p>
+									{portalProvider.permissions?.externalContributor
+										? language?.permissionExternalContributor
+										: language?.permissionBaseDenied}
+								</p>
+								<Button type={'primary'} label={language?.returnHome} handlePress={() => navigate(URLS.base)} />
+							</S.MessageWrapper>
+						</S.CenteredWrapper>
+					</Portal>
+				);
+			}
+
 			return (
 				<>
 					{!portalProvider.current && <Loader message={`${language?.loadingPortal}...`} />}

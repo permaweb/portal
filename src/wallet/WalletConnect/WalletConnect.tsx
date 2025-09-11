@@ -19,12 +19,6 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
-declare global {
-	interface Window {
-		wanderInstance: any;
-	}
-}
-
 export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engine'; callback?: () => void }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -183,10 +177,6 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 							</S.DHeaderWrapper>
 							<TurboCredits showBorderBottom setShowFundUpload={setShowFundUpload} />
 							<S.DBodyWrapper>
-								<li onClick={() => setShowProfileManager(true)}>
-									<ReactSVG src={ASSETS.write} />
-									{language?.profile}
-								</li>
 								{auth?.authType !== 'NATIVE_WALLET' && window.wanderInstance && (
 									<li
 										onClick={() => window.wanderInstance.open(backupsNeeded > 0 ? 'backup' : undefined)}
@@ -197,6 +187,10 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 										{backupsNeeded > 0 && <S.MenuBadge>{backupsNeeded}</S.MenuBadge>}
 									</li>
 								)}
+								<li onClick={() => setShowProfileManager(true)}>
+									<ReactSVG src={ASSETS.write} />
+									{language?.profile}
+								</li>
 								<li onClick={() => setShowLanguageSelector(true)}>
 									<ReactSVG src={ASSETS.language} />
 									{language?.language}

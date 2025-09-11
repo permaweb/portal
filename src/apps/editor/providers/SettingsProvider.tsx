@@ -134,6 +134,22 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		};
 	}, [settings.isDesktop, settings.sidebarOpen]);
 
+	React.useEffect(() => {
+		const themeBackgrounds = {
+			'light-primary': '#FFFFFF',
+			'light-high-contrast': '#FEFEFE',
+			'light-alt-1': '#FEFEFE',
+			'light-alt-2': '#FCFCFC',
+			'dark-primary': '#1B1B1B',
+			'dark-high-contrast': '#191A1E',
+			'dark-alt-1': '#16161C',
+			'dark-alt-2': '#17191F',
+		};
+
+		const backgroundColor = themeBackgrounds[settings.theme] || themeBackgrounds['dark-primary'];
+		document.body.style.backgroundColor = backgroundColor;
+	}, [settings.theme]);
+
 	const updateSettings = <K extends keyof Settings>(key: K, value: Settings[K]) => {
 		setSettings((prevSettings) => {
 			const newSettings = { ...prevSettings, [key]: value };

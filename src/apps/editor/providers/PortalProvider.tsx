@@ -143,7 +143,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		(async function () {
 			try {
 				if (!current && currentId && permawebProvider.libs) {
-					handleInitPermissionSet(true);
 					const cachedPortal = getCachedPortal(currentId);
 					if (cachedPortal) {
 						handlePortalSetup(cachedPortal);
@@ -252,21 +251,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		}
 	}
 
-	function handleInitPermissionSet(base: boolean) {
-		const updatedPermissions = permissions
-			? { ...permissions, base: base }
-			: {
-					base: base,
-					updatePortalMeta: false,
-					updateUsers: false,
-					postAutoIndex: false,
-					postRequestIndex: false,
-					updatePostRequestState: false,
-					externalContributor: false,
-			  };
-		setPermissions(updatedPermissions);
-	}
-
 	async function fetchPortalUserProfile(user: PortalUserType) {
 		try {
 			let profile: any = null;
@@ -323,7 +307,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		if (currentId) {
 			try {
 				const portalData = await permawebProvider.libs.getZone(currentId);
-				console.log('portalData:', JSON.stringify(portalData, null, 2));
 
 				const users: PortalUserType[] = [];
 				if (portalData?.roles) {
@@ -386,8 +369,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	};
 
 	const isPermissionsLoading = React.useMemo(() => {
-		if (!currentId) return false; // no portal selected → nothing to load
-		return permissions === null || updating; // waiting for permissions or actively fetching
+		if (!currentId) return false; // No portal selected → nothing to load
+		return permissions === null || updating; // Waiting for permissions or actively fetching
 	}, [currentId, permissions, updating]);
 
 	return (

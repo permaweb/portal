@@ -38,7 +38,7 @@ interface ArweaveContextState {
 	refreshTurboBalance: () => void;
 	handleConnect: any;
 	handleDisconnect: (redirect: boolean) => void;
-	turboBalanceObj: TurboBalance;
+	turboBalanceObj: TurboBalance | null;
 	backupsNeeded: number;
 }
 
@@ -53,14 +53,7 @@ const DEFAULT_CONTEXT = {
 	handleConnect() {},
 	handleDisconnect(_redirect: boolean) {},
 	setWalletModalVisible(_open: boolean) {},
-	turboBalanceObj: {
-		winc: '0',
-		balance: '0',
-		controlledWinc: '0',
-		effectiveBalance: '0',
-		givenApprovals: [],
-		receivedApprovals: [],
-	},
+	turboBalanceObj: null,
 	backupsNeeded: 0,
 };
 
@@ -77,7 +70,14 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	const [wallet, setWallet] = React.useState<any>(null);
 	const [walletType, setWalletType] = React.useState<WalletEnum | null>(null);
 	const [walletAddress, setWalletAddress] = React.useState<string | null>(null);
-	const [turboBalanceObj, setTurboBalanceObj] = React.useState<{ [key: string]: any }>({});
+	const [turboBalanceObj, setTurboBalanceObj] = React.useState<TurboBalance>({
+		winc: '0',
+		balance: '0',
+		controlledWinc: '0',
+		effectiveBalance: '0',
+		givenApprovals: [],
+		receivedApprovals: [],
+	});
 	const [arBalance, setArBalance] = React.useState<number | null>(null);
 	const [turboBalance, setTurboBalance] = React.useState<number | null>(null);
 	const [backupsNeeded, setBackupsNeeded] = React.useState<number>(0);
@@ -115,10 +115,10 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				setBackupsNeeded(window.wanderInstance.backupInfo.backupsNeeded);
 			}
 		};
-		
+
 		checkBackupStatus();
 		const interval = setInterval(checkBackupStatus, 10000);
-		
+
 		return () => clearInterval(interval);
 	}, []);
 
@@ -204,7 +204,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		setWalletType(null);
 		setArBalance(null);
 		setTurboBalance(null);
-		setTurboBalanceObj({});
+		setTurboBalanceObj(null);
 
 		if (redirect) navigate(URLS.base);
 	}
@@ -247,7 +247,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					setTurboBalance(next);
 					return next;
 				} else {
-					console.error(`Turbo balance fetch failed: HTTP ${result.status} – ${await result.text()}`);
 					setTurboBalance(0);
 					setTurboBalanceObj({
 						winc: '0',
@@ -260,7 +259,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					return 0;
 				}
 			} catch (e: any) {
-				console.error('Error fetching turbo balance:', e);
 				setTurboBalance(null);
 				return null;
 			}
