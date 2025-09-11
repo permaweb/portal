@@ -4,8 +4,6 @@ import { ArconnectSigner, TurboFactory } from '@ardrive/turbo-sdk/web';
 
 import { Accordion } from 'components/atoms/Accordion';
 import { Button } from 'components/atoms/Button';
-import { Panel } from 'components/atoms/Panel';
-import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { ASSETS } from 'helpers/config';
 import { getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -17,6 +15,7 @@ import * as S from './styles';
 type Props = {
 	showBorderBottom?: boolean;
 	allowExpandApprovals?: boolean;
+	setShowFundUpload: (show: boolean) => void;
 };
 
 interface TurboApproval {
@@ -73,7 +72,6 @@ export default function TurboCredits(props: Props) {
 	const language = languageProvider.object[languageProvider.current];
 	const [expanded, setExpanded] = React.useState<boolean>(false);
 	const [showGivenBreakdown, setShowGivenBreakdown] = React.useState<boolean>(false);
-	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
 
 	const signer = new ArconnectSigner(arProvider.wallet);
@@ -137,7 +135,7 @@ export default function TurboCredits(props: Props) {
 							<Button
 								type={'alt3'}
 								label={language?.add}
-								handlePress={() => setShowFundUpload(true)}
+								handlePress={() => props.setShowFundUpload(true)}
 								icon={ASSETS.add}
 								iconLeftAlign
 							/>
@@ -206,15 +204,6 @@ export default function TurboCredits(props: Props) {
 					</S.AccordionContent>
 				</Accordion>
 			</S.DBalanceBody>
-			<Panel
-				open={showFundUpload}
-				width={575}
-				header={language?.fundTurboBalance}
-				handleClose={() => setShowFundUpload(false)}
-				className={'modal-wrapper'}
-			>
-				<TurboBalanceFund handleClose={() => setShowFundUpload(false)} />
-			</Panel>
 		</S.DBalanceWrapper>
 	);
 }
