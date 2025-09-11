@@ -75,7 +75,9 @@ export default function UndernameRequestsList(props: {
 		}
 		if (availability.available && !availability.reserved) {
 			console.log('Requesting undername', name.trim());
-			// props.onRequest(name.trim());
+			props.onRequest(name.trim());
+			setName('');
+			setOpenClaim(false);
 		}
 		// props.onRequest(name.trim());
 		// leave panel open; if you want to close on submit success, close it in parent after refresh
@@ -185,7 +187,7 @@ export default function UndernameRequestsList(props: {
 				<S.ClaimCard>
 					<S.Row>
 						<S.Input
-							placeholder="e.g. tom_portal"
+							placeholder="Enter your undername"
 							value={name}
 							onChange={handleChange}
 							maxLength={MAX_UNDERNAME}
