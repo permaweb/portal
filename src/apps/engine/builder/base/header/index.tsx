@@ -1,6 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
+import { ASSETS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
 import Icon from 'engine/components/icon';
 import Toggle from 'engine/components/toggle';
 import WalletConnect from 'engine/components/wallet/walletConnect';
@@ -21,7 +23,7 @@ export default function Header(props: any) {
 	const { portal } = usePortalProvider();
 	const Themes = preview ? defaultThemes : portal?.Themes;
 	const Layout = preview ? defaultLayout : portal?.Layout;
-	const Logo = portal?.Logo;
+	const Logo = portal?.Logo === 'None' ? ASSETS.portalLogo : portal?.Logo;
 	const [logoError, setLogoError] = React.useState<{ [key: string]: boolean }>({});
 	const { settings, updateSetting } = preview
 		? (() => {
@@ -46,7 +48,7 @@ export default function Header(props: any) {
 	}
 
 	const renderLogo = (txId: string) => {
-		const url = `https://arweave.net/${txId}`;
+		const url = txId.startsWith('http') ? txId : getTxEndpoint(txId);
 		
 		if (logoError[txId]) {
 			return <img src={url} alt="Logo" />;

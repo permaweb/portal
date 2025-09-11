@@ -35,7 +35,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		return [
 			{
 				path: portalProvider.current?.id ? URLS.portalBase(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.portal,
+				icon: ASSETS.portalIcon,
 				label: language?.home,
 			},
 			{
@@ -273,7 +273,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 											setShowPortalDropdown(false);
 										}}
 									>
-										<ReactSVG src={ASSETS.portal} />
+										<ReactSVG src={ASSETS.portalIcon} />
 										{language?.portalReturn}
 									</button>
 									<button

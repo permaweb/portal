@@ -10,6 +10,7 @@ export const Search = styled.div<{ $active: boolean }>`
 		position: absolute;
 		height: 14px;
 		padding: 3px;
+		margin-top:.5px;
 		color: black;
 		stroke-width: 3;
 		&:hover {
@@ -17,7 +18,7 @@ export const Search = styled.div<{ $active: boolean }>`
 		}
 	}
 	input {
-		border: none;
+		border: 1px solid rgba(var(--color-text), 1);
 		background: white;
 		color: black;
 		height: 22px;

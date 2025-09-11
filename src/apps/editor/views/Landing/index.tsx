@@ -150,7 +150,7 @@ export default function Landing() {
 										{portal.icon && checkValidAddress(portal.icon) ? (
 											<img src={getTxEndpoint(portal.icon)} alt={'Portal Icon'} />
 										) : (
-											<ReactSVG src={ASSETS.portal} />
+											<ReactSVG src={ASSETS.portalIcon} />
 										)}
 										{portal.name ?? formatAddress(portal.id, false)}
 									</Link>
@@ -220,7 +220,7 @@ export default function Landing() {
 										{portal.icon && checkValidAddress(portal.icon) ? (
 											<img src={getTxEndpoint(portal.icon)} alt={'Portal Icon'} />
 										) : (
-											<ReactSVG src={ASSETS.portal} />
+											<ReactSVG src={ASSETS.portalIcon} />
 										)}
 										{portal.name}
 									</button>

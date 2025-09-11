@@ -75,7 +75,8 @@ export const ASSETS = {
 	pages: getTxEndpoint('q5_Jqu65WCd5waOk1KC6eGllxoCS8Mv40FWPzh2PUWA'),
 	paragraph: getTxEndpoint('R18ieTzflNf8U8AGo4E__ZLUOvFjBBhOmRFUFll51Do'),
 	plus: getTxEndpoint('v7jeKwAuE58KuolZ2a-E2AnyGWRQKnujTQtOxTyETLs'),
-	portal: getTxEndpoint('WzomcwfXZ_4hhUvDso1wsyJpNBHGeHezFZQv3V706Hw'),
+	portalIcon: getTxEndpoint('WzomcwfXZ_4hhUvDso1wsyJpNBHGeHezFZQv3V706Hw'),
+	portalLogo: getTxEndpoint('aj9U65nFbuzped5y1XuLdo75TnR4TOuhx1AHmRottqg'),
 	post: getTxEndpoint('nPknvEex1uekCo-HZ-5uzsMw4u_rJzj8wZVK5QI3WKw'),
 	posts: getTxEndpoint('scJ-YfxBggKURU_lF7eLLrKSe9L7cBD1GB1bcIpzKJI'),
 	othent: getTxEndpoint('jDmU1yqdfK41qZ8mUj61MZlji-rX7bHJV12s1lMlw3A'),
@@ -308,7 +309,6 @@ export const DEFAULT_LAYOUT = {
 				display: true,
 				positionX: 'left',
 				positionY: 'bottom',
-				txId: null,
 				size: '80%',
 			},
 			links: [],
@@ -477,8 +477,8 @@ export const DEFAULT_THEME = {
 	card: {
 		colors: {
 			background: {
-				light: '205,205,205',
-				dark: '55,55,55',
+				light: '255,255,255',
+				dark: '0,0,0',
 			},
 			border: {
 				light: 'border',
@@ -487,7 +487,7 @@ export const DEFAULT_THEME = {
 		},
 		preferences: {
 			opacity: {
-				light: 1,
+				light: 0.9,
 				dark: 0.6,
 			},
 		},

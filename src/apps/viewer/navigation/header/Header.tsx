@@ -56,7 +56,7 @@ export default function Header() {
 	// 	if (icon && checkValidAddress(icon)) {
 	// 		return <img src={getTxEndpoint(icon)} />;
 	// 	}
-	// 	return <ReactSVG src={ASSETS.portal} />;
+	// 	return <ReactSVG src={ASSETS.portalIcon} />;
 	// }
 
 	function getNavigation() {
