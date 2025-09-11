@@ -44,43 +44,46 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	const [profilePending, setProfilePending] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		try {
-			const aoConnection = import.meta.env.VITE_AO ?? 'legacy';
-			console.log(`AO Connection: [${aoConnection}]`);
-			console.log(`AO Node URL: ${AO_NODE.url}`);
+		if (arProvider.wallet) {
+			try {
+				const aoConnection = import.meta.env.VITE_AO ?? 'legacy';
 
-			const signer = createSigner(arProvider.wallet);
+				console.log(`AO Connection: [${aoConnection}]`);
+				console.log(`AO Node URL: ${AO_NODE.url}`);
 
-			let ao: any;
-			if (aoConnection === 'mainnet') {
-				ao = connect({
-					MODE: 'mainnet',
-					URL: AO_NODE.url,
-					signer,
-				});
-			} else if (import.meta.env.VITE_AO === 'legacy') {
-				ao = connect({ MODE: 'legacy' });
+				const signer = createSigner(arProvider.wallet);
+
+				let ao: any;
+				if (aoConnection === 'mainnet') {
+					ao = connect({
+						MODE: 'mainnet',
+						URL: AO_NODE.url,
+						signer,
+					});
+				} else if (import.meta.env.VITE_AO === 'legacy') {
+					ao = connect({ MODE: 'legacy' });
+				}
+
+				const dependencies = {
+					ao: ao,
+					arweave: Arweave.init({}),
+					signer: signer,
+					node: AO_NODE,
+				};
+
+				setDeps(dependencies);
+
+				const initializedLibs = Permaweb.init(dependencies);
+				setLibs(initializedLibs);
+			} catch (error) {
+				console.error('Error in PermawebProvider initialization:', error);
 			}
-
-			const dependencies = {
-				ao: ao,
-				arweave: Arweave.init({}),
-				signer: signer,
-				node: AO_NODE,
-			};
-
-			setDeps(dependencies);
-
-			const initializedLibs = Permaweb.init(dependencies);
-			setLibs(initializedLibs);
-		} catch (error) {
-			console.error('Error in PermawebProvider initialization:', error);
 		}
 	}, [arProvider.wallet]);
 
 	React.useEffect(() => {
 		(async function () {
-			if (!arProvider.walletAddress) {
+			if (!arProvider.walletAddress || !libs?.getProfileByWalletAddress) {
 				// Clear profile when wallet disconnects
 				setProfile(null);
 				setProfilePending(false);

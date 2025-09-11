@@ -7,7 +7,6 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { PortalPageType } from 'helpers/types';
 import { urlify } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -43,7 +42,7 @@ export default function PageList() {
 
 		return portalProvider.current?.id ? (
 			<S.Wrapper>
-				{Object.entries(sortedPages).map(([key, index]) => {
+				{Object.entries(sortedPages).map(([key], index) => {
 					return (
 						<S.PageWrapper key={index} className={'fade-in'}>
 							<S.PageHeader>
