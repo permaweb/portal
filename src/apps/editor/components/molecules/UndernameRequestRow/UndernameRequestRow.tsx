@@ -3,6 +3,8 @@ import { Panel } from 'components/atoms/Panel';
 import * as S from './styles';
 import type { UndernameRequest } from 'editor/components/organisms/UndernameRequestsList/UndernameRequestsList';
 import { StatusBadge } from '../StatusBadge';
+import { Button } from 'components/atoms/Button';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 
 function ts(ts?: number) {
 	return ts ? new Date(ts).toLocaleString() : '—';
@@ -15,6 +17,8 @@ export default function UndernameRequestRow(props: {
 	onReject: (id: number, reason: string) => void;
 	showRequester?: boolean;
 }) {
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
 	const [open, setOpen] = React.useState(false);
 	const [reason, setReason] = React.useState('');
 	const pending = props.row.status === 'pending';
@@ -42,15 +46,11 @@ export default function UndernameRequestRow(props: {
 			<Panel
 				open={open}
 				width={560}
-				header={'Undername Request'}
+				header={`Undername #${props.row.id}`}
 				handleClose={() => setOpen(false)}
 				closeHandlerDisabled
 			>
 				<S.PanelContent>
-					<S.KV>
-						<span>Id</span>
-						<code>#{props.row.id}</code>
-					</S.KV>
 					<S.KV>
 						<span>Undername</span>
 						<code>{props.row.name}</code>
@@ -61,7 +61,7 @@ export default function UndernameRequestRow(props: {
 					</S.KV>
 					<S.KV>
 						<span>Status</span>
-						<S.StatusPill data-status={props.row.status}>{props.row.status}</S.StatusPill>
+						<StatusBadge status={props.row.status} />
 					</S.KV>
 					<S.KV>
 						<span>Created</span>
@@ -71,41 +71,52 @@ export default function UndernameRequestRow(props: {
 						<span>Decision</span>
 						<p>{ts(props.row.decidedAt)}</p>
 					</S.KV>
+					{props.row.status !== 'pending' && (
+						<S.KV>
+							<span>Decided by</span>
+							<p>{props.row.status === 'cancelled' ? props.row.requester : props.row.decidedBy}</p>
+						</S.KV>
+					)}
 					{props.row.reason ? <S.ReasonNote>Reason: {props.row.reason}</S.ReasonNote> : null}
+					{pending && (
+						<S.Sections>
+							<S.Section>
+								<S.SectionHeader>Approval</S.SectionHeader>
+								<S.SectionBody>
+									<S.Placeholder>Approval configuration UI goes here.</S.Placeholder>
+								</S.SectionBody>
+								<S.SectionFooter>
+									<Button
+										type={'alt1'}
+										label={language?.approve || 'Approve'}
+										handlePress={() => props.onApprove(props.row.id)}
+									/>
+								</S.SectionFooter>
+							</S.Section>
 
-					<S.ActionsBar>
-						{pending ? (
-							<>
-								<S.Primary
-									onClick={() => {
-										props.onApprove(props.row.id);
-										setOpen(false);
-									}}
-								>
-									Approve
-								</S.Primary>
-								<S.Reason>
-									<input placeholder="Reason (optional)" value={reason} onChange={(e) => setReason(e.target.value)} />
-									<S.Danger
-										onClick={() => {
+							<S.Section>
+								<S.SectionHeader>Rejection</S.SectionHeader>
+								<S.SectionBody>
+									<S.TextArea
+										rows={4}
+										placeholder={language?.reason || 'Reason (optional)'}
+										value={reason}
+										onChange={(e) => setReason(e.target.value)}
+									/>
+								</S.SectionBody>
+								<S.SectionFooter>
+									<Button
+										type={'warning'}
+										label={language?.reject || 'Reject'}
+										handlePress={() => {
 											props.onReject(props.row.id, reason || '');
 											setOpen(false);
 										}}
-									>
-										Reject
-									</S.Danger>
-								</S.Reason>
-							</>
-						) : (
-							<S.MutedNote>
-								{props.row.status === 'approved'
-									? 'Already approved'
-									: props.row.status === 'rejected'
-									? 'Already rejected'
-									: 'Cancelled'}
-							</S.MutedNote>
-						)}
-					</S.ActionsBar>
+									/>
+								</S.SectionFooter>
+							</S.Section>
+						</S.Sections>
+					)}
 				</S.PanelContent>
 			</Panel>
 		</>

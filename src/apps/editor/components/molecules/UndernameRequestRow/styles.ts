@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { STYLING } from 'helpers/config';
 
 export const Row = styled.div<{ showRequester?: boolean }>`
 	width: 100%;
@@ -59,9 +58,11 @@ export const KV = styled.div`
 	display: flex;
 	justify-content: space-between;
 	gap: 12px;
+	border-bottom: 1px solid ${(p) => p.theme.colors.border.primary};
+	padding-bottom: 8px;
 	span {
 		color: ${(p) => p.theme.colors.font.alt1};
-		font-size: ${(p) => p.theme.typography.size.xxSmall};
+		font-size: ${(p) => p.theme.typography.size.small};
 		font-weight: ${(p) => p.theme.typography.weight.bold};
 		text-transform: uppercase;
 	}
@@ -95,7 +96,7 @@ export const StatusPill = styled.span`
 `;
 export const ReasonNote = styled.div`
 	color: ${(p) => p.theme.colors.font.secondary};
-	font-size: ${(p) => p.theme.typography.size.xxSmall};
+	font-size: ${(p) => p.theme.typography.size.lg};
 `;
 
 export const ActionsBar = styled.div`
@@ -145,4 +146,65 @@ export const Danger = styled.button`
 export const MutedNote = styled.div`
 	color: ${(p) => p.theme.colors.font.secondary};
 	font-size: ${(p) => p.theme.typography.size.small};
+`;
+
+export const Sections = styled.div`
+	display: grid;
+	gap: 16px;
+	margin-top: 8px;
+`;
+
+export const Section = styled.div`
+	border: 1px solid ${(p) => p.theme.colors.border.primary};
+	border-radius: ${(p) => p.theme.dimensions?.radius?.primary || '8px'};
+	background: ${(p) => p.theme.colors.container.primary.background};
+	overflow: hidden;
+`;
+
+export const SectionHeader = styled.div`
+	padding: 10px 12px;
+	background: ${(p) => p.theme.colors.container.alt1.background};
+	border-bottom: 1px solid ${(p) => p.theme.colors.border.primary};
+	font-family: ${(p) => p.theme.typography.family.primary};
+	font-weight: ${(p) => p.theme.typography.weight.bold};
+	font-size: ${(p) => p.theme.typography.size.small};
+	color: ${(p) => p.theme.colors.font.primary};
+`;
+
+export const SectionBody = styled.div`
+	padding: 12px;
+	display: grid;
+	gap: 10px;
+`;
+
+export const SectionFooter = styled.div`
+	padding: 10px 12px;
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	border-top: 1px solid ${(p) => p.theme.colors.border.primary};
+`;
+
+export const Placeholder = styled.div`
+	padding: 12px;
+	border: 1px dashed ${(p) => p.theme.colors.border.primary};
+	border-radius: 8px;
+	color: ${(p) => p.theme.colors.font.secondary};
+	font-size: ${(p) => p.theme.typography.size.small};
+`;
+
+export const TextArea = styled.textarea`
+	width: 100%;
+	resize: vertical;
+	min-height: 96px;
+	padding: 10px 12px;
+	border: 1px solid ${(p) => p.theme.colors.border.primary};
+	border-radius: 8px;
+	background: ${(p) => p.theme.colors.container.primary.background};
+	color: ${(p) => p.theme.colors.font.primary};
+	font-size: ${(p) => p.theme.typography.size.base};
+	font-family: ${(p) => p.theme.typography.family.primary};
+	&:focus-visible {
+		outline: 2px solid ${(p) => p.theme.colors.primary1};
+	}
 `;
