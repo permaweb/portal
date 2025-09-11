@@ -17,11 +17,10 @@ import { Portal } from 'components/atoms/Portal';
 import { DOM, URLS } from 'helpers/config';
 import { preloadAllAssets } from 'helpers/preloader';
 import { GlobalStyle } from 'helpers/styles';
-import { ArweaveProvider, useArweaveProvider } from 'providers/ArweaveProvider';
+import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvider';
 import { NotificationProvider } from 'providers/NotificationProvider';
 import { PermawebProvider, usePermawebProvider } from 'providers/PermawebProvider';
-import { WalletBlock } from 'wallet/WalletBlock';
 import { WanderInit } from 'wallet/WanderInit';
 
 import * as S from './styles';
@@ -62,7 +61,6 @@ function getLazyImport(view: string) {
 function AppContent() {
 	const navigate = useNavigate();
 
-	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();

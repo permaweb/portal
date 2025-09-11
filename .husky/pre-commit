@@ -1,22 +1,15 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-# Ensure language.ts keys are sorted before commit
-npm run fix:lang
-
-echo "pre-commit checks complete"
-
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
 set -euo pipefail
-# Make sure we’re at repo root
+
+# Make sure we're at repo root
 cd -P "$(git rev-parse --show-toplevel)"
 
-# Your custom step first (fail fast if it must pass)
+# Ensure language.ts keys are sorted before commit
 npm run fix:lang
 
-# Format only staged files, chunked & safe
+# Format only staged files using lint-staged
 npx lint-staged --quiet
 
 echo "✅ pre-commit checks complete"
