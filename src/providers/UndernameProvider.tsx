@@ -2,7 +2,12 @@
 import * as React from 'react';
 import { readProcess, sendMessage } from '@permaweb/libs';
 
-import { UNDERNAMES_PROCESS_ID, UNDERNAMES_HANDLERS, type HandlerKey, type HandlerSpec } from './constants';
+import {
+	UNDERNAMES_PROCESS_ID,
+	UNDERNAMES_HANDLERS,
+	type HandlerKey,
+	type HandlerSpec,
+} from '../processes/undernames/constants';
 
 /** ----- Types that mirror your Lua state ----- */
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
@@ -12,11 +17,8 @@ export type UndernameRequest = {
 	name: string;
 	requester: string;
 	status: RequestStatus;
-	created_at?: number; // raw from process
 	createdAt?: number; // normalized for UI
-	decided_at?: number;
 	decidedAt?: number;
-	decided_by?: string;
 	decidedBy?: string;
 	reason?: string;
 };
@@ -48,12 +50,11 @@ type UndernamesContextState = {
 	// refreshers
 	refreshAll: () => Promise<void>;
 	refreshOwners: () => Promise<void>;
-	refreshRequests: (filter?: Partial<{ Status: string; Name: string; Requester: string }>) => Promise<void>;
+	refreshRequests: () => Promise<void>;
 	refreshReserved: () => Promise<void>;
 	refreshControllers: () => Promise<void>;
 	refreshPolicy: () => Promise<void>;
 
-	// reads (raw)
 	ownerOf: (name: string) => Promise<string | null>;
 	checkAvailability: (name: string) => Promise<{
 		name: string;
@@ -69,7 +70,7 @@ type UndernamesContextState = {
 	addController: (addr: string) => Promise<void>;
 	removeController: (addr: string) => Promise<void>;
 
-	addReserved: (name: string, to?: string) => Promise<void>;
+	addReserved: (name: string, to: string) => Promise<void>;
 	removeReserved: (name: string) => Promise<void>;
 
 	request: (name: string) => Promise<void>;
@@ -357,9 +358,9 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	);
 
 	const addReserved = React.useCallback(
-		async (name: string, to?: string) => {
+		async (name: string, to: string) => {
 			const params: any = { Name: name };
-			if (to) params.To = to;
+			params.To = to;
 			await send('AddReserved', params);
 			await refreshReserved();
 		},

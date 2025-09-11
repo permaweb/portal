@@ -171,7 +171,7 @@ Requests = {}
 
 -- request schema:
 -- { id, name, requester, status="pending"|"approved"|"rejected"|"cancelled",
---   created_at, decided_at?, decided_by?, reason?, metadata = {} }
+--   decidedAt?, decidedBy?, reason?, metadata = {} }
 function Requests.create(requester, name, Msg)
 	name = Utils.normalize(name)
 	if State.Owners[name] then
@@ -198,7 +198,7 @@ function Requests.create(requester, name, Msg)
 		name = name,
 		requester = requester,
 		status = 'pending',
-		created_at = Utils.ts(Msg),
+		createdAt = Utils.ts(Msg),
 	}
 	Utils.audit(requester, 'request_undername', { id = id, name = name }, Msg)
 	return { id = id }
@@ -216,8 +216,8 @@ function Requests.cancel(actor, id, Msg)
 		error('cannot cancel non-pending')
 	end
 	r.status = 'cancelled'
-	r.decided_at = Utils.ts(Msg)
-	r.decided_by = actor
+	r.decidedAt = Utils.ts(Msg)
+	r.decidedBy = actor
 	Utils.audit(actor, 'cancel_request', { id = id }, Msg)
 	return { cancelled = id }
 end
@@ -237,8 +237,8 @@ function Requests.approve(actor, id, Msg)
 
 	State.Owners[r.name] = r.requester
 	r.status = 'approved'
-	r.decided_at = Utils.ts(Msg)
-	r.decided_by = actor
+	r.decidedAt = Utils.ts(Msg)
+	r.decidedBy = actor
 
 	-- clear any reservation (generic or to=addr)
 	if State.Reserved[r.name] then
@@ -259,8 +259,8 @@ function Requests.reject(actor, id, reason, Msg)
 		error('request not pending')
 	end
 	r.status = 'rejected'
-	r.decided_at = Utils.ts(Msg)
-	r.decided_by = actor
+	r.decidedAt = Utils.ts(Msg)
+	r.decidedBy = actor
 	r.reason = reason or 'unspecified'
 	Utils.audit(actor, 'reject_request', { id = id, reason = r.reason }, Msg)
 	return { rejected = id, reason = r.reason }
