@@ -40,6 +40,7 @@ export default function UndernameRequestsList(props: {
 	onReject: (id: number, reason: string) => void;
 	onRequest: (name: string) => void; // NEW: create request
 	isRequesting?: boolean; // NEW: disables submit while sending
+	showRequesterColumn?: boolean; // NEW: show requester column
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -69,6 +70,8 @@ export default function UndernameRequestsList(props: {
 	// data shaping
 	const processed = React.useMemo(() => {
 		let rows = props.requests;
+		// filter non approved ones only
+		rows = rows.filter((r) => r.status !== 'approved');
 		if (props.filterByRequester) rows = rows.filter((r) => r.requester === props.filterByRequester);
 		return [...rows].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 	}, [props.requests, props.filterByRequester]);
@@ -112,10 +115,10 @@ export default function UndernameRequestsList(props: {
 				</S.Toolbar>
 
 				<S.ListWrapper>
-					<S.HeaderRow>
+					<S.HeaderRow showRequester={!!props.showRequesterColumn}>
 						<S.HeaderCell>Id</S.HeaderCell>
 						<S.HeaderCell>Undername</S.HeaderCell>
-						<S.HeaderCell>Requester</S.HeaderCell>
+						{props.showRequesterColumn && <S.HeaderCell>Requester</S.HeaderCell>}
 						<S.HeaderCell>Status</S.HeaderCell>
 						<S.HeaderCell>Created</S.HeaderCell>
 						<S.HeaderCell>Decision</S.HeaderCell>
@@ -128,6 +131,7 @@ export default function UndernameRequestsList(props: {
 								busy={!!props.busyIds?.includes(r.id)}
 								onApprove={props.onApprove}
 								onReject={props.onReject}
+								showRequester={!!props.showRequesterColumn}
 							/>
 						</S.RowWrapper>
 					))}

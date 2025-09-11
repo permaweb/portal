@@ -13,6 +13,7 @@ export default function UndernameRequestRow(props: {
 	busy?: boolean;
 	onApprove: (id: number) => void;
 	onReject: (id: number, reason: string) => void;
+	showRequester?: boolean;
 }) {
 	const [open, setOpen] = React.useState(false);
 	const [reason, setReason] = React.useState('');
@@ -26,10 +27,11 @@ export default function UndernameRequestRow(props: {
 				data-busy={props.busy ? '1' : '0'}
 				onClick={() => !props.busy && setOpen(true)}
 				title="Click to manage"
+				showRequester={props.showRequester}
 			>
 				<S.Cell mono>#{props.row.id}</S.Cell>
 				<S.Cell mono>{props.row.name}</S.Cell>
-				<S.Cell mono>{props.row.requester}</S.Cell>
+				{props.showRequester ? <S.Cell mono>{props.row.requester}</S.Cell> : null}
 				<S.Cell mono>
 					<StatusBadge status={props.row.status} />
 				</S.Cell>
@@ -37,7 +39,13 @@ export default function UndernameRequestRow(props: {
 				<S.Cell mono>{ts(props.row.decidedAt)}</S.Cell>
 			</S.Row>
 
-			<Panel open={open} width={560} header={'Manage Request'} handleClose={() => setOpen(false)} closeHandlerDisabled>
+			<Panel
+				open={open}
+				width={560}
+				header={'Undername Request'}
+				handleClose={() => setOpen(false)}
+				closeHandlerDisabled
+			>
 				<S.PanelContent>
 					<S.KV>
 						<span>Id</span>

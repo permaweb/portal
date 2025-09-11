@@ -113,6 +113,7 @@ export default function PortalFlowDemo() {
 				filterByRequester="0xAlice"
 				onApprove={handleAdminApprove}
 				onReject={handleAdminReject}
+				onRequest={handleUserSubmit}
 			/>
 			<UndernamesList owners={all} filterAddress="0xAlice" />
 			<UndernamesList owners={all} />

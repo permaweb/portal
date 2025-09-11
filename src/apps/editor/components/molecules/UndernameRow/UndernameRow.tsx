@@ -19,16 +19,6 @@ export default function UndernameRow(props: { row: UndernameOwnerRow }) {
 				</S.RowHeader>
 				<S.RowDetail>
 					<S.Address>{props.row.owner}</S.Address>
-					<S.Actions>
-						<Button
-							type={'alt3'}
-							label={language?.manage || 'Manage'}
-							handlePress={(e) => {
-								e.stopPropagation();
-								setShowPanel(true);
-							}}
-						/>
-					</S.Actions>
 				</S.RowDetail>
 			</S.RowWrapper>
 
