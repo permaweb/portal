@@ -149,10 +149,14 @@ function tryParse(out: any) {
 	const raw = out?.Output ?? out?.output ?? out?.Messages?.[0]?.Data ?? out?.messages?.[0]?.data ?? out?.data ?? '';
 	if (typeof raw === 'string' && raw.length > 0) {
 		try {
-			return JSON.parse(raw);
+			const rawJSON = JSON.parse(raw);
+			const { ok, result } = rawJSON;
+			console.log('UndernamesProvider: parsed', { ok, result });
+			return result;
 		} catch {}
 	}
-	return out;
+	const result = out.result;
+	return result;
 }
 
 /** normalize requests: add camelCase aliases for UI */
@@ -213,13 +217,10 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	/** refresh everything with Export */
 	const refreshAll = React.useCallback(async () => {
 		if (!ready) return;
-		console.log('UndernamesProvider: refreshAll', libs);
 		setLoading(true);
 		setError(null);
 		try {
-			console.log('Reading undernames export...');
 			const out = await read('Export');
-			console.log('Undernames export', out);
 			// expected: { controllers, policy, reserved, owners, requests, requestSeq, superAdmin? }
 			setControllers(Array.isArray(out?.controllers) ? out.controllers : controllers);
 			setPolicyState(
@@ -438,7 +439,6 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		if (!libs) return;
 		if (!ready) return;
-		console.log('UndernamesProvider: libs ready', libs);
 		refreshAll();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ready, libs]);

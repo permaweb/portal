@@ -4,23 +4,21 @@ import { Pagination } from 'components/atoms/Pagination';
 import * as S from './styles';
 import { UndernameRow } from 'editor/components/molecules/UndernameRow';
 
-export type UndernameOwnerRow = {
-	name: string;
-	owner: string;
-};
+type UndernameOwnerMap = Record<string, string>; // key: undername, value: owner
+type OwnerRow = { name: string; owner: string };
 
 const PAGE_SIZE = 10;
 
-export default function UndernamesList(props: { owners: UndernameOwnerRow[]; filterAddress?: string }) {
+export default function UndernamesList(props: { owners: UndernameOwnerMap; filterAddress?: string }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const [currentPage, setCurrentPage] = React.useState(1);
 
-	// Filter + sort
-	const processedOwners = React.useMemo(() => {
-		let rows = props.owners;
+	// Normalize + filter + sort
+	const processedOwners: OwnerRow[] = React.useMemo(() => {
+		let rows: OwnerRow[] = Object.entries(props.owners || {}).map(([name, owner]) => ({ name, owner }));
 		if (props.filterAddress) rows = rows.filter((o) => o.owner === props.filterAddress);
-		return [...rows].sort((a, b) => a.name.localeCompare(b.name));
+		return rows.sort((a, b) => a.name.localeCompare(b.name));
 	}, [props.owners, props.filterAddress]);
 
 	const totalPages = React.useMemo(
@@ -38,6 +36,7 @@ export default function UndernamesList(props: { owners: UndernameOwnerRow[]; fil
 
 	const startIndex = (currentPage - 1) * PAGE_SIZE;
 	const endIndexExclusive = Math.min(startIndex + PAGE_SIZE, processedOwners.length);
+
 	const pageOwners = React.useMemo(
 		() => processedOwners.slice(startIndex, endIndexExclusive),
 		[processedOwners, startIndex, endIndexExclusive]

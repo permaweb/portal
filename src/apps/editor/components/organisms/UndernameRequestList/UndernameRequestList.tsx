@@ -13,9 +13,12 @@ export type UndernameRequest = {
 	name: string;
 	requester: string;
 	status: RequestStatus;
-	createdAt: number;
+	createdAt?: number;
+	created_at?: number; // deprecated
+	decided_at?: number; // deprecated
 	decidedAt?: number;
 	decidedBy?: string;
+	decided_by?: string; // deprecated
 	reason?: string;
 };
 

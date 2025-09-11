@@ -2,14 +2,10 @@ import * as React from 'react';
 import { UndernameRequest } from '../AdminUndernamesReq/AdminUndernamesReq';
 import { UndernamesList } from '../UndernamesList';
 import { UndernameRequestList } from '../UndernameRequestList';
-
-const all = [
-	{ name: 'tom_portal', owner: 'NfbCSc_O61Mvzoq94_FLGk8WS8cuyxaiX1NAuumUVxM' },
-	{ name: 'alice_portal', owner: '0xAlice' },
-	{ name: 'bhavya', owner: 'GvK2GjHWF_4F3DjuzdoGR_DGyTjMAks1k04lGyJPAOc' },
-];
+import { useUndernamesProvider } from 'providers/UndernameProvider';
 
 export default function PortalFlowDemo() {
+	const { requests, owners } = useUndernamesProvider();
 	// Mock state
 	const [userRequests, setUserRequests] = React.useState<UndernameRequest[]>([
 		{
@@ -109,14 +105,14 @@ export default function PortalFlowDemo() {
 	return (
 		<div style={{ display: 'grid', gap: '32px', padding: '32px' }}>
 			<UndernameRequestList
-				requests={userRequests}
-				filterByRequester="0xAlice"
+				requests={requests}
 				onApprove={handleAdminApprove}
 				onReject={handleAdminReject}
 				onRequest={handleUserSubmit}
+				showRequesterColumn
 			/>
-			<UndernamesList owners={all} filterAddress="0xAlice" />
-			<UndernamesList owners={all} />
+			<UndernamesList owners={owners} filterAddress="0xAlice" />
+			<UndernamesList owners={owners} />
 		</div>
 	);
 }

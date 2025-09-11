@@ -188,7 +188,7 @@ export const SectionFooter = styled.div`
 export const Placeholder = styled.div`
 	padding: 12px;
 	border: 1px dashed ${(p) => p.theme.colors.border.primary};
-	border-radius: 8px;
+	border-radius: ;
 	color: ${(p) => p.theme.colors.font.secondary};
 	font-size: ${(p) => p.theme.typography.size.small};
 `;
