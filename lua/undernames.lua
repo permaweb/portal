@@ -339,16 +339,29 @@ function Ownership.owner_of(name)
 end
 
 function Ownership.force_release(actor, name, reason, Msg)
-	Utils.require_controller(actor) --- should be able to release by both controller and requester?
 	name = Utils.normalize(name)
-	if not Owners_exists(name) then
+
+	local rec = Owners_get(name)
+	if not rec then
 		error('name not registered')
 	end
+
+	local isController = Utils.is_controller(actor)
+	local isOwner = (rec.owner == actor)
+	if not (isController or isOwner) then
+		error('not permitted: must be controller or current owner')
+	end
+
 	State.Owners[name] = nil
-	Utils.audit(actor, 'force_release', { name = name, reason = reason }, Msg)
+	Utils.audit(actor, 'force_release', {
+		name = name,
+		reason = reason or 'unspecified',
+		wasOwner = rec.owner,
+		by = isOwner and 'owner' or 'controller',
+	}, Msg)
+
 	return { released = name }
 end
-
 -- =========================
 -- Internal: claim policy check
 -- =========================
