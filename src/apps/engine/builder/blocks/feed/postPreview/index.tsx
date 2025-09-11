@@ -7,7 +7,7 @@ export default function PostPreview(props: any) {
 	const { portal } = usePortalProvider();
 	const Layout = portal?.Layout;
 	const { preview, post, loading } = props;
-	
+
 	switch (props?.layout) {
 		case 'journal':
 			return <PostPreview_Journal layout={Layout} post={post} />;

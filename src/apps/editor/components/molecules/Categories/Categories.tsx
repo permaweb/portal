@@ -60,12 +60,14 @@ export default function Categories(props: {
 		categories: props.categories,
 		setCategories: props.setCategories,
 		skipAuthCheck: props.skipAuthCheck,
+		selectOnAdd: props.selectOnAdd,
 		allowReorder: props.allowReorder,
 		unauthorized,
 		portalId: portalProvider.current?.id || null,
 		portalCategories: portalProvider.current?.categories || [],
 		refreshCurrentPortal: portalProvider.refreshCurrentPortal,
 	});
+
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
 			if (portalProvider.current.categories) setCategoryOptions(portalProvider.current.categories);

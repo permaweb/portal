@@ -18,7 +18,6 @@ import * as S from './styles';
 
 const MAX_EDITOR_LENGTH = 500;
 
-
 function CommentEditorContent(props: any) {
 	const { commentsId, parentId, existingComments = [], onCommentAdded, onSubmittingChange } = props;
 	const [editor] = useLexicalComposerContext();
@@ -73,15 +72,17 @@ function CommentEditorContent(props: any) {
 			});
 			setEditorText('');
 			setCanSend(false);
-			
+
 			// Notify parent component to refresh comments
 			if (onCommentAdded && comment) {
 				onCommentAdded(comment);
 			} else {
 				// Fallback: dispatch custom event for parent to listen to
-				window.dispatchEvent(new CustomEvent('commentAdded', { 
-					detail: { comment, commentsId } 
-				}));
+				window.dispatchEvent(
+					new CustomEvent('commentAdded', {
+						detail: { comment, commentsId },
+					})
+				);
 			}
 		} catch (error) {
 			console.error('Failed to create comment:', error);
@@ -93,11 +94,10 @@ function CommentEditorContent(props: any) {
 
 	const checkForDuplicate = (text: string) => {
 		if (!profile?.id || !existingComments.length) return false;
-		
+
 		const normalizedText = text.trim().toLowerCase();
-		return existingComments.some((comment: any) => 
-			comment.author?.id === profile.id && 
-			comment.content?.trim().toLowerCase() === normalizedText
+		return existingComments.some(
+			(comment: any) => comment.author?.id === profile.id && comment.content?.trim().toLowerCase() === normalizedText
 		);
 	};
 
@@ -111,7 +111,6 @@ function CommentEditorContent(props: any) {
 			setCanSend(trimmedText.length > 0 && text.length <= MAX_EDITOR_LENGTH && !isDuplicate);
 		});
 	};
-
 
 	return (
 		<>

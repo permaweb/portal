@@ -11,7 +11,7 @@ on:
         default: 'main'
         type: choice
         options:
-        - main
+          - main
 
 jobs:
   deploy:

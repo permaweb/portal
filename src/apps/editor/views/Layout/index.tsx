@@ -23,13 +23,13 @@ export default function Layout() {
 
 	// Get the current layout from the portal
 	const currentLayout = portalProvider.current?.layout;
-	
+
 	console.log('Portal data:', portalProvider.current);
 	console.log('Current layout:', currentLayout);
 
 	const handleSubmit = async (parsedValue: any) => {
 		console.log('Attempting to save layout:', parsedValue);
-		
+
 		if (!arProvider.wallet) {
 			addNotification('Please connect your wallet to save changes', 'warning');
 			throw new Error('Wallet not connected');
@@ -46,7 +46,7 @@ export default function Layout() {
 			// Format for the process
 			const updateValue = permawebProvider.libs.mapToProcessCase(parsedValue);
 			console.log('Update value after mapToProcessCase:', updateValue);
-			
+
 			const updateData = { Layout: updateValue };
 			console.log('Final update data:', updateData);
 
@@ -69,14 +69,8 @@ export default function Layout() {
 	return (
 		<S.Wrapper className={'fade-in'}>
 			<ViewHeader header={language?.layout} />
-			<JsonEditor
-				initialValue={currentLayout}
-				onSave={handleSubmit}
-				loading={loading}
-			/>
-			<S.Preview className="border-wrapper-alt1">
-				Preview...
-			</S.Preview>
+			<JsonEditor initialValue={currentLayout} onSave={handleSubmit} loading={loading} />
+			<S.Preview className="border-wrapper-alt1">Preview...</S.Preview>
 		</S.Wrapper>
 	);
 }

@@ -49,21 +49,21 @@ export default function Header(props: any) {
 
 	const renderLogo = (txId: string) => {
 		const url = txId.startsWith('http') ? txId : getTxEndpoint(txId);
-		
+
 		if (logoError[txId]) {
 			return <img src={url} alt="Logo" />;
 		}
-    
+
 		return (
-			<ReactSVG 
+			<ReactSVG
 				src={url}
 				beforeInjection={(svg) => {
 					if (logoError[txId]) {
-						setLogoError(prev => ({ ...prev, [txId]: false }));
+						setLogoError((prev) => ({ ...prev, [txId]: false }));
 					}
 				}}
 				fallback={() => {
-					setLogoError(prev => ({ ...prev, [txId]: true }));
+					setLogoError((prev) => ({ ...prev, [txId]: true }));
 					return <img src={url} alt="Logo" />;
 				}}
 			/>
@@ -87,13 +87,9 @@ export default function Header(props: any) {
 							<S.Logo $layout={content.logo}>
 								{Logo ? (
 									preview ? (
-										<a href="">
-											{renderLogo(Logo)}
-										</a>
+										<a href="">{renderLogo(Logo)}</a>
 									) : (
-										<NavLink to={getRedirect()}>
-											{renderLogo(Logo)}
-										</NavLink>
+										<NavLink to={getRedirect()}>{renderLogo(Logo)}</NavLink>
 									)
 								) : (
 									<h1>{name}</h1>

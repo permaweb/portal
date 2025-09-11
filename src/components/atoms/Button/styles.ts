@@ -584,11 +584,11 @@ export const IconIndicator = styled(IconPrimary)`
 `;
 
 export const Warning = styled(Alt1)`
-	background: ${(props) => (props.active ? props.theme.colors.warning.primary : props.theme.colors.warning.alt1)};
-	border: 1px solid ${(props) => (props.active ? props.theme.colors.warning.primary : props.theme.colors.warning.alt1)};
+	background: ${(props) => (props.active ? props.theme.colors.warning.alt1 : props.theme.colors.warning.primary)};
+	border: 1px solid ${(props) => (props.active ? props.theme.colors.warning.alt1 : props.theme.colors.warning.primary)};
 	&:hover {
-		background: ${(props) => props.theme.colors.warning.primary};
-		border: 1px solid ${(props) => props.theme.colors.warning.primary};
+		background: ${(props) => props.theme.colors.warning.alt1};
+		border: 1px solid ${(props) => props.theme.colors.warning.alt1};
 		span {
 			color: ${(props) => props.theme.colors.font.light1} !important;
 		}
@@ -598,8 +598,8 @@ export const Warning = styled(Alt1)`
 		}
 	}
 	&:focus {
-		background: ${(props) => (props.active ? props.theme.colors.warning.primary : props.theme.colors.warning.primary)};
-		border: 1px solid ${(props) => props.theme.colors.warning.primary};
+		background: ${(props) => (props.active ? props.theme.colors.warning.alt1 : props.theme.colors.warning.alt1)};
+		border: 1px solid ${(props) => props.theme.colors.warning.alt1};
 		span {
 			color: ${(props) => props.theme.colors.font.light1} !important;
 		}

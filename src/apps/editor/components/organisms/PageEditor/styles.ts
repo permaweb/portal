@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 import { open, transition1 } from 'helpers/animations';
 
-export const Wrapper = styled.div`	
+export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	width: 100%;

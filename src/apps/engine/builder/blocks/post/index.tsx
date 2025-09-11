@@ -30,19 +30,19 @@ export default function Post(props: any) {
 			document.title = `${post.name} - ${Name}`;
 		}
 	}, [Name, post]);
-	
+
 	React.useEffect(() => {
 		if (post?.metadata?.content) {
 			setContent(post.metadata.content);
 		} else if (post?.metadata?.contentTx) {
 			setIsLoadingContent(true);
 			fetch(`https://arweave.net/${post.metadata.contentTx}`)
-				.then(res => res.json())
-				.then(data => {
+				.then((res) => res.json())
+				.then((data) => {
 					setContent(data);
 					setIsLoadingContent(false);
 				})
-				.catch(err => {
+				.catch((err) => {
 					console.error('Failed to load content:', err);
 					setIsLoadingContent(false);
 				});
@@ -83,40 +83,44 @@ export default function Post(props: any) {
 						})}
 				</S.Tags>
 				{isLoadingContent && <p>Loading content...</p>}
-				{!isLoadingPost && !isLoadingContent && content && Array.isArray(content) && content.map((entry) => {
-					switch (entry.type) {
-						case 'header-1':
-							return <h1 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						case 'header-2':
-							return <h2 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						case 'header-3':
-							return <h3 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						case 'header-4':
-							return <h4 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						case 'header-5':
-							return <h5 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						case 'header-6':
-							return <h6 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						case 'image':
-							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						case 'video':
-							console.log('Vid: ', entry);
-							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						case 'paragraph':
-							return <p key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						case 'quote':
-							return <blockquote key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						case 'code':
-							return <code key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						case 'unordered-list':
-							return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						case 'ordered-list':
-							return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-						default:
-							return <b key={entry.id}>{JSON.stringify(entry)}</b>;
-					}
-				})}
-			</S.Post>			
+				{!isLoadingPost &&
+					!isLoadingContent &&
+					content &&
+					Array.isArray(content) &&
+					content.map((entry) => {
+						switch (entry.type) {
+							case 'header-1':
+								return <h1 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'header-2':
+								return <h2 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'header-3':
+								return <h3 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'header-4':
+								return <h4 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'header-5':
+								return <h5 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'header-6':
+								return <h6 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'image':
+								return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'video':
+								console.log('Vid: ', entry);
+								return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'paragraph':
+								return <p key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'quote':
+								return <blockquote key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'code':
+								return <code key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'unordered-list':
+								return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'ordered-list':
+								return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							default:
+								return <b key={entry.id}>{JSON.stringify(entry)}</b>;
+						}
+					})}
+			</S.Post>
 			<Comments commentsId={post?.metadata?.comments} />
 		</S.Wrapper>
 	);

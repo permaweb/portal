@@ -22,11 +22,11 @@ export default function Panel(props: {
 
 	const escFunction = React.useCallback(
 		(e: any) => {
-			if (e.key === 'Escape' && props.handleClose && !props.closeHandlerDisabled) {
+			if (e.key === 'Escape' && props.open && props.handleClose && !props.closeHandlerDisabled) {
 				props.handleClose();
 			}
 		},
-		[props]
+		[props.open, props.handleClose]
 	);
 
 	React.useEffect(() => {

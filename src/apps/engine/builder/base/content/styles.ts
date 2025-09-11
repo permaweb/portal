@@ -17,7 +17,7 @@ export const Content = styled.div<{ $layout: any; maxWidth: number }>`
 	flex-direction: column;
 	width: 100%;
 	// max-width: ${(props) => (props.maxWidth ? `${props.maxWidth}px` : undefined)};
-	padding: ${(props) => (props.$layout?.padding ? `${props.$layout?.padding}` : 0)};;
-	
+	padding: ${(props) => (props.$layout?.padding ? `${props.$layout?.padding}` : 0)};
+
 	box-sizing: border-box;
 `;

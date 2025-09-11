@@ -370,8 +370,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	const isPermissionsLoading = React.useMemo(() => {
 		if (!currentId) return false; // No portal selected → nothing to load
-		return permissions === null || updating; // Waiting for permissions or actively fetching
-	}, [currentId, permissions, updating]);
+		return permissions === null; // Waiting for permissions or actively fetching
+	}, [currentId, permissions]);
 
 	return (
 		<PortalContext.Provider

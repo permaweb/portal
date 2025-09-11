@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { open, transition1 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.div`	
+export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	width: 100%;
@@ -13,7 +13,7 @@ export const Wrapper = styled.div`
 	}
 `;
 
-export const Editor = styled.div`	
+export const Editor = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
@@ -54,9 +54,10 @@ export const Code = styled.div`
 	flex: 1;
 	overflow-y: auto;
 
-	textarea, pre {
+	textarea,
+	pre {
 		flex: 1;
-		border: 1px solid #3D3D3D;
+		border: 1px solid #3d3d3d;
 		min-height: 100%;
 		overflow-y: scroll;
 		background: #222;
@@ -81,7 +82,7 @@ export const Code = styled.div`
 export const Pre = styled.pre`
 	background: #222;
 	padding: 10px;
-	margin:0;
+	margin: 0;
 	box-sizing: border-box;
 	white-space: pre-wrap;
 `;

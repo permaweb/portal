@@ -51,7 +51,7 @@ export default function Comments(props: any) {
 	return (
 		<S.Comments>
 			<h2>Comments</h2>
-			<CommentAdd commentsId={commentsId}/>
+			<CommentAdd commentsId={commentsId} />
 			<S.CommentList>
 				{comments &&
 					comments.map((comment: any, index: string) => {

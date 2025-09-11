@@ -14,7 +14,7 @@ export const FooterWrapper = styled.div<{ $layout: any; $theme: any }>`
 	border-top: ${(props) => (props.$layout?.border?.top ? `1px solid rgba(var(--color-border),1)` : `unset`)};
 	font-weight: 600;
 	box-sizing: border-box;
-	overflow:hidden;
+	overflow: hidden;
 	z-index: 1;
 `;
 
@@ -36,6 +36,6 @@ export const Footer = styled.div<{ $layout: any }>`
 
 export const Copyright = styled.div`
 	padding: 10px 40px 0 40px;
-	margin-top:10px;
-	border-top: 1px solid rgba(var(--color-border),3);
+	margin-top: 10px;
+	border-top: 1px solid rgba(var(--color-border), 3);
 `;

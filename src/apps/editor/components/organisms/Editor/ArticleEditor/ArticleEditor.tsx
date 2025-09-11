@@ -117,8 +117,8 @@ export default function ArticleEditor(props: {
 				) {
 					const lastBlockIndex = currentPost.data?.content ? currentPost.data.content.length - 1 : 0;
 					if (
-						!currentPost.data.content.length ||
-						currentPost.data.content[lastBlockIndex].id === currentPost.editor.focusedBlock.id
+						!currentPost.data?.content?.length ||
+						currentPost.data?.content?.[lastBlockIndex].id === currentPost.editor.focusedBlock.id
 					) {
 						event.preventDefault();
 						handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: true });

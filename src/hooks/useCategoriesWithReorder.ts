@@ -1,9 +1,10 @@
+import React from 'react';
+
 import { PortalCategoryType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import React from 'react';
 
 export function useCategoriesWithReorder(props: {
 	categories: PortalCategoryType[];

@@ -160,7 +160,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 										<S.PostActionRequestLine>
 											<p>{request.name}</p>
 											<Button
-												type={'alt3'}
+												type={'alt4'}
 												label={language.reviewPost}
 												handlePress={() => handleReviewRedirect(request.id)}
 												disabled={unauthorized}
@@ -183,7 +183,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 								type={'primary'}
 								label={language.close}
 								handlePress={() => setShowRequests(false)}
-								disabled={!portalProvider?.permissions?.updatePortalMeta}
+								disabled={false}
 								height={40}
 								fullWidth
 							/>
