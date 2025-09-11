@@ -81,7 +81,6 @@ function AppContent() {
 	}, []);
 
 	React.useEffect(() => {
-		// Hide the HTML loader when the app is ready
 		if (!hasHiddenLoaderRef.current && settings) {
 			hasHiddenLoaderRef.current = true;
 			const loader = document.getElementById('app-loader');
@@ -143,7 +142,10 @@ function AppContent() {
 				);
 			}
 
-			if (!portalProvider.permissions?.base || portalProvider.permissions?.externalContributor) {
+			if (
+				portalProvider.permissions &&
+				(!portalProvider.permissions?.base || portalProvider.permissions?.externalContributor)
+			) {
 				return (
 					<Portal node={DOM.overlay}>
 						<S.CenteredWrapper className={'overlay'}>

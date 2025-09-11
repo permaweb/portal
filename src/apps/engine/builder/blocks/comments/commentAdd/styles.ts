@@ -10,15 +10,15 @@ export const CommentAdd = styled.div<{ $active: boolean }>`
 	pointer-events: ${(props) => (props.$active ? 'default' : 'none')};
 	user-select: ${(props) => (props.$active ? 'default' : 'none')};
 
-	.editor-placeholder{
+	.editor-placeholder {
 		position: absolute;
-		top:0;
-		bottom:0;
+		top: 0;
+		bottom: 0;
 		padding: 10px;
 		font-size: var(--font-size-large);
-    font-weight: 400;
+		font-weight: 400;
 		user-select: none;
-		opacity:.4;
+		opacity: 0.4;
 	}
 `;
 
@@ -30,7 +30,7 @@ export const Editor = styled.div`
 	padding: 10px;
 	padding-right: 80px;
 	min-height: 30px;
-	
+
 	> div[data-lexical-placeholder] {
 		position: absolute;
 		top: 10px;
@@ -153,11 +153,11 @@ export const EmojiSearchInput = styled.input`
 	outline: none;
 	box-sizing: border-box;
 	height: 32px;
-	
+
 	&::placeholder {
 		color: rgba(var(--color-text), 0.5);
 	}
-	
+
 	&:focus {
 		background: rgba(var(--color-text), 0.15);
 	}
@@ -170,7 +170,7 @@ export const EmojiCategories = styled.div`
 `;
 
 export const EmojiCategoryTab = styled.div<{ $active: boolean }>`
-	background: ${props => props.$active ? 'rgba(var(--color-text), 0.15)' : 'rgba(var(--color-text), 0.05)'};
+	background: ${(props) => (props.$active ? 'rgba(var(--color-text), 0.15)' : 'rgba(var(--color-text), 0.05)')};
 	border-radius: var(--border-radius);
 	padding: 6px;
 	font-size: 16px;
@@ -180,7 +180,7 @@ export const EmojiCategoryTab = styled.div<{ $active: boolean }>`
 	align-items: center;
 	justify-content: center;
 	transition: background-color 0.2s;
-	
+
 	&:hover {
 		background: rgba(var(--color-text), 0.15);
 	}
@@ -193,24 +193,24 @@ export const EmojiGrid = styled.div`
 	flex: 1;
 	overflow-y: auto;
 	overflow-x: hidden;
-	
+
 	/* Thin scrollbar */
 	scrollbar-width: thin;
 	scrollbar-color: rgba(var(--color-text), 0.3) transparent;
-	
+
 	&::-webkit-scrollbar {
 		width: 6px;
 	}
-	
+
 	&::-webkit-scrollbar-track {
 		background: transparent;
 	}
-	
+
 	&::-webkit-scrollbar-thumb {
 		background: rgba(var(--color-text), 0.3);
 		border-radius: 3px;
 	}
-	
+
 	&::-webkit-scrollbar-thumb:hover {
 		background: rgba(var(--color-text), 0.5);
 	}
@@ -228,7 +228,7 @@ export const EmojiButton = styled.button`
 	align-items: center;
 	justify-content: center;
 	height: 28px;
-	
+
 	&:hover {
 		background: rgba(var(--color-text), 0.1);
 	}
@@ -244,11 +244,11 @@ export const Send = styled.div<{ $active: boolean }>`
 	width: 28px;
 	height: 28px;
 
-	svg {		
+	svg {
 		width: 18px;
 		height: 18px;
-		margin-top:2px;
-		margin-right:2px;
+		margin-top: 2px;
+		margin-right: 2px;
 		color: white;
 	}
 

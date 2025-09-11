@@ -52,11 +52,11 @@ export const EmojiSearchInput = styled.input`
 	outline: none;
 	box-sizing: border-box;
 	height: 32px;
-	
+
 	&::placeholder {
 		color: rgba(var(--color-text), 0.5);
 	}
-	
+
 	&:focus {
 		background: rgba(var(--color-text), 0.15);
 	}
@@ -69,7 +69,7 @@ export const EmojiCategories = styled.div`
 `;
 
 export const EmojiCategoryTab = styled.div<{ $active: boolean }>`
-	background: ${props => props.$active ? 'rgba(var(--color-text), 0.15)' : 'rgba(var(--color-text), 0.05)'};
+	background: ${(props) => (props.$active ? 'rgba(var(--color-text), 0.15)' : 'rgba(var(--color-text), 0.05)')};
 	border-radius: var(--border-radius);
 	padding: 6px;
 	font-size: 16px;
@@ -79,7 +79,7 @@ export const EmojiCategoryTab = styled.div<{ $active: boolean }>`
 	align-items: center;
 	justify-content: center;
 	transition: background-color 0.2s;
-	
+
 	&:hover {
 		background: rgba(var(--color-text), 0.15);
 	}
@@ -92,24 +92,24 @@ export const EmojiGrid = styled.div`
 	flex: 1;
 	overflow-y: auto;
 	overflow-x: hidden;
-	
+
 	/* Thin scrollbar */
 	scrollbar-width: thin;
 	scrollbar-color: rgba(var(--color-text), 0.3) transparent;
-	
+
 	&::-webkit-scrollbar {
 		width: 6px;
 	}
-	
+
 	&::-webkit-scrollbar-track {
 		background: transparent;
 	}
-	
+
 	&::-webkit-scrollbar-thumb {
 		background: rgba(var(--color-text), 0.3);
 		border-radius: 3px;
 	}
-	
+
 	&::-webkit-scrollbar-thumb:hover {
 		background: rgba(var(--color-text), 0.5);
 	}
@@ -127,7 +127,7 @@ export const EmojiButton = styled.button`
 	align-items: center;
 	justify-content: center;
 	height: 28px;
-	
+
 	&:hover {
 		background: rgba(var(--color-text), 0.1);
 	}

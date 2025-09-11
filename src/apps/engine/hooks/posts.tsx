@@ -114,7 +114,8 @@ export const usePost = (txId: any) => {
 		}
 
 		setIsLoading(true);
-		libs.getAtomicAsset(txId)
+		libs
+			.getAtomicAsset(txId)
 			.then((fetchedPost: any) => {
 				setFullPost(fetchedPost);
 				setIsLoading(false);

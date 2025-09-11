@@ -110,13 +110,7 @@ export default defineConfig(({ mode }) => {
 			},
 		},
 		optimizeDeps: {
-			include: [
-				'buffer',
-				'process',
-				'crypto',
-				'stream',
-				'util'
-			],
+			include: ['buffer', 'process', 'crypto', 'stream', 'util'],
 		},
 		build: config[app].build,
 		server: {

@@ -6,7 +6,7 @@ export const defaultLayout: PortalLayout = {
 		wallpaper: '',
 		borderRadius: 0,
 		maxWidth: 1600,
-		padding: "0 20px"
+		padding: '0 20px',
 	},
 	header: {
 		layout: {

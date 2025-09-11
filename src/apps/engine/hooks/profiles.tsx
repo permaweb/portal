@@ -15,7 +15,7 @@ export const useProfile = (profileId: string) => {
 			setProfile(null);
 			return;
 		}
-		
+
 		if (!libs) {
 			setProfile(null);
 			return;
@@ -31,7 +31,7 @@ export const useProfile = (profileId: string) => {
 			setProfile(cached);
 			return;
 		}
-		
+
 		const cachedByWallet = localStorage.getItem(`profile-by-wallet-${profileId}`);
 		if (cachedByWallet) {
 			const parsed = JSON.parse(cachedByWallet);
