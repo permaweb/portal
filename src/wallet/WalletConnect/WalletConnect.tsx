@@ -162,12 +162,13 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 					disabled={!showWalletDropdown}
 				>
 					<S.PWrapper>
-						<Avatar owner={permawebProvider.profile} loading={isLoading} dimensions={{ wrapper: 35, icon: 21.5 }} callback={handlePress} />
-						{backupsNeeded > 0 && arProvider.walletAddress && (
-							<S.BackupWarning>
-								{backupsNeeded}
-							</S.BackupWarning>
-						)}
+						<Avatar
+							owner={permawebProvider.profile}
+							loading={isLoading}
+							dimensions={{ wrapper: 35, icon: 21.5 }}
+							callback={handlePress}
+						/>
+						{backupsNeeded > 0 && arProvider.walletAddress && <S.BackupWarning>{backupsNeeded}</S.BackupWarning>}
 						<div ref={wrapperRef} />
 					</S.PWrapper>
 					{showWalletDropdown && (
@@ -180,7 +181,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 									</S.DHeader>
 								</S.DHeaderFlex>
 							</S.DHeaderWrapper>
-							<TurboCredits showBorderBottom />
+							<TurboCredits showBorderBottom setShowFundUpload={setShowFundUpload} />
 							<S.DBodyWrapper>
 								<li onClick={() => setShowProfileManager(true)}>
 									<ReactSVG src={ASSETS.write} />
