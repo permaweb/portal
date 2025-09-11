@@ -209,6 +209,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 				tags: buildTags(params),
 				data: '',
 			});
+			console.log('UndernamesProvider: send', { action, params, msgId });
 			return msgId;
 		},
 		[libs]
@@ -381,7 +382,8 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 		async (name: string) => {
 			await send('Request', { Name: name });
 			await refreshRequests();
-			await refreshOwners(); // in case of auto-approval via reservation
+			await refreshOwners();
+			console.log('requested undername', name);
 		},
 		[send, refreshRequests, refreshOwners]
 	);

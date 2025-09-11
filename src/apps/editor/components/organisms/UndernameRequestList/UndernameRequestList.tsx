@@ -5,6 +5,7 @@ import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
 import * as S from './styles';
 import { UndernameRequestRow } from 'editor/components/molecules/UndernameRequestRow';
+import { useUndernamesProvider } from 'providers/UndernameProvider';
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
@@ -45,6 +46,7 @@ export default function UndernameRequestsList(props: {
 	isRequesting?: boolean; // NEW: disables submit while sending
 	showRequesterColumn?: boolean; // NEW: show requester column
 }) {
+	const { checkAvailability } = useUndernamesProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -62,11 +64,20 @@ export default function UndernameRequestsList(props: {
 		setError(validateUndername(next));
 	}, []);
 
-	const handleRequest = React.useCallback(() => {
+	const handleRequest = React.useCallback(async () => {
 		const err = validateUndername(name);
 		setError(err);
 		if (err) return;
-		props.onRequest(name.trim());
+		const availability = await checkAvailability(name);
+		if (!availability) {
+			setError('Name is already taken');
+			return;
+		}
+		if (availability.available && !availability.reserved) {
+			console.log('Requesting undername', name.trim());
+			// props.onRequest(name.trim());
+		}
+		// props.onRequest(name.trim());
 		// leave panel open; if you want to close on submit success, close it in parent after refresh
 	}, [name, props]);
 

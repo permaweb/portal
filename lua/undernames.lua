@@ -2,14 +2,14 @@ local json = require('json')
 
 State = State
 	or {
-		SuperAdmin = State and State.SuperAdmin or nil, -- single address
+		SuperAdmin = nil,
 		Controllers = {},
 		Owners = {},
 		Reserved = {},
 		Requests = {},
 		RequestSeq = 0,
 		Policy = {
-			MaxPerAddr = 5,
+			MaxPerEntity = 1,
 			RequireApproval = true,
 		},
 		Audit = {},
@@ -82,6 +82,39 @@ local function reply(Msg, ok, result)
 end
 
 -- =========================
+-- Owners helpers (fresh schema only)
+-- =========================
+local function Owners_get(name)
+	return State.Owners[name]
+end
+
+local function Owners_exists(name)
+	local rec = State.Owners[name]
+	return rec ~= nil and rec.owner ~= nil
+end
+
+local function Owners_set(name, owner, meta)
+	State.Owners[name] = {
+		owner = owner,
+		requestedAt = meta and meta.requestedAt or nil,
+		approvedAt = meta and meta.approvedAt or nil,
+		approvedBy = meta and meta.approvedBy or nil,
+		requestId = meta and meta.requestId or nil,
+		source = meta and meta.source or nil,
+		auto = meta and meta.auto or false,
+	}
+end
+
+local function Owners_countByAddress(addr)
+	local c = 0
+	for _, rec in pairs(State.Owners) do
+		if rec and rec.owner == addr then
+			c = c + 1
+		end
+	end
+	return c
+end
+-- =========================
 -- Controllers
 -- ========================
 
@@ -139,7 +172,7 @@ Reserved = {}
 function Reserved.add(actor, name, toAddr, Msg)
 	Utils.require_controller(actor)
 	name = Utils.normalize(name)
-	if State.Owners[name] then
+	if Owners_exists(name) then
 		error('name already registered')
 	end
 	State.Reserved[name] = { to = toAddr, by = actor, at = Utils.ts(Msg) }
@@ -174,7 +207,7 @@ Requests = {}
 --   decidedAt?, decidedBy?, reason?, metadata = {} }
 function Requests.create(requester, name, Msg)
 	name = Utils.normalize(name)
-	if State.Owners[name] then
+	if Owners_exists(name) then
 		error('name already registered')
 	end
 
@@ -231,11 +264,17 @@ function Requests.approve(actor, id, Msg)
 	if r.status ~= 'pending' then
 		error('request not pending')
 	end
-	if State.Owners[r.name] then
+	if Owners_exists(r.name) then
 		error('name already registered')
 	end
 
-	State.Owners[r.name] = r.requester
+	Owners_set(r.name, r.requester, {
+		requestedAt = r.createdAt,
+		approvedAt = Utils.ts(Msg),
+		approvedBy = actor,
+		requestId = r.id,
+		source = 'approval',
+	})
 	r.status = 'approved'
 	r.decidedAt = Utils.ts(Msg)
 	r.decidedBy = actor
@@ -295,13 +334,14 @@ end
 Ownership = {}
 
 function Ownership.owner_of(name)
-	return State.Owners[Utils.normalize(name)]
+	local rec = Owners_get(Utils.normalize(name))
+	return rec and rec.owner or nil
 end
 
 function Ownership.force_release(actor, name, reason, Msg)
-	Utils.require_controller(actor)
+	Utils.require_controller(actor) --- should be able to release by both controller and requester?
 	name = Utils.normalize(name)
-	if not State.Owners[name] then
+	if not Owners_exists(name) then
 		error('name not registered')
 	end
 	State.Owners[name] = nil
@@ -314,25 +354,17 @@ end
 -- =========================
 local function can_claim(addr, name)
 	name = Utils.normalize(name)
-	if State.Owners[name] then
+	if Owners_exists(name) then
 		return false, 'name taken'
 	end
-	-- reserved is informative only; no block here
-	local cap = tonumber(State.Policy.MaxPerAddr or 0)
+	local cap = tonumber(State.Policy.MaxPerEntity or 0)
 	if cap and cap > 0 then
-		local count = 0
-		for _, owner in pairs(State.Owners) do
-			if owner == addr then
-				count = count + 1
-			end
-		end
-		if count >= cap then
+		if Owners_countByAddress(addr) >= cap then
 			return false, 'per-address limit reached'
 		end
 	end
 	return true
 end
-
 -- =========================
 -- Handlers (AO entrypoints)
 -- =========================
@@ -423,14 +455,15 @@ Handlers.add('PortalRegistry.CheckAvailability', function(Msg)
 	end
 	local n = Utils.normalize(name)
 	local ok, reason = can_claim(Msg.From, n)
+	local rec = Owners_get(n)
 	local r = State.Reserved[n]
 	local reservedForCaller = r and r.to == Msg.From or false
-	local canRequest = (State.Owners[n] == nil) and not (r and r.to and r.to ~= Msg.From)
+	local canRequest = (rec == nil) and not (r and r.to and r.to ~= Msg.From)
 
 	reply(Msg, true, {
 		name = n,
-		available = (State.Owners[n] == nil),
-		takenBy = State.Owners[n],
+		available = (rec == nil),
+		takenBy = rec and rec.owner or nil,
 		reserved = r ~= nil,
 		reservedFor = r and r.to or nil,
 		reservedForCaller = reservedForCaller,
@@ -458,7 +491,13 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 			reply(Msg, false, { error = err })
 			return
 		end
-		State.Owners[nRequested] = Msg.From
+		Owners_set(nRequested, Msg.From, {
+			requestedAt = Utils.ts(Msg),
+			approvedAt = Utils.ts(Msg),
+			approvedBy = Msg.From, --self-approved
+			source = 'reserved',
+			auto = true,
+		})
 		State.Reserved[nRequested] = nil
 		Utils.audit(Msg.From, 'claim_reserved_for', { name = nRequested }, Msg)
 		reply(Msg, true, { status = 'approved', auto = true, name = nRequested, owner = Msg.From })
@@ -471,7 +510,13 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 			reply(Msg, false, { error = err })
 			return
 		end
-		State.Owners[nRequested] = Msg.From
+		Owners_set(nRequested, Msg.From, {
+			requestedAt = Utils.ts(Msg),
+			approvedAt = Utils.ts(Msg),
+			approvedBy = Msg.From,
+			source = 'self',
+			auto = true,
+		})
 		if rinfo then
 			State.Reserved[nRequested] = nil
 		end
@@ -566,15 +611,15 @@ Handlers.add('PortalRegistry.SetPolicy', function(Msg)
 
 	local updates = {}
 
-	-- MaxPerAddr (number)
-	if Msg.MaxPerAddr ~= nil then
-		local new_max_per_addr = tonumber(Msg.MaxPerAddr)
+	-- MaxPerEntity (number)
+	if Msg.MaxPerEntity ~= nil then
+		local new_max_per_addr = tonumber(Msg.MaxPerEntity)
 		if not new_max_per_addr or new_max_per_addr <= 0 then
-			reply(Msg, false, { error = 'MaxPerAddr must be a positive number' })
+			reply(Msg, false, { error = 'MaxPerEntity must be a positive number' })
 			return
 		end
-		State.Policy.MaxPerAddr = new_max_per_addr
-		updates.MaxPerAddr = new_max_per_addr
+		State.Policy.MaxPerEntity = new_max_per_addr
+		updates.MaxPerEntity = new_max_per_addr
 	end
 
 	-- RequireApproval (boolean)
@@ -605,8 +650,17 @@ end)
 -- Listings & audit
 Handlers.add('PortalRegistry.ListUndernames', function(Msg)
 	local rows = {}
-	for name, owner in pairs(State.Owners) do
-		table.insert(rows, { name = name, owner = owner })
+	for name, rec in pairs(State.Owners) do
+		table.insert(rows, {
+			name = name,
+			owner = rec.owner,
+			requestedAt = rec.requestedAt,
+			approvedAt = rec.approvedAt,
+			approvedBy = rec.approvedBy,
+			requestId = rec.requestId,
+			source = rec.source,
+			auto = rec.auto,
+		})
 	end
 	table.sort(rows, function(a, b)
 		return a.name < b.name

@@ -11,7 +11,7 @@ export type UndernameRequest = {
 	name: string;
 	requester: string;
 	status: RequestStatus;
-	createdAt: number;
+	createdAt?: number;
 	decidedAt?: number;
 	decidedBy?: string;
 	reason?: string;
