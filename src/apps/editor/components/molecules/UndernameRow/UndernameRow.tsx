@@ -13,7 +13,7 @@ export default function UndernameRow(props: { row: UndernameOwnerRow }) {
 
 	return (
 		<>
-			<S.RowWrapper className={'fade-in'} onClick={() => setShowPanel(true)}>
+			<S.RowWrapper className={'fade-in'}>
 				<S.RowHeader>
 					<p>{props.row.name}</p>
 				</S.RowHeader>
