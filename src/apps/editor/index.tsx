@@ -24,6 +24,7 @@ import { PermawebProvider, usePermawebProvider } from 'providers/PermawebProvide
 import { WanderInit } from 'wallet/WanderInit';
 
 import * as S from './styles';
+import { UndernamesProvider } from 'providers/UndernameProvider';
 
 const views = (import.meta as any).glob('./views/**/index.tsx');
 
@@ -246,8 +247,11 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 							<PermawebProvider>
 								<NotificationProvider>
 									<PortalProvider>
-										<GlobalStyle />
-										<App />
+										<UndernamesProvider>
+											<GlobalStyle />
+											<App />
+											<WalletConnect app="editor" />
+										</UndernamesProvider>
 									</PortalProvider>
 								</NotificationProvider>
 							</PermawebProvider>

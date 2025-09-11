@@ -1,13 +1,7 @@
 // src/providers/UndernamesProvider.tsx
 import * as React from 'react';
-import { readProcess, sendMessage } from '@permaweb/libs';
-
-import {
-	UNDERNAMES_PROCESS_ID,
-	UNDERNAMES_HANDLERS,
-	type HandlerKey,
-	type HandlerSpec,
-} from '../processes/undernames/constants';
+import { UNDERNAMES_PROCESS_ID, UNDERNAMES_HANDLERS, type HandlerKey } from '../processes/undernames/constants';
+import { usePermawebProvider } from './PermawebProvider';
 
 /** ----- Types that mirror your Lua state ----- */
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
@@ -85,7 +79,7 @@ type UndernamesContextState = {
 const DEFAULT_POLICY: Policy = { MaxPerAddr: 4, RequireApproval: true };
 
 const DEFAULT_CTX: UndernamesContextState = {
-	ready: Boolean(UNDERNAMES_PROCESS_ID && UNDERNAMES_PROCESS_ID !== 'REPLACE_ME_WITH_PROCESS_ID'),
+	ready: Boolean(UNDERNAMES_PROCESS_ID),
 	loading: false,
 	error: null,
 
@@ -173,9 +167,8 @@ function normalizeRequests(arr: any[]): UndernameRequest[] {
 
 /** ----- Provider ----- */
 export function UndernamesProvider(props: { children: React.ReactNode }) {
-	const [ready] = React.useState<boolean>(
-		Boolean(UNDERNAMES_PROCESS_ID && UNDERNAMES_PROCESS_ID !== 'REPLACE_ME_WITH_PROCESS_ID')
-	);
+	const { libs } = usePermawebProvider();
+	const [ready] = React.useState<boolean>(Boolean(UNDERNAMES_PROCESS_ID));
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [error, setError] = React.useState<string | null>(null);
 
@@ -188,36 +181,45 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	const [superAdmin, setSuperAdmin] = React.useState<string | null>(null);
 
 	/** low-level read */
-	const read = React.useCallback(async (key: HandlerKey, params?: Record<string, any>) => {
-		const action = UNDERNAMES_HANDLERS[key].action;
-		const res = await readProcess({
-			processId: UNDERNAMES_PROCESS_ID,
-			action: act(action),
-			tags: buildTags(params),
-			data: '',
-		});
-		return tryParse(res);
-	}, []);
+	const read = React.useCallback(
+		async (key: HandlerKey, params?: Record<string, any>) => {
+			const action = UNDERNAMES_HANDLERS[key].action;
+			const res = await libs.readProcess({
+				processId: UNDERNAMES_PROCESS_ID,
+				action: act(action),
+				tags: buildTags(params),
+				data: {},
+			});
+			return tryParse(res);
+		},
+		[libs]
+	);
 
 	/** low-level write */
-	const send = React.useCallback(async (key: HandlerKey, params?: Record<string, any>) => {
-		const action = UNDERNAMES_HANDLERS[key].action;
-		const msgId = await sendMessage({
-			processId: UNDERNAMES_PROCESS_ID,
-			action: act(action),
-			tags: buildTags(params),
-			data: '',
-		});
-		return msgId;
-	}, []);
+	const send = React.useCallback(
+		async (key: HandlerKey, params?: Record<string, any>) => {
+			const action = UNDERNAMES_HANDLERS[key].action;
+			const msgId = await libs.sendMessage({
+				processId: UNDERNAMES_PROCESS_ID,
+				action: act(action),
+				tags: buildTags(params),
+				data: '',
+			});
+			return msgId;
+		},
+		[libs]
+	);
 
 	/** refresh everything with Export */
 	const refreshAll = React.useCallback(async () => {
 		if (!ready) return;
+		console.log('UndernamesProvider: refreshAll', libs);
 		setLoading(true);
 		setError(null);
 		try {
+			console.log('Reading undernames export...');
 			const out = await read('Export');
+			console.log('Undernames export', out);
 			// expected: { controllers, policy, reserved, owners, requests, requestSeq, superAdmin? }
 			setControllers(Array.isArray(out?.controllers) ? out.controllers : controllers);
 			setPolicyState(
@@ -240,7 +242,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 		} finally {
 			setLoading(false);
 		}
-	}, [controllers, ready]);
+	}, [controllers, ready, libs]);
 
 	const refreshOwners = React.useCallback(async () => {
 		if (!ready) return;
@@ -434,10 +436,12 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 
 	// initial load
 	React.useEffect(() => {
+		if (!libs) return;
 		if (!ready) return;
-		void refreshAll();
+		console.log('UndernamesProvider: libs ready', libs);
+		refreshAll();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ready]);
+	}, [ready, libs]);
 
 	const value: UndernamesContextState = {
 		ready,
