@@ -12,6 +12,7 @@
 		]
 	},
 	"scripts": {
+		"prepare": "husky install",
 		"clean:install": "rm -rf node_modules package-lock.json || true && npm cache clean --force && npm install",
 		"format": "prettier --write .",
 		"lint:lang": "node ./scripts/sort-language.js --check",
