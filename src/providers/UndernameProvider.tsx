@@ -140,9 +140,8 @@ function act(n: string) {
 	return n; // we pass the full action from handlers (already includes prefix)
 }
 
-function buildTags<K extends HandlerKey>(key: K, params?: Record<string, string | number | boolean>) {
-	const spec: HandlerSpec = UNDERNAMES_HANDLERS[key];
-	const tags: { name: string; value: string }[] = [{ name: 'Action', value: spec.action }];
+function buildTags(params?: Record<string, string | number | boolean>) {
+	const tags: { name: string; value: string }[] = [];
 	if (params) {
 		for (const [k, v] of Object.entries(params)) {
 			if (v === undefined || v === null) continue;
@@ -194,7 +193,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 		const res = await readProcess({
 			processId: UNDERNAMES_PROCESS_ID,
 			action: act(action),
-			tags: buildTags(key, params),
+			tags: buildTags(params),
 			data: '',
 		});
 		return tryParse(res);
@@ -206,7 +205,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 		const msgId = await sendMessage({
 			processId: UNDERNAMES_PROCESS_ID,
 			action: act(action),
-			tags: buildTags(key, params),
+			tags: buildTags(params),
 			data: '',
 		});
 		return msgId;
