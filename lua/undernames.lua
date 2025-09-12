@@ -471,7 +471,10 @@ Handlers.add('PortalRegistry.CheckAvailability', function(Msg)
 	local rec = Owners_get(n)
 	local r = State.Reserved[n]
 	local reservedForCaller = r and r.to == Msg.From or false
-	local canRequest = (rec == nil) and not (r and r.to and r.to ~= Msg.From)
+	local count = Owners_countByAddress(Msg.From)
+	local canRequest = (rec == nil)
+		and not (r and r.to and r.to ~= Msg.From)
+		and (State.Policy.MaxPerEntity == nil or count < State.Policy.MaxPerEntity)
 
 	reply(Msg, true, {
 		name = n,
@@ -492,6 +495,11 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 	local name_requested = Msg.Name
 	if not name_requested or #name_requested == 0 then
 		reply(Msg, false, { error = 'Name tag required' })
+		return
+	end
+	local requestersOwnedCount = Owners_countByAddress(Msg.From)
+	if State.Policy.MaxPerEntity and requestersOwnedCount >= State.Policy.MaxPerEntity then
+		reply(Msg, false, { error = 'per-address limit reached' })
 		return
 	end
 	local nRequested = Utils.normalize(name_requested)

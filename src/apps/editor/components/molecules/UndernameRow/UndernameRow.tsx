@@ -5,6 +5,11 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 import { TypeUndernameOwnerRow } from 'editor/components/organisms/UndernamesList/UndernamesList';
+import { useUndernamesProvider } from 'providers/UndernameProvider';
+import { IS_TESTNET } from 'helpers/config';
+import { ANT, ArconnectSigner, ARIO } from '@ar.io/sdk';
+import { getPortalIdFromURL } from 'helpers/utils';
+import { useNotifications } from 'providers/NotificationProvider';
 
 function fmtTs(ts?: number) {
 	return ts ? new Date(ts).toLocaleString() : '—';
@@ -21,9 +26,34 @@ export function shortAddr(a?: string) {
 }
 
 export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
+	const { forceRelease } = useUndernamesProvider();
+	const { addNotification } = useNotifications();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+
 	const [showPanel, setShowPanel] = React.useState(false);
+	const [reason, setReason] = React.useState('');
+
+	const handleRelease = async () => {
+		try {
+			const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
+			const arnsRecord = await ario.getArNSRecord({ name: 'bhavya-gor-experiments' });
+			const signer = new ArconnectSigner(window.arweaveWallet);
+			const ant = ANT.init({
+				processId: arnsRecord.processId,
+				signer,
+			});
+			const { id: txId } = await ant.removeUndernameRecord(
+				{ undername: props.row.name },
+				{ tags: [{ name: 'PortalReleaseUndername', value: props.row.name }] }
+			);
+			await forceRelease(props.row.name, 'ADD_REASON_BLOCK');
+			addNotification(`Undername released`, 'success');
+			setShowPanel(false);
+		} catch (error) {
+			console.error('Failed to release undername:', error);
+		}
+	};
 
 	return (
 		<>
@@ -98,18 +128,28 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 						<span>{language?.auto || 'Auto'}</span>
 						<span>{props.row.auto ? 'Yes' : 'No'}</span>
 					</S.KV>
-
-					<S.ActionsWrapper>
-						<Button
-							type="warning"
-							label={language?.release || 'Release'}
-							handlePress={(e) => {
-								e.stopPropagation();
-								console.log('release undername', props.row.name);
-								setShowPanel(false);
-							}}
-						/>
-					</S.ActionsWrapper>
+					<S.Section>
+						<S.SectionHeader>Release Undername</S.SectionHeader>
+						<S.SectionBody>
+							<S.TextArea
+								rows={4}
+								placeholder={language?.reason || 'Reason (optional)'}
+								value={reason}
+								onChange={(e) => setReason(e.target.value)}
+							/>
+						</S.SectionBody>
+						<S.SectionFooter>
+							<Button
+								type="warning"
+								label={language?.release || 'Release'}
+								handlePress={(e) => {
+									e.stopPropagation();
+									handleRelease();
+									setShowPanel(false);
+								}}
+							/>
+						</S.SectionFooter>
+					</S.Section>
 				</S.PanelContent>
 			</Panel>
 		</>

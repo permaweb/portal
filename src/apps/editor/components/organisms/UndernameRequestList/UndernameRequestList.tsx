@@ -9,6 +9,7 @@ import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { IS_TESTNET } from 'helpers/config';
 import { ANT, ArconnectSigner, ARIO } from '@ar.io/sdk';
 import { getPortalIdFromURL } from 'helpers/utils';
+import { useNotifications } from 'providers/NotificationProvider';
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
@@ -43,13 +44,14 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 	const language = languageProvider.object[languageProvider.current];
 
 	// pagination
+	const { addNotification } = useNotifications();
 	const [currentPage, setCurrentPage] = React.useState(1);
 
 	// claim panel state
 	const [openClaim, setOpenClaim] = React.useState(false);
 	const [name, setName] = React.useState('');
 	const [error, setError] = React.useState<string | null>(null);
-
+	const [loading, setLoading] = React.useState(false);
 	const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		const next = e.target.value.toLowerCase();
 		setName(next);
@@ -60,23 +62,25 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 		const err = validateUndername(name);
 		setError(err);
 		if (err) return;
+		setLoading(true);
 		const availability = await checkAvailability(name);
 		if (!availability) {
 			setError('Name is already taken');
+			addNotification('Name is already taken', 'warning');
 			return;
 		}
 		if (availability.available && !availability.reserved) {
 			await request(name.trim());
 			setName('');
 			setOpenClaim(false);
+			addNotification('Undername request submitted', 'success');
+			setLoading(false);
 		}
 	}, [name, props]);
 
 	// data shaping
 	const processed = React.useMemo(() => {
 		let rows = requests;
-		// filter non approved ones only
-		rows = rows.filter((r) => r.status !== 'approved');
 		if (props.filterByRequester) rows = rows.filter((r) => r.requester === props.filterByRequester);
 		return [...rows].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 	}, [requests, props.filterByRequester]);
@@ -88,8 +92,9 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 	}, [totalPages]);
 
 	const handleAdminApprove = async (id: number) => {
+		setLoading(true);
 		const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
-		const arnsRecord = await ario.getArNSRecord({ name: 'portal' });
+		const arnsRecord = await ario.getArNSRecord({ name: 'bhavya-gor-experiments' });
 		const signer = new ArconnectSigner(window.arweaveWallet);
 		const portalId = getPortalIdFromURL();
 		const ant = ANT.init({
@@ -108,11 +113,16 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 			{ tags: [{ name: 'PortalNewUndername', value: undernameRow.name }] }
 		);
 		console.log('Undername set in transaction', txId);
+		setLoading(false);
 		await approve(id);
+		addNotification(`Undername ${undernameRow.name} approved`, 'success');
 	};
 
 	const handleAdminReject = async (id: number, reason: string) => {
+		setLoading(true);
 		await reject(id, reason);
+		setLoading(false);
+		addNotification('Undername request rejected', 'success');
 	};
 
 	const startIndex = (currentPage - 1) * PAGE_SIZE;
@@ -131,9 +141,19 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 	const content = React.useMemo(() => {
 		if (processed.length === 0) {
 			return (
-				<S.WrapperEmpty>
-					<p>{language?.noRequestsFound || 'No requests found'}</p>
-				</S.WrapperEmpty>
+				<>
+					<S.Toolbar>
+						<div />
+						<Button
+							type={'alt1'}
+							label={language?.claimUndername || 'Claim undername'}
+							handlePress={() => setOpenClaim(true)}
+						/>
+					</S.Toolbar>
+					<S.WrapperEmpty>
+						<p>{language?.noRequestsFound || 'No requests found'}</p>
+					</S.WrapperEmpty>
+				</>
 			);
 		}
 		return (
@@ -144,6 +164,7 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 						type={'alt1'}
 						label={language?.claimUndername || 'Claim undername'}
 						handlePress={() => setOpenClaim(true)}
+						disabled={loading}
 					/>
 				</S.Toolbar>
 

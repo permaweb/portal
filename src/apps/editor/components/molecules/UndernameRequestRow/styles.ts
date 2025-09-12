@@ -156,7 +156,7 @@ export const Sections = styled.div`
 
 export const Section = styled.div`
 	border: 1px solid ${(p) => p.theme.colors.border.primary};
-	border-radius: ${(p) => p.theme.dimensions?.radius?.primary || '8px'};
+	border-radius: 8px;
 	background: ${(p) => p.theme.colors.container.primary.background};
 	overflow: hidden;
 `;

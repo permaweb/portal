@@ -116,3 +116,64 @@ export const KV = styled.div`
 		font-size: ${(p) => p.theme.typography.size.xxSmall};
 	}
 `;
+
+export const Sections = styled.div`
+	display: grid;
+	gap: 16px;
+	margin-top: 8px;
+`;
+
+export const Section = styled.div`
+	border: 1px solid ${(p) => p.theme.colors.border.primary};
+	border-radius: 8px;
+	background: ${(p) => p.theme.colors.container.primary.background};
+	overflow: hidden;
+`;
+
+export const SectionHeader = styled.div`
+	padding: 10px 12px;
+	background: ${(p) => p.theme.colors.container.alt1.background};
+	border-bottom: 1px solid ${(p) => p.theme.colors.border.primary};
+	font-family: ${(p) => p.theme.typography.family.primary};
+	font-weight: ${(p) => p.theme.typography.weight.bold};
+	font-size: ${(p) => p.theme.typography.size.small};
+	color: ${(p) => p.theme.colors.font.primary};
+`;
+
+export const SectionBody = styled.div`
+	padding: 12px;
+	display: grid;
+	gap: 10px;
+`;
+
+export const SectionFooter = styled.div`
+	padding: 10px 12px;
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	border-top: 1px solid ${(p) => p.theme.colors.border.primary};
+`;
+
+export const Placeholder = styled.div`
+	padding: 12px;
+	border: 1px dashed ${(p) => p.theme.colors.border.primary};
+	border-radius: ;
+	color: ${(p) => p.theme.colors.font.secondary};
+	font-size: ${(p) => p.theme.typography.size.small};
+`;
+
+export const TextArea = styled.textarea`
+	width: 100%;
+	resize: vertical;
+	min-height: 96px;
+	padding: 10px 12px;
+	border: 1px solid ${(p) => p.theme.colors.border.primary};
+	border-radius: 8px;
+	background: ${(p) => p.theme.colors.container.primary.background};
+	color: ${(p) => p.theme.colors.font.primary};
+	font-size: ${(p) => p.theme.typography.size.base};
+	font-family: ${(p) => p.theme.typography.family.primary};
+	&:focus-visible {
+		outline: 2px solid ${(p) => p.theme.colors.primary1};
+	}
+`;

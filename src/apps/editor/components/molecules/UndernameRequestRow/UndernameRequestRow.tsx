@@ -15,6 +15,7 @@ export default function UndernameRequestRow(props: {
 	row: UndernameRequest;
 	onApprove: (id: number) => Promise<void>;
 	onReject: (id: number, reason: string) => Promise<void>;
+	loading: boolean;
 	showRequester?: boolean;
 }) {
 	const languageProvider = useLanguageProvider();
@@ -86,8 +87,9 @@ export default function UndernameRequestRow(props: {
 								<S.SectionFooter>
 									<Button
 										type={'alt1'}
-										label={language?.approve || 'Approve'}
+										label={props.loading ? language?.approving || 'Approving...' : language?.approve || 'Approve'}
 										handlePress={() => props.onApprove(props.row.id)}
+										disabled={props.loading}
 									/>
 								</S.SectionFooter>
 							</S.Section>
@@ -105,7 +107,7 @@ export default function UndernameRequestRow(props: {
 								<S.SectionFooter>
 									<Button
 										type={'warning'}
-										label={language?.reject || 'Reject'}
+										label={props.loading ? language?.rejecting || 'Rejecting...' : language?.reject || 'Reject'}
 										handlePress={() => {
 											props.onReject(props.row.id, reason || '');
 											setOpen(false);
