@@ -68,8 +68,6 @@ export default function Categories(props: {
 		refreshCurrentPortal: portalProvider.refreshCurrentPortal,
 	});
 
-	console.log(categoryLoading);
-
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
 			if (portalProvider.current.categories) setCategoryOptions(portalProvider.current.categories);

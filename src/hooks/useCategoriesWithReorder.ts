@@ -443,36 +443,45 @@ export function useCategoriesWithReorder(props: {
 		const flattened = flattenCategories(categoryOptions);
 		const dragged = flattened.find((item) => item.category.id === update.draggableId);
 
-		// Use the destination index to find which category we're near
-		let bestParentCandidate = null;
-
-		if (mouseX > 850 && destination.index > 0) {
-			// Look at the category just before the drop destination
-			const potentialParent = flattened[destination.index - 1];
-
-			if (potentialParent && dragged) {
-				const canBeChild =
-					!potentialParent.path.startsWith(dragged.path + '.') && potentialParent.category.id !== dragged.category.id;
-
-				if (canBeChild) {
-					bestParentCandidate = potentialParent;
-				}
-			}
+		if (!dragged) {
+			setDragOverId(null);
+			setShowChildDropZone(false);
+			return;
 		}
 
-		// If no destination-based parent, fall back to checking all categories
-		if (!bestParentCandidate && mouseX > 850) {
-			for (let i = 0; i < flattened.length; i++) {
-				const potentialParent = flattened[i];
+		// Find the category element we're hovering over based on destination index
+		let hoveredCategory = null;
 
-				if (!dragged || !potentialParent) continue;
+		// Use destination index to find the category we're dropping near
+		if (destination.index < flattened.length) {
+			hoveredCategory = flattened[destination.index];
+		} else if (destination.index > 0 && destination.index >= flattened.length) {
+			// If dropping at the end, use the last category
+			hoveredCategory = flattened[flattened.length - 1];
+		}
 
+		let bestParentCandidate = null;
+
+		// Only show parent relationship if:
+		// 1. Mouse is significantly to the right (indicating intent to nest)
+		// 2. The target category can be a valid parent
+		if (mouseX > 850) {
+			let potentialParent = null;
+
+			// Find the category that should become the parent
+			// This should be the category immediately before the current drop position
+			// or the category we're hovering over if we're dropping at the end
+			if (destination.index > 0) {
+				potentialParent = flattened[destination.index - 1];
+			}
+
+			if (potentialParent && potentialParent.category.id !== dragged.category.id) {
 				const canBeChild =
-					!potentialParent.path.startsWith(dragged.path + '.') && potentialParent.category.id !== dragged.category.id;
+					!potentialParent.path.startsWith(dragged.path + '.') && // Not dragging into own descendant
+					!(dragged.path.startsWith(potentialParent.path + '.') && dragged.level === potentialParent.level + 1); // Not already a direct child
 
 				if (canBeChild) {
 					bestParentCandidate = potentialParent;
-					break; // Take the first valid one
 				}
 			}
 		}
