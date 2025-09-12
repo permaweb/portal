@@ -5,7 +5,6 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
-import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Select } from 'components/atoms/Select';

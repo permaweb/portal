@@ -51,7 +51,6 @@ export function useCategoriesWithReorder(props: {
 					rects.set(id, element.getBoundingClientRect());
 				}
 			});
-			console.log('Updated element rects:', rects.size, 'elements from refs');
 		}
 		setCategoryElementRects(rects);
 	}, [props.allowReorder]);
@@ -61,15 +60,12 @@ export function useCategoriesWithReorder(props: {
 		const handleMouseMove = (event: MouseEvent) => {
 			if (isDragging) {
 				setMouseX(event.clientX);
-				// console.log('Mouse tracking:', event.clientX);
 			}
 		};
 
 		if (isDragging) {
-			console.log('Starting mouse tracking');
 			document.addEventListener('mousemove', handleMouseMove);
 			return () => {
-				console.log('Stopping mouse tracking');
 				document.removeEventListener('mousemove', handleMouseMove);
 			};
 		}
@@ -80,7 +76,7 @@ export function useCategoriesWithReorder(props: {
 			setCategoryLoading(true);
 			try {
 				const effectiveParent = getEffectiveParentId();
-				console.log('Adding new category under parent ID:', effectiveParent);
+
 				const newCategory: PortalCategoryType = {
 					id: Date.now().toString(),
 					name: newCategoryName,
@@ -132,7 +128,7 @@ export function useCategoriesWithReorder(props: {
 
 				props.refreshCurrentPortal();
 
-				console.log(`Category update: ${categoryUpdateId}`);
+				console.log(`Categories update: ${categoryUpdateId}`);
 
 				if (props.selectOnAdd) props.setCategories([...props.categories, newCategory]);
 
@@ -193,7 +189,7 @@ export function useCategoriesWithReorder(props: {
 
 				props.refreshCurrentPortal();
 
-				console.log(`Category update: ${categoryUpdateId}`);
+				console.log(`Categories update: ${categoryUpdateId}`);
 
 				setCategoryOptions(updatedCategories);
 				addNotification(`${language?.categoriesUpdated}!`, 'success');
@@ -291,8 +287,6 @@ export function useCategoriesWithReorder(props: {
 	};
 
 	const handleDragEnd = async (result: any) => {
-		console.log('Drag ended - cleaning up states');
-
 		// Store dragOverId before clearing it for logic use
 		const activeDragOverId = dragOverId;
 
@@ -303,9 +297,6 @@ export function useCategoriesWithReorder(props: {
 		setShowChildDropZone(false);
 		setMouseX(0);
 		draggedElementRef.current = null;
-
-		console.log('Drag result:', result);
-		console.log('Active dragOverId was:', activeDragOverId);
 
 		if (!result.destination || props.unauthorized) return;
 		const { source, destination } = result;
@@ -330,8 +321,6 @@ export function useCategoriesWithReorder(props: {
 		let shouldMakeChild = false;
 		let newParent = null;
 
-		console.log('handleDragEnd - activeDragOverId:', activeDragOverId, 'destination.index:', destination.index);
-
 		if (activeDragOverId) {
 			// Find the parent based on activeDragOverId (which was set during drag update)
 			const potentialParent = flattened.find((item) => item.category.id === activeDragOverId);
@@ -343,12 +332,6 @@ export function useCategoriesWithReorder(props: {
 				potentialParent.category.id !== dragged.category.id; // Not same category
 
 			if (canBeChild) {
-				console.log(
-					'Making child relationship - parent:',
-					potentialParent.category.name,
-					'child:',
-					dragged.category.name
-				);
 				shouldMakeChild = true;
 				newParent = potentialParent;
 			}
@@ -356,11 +339,7 @@ export function useCategoriesWithReorder(props: {
 
 		let reordered: PortalCategoryType[];
 
-		console.log(shouldMakeChild);
-		console.log(newParent);
-
 		if (shouldMakeChild && newParent) {
-			console.log('Creating child relationship...');
 			// Make the dragged item a child of the new parent
 			const subtree = flattened.filter(
 				(item) => item.path === dragged.path || item.path.startsWith(dragged.path + '.')
@@ -369,25 +348,11 @@ export function useCategoriesWithReorder(props: {
 				(item) => !(item.path === dragged.path || item.path.startsWith(dragged.path + '.'))
 			);
 
-			console.log(
-				'Subtree to move:',
-				subtree.map((item) => item.category.name)
-			);
-			console.log(
-				'Remaining items:',
-				remaining.map((item) => item.category.name)
-			);
-
 			// Update the dragged item's level to be child of new parent
 			const updatedSubtree = subtree.map((item) => ({
 				...item,
 				level: item.level - dragged.level + newParent.level + 1,
 			}));
-
-			console.log(
-				'Updated subtree levels:',
-				updatedSubtree.map((item) => `${item.category.name} (level ${item.level})`)
-			);
 
 			// Find insertion point after the new parent and its existing children
 			let insertIdx = 0;
@@ -402,15 +367,9 @@ export function useCategoriesWithReorder(props: {
 				}
 			}
 
-			console.log('Insertion index:', insertIdx);
 			const newFlattened = [...remaining.slice(0, insertIdx), ...updatedSubtree, ...remaining.slice(insertIdx)];
-			console.log(
-				'New flattened structure:',
-				newFlattened.map((item) => `${item.category.name} (level ${item.level})`)
-			);
 
 			reordered = reconstructHierarchy(newFlattened);
-			console.log('Reconstructed hierarchy:', reordered);
 		} else {
 			// Regular reordering logic
 			const subtree = flattened.filter(
@@ -432,6 +391,7 @@ export function useCategoriesWithReorder(props: {
 		setCategoryOptions(reordered);
 
 		if (arProvider.wallet && props.portalId) {
+			setCategoryLoading(true);
 			try {
 				const categoryUpdateId = await permawebProvider.libs.updateZone(
 					{ Categories: permawebProvider.libs.mapToProcessCase(reordered) },
@@ -446,6 +406,7 @@ export function useCategoriesWithReorder(props: {
 			} catch (e: any) {
 				addNotification(e.message ?? 'Error reordering categories', 'warning');
 			}
+			setCategoryLoading(false);
 		}
 	};
 
@@ -465,8 +426,6 @@ export function useCategoriesWithReorder(props: {
 		setIsDragging(true);
 		setMouseX(0);
 
-		console.log('Drag started - reset all states');
-
 		// Update element rects immediately when drag starts
 		setTimeout(() => {
 			updateElementRects();
@@ -484,55 +443,53 @@ export function useCategoriesWithReorder(props: {
 		const flattened = flattenCategories(categoryOptions);
 		const dragged = flattened.find((item) => item.category.id === update.draggableId);
 
-		console.log('Drag update:', {
-			destinationIndex: destination.index,
-			mouseX,
-			draggedId: update.draggableId,
-			elementRectsSize: categoryElementRects.size,
-		});
-
-		// Use the destination index to find which category we're near
-		let bestParentCandidate = null;
-
-		if (mouseX > 850 && destination.index > 0) {
-			// Look at the category just before the drop destination
-			const potentialParent = flattened[destination.index - 1];
-
-			if (potentialParent && dragged) {
-				const canBeChild =
-					!potentialParent.path.startsWith(dragged.path + '.') && potentialParent.category.id !== dragged.category.id;
-
-				if (canBeChild) {
-					console.log('Checking destination-based parent:', potentialParent.category.name);
-					bestParentCandidate = potentialParent;
-				}
-			}
+		if (!dragged) {
+			setDragOverId(null);
+			setShowChildDropZone(false);
+			return;
 		}
 
-		// If no destination-based parent, fall back to checking all categories
-		if (!bestParentCandidate && mouseX > 850) {
-			for (let i = 0; i < flattened.length; i++) {
-				const potentialParent = flattened[i];
+		// Find the category element we're hovering over based on destination index
+		let hoveredCategory = null;
 
-				if (!dragged || !potentialParent) continue;
+		// Use destination index to find the category we're dropping near
+		if (destination.index < flattened.length) {
+			hoveredCategory = flattened[destination.index];
+		} else if (destination.index > 0 && destination.index >= flattened.length) {
+			// If dropping at the end, use the last category
+			hoveredCategory = flattened[flattened.length - 1];
+		}
 
+		let bestParentCandidate = null;
+
+		// Only show parent relationship if:
+		// 1. Mouse is significantly to the right (indicating intent to nest)
+		// 2. The target category can be a valid parent
+		if (mouseX > 850) {
+			let potentialParent = null;
+
+			// Find the category that should become the parent
+			// This should be the category immediately before the current drop position
+			// or the category we're hovering over if we're dropping at the end
+			if (destination.index > 0) {
+				potentialParent = flattened[destination.index - 1];
+			}
+
+			if (potentialParent && potentialParent.category.id !== dragged.category.id) {
 				const canBeChild =
-					!potentialParent.path.startsWith(dragged.path + '.') && potentialParent.category.id !== dragged.category.id;
+					!potentialParent.path.startsWith(dragged.path + '.') && // Not dragging into own descendant
+					!(dragged.path.startsWith(potentialParent.path + '.') && dragged.level === potentialParent.level + 1); // Not already a direct child
 
 				if (canBeChild) {
-					console.log('Fallback check for:', potentialParent.category.name);
 					bestParentCandidate = potentialParent;
-					break; // Take the first valid one
 				}
 			}
 		}
 
 		if (bestParentCandidate) {
-			console.log('Setting dragOverId to:', bestParentCandidate.category.name);
 			setDragOverId(bestParentCandidate.category.id);
 			setShowChildDropZone(true);
 		} else {
-			console.log('Clearing dragOverId');
 			setDragOverId(null);
 			setShowChildDropZone(false);
 		}

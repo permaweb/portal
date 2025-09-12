@@ -248,9 +248,6 @@ export default function Categories(props: {
 												</Draggable>
 												{(() => {
 													const shouldShow = showChildDropZone && dragOverId === item.category.id;
-													if (shouldShow) {
-														console.log('Showing ChildDropZone for:', item.category.name);
-													}
 													return shouldShow ? <S.ChildDropZone visible={true} level={item.level} /> : null;
 												})()}
 											</React.Fragment>

@@ -100,7 +100,7 @@ export const BodyWrapper = styled.div`
 `;
 
 export const CategoriesBodyWrapper = styled(BodyWrapper)`
-	margin: 20px 0 0 0;
+	margin: 0;
 `;
 
 export const TopicsBodyWrapper = styled(BodyWrapper)``;

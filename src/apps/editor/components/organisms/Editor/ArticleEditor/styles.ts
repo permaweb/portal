@@ -34,7 +34,7 @@ export const EditorWrapper = styled.div<{ panelOpen: boolean }>`
 		padding: 0;
 	}
 
-	@media (min-width: ${STYLING.cutoffs.max}) {
+	@media (min-width: ${STYLING.cutoffs.maxEditor}) {
 		transition: none;
 	}
 `;

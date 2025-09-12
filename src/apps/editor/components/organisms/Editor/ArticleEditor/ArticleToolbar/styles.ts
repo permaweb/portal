@@ -104,7 +104,7 @@ export const Panel = styled.div<{ open: boolean }>`
 		border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
 	}
 
-	@media (min-width: ${STYLING.cutoffs.max}) {
+	@media (min-width: ${STYLING.cutoffs.maxEditor}) {
 		display: ${(props) => (props.open ? 'block' : 'none')};
 	}
 `;
