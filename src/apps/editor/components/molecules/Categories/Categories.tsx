@@ -68,6 +68,8 @@ export default function Categories(props: {
 		refreshCurrentPortal: portalProvider.refreshCurrentPortal,
 	});
 
+	console.log(categoryLoading);
+
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
 			if (portalProvider.current.categories) setCategoryOptions(portalProvider.current.categories);
@@ -248,9 +250,6 @@ export default function Categories(props: {
 												</Draggable>
 												{(() => {
 													const shouldShow = showChildDropZone && dragOverId === item.category.id;
-													if (shouldShow) {
-														console.log('Showing ChildDropZone for:', item.category.name);
-													}
 													return shouldShow ? <S.ChildDropZone visible={true} level={item.level} /> : null;
 												})()}
 											</React.Fragment>
