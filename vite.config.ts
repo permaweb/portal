@@ -26,57 +26,24 @@ export default defineConfig(({ mode }) => {
 					input: path.resolve(root, 'index.html'),
 					plugins: [
 						polyfillNode(),
-						visualizer({
-							filename: 'dist/bundle-analysis.html',
-							open: false,
-							gzipSize: true,
-						}),
+						// Temporarily remove visualizer
+						// visualizer({
+						//	filename: 'dist/bundle-analysis.html',
+						//	open: false,
+						//	gzipSize: true,
+						// }),
 					],
-					treeshake: {
-						moduleSideEffects: false,
-						propertyReadSideEffects: false,
-						unknownGlobalSideEffects: false,
-					},
+					// Temporarily disable aggressive tree shaking
+					// treeshake: {
+					//	moduleSideEffects: false,
+					//	propertyReadSideEffects: false,
+					//	unknownGlobalSideEffects: false,
+					// },
 					output: {
-						manualChunks: (id: string) => {
-							if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-								return 'vendor';
-							}
-							if (
-								id.includes('styled-components') ||
-								id.includes('@hello-pangea/dnd') ||
-								id.includes('react-colorful')
-							) {
-								return 'ui';
-							}
-							if (id.includes('@dha-team/arbundles')) {
-								return 'arbundles';
-							}
-							if (id.includes('@permaweb/libs') || id.includes('arweave')) {
-								return 'permaweb-core';
-							}
-							if (id.includes('@ardrive/turbo-sdk')) {
-								return 'turbo-sdk';
-							}
-							if (id.includes('@ar.io/sdk')) {
-								return 'ario-sdk';
-							}
-							if (id.includes('@permaweb/aoconnect')) {
-								return 'ao-connect';
-							}
-							if (id.includes('@stripe/')) {
-								return 'stripe';
-							}
-							if (
-								id.includes('html-react-parser') ||
-								id.includes('react-markdown') ||
-								id.includes('react-svg') ||
-								id.includes('webfontloader')
-							) {
-								return 'utils';
-							}
-
-							return undefined;
+						manualChunks: {
+							// Only essential chunks - remove heavy SDKs for now
+							vendor: ['react', 'react-dom', 'react-router-dom'],
+							ui: ['styled-components', '@hello-pangea/dnd', 'react-colorful'],
 						},
 					},
 				},
@@ -110,7 +77,6 @@ export default defineConfig(({ mode }) => {
 		base: './',
 		plugins: [
 			nodePolyfills({
-				include: ['buffer', 'process', 'crypto', 'stream', 'util'],
 				protocolImports: true,
 			}),
 			react(),
@@ -128,15 +94,40 @@ export default defineConfig(({ mode }) => {
 				store: path.resolve(__dirname, 'src/store'),
 				wallet: path.resolve(__dirname, 'src/wallet'),
 				wrappers: path.resolve(__dirname, 'src/wrappers'),
+				// Restore full polyfill aliases
 				process: 'vite-plugin-node-polyfills/polyfills/process-es6',
 				buffer: 'vite-plugin-node-polyfills/polyfills/buffer',
 				crypto: 'vite-plugin-node-polyfills/polyfills/crypto',
 				stream: 'vite-plugin-node-polyfills/polyfills/stream',
 				util: 'vite-plugin-node-polyfills/polyfills/util',
+				path: 'vite-plugin-node-polyfills/polyfills/path',
+				events: 'vite-plugin-node-polyfills/polyfills/events',
+				timers: 'vite-plugin-node-polyfills/polyfills/timers',
+				http: 'vite-plugin-node-polyfills/polyfills/http',
+				https: 'vite-plugin-node-polyfills/polyfills/http',
+				os: 'vite-plugin-node-polyfills/polyfills/os',
+				assert: 'vite-plugin-node-polyfills/polyfills/assert',
+				zlib: 'vite-plugin-node-polyfills/polyfills/zlib',
+				constants: 'vite-plugin-node-polyfills/polyfills/constants',
 			},
 		},
 		optimizeDeps: {
-			include: ['buffer', 'process', 'crypto', 'stream', 'util'],
+			include: [
+				'buffer',
+				'process',
+				'crypto',
+				'stream',
+				'util',
+				'path',
+				'events',
+				'timers',
+				'http',
+				'https',
+				'os',
+				'assert',
+				'zlib',
+				'constants',
+			],
 		},
 		build: config[app].build,
 		server: {
