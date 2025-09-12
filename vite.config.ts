@@ -1,7 +1,6 @@
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import polyfillNode from 'rollup-plugin-polyfill-node';
-import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { viteSingleFile } from 'vite-plugin-singlefile';
@@ -21,30 +20,56 @@ export default defineConfig(({ mode }) => {
 				sourcemap: false,
 				outDir: path.resolve(__dirname, `dist/${app}`),
 				emptyOutDir: true,
-				minify: 'terser',
 				rollupOptions: {
 					input: path.resolve(root, 'index.html'),
-					plugins: [
-						polyfillNode(),
-						// Temporarily remove visualizer
-						// visualizer({
-						//	filename: 'dist/bundle-analysis.html',
-						//	open: false,
-						//	gzipSize: true,
-						// }),
-					],
-					// Temporarily disable aggressive tree shaking
-					// treeshake: {
-					//	moduleSideEffects: false,
-					//	propertyReadSideEffects: false,
-					//	unknownGlobalSideEffects: false,
-					// },
+					plugins: [polyfillNode()],
 					output: {
-						manualChunks: {
-							// Only essential chunks - remove heavy SDKs for now
-							vendor: ['react', 'react-dom', 'react-router-dom'],
-							ui: ['styled-components', '@hello-pangea/dnd', 'react-colorful'],
+						manualChunks: (id: string) => {
+							if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+								return 'vendor';
+							}
+							if (id.includes('@permaweb/aoconnect')) {
+								return 'ao-connect';
+							}
+							if (id.includes('@permaweb/libs') || id.includes('arweave')) {
+								return 'permaweb-libs';
+							}
+							if (id.includes('@stripe/')) {
+								return 'stripe';
+							}
+							if (
+								id.includes('html-react-parser') ||
+								id.includes('react-markdown') ||
+								id.includes('react-svg') ||
+								id.includes('webfontloader')
+							) {
+								return 'utils';
+							}
+
+							return undefined;
 						},
+					},
+				},
+			},
+		},
+		viewer: {
+			port: 4000,
+			build: {
+				sourcemap: false,
+				outDir: path.resolve(__dirname, `dist/${app}`),
+				emptyOutDir: true,
+				cssCodeSplit: false,
+				assetsInlineLimit: 10_000_000,
+				rollupOptions: {
+					input: path.resolve(root, 'index.tsx'),
+					plugins: [polyfillNode()],
+					output: {
+						inlineDynamicImports: true,
+						manualChunks: undefined,
+						entryFileNames: `bundle.js`,
+						chunkFileNames: `bundle.js`,
+						assetFileNames: `[name][extname]`,
+						format: 'es',
 					},
 				},
 			},
@@ -94,7 +119,6 @@ export default defineConfig(({ mode }) => {
 				store: path.resolve(__dirname, 'src/store'),
 				wallet: path.resolve(__dirname, 'src/wallet'),
 				wrappers: path.resolve(__dirname, 'src/wrappers'),
-				// Restore full polyfill aliases
 				process: 'vite-plugin-node-polyfills/polyfills/process-es6',
 				buffer: 'vite-plugin-node-polyfills/polyfills/buffer',
 				crypto: 'vite-plugin-node-polyfills/polyfills/crypto',
@@ -112,22 +136,7 @@ export default defineConfig(({ mode }) => {
 			},
 		},
 		optimizeDeps: {
-			include: [
-				'buffer',
-				'process',
-				'crypto',
-				'stream',
-				'util',
-				'path',
-				'events',
-				'timers',
-				'http',
-				'https',
-				'os',
-				'assert',
-				'zlib',
-				'constants',
-			],
+			include: ['buffer', 'process', 'crypto', 'stream', 'util'],
 		},
 		build: config[app].build,
 		server: {
