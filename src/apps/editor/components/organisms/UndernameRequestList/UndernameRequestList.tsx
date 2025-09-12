@@ -6,6 +6,9 @@ import { Panel } from 'components/atoms/Panel';
 import * as S from './styles';
 import { UndernameRequestRow } from 'editor/components/molecules/UndernameRequestRow';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
+import { IS_TESTNET } from 'helpers/config';
+import { ANT, ArconnectSigner, ARIO } from '@ar.io/sdk';
+import { getPortalIdFromURL } from 'helpers/utils';
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
@@ -34,17 +37,8 @@ function validateUndername(raw: string) {
 	return null;
 }
 
-export default function UndernameRequestsList(props: {
-	requests: UndernameRequest[];
-	filterByRequester?: string;
-	busyIds?: number[];
-	onApprove: (id: number) => void;
-	onReject: (id: number, reason: string) => void;
-	onRequest: (name: string) => void; // NEW: create request
-	isRequesting?: boolean; // NEW: disables submit while sending
-	showRequesterColumn?: boolean; // NEW: show requester column
-}) {
-	const { checkAvailability } = useUndernamesProvider();
+export default function UndernameRequestsList(props: { filterByRequester?: string; showRequesterColumn?: boolean }) {
+	const { checkAvailability, request, requests, approve, reject } = useUndernamesProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -72,29 +66,54 @@ export default function UndernameRequestsList(props: {
 			return;
 		}
 		if (availability.available && !availability.reserved) {
-			console.log('Requesting undername', name.trim());
-			props.onRequest(name.trim());
+			await request(name.trim());
 			setName('');
 			setOpenClaim(false);
 		}
-		// props.onRequest(name.trim());
-		// leave panel open; if you want to close on submit success, close it in parent after refresh
 	}, [name, props]);
 
 	// data shaping
 	const processed = React.useMemo(() => {
-		let rows = props.requests;
+		let rows = requests;
 		// filter non approved ones only
 		rows = rows.filter((r) => r.status !== 'approved');
 		if (props.filterByRequester) rows = rows.filter((r) => r.requester === props.filterByRequester);
 		return [...rows].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-	}, [props.requests, props.filterByRequester]);
+	}, [requests, props.filterByRequester]);
 
 	const totalPages = React.useMemo(() => Math.max(1, Math.ceil(processed.length / PAGE_SIZE)), [processed.length]);
 
 	React.useEffect(() => {
 		setCurrentPage((prev) => (prev > totalPages ? totalPages : prev < 1 ? 1 : prev));
 	}, [totalPages]);
+
+	const handleAdminApprove = async (id: number) => {
+		const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
+		const arnsRecord = await ario.getArNSRecord({ name: 'portal' });
+		const signer = new ArconnectSigner(window.arweaveWallet);
+		const portalId = getPortalIdFromURL();
+		const ant = ANT.init({
+			processId: arnsRecord.processId,
+			signer,
+		});
+		const undernameRow = requests.find((r) => r.id === id);
+		console.log('Approving request for', undernameRow, arnsRecord, ant);
+		if (!undernameRow) return;
+		const { id: txId } = await ant.setUndernameRecord(
+			{
+				undername: undernameRow.name,
+				transactionId: portalId,
+				ttlSeconds: 900,
+			},
+			{ tags: [{ name: 'PortalNewUndername', value: undernameRow.name }] }
+		);
+		console.log('Undername set in transaction', txId);
+		await approve(id);
+	};
+
+	const handleAdminReject = async (id: number, reason: string) => {
+		await reject(id, reason);
+	};
 
 	const startIndex = (currentPage - 1) * PAGE_SIZE;
 	const endIndex = Math.min(startIndex + PAGE_SIZE, processed.length);
@@ -142,9 +161,8 @@ export default function UndernameRequestsList(props: {
 						<S.RowWrapper key={r.id}>
 							<UndernameRequestRow
 								row={r}
-								busy={!!props.busyIds?.includes(r.id)}
-								onApprove={props.onApprove}
-								onReject={props.onReject}
+								onApprove={async (id) => await handleAdminApprove(id)}
+								onReject={async (id, reason) => await handleAdminReject(id, reason)}
 								showRequester={!!props.showRequesterColumn}
 							/>
 						</S.RowWrapper>
@@ -152,7 +170,7 @@ export default function UndernameRequestsList(props: {
 				</S.ListWrapper>
 			</>
 		);
-	}, [processed.length, pageRows, language, props.busyIds, props.onApprove, props.onReject]);
+	}, [processed.length, pageRows, language]);
 
 	return (
 		<S.Wrapper>
@@ -189,13 +207,12 @@ export default function UndernameRequestsList(props: {
 							value={name}
 							onChange={handleChange}
 							maxLength={MAX_UNDERNAME}
-							disabled={!!props.isRequesting}
 						/>
 						<Button
 							type={'alt1'}
 							label={language?.request || 'Request'}
 							handlePress={handleRequest}
-							disabled={!!props.isRequesting || !name.trim() || !!error}
+							disabled={!name.trim() || !!error}
 						/>
 					</S.Row>
 					{error && <S.Error>{error}</S.Error>}

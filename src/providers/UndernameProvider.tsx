@@ -34,7 +34,7 @@ type UndernamesContextState = {
 
 	// data
 	controllers: string[];
-	owners: Record<string, string>; // name -> owner
+	owners: Record<string, any>; // name -> owner
 	reserved: Record<string, ReservedEntry>;
 	requests: UndernameRequest[];
 	policy: Policy;

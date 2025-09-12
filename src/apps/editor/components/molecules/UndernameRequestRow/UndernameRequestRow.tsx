@@ -13,9 +13,8 @@ function ts(ts?: number) {
 
 export default function UndernameRequestRow(props: {
 	row: UndernameRequest;
-	busy?: boolean;
-	onApprove: (id: number) => void;
-	onReject: (id: number, reason: string) => void;
+	onApprove: (id: number) => Promise<void>;
+	onReject: (id: number, reason: string) => Promise<void>;
 	showRequester?: boolean;
 }) {
 	const languageProvider = useLanguageProvider();
@@ -27,13 +26,7 @@ export default function UndernameRequestRow(props: {
 	return (
 		<>
 			{/* Clickable grid row aligned with header (6 cols) */}
-			<S.Row
-				role="row"
-				data-busy={props.busy ? '1' : '0'}
-				onClick={() => !props.busy && setOpen(true)}
-				title="Click to manage"
-				showRequester={props.showRequester}
-			>
+			<S.Row role="row" onClick={() => setOpen(true)} title="Click to manage" showRequester={props.showRequester}>
 				<S.Cell mono>#{props.row.id}</S.Cell>
 				<S.Cell mono>{props.row.name}</S.Cell>
 				{props.showRequester ? (

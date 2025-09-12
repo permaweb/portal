@@ -3,8 +3,8 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { Pagination } from 'components/atoms/Pagination';
 import * as S from './styles';
 import { UndernameRow } from 'editor/components/molecules/UndernameRow';
+import { useUndernamesProvider } from 'providers/UndernameProvider';
 
-/** Backend record for a single undername */
 type OwnerRecord = {
 	owner: string;
 	requestedAt?: number;
@@ -15,25 +15,21 @@ type OwnerRecord = {
 	auto?: boolean;
 };
 
-/** Row shape passed to <UndernameRow /> and used for list rendering */
 export type TypeUndernameOwnerRow = {
 	name: string;
 } & OwnerRecord;
 
 const PAGE_SIZE = 10;
 
-export default function UndernamesList(props: {
-	/** Map from undername -> owner record */
-	owners: Record<string, OwnerRecord>;
-	filterAddress?: string;
-}) {
+export default function UndernamesList(props: { filterAddress?: string }) {
+	const { owners } = useUndernamesProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const [currentPage, setCurrentPage] = React.useState(1);
 
 	// Normalize map -> array, then filter + sort
 	const processedOwners: TypeUndernameOwnerRow[] = React.useMemo(() => {
-		const rows: TypeUndernameOwnerRow[] = Object.entries(props.owners || {}).map(([name, rec]) => ({
+		const rows: TypeUndernameOwnerRow[] = Object.entries(owners || {}).map(([name, rec]) => ({
 			name,
 			owner: rec.owner,
 			requestedAt: rec.requestedAt,
@@ -47,7 +43,7 @@ export default function UndernamesList(props: {
 		const filtered = props.filterAddress ? rows.filter((o) => o.owner === props.filterAddress) : rows;
 
 		return filtered.sort((a, b) => a.name.localeCompare(b.name));
-	}, [props.owners, props.filterAddress]);
+	}, [owners, props.filterAddress]);
 
 	const totalPages = React.useMemo(
 		() => Math.max(1, Math.ceil(processedOwners.length / PAGE_SIZE)),
