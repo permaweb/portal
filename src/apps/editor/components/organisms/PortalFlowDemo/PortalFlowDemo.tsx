@@ -3,6 +3,7 @@ import { UndernameRequestList } from '../UndernameRequestList';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { ARIO, ANT, ArconnectSigner } from '@ar.io/sdk';
 import { IS_TESTNET } from 'helpers/config';
+import { getPortalIdFromURL } from 'helpers/utils';
 
 const owners = {
 	helloworld: {
@@ -47,24 +48,30 @@ export default function PortalFlowDemo() {
 	};
 
 	const handleAdminApprove = async (id: number) => {
-		const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
-		const arnsRecord = await ario.getArNSRecord({ name: 'portal' });
+		// const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
+		const ario = ARIO.mainnet();
+		console.log('ARIO instance', ario);
+		const arnsRecord = await ario.getArNSRecord({ name: 'bhavya-gor-experiments' });
 		const signer = new ArconnectSigner(window.arweaveWallet);
+		const portalId = getPortalIdFromURL();
 		const ant = ANT.init({
 			processId: arnsRecord.processId,
 			signer,
 		});
 		const undernameRow = requests.find((r) => r.id === id);
+		console.log('Approving request for', undernameRow, arnsRecord, ant);
 		if (!undernameRow) return;
-
+		//
 		const { id: txId } = await ant.setUndernameRecord(
 			{
 				undername: undernameRow.name,
-				transactionId: '432l1cy0aksiL_x9M359faGzM_yjralacHIUo8_nQXM', // what is this?
+				transactionId: portalId,
 				ttlSeconds: 900,
 			},
 			{ tags: [{ name: 'PortalNewUndername', value: undernameRow.name }] }
 		);
+		console.log('Undername set in transaction', txId);
+		await approve(id);
 	};
 
 	const handleAdminReject = async (id: number, reason: string) => {

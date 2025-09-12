@@ -15,12 +15,10 @@ export type UndernameRequest = {
 	requester: string;
 	status: RequestStatus;
 	createdAt?: number;
-	created_at?: number; // deprecated
-	decided_at?: number; // deprecated
 	decidedAt?: number;
 	decidedBy?: string;
-	decided_by?: string; // deprecated
 	reason?: string;
+	[key: string]: any;
 };
 
 const PAGE_SIZE = 10;

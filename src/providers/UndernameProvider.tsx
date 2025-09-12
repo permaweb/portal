@@ -2,8 +2,8 @@
 import * as React from 'react';
 import { UNDERNAMES_PROCESS_ID, UNDERNAMES_HANDLERS, type HandlerKey } from '../processes/undernames/constants';
 import { usePermawebProvider } from './PermawebProvider';
+import { getPortalIdFromURL } from 'helpers/utils';
 
-/** ----- Types that mirror your Lua state ----- */
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
 export type UndernameRequest = {
@@ -215,6 +215,22 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 		[libs]
 	);
 
+	const sendByForwardAction = React.useCallback(
+		async (params?: Record<string, any>) => {
+			const portalId = getPortalIdFromURL();
+			if (!portalId) throw new Error('No portal ID found in URL');
+			const msgId = await libs.sendMessage({
+				processId: portalId,
+				action: 'Run-Action',
+				tags: buildTags(params),
+				data: '',
+			});
+			console.log('UndernamesProvider: sendByForwardAction', { params, msgId });
+			return msgId;
+		},
+		[libs]
+	);
+
 	/** refresh everything with Export */
 	const refreshAll = React.useCallback(async () => {
 		if (!ready) return;
@@ -380,7 +396,11 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 
 	const request = React.useCallback(
 		async (name: string) => {
-			await send('Request', { Name: name });
+			await sendByForwardAction({
+				'Forward-Action': 'PortalRegistry.Request',
+				'Forward-To': UNDERNAMES_PROCESS_ID,
+				Name: name,
+			});
 			await refreshRequests();
 			await refreshOwners();
 			console.log('requested undername', name);
@@ -411,6 +431,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 			const params: any = { Id: id };
 			if (reason) params.Reason = reason;
 			await send('Reject', params);
+			console.log('rejected undername request', id, reason);
 			await refreshRequests();
 		},
 		[send, refreshRequests]
