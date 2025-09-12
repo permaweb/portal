@@ -1,6 +1,7 @@
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import polyfillNode from 'rollup-plugin-polyfill-node';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { viteSingleFile } from 'vite-plugin-singlefile';
@@ -13,37 +14,70 @@ export default defineConfig(({ mode }) => {
 
 	const root = path.resolve(__dirname, `src/apps/${app}`);
 
-	const config = {
+	const config: any = {
 		editor: {
 			port: 3000,
 			build: {
 				sourcemap: false,
 				outDir: path.resolve(__dirname, `dist/${app}`),
 				emptyOutDir: true,
+				minify: 'terser',
 				rollupOptions: {
 					input: path.resolve(root, 'index.html'),
-					plugins: [polyfillNode()],
-				},
-			},
-		},
-		viewer: {
-			port: 4000,
-			build: {
-				sourcemap: false,
-				outDir: path.resolve(__dirname, `dist/${app}`),
-				emptyOutDir: true,
-				cssCodeSplit: false,
-				assetsInlineLimit: 10_000_000,
-				rollupOptions: {
-					input: path.resolve(root, 'index.tsx'),
-					plugins: [polyfillNode()],
+					plugins: [
+						polyfillNode(),
+						visualizer({
+							filename: 'dist/bundle-analysis.html',
+							open: false,
+							gzipSize: true,
+						}),
+					],
+					treeshake: {
+						moduleSideEffects: false,
+						propertyReadSideEffects: false,
+						unknownGlobalSideEffects: false,
+					},
 					output: {
-						inlineDynamicImports: true,
-						manualChunks: undefined,
-						entryFileNames: `bundle.js`,
-						chunkFileNames: `bundle.js`,
-						assetFileNames: `[name][extname]`,
-						format: 'es',
+						manualChunks: (id: string) => {
+							if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+								return 'vendor';
+							}
+							if (
+								id.includes('styled-components') ||
+								id.includes('@hello-pangea/dnd') ||
+								id.includes('react-colorful')
+							) {
+								return 'ui';
+							}
+							if (id.includes('@dha-team/arbundles')) {
+								return 'arbundles';
+							}
+							if (id.includes('@permaweb/libs') || id.includes('arweave')) {
+								return 'permaweb-core';
+							}
+							if (id.includes('@ardrive/turbo-sdk')) {
+								return 'turbo-sdk';
+							}
+							if (id.includes('@ar.io/sdk')) {
+								return 'ario-sdk';
+							}
+							if (id.includes('@permaweb/aoconnect')) {
+								return 'ao-connect';
+							}
+							if (id.includes('@stripe/')) {
+								return 'stripe';
+							}
+							if (
+								id.includes('html-react-parser') ||
+								id.includes('react-markdown') ||
+								id.includes('react-svg') ||
+								id.includes('webfontloader')
+							) {
+								return 'utils';
+							}
+
+							return undefined;
+						},
 					},
 				},
 			},
@@ -76,6 +110,7 @@ export default defineConfig(({ mode }) => {
 		base: './',
 		plugins: [
 			nodePolyfills({
+				include: ['buffer', 'process', 'crypto', 'stream', 'util'],
 				protocolImports: true,
 			}),
 			react(),
@@ -98,15 +133,6 @@ export default defineConfig(({ mode }) => {
 				crypto: 'vite-plugin-node-polyfills/polyfills/crypto',
 				stream: 'vite-plugin-node-polyfills/polyfills/stream',
 				util: 'vite-plugin-node-polyfills/polyfills/util',
-				path: 'vite-plugin-node-polyfills/polyfills/path',
-				events: 'vite-plugin-node-polyfills/polyfills/events',
-				timers: 'vite-plugin-node-polyfills/polyfills/timers',
-				http: 'vite-plugin-node-polyfills/polyfills/http',
-				https: 'vite-plugin-node-polyfills/polyfills/http',
-				os: 'vite-plugin-node-polyfills/polyfills/os',
-				assert: 'vite-plugin-node-polyfills/polyfills/assert',
-				zlib: 'vite-plugin-node-polyfills/polyfills/zlib',
-				constants: 'vite-plugin-node-polyfills/polyfills/constants',
 			},
 		},
 		optimizeDeps: {

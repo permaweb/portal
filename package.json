@@ -21,8 +21,8 @@
 		"start:editor:legacy": "NODE_ENV=development VITE_APP=editor VITE_AO=legacy VITE_ARIO_TESTNET=true vite",
 		"start:engine:mainnet": "NODE_ENV=development VITE_APP=engine VITE_AO=mainnet vite",
 		"start:engine:legacy": "NODE_ENV=development VITE_APP=engine VITE_AO=legacy VITE_ARIO_TESTNET=true vite",
-		"build:editor": "NODE_ENV=production VITE_APP=editor VITE_AO=mainnet vite build",
-		"build:engine": "NODE_ENV=production VITE_APP=engine VITE_AO=legacy vite build",
+		"build:editor": "NODE_OPTIONS=--max-old-space-size=6144 NODE_ENV=production VITE_APP=editor VITE_AO=mainnet vite build",
+		"build:engine": "NODE_OPTIONS=--max-old-space-size=6144 NODE_ENV=production VITE_APP=engine VITE_AO=legacy vite build",
 		"deploy:editor:main": "VITE_APP=editor npm run build:editor && permaweb-deploy --arns-name portal --ttl-seconds 60 --deploy-folder ./dist/editor",
 		"deploy:editor:staging": "VITE_APP=editor npm run build:editor && permaweb-deploy --arns-name portalenv --ttl-seconds 60 --undername staging --deploy-folder ./dist/editor",
 		"deploy:engine": "VITE_APP=engine npm run build:engine && permaweb-deploy --arns-name portalenv --ttl-seconds 60 --undername engine --deploy-file ./dist/engine/bundle.js"
@@ -76,8 +76,13 @@
 		"permaweb-deploy": "2.3.0",
 		"prettier": "^2.8.3",
 		"rollup-plugin-polyfill-node": "^0.13.0",
+		"rollup-plugin-visualizer": "^6.0.3",
+		"terser": "^5.44.0",
 		"vite": "^6.3.5",
 		"vite-plugin-node-polyfills": "^0.23.0",
 		"vite-plugin-singlefile": "^2.2.0"
+	},
+	"overrides": {
+		"@dha-team/arbundles": "1.0.4"
 	}
 }

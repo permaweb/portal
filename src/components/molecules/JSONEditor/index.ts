@@ -1,1 +1,1 @@
-export { default as JSONEditor } from './JSONEditor';
+export { default as JSONEditor } from './LazyJSONEditor';
