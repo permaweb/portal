@@ -8,7 +8,6 @@ import { TypeUndernameOwnerRow } from 'editor/components/organisms/UndernamesLis
 import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { IS_TESTNET } from 'helpers/config';
 import { ANT, ArconnectSigner, ARIO } from '@ar.io/sdk';
-import { getPortalIdFromURL } from 'helpers/utils';
 import { useNotifications } from 'providers/NotificationProvider';
 
 function fmtTs(ts?: number) {
@@ -37,6 +36,7 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 	const handleRelease = async () => {
 		try {
 			const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
+			// const ario = ARIO.mainnet();
 			const arnsRecord = await ario.getArNSRecord({ name: 'bhavya-gor-experiments' });
 			const signer = new ArconnectSigner(window.arweaveWallet);
 			const ant = ANT.init({
@@ -47,7 +47,7 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 				{ undername: props.row.name },
 				{ tags: [{ name: 'PortalReleaseUndername', value: props.row.name }] }
 			);
-			await forceRelease(props.row.name, 'ADD_REASON_BLOCK');
+			await forceRelease(props.row.name, reason);
 			addNotification(`Undername released`, 'success');
 			setShowPanel(false);
 		} catch (error) {
