@@ -39,7 +39,7 @@ function validateUndername(raw: string) {
 }
 
 export default function UndernameRequestsList(props: { filterByRequester?: string; showRequesterColumn?: boolean }) {
-	const { checkAvailability, request, requests, approve, reject } = useUndernamesProvider();
+	const { checkAvailability, request, requests, approve, reject, owners } = useUndernamesProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -52,6 +52,10 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 	const [name, setName] = React.useState('');
 	const [error, setError] = React.useState<string | null>(null);
 	const [loading, setLoading] = React.useState(false);
+	const portalId = getPortalIdFromURL();
+	const ownedByPortal = React.useMemo(() => {
+		return owners.map((owner: any) => owner.owner).includes(portalId);
+	}, [owners, portalId]);
 	const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		const next = e.target.value.toLowerCase();
 		setName(next);
@@ -185,6 +189,7 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 								onApprove={async (id) => await handleAdminApprove(id)}
 								onReject={async (id, reason) => await handleAdminReject(id, reason)}
 								showRequester={!!props.showRequesterColumn}
+								loading={loading}
 							/>
 						</S.RowWrapper>
 					))}

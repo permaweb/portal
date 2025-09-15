@@ -17,7 +17,6 @@ export type UndernameRequest = {
 	reason?: string;
 };
 
-export type UndernameOwnerRow = { name: string; owner: string };
 export type ReservedEntry = { to?: string; by: string; at: number };
 
 export type Policy = {
@@ -34,7 +33,7 @@ type UndernamesContextState = {
 
 	// data
 	controllers: string[];
-	owners: Record<string, any>; // name -> owner
+	owners: Record<string, any>;
 	reserved: Record<string, ReservedEntry>;
 	requests: UndernameRequest[];
 	policy: Policy;
@@ -177,7 +176,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	const [error, setError] = React.useState<string | null>(null);
 
 	const [controllers, setControllers] = React.useState<string[]>([]);
-	const [owners, setOwners] = React.useState<Record<string, string>>({});
+	const [owners, setOwners] = React.useState<Record<string, any>>({});
 	const [reserved, setReserved] = React.useState<Record<string, ReservedEntry>>({});
 	const [requests, setRequests] = React.useState<UndernameRequest[]>([]);
 	const [policy, setPolicyState] = React.useState<Policy>(DEFAULT_POLICY);
@@ -266,12 +265,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 		if (!ready) return;
 		try {
 			const out = await read('ListUndernames');
-			// out.undernames: [{ name, owner }]
-			const map: Record<string, string> = {};
-			(out?.undernames ?? []).forEach((row: UndernameOwnerRow) => {
-				map[row.name] = row.owner;
-			});
-			setOwners(map);
+			setOwners(out.undernames ?? {});
 		} catch (e: any) {
 			setError(e?.message ?? 'Failed to refresh owners');
 		}

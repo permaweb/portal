@@ -14,6 +14,7 @@ State = State
 		},
 		Audit = {},
 		Processed = {},
+
 		Bootstrapped = false,
 	}
 
@@ -671,7 +672,7 @@ end)
 -- Listings & audit
 Handlers.add('PortalRegistry.ListUndernames', function(Msg)
 	local rows = {}
-	for name, rec in pairs(State.Owners) do
+	for name, rec in pairs(State.Owners or {}) do
 		table.insert(rows, {
 			name = name,
 			owner = rec.owner,
@@ -714,7 +715,7 @@ Handlers.add('PortalRegistry.Export', function(Msg)
 		controllers = Controllers.list(),
 		policy = State.Policy,
 		reserved = Reserved.list(),
-		owners = State.Owners,
+		owners = State.Owners or {},
 		requests = State.Requests,
 		requestSeq = State.RequestSeq,
 	})
