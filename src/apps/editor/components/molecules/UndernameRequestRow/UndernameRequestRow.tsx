@@ -6,6 +6,7 @@ import { StatusBadge } from '../StatusBadge';
 import { Button } from 'components/atoms/Button';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { shortAddr } from '../UndernameRow/UndernameRow';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 function ts(ts?: number) {
 	return ts ? new Date(ts).toLocaleString() : '—';
@@ -19,10 +20,38 @@ export default function UndernameRequestRow(props: {
 	showRequester?: boolean;
 }) {
 	const languageProvider = useLanguageProvider();
+	const { fetchProfile } = usePermawebProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const [open, setOpen] = React.useState(false);
 	const [reason, setReason] = React.useState('');
 	const pending = props.row.status === 'pending';
+	const [decidedBy, setDecidedBy] = React.useState<string | null>(null);
+
+	React.useEffect(() => {
+		let cancelled = false;
+
+		(async () => {
+			if (!props.row.decidedBy) {
+				setDecidedBy(null);
+				return;
+			}
+
+			try {
+				const profile = await fetchProfile(props.row.decidedBy);
+				if (!cancelled) {
+					setDecidedBy(profile?.username ?? props.row.decidedBy);
+				}
+			} catch {
+				if (!cancelled) {
+					setDecidedBy(props.row.decidedBy);
+				}
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [props.row.decidedBy, fetchProfile]);
 
 	return (
 		<>
@@ -73,7 +102,7 @@ export default function UndernameRequestRow(props: {
 					{props.row.status !== 'pending' && (
 						<S.KV>
 							<span>Decided by</span>
-							<p>{props.row.status === 'cancelled' ? props.row.requester : props.row.decidedBy}</p>
+							<p>{props.row.status === 'cancelled' ? props.row.requester : decidedBy}</p>
 						</S.KV>
 					)}
 					{props.row.reason ? <S.ReasonNote>Reason: {props.row.reason}</S.ReasonNote> : null}

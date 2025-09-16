@@ -4,6 +4,7 @@ import { Pagination } from 'components/atoms/Pagination';
 import * as S from './styles';
 import { UndernameRow } from 'editor/components/molecules/UndernameRow';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 type OwnerRecord = {
 	owner: string;
@@ -23,27 +24,45 @@ const PAGE_SIZE = 10;
 
 export default function UndernamesList(props: { filterAddress?: string }) {
 	const { owners } = useUndernamesProvider();
+	const { fetchProfile } = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const [currentPage, setCurrentPage] = React.useState(1);
+	const [processedOwners, setProcessedOwners] = React.useState<TypeUndernameOwnerRow[]>([]);
 
-	// Normalize map -> array, then filter + sort
-	const processedOwners: TypeUndernameOwnerRow[] = React.useMemo(() => {
-		const rows: TypeUndernameOwnerRow[] = Object.entries(owners || {}).map(([name, rec]) => ({
-			name,
-			owner: rec.owner,
-			requestedAt: rec.requestedAt,
-			approvedAt: rec.approvedAt,
-			approvedBy: rec.approvedBy,
-			requestId: rec.requestId ?? null,
-			source: rec.source,
-			auto: !!rec.auto,
-		}));
+	React.useEffect(() => {
+		let cancelled = false;
 
-		const filtered = props.filterAddress ? rows.filter((o) => o.owner === props.filterAddress) : rows;
+		(async () => {
+			const rows: TypeUndernameOwnerRow[] = await Promise.all(
+				Object.entries(owners ?? {}).map(async ([name, rec]) => {
+					const approvedBy = rec.approvedBy
+						? (await fetchProfile(rec.approvedBy))?.username ?? rec.approvedBy
+						: rec.approvedBy ?? null; // keep ID/null if no profile
 
-		return filtered.sort((a, b) => a.name.localeCompare(b.name));
-	}, [owners, props.filterAddress]);
+					return {
+						name,
+						owner: rec.owner,
+						requestedAt: rec.requestedAt ?? null,
+						approvedAt: rec.approvedAt ?? null,
+						approvedBy,
+						requestId: rec.requestId ?? null,
+						source: rec.source ?? null,
+						auto: !!rec.auto,
+					};
+				})
+			);
+
+			const filtered = props.filterAddress ? rows.filter((o) => o.owner === props.filterAddress) : rows;
+
+			const sorted = filtered.sort((a, b) => a.name.localeCompare(b.name));
+			if (!cancelled) setProcessedOwners(sorted);
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [owners, props.filterAddress, fetchProfile]);
 
 	const totalPages = React.useMemo(
 		() => Math.max(1, Math.ceil(processedOwners.length / PAGE_SIZE)),

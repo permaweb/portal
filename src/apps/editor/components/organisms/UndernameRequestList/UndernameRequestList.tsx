@@ -1,8 +1,6 @@
 import React from 'react';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { Pagination } from 'components/atoms/Pagination';
-import { Button } from 'components/atoms/Button';
-import { Panel } from 'components/atoms/Panel';
 import * as S from './styles';
 import { UndernameRequestRow } from 'editor/components/molecules/UndernameRequestRow';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
@@ -10,6 +8,7 @@ import { IS_TESTNET } from 'helpers/config';
 import { ANT, ArconnectSigner, ARIO } from '@ar.io/sdk';
 import { getPortalIdFromURL } from 'helpers/utils';
 import { useNotifications } from 'providers/NotificationProvider';
+import { ClaimUndername } from 'editor/components/molecules/ClaimUndername';
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
@@ -26,20 +25,9 @@ export type UndernameRequest = {
 };
 
 const PAGE_SIZE = 10;
-const MAX_UNDERNAME = 51;
-
-function validateUndername(raw: string) {
-	const name = (raw || '').toLowerCase();
-	if (!name) return 'Name is required';
-	if (name.length > MAX_UNDERNAME) return `Max ${MAX_UNDERNAME} characters`;
-	if (name === 'www') return 'Cannot be "www"';
-	if (!/^[a-z0-9_.-]+$/.test(name)) return 'Only a–z, 0–9, underscore (_), dot (.), and dash (-) allowed';
-	if (/^-|-$/.test(name)) return 'No leading or trailing dashes';
-	return null;
-}
 
 export default function UndernameRequestsList(props: { filterByRequester?: string; showRequesterColumn?: boolean }) {
-	const { checkAvailability, request, requests, approve, reject, owners } = useUndernamesProvider();
+	const { requests, approve, reject } = useUndernamesProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -47,40 +35,7 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 	const { addNotification } = useNotifications();
 	const [currentPage, setCurrentPage] = React.useState(1);
 
-	// claim panel state
-	const [openClaim, setOpenClaim] = React.useState(false);
-	const [name, setName] = React.useState('');
-	const [error, setError] = React.useState<string | null>(null);
 	const [loading, setLoading] = React.useState(false);
-	const portalId = getPortalIdFromURL();
-	const ownedByPortal = React.useMemo(() => {
-		return owners.map((owner: any) => owner.owner).includes(portalId);
-	}, [owners, portalId]);
-	const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-		const next = e.target.value.toLowerCase();
-		setName(next);
-		setError(validateUndername(next));
-	}, []);
-
-	const handleRequest = React.useCallback(async () => {
-		const err = validateUndername(name);
-		setError(err);
-		if (err) return;
-		setLoading(true);
-		const availability = await checkAvailability(name);
-		if (!availability) {
-			setError('Name is already taken');
-			addNotification('Name is already taken', 'warning');
-			return;
-		}
-		if (availability.available && !availability.reserved) {
-			await request(name.trim());
-			setName('');
-			setOpenClaim(false);
-			addNotification('Undername request submitted', 'success');
-			setLoading(false);
-		}
-	}, [name, props]);
 
 	// data shaping
 	const processed = React.useMemo(() => {
@@ -97,7 +52,8 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 
 	const handleAdminApprove = async (id: number) => {
 		setLoading(true);
-		const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
+		// const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
+		const ario = ARIO.mainnet();
 		const arnsRecord = await ario.getArNSRecord({ name: 'bhavya-gor-experiments' });
 		const signer = new ArconnectSigner(window.arweaveWallet);
 		const portalId = getPortalIdFromURL();
@@ -148,11 +104,7 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 				<>
 					<S.Toolbar>
 						<div />
-						<Button
-							type={'alt1'}
-							label={language?.claimUndername || 'Claim undername'}
-							handlePress={() => setOpenClaim(true)}
-						/>
+						<ClaimUndername />
 					</S.Toolbar>
 					<S.WrapperEmpty>
 						<p>{language?.noRequestsFound || 'No requests found'}</p>
@@ -164,12 +116,7 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 			<>
 				<S.Toolbar>
 					<div />
-					<Button
-						type={'alt1'}
-						label={language?.claimUndername || 'Claim undername'}
-						handlePress={() => setOpenClaim(true)}
-						disabled={loading}
-					/>
+					<ClaimUndername />
 				</S.Toolbar>
 
 				<S.ListWrapper>
@@ -214,39 +161,6 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 					iconButtons
 				/>
 			</S.Footer>
-
-			<Panel
-				open={openClaim}
-				width={560}
-				header={language?.claimUndername || 'Claim an undername'}
-				handleClose={() => {
-					setOpenClaim(false);
-					setName('');
-					setError(null);
-				}}
-				closeHandlerDisabled
-			>
-				<S.ClaimCard>
-					<S.Row>
-						<S.Input
-							placeholder="Enter your undername"
-							value={name}
-							onChange={handleChange}
-							maxLength={MAX_UNDERNAME}
-						/>
-						<Button
-							type={'alt1'}
-							label={language?.request || 'Request'}
-							handlePress={handleRequest}
-							disabled={!name.trim() || !!error}
-						/>
-					</S.Row>
-					{error && <S.Error>{error}</S.Error>}
-					<S.Helper>
-						Max: 51 Characters · Allowed: a–z, 0–9, `_ . -` · No leading/trailing dashes · Cannot be “www”
-					</S.Helper>
-				</S.ClaimCard>
-			</Panel>
 		</S.Wrapper>
 	);
 }

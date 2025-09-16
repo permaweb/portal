@@ -150,7 +150,6 @@ function tryParse(out: any) {
 		try {
 			const rawJSON = JSON.parse(raw);
 			const { ok, result } = rawJSON;
-			console.log('UndernamesProvider: parsed', { ok, result });
 			return result;
 		} catch {}
 	}
@@ -208,7 +207,6 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 				tags: buildTags(params),
 				data: '',
 			});
-			console.log('UndernamesProvider: send', { action, params, msgId });
 			return msgId;
 		},
 		[libs]
@@ -224,7 +222,6 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 				tags: buildTags(params),
 				data: '',
 			});
-			console.log('UndernamesProvider: sendByForwardAction', { params, msgId });
 			return msgId;
 		},
 		[libs]
@@ -250,7 +247,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 					: DEFAULT_POLICY
 			);
 			setReserved(out?.reserved ?? {});
-			setOwners(out?.owners ?? {});
+			setOwners(out?.owners);
 			setRequests(normalizeRequests(Object.values(out?.requests ?? {})));
 			setRequestSeq(Number(out?.requestSeq ?? 0));
 			setSuperAdmin(out?.superAdmin ?? null);
@@ -265,7 +262,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 		if (!ready) return;
 		try {
 			const out = await read('ListUndernames');
-			setOwners(out.undernames ?? {});
+			setOwners(out.undernames);
 		} catch (e: any) {
 			setError(e?.message ?? 'Failed to refresh owners');
 		}
@@ -397,7 +394,6 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 			});
 			await refreshRequests();
 			await refreshOwners();
-			console.log('requested undername', name);
 		},
 		[send, refreshRequests, refreshOwners]
 	);
@@ -425,7 +421,6 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 			const params: any = { Id: id };
 			if (reason) params.Reason = reason;
 			await send('Reject', params);
-			console.log('rejected undername request', id, reason);
 			await refreshRequests();
 		},
 		[send, refreshRequests]

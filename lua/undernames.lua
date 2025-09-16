@@ -671,23 +671,7 @@ end)
 
 -- Listings & audit
 Handlers.add('PortalRegistry.ListUndernames', function(Msg)
-	local rows = {}
-	for name, rec in pairs(State.Owners or {}) do
-		table.insert(rows, {
-			name = name,
-			owner = rec.owner,
-			requestedAt = rec.requestedAt,
-			approvedAt = rec.approvedAt,
-			approvedBy = rec.approvedBy,
-			requestId = rec.requestId,
-			source = rec.source,
-			auto = rec.auto,
-		})
-	end
-	table.sort(rows, function(a, b)
-		return a.name < b.name
-	end)
-	reply(Msg, true, { undernames = rows })
+	reply(Msg, true, { undernames = State.Owners or {} })
 end)
 
 Handlers.add('PortalRegistry.TransferSuperAdmin', function(Msg)

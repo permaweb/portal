@@ -16,6 +16,7 @@ interface PermawebContextState {
 	profile: Types.ProfileType;
 	handleInitialProfileCache: (address: string, profileId: string) => void;
 	refreshProfile: () => void;
+	fetchProfile: (address: string) => Promise<Types.ProfileType | null>;
 }
 
 const DEFAULT_CONTEXT = {
@@ -24,6 +25,7 @@ const DEFAULT_CONTEXT = {
 	profile: null,
 	handleInitialProfileCache(_address: string, _profileId: string) {},
 	refreshProfile() {},
+	fetchProfile: async (_address: string) => null,
 };
 
 const PermawebContext = React.createContext<PermawebContextState>(DEFAULT_CONTEXT);
@@ -235,6 +237,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				handleInitialProfileCache: (address: string, profileId: string) =>
 					handleInitialProfileCache(address, profileId),
 				refreshProfile: () => setRefreshProfileTrigger((prev) => !prev),
+				fetchProfile: resolveProfile,
 			}}
 		>
 			{props.children}
