@@ -8,7 +8,7 @@ import { useNotifications } from 'providers/NotificationProvider';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { ARIO } from '@ar.io/sdk';
-import { PARENT_UNDERNAME } from 'processes/undernames/constants';
+import { PARENT_UNDERNAME } from '../../../../../processes/undernames/constants';
 
 type RuleState = {
 	nonEmpty: boolean;
@@ -151,7 +151,7 @@ export default function ClaimUndername() {
 		}
 	}, [name, ownedByPortal, loading, checkAvailability, request, addNotification]);
 
-	// if (ownedByPortal) return null; // if portal already owns an undername, don't show the claim button
+	if (ownedByPortal) return null; // if portal already owns an undername, don't show the claim button
 
 	return (
 		<>
