@@ -66,7 +66,7 @@ type UndernamesContextState = {
 	addReserved: (name: string, to: string) => Promise<void>;
 	removeReserved: (name: string) => Promise<void>;
 
-	request: (name: string) => Promise<void>;
+	request: (name: string, processId: string) => Promise<void>;
 	cancel: (id: number) => Promise<void>;
 	approve: (id: number) => Promise<void>;
 	reject: (id: number, reason?: string) => Promise<void>;
@@ -114,7 +114,7 @@ const DEFAULT_CTX: UndernamesContextState = {
 	addReserved: async () => {},
 	removeReserved: async () => {},
 
-	request: async () => {},
+	request: async (name: string, processId: string) => {},
 	cancel: async () => {},
 	approve: async () => {},
 	reject: async () => {},
@@ -386,11 +386,15 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	);
 
 	const request = React.useCallback(
-		async (name: string) => {
+		async (name: string, processId: string) => {
+			const portalId = getPortalIdFromURL();
 			await sendByForwardAction({
 				'Forward-Action': 'PortalRegistry.Request',
 				'Forward-To': UNDERNAMES_PROCESS_ID,
 				Name: name,
+				'ANT-Process-Id': processId, // process ID of the parent arns record
+				'Record-Transaction-Id': portalId, // transaction ID of the portal
+				'Record-TTL-Seconds': 900,
 			});
 			await refreshRequests();
 			await refreshOwners();

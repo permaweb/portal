@@ -9,6 +9,7 @@ import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { IS_TESTNET } from 'helpers/config';
 import { ANT, ArconnectSigner, ARIO } from '@ar.io/sdk';
 import { useNotifications } from 'providers/NotificationProvider';
+import { PARENT_UNDERNAME } from '../../../../../processes/undernames/constants';
 
 function fmtTs(ts?: number) {
 	return ts ? new Date(ts).toLocaleString() : '—';
@@ -35,9 +36,13 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 
 	const handleRelease = async () => {
 		try {
-			const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
-			// const ario = ARIO.mainnet();
-			const arnsRecord = await ario.getArNSRecord({ name: 'bhavya-gor-experiments' });
+			if (IS_TESTNET) {
+				console.warn('Releasing undernames on testnet is not supported yet.');
+				addNotification('Releasing undernames on testnet is not supported yet.', 'warning');
+				return;
+			}
+			const ario = ARIO.mainnet();
+			const arnsRecord = await ario.getArNSRecord({ name: PARENT_UNDERNAME });
 			const signer = new ArconnectSigner(window.arweaveWallet);
 			const ant = ANT.init({
 				processId: arnsRecord.processId,
@@ -47,6 +52,7 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 				{ undername: props.row.name },
 				{ tags: [{ name: 'PortalReleaseUndername', value: props.row.name }] }
 			);
+			console.log('Release transaction ID:', txId);
 			await forceRelease(props.row.name, reason);
 			addNotification(`Undername released`, 'success');
 			setShowPanel(false);
@@ -60,7 +66,15 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 			{/* Table row */}
 			<S.RowWrapper className="fade-in" onClick={() => setShowPanel(true)}>
 				<S.Cell>
-					<p>{props.row.name}</p>
+					<p>
+						<a
+							href={`https://${props.row.name}_${PARENT_UNDERNAME}.arweave.net/`}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							{props.row.name}
+						</a>
+					</p>
 				</S.Cell>
 				<S.Cell>
 					<S.Address title={props.row.owner}>{shortAddr(props.row.owner)}</S.Address>

@@ -9,6 +9,7 @@ import { ANT, ArconnectSigner, ARIO } from '@ar.io/sdk';
 import { getPortalIdFromURL } from 'helpers/utils';
 import { useNotifications } from 'providers/NotificationProvider';
 import { ClaimUndername } from 'editor/components/molecules/ClaimUndername';
+import { PARENT_UNDERNAME, TESTING_UNDERNAME } from '../../../../../processes/undernames/constants';
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
@@ -51,10 +52,15 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 	}, [totalPages]);
 
 	const handleAdminApprove = async (id: number) => {
-		setLoading(true);
-		// const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
 		const ario = ARIO.mainnet();
-		const arnsRecord = await ario.getArNSRecord({ name: 'bhavya-gor-experiments' });
+		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
+		console.log('ArNS record for', PARENT_UNDERNAME, arnsRecord);
+		if (IS_TESTNET) {
+			console.warn('Approving undernames on testnet is not supported yet.');
+			addNotification('Cant approve on Testnet', 'warning');
+			return;
+		}
+		setLoading(true);
 		const signer = new ArconnectSigner(window.arweaveWallet);
 		const portalId = getPortalIdFromURL();
 		const ant = ANT.init({

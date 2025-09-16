@@ -18,9 +18,6 @@ State = State
 		Bootstrapped = false,
 	}
 
--- =========================
--- Utils
--- =========================
 local Utils = {}
 
 function Utils.is_super_admin(addr)
@@ -75,6 +72,52 @@ function Utils.once(Msg)
 	return true
 end
 
+local function try_set_undername_record(antId, sub, tx, ttl, priority)
+	if not antId or antId == '' then
+		return false, 'missing ANT-Process-Id'
+	end
+	if not tx or #tx ~= 43 then
+		return false, 'invalid Record-Transaction-Id'
+	end
+	ttl = tonumber(ttl) or 900
+	if ttl < 60 or ttl > 86400 then
+		return false, 'ttl out of range (60..86400)'
+	end
+
+	local tags = {
+		{ name = 'Action', value = 'Set-Record' },
+		{ name = 'Sub-Domain', value = sub },
+		{ name = 'Transaction-Id', value = tx },
+		{ name = 'TTL-Seconds', value = tostring(ttl) },
+	}
+	if priority ~= nil then
+		table.insert(tags, { name = 'Priority', value = tostring(priority) })
+	end
+	ao.send({ Target = antId, Tags = tags })
+	return true
+end
+
+local function collect_record_params_for_self_claim(Msg, name_under)
+	local antId = Msg.Tags['ANT-Process-Id']
+	local txId = Msg.Tags['Record-Transaction-Id']
+	local ttl = Msg.Tags['Record-TTL-Seconds']
+	local priority = Msg.Tags['Record-Priority']
+	local sub = name_under
+
+	if not antId or antId == '' then
+		return nil, 'ANT-Process-Id required for self-claim'
+	end
+	if not txId or #txId ~= 43 then
+		return nil, 'Record-Transaction-Id required (43 chars)'
+	end
+	ttl = tonumber(ttl) or 900
+	if ttl < 60 or ttl > 86400 then
+		return nil, 'Record-TTL-Seconds out of range (60..86400)'
+	end
+
+	return { antId = antId, sub = sub, tx = txId, ttl = ttl, priority = priority }
+end
+
 local function reply(Msg, ok, result)
 	ao.send({
 		Target = Msg.From,
@@ -82,9 +125,6 @@ local function reply(Msg, ok, result)
 	})
 end
 
--- =========================
--- Owners helpers (fresh schema only)
--- =========================
 local function Owners_get(name)
 	return State.Owners[name]
 end
@@ -115,9 +155,6 @@ local function Owners_countByAddress(addr)
 	end
 	return c
 end
--- =========================
--- Controllers
--- ========================
 
 Controllers = {}
 
@@ -493,19 +530,21 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 	if not Utils.once(Msg) then
 		return
 	end
+
 	local name_requested = Msg.Name
 	if not name_requested or #name_requested == 0 then
 		reply(Msg, false, { error = 'Name tag required' })
 		return
 	end
+
 	local requestersOwnedCount = Owners_countByAddress(Msg.From)
 	if State.Policy.MaxPerEntity and requestersOwnedCount >= State.Policy.MaxPerEntity then
 		reply(Msg, false, { error = 'per-address limit reached' })
 		return
 	end
+
 	local nRequested = Utils.normalize(name_requested)
 
-	-- Auto-claim if reserved for this address
 	local rinfo = State.Reserved[nRequested]
 	if rinfo and rinfo.to and rinfo.to == Msg.From then
 		local ok, err = can_claim(Msg.From, nRequested)
@@ -513,10 +552,39 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 			reply(Msg, false, { error = err })
 			return
 		end
+
+		-- Require record params and set record BEFORE ownership is granted
+		local params, perr = collect_record_params_for_self_claim(Msg, nRequested)
+		if not params then
+			Utils.audit(
+				Msg.From,
+				'claim_reserved_blocked_missing_record_params',
+				{ name = nRequested, error = perr },
+				Msg
+			)
+			reply(Msg, false, { error = perr, code = 'MISSING_RECORD_PARAMS' })
+			return
+		end
+
+		local sent, sendErr = try_set_undername_record(params.antId, params.sub, params.tx, params.ttl, params.priority)
+		if not sent then
+			Utils.audit(Msg.From, 'claim_reserved_blocked_set_record_failed', {
+				name = nRequested,
+				error = sendErr,
+				antId = params.antId,
+				sub = params.sub,
+				tx = params.tx,
+				ttl = params.ttl,
+				priority = params.priority,
+			}, Msg)
+			reply(Msg, false, { error = sendErr, code = 'SET_RECORD_FAILED' })
+			return
+		end
+
 		Owners_set(nRequested, Msg.From, {
 			requestedAt = Utils.ts(Msg),
 			approvedAt = Utils.ts(Msg),
-			approvedBy = Msg.From, --self-approved
+			approvedBy = Msg.From,
 			source = 'reserved',
 			auto = true,
 		})
@@ -532,6 +600,29 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 			reply(Msg, false, { error = err })
 			return
 		end
+
+		local params, perr = collect_record_params_for_self_claim(Msg, nRequested)
+		if not params then
+			Utils.audit(Msg.From, 'self_claim_blocked_missing_record_params', { name = nRequested, error = perr }, Msg)
+			reply(Msg, false, { error = perr, code = 'MISSING_RECORD_PARAMS' })
+			return
+		end
+
+		local sent, sendErr = try_set_undername_record(params.antId, params.sub, params.tx, params.ttl, params.priority)
+		if not sent then
+			Utils.audit(Msg.From, 'self_claim_blocked_set_record_failed', {
+				name = nRequested,
+				error = sendErr,
+				antId = params.antId,
+				sub = params.sub,
+				tx = params.tx,
+				ttl = params.ttl,
+				priority = params.priority,
+			}, Msg)
+			reply(Msg, false, { error = sendErr, code = 'SET_RECORD_FAILED' })
+			return
+		end
+
 		Owners_set(nRequested, Msg.From, {
 			requestedAt = Utils.ts(Msg),
 			approvedAt = Utils.ts(Msg),
@@ -552,6 +643,7 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 		reply(Msg, false, { error = err })
 		return
 	end
+
 	local res = Requests.create(Msg.From, nRequested, Msg)
 	reply(Msg, true, { status = 'pending', id = res.id, name = nRequested })
 end)

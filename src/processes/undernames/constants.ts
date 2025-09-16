@@ -9,6 +9,9 @@ export type HandlerSpec = {
 	params?: Record<string, ParamKind>;
 };
 
+export const PARENT_UNDERNAME = 'portal';
+export const TESTING_UNDERNAME = 'bhavya-gor-experiments';
+
 export const UNDERNAMES_HANDLERS = {
 	// Bootstrap / controllers
 	Bootstrap: { action: `${ACTION_PREFIX}Bootstrap` },

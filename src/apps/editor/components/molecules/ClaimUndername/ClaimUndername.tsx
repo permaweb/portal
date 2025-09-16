@@ -7,6 +7,8 @@ import { getPortalIdFromURL } from 'helpers/utils';
 import { useNotifications } from 'providers/NotificationProvider';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
+import { ARIO } from '@ar.io/sdk';
+import { PARENT_UNDERNAME } from 'processes/undernames/constants';
 
 type RuleState = {
 	nonEmpty: boolean;
@@ -20,7 +22,8 @@ type RuleState = {
 	labelsValid: boolean;
 };
 
-const RESERVED = new Set(['www']); // extend later if registry adds more
+const RESERVED = new Set(['www']); // extend later if registry adds more, can get from the process too
+const MAX_UNDERNAME = 51;
 
 function evaluateRules(raw: string): RuleState {
 	const name = (raw || '').toLowerCase();
@@ -72,18 +75,6 @@ function firstError(rs: RuleState): string | null {
 	return null;
 }
 
-const MAX_UNDERNAME = 51;
-
-function validateUndername(raw: string) {
-	const name = (raw || '').toLowerCase();
-	if (!name) return 'Name is required';
-	if (name.length > MAX_UNDERNAME) return `Max ${MAX_UNDERNAME} characters`;
-	if (name === 'www') return 'Cannot be "www"';
-	if (!/^[a-z0-9_.-]+$/.test(name)) return 'Only a–z, 0–9, underscore (_), dot (.), and dash (-) allowed';
-	if (/^-|-$/.test(name)) return 'No leading or trailing dashes';
-	return null;
-}
-
 export default function ClaimUndername() {
 	const { checkAvailability, request, owners } = useUndernamesProvider();
 	const portalProvider = usePortalProvider();
@@ -92,7 +83,7 @@ export default function ClaimUndername() {
 	const portalName = portalProvider.current.name || 'This portal';
 	const [openClaim, setOpenClaim] = React.useState(false);
 	const [name, setName] = React.useState(portalName.toLowerCase());
-	const [ruleState, setRuleState] = React.useState<RuleState>(() => evaluateRules(portalName.toLowerCase()));
+	const [ruleState, setRuleState] = React.useState<RuleState>(() => evaluateRules(name));
 	const [error, setError] = React.useState<string | null>(null);
 	const [loading, setLoading] = React.useState(false);
 	const portalId = getPortalIdFromURL();
@@ -102,6 +93,12 @@ export default function ClaimUndername() {
 		if (!owners || !portalId) return false;
 		return Object.values(owners ?? {}).some((entry: any) => entry.owner === portalId);
 	}, [owners, portalId]);
+	const nameTakenByOther = React.useMemo(() => {
+		if (!owners || !portalId) return false;
+		const entry = owners?.[name];
+		if (!entry) return false;
+		return entry.owner !== portalId;
+	}, [owners, portalId, name]);
 
 	const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		const next = e.target.value.toLowerCase();
@@ -113,7 +110,11 @@ export default function ClaimUndername() {
 
 	const handleRequest = React.useCallback(async () => {
 		if (ownedByPortal) {
-			addNotification('This portal already owns an undername', 'warning');
+			setError('Portal already owns an undername');
+			return;
+		}
+		if (nameTakenByOther) {
+			setError('Name is already assigned to another portal');
 			return;
 		}
 		if (loading) return;
@@ -123,27 +124,25 @@ export default function ClaimUndername() {
 		setRuleState(rs);
 		setError(err);
 		if (err) return;
-
 		setLoading(true);
+		const ario = ARIO.mainnet();
+		const arnsRecord = await ario.getArNSRecord({ name: PARENT_UNDERNAME });
 		try {
 			const availability = await checkAvailability(name);
 			if (!availability) {
 				setError('Something went wrong, please try again later');
-				addNotification('Something went wrong', 'warning');
 				return;
 			}
 			if (availability.reserved) {
 				setError('This name is reserved');
-				addNotification('This name is reserved', 'warning');
 				return;
 			}
 			if (!availability.available) {
 				setError('Name is already taken');
-				addNotification('Name is already taken', 'warning');
 				return;
 			}
 
-			await request(name.trim());
+			await request(name.trim(), arnsRecord.processId); //process id of the parent undername
 			setName('');
 			setOpenClaim(false);
 			addNotification('Undername request submitted', 'success');
@@ -167,7 +166,6 @@ export default function ClaimUndername() {
 				header={language?.claimUndername || 'Claim an undername'}
 				handleClose={() => {
 					setOpenClaim(false);
-					setName('');
 					setError(null);
 				}}
 				closeHandlerDisabled
