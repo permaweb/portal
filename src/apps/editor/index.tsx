@@ -130,7 +130,7 @@ function AppContent() {
 				);
 			}
 
-			if (portalProvider.isPermissionsLoading) {
+			if (!portalProvider.permissions) {
 				return (
 					<Portal node={DOM.overlay}>
 						<S.CenteredWrapper className={'overlay'}>

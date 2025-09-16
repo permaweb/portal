@@ -2,8 +2,7 @@ import * as React from 'react';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
-import { ArticleStatusType, GQLNodeResponseType, PortalAssetRequestType } from 'helpers/types';
-import { getTagValue } from 'helpers/utils';
+import { ArticleStatusType, PortalAssetRequestType } from 'helpers/types';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 type RequestRow = {
@@ -36,10 +35,12 @@ export function usePostsList(props: { pageSize?: number }) {
 	}, [currentStatusFilter]);
 
 	React.useEffect(() => {
-		(async function () {
-			if (requests !== null) return;
-			if (!showRequests) return;
+		if (!showRequests) {
+			setRequests(null);
+			return;
+		}
 
+		(async function () {
 			const ids = portalProvider.current?.requests.map((asset: PortalAssetRequestType) => asset.id);
 
 			if (!ids?.length) {
@@ -48,25 +49,11 @@ export function usePostsList(props: { pageSize?: number }) {
 			}
 
 			try {
-				const gqlResponse = await permawebProvider.libs.getAggregatedGQLData({ ids });
-				setLoading(true);
-				const seeded = (gqlResponse ?? []).map((el: GQLNodeResponseType) => ({
-					id: el.node.id,
-					name: getTagValue(el.node.tags, 'Bootloader-Name'),
-					creatorId: getTagValue(el.node.tags, 'Creator'),
-					dateCreated: (el.node.block?.timestamp * 1000).toString() ?? '-',
-				}));
-
-				setRequests(seeded);
-
-				const returnedIds = new Set((gqlResponse ?? []).map((el: GQLNodeResponseType) => el.node.id));
-				const missingIds = ids.filter((id) => !returnedIds.has(id));
-
-				if (missingIds.length > 0) {
+				if (ids.length > 0) {
 					let cancelled = false;
-					let remaining = missingIds.length;
+					let remaining = ids.length;
 
-					missingIds.forEach(async (id) => {
+					ids.forEach(async (id) => {
 						try {
 							const asset = await permawebProvider.libs.getAtomicAsset(id);
 							if (cancelled) return;
@@ -100,10 +87,12 @@ export function usePostsList(props: { pageSize?: number }) {
 			} catch (e: any) {
 				console.error(e);
 				setLoading(false);
-				setRequests((prev) => prev ?? []);
+				setRequests((prev) => prev);
 			}
 		})();
-	}, [requests, showRequests, portalProvider.current?.requests]);
+	}, [showRequests, portalProvider.current?.requests]);
+
+	// console.log(requests)
 
 	const assets = React.useMemo(() => {
 		if (!portalProvider.current?.assets) return [];

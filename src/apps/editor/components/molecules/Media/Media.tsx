@@ -10,7 +10,7 @@ import { Modal } from 'components/atoms/Modal';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { PortalDetailType } from 'helpers/types';
+import { PortalDetailType, PortalPatchMapEnum } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -106,7 +106,7 @@ export default function Media(props: {
 
 					if (opts?.remove) setMedia(null);
 
-					portalProvider.refreshCurrentPortal();
+					portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Overview);
 				} else if (props.onMediaUpload && media && !opts?.remove) {
 					// For new portals, just upload the media and return the ID
 					try {

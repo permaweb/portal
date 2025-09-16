@@ -5,14 +5,18 @@ import { debounce } from 'lodash';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
+import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
+import { Loader } from 'components/atoms/Loader';
 import { ASSETS, STYLING, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { PortalHeaderType } from 'helpers/types';
+import { PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
 import { formatAddress } from 'helpers/utils';
 import { checkWindowCutoff } from 'helpers/window';
 import { useNavigationConfirm } from 'hooks/useNavigationConfirm';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletConnect } from 'wallet/WalletConnect';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
@@ -23,12 +27,15 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	const { confirmNavigation } = useNavigationConfirm('post', 'Changes you made may not be saved.');
 
 	const portalProvider = usePortalProvider();
+	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	const { addNotification } = useNotifications();
 	const { navWidth, setNavWidth } = useNavigation();
 
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
 	const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
+	const [portalUpdating, setPortalUpdating] = React.useState<boolean>(false);
 	const [isResizing, setIsResizing] = React.useState<boolean>(false);
 
 	const paths = React.useMemo(() => {
@@ -210,6 +217,22 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		}
 	}, [navWidth, props.open, desktop, languageProvider?.current]);
 
+	async function handlePortalUpdate() {
+		if (portalProvider.current?.id) {
+			setPortalUpdating(true);
+			try {
+				await permawebProvider.libs.updateZoneVersion({
+					zoneId: portalProvider.current.id,
+				});
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Overview);
+				addNotification(`${language.portalUpdated}!`, 'success');
+			} catch (e: any) {
+				addNotification(e.message ?? 'An error occurred getting this portal', 'warning');
+			}
+			setPortalUpdating(false);
+		}
+	}
+
 	const portal = React.useMemo(() => {
 		if (portalProvider.current?.id) {
 			return (
@@ -226,6 +249,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						>
 							<span>{portalProvider.current ? portalProvider.current.name : '-'}</span>
 							<ReactSVG src={ASSETS.arrow} />
+							{portalProvider.updateAvailable && <S.UpdateNotification>1</S.UpdateNotification>}
 						</S.Portal>
 						{showPortalDropdown && (
 							<S.PortalDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
@@ -240,11 +264,26 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 											return (
 												<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>
 													<Link to={path} onClick={(e) => handleNavigate(e, path)}>
-														<span>{portal.name ?? formatAddress(portal.id, false)}</span>
+														<p>{portal.name ?? formatAddress(portal.id, false)}</p>
 														{active && (
-															<S.PIndicator>
-																<ReactSVG src={ASSETS.checkmark} />
-															</S.PIndicator>
+															<>
+																{portalProvider.updateAvailable ? (
+																	<Button
+																		type={'alt4'}
+																		label={`1 ${language.updateAvailable}`}
+																		handlePress={(e: any) => {
+																			e.stopPropagation();
+																			e.preventDefault();
+																			setShowPortalDropdown(false);
+																			handlePortalUpdate();
+																		}}
+																	/>
+																) : (
+																	<S.PIndicator>
+																		<ReactSVG src={ASSETS.checkmark} />
+																	</S.PIndicator>
+																)}
+															</>
 														)}
 													</Link>
 												</S.PDropdownLink>
@@ -326,6 +365,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 	return (
 		<>
+			{portalUpdating && <Loader message={`${language.updatingPortal}...`} />}
 			{panel}
 			<S.Header navigationOpen={props.open} navWidth={navWidth} className={'fade-in'}>
 				<S.Content>

@@ -252,6 +252,7 @@ export const PortalUpdateWrapper = styled.div`
 	background: ${(props) => props.theme.colors.contrast.background};
 	border: 1px solid ${(props) => props.theme.colors.contrast.border};
 	border-radius: ${STYLING.dimensions.radius.alt4};
+	margin: 0 0 0 10px;
 	span {
 		color: ${(props) => props.theme.colors.contrast.color};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
@@ -269,6 +270,7 @@ export const Portal = styled.button<{ active: boolean }>`
 		props.active ? props.theme.colors.container.primary.active : props.theme.colors.container.primary.background};
 	border-radius: ${STYLING.dimensions.radius.alt4};
 	padding: 7.5px 16.5px;
+	position: relative;
 
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
@@ -297,6 +299,36 @@ export const Portal = styled.button<{ active: boolean }>`
 
 	&:disabled {
 		background: ${(props) => props.theme.colors.container.primary.background};
+	}
+`;
+
+export const UpdateNotification = styled.div`
+	position: absolute;
+	top: -5px;
+	right: -8.5px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: ${(props) => props.theme.colors.warning.primary};
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	animation: pulse 2s infinite;
+	color: ${(props) => props.theme.colors.font.light1};
+	font-size: 10px;
+	font-weight: bold;
+	font-family: ${(props) => props.theme.typography.family.primary};
+
+	@keyframes pulse {
+		0% {
+			box-shadow: 0 0 0 0 ${(props) => props.theme.colors.warning.primary};
+		}
+		70% {
+			box-shadow: 0 0 0 8px transparent;
+		}
+		100% {
+			box-shadow: 0 0 0 0 transparent;
+		}
 	}
 `;
 
@@ -332,13 +364,12 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		cursor: ${(props) => (props.active ? 'default' : 'pointer')};
-		pointer-events: ${(props) => (props.active ? 'none' : 'auto')};
+		cursor: pointer;
 		background: ${(props) => props.theme.colors.container.primary.background};
 		border-radius: ${STYLING.dimensions.radius.alt4};
 		transition: all 100ms;
 		padding: 0 10px;
-		span {
+		p {
 			color: ${(props) => props.theme.colors.font.primary} !important;
 			font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 			font-weight: ${(props) => props.theme.typography.weight.medium} !important;

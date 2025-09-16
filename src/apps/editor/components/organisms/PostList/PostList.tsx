@@ -150,7 +150,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 						<span>{language?.noRequestsFound}</span>
 					</S.PostsActionsRequestsInfo>
 				);
-			} else {
+			} else if (requests.length > 0) {
 				content = (
 					<S.PostsActionsRequests>
 						<S.PostsActionsRequestsBody>

@@ -1,18 +1,11 @@
 import { getTxEndpoint } from './endpoints';
-import { ArticleBlockEnum } from './types';
-
-// TODO
-// export const AO_NODE = {
-// 	url: 'https://hb.portalinto.com',
-// 	scheduler: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
-// };
+import { ArticleBlockEnum, PortalPatchMapEnum } from './types';
 
 export const AO_NODE = {
-	url: 'http://localhost:8734',
-	scheduler: 'mYJTM8VpIibDLuyGLQTcbcPy-LeOY48qzECADTUYfWc',
+	url: 'https://hb.portalinto.com',
+	scheduler: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
 };
 
-// Testnet configuration
 export const IS_TESTNET = import.meta.env.VITE_ARIO_TESTNET === 'true';
 
 export const SOCIAL_LINK_ASSETS = {
@@ -711,6 +704,16 @@ export const PORTAL_DATA = () => `
 	</body>
 </html>
 `;
+
+export const PORTAL_PATCH_MAP = {
+	[PortalPatchMapEnum.Overview]: ['Owner', 'Version', 'Store.Name', 'Store.Icon', 'Store.Logo'],
+	[PortalPatchMapEnum.Users]: ['Roles', 'RoleOptions', 'Permissions'],
+	[PortalPatchMapEnum.Navigation]: ['Store.Categories', 'Store.Topics', 'Store.Links'],
+	[PortalPatchMapEnum.Presentation]: ['Store.Layout', 'Store.Pages', 'Store.Themes', 'Store.Fonts'],
+	[PortalPatchMapEnum.Media]: ['Store.Uploads'],
+	[PortalPatchMapEnum.Posts]: ['Store.Index'],
+	[PortalPatchMapEnum.Requests]: ['Store.IndexRequests'],
+};
 
 export const PORTAL_ROLES = {
 	ADMIN: 'Admin',

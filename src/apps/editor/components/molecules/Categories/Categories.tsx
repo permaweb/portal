@@ -300,7 +300,9 @@ export default function Categories(props: {
 						value={newCategoryName}
 						onChange={(e: any) => setNewCategoryName(e.target.value)}
 						invalid={{ status: false, message: null }}
-						disabled={!portalProvider.permissions?.updatePortalMeta || categoryLoading}
+						disabled={
+							!portalProvider.permissions?.updatePortalMeta || !portalProvider.current?.categories || categoryLoading
+						}
 						autoFocus={showCategoryAdd}
 						hideErrorMessage
 						sm

@@ -3,6 +3,7 @@ import React from 'react';
 import { JsonEditor } from 'editor/components/molecules/JsonEditor';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
+import { PortalPatchMapEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -55,7 +56,7 @@ export default function LayoutTab() {
 			addNotification('Layout saved successfully!', 'success');
 
 			// Refresh the portal data
-			portalProvider.refreshCurrentPortal();
+			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
 		} catch (error) {
 			console.error('Error saving layout:', error);
 			addNotification('Error saving layout', 'warning');

@@ -125,10 +125,10 @@ export const MenuBadge = styled.span`
 	text-align: center;
 `;
 
-export const BackupWarning = styled.div`
+export const BackupNotification = styled.div`
 	position: absolute;
 	top: -5px;
-	right: -5px;
+	right: -7.5px;
 	width: 16px;
 	height: 16px;
 	border-radius: 50%;
@@ -147,10 +147,10 @@ export const BackupWarning = styled.div`
 			box-shadow: 0 0 0 0 ${(props) => props.theme.colors.warning.primary};
 		}
 		70% {
-			box-shadow: 0 0 0 8px ${(props) => props.theme.colors.shadow.primary};
+			box-shadow: 0 0 0 8px transparent;
 		}
 		100% {
-			box-shadow: 0 0 0 0 ${(props) => props.theme.colors.shadow.primary};
+			box-shadow: 0 0 0 0 transparent;
 		}
 	}
 `;

@@ -2,7 +2,7 @@ import Arweave from 'arweave';
 import { ARIOToken, mARIOToken } from '@ar.io/sdk';
 
 import { STORAGE, URLS } from './config';
-import { PortalAssetType } from './types';
+import { PortalAssetType, PortalUserType } from './types';
 
 export function checkValidAddress(address: string | null) {
 	if (!address) return false;
@@ -309,6 +309,20 @@ export function getPortalAssets(index: PortalAssetType[]) {
 		(asset: any) =>
 			asset.processType && asset.processType === 'atomic-asset' && asset.assetType && asset.assetType === 'blog-post'
 	);
+}
+
+export function getPortalUsers(roles: any) {
+	const users: PortalUserType[] = [];
+	if (roles) {
+		for (const entry of Object.keys(roles)) {
+			users.push({
+				address: entry,
+				type: roles[entry].type,
+				roles: roles[entry].roles,
+			});
+		}
+	}
+	return users;
 }
 
 export function stripFontWeights(fontString: string) {

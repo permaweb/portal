@@ -6,7 +6,7 @@ import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Select } from 'components/atoms/Select';
 import { ASSETS } from 'helpers/config';
-import { SelectOptionType } from 'helpers/types';
+import { PortalPatchMapEnum, SelectOptionType } from 'helpers/types';
 import { checkValidAddress, formatRoleLabel } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -93,7 +93,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				console.log(`Roles update: ${rolesUpdate}`);
 
 				addNotification(`${props.user ? language?.userUpdated : language?.userAdded}!`, 'success');
-				portalProvider.refreshCurrentPortal();
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Users);
 				props.handleClose();
 				setWalletAddress('');
 				setRole(null);

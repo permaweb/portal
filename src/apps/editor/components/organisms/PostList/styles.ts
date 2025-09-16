@@ -104,8 +104,8 @@ export const PostsActionsRequestsWrapper = styled.div<{ type: ViewLayoutType }>`
 
 	.notification {
 		position: absolute;
-		top: -3.5px;
-		right: ${(props) => (props.type === 'detail' ? '0' : '-3.5px')};
+		top: ${(props) => (props.type === 'detail' ? '-5px' : '-7.5px')};
+		right: ${(props) => (props.type === 'detail' ? '0' : '-5px')};
 	}
 `;
 
@@ -249,8 +249,7 @@ export const WrapperEmpty = styled.div<{ type: ViewLayoutType }>`
 export const LoadingWrapper = styled(WrapperEmpty)``;
 
 export const InfoWrapper = styled.div`
-	width: 100%;
-	margin: 5px auto 0 auto;
+	margin: 5px 0 0 auto;
 	padding: 3.5px 10px;
 	display: flex;
 	justify-content: center;

@@ -13,7 +13,7 @@ import { getTxEndpoint } from 'helpers/endpoints';
 import {
 	PortalAssetRequestType,
 	PortalHeaderType,
-	PortalPageType,
+	PortalPatchMapEnum,
 	PortalUserType,
 	RequestUpdateType,
 } from 'helpers/types';
@@ -155,10 +155,11 @@ export default function Editor() {
 						}
 
 						addNotification(`${language?.postStatusUpdated}!`, 'success');
-						portalProvider.refreshCurrentPortal();
 
-						await new Promise((r) => setTimeout(r, 1000));
-						navigate(URLS.portalBase(portalProvider.current.id));
+						portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Requests, PortalPatchMapEnum.Posts]);
+
+						// await new Promise((r) => setTimeout(r, 1000));
+						// navigate(URLS.portalBase(portalProvider.current.id));
 					} else {
 						addNotification(language?.errorUpdatingPost, 'warning');
 					}
@@ -216,26 +217,27 @@ export default function Editor() {
 						data: data,
 					});
 
-					if (isStaticPage) {
-						const updatedPages = [
-							...(portalProvider.current?.pages?.filter((page: PortalPageType) => page.id !== assetId) ?? []),
-							{ name: currentPost.data.title, id: assetId },
-						];
+					/* TODO */
+					// if (isStaticPage) {
+					// 	const updatedPages = [
+					// 		...(portalProvider.current?.pages?.filter((page: PortalPageType) => page.id !== assetId) ?? []),
+					// 		{ name: currentPost.data.title, id: assetId },
+					// 	];
 
-						const pagesUpdateId = await permawebProvider.libs.updateZone(
-							{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
-							portalProvider.current.id,
-							arProvider.wallet
-						);
+					// 	const pagesUpdateId = await permawebProvider.libs.updateZone(
+					// 		{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
+					// 		portalProvider.current.id,
+					// 		arProvider.wallet
+					// 	);
 
-						portalProvider.refreshCurrentPortal();
+					// 	portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Pages);
 
-						console.log(`Pages update: ${pagesUpdateId}`);
-					}
+					// 	console.log(`Pages update: ${pagesUpdateId}`);
+					// }
 
 					console.log(`Asset content update: ${assetContentUpdateId}`);
 					addNotification(`${language?.postUpdated}!`, 'success');
-					portalProvider.refreshCurrentPortal('assets');
+					portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Posts);
 				} catch (e: any) {
 					addNotification(e.message ?? language?.errorUpdatingPost, 'warning');
 				}
@@ -276,21 +278,21 @@ export default function Editor() {
 					console.log(`Asset content update: ${assetContentUpdateId}`);
 
 					/* Add static pages assets directly to the portal process */
-					if (isStaticPage && portalProvider.permissions?.updatePortalMeta) {
-						const updatedPages = [...portalProvider.current?.pages, { name: currentPost.data.title, id: assetId }];
-						const pagesUpdateId = await permawebProvider.libs.updateZone(
-							{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
-							portalProvider.current.id,
-							arProvider.wallet
-						);
+					// if (isStaticPage && portalProvider.permissions?.updatePortalMeta) {
+					// 	const updatedPages = [...portalProvider.current?.pages, { name: currentPost.data.title, id: assetId }];
+					// 	const pagesUpdateId = await permawebProvider.libs.updateZone(
+					// 		{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
+					// 		portalProvider.current.id,
+					// 		arProvider.wallet
+					// 	);
 
-						portalProvider.refreshCurrentPortal();
+					// 	portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
 
-						console.log(`Pages update: ${pagesUpdateId}`);
+					// 	console.log(`Pages update: ${pagesUpdateId}`);
 
-						navigate(URLS.portalPages(portalProvider.current?.id));
-						return;
-					}
+					// 	navigate(URLS.portalPages(portalProvider.current?.id));
+					// 	return;
+					// }
 
 					/* Index post in the current portal this user is contributing to */
 					let internalIndexAction = null;
@@ -333,8 +335,10 @@ export default function Editor() {
 
 								console.log(`Asset index update: ${assetIndexUpdateId}`);
 
-								portalProvider.refreshCurrentPortal();
+								portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Posts);
 							}
+						} else {
+							portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Requests);
 						}
 					}
 
@@ -385,7 +389,7 @@ export default function Editor() {
 										});
 
 										console.log(`Asset index update: ${assetIndexUpdateId}`);
-										portalProvider.refreshCurrentPortal('assets');
+										portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Posts);
 									}
 								}
 							}
