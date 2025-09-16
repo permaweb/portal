@@ -52,35 +52,16 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 	}, [totalPages]);
 
 	const handleAdminApprove = async (id: number) => {
-		const ario = ARIO.mainnet();
-		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
-		console.log('ArNS record for', PARENT_UNDERNAME, arnsRecord);
 		if (IS_TESTNET) {
 			console.warn('Approving undernames on testnet is not supported yet.');
 			addNotification('Cant approve on Testnet', 'warning');
 			return;
 		}
-		setLoading(true);
-		const signer = new ArconnectSigner(window.arweaveWallet);
-		const portalId = getPortalIdFromURL();
-		const ant = ANT.init({
-			processId: arnsRecord.processId,
-			signer,
-		});
+		const ario = ARIO.mainnet();
+		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
 		const undernameRow = requests.find((r) => r.id === id);
-		console.log('Approving request for', undernameRow, arnsRecord, ant);
-		if (!undernameRow) return;
-		const { id: txId } = await ant.setUndernameRecord(
-			{
-				undername: undernameRow.name,
-				transactionId: portalId,
-				ttlSeconds: 900,
-			},
-			{ tags: [{ name: 'PortalNewUndername', value: undernameRow.name }] }
-		);
-		console.log('Undername set in transaction', txId);
-		setLoading(false);
-		await approve(id);
+		setLoading(true);
+		await approve(id, arnsRecord.processId); // now approve at undernames process will handle the call to the arns
 		addNotification(`Undername ${undernameRow.name} approved`, 'success');
 	};
 

@@ -5,6 +5,7 @@ import * as S from './styles';
 import { UndernameRow } from 'editor/components/molecules/UndernameRow';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
+import { AddController } from 'editor/components/molecules/AddController';
 
 type OwnerRecord = {
 	owner: string;
@@ -97,26 +98,38 @@ export default function UndernamesList(props: { filterAddress?: string }) {
 	const rows = React.useMemo(() => {
 		if (processedOwners.length === 0) {
 			return (
-				<S.WrapperEmpty>
-					<p>{language?.noOwnersFound || 'No undernames found'}</p>
-				</S.WrapperEmpty>
+				<>
+					<S.Toolbar>
+						<div />
+						<AddController />
+					</S.Toolbar>
+					<S.WrapperEmpty>
+						<p>{language?.noOwnersFound || 'No undernames found'}</p>
+					</S.WrapperEmpty>
+				</>
 			);
 		}
 		return (
-			<S.OwnersWrapper>
-				<S.HeaderRow>
-					<S.HeaderCell>{language?.undername || 'Undername'}</S.HeaderCell>
-					<S.HeaderCell>{language?.owner || 'Owner'}</S.HeaderCell>
-					<S.HeaderCell>{language?.requestedAt || 'Requested'}</S.HeaderCell>
-					<S.HeaderCell>{language?.approvedAt || 'Approved'}</S.HeaderCell>
-					<S.HeaderCell>{language?.grantSource || 'Source'}</S.HeaderCell>
-				</S.HeaderRow>
-				{pageOwners.map((row) => (
-					<S.OwnerWrapper key={row.name}>
-						<UndernameRow row={row} />
-					</S.OwnerWrapper>
-				))}
-			</S.OwnersWrapper>
+			<>
+				<S.Toolbar>
+					<div />
+					<AddController />
+				</S.Toolbar>
+				<S.OwnersWrapper>
+					<S.HeaderRow>
+						<S.HeaderCell>{language?.undername || 'Undername'}</S.HeaderCell>
+						<S.HeaderCell>{language?.owner || 'Owner'}</S.HeaderCell>
+						<S.HeaderCell>{language?.requestedAt || 'Requested'}</S.HeaderCell>
+						<S.HeaderCell>{language?.approvedAt || 'Approved'}</S.HeaderCell>
+						<S.HeaderCell>{language?.grantSource || 'Source'}</S.HeaderCell>
+					</S.HeaderRow>
+					{pageOwners.map((row) => (
+						<S.OwnerWrapper key={row.name}>
+							<UndernameRow row={row} />
+						</S.OwnerWrapper>
+					))}
+				</S.OwnersWrapper>
+			</>
 		);
 	}, [processedOwners.length, pageOwners, language]);
 

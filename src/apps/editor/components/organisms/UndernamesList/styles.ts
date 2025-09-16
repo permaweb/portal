@@ -76,3 +76,11 @@ export const HeaderCell = styled.div`
 	font-weight: ${(p) => p.theme.typography.weight.bold};
 	color: ${(p) => p.theme.colors.font.primary};
 `;
+
+export const Toolbar = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 12px 12px 12px;
+`;

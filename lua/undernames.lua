@@ -72,6 +72,21 @@ function Utils.once(Msg)
 	return true
 end
 
+local function try_remove_undername_record(antId, sub)
+	if not antId or antId == '' then
+		return false, 'missing ANT-Process-Id'
+	end
+	if not sub or sub == '' then
+		return false, 'missing Sub-Domain'
+	end
+	local tags = {
+		{ name = 'Action', value = 'Remove-Record' },
+		{ name = 'Sub-Domain', value = sub },
+	}
+	ao.send({ Target = antId, Tags = tags })
+	return true
+end
+
 local function try_set_undername_record(antId, sub, tx, ttl, priority)
 	if not antId or antId == '' then
 		return false, 'missing ANT-Process-Id'
@@ -295,6 +310,7 @@ end
 function Requests.approve(actor, id, Msg)
 	Utils.require_controller(actor)
 	local r = State.Requests[id]
+
 	if not r then
 		error('request not found')
 	end
@@ -303,6 +319,33 @@ function Requests.approve(actor, id, Msg)
 	end
 	if Owners_exists(r.name) then
 		error('name already registered')
+	end
+
+	local params, perr = collect_record_params_for_self_claim(Msg, r.name)
+	if not params then
+		Utils.audit(
+			Msg.From,
+			'claim_reserved_blocked_missing_record_params',
+			{ id = id, name = r.name, error = perr },
+			Msg
+		)
+		reply(Msg, false, { error = perr, code = 'MISSING_RECORD_PARAMS' })
+		return
+	end
+
+	local sent, sendErr = try_set_undername_record(params.antId, params.sub, params.tx, params.ttl, params.priority)
+	if not sent then
+		Utils.audit(Msg.From, 'claim_reserved_blocked_set_record_failed', {
+			name = r.name,
+			error = sendErr,
+			antId = params.antId,
+			sub = params.sub,
+			tx = params.tx,
+			ttl = params.ttl,
+			priority = params.priority,
+		}, Msg)
+		reply(Msg, false, { error = sendErr, code = 'SET_RECORD_FAILED' })
+		return
 	end
 
 	Owners_set(r.name, r.requester, {
@@ -389,16 +432,43 @@ function Ownership.force_release(actor, name, reason, Msg)
 		error('not permitted: must be controller or current owner')
 	end
 
+	local antId = Msg.Tags['Ant-Process-Id']
+
+	if not antId then
+		error('ANT-Process-Id required for force_release')
+	end
+
+	local ok, err = try_remove_undername_record(antId, name)
+	if not ok then
+		Utils.audit(actor, 'force_release_remove_record_failed', {
+			name = name,
+			antId = antId,
+			sub = name,
+			error = err,
+		}, Msg)
+		error('failed to remove record: ' .. err)
+	end
+
+	-- only if Remove-Record was sent successfully, clear our state
 	State.Owners[name] = nil
+
+	local hadReservation = false
+	if State.Reserved[name] ~= nil then
+		hadReservation = true
+		State.Reserved[name] = nil
+	end
+
 	Utils.audit(actor, 'force_release', {
 		name = name,
 		reason = reason or 'unspecified',
 		wasOwner = rec.owner,
 		by = isOwner and 'owner' or 'controller',
+		clearedReservation = hadReservation,
 	}, Msg)
 
-	return { released = name }
+	return { released = name, clearedReservation = hadReservation }
 end
+
 -- =========================
 -- Internal: claim policy check
 -- =========================

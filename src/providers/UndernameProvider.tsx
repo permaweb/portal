@@ -68,10 +68,10 @@ type UndernamesContextState = {
 
 	request: (name: string, processId: string) => Promise<void>;
 	cancel: (id: number) => Promise<void>;
-	approve: (id: number) => Promise<void>;
+	approve: (id: number, processId: string) => Promise<void>;
 	reject: (id: number, reason?: string) => Promise<void>;
 
-	forceRelease: (name: string, reason?: string) => Promise<void>;
+	forceRelease: (name: string, processId: string, reason?: string) => Promise<void>;
 	setPolicy: (p: Partial<Policy>) => Promise<void>;
 };
 
@@ -116,10 +116,10 @@ const DEFAULT_CTX: UndernamesContextState = {
 
 	request: async (name: string, processId: string) => {},
 	cancel: async () => {},
-	approve: async () => {},
+	approve: async (id: number, processId: string) => {},
 	reject: async () => {},
 
-	forceRelease: async () => {},
+	forceRelease: async (name: string, processId: string, reason?: string) => {},
 	setPolicy: async () => {},
 };
 
@@ -258,6 +258,8 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 		}
 	}, [controllers, ready, libs]);
 
+	const portalId = getPortalIdFromURL();
+
 	const refreshOwners = React.useCallback(async () => {
 		if (!ready) return;
 		try {
@@ -387,7 +389,6 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 
 	const request = React.useCallback(
 		async (name: string, processId: string) => {
-			const portalId = getPortalIdFromURL();
 			await sendByForwardAction({
 				'Forward-Action': 'PortalRegistry.Request',
 				'Forward-To': UNDERNAMES_PROCESS_ID,
@@ -411,8 +412,13 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	);
 
 	const approve = React.useCallback(
-		async (id: number) => {
-			await send('Approve', { Id: id });
+		async (id: number, processId: string) => {
+			await send('Approve', {
+				Id: id,
+				'Ant-Process-Id': processId,
+				'Record-Transaction-Id': portalId,
+				'Record-TTL-Seconds': 900,
+			});
 			await refreshRequests();
 			await refreshOwners();
 			await refreshReserved();
@@ -431,8 +437,8 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	);
 
 	const forceRelease = React.useCallback(
-		async (name: string, reason?: string) => {
-			const params: any = { Name: name };
+		async (name: string, processId: string, reason?: string) => {
+			const params: any = { Name: name, 'Ant-Process-Id': processId };
 			if (reason) params.Reason = reason;
 			await send('ForceRelease', params);
 			await refreshOwners();
