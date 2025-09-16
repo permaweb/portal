@@ -13,6 +13,7 @@ export const language = {
 		alignCaption: `Align caption`,
 		all: `All`,
 		amount: `Amount`,
+		amountToShare: `Amount to Share`,
 		app: `Portal`,
 		appearance: `Appearance`,
 		approve: `Approve`,
@@ -401,8 +402,10 @@ export const language = {
 		unauthorizedPostReview: `Only portal admins or moderators can review posts.`,
 		unauthorizedUsersUpdate: `Only portal admins can add or modify users.`,
 		untitledPost: `Untitled Post`,
+		updateAvailable: `Update Available`,
 		updating: `Updating`,
 		updatingFonts: `Updating Fonts`,
+		updatingPortal: `Updating Portal`,
 		updatingPostStatus: `Updating Post Status`,
 		updatingTheme: `Updating Theme`,
 		upgradeToPermanentSuccessfully: `Upgraded to permanent successfully.`,
@@ -449,6 +452,7 @@ export const language = {
 		// TODO: translate
 
 		addCredits: `Add Credits`,
+		amountToShare: `Amount to Share`,
 		arioToken: `AR.IO Token`,
 		arnsBuyDescription: `Register permanently`,
 		arnsDashesValidation: `No Leading or Trailing Dashes`,

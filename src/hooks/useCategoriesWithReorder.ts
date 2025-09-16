@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { PortalCategoryType } from 'helpers/types';
+import { PortalCategoryType, PortalPatchMapEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -15,7 +15,7 @@ export function useCategoriesWithReorder(props: {
 	unauthorized?: boolean;
 	portalId: string;
 	portalCategories: PortalCategoryType[] | null;
-	refreshCurrentPortal: () => void;
+	refreshCurrentPortal: (patchKey: PortalPatchMapEnum.Navigation) => void;
 }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -126,7 +126,7 @@ export function useCategoriesWithReorder(props: {
 					arProvider.wallet
 				);
 
-				props.refreshCurrentPortal();
+				props.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
 				console.log(`Categories update: ${categoryUpdateId}`);
 
@@ -187,7 +187,7 @@ export function useCategoriesWithReorder(props: {
 
 				props.setCategories([]);
 
-				props.refreshCurrentPortal();
+				props.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
 				console.log(`Categories update: ${categoryUpdateId}`);
 
@@ -401,7 +401,7 @@ export function useCategoriesWithReorder(props: {
 
 				console.log(`Categories update: ${categoryUpdateId}`);
 
-				props.refreshCurrentPortal();
+				props.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 				addNotification(`${language?.categoriesUpdated}!`, 'success');
 			} catch (e: any) {
 				addNotification(e.message ?? 'Error reordering categories', 'warning');
@@ -450,6 +450,7 @@ export function useCategoriesWithReorder(props: {
 		}
 
 		// Find the category element we're hovering over based on destination index
+		// @ts-ignore
 		let hoveredCategory = null;
 
 		// Use destination index to find the category we're dropping near

@@ -11,7 +11,7 @@ import { Tabs } from 'components/atoms/Tabs';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
 import { ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { MediaConfigType, PortalUploadOptionType, PortalUploadType } from 'helpers/types';
+import { MediaConfigType, PortalPatchMapEnum, PortalUploadOptionType, PortalUploadType } from 'helpers/types';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -155,7 +155,7 @@ export default function MediaLibrary(props: {
 			addNotification(`${language?.mediaUploaded}!`, 'success');
 			handleClear(null);
 
-			portalProvider.refreshCurrentPortal();
+			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Media);
 		} catch (e: any) {
 			handleClear(e.message ?? 'Error uploading media');
 		}
@@ -223,7 +223,7 @@ export default function MediaLibrary(props: {
 
 				setSelectedUpload(null);
 
-				portalProvider.refreshCurrentPortal();
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Media);
 
 				console.log(`Media update: ${mediaUpdateId}`);
 

@@ -71,7 +71,6 @@ export const Dropdown = styled.div`
 	z-index: 1;
 	top: 40px;
 	right: -1.5px;
-	border-radius: ${STYLING.dimensions.radius.primary};
 `;
 
 export const DHeaderWrapper = styled.div`
@@ -96,8 +95,7 @@ export const DHeaderFlex = styled.div`
 	align-items: center;
 	gap: 12.5px;
 	margin: 7.5px 0 0 0;
-	padding: 0 5px 15px 5px;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+	padding: 0 7.5px 2.5px 7.5px;
 
 	svg {
 		padding: 2.5px 0 0 0;
@@ -127,10 +125,10 @@ export const MenuBadge = styled.span`
 	text-align: center;
 `;
 
-export const BackupWarning = styled.div`
+export const BackupNotification = styled.div`
 	position: absolute;
 	top: -5px;
-	right: -5px;
+	right: -7.5px;
 	width: 16px;
 	height: 16px;
 	border-radius: 50%;
@@ -149,10 +147,10 @@ export const BackupWarning = styled.div`
 			box-shadow: 0 0 0 0 ${(props) => props.theme.colors.warning.primary};
 		}
 		70% {
-			box-shadow: 0 0 0 8px ${(props) => props.theme.colors.shadow.primary};
+			box-shadow: 0 0 0 8px transparent;
 		}
 		100% {
-			box-shadow: 0 0 0 0 ${(props) => props.theme.colors.shadow.primary};
+			box-shadow: 0 0 0 0 transparent;
 		}
 	}
 `;
@@ -269,6 +267,10 @@ export const DBodyWrapper = styled.ul`
 			}
 		}
 	}
+`;
+
+export const DCreditsWrapper = styled.div`
+	padding: 0 7.5px;
 `;
 
 export const DFooterWrapper = styled(DBodyWrapper)`

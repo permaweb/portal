@@ -162,7 +162,9 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 							dimensions={{ wrapper: 35, icon: 21.5 }}
 							callback={handlePress}
 						/>
-						{backupsNeeded > 0 && arProvider.walletAddress && <S.BackupWarning>{backupsNeeded}</S.BackupWarning>}
+						{backupsNeeded > 0 && arProvider.walletAddress && (
+							<S.BackupNotification>{backupsNeeded}</S.BackupNotification>
+						)}
 						<div ref={wrapperRef} />
 					</S.PWrapper>
 					{showWalletDropdown && (
@@ -175,7 +177,9 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 									</S.DHeader>
 								</S.DHeaderFlex>
 							</S.DHeaderWrapper>
-							<TurboCredits showBorderBottom setShowFundUpload={setShowFundUpload} />
+							<S.DCreditsWrapper>
+								<TurboCredits showBorderBottom setShowFundUpload={setShowFundUpload} />
+							</S.DCreditsWrapper>
 							<S.DBodyWrapper>
 								{auth?.authType !== 'NATIVE_WALLET' && window.wanderInstance && (
 									<li

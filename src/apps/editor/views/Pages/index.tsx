@@ -36,7 +36,7 @@ export default function Pages() {
 					]
 				}
 			/>
-			<S.BodyWrapper className={'border-wrapper-alt1'}>
+			<S.BodyWrapper className={'border-wrapper-alt2'}>
 				<PageList />
 			</S.BodyWrapper>
 		</S.Wrapper>

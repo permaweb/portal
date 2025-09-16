@@ -9,7 +9,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Select } from 'components/atoms/Select';
 import { ASSETS, DEFAULT_THEME } from 'helpers/config';
-import { PortalSchemeType, PortalThemeType } from 'helpers/types';
+import { PortalPatchMapEnum, PortalSchemeType, PortalThemeType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -730,7 +730,7 @@ export default function Themes() {
 					arProvider.wallet
 				);
 
-				portalProvider.refreshCurrentPortal();
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
 
 				console.log(`Theme update: ${themeUpdateId}`);
 

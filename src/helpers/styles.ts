@@ -168,7 +168,7 @@ export const GlobalStyle = createGlobalStyle`
 
   .border-wrapper-alt1 {
     background: ${(props) => props.theme.colors.container.primary.background};
-    box-shadow: 0 0.5px 0.5px 0 ${(props) => props.theme.colors.shadow.primary};
+    box-shadow: 0 1.5px 10px 0 ${(props) => props.theme.colors.shadow.primary};
     border: 1px solid ${(props) => props.theme.colors.border.alt1};
     border-radius: ${STYLING.dimensions.radius.alt1};
   }
@@ -194,20 +194,33 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   .notification {
-    height: 14.5px;
-    width: 14.5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    background: ${(props) => props.theme.colors.indicator.alt1};
-    border-radius: 50%;
+    width: 16px;
+		height: 16px;
+		border-radius: 50%;
+		background: ${(props) => props.theme.colors.warning.primary};
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		animation: pulse 2s infinite;
 
-    span {
-      font-size: 8px;
-      font-weight: ${(props) => props.theme.typography.weight.bold};
-      color: ${(props) => props.theme.colors.font.light1};
-    }
+		span {
+			color: ${(props) => props.theme.colors.font.light1};
+			font-size: 10px;
+			font-weight: bold;
+			font-family: ${(props) => props.theme.typography.family.primary};
+		}
+
+		@keyframes pulse {
+			0% {
+				box-shadow: 0 0 0 0 ${(props) => props.theme.colors.warning.primary};
+			}
+			70% {
+				box-shadow: 0 0 0 8px transparent;
+			}
+			100% {
+				box-shadow: 0 0 0 0 transparent;
+			}
+		}
   }
 
   .max-view-wrapper {

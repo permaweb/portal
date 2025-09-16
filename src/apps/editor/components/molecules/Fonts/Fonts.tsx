@@ -7,7 +7,7 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Select } from 'components/atoms/Select';
 import { FONT_OPTIONS } from 'helpers/config';
-import { SelectOptionType } from 'helpers/types';
+import { PortalPatchMapEnum, SelectOptionType } from 'helpers/types';
 import { stripFontWeights } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -59,7 +59,7 @@ export default function Fonts() {
 					arProvider.wallet
 				);
 
-				portalProvider.refreshCurrentPortal();
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
 
 				console.log(`Font update: ${fontUpdateId}`);
 

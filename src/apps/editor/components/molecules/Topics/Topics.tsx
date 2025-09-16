@@ -6,7 +6,7 @@ import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
 import { ASSETS } from 'helpers/config';
-import { PortalTopicType } from 'helpers/types';
+import { PortalPatchMapEnum, PortalTopicType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -63,7 +63,7 @@ export default function Topics(props: {
 					arProvider.wallet
 				);
 
-				portalProvider.refreshCurrentPortal();
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
 				console.log(`Topic update: ${topicUpdateId}`);
 
@@ -93,7 +93,7 @@ export default function Topics(props: {
 
 				props.setTopics([]);
 
-				portalProvider.refreshCurrentPortal();
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
 				console.log(`Topic update: ${topicUpdateId}`);
 
@@ -179,7 +179,7 @@ export default function Topics(props: {
 					value={newTopic}
 					onChange={(e: any) => setNewTopic(e.target.value)}
 					invalid={{ status: topicOptions?.length && topicOptions.includes(newTopic), message: null }}
-					disabled={!portalProvider.permissions?.updatePortalMeta || topicLoading}
+					disabled={!portalProvider.permissions?.updatePortalMeta || !portalProvider.current?.topics || topicLoading}
 					autoFocus={showTopicAdd}
 					hideErrorMessage
 					sm

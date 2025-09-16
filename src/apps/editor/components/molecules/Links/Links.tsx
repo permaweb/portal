@@ -8,7 +8,7 @@ import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
 import { ASSETS, SOCIAL_LINK_ASSETS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { PortalLinkType, ViewLayoutType } from 'helpers/types';
+import { PortalLinkType, PortalPatchMapEnum, ViewLayoutType } from 'helpers/types';
 import { checkValidAddress, validateUrl } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -49,7 +49,13 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	const linkActionDisabled =
-		unauthorized || !arProvider.wallet || !portalProvider.current?.id || !newLinkUrl || !newLinkTitle || linkLoading;
+		unauthorized ||
+		!portalProvider.current?.links ||
+		!arProvider.wallet ||
+		!portalProvider.current?.id ||
+		!newLinkUrl ||
+		!newLinkTitle ||
+		linkLoading;
 
 	const handleSelect = (link: PortalLinkType) => {
 		const isSelected = selectedLinks.some((selectedLink) => selectedLink.url === link.url);
@@ -76,7 +82,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 
 				setSelectedLinks([]);
 
-				portalProvider.refreshCurrentPortal();
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
 				console.log(`Link update: ${linkUpdateId}`);
 
@@ -106,7 +112,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 					arProvider.wallet
 				);
 
-				portalProvider.refreshCurrentPortal();
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
 				console.log(`Link update: ${linkUpdateId}`);
 
@@ -227,7 +233,13 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 										type={'alt4'}
 										label={language?.prefill}
 										handlePress={() => setShowPrefills(!showPrefills)}
-										disabled={unauthorized || !arProvider.wallet || !portalProvider.current?.id || linkLoading}
+										disabled={
+											unauthorized ||
+											!arProvider.wallet ||
+											!portalProvider.current?.links ||
+											!portalProvider.current?.id ||
+											linkLoading
+										}
 										loading={false}
 									/>
 									{showPrefills && (
@@ -261,14 +273,14 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 							onChange={(e: any) => setNewLinkTitle(e.target.value)}
 							invalid={{ status: false, message: null }}
 							label={language?.text}
-							disabled={linkLoading || unauthorized}
+							disabled={linkLoading || !portalProvider.current?.links || unauthorized}
 							hideErrorMessage
 							sm
 						/>
 						<S.IconInput
 							hasData={newLinkIcon !== null}
 							onClick={() => inputRef.current.click()}
-							disabled={unauthorized || linkLoading}
+							disabled={unauthorized || linkLoading || !portalProvider.current?.links}
 						>
 							{getIconWrapper()}
 						</S.IconInput>
@@ -305,7 +317,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 							invalid={{ status: newLinkUrl?.length > 0 && !validateUrl(newLinkUrl), message: null }}
 							label={language?.url}
 							placeholder={'https://'}
-							disabled={linkLoading || unauthorized}
+							disabled={linkLoading || unauthorized || !portalProvider.current?.links}
 							hideErrorMessage
 							sm
 						/>
@@ -322,7 +334,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 								setSelectedLinks([]);
 							}}
 							active={editMode}
-							disabled={unauthorized || linkOptions?.length <= 0 || linkLoading}
+							disabled={unauthorized || linkOptions?.length <= 0 || !portalProvider.current?.links || linkLoading}
 							loading={false}
 							icon={editMode ? ASSETS.close : ASSETS.write}
 							iconLeftAlign

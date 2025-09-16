@@ -149,6 +149,16 @@ export type PortalPermissionsType = {
 	externalContributor?: boolean;
 };
 
+export enum PortalPatchMapEnum {
+	Overview = 'overview',
+	Users = 'users',
+	Navigation = 'navigation',
+	Presentation = 'presentation',
+	Media = 'media',
+	Posts = 'posts',
+	Requests = 'requests',
+}
+
 export enum ArticleBlockEnum {
 	Paragraph = 'paragraph',
 	Quote = 'quote',
@@ -284,8 +294,6 @@ export type MediaConfigType = {
 };
 
 export type DesignPanelType = 'themes' | 'fonts' | 'logo';
-
-export type RefreshFieldType = 'assets';
 
 export type BasicAlignmentType = 'left' | 'center' | 'right' | 'top' | 'bottom';
 

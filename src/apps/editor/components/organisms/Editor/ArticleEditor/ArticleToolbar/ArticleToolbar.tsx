@@ -173,7 +173,7 @@ export default function ArticleToolbar(props: {
 		(user: PortalUserType) => user.address === permawebProvider.profile?.id
 	);
 	const submitUnauthorized =
-		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions.postAutoIndex;
+		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions?.postAutoIndex;
 	const isCurrentRequest =
 		!!assetId && portalProvider.current?.requests?.some((request: PortalAssetRequestType) => request.id === assetId);
 

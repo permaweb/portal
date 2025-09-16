@@ -108,7 +108,7 @@ function AppContent() {
 				}
 			}
 		})();
-	}, [permawebProvider.profile]);
+	}, [permawebProvider.profile?.id, permawebProvider.profile?.version]);
 
 	function getRoute(path: string, element: React.ReactNode) {
 		const baseRoutes = [URLS.base, URLS.docs, `URLS.docs/*`, `${URLS.docs}:active/*`, URLS.notFound, '*'];
@@ -130,7 +130,7 @@ function AppContent() {
 				);
 			}
 
-			if (portalProvider.isPermissionsLoading) {
+			if (!portalProvider.permissions) {
 				return (
 					<Portal node={DOM.overlay}>
 						<S.CenteredWrapper className={'overlay'}>

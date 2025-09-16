@@ -7,8 +7,16 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
-import { DEFAULT_LAYOUT, DEFAULT_PAGES, DEFAULT_THEME, PORTAL_DATA, PORTAL_ROLES, URLS } from 'helpers/config';
-import { PortalDetailType, PortalHeaderType } from 'helpers/types';
+import {
+	DEFAULT_LAYOUT,
+	DEFAULT_PAGES,
+	DEFAULT_THEME,
+	PORTAL_DATA,
+	PORTAL_PATCH_MAP,
+	PORTAL_ROLES,
+	URLS,
+} from 'helpers/config';
+import { PortalDetailType, PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
 import { checkValidAddress, getBootTag } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -80,7 +88,7 @@ export default function PortalManager(props: {
 					data.Icon = 'None';
 				}
 
-				if (props.portal && props.portal.id) {
+				if (props.portal?.id) {
 					const portalsUpdateData = portalProvider.portals
 						.filter((portal: PortalHeaderType) => portal.id !== props.portal.id)
 						.map((portal: PortalHeaderType) => ({
@@ -103,23 +111,31 @@ export default function PortalManager(props: {
 
 					response = `${language?.portalUpdated}!`;
 
-					portalProvider.refreshCurrentPortal();
+					portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Overview);
 				} else {
+					const getPatchMapTag = (key: string, values: string[]) => {
+						const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+						return {
+							name: `Zone-Patch-Map-${capitalizedKey}`,
+							value: JSON.stringify(values),
+						};
+					};
+
 					const tags = [
 						getBootTag('Name', data.Name),
 						{ name: 'Content-Type', value: 'text/html' },
 						{ name: 'Zone-Type', value: 'Portal' },
 					];
 
+					for (const key of Object.keys(PORTAL_PATCH_MAP)) {
+						tags.push(getPatchMapTag(key, PORTAL_PATCH_MAP[key]));
+					}
+
 					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
 					if (data.Icon) tags.push(getBootTag('Icon', data.Icon));
 
-					const portalId = await permawebProvider.libs.createZone(
-						{
-							data: PORTAL_DATA(),
-							tags: tags,
-						},
-						(status: any) => console.log(status)
+					const portalId = await permawebProvider.libs.createZone({ tags: tags, data: PORTAL_DATA() }, (status: any) =>
+						console.log(status)
 					);
 
 					console.log(`Portal ID: ${portalId}`);
