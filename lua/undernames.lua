@@ -98,14 +98,14 @@ local function try_set_undername_record(antId, sub, tx, ttl, priority)
 end
 
 local function collect_record_params_for_self_claim(Msg, name_under)
-	local antId = Msg.Tags['ANT-Process-Id']
+	local antId = Msg.Tags['Ant-Process-Id']
 	local txId = Msg.Tags['Record-Transaction-Id']
 	local ttl = Msg.Tags['Record-TTL-Seconds']
 	local priority = Msg.Tags['Record-Priority']
 	local sub = name_under
 
 	if not antId or antId == '' then
-		return nil, 'ANT-Process-Id required for self-claim'
+		return nil, 'Ant-Process-Id required for self-claim'
 	end
 	if not txId or #txId ~= 43 then
 		return nil, 'Record-Transaction-Id required (43 chars)'
@@ -114,7 +114,6 @@ local function collect_record_params_for_self_claim(Msg, name_under)
 	if ttl < 60 or ttl > 86400 then
 		return nil, 'Record-TTL-Seconds out of range (60..86400)'
 	end
-
 	return { antId = antId, sub = sub, tx = txId, ttl = ttl, priority = priority }
 end
 
@@ -565,7 +564,6 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 			reply(Msg, false, { error = perr, code = 'MISSING_RECORD_PARAMS' })
 			return
 		end
-
 		local sent, sendErr = try_set_undername_record(params.antId, params.sub, params.tx, params.ttl, params.priority)
 		if not sent then
 			Utils.audit(Msg.From, 'claim_reserved_blocked_set_record_failed', {
@@ -580,7 +578,6 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 			reply(Msg, false, { error = sendErr, code = 'SET_RECORD_FAILED' })
 			return
 		end
-
 		Owners_set(nRequested, Msg.From, {
 			requestedAt = Utils.ts(Msg),
 			approvedAt = Utils.ts(Msg),

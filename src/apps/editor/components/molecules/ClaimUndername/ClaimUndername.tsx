@@ -8,7 +8,7 @@ import { useNotifications } from 'providers/NotificationProvider';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { ARIO } from '@ar.io/sdk';
-import { PARENT_UNDERNAME } from '../../../../../processes/undernames/constants';
+import { PARENT_UNDERNAME, TESTING_UNDERNAME } from '../../../../../processes/undernames/constants';
 
 type RuleState = {
 	nonEmpty: boolean;
@@ -126,22 +126,30 @@ export default function ClaimUndername() {
 		if (err) return;
 		setLoading(true);
 		const ario = ARIO.mainnet();
-		const arnsRecord = await ario.getArNSRecord({ name: PARENT_UNDERNAME });
+		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
+		const portalId = getPortalIdFromURL();
 		try {
 			const availability = await checkAvailability(name);
 			if (!availability) {
 				setError('Something went wrong, please try again later');
 				return;
 			}
-			if (availability.reserved) {
-				setError('This name is reserved');
+			if (availability.reserved && !availability.reservedFor?.includes(portalId || '')) {
+				setError('This name is reserved for another portal');
 				return;
 			}
 			if (!availability.available) {
 				setError('Name is already taken');
 				return;
 			}
-
+			console.log(
+				'Requesting undername',
+				name.trim(),
+				'for portal',
+				portalId,
+				'using ArNS process',
+				arnsRecord.processId
+			);
 			await request(name.trim(), arnsRecord.processId); //process id of the parent undername
 			setName('');
 			setOpenClaim(false);
@@ -151,7 +159,7 @@ export default function ClaimUndername() {
 		}
 	}, [name, ownedByPortal, loading, checkAvailability, request, addNotification]);
 
-	if (ownedByPortal) return null; // if portal already owns an undername, don't show the claim button
+	if (ownedByPortal) return null;
 
 	return (
 		<>

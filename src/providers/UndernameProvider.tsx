@@ -392,7 +392,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 				'Forward-Action': 'PortalRegistry.Request',
 				'Forward-To': UNDERNAMES_PROCESS_ID,
 				Name: name,
-				'ANT-Process-Id': processId, // process ID of the parent arns record
+				'Ant-Process-Id': processId, // process ID of the parent arns record
 				'Record-Transaction-Id': portalId, // transaction ID of the portal
 				'Record-TTL-Seconds': 900,
 			});

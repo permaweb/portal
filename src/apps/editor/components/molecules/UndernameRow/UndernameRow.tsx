@@ -6,10 +6,9 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import * as S from './styles';
 import { TypeUndernameOwnerRow } from 'editor/components/organisms/UndernamesList/UndernamesList';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
-import { IS_TESTNET } from 'helpers/config';
 import { ANT, ArconnectSigner, ARIO } from '@ar.io/sdk';
 import { useNotifications } from 'providers/NotificationProvider';
-import { PARENT_UNDERNAME } from '../../../../../processes/undernames/constants';
+import { PARENT_UNDERNAME, TESTING_UNDERNAME } from '../../../../../processes/undernames/constants';
 
 function fmtTs(ts?: number) {
 	return ts ? new Date(ts).toLocaleString() : '—';
@@ -36,13 +35,13 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 
 	const handleRelease = async () => {
 		try {
-			if (IS_TESTNET) {
-				console.warn('Releasing undernames on testnet is not supported yet.');
-				addNotification('Releasing undernames on testnet is not supported yet.', 'warning');
-				return;
-			}
+			// if (IS_TESTNET) {
+			// 	console.warn('Releasing undernames on testnet is not supported yet.');
+			// 	addNotification('Releasing undernames on testnet is not supported yet.', 'warning');
+			// 	return;
+			// }
 			const ario = ARIO.mainnet();
-			const arnsRecord = await ario.getArNSRecord({ name: PARENT_UNDERNAME });
+			const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
 			const signer = new ArconnectSigner(window.arweaveWallet);
 			const ant = ANT.init({
 				processId: arnsRecord.processId,
