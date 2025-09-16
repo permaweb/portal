@@ -32,7 +32,7 @@ export default function Domains() {
 					/>,
 				]}
 			/>
-			<S.BodyWrapper className={'border-wrapper-alt1'}>
+			<S.BodyWrapper className={'border-wrapper-alt2'}>
 				<DomainList />
 			</S.BodyWrapper>
 			{!portalProvider.permissions?.updatePortalMeta && (

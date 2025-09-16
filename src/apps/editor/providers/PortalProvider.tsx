@@ -164,57 +164,58 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [current, currentId, permawebProvider.libs]);
 
-	React.useEffect(() => {
-		(async function () {
-			if (current) {
-				let changeDetected = false;
-				let tries = 0;
-				const maxTries = 10;
+	// TODO
+	// React.useEffect(() => {
+	// 	(async function () {
+	// 		if (current) {
+	// 			let changeDetected = false;
+	// 			let tries = 0;
+	// 			const maxTries = 10;
 
-				console.log('Starting portal update check...');
+	// 			console.log('Starting portal update check...');
 
-				setUpdating(true);
-				while (!changeDetected && tries < maxTries) {
-					try {
-						console.log(`Attempt ${tries + 1} to get portal data...`);
+	// 			setUpdating(true);
+	// 			while (!changeDetected && tries < maxTries) {
+	// 				try {
+	// 					console.log(`Attempt ${tries + 1} to get portal data...`);
 
-						const existingPortal = { ...current };
-						const updatedPortal = await fetchPortal();
+	// 					const existingPortal = { ...current };
+	// 					const updatedPortal = await fetchPortal();
 
-						let changeRuleMet = JSON.stringify(existingPortal) !== JSON.stringify(updatedPortal);
-						if (refreshField) {
-							switch (refreshField) {
-								case 'assets':
-									changeRuleMet = !areAssetsEqual(existingPortal.assets ?? [], updatedPortal.assets ?? []);
-									break;
-								default:
-									break;
-							}
-						}
+	// 					let changeRuleMet = JSON.stringify(existingPortal) !== JSON.stringify(updatedPortal);
+	// 					if (refreshField) {
+	// 						switch (refreshField) {
+	// 							case 'assets':
+	// 								changeRuleMet = !areAssetsEqual(existingPortal.assets ?? [], updatedPortal.assets ?? []);
+	// 								break;
+	// 							default:
+	// 								break;
+	// 						}
+	// 					}
 
-						if (changeRuleMet) {
-							console.log('Change detected in portal data. Updating current portal...');
-							handlePortalSetup(updatedPortal);
-							cachePortal(currentId, updatedPortal);
-							changeDetected = true;
-						} else {
-							console.log('No change detected. Retrying...');
-							await new Promise((resolve) => setTimeout(resolve, 2000));
-							tries++;
-						}
-					} catch (e: any) {
-						console.error('Error occurred while getting portal:', e);
-						addNotification(e.message ?? 'An error occurred getting this portal', 'warning');
-					}
-				}
+	// 					if (changeRuleMet) {
+	// 						console.log('Change detected in portal data. Updating current portal...');
+	// 						handlePortalSetup(updatedPortal);
+	// 						cachePortal(currentId, updatedPortal);
+	// 						changeDetected = true;
+	// 					} else {
+	// 						console.log('No change detected. Retrying...');
+	// 						await new Promise((resolve) => setTimeout(resolve, 2000));
+	// 						tries++;
+	// 					}
+	// 				} catch (e: any) {
+	// 					console.error('Error occurred while getting portal:', e);
+	// 					addNotification(e.message ?? 'An error occurred getting this portal', 'warning');
+	// 				}
+	// 			}
 
-				if (!changeDetected) {
-					console.log('Max attempts reached without detecting changes.');
-				}
-				setUpdating(false);
-			}
-		})();
-	}, [refreshCurrentTrigger]);
+	// 			if (!changeDetected) {
+	// 				console.log('Max attempts reached without detecting changes.');
+	// 			}
+	// 			setUpdating(false);
+	// 		}
+	// 	})();
+	// }, [refreshCurrentTrigger]);
 
 	function getUserPermissions(address: string, portal: PortalDetailType) {
 		const user = portal.users.find((user: PortalUserType) => user.address === address);
@@ -303,58 +304,161 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		return users;
 	}
 
+	const fetchPatchDataConcurrently = async (processId: string) => {
+		const patchKeys = ['overview', 'users', 'presentation', 'navigation', 'posts', 'requests'];
+
+		// Fetch each patch URL concurrently
+		patchKeys.forEach(async (key) => {
+			try {
+				const data = await permawebProvider.libs.readState({ processId: processId, path: key });
+
+				console.log(data);
+
+				// const data = await response.json();
+
+				// Update the current portal state immediately with this patch data
+				setCurrent((prevPortal) => {
+					if (!prevPortal) {
+						// Initialize portal if not exists
+						const newPortal: PortalDetailType = {
+							id: processId,
+							name: null,
+							logo: null,
+							icon: null,
+							assets: null,
+							requests: null,
+							categories: null,
+							topics: null,
+							links: null,
+							uploads: null,
+							fonts: null,
+							themes: null,
+							users: null,
+							pages: null,
+							layout: undefined,
+							roleOptions: null,
+							permissions: null,
+							domains: null,
+						};
+						prevPortal = newPortal;
+					}
+
+					// Update specific fields based on patch key
+					const updatedPortal = { ...prevPortal };
+
+					switch (key) {
+						case 'overview':
+							updatedPortal.name = data.Name ?? updatedPortal.name;
+							updatedPortal.logo = data.Logo ?? updatedPortal.logo;
+							updatedPortal.icon = data.Icon ?? updatedPortal.icon;
+							break;
+						case 'users':
+							updatedPortal.roleOptions = data.RoleOptions ?? updatedPortal.roleOptions;
+							updatedPortal.permissions = data.Permissions ?? updatedPortal.permissions;
+							if (data.Roles) {
+								const users: PortalUserType[] = [];
+								for (const entry of Object.keys(data.Roles)) {
+									users.push({
+										address: entry,
+										type: data.Roles[entry].type,
+										roles: data.Roles[entry].roles,
+									});
+								}
+								updatedPortal.users = users;
+							}
+							break;
+						case 'presentation':
+							updatedPortal.layout = data.Layout ?? updatedPortal.layout;
+							updatedPortal.pages = data.Pages ?? updatedPortal.pages;
+							updatedPortal.themes = data.Themes ?? updatedPortal.themes;
+							break;
+						case 'navigation':
+							updatedPortal.categories = data.Categories ?? updatedPortal.categories;
+							updatedPortal.topics = data.Topics ?? updatedPortal.topics;
+							updatedPortal.links = data.Links ?? updatedPortal.links;
+							break;
+						case 'posts':
+							updatedPortal.assets = getPortalAssets(data.Index);
+							break;
+						case 'requests':
+							updatedPortal.requests = data.IndexRequests ?? updatedPortal.requests;
+							break;
+					}
+
+					console.log(updatedPortal);
+
+					return updatedPortal;
+				});
+			} catch (e) {
+				console.warn(`Failed to fetch patch data for ${key}:`, e);
+			}
+		});
+	};
+
 	const fetchPortal = async () => {
 		if (currentId) {
-			try {
-				const portalData = await permawebProvider.libs.getZone(currentId);
+			// Try fetching from patch URLs first
+			await fetchPatchDataConcurrently(currentId);
+			return null; // State is updated directly by fetchPatchDataConcurrently
+			// 	try {
+			// 		// Try fetching from patch URLs first
+			// 		await fetchPatchDataConcurrently(currentId);
+			// 		return null; // State is updated directly by fetchPatchDataConcurrently
+			// 	} catch (e: any) {
+			// 		// Fallback to original getZone method
+			// 		console.warn('Patch URLs failed, falling back to getZone:', e);
 
-				const users: PortalUserType[] = [];
-				if (portalData?.roles) {
-					for (const entry of Object.keys(portalData.roles)) {
-						users.push({
-							address: entry,
-							type: portalData.roles[entry].type,
-							roles: portalData.roles[entry].roles,
-						});
-					}
-				}
+			// 		try {
+			// 			const portalData = await permawebProvider.libs.getZone(currentId);
 
-				/* Check and update zone version if available */
-				if (portalData.version !== CurrentZoneVersion) {
-					if (arProvider.wallet && arProvider.walletAddress === portalData.owner) {
-						console.log('Zone version does match current version, updating...');
-						await permawebProvider.libs.updateZoneVersion({
-							zoneId: currentId,
-						});
-						console.log('Updated zone version.');
-					}
-				}
+			// 			const users: PortalUserType[] = [];
+			// 			if (portalData?.roles) {
+			// 				for (const entry of Object.keys(portalData.roles)) {
+			// 					users.push({
+			// 						address: entry,
+			// 						type: portalData.roles[entry].type,
+			// 						roles: portalData.roles[entry].roles,
+			// 					});
+			// 				}
+			// 			}
 
-				const portal: PortalDetailType = {
-					id: currentId,
-					name: portalData.store?.name ?? 'None',
-					logo: portalData.store?.logo ?? 'None',
-					icon: portalData.store?.icon ?? 'None',
-					assets: getPortalAssets(portalData?.store?.index),
-					requests: portalData?.store?.indexRequests ?? [],
-					categories: portalData?.store?.categories ?? [],
-					topics: portalData?.store?.topics ?? [],
-					links: portalData?.store?.links ?? [],
-					uploads: portalData?.store?.uploads ?? [],
-					fonts: portalData?.store?.fonts ?? {},
-					themes: portalData?.store?.themes ?? [],
-					users: getPortalUsers(portalData?.roles),
-					pages: portalData?.store?.pages ?? [],
-					layout: portalData?.store?.layout,
-					roleOptions: portalData.roleOptions ?? {},
-					permissions: portalData.permissions ?? {},
-					domains: [],
-				};
+			// 			/* Check and update portal version if available */
+			// 			if (portalData.version !== CurrentZoneVersion) {
+			// 				if (arProvider.wallet && arProvider.walletAddress === portalData.owner) {
+			// 					console.log('Portal version does match current version, updating...');
+			// 					await permawebProvider.libs.updateZoneVersion({
+			// 						zoneId: currentId,
+			// 					});
+			// 					console.log('Updated portal version.');
+			// 				}
+			// 			}
 
-				return portal;
-			} catch (e: any) {
-				throw new Error('An error occurred getting this portal.');
-			}
+			// 			const portal: PortalDetailType = {
+			// 				id: currentId,
+			// 				name: portalData.store?.name ?? 'None',
+			// 				logo: portalData.store?.logo ?? 'None',
+			// 				icon: portalData.store?.icon ?? 'None',
+			// 				assets: getPortalAssets(portalData?.store?.index),
+			// 				requests: portalData?.store?.indexRequests ?? [],
+			// 				categories: portalData?.store?.categories ?? [],
+			// 				topics: portalData?.store?.topics ?? [],
+			// 				links: portalData?.store?.links ?? [],
+			// 				uploads: portalData?.store?.uploads ?? [],
+			// 				fonts: portalData?.store?.fonts ?? {},
+			// 				themes: portalData?.store?.themes ?? [],
+			// 				users: getPortalUsers(portalData?.roles),
+			// 				pages: portalData?.store?.pages ?? [],
+			// 				layout: portalData?.store?.layout,
+			// 				roleOptions: portalData.roleOptions ?? {},
+			// 				permissions: portalData.permissions ?? {},
+			// 				domains: [],
+			// 			};
+
+			// 			return portal;
+			// 		} catch (fallbackError: any) {
+			// 			throw new Error('An error occurred getting this portal.');
+			// 		}
+			// 	}
 		}
 	};
 

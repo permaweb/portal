@@ -7,7 +7,7 @@ export const DBalanceWrapper = styled.div<{ showBorderBottom: boolean }>`
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
-	padding: 15px 7.5px;
+	padding: 15px 0;
 	border-bottom: ${(props) => (props.showBorderBottom ? `1px solid ${props.theme.colors.border.primary}` : 'none')};
 `;
 

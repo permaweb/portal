@@ -1,9 +1,15 @@
 import { getTxEndpoint } from './endpoints';
 import { ArticleBlockEnum } from './types';
 
+// TODO
+// export const AO_NODE = {
+// 	url: 'https://hb.portalinto.com',
+// 	scheduler: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
+// };
+
 export const AO_NODE = {
-	url: 'https://hb.portalinto.com',
-	scheduler: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
+	url: 'http://localhost:8734',
+	scheduler: 'mYJTM8VpIibDLuyGLQTcbcPy-LeOY48qzECADTUYfWc',
 };
 
 // Testnet configuration

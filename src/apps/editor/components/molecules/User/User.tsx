@@ -100,8 +100,8 @@ export default function User(props: {
 
 			<Panel
 				open={showShareCredits}
-				width={500}
-				header={'Share Credits'}
+				width={575}
+				header={language.shareCredits}
 				handleClose={() => setShowShareCredits((prev) => !prev)}
 				closeHandlerDisabled
 			>
@@ -117,7 +117,7 @@ export default function User(props: {
 			{props.user.roles && (
 				<Panel
 					open={showManageUser}
-					width={500}
+					width={575}
 					header={language?.manageUser}
 					handleClose={() => setShowManageUser((prev) => !prev)}
 					closeHandlerDisabled

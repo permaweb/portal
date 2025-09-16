@@ -175,7 +175,9 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 									</S.DHeader>
 								</S.DHeaderFlex>
 							</S.DHeaderWrapper>
-							<TurboCredits showBorderBottom setShowFundUpload={setShowFundUpload} />
+							<S.DCreditsWrapper>
+								<TurboCredits showBorderBottom setShowFundUpload={setShowFundUpload} />
+							</S.DCreditsWrapper>
 							<S.DBodyWrapper>
 								{auth?.authType !== 'NATIVE_WALLET' && window.wanderInstance && (
 									<li

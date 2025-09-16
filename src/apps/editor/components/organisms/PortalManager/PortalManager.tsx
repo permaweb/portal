@@ -80,7 +80,7 @@ export default function PortalManager(props: {
 					data.Icon = 'None';
 				}
 
-				if (props.portal && props.portal.id) {
+				if (props.portal?.id) {
 					const portalsUpdateData = portalProvider.portals
 						.filter((portal: PortalHeaderType) => portal.id !== props.portal.id)
 						.map((portal: PortalHeaderType) => ({
@@ -105,21 +105,28 @@ export default function PortalManager(props: {
 
 					portalProvider.refreshCurrentPortal();
 				} else {
+					const getPatchMapTag = (key: string, values: string[]) => ({
+						name: [`Zone-Patch-Map-${key}`],
+						value: JSON.stringify(values),
+					});
+
 					const tags = [
 						getBootTag('Name', data.Name),
-						{ name: 'Content-Type', value: 'text/html' },
+						// { name: 'Content-Type', value: 'text/html' }, // TODO
 						{ name: 'Zone-Type', value: 'Portal' },
+						getPatchMapTag('Overview', ['Owner', 'Version', 'Store.Name', 'Store.Icon', 'Store.Logo']),
+						getPatchMapTag('Users', ['Roles', 'RoleOptions', 'Permissions']),
+						getPatchMapTag('Presentation', ['Store.Layout', 'Store.Pages', 'Store.Themes']),
+						getPatchMapTag('Navigation', ['Store.Categories', 'Store.Topics', 'Store.Links']),
+						getPatchMapTag('Posts', ['Store.Index']),
+						getPatchMapTag('Requests', ['Store.IndexRequests']),
 					];
 
 					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
 					if (data.Icon) tags.push(getBootTag('Icon', data.Icon));
 
-					const portalId = await permawebProvider.libs.createZone(
-						{
-							data: PORTAL_DATA(),
-							tags: tags,
-						},
-						(status: any) => console.log(status)
+					const portalId = await permawebProvider.libs.createZone({ tags: tags, data: PORTAL_DATA() }, (status: any) =>
+						console.log(status)
 					);
 
 					console.log(`Portal ID: ${portalId}`);

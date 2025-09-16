@@ -13,6 +13,7 @@ export const language = {
 		alignCaption: `Align caption`,
 		all: `All`,
 		amount: `Amount`,
+		amountToShare: `Amount to Share`,
 		app: `Portal`,
 		appearance: `Appearance`,
 		approve: `Approve`,
