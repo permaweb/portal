@@ -8,8 +8,9 @@ import { TypeUndernameOwnerRow } from 'editor/components/organisms/UndernamesLis
 import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { ARIO } from '@ar.io/sdk';
 import { useNotifications } from 'providers/NotificationProvider';
-import { PARENT_UNDERNAME, TESTING_UNDERNAME } from '../../../../../processes/undernames/constants';
+import { PARENT_UNDERNAME } from '../../../../../processes/undernames/constants';
 import { IS_TESTNET } from 'helpers/config';
+import { ConfirmModal } from 'components/atoms/ConfirmModal';
 
 function fmtTs(ts?: number) {
 	return ts ? new Date(ts).toLocaleString() : '—';
@@ -33,28 +34,29 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 
 	const [showPanel, setShowPanel] = React.useState(false);
 	const [reason, setReason] = React.useState('');
-
+	const [showConfirm, setShowConfirm] = React.useState(false);
+	const confirmDisabled = !reason.trim(); // require reason
 	const handleRelease = async () => {
 		try {
 			if (IS_TESTNET) {
-				console.warn('Releasing undernames on testnet is not supported yet.');
-				addNotification('Releasing undernames on testnet is not supported yet.', 'warning');
+				console.warn('Releasing subdomains on testnet is not supported yet.');
+				addNotification('Releasing subdomains on testnet is not supported yet.', 'warning');
 				return;
 			}
 			const ario = ARIO.mainnet();
-			const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
-			await forceRelease(props.row.name, arnsRecord.processId, reason); //name, processId, reason
-			addNotification(`Undername released`, 'success');
+			const arnsRecord = await ario.getArNSRecord({ name: PARENT_UNDERNAME });
+			await forceRelease(props.row.name, arnsRecord.processId, reason);
+			addNotification(`Subdomain released`, 'success');
 			setShowPanel(false);
 		} catch (error) {
-			console.error('Failed to release undername:', error);
+			console.error('Failed to release subdomain:', error);
 		}
 	};
 
 	return (
 		<>
 			{/* Table row */}
-			<S.RowWrapper className="fade-in" onClick={() => setShowPanel(true)}>
+			<S.RowWrapper className="fade-in">
 				<S.Cell>
 					<p>
 						<a
@@ -78,36 +80,39 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 				<S.Cell>
 					<p>{srcLabel(props.row.source)}</p>
 				</S.Cell>
+				<S.Cell mono>
+					<Button type={'alt3'} label={language?.manage || 'Manage'} handlePress={() => setShowPanel(true)} />
+				</S.Cell>
 			</S.RowWrapper>
 
 			{/* Details panel */}
 			<Panel
 				open={showPanel}
 				width={500}
-				header={language?.manageUndername || 'Manage Undername'}
+				header={language?.manageUndername || 'Manage Subdomain'}
 				handleClose={() => setShowPanel(false)}
 				closeHandlerDisabled
 			>
 				<S.PanelContent>
 					<S.KV>
-						<span>{language?.undername || 'Undername'}</span>
+						<span>Subdomain</span>
 						<code>{props.row.name}</code>
 					</S.KV>
 
 					<S.KV>
-						<span>{language?.owner || 'Owner'}</span>
+						<span>Owner</span>
 						<code title={props.row.owner}>{props.row.owner}</code>
 					</S.KV>
 
 					<S.KV>
-						<span>{language?.requestedAt || 'Requested at'}</span>
+						<span>Requested At</span>
 						<time dateTime={props.row.requestedAt ? new Date(props.row.requestedAt).toISOString() : undefined}>
 							{fmtTs(props.row.requestedAt)}
 						</time>
 					</S.KV>
 
 					<S.KV>
-						<span>{language?.approvedAt || 'Approved at'}</span>
+						<span>Approved At</span>
 						<time dateTime={props.row.approvedAt ? new Date(props.row.approvedAt).toISOString() : undefined}>
 							{fmtTs(props.row.approvedAt)}
 						</time>
@@ -133,11 +138,11 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 						<span>{props.row.auto ? 'Yes' : 'No'}</span>
 					</S.KV>
 					<S.Section>
-						<S.SectionHeader>Release Undername</S.SectionHeader>
+						<S.SectionHeader>Release Subdomain</S.SectionHeader>
 						<S.SectionBody>
 							<S.TextArea
 								rows={4}
-								placeholder={language?.reason || 'Reason (optional)'}
+								placeholder={'Reason (mandatory)'}
 								value={reason}
 								onChange={(e) => setReason(e.target.value)}
 							/>
@@ -146,15 +151,37 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 							<Button
 								type="warning"
 								label={language?.release || 'Release'}
+								disabled={confirmDisabled}
 								handlePress={(e) => {
 									e.stopPropagation();
-									handleRelease();
-									setShowPanel(false);
+									setShowConfirm(true);
 								}}
 							/>
 						</S.SectionFooter>
 					</S.Section>
 				</S.PanelContent>
+				<ConfirmModal
+					open={showConfirm}
+					message={
+						<>
+							<strong>Release “{props.row.name}”?</strong>
+							<br />
+							This will revoke ownership and remove the record on-chain. Reason:
+							<br />
+							<em>{reason || '—'}</em>
+						</>
+					}
+					confirmLabel="Yes, release"
+					rejectLabel="Cancel"
+					onReject={() => {
+						setShowConfirm(false);
+					}}
+					onClose={() => setShowConfirm(false)}
+					onConfirm={async () => {
+						if (confirmDisabled) return;
+						await handleRelease();
+					}}
+				/>
 			</Panel>
 		</>
 	);

@@ -39,7 +39,7 @@ export const HeaderRow = styled.div<{ showRequester?: boolean }>`
 	width: 100%;
 	display: grid;
 	grid-template-columns: ${(p) =>
-		p.showRequester ? '0.5fr 1fr 1.6fr 0.9fr 1fr 1fr' : '0.5fr 1fr 0.9fr 1fr 1fr'}; /* 5 or 6 columns */
+		p.showRequester ? '1fr 1fr 1fr 0.9fr 1fr 0.5fr' : '1fr 1fr 0.9fr 1fr 0.5fr'}; /* 5 or 6 columns */
 	gap: 8px;
 	align-items: center;
 	padding: 12.5px 15px;

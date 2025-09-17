@@ -7,24 +7,31 @@ import { Button } from 'components/atoms/Button';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { shortAddr } from '../UndernameRow/UndernameRow';
 import { usePermawebProvider } from 'providers/PermawebProvider';
+import { ConfirmModal } from 'components/atoms/ConfirmModal';
+import { useUndernamesProvider } from 'providers/UndernameProvider';
 
 function ts(ts?: number) {
 	return ts ? new Date(ts).toLocaleString() : '—';
 }
 
+type ConfirmKind = 'approve' | 'reject' | null;
+
 export default function UndernameRequestRow(props: {
 	row: UndernameRequest;
-	onApprove: (id: number) => Promise<void>;
+	onApprove: (id: number, reason?: string) => Promise<void>;
 	onReject: (id: number, reason: string) => Promise<void>;
 	loading: boolean;
 	showRequester?: boolean;
 }) {
+	const { isLoggedInUserController } = useUndernamesProvider();
 	const languageProvider = useLanguageProvider();
 	const { fetchProfile } = usePermawebProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const [open, setOpen] = React.useState(false);
 	const [reason, setReason] = React.useState('');
+	const [confirmKind, setConfirmKind] = React.useState<ConfirmKind>(null); // << which action to confirm
 	const pending = props.row.status === 'pending';
+	const showConfirm = confirmKind !== null;
 	const [decidedBy, setDecidedBy] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
@@ -53,11 +60,47 @@ export default function UndernameRequestRow(props: {
 		};
 	}, [props.row.decidedBy, fetchProfile]);
 
+	const confirmLabel = confirmKind === 'approve' ? language?.approve || 'Approve' : language?.reject || 'Reject';
+	const rejectLabel = language?.cancel || 'Cancel';
+
+	const handleOpenConfirm = React.useCallback((kind: ConfirmKind) => {
+		setConfirmKind(kind);
+	}, []);
+	const confirmMessage = React.useMemo(() => {
+		if (!confirmKind) return null;
+		if (confirmKind === 'approve') {
+			return (
+				<>
+					<strong>Approve request for {props.row.name}?</strong>
+				</>
+			);
+		}
+		return (
+			<>
+				<strong>Reject request for {props.row.name}?</strong>
+			</>
+		);
+	}, [confirmKind, props.row.id, props.row.name, reason]);
+
+	const handleConfirm = React.useCallback(async () => {
+		if (!confirmKind) return;
+		if (confirmKind === 'approve') {
+			if (!reason.trim()) {
+				await props.onApprove(props.row.id, reason);
+				return;
+			}
+			await props.onApprove(props.row.id);
+		} else {
+			if (!reason.trim()) return; // guard
+			await props.onReject(props.row.id, reason.trim());
+		}
+		setConfirmKind(null);
+		setOpen(false);
+	}, [confirmKind, props.onApprove, props.onReject, props.row.id, reason]);
+	const showAdminControls = pending && isLoggedInUserController;
 	return (
 		<>
-			{/* Clickable grid row aligned with header (6 cols) */}
-			<S.Row role="row" onClick={() => setOpen(true)} title="Click to manage" showRequester={props.showRequester}>
-				<S.Cell mono>#{props.row.id}</S.Cell>
+			<S.Row role="row" title="Click to manage" showRequester={props.showRequester}>
 				<S.Cell mono>{props.row.name}</S.Cell>
 				{props.showRequester ? (
 					<S.Cell mono>
@@ -69,18 +112,21 @@ export default function UndernameRequestRow(props: {
 				</S.Cell>
 				<S.Cell mono>{ts(props.row.createdAt)}</S.Cell>
 				<S.Cell mono>{ts(props.row.decidedAt)}</S.Cell>
+				<S.Cell mono>
+					<Button type={'alt3'} label={language?.manage || 'Manage'} handlePress={() => setOpen(true)} />
+				</S.Cell>
 			</S.Row>
 
 			<Panel
 				open={open}
 				width={560}
-				header={`Undername #${props.row.id}`}
+				header={`Subdomain #${props.row.id}`}
 				handleClose={() => setOpen(false)}
 				closeHandlerDisabled
 			>
 				<S.PanelContent>
 					<S.KV>
-						<span>Undername</span>
+						<span>Subdomain</span>
 						<code>{props.row.name}</code>
 					</S.KV>
 					<S.KV>
@@ -106,41 +152,30 @@ export default function UndernameRequestRow(props: {
 						</S.KV>
 					)}
 					{props.row.reason ? <S.ReasonNote>Reason: {props.row.reason}</S.ReasonNote> : null}
-					{pending && (
+					{showAdminControls && (
 						<S.Sections>
 							<S.Section>
-								<S.SectionHeader>Approval</S.SectionHeader>
-								<S.SectionBody>
-									<S.Placeholder>Approval configuration UI goes here.</S.Placeholder>
-								</S.SectionBody>
-								<S.SectionFooter>
-									<Button
-										type={'alt1'}
-										label={props.loading ? language?.approving || 'Approving...' : language?.approve || 'Approve'}
-										handlePress={() => props.onApprove(props.row.id)}
-										disabled={props.loading}
-									/>
-								</S.SectionFooter>
-							</S.Section>
-
-							<S.Section>
-								<S.SectionHeader>Rejection</S.SectionHeader>
+								<S.SectionHeader>Admin Controls</S.SectionHeader>
 								<S.SectionBody>
 									<S.TextArea
 										rows={4}
-										placeholder={language?.reason || 'Reason (optional)'}
+										placeholder={'Reason (optional for approval, mandatory for rejection)'}
 										value={reason}
 										onChange={(e) => setReason(e.target.value)}
 									/>
 								</S.SectionBody>
 								<S.SectionFooter>
 									<Button
+										type={'alt1'}
+										label={props.loading ? language?.approving || 'Approving...' : language?.approve || 'Approve'}
+										handlePress={() => handleOpenConfirm('approve')}
+										disabled={props.loading}
+									/>
+									<Button
 										type={'warning'}
 										label={props.loading ? language?.rejecting || 'Rejecting...' : language?.reject || 'Reject'}
-										handlePress={() => {
-											props.onReject(props.row.id, reason || '');
-											setOpen(false);
-										}}
+										handlePress={() => handleOpenConfirm('reject')}
+										disabled={props.loading || !reason.trim()}
 									/>
 								</S.SectionFooter>
 							</S.Section>
@@ -148,6 +183,17 @@ export default function UndernameRequestRow(props: {
 					)}
 				</S.PanelContent>
 			</Panel>
+			<ConfirmModal
+				open={showConfirm}
+				message={confirmMessage}
+				confirmLabel={confirmLabel}
+				rejectLabel={rejectLabel}
+				onConfirm={handleConfirm}
+				onReject={() => {
+					setConfirmKind(null);
+				}}
+				onClose={() => setConfirmKind(null)}
+			/>
 		</>
 	);
 }

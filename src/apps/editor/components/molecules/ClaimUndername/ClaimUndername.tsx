@@ -110,11 +110,11 @@ export default function ClaimUndername() {
 
 	const handleRequest = React.useCallback(async () => {
 		if (ownedByPortal) {
-			setError('Portal already owns an undername');
+			setError('Portal already owns an subdomain');
 			return;
 		}
 		if (nameTakenByOther) {
-			setError('Name is already assigned to another portal');
+			setError('Subdomain is already assigned to another portal');
 			return;
 		}
 		if (loading) return;
@@ -126,7 +126,7 @@ export default function ClaimUndername() {
 		if (err) return;
 		setLoading(true);
 		const ario = ARIO.mainnet();
-		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
+		const arnsRecord = await ario.getArNSRecord({ name: PARENT_UNDERNAME });
 		const portalId = getPortalIdFromURL();
 		try {
 			const availability = await checkAvailability(name);
@@ -135,25 +135,17 @@ export default function ClaimUndername() {
 				return;
 			}
 			if (availability.reserved && !availability.reservedFor?.includes(portalId || '')) {
-				setError('This name is reserved for another portal');
+				setError('This subdomain is reserved for another portal');
 				return;
 			}
 			if (!availability.available) {
 				setError('Name is already taken');
 				return;
 			}
-			console.log(
-				'Requesting undername',
-				name.trim(),
-				'for portal',
-				portalId,
-				'using ArNS process',
-				arnsRecord.processId
-			);
 			await request(name.trim(), arnsRecord.processId); //process id of the parent undername
 			setName('');
 			setOpenClaim(false);
-			addNotification('Undername request submitted', 'success');
+			addNotification('Subdomain request submitted', 'success');
 		} finally {
 			setLoading(false);
 		}
@@ -163,15 +155,11 @@ export default function ClaimUndername() {
 
 	return (
 		<>
-			<Button
-				type={'alt1'}
-				label={language?.claimUndername || 'Claim an undername'}
-				handlePress={() => setOpenClaim(true)}
-			/>
+			<Button type={'alt1'} label={'Claim Subdomain'} handlePress={() => setOpenClaim(true)} />
 			<Panel
 				open={openClaim}
 				width={560}
-				header={language?.claimUndername || 'Claim an undername'}
+				header={'Claim your subdomain'}
 				handleClose={() => {
 					setOpenClaim(false);
 					setError(null);
@@ -181,7 +169,7 @@ export default function ClaimUndername() {
 				<S.ClaimCard>
 					<S.Row>
 						<S.Input
-							placeholder="Enter your undername"
+							placeholder="Enter your subdomain"
 							value={name}
 							onChange={handleChange}
 							maxLength={MAX_UNDERNAME}

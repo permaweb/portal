@@ -4,7 +4,7 @@ import { STYLING } from 'helpers/config';
 export const RowWrapper = styled.div`
 	width: 100%;
 	display: grid;
-	grid-template-columns: 0.5fr 1fr 1.6fr 0.9fr 1fr 1fr;
+	grid-template-columns: 1.3fr 1fr 1fr 0.9fr 1fr 0.5fr;
 	gap: 8px;
 	align-items: center;
 	padding: 12.5px 15px;

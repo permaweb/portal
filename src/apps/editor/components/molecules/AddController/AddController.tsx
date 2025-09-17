@@ -53,11 +53,11 @@ export default function AddController() {
 
 	return (
 		<>
-			<Button type={'alt1'} label={'Add Controller'} handlePress={() => setOpen(true)} />
+			<Button type={'alt1'} label={'Add Admin'} handlePress={() => setOpen(true)} />
 			<Panel
 				open={open}
 				width={560}
-				header={'Add Controller Address'}
+				header={'Add Admin Address'}
 				handleClose={() => {
 					setOpen(false);
 					setError(null);
@@ -67,7 +67,7 @@ export default function AddController() {
 				<S.Card>
 					<S.Row>
 						<S.Input
-							placeholder="Enter controller address"
+							placeholder="Enter admin address"
 							value={addr}
 							onChange={handleChange}
 							onKeyDown={handleKeyDown}

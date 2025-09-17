@@ -3,6 +3,7 @@ import * as React from 'react';
 import { UNDERNAMES_PROCESS_ID, UNDERNAMES_HANDLERS, type HandlerKey } from '../processes/undernames/constants';
 import { usePermawebProvider } from './PermawebProvider';
 import { getPortalIdFromURL } from 'helpers/utils';
+import { useArweaveProvider } from './ArweaveProvider';
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
@@ -30,6 +31,7 @@ type UndernamesContextState = {
 	ready: boolean;
 	loading: boolean;
 	error: string | null;
+	isLoggedInUserController?: boolean; // derived
 
 	// data
 	controllers: string[];
@@ -68,7 +70,7 @@ type UndernamesContextState = {
 
 	request: (name: string, processId: string) => Promise<void>;
 	cancel: (id: number) => Promise<void>;
-	approve: (id: number, processId: string) => Promise<void>;
+	approve: (id: number, processId: string, reason?: string) => Promise<void>;
 	reject: (id: number, reason?: string) => Promise<void>;
 
 	forceRelease: (name: string, processId: string, reason?: string) => Promise<void>;
@@ -81,6 +83,7 @@ const DEFAULT_CTX: UndernamesContextState = {
 	ready: Boolean(UNDERNAMES_PROCESS_ID),
 	loading: false,
 	error: null,
+	isLoggedInUserController: false,
 
 	controllers: [],
 	owners: {},
@@ -170,6 +173,7 @@ function normalizeRequests(arr: any[]): UndernameRequest[] {
 /** ----- Provider ----- */
 export function UndernamesProvider(props: { children: React.ReactNode }) {
 	const { libs } = usePermawebProvider();
+	const { walletAddress } = useArweaveProvider();
 	const [ready] = React.useState<boolean>(Boolean(UNDERNAMES_PROCESS_ID));
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [error, setError] = React.useState<string | null>(null);
@@ -181,6 +185,10 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	const [policy, setPolicyState] = React.useState<Policy>(DEFAULT_POLICY);
 	const [requestSeq, setRequestSeq] = React.useState<number>(0);
 	const [superAdmin, setSuperAdmin] = React.useState<string | null>(null);
+
+	const isLoggedInUserController = React.useMemo(() => {
+		return Boolean(controllers.includes(walletAddress));
+	}, [controllers, walletAddress]);
 
 	/** low-level read */
 	const read = React.useCallback(
@@ -412,13 +420,16 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	);
 
 	const approve = React.useCallback(
-		async (id: number, processId: string) => {
-			await send('Approve', {
+		async (id: number, processId: string, reason?: string) => {
+			let params: any = {
 				Id: id,
 				'Ant-Process-Id': processId,
 				'Record-Transaction-Id': portalId,
 				'Record-TTL-Seconds': 900,
-			});
+			};
+			if (reason) params.Reason = reason;
+
+			await send('Approve', params);
 			await refreshRequests();
 			await refreshOwners();
 			await refreshReserved();
@@ -502,6 +513,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 
 		forceRelease,
 		setPolicy,
+		isLoggedInUserController,
 	};
 
 	return <Ctx.Provider value={value}>{props.children}</Ctx.Provider>;

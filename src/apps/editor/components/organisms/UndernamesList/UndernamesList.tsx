@@ -24,7 +24,7 @@ export type TypeUndernameOwnerRow = {
 const PAGE_SIZE = 10;
 
 export default function UndernamesList(props: { filterAddress?: string }) {
-	const { owners } = useUndernamesProvider();
+	const { owners, isLoggedInUserController } = useUndernamesProvider();
 	const { fetchProfile } = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -99,10 +99,12 @@ export default function UndernamesList(props: { filterAddress?: string }) {
 		if (processedOwners.length === 0) {
 			return (
 				<>
-					<S.Toolbar>
-						<div />
-						<AddController />
-					</S.Toolbar>
+					{isLoggedInUserController && (
+						<S.Toolbar>
+							<div />
+							<AddController />
+						</S.Toolbar>
+					)}
 					<S.WrapperEmpty>
 						<p>{language?.noOwnersFound || 'No undernames found'}</p>
 					</S.WrapperEmpty>
@@ -111,17 +113,20 @@ export default function UndernamesList(props: { filterAddress?: string }) {
 		}
 		return (
 			<>
-				<S.Toolbar>
-					<div />
-					<AddController />
-				</S.Toolbar>
+				{isLoggedInUserController && (
+					<S.Toolbar>
+						<div />
+						<AddController />
+					</S.Toolbar>
+				)}
 				<S.OwnersWrapper>
 					<S.HeaderRow>
-						<S.HeaderCell>{language?.undername || 'Undername'}</S.HeaderCell>
+						<S.HeaderCell>Subdomain</S.HeaderCell>
 						<S.HeaderCell>{language?.owner || 'Owner'}</S.HeaderCell>
 						<S.HeaderCell>{language?.requestedAt || 'Requested'}</S.HeaderCell>
 						<S.HeaderCell>{language?.approvedAt || 'Approved'}</S.HeaderCell>
 						<S.HeaderCell>{language?.grantSource || 'Source'}</S.HeaderCell>
+						<S.HeaderCell>Action</S.HeaderCell>
 					</S.HeaderRow>
 					{pageOwners.map((row) => (
 						<S.OwnerWrapper key={row.name}>

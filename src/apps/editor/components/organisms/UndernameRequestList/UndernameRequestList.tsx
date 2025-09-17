@@ -5,8 +5,7 @@ import * as S from './styles';
 import { UndernameRequestRow } from 'editor/components/molecules/UndernameRequestRow';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { IS_TESTNET } from 'helpers/config';
-import { ANT, ArconnectSigner, ARIO } from '@ar.io/sdk';
-import { getPortalIdFromURL } from 'helpers/utils';
+import { ARIO } from '@ar.io/sdk';
 import { useNotifications } from 'providers/NotificationProvider';
 import { ClaimUndername } from 'editor/components/molecules/ClaimUndername';
 import { PARENT_UNDERNAME, TESTING_UNDERNAME } from '../../../../../processes/undernames/constants';
@@ -35,7 +34,6 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 	// pagination
 	const { addNotification } = useNotifications();
 	const [currentPage, setCurrentPage] = React.useState(1);
-
 	const [loading, setLoading] = React.useState(false);
 
 	// data shaping
@@ -51,7 +49,7 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 		setCurrentPage((prev) => (prev > totalPages ? totalPages : prev < 1 ? 1 : prev));
 	}, [totalPages]);
 
-	const handleAdminApprove = async (id: number) => {
+	const handleAdminApprove = async (id: number, reason?: string) => {
 		if (IS_TESTNET) {
 			console.warn('Approving undernames on testnet is not supported yet.');
 			addNotification('Cant approve on Testnet', 'warning');
@@ -61,7 +59,7 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
 		const undernameRow = requests.find((r) => r.id === id);
 		setLoading(true);
-		await approve(id, arnsRecord.processId); // now approve at undernames process will handle the call to the arns
+		await approve(id, arnsRecord.processId, reason); // now approve at undernames process will handle the call to the arns
 		addNotification(`Undername ${undernameRow.name} approved`, 'success');
 	};
 
@@ -108,12 +106,12 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 
 				<S.ListWrapper>
 					<S.HeaderRow showRequester={!!props.showRequesterColumn}>
-						<S.HeaderCell>Id</S.HeaderCell>
-						<S.HeaderCell>Undername</S.HeaderCell>
+						<S.HeaderCell>Subdomain</S.HeaderCell>
 						{props.showRequesterColumn && <S.HeaderCell>Requester</S.HeaderCell>}
 						<S.HeaderCell>Status</S.HeaderCell>
 						<S.HeaderCell>Created</S.HeaderCell>
 						<S.HeaderCell>Decision</S.HeaderCell>
+						<S.HeaderCell>Action</S.HeaderCell>
 					</S.HeaderRow>
 
 					{pageRows.map((r) => (
