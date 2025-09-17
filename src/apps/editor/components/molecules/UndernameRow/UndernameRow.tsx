@@ -8,7 +8,7 @@ import { TypeUndernameOwnerRow } from 'editor/components/organisms/UndernamesLis
 import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { ARIO } from '@ar.io/sdk';
 import { useNotifications } from 'providers/NotificationProvider';
-import { PARENT_UNDERNAME } from '../../../../../processes/undernames/constants';
+import { PARENT_UNDERNAME, TESTING_UNDERNAME } from '../../../../../processes/undernames/constants';
 import { IS_TESTNET } from 'helpers/config';
 import { ConfirmModal } from 'components/atoms/ConfirmModal';
 
@@ -38,13 +38,13 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 	const confirmDisabled = !reason.trim(); // require reason
 	const handleRelease = async () => {
 		try {
-			if (IS_TESTNET) {
-				console.warn('Releasing subdomains on testnet is not supported yet.');
-				addNotification('Releasing subdomains on testnet is not supported yet.', 'warning');
-				return;
-			}
+			// if (IS_TESTNET) {
+			// 	console.warn('Releasing subdomains on testnet is not supported yet.');
+			// 	addNotification('Releasing subdomains on testnet is not supported yet.', 'warning');
+			// 	return;
+			// }
 			const ario = ARIO.mainnet();
-			const arnsRecord = await ario.getArNSRecord({ name: PARENT_UNDERNAME });
+			const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
 			await forceRelease(props.row.name, arnsRecord.processId, reason);
 			addNotification(`Subdomain released`, 'success');
 			setShowPanel(false);

@@ -50,11 +50,11 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 	}, [totalPages]);
 
 	const handleAdminApprove = async (id: number, reason?: string) => {
-		if (IS_TESTNET) {
-			console.warn('Approving undernames on testnet is not supported yet.');
-			addNotification('Cant approve on Testnet', 'warning');
-			return;
-		}
+		// if (IS_TESTNET) {
+		// 	console.warn('Approving undernames on testnet is not supported yet.');
+		// 	addNotification('Cant approve on Testnet', 'warning');
+		// 	return;
+		// }
 		const ario = ARIO.mainnet();
 		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
 		const undernameRow = requests.find((r) => r.id === id);

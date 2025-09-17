@@ -126,7 +126,7 @@ export default function ClaimUndername() {
 		if (err) return;
 		setLoading(true);
 		const ario = ARIO.mainnet();
-		const arnsRecord = await ario.getArNSRecord({ name: PARENT_UNDERNAME });
+		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
 		const portalId = getPortalIdFromURL();
 		try {
 			const availability = await checkAvailability(name);

@@ -458,6 +458,23 @@ function Ownership.force_release(actor, name, reason, Msg)
 		State.Reserved[name] = nil
 	end
 
+	if rec.requestId then
+		local r = State.Requests[rec.requestId]
+		print('found related request', rec.requestId, r and r.status or 'nil')
+		if r and r.status == 'approved' then
+			r.status = 'released'
+			r.decidedAt = Utils.ts(Msg)
+			r.decidedBy = actor
+			r.reason = reason or 'force_release'
+			Utils.audit(actor, 'release_request', {
+				id = rec.requestId,
+				name = name,
+				wasOwner = rec.owner,
+				reason = r.reason,
+			}, Msg)
+		end
+	end
+
 	Utils.audit(actor, 'force_release', {
 		name = name,
 		reason = reason or 'unspecified',
