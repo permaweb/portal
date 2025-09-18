@@ -69,6 +69,7 @@ type UndernamesContextState = {
 	removeReserved: (name: string) => Promise<void>;
 
 	request: (name: string, processId: string) => Promise<void>;
+	requestForNewPortal: (name: string, processId: string, portalId: string) => Promise<void>; // only for portal creation
 	cancel: (id: number) => Promise<void>;
 	approve: (id: number, processId: string, reason?: string) => Promise<void>;
 	reject: (id: number, reason?: string) => Promise<void>;
@@ -118,6 +119,7 @@ const DEFAULT_CTX: UndernamesContextState = {
 	removeReserved: async () => {},
 
 	request: async (name: string, processId: string) => {},
+	requestForNewPortal: async (name: string, processId: string, portalId: string) => {},
 	cancel: async () => {},
 	approve: async (id: number, processId: string) => {},
 	reject: async () => {},
@@ -209,6 +211,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	const send = React.useCallback(
 		async (key: HandlerKey, params?: Record<string, any>) => {
 			const action = UNDERNAMES_HANDLERS[key].action;
+			console.log('UndernamesProvider send', { action, params });
 			const msgId = await libs.sendMessage({
 				processId: UNDERNAMES_PROCESS_ID,
 				action: act(action),
@@ -343,6 +346,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	const checkAvailability = React.useCallback(
 		async (name: string) => {
 			const out = await read('CheckAvailability', { Name: name });
+			console.log('checkAvailability', { name, out });
 			return {
 				name: out?.name ?? name,
 				available: !!out?.available,
@@ -404,6 +408,22 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 				'Ant-Process-Id': processId, // process ID of the parent arns record
 				'Record-Transaction-Id': portalId, // transaction ID of the portal
 				'Record-TTL-Seconds': 900,
+			});
+			await refreshRequests();
+			await refreshOwners();
+		},
+		[sendByForwardAction, refreshRequests, refreshOwners]
+	);
+
+	const requestForNewPortal = React.useCallback(
+		async (name: string, processId: string, portalId: string) => {
+			console.log('requestForNewPortal', { name, processId, portalId });
+			await send('Request', {
+				Name: name,
+				'Ant-Process-Id': processId,
+				'Record-Transaction-Id': portalId,
+				'Record-TTL-Seconds': 900,
+				'Transfer-Ownership-To': portalId,
 			});
 			await refreshRequests();
 			await refreshOwners();
@@ -507,6 +527,7 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 		removeReserved,
 
 		request,
+		requestForNewPortal,
 		cancel,
 		approve,
 		reject,

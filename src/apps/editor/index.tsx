@@ -246,13 +246,13 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 						<ArweaveProvider>
 							<PermawebProvider>
 								<NotificationProvider>
-									<PortalProvider>
-										<UndernamesProvider>
+									<UndernamesProvider>
+										<PortalProvider>
 											<GlobalStyle />
 											<App />
 											<WalletConnect app="editor" />
-										</UndernamesProvider>
-									</PortalProvider>
+										</PortalProvider>
+									</UndernamesProvider>
 								</NotificationProvider>
 							</PermawebProvider>
 						</ArweaveProvider>

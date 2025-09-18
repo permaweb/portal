@@ -14,7 +14,6 @@ State = State
 		},
 		Audit = {},
 		Processed = {},
-
 		Bootstrapped = false,
 	}
 
@@ -609,6 +608,7 @@ Handlers.add('PortalRegistry.CheckAvailability', function(Msg)
 		reservedForCaller = reservedForCaller,
 		canRequest = canRequest,
 		userReason = ok and nil or reason,
+		currentOwnedCount = count,
 	})
 end)
 
@@ -616,7 +616,7 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 	if not Utils.once(Msg) then
 		return
 	end
-
+	print('handling request', Msg.Id, Msg.From)
 	local name_requested = Msg.Name
 	if not name_requested or #name_requested == 0 then
 		reply(Msg, false, { error = 'Name tag required' })
@@ -629,6 +629,10 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 		return
 	end
 
+	local transferTo = Msg['Transfer-Ownership-To']
+	print('transferTo', transferTo, Msg.Tags)
+
+	local owner = transferTo or Msg.From
 	local nRequested = Utils.normalize(name_requested)
 
 	local rinfo = State.Reserved[nRequested]
@@ -665,7 +669,7 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 			reply(Msg, false, { error = sendErr, code = 'SET_RECORD_FAILED' })
 			return
 		end
-		Owners_set(nRequested, Msg.From, {
+		Owners_set(nRequested, owner, {
 			requestedAt = Utils.ts(Msg),
 			approvedAt = Utils.ts(Msg),
 			approvedBy = Msg.From,
@@ -707,7 +711,7 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 			return
 		end
 
-		Owners_set(nRequested, Msg.From, {
+		Owners_set(nRequested, owner, {
 			requestedAt = Utils.ts(Msg),
 			approvedAt = Utils.ts(Msg),
 			approvedBy = Msg.From,
@@ -718,7 +722,7 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 			State.Reserved[nRequested] = nil
 		end
 		Utils.audit(Msg.From, 'self_claim', { name = nRequested }, Msg)
-		reply(Msg, true, { status = 'approved', auto = true, name = nRequested, owner = Msg.From })
+		reply(Msg, true, { status = 'approved', auto = true, name = nRequested, owner = owner })
 		return
 	end
 
@@ -728,7 +732,7 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 		return
 	end
 
-	local res = Requests.create(Msg.From, nRequested, Msg)
+	local res = Requests.create(owner, nRequested, Msg)
 	reply(Msg, true, { status = 'pending', id = res.id, name = nRequested })
 end)
 

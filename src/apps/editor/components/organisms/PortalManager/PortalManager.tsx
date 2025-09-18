@@ -25,6 +25,77 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
+import { useUndernamesProvider } from 'providers/UndernameProvider';
+import { ARIO } from '@ar.io/sdk';
+import { PARENT_UNDERNAME, TESTING_UNDERNAME } from '../../.../../../../../processes/undernames/constants';
+
+type RuleState = {
+	nonEmpty: boolean;
+	maxLen: boolean;
+	charset: boolean;
+	notWWW: boolean;
+	noAt: boolean;
+	noEdgeDash: boolean;
+	noEdgeUnderscore: boolean;
+	noDoubleUnderscore: boolean;
+	labelsValid: boolean;
+};
+
+const RESERVED = new Set(['www']);
+const MAX_UNDERNAME = 51;
+
+// derive from portal name
+function deriveSubdomain(raw: string): string {
+	if (!raw) return '';
+	let n = raw.toLowerCase();
+	n = n.replace(/\s+/g, '-'); // spaces -> dash
+	n = n.replace(/[^a-z0-9_.-]/g, ''); // strip invalid
+	n = n.replace(/-{2,}/g, '-'); // collapse --
+	n = n.replace(/_{2,}/g, '_'); // collapse __
+	n = n.replace(/^\-+|\-+$/g, ''); // trim edge dashes
+	n = n.replace(/^_+|_+$/g, ''); // trim edge underscores
+	return n.slice(0, MAX_UNDERNAME);
+}
+
+function evaluateRules(raw: string): RuleState {
+	const name = (raw || '').toLowerCase();
+	const nonEmpty = name.length > 0;
+	const maxLen = name.length <= MAX_UNDERNAME;
+	const charset = /^[a-z0-9_.-]+$/.test(name);
+	const notWWW = !RESERVED.has(name);
+	const noAt = !name.includes('@');
+	const noEdgeDash = !/(^-|-$)/.test(name);
+	const noEdgeUnderscore = !/(^_|_$)/.test(name);
+	const noDoubleUnderscore = !/__/.test(name);
+	const labels = name.split('_');
+	const labelsValid =
+		labels.length > 0 &&
+		labels.every((l) => l.length > 0 && /^[a-z0-9.-]+$/.test(l) && !/^[-.]/.test(l) && !/[-.]$/.test(l));
+	return {
+		nonEmpty,
+		maxLen,
+		charset,
+		notWWW,
+		noAt,
+		noEdgeDash,
+		noEdgeUnderscore,
+		noDoubleUnderscore,
+		labelsValid,
+	};
+}
+
+function firstError(rs: RuleState): string | null {
+	if (!rs.nonEmpty) return 'Subdomain is required';
+	if (!rs.maxLen) return `Max ${MAX_UNDERNAME} characters`;
+	if (!rs.charset) return 'Only a–z, 0–9, underscore (_), dot (.), and dash (-) allowed';
+	if (!rs.notWWW) return 'Cannot be "www"';
+	if (!rs.noAt) return 'Cannot contain "@"';
+	if (!rs.noEdgeDash) return 'No leading or trailing dashes';
+	if (!rs.noEdgeUnderscore) return 'No leading or trailing underscores';
+	if (!rs.noDoubleUnderscore) return 'No consecutive underscores';
+	if (!rs.labelsValid) return 'Each part must use a–z, 0–9, . or -, and cannot start/end with . or -';
+	return null;
+}
 
 export default function PortalManager(props: {
 	portal: PortalDetailType | null;
@@ -39,10 +110,20 @@ export default function PortalManager(props: {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	const isCreating = !props.portal;
+
+	const [claimSub, setClaimSub] = React.useState(false);
+	const [subEditable, setSubEditable] = React.useState(false);
+	const [subName, setSubName] = React.useState('');
+	const [subRules, setSubRules] = React.useState<RuleState>(() => evaluateRules(''));
+	const [subError, setSubError] = React.useState<string | null>(null);
+
+	const { checkAvailability, requestForNewPortal } = useUndernamesProvider();
+
 	const [name, setName] = React.useState<string>('');
 	const [logoId, setLogoId] = React.useState<string | null>(null);
 	const [iconId, setIconId] = React.useState<string | null>(null);
-
+	const [subTouched, setSubTouched] = React.useState(false);
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
 
@@ -57,6 +138,36 @@ export default function PortalManager(props: {
 			setIconId(null);
 		}
 	}, [props.portal]);
+
+	React.useEffect(() => {
+		setSubTouched(false);
+		setSubEditable(false);
+		setSubName('');
+	}, [claimSub]);
+
+	React.useEffect(() => {
+		if (!isCreating || !claimSub) return;
+
+		// Only auto-derive when user hasn't typed anything yet.
+		if (!subEditable && !subTouched) {
+			const derived = deriveSubdomain(name);
+			if (derived !== subName) {
+				setSubName(derived);
+				const rs = evaluateRules(derived);
+				setSubRules(rs);
+				setSubError(firstError(rs));
+			}
+		}
+	}, [isCreating, claimSub, subEditable, subTouched, name, subName]);
+
+	const handleSubChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+		const next = e.target.value.toLowerCase();
+		setSubTouched(true);
+		setSubName(next);
+		const rs = evaluateRules(next);
+		setSubRules(rs);
+		setSubError(firstError(rs));
+	}, []);
 
 	async function handleSubmit() {
 		if (arProvider.wallet && permawebProvider.profile?.id) {
@@ -181,8 +292,32 @@ export default function PortalManager(props: {
 					console.log(`Portal update: ${portalUpdateId}`);
 
 					response = `${language?.portalCreated}!`;
-
-					navigate(URLS.portalBase(portalId));
+					if (claimSub) {
+						console.log('Will claim subdomain', subName, 'for portal', portalId);
+						// Ensure current input is valid
+						const rs = evaluateRules(subName);
+						const err = firstError(rs);
+						if (!err && subName) {
+							try {
+								// Optional: check availability to give instant feedback
+								const avail = await checkAvailability(subName);
+								console.log('Subdomain availability', avail);
+								if (avail && avail.available && (!avail.reserved || avail.reservedFor === arProvider.walletAddress)) {
+									const ario = ARIO.mainnet();
+									const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
+									await requestForNewPortal(subName.trim(), arnsRecord.processId, portalId);
+									console.log(`Requested undername "${subName}" for portal ${portalId}`);
+								} else {
+									console.warn(`Subdomain "${subName}" not available`, avail);
+								}
+							} catch (e) {
+								console.error('Failed to request subdomain:', e);
+							}
+						} else {
+							console.warn('Subdomain invalid at save time:', err);
+						}
+					}
+					// navigate(URLS.portalBase(portalId));
 				}
 
 				if (profileUpdateId) console.log(`Profile update: ${profileUpdateId}`);
@@ -243,6 +378,84 @@ export default function PortalManager(props: {
 										required
 										hideErrorMessage
 									/>
+									{isCreating && (
+										<S.SubdomainSection>
+											<S.CheckRow>
+												<input
+													type="checkbox"
+													id="claim-subdomain"
+													checked={claimSub}
+													onChange={(e) => setClaimSub(e.target.checked)}
+													disabled={loading}
+												/>
+												<label htmlFor="claim-subdomain">Claim subdomain for this portal</label>
+											</S.CheckRow>
+
+											{claimSub && (
+												<S.SubdomainCard>
+													<S.SubdomainHeader>
+														<span>Subdomain</span>
+														<S.SubdomainActions>
+															<Button
+																type={'alt1'}
+																label={subEditable ? 'Lock' : 'Edit'}
+																handlePress={() => setSubEditable((v) => !v)}
+																disabled={loading}
+															/>
+														</S.SubdomainActions>
+													</S.SubdomainHeader>
+
+													{subEditable ? (
+														<S.SubdomainInput
+															placeholder="my-subdomain"
+															value={subName}
+															onChange={handleSubChange}
+															maxLength={MAX_UNDERNAME}
+															disabled={loading}
+														/>
+													) : (
+														<S.SubdomainPreview>
+															<code>{subName || '—'}</code>
+														</S.SubdomainPreview>
+													)}
+
+													<S.SubdomainHint>
+														Preview:{' '}
+														<a
+															href={`https://${subName || '…'}_${PARENT_UNDERNAME}.arweave.net/`}
+															target="_blank"
+															rel="noopener noreferrer"
+															onClick={(e) => {
+																if (!subName) e.preventDefault();
+															}}
+														>
+															https://{subName || '…'}_{PARENT_UNDERNAME}.arweave.net/
+														</a>
+													</S.SubdomainHint>
+
+													{/* validations */}
+													<S.Validation>
+														<span>{subRules.nonEmpty ? '✅' : '❌'} Not empty</span>
+														<span>
+															{subRules.maxLen ? '✅' : '❌'} ≤ {MAX_UNDERNAME} characters
+														</span>
+														<span>{subRules.charset ? '✅' : '❌'} Allowed: a–z, 0–9, `_ . -`</span>
+														<span>{subRules.notWWW ? '✅' : '❌'} Not "www"</span>
+														<span>{subRules.noAt ? '✅' : '❌'} No "@"</span>
+														<span>{subRules.noEdgeDash ? '✅' : '❌'} No leading/trailing dashes</span>
+														<span>{subRules.noEdgeUnderscore ? '✅' : '❌'} No leading/trailing underscores</span>
+														<span>{subRules.noDoubleUnderscore ? '✅' : '❌'} No consecutive underscores</span>
+														<span>
+															{subRules.labelsValid ? '✅' : '❌'} Each part valid (a–z, 0–9, . or -, not
+															starting/ending with . or -)
+														</span>
+													</S.Validation>
+
+													{subError && <S.Error>{subError}</S.Error>}
+												</S.SubdomainCard>
+											)}
+										</S.SubdomainSection>
+									)}
 								</S.TForm>
 							</S.Form>
 							<S.PWrapper>
