@@ -5,7 +5,7 @@ import * as S from './styles';
 import { UndernameRow } from 'editor/components/molecules/UndernameRow';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import { useArweaveProvider } from 'providers/ArweaveProvider';
+import { getPortalIdFromURL } from 'helpers/utils';
 
 type OwnerRecord = {
 	owner: string;
@@ -26,12 +26,12 @@ const PAGE_SIZE = 10;
 export default function UndernamesList() {
 	const { owners, isLoggedInUserController } = useUndernamesProvider();
 	const { fetchProfile } = usePermawebProvider();
-	const arProvider = useArweaveProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [processedOwners, setProcessedOwners] = React.useState<TypeUndernameOwnerRow[]>([]);
 	const [filter, setFilter] = React.useState('');
+	const portalId = getPortalIdFromURL();
 	React.useEffect(() => {
 		let cancelled = false;
 
@@ -54,10 +54,11 @@ export default function UndernamesList() {
 					};
 				})
 			);
+
 			const f = filter.trim().toLowerCase();
 			let filtered = f ? rows.filter((o) => o.owner === f || o.name === f) : rows;
 			if (!isLoggedInUserController) {
-				filtered = filtered.filter((o) => o.owner === arProvider.walletAddress);
+				filtered = filtered.filter((o) => o.owner === portalId);
 			}
 
 			const sorted = filtered.sort((a, b) => a.name.localeCompare(b.name));
