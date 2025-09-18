@@ -537,6 +537,8 @@ export const language = {
 		unauthorizedDomainManage: `Only portal admins can manage domains.`,
 		unauthorizedDomainRegister: `Only portal admins can register domain names.`,
 		unauthorizedPortalUpdateMedia: `Only portal admins can add or remove media.`,
+		updateAvailable: `Update Available`,
+		updatingPortal: `Updating Portal`,
 		upgradeToPermanentSuccessfully: `Upgraded to permanent successfully.`,
 		usd: `USD`,
 		userInviteInfo: `The user being added will see this invite in their Portal Home Screen.`,

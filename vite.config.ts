@@ -53,28 +53,6 @@ export default defineConfig(({ mode }) => {
 				},
 			},
 		},
-		viewer: {
-			port: 4000,
-			build: {
-				sourcemap: false,
-				outDir: path.resolve(__dirname, `dist/${app}`),
-				emptyOutDir: true,
-				cssCodeSplit: false,
-				assetsInlineLimit: 10_000_000,
-				rollupOptions: {
-					input: path.resolve(root, 'index.tsx'),
-					plugins: [polyfillNode()],
-					output: {
-						inlineDynamicImports: true,
-						manualChunks: undefined,
-						entryFileNames: `bundle.js`,
-						chunkFileNames: `bundle.js`,
-						assetFileNames: `[name][extname]`,
-						format: 'es',
-					},
-				},
-			},
-		},
 		engine: {
 			port: 5000,
 			build: {
@@ -111,7 +89,7 @@ export default defineConfig(({ mode }) => {
 				registerType: 'autoUpdate',
 				workbox: {
 					globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-					maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
+					maximumFileSizeToCacheInBytes: (app === 'editor' ? 10 : 24) * 1024 * 1024, // 10 MB for Editor / 24 for Engine
 					runtimeCaching: [
 						{
 							urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

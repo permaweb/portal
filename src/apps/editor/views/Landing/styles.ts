@@ -56,6 +56,12 @@ export const HeaderAction = styled.div`
 			color: ${(props) => props.theme.colors.font.alt1};
 		}
 	}
+
+	.notification {
+		position: absolute;
+		top: -5px;
+		right: -23.5px;
+	}
 `;
 
 export const HeaderIndicator = styled.div``;

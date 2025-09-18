@@ -95,21 +95,24 @@ export enum PortalSchemeType {
 	Dark = 'dark',
 }
 
-export type PortalThemeType = {
-	name: string;
-	active: boolean;
-	scheme: PortalSchemeType;
-	colors: {
-		background: string;
-		primary: string;
-		links: string;
-	};
-	preferences: {
-		gradient: boolean;
-		shadow: boolean;
-		borders: boolean;
-	};
-};
+export type PortalThemeType = any;
+
+// TODO
+// export type PortalThemeType = {
+// 	name: string;
+// 	active: boolean;
+// 	scheme: PortalSchemeType;
+// 	colors: {
+// 		background: string;
+// 		primary: string;
+// 		links: string;
+// 	};
+// 	preferences: {
+// 		gradient: boolean;
+// 		shadow: boolean;
+// 		borders: boolean;
+// 	};
+// };
 
 export type PortalTopicType = { value: string };
 
