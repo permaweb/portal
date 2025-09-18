@@ -21,7 +21,6 @@ export default function UndernameRequestRow(props: {
 	onApprove: (id: number, reason?: string) => Promise<void>;
 	onReject: (id: number, reason: string) => Promise<void>;
 	loading: boolean;
-	showRequester?: boolean;
 }) {
 	const { isLoggedInUserController } = useUndernamesProvider();
 	const languageProvider = useLanguageProvider();
@@ -98,15 +97,14 @@ export default function UndernameRequestRow(props: {
 		setOpen(false);
 	}, [confirmKind, props.onApprove, props.onReject, props.row.id, reason]);
 	const showAdminControls = pending && isLoggedInUserController;
+	const showUserInfoOnPending = pending && !isLoggedInUserController;
 	return (
 		<>
-			<S.Row role="row" title="Click to manage" showRequester={props.showRequester}>
+			<S.Row role="row" title="Click to manage">
 				<S.Cell mono>{props.row.name}</S.Cell>
-				{props.showRequester ? (
-					<S.Cell mono>
-						<S.Address title={props.row.requester}>{shortAddr(props.row.requester)}</S.Address>
-					</S.Cell>
-				) : null}
+				<S.Cell mono>
+					<S.Address title={props.row.requester}>{shortAddr(props.row.requester)}</S.Address>
+				</S.Cell>
 				<S.Cell mono>
 					<StatusBadge status={props.row.status} />
 				</S.Cell>
@@ -151,11 +149,17 @@ export default function UndernameRequestRow(props: {
 							<p>{props.row.status === 'cancelled' ? props.row.requester : decidedBy}</p>
 						</S.KV>
 					)}
+					{showUserInfoOnPending && (
+						<S.Section>
+							<S.SectionHeader>Note</S.SectionHeader>
+							<S.SectionBody>Your request is pending. You will be notified once a controller reviews it.</S.SectionBody>
+						</S.Section>
+					)}
 					{props.row.reason ? <S.ReasonNote>Reason: {props.row.reason}</S.ReasonNote> : null}
 					{showAdminControls && (
 						<S.Sections>
 							<S.Section>
-								<S.SectionHeader>Admin Controls</S.SectionHeader>
+								<S.SectionHeader>Approve or Reject</S.SectionHeader>
 								<S.SectionBody>
 									<S.TextArea
 										rows={4}

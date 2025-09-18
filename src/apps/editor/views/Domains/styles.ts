@@ -5,6 +5,12 @@ export const Wrapper = styled.div`
 	margin: 0 auto;
 `;
 
+export const SubdomainsWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+`;
+
 export const BodyWrapper = styled.div`
 	width: 100%;
 	display: flex;

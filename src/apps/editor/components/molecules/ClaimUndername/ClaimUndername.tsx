@@ -9,6 +9,7 @@ import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { ARIO } from '@ar.io/sdk';
 import { PARENT_UNDERNAME, TESTING_UNDERNAME } from '../../../../../processes/undernames/constants';
+import { ASSETS } from 'helpers/config';
 
 type RuleState = {
 	nonEmpty: boolean;
@@ -76,7 +77,7 @@ function firstError(rs: RuleState): string | null {
 }
 
 export default function ClaimUndername() {
-	const { checkAvailability, request, owners } = useUndernamesProvider();
+	const { checkAvailability, request, owners, requests } = useUndernamesProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const { addNotification } = useNotifications();
@@ -91,8 +92,11 @@ export default function ClaimUndername() {
 
 	const ownedByPortal = React.useMemo(() => {
 		if (!owners || !portalId) return false;
-		return Object.values(owners ?? {}).some((entry: any) => entry.owner === portalId);
+		const ownedBy = Object.values(owners ?? {}).some((entry: any) => entry.owner === portalId);
+		const requestedBy = requests?.some((r) => r.requester === portalId && r.status === 'pending');
+		return ownedBy || requestedBy;
 	}, [owners, portalId]);
+
 	const nameTakenByOther = React.useMemo(() => {
 		if (!owners || !portalId) return false;
 		const entry = owners?.[name];
@@ -151,11 +155,17 @@ export default function ClaimUndername() {
 		}
 	}, [name, ownedByPortal, loading, checkAvailability, request, addNotification]);
 
-	if (ownedByPortal) return null;
-
 	return (
 		<>
-			<Button type={'alt1'} label={'Claim Subdomain'} handlePress={() => setOpenClaim(true)} />
+			<Button
+				type={'alt1'}
+				label={'Claim Subdomain'}
+				handlePress={() => setOpenClaim(true)}
+				icon={ASSETS.domains}
+				iconLeftAlign
+				disabled={ownedByPortal}
+				tooltip={ownedByPortal ? 'This portal already owns a subdomain or has a request in pending state' : undefined}
+			/>
 			<Panel
 				open={openClaim}
 				width={560}

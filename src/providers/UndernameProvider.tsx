@@ -189,7 +189,8 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	const [superAdmin, setSuperAdmin] = React.useState<string | null>(null);
 
 	const isLoggedInUserController = React.useMemo(() => {
-		return Boolean(controllers.includes(walletAddress));
+		const isWalletAController = controllers.find((c) => c === walletAddress);
+		return Boolean(isWalletAController);
 	}, [controllers, walletAddress]);
 
 	/** low-level read */

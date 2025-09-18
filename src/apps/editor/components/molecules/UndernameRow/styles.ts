@@ -1,10 +1,10 @@
 import styled from 'styled-components';
 import { STYLING } from 'helpers/config';
 
-export const RowWrapper = styled.div`
+export const RowWrapper = styled.div<{ compact?: boolean }>`
 	width: 100%;
 	display: grid;
-	grid-template-columns: 1.3fr 1fr 1fr 0.9fr 1fr 0.5fr;
+	grid-template-columns: ${(p) => (p.compact ? '1.3fr 1fr 0.5fr' : '1.3fr 1fr 1fr 0.9fr 1fr 0.5fr')};
 	gap: 8px;
 	align-items: center;
 	padding: 12.5px 15px;

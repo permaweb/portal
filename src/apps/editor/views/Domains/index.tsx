@@ -11,7 +11,10 @@ import { ASSETS, URLS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
-import { PortalFlowDemo } from 'editor/components/organisms/PortalFlowDemo';
+import { UndernameRequestList } from 'editor/components/organisms/UndernameRequestList';
+import { UndernamesList } from 'editor/components/organisms/UndernamesList';
+import { ClaimUndername } from 'editor/components/molecules/ClaimUndername';
+import { AddController } from 'editor/components/molecules/AddController';
 
 export default function Domains() {
 	const navigate = useNavigate();
@@ -62,6 +65,11 @@ export default function Domains() {
 					<span>{language?.unauthorizedDomainManage}</span>
 				</S.InfoWrapper>
 			)}
+			<ViewHeader header={language?.subdomains ?? 'Sub-Domains'} actions={[<ClaimUndername />, <AddController />]} />
+			<S.SubdomainsWrapper className={'fade-in'}>
+				<UndernamesList />
+				<UndernameRequestList />
+			</S.SubdomainsWrapper>
 		</S.Wrapper>
 	);
 }

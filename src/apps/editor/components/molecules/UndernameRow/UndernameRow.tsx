@@ -27,7 +27,7 @@ export function shortAddr(a?: string) {
 }
 
 export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
-	const { forceRelease } = useUndernamesProvider();
+	const { forceRelease, isLoggedInUserController } = useUndernamesProvider();
 	const { addNotification } = useNotifications();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -38,11 +38,11 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 	const confirmDisabled = !reason.trim(); // require reason
 	const handleRelease = async () => {
 		try {
-			// if (IS_TESTNET) {
-			// 	console.warn('Releasing subdomains on testnet is not supported yet.');
-			// 	addNotification('Releasing subdomains on testnet is not supported yet.', 'warning');
-			// 	return;
-			// }
+			if (IS_TESTNET) {
+				console.warn('Releasing subdomains on testnet is not supported yet.');
+				addNotification('Releasing subdomains on testnet is not supported yet.', 'warning');
+				return;
+			}
 			const ario = ARIO.mainnet();
 			const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
 			await forceRelease(props.row.name, arnsRecord.processId, reason);
@@ -52,11 +52,11 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 			console.error('Failed to release subdomain:', error);
 		}
 	};
-
+	const compactMode = !isLoggedInUserController;
 	return (
 		<>
 			{/* Table row */}
-			<S.RowWrapper className="fade-in">
+			<S.RowWrapper className="fade-in" compact={compactMode}>
 				<S.Cell>
 					<p>
 						<a
@@ -71,15 +71,19 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 				<S.Cell>
 					<S.Address title={props.row.owner}>{shortAddr(props.row.owner)}</S.Address>
 				</S.Cell>
-				<S.Cell>
-					<p>{fmtTs(props.row.requestedAt)}</p>
-				</S.Cell>
-				<S.Cell>
-					<p>{fmtTs(props.row.approvedAt)}</p>
-				</S.Cell>
-				<S.Cell>
-					<p>{srcLabel(props.row.source)}</p>
-				</S.Cell>
+				{isLoggedInUserController && (
+					<>
+						<S.Cell>
+							<p>{fmtTs(props.row.requestedAt)}</p>
+						</S.Cell>
+						<S.Cell>
+							<p>{fmtTs(props.row.approvedAt)}</p>
+						</S.Cell>
+						<S.Cell>
+							<p>{srcLabel(props.row.source)}</p>
+						</S.Cell>
+					</>
+				)}
 				<S.Cell mono>
 					<Button type={'alt3'} label={language?.manage || 'Manage'} handlePress={() => setShowPanel(true)} />
 				</S.Cell>

@@ -1,10 +1,9 @@
 import styled from 'styled-components';
 
-export const Row = styled.div<{ showRequester?: boolean }>`
+export const Row = styled.div`
 	width: 100%;
 	display: grid;
-	grid-template-columns: ${(p) =>
-		p.showRequester ? '1fr 0.8fr 0.7fr 0.9fr 1fr 0.5fr' : '1fr 1fr 0.9fr 1fr 0.5fr'}; /* 5 or 6 columns */
+	grid-template-columns: 1fr 0.8fr 0.7fr 0.9fr 1fr 0.5fr;
 	gap: 8px;
 	align-items: center;
 	padding: 12.5px 15px;

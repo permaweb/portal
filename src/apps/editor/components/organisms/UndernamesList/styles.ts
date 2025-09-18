@@ -59,10 +59,10 @@ export const WrapperEmpty = styled.div`
 	}
 `;
 
-export const HeaderRow = styled.div`
+export const HeaderRow = styled.div<{ compact?: boolean }>`
 	width: 100%;
 	display: grid;
-	grid-template-columns: 1.3fr 1fr 1fr 0.9fr 1fr 0.5fr;
+	grid-template-columns: ${(p) => (p.compact ? '1.3fr 1fr 0.5fr' : '1.3fr 1fr 1fr 0.9fr 1fr 0.5fr')};
 	gap: 8px;
 	align-items: center;
 	padding: 12.5px 15px;
@@ -82,5 +82,18 @@ export const Toolbar = styled.div`
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
-	padding: 12px 12px 12px 12px;
+	padding: 6px;
+`;
+
+export const Input = styled.input`
+	flex: 1;
+	min-width: 180px;
+	border: 1px solid ${(p) => p.theme.colors.border.primary};
+	border-radius: 8px;
+	background: ${(p) => p.theme.colors.container.primary.background};
+	color: ${(p) => p.theme.colors.font.primary};
+	font-size: ${(p) => p.theme.typography.size.base};
+	&:focus-visible {
+		outline: 2px solid ${(p) => p.theme.colors.primary1};
+	}
 `;

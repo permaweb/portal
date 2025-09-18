@@ -5,7 +5,7 @@ import * as S from './styles';
 import { UndernameRow } from 'editor/components/molecules/UndernameRow';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import { AddController } from 'editor/components/molecules/AddController';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 
 type OwnerRecord = {
 	owner: string;
@@ -23,14 +23,15 @@ export type TypeUndernameOwnerRow = {
 
 const PAGE_SIZE = 10;
 
-export default function UndernamesList(props: { filterAddress?: string }) {
+export default function UndernamesList() {
 	const { owners, isLoggedInUserController } = useUndernamesProvider();
 	const { fetchProfile } = usePermawebProvider();
+	const arProvider = useArweaveProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [processedOwners, setProcessedOwners] = React.useState<TypeUndernameOwnerRow[]>([]);
-
+	const [filter, setFilter] = React.useState('');
 	React.useEffect(() => {
 		let cancelled = false;
 
@@ -53,8 +54,11 @@ export default function UndernamesList(props: { filterAddress?: string }) {
 					};
 				})
 			);
-
-			const filtered = props.filterAddress ? rows.filter((o) => o.owner === props.filterAddress) : rows;
+			const f = filter.trim().toLowerCase();
+			let filtered = f ? rows.filter((o) => o.owner === f || o.name === f) : rows;
+			if (!isLoggedInUserController) {
+				filtered = filtered.filter((o) => o.owner === arProvider.walletAddress);
+			}
 
 			const sorted = filtered.sort((a, b) => a.name.localeCompare(b.name));
 			if (!cancelled) setProcessedOwners(sorted);
@@ -63,7 +67,7 @@ export default function UndernamesList(props: { filterAddress?: string }) {
 		return () => {
 			cancelled = true;
 		};
-	}, [owners, props.filterAddress, fetchProfile]);
+	}, [owners, filter, fetchProfile]);
 
 	const totalPages = React.useMemo(
 		() => Math.max(1, Math.ceil(processedOwners.length / PAGE_SIZE)),
@@ -101,12 +105,19 @@ export default function UndernamesList(props: { filterAddress?: string }) {
 				<>
 					{isLoggedInUserController && (
 						<S.Toolbar>
-							<div />
-							<AddController />
+							{processedOwners.length > 0 ? (
+								<S.Input
+									placeholder="Filter by Address or Subdomain"
+									value={filter}
+									onChange={(e) => setFilter(e.target.value)}
+								/>
+							) : (
+								<div />
+							)}
 						</S.Toolbar>
 					)}
 					<S.WrapperEmpty>
-						<p>{language?.noOwnersFound || 'No undernames found'}</p>
+						<h3>No Owned Subdomains found for this portal</h3>
 					</S.WrapperEmpty>
 				</>
 			);
@@ -115,17 +126,28 @@ export default function UndernamesList(props: { filterAddress?: string }) {
 			<>
 				{isLoggedInUserController && (
 					<S.Toolbar>
-						<div />
-						<AddController />
+						{processedOwners.length > 0 ? (
+							<S.Input
+								placeholder="Filter by Address or Subdomain"
+								value={filter}
+								onChange={(e) => setFilter(e.target.value)}
+							/>
+						) : (
+							<div />
+						)}
 					</S.Toolbar>
 				)}
 				<S.OwnersWrapper>
 					<S.HeaderRow>
 						<S.HeaderCell>Subdomain</S.HeaderCell>
 						<S.HeaderCell>{language?.owner || 'Owner'}</S.HeaderCell>
-						<S.HeaderCell>{language?.requestedAt || 'Requested'}</S.HeaderCell>
-						<S.HeaderCell>{language?.approvedAt || 'Approved'}</S.HeaderCell>
-						<S.HeaderCell>{language?.grantSource || 'Source'}</S.HeaderCell>
+						{isLoggedInUserController && (
+							<>
+								<S.HeaderCell>{language?.requestedAt || 'Requested'}</S.HeaderCell>
+								<S.HeaderCell>{language?.approvedAt || 'Approved'}</S.HeaderCell>
+								<S.HeaderCell>{language?.grantSource || 'Source'}</S.HeaderCell>
+							</>
+						)}
 						<S.HeaderCell>Action</S.HeaderCell>
 					</S.HeaderRow>
 					{pageOwners.map((row) => (
@@ -148,8 +170,8 @@ export default function UndernamesList(props: { filterAddress?: string }) {
 					currentPage={currentPage}
 					currentRange={currentRange}
 					setCurrentPage={setCurrentPage}
-					showRange
-					showControls
+					showRange={processedOwners.length > 0}
+					showControls={processedOwners.length > PAGE_SIZE}
 					iconButtons
 				/>
 			</S.OwnersFooter>

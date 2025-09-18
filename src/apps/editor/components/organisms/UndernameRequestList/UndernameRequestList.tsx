@@ -9,6 +9,7 @@ import { ARIO } from '@ar.io/sdk';
 import { useNotifications } from 'providers/NotificationProvider';
 import { ClaimUndername } from 'editor/components/molecules/ClaimUndername';
 import { PARENT_UNDERNAME, TESTING_UNDERNAME } from '../../../../../processes/undernames/constants';
+import { getPortalIdFromURL } from 'helpers/utils';
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
@@ -24,14 +25,13 @@ export type UndernameRequest = {
 	[key: string]: any;
 };
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 3;
 
-export default function UndernameRequestsList(props: { filterByRequester?: string; showRequesterColumn?: boolean }) {
+export default function UndernameRequestsList() {
 	const { requests, approve, reject } = useUndernamesProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-
-	// pagination
+	const portalId = getPortalIdFromURL();
 	const { addNotification } = useNotifications();
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [loading, setLoading] = React.useState(false);
@@ -39,9 +39,15 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 	// data shaping
 	const processed = React.useMemo(() => {
 		let rows = requests;
-		if (props.filterByRequester) rows = rows.filter((r) => r.requester === props.filterByRequester);
-		return [...rows].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-	}, [requests, props.filterByRequester]);
+		rows = rows.filter((r) => r.requester === portalId); // only show requests from this portal
+
+		return [...rows].sort((a, b) => {
+			if (a.status === 'pending' && b.status !== 'pending') return -1;
+			if (b.status === 'pending' && a.status !== 'pending') return 1;
+
+			return (b.createdAt || 0) - (a.createdAt || 0);
+		});
+	}, [requests, portalId]);
 
 	const totalPages = React.useMemo(() => Math.max(1, Math.ceil(processed.length / PAGE_SIZE)), [processed.length]);
 
@@ -50,11 +56,11 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 	}, [totalPages]);
 
 	const handleAdminApprove = async (id: number, reason?: string) => {
-		// if (IS_TESTNET) {
-		// 	console.warn('Approving undernames on testnet is not supported yet.');
-		// 	addNotification('Cant approve on Testnet', 'warning');
-		// 	return;
-		// }
+		if (IS_TESTNET) {
+			console.warn('Approving undernames on testnet is not supported yet.');
+			addNotification('Cant approve on Testnet', 'warning');
+			return;
+		}
 		const ario = ARIO.mainnet();
 		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
 		const undernameRow = requests.find((r) => r.id === id);
@@ -87,27 +93,19 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 		if (processed.length === 0) {
 			return (
 				<>
-					<S.Toolbar>
-						<div />
-						<ClaimUndername />
-					</S.Toolbar>
 					<S.WrapperEmpty>
-						<p>{language?.noRequestsFound || 'No requests found'}</p>
+						<h3>No Subdomain requests found</h3>
+						<p>Subdomains can be requested for the portal using the Claim Subdomain button</p>
 					</S.WrapperEmpty>
 				</>
 			);
 		}
 		return (
 			<>
-				<S.Toolbar>
-					<div />
-					<ClaimUndername />
-				</S.Toolbar>
-
 				<S.ListWrapper>
-					<S.HeaderRow showRequester={!!props.showRequesterColumn}>
+					<S.HeaderRow>
 						<S.HeaderCell>Subdomain</S.HeaderCell>
-						{props.showRequesterColumn && <S.HeaderCell>Requester</S.HeaderCell>}
+						<S.HeaderCell>Requester</S.HeaderCell>
 						<S.HeaderCell>Status</S.HeaderCell>
 						<S.HeaderCell>Created</S.HeaderCell>
 						<S.HeaderCell>Decision</S.HeaderCell>
@@ -120,7 +118,6 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 								row={r}
 								onApprove={async (id) => await handleAdminApprove(id)}
 								onReject={async (id, reason) => await handleAdminReject(id, reason)}
-								showRequester={!!props.showRequesterColumn}
 								loading={loading}
 							/>
 						</S.RowWrapper>
@@ -133,7 +130,6 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 	return (
 		<S.Wrapper>
 			{content}
-
 			<S.Footer>
 				<Pagination
 					totalItems={processed.length}
@@ -141,8 +137,8 @@ export default function UndernameRequestsList(props: { filterByRequester?: strin
 					currentPage={currentPage}
 					currentRange={currentRange}
 					setCurrentPage={setCurrentPage}
-					showRange
-					showControls
+					showRange={processed.length > 0}
+					showControls={processed.length > PAGE_SIZE}
 					iconButtons
 				/>
 			</S.Footer>
