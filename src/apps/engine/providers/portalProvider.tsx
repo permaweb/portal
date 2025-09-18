@@ -63,14 +63,35 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		(async () => {
 			try {
 				const cached = getCachedPortal(portalId);
-				const res = await permawebProvider.libs.getZone(portalId);
-				console.log('Zone: ', res);
+
+				// Fetch from multiple endpoints
+				const overview = permawebProvider.libs.mapFromProcessCase(
+					await permawebProvider.libs.readState({ processId: portalId, path: 'overview' })
+				);
+				const presentation = permawebProvider.libs.mapFromProcessCase(
+					await permawebProvider.libs.readState({ processId: portalId, path: 'presentation' })
+				);
+				const navigation = permawebProvider.libs.mapFromProcessCase(
+					await permawebProvider.libs.readState({ processId: portalId, path: 'navigation' })
+				);
+				const posts = permawebProvider.libs.mapFromProcessCase(
+					await permawebProvider.libs.readState({ processId: portalId, path: 'posts' })
+				);
 
 				const zone = {
 					...defaultPortal,
 					...cached,
-					...res.store,
-					posts: res.store?.index ? [...res.store.index].reverse() : [],
+					name: overview?.name,
+					logo: overview?.logo,
+					icon: overview?.icon,
+					layout: presentation?.layout,
+					pages: presentation?.pages,
+					themes: presentation?.themes,
+					fonts: presentation?.fonts,
+					categories: navigation?.categories,
+					topics: navigation?.topics,
+					links: navigation?.links,
+					posts: posts?.index ? [...posts.index].reverse() : [],
 				};
 
 				const Name = zone?.name;
