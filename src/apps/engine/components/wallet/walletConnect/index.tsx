@@ -129,7 +129,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 
 	function getUserMenu() {
 		return (
-			<S.UserMenu>
+			<S.UserMenu id="UserMenu">
 				<S.HeaderWrapper>
 					<S.Header>
 						<S.Banner>

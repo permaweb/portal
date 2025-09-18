@@ -74,6 +74,8 @@ export const UserMenu = styled.div`
 	flex-direction: column;
 	width: 300px;
 	height: 100%;
+	background: var(--color-card-background);
+	border: 1px solid rgba(var(--color-border), 0.1);
 `;
 
 export const HeaderWrapper = styled.div`
@@ -204,7 +206,7 @@ export const NavigationEntry = styled.div<{ $disabled?: boolean }>`
 
 	&:hover {
 		cursor: pointer;
-		background: rgba(var(--color-text), 0.1);
+		background: rgba(var(--color-text), 0.05);
 		color: rgba(var(--color-primary), 1);
 
 		svg {

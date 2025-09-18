@@ -77,7 +77,9 @@ export function initThemes(Themes: any[]) {
 			'--color-content-background': `rgba(${theme.content.colors.background[scheme]},${theme.content.preferences.opacity[scheme]})`,
 
 			// Cards
-			'--color-card-background': `rgba(${theme.card.colors.background[scheme]},${theme.card.preferences.opacity[scheme]})`,
+			'--color-card-background': `rgba(${getColor(theme, scheme, theme.card.colors.background[scheme])},${
+				theme.card.preferences.opacity[scheme]
+			})`,
 			'--color-card-border': `rgba(${getColor(theme, scheme, theme.card.colors.border[scheme])},1)`,
 			'--color-card-border-contrast': `rgba(${getContrastColor(
 				getColor(theme, scheme, theme.card.colors.border[scheme])

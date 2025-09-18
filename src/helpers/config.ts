@@ -477,8 +477,8 @@ export const DEFAULT_THEME = {
 	card: {
 		colors: {
 			background: {
-				light: '255,255,255',
-				dark: '0,0,0',
+				light: 'background',
+				dark: 'background',
 			},
 			border: {
 				light: 'border',
@@ -487,8 +487,8 @@ export const DEFAULT_THEME = {
 		},
 		preferences: {
 			opacity: {
-				light: 0.9,
-				dark: 0.6,
+				light: 1,
+				dark: 1,
 			},
 		},
 	},

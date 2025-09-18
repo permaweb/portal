@@ -111,7 +111,7 @@ export default defineConfig(({ mode }) => {
 				registerType: 'autoUpdate',
 				workbox: {
 					globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-					maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
+					maximumFileSizeToCacheInBytes: (app === 'editor' ? 10 : 24) * 1024 * 1024, // 10 MB for Editor / 24 for Engine
 					runtimeCaching: [
 						{
 							urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

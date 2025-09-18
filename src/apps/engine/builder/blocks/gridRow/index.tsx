@@ -9,9 +9,11 @@ export default function GridRow(props: any) {
 	const { portal } = usePortalProvider();
 	const Layout = preview ? defaultLayout : portal?.Layout;
 
+	console.log('Layout: ', Layout);
+
 	return (
 		<S.GridRow $layout={layout} id="GridRow">
-			<S.GridRowWrapper $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
+			<S.GridRowWrapper $layout={layout} padding={Layout?.basics?.padding} maxWidth={Layout?.basics?.maxWidth}>
 				{content.map((element: any, index: number) => {
 					return (
 						<React.Fragment key={index}>
