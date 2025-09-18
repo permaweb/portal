@@ -294,17 +294,15 @@ export default function PortalManager(props: {
 					response = `${language?.portalCreated}!`;
 					if (claimSub) {
 						console.log('Will claim subdomain', subName, 'for portal', portalId);
-						// Ensure current input is valid
 						const rs = evaluateRules(subName);
 						const err = firstError(rs);
 						if (!err && subName) {
 							try {
-								// Optional: check availability to give instant feedback
 								const avail = await checkAvailability(subName);
 								console.log('Subdomain availability', avail);
 								if (avail && avail.available && (!avail.reserved || avail.reservedFor === arProvider.walletAddress)) {
 									const ario = ARIO.mainnet();
-									const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
+									const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME }); // after testing we change to PARENT_UNDERNAME
 									await requestForNewPortal(subName.trim(), arnsRecord.processId, portalId);
 									console.log(`Requested undername "${subName}" for portal ${portalId}`);
 								} else {

@@ -7,7 +7,6 @@ import { useUndernamesProvider } from 'providers/UndernameProvider';
 import { IS_TESTNET } from 'helpers/config';
 import { ARIO } from '@ar.io/sdk';
 import { useNotifications } from 'providers/NotificationProvider';
-import { ClaimUndername } from 'editor/components/molecules/ClaimUndername';
 import { PARENT_UNDERNAME, TESTING_UNDERNAME } from '../../../../../processes/undernames/constants';
 import { getPortalIdFromURL } from 'helpers/utils';
 
@@ -56,13 +55,13 @@ export default function UndernameRequestsList() {
 	}, [totalPages]);
 
 	const handleAdminApprove = async (id: number, reason?: string) => {
-		if (IS_TESTNET) {
-			console.warn('Approving undernames on testnet is not supported yet.');
-			addNotification('Cant approve on Testnet', 'warning');
-			return;
-		}
+		// if (IS_TESTNET) {
+		// 	console.warn('Approving undernames on testnet is not supported yet.');
+		// 	addNotification('Cant approve on Testnet', 'warning');
+		// 	return;
+		// }
 		const ario = ARIO.mainnet();
-		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME });
+		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME }); // after testing we change to PARENT_UNDERNAME
 		const undernameRow = requests.find((r) => r.id === id);
 		setLoading(true);
 		await approve(id, arnsRecord.processId, reason); // now approve at undernames process will handle the call to the arns

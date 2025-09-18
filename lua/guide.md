@@ -46,6 +46,9 @@ Basic considerations here -
 2. Future-proof: add more flags without changing the flow.
 3. maxPerAddr: cap on how many undernames one address can own (e.g., 1, 2, 4…).
 
+## Before starting
+1. Make sure to make the process as a controller in the arns record.
+2. Update 'TESTING_UNDERNAME' to the record you known that you just added the process as a controller.
 
 
 ## Commands to work with the lua file
@@ -76,9 +79,23 @@ Send({ Target = ao.id, Tags = { ["Action"]="PortalRegistry.CheckAvailability", [
 ### Request undername
 
 ``` bash
-Send({ Target = ao.id, Tags = { ["Action"]="PortalRegistry.Request", ["Name"]="<UNDERNAME>" } })
+Send({ Target = ao.id, Tags = {
+  ["Action"]="PortalRegistry.Request",
+  ["Name"]="<UNDERNAME>",
+  ["Ant-Process-Id"]="<ANT_PROCESS_ID>",             # parent ANT process id (ArNS name’s process)
+  ["Record-Transaction-Id"]="<TX_ID_43CHARS>",       # target tx for the undername
+  ["Record-TTL-Seconds"]="<TTL:60..86400>",          # e.g. "900"
+  ["Record-Priority"]="<OPTIONAL_NUMBER>"            # optional
+} })
 Send({ Target = ao.id, Tags = { ["Action"]="PortalRegistry.Cancel", ["Id"]="<ID>" } })
-Send({ Target = ao.id, Tags = { ["Action"]="PortalRegistry.Approve", ["Id"]="<ID>" } })
+Send({ Target = ao.id, Tags = {
+  ["Action"]="PortalRegistry.Approve",
+  ["Id"]="<REQUEST_ID>",
+  ["Ant-Process-Id"]="<ANT_PROCESS_ID>",
+  ["Record-Transaction-Id"]="<TX_ID_43CHARS>",
+  ["Record-TTL-Seconds"]="<TTL:60..86400>",
+  ["Record-Priority"]="<OPTIONAL_NUMBER>"
+} })
 Send({ Target = ao.id, Tags = { ["Action"]="PortalRegistry.Reject", ["Id"]="<ID>", ["Reason"]="<REASON>" } })
 Send({ Target = ao.id, Tags = { ["Action"]="PortalRegistry.ListRequests" } })
 ```
@@ -96,5 +113,22 @@ Send({ Target = ao.id, Tags = { ["Action"]="PortalRegistry.Export" } })
 
 ``` bash
 Send({ Target = ao.id, Tags = { ["Action"]="PortalRegistry.OwnerOf", ["Name"]="<UNDERNAME>" } })
-Send({ Target = ao.id, Tags = { ["Action"]="PortalRegistry.ForceRelease", ["Name"]="<UNDERNAME>", ["Reason"]="<REASON>" } })
+Send({ Target = ao.id, Tags = {
+  ["Action"]="PortalRegistry.ForceRelease",
+  ["Name"]="<UNDERNAME>",
+  ["Reason"]="<REASON>",
+  ["Ant-Process-Id"]="<ANT_PROCESS_ID>"
+} })
+```
+
+
+
+### Policy
+``` bash
+# Set both (example)
+Send({ Target = ao.id, Tags = { ["Action"]="PortalRegistry.SetPolicy", ["MaxPerEntity"]="1", ["RequireApproval"]="true" } })
+
+# Set individually
+Send({ Target = ao.id, Tags = { ["Action"]="PortalRegistry.SetPolicy", ["MaxPerEntity"]="<POS_INT>" } })
+Send({ Target = ao.id, Tags = { ["Action"]="PortalRegistry.SetPolicy", ["RequireApproval"]="true|false" } })
 ```
