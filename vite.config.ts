@@ -78,7 +78,7 @@ export default defineConfig(({ mode }) => {
 
 	return {
 		root,
-		base: '/',
+		base: './',
 		plugins: [
 			nodePolyfills({
 				protocolImports: true,
@@ -86,6 +86,7 @@ export default defineConfig(({ mode }) => {
 			react(),
 			...(app === 'viewer' ? [viteSingleFile()] : []),
 			VitePWA({
+				injectRegister: 'inline',
 				registerType: 'autoUpdate',
 				workbox: {
 					globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
