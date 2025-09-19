@@ -78,7 +78,7 @@ export default defineConfig(({ mode }) => {
 
 	return {
 		root,
-		base: './',
+		base: '/',
 		plugins: [
 			nodePolyfills({
 				protocolImports: true,
@@ -90,6 +90,11 @@ export default defineConfig(({ mode }) => {
 				workbox: {
 					globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
 					maximumFileSizeToCacheInBytes: (app === 'editor' ? 10 : 24) * 1024 * 1024, // 10 MB for Editor / 24 for Engine
+					clientsClaim: true,
+					skipWaiting: true,
+					cleanupOutdatedCaches: true,
+					navigateFallbackDenylist: [/^\/assets\//],
+					ignoreURLParametersMatching: [/^v$/, /^ver$/, /^utm_/, /^cachebust$/],
 					runtimeCaching: [
 						{
 							urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -167,7 +172,7 @@ export default defineConfig(({ mode }) => {
 				events: 'vite-plugin-node-polyfills/polyfills/events',
 				timers: 'vite-plugin-node-polyfills/polyfills/timers',
 				http: 'vite-plugin-node-polyfills/polyfills/http',
-				https: 'vite-plugin-node-polyfills/polyfills/http',
+				https: 'vite-plugin-node-polyfills/polyfills/https',
 				os: 'vite-plugin-node-polyfills/polyfills/os',
 				assert: 'vite-plugin-node-polyfills/polyfills/assert',
 				zlib: 'vite-plugin-node-polyfills/polyfills/zlib',
