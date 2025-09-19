@@ -1,4 +1,5 @@
 import { Fonts } from 'editor/components/molecules/Fonts';
+import { Layout } from 'editor/components/molecules/Layout';
 import { Media } from 'editor/components/molecules/Media';
 import { Themes } from 'editor/components/molecules/Themes';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
@@ -7,7 +8,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-export default function DesignTab() {
+export default function DesignBasic() {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -27,6 +28,12 @@ export default function DesignTab() {
 				</S.Section>
 			</S.SectionWrapper>
 			<S.SectionWrapper>
+				<S.Section className={'border-wrapper-alt2'}>
+					<S.SectionHeader>
+						<p>{language?.layout}</p>
+					</S.SectionHeader>
+					<Layout />
+				</S.Section>
 				<S.Section className={'border-wrapper-alt2'}>
 					<S.SectionHeader>
 						<p>{language?.themes}</p>
