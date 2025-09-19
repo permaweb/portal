@@ -1,0 +1,50 @@
+import styled from 'styled-components';
+
+import { STYLING } from 'helpers/config';
+
+export const BodyWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	gap: 25px;
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		flex-direction: column;
+		gap: 20px;
+	}
+`;
+
+export const SectionWrapper = styled.div`
+	height: fit-content;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 25px;
+`;
+
+export const Section = styled.div`
+	height: fit-content;
+	width: 100%;
+	padding: 17.5px 15px 15px 15px;
+`;
+
+export const SectionHeader = styled.div`
+	margin: 0 0 17.5px 0;
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.small};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		text-transform: uppercase;
+		line-height: 1;
+	}
+`;
+
+export const InfoWrapper = styled.div`
+	width: fit-content;
+	margin: 0 0 0 auto;
+	padding: 0.5px 10px 2.5px 10px;
+	span {
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+	}
+`;

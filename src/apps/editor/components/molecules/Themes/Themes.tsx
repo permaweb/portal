@@ -1,5 +1,6 @@
 import React from 'react';
 import { HexColorInput, HexColorPicker } from 'react-colorful';
+import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -100,7 +101,7 @@ function Color(props: {
 					maxWidth={props.maxWidth}
 					text={value ? getColorContrast(value) : undefined}
 				>
-					<span>{`${value}`}</span>
+					<span>{`${value ? value.toUpperCase() : '-'}`}</span>
 				</S.ColorBody>
 			</S.ColorWrapper>
 			{showSelector && (
@@ -147,10 +148,13 @@ function Color(props: {
 const ThemeSection = React.memo(function ThemeSection(props: any) {
 	const portalProvider = usePortalProvider();
 	const { theme, setTheme, name, setName, section, loading } = props;
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	// Local state for name editing to prevent re-renders
 	const [localName, setLocalName] = React.useState(theme.name || '');
+	const [open, setOpen] = React.useState<boolean>(false);
 
 	// Update local name when theme changes from outside
 	React.useEffect(() => {
@@ -185,103 +189,69 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 	}
 
 	return (
-		<S.ThemeSection key={theme.name} colors={theme.basics.colors} preferences={theme.basics.preferences}>
-			<span>{section.toUpperCase()}</span>
-			{/* JSON.stringify(theme.basics.preferences) */}
-			{section === 'basics' && (
-				<S.GridWrapper id={'GridWrapper'}>
-					<S.GridRows>
-						<S.GridRow>
-							<S.ThemeKey style={{ flex: 1 }}>Name</S.ThemeKey>
-							<S.ThemeValue style={{ flex: 2.5, padding: 0 }}>
-								<FormField
-									key={'theme-name-field'}
-									value={localName}
-									onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-										// Only update local state while typing
-										setLocalName(e.target.value);
-										// Notify parent that there are pending changes
-										if (props.onNameChange) {
-											props.onNameChange(e.target.value);
-										}
-									}}
-									// onBlur={() => {
-									// 	// Only update parent when done editing
-									// 	if (localName !== props.theme.name) {
-									// 		const updatedTheme = { ...props.theme, name: localName };
-									// 		props.setTheme(updatedTheme);
-									// 	}
-									// }}
-									invalid={{ status: false, message: null }}
-									disabled={false}
-									hideErrorMessage={true}
-								/>
-							</S.ThemeValue>
-						</S.GridRow>
-					</S.GridRows>
-				</S.GridWrapper>
+		<S.ThemeSectionColumnWrapper key={theme.name}>
+			<S.ThemeSectionColumnAction open={open} disabled={false} onClick={() => setOpen((prev) => !prev)}>
+				<p>{section.toUpperCase()}</p>
+				<ReactSVG src={ASSETS.arrow} />
+			</S.ThemeSectionColumnAction>
+			{open && (
+				<S.ThemeSectionColumn>
+					<S.ThemeSectionHeader>
+						<span>{'Element'.toUpperCase()}</span>
+						<S.ThemeSectionHeaderVariants>
+							<span>
+								<ReactSVG src={ASSETS.light} />
+								{'Light'.toUpperCase()}
+							</span>
+							<span>
+								<ReactSVG src={ASSETS.dark} /> {'Dark'.toUpperCase()}
+							</span>
+						</S.ThemeSectionHeaderVariants>
+					</S.ThemeSectionHeader>
+					{Object.entries(sortedSection).map(([key, value]: any) => {
+						return (
+							<S.ThemeRowWrapper key={key}>
+								<S.ThemeRow>
+									<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
+									<S.ThemeVariantsWrapper>
+										<S.ThemeLight colors={props.theme.basics?.colors}>
+											<S.ThemeValue>
+												<Color
+													key={`${key}-light`}
+													label={key}
+													value={value.light}
+													basics={props.theme.basics?.colors}
+													scheme={'light'}
+													onChange={(newColor) => handleThemeChange('basics', 'colors', 'light', key, newColor)}
+													loading={loading}
+													disabled={unauthorized}
+													width={125}
+												/>
+											</S.ThemeValue>
+										</S.ThemeLight>
+										<S.ThemeDark colors={props.theme.basics?.colors}>
+											<S.ThemeValue>
+												<Color
+													key={`${key}-dark`}
+													label={key}
+													value={value.dark}
+													basics={props.theme.basics?.colors}
+													scheme={'dark'}
+													onChange={(newColor) => handleThemeChange('basics', 'colors', 'dark', key, newColor)}
+													loading={loading}
+													disabled={unauthorized}
+													width={125}
+												/>
+											</S.ThemeValue>
+										</S.ThemeDark>
+									</S.ThemeVariantsWrapper>
+								</S.ThemeRow>
+							</S.ThemeRowWrapper>
+						);
+					})}
+				</S.ThemeSectionColumn>
 			)}
-			<S.ThemeRowHeader>
-				<S.ThemeLight colors={props.theme.basics?.colors}>
-					<S.ThemeKey />
-					<S.ThemeValue></S.ThemeValue>
-				</S.ThemeLight>
-				<S.ThemeDark colors={props.theme.basics?.colors}>
-					<S.ThemeKey />
-					<S.ThemeValue />
-				</S.ThemeDark>
-			</S.ThemeRowHeader>
-			{Object.entries(sortedSection).map(([key, value]: any) => {
-				return (
-					<>
-						<S.ThemeRow>
-							<S.ThemeLight colors={props.theme.basics?.colors}>
-								<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
-								<S.ThemeValue>
-									<Color
-										key={key}
-										label={key}
-										value={value.light}
-										basics={props.theme.basics?.colors}
-										scheme="light"
-										onChange={(newColor) => handleThemeChange('basics', 'colors', 'light', key, newColor)}
-										loading={loading}
-										disabled={unauthorized}
-									/>
-								</S.ThemeValue>
-							</S.ThemeLight>
-							<S.ThemeDark colors={props.theme.basics?.colors}>
-								<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
-								<S.ThemeValue>
-									<Color
-										key={key}
-										label={key}
-										value={value.dark}
-										basics={props.theme.basics?.colors}
-										scheme="dark"
-										onChange={(newColor) => handleThemeChange('basics', 'colors', 'dark', key, newColor)}
-										loading={loading}
-										disabled={unauthorized}
-									/>
-								</S.ThemeValue>
-							</S.ThemeDark>
-						</S.ThemeRow>
-					</>
-				);
-			})}
-
-			<S.ThemeRowFooter>
-				<S.ThemeLight colors={props.theme.basics?.colors}>
-					<S.ThemeKey />
-					<S.ThemeValue />
-				</S.ThemeLight>
-				<S.ThemeDark colors={props.theme.basics?.colors}>
-					<S.ThemeKey />
-					<S.ThemeValue />
-				</S.ThemeDark>
-			</S.ThemeRowFooter>
-			<S.ThemePreview></S.ThemePreview>
-		</S.ThemeSection>
+		</S.ThemeSectionColumnWrapper>
 	);
 });
 
@@ -294,6 +264,7 @@ function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpd
 	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
 	const [originalTheme] = React.useState<PortalThemeType>(props.theme); // Store original for comparison
 	const [pendingNameChange, setPendingNameChange] = React.useState<string | null>(null);
+	const [localName, setLocalName] = React.useState(theme.name || '');
 
 	// Only update if props.theme actually changes from external source
 	// Don't update if the only change is the name (which we're editing locally)
@@ -316,36 +287,62 @@ function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpd
 		return nameChanged || themeChanged;
 	}, [originalTheme, theme, pendingNameChange]);
 
-	const order = ['basics', 'header', 'navigation', 'content', 'footer', 'card'];
-	const sortedTheme = Object.fromEntries([
-		...order.map((k) => [k, theme[k]]).filter(([_, v]) => v !== undefined),
-		...Object.entries(theme || {}).filter(([k]) => !order.includes(k)),
-	]);
+	// const order = ['basics', 'header', 'navigation', 'content', 'footer', 'card'];
+	// const sortedTheme = Object.fromEntries([
+	// 	...order.map((k) => [k, theme[k]]).filter(([_, v]) => v !== undefined),
+	// 	...Object.entries(theme || {}).filter(([k]) => !order.includes(k)),
+	// ]);
 
 	return (
-		<S.ThemeWrapper id="ThemeWrapper">
-			<Select
+		<S.ThemeWrapper id={'ThemeWrapper'}>
+			{/* <Select
 				activeOption={{ id: theme?.name || 'Default', label: theme?.name || 'Default' }}
 				setActiveOption={() => {}}
 				options={[{ id: theme?.name || 'Default', label: theme?.name || 'Default' }]}
 				disabled={false}
+			/> */}
+			<FormField
+				key={'theme-name-field'}
+				value={localName}
+				label={'Name'}
+				onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+					const newName = e.target.value;
+					setLocalName(newName);
+					setPendingNameChange(newName);
+				}}
+				invalid={{ status: false, message: null }}
+				disabled={false}
+				hideErrorMessage={true}
 			/>
 			<S.Theme>
 				<ThemeSection
 					theme={theme}
 					setTheme={setTheme}
-					section="basics"
+					section={'basics'}
 					loading={props.loading}
 					onNameChange={setPendingNameChange}
 				/>
-				<S.ThemeSectionWrapper $show={showExpertMode}>
-					{Object.entries(sortedTheme).map(([key]) => {
-						if (key === 'basics' || key === 'name' || key === 'active') return null;
-						return (
-							<ThemeSection key={key} theme={sortedTheme} setTheme={setTheme} section={key} loading={props.loading} />
-						);
-					})}
-				</S.ThemeSectionWrapper>
+				<ThemeSection
+					theme={theme}
+					setTheme={setTheme}
+					section={'header'}
+					loading={props.loading}
+					onNameChange={setPendingNameChange}
+				/>
+				<ThemeSection
+					theme={theme}
+					setTheme={setTheme}
+					section={'footer'}
+					loading={props.loading}
+					onNameChange={setPendingNameChange}
+				/>
+				<ThemeSection
+					theme={theme}
+					setTheme={setTheme}
+					section={'card'}
+					loading={props.loading}
+					onNameChange={setPendingNameChange}
+				/>
 			</S.Theme>
 
 			<S.EndActions>
@@ -362,7 +359,6 @@ function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpd
 					disabled={props.loading || !hasChanges}
 				/>
 			</S.EndActions>
-			{/* <pre>{JSON.stringify(theme, null, 2)}</pre> */}
 		</S.ThemeWrapper>
 	);
 }
@@ -450,7 +446,7 @@ function Section(props: {
 
 	return (
 		<>
-			<S.Section id="Section">
+			<S.Section id={'Section'}>
 				<S.SectionHeader>
 					<p>{name}</p>
 					{/*
@@ -498,7 +494,7 @@ function Section(props: {
 					</S.FlexWrapper>
 					*/}
 					<S.AttributesWrapper
-						className="border-wrapper-alt2"
+						className={'border-wrapper-alt2'}
 						style={{
 							color: `rgba(${theme.basics.colors.text},1)`,
 							background: `rgba(${theme.basics.colors.background},1)`,
@@ -526,7 +522,7 @@ function Section(props: {
 					</S.AttributesWrapper>
 
 					<S.AttributesWrapper
-						className="border-wrapper-alt2"
+						className={'border-wrapper-alt2'}
 						style={{
 							color: `rgba(${theme.basics.colors.text},1)`,
 							background: `rgba(${theme.basics.colors.background},1)`,

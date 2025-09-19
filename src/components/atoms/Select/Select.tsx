@@ -32,7 +32,7 @@ export default function Select(props: {
 					<ReactSVG src={ASSETS.arrow} />
 				</S.Dropdown>
 				{active && (
-					<S.Options className={'border-wrapper-primary scroll-wrapper-hidden'} top={props.label ? 77.5 : 43.5}>
+					<S.Options className={'border-wrapper-alt1 scroll-wrapper-hidden'} top={props.label ? 77.5 : 50}>
 						{props.options.map((option: SelectOptionType, index: number) => {
 							return (
 								<S.Option
