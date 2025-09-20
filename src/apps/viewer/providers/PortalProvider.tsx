@@ -49,11 +49,21 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			if (portalId) setCurrentId(portalId);
 			else {
 				try {
-					// Fix: Use proper URL format for fetching ArNS headers
-					const resolvedId = (await fetch(`${window.location.protocol}//${window.location.host}`)).headers.get(
-						'X-Arns-Resolved-Id'
-					);
-					setCurrentId(resolvedId);
+					// Check for deployment changes and clear cache if needed
+					const deploymentResponse = await fetch('/deployment-check');
+					const currentResolvedId = deploymentResponse.headers.get('X-Arns-Resolved-Id');
+
+					// Store the resolved ID for comparison
+					const storedId = localStorage.getItem('arns-resolved-id');
+					if (storedId && storedId !== currentResolvedId && currentResolvedId) {
+						// Deployment changed - trigger cache clear by making another request
+						await fetch('/deployment-check');
+						localStorage.setItem('arns-resolved-id', currentResolvedId);
+					} else if (currentResolvedId) {
+						localStorage.setItem('arns-resolved-id', currentResolvedId);
+					}
+
+					setCurrentId(currentResolvedId);
 				} catch (e: any) {}
 			}
 		})();
