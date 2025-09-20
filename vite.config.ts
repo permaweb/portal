@@ -94,25 +94,14 @@ export default defineConfig(({ mode }) => {
 					clientsClaim: true,
 					skipWaiting: true,
 					cleanupOutdatedCaches: true,
-					dontCacheBustURLsMatching: /^assets\/.+\.[a-f0-9]{8}\./,
 					navigateFallbackDenylist: [/^\/assets\//, /^assets\//],
 					ignoreURLParametersMatching: [/^v$/, /^ver$/, /^utm_/, /^cachebust$/],
 					mode: 'production',
 					sourcemap: false,
 					runtimeCaching: [
 						{
-							urlPattern: ({ url }) =>
-								url.pathname === '/' &&
-								(url.hostname.includes('.arweave.') || url.hostname.includes('portal.arweave.net')),
-							handler: 'NetworkFirst',
-							options: {
-								cacheName: 'arns-deployment-cache',
-								networkTimeoutSeconds: 3,
-								expiration: {
-									maxEntries: 1,
-									maxAgeSeconds: 60, // 1 minute
-								},
-							},
+							urlPattern: ({ url }) => url.hostname.includes('portal'),
+							handler: 'NetworkOnly',
 						},
 						{
 							urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
