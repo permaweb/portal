@@ -94,8 +94,10 @@ export default defineConfig(({ mode }) => {
 					clientsClaim: true,
 					skipWaiting: true,
 					cleanupOutdatedCaches: true,
-					navigateFallbackDenylist: [/^\/assets\//],
+					navigateFallbackDenylist: [/^\/assets\//, /^assets\//],
 					ignoreURLParametersMatching: [/^v$/, /^ver$/, /^utm_/, /^cachebust$/],
+					mode: 'production',
+					sourcemap: false,
 					runtimeCaching: [
 						{
 							urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
