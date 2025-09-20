@@ -86,8 +86,9 @@ export default defineConfig(({ mode }) => {
 			react(),
 			...(app === 'viewer' ? [viteSingleFile()] : []),
 			VitePWA({
-				injectRegister: 'inline',
+				injectRegister: false,
 				registerType: 'autoUpdate',
+				disable: false,
 				workbox: {
 					globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
 					maximumFileSizeToCacheInBytes: (app === 'editor' ? 10 : 24) * 1024 * 1024, // 10 MB for Editor / 24 for Engine
@@ -99,10 +100,6 @@ export default defineConfig(({ mode }) => {
 					mode: 'production',
 					sourcemap: false,
 					runtimeCaching: [
-						{
-							urlPattern: ({ url }) => url.hostname.includes('portal'),
-							handler: 'NetworkOnly',
-						},
 						{
 							urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
 							handler: 'CacheFirst',
