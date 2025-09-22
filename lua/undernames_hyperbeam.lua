@@ -1,5 +1,19 @@
 local json = require('json')
 
+function SyncState(patch)
+	if patch then
+		for k, v in pairs(patch) do
+			local key = string.lower(k)
+			Send({ device = 'patch@1.0', [key] = json.encode(v) })
+		end
+	else
+		for k, v in pairs(State) do
+			local key = string.lower(k)
+			Send({ device = 'patch@1.0', [key] = json.encode(v) })
+		end
+	end
+end
+
 State = State
 	or {
 		SuperAdmin = nil,
@@ -17,6 +31,9 @@ State = State
 		Bootstrapped = false,
 	}
 
+-- =========================
+-- Utils
+-- =========================
 local Utils = {}
 
 function Utils.is_super_admin(addr)
@@ -30,7 +47,7 @@ end
 function Utils.normalize(name)
 	assert(type(name) == 'string' and #name > 0, 'name must be non-empty string')
 	local n = name:lower()
-	assert(n:match('^[a-z0-9_%.-]+$'), 'invalid name: allowed [a-z0-9_%.%-]') -- restrictions based on undernames req
+	assert(n:match('^[a-z0-9_%.-]+$'), 'invalid name: allowed [a-z0-9_%.%-]')
 	return n
 end
 
@@ -71,6 +88,9 @@ function Utils.once(Msg)
 	return true
 end
 
+-- =========================
+-- ANT helpers
+-- =========================
 local function try_remove_undername_record(antId, sub)
 	if not antId or antId == '' then
 		return false, 'missing ANT-Process-Id'
@@ -124,11 +144,11 @@ local function collect_record_params_for_self_claim(Msg, name_under)
 	if not txId or #txId ~= 43 then
 		return nil, 'Record-Transaction-Id required (43 chars)'
 	end
-	ttl = tonumber(ttl) or 900
-	if ttl < 60 or ttl > 86400 then
+	local nttl = tonumber(ttl) or 900
+	if nttl < 60 or nttl > 86400 then
 		return nil, 'Record-TTL-Seconds out of range (60..86400)'
 	end
-	return { antId = antId, sub = sub, tx = txId, ttl = ttl, priority = priority }
+	return { antId = antId, sub = sub, tx = txId, ttl = nttl, priority = priority }
 end
 
 local function reply(Msg, ok, result)
@@ -138,6 +158,9 @@ local function reply(Msg, ok, result)
 	})
 end
 
+-- =========================
+-- Owners
+-- =========================
 local function Owners_get(name)
 	return State.Owners[name]
 end
@@ -157,6 +180,7 @@ local function Owners_set(name, owner, meta)
 		source = meta and meta.source or nil,
 		auto = meta and meta.auto or false,
 	}
+	SyncState({ Owners = State.Owners })
 end
 
 local function Owners_countByAddress(addr)
@@ -169,6 +193,9 @@ local function Owners_countByAddress(addr)
 	return c
 end
 
+-- =========================
+-- Controllers
+-- =========================
 Controllers = {}
 
 function Controllers.bootstrap_first(Msg)
@@ -177,6 +204,18 @@ function Controllers.bootstrap_first(Msg)
 		Utils.set_add(State.Controllers, Msg.From)
 		State.Bootstrapped = true
 		Utils.audit(Msg.From, 'bootstrap_super_admin', { super_admin = Msg.From }, Msg)
+		SyncState({
+			SuperAdmin = State.SuperAdmin,
+			Controllers = State.Controllers,
+			Bootstrapped = true,
+			Audit = State.Audit,
+			Owners = State.Owners,
+			Policy = State.Policy,
+			Reserved = State.Reserved,
+			Requests = State.Requests,
+			RequestSeq = State.RequestSeq,
+			Processed = State.Processed,
+		})
 		return { seeded = Msg.From, superAdmin = Msg.From }
 	else
 		return { message = 'already bootstrapped', superAdmin = State.SuperAdmin }
@@ -190,6 +229,7 @@ function Controllers.add(actor, addr, Msg)
 	end
 	Utils.set_add(State.Controllers, addr)
 	Utils.audit(actor, 'add_controller', { addr = addr }, Msg)
+	SyncState({ Controllers = State.Controllers, Audit = State.Audit })
 	return { added = addr }
 end
 
@@ -200,6 +240,7 @@ function Controllers.remove(actor, addr, Msg)
 	end
 	Utils.set_del(State.Controllers, addr)
 	Utils.audit(actor, 'remove_controller', { addr = addr }, Msg)
+	SyncState({ Controllers = State.Controllers, Audit = State.Audit })
 	return { removed = addr }
 end
 
@@ -216,8 +257,7 @@ end
 
 -- =========================
 -- Reserved
--- =======================
-
+-- =========================
 Reserved = {}
 
 function Reserved.add(actor, name, toAddr, Msg)
@@ -228,6 +268,7 @@ function Reserved.add(actor, name, toAddr, Msg)
 	end
 	State.Reserved[name] = { to = toAddr, by = actor, at = Utils.ts(Msg) }
 	Utils.audit(actor, 'reserve_name', { name = name, to = toAddr }, Msg)
+	SyncState({ Reserved = State.Reserved, Audit = State.Audit })
 	return { reserved = name, to = toAddr }
 end
 
@@ -236,6 +277,7 @@ function Reserved.remove(actor, name, Msg)
 	name = Utils.normalize(name)
 	State.Reserved[name] = nil
 	Utils.audit(actor, 'unreserve_name', { name = name }, Msg)
+	SyncState({ Reserved = State.Reserved, Audit = State.Audit })
 	return { unreserved = name }
 end
 
@@ -251,24 +293,23 @@ function Reserved.list()
 	return out
 end
 
+-- =========================
+-- Requests
+-- =========================
 Requests = {}
 
--- request schema:
--- { id, name, requester, status="pending"|"approved"|"rejected"|"cancelled",
---   decidedAt?, decidedBy?, reason?, metadata = {} }
+-- schema: { id, name, requester, status, createdAt, decidedAt?, decidedBy?, reason? }
 function Requests.create(requester, name, Msg)
 	name = Utils.normalize(name)
 	if Owners_exists(name) then
 		error('name already registered')
 	end
 
-	-- HARD BLOCK: if reserved for someone else, do not create a request
 	local rinfo = State.Reserved[name]
 	if rinfo and rinfo.to and rinfo.to ~= requester then
 		error('name reserved for a different address')
 	end
 
-	-- dedupe same requester
 	for _, req in pairs(State.Requests) do
 		if req.name == name and req.requester == requester and req.status == 'pending' then
 			return { id = req.id, info = 'duplicate pending' }
@@ -285,6 +326,7 @@ function Requests.create(requester, name, Msg)
 		createdAt = Utils.ts(Msg),
 	}
 	Utils.audit(requester, 'request_undername', { id = id, name = name }, Msg)
+	SyncState({ Requests = State.Requests, RequestSeq = State.RequestSeq, Audit = State.Audit })
 	return { id = id }
 end
 
@@ -303,13 +345,13 @@ function Requests.cancel(actor, id, Msg)
 	r.decidedAt = Utils.ts(Msg)
 	r.decidedBy = actor
 	Utils.audit(actor, 'cancel_request', { id = id }, Msg)
+	SyncState({ Requests = State.Requests, Audit = State.Audit })
 	return { cancelled = id }
 end
 
 function Requests.approve(actor, id, Msg)
 	Utils.require_controller(actor)
 	local r = State.Requests[id]
-
 	if not r then
 		error('request not found')
 	end
@@ -358,12 +400,17 @@ function Requests.approve(actor, id, Msg)
 	r.decidedAt = Utils.ts(Msg)
 	r.decidedBy = actor
 
-	-- clear any reservation (generic or to=addr)
 	if State.Reserved[r.name] then
 		State.Reserved[r.name] = nil
 	end
 
 	Utils.audit(actor, 'approve_request', { id = id, name = r.name, owner = r.requester }, Msg)
+	SyncState({
+		Requests = State.Requests,
+		Owners = State.Owners,
+		Reserved = State.Reserved,
+		Audit = State.Audit,
+	})
 	return { approved = id, name = r.name, owner = r.requester }
 end
 
@@ -381,6 +428,7 @@ function Requests.reject(actor, id, reason, Msg)
 	r.decidedBy = actor
 	r.reason = reason or 'unspecified'
 	Utils.audit(actor, 'reject_request', { id = id, reason = r.reason }, Msg)
+	SyncState({ Requests = State.Requests, Audit = State.Audit })
 	return { rejected = id, reason = r.reason }
 end
 
@@ -409,7 +457,9 @@ function Requests.list(filter)
 	return out
 end
 
+-- =========================
 -- Ownership
+-- =========================
 Ownership = {}
 
 function Ownership.owner_of(name)
@@ -432,23 +482,22 @@ function Ownership.force_release(actor, name, reason, Msg)
 	end
 
 	local antId = Msg.Tags['Ant-Process-Id']
-
 	if not antId then
 		error('ANT-Process-Id required for force_release')
 	end
 
 	local ok, err = try_remove_undername_record(antId, name)
 	if not ok then
-		Utils.audit(actor, 'force_release_remove_record_failed', {
-			name = name,
-			antId = antId,
-			sub = name,
-			error = err,
-		}, Msg)
+		Utils.audit(
+			actor,
+			'force_release_remove_record_failed',
+			{ name = name, antId = antId, sub = name, error = err },
+			Msg
+		)
 		error('failed to remove record: ' .. err)
 	end
 
-	-- only if Remove-Record was sent successfully, clear our state
+	-- clear ownership
 	State.Owners[name] = nil
 
 	local hadReservation = false
@@ -459,7 +508,6 @@ function Ownership.force_release(actor, name, reason, Msg)
 
 	if rec.requestId then
 		local r = State.Requests[rec.requestId]
-		print('found related request', rec.requestId, r and r.status or 'nil')
 		if r and r.status == 'approved' then
 			r.status = 'released'
 			r.decidedAt = Utils.ts(Msg)
@@ -482,11 +530,12 @@ function Ownership.force_release(actor, name, reason, Msg)
 		clearedReservation = hadReservation,
 	}, Msg)
 
+	SyncState({ Owners = State.Owners, Reserved = State.Reserved, Requests = State.Requests, Audit = State.Audit })
 	return { released = name, clearedReservation = hadReservation }
 end
 
 -- =========================
--- Internal: claim policy check
+-- Claim policy
 -- =========================
 local function can_claim(addr, name)
 	name = Utils.normalize(name)
@@ -501,11 +550,10 @@ local function can_claim(addr, name)
 	end
 	return true
 end
+
 -- =========================
 -- Handlers (AO entrypoints)
 -- =========================
-
--- Bootstrap first controller (one-time)
 Handlers.add('PortalRegistry.Bootstrap', function(Msg)
 	if not Utils.once(Msg) then
 		return
@@ -582,13 +630,13 @@ Handlers.add('PortalRegistry.ListReserved', function(Msg)
 end)
 
 -- Availability (read-only, for UI)
-
 Handlers.add('PortalRegistry.CheckAvailability', function(Msg)
 	local name = Msg.Name
 	if not name or #name == 0 then
 		reply(Msg, false, { error = 'Name tag required' })
 		return
 	end
+
 	local n = Utils.normalize(name)
 	local ok, reason = can_claim(Msg.From, n)
 	local rec = Owners_get(n)
@@ -608,14 +656,15 @@ Handlers.add('PortalRegistry.CheckAvailability', function(Msg)
 		reservedForCaller = reservedForCaller,
 		canRequest = canRequest,
 		userReason = ok and nil or reason,
+		currentOwnedCount = count,
 	})
 end)
 
+-- Request flow
 Handlers.add('PortalRegistry.Request', function(Msg)
 	if not Utils.once(Msg) then
 		return
 	end
-	print('handling request', Msg.Id, Msg.From)
 	local name_requested = Msg.Name
 	if not name_requested or #name_requested == 0 then
 		reply(Msg, false, { error = 'Name tag required' })
@@ -629,8 +678,6 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 	end
 
 	local transferTo = Msg['Transfer-Ownership-To']
-	print('transferTo', transferTo, Msg.Tags)
-
 	local owner = transferTo or Msg.From
 	local nRequested = Utils.normalize(name_requested)
 
@@ -642,7 +689,6 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 			return
 		end
 
-		-- Require record params and set record BEFORE ownership is granted
 		local params, perr = collect_record_params_for_self_claim(Msg, nRequested)
 		if not params then
 			Utils.audit(
@@ -668,6 +714,7 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 			reply(Msg, false, { error = sendErr, code = 'SET_RECORD_FAILED' })
 			return
 		end
+
 		Owners_set(nRequested, owner, {
 			requestedAt = Utils.ts(Msg),
 			approvedAt = Utils.ts(Msg),
@@ -677,6 +724,7 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 		})
 		State.Reserved[nRequested] = nil
 		Utils.audit(Msg.From, 'claim_reserved_for', { name = nRequested }, Msg)
+		SyncState({ Owners = State.Owners, Reserved = State.Reserved, Audit = State.Audit })
 		reply(Msg, true, { status = 'approved', auto = true, name = nRequested, owner = Msg.From })
 		return
 	end
@@ -721,6 +769,7 @@ Handlers.add('PortalRegistry.Request', function(Msg)
 			State.Reserved[nRequested] = nil
 		end
 		Utils.audit(Msg.From, 'self_claim', { name = nRequested }, Msg)
+		SyncState({ Owners = State.Owners, Reserved = State.Reserved, Audit = State.Audit })
 		reply(Msg, true, { status = 'approved', auto = true, name = nRequested, owner = owner })
 		return
 	end
@@ -803,7 +852,7 @@ Handlers.add('PortalRegistry.ForceRelease', function(Msg)
 	reply(Msg, true, r)
 end)
 
--- Policy (optional updater)
+-- Policy
 Handlers.add('PortalRegistry.SetPolicy', function(Msg)
 	if not Utils.once(Msg) then
 		return
@@ -812,31 +861,29 @@ Handlers.add('PortalRegistry.SetPolicy', function(Msg)
 
 	local updates = {}
 
-	-- MaxPerEntity (number)
 	if Msg.MaxPerEntity ~= nil then
-		local new_max_per_addr = tonumber(Msg.MaxPerEntity)
-		if not new_max_per_addr or new_max_per_addr <= 0 then
+		local new_max = tonumber(Msg.MaxPerEntity)
+		if not new_max or new_max <= 0 then
 			reply(Msg, false, { error = 'MaxPerEntity must be a positive number' })
 			return
 		end
-		State.Policy.MaxPerEntity = new_max_per_addr
-		updates.MaxPerEntity = new_max_per_addr
+		State.Policy.MaxPerEntity = new_max
+		updates.MaxPerEntity = new_max
 	end
 
-	-- RequireApproval (boolean)
 	if Msg.RequireApproval ~= nil then
-		local string_require_approval = tostring(Msg.RequireApproval):lower()
-		local new_require_approval
-		if string_require_approval == 'true' then
-			new_require_approval = true
-		elseif string_require_approval == 'false' then
-			new_require_approval = false
+		local s = tostring(Msg.RequireApproval):lower()
+		local val
+		if s == 'true' then
+			val = true
+		elseif s == 'false' then
+			val = false
 		else
 			reply(Msg, false, { error = 'RequireApproval must be true or false' })
 			return
 		end
-		State.Policy.RequireApproval = new_require_approval
-		updates.RequireApproval = new_require_approval
+		State.Policy.RequireApproval = val
+		updates.RequireApproval = val
 	end
 
 	if next(updates) == nil then
@@ -845,6 +892,7 @@ Handlers.add('PortalRegistry.SetPolicy', function(Msg)
 	end
 
 	Utils.audit(Msg.From, 'set_policy', updates, Msg)
+	SyncState({ Policy = State.Policy, Audit = State.Audit })
 	reply(Msg, true, { policy = State.Policy, updated = updates })
 end)
 
@@ -865,6 +913,7 @@ Handlers.add('PortalRegistry.TransferSuperAdmin', function(Msg)
 	end
 	State.SuperAdmin = newAdmin
 	Utils.audit(Msg.From, 'transfer_super_admin', { new_super_admin = newAdmin }, Msg)
+	SyncState({ SuperAdmin = State.SuperAdmin, Audit = State.Audit })
 	reply(Msg, true, { superAdmin = newAdmin })
 end)
 

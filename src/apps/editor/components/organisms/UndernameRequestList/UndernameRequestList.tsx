@@ -62,10 +62,11 @@ export default function UndernameRequestsList() {
 		// }
 		const ario = ARIO.mainnet();
 		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME }); // after testing we change to PARENT_UNDERNAME
+		console.log('ArNS Record for undername parent', arnsRecord.processId);
 		const undernameRow = requests.find((r) => r.id === id);
 		setLoading(true);
-		await approve(id, arnsRecord.processId, reason); // now approve at undernames process will handle the call to the arns
-		addNotification(`Undername ${undernameRow.name} approved`, 'success');
+		// await approve(id, arnsRecord.processId, reason); // now approve at undernames process will handle the call to the arns
+		// addNotification(`Undername ${undernameRow.name} approved`, 'success');
 	};
 
 	const handleAdminReject = async (id: number, reason: string) => {
