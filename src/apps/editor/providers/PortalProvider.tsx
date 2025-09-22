@@ -120,7 +120,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					setPortals(updated);
 				})();
 			} else {
-				setPermissions(null);
+				setPermissions({ base: false });
 			}
 		}
 	}, [arProvider.walletAddress, permawebProvider.profile?.portals, permawebProvider.profile?.invites]);

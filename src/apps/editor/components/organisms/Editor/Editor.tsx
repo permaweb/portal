@@ -155,11 +155,8 @@ export default function Editor() {
 						}
 
 						addNotification(`${language?.postStatusUpdated}!`, 'success');
-
 						portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Requests, PortalPatchMapEnum.Posts]);
-
-						// await new Promise((r) => setTimeout(r, 1000));
-						// navigate(URLS.portalBase(portalProvider.current.id));
+						if (updateType === 'Reject') navigate(URLS.portalBase(portalProvider.current.id));
 					} else {
 						addNotification(language?.errorUpdatingPost, 'warning');
 					}

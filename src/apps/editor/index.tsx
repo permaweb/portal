@@ -132,12 +132,8 @@ function AppContent() {
 
 			if (!portalProvider.permissions) {
 				return (
-					<Portal node={DOM.overlay}>
-						<S.CenteredWrapper className={'overlay'}>
-							<S.MessageWrapper>
-								<p>{`${language?.loggingIn}...`}</p>
-							</S.MessageWrapper>
-						</S.CenteredWrapper>
+					<Portal node={DOM.loader}>
+						<Loader />
 					</Portal>
 				);
 			}
