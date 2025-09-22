@@ -97,7 +97,6 @@ export enum PortalSchemeType {
 
 export type PortalThemeType = any;
 
-// TODO
 // export type PortalThemeType = {
 // 	name: string;
 // 	active: boolean;

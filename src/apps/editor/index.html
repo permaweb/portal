@@ -147,8 +147,12 @@
 		</script>
 		<script>
 			if ('serviceWorker' in navigator) {
+				/* Only register service worker in production builds */
 				/* Skip service worker for domain fetch to detect ArNS updates */
-				if (!window.location.hostname.includes('portal')) {
+				const isProduction = window.location.protocol === 'https:' || window.location.hostname !== 'localhost';
+				const skipForArNS = window.location.hostname.includes('portal');
+
+				if (isProduction && !skipForArNS) {
 					navigator.serviceWorker
 						.register('/sw.js', { scope: '/' })
 						.then((registration) => {

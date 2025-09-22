@@ -34,7 +34,6 @@ export function useNavigationConfirm(url: string, message: string) {
 		const regex = new RegExp(`\\/${url}(\\/|$)`);
 
 		if (regex.test(window.location.href)) {
-			console.log(window.location.href);
 			if (window.confirm(message)) {
 				navigate(to);
 			}
