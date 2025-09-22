@@ -261,7 +261,9 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										{portalProvider.portals.map((portal: PortalHeaderType) => {
 											const hash = window.location.hash;
 											const parts = hash.split('/').filter(Boolean);
-											const section = parts[2] || ''; // say design, posts, media, setup etc sub navigation
+											let section = parts[2] || ''; // say design, posts, media, setup etc sub navigation
+											let afterSection = parts[3] || ''; // say post id or page id
+											if (afterSection) section = ''; // special case for editor
 											const active = portalProvider.current ? portalProvider.current.id === portal.id : false;
 											const path = `${URLS.base}${portal.id}/${section}`;
 											return (
