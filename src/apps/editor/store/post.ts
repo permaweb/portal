@@ -3,9 +3,10 @@ import { Dispatch } from 'redux';
 import { PortalAssetPostType, ReduxActionType } from 'helpers/types';
 
 const UPDATE_CURRENT_POST = 'UPDATE_CURRENT_POST';
+const SET_ORIGINAL_DATA = 'SET_ORIGINAL_DATA';
 const CLEAR_CURRENT_POST = 'CLEAR_CURRENT_POST';
 
-export const initStateCurrentPost: { data: PortalAssetPostType; editor: any } = {
+export const initStateCurrentPost: { data: PortalAssetPostType; originalData: any; editor: any } = {
 	data: {
 		id: null,
 		title: '',
@@ -21,6 +22,7 @@ export const initStateCurrentPost: { data: PortalAssetPostType; editor: any } = 
 		lastUpdate: null,
 		releaseDate: null,
 	},
+	originalData: null,
 	editor: {
 		titleFocused: false,
 		blockEditMode: true,
@@ -45,8 +47,14 @@ export function currentPostClear() {
 	};
 }
 
+export function setOriginalData(data: any) {
+	return (dispatch: Dispatch) => {
+		dispatch({ type: SET_ORIGINAL_DATA, payload: data });
+	};
+}
+
 export function currentPost(
-	state: { data: PortalAssetPostType; editor: any } = initStateCurrentPost,
+	state: { data: PortalAssetPostType; originalData: any; editor: any } = initStateCurrentPost,
 	action: ReduxActionType
 ) {
 	switch (action.type) {
@@ -70,8 +78,17 @@ export function currentPost(
 				};
 			}
 			return state;
+		case SET_ORIGINAL_DATA:
+			return {
+				...state,
+				originalData: { ...action.payload },
+			};
 		case CLEAR_CURRENT_POST:
-			return { ...state, data: { ...initStateCurrentPost.data } };
+			return {
+				...state,
+				data: { ...initStateCurrentPost.data },
+				originalData: null,
+			};
 		default:
 			return state;
 	}

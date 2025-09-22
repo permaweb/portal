@@ -4,7 +4,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
-import { currentPostUpdate } from 'editor/store/post';
+import { currentPostUpdate, setOriginalData } from 'editor/store/post';
 
 import { Button } from 'components/atoms/Button';
 import { Modal } from 'components/atoms/Modal';
@@ -50,14 +50,37 @@ export default function Editor() {
 		dispatch(currentPostUpdate(updatedField));
 	};
 
+	const hasUnsavedChanges = () => {
+		const current = currentPost.data;
+		const original = currentPost.originalData;
+
+		// If there's no original data, consider it as changes (new post)
+		if (!original) return true;
+
+		// Compare all relevant fields
+		return (
+			current.title !== original.title ||
+			current.description !== original.description ||
+			current.status !== original.status ||
+			current.thumbnail !== original.thumbnail ||
+			current.releaseDate !== original.releaseDate ||
+			JSON.stringify(current.content) !== JSON.stringify(original.content) ||
+			JSON.stringify(current.categories) !== JSON.stringify(original.categories) ||
+			JSON.stringify(current.topics) !== JSON.stringify(original.topics) ||
+			JSON.stringify(current.externalRecipients) !== JSON.stringify(original.externalRecipients)
+		);
+	};
+
 	React.useEffect(() => {
 		const isEmpty =
 			!currentPost.data.content ||
 			currentPost.data.content.length === 0 ||
 			currentPost.data.content.every((block) => !block.content || block.content.trim() === '');
 
-		handleCurrentPostUpdate({ field: 'submitDisabled', value: isEmpty });
-	}, [currentPost.data.content]);
+		const noChanges = !hasUnsavedChanges() && currentPost.data.id !== null;
+
+		handleCurrentPostUpdate({ field: 'submitDisabled', value: isEmpty || noChanges });
+	}, [currentPost.data, currentPost.originalData]);
 
 	/* User is a moderator and can only review existing posts, not create new ones */
 	const unauthorized =
@@ -235,6 +258,9 @@ export default function Editor() {
 					console.log(`Asset content update: ${assetContentUpdateId}`);
 					addNotification(`${language?.postUpdated}!`, 'success');
 					portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Posts);
+
+					// Update original data to reflect the saved state
+					dispatch(setOriginalData(currentPost.data));
 				} catch (e: any) {
 					addNotification(e.message ?? language?.errorUpdatingPost, 'warning');
 				}
@@ -394,6 +420,12 @@ export default function Editor() {
 					}
 
 					addNotification(`${language?.postSaved}!`, 'success');
+
+					// Update the current post with the new assetId and set it as saved state
+					const updatedPostData = { ...currentPost.data, id: assetId };
+					handleCurrentPostUpdate({ field: 'id', value: assetId });
+					dispatch(setOriginalData(updatedPostData));
+
 					navigate(`${URLS.postEditArticle(portalProvider.current.id)}${assetId}`);
 				} catch (e: any) {
 					addNotification(e.message ?? 'Error creating post', 'warning');

@@ -5,7 +5,7 @@ import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
-import { currentPostClear, currentPostUpdate } from 'editor/store/post';
+import { currentPostClear, currentPostUpdate, setOriginalData } from 'editor/store/post';
 
 import { Loader } from 'components/atoms/Loader';
 import { URLS } from 'helpers/config';
@@ -39,34 +39,60 @@ export default function ArticleEditor(props: {
 		dispatch(currentPostUpdate(updatedField));
 	};
 
+	const previousAssetIdRef = React.useRef<string | undefined>(undefined);
+
 	React.useEffect(() => {
 		(async function () {
 			if (portalProvider.current?.id) {
 				if (assetId) {
 					if (!checkValidAddress(assetId)) navigate(URLS.postCreateArticle(portalProvider.current.id));
 
-					handleCurrentPostUpdate({
-						field: 'loading',
-						value: { active: true, message: `${language?.loadingPost}...` },
-					});
-					try {
-						const response = await permawebProvider.libs.getAtomicAsset(assetId);
+					const hasCurrentPostData = currentPost.data.id === assetId && currentPost.data.title;
 
-						handleCurrentPostUpdate({ field: 'title', value: response?.name });
-						handleCurrentPostUpdate({ field: 'creator', value: response?.creator });
-						handleCurrentPostUpdate({ field: 'status', value: response?.metadata?.status });
-						handleCurrentPostUpdate({ field: 'categories', value: response?.metadata?.categories });
-						handleCurrentPostUpdate({ field: 'topics', value: response?.metadata?.topics });
-						handleCurrentPostUpdate({ field: 'content', value: response?.metadata?.content });
-						handleCurrentPostUpdate({ field: 'thumbnail', value: response?.metadata?.thumbnail });
-						handleCurrentPostUpdate({ field: 'description', value: response?.metadata?.description });
-					} catch (e: any) {
-						console.error(e);
+					if (!hasCurrentPostData) {
+						dispatch(currentPostClear());
+						handleCurrentPostUpdate({
+							field: 'loading',
+							value: { active: true, message: `${language?.loadingPost}...` },
+						});
+						try {
+							const response = await permawebProvider.libs.getAtomicAsset(assetId);
+
+							const postData = {
+								id: assetId as string | null,
+								title: response?.name || '',
+								creator: response?.creator || null,
+								status: response?.metadata?.status || 'draft',
+								categories: response?.metadata?.categories || [],
+								topics: response?.metadata?.topics || [],
+								content: response?.metadata?.content || null,
+								thumbnail: response?.metadata?.thumbnail || null,
+								description: response?.metadata?.description || '',
+								externalRecipients: [],
+								dateCreated: null,
+								lastUpdate: null,
+								releaseDate: null,
+							};
+
+							// Update current data
+							Object.keys(postData).forEach((key) => {
+								handleCurrentPostUpdate({ field: key, value: postData[key as keyof typeof postData] });
+							});
+
+							// Set original data for comparison
+							dispatch(setOriginalData(postData as any));
+						} catch (e: any) {
+							console.error(e);
+						}
+						handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
 					}
-					handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
 				} else {
-					dispatch(currentPostClear());
+					// Clear the post if we're creating a new post (assetId is undefined)
+					// but have content from an existing post (currentPost.data.id exists)
+					// This handles the case where user navigates from editing an existing post to creating new
+					if (currentPost.data.id) dispatch(currentPostClear());
 				}
+				previousAssetIdRef.current = assetId;
 			}
 		})();
 	}, [assetId, portalProvider.current?.id]);

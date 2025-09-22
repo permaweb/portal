@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import { debounce } from 'lodash';
 
@@ -13,7 +13,6 @@ import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
 import { formatAddress } from 'helpers/utils';
 import { checkWindowCutoff } from 'helpers/window';
-import { useNavigationConfirm } from 'hooks/useNavigationConfirm';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -24,8 +23,7 @@ import { useNavigation } from './NavigationContext';
 import * as S from './styles';
 
 export default function Navigation(props: { open: boolean; toggle: () => void }) {
-	const { confirmNavigation } = useNavigationConfirm('post', 'Changes you made may not be saved.');
-
+	const navigate = useNavigate();
 	const portalProvider = usePortalProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
@@ -142,7 +140,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 	const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, to: string) => {
 		e.preventDefault();
-		confirmNavigation(to);
+		navigate(to);
 		if (!desktop) props.toggle();
 	};
 
