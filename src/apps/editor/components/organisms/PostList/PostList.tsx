@@ -156,7 +156,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 						<S.PostsActionsRequestsBody>
 							{requests.map((request: PortalAssetRequestType) => {
 								return (
-									<S.PostActionRequest key={request.id} className={'border-wrapper-primary'}>
+									<S.PostActionRequest key={request.id}>
 										<S.PostActionRequestLine>
 											<p>{request.name}</p>
 											<Button

@@ -41,7 +41,7 @@ export function usePostsList(props: { pageSize?: number }) {
 		}
 
 		(async function () {
-			const ids = portalProvider.current?.requests.map((asset: PortalAssetRequestType) => asset.id);
+			const ids = portalProvider.current?.requests?.map((asset: PortalAssetRequestType) => asset.id) ?? [];
 
 			if (!ids?.length) {
 				setRequests([]);
@@ -91,8 +91,6 @@ export function usePostsList(props: { pageSize?: number }) {
 			}
 		})();
 	}, [showRequests, portalProvider.current?.requests]);
-
-	// console.log(requests)
 
 	const assets = React.useMemo(() => {
 		if (!portalProvider.current?.assets) return [];

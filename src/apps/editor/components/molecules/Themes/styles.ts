@@ -476,7 +476,7 @@ export const ThemeSectionColumnAction = styled.button<{ open: boolean }>`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 7.5px 15px;
+	padding: 6.5px 15px;
 	background: ${(props) => props.theme.colors.button.primary.background};
 
 	border-top: 1px solid ${(props) => props.theme.colors.button.primary.border};

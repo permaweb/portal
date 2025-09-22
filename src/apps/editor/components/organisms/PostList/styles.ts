@@ -147,13 +147,17 @@ export const PostsActionsRequestsBody = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
+
+	> * {
+		border-bottom: 1px dotted ${(props) => props.theme.colors.border.primary};
+		padding: 0 0 15px 0;
+	}
 `;
 
 export const PostActionRequest = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
-	padding: 15px;
 `;
 
 export const PostActionRequestLine = styled.div`

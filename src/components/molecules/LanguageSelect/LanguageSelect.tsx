@@ -23,6 +23,7 @@ export default function LanguageSelect() {
 				disabled={false}
 				hideActiveOption
 				icon={ASSETS.language}
+				dropdownTop={42.5}
 			/>
 		</S.Wrapper>
 	);

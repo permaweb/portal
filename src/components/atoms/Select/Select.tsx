@@ -15,6 +15,7 @@ export default function Select(props: {
 	disabled: boolean;
 	icon?: string;
 	hideActiveOption?: boolean;
+	dropdownTop?: number;
 }) {
 	const [active, setActive] = React.useState<boolean>(false);
 
@@ -32,7 +33,10 @@ export default function Select(props: {
 					<ReactSVG src={ASSETS.arrow} />
 				</S.Dropdown>
 				{active && (
-					<S.Options className={'border-wrapper-alt1 scroll-wrapper-hidden'} top={props.label ? 77.5 : 50}>
+					<S.Options
+						className={'border-wrapper-alt1 scroll-wrapper-hidden'}
+						top={props.dropdownTop ? props.dropdownTop : props.label ? 77.5 : 50}
+					>
 						{props.options.map((option: SelectOptionType, index: number) => {
 							return (
 								<S.Option

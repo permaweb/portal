@@ -146,12 +146,9 @@
 			};
 		</script>
 		<script>
-			// Custom service worker registration that skips portal domains
 			if ('serviceWorker' in navigator) {
-				// Don't register service worker for portal domains to avoid deployment caching issues
-				if (window.location.hostname.includes('portal')) {
-					console.log('Skipping service worker registration for portal domain');
-				} else {
+				/* Skip service worker for domain fetch to detect ArNS updates */
+				if (!window.location.hostname.includes('portal')) {
 					navigator.serviceWorker
 						.register('/sw.js', { scope: '/' })
 						.then((registration) => {
