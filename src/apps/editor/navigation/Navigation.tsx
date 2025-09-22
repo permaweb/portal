@@ -259,8 +259,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 								{portalProvider.portals && portalProvider.portals.length > 0 && (
 									<S.PDropdownBody>
 										{portalProvider.portals.map((portal: PortalHeaderType) => {
+											const hash = window.location.hash;
+											const parts = hash.split('/').filter(Boolean);
+											const section = parts[2] || ''; // say design, posts, media, setup etc sub navigation
 											const active = portalProvider.current ? portalProvider.current.id === portal.id : false;
-											const path = `${URLS.base}${portal.id}`;
+											const path = `${URLS.base}${portal.id}/${section}`;
 											return (
 												<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>
 													<Link to={path} onClick={(e) => handleNavigate(e, path)}>
