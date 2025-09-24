@@ -85,82 +85,82 @@ export default defineConfig(({ mode }) => {
 			}),
 			react(),
 			...(app === 'viewer' ? [viteSingleFile()] : []),
-			VitePWA({
-				injectRegister: false,
-				registerType: 'autoUpdate',
-				disable: false,
-				workbox: {
-					globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-					maximumFileSizeToCacheInBytes: (app === 'editor' ? 10 : 24) * 1024 * 1024, // 10 MB for Editor / 24 for Engine
-					clientsClaim: true,
-					skipWaiting: true,
-					cleanupOutdatedCaches: true,
-					navigateFallbackDenylist: [/^\/assets\//, /^assets\//],
-					ignoreURLParametersMatching: [/^v$/, /^ver$/, /^utm_/, /^cachebust$/],
-					mode: 'production',
-					sourcemap: false,
-					runtimeCaching: [
-						{
-							urlPattern:
-								/^https:\/\/portal\.(?:[^\/]+)(?:\/(?:(?!assets\/|favicon|manifest|\.js|\.css|\.png|\.svg|\.ico|\.woff|\.woff2).)*)?$/i,
-							handler: 'NetworkOnly',
-							method: 'GET',
-							options: { cacheName: 'portal-gateway-bypass' },
-						},
-						{
-							urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-							handler: 'CacheFirst',
-							options: {
-								cacheName: 'google-fonts-cache',
-								expiration: {
-									maxEntries: 10,
-									maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-								},
-							},
-						},
-						{
-							urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-							handler: 'CacheFirst',
-							options: {
-								cacheName: 'gstatic-fonts-cache',
-								expiration: {
-									maxEntries: 10,
-									maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-								},
-							},
-						},
-						{
-							urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-							handler: 'CacheFirst',
-							options: {
-								cacheName: 'images-cache',
-								expiration: {
-									maxEntries: 100,
-									maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-								},
-							},
-						},
-					],
-				},
-				manifest: {
-					name: 'Portal',
-					short_name: 'Portal',
-					description: 'Permaweb Portal Application',
-					theme_color: '#ffffff',
-					icons: [
-						{
-							src: 'icon-192x192.png',
-							sizes: '192x192',
-							type: 'image/png',
-						},
-						{
-							src: 'icon-512x512.png',
-							sizes: '512x512',
-							type: 'image/png',
-						},
-					],
-				},
-			}),
+			// VitePWA({
+			// 	injectRegister: false,
+			// 	registerType: 'autoUpdate',
+			// 	disable: false,
+			// 	workbox: {
+			// 		globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+			// 		maximumFileSizeToCacheInBytes: (app === 'editor' ? 10 : 24) * 1024 * 1024, // 10 MB for Editor / 24 for Engine
+			// 		clientsClaim: true,
+			// 		skipWaiting: true,
+			// 		cleanupOutdatedCaches: true,
+			// 		navigateFallbackDenylist: [/^\/assets\//, /^assets\//],
+			// 		ignoreURLParametersMatching: [/^v$/, /^ver$/, /^utm_/, /^cachebust$/],
+			// 		mode: 'production',
+			// 		sourcemap: false,
+			// 		runtimeCaching: [
+			// 			{
+			// 				urlPattern:
+			// 					/^https:\/\/portal\.(?:[^\/]+)(?:\/(?:(?!assets\/|favicon|manifest|\.js|\.css|\.png|\.svg|\.ico|\.woff|\.woff2).)*)?$/i,
+			// 				handler: 'NetworkOnly',
+			// 				method: 'GET',
+			// 				options: { cacheName: 'portal-gateway-bypass' },
+			// 			},
+			// 			{
+			// 				urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+			// 				handler: 'CacheFirst',
+			// 				options: {
+			// 					cacheName: 'google-fonts-cache',
+			// 					expiration: {
+			// 						maxEntries: 10,
+			// 						maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+			// 					},
+			// 				},
+			// 			},
+			// 			{
+			// 				urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+			// 				handler: 'CacheFirst',
+			// 				options: {
+			// 					cacheName: 'gstatic-fonts-cache',
+			// 					expiration: {
+			// 						maxEntries: 10,
+			// 						maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+			// 					},
+			// 				},
+			// 			},
+			// 			{
+			// 				urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+			// 				handler: 'CacheFirst',
+			// 				options: {
+			// 					cacheName: 'images-cache',
+			// 					expiration: {
+			// 						maxEntries: 100,
+			// 						maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+			// 					},
+			// 				},
+			// 			},
+			// 		],
+			// 	},
+			// 	manifest: {
+			// 		name: 'Portal',
+			// 		short_name: 'Portal',
+			// 		description: 'Permaweb Portal Application',
+			// 		theme_color: '#ffffff',
+			// 		icons: [
+			// 			{
+			// 				src: 'icon-192x192.png',
+			// 				sizes: '192x192',
+			// 				type: 'image/png',
+			// 			},
+			// 			{
+			// 				src: 'icon-512x512.png',
+			// 				sizes: '512x512',
+			// 				type: 'image/png',
+			// 			},
+			// 		],
+			// 	},
+			// }),
 		],
 		resolve: {
 			alias: {
