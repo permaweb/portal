@@ -1,11 +1,11 @@
-import { PageEditor } from 'editor/components/organisms/PageEditor';
+import { Editor } from 'editor/components/organisms/Editor';
 
 import * as S from './styles';
 
 export default function Edit() {
 	return (
 		<S.Wrapper>
-			<PageEditor />
+			<Editor />
 		</S.Wrapper>
 	);
 }

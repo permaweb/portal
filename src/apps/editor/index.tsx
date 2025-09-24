@@ -193,7 +193,7 @@ function AppContent() {
 						{getRoute(`${URLS.base}:portalId/post/create/article`, <PostEdit />)}
 						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <PostEdit />)}
 						{getRoute(`${URLS.base}:portalId/page/create`, <PageCreate />)}
-						{getRoute(`${URLS.base}:portalId/page/edit/:pageId`, <PageEdit />)}
+						{getRoute(`${URLS.base}:portalId/page/edit/:assetId`, <PageEdit />)}
 						{getRoute(`${URLS.base}:portalId/setup`, <Setup />)}
 						{getRoute(`${URLS.base}:portalId/design`, <Design />)}
 						{getRoute(`${URLS.base}:portalId/design/:active`, <Design />)}

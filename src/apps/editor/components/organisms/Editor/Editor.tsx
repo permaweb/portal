@@ -17,7 +17,7 @@ import {
 	PortalUserType,
 	RequestUpdateType,
 } from 'helpers/types';
-import { filterDuplicates } from 'helpers/utils';
+import { filterDuplicates, urlify } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -194,7 +194,7 @@ export default function Editor() {
 
 	async function handleSubmit() {
 		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
-			handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language?.savingPost}...` } });
+			handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language?.saving}...` } });
 
 			if (!validateSubmit()) {
 				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
@@ -237,27 +237,51 @@ export default function Editor() {
 						data: data,
 					});
 
-					/* TODO */
-					// if (isStaticPage) {
-					// 	const updatedPages = [
-					// 		...(portalProvider.current?.pages?.filter((page: PortalPageType) => page.id !== assetId) ?? []),
-					// 		{ name: currentPost.data.title, id: assetId },
-					// 	];
+					if (isStaticPage) {
+						const currentPages = portalProvider.current?.pages || {};
 
-					// 	const pagesUpdateId = await permawebProvider.libs.updateZone(
-					// 		{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
-					// 		portalProvider.current.id,
-					// 		arProvider.wallet
-					// 	);
+						// Find the current page by looking for the asset ID in the page values
+						const currentPageEntry: any = Object.entries(currentPages).find(([_, page]: any) => page.id === assetId);
+						const currentPageKey = currentPageEntry?.[0];
+						const currentPageName = currentPageEntry?.[1]?.name;
 
-					// 	portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Pages);
+						// Only update pages if the title has changed
+						if (urlify(currentPageName) !== urlify(currentPost.data.title)) {
+							const updatedPages = {
+								...currentPages,
+								[urlify(currentPost.data.title)]: {
+									type: 'static',
+									id: assetId,
+									name: currentPost.data.title,
+								},
+							};
 
-					// 	console.log(`Pages update: ${pagesUpdateId}`);
-					// }
+							console.log(currentPageKey);
+							console.log(updatedPages);
+
+							// Remove the old page entry using the correct key
+							if (currentPageKey) {
+								delete updatedPages[currentPageKey];
+							}
+
+							const pagesUpdateId = await permawebProvider.libs.updateZone(
+								{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
+								portalProvider.current.id,
+								arProvider.wallet
+							);
+
+							portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
+
+							console.log(`Pages update: ${pagesUpdateId}`);
+						}
+					}
 
 					console.log(`Asset content update: ${assetContentUpdateId}`);
 					addNotification(`${language?.postUpdated}!`, 'success');
-					portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Posts);
+					portalProvider.refreshCurrentPortal([
+						...(isStaticPage ? [PortalPatchMapEnum.Presentation] : []),
+						PortalPatchMapEnum.Posts,
+					]);
 
 					// Update original data to reflect the saved state
 					dispatch(setOriginalData(currentPost.data));
@@ -301,21 +325,35 @@ export default function Editor() {
 					console.log(`Asset content update: ${assetContentUpdateId}`);
 
 					/* Add static pages assets directly to the portal process */
-					// if (isStaticPage && portalProvider.permissions?.updatePortalMeta) {
-					// 	const updatedPages = [...portalProvider.current?.pages, { name: currentPost.data.title, id: assetId }];
-					// 	const pagesUpdateId = await permawebProvider.libs.updateZone(
-					// 		{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
-					// 		portalProvider.current.id,
-					// 		arProvider.wallet
-					// 	);
+					if (isStaticPage && portalProvider.permissions?.updatePortalMeta) {
+						const currentPages = portalProvider.current?.pages || {};
+						const updatedPages = {
+							...currentPages,
+							[urlify(currentPost.data.title)]: {
+								type: 'static',
+								id: assetId,
+								name: currentPost.data.title,
+							},
+						};
+						const pagesUpdateId = await permawebProvider.libs.updateZone(
+							{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
+							portalProvider.current.id,
+							arProvider.wallet
+						);
 
-					// 	portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
+						portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
 
-					// 	console.log(`Pages update: ${pagesUpdateId}`);
+						console.log(`Pages update: ${pagesUpdateId}`);
 
-					// 	navigate(URLS.portalPages(portalProvider.current?.id));
-					// 	return;
-					// }
+						// Update the current post with the new assetId and set it as saved state
+						const updatedPostData = { ...currentPost.data, id: assetId };
+						handleCurrentPostUpdate({ field: 'id', value: assetId });
+						dispatch(setOriginalData(updatedPostData));
+
+						navigate(URLS.portalPages(portalProvider.current?.id));
+						handleSubmitUpdate();
+						return;
+					}
 
 					/* Index post in the current portal this user is contributing to */
 					let internalIndexAction = null;

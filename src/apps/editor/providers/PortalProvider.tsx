@@ -6,7 +6,7 @@ import { CurrentZoneVersion } from '@permaweb/libs';
 import { PortalManager } from 'editor/components/organisms/PortalManager';
 
 import { Panel } from 'components/atoms/Panel';
-import { PORTAL_PATCH_MAP } from 'helpers/config';
+import { AO_NODE, PORTAL_PATCH_MAP } from 'helpers/config';
 import {
 	PortalDetailType,
 	PortalHeaderType,
@@ -71,6 +71,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const { addNotification } = useNotifications();
 
 	const hasFetchedMeta = React.useRef(false);
+	const authoritiesRef = React.useRef(false);
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
 	const [invites, setInvites] = React.useState<PortalHeaderType[] | null>(null);
@@ -202,6 +203,19 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 							switch (key) {
 								case 'overview':
+									if (
+										data.authorities &&
+										!data.authorities.includes(AO_NODE.authority) &&
+										permawebProvider.libs?.updateZoneAuthorities &&
+										!authoritiesRef.current
+									) {
+										authoritiesRef.current = true;
+										permawebProvider.libs.updateZoneAuthorities({
+											zoneId: currentId,
+											authorityId: AO_NODE.authority,
+										});
+									}
+
 									/* Check for portal version update */
 									if (
 										data.version !== CurrentZoneVersion &&

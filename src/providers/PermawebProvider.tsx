@@ -37,6 +37,8 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	const authoritiesRef = React.useRef(false);
+
 	const [deps, setDeps] = React.useState<any>(null);
 	const [libs, setLibs] = React.useState<any>(null);
 	const [profile, setProfile] = React.useState<Types.ProfileType | null>(null);
@@ -52,7 +54,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 			let ao: any;
 			if (aoConnection === 'mainnet') {
-				ao = connect({ MODE: 'mainnet', URL: AO_NODE.url, signer });
+				ao = connect({ MODE: 'mainnet', URL: AO_NODE.url, SCHEDULER: AO_NODE.scheduler, signer });
 			} else if (import.meta.env.VITE_AO === 'legacy') {
 				ao = connect({ MODE: 'legacy' });
 			}
@@ -167,6 +169,30 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 			}
 		})();
 	}, [refreshProfileTrigger]);
+
+	/* Determine if the current authority has changed and if it is present in the profile.
+		If it's not then add it to the profile authorities list
+	*/
+	React.useEffect(() => {
+		if (authoritiesRef.current) return;
+
+		(async function () {
+			try {
+				if (profile?.authorities && !profile?.authorities.includes(AO_NODE.authority) && libs?.updateZoneAuthorities) {
+					authoritiesRef.current = true;
+
+					await libs.updateZoneAuthorities({
+						zoneId: profile.id,
+						authorityId: AO_NODE.authority,
+					});
+
+					setRefreshProfileTrigger((prev) => !prev);
+				}
+			} catch (e: any) {
+				console.error('Failed to update profile authorities:', e);
+			}
+		})();
+	}, [profile?.id, AO_NODE.authority, libs?.updateZoneAuthorities]);
 
 	async function resolveProfile(address: string) {
 		if (libs) {
