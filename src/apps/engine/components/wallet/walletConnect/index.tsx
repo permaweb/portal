@@ -91,12 +91,15 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		if (auth) {
 			const status = auth.authStatus;
 			if (status === 'loading') setLabel('Signing in');
-			else if ((status === 'authenticated' || auth.authType === 'NATIVE_WALLET') && profile) {
+			else if (
+				(status === 'authenticated' || auth.authType === 'NATIVE_WALLET' || localStorage.getItem(STORAGE.walletType)) &&
+				profile
+			) {
 				setLabel(profile.displayName || 'My Profile');
 				setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : '');
 				setBanner(profile?.banner && checkValidAddress(profile.banner) ? getTxEndpoint(profile.banner) : '');
 			}
-		} else if (localStorage.getItem(STORAGE.walletType) === 'NATIVE_WALLET' && profile) {
+		} else if (localStorage.getItem(STORAGE.walletType) && profile) {
 			setLabel(profile.displayName || 'My Profile');
 			setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : '');
 			setBanner(profile?.banner && checkValidAddress(profile.banner) ? getTxEndpoint(profile.banner) : '');

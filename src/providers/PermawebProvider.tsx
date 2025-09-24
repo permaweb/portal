@@ -77,10 +77,13 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		(async function () {
-			if (!arProvider.walletAddress || !libs?.getProfileByWalletAddress) {
-				// Clear profile when wallet disconnects
+			if (!arProvider.walletAddress) {
 				setProfile(null);
 				setProfilePending(false);
+				return;
+			}
+
+			if (!libs?.getProfileByWalletAddress) {
 				return;
 			}
 
