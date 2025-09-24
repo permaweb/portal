@@ -101,6 +101,12 @@ export default defineConfig(({ mode }) => {
 					sourcemap: false,
 					runtimeCaching: [
 						{
+							urlPattern: /^https:\/\/portal\.[^\/]+\/(?:\?[^#]*)?(?:#.*)?$/i,
+							handler: 'NetworkOnly',
+							method: 'GET',
+							options: { cacheName: 'portal-root-bypass' },
+						},
+						{
 							urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
 							handler: 'CacheFirst',
 							options: {

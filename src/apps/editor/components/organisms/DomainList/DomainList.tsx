@@ -7,9 +7,10 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
+import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TxAddress } from 'components/atoms/TxAddress';
-import { InsufficientBalanceCTA, PaymentSummary, PayWithSelector } from 'components/molecules/Payment';
+import { InsufficientBalanceCTA, PaymentSummary } from 'components/molecules/Payment';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { getArnsCost } from 'helpers/arnsCosts';
 import { ASSETS, IS_TESTNET } from 'helpers/config';
@@ -61,6 +62,9 @@ export default function DomainList() {
 		years: 1,
 	});
 	const [upgradeModal, setUpgradeModal] = React.useState<{ open: boolean; domain?: UserOwnedDomain }>({ open: false });
+	const [confirmAssignModal, setConfirmAssignModal] = React.useState<{ open: boolean; domain?: UserOwnedDomain }>({
+		open: false,
+	});
 	const [showFund, setShowFund] = React.useState<boolean>(false);
 	// startTransition removed - using direct state updates for speed
 	const [expandedDetails, setExpandedDetails] = React.useState<Set<string>>(new Set());
@@ -149,8 +153,10 @@ export default function DomainList() {
 			}
 		>
 	>({});
-	const [extendPaymentMethod, setExtendPaymentMethod] = React.useState<'turbo' | 'ario'>(IS_TESTNET ? 'ario' : 'turbo');
-	const [upgradePaymentMethod, setUpgradePaymentMethod] = React.useState<'turbo' | 'ario'>(
+	const [extendPaymentMethod, _setExtendPaymentMethod] = React.useState<'turbo' | 'ario'>(
+		IS_TESTNET ? 'ario' : 'turbo'
+	);
+	const [upgradePaymentMethod, _setUpgradePaymentMethod] = React.useState<'turbo' | 'ario'>(
 		IS_TESTNET ? 'ario' : 'turbo'
 	);
 	const costsLoadingRef = React.useRef<Set<string>>(new Set());
@@ -745,7 +751,10 @@ export default function DomainList() {
 						<Button
 							type={'alt3'}
 							label={redirectingDomains.has(domain.name) ? language.assigning : language.assignToThisPortal}
-							handlePress={() => redirectDomainToPortal(domain)}
+							handlePress={(e: any) => {
+								e.stopPropagation();
+								setConfirmAssignModal({ open: true, domain });
+							}}
 							disabled={redirectingDomains.has(domain.name)}
 						/>
 					)}
@@ -1023,7 +1032,7 @@ export default function DomainList() {
 							</S.ModalYearSelector>
 						</S.ModalSection>
 						{/* Pay-with options */}
-						{!IS_TESTNET && (
+						{/* {!IS_TESTNET && (
 							<S.PaymentSelectorWrapper>
 								<PayWithSelector
 									method={extendPaymentMethod}
@@ -1031,7 +1040,7 @@ export default function DomainList() {
 									arioSelectable={!!(arIOBalance && arIOBalance > 0)}
 								/>
 							</S.PaymentSelectorWrapper>
-						)}
+						)} */}
 
 						{/* Summary: total due, current balance, final balance */}
 						<S.PaymentSummaryWrapper>
@@ -1207,7 +1216,7 @@ export default function DomainList() {
 							<S.ModalSectionContent>{upgradeModal.domain.name}</S.ModalSectionContent>
 						</S.ModalSection>
 						{/* Pay-with options */}
-						{!IS_TESTNET && (
+						{/* {!IS_TESTNET && (
 							<S.PaymentSelectorWrapper>
 								<PayWithSelector
 									method={upgradePaymentMethod}
@@ -1215,7 +1224,7 @@ export default function DomainList() {
 									arioSelectable={!!(arIOBalance && arIOBalance > 0)}
 								/>
 							</S.PaymentSelectorWrapper>
-						)}
+						)} */}
 
 						{/* Summary: total due, current balance, final balance */}
 						<S.PaymentSummaryWrapper>
@@ -1379,6 +1388,45 @@ export default function DomainList() {
 				)}
 			</Panel>
 
+			{/* Domain Assignment Confirmation Modal */}
+
+			{confirmAssignModal.open && (
+				<Modal
+					header={language.confirmDomainAssignment}
+					handleClose={() => setConfirmAssignModal({ open: false })}
+					className={'modal-wrapper'}
+				>
+					{confirmAssignModal.domain && (
+						<S.ModalWrapper>
+							<S.ModalSection>
+								<S.ModalSectionTitle>Domain</S.ModalSectionTitle>
+								<S.ModalSectionContent>{confirmAssignModal.domain.name}</S.ModalSectionContent>
+							</S.ModalSection>
+							<S.ModalSection>
+								<p>{language.confirmDomainAssignmentMessage}</p>
+							</S.ModalSection>
+							<S.ModalActions>
+								<Button
+									type={'primary'}
+									label={language.cancel}
+									handlePress={() => setConfirmAssignModal({ open: false })}
+								/>
+								<Button
+									type={'alt1'}
+									label={language.confirm}
+									handlePress={() => {
+										setConfirmAssignModal({ open: false });
+										if (confirmAssignModal.domain) {
+											redirectDomainToPortal(confirmAssignModal.domain);
+										}
+									}}
+									disabled={redirectingDomains.has(confirmAssignModal.domain.name)}
+								/>
+							</S.ModalActions>
+						</S.ModalWrapper>
+					)}
+				</Modal>
+			)}
 			{/* Turbo Top-up Modal */}
 			<Panel
 				open={showFund}
