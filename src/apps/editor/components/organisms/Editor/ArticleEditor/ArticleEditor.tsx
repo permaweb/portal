@@ -49,7 +49,10 @@ export default function ArticleEditor(props: {
 
 					const hasCurrentPostData = currentPost.data.id === assetId && currentPost.data.title;
 
-					if (!hasCurrentPostData) {
+					// Always load if the assetId has changed, even if we have some post data
+					const assetIdChanged = previousAssetIdRef.current !== assetId;
+
+					if (!hasCurrentPostData || assetIdChanged) {
 						dispatch(currentPostClear());
 						handleCurrentPostUpdate({
 							field: 'loading',

@@ -333,6 +333,13 @@ export function urlify(str: string) {
 	return str.toLowerCase().split(' ').join('-');
 }
 
+export function displayUrlName(str: string) {
+	return str
+		.split('-')
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(' ');
+}
+
 export function getPortalIdFromURL(): string | null {
 	const { pathname, hash } = window.location;
 

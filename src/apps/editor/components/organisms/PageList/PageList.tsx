@@ -7,7 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { ASSETS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { urlify } from 'helpers/utils';
+import { displayUrlName, urlify } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -47,17 +47,19 @@ export default function PageList() {
 						<S.PageWrapper key={index} className={'fade-in'}>
 							<S.PageHeader>
 								<Link to={`${getTxEndpoint(portalProvider.current.id)}/#/${urlify(key)}`} target={'_blank'}>
-									<p>{key.charAt(0).toUpperCase() + key.slice(1)}</p>
+									<p>{displayUrlName(key)}</p>
 									<ReactSVG src={ASSETS.newTab} />
 								</Link>
 							</S.PageHeader>
 							<S.PageDetail>
 								<S.PageActions>
-									<Button
-										type={'alt3'}
-										label={language?.edit}
-										handlePress={() => navigate(`${URLS.pageEdit(portalProvider.current.id)}${key}`)}
-									/>
+									{sortedPages[key].type === 'static' && (
+										<Button
+											type={'alt3'}
+											label={language?.edit}
+											handlePress={() => navigate(`${URLS.pageEdit(portalProvider.current.id)}${sortedPages[key].id}`)}
+										/>
+									)}
 								</S.PageActions>
 							</S.PageDetail>
 						</S.PageWrapper>
@@ -65,7 +67,7 @@ export default function PageList() {
 				})}
 			</S.Wrapper>
 		) : null;
-	}, [portalProvider, portalProvider.current?.id, portalProvider.current?.domains, languageProvider.current]);
+	}, [portalProvider.current?.id, portalProvider.current?.pages, languageProvider.current]);
 
 	return pages;
 }
