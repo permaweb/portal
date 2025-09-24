@@ -26,8 +26,8 @@ export function shortAddr(a?: string) {
 	return a ? `${a.slice(0, 6)}…${a.slice(-6)}` : '—';
 }
 
-export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
-	const { forceRelease, isLoggedInUserController } = useUndernamesProvider();
+export default function UndernameRow(props: { row: TypeUndernameOwnerRow; isAdminView?: boolean }) {
+	const { forceRelease } = useUndernamesProvider();
 	const { addNotification } = useNotifications();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -38,11 +38,6 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 	const confirmDisabled = !reason.trim(); // require reason
 	const handleRelease = async () => {
 		try {
-			// if (IS_TESTNET) {
-			// 	console.warn('Releasing subdomains on testnet is not supported yet.');
-			// 	addNotification('Releasing subdomains on testnet is not supported yet.', 'warning');
-			// 	return;
-			// }
 			const ario = ARIO.mainnet();
 			const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME }); // after testing we change to PARENT_UNDERNAME
 			await forceRelease(props.row.name, arnsRecord.processId, reason);
@@ -52,10 +47,9 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 			console.error('Failed to release subdomain:', error);
 		}
 	};
-	const compactMode = !isLoggedInUserController;
+	const compactMode = !props.isAdminView;
 	return (
 		<>
-			{/* Table row */}
 			<S.RowWrapper className="fade-in" compact={compactMode}>
 				<S.Cell>
 					<p>
@@ -71,7 +65,7 @@ export default function UndernameRow(props: { row: TypeUndernameOwnerRow }) {
 				<S.Cell>
 					<S.Address title={props.row.owner}>{shortAddr(props.row.owner)}</S.Address>
 				</S.Cell>
-				{isLoggedInUserController && (
+				{props.isAdminView && (
 					<>
 						<S.Cell>
 							<p>{fmtTs(props.row.requestedAt)}</p>

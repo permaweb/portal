@@ -23,42 +23,81 @@ export type TypeUndernameOwnerRow = {
 
 const PAGE_SIZE = 10;
 
-export default function UndernamesList() {
-	const { owners, isLoggedInUserController } = useUndernamesProvider();
+export default function UndernamesList(props: { isAdminView?: boolean }) {
+	const { owners } = useUndernamesProvider();
 	const { fetchProfile } = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [processedOwners, setProcessedOwners] = React.useState<TypeUndernameOwnerRow[]>([]);
-	const [filter, setFilter] = React.useState('');
+
+	const [sourceFilter, setSourceFilter] = React.useState<'all' | 'approval' | 'reserved' | 'self'>('all');
+	const [approvedByFilter, setApprovedByFilter] = React.useState('');
+	const [autoFilter, setAutoFilter] = React.useState<'all' | 'true' | 'false'>('all');
+
 	const portalId = getPortalIdFromURL();
+
+	const clearAdminFilters = React.useCallback(() => {
+		setSourceFilter('all');
+		setApprovedByFilter('');
+		setAutoFilter('all');
+	}, []);
+
+	const approvedByOptions = React.useMemo(() => {
+		if (!props.isAdminView) return [];
+		const set = new Set<string>();
+		for (const [_, rec] of Object.entries(owners ?? {})) {
+			const val = rec.approvedBy?.trim();
+			if (val) set.add(val);
+		}
+		return Array.from(set).sort((a, b) => a.localeCompare(b));
+	}, [owners, props.isAdminView]);
+
 	React.useEffect(() => {
 		let cancelled = false;
 
 		(async () => {
+			// shape rows with resolved approvedBy profile usernames when possible
 			const rows: TypeUndernameOwnerRow[] = await Promise.all(
 				Object.entries(owners ?? {}).map(async ([name, rec]) => {
 					const approvedBy = rec.approvedBy
 						? (await fetchProfile(rec.approvedBy))?.username ?? rec.approvedBy
-						: rec.approvedBy ?? null; // keep ID/null if no profile
+						: rec.approvedBy ?? null;
 
 					return {
 						name,
 						owner: rec.owner,
 						requestedAt: rec.requestedAt ?? null,
 						approvedAt: rec.approvedAt ?? null,
-						approvedBy,
+						approvedBy: approvedBy ?? undefined,
 						requestId: rec.requestId ?? null,
-						source: rec.source ?? null,
+						source: (rec.source as any) ?? null,
 						auto: !!rec.auto,
 					};
 				})
 			);
 
-			const f = filter.trim().toLowerCase();
-			let filtered = f ? rows.filter((o) => o.owner === f || o.name === f) : rows;
-			if (!isLoggedInUserController) {
+			let filtered = rows;
+
+			if (!props.isAdminView) {
 				filtered = filtered.filter((o) => o.owner === portalId);
+			}
+
+			if (props.isAdminView) {
+				if (sourceFilter !== 'all') {
+					filtered = filtered.filter((o) => (o.source ?? undefined) === sourceFilter);
+				}
+
+				if (approvedByFilter.trim()) {
+					const term = approvedByFilter.trim().toLowerCase();
+					filtered = filtered.filter((o) => (o.approvedBy ?? '').toLowerCase().includes(term));
+				}
+
+				if (autoFilter !== 'all') {
+					const want = autoFilter === 'true';
+					filtered = filtered.filter((o) => !!o.auto === want);
+				}
 			}
 
 			const sorted = filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -68,7 +107,7 @@ export default function UndernamesList() {
 		return () => {
 			cancelled = true;
 		};
-	}, [owners, filter, fetchProfile]);
+	}, [owners, fetchProfile, props.isAdminView, portalId, sourceFilter, approvedByFilter, autoFilter]);
 
 	const totalPages = React.useMemo(
 		() => Math.max(1, Math.ceil(processedOwners.length / PAGE_SIZE)),
@@ -76,11 +115,7 @@ export default function UndernamesList() {
 	);
 
 	React.useEffect(() => {
-		setCurrentPage((prev) => {
-			if (prev > totalPages) return totalPages;
-			if (prev < 1) return 1;
-			return prev;
-		});
+		setCurrentPage((prev) => (prev > totalPages ? totalPages : prev < 1 ? 1 : prev));
 	}, [totalPages]);
 
 	const startIndex = (currentPage - 1) * PAGE_SIZE;
@@ -104,45 +139,112 @@ export default function UndernamesList() {
 		if (processedOwners.length === 0) {
 			return (
 				<>
-					{isLoggedInUserController && (
-						<S.Toolbar>
-							{processedOwners.length > 0 ? (
-								<S.Input
-									placeholder="Filter by Address or Subdomain"
-									value={filter}
-									onChange={(e) => setFilter(e.target.value)}
-								/>
-							) : (
-								<div />
-							)}
-						</S.Toolbar>
+					{props.isAdminView && (
+						<>
+							<S.FilterBar>
+								<S.FilterGroup>
+									<S.FilterLabel>Source</S.FilterLabel>
+									<S.Select value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value as any)}>
+										<option value="all">All</option>
+										<option value="approval">Approval</option>
+										<option value="reserved">Reserved</option>
+										<option value="self">Self</option>
+									</S.Select>
+								</S.FilterGroup>
+
+								<S.FilterGroup>
+									<S.FilterLabel>Approved By</S.FilterLabel>
+									<S.Input
+										list="approvedByList"
+										placeholder="address"
+										value={approvedByFilter}
+										onChange={(e) => setApprovedByFilter(e.target.value)}
+									/>
+									<datalist id="approvedByList">
+										{approvedByOptions.map((v) => (
+											<option key={v} value={v} />
+										))}
+									</datalist>
+								</S.FilterGroup>
+
+								<S.FilterGroup>
+									<S.FilterLabel>Auto</S.FilterLabel>
+									<S.Select value={autoFilter} onChange={(e) => setAutoFilter(e.target.value as any)}>
+										<option value="all">All</option>
+										<option value="true">Yes</option>
+										<option value="false">No</option>
+									</S.Select>
+								</S.FilterGroup>
+
+								<S.FilterActions>
+									<S.ClearButton type="button" onClick={clearAdminFilters}>
+										Clear
+									</S.ClearButton>
+								</S.FilterActions>
+							</S.FilterBar>
+						</>
 					)}
+
 					<S.WrapperEmpty>
-						<h3>No Owned Subdomains found for this portal</h3>
+						<h3>No Owned Subdomains found</h3>
 					</S.WrapperEmpty>
 				</>
 			);
 		}
+
 		return (
 			<>
-				{isLoggedInUserController && (
-					<S.Toolbar>
-						{processedOwners.length > 0 ? (
-							<S.Input
-								placeholder="Filter by Address or Subdomain"
-								value={filter}
-								onChange={(e) => setFilter(e.target.value)}
-							/>
-						) : (
-							<div />
-						)}
-					</S.Toolbar>
+				{props.isAdminView && (
+					<>
+						<S.FilterBar>
+							<S.FilterGroup>
+								<S.FilterLabel>Source</S.FilterLabel>
+								<S.Select value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value as any)}>
+									<option value="all">All</option>
+									<option value="approval">Approval</option>
+									<option value="reserved">Reserved</option>
+									<option value="self">Self</option>
+								</S.Select>
+							</S.FilterGroup>
+
+							<S.FilterGroup>
+								<S.FilterLabel>Approved By</S.FilterLabel>
+								<S.Input
+									list="approvedByList"
+									placeholder="address"
+									value={approvedByFilter}
+									onChange={(e) => setApprovedByFilter(e.target.value)}
+								/>
+								<datalist id="approvedByList">
+									{approvedByOptions.map((v) => (
+										<option key={v} value={v} />
+									))}
+								</datalist>
+							</S.FilterGroup>
+
+							<S.FilterGroup>
+								<S.FilterLabel>Auto</S.FilterLabel>
+								<S.Select value={autoFilter} onChange={(e) => setAutoFilter(e.target.value as any)}>
+									<option value="all">All</option>
+									<option value="true">Yes</option>
+									<option value="false">No</option>
+								</S.Select>
+							</S.FilterGroup>
+
+							<S.FilterActions>
+								<S.ClearButton type="button" onClick={clearAdminFilters}>
+									Clear
+								</S.ClearButton>
+							</S.FilterActions>
+						</S.FilterBar>
+					</>
 				)}
+
 				<S.OwnersWrapper>
 					<S.HeaderRow>
 						<S.HeaderCell>Subdomain</S.HeaderCell>
 						<S.HeaderCell>{language?.owner || 'Owner'}</S.HeaderCell>
-						{isLoggedInUserController && (
+						{props.isAdminView && (
 							<>
 								<S.HeaderCell>{language?.requestedAt || 'Requested'}</S.HeaderCell>
 								<S.HeaderCell>{language?.approvedAt || 'Approved'}</S.HeaderCell>
@@ -151,15 +253,25 @@ export default function UndernamesList() {
 						)}
 						<S.HeaderCell>Action</S.HeaderCell>
 					</S.HeaderRow>
+
 					{pageOwners.map((row) => (
 						<S.OwnerWrapper key={row.name}>
-							<UndernameRow row={row} />
+							<UndernameRow row={row} isAdminView />
 						</S.OwnerWrapper>
 					))}
 				</S.OwnersWrapper>
 			</>
 		);
-	}, [processedOwners.length, pageOwners, language]);
+	}, [
+		processedOwners.length,
+		pageOwners,
+		language,
+		props.isAdminView,
+		sourceFilter,
+		approvedByFilter,
+		autoFilter,
+		approvedByOptions,
+	]);
 
 	return (
 		<S.Wrapper>

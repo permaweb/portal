@@ -71,7 +71,7 @@ type UndernamesContextState = {
 	request: (name: string, processId: string) => Promise<void>;
 	requestForNewPortal: (name: string, processId: string, portalId: string) => Promise<void>; // only for portal creation
 	cancel: (id: number) => Promise<void>;
-	approve: (id: number, processId: string, reason?: string) => Promise<void>;
+	approve: (id: number, processId: string, requester: string, reason?: string) => Promise<void>;
 	reject: (id: number, reason?: string) => Promise<void>;
 
 	forceRelease: (name: string, processId: string, reason?: string) => Promise<void>;
@@ -441,11 +441,11 @@ export function UndernamesProvider(props: { children: React.ReactNode }) {
 	);
 
 	const approve = React.useCallback(
-		async (id: number, processId: string, reason?: string) => {
+		async (id: number, processId: string, requester: string, reason?: string) => {
 			let params: any = {
 				Id: id,
 				'Ant-Process-Id': processId,
-				'Record-Transaction-Id': portalId,
+				'Record-Transaction-Id': requester,
 				'Record-TTL-Seconds': 900,
 			};
 			if (reason) params.Reason = reason;

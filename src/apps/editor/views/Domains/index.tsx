@@ -14,7 +14,6 @@ import * as S from './styles';
 import { UndernameRequestList } from 'editor/components/organisms/UndernameRequestList';
 import { UndernamesList } from 'editor/components/organisms/UndernamesList';
 import { ClaimUndername } from 'editor/components/molecules/ClaimUndername';
-import { AddController } from 'editor/components/molecules/AddController';
 
 export default function Domains() {
 	const navigate = useNavigate();
@@ -60,6 +59,11 @@ export default function Domains() {
 					</S.DomainsWrapper>
 				)}
 			</S.BodyWrapper>
+			<ViewHeader header={language?.subdomains ?? 'Sub-Domains'} actions={[<ClaimUndername />]} />
+			<S.SubdomainsWrapper className={'fade-in'}>
+				<UndernamesList />
+				<UndernameRequestList />
+			</S.SubdomainsWrapper>
 			{!portalProvider.permissions?.updatePortalMeta && (
 				<S.InfoWrapper className={'warning'}>
 					<span>{language?.unauthorizedDomainManage}</span>

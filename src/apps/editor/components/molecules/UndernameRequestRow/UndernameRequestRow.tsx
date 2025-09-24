@@ -8,7 +8,6 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { shortAddr } from '../UndernameRow/UndernameRow';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { ConfirmModal } from 'components/atoms/ConfirmModal';
-import { useUndernamesProvider } from 'providers/UndernameProvider';
 
 function ts(ts?: number) {
 	return ts ? new Date(ts).toLocaleString() : '—';
@@ -21,8 +20,8 @@ export default function UndernameRequestRow(props: {
 	onApprove: (id: number, reason?: string) => Promise<void>;
 	onReject: (id: number, reason: string) => Promise<void>;
 	loading: boolean;
+	isAdminView?: boolean;
 }) {
-	const { isLoggedInUserController } = useUndernamesProvider();
 	const languageProvider = useLanguageProvider();
 	const { fetchProfile } = usePermawebProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -96,8 +95,8 @@ export default function UndernameRequestRow(props: {
 		setConfirmKind(null);
 		setOpen(false);
 	}, [confirmKind, props.onApprove, props.onReject, props.row.id, reason]);
-	const showAdminControls = pending && isLoggedInUserController;
-	const showUserInfoOnPending = pending && !isLoggedInUserController;
+	const showAdminControls = pending && props.isAdminView;
+	const showUserInfoOnPending = pending && !props.isAdminView;
 	return (
 		<>
 			<S.Row role="row" title="Click to manage">

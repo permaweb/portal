@@ -128,3 +128,57 @@ export const Helper = styled.div`
 	color: ${(p) => p.theme.colors.font.secondary};
 	font-size: ${(p) => p.theme.typography.size.xxSmall};
 `;
+
+export const FilterBar = styled.div`
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 12px;
+	align-items: end;
+	margin: 12px 0 16px;
+	@media (max-width: 960px) {
+		grid-template-columns: 1fr 1fr;
+	}
+`;
+
+export const FilterGroup = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+`;
+
+export const FilterLabel = styled.label`
+	font-size: 12px;
+	opacity: 0.8;
+`;
+
+export const Select = styled.select`
+	height: 36px;
+	padding: 0 10px;
+	border-radius: 8px;
+	border: 1px solid ${({ theme }) => theme.colors.border?.primary ?? 'rgba(0,0,0,0.12)'};
+	background: ${({ theme }) => theme.colors.container?.primary ?? 'white'};
+	color: ${({ theme }) => theme.colors.font?.primary ?? 'inherit'};
+	outline: none;
+`;
+
+export const DateInput = styled(Input).attrs({ type: 'date' })``;
+
+export const FilterActions = styled.div`
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+`;
+
+export const ClearButton = styled.button`
+	height: 36px;
+	padding: 0 12px;
+	border-radius: 8px;
+	border: 1px solid ${({ theme }) => theme.colors.border?.primary ?? 'rgba(0,0,0,0.12)'};
+	background: ${({ theme }) => theme.colors.container?.alt1 ?? 'transparent'};
+	color: ${({ theme }) => theme.colors.font?.primary ?? 'inherit'};
+	cursor: pointer;
+
+	&:hover {
+		filter: brightness(0.98);
+	}
+`;

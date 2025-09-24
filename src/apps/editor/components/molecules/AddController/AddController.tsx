@@ -12,7 +12,7 @@ function validateAddress(addr: string): string | null {
 }
 
 export default function AddController() {
-	const { addController, isLoggedInUserController } = useUndernamesProvider();
+	const { addController } = useUndernamesProvider();
 	const hasSubmittedRef = React.useRef(false);
 
 	const [open, setOpen] = React.useState(false);
@@ -50,7 +50,6 @@ export default function AddController() {
 		},
 		[error, isLoading, handleSubmit]
 	);
-	if (!isLoggedInUserController) return null;
 	return (
 		<>
 			<Button type={'alt1'} label={'Add Admin'} handlePress={() => setOpen(true)} />

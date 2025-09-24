@@ -20,12 +20,14 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 
 import { useNavigation } from './NavigationContext';
 import * as S from './styles';
+import { useUndernamesProvider } from 'providers/UndernameProvider';
 
 export default function Navigation(props: { open: boolean; toggle: () => void }) {
 	const navigate = useNavigate();
 	const portalProvider = usePortalProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
+	const undernamesProvider = useUndernamesProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const { addNotification } = useNotifications();
 	const { navWidth, setNavWidth } = useNavigation();
@@ -36,7 +38,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	const [isResizing, setIsResizing] = React.useState<boolean>(false);
 
 	const paths = React.useMemo(() => {
-		return [
+		let paths = [
 			{
 				path: portalProvider.current?.id ? URLS.portalBase(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.portalIcon,
@@ -78,6 +80,15 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				label: language?.domains,
 			},
 		];
+		if (true) {
+			paths.push({
+				path: portalProvider.current?.id ? URLS.portalAdminBase(portalProvider.current.id) : URLS.base,
+				icon: ASSETS.portalIcon,
+				label: language?.admin,
+			});
+		}
+
+		return paths;
 	}, [portalProvider.current?.id, languageProvider?.current]);
 
 	function handleWindowResize() {

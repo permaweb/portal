@@ -43,6 +43,7 @@ const Pages = getLazyImport('Pages');
 const Domains = getLazyImport('Domains');
 const DomainsRegister = getLazyImport('Domains/Register');
 const Docs = getLazyImport('Docs');
+const Admin = getLazyImport('Admin');
 const NotFound = getLazyImport('NotFound');
 
 function getLazyImport(view: string) {
@@ -217,6 +218,7 @@ function AppContent() {
 						{getRoute(`${URLS.base}:portalId/users`, <Users />)}
 						{getRoute(`${URLS.base}:portalId/pages`, <Pages />)}
 						{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
+						{getRoute(`${URLS.base}:portalId/admin`, <Admin />)}
 						{getRoute(`${URLS.base}:portalId/domains/register`, <DomainsRegister />)}
 						{getRoute(URLS.docs, <Docs />)}
 						{getRoute(`${URLS.docs}:active/*`, <Docs />)}
@@ -250,7 +252,6 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 										<PortalProvider>
 											<GlobalStyle />
 											<App />
-											<WalletConnect app="editor" />
 										</PortalProvider>
 									</UndernamesProvider>
 								</NotificationProvider>

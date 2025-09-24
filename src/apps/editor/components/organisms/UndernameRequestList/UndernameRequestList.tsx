@@ -1,52 +1,98 @@
 import React from 'react';
-import { useLanguageProvider } from 'providers/LanguageProvider';
 import { Pagination } from 'components/atoms/Pagination';
 import * as S from './styles';
 import { UndernameRequestRow } from 'editor/components/molecules/UndernameRequestRow';
 import { useUndernamesProvider } from 'providers/UndernameProvider';
-import { IS_TESTNET } from 'helpers/config';
 import { ARIO } from '@ar.io/sdk';
 import { useNotifications } from 'providers/NotificationProvider';
 import { PARENT_UNDERNAME, TESTING_UNDERNAME } from '../../../../../processes/undernames/constants';
 import { getPortalIdFromURL } from 'helpers/utils';
 
-export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
+export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | 'released';
 
 export type UndernameRequest = {
 	id: number;
 	name: string;
 	requester: string;
 	status: RequestStatus;
-	createdAt?: number;
-	decidedAt?: number;
+	createdAt?: number; // unix seconds
+	decidedAt?: number; // unix seconds
 	decidedBy?: string;
 	reason?: string;
 	[key: string]: any;
 };
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 7;
 
-export default function UndernameRequestsList() {
+export default function UndernameRequestsList(props: { isAdminView?: boolean }) {
 	const { requests, approve, reject } = useUndernamesProvider();
-	const languageProvider = useLanguageProvider();
-	const language = languageProvider.object[languageProvider.current];
 	const portalId = getPortalIdFromURL();
 	const { addNotification } = useNotifications();
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [loading, setLoading] = React.useState(false);
 
-	// data shaping
+	const [statusFilter, setStatusFilter] = React.useState<RequestStatus | 'all'>('all');
+	const [decidedByFilter, setDecidedByFilter] = React.useState<string>('');
+	const [fromDate, setFromDate] = React.useState<string>(''); // yyyy-mm-dd
+	const [toDate, setToDate] = React.useState<string>(''); // yyyy-mm-dd
+
+	const clearFilters = React.useCallback(() => {
+		setStatusFilter('all');
+		setDecidedByFilter('');
+		setFromDate('');
+		setToDate('');
+	}, []);
+
+	const decidedByOptions = React.useMemo(() => {
+		if (!props.isAdminView) return [];
+		const set = new Set<string>();
+		for (const r of requests) {
+			if (r.decidedBy && r.decidedBy.trim()) set.add(r.decidedBy.trim());
+		}
+		return Array.from(set).sort((a, b) => a.localeCompare(b));
+	}, [requests, props.isAdminView]);
+
+	const toStartOfDay = (d: string) => (d ? Math.floor(new Date(d + 'T00:00:00Z').getTime() / 1000) : undefined);
+	const toEndOfDay = (d: string) => (d ? Math.floor(new Date(d + 'T23:59:59Z').getTime() / 1000) : undefined);
+
 	const processed = React.useMemo(() => {
 		let rows = requests;
-		rows = rows.filter((r) => r.requester === portalId); // only show requests from this portal
+
+		// Non-admin: show only own requests
+		if (!props.isAdminView) {
+			rows = rows.filter((r) => r.requester === portalId);
+		}
+
+		// Admin filters
+		if (props.isAdminView) {
+			if (statusFilter !== 'all') {
+				rows = rows.filter((r) => r.status === statusFilter);
+			}
+
+			const decidedByTerm = decidedByFilter.trim();
+			if (decidedByTerm) {
+				rows = rows.filter((r) => (r.decidedBy || '').toLowerCase().includes(decidedByTerm.toLowerCase()));
+			}
+
+			const fromTs = toStartOfDay(fromDate);
+			const toTs = toEndOfDay(toDate);
+
+			if (fromTs || toTs) {
+				rows = rows.filter((r) => {
+					const base = r.createdAt ?? r.decidedAt ?? 0;
+					if (fromTs && base < fromTs) return false;
+					if (toTs && base > toTs) return false;
+					return true;
+				});
+			}
+		}
 
 		return [...rows].sort((a, b) => {
 			if (a.status === 'pending' && b.status !== 'pending') return -1;
 			if (b.status === 'pending' && a.status !== 'pending') return 1;
-
 			return (b.createdAt || 0) - (a.createdAt || 0);
 		});
-	}, [requests, portalId]);
+	}, [requests, portalId, props.isAdminView, statusFilter, decidedByFilter, fromDate, toDate]);
 
 	const totalPages = React.useMemo(() => Math.max(1, Math.ceil(processed.length / PAGE_SIZE)), [processed.length]);
 
@@ -55,18 +101,14 @@ export default function UndernameRequestsList() {
 	}, [totalPages]);
 
 	const handleAdminApprove = async (id: number, reason?: string) => {
-		// if (IS_TESTNET) {
-		// 	console.warn('Approving undernames on testnet is not supported yet.');
-		// 	addNotification('Cant approve on Testnet', 'warning');
-		// 	return;
-		// }
 		const ario = ARIO.mainnet();
-		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME }); // after testing we change to PARENT_UNDERNAME
+		const arnsRecord = await ario.getArNSRecord({ name: TESTING_UNDERNAME }); // after testing change to PARENT_UNDERNAME
 		console.log('ArNS Record for undername parent', arnsRecord.processId);
 		const undernameRow = requests.find((r) => r.id === id);
 		setLoading(true);
-		// await approve(id, arnsRecord.processId, reason); // now approve at undernames process will handle the call to the arns
-		// addNotification(`Undername ${undernameRow.name} approved`, 'success');
+		await approve(id, arnsRecord.processId, reason);
+		setLoading(false);
+		addNotification(`Undername ${undernameRow?.name ?? id} approved`, 'success');
 	};
 
 	const handleAdminReject = async (id: number, reason: string) => {
@@ -93,15 +135,112 @@ export default function UndernameRequestsList() {
 		if (processed.length === 0) {
 			return (
 				<>
+					{props.isAdminView && (
+						<S.FilterBar>
+							<S.FilterGroup>
+								<S.FilterLabel>Status</S.FilterLabel>
+								<S.Select
+									value={statusFilter}
+									onChange={(e) => setStatusFilter(e.target.value as RequestStatus | 'all')}
+								>
+									<option value="all">All</option>
+									<option value="pending">Pending</option>
+									<option value="approved">Approved</option>
+									<option value="rejected">Rejected</option>
+									<option value="cancelled">Cancelled</option>
+									<option value="released">Released</option>
+								</S.Select>
+							</S.FilterGroup>
+
+							<S.FilterGroup>
+								<S.FilterLabel>Decided By</S.FilterLabel>
+								<S.Input
+									list="deciders"
+									placeholder="address"
+									value={decidedByFilter}
+									onChange={(e) => setDecidedByFilter(e.target.value)}
+								/>
+								<datalist id="deciders">
+									{decidedByOptions.map((v) => (
+										<option key={v} value={v} />
+									))}
+								</datalist>
+							</S.FilterGroup>
+
+							<S.FilterGroup>
+								<S.FilterLabel>Date From</S.FilterLabel>
+								<S.DateInput type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+							</S.FilterGroup>
+
+							<S.FilterGroup>
+								<S.FilterLabel>Date To</S.FilterLabel>
+								<S.DateInput type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+							</S.FilterGroup>
+
+							<S.FilterActions>
+								<S.ClearButton type="button" onClick={clearFilters}>
+									Clear
+								</S.ClearButton>
+							</S.FilterActions>
+						</S.FilterBar>
+					)}
 					<S.WrapperEmpty>
 						<h3>No Subdomain requests found</h3>
-						<p>Subdomains can be requested for the portal using the Claim Subdomain button</p>
 					</S.WrapperEmpty>
 				</>
 			);
 		}
+
 		return (
 			<>
+				{/* Admin-only filter bar */}
+				{props.isAdminView && (
+					<S.FilterBar>
+						<S.FilterGroup>
+							<S.FilterLabel>Status</S.FilterLabel>
+							<S.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as RequestStatus | 'all')}>
+								<option value="all">All</option>
+								<option value="pending">Pending</option>
+								<option value="approved">Approved</option>
+								<option value="rejected">Rejected</option>
+								<option value="cancelled">Cancelled</option>
+								<option value="released">Released</option>
+							</S.Select>
+						</S.FilterGroup>
+
+						<S.FilterGroup>
+							<S.FilterLabel>Decided By</S.FilterLabel>
+							<S.Input
+								list="deciders"
+								placeholder="address"
+								value={decidedByFilter}
+								onChange={(e) => setDecidedByFilter(e.target.value)}
+							/>
+							<datalist id="deciders">
+								{decidedByOptions.map((v) => (
+									<option key={v} value={v} />
+								))}
+							</datalist>
+						</S.FilterGroup>
+
+						<S.FilterGroup>
+							<S.FilterLabel>Date From</S.FilterLabel>
+							<S.DateInput type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+						</S.FilterGroup>
+
+						<S.FilterGroup>
+							<S.FilterLabel>Date To</S.FilterLabel>
+							<S.DateInput type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+						</S.FilterGroup>
+
+						<S.FilterActions>
+							<S.ClearButton type="button" onClick={clearFilters}>
+								Clear
+							</S.ClearButton>
+						</S.FilterActions>
+					</S.FilterBar>
+				)}
+
 				<S.ListWrapper>
 					<S.HeaderRow>
 						<S.HeaderCell>Subdomain</S.HeaderCell>
@@ -119,13 +258,24 @@ export default function UndernameRequestsList() {
 								onApprove={async (id) => await handleAdminApprove(id)}
 								onReject={async (id, reason) => await handleAdminReject(id, reason)}
 								loading={loading}
+								isAdminView
 							/>
 						</S.RowWrapper>
 					))}
 				</S.ListWrapper>
 			</>
 		);
-	}, [processed.length, pageRows, language]);
+	}, [
+		processed.length,
+		pageRows,
+		props.isAdminView,
+		statusFilter,
+		decidedByFilter,
+		fromDate,
+		toDate,
+		decidedByOptions,
+		loading,
+	]);
 
 	return (
 		<S.Wrapper>

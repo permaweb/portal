@@ -166,6 +166,7 @@ function createURLs() {
 	const portalBase = (portalId: string) => `${base}${portalId}/`;
 	const postCreateBase = (portalId: string) => `${base}${portalId}/${post}create/`;
 	const postEditBase = (portalId: string) => `${base}${portalId}/${post}edit/`;
+	const portalAdminBase = (portalId: string) => `${portalBase(portalId)}admin/`;
 
 	const pageBase = (portalId: string) => `${portalBase(portalId)}page/`;
 
@@ -173,6 +174,7 @@ function createURLs() {
 
 	return {
 		base: base,
+		portalAdminBase,
 		category: (categoryId: string) => `category/${categoryId}`,
 		creator: (creatorId: string) => `creator/${creatorId}`,
 		info: (page: string) => `info/${page}`,
