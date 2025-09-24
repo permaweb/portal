@@ -1128,19 +1128,20 @@ export default function DomainList() {
 								handlePress={() => setExtendModal({ open: false, years: 1 })}
 							/>
 							{/* Insufficient balance CTA */}
-							<S.InsufficientBalanceWrapper>
-								{(() => {
-									const due = IS_TESTNET || extendPaymentMethod === 'ario' ? extendCost?.mario : extendCost?.winc;
-									const bal = IS_TESTNET || extendPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
-									const loadingCost = extendCostLoading || due == null;
-									const loadingBal = IS_TESTNET
-										? arIOBalance == null
-										: extendPaymentMethod === 'ario'
-										? arIOBalance == null
-										: arProvider.turboBalance == null;
-									const insufficient = !(due != null && bal != null && bal >= due);
-									const isLoading = loadingCost || loadingBal;
-									return (
+
+							{(() => {
+								const due = IS_TESTNET || extendPaymentMethod === 'ario' ? extendCost?.mario : extendCost?.winc;
+								const bal = IS_TESTNET || extendPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+								const loadingCost = extendCostLoading || due == null;
+								const loadingBal = IS_TESTNET
+									? arIOBalance == null
+									: extendPaymentMethod === 'ario'
+									? arIOBalance == null
+									: arProvider.turboBalance == null;
+								const insufficient = !(due != null && bal != null && bal >= due);
+								const isLoading = loadingCost || loadingBal;
+								return insufficient ? (
+									<S.InsufficientBalanceWrapper>
 										<InsufficientBalanceCTA
 											method={IS_TESTNET ? 'ario' : extendPaymentMethod}
 											insufficient={insufficient}
@@ -1153,9 +1154,10 @@ export default function DomainList() {
 											}
 											onAddCredits={() => setShowFund(true)}
 										/>
-									);
-								})()}
-							</S.InsufficientBalanceWrapper>
+									</S.InsufficientBalanceWrapper>
+								) : null;
+							})()}
+
 							<Button
 								type={'alt1'}
 								label={language.confirm}

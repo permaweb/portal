@@ -318,15 +318,17 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										<ReactSVG src={ASSETS.portalIcon} />
 										{language?.portalReturn}
 									</button>
-									<button
-										onClick={() => {
-											portalProvider.setShowPortalManager(true);
-											setShowPortalDropdown(false);
-										}}
-									>
-										<ReactSVG src={ASSETS.write} />
-										{language?.editPortal}
-									</button>
+									{portalProvider.permissions?.updatePortalMeta && (
+										<button
+											onClick={() => {
+												portalProvider.setShowPortalManager(true);
+												setShowPortalDropdown(false);
+											}}
+										>
+											<ReactSVG src={ASSETS.write} />
+											{language?.editPortal}
+										</button>
+									)}
 									<button
 										onClick={() => {
 											portalProvider.setShowPortalManager(true, true);
