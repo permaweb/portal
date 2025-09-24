@@ -113,7 +113,6 @@ export default function PortalManager(props: {
 	const isCreating = !props.portal;
 
 	const [claimSub, setClaimSub] = React.useState(false);
-	const [subEditable, setSubEditable] = React.useState(false);
 	const [subName, setSubName] = React.useState('');
 	const [subRules, setSubRules] = React.useState<RuleState>(() => evaluateRules(''));
 	const [subError, setSubError] = React.useState<string | null>(null);
@@ -121,11 +120,27 @@ export default function PortalManager(props: {
 	const { checkAvailability, requestForNewPortal } = useUndernamesProvider();
 
 	const [name, setName] = React.useState<string>('');
+	const [availability, setAvailability] = React.useState<{
+		loading: boolean;
+		available?: boolean;
+		reserved?: boolean;
+		reservedFor?: string | null;
+		error?: string | null;
+	}>({ loading: false });
 	const [logoId, setLogoId] = React.useState<string | null>(null);
 	const [iconId, setIconId] = React.useState<string | null>(null);
 	const [subTouched, setSubTouched] = React.useState(false);
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
+
+	const isAllRulesOk = !subError && !!subName;
+	const reservedForYou =
+		availability.reserved &&
+		availability.reservedFor &&
+		arProvider.walletAddress &&
+		availability.reservedFor.toLowerCase() === arProvider.walletAddress.toLowerCase();
+
+	const isAvailableToProceed = availability.available === true && (!availability.reserved || reservedForYou === true);
 
 	React.useEffect(() => {
 		if (props.portal) {
@@ -141,15 +156,13 @@ export default function PortalManager(props: {
 
 	React.useEffect(() => {
 		setSubTouched(false);
-		setSubEditable(false);
 		setSubName('');
 	}, [claimSub]);
 
 	React.useEffect(() => {
 		if (!isCreating || !claimSub) return;
 
-		// Only auto-derive when user hasn't typed anything yet.
-		if (!subEditable && !subTouched) {
+		if (!subTouched) {
 			const derived = deriveSubdomain(name);
 			if (derived !== subName) {
 				setSubName(derived);
@@ -158,7 +171,43 @@ export default function PortalManager(props: {
 				setSubError(firstError(rs));
 			}
 		}
-	}, [isCreating, claimSub, subEditable, subTouched, name, subName]);
+	}, [isCreating, claimSub, subTouched, name, subName]);
+
+	React.useEffect(() => {
+		if (!claimSub) {
+			setAvailability({ loading: false });
+			return;
+		}
+		if (!isAllRulesOk) {
+			// invalid input -> don’t ping availability
+			setAvailability((prev) => ({
+				...prev,
+				loading: false,
+				available: undefined,
+				reserved: undefined,
+				reservedFor: null,
+			}));
+			return;
+		}
+
+		const handle = setTimeout(async () => {
+			setAvailability({ loading: true });
+			try {
+				const res = await checkAvailability(subName.trim());
+				setAvailability({
+					loading: false,
+					available: !!res?.available,
+					reserved: !!res?.reserved,
+					reservedFor: res?.reservedFor ?? null,
+					error: null,
+				});
+			} catch (e: any) {
+				setAvailability({ loading: false, error: e?.message || 'Failed to check availability' });
+			}
+		}, 400);
+
+		return () => clearTimeout(handle);
+	}, [claimSub, isAllRulesOk, subName, checkAvailability]);
 
 	const handleSubChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		const next = e.target.value.toLowerCase();
@@ -315,7 +364,7 @@ export default function PortalManager(props: {
 							console.warn('Subdomain invalid at save time:', err);
 						}
 					}
-					// navigate(URLS.portalBase(portalId));
+					navigate(URLS.portalBase(portalId));
 				}
 
 				if (profileUpdateId) console.log(`Profile update: ${profileUpdateId}`);
@@ -393,30 +442,15 @@ export default function PortalManager(props: {
 												<S.SubdomainCard>
 													<S.SubdomainHeader>
 														<span>Subdomain</span>
-														<S.SubdomainActions>
-															<Button
-																type={'alt1'}
-																label={subEditable ? 'Lock' : 'Edit'}
-																handlePress={() => setSubEditable((v) => !v)}
-																disabled={loading}
-															/>
-														</S.SubdomainActions>
 													</S.SubdomainHeader>
 
-													{subEditable ? (
-														<S.SubdomainInput
-															placeholder="my-subdomain"
-															value={subName}
-															onChange={handleSubChange}
-															maxLength={MAX_UNDERNAME}
-															disabled={loading}
-														/>
-													) : (
-														<S.SubdomainPreview>
-															<code>{subName || '—'}</code>
-														</S.SubdomainPreview>
-													)}
-
+													<S.SubdomainInput
+														placeholder="my-subdomain"
+														value={subName}
+														onChange={handleSubChange}
+														maxLength={MAX_UNDERNAME}
+														disabled={loading}
+													/>
 													<S.SubdomainHint>
 														Preview:{' '}
 														<a
@@ -432,24 +466,25 @@ export default function PortalManager(props: {
 													</S.SubdomainHint>
 
 													{/* validations */}
-													<S.Validation>
-														<span>{subRules.nonEmpty ? '✅' : '❌'} Not empty</span>
-														<span>
-															{subRules.maxLen ? '✅' : '❌'} ≤ {MAX_UNDERNAME} characters
-														</span>
-														<span>{subRules.charset ? '✅' : '❌'} Allowed: a–z, 0–9, `_ . -`</span>
-														<span>{subRules.notWWW ? '✅' : '❌'} Not "www"</span>
-														<span>{subRules.noAt ? '✅' : '❌'} No "@"</span>
-														<span>{subRules.noEdgeDash ? '✅' : '❌'} No leading/trailing dashes</span>
-														<span>{subRules.noEdgeUnderscore ? '✅' : '❌'} No leading/trailing underscores</span>
-														<span>{subRules.noDoubleUnderscore ? '✅' : '❌'} No consecutive underscores</span>
-														<span>
-															{subRules.labelsValid ? '✅' : '❌'} Each part valid (a–z, 0–9, . or -, not
-															starting/ending with . or -)
-														</span>
-													</S.Validation>
-
-													{subError && <S.Error>{subError}</S.Error>}
+													{claimSub && (
+														<S.StatusLine>
+															{subError ? (
+																<>❌ {subError}</>
+															) : !subName ? (
+																<> </>
+															) : availability.loading ? (
+																<>⏳ Checking availability…</>
+															) : availability.error ? (
+																<>❌ {availability.error}</>
+															) : availability.available === false ? (
+																<>❌ This subdomain is not available.</>
+															) : reservedForYou ? (
+																<>✅ You’re good to go — reserved for you.</>
+															) : availability.available ? (
+																<>✅ You’re good to go — a request will be reviewed by an admin.</>
+															) : null}
+														</S.StatusLine>
+													)}
 												</S.SubdomainCard>
 											)}
 										</S.SubdomainSection>
@@ -488,7 +523,11 @@ export default function PortalManager(props: {
 									type={'alt1'}
 									label={language?.save}
 									handlePress={handleSubmit}
-									disabled={!name || loading}
+									disabled={
+										!name ||
+										loading ||
+										(isCreating && claimSub && (!isAllRulesOk || availability.loading || !isAvailableToProceed))
+									}
 									loading={false}
 								/>
 							</S.SAction>

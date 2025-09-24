@@ -325,3 +325,9 @@ export const Error = styled.div`
 	font-size: ${(p) => p.theme.typography.size.xSmall};
 	font-weight: ${(p) => p.theme.typography.weight.medium};
 `;
+
+export const StatusLine = styled.div`
+	margin-top: 8px;
+	font-size: 12px;
+	opacity: 0.9;
+`;
