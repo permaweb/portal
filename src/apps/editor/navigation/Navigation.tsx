@@ -80,7 +80,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				label: language?.domains,
 			},
 		];
-		if (true) {
+		if (undernamesProvider.isLoggedInUserController) {
 			paths.push({
 				path: portalProvider.current?.id ? URLS.portalAdminBase(portalProvider.current.id) : URLS.base,
 				icon: ASSETS.portalIcon,

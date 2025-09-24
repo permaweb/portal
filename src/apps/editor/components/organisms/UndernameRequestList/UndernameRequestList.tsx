@@ -106,7 +106,7 @@ export default function UndernameRequestsList(props: { isAdminView?: boolean }) 
 		console.log('ArNS Record for undername parent', arnsRecord.processId);
 		const undernameRow = requests.find((r) => r.id === id);
 		setLoading(true);
-		await approve(id, arnsRecord.processId, reason);
+		await approve(id, arnsRecord.processId, reason, undernameRow.requester);
 		setLoading(false);
 		addNotification(`Undername ${undernameRow?.name ?? id} approved`, 'success');
 	};
