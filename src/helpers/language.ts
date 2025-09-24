@@ -1,7 +1,6 @@
 export const language = {
 	en: {
 		add: `Add`,
-		admin: `Admin`,
 		addCaption: `Add a caption`,
 		addCategory: `Add a category`,
 		addCredits: `Add Credits`,
@@ -12,6 +11,7 @@ export const language = {
 		addTo: `Add To `,
 		addTopic: `Add a tag`,
 		addUser: `Add a user`,
+		admin: `Admin`,
 		alignCaption: `Align caption`,
 		all: `All`,
 		amount: `Amount`,
@@ -479,7 +479,6 @@ export const language = {
 	},
 	es: {
 		add: `Agregar`,
-		admin: `Administración`,
 		addCaption: `Agregar descripción`,
 		addCategory: `Agregar categoría`,
 		addCredits: `Agregar créditos`,
@@ -490,6 +489,7 @@ export const language = {
 		addTo: `Agregar a `,
 		addTopic: `Agregar etiqueta`,
 		addUser: `Agregar usuario`,
+		admin: `Administración`,
 		alignCaption: `Alinear descripción`,
 		all: `Todos`,
 		amount: `Cantidad`,
