@@ -109,7 +109,18 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						const updated = await Promise.all(
 							profilePortals.map(async (portal: PortalHeaderType) => {
 								const cached = getCachedPortal(portal.id);
-								const data = cached ?? (await permawebProvider.libs.getZone(portal.id));
+
+								let data = cached;
+								if (!data) {
+									data = permawebProvider.libs.mapFromProcessCase(
+										await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Overview })
+									);
+
+									data.users = permawebProvider.libs.mapFromProcessCase(
+										await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Users })
+									);
+								}
+
 								return {
 									...portal,
 									name: data.name ?? data.store?.name ?? 'None',

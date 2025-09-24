@@ -59,7 +59,7 @@ export default function PortalManager(props: {
 	}, [props.portal]);
 
 	async function handleSubmit() {
-		if (arProvider.wallet && permawebProvider.profile?.id) {
+		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.permissions?.updatePortalMeta) {
 			setLoading(true);
 
 			try {
