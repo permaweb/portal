@@ -321,4 +321,11 @@ export const GlobalStyle = createGlobalStyle`
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+	#wanderConnectIframeHost {
+		--backgroundLight: ${(props) => props.theme.colors.container.alt11.background};
+		--background: ${(props) => props.theme.colors.container.alt11.background};
+		--backdropBackground: ${(props) => props.theme.colors.shadow.primary};
+		--backdropBackdropFilter: blur(1.5px);
+	}
 `;

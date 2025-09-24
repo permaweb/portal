@@ -98,33 +98,40 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	}, [arProvider.walletAddress]);
 
 	React.useEffect(() => {
-		const profilePortals = permawebProvider.profile?.portals ?? [];
-		setPortals(profilePortals);
-		setInvites(permawebProvider.profile?.invites ?? []);
-		if (!hasFetchedMeta.current) {
-			hasFetchedMeta.current = true;
-			if (profilePortals.length > 0) {
-				(async () => {
-					const updated = await Promise.all(
-						profilePortals.map(async (portal: PortalHeaderType) => {
-							const cached = getCachedPortal(portal.id);
-							const data = cached ?? (await permawebProvider.libs.getZone(portal.id));
-							return {
-								...portal,
-								name: data.name ?? data.store?.name ?? 'None',
-								logo: data.logo ?? data.store?.logo ?? 'None',
-								icon: data.icon ?? data.store?.icon ?? 'None',
-								users: data.users ?? getPortalUsers(data.roles),
-							};
-						})
-					);
-					setPortals(updated);
-				})();
-			} else {
-				setPermissions({ base: false });
+		if (permawebProvider.profile?.id) {
+			const profilePortals = permawebProvider.profile?.portals ?? [];
+			setPortals(profilePortals);
+			setInvites(permawebProvider.profile?.invites ?? []);
+			if (!hasFetchedMeta.current) {
+				hasFetchedMeta.current = true;
+				if (profilePortals.length > 0) {
+					(async () => {
+						const updated = await Promise.all(
+							profilePortals.map(async (portal: PortalHeaderType) => {
+								const cached = getCachedPortal(portal.id);
+								const data = cached ?? (await permawebProvider.libs.getZone(portal.id));
+								return {
+									...portal,
+									name: data.name ?? data.store?.name ?? 'None',
+									logo: data.logo ?? data.store?.logo ?? 'None',
+									icon: data.icon ?? data.store?.icon ?? 'None',
+									users: data.users ?? getPortalUsers(data.roles),
+								};
+							})
+						);
+						setPortals(updated);
+					})();
+				} else {
+					setPermissions({ base: false });
+				}
 			}
 		}
-	}, [arProvider.walletAddress, permawebProvider.profile?.portals, permawebProvider.profile?.invites]);
+	}, [
+		arProvider.walletAddress,
+		permawebProvider.profile?.id,
+		permawebProvider.profile?.portals,
+		permawebProvider.profile?.invites,
+	]);
 
 	React.useEffect(() => {
 		if (portals?.length > 0) {

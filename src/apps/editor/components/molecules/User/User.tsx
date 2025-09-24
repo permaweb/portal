@@ -54,7 +54,7 @@ export default function User(props: {
 			<S.UserWrapper
 				key={props.user.address}
 				className={'fade-in'}
-				onClick={() => (props.hideAction ? {} : setShowManageUser((prev) => !prev))}
+				onClick={() => (props.hideAction || unauthorized ? {} : setShowManageUser((prev) => !prev))}
 				disabled={unauthorized}
 				hideAction={props.hideAction}
 				isCurrent={currentLoggedInUser && !props.hideAction}
