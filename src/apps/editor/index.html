@@ -147,26 +147,24 @@
 		</script>
 		<script>
 			if ('serviceWorker' in navigator) {
-				/* Only register service worker in production builds */
-				/* Skip service worker for domain fetch to detect ArNS updates */
 				const isProduction = window.location.protocol === 'https:' || window.location.hostname !== 'localhost';
-				const skipForArNS = window.location.hostname.includes('portal');
+				const isPortalGatewayHost = window.location.hostname.toLowerCase().startsWith('portal.');
+
+				const { pathname, search, hash } = window.location;
+				const isBaseNavigation = (pathname === '/' || pathname === '') && !search && !hash;
+
+				const skipForArNS = isPortalGatewayHost && isBaseNavigation;
 
 				if (isProduction && !skipForArNS) {
 					navigator.serviceWorker
 						.register('/sw.js', { scope: '/' })
-						.then((registration) => {
-							console.log('SW registered: ', registration);
-						})
-						.catch((registrationError) => {
-							console.log('SW registration failed: ', registrationError);
-						});
+						.then((registration) => console.log('SW registered:', registration))
+						.catch((err) => console.log('SW registration failed:', err));
 				} else if (skipForArNS) {
-					/* Unregister any existing service workers on portal domains */
-					navigator.serviceWorker.getRegistrations().then((registrations) => {
-						registrations.forEach((registration) => {
-							registration.unregister();
-							console.log('SW unregistered on portal domain: ', registration);
+					navigator.serviceWorker.getRegistrations().then((regs) => {
+						regs.forEach((r) => {
+							r.unregister();
+							console.log('SW unregistered on portal domain root:', r);
 						});
 					});
 				}

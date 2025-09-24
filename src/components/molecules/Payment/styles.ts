@@ -57,7 +57,8 @@ export const PaymentSummaryValue = styled.p`
 export const PayWithSelectorWrapper = styled.div`
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	justify-content: space-between;
+	gap: 15px;
 	flex-wrap: wrap;
 `;
 

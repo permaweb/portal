@@ -317,13 +317,20 @@ export const DomainCostActions = styled.div`
 export const ModalWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 15px;
 `;
 
 export const ModalSection = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 2.5px;
+
+	p {
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+	}
 `;
 
 export const ModalSectionTitle = styled.div`
@@ -408,7 +415,7 @@ export const InsufficientBalanceWrapper = styled.div`
 
 export const ModalActions = styled.div`
 	display: flex;
-	gap: 7.5px;
+	gap: 15px;
 	flex-wrap: wrap;
 	justify-content: flex-end;
 	margin: 15px 0 0 0;
