@@ -161,6 +161,14 @@
 						.catch((registrationError) => {
 							console.log('SW registration failed: ', registrationError);
 						});
+				} else if (skipForArNS) {
+					/* Unregister any existing service workers on portal domains */
+					navigator.serviceWorker.getRegistrations().then((registrations) => {
+						registrations.forEach((registration) => {
+							registration.unregister();
+							console.log('SW unregistered on portal domain: ', registration);
+						});
+					});
 				}
 			}
 		</script>
