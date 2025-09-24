@@ -256,9 +256,6 @@ export default function Editor() {
 								},
 							};
 
-							console.log(currentPageKey);
-							console.log(updatedPages);
-
 							// Remove the old page entry using the correct key
 							if (currentPageKey) {
 								delete updatedPages[currentPageKey];

@@ -529,6 +529,7 @@ export const language = {
 		releaseDate: `Release Date`,
 		releaseDateUpdated: `Release Date Updated`,
 		reviewPost: `Review Post`,
+		saving: `Saving`,
 		shareCredits: `Share Credits`,
 		smaller: `Smaller`,
 		testnetMode: `This is testnet mode. You can get tario tokens from the testnet faucet.`,
