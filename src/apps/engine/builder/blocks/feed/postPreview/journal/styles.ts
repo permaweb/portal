@@ -6,12 +6,12 @@ export const Post = styled.div<{ $layout: any }>`
 	display: flex;
 	// flex-direction: ${(props: any) => (props.$layout?.flow === 'column' ? `column` : `row`)};
 	width: 100%;
-	background: var(--color-card-background);
+	// background: var(--color-card-background);
 	padding-top: 40px;
 	box-sizing: border-box;
 	border-radius: var(--border-radius);
 	gap: 20px;
-	box-shadow: ${(props: any) => (props.$layout?.shadow ? `0 4px 10px rgba(0, 0, 0, 0.4)` : `unset`)};
+	// box-shadow: ${(props: any) => (props.$layout?.shadow ? `0 4px 10px rgba(0, 0, 0, 0.4)` : `unset`)};
 	border-top: 2px solid var(--color-card-border);
 	margin-bottom: 21px;
 `;

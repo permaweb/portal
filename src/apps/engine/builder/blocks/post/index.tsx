@@ -5,6 +5,7 @@ import Tag from 'engine/components/tag';
 import { usePost } from 'engine/hooks/posts';
 import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
+import { getTxEndpoint } from 'helpers/endpoints';
 
 import Comments from '../comments';
 
@@ -36,7 +37,7 @@ export default function Post(props: any) {
 			setContent(post.metadata.content);
 		} else if (post?.metadata?.contentTx) {
 			setIsLoadingContent(true);
-			fetch(`https://arweave.net/${post.metadata.contentTx}`)
+			fetch(getTxEndpoint(post.metadata.contentTx))
 				.then((res) => res.json())
 				.then((data) => {
 					setContent(data);
@@ -58,7 +59,7 @@ export default function Post(props: any) {
 					<img
 						className="loadingAvatar"
 						onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-						src={!isLoadingProfile ? `https://arweave.net/${profile?.thumbnail}` : ''}
+						src={!isLoadingProfile && profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : ''}
 					/>
 					<span>{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}</span>&nbsp;
 					<span>
@@ -70,11 +71,13 @@ export default function Post(props: any) {
 						)}
 					</span>
 				</S.Meta>
-				<S.Thumbnail
-					className="loadingThumbnail"
-					onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
-					src={!isLoadingPost ? `https://arweave.net/${post?.metadata?.thumbnail}` : ''}
-				/>
+				{!isLoadingPost && post?.metadata?.thumbnail && (
+					<S.Thumbnail
+						className="loadingThumbnail"
+						onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
+						src={!isLoadingPost && post?.metadata?.thumbnail ? getTxEndpoint(post.metadata.thumbnail) : ''}
+					/>
+				)}
 				<S.Tags>
 					{post &&
 						post?.metadata?.topics &&

@@ -4,6 +4,7 @@ import Placeholder from 'engine/components/placeholder';
 import useNavigate from 'engine/helpers/preview';
 import { useComments } from 'engine/hooks/comments';
 import { useProfile } from 'engine/hooks/profiles';
+import { getTxEndpoint } from 'helpers/endpoints';
 
 import * as S from './styles';
 
@@ -22,7 +23,7 @@ export default function PostPreview_Journal(props: any) {
 			<S.Comment>
 				<S.CommentHeader>
 					<S.Avatar>
-						<img src={`https://arweave.net/${profile?.thumbnail}`} />
+						<img src={profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : ''} />
 					</S.Avatar>
 					<S.Username>{profile?.displayName || '[[displayName]]'}</S.Username>
 					<S.Date>{`${new Date(comment?.dateCreated || 'now').toLocaleDateString()} ${new Date(
@@ -62,7 +63,7 @@ export default function PostPreview_Journal(props: any) {
 						<S.SourceIcon
 							className="loadingAvatar"
 							onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-							src={!isLoadingProfile ? `https://arweave.net/${profile?.thumbnail}` : ''}
+							src={!isLoadingProfile && profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : ''}
 						/>
 						<S.Author onClick={() => navigate(`/user/${profile.id}`)}>
 							{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}
@@ -78,14 +79,16 @@ export default function PostPreview_Journal(props: any) {
 						</S.Date>
 					</S.Meta>
 				</S.SideA>
-				<S.SideB>
-					<img
-						className="loadingThumbnail"
-						onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
-						onClick={() => navigate(`/post/${post?.id}`)}
-						src={post ? `https://arweave.net/${post?.metadata?.thumbnail}` : ''}
-					/>
-				</S.SideB>
+				{post?.metadata?.thumbnail && (
+					<S.SideB>
+						<img
+							className="loadingThumbnail"
+							onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
+							onClick={() => navigate(`/post/${post?.id}`)}
+							src={post?.metadata?.thumbnail ? getTxEndpoint(post.metadata.thumbnail) : ''}
+						/>
+					</S.SideB>
+				)}
 			</S.Content>
 			{comments?.length > 0 && (
 				<S.Comments>

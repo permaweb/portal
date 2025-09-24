@@ -12,14 +12,14 @@ export const Marker = styled.div<{ $state: boolean }>`
 export const Icon = styled.div<{ $state: boolean }>`
 	position: absolute;
 	width: 14px;
-	top: 5px;
+	top: 6px;
 
 	svg {
 		transition: fill 0.4s, stroke 0.4s;
 	}
 
 	&:nth-of-type(1) {
-		left: 5px;
+		left: 6px;
 		svg {
 			color: white;
 		}

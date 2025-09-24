@@ -9,7 +9,7 @@ import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Select } from 'components/atoms/Select';
-import { ASSETS, DEFAULT_THEME } from 'helpers/config';
+import { ASSETS, THEME } from 'helpers/config';
 import { PortalPatchMapEnum, PortalSchemeType, PortalThemeType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -409,7 +409,7 @@ function Section(props: {
 	const [showNameEdit, setShowNameEdit] = React.useState<boolean>(false);
 	const [showRemoveConfirmation, setShowRemoveConfirmation] = React.useState<boolean>(false);
 
-	const orderedRemainingTheme = Object.keys(DEFAULT_THEME.basics.colors)
+	const orderedRemainingTheme = Object.keys(THEME.DEFAULT.basics.colors)
 		// .filter((key) => key !== 'background')
 		.reduce((acc: Record<string, any>, key) => {
 			if (remainingTheme && remainingTheme.hasOwnProperty(key)) {

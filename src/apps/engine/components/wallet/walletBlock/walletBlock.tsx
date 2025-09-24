@@ -1,6 +1,5 @@
-import Icon from 'engine/components/icon';
-import * as ICONS from 'engine/constants/icons';
-
+import { ReactSVG } from 'react-svg';
+import { ICONS_UI } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -12,7 +11,7 @@ export default function WalletBlock() {
 	return (
 		<S.Wrapper>
 			<S.Icon>
-				<Icon icon={ICONS.WALLET} />
+				<ReactSVG src={ICONS_UI.WALLET} />
 			</S.Icon>
 			<p>{language.connectToContinue}</p>
 		</S.Wrapper>

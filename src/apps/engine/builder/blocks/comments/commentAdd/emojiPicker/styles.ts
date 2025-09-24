@@ -7,6 +7,12 @@ export const EmojisIcon = styled.div`
 	justify-content: center;
 	height: 100%;
 
+	div {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
 	svg {
 		width: 24px;
 		height: 24px;

@@ -1,23 +1,24 @@
 export const ARROW_UP = 'Arrow up';
 export const ARROW_DOWN = 'Arrow down';
+export const BANNER = 'Banner';
 export const COPY = 'Copy';
 export const CLOSE = 'Close';
 export const COMMENTS = 'Comments';
 export const DARK = 'Dark';
 export const EDIT = 'Edit';
+export const EMOJI = 'Emoji';
+export const HOME = 'Home';
+export const LIGHT = 'Light';
+export const MENU = 'Menu';
 export const PORTAL = 'Portal';
 export const POST = 'Post';
 export const USER = 'User';
-export const BANNER = 'Banner';
-export const LIGHT = 'Light';
+export const REPLY = 'Reply';
 export const SEARCH = 'Search';
+export const SEND = 'Send';
+export const SETTINGS = 'Settings';
 export const SIGN_OUT = 'Sign out';
 export const WALLET = 'Wallet';
-export const SEND = 'Send';
-export const EMOJI = 'Emoji';
-export const REPLY = 'Reply';
-export const HOME = 'Home';
-export const SETTINGS = 'Settings';
 
 // Hints
 export const ALERT = 'Alert';

@@ -16,6 +16,7 @@ interface PermawebContextState {
 	profile: Types.ProfileType;
 	handleInitialProfileCache: (address: string, profileId: string) => void;
 	refreshProfile: () => void;
+	setPortalRoles: (roles: string[]) => void;
 }
 
 const DEFAULT_CONTEXT = {
@@ -24,6 +25,7 @@ const DEFAULT_CONTEXT = {
 	profile: null,
 	handleInitialProfileCache(_address: string, _profileId: string) {},
 	refreshProfile() {},
+	setPortalRoles(_roles: string[]) {},
 };
 
 const PermawebContext = React.createContext<PermawebContextState>(DEFAULT_CONTEXT);
@@ -201,6 +203,12 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		setProfilePending(true);
 	}
 
+	function setPortalRoles(roles: string[]) {
+		if (profile) {
+			setProfile({ ...profile, roles });
+		}
+	}
+
 	return (
 		<PermawebContext.Provider
 			value={{
@@ -210,6 +218,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				handleInitialProfileCache: (address: string, profileId: string) =>
 					handleInitialProfileCache(address, profileId),
 				refreshProfile: () => setRefreshProfileTrigger((prev) => !prev),
+				setPortalRoles: (roles: string[]) => setPortalRoles(roles),
 			}}
 		>
 			{props.children}

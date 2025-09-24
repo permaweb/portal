@@ -1,4 +1,4 @@
-import { ASSETS, SOCIAL_LINK_ASSETS } from './config';
+import { ASSETS, ICONS_SOCIAL } from './config';
 
 export class AssetPreloader {
 	private preloadedAssets = new Set<string>();
@@ -79,7 +79,7 @@ export class AssetPreloader {
 	}
 
 	async preloadAllAssets(): Promise<void> {
-		const allAssets = [...Object.values(ASSETS), ...Object.values(SOCIAL_LINK_ASSETS)];
+		const allAssets = [...Object.values(ASSETS), ...Object.values(ICONS_SOCIAL)];
 
 		const preloadPromises = allAssets.map((url) => this.preloadAsset(url));
 
@@ -91,9 +91,7 @@ export class AssetPreloader {
 	}
 
 	async preloadSpecificAssets(assetKeys: string[]): Promise<void> {
-		const urlsToPreload = assetKeys
-			.map((key) => (ASSETS as any)[key] || (SOCIAL_LINK_ASSETS as any)[key])
-			.filter(Boolean);
+		const urlsToPreload = assetKeys.map((key) => (ASSETS as any)[key] || (ICONS_SOCIAL as any)[key]).filter(Boolean);
 
 		const preloadPromises = urlsToPreload.map((url) => this.preloadAsset(url));
 

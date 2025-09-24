@@ -1,6 +1,6 @@
 import * as React from 'react';
-import Icon from 'engine/components/icon';
-import * as ICONS from 'engine/constants/icons';
+import { ReactSVG } from 'react-svg';
+import { ICONS_UI } from 'helpers/config';
 
 import * as S from './styles';
 
@@ -1768,7 +1768,7 @@ export default function EmojiPicker({ onInsertEmoji }: EmojiPickerProps) {
 	return (
 		<S.Emojis>
 			<S.EmojisIcon ref={emojiButtonRef} onClick={() => setIsVisible(!isVisible)}>
-				<Icon icon={ICONS.EMOJI} />
+				<ReactSVG src={ICONS_UI.EMOJI} />
 			</S.EmojisIcon>
 			{isVisible && (
 				<S.EmojiPicker ref={emojiPickerRef}>

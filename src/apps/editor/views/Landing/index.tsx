@@ -10,7 +10,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { LanguageSelect } from 'components/molecules/LanguageSelect';
-import { ASSETS, URLS } from 'helpers/config';
+import { ASSETS, ICONS_UI, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalHeaderType } from 'helpers/types';
 import { checkValidAddress, formatAddress } from 'helpers/utils';
@@ -150,7 +150,7 @@ export default function Landing() {
 										{portal.icon && checkValidAddress(portal.icon) ? (
 											<img src={getTxEndpoint(portal.icon)} alt={'Portal Icon'} />
 										) : (
-											<ReactSVG src={ASSETS.portalIcon} />
+											<ReactSVG src={ICONS_UI.PORTAL} />
 										)}
 										{portal.name ?? formatAddress(portal.id, false)}
 									</Link>
@@ -220,7 +220,7 @@ export default function Landing() {
 										{portal.icon && checkValidAddress(portal.icon) ? (
 											<img src={getTxEndpoint(portal.icon)} alt={'Portal Icon'} />
 										) : (
-											<ReactSVG src={ASSETS.portalIcon} />
+											<ReactSVG src={ICONS_UI.PORTAL} />
 										)}
 										{portal.name}
 									</button>

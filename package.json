@@ -43,7 +43,7 @@
 		"@permaweb/libs": "0.0.56",
 		"@stripe/react-stripe-js": "^3.5.1",
 		"@stripe/stripe-js": "^6.1.0",
-		"@wanderapp/connect": "^0.1.11",
+		"@wanderapp/connect": "^0.1.12",
 		"arweave": "^1.15.5",
 		"html-react-parser": "^5.2.5",
 		"lexical": "^0.34.0",

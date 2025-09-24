@@ -8,7 +8,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
-import { ASSETS, STYLING, URLS } from 'helpers/config';
+import { ASSETS, ICONS_UI, STYLING, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
 import { formatAddress } from 'helpers/utils';
@@ -40,7 +40,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		return [
 			{
 				path: portalProvider.current?.id ? URLS.portalBase(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.portalIcon,
+				icon: ICONS_UI.PORTAL,
 				label: language?.home,
 			},
 			{
@@ -315,7 +315,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 											setShowPortalDropdown(false);
 										}}
 									>
-										<ReactSVG src={ASSETS.portalIcon} />
+										<ReactSVG src={ICONS_UI.PORTAL} />
 										{language?.portalReturn}
 									</button>
 									<button

@@ -1,13 +1,11 @@
 import React from 'react';
 import { WanderConnect } from '@wanderapp/connect';
-import Icon from 'engine/components/icon';
 import { Panel } from 'engine/components/panel';
 import ProfileEditor from 'engine/components/profileEditor';
-import * as ICONS from 'engine/constants/icons';
 import useNavigate from 'engine/helpers/preview';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
-import { STORAGE } from 'helpers/config';
+import { ICONS_UI, STORAGE } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -15,6 +13,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
+import { ReactSVG } from 'react-svg';
 
 export default function WalletConnect(_props: { callback?: () => void }) {
 	const navigate = useNavigate();
@@ -94,17 +93,13 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 			if (status === 'loading') setLabel('Signing in');
 			else if ((status === 'authenticated' || auth.authType === 'NATIVE_WALLET') && profile) {
 				setLabel(profile.displayName || 'My Profile');
-				setAvatar(
-					profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : ''
-				);
-				setBanner(profile?.banner && checkValidAddress(profile.banner) ? `https://arweave.net/${profile?.banner}` : '');
+				setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : '');
+				setBanner(profile?.banner && checkValidAddress(profile.banner) ? getTxEndpoint(profile.banner) : '');
 			}
 		} else if (localStorage.getItem(STORAGE.walletType) === 'NATIVE_WALLET' && profile) {
 			setLabel(profile.displayName || 'My Profile');
-			setAvatar(
-				profile?.thumbnail && checkValidAddress(profile.thumbnail) ? `https://arweave.net/${profile?.thumbnail}` : ''
-			);
-			setBanner(profile?.banner && checkValidAddress(profile.banner) ? `https://arweave.net/${profile?.banner}` : '');
+			setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : '');
+			setBanner(profile?.banner && checkValidAddress(profile.banner) ? getTxEndpoint(profile.banner) : '');
 		} else {
 			setLabel('Log in');
 			setAvatar('');
@@ -133,11 +128,13 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 				<S.HeaderWrapper>
 					<S.Header>
 						<S.Banner>
-							<img
-								className="missingBanner"
-								onLoad={(e) => e.currentTarget.classList.remove('missingBanner')}
-								src={banner}
-							/>
+							{banner !== '' && (
+								<img
+									className="missingBanner"
+									onLoad={(e) => e.currentTarget.classList.remove('missingBanner')}
+									src={banner}
+								/>
+							)}
 						</S.Banner>
 						<S.Avatar>
 							<img
@@ -149,7 +146,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 						<S.DisplayName>{profile?.displayName ? profile.displayName : 'My Profile'}</S.DisplayName>
 						<S.DAddress>
 							{shorten(arProvider.walletAddress)}
-							<Icon icon={ICONS.COPY} />
+							<ReactSVG src={ICONS_UI.COPY} />
 						</S.DAddress>
 					</S.Header>
 				</S.HeaderWrapper>
@@ -162,30 +159,30 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 								navigate(`user/${profile.id}`);
 							}}
 						>
-							<Icon icon={ICONS.USER} />
+							<ReactSVG src={ICONS_UI.USER} />
 							{language.myProfile}
 						</S.NavigationEntry>
 					)}
 					<S.NavigationEntry $disabled={!profile?.id}>
-						<Icon icon={ICONS.POST} />
+						<ReactSVG src={ICONS_UI.POST} />
 						{language.myPosts}
 					</S.NavigationEntry>
 					<S.NavigationEntry $disabled={!profile?.id}>
-						<Icon icon={ICONS.COMMENTS} />
+						<ReactSVG src={ICONS_UI.COMMENTS} />
 						{language.myComments}
 					</S.NavigationEntry>
 					{auth.authType !== 'NATIVE_WALLET' && (
 						<S.NavigationEntry onClick={() => window.wanderInstance.open()}>
-							<Icon icon={ICONS.WALLET} />
+							<ReactSVG src={ICONS_UI.WALLET} />
 							{language.myWallet}
 						</S.NavigationEntry>
 					)}
 					<S.NavigationEntry onClick={() => setShowProfileManage(true)}>
-						<Icon icon={profile?.id ? ICONS.EDIT : ICONS.USER} />
+						<ReactSVG src={profile?.id ? ICONS_UI.EDIT : ICONS_UI.USER} />
 						{profile?.id ? language.editProfile : language.createProfile}
 						{!profile?.id && (
 							<S.Hint>
-								<Icon icon={ICONS.INFO} />
+								<ReactSVG src={ICONS_UI.INFO} />
 							</S.Hint>
 						)}
 					</S.NavigationEntry>
@@ -201,11 +198,11 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 									portalProvider.setEditorMode('mini');
 								}}
 							>
-								<Icon icon={ICONS.PORTAL} />
+								<ReactSVG src={ICONS_UI.PORTAL} />
 								Zone Editor
 							</S.NavigationEntry>
 							<S.NavigationEntry onClick={() => window.open('https://portal.arweave.net/', '_blank')}>
-								<Icon icon={ICONS.PORTAL} />
+								<ReactSVG src={ICONS_UI.PORTAL} />
 								Portal Editor
 							</S.NavigationEntry>
 						</S.NavigationWrapper>
@@ -214,7 +211,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 				)}
 				<S.DFooterWrapper>
 					<S.NavigationEntry onClick={handleDisconnect}>
-						<Icon icon={ICONS.SIGN_OUT} />
+						<ReactSVG src={ICONS_UI.SIGNOUT} />
 						{language.disconnect}
 					</S.NavigationEntry>
 				</S.DFooterWrapper>
@@ -233,7 +230,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 								<img src={checkValidAddress(avatar) ? getTxEndpoint(avatar) : avatar} />
 							</div>
 						) : (
-							<Icon icon={ICONS.USER} />
+							<ReactSVG src={ICONS_UI.USER} />
 						)}
 						<span>{label}</span>
 					</S.LAction>

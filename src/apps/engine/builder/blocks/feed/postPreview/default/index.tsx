@@ -5,6 +5,7 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 import { useProfile } from 'engine/hooks/profiles';
 import { useComments } from 'engine/hooks/comments';
 import { getRedirect } from 'helpers/utils';
+import { getTxEndpoint } from 'helpers/endpoints';
 import * as S from './styles';
 
 export default function PostPreview_Default(props: any) {
@@ -23,7 +24,7 @@ export default function PostPreview_Default(props: any) {
 			<S.Comment>
 				<S.CommentHeader>
 					<S.Avatar>
-						<img src={`https://arweave.net/${profile?.thumbnail}`} />
+						<img src={profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : ''} />
 					</S.Avatar>
 					<S.Username>{profile?.displayName || '[[displayName]]'}</S.Username>
 					<S.Date>{`${new Date(comment?.dateCreated || 'now').toLocaleDateString()} ${new Date(
@@ -58,7 +59,7 @@ export default function PostPreview_Default(props: any) {
 					className="loadingThumbnail"
 					onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
 					onClick={() => navigate(getRedirect(`post/${post?.id}`))}
-					src={post ? `https://arweave.net/${post?.metadata?.thumbnail}` : ''}
+					src={post?.metadata?.thumbnail ? getTxEndpoint(post.metadata.thumbnail) : ''}
 				/>
 				<h2 className={!post ? 'loadingPlaceholder' : ''} onClick={(e) => navigate(getRedirect(`post/${post?.id}`))}>
 					<span>{post ? post?.name : <Placeholder width="180" />}</span>
@@ -67,7 +68,7 @@ export default function PostPreview_Default(props: any) {
 					<S.SourceIcon
 						className="loadingAvatar"
 						onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-						src={profile?.thumbnail ? `https://arweave.net/${profile.thumbnail}` : ''}
+						src={profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : ''}
 					/>
 					<S.Author onClick={() => navigate(getRedirect(`user/${profile.id}`))}>{profile?.displayName}</S.Author>
 					<S.Date>

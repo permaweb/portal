@@ -6,6 +6,7 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 export const usePosts = (props?: any) => {
 	const { preview = false } = props || {};
 	const { portal } = usePortalProvider();
+	const { profile } = useProfile(props?.author || null);
 	const Posts = portal?.Posts || [];
 	const isLoading = false;
 	const error = null;
@@ -89,7 +90,6 @@ export const usePosts = (props?: any) => {
 			if (Title) break;
 		}
 	} else if (props?.author) {
-		const { profile } = useProfile(props.author);
 		Title = profile?.displayName;
 	}
 

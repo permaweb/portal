@@ -51,14 +51,6 @@ export default function Header() {
 		return <h4>{portalProvider.current?.name ?? '-'}</h4>;
 	}
 
-	// function getIcon() {
-	// 	const icon = portalProvider.current?.icon;
-	// 	if (icon && checkValidAddress(icon)) {
-	// 		return <img src={getTxEndpoint(icon)} />;
-	// 	}
-	// 	return <ReactSVG src={ASSETS.portalIcon} />;
-	// }
-
 	function getNavigation() {
 		const overflowCount = 7;
 

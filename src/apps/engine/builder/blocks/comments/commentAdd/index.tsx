@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { ReactSVG } from 'react-svg';
 import { $getRoot, $getSelection } from 'lexical';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
@@ -8,12 +9,10 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $insertNodes, COMMAND_PRIORITY_HIGH, KEY_ENTER_COMMAND, TextNode } from 'lexical';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-import Icon from 'engine/components/icon';
-import * as ICONS from 'engine/constants/icons';
-
+import { ICONS_UI } from 'helpers/config';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import EmojiPicker from './emojiPicker';
 
+import EmojiPicker from './emojiPicker';
 import * as S from './styles';
 
 const MAX_EDITOR_LENGTH = 500;
@@ -119,7 +118,7 @@ function CommentEditorContent(props: any) {
 				<S.Actions>
 					<EmojiPicker onInsertEmoji={handleEmoji} />
 					<S.Send onClick={handleSubmit} $active={canSend && !isSubmitting}>
-						<Icon icon={ICONS.SEND} />
+						<ReactSVG src={ICONS_UI.SEND} />
 					</S.Send>
 				</S.Actions>
 			</S.Editor>

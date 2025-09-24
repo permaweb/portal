@@ -103,26 +103,6 @@ export const Actions = styled.div`
 
 export const Emojis = styled.div``;
 
-export const EmojisIcon = styled.div`
-	display: flex;
-	justify-content: center;
-	height: 100%;
-
-	svg {
-		width: 24px;
-		height: 24px;
-		stroke: rgba(var(--color-text), 0.6);
-	}
-
-	&:hover {
-		cursor: pointer;
-
-		svg {
-			stroke: rgba(var(--color-text), 1);
-		}
-	}
-`;
-
 export const EmojiPicker = styled.div`
 	position: absolute;
 	margin-top: 28px;
@@ -243,6 +223,12 @@ export const Send = styled.div<{ $active: boolean }>`
 	border-radius: 50%;
 	width: 28px;
 	height: 28px;
+
+	div {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
 
 	svg {
 		width: 18px;

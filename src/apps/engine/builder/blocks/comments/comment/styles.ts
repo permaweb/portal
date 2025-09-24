@@ -1,9 +1,16 @@
 import styled from 'styled-components';
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div<{ status: string }>`
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
+	opacity: ${(props) => (props?.status === 'active' ? 1 : 0.4)};
+	box-shadow: ${(props) =>
+		props?.status === 'active' ? '0 4px 10px rgba(0, 0, 0, 0.4)' : '0 1px 4px rgba(0, 0, 0, 0.4)'};
+
+	&:hover {
+		opacity: ${(props) => (props?.status === 'active' ? 1 : 1)};
+	}
 `;
 
 export const Comment = styled.div<{ $level: number }>`
@@ -14,7 +21,6 @@ export const Comment = styled.div<{ $level: number }>`
 	padding: 10px;
 	margin-top: ${(props) => (props.$level > 0 ? `-16px` : 0)};
 	border-radius: var(--border-radius);
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 `;
 
 export const Avatar = styled.div`
@@ -30,7 +36,10 @@ export const Avatar = styled.div`
 	}
 `;
 
-export const Content = styled.div``;
+export const Content = styled.div`
+	position: relative;
+	width: 100%;
+`;
 
 export const Meta = styled.div`
 	display: flex;
@@ -51,7 +60,72 @@ export const Date = styled.span`
 `;
 
 export const Text = styled.div`
+	width: 100%;
 	margin-top: 4px;
+`;
+
+export const Menu = styled.div`
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: fit-content;
+`;
+
+export const IconWrapper = styled.div`
+	display: flex;
+	margin-left: auto;
+	justify-content: center;
+	align-items: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+
+	div {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	svg {
+		width: 18px;
+		height: 18px;
+	}
+
+	&:hover {
+		cursor: pointer;
+		background: rgba(100, 100, 100, 0.6);
+	}
+`;
+
+export const MenuCategory = styled.div``;
+
+export const MenuEntries = styled.div`
+	position: relative;
+	background: var(--color-card-background);
+	border: 1px solid var(--color-card-border);
+	padding: 2px 2px;
+	backdrop-filter: blur(5px);
+	z-index: 99;
+`;
+
+export const MenuEntry = styled.div`
+	display: flex;
+	padding: 4px 10px 4px 6px;
+
+	div {
+		display: flex;
+		justify-content: start;
+		align-items: center;
+	}
+
+	svg {
+		width: 16px;
+		height: 16px;
+		margin-right: 4px;
+	}
+	&:hover {
+		cursor: pointer;
+		background: rgba(50, 50, 50, 1);
+	}
 `;
 
 export const Actions = styled.div`
