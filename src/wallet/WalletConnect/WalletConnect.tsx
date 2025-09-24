@@ -61,7 +61,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 						label: false,
 						customStyles: `
 							#wanderConnectButtonHost {
-								display:none;
+								display: none;
 							}`,
 					},
 					iframe: {
@@ -76,17 +76,10 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 								type: 'modal',
 							},
 						},
-						cssVars: {
-							light: {},
-							dark: {
-								boxShadow: 'none',
-							},
-						},
-						customStyles: ``,
 					},
 				});
 
-				setInstance(wanderInstance);
+				if (!instance) setInstance(wanderInstance);
 				window.wanderInstance = wanderInstance;
 			} catch (e) {
 				console.error(e);
