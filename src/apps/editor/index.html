@@ -167,6 +167,11 @@
 							console.log('SW unregistered on portal domain root:', r);
 						});
 					});
+					// Clear all caches when unregistering SW on portal domains
+					caches.keys().then((cacheNames) => {
+						cacheNames.forEach((cacheName) => caches.delete(cacheName));
+						console.log('All caches cleared on ArNS change');
+					});
 				}
 			}
 		</script>
