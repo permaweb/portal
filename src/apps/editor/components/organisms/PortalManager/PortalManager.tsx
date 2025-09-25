@@ -59,7 +59,7 @@ export default function PortalManager(props: {
 	}, [props.portal]);
 
 	async function handleSubmit() {
-		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.permissions?.updatePortalMeta) {
+		if (arProvider.wallet && permawebProvider.profile?.id) {
 			setLoading(true);
 
 			try {
@@ -88,7 +88,7 @@ export default function PortalManager(props: {
 					data.Icon = 'None';
 				}
 
-				if (props.portal?.id) {
+				if (props.portal?.id && portalProvider.permissions?.updatePortalMeta) {
 					const portalsUpdateData = portalProvider.portals
 						.filter((portal: PortalHeaderType) => portal.id !== props.portal.id)
 						.map((portal: PortalHeaderType) => ({
