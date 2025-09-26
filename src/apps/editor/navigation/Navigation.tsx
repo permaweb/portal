@@ -9,9 +9,8 @@ import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { ASSETS, STYLING, URLS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
-import { formatAddress } from 'helpers/utils';
+import { formatAddress, resolvePrimaryDomain } from 'helpers/utils';
 import { checkWindowCutoff } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -107,8 +106,8 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		(e: MouseEvent) => {
 			if (!isResizing) return;
 
-			const newWidth = Math.max(67.5, Math.min(260, e.clientX));
-			const finalWidth = newWidth < 140 ? 67.5 : newWidth;
+			const newWidth = Math.max(STYLING.dimensions.nav.widthMin, Math.min(260, e.clientX));
+			const finalWidth = newWidth < 140 ? STYLING.dimensions.nav.widthMin : newWidth;
 
 			setNavWidth(finalWidth);
 
@@ -146,7 +145,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 	const navigationToggle = React.useMemo(() => {
 		return (
-			<S.ToggleWrapper>
+			<S.ToggleWrapper open={props.open}>
 				<IconButton
 					type={'primary'}
 					src={ASSETS.navigation}
@@ -196,7 +195,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 		if (desktop) {
 			return (
-				<S.Panel open={props.open} className={'fade-in'} width={navWidth}>
+				<S.Panel open={props.open && navWidth > STYLING.dimensions.nav.widthMin} className={'fade-in'} width={navWidth}>
 					{content}
 					<S.ResizeHandle onMouseDown={handleResizeStart} />
 				</S.Panel>
@@ -297,12 +296,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 								<S.PDropdownFooter>
 									<button
 										onClick={() => {
-											// In development, redirect to local engine on port 5000
-											const siteUrl =
-												window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-													? `http://localhost:5000/${portalProvider.current.id}`
-													: getTxEndpoint(portalProvider.current.id);
-											window.open(siteUrl);
+											window.open(resolvePrimaryDomain(portalProvider.current?.domains));
 											setShowPortalDropdown(false);
 										}}
 									>
@@ -372,10 +366,10 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		<>
 			{portalUpdating && <Loader message={`${language.updatingPortal}...`} />}
 			{panel}
-			<S.Header navigationOpen={props.open} navWidth={navWidth} className={'fade-in'}>
+			<S.Header navigationOpen={navWidth > STYLING.dimensions.nav.widthMin} navWidth={navWidth} className={'fade-in'}>
 				<S.Content>
 					<S.C1Wrapper>
-						{!props.open && navigationToggle}
+						{!props.open && !desktop && navigationToggle}
 						{portal}
 					</S.C1Wrapper>
 					<S.ActionsWrapper>

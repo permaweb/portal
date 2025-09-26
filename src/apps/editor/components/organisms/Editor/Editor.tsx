@@ -217,6 +217,7 @@ export default function Editor() {
 				content: currentPost.data.content,
 				topics: currentPost.data.topics,
 				categories: currentPost.data.categories,
+				releaseDate: currentPost.data.releaseDate ?? new Date().getTime().toString(),
 			});
 
 			if (currentPost.data.thumbnail) {

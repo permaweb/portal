@@ -7,26 +7,30 @@ import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TxAddress } from 'components/atoms/TxAddress';
-import { InsufficientBalanceCTA, PaymentSummary, PayWithSelector } from 'components/molecules/Payment';
+import { InsufficientBalanceCTA, PaymentSummary } from 'components/molecules/Payment';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { getArnsCost } from 'helpers/arnsCosts';
 import { ASSETS, IS_TESTNET, URLS } from 'helpers/config';
+import { PortalDomainType, PortalPatchMapEnum } from 'helpers/types';
 import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
 export default function Domains() {
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
+	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -34,28 +38,24 @@ export default function Domains() {
 	const { balance: arIOBalance, loading: arIOBalanceLoading, refetch: refetchArIOBalance } = useArIOBalance();
 
 	const [domain, setDomain] = React.useState<string>('');
-
-	const [registeredDomains, setRegisteredDomains] = React.useState<any>(null);
+	const [loadingAvailable, setLoadingAvailable] = React.useState<boolean>(false);
 	const [domainAvailable, setDomainAvailable] = React.useState<boolean | null>(null);
 
 	const [purchaseType, setPurchaseType] = React.useState<'buy' | 'lease' | null>(null);
 	const [leaseDuration, setLeaseDuration] = React.useState<number | null>(1);
 
-	// Payment method: default to turbo on mainnet; ARIO on testnet
 	const [paymentMethod, setPaymentMethod] = React.useState<'turbo' | 'ario'>(IS_TESTNET ? 'ario' : 'turbo');
 
 	const [turboFiatBuyAmount, setTurboFiatBuyAmount] = React.useState<string | null>(null);
 	const [turboFiatLeaseAmount, setTurboFiatLeaseAmount] = React.useState<string | null>(null);
 	const [turboCreditBuyAmount, setTurboCreditBuyAmount] = React.useState<number | null>(null);
 	const [turboCreditLeaseAmount, setTurboCreditLeaseAmount] = React.useState<number | null>(null);
-	// ARIO (mARIO) costs for both networks (testnet always, mainnet when paying with ARIO)
 	const [arioCostBuyAmount, setArioCostBuyAmount] = React.useState<number | null>(null);
 	const [arioCostLeaseAmount, setArioCostLeaseAmount] = React.useState<number | null>(null);
 
 	const [insufficientBalance, setInsufficientBalance] = React.useState<boolean>(false);
 	const [showFund, setShowFund] = React.useState<boolean>(false);
 
-	// Success/error states for domain registration
 	const [purchaseSuccess, setPurchaseSuccess] = React.useState<{
 		domain: string;
 		transactionId: string;
@@ -65,8 +65,8 @@ export default function Domains() {
 	const [purchaseError, setPurchaseError] = React.useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
 
-	// Confirmation state and computed readiness
 	const [showConfirm, setShowConfirm] = React.useState<boolean>(false);
+	const [usePrimary, setUsePrimary] = React.useState<boolean>(true);
 	const [confirmPaymentMethod, setConfirmPaymentMethod] = React.useState<'turbo' | 'ario'>(
 		IS_TESTNET ? 'ario' : 'turbo'
 	);
@@ -111,21 +111,6 @@ export default function Domains() {
 	}
 
 	React.useEffect(() => {
-		(async function () {
-			try {
-				// Create ARIO instance for the appropriate network to configure the contract
-				const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
-
-				// Use fetchAllArNSRecords with the configured contract
-				const domains = await fetchAllArNSRecords({ contract: ario });
-				setRegisteredDomains(domains);
-			} catch (e: any) {
-				console.error(e);
-			}
-		})();
-	}, []);
-
-	React.useEffect(() => {
 		handleClear(false);
 
 		const trimmed = domain.trim();
@@ -138,18 +123,20 @@ export default function Domains() {
 
 		setDomainAvailable(null);
 
-		const timeoutId = setTimeout(async () => {
+		const timer = setTimeout(async () => {
+			setLoadingAvailable(true);
 			try {
-				const isAvailable = !registeredDomains[domain.trim()];
-				setDomainAvailable(isAvailable);
-			} catch {
-				setDomainAvailable(null);
+				const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
+				const record = await ario.getArNSRecord({ name: domain });
+
+				setDomainAvailable(!record);
+			} catch (err) {
+				console.error('Failed to fetch record:', err);
 			}
+			setLoadingAvailable(false);
 		}, 750);
 
-		return () => {
-			clearTimeout(timeoutId);
-		};
+		return () => clearTimeout(timer);
 	}, [domain]);
 
 	React.useEffect(() => {
@@ -219,6 +206,11 @@ export default function Domains() {
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	async function handleSubmit(methodOverride?: 'turbo' | 'ario') {
+		if (unauthorized) {
+			console.error('User is not authorized to register domains for this portal');
+			return;
+		}
+
 		if (!purchaseType || !domain.trim() || !domainAvailable) {
 			console.error('Invalid purchase parameters');
 			return;
@@ -367,6 +359,34 @@ export default function Domains() {
 				console.error('Auto-redirect after purchase failed:', redirectErr);
 			}
 
+			const current = portalProvider.current?.domains ?? [];
+
+			let next: PortalDomainType[];
+
+			/* Remove the current primary flag from other domains if this domain is set to use primary */
+			if (usePrimary) {
+				const hadName = current.some((d) => d.name === name);
+
+				next = current.map<PortalDomainType>(
+					(d) => (d.name === name ? { name, primary: true } : { name: d.name }) // keep name, drop primary
+				);
+
+				if (!hadName) next.push({ name, primary: true });
+			} else {
+				const withoutDup = current.filter((d) => d.name !== name);
+				next = [...withoutDup, { name }];
+			}
+
+			const domainUpdateId = await permawebProvider.libs.updateZone(
+				{ Domains: permawebProvider.libs.mapToProcessCase(next) },
+				portalProvider.current.id,
+				arProvider.wallet
+			);
+
+			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
+
+			console.log(`Domain update: ${domainUpdateId}`);
+
 			// Set success state
 			setPurchaseSuccess({
 				domain: name,
@@ -500,26 +520,29 @@ export default function Domains() {
 									<FormField
 										value={domain}
 										onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDomain(e.target.value)}
-										placeholder={!registeredDomains ? `${language.gettingDomains}...` : language.domainName}
+										placeholder={language.domainName}
 										invalid={{ status: false, message: null }}
-										disabled={!registeredDomains || unauthorized}
+										disabled={unauthorized}
 										hideErrorMessage
 										sm
 									/>
 								</S.SearchInputWrapper>
 								<S.SearchOutputWrapper>
-									{!registeredDomains && (
+									{loadingAvailable && (
 										<S.UpdateWrapper className={'border-wrapper-alt3'}>
 											<p>{`${language.loading}...`}</p>
 										</S.UpdateWrapper>
 									)}
 									{domainAvailable !== null && (
-										<S.UpdateWrapper className={'border-wrapper-alt3'}>
+										<S.UpdateWrapperIndicator
+											className={'border-wrapper-alt3'}
+											status={domainAvailable ? 'valid' : 'invalid'}
+										>
 											<p>{domainAvailable ? language.domainAvailable : language.domainUnavailable}</p>
 											<S.Indicator status={domainAvailable ? 'valid' : 'invalid'}>
 												<ReactSVG src={domainAvailable ? ASSETS.success : ASSETS.warning} />
 											</S.Indicator>
-										</S.UpdateWrapper>
+										</S.UpdateWrapperIndicator>
 									)}
 									{unauthorized && (
 										<S.UnauthorizedWrapper className={'warning'}>
@@ -674,7 +697,7 @@ export default function Domains() {
 							)} */}
 							<S.CheckoutWrapper>
 								<S.CheckoutLine>
-									<span>{language.domainName}</span>
+									<span>{language.checkoutDomainName}</span>
 									<S.CheckoutDivider />
 									<p>{domain && domainAvailable ? domain : '-'}</p>
 								</S.CheckoutLine>
@@ -683,7 +706,11 @@ export default function Domains() {
 									<S.CheckoutDivider />
 									<p>
 										{purchaseType
-											? `${language[purchaseType]}${purchaseType === 'lease' ? ` (${leaseDuration} Years)` : ''}`
+											? `${language[purchaseType]}${
+													purchaseType === 'lease'
+														? ` (${leaseDuration} ${leaseDuration === 1 ? language.year : language.years})`
+														: ''
+											  }`
 											: '-'}
 									</p>
 								</S.CheckoutLine>
@@ -715,7 +742,7 @@ export default function Domains() {
 									type={'primary'}
 									label={language.clear}
 									handlePress={() => handleClear(true)}
-									disabled={!domain}
+									disabled={!domain || loadingAvailable}
 								/>
 								<Button
 									type={'alt1'}
@@ -845,7 +872,7 @@ export default function Domains() {
 										: language.permanent}
 								</S.ModalValue>
 							</S.ModalLine>
-							{!IS_TESTNET && (
+							{/* {!IS_TESTNET && (
 								<S.ModalLine>
 									<S.ModalLabel>{language.fundTurboPaymentHeader}</S.ModalLabel>
 									<S.ModalDivider />
@@ -857,7 +884,7 @@ export default function Domains() {
 										/>
 									</S.ModalValue>
 								</S.ModalLine>
-							)}
+							)} */}
 							<S.PaymentSummaryWrapper>
 								{(() => {
 									const payTokens = IS_TESTNET || confirmPaymentMethod === 'ario';
@@ -899,6 +926,16 @@ export default function Domains() {
 								})()}
 							</S.PaymentSummaryWrapper>
 						</S.ModalGrid>
+						<S.ModalPrimaryNameWrapper active={usePrimary} onClick={() => setUsePrimary((prev) => !prev)}>
+							<span>Set as primary domain</span>
+							<Checkbox checked={usePrimary} disabled={false} handleSelect={() => setUsePrimary((prev) => !prev)} />
+						</S.ModalPrimaryNameWrapper>
+						<S.ModalPrimaryNameDescription>
+							<span>
+								* This will set the default domain for this portal. When clicking 'Go To Site' from the editor, you will
+								be sent to this domain. Existing domains will still point to this portal.
+							</span>
+						</S.ModalPrimaryNameDescription>
 						<S.ModalActions>
 							<InsufficientBalanceCTA
 								method={IS_TESTNET ? 'ario' : confirmPaymentMethod}

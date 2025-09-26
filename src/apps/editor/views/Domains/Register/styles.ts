@@ -102,10 +102,10 @@ export const IndicatorLine = styled.div`
 `;
 
 export const Indicator = styled.div<{ status: null | 'valid' | 'invalid' }>`
-	min-height: 13.5px;
-	height: 13.5px;
-	min-width: 13.5px;
-	width: 13.5px;
+	min-height: 15px;
+	height: 15px;
+	min-width: 15px;
+	width: 15px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -118,9 +118,9 @@ export const Indicator = styled.div<{ status: null | 'valid' | 'invalid' }>`
 	border-radius: 50%;
 
 	svg {
-		height: 7.5px;
-		width: 7.5px;
-		margin: 0 0 2.15px 0;
+		height: 8.5px;
+		width: 8.5px;
+		margin: 0 0 1.5px 0;
 		color: ${(props) => props.theme.colors.font.light1};
 		fill: ${(props) => props.theme.colors.font.light1};
 	}
@@ -299,6 +299,7 @@ export const UpdateWrapper = styled.div`
 	gap: 7.5px;
 	border-radius: ${STYLING.dimensions.radius.primary} !important;
 	background: ${(props) => props.theme.colors.container.alt11.background};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
 
 	p {
 		color: ${(props) => props.theme.colors.font.light1} !important;
@@ -306,6 +307,33 @@ export const UpdateWrapper = styled.div`
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: none !important;
+	}
+`;
+
+export const UpdateWrapperIndicator = styled(UpdateWrapper)<{ status: 'valid' | 'invalid' }>`
+	background: ${(props) => {
+		if (props.status === 'valid') return props.theme.colors.indicator.active;
+		if (props.status === 'invalid') return props.theme.colors.warning.primary;
+		return props.theme.colors.container.alt4.background;
+	}};
+	border: 1px solid
+		${(props) => {
+			if (props.status === 'valid') return props.theme.colors.indicator.active;
+			if (props.status === 'invalid') return props.theme.colors.warning.primary;
+			return props.theme.colors.container.alt4.background;
+		}};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	box-shadow: 0 1.5px 10px 0 ${(props) => props.theme.colors.shadow.primary};
+
+	${Indicator} {
+		background: transparent !important;
+		border: none !important;
+
+		svg {
+			height: 12.5px;
+			width: 12.5px;
+			margin: ${(props) => (props.status === 'valid' ? '2.5px 0 0 0' : '7.5px 0 0 0')};
+		}
 	}
 `;
 
@@ -502,6 +530,49 @@ export const ModalValue = styled.span`
 
 	&.uppercase {
 		text-transform: none;
+	}
+`;
+
+export const ModalPrimaryNameWrapper = styled.div<{ active: boolean }>`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12.5px;
+	padding: 12.5px;
+	margin: 5px 0 0 0;
+	transition: all 100ms;
+
+	background: ${(props) =>
+		props.active
+			? props.theme.colors.button.primary.active.background
+			: props.theme.colors.container.primary.background};
+	border: 1px solid
+		${(props) => (props.active ? props.theme.colors.button.primary.active.border : props.theme.colors.border.primary)};
+	border-radius: ${STYLING.dimensions.radius.primary};
+
+	span {
+		color: ${(props) => (props.active ? props.theme.colors.font.primary : props.theme.colors.font.alt1)};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		text-transform: uppercase;
+	}
+
+	&:hover {
+		background: ${(props) => props.theme.colors.button.primary.active.background};
+		border: 1px solid ${(props) => props.theme.colors.button.primary.active.border};
+		cursor: pointer;
+	}
+`;
+
+export const ModalPrimaryNameDescription = styled.div`
+	margin: 0 0 5px 0;
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-family: ${(props) => props.theme.typography.family.primary};
 	}
 `;
 

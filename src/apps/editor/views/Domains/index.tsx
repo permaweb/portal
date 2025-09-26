@@ -1,7 +1,9 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ViewHeader } from 'editor/components/atoms/ViewHeader';
-import { DomainList } from 'editor/components/organisms/DomainList';
+import { DomainListArNS } from 'editor/components/organisms/DomainListArNS';
+import { DomainListPortal } from 'editor/components/organisms/DomainListPortal';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
@@ -17,11 +19,19 @@ export default function Domains() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	const [showAdditionalRecords, setShowAdditionalRecords] = React.useState(false);
+
 	return (
 		<S.Wrapper className={'fade-in'}>
 			<ViewHeader
 				header={language?.domains}
 				actions={[
+					<Button
+						type={'primary'}
+						label={showAdditionalRecords ? language.hideYourRecords : language.showYourRecords}
+						handlePress={() => setShowAdditionalRecords((prev) => !prev)}
+						disabled={false}
+					/>,
 					<Button
 						type={'alt1'}
 						label={language.registerDomain}
@@ -32,8 +42,19 @@ export default function Domains() {
 					/>,
 				]}
 			/>
-			<S.BodyWrapper className={'border-wrapper-alt2'}>
-				<DomainList />
+			<S.BodyWrapper>
+				<S.DomainsWrapper className={'border-wrapper-alt2'}>
+					<DomainListPortal type={'detail'} />
+				</S.DomainsWrapper>
+
+				{showAdditionalRecords && (
+					<S.DomainsWrapper>
+						<h6>Your Records</h6>
+						<S.DomainsArNS className={'border-wrapper-alt2'}>
+							<DomainListArNS />
+						</S.DomainsArNS>
+					</S.DomainsWrapper>
+				)}
 			</S.BodyWrapper>
 			{!portalProvider.permissions?.updatePortalMeta && (
 				<S.InfoWrapper className={'warning'}>

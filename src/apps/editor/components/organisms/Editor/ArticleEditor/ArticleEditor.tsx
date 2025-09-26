@@ -74,7 +74,7 @@ export default function ArticleEditor(props: {
 								externalRecipients: [],
 								dateCreated: null,
 								lastUpdate: null,
-								releaseDate: null,
+								releaseDate: response?.metadata?.releaseDate,
 							};
 
 							// Update current data

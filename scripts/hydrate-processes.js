@@ -4,9 +4,11 @@ const processes = [
 	'AkYCapq3Vh5BgHwZ-78xW8MyYsfcAiniiQDJPkAxQwk',
 	'_yrKMZgXrKRGzOHVGnLs0loYqguDWoky6GBLtXkOjU4',
 	'MnStjqzzLhtywkQKpyL8xYWbxsq1GbuS1OjRcLXKsQI',
+	'2qGS9rGidhOjlXIOogOcOSdvoEqr5OWhuxMdDXDiDF4',
+	'xmbVURrJAPE2FgheP26cb8YRzjXRTl6EFEzMDmReo74',
 ];
 
-const url = 'https://hb.portalinto.com';
+const url = 'http://localhost:8734';
 
 (async function () {
 	for (const processId of processes) {

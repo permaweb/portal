@@ -2,7 +2,7 @@ import Arweave from 'arweave';
 import { ARIOToken, mARIOToken } from '@ar.io/sdk';
 
 import { STORAGE, URLS } from './config';
-import { PortalAssetType, PortalUserType } from './types';
+import { PortalAssetType, PortalDomainType, PortalUserType } from './types';
 
 export function checkValidAddress(address: string | null) {
 	if (!address) return false;
@@ -376,4 +376,15 @@ export function stripAnsiChars(input: string) {
 	if (!input) return null;
 	const ansiRegex = /\x1B\[[0-9;]*m/g;
 	return input.toString().replace(ansiRegex, '');
+}
+
+function getCurrentGateway() {
+	const { host } = window.location;
+	const parts = host.split('.');
+	return `${parts[1]}.${parts[2]}`;
+}
+
+export function resolvePrimaryDomain(domains: PortalDomainType[]) {
+	const gateway = window.location.hostname === 'localhost' ? 'arweave.net' : getCurrentGateway();
+	return `https://${domains?.find((domain) => domain.primary)?.name || domains?.[0]?.name}.${gateway}`;
 }
