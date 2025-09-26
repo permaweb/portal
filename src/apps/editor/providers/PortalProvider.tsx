@@ -273,6 +273,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									updatedPortal.categories = data.categories ?? updatedPortal.categories ?? [];
 									updatedPortal.topics = data.topics ?? updatedPortal.topics ?? [];
 									updatedPortal.links = data.links ?? updatedPortal.links ?? [];
+									updatedPortal.domains = data.domains ?? updatedPortal.domains ?? [];
 									break;
 								case 'media':
 									updatedPortal.uploads = data.uploads ?? updatedPortal.uploads ?? [];

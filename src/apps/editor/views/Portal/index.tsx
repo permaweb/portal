@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
 import { ViewHeader } from 'editor/components/atoms/ViewHeader';
-import { DomainList } from 'editor/components/organisms/DomainList';
+import { DomainListPortal } from 'editor/components/organisms/DomainListPortal';
 import { PortalDesign } from 'editor/components/organisms/PortalDesign';
 import { PortalSetup } from 'editor/components/organisms/PortalSetup';
 import { PostList } from 'editor/components/organisms/PostList';
@@ -10,7 +10,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { ASSETS, URLS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
+import { resolvePrimaryDomain } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -34,14 +34,7 @@ export default function Portal() {
 					<Button
 						type={'primary'}
 						label={language?.goToSite}
-						handlePress={() => {
-							// In development, redirect to local engine on port 5000
-							const siteUrl =
-								window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-									? `http://localhost:5000/${portalProvider.current.id}`
-									: getTxEndpoint(portalProvider.current.id);
-							window.open(siteUrl);
-						}}
+						handlePress={() => window.open(resolvePrimaryDomain(portalProvider.current?.domains))}
 						disabled={!portalProvider.current}
 						icon={ASSETS.site}
 						iconLeftAlign
@@ -86,7 +79,7 @@ export default function Portal() {
 							/>
 						</S.SectionHeader>
 						<S.SectionBody>
-							<DomainList />
+							<DomainListPortal type={'header'} />
 						</S.SectionBody>
 					</S.DomainSection>
 				</S.SectionWrapper>

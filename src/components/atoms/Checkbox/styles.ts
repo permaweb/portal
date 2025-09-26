@@ -3,8 +3,8 @@ import styled from 'styled-components';
 export const Wrapper = styled.div<{ disabled: boolean }>`
 	position: relative;
 	svg {
-		height: 9.5px;
-		width: 9.5px;
+		height: 11.5px;
+		width: 11.5px;
 		margin: 1.5px 0 0 0;
 		position: absolute;
 		top: 0;
@@ -26,9 +26,9 @@ export const Input = styled.input`
 		props.checked ? props.theme.colors.checkbox.active.background : props.theme.colors.checkbox.background};
 	border: 1px solid
 		${(props) => (props.checked ? props.theme.colors.checkbox.active.background : props.theme.colors.border.alt4)};
-	border-radius: 1.5px;
-	height: 12.5px;
-	width: 12.5px;
+	border-radius: 2.5px;
+	height: 15px;
+	width: 15px;
 	position: relative;
 	display: flex;
 	align-items: center;

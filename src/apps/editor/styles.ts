@@ -14,10 +14,7 @@ export const View = styled.main<{ navigationOpen: boolean; navWidth?: number }>`
 	position: relative;
 	top: ${STYLING.dimensions.nav.height};
 	padding: 0 20px 20px
-		${(props) =>
-			props.navigationOpen
-				? `calc(${props.navWidth ? `${props.navWidth}px` : STYLING.dimensions.nav.width} + 30px)`
-				: '30px'};
+		calc(${(props) => (props.navWidth ? `${props.navWidth}px` : STYLING.dimensions.nav.width)} + 30px);
 	margin: 0 auto;
 	transition: padding-left ${transition2};
 	display: flex;
@@ -59,10 +56,7 @@ export const Footer = styled.footer<{ navigationOpen: boolean; navWidth?: number
 	width: 100%;
 	max-width: ${STYLING.cutoffs.max};
 	padding: 0 20px 15px
-		${(props) =>
-			props.navigationOpen
-				? `calc(${props.navWidth ? `${props.navWidth}px` : STYLING.dimensions.nav.width} + 30px)`
-				: '30px'};
+		calc(${(props) => (props.navWidth ? `${props.navWidth}px` : STYLING.dimensions.nav.width)} + 30px);
 	transition: padding-left ${transition2};
 	margin: ${STYLING.dimensions.nav.height} 0 0 0;
 	display: flex;

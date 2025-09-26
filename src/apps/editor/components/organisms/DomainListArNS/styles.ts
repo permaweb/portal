@@ -179,8 +179,7 @@ export const DomainDetail = styled.div`
 export const DomainActions = styled.div`
 	display: flex;
 	align-items: center;
-	column-gap: 12px;
-	row-gap: 8px;
+	gap: 12.5px;
 	flex-wrap: wrap;
 `;
 
@@ -205,7 +204,7 @@ export const LoadingWrapper = styled(WrapperEmpty)`
 `;
 
 export const SectionHeader = styled.div`
-	padding: 20px 15px 15px 15px;
+	padding: 17.5px 15px 15px 15px;
 	background: ${(props) => props.theme.colors.container.alt1.background};
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 
