@@ -14,6 +14,7 @@ export const Wrapper = styled.div<{ status: string }>`
 `;
 
 export const Comment = styled.div<{ $level: number }>`
+	position: relative;
 	display: flex;
 	gap: 10px;
 	margin-left: ${(props) => `calc(${props.$level} * 30px)`};
@@ -149,5 +150,35 @@ export const Action = styled.div`
 	&:hover {
 		cursor: pointer;
 		opacity: 1;
+	}
+`;
+
+export const LoadingOverlay = styled.div`
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(2px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--border-radius);
+	z-index: 10;
+`;
+
+export const Spinner = styled.div`
+	width: 30px;
+	height: 30px;
+	border: 3px solid rgba(255, 255, 255, 0.2);
+	border-top-color: rgba(var(--color-primary), 1);
+	border-radius: 50%;
+	animation: spin 0.8s linear infinite;
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 `;

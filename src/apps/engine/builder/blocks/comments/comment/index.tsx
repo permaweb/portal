@@ -14,11 +14,14 @@ export default function Comment(props: any) {
 	const { profile, isLoading: isLoadingProfile } = useProfile(data?.creator || '');
 	const [showEditor, setShowEditor] = React.useState(false);
 	const [openMenu, setOpenMenu] = React.useState(false);
+	const [commentData, setCommentData] = React.useState(data);
+	const [isUpdating, setIsUpdating] = React.useState(false);
 	const menuRef = React.useRef<HTMLDivElement>(null);
 	const { profile: user, libs } = usePermawebProvider();
 
 	const canEditCommentStatus = ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
-	const canRemoveComment = ['Admin', 'Moderator'].some((r) => user.roles.includes(r)) || data.creator === user.owner;
+	const canRemoveComment =
+		['Admin', 'Moderator'].some((r) => user.roles.includes(r)) || commentData.creator === user.owner;
 	const showMenu = canEditCommentStatus || canRemoveComment;
 
 	React.useEffect(() => {
@@ -45,26 +48,43 @@ export default function Comment(props: any) {
 	}
 
 	async function handleCommentRemove() {
-		const removeId = await libs.removeComment({
-			commentsId: commentsId,
-			commentId: data.id,
-		});
-		console.log('removeId: ', removeId);
+		setOpenMenu(false);
+		setIsUpdating(true);
+		try {
+			await libs.removeComment({
+				commentsId: commentsId,
+				commentId: commentData.id,
+			});
+		} finally {
+			setIsUpdating(false);
+		}
 	}
 
 	async function handleCommentStatus(status: string) {
-		console.log('Block comment: ', commentsId);
-		const updateId = await libs.updateCommentStatus({
-			commentsId: commentsId,
-			commentId: data.id,
-			status: status,
-		});
-		console.log('updateId: ', updateId);
+		setOpenMenu(false);
+		setIsUpdating(true);
+		try {
+			const updateId = await libs.updateCommentStatus({
+				commentsId: commentsId,
+				commentId: commentData.id,
+				status: status,
+			});
+			if (updateId) {
+				setCommentData({ ...commentData, status: status });
+			}
+		} finally {
+			setIsUpdating(false);
+		}
 	}
 
-	return data && (data.status === 'active' || canEditCommentStatus) ? (
-		<S.Wrapper status={data.status}>
+	return commentData && (commentData.status === 'active' || canEditCommentStatus) ? (
+		<S.Wrapper status={commentData.status}>
 			<S.Comment $level={level}>
+				{isUpdating && (
+					<S.LoadingOverlay>
+						<S.Spinner />
+					</S.LoadingOverlay>
+				)}
 				<S.Avatar>
 					<img
 						className="loadingAvatar"
@@ -76,10 +96,10 @@ export default function Comment(props: any) {
 					<S.Meta>
 						<S.Username>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</S.Username>
 						<S.Date>
-							{!data?.dateCreated ? (
+							{!commentData?.dateCreated ? (
 								<Placeholder />
 							) : (
-								new Date(data.dateCreated).toLocaleString('en-US', {
+								new Date(commentData.dateCreated).toLocaleString('en-US', {
 									day: '2-digit',
 									month: '2-digit',
 									year: '2-digit',
@@ -90,7 +110,7 @@ export default function Comment(props: any) {
 							)}
 						</S.Date>
 					</S.Meta>
-					<S.Text>{data.content}</S.Text>
+					<S.Text>{commentData.content}</S.Text>
 					{showMenu && (
 						<S.Menu ref={menuRef}>
 							<S.IconWrapper onClick={() => setOpenMenu(!openMenu)}>
@@ -101,10 +121,10 @@ export default function Comment(props: any) {
 									<S.MenuCategory>
 										{canEditCommentStatus && (
 											<S.MenuEntry
-												onClick={() => handleCommentStatus(data.status === 'active' ? 'inactive' : 'active')}
+												onClick={() => handleCommentStatus(commentData.status === 'active' ? 'inactive' : 'active')}
 											>
-												<ReactSVG src={data.status === 'active' ? ICONS_UI.HIDE : ICONS_UI.SHOW} />
-												{data.status === 'active' ? 'Hide Comment' : 'Unhide Comment'}
+												<ReactSVG src={commentData.status === 'active' ? ICONS_UI.HIDE : ICONS_UI.SHOW} />
+												{commentData.status === 'active' ? 'Hide Comment' : 'Unhide Comment'}
 											</S.MenuEntry>
 										)}
 										{canRemoveComment && (
@@ -115,9 +135,9 @@ export default function Comment(props: any) {
 										)}
 									</S.MenuCategory>
 									{/* <S.MenuCategory>
-								<S.MenuEntry onClick={handleUserMute}>Mute User</S.MenuEntry>
-								<S.MenuEntry onClick={handleUserBlock}>Block User</S.MenuEntry>
-							</S.MenuCategory> */}
+										<S.MenuEntry onClick={handleUserMute}>Mute User</S.MenuEntry>
+										<S.MenuEntry onClick={handleUserBlock}>Block User</S.MenuEntry>
+									</S.MenuCategory> */}
 								</S.MenuEntries>
 							)}
 						</S.Menu>
@@ -132,7 +152,7 @@ export default function Comment(props: any) {
 					</S.Actions>
 				</S.Content>
 			</S.Comment>
-			{showEditor && <CommentAdd commentsId={commentsId} parentId={data.id} />}
+			{showEditor && <CommentAdd commentsId={commentsId} parentId={commentData.id} />}
 		</S.Wrapper>
 	) : null;
 }

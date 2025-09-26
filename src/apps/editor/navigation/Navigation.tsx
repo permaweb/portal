@@ -45,37 +45,42 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalPosts(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.posts,
+				icon: ICONS_UI.POSTS,
 				label: language?.posts,
 			},
 			{
+				path: portalProvider.current?.id ? URLS.portalModeration(portalProvider.current.id) : URLS.base,
+				icon: ICONS_UI.MODERATION,
+				label: language?.moderation,
+			},
+			{
 				path: portalProvider.current?.id ? URLS.portalDesign(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.design,
+				icon: ICONS_UI.DESIGN,
 				label: language?.design,
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalMedia(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.media,
+				icon: ICONS_UI.MEDIA,
 				label: language?.media,
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalSetup(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.setup,
+				icon: ICONS_UI.SETUP,
 				label: language?.setup,
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalUsers(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.users,
+				icon: ICONS_UI.USERS,
 				label: language?.users,
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalPages(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.pages,
+				icon: ICONS_UI.PAGES,
 				label: language?.pages,
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalDomains(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.domains,
+				icon: ICONS_UI.DOMAINS,
 				label: language?.domains,
 			},
 		];
