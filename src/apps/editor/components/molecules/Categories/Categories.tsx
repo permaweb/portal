@@ -140,7 +140,7 @@ export default function Categories(props: {
 	};
 
 	const CategoryOptions = ({ categories, level = 0 }: { categories: PortalCategoryType[]; level?: number }) => {
-		const isDragEnabled = props.allowReorder;
+		const isDragEnabled = props.allowReorder && portalProvider.permissions?.updatePortalMeta;
 
 		return (
 			<S.CategoriesList>
@@ -172,7 +172,7 @@ export default function Categories(props: {
 			);
 		}
 
-		if (props.allowReorder) {
+		if (props.allowReorder && portalProvider.permissions?.updatePortalMeta) {
 			const flattened = flattenCategories(categoryOptions);
 
 			return (

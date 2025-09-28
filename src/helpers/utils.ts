@@ -384,7 +384,9 @@ function getCurrentGateway() {
 	return `${parts[1]}.${parts[2]}`;
 }
 
-export function resolvePrimaryDomain(domains: PortalDomainType[]) {
+export function resolvePrimaryDomain(domains: PortalDomainType[], portalId: string) {
 	const gateway = window.location.hostname === 'localhost' ? 'arweave.net' : getCurrentGateway();
-	return `https://${domains?.find((domain) => domain.primary)?.name || domains?.[0]?.name}.${gateway}`;
+	const domain = domains?.find((domain) => domain.primary)?.name || domains?.[0]?.name;
+	if (domain) return `https://${domain}.${gateway}`;
+	else return `https://${gateway}/${portalId}`;
 }

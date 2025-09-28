@@ -34,7 +34,9 @@ export default function Portal() {
 					<Button
 						type={'primary'}
 						label={language?.goToSite}
-						handlePress={() => window.open(resolvePrimaryDomain(portalProvider.current?.domains))}
+						handlePress={() =>
+							window.open(resolvePrimaryDomain(portalProvider.current?.domains, portalProvider.current?.id))
+						}
 						disabled={!portalProvider.current}
 						icon={ASSETS.site}
 						iconLeftAlign
