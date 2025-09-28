@@ -296,7 +296,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 								<S.PDropdownFooter>
 									<button
 										onClick={() => {
-											window.open(resolvePrimaryDomain(portalProvider.current?.domains));
+											window.open(resolvePrimaryDomain(portalProvider.current?.domains, portalProvider.current?.id));
 											setShowPortalDropdown(false);
 										}}
 									>
