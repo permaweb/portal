@@ -121,8 +121,8 @@ export const language = {
 		domainRegistrationSuccessful: `Domain Registration Successful!`,
 		domains: `Domains`,
 		domainsLink: `Go to Domains`,
-		domainUnavailable: `This domain is not available`,
 		domainsUpdated: `Domains Updated`,
+		domainUnavailable: `This domain is not available`,
 		done: `Done`,
 		draft: `Draft`,
 		edit: `Edit`,
@@ -375,10 +375,10 @@ export const language = {
 		select: `Select`,
 		selectParentCategory: `Select Parent Category`,
 		selectPortal: `Select Your Portal`,
+		setPrimaryDomain: `Set as Primary Domain`,
 		settings: `Settings`,
 		setup: `Setup`,
 		setupLink: `Go to Full Setup`,
-		setPrimaryDomain: `Set as Primary Domain`,
 		shareCredits: `Share Credits`,
 		showCaptionTools: `Show Caption Tools`,
 		showDomainActions: `Show Domain Actions`,
@@ -478,6 +478,16 @@ export const language = {
 		yyyyPlaceholder: `YYYY`,
 	},
 	es: {
+		// === UNTRANSLATED START ===
+		// TODO: translate
+
+		domainsUpdated: `Domains Updated`,
+		hideYourRecords: `Hide Your Records`,
+		primaryDomain: `Primary Domain`,
+		setPrimaryDomain: `Set as Primary Domain`,
+		showDomainActions: `Show Domain Actions`,
+		showYourRecords: `Show Your Records`,
+		// === UNTRANSLATED END ===
 		add: `Agregar`,
 		addCaption: `Agregar descripción`,
 		addCategory: `Agregar categoría`,
