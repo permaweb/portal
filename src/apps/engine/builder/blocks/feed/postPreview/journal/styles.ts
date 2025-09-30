@@ -158,6 +158,12 @@ export const Avatar = styled.div`
 		height: 18px;
 		border-radius: 50%;
 	}
+
+	svg {
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+	}
 `;
 
 export const Username = styled.div`
