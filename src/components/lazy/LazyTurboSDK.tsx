@@ -23,6 +23,7 @@ export const useTurboSDK = () => {
 				loading = true;
 
 				// Dynamic import - only loads when actually needed
+				// @ts-ignore
 				const turboModule = await import('@ardrive/turbo-sdk/web');
 				TurboSDK = turboModule;
 				setSdk(turboModule);

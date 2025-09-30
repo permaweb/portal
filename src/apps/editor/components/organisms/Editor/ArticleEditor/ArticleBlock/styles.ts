@@ -27,20 +27,6 @@ function getElementPadding(type: ArticleBlockEnum) {
 	}
 }
 
-function getElementToolbarToggleDisplay(type: ArticleBlockEnum) {
-	switch (type) {
-		case 'image':
-		case 'video':
-		case 'code':
-		case 'quote':
-		case 'ordered-list':
-		case 'unordered-list':
-			return 'none';
-		default:
-			return 'block';
-	}
-}
-
 function getElementWrapper(blockEditMode: boolean, type: ArticleBlockEnum, theme: DefaultTheme) {
 	switch (type) {
 		case 'image':
@@ -135,19 +121,6 @@ export const ElementWrapper = styled.div<{ blockEditMode: boolean; type: Article
 	gap: 10px;
 	position: relative;
 	cursor: default;
-
-	/* ${(props) =>
-		!props.blockEditMode &&
-		`
-		&:hover {
-			${ElementToolbarToggle} {
-				display: block;
-			}
-			${ElementIndicatorDivider} {
-				display: ${getElementToolbarToggleDisplay(props.type)};
-			}
-		}
-	`} */
 `;
 
 export const ElementDragWrapper = styled.div`
@@ -169,6 +142,14 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 		text-decoration: underline;
 		text-decoration-thickness: 1.25px;
 		cursor: pointer;
+	}
+
+	i {
+		font-style: italic;
+	}
+
+	b {
+		font-weight: 700;
 	}
 
 	blockquote {
@@ -340,12 +321,19 @@ export const SelectionWrapper = styled.div`
 	}
 `;
 
-export const BlockSelector = styled.div<{ blockEditMode: boolean }>`
+export const BlockSelector = styled.div<{ blockEditMode: boolean; position?: 'above' | 'below' }>`
 	max-height: 65vh;
 	width: 300px;
 	position: absolute;
-	z-index: 1;
-	top: ${(props) => (props.blockEditMode ? '67.5px' : '27.5px')};
+	z-index: 10;
+	${(props) =>
+		props.position === 'above'
+			? `
+		bottom: ${props.blockEditMode ? '67.5px' : '34.5px'};
+	`
+			: `
+		top: ${props.blockEditMode ? '67.5px' : '27.5px'};
+	`}
 	left: ${(props) => (props.blockEditMode ? '15px' : '0px')};
 	padding: 15px 5px;
 `;

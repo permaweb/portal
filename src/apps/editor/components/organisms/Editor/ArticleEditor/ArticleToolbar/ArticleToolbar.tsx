@@ -26,6 +26,7 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { ArticleBlocks } from '../ArticleBlocks';
 import { ArticlePost } from '../ArticlePost';
 
+import { ArticleToolbarMarkup } from './ArticleToolbarMarkup';
 import * as S from './styles';
 
 export default function ArticleToolbar(props: {
@@ -52,14 +53,15 @@ export default function ArticleToolbar(props: {
 
 	const titleRef = React.useRef<any>(null);
 	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.label);
-	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.initial)));
+	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
+	const prevDesktopRef = React.useRef<boolean>(desktop);
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
 
 	function handleWindowResize() {
-		if (checkWindowCutoff(parseInt(STYLING.cutoffs.initial))) {
+		if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {
 			setDesktop(true);
 		} else {
 			setDesktop(false);
@@ -81,7 +83,15 @@ export default function ArticleToolbar(props: {
 	}, [titleRef]);
 
 	React.useEffect(() => {
-		if (!desktop) handleCurrentPostUpdate({ field: 'panelOpen', value: false });
+		const wasDesktop = prevDesktopRef.current;
+		const isDesktop = desktop;
+
+		// Close panel when transitioning to mobile OR from mobile to desktop
+		if ((!isDesktop && wasDesktop) || (isDesktop && !wasDesktop)) {
+			handleCurrentPostUpdate({ field: 'panelOpen', value: false });
+		}
+
+		prevDesktopRef.current = desktop;
 	}, [desktop]);
 
 	React.useEffect(() => {
@@ -218,15 +228,9 @@ export default function ArticleToolbar(props: {
 	}
 
 	const panel = React.useMemo(() => {
-		const content = (
+		const content = currentPost.editor.panelOpen ? (
 			<S.Panel className={'border-wrapper-primary fade-in'} open={currentPost.editor.panelOpen}>
-				<Tabs onTabPropClick={(label: string) => setCurrentTab(label)} type={'alt1'}>
-					{TABS.map((tab: { label: string; icon?: string }, index: number) => {
-						return <S.TabWrapper key={index} label={tab.label} icon={tab.icon ? tab.icon : null} />;
-					})}
-				</Tabs>
-				<S.TabContent className={'scroll-wrapper-hidden'}>{getCurrentTab()}</S.TabContent>
-				<S.PanelCloseWrapper>
+				<S.PanelCloseWrapperStart>
 					<IconButton
 						type={'primary'}
 						src={ASSETS.close}
@@ -240,9 +244,32 @@ export default function ArticleToolbar(props: {
 						noFocus
 						disabled={currentPost.editor.loading.active}
 					/>
-				</S.PanelCloseWrapper>
+				</S.PanelCloseWrapperStart>
+				<Tabs onTabPropClick={(label: string) => setCurrentTab(label)} type={'alt1'}>
+					{TABS.map((tab: { label: string; icon?: string }, index: number) => {
+						return <S.TabWrapper key={index} label={tab.label} icon={tab.icon ? tab.icon : null} />;
+					})}
+				</Tabs>
+				<S.TabContent className={'scroll-wrapper-hidden'}>
+					{getCurrentTab()}
+					{!desktop && (
+						<S.PanelCloseWrapperEnd>
+							<Button
+								type={'primary'}
+								label={language?.closeToolkit}
+								handlePress={() =>
+									handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })
+								}
+								noFocus
+								disabled={currentPost.editor.loading.active}
+								height={40}
+								fullWidth
+							/>
+						</S.PanelCloseWrapperEnd>
+					)}
+				</S.TabContent>
 			</S.Panel>
-		);
+		) : null;
 		if (!desktop)
 			return currentPost.editor.panelOpen ? (
 				<Portal node={DOM.overlay}>
@@ -265,6 +292,7 @@ export default function ArticleToolbar(props: {
 					/>
 				</S.TitleWrapper>
 				<S.EndActions>
+					<ArticleToolbarMarkup />
 					<Button
 						type={'primary'}
 						label={language?.toolkit}

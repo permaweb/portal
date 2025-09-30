@@ -29,7 +29,6 @@ export const BADropdownAction = styled.div`
 		width: 100%;
 		display: flex;
 		align-items: center;
-		background: ${(props) => props.theme.colors.container.primary.background};
 		border-radius: ${STYLING.dimensions.radius.alt4};
 		transition: all 100ms;
 		padding: 0 10px;

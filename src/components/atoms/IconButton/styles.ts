@@ -107,25 +107,39 @@ export const Primary = styled.button<{
 	pointer-events: ${(props) => (props.disabled ? 'none' : 'all')};
 	border-radius: 50%;
 
+	background: ${(props) =>
+		props.active
+			? props.theme.colors.button.primary.active.background
+			: props.disabled
+			? props.theme.colors.button.primary.disabled.background
+			: 'transparent'};
+	border: 1px solid
+		${(props) =>
+			props.active
+				? props.theme.colors.button.primary.active.border
+				: props.disabled
+				? props.theme.colors.button.primary.disabled.border
+				: 'transparent'};
+
 	svg {
 		height: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)} !important;
 		width: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)} !important;
 		margin: auto !important;
 		color: ${(props) =>
 			props.disabled
-				? props.theme.colors.icon.primary.disabled
+				? props.theme.colors.icon.alt1.disabled
 				: props.active
-				? props.theme.colors.icon.primary.fill
-				: props.theme.colors.icon.primary.fill};
+				? props.theme.colors.button.primary.active.color
+				: props.theme.colors.button.primary.color};
 		fill: ${(props) =>
 			props.disabled
-				? props.theme.colors.icon.primary.disabled
+				? props.theme.colors.icon.alt1.disabled
 				: props.active
-				? props.theme.colors.icon.primary.fill
-				: props.theme.colors.icon.primary.fill};
+				? props.theme.colors.button.primary.active.color
+				: props.theme.colors.button.primary.color};
 	}
 	&:hover {
-		background: ${(props) => props.theme.colors.icon.primary.active};
+		background: ${(props) => props.theme.colors.button.primary.active.background};
 	}
 `;
 
