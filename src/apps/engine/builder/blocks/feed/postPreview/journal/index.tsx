@@ -4,16 +4,34 @@ import Placeholder from 'engine/components/placeholder';
 import useNavigate from 'engine/helpers/preview';
 import { useComments } from 'engine/hooks/comments';
 import { useProfile } from 'engine/hooks/profiles';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 import { getTxEndpoint } from 'helpers/endpoints';
+import { ICONS_UI } from 'helpers/config';
+import { usePermawebProvider } from 'providers/PermawebProvider';
+import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 
 import * as S from './styles';
 
 export default function PostPreview_Journal(props: any) {
 	const navigate = useNavigate();
-	const { layout } = props;
-	const { preview, post, loading } = props;
+	const { profile: user } = usePermawebProvider();
+	const { portal } = usePortalProvider();
+	const { layout, post } = props;
 	const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || null);
 	const { comments, isLoading: isLoadingComments, error: errorComments } = useComments(post?.id || null, true);
+
+	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+
+	const menuEntries: MenuItem[] = [];
+
+	if (canEditPost) {
+		menuEntries.push({
+			icon: ICONS_UI.EDIT,
+			label: 'Edit Post',
+			action: 'editPost',
+			postId: post?.id,
+		});
+	}
 
 	const Comment = (data: any) => {
 		const { data: comment } = data;
@@ -37,9 +55,10 @@ export default function PostPreview_Journal(props: any) {
 
 	return (
 		<S.Post $layout={layout && layout.card}>
+			<ContextMenu entries={menuEntries} />
 			<S.Categories>
 				{post ? (
-					post?.metadata?.categories.map((category: any, index: number) => {
+					post?.metadata?.categories?.map((category: any, index: number) => {
 						return (
 							<React.Fragment key={index}>
 								<NavLink to={`/feed/category/${category.id}`}>
@@ -55,9 +74,17 @@ export default function PostPreview_Journal(props: any) {
 			</S.Categories>
 			<S.Content>
 				<S.SideA>
-					<h2 className={!post ? 'loadingPlaceholder' : ''} onClick={(e) => navigate(`/post/${post?.id}`)}>
-						<span>{post ? post?.name : <Placeholder width="180" />}</span>
-					</h2>
+					<S.TitleWrapper>
+						<h2 className={!post ? 'loadingPlaceholder' : ''} onClick={(e) => navigate(`/post/${post?.id}`)}>
+							<span>{post ? post?.name : <Placeholder width="180" />}</span>
+						</h2>
+						{post?.metadata?.status === 'draft' && (
+							<S.DraftIndicator>
+								<S.DraftDot />
+								Draft
+							</S.DraftIndicator>
+						)}
+					</S.TitleWrapper>
 					<p>{post?.metadata.description}</p>
 					<S.Meta>
 						<S.SourceIcon

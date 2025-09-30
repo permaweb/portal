@@ -89,7 +89,10 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 				const portalUsers = users?.roles ? getPortalUsers(users.roles) : null;
 
-				const userIdentifier = permawebProvider.profile?.id || arProvider.walletAddress;
+				// Only consider user logged in if they have a wallet address
+				const userIdentifier = arProvider.walletAddress
+					? permawebProvider.profile?.id || arProvider.walletAddress
+					: null;
 
 				if (userIdentifier && portalUsers && users?.permissions) {
 					const currentPortalUser = portalUsers.find((user: PortalUserType) => user.address === userIdentifier);
@@ -100,6 +103,10 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 					setPermissions(getUserPermissions(userIdentifier, portalUsers, users.permissions));
 				} else {
+					// Clear roles when no user is logged in
+					if (permawebProvider.profile) {
+						permawebProvider.setPortalRoles([]);
+					}
 					setPermissions({ base: false });
 				}
 

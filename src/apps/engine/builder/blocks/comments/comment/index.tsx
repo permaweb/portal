@@ -6,6 +6,7 @@ import { useProfile } from 'engine/hooks/profiles';
 import { ICONS_UI } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import CommentAdd from '../commentAdd';
+import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 
 import * as S from './styles';
 
@@ -13,31 +14,16 @@ export default function Comment(props: any) {
 	const { data, level, commentsId } = props;
 	const { profile, isLoading: isLoadingProfile } = useProfile(data?.creator || '');
 	const [showEditor, setShowEditor] = React.useState(false);
-	const [openMenu, setOpenMenu] = React.useState(false);
 	const [commentData, setCommentData] = React.useState(data);
 	const [isUpdating, setIsUpdating] = React.useState(false);
-	const menuRef = React.useRef<HTMLDivElement>(null);
 	const { profile: user, libs } = usePermawebProvider();
 
-	const canEditCommentStatus = ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+	const canEditCommentStatus = user?.owner && ['Admin', 'Moderator'].some((r) => user?.roles?.includes(r));
 	const canRemoveComment =
-		['Admin', 'Moderator'].some((r) => user.roles.includes(r)) || commentData.creator === user.owner;
-	const showMenu = canEditCommentStatus || canRemoveComment;
-
-	React.useEffect(() => {
-		function handleClickOutside(event: MouseEvent) {
-			if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-				setOpenMenu(false);
-			}
-		}
-
-		if (showMenu) {
-			document.addEventListener('mousedown', handleClickOutside);
-			return () => {
-				document.removeEventListener('mousedown', handleClickOutside);
-			};
-		}
-	}, [showMenu]);
+		(user?.owner && ['Admin', 'Moderator'].some((r) => user?.roles?.includes(r))) ||
+		commentData.creator === user?.owner;
+	const canEditComment = user?.owner && commentData.creator === user?.owner;
+	const showMenu = canEditCommentStatus || canRemoveComment || canEditComment;
 
 	function handleUserMute() {
 		console.log('Mute user: ', profile?.id);
@@ -48,7 +34,6 @@ export default function Comment(props: any) {
 	}
 
 	async function handleCommentRemove() {
-		setOpenMenu(false);
 		setIsUpdating(true);
 		try {
 			await libs.removeComment({
@@ -61,9 +46,9 @@ export default function Comment(props: any) {
 	}
 
 	async function handleCommentStatus(status: string) {
-		setOpenMenu(false);
 		setIsUpdating(true);
 		try {
+			console.log('libs: ', libs);
 			const updateId = await libs.updateCommentStatus({
 				commentsId: commentsId,
 				commentId: commentData.id,
@@ -77,7 +62,43 @@ export default function Comment(props: any) {
 		}
 	}
 
-	return commentData && (commentData.status === 'active' || canEditCommentStatus) ? (
+	const menuEntries: MenuItem[] = [];
+
+	if (canEditComment) {
+		menuEntries.push({
+			icon: ICONS_UI.EDIT,
+			label: 'Edit Comment',
+			onClick: () => {}, // TODO: implement edit functionality
+		});
+		// Add spacer after edit if there are other options
+		if (canEditCommentStatus || canRemoveComment) {
+			menuEntries.push({ type: 'spacer' });
+		}
+	}
+
+	if (canEditCommentStatus) {
+		menuEntries.push({
+			icon: commentData.status === 'active' ? ICONS_UI.HIDE : ICONS_UI.SHOW,
+			label: commentData.status === 'active' ? 'Hide Comment' : 'Unhide Comment',
+			onClick: () => handleCommentStatus(commentData.status === 'active' ? 'inactive' : 'active'),
+		});
+	}
+
+	if (canRemoveComment) {
+		menuEntries.push({
+			icon: ICONS_UI.REMOVE,
+			label: 'Remove Comment',
+			onClick: handleCommentRemove,
+		});
+	}
+
+	// Re-check visibility when user changes
+	if (!commentData) return null;
+	// Explicitly check if user is logged in and has permission for hidden comments
+	const hasModPermission = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+	if (commentData.status !== 'active' && !hasModPermission) return null;
+
+	return (
 		<S.Wrapper status={commentData.status}>
 			<S.Comment $level={level}>
 				{isUpdating && (
@@ -95,6 +116,12 @@ export default function Comment(props: any) {
 				<S.Content>
 					<S.Meta>
 						<S.Username>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</S.Username>
+						{commentData.status !== 'active' && (
+							<S.HiddenIndicator>
+								<ReactSVG src={ICONS_UI.HIDE} />
+								Hidden
+							</S.HiddenIndicator>
+						)}
 						<S.Date>
 							{!commentData?.dateCreated ? (
 								<Placeholder />
@@ -111,37 +138,7 @@ export default function Comment(props: any) {
 						</S.Date>
 					</S.Meta>
 					<S.Text>{commentData.content}</S.Text>
-					{showMenu && (
-						<S.Menu ref={menuRef}>
-							<S.IconWrapper onClick={() => setOpenMenu(!openMenu)}>
-								<ReactSVG src={ICONS_UI.MENU} />
-							</S.IconWrapper>
-							{openMenu && (
-								<S.MenuEntries>
-									<S.MenuCategory>
-										{canEditCommentStatus && (
-											<S.MenuEntry
-												onClick={() => handleCommentStatus(commentData.status === 'active' ? 'inactive' : 'active')}
-											>
-												<ReactSVG src={commentData.status === 'active' ? ICONS_UI.HIDE : ICONS_UI.SHOW} />
-												{commentData.status === 'active' ? 'Hide Comment' : 'Unhide Comment'}
-											</S.MenuEntry>
-										)}
-										{canRemoveComment && (
-											<S.MenuEntry onClick={handleCommentRemove}>
-												<ReactSVG src={ICONS_UI.REMOVE} />
-												Remove Comment
-											</S.MenuEntry>
-										)}
-									</S.MenuCategory>
-									{/* <S.MenuCategory>
-										<S.MenuEntry onClick={handleUserMute}>Mute User</S.MenuEntry>
-										<S.MenuEntry onClick={handleUserBlock}>Block User</S.MenuEntry>
-									</S.MenuCategory> */}
-								</S.MenuEntries>
-							)}
-						</S.Menu>
-					)}
+					<ContextMenu entries={menuEntries} />
 					<S.Actions>
 						<S.Action onClick={() => setShowEditor(true)}>
 							<ReactSVG src={ICONS_UI.REPLY} />
@@ -154,5 +151,5 @@ export default function Comment(props: any) {
 			</S.Comment>
 			{showEditor && <CommentAdd commentsId={commentsId} parentId={commentData.id} />}
 		</S.Wrapper>
-	) : null;
+	);
 }

@@ -49,6 +49,8 @@ export const Editor = styled.div`
 		font-size: 14px;
 		line-height: 1.5;
 		position: relative;
+		z-index: 2;
+		cursor: text;
 	}
 
 	.editor-paragraph {

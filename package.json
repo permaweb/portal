@@ -40,7 +40,7 @@
 		"@lexical/utils": "^0.34.0",
 		"@monaco-editor/react": "^4.7.0",
 		"@permaweb/aoconnect": "https://arweave.net/ukZWnWNLVS6cdk9ohkHlmyY8NGRYde2EDfdeXB5BVwU",
-		"@permaweb/libs": "0.0.56",
+		"@permaweb/libs": "^0.0.58",
 		"@stripe/react-stripe-js": "^3.5.1",
 		"@stripe/stripe-js": "^6.1.0",
 		"@wanderapp/connect": "^0.1.12",

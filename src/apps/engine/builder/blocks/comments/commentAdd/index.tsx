@@ -10,6 +10,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { $insertNodes, COMMAND_PRIORITY_HIGH, KEY_ENTER_COMMAND, TextNode } from 'lexical';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { ICONS_UI } from 'helpers/config';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import EmojiPicker from './emojiPicker';
@@ -111,9 +112,16 @@ function CommentEditorContent(props: any) {
 		});
 	};
 
+	const handleEditorClick = (e: React.MouseEvent) => {
+		// Focus the editor when clicking on the container
+		if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('editor-input')) {
+			editor.focus();
+		}
+	};
+
 	return (
 		<>
-			<S.Editor>
+			<S.Editor onClick={handleEditorClick}>
 				<ContentEditable className="editor-input" />
 				<S.Actions>
 					<EmojiPicker onInsertEmoji={handleEmoji} />
@@ -131,6 +139,7 @@ function CommentEditorContent(props: any) {
 export default function CommentAdd(props: any) {
 	const { commentsId, parentId } = props;
 	const { profile } = usePermawebProvider();
+	const { walletAddress } = useArweaveProvider();
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 
 	const initialConfig = {
@@ -149,14 +158,15 @@ export default function CommentAdd(props: any) {
 		},
 	};
 
-	const placeholder = profile?.id
+	const isLoggedIn = Boolean(walletAddress && profile?.id);
+	const placeholder = isLoggedIn
 		? !parentId
 			? 'Write a comment...'
 			: 'Write a reply...'
 		: 'Login to write a comment...';
 
 	return (
-		<S.CommentAdd $active={Boolean(profile?.id) && !isSubmitting}>
+		<S.CommentAdd $active={isLoggedIn && !isSubmitting}>
 			<LexicalComposer initialConfig={initialConfig}>
 				<PlainTextPlugin
 					contentEditable={

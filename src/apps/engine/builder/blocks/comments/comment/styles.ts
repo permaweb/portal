@@ -4,13 +4,24 @@ export const Wrapper = styled.div<{ status: string }>`
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
-	opacity: ${(props) => (props?.status === 'active' ? 1 : 0.4)};
+	position: relative;
 	box-shadow: ${(props) =>
 		props?.status === 'active' ? '0 4px 10px rgba(0, 0, 0, 0.4)' : '0 1px 4px rgba(0, 0, 0, 0.4)'};
 
-	&:hover {
-		opacity: ${(props) => (props?.status === 'active' ? 1 : 1)};
-	}
+	${(props) =>
+		props?.status !== 'active' &&
+		`
+		&::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			width: 4px;
+			background: #e74c3c;
+			border-radius: var(--border-radius) 0 0 var(--border-radius);
+		}
+	`}
 `;
 
 export const Comment = styled.div<{ $level: number }>`
@@ -65,70 +76,6 @@ export const Text = styled.div`
 	margin-top: 4px;
 `;
 
-export const Menu = styled.div`
-	position: absolute;
-	right: 0;
-	top: 0;
-	width: fit-content;
-`;
-
-export const IconWrapper = styled.div`
-	display: flex;
-	margin-left: auto;
-	justify-content: center;
-	align-items: center;
-	width: 28px;
-	height: 28px;
-	border-radius: 50%;
-
-	div {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-	svg {
-		width: 18px;
-		height: 18px;
-	}
-
-	&:hover {
-		cursor: pointer;
-		background: rgba(100, 100, 100, 0.6);
-	}
-`;
-
-export const MenuCategory = styled.div``;
-
-export const MenuEntries = styled.div`
-	position: relative;
-	background: var(--color-card-background);
-	border: 1px solid var(--color-card-border);
-	padding: 2px 2px;
-	backdrop-filter: blur(5px);
-	z-index: 99;
-`;
-
-export const MenuEntry = styled.div`
-	display: flex;
-	padding: 4px 10px 4px 6px;
-
-	div {
-		display: flex;
-		justify-content: start;
-		align-items: center;
-	}
-
-	svg {
-		width: 16px;
-		height: 16px;
-		margin-right: 4px;
-	}
-	&:hover {
-		cursor: pointer;
-		background: rgba(50, 50, 50, 1);
-	}
-`;
-
 export const Actions = styled.div`
 	display: flex;
 	font-size: 14px;
@@ -180,5 +127,29 @@ export const Spinner = styled.div`
 		to {
 			transform: rotate(360deg);
 		}
+	}
+`;
+
+export const HiddenIndicator = styled.div`
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	background: rgba(231, 76, 60, 0.2);
+	color: #e74c3c;
+	padding: 2px 8px;
+	border-radius: var(--border-radius);
+	font-size: 11px;
+	font-weight: 600;
+
+	div {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	svg {
+		width: 14px;
+		height: 14px;
+		fill: #e74c3c;
 	}
 `;

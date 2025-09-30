@@ -34,6 +34,32 @@ export const Category = styled.div`
 	color: var(--color-card-border-contrast);
 `;
 
+export const TitleWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	width: 100%;
+`;
+
+export const DraftDot = styled.div`
+	width: 8px;
+	height: 8px;
+	background: #eeca00;
+	border-radius: 50%;
+`;
+
+export const DraftIndicator = styled.div`
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: rgba(238, 202, 0, 0.2);
+	color: #eeca00;
+	padding: 4px 10px;
+	border-radius: var(--border-radius);
+	font-size: 11px;
+	font-weight: 600;
+	margin-left: 12px;
+`;
+
 export const Content = styled.div`
 	display: flex;
 	position: relative;

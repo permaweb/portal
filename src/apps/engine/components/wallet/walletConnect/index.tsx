@@ -111,7 +111,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	}, [auth, profile]);
 
 	function handlePress() {
-		if (auth?.authStatus === 'authenticated' || auth?.authType === 'NATIVE_WALLET') {
+		if (auth?.authStatus === 'authenticated' || auth?.authType === 'NATIVE_WALLET' || arProvider.walletAddress) {
 			setShowUserMenu(!showUserMenu);
 		} else {
 			window.wanderInstance.open();

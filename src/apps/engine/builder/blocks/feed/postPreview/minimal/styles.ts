@@ -33,6 +33,32 @@ export const Category = styled.div`
 	color: var(--color-card-border-contrast);
 `;
 
+export const TitleWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	width: 100%;
+`;
+
+export const DraftDot = styled.div`
+	width: 8px;
+	height: 8px;
+	background: #eeca00;
+	border-radius: 50%;
+`;
+
+export const DraftIndicator = styled.div`
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: rgba(238, 202, 0, 0.2);
+	color: #eeca00;
+	padding: 4px 10px;
+	border-radius: var(--border-radius);
+	font-size: 11px;
+	font-weight: 600;
+	margin-left: 12px;
+`;
+
 export const Content = styled.div`
 	display: flex;
 	position: relative;
@@ -134,4 +160,30 @@ export const Username = styled.div`
 export const Date = styled.div`
 	font-size: 12px;
 	opacity: 0.6;
+`;
+
+export const Comments = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	flex: 1;
+
+	h3 {
+		margin: 0;
+		user-select: none;
+	}
+`;
+
+export const Comment = styled.div``;
+
+export const CommentHeader = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 2px;
+`;
+
+export const CommentText = styled.div`
+	font-size: 12px;
+	opacity: 0.8;
 `;
