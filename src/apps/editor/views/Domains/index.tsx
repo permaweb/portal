@@ -69,11 +69,6 @@ export default function Domains() {
 					<span>{language?.unauthorizedDomainManage}</span>
 				</S.InfoWrapper>
 			)}
-			<ViewHeader header={language?.subdomains ?? 'Sub-Domains'} actions={[<ClaimUndername />, <AddController />]} />
-			<S.SubdomainsWrapper className={'fade-in'}>
-				<UndernamesList />
-				<UndernameRequestList />
-			</S.SubdomainsWrapper>
 		</S.Wrapper>
 	);
 }
