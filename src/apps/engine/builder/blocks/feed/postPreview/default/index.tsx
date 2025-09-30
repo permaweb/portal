@@ -1,10 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import useNavigate from 'engine/helpers/preview';
-import { usePortalProvider } from 'engine/providers/portalProvider';
-import { useProfile } from 'engine/hooks/profiles';
 import { useComments } from 'engine/hooks/comments';
+import { useProfile } from 'engine/hooks/profiles';
+import { usePortalProvider } from 'engine/providers/portalProvider';
+
 import { getRedirect } from 'helpers/utils';
+
 import * as S from './styles';
 
 export default function PostPreview_Default(props: any) {

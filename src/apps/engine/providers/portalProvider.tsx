@@ -91,7 +91,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					categories: navigation?.categories,
 					topics: navigation?.topics,
 					links: navigation?.links,
-					posts: posts?.index ? [...posts.index].reverse() : [],
+					posts: posts?.index
+						? [...posts.index].reverse().filter((post: any) => post.metadata?.status === 'published')
+						: [],
 				};
 
 				const Name = zone?.name;
@@ -102,8 +104,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const Themes = zone?.themes;
 				const Logo = zone?.logo;
 				const Fonts = zone?.fonts;
+				const Links = zone?.links;
 
-				const portalData = { Name, Categories, Layout, Pages, Themes, Posts, Logo, Fonts };
+				const portalData = { Name, Categories, Layout, Pages, Themes, Posts, Logo, Fonts, Links };
 				console.log('portalData: ', portalData);
 				setPortal(portalData);
 				if (portalId && portalData) cachePortal(portalId, portalData);
