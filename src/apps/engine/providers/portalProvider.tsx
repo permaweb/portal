@@ -5,6 +5,7 @@ import { defaultPages } from 'engine/defaults/pages.defaults';
 import { defaultThemes } from 'engine/defaults/theme.defaults';
 import WebFont from 'webfontloader';
 
+import { PortalPermissionsType, PortalUserType } from 'helpers/types';
 import {
 	areAssetsEqual,
 	cachePortal,
@@ -14,7 +15,6 @@ import {
 	getPortalAssets,
 	getPortalUsers,
 } from 'helpers/utils';
-import { PortalPermissionsType, PortalUserType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -64,6 +64,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [updating, setUpdating] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
+		console.log('Portal fetch check:', { portalId, hasLibs: !!permawebProvider.libs });
 		if (!portalId || !permawebProvider.libs) return;
 
 		(async () => {

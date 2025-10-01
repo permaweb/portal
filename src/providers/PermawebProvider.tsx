@@ -9,7 +9,6 @@ import { AO_NODE, STORAGE } from 'helpers/config';
 
 import { useArweaveProvider } from './ArweaveProvider';
 import { useLanguageProvider } from './LanguageProvider';
-// import { ArconnectSigner } from '@ar.io/sdk';
 
 interface PermawebContextState {
 	deps: any;
@@ -52,17 +51,14 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		try {
 			const aoConnection = import.meta.env.VITE_AO ?? 'legacy';
 
-			// const signer = new ArconnectSigner(arProvider.wallet);
 			let signer = null;
 			if (arProvider.wallet) signer = createSigner(arProvider.wallet);
 
 			let ao: any;
 			if (aoConnection === 'mainnet') {
-				if (!signer) {
-					// Don't initialize in mainnet mode without a signer
-					return;
-				}
-				ao = connect({ MODE: 'mainnet', URL: AO_NODE.url, SCHEDULER: AO_NODE.scheduler, signer });
+				const config: any = { MODE: 'mainnet', URL: AO_NODE.url, SCHEDULER: AO_NODE.scheduler };
+				if (signer) config.signer = signer;
+				ao = connect(config);
 			} else if (import.meta.env.VITE_AO === 'legacy') {
 				ao = connect({ MODE: 'legacy' });
 			}
