@@ -1,6 +1,6 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
-import { ICONS_UI } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import * as S from './styles';
@@ -50,7 +50,7 @@ export default function ContextMenu({ entries, children }: ContextMenuProps) {
 				<div onClick={() => setOpenMenu(!openMenu)}>{children}</div>
 			) : (
 				<S.IconWrapper onClick={() => setOpenMenu(!openMenu)}>
-					<ReactSVG src={ICONS_UI.MENU} />
+					<ReactSVG src={ICONS.menu} />
 				</S.IconWrapper>
 			)}
 			{openMenu && (

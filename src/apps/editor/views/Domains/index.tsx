@@ -5,7 +5,7 @@ import { DomainList } from 'editor/components/organisms/DomainList';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
-import { ASSETS, URLS } from 'helpers/config';
+import { ICONS, URLS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -27,7 +27,7 @@ export default function Domains() {
 						label={language.registerDomain}
 						handlePress={() => navigate(URLS.portalDomainsRegister(portalProvider.current?.id))}
 						disabled={!portalProvider.permissions.updatePortalMeta}
-						icon={ASSETS.domains}
+						icon={ICONS.domains}
 						iconLeftAlign
 					/>,
 				]}

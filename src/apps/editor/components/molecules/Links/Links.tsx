@@ -6,7 +6,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
-import { ASSETS, ICONS_SOCIAL } from 'helpers/config';
+import { ICONS, ICONS_SOCIAL } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalLinkType, PortalPatchMapEnum, ViewLayoutType } from 'helpers/types';
 import { checkValidAddress, validateUrl } from 'helpers/utils';
@@ -191,7 +191,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 					return (
 						<S.LinkWrapper key={index} editMode={editMode} active={isSelected}>
 							<button onClick={() => (editMode ? handleSelect(link) : window.open(link.url, '_blank'))}>
-								<ReactSVG src={link.icon ? getTxEndpoint(link.icon) : ASSETS.link} />
+								<ReactSVG src={link.icon ? getTxEndpoint(link.icon) : ICONS.link} />
 								<S.LinkTooltip className={'info'}>
 									<span>{link.title}</span>
 								</S.LinkTooltip>
@@ -307,7 +307,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 							handlePress={addLink}
 							disabled={linkActionDisabled}
 							loading={linkLoading}
-							icon={ASSETS.add}
+							icon={ICONS.add}
 							iconLeftAlign
 							formSubmit
 						/>
@@ -336,7 +336,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 							active={editMode}
 							disabled={unauthorized || linkOptions?.length <= 0 || !portalProvider.current?.links || linkLoading}
 							loading={false}
-							icon={editMode ? ASSETS.close : ASSETS.write}
+							icon={editMode ? ICONS.close : ICONS.write}
 							iconLeftAlign
 						/>
 					</S.LinksHeader>
@@ -353,7 +353,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 							handlePress={() => setShowDeleteConfirmation(true)}
 							disabled={!selectedLinks?.length || linkLoading}
 							loading={false}
-							icon={ASSETS.delete}
+							icon={ICONS.delete}
 							iconLeftAlign
 							warning
 						/>
@@ -388,7 +388,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 								handlePress={() => deleteLinks()}
 								disabled={!selectedLinks?.length || linkLoading}
 								loading={linkLoading}
-								icon={ASSETS.delete}
+								icon={ICONS.delete}
 								iconLeftAlign
 								warning
 							/>

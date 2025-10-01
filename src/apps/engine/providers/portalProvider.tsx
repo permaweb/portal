@@ -133,10 +133,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const Pages = zone?.pages;
 				const Posts = zone?.posts;
 				const Themes = zone?.themes;
+				const Links = zone?.links;
 				const Logo = zone?.logo;
 				const Fonts = zone?.fonts;
 
-				const portalData = { Name, Categories, Layout, Pages, Themes, Posts, Logo, Fonts };
+				const portalData = { Name, Categories, Layout, Pages, Themes, Posts, Links, Logo, Fonts };
 				console.log('portalData: ', portalData);
 				setPortal(portalData);
 				if (portalId && portalData) cachePortal(portalId, portalData);

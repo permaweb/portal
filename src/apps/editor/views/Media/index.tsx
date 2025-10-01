@@ -7,7 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -39,7 +39,7 @@ export default function Media() {
 							type={'alt1'}
 							label={language?.add}
 							handlePress={() => setShowFundUpload(true)}
-							icon={ASSETS.add}
+							icon={ICONS.add}
 							iconLeftAlign
 						/>,
 					]}

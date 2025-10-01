@@ -6,7 +6,7 @@ import { useProfile } from 'engine/hooks/profiles';
 import { useComments } from 'engine/hooks/comments';
 import { getRedirect } from 'helpers/utils';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { ICONS_UI } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 import * as S from './styles';
@@ -26,7 +26,7 @@ export default function PostPreview_Default(props: any) {
 
 	if (canEditPost) {
 		menuEntries.push({
-			icon: ICONS_UI.EDIT,
+			icon: ICONS.edit,
 			label: 'Edit Post',
 			action: 'editPost',
 			postId: post?.id,

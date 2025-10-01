@@ -7,7 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -31,7 +31,7 @@ export default function Users() {
 							label={language?.addUser}
 							handlePress={() => setShowAddUser(!showAddUser)}
 							disabled={!portalProvider?.permissions?.updateUsers}
-							icon={ASSETS.add}
+							icon={ICONS.add}
 							iconLeftAlign
 						/>,
 					]}

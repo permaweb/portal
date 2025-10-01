@@ -5,7 +5,7 @@ import ProfileEditor from 'engine/components/profileEditor';
 import useNavigate from 'engine/helpers/preview';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
-import { ICONS_UI, STORAGE } from 'helpers/config';
+import { ICONS, STORAGE } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -149,7 +149,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 						<S.DisplayName>{profile?.displayName ? profile.displayName : 'My Profile'}</S.DisplayName>
 						<S.DAddress>
 							{shorten(arProvider.walletAddress)}
-							<ReactSVG src={ICONS_UI.COPY} />
+							<ReactSVG src={ICONS.copy} />
 						</S.DAddress>
 					</S.Header>
 				</S.HeaderWrapper>
@@ -162,30 +162,30 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 								navigate(`user/${profile.id}`);
 							}}
 						>
-							<ReactSVG src={ICONS_UI.USER} />
+							<ReactSVG src={ICONS.user} />
 							{language.myProfile}
 						</S.NavigationEntry>
 					)}
 					<S.NavigationEntry $disabled={!profile?.id}>
-						<ReactSVG src={ICONS_UI.POST} />
+						<ReactSVG src={ICONS.post} />
 						{language.myPosts}
 					</S.NavigationEntry>
 					<S.NavigationEntry $disabled={!profile?.id}>
-						<ReactSVG src={ICONS_UI.COMMENTS} />
+						<ReactSVG src={ICONS.comments} />
 						{language.myComments}
 					</S.NavigationEntry>
 					{auth.authType !== 'NATIVE_WALLET' && (
 						<S.NavigationEntry onClick={() => window.wanderInstance.open()}>
-							<ReactSVG src={ICONS_UI.WALLET} />
+							<ReactSVG src={ICONS.wallet} />
 							{language.myWallet}
 						</S.NavigationEntry>
 					)}
 					<S.NavigationEntry onClick={() => setShowProfileManage(true)}>
-						<ReactSVG src={profile?.id ? ICONS_UI.EDIT : ICONS_UI.USER} />
+						<ReactSVG src={profile?.id ? ICONS.edit : ICONS.user} />
 						{profile?.id ? language.editProfile : language.createProfile}
 						{!profile?.id && (
 							<S.Hint>
-								<ReactSVG src={ICONS_UI.INFO} />
+								<ReactSVG src={ICONS.info} />
 							</S.Hint>
 						)}
 					</S.NavigationEntry>
@@ -201,11 +201,11 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 									portalProvider.setEditorMode('mini');
 								}}
 							>
-								<ReactSVG src={ICONS_UI.PORTAL} />
+								<ReactSVG src={ICONS.portal} />
 								Zone Editor
 							</S.NavigationEntry>
 							<S.NavigationEntry onClick={() => window.open('https://portal.arweave.net/', '_blank')}>
-								<ReactSVG src={ICONS_UI.PORTAL} />
+								<ReactSVG src={ICONS.portal} />
 								Portal Editor
 							</S.NavigationEntry>
 						</S.NavigationWrapper>
@@ -214,7 +214,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 				)}
 				<S.DFooterWrapper>
 					<S.NavigationEntry onClick={handleDisconnect}>
-						<ReactSVG src={ICONS_UI.SIGNOUT} />
+						<ReactSVG src={ICONS.signout} />
 						{language.disconnect}
 					</S.NavigationEntry>
 				</S.DFooterWrapper>
@@ -233,7 +233,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 								<img src={checkValidAddress(avatar) ? getTxEndpoint(avatar) : avatar} />
 							</div>
 						) : (
-							<ReactSVG src={ICONS_UI.USER} />
+							<ReactSVG src={ICONS.user} />
 						)}
 						<span>{label}</span>
 					</S.LAction>

@@ -6,7 +6,7 @@ import { useComments } from 'engine/hooks/comments';
 import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { ICONS_UI } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 
@@ -26,7 +26,7 @@ export default function PostPreview_Journal(props: any) {
 
 	if (canEditPost) {
 		menuEntries.push({
-			icon: ICONS_UI.EDIT,
+			icon: ICONS.edit,
 			label: 'Edit Post',
 			action: 'editPost',
 			postId: post?.id,

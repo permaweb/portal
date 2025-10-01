@@ -1,5 +1,5 @@
 import { ReactSVG } from 'react-svg';
-import { ICONS_UI } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import * as S from './styles';
 
 export default function Toggle(props: any) {
@@ -8,10 +8,10 @@ export default function Toggle(props: any) {
 			{props.theme && (
 				<>
 					<S.Icon $state={props.state}>
-						<ReactSVG src={ICONS_UI.LIGHT} />
+						<ReactSVG src={ICONS.light} />
 					</S.Icon>
 					<S.Icon $state={props.state}>
-						<ReactSVG src={ICONS_UI.DARK} />
+						<ReactSVG src={ICONS.dark} />
 					</S.Icon>
 				</>
 			)}

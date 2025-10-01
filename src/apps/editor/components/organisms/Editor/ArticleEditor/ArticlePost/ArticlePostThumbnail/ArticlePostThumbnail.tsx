@@ -10,7 +10,7 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
@@ -107,7 +107,7 @@ export default function ArticlePostThumbnail() {
 			);
 		return (
 			<>
-				<ReactSVG src={ASSETS.image} />
+				<ReactSVG src={ICONS.image} />
 				<span>{language?.uploadFeaturedImage}</span>
 			</>
 		);
@@ -139,7 +139,7 @@ export default function ArticlePostThumbnail() {
 						handlePress={() => handleCurrentPostUpdate({ field: 'thumbnail', value: null })}
 						disabled={!currentPost?.data?.thumbnail}
 						loading={false}
-						icon={ASSETS.delete}
+						icon={ICONS.delete}
 						iconLeftAlign
 						warning
 					/>

@@ -9,7 +9,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Tabs } from 'components/atoms/Tabs';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { MediaConfigType, PortalPatchMapEnum, PortalUploadOptionType, PortalUploadType } from 'helpers/types';
 import { useUploadCost } from 'hooks/useUploadCost';
@@ -38,14 +38,14 @@ export default function MediaLibrary(props: {
 	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
 		image: {
 			type: 'image',
-			icon: ASSETS.image,
+			icon: ICONS.image,
 			label: language?.image,
 			renderContent: (url) => <img src={url} />,
 			acceptType: 'image/*',
 		},
 		video: {
 			type: 'video',
-			icon: ASSETS.video,
+			icon: ICONS.video,
 			label: language?.video,
 			renderContent: (url) => <video controls src={url} />,
 			acceptType: 'video/*',
@@ -319,7 +319,7 @@ export default function MediaLibrary(props: {
 							{getUpload(upload)}
 							{active && (
 								<S.Indicator>
-									<ReactSVG src={ASSETS.checkmark} />
+									<ReactSVG src={ICONS.checkmark} />
 								</S.Indicator>
 							)}
 						</S.UploadWrapper>
@@ -339,7 +339,7 @@ export default function MediaLibrary(props: {
 							<IconButton
 								type={'alt1'}
 								active={false}
-								src={ASSETS.minus}
+								src={ICONS.minus}
 								handlePress={() => setColumns((prev) => prev + 1)}
 								disabled={columns >= 8}
 								dimensions={{ wrapper: 23.5, icon: 13.5 }}
@@ -349,7 +349,7 @@ export default function MediaLibrary(props: {
 							<IconButton
 								type={'alt1'}
 								active={false}
-								src={ASSETS.plus}
+								src={ICONS.plus}
 								handlePress={() => setColumns((prev) => prev - 1)}
 								disabled={columns <= 2}
 								dimensions={{ wrapper: 23.5, icon: 13.5 }}
@@ -363,7 +363,7 @@ export default function MediaLibrary(props: {
 							handlePress={() => setShowDeleteConfirmation(true)}
 							disabled={unauthorized || !selectedUpload}
 							loading={false}
-							icon={ASSETS.delete}
+							icon={ICONS.delete}
 							iconLeftAlign
 							warning
 						/>
@@ -373,7 +373,7 @@ export default function MediaLibrary(props: {
 							handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
 							disabled={unauthorized}
 							loading={false}
-							icon={ASSETS.upload}
+							icon={ICONS.upload}
 							iconLeftAlign
 						/>
 					</S.HeaderActions>
@@ -423,7 +423,7 @@ export default function MediaLibrary(props: {
 								handlePress={() => deleteUpload()}
 								disabled={!selectedUpload || mediaLoading}
 								loading={mediaLoading}
-								icon={ASSETS.delete}
+								icon={ICONS.delete}
 								iconLeftAlign
 								warning
 							/>

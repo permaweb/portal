@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
-import { ICONS_UI } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 
 import * as S from './styles';
 
@@ -64,7 +64,7 @@ export default function CategoryReel(props: any) {
 				</div>
 				{authenticated && (
 					<div className="featured-banner-remove" onClick={() => removeBanner()}>
-						<ReactSVG src={ICONS_UI.REMOVE} />
+						<ReactSVG src={ICONS.remove} />
 					</div>
 				)}
 			</div>

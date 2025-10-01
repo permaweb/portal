@@ -3,7 +3,7 @@ import { JSONTree } from 'react-json-tree';
 import { useTheme } from 'styled-components';
 
 import { IconButton } from 'components/atoms/IconButton';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { stripAnsiChars } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -112,7 +112,7 @@ export default function JSONViewer(props: {
 					{!props.noFullScreen && (
 						<IconButton
 							type={'alt1'}
-							src={ASSETS.fullscreen}
+							src={ICONS.fullscreen}
 							handlePress={toggleFullscreen}
 							dimensions={{
 								wrapper: 25,
@@ -124,7 +124,7 @@ export default function JSONViewer(props: {
 					)}
 					<IconButton
 						type={'alt1'}
-						src={ASSETS.copy}
+						src={ICONS.copy}
 						handlePress={copyData}
 						disabled={!data}
 						dimensions={{

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const Menu = styled.div`
 	position: absolute;
 	right: 0;
-	top: 0;
+	top: 3px;
 	width: fit-content;
 `;
 

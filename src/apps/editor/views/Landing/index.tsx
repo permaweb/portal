@@ -10,7 +10,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { LanguageSelect } from 'components/molecules/LanguageSelect';
-import { ASSETS, ICONS_UI, URLS } from 'helpers/config';
+import { ICONS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalHeaderType } from 'helpers/types';
 import { checkValidAddress, formatAddress } from 'helpers/utils';
@@ -108,11 +108,11 @@ export default function Landing() {
 		if (!arProvider.wallet || (permawebProvider.profile && !permawebProvider.profile.id)) {
 			disabled = false;
 			label = language?.connect || 'Connect Wallet';
-			icon = ASSETS.wallet;
+			icon = ICONS.wallet;
 
 			if (permawebProvider.profile && !permawebProvider.profile.id) {
 				label = language?.createProfile || 'Create Profile';
-				icon = ASSETS.user;
+				icon = ICONS.user;
 				action = () => setShowProfileManager(true);
 			}
 
@@ -124,7 +124,7 @@ export default function Landing() {
 		} else if (!permawebProvider.profile) {
 			disabled = true;
 			label = `${language?.loading}...`;
-			icon = ASSETS.user;
+			icon = ICONS.user;
 			content = (
 				<S.PortalsLoadingWrapper>
 					<p>{language?.fetchingPortals}</p>
@@ -134,7 +134,7 @@ export default function Landing() {
 		} else {
 			disabled = false;
 			label = language?.createPortal;
-			icon = ASSETS.add;
+			icon = ICONS.add;
 			action = () => portalProvider.setShowPortalManager(true, true);
 
 			if (portalProvider.portals && portalProvider.portals.length > 0) {
@@ -150,7 +150,7 @@ export default function Landing() {
 										{portal.icon && checkValidAddress(portal.icon) ? (
 											<img src={getTxEndpoint(portal.icon)} alt={'Portal Icon'} />
 										) : (
-											<ReactSVG src={ICONS_UI.PORTAL} />
+											<ReactSVG src={ICONS.portal} />
 										)}
 										{portal.name ?? formatAddress(portal.id, false)}
 									</Link>
@@ -220,7 +220,7 @@ export default function Landing() {
 										{portal.icon && checkValidAddress(portal.icon) ? (
 											<img src={getTxEndpoint(portal.icon)} alt={'Portal Icon'} />
 										) : (
-											<ReactSVG src={ICONS_UI.PORTAL} />
+											<ReactSVG src={ICONS.portal} />
 										)}
 										{portal.name}
 									</button>

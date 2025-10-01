@@ -12,7 +12,7 @@ import { TxAddress } from 'components/atoms/TxAddress';
 import { InsufficientBalanceCTA, PaymentSummary, PayWithSelector } from 'components/molecules/Payment';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { getArnsCost } from 'helpers/arnsCosts';
-import { ASSETS, IS_TESTNET } from 'helpers/config';
+import { ICONS, IS_TESTNET } from 'helpers/config';
 import { loadCachedDomains, saveCachedDomains } from 'helpers/domainCache';
 import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
@@ -775,7 +775,7 @@ export default function DomainList() {
 					<S.DomainHeader>
 						<S.DomainHeaderContent>
 							<S.DomainArrow isOpen={isOpen}>
-								<ReactSVG src={ASSETS.arrow} />
+								<ReactSVG src={ICONS.arrow} />
 							</S.DomainArrow>
 							<S.DomainName>{domain.name}</S.DomainName>
 							{/* {TODO sectionId === 'assignedHere' && (

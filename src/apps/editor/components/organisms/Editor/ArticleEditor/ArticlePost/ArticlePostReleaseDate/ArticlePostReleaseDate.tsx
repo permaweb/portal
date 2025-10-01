@@ -10,7 +10,7 @@ import { FormField } from 'components/atoms/FormField';
 import { Panel } from 'components/atoms/Panel';
 import { Select } from 'components/atoms/Select';
 import { Toggle } from 'components/atoms/Toggle';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { SelectOptionType } from 'helpers/types';
 import { formatDate } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -267,7 +267,7 @@ export default function ArticlePostReleaseDate() {
 						type={'alt4'}
 						label={language.edit}
 						handlePress={() => setShowEdit(true)}
-						icon={ASSETS.date}
+						icon={ICONS.date}
 						iconLeftAlign
 					/>
 				</S.HeaderWrapper>

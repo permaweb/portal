@@ -9,7 +9,7 @@ import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Select } from 'components/atoms/Select';
-import { ASSETS, THEME } from 'helpers/config';
+import { ICONS, THEME } from 'helpers/config';
 import { PortalPatchMapEnum, PortalSchemeType, PortalThemeType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -192,7 +192,7 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 		<S.ThemeSectionColumnWrapper key={theme.name}>
 			<S.ThemeSectionColumnAction open={open} disabled={false} onClick={() => setOpen((prev) => !prev)}>
 				<p>{section.toUpperCase()}</p>
-				<ReactSVG src={ASSETS.arrow} />
+				<ReactSVG src={ICONS.arrow} />
 			</S.ThemeSectionColumnAction>
 			{open && (
 				<S.ThemeSectionColumn>
@@ -200,11 +200,11 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 						<span>{'Element'.toUpperCase()}</span>
 						<S.ThemeSectionHeaderVariants>
 							<span>
-								<ReactSVG src={ASSETS.light} />
+								<ReactSVG src={ICONS.light} />
 								{'Light'.toUpperCase()}
 							</span>
 							<span>
-								<ReactSVG src={ASSETS.dark} /> {'Dark'.toUpperCase()}
+								<ReactSVG src={ICONS.dark} /> {'Dark'.toUpperCase()}
 							</span>
 						</S.ThemeSectionHeaderVariants>
 					</S.ThemeSectionHeader>
@@ -454,7 +454,7 @@ function Section(props: {
 						<IconButton
 							type={'alt1'}
 							active={false}
-							src={ASSETS.write}
+							src={ICONS.write}
 							handlePress={() => setShowNameEdit(true)}
 							disabled={unauthorized}
 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
@@ -465,7 +465,7 @@ function Section(props: {
 						<IconButton
 							type={'alt1'}
 							active={false}
-							src={ASSETS.delete}
+							src={ICONS.delete}
 							handlePress={() => setShowRemoveConfirmation(true)}
 							disabled={unauthorized || props.removeDisabled}
 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
@@ -637,7 +637,7 @@ function Section(props: {
 								}}
 								disabled={unauthorized}
 								loading={false}
-								icon={ASSETS.delete}
+								icon={ICONS.delete}
 								iconLeftAlign
 								warning
 							/>
@@ -845,7 +845,7 @@ export default function Themes() {
 						label={language?.addTheme}
 						handlePress={handleAddTheme}
 						disabled={unauthorized}
-						icon={ASSETS.add}
+						icon={ICONS.add}
 						iconLeftAlign
 					/>
 				</S.EndActions>

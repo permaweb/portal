@@ -5,7 +5,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { PortalPatchMapEnum, PortalTopicType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -146,7 +146,7 @@ export default function Topics(props: {
 							handlePress={() => (active ? removeTopic(topic) : props.setTopics([...props.topics, topic]))}
 							active={active}
 							disabled={unauthorized || topicLoading}
-							icon={active ? ASSETS.close : ASSETS.add}
+							icon={active ? ICONS.close : ICONS.add}
 						/>
 					);
 				})}
@@ -171,7 +171,7 @@ export default function Topics(props: {
 					handlePress={addTopic}
 					disabled={topicActionDisabled}
 					loading={topicLoading}
-					icon={ASSETS.add}
+					icon={ICONS.add}
 					iconLeftAlign
 					formSubmit
 				/>
@@ -203,7 +203,7 @@ export default function Topics(props: {
 										type={'primary'}
 										label={language.close}
 										handlePress={() => setShowTopicAdd(false)}
-										icon={ASSETS.close}
+										icon={ICONS.close}
 										iconLeftAlign
 										height={40}
 										fullWidth
@@ -217,7 +217,7 @@ export default function Topics(props: {
 									label={language.addTopic}
 									handlePress={() => setShowTopicAdd(true)}
 									disabled={!portalProvider.permissions?.updatePortalMeta}
-									icon={ASSETS.add}
+									icon={ICONS.add}
 									iconLeftAlign
 									height={40}
 									fullWidth
@@ -237,7 +237,7 @@ export default function Topics(props: {
 							handlePress={() => setShowDeleteConfirmation(true)}
 							disabled={unauthorized || !props.topics?.length || topicLoading}
 							loading={false}
-							icon={ASSETS.delete}
+							icon={ICONS.delete}
 							iconLeftAlign
 							warning
 						/>
@@ -272,7 +272,7 @@ export default function Topics(props: {
 								handlePress={() => deleteTopics()}
 								disabled={!props.topics?.length || topicLoading}
 								loading={unauthorized || topicLoading}
-								icon={ASSETS.delete}
+								icon={ICONS.delete}
 								iconLeftAlign
 								warning
 							/>

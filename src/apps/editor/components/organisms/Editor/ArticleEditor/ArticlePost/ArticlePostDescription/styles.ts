@@ -27,7 +27,7 @@ export const ActionWrapper = styled.div`
 		svg {
 			height: 18.5px;
 			width: 18.5px;
-			transform: rotate(270deg);
+			transform: rotate(90deg);
 			color: ${(props) => props.theme.colors.font.alt1};
 			fill: ${(props) => props.theme.colors.font.alt1};
 		}

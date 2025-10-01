@@ -30,7 +30,7 @@ export const EmojisIcon = styled.div`
 
 export const EmojiPicker = styled.div`
 	position: absolute;
-	margin-top: 28px;
+	top: 50px;
 	right: -8px;
 	z-index: 100;
 	background: var(--color-card-background);
@@ -39,8 +39,22 @@ export const EmojiPicker = styled.div`
 	padding: 10px;
 	width: 300px;
 	height: 240px;
+	backdrop-filter: blur(5px);
 	display: flex;
 	flex-direction: column;
+
+	&::before {
+		content: '';
+		position: absolute;
+		top: -8px;
+		right: 48px;
+		width: 0;
+		height: 0;
+		border-left: 8px solid transparent;
+		border-right: 8px solid transparent;
+		border-bottom: 8px solid var(--color-card-background);
+		filter: drop-shadow(0 -1px 0 rgba(var(--color-text), 0.1));
+	}
 `;
 
 export const EmojiSearch = styled.div`

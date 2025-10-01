@@ -5,7 +5,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
-import { ASSETS, LAYOUT, PAGES } from 'helpers/config';
+import { ICONS, LAYOUT, PAGES } from 'helpers/config';
 import { PortalPatchMapEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -140,7 +140,7 @@ export default function Layout() {
 								onClick={() => (active ? {} : handleLayoutOptionChange(option.name))}
 							>
 								<p>{option.name}</p>
-								<S.Indicator active={active}>{active && <ReactSVG src={ASSETS.checkmark} />}</S.Indicator>
+								<S.Indicator active={active}>{active && <ReactSVG src={ICONS.checkmark} />}</S.Indicator>
 							</S.Option>
 						);
 					})}

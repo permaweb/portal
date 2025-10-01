@@ -24,7 +24,6 @@ export const LAYOUT_JOURNAL = {
 				positionY: 'bottom',
 				size: '80%',
 			},
-			links: [],
 		},
 	},
 	navigation: {

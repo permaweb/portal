@@ -1,7 +1,7 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { SelectOptionType } from 'helpers/types';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
@@ -30,7 +30,7 @@ export default function Select(props: {
 				<S.Dropdown active={active} disabled={props.disabled} onClick={() => setActive(!active)}>
 					{props.icon && <ReactSVG src={props.icon} />}
 					{!props.hideActiveOption && <span>{props.activeOption.label}</span>}
-					<ReactSVG src={ASSETS.arrow} />
+					<ReactSVG src={ICONS.arrow} />
 				</S.Dropdown>
 				{active && (
 					<S.Options

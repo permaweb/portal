@@ -1,6 +1,6 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
-import { ICONS_UI } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { CloseHandler } from 'engine/components/wrappers/closeHandler';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -47,7 +47,7 @@ export default function Panel(props: IProps) {
 								</S.LT>
 								{props.handleClose && (
 									<S.Close onClick={() => props.handleClose()}>
-										<ReactSVG src={ICONS_UI.CLOSE} />
+										<ReactSVG src={ICONS.close} />
 									</S.Close>
 								)}
 							</S.Header>

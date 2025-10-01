@@ -8,7 +8,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Modal } from 'components/atoms/Modal';
-import { ASSETS, URLS } from 'helpers/config';
+import { ICONS, URLS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -38,7 +38,7 @@ export default function Posts() {
 							label={language?.createPost}
 							handlePress={() => navigate(URLS.postCreateArticle(portalProvider.current.id))}
 							disabled={unauthorizedCreate || !portalProvider.current}
-							icon={ASSETS.add}
+							icon={ICONS.add}
 							iconLeftAlign
 						/>,
 					]}

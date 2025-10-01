@@ -5,7 +5,7 @@ import { ReactSVG } from 'react-svg';
 import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
-import { ASSETS, STYLING, URLS } from 'helpers/config';
+import { ICONS, STYLING, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalCategoryType, PortalLinkType } from 'helpers/types';
 import { checkValidAddress, getRedirect } from 'helpers/utils';
@@ -22,7 +22,7 @@ function Category(props: { category: PortalCategoryType }) {
 		<S.CategoryWrapper>
 			<S.CategoryLink>
 				<Link to={getRedirect(URLS.category(props.category.id))}>
-					{props.category.name} {hasChildren && <ReactSVG src={ASSETS.arrow} />}
+					{props.category.name} {hasChildren && <ReactSVG src={ICONS.arrow} />}
 				</Link>
 			</S.CategoryLink>
 			{props.category.children?.length > 0 && (
@@ -79,7 +79,7 @@ export default function Header() {
 										type={'alt3'}
 										label={language?.more}
 										handlePress={() => setShowOverflowCategories((prev) => !prev)}
-										icon={ASSETS.arrow}
+										icon={ICONS.arrow}
 										height={30}
 									/>
 									{showOverflowCategories && overflowCategories && (
@@ -106,7 +106,7 @@ export default function Header() {
 					return (
 						<S.LinkWrapper key={index}>
 							<Link to={link.url} target={'_href'}>
-								<ReactSVG src={link.icon ? getTxEndpoint(link.icon) : ASSETS.link} />
+								<ReactSVG src={link.icon ? getTxEndpoint(link.icon) : ICONS.link} />
 								<S.LinkTooltip className={'info'}>
 									<span>{link.title}</span>
 								</S.LinkTooltip>

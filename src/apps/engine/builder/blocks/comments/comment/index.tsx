@@ -3,7 +3,7 @@ import { ReactSVG } from 'react-svg';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import Placeholder from 'engine/components/placeholder';
 import { useProfile } from 'engine/hooks/profiles';
-import { ICONS_UI } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import CommentAdd from '../commentAdd';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
@@ -66,7 +66,7 @@ export default function Comment(props: any) {
 
 	if (canEditComment) {
 		menuEntries.push({
-			icon: ICONS_UI.EDIT,
+			icon: ICONS.edit,
 			label: 'Edit Comment',
 			onClick: () => {}, // TODO: implement edit functionality
 		});
@@ -78,7 +78,7 @@ export default function Comment(props: any) {
 
 	if (canEditCommentStatus) {
 		menuEntries.push({
-			icon: commentData.status === 'active' ? ICONS_UI.HIDE : ICONS_UI.SHOW,
+			icon: commentData.status === 'active' ? ICONS.hide : ICONS.show,
 			label: commentData.status === 'active' ? 'Hide Comment' : 'Unhide Comment',
 			onClick: () => handleCommentStatus(commentData.status === 'active' ? 'inactive' : 'active'),
 		});
@@ -86,7 +86,7 @@ export default function Comment(props: any) {
 
 	if (canRemoveComment) {
 		menuEntries.push({
-			icon: ICONS_UI.REMOVE,
+			icon: ICONS.remove,
 			label: 'Remove Comment',
 			onClick: handleCommentRemove,
 		});
@@ -118,7 +118,7 @@ export default function Comment(props: any) {
 						<S.Username>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</S.Username>
 						{commentData.status !== 'active' && (
 							<S.HiddenIndicator>
-								<ReactSVG src={ICONS_UI.HIDE} />
+								<ReactSVG src={ICONS.hide} />
 								Hidden
 							</S.HiddenIndicator>
 						)}
@@ -141,7 +141,7 @@ export default function Comment(props: any) {
 					<ContextMenu entries={menuEntries} />
 					<S.Actions>
 						<S.Action onClick={() => setShowEditor(true)}>
-							<ReactSVG src={ICONS_UI.REPLY} />
+							<ReactSVG src={ICONS.reply} />
 							Reply
 						</S.Action>
 						{/* <S.Action><ReactSVG src={`img/icons/arrow_up.svg`} />Up</S.Action> */}

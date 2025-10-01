@@ -8,7 +8,7 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
 import { Panel } from 'components/atoms/Panel';
-import { ASSETS, URLS } from 'helpers/config';
+import { ICONS, URLS } from 'helpers/config';
 import { ArticleStatusType, PortalAssetRequestType, PortalAssetType, ViewLayoutType } from 'helpers/types';
 import { formatDate } from 'helpers/utils';
 import { usePostsList } from 'hooks/usePostList';
@@ -130,7 +130,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 							type={dropdown ? 'alt3' : 'primary'}
 							label={dateAscending ? language?.sortNewestToOldest : language?.sortOldestToNewest}
 							handlePress={() => handleActionPress(() => setDateAscending(!dateAscending))}
-							icon={ASSETS.arrows}
+							icon={ICONS.arrows}
 						/>
 						{props.type === 'detail' && getRequests()}
 					</S.PostsActionsEnd>
@@ -164,7 +164,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 												label={language.reviewPost}
 												handlePress={() => handleReviewRedirect(request.id)}
 												disabled={unauthorized}
-												icon={ASSETS.newTab}
+												icon={ICONS.newTab}
 											/>
 										</S.PostActionRequestLine>
 										<S.PostActionRequestLine>
@@ -248,7 +248,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 										type={'alt4'}
 										label={language?.filter}
 										handlePress={() => setShowFilterActions(!showFilterActions)}
-										icon={ASSETS.filter}
+										icon={ICONS.filter}
 										iconLeftAlign
 									/>
 									{showFilterActions && (

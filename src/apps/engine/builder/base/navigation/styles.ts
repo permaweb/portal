@@ -156,7 +156,7 @@ export const Arrow = styled.div`
 	}
 
 	svg {
-		transform: rotate(180deg);
+		transform: rotate(0deg);
 	}
 `;
 

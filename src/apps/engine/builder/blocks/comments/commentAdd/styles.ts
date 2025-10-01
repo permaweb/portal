@@ -103,11 +103,13 @@ export const Actions = styled.div`
 	z-index: 1;
 `;
 
-export const Emojis = styled.div``;
+export const Emojis = styled.div`
+	position: relative;
+`;
 
 export const EmojiPicker = styled.div`
 	position: absolute;
-	margin-top: 28px;
+	bottom: 40px;
 	right: -8px;
 	z-index: 100;
 	background: var(--color-card-background);

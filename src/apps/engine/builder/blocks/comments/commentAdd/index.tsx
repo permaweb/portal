@@ -9,7 +9,7 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $insertNodes, COMMAND_PRIORITY_HIGH, KEY_ENTER_COMMAND, TextNode } from 'lexical';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-import { ICONS_UI } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -126,7 +126,7 @@ function CommentEditorContent(props: any) {
 				<S.Actions>
 					<EmojiPicker onInsertEmoji={handleEmoji} />
 					<S.Send onClick={handleSubmit} $active={canSend && !isSubmitting}>
-						<ReactSVG src={ICONS_UI.SEND} />
+						<ReactSVG src={ICONS.send} />
 					</S.Send>
 				</S.Actions>
 			</S.Editor>

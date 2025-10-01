@@ -1,5 +1,5 @@
 import { Select } from 'components/atoms/Select';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { LanguageEnum, SelectOptionType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -22,7 +22,7 @@ export default function LanguageSelect() {
 				setActiveOption={(option: SelectOptionType) => handleLanguageChange(option)}
 				disabled={false}
 				hideActiveOption
-				icon={ASSETS.language}
+				icon={ICONS.language}
 				dropdownTop={42.5}
 			/>
 		</S.Wrapper>

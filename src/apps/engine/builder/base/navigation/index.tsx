@@ -2,7 +2,7 @@ import React from 'react';
 import { ReactSVG } from 'react-svg';
 import { NavLink } from 'react-router-dom';
 import { getRedirect } from 'helpers/utils';
-import { ICONS_UI } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 import { initThemes } from 'engine/helpers/themes';
 import { defaultThemes } from 'engine/defaults/theme.defaults';
@@ -45,7 +45,7 @@ export default function Navigation(props: any) {
 						{entry.name}
 						{entry.children && entry.children.length > 0 && (
 							<S.Arrow>
-								<ReactSVG src={ICONS_UI.ARROW} />
+								<ReactSVG src={ICONS.arrow} />
 							</S.Arrow>
 						)}
 					</NavLink>

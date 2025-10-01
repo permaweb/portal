@@ -8,7 +8,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
-import { ASSETS, STYLING } from 'helpers/config';
+import { ICONS, STYLING } from 'helpers/config';
 import { PortalCategoryType } from 'helpers/types';
 import { useCategoriesWithReorder } from 'hooks/useCategoriesWithReorder';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -99,7 +99,7 @@ export default function Categories(props: {
 						>
 							<S.CategoryDrag level={level} isDragging={snapshot.isDragging}>
 								<S.CategoryDragHandle {...provided.dragHandleProps}>
-									<ReactSVG src={ASSETS.drag} />
+									<ReactSVG src={ICONS.drag} />
 								</S.CategoryDragHandle>
 								<S.CategoryContent>
 									<Button
@@ -108,7 +108,7 @@ export default function Categories(props: {
 										handlePress={() => handleSelectCategory(category.id)}
 										active={active}
 										disabled={unauthorized || categoryLoading || isDragging}
-										icon={active ? ASSETS.close : ASSETS.add}
+										icon={active ? ICONS.close : ICONS.add}
 									/>
 								</S.CategoryContent>
 							</S.CategoryDrag>
@@ -129,7 +129,7 @@ export default function Categories(props: {
 						handlePress={() => handleSelectCategory(category.id)}
 						active={active}
 						disabled={unauthorized || categoryLoading}
-						icon={active ? ASSETS.close : ASSETS.add}
+						icon={active ? ICONS.close : ICONS.add}
 					/>
 				</S.CategoryOption>
 				{category.children && category.children.length > 0 && (
@@ -224,7 +224,7 @@ export default function Categories(props: {
 																	className={dragOverId === item.category.id ? 'can-be-parent' : ''}
 																>
 																	<S.CategoryDragHandle {...provided.dragHandleProps}>
-																		<ReactSVG src={ASSETS.drag} />
+																		<ReactSVG src={ICONS.drag} />
 																	</S.CategoryDragHandle>
 																	<S.CategoryContent>
 																		<Button
@@ -233,7 +233,7 @@ export default function Categories(props: {
 																			handlePress={() => handleSelectCategory(item.category.id)}
 																			active={active}
 																			disabled={unauthorized || categoryLoading || isDragging}
-																			icon={active ? ASSETS.close : ASSETS.add}
+																			icon={active ? ICONS.close : ICONS.add}
 																		/>
 																		{snapshot.isDragging && selectedIds.size > 1 && (
 																			<div className={'notification'}>
@@ -292,7 +292,7 @@ export default function Categories(props: {
 						handlePress={addCategory}
 						disabled={unauthorized || !newCategoryName || categoryLoading}
 						loading={categoryLoading}
-						icon={ASSETS.add}
+						icon={ICONS.add}
 						iconLeftAlign
 						formSubmit
 					/>
@@ -327,7 +327,7 @@ export default function Categories(props: {
 										type={'primary'}
 										label={language.close}
 										handlePress={() => setShowCategoryAdd(false)}
-										icon={ASSETS.close}
+										icon={ICONS.close}
 										iconLeftAlign
 										height={40}
 										fullWidth
@@ -340,7 +340,7 @@ export default function Categories(props: {
 								label={language.addCategory}
 								handlePress={() => setShowCategoryAdd(true)}
 								disabled={!portalProvider.permissions?.updatePortalMeta}
-								icon={ASSETS.add}
+								icon={ICONS.add}
 								iconLeftAlign
 								height={40}
 								fullWidth
@@ -359,7 +359,7 @@ export default function Categories(props: {
 							handlePress={() => setShowDeleteConfirmation(true)}
 							disabled={unauthorized || !props.categories?.length || categoryLoading}
 							loading={false}
-							icon={ASSETS.delete}
+							icon={ICONS.delete}
 							iconLeftAlign
 							warning
 						/>
@@ -394,7 +394,7 @@ export default function Categories(props: {
 								handlePress={() => deleteCategories()}
 								disabled={!props.categories?.length || categoryLoading}
 								loading={categoryLoading}
-								icon={ASSETS.delete}
+								icon={ICONS.delete}
 								iconLeftAlign
 								warning
 							/>

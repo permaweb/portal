@@ -286,6 +286,7 @@ export const Portal = styled.button<{ active: boolean }>`
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
 		margin: 2.5px 0px 0 12.5px;
+		transform: rotate(180deg);
 	}
 	&:hover {
 		background: ${(props) => props.theme.colors.container.primary.active};

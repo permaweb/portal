@@ -99,7 +99,7 @@ export const NTitleMobile = styled.button<{ open: boolean }>`
 		height: 12.5px;
 		width: 12.5px;
 		margin: 3.5px 0 0 0;
-		transform: rotate(${(props) => (props.open ? '180deg' : '0deg')});
+		transform: rotate(${(props) => (props.open ? '0deg' : '180deg')});
 		fill: ${(props) => props.theme.colors.font.primary};
 		color: ${(props) => props.theme.colors.font.primary};
 	}
