@@ -80,7 +80,7 @@ export default function PortalManager(props: {
 					data.Icon = 'None';
 				}
 
-				if (props.portal?.id) {
+				if (props.portal?.id && portalProvider.permissions?.updatePortalMeta) {
 					const portalsUpdateData = portalProvider.portals
 						.filter((portal: PortalHeaderType) => portal.id !== props.portal.id)
 						.map((portal: PortalHeaderType) => ({

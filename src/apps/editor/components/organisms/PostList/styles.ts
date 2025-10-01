@@ -253,11 +253,16 @@ export const WrapperEmpty = styled.div<{ type: ViewLayoutType }>`
 export const LoadingWrapper = styled(WrapperEmpty)``;
 
 export const InfoWrapper = styled.div`
+	max-width: 100%;
 	margin: 5px 0 0 auto;
 	padding: 3.5px 10px;
 	display: flex;
 	justify-content: center;
 	span {
+		display: block;
+		max-width: 95%;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 	}
 `;

@@ -8,10 +8,19 @@ export const Wrapper = styled.div`
 export const BodyWrapper = styled.div`
 	width: 100%;
 	display: flex;
-	flex-wrap: wrap;
+	flex-direction: column;
 	gap: 25px;
+`;
+
+export const DomainsWrapper = styled.div`
+	h6 {
+		font-size: ${(props) => props.theme.typography.size.xxLg} !important;
+		margin: 0 0 15px 0;
+	}
+`;
+
+export const DomainsArNS = styled.div`
 	overflow: hidden;
-	border: 1px solid ${(props) => props.theme.colors.border.primary} !important;
 `;
 
 export const InfoWrapper = styled.div`

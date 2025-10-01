@@ -7,19 +7,22 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
+import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TxAddress } from 'components/atoms/TxAddress';
-import { InsufficientBalanceCTA, PaymentSummary, PayWithSelector } from 'components/molecules/Payment';
+import { InsufficientBalanceCTA, PaymentSummary } from 'components/molecules/Payment';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { getArnsCost } from 'helpers/arnsCosts';
 import { ICONS, IS_TESTNET } from 'helpers/config';
 import { loadCachedDomains, saveCachedDomains } from 'helpers/domainCache';
+import { PortalPatchMapEnum } from 'helpers/types';
 import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useLatestANTVersion } from 'hooks/useLatestANTVersion';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
@@ -36,8 +39,9 @@ interface UserOwnedDomain {
 	requiresAntUpdate?: boolean;
 }
 
-export default function DomainList() {
+export default function DomainListArNS() {
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 	const { addNotification } = useNotifications();
 	const languageProvider = useLanguageProvider();
@@ -61,6 +65,12 @@ export default function DomainList() {
 		years: 1,
 	});
 	const [upgradeModal, setUpgradeModal] = React.useState<{ open: boolean; domain?: UserOwnedDomain }>({ open: false });
+	const [confirmAssignModal, setConfirmAssignModal] = React.useState<{ open: boolean; domain?: UserOwnedDomain }>({
+		open: false,
+	});
+	const [confirmUnassignModal, setConfirmUnassignModal] = React.useState<{ open: boolean; domain?: UserOwnedDomain }>({
+		open: false,
+	});
 	const [showFund, setShowFund] = React.useState<boolean>(false);
 	// startTransition removed - using direct state updates for speed
 	const [expandedDetails, setExpandedDetails] = React.useState<Set<string>>(new Set());
@@ -149,8 +159,10 @@ export default function DomainList() {
 			}
 		>
 	>({});
-	const [extendPaymentMethod, setExtendPaymentMethod] = React.useState<'turbo' | 'ario'>(IS_TESTNET ? 'ario' : 'turbo');
-	const [upgradePaymentMethod, setUpgradePaymentMethod] = React.useState<'turbo' | 'ario'>(
+	const [extendPaymentMethod, _setExtendPaymentMethod] = React.useState<'turbo' | 'ario'>(
+		IS_TESTNET ? 'ario' : 'turbo'
+	);
+	const [upgradePaymentMethod, _setUpgradePaymentMethod] = React.useState<'turbo' | 'ario'>(
 		IS_TESTNET ? 'ario' : 'turbo'
 	);
 	const costsLoadingRef = React.useRef<Set<string>>(new Set());
@@ -650,37 +662,7 @@ export default function DomainList() {
 						label={language.removeFromPortal}
 						handlePress={(e: any) => {
 							e.stopPropagation();
-							(async () => {
-								const confirmed = window.confirm(language.removeAssignmentConfirm);
-								if (!confirmed) return;
-								try {
-									await window.arweaveWallet.connect([
-										'SIGN_TRANSACTION',
-										'ACCESS_ADDRESS',
-										'ACCESS_PUBLIC_KEY',
-										'DISPATCH',
-									]);
-									const signer = new ArconnectSigner(window.arweaveWallet);
-									const ant = ANT.init({ processId: domain.antId, signer });
-									const def = defaultTargetIdRef.current || defaultTargetManifestId;
-									if (def) {
-										await ant.setBaseNameRecord({ transactionId: def, ttlSeconds: 3600 });
-									} else if (domain.target) {
-										await ant.setBaseNameRecord({ transactionId: domain.target, ttlSeconds: 60 });
-									}
-									setUserOwnedDomains((prev) =>
-										prev.map((d) =>
-											d.name === domain.name
-												? { ...d, target: defaultTargetManifestId, isRedirectedToPortal: false }
-												: d
-										)
-									);
-									addNotification(language.assignmentRemoved, 'success');
-								} catch (err: any) {
-									console.error('Error removing assignment:', err);
-									addNotification(`${language.errorOccurred}: ${err.message}`, 'warning');
-								}
-							})();
+							setConfirmUnassignModal({ open: true, domain });
 						}}
 					/>
 				)}
@@ -745,7 +727,10 @@ export default function DomainList() {
 						<Button
 							type={'alt3'}
 							label={redirectingDomains.has(domain.name) ? language.assigning : language.assignToThisPortal}
-							handlePress={() => redirectDomainToPortal(domain)}
+							handlePress={(e: any) => {
+								e.stopPropagation();
+								setConfirmAssignModal({ open: true, domain });
+							}}
 							disabled={redirectingDomains.has(domain.name)}
 						/>
 					)}
@@ -778,9 +763,6 @@ export default function DomainList() {
 								<ReactSVG src={ICONS.arrow} />
 							</S.DomainArrow>
 							<S.DomainName>{domain.name}</S.DomainName>
-							{/* {TODO sectionId === 'assignedHere' && (
-								<S.StatusBadge className="redirected">✓ {language.toThisPortal}</S.StatusBadge>
-							)} */}
 						</S.DomainHeaderContent>
 					</S.DomainHeader>
 					<S.DomainDetail>{renderDomainActions(domain, sectionId)}</S.DomainDetail>
@@ -907,6 +889,19 @@ export default function DomainList() {
 				)
 			);
 
+			const updated = portalProvider.current?.domains ?? [];
+			updated.push({ name: domain?.name });
+
+			const domainUpdateId = await permawebProvider.libs.updateZone(
+				{ Domains: permawebProvider.libs.mapToProcessCase(updated) },
+				portalProvider.current.id,
+				arProvider.wallet
+			);
+
+			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
+
+			console.log(`Domain update: ${domainUpdateId}`);
+
 			addNotification(language.redirectSuccess, 'success');
 		} catch (error: any) {
 			console.error('Error redirecting domain:', error);
@@ -917,6 +912,42 @@ export default function DomainList() {
 				newSet.delete(domain.name);
 				return newSet;
 			});
+		}
+	}
+
+	// Unassign domain from current portal
+	async function unassignDomainFromPortal(domain: UserOwnedDomain) {
+		try {
+			await window.arweaveWallet.connect(['SIGN_TRANSACTION', 'ACCESS_ADDRESS', 'ACCESS_PUBLIC_KEY', 'DISPATCH']);
+			const signer = new ArconnectSigner(window.arweaveWallet);
+			const ant = ANT.init({ processId: domain.antId, signer });
+			const def = defaultTargetIdRef.current || defaultTargetManifestId;
+			if (def) {
+				await ant.setBaseNameRecord({ transactionId: def, ttlSeconds: 3600 });
+			} else if (domain.target) {
+				await ant.setBaseNameRecord({ transactionId: domain.target, ttlSeconds: 60 });
+			}
+			setUserOwnedDomains((prev) =>
+				prev.map((d) =>
+					d.name === domain.name ? { ...d, target: defaultTargetManifestId, isRedirectedToPortal: false } : d
+				)
+			);
+			const updated = (portalProvider.current?.domains ?? []).filter((d) => d.name !== domain.name);
+
+			const domainUpdateId = await permawebProvider.libs.updateZone(
+				{ Domains: permawebProvider.libs.mapToProcessCase(updated) },
+				portalProvider.current.id,
+				arProvider.wallet
+			);
+
+			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
+
+			console.log(`Domain update: ${domainUpdateId}`);
+
+			addNotification(language.assignmentRemoved, 'success');
+		} catch (err: any) {
+			console.error('Error removing assignment:', err);
+			addNotification(`${language.errorOccurred}: ${err.message}`, 'warning');
 		}
 	}
 
@@ -954,7 +985,7 @@ export default function DomainList() {
 	const failed = userOwnedDomains.filter((d) => d.status === 'failed');
 
 	return (
-		<S.Wrapper>
+		<S.Wrapper className={'fade-in'}>
 			{/* Domain Groupings */}
 			{(() => {
 				const sections = [
@@ -1023,7 +1054,7 @@ export default function DomainList() {
 							</S.ModalYearSelector>
 						</S.ModalSection>
 						{/* Pay-with options */}
-						{!IS_TESTNET && (
+						{/* {!IS_TESTNET && (
 							<S.PaymentSelectorWrapper>
 								<PayWithSelector
 									method={extendPaymentMethod}
@@ -1031,7 +1062,7 @@ export default function DomainList() {
 									arioSelectable={!!(arIOBalance && arIOBalance > 0)}
 								/>
 							</S.PaymentSelectorWrapper>
-						)}
+						)} */}
 
 						{/* Summary: total due, current balance, final balance */}
 						<S.PaymentSummaryWrapper>
@@ -1119,19 +1150,20 @@ export default function DomainList() {
 								handlePress={() => setExtendModal({ open: false, years: 1 })}
 							/>
 							{/* Insufficient balance CTA */}
-							<S.InsufficientBalanceWrapper>
-								{(() => {
-									const due = IS_TESTNET || extendPaymentMethod === 'ario' ? extendCost?.mario : extendCost?.winc;
-									const bal = IS_TESTNET || extendPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
-									const loadingCost = extendCostLoading || due == null;
-									const loadingBal = IS_TESTNET
-										? arIOBalance == null
-										: extendPaymentMethod === 'ario'
-										? arIOBalance == null
-										: arProvider.turboBalance == null;
-									const insufficient = !(due != null && bal != null && bal >= due);
-									const isLoading = loadingCost || loadingBal;
-									return (
+
+							{(() => {
+								const due = IS_TESTNET || extendPaymentMethod === 'ario' ? extendCost?.mario : extendCost?.winc;
+								const bal = IS_TESTNET || extendPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+								const loadingCost = extendCostLoading || due == null;
+								const loadingBal = IS_TESTNET
+									? arIOBalance == null
+									: extendPaymentMethod === 'ario'
+									? arIOBalance == null
+									: arProvider.turboBalance == null;
+								const insufficient = !(due != null && bal != null && bal >= due);
+								const isLoading = loadingCost || loadingBal;
+								return insufficient && !isLoading ? (
+									<S.InsufficientBalanceWrapper>
 										<InsufficientBalanceCTA
 											method={IS_TESTNET ? 'ario' : extendPaymentMethod}
 											insufficient={insufficient}
@@ -1144,9 +1176,10 @@ export default function DomainList() {
 											}
 											onAddCredits={() => setShowFund(true)}
 										/>
-									);
-								})()}
-							</S.InsufficientBalanceWrapper>
+									</S.InsufficientBalanceWrapper>
+								) : null;
+							})()}
+
 							<Button
 								type={'alt1'}
 								label={language.confirm}
@@ -1207,7 +1240,7 @@ export default function DomainList() {
 							<S.ModalSectionContent>{upgradeModal.domain.name}</S.ModalSectionContent>
 						</S.ModalSection>
 						{/* Pay-with options */}
-						{!IS_TESTNET && (
+						{/* {!IS_TESTNET && (
 							<S.PaymentSelectorWrapper>
 								<PayWithSelector
 									method={upgradePaymentMethod}
@@ -1215,7 +1248,7 @@ export default function DomainList() {
 									arioSelectable={!!(arIOBalance && arIOBalance > 0)}
 								/>
 							</S.PaymentSelectorWrapper>
-						)}
+						)} */}
 
 						{/* Summary: total due, current balance, final balance */}
 						<S.PaymentSummaryWrapper>
@@ -1379,6 +1412,84 @@ export default function DomainList() {
 				)}
 			</Panel>
 
+			{/* Domain Assignment Confirmation Modal */}
+
+			{confirmAssignModal.open && (
+				<Modal
+					header={language.confirmDomainAssignment}
+					handleClose={() => setConfirmAssignModal({ open: false })}
+					className={'modal-wrapper'}
+				>
+					{confirmAssignModal.domain && (
+						<S.ModalWrapper>
+							<S.ModalSection>
+								<S.ModalSectionTitle>Domain</S.ModalSectionTitle>
+								<S.ModalSectionContent>{confirmAssignModal.domain.name}</S.ModalSectionContent>
+							</S.ModalSection>
+							<S.ModalSection>
+								<p>{language.confirmDomainAssignmentMessage}</p>
+							</S.ModalSection>
+							<S.ModalActions>
+								<Button
+									type={'primary'}
+									label={language.cancel}
+									handlePress={() => setConfirmAssignModal({ open: false })}
+								/>
+								<Button
+									type={'alt1'}
+									label={language.confirm}
+									handlePress={() => {
+										setConfirmAssignModal({ open: false });
+										if (confirmAssignModal.domain) {
+											redirectDomainToPortal(confirmAssignModal.domain);
+										}
+									}}
+									disabled={redirectingDomains.has(confirmAssignModal.domain.name)}
+								/>
+							</S.ModalActions>
+						</S.ModalWrapper>
+					)}
+				</Modal>
+			)}
+
+			{/* Domain Unassignment Confirmation Modal */}
+
+			{confirmUnassignModal.open && (
+				<Modal
+					header={language.removeAssignmentConfirm || 'Remove Domain Assignment'}
+					handleClose={() => setConfirmUnassignModal({ open: false })}
+					className={'modal-wrapper'}
+				>
+					{confirmUnassignModal.domain && (
+						<S.ModalWrapper>
+							<S.ModalSection>
+								<S.ModalSectionTitle>Domain</S.ModalSectionTitle>
+								<S.ModalSectionContent>{confirmUnassignModal.domain.name}</S.ModalSectionContent>
+							</S.ModalSection>
+							<S.ModalSection>
+								<p>{language.removeAssignmentConfirmMessage}</p>
+							</S.ModalSection>
+							<S.ModalActions>
+								<Button
+									type={'primary'}
+									label={language.cancel}
+									handlePress={() => setConfirmUnassignModal({ open: false })}
+								/>
+								<Button
+									type={'alt1'}
+									label={language.confirm}
+									handlePress={() => {
+										setConfirmUnassignModal({ open: false });
+										if (confirmUnassignModal.domain) {
+											unassignDomainFromPortal(confirmUnassignModal.domain);
+										}
+									}}
+								/>
+							</S.ModalActions>
+						</S.ModalWrapper>
+					)}
+				</Modal>
+			)}
 			{/* Turbo Top-up Modal */}
 			<Panel
 				open={showFund}

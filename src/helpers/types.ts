@@ -20,7 +20,7 @@ export type PortalDetailType = {
 	links?: PortalLinkType[];
 	roleOptions?: { [key: string]: PortalUserRoleType };
 	permissions?: PortalPermissionsType;
-	domains?: string[];
+	domains?: PortalDomainType[];
 	uploads?: PortalUploadType[];
 	fonts?: PortalFontsType;
 	themes?: PortalThemeType[];
@@ -47,7 +47,7 @@ export type PortalAssetType = {
 		status?: ArticleStatusType;
 		content?: any;
 		thumbnail?: string;
-		releasedDate?: number;
+		releaseDate?: number;
 	};
 };
 
@@ -97,22 +97,6 @@ export enum PortalSchemeType {
 
 export type PortalThemeType = any;
 
-// export type PortalThemeType = {
-// 	name: string;
-// 	active: boolean;
-// 	scheme: PortalSchemeType;
-// 	colors: {
-// 		background: string;
-// 		primary: string;
-// 		links: string;
-// 	};
-// 	preferences: {
-// 		gradient: boolean;
-// 		shadow: boolean;
-// 		borders: boolean;
-// 	};
-// };
-
 export type PortalTopicType = { value: string };
 
 export type PortalLinkType = {
@@ -126,6 +110,11 @@ export type PortalUploadType = {
 	dateUploaded: string;
 	type: PortalUploadOptionType;
 	thumbnail?: string;
+};
+
+export type PortalDomainType = {
+	name: string;
+	primary?: boolean;
 };
 
 export type PortalUploadOptionType = 'image' | 'video';

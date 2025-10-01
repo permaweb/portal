@@ -179,8 +179,7 @@ export const DomainDetail = styled.div`
 export const DomainActions = styled.div`
 	display: flex;
 	align-items: center;
-	column-gap: 12px;
-	row-gap: 8px;
+	gap: 12.5px;
 	flex-wrap: wrap;
 `;
 
@@ -205,7 +204,7 @@ export const LoadingWrapper = styled(WrapperEmpty)`
 `;
 
 export const SectionHeader = styled.div`
-	padding: 20px 15px 15px 15px;
+	padding: 17.5px 15px 15px 15px;
 	background: ${(props) => props.theme.colors.container.alt1.background};
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 
@@ -317,13 +316,20 @@ export const DomainCostActions = styled.div`
 export const ModalWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 15px;
 `;
 
 export const ModalSection = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 2.5px;
+
+	p {
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+	}
 `;
 
 export const ModalSectionTitle = styled.div`
@@ -408,7 +414,7 @@ export const InsufficientBalanceWrapper = styled.div`
 
 export const ModalActions = styled.div`
 	display: flex;
-	gap: 7.5px;
+	gap: 15px;
 	flex-wrap: wrap;
 	justify-content: flex-end;
 	margin: 15px 0 0 0;

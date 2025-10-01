@@ -134,9 +134,11 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 						})}
 					</S.InfoWrapper>
 				)}
-				<S.InfoWrapper className={'border-wrapper-alt3'}>
-					<p>{language.userInviteInfo}</p>
-				</S.InfoWrapper>
+				{!props.user && (
+					<S.InfoWrapper className={'border-wrapper-alt3'}>
+						<p>{language.userInviteInfo}</p>
+					</S.InfoWrapper>
+				)}
 				<S.ActionsWrapper>
 					<Button
 						type={'alt1'}

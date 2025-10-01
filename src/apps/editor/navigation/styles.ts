@@ -26,10 +26,16 @@ export const Panel = styled.nav<{ open: boolean; width?: number }>`
 	top: 0;
 	left: 0;
 	z-index: 4;
-	transform: translateX(${(props) => (props.open ? '0' : '-100%')});
+	transform: translateX(0);
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		transform: translateX(${(props) => (props.open ? '0' : '-100%')});
+	}
 	transition: transform ${transition2}, width ${transition1};
-	background: ${(props) => props.theme.colors.container.alt1.background};
-	border-right: 1px solid ${(props) => props.theme.colors.border.primary};
+	background: ${(props) =>
+		props.open ? props.theme.colors.container.alt1.background : props.theme.colors.view.background};
+	border-right: 1px solid
+		${(props) => (props.open ? props.theme.colors.border.primary : props.theme.colors.border.alt9)};
 `;
 
 export const ResizeHandle = styled.div`
@@ -55,11 +61,15 @@ export const PanelHeader = styled.div`
 	padding: 0 15px;
 `;
 
-export const ToggleWrapper = styled.div`
+export const ToggleWrapper = styled.div<{ open: boolean }>`
 	height: ${STYLING.dimensions.nav.height};
 	display: flex;
 	align-items: center;
 	gap: 7.5px;
+
+	button {
+		cursor: ${(props) => (props.open ? 'w-resize' : 'e-resize')} !important;
+	}
 `;
 
 export const Logo = styled.div`
@@ -182,14 +192,14 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 export const Header = styled.header<{ navigationOpen: boolean; navWidth?: number }>`
 	height: ${STYLING.dimensions.nav.height};
 	width: 100%;
-	padding: 0 20px 0
-		${(props) =>
-			props.navigationOpen
-				? `calc(${props.navWidth ? `${props.navWidth}px` : STYLING.dimensions.nav.width} + 10px)`
-				: '20px'};
+	padding: 0 20px 0 calc(${(props) => (props.navWidth ? `${props.navWidth}px` : STYLING.dimensions.nav.width)} + 10px);
 	transition: padding-left ${transition2};
 	position: fixed;
 	top: 0;
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		padding: 0 20px;
+	}
 	z-index: 2;
 	background: ${(props) => props.theme.colors.view.background};
 
@@ -263,8 +273,7 @@ export const Portal = styled.button<{ active: boolean }>`
 	display: flex;
 	align-items: center;
 	cursor: pointer;
-	background: ${(props) =>
-		props.active ? props.theme.colors.container.primary.active : props.theme.colors.container.primary.background};
+	background: ${(props) => (props.active ? props.theme.colors.container.primary.active : 'transparent')};
 	border-radius: ${STYLING.dimensions.radius.alt4};
 	padding: 7.5px 16.5px;
 	position: relative;
@@ -331,7 +340,7 @@ export const UpdateNotification = styled.div`
 `;
 
 export const PortalDropdown = styled.div`
-	max-height: 65vh;
+	max-height: 75vh;
 	width: 350px;
 	max-width: 80vw;
 	position: absolute;
@@ -363,7 +372,7 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 		align-items: center;
 		justify-content: space-between;
 		cursor: pointer;
-		background: ${(props) => props.theme.colors.container.primary.background};
+		background: transparent;
 		border-radius: ${STYLING.dimensions.radius.alt4};
 		transition: all 100ms;
 		padding: 0 10px;

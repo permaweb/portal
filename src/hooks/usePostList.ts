@@ -9,7 +9,7 @@ type RequestRow = {
 	id: string;
 	name: string;
 	creatorId: string;
-	dateCreated: string; // keep as string to match your existing UI (formatDate handles it)
+	releaseDate: number;
 };
 
 export function usePostsList(props: { pageSize?: number }) {
@@ -62,7 +62,7 @@ export function usePostsList(props: { pageSize?: number }) {
 								id: asset.id,
 								name: asset.name,
 								creatorId: asset.creator,
-								dateCreated: asset.dateCreated,
+								releaseDate: asset.metadata?.releaseDate,
 							};
 
 							setRequests((prev) => {
@@ -97,8 +97,8 @@ export function usePostsList(props: { pageSize?: number }) {
 		return portalProvider.current.assets
 			.filter((asset: any) => currentStatusFilter === 'all' || asset.metadata?.status === currentStatusFilter)
 			.sort((a, b) => {
-				const dateA = new Date(Number(a.dateCreated)).getTime();
-				const dateB = new Date(Number(b.dateCreated)).getTime();
+				const dateA = new Date(Number(a.metadata?.releaseDate)).getTime();
+				const dateB = new Date(Number(b.metadata?.releaseDate)).getTime();
 				return dateAscending ? dateA - dateB : dateB - dateA;
 			});
 	}, [portalProvider.current?.assets, currentStatusFilter, dateAscending]);

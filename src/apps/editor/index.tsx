@@ -14,7 +14,7 @@ import { persistor, store } from 'editor/store';
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Portal } from 'components/atoms/Portal';
-import { DOM, URLS } from 'helpers/config';
+import { DOM, STYLING, URLS } from 'helpers/config';
 import { preloadAllAssets } from 'helpers/preloader';
 import { GlobalStyle } from 'helpers/styles';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
@@ -66,9 +66,9 @@ function AppContent() {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	const { navWidth } = useNavigation();
+	const { navWidth, setNavWidth } = useNavigation();
 
-	const { settings, updateSettings } = useSettingsProvider();
+	const { settings } = useSettingsProvider();
 
 	const hasCheckedProfileRef = React.useRef(false);
 	const hasInitializedPreloaderRef = React.useRef(false);
@@ -162,11 +162,26 @@ function AppContent() {
 			return (
 				<>
 					{!portalProvider.current && <Loader message={`${language?.loadingPortal}...`} />}
-					<Navigation open={settings.sidebarOpen} toggle={() => updateSettings('sidebarOpen', !settings.sidebarOpen)} />
-					<S.View className={'max-view-wrapper'} navigationOpen={settings.sidebarOpen} navWidth={navWidth}>
+					<Navigation
+						open={navWidth > STYLING.dimensions.nav.widthMin}
+						toggle={() => {
+							if (navWidth > STYLING.dimensions.nav.widthMin) {
+								// Set to minimum width
+								setNavWidth(STYLING.dimensions.nav.widthMin);
+							} else {
+								// Expand to default width
+								setNavWidth(260);
+							}
+						}}
+					/>
+					<S.View
+						className={'max-view-wrapper'}
+						navigationOpen={navWidth > STYLING.dimensions.nav.widthMin}
+						navWidth={navWidth}
+					>
 						{element}
 					</S.View>
-					<S.Footer navigationOpen={settings.sidebarOpen} navWidth={navWidth}>
+					<S.Footer navigationOpen={navWidth > STYLING.dimensions.nav.widthMin} navWidth={navWidth}>
 						<p>
 							{language?.app} {new Date().getFullYear()}
 						</p>
@@ -195,7 +210,7 @@ function AppContent() {
 						{getRoute(`${URLS.base}:portalId/post/create/article`, <PostEdit />)}
 						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <PostEdit />)}
 						{getRoute(`${URLS.base}:portalId/page/create`, <PageCreate />)}
-						{getRoute(`${URLS.base}:portalId/page/edit/:pageId`, <PageEdit />)}
+						{getRoute(`${URLS.base}:portalId/page/edit/:assetId`, <PageEdit />)}
 						{getRoute(`${URLS.base}:portalId/setup`, <Setup />)}
 						{getRoute(`${URLS.base}:portalId/design`, <Design />)}
 						{getRoute(`${URLS.base}:portalId/design/:active`, <Design />)}

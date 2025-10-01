@@ -2,7 +2,7 @@ import Arweave from 'arweave';
 import { ARIOToken, mARIOToken } from '@ar.io/sdk';
 
 import { STORAGE, URLS } from './config';
-import { PortalAssetType, PortalUserType } from './types';
+import { PortalAssetType, PortalDomainType, PortalUserType } from './types';
 
 export function checkValidAddress(address: string | null) {
 	if (!address) return false;
@@ -333,6 +333,13 @@ export function urlify(str: string) {
 	return str.toLowerCase().split(' ').join('-');
 }
 
+export function displayUrlName(str: string) {
+	return str
+		.split('-')
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(' ');
+}
+
 export function getPortalIdFromURL(): string | null {
 	const { pathname, hash } = window.location;
 
@@ -369,4 +376,17 @@ export function stripAnsiChars(input: string) {
 	if (!input) return null;
 	const ansiRegex = /\x1B\[[0-9;]*m/g;
 	return input.toString().replace(ansiRegex, '');
+}
+
+function getCurrentGateway() {
+	const { host } = window.location;
+	const parts = host.split('.');
+	return `${parts[1]}.${parts[2]}`;
+}
+
+export function resolvePrimaryDomain(domains: PortalDomainType[], portalId: string) {
+	const gateway = window.location.hostname === 'localhost' ? 'arweave.net' : getCurrentGateway();
+	const domain = domains?.find((domain) => domain.primary)?.name || domains?.[0]?.name;
+	if (domain) return `https://${domain}.${gateway}`;
+	else return `https://${gateway}/${portalId}`;
 }

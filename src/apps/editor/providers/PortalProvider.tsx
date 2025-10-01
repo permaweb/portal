@@ -6,7 +6,7 @@ import { CurrentZoneVersion } from '@permaweb/libs';
 import { PortalManager } from 'editor/components/organisms/PortalManager';
 
 import { Panel } from 'components/atoms/Panel';
-import { PORTAL_PATCH_MAP } from 'helpers/config';
+import { AO_NODE, PORTAL_PATCH_MAP } from 'helpers/config';
 import {
 	PortalDetailType,
 	PortalHeaderType,
@@ -71,6 +71,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const { addNotification } = useNotifications();
 
 	const hasFetchedMeta = React.useRef(false);
+	const authoritiesRef = React.useRef(false);
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
 	const [invites, setInvites] = React.useState<PortalHeaderType[] | null>(null);
@@ -97,33 +98,51 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	}, [arProvider.walletAddress]);
 
 	React.useEffect(() => {
-		const profilePortals = permawebProvider.profile?.portals ?? [];
-		setPortals(profilePortals);
-		setInvites(permawebProvider.profile?.invites ?? []);
-		if (!hasFetchedMeta.current) {
-			hasFetchedMeta.current = true;
-			if (profilePortals.length > 0) {
-				(async () => {
-					const updated = await Promise.all(
-						profilePortals.map(async (portal: PortalHeaderType) => {
-							const cached = getCachedPortal(portal.id);
-							const data = cached ?? (await permawebProvider.libs.getZone(portal.id));
-							return {
-								...portal,
-								name: data.name ?? data.store?.name ?? 'None',
-								logo: data.logo ?? data.store?.logo ?? 'None',
-								icon: data.icon ?? data.store?.icon ?? 'None',
-								users: data.users ?? getPortalUsers(data.roles),
-							};
-						})
-					);
-					setPortals(updated);
-				})();
-			} else {
-				setPermissions({ base: false });
+		if (permawebProvider.profile?.id) {
+			const profilePortals = permawebProvider.profile?.portals ?? [];
+			setPortals(profilePortals);
+			setInvites(permawebProvider.profile?.invites ?? []);
+			if (!hasFetchedMeta.current) {
+				hasFetchedMeta.current = true;
+				if (profilePortals.length > 0) {
+					(async () => {
+						const updated = await Promise.all(
+							profilePortals.map(async (portal: PortalHeaderType) => {
+								const cached = getCachedPortal(portal.id);
+
+								let data = cached;
+								if (!data) {
+									data = permawebProvider.libs.mapFromProcessCase(
+										await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Overview })
+									);
+
+									data.users = permawebProvider.libs.mapFromProcessCase(
+										await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Users })
+									);
+								}
+
+								return {
+									...portal,
+									name: data.name ?? data.store?.name ?? 'None',
+									logo: data.logo ?? data.store?.logo ?? 'None',
+									icon: data.icon ?? data.store?.icon ?? 'None',
+									users: data.users ?? getPortalUsers(data.roles),
+								};
+							})
+						);
+						setPortals(updated);
+					})();
+				} else {
+					setPermissions({ base: false });
+				}
 			}
 		}
-	}, [arProvider.walletAddress, permawebProvider.profile?.portals, permawebProvider.profile?.invites]);
+	}, [
+		arProvider.walletAddress,
+		permawebProvider.profile?.id,
+		permawebProvider.profile?.portals,
+		permawebProvider.profile?.invites,
+	]);
 
 	React.useEffect(() => {
 		if (portals?.length > 0) {
@@ -202,6 +221,19 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 							switch (key) {
 								case 'overview':
+									if (
+										data.authorities &&
+										!data.authorities.includes(AO_NODE.authority) &&
+										permawebProvider.libs?.updateZoneAuthorities &&
+										!authoritiesRef.current
+									) {
+										authoritiesRef.current = true;
+										permawebProvider.libs.updateZoneAuthorities({
+											zoneId: currentId,
+											authorityId: AO_NODE.authority,
+										});
+									}
+
 									/* Check for portal version update */
 									if (
 										data.version !== CurrentZoneVersion &&
@@ -241,6 +273,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									updatedPortal.categories = data.categories ?? updatedPortal.categories ?? [];
 									updatedPortal.topics = data.topics ?? updatedPortal.topics ?? [];
 									updatedPortal.links = data.links ?? updatedPortal.links ?? [];
+									updatedPortal.domains = data.domains ?? updatedPortal.domains ?? [];
 									break;
 								case 'media':
 									updatedPortal.uploads = data.uploads ?? updatedPortal.uploads ?? [];

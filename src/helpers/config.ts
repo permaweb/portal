@@ -12,7 +12,8 @@ export { ICONS, ICONS_SOCIAL };
 
 export const AO_NODE = {
 	url: 'https://hb.portalinto.com',
-	scheduler: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
+	authority: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
+	scheduler: 'NoZH3pueH0Cih6zjSNu_KRAcmg4ZJV1aGHKi0Pi5_Hc',
 };
 
 export const IS_TESTNET = import.meta.env.VITE_ARIO_TESTNET === 'true';
@@ -61,6 +62,7 @@ export const STYLING = {
 			height: '70px',
 			linksHeight: '50px',
 			width: '260px',
+			widthMin: 67.5,
 		},
 		radius: {
 			primary: '7.5px',
@@ -218,34 +220,36 @@ export const UPLOAD = {
 export const PORTAL_DATA = () => `
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-		<link rel="icon" href="https://arweave.net/WzomcwfXZ_4hhUvDso1wsyJpNBHGeHezFZQv3V706Hw" />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Ramaraja&display=swap"
-			rel="stylesheet"
-		/>
-		<link
-			href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,200..900;1,200..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Ramaraja&display=swap"
-			rel="stylesheet"
-		/>
-		<title>Portal</title>
-	</head>
-	<body>
-		<div id="portal"></div>
-		<script type="module" src="https://engine_portalenv.arweave.net"></script>
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <title>Portal</title>
+  </head>
+  <body>
+    <div id="portal"></div>
+    <script type="module">
+      function getGateway() {
+        const host = window.location.hostname;
+        const parts = host.split('.');
+		return \`\${parts[parts.length - 2]}.\${parts[parts.length - 1]}\`;
+      }
+
+      const gateway = getGateway();
+
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = \`https://engine_portalenv.\${gateway}\`;
+      document.body.appendChild(script);
+    </script>
+  </body>
 </html>
 `;
 
 export const PORTAL_PATCH_MAP = {
-	[PortalPatchMapEnum.Overview]: ['Owner', 'Version', 'Store.Name', 'Store.Icon', 'Store.Logo'],
+	[PortalPatchMapEnum.Overview]: ['Owner', 'Version', 'Authorities', 'Store.Name', 'Store.Icon', 'Store.Logo'],
 	[PortalPatchMapEnum.Users]: ['Roles', 'RoleOptions', 'Permissions'],
-	[PortalPatchMapEnum.Navigation]: ['Store.Categories', 'Store.Topics', 'Store.Links'],
+	[PortalPatchMapEnum.Navigation]: ['Store.Categories', 'Store.Topics', 'Store.Links', 'Store.Domains'],
 	[PortalPatchMapEnum.Presentation]: ['Store.Layout', 'Store.Pages', 'Store.Themes', 'Store.Fonts'],
 	[PortalPatchMapEnum.Media]: ['Store.Uploads'],
 	[PortalPatchMapEnum.Posts]: ['Store.Index'],

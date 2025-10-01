@@ -23,14 +23,14 @@ export const Posts = (props: { paginatedPosts?: PortalAssetType[]; type?: ViewLa
 
 	if (!props.paginatedPosts.length) {
 		return (
-			<S.WrapperEmpty type={props.type}>
+			<S.WrapperEmpty type={props.type} className={'border-wrapper-alt2'}>
 				<p>{language?.noPostsFound}</p>
 			</S.WrapperEmpty>
 		);
 	}
 
 	return (
-		<S.PostsWrapper type={props.type}>
+		<S.PostsWrapper type={props.type} className={'border-wrapper-alt2'}>
 			{props.paginatedPosts.map((post: PortalAssetType) => (
 				<Post key={post.id} post={post} />
 			))}
