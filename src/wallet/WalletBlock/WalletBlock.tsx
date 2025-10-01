@@ -1,7 +1,7 @@
 import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { WalletEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -17,7 +17,7 @@ export default function WalletBlock() {
 	return (
 		<S.Wrapper>
 			<S.Icon>
-				<ReactSVG src={ASSETS.wallet} />
+				<ReactSVG src={ICONS.wallet} />
 			</S.Icon>
 			<p>{language?.connectToContinue}</p>
 			<S.WalletConnect>

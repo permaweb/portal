@@ -11,7 +11,7 @@ import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
 import { Tabs } from 'components/atoms/Tabs';
-import { ASSETS, DOM, STYLING } from 'helpers/config';
+import { ICONS, DOM, STYLING } from 'helpers/config';
 import {
 	ArticleBlockEnum,
 	PortalAssetRequestType,
@@ -233,7 +233,7 @@ export default function ArticleToolbar(props: {
 				<S.PanelCloseWrapperStart>
 					<IconButton
 						type={'primary'}
-						src={ASSETS.close}
+						src={ICONS.close}
 						handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
 						tooltip={language?.closeToolkit}
 						tooltipPosition={'bottom-right'}
@@ -299,7 +299,7 @@ export default function ArticleToolbar(props: {
 						handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
 						active={currentPost.editor.panelOpen}
 						disabled={currentPost.editor.loading.active}
-						icon={currentPost.editor.panelOpen ? ASSETS.close : ASSETS.tools}
+						icon={currentPost.editor.panelOpen ? ICONS.close : ICONS.tools}
 						iconLeftAlign
 						tooltip={'CTRL + K'}
 						noFocus
@@ -312,7 +312,7 @@ export default function ArticleToolbar(props: {
 						}
 						active={currentPost.editor.blockEditMode}
 						disabled={currentPost.editor.loading.active}
-						icon={currentPost.editor.blockEditMode ? ASSETS.close : ASSETS.layout}
+						icon={currentPost.editor.blockEditMode ? ICONS.close : ICONS.layout}
 						iconLeftAlign
 						tooltip={'CTRL + L'}
 						noFocus

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Modal } from 'components/atoms/Modal';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { FormFieldType, ValidationType } from 'helpers/types';
 import { formatRequiredField } from 'helpers/utils';
 
@@ -55,7 +55,7 @@ export default function FormField(props: {
 							<IconButton
 								type={'primary'}
 								active={false}
-								src={ASSETS.info}
+								src={ICONS.info}
 								handlePress={() => setShowTooltip(!showTooltip)}
 								dimensions={{ wrapper: 22.5, icon: 13.5 }}
 							/>

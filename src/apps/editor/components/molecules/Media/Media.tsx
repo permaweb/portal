@@ -8,7 +8,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalDetailType, PortalPatchMapEnum } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
@@ -171,7 +171,7 @@ export default function Media(props: {
 					<S.RemoveWrapper className={'fade-in'}>
 						<IconButton
 							type={'alt1'}
-							src={ASSETS.delete}
+							src={ICONS.delete}
 							handlePress={() => setShowRemoveConfirmation(true)}
 							dimensions={{
 								wrapper: 20,
@@ -186,7 +186,7 @@ export default function Media(props: {
 			);
 		}
 
-		const assetSrc = props.type === 'icon' ? ASSETS.icon : ASSETS.image;
+		const assetSrc = props.type === 'icon' ? ICONS.icon : ICONS.image;
 		const uploadText = props.type === 'icon' ? language?.uploadIcon : language?.uploadLogo;
 
 		return (
@@ -317,7 +317,7 @@ export default function Media(props: {
 										handlePress={() => handleRemoveMedia()}
 										disabled={unauthorized || loading}
 										loading={false}
-										icon={ASSETS.delete}
+										icon={ICONS.delete}
 										iconLeftAlign
 										warning
 									/>

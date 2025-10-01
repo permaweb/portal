@@ -10,7 +10,7 @@ import { useSettingsProvider as useViewerSettingsProvider } from 'viewer/provide
 import { Avatar } from 'components/atoms/Avatar';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { LanguageEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -179,29 +179,29 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 										onClick={() => window.wanderInstance.open(backupsNeeded > 0 ? 'backup' : undefined)}
 										style={{ position: 'relative' }}
 									>
-										<ReactSVG src={ASSETS.wallet} />
+										<ReactSVG src={ICONS.wallet} />
 										{language?.wallet}
 										{backupsNeeded > 0 && <S.MenuBadge>{backupsNeeded}</S.MenuBadge>}
 									</li>
 								)}
 								<li onClick={() => setShowProfileManager(true)}>
-									<ReactSVG src={ASSETS.write} />
+									<ReactSVG src={ICONS.write} />
 									{language?.profile}
 								</li>
 								<li onClick={() => setShowLanguageSelector(true)}>
-									<ReactSVG src={ASSETS.language} />
+									<ReactSVG src={ICONS.language} />
 									{language?.language}
 								</li>
 								{availableThemes && (
 									<li onClick={() => setShowThemeSelector(true)}>
-										<ReactSVG src={ASSETS.design} />
+										<ReactSVG src={ICONS.design} />
 										{language?.appearance}
 									</li>
 								)}
 							</S.DBodyWrapper>
 							<S.DFooterWrapper>
 								<li onClick={handleDisconnect}>
-									<ReactSVG src={ASSETS.disconnect} />
+									<ReactSVG src={ICONS.disconnect} />
 									{language?.disconnect}
 								</li>
 							</S.DFooterWrapper>

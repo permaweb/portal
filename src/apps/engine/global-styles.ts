@@ -181,9 +181,6 @@ export const Page = styled.div<{ $layout: any }>`
 	width: 100%;
 	min-height: 100%;
 	background-color: rgba(var(--color-background), 1);
-	// background-image: ${(props: any) =>
-		props.$layout?.wallpaper ? `url('img/wallpapers/wp${props.$layout.wallpaper}.jpg')` : `unset`};
-	// background-image: url('https://arweave.net/BBbg_l-3_Z6UPH_9PG-Ad2ntHLwe9HhdMdEsbk8r_DU');
 	background-attachment: fixed;
 	background-size: cover;
 	color: rgba(var(--color-text), 1);

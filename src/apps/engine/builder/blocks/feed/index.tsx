@@ -11,14 +11,18 @@ export default function Feed(props?: any) {
 	const params = useParams();
 	const { portal } = usePortalProvider();
 	const Name = portal?.Name;
-	const filters = {
-		category: params.category ?? props.category ?? null,
-		tags: params.tag ? [params.tag] : null,
-		author: params.author ?? params.user ?? null,
-		search: params.search ?? null,
-		date: params.year ? { year: +params.year, month: +params.month } : null,
-	};
-	const { Posts, Title } = Object.values(filters).some(Boolean) ? usePosts(filters) : usePosts({ preview });
+	const hasFilters =
+		params.category || props.category || params.tag || params.author || params.user || params.search || params.year;
+	const filters = hasFilters
+		? {
+				category: params.category ?? props.category ?? null,
+				tags: params.tag ? [params.tag] : null,
+				author: params.author ?? params.user ?? null,
+				search: params.search ?? null,
+				date: params.year ? { year: +params.year, month: +params.month } : null,
+		  }
+		: { preview };
+	const { Posts, Title } = usePosts(filters);
 
 	React.useEffect(() => {
 		if (Title) {
@@ -33,7 +37,7 @@ export default function Feed(props?: any) {
 				<S.FeedHeader>
 					<span>Search results</span>
 					<h1>{params.search}</h1>
-					<p>{Posts.length} posts</p>
+					<p>{Posts ? Posts.length : 0} posts</p>
 				</S.FeedHeader>
 			)}
 			{Posts ? (

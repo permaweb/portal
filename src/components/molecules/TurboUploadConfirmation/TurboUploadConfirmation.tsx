@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button } from 'components/atoms/Button';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -76,7 +76,7 @@ export default function TurboUploadConfirmation(props: {
 									label={language?.addFunds}
 									handlePress={() => setShowFundUpload(true)}
 									disabled={showFundUpload}
-									icon={ASSETS.add}
+									icon={ICONS.add}
 									iconLeftAlign
 									height={50}
 									fullWidth

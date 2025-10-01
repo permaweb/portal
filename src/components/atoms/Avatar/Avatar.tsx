@@ -1,7 +1,7 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 import { Loader } from '../Loader';
@@ -30,7 +30,7 @@ export default function Avatar(props: {
 					<Loader sm relative />
 				</S.LoaderWrapper>
 			);
-		} else return <ReactSVG src={ASSETS.user} />;
+		} else return <ReactSVG src={ICONS.user} />;
 	}, [props.loading, props.owner, hasError]);
 
 	return (

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
-import { ASSETS, DOM } from 'helpers/config';
+import { ICONS, DOM } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
@@ -77,7 +77,7 @@ export default function Panel(props: {
 									<IconButton
 										type={'primary'}
 										warning
-										src={ASSETS.close}
+										src={ICONS.close}
 										handlePress={() => props.handleClose()}
 										active={false}
 										dimensions={{

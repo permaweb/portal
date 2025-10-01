@@ -7,7 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { DesignPanelType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -82,7 +82,7 @@ export default function PortalDesign() {
 					label={label}
 					handlePress={() => handleOpenAction(action)}
 					disabled={!portalProvider?.permissions?.updatePortalMeta}
-					icon={ASSETS.arrow}
+					icon={ICONS.arrow}
 					height={40}
 					fullWidth
 				/>

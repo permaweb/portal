@@ -9,7 +9,7 @@ import { UserList } from 'editor/components/organisms/UserList';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
-import { ASSETS, URLS } from 'helpers/config';
+import { ICONS, URLS } from 'helpers/config';
 import { resolvePrimaryDomain } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -38,7 +38,7 @@ export default function Portal() {
 							window.open(resolvePrimaryDomain(portalProvider.current?.domains, portalProvider.current?.id))
 						}
 						disabled={!portalProvider.current}
-						icon={ASSETS.site}
+						icon={ICONS.site}
 						iconLeftAlign
 					/>,
 					<Button
@@ -46,7 +46,7 @@ export default function Portal() {
 						label={language?.createPost}
 						handlePress={() => navigate(URLS.postCreateArticle(portalProvider.current.id))}
 						disabled={unauthorized || !portalProvider.current}
-						icon={ASSETS.add}
+						icon={ICONS.add}
 						iconLeftAlign
 					/>,
 				]}

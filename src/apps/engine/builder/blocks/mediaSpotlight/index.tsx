@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 
 import { usePosts } from '../../../hooks/posts';
+import { getTxEndpoint } from 'helpers/endpoints';
 
 import * as S from './styles';
 
@@ -28,7 +29,9 @@ export default function MediaSpotlight(props: any) {
 										})}
 									</S.Meta>
 									<S.Thumbnail>
-										<img src={!isLoadingPosts ? `https://arweave.net/${post?.metadata?.thumbnail}` : null} />
+										<img
+											src={!isLoadingPosts && post?.metadata?.thumbnail ? getTxEndpoint(post.metadata.thumbnail) : null}
+										/>
 									</S.Thumbnail>
 									<h3>{post.name}</h3>
 								</S.Podcast>

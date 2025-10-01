@@ -7,6 +7,12 @@ export const EmojisIcon = styled.div`
 	justify-content: center;
 	height: 100%;
 
+	div {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
 	svg {
 		width: 24px;
 		height: 24px;
@@ -24,7 +30,7 @@ export const EmojisIcon = styled.div`
 
 export const EmojiPicker = styled.div`
 	position: absolute;
-	margin-top: 28px;
+	bottom: 55px;
 	right: -8px;
 	z-index: 100;
 	background: var(--color-card-background);
@@ -33,6 +39,7 @@ export const EmojiPicker = styled.div`
 	padding: 10px;
 	width: 300px;
 	height: 240px;
+	backdrop-filter: blur(5px);
 	display: flex;
 	flex-direction: column;
 `;

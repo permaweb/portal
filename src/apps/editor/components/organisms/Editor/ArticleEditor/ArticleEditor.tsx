@@ -158,16 +158,34 @@ export default function ArticleEditor(props: {
 						(block: ArticleBlockType) => block.id === currentPost.editor.focusedBlock.id
 					);
 					const currentBlock = currentPost.data.content[currentBlockIndex];
-					if (
-						(currentBlock &&
-							!(currentBlock.type === 'image') &&
-							(!currentBlock.content.length ||
-								(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
-								currentBlock.content === '<li><br></li>' ||
-								(currentBlock.type === 'ordered-list' && currentBlock.content === '<li></li>') ||
-								currentBlock.content === '<li><br></li>')) ||
-						currentBlock.content === '<br>'
-					) {
+
+					// Check if content is empty or will be empty after this backspace
+					const isEmpty =
+						!currentBlock.content.length ||
+						((currentBlock.type === 'ordered-list' || currentBlock.type === 'unordered-list') &&
+							currentBlock.content === '<li></li>') ||
+						currentBlock.content === '<li><br></li>' ||
+						currentBlock.content === '<br>';
+
+					// For list items, also check if we're about to delete the last character in a single-item list
+					let willBeEmpty = false;
+					if (currentBlock.type === 'ordered-list' || currentBlock.type === 'unordered-list') {
+						// Count the number of <li> elements
+						const liCount = (currentBlock.content.match(/<li>/gi) || []).length;
+
+						// Only proceed if there's exactly one list item
+						if (liCount === 1) {
+							const textContent = currentBlock.content.replace(/<[^>]*>/g, '').trim();
+							const selection = window.getSelection();
+							if (selection && selection.rangeCount > 0) {
+								const range = selection.getRangeAt(0);
+								// If cursor is at position 1 or less and there's only 1 character or less, this backspace will empty it
+								willBeEmpty = textContent.length <= 1 && range.startOffset <= 1;
+							}
+						}
+					}
+
+					if (currentBlock && !(currentBlock.type === 'image') && (isEmpty || willBeEmpty)) {
 						event.preventDefault();
 						deleteBlock(currentBlock.id);
 						if (currentBlockIndex > 0) {

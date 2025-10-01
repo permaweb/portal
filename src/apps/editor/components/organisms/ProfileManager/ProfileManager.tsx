@@ -7,7 +7,7 @@ import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { TextArea } from 'components/atoms/TextArea';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -152,7 +152,7 @@ export default function ProfileManager(props: {
 		if (banner) return <img src={checkValidAddress(banner) ? getTxEndpoint(banner) : banner} />;
 		return (
 			<>
-				<ReactSVG src={ASSETS.image} />
+				<ReactSVG src={ICONS.image} />
 				<span>{language?.uploadBanner}</span>
 			</>
 		);
@@ -162,7 +162,7 @@ export default function ProfileManager(props: {
 		if (thumbnail) return <img src={checkValidAddress(thumbnail) ? getTxEndpoint(thumbnail) : thumbnail} />;
 		return (
 			<>
-				<ReactSVG src={ASSETS.user} />
+				<ReactSVG src={ICONS.user} />
 				<span>{language?.uploadAvatar}</span>
 			</>
 		);

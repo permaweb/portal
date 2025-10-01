@@ -4,7 +4,8 @@ import { EditorStoreRootState } from 'editor/store';
 import { currentPostUpdate } from 'editor/store/post';
 
 import { IconButton } from 'components/atoms/IconButton';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
@@ -12,9 +13,15 @@ export default function ArticleToolbarMarkup() {
 	const dispatch = useDispatch();
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
 
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
+
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
+
+	const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPod|iPad/.test(navigator.platform);
+	const modKey = isMac ? 'Cmd' : 'Ctrl';
 
 	function getMarkupAction(markupType: 'bold' | 'italic' | 'underline' | 'strikethrough') {
 		let icon = null;
@@ -22,20 +29,20 @@ export default function ArticleToolbarMarkup() {
 
 		switch (markupType) {
 			case 'bold':
-				icon = ASSETS.bold;
-				tooltip = 'Bold (Cmd + B)';
+				icon = ICONS.bold;
+				tooltip = `${language?.bold || 'Bold'} (${modKey} + B)`;
 				break;
 			case 'italic':
-				icon = ASSETS.italic;
-				tooltip = 'Italic (Cmd + I)';
+				icon = ICONS.italic;
+				tooltip = `${language?.italic || 'Italic'} (${modKey} + I)`;
 				break;
 			case 'underline':
-				icon = ASSETS.underline;
-				tooltip = 'Underline (Cmd + U)';
+				icon = ICONS.underline;
+				tooltip = `${language?.underline || 'Underline'} (${modKey} + U)`;
 				break;
 			case 'strikethrough':
-				icon = ASSETS.strikethrough;
-				tooltip = 'Strikethrough (Cmd + S)';
+				icon = ICONS.strikethrough;
+				tooltip = `${language?.strikethrough || 'Strikethrough'} (${modKey} + S)`;
 				break;
 		}
 

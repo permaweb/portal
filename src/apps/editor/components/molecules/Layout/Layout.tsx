@@ -5,7 +5,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
-import { ASSETS, DEFAULT_LAYOUT, DEFAULT_PAGES } from 'helpers/config';
+import { ICONS, LAYOUT, PAGES } from 'helpers/config';
 import { PortalPatchMapEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -22,10 +22,10 @@ export default function Layout() {
 	const language = languageProvider.object[languageProvider.current];
 	const { addNotification } = useNotifications();
 
-	const [layout, setLayout] = React.useState(portalProvider.current?.layout || DEFAULT_LAYOUT);
-	const [pages, setPages] = React.useState<any>(portalProvider.current?.pages || DEFAULT_PAGES);
-	const [originalLayout] = React.useState(portalProvider.current?.layout || DEFAULT_LAYOUT);
-	const [originalPages] = React.useState(portalProvider.current?.pages || DEFAULT_PAGES);
+	const [layout, setLayout] = React.useState(portalProvider.current?.layout || LAYOUT.JOURNAL);
+	const [pages, setPages] = React.useState<any>(portalProvider.current?.pages || PAGES.JOURNAL);
+	const [originalLayout] = React.useState(portalProvider.current?.layout || LAYOUT.JOURNAL);
+	const [originalPages] = React.useState(portalProvider.current?.pages || PAGES.JOURNAL);
 	const [loading, setLoading] = React.useState<boolean>(false);
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
@@ -140,7 +140,7 @@ export default function Layout() {
 								onClick={() => (active ? {} : handleLayoutOptionChange(option.name))}
 							>
 								<p>{option.name}</p>
-								<S.Indicator active={active}>{active && <ReactSVG src={ASSETS.checkmark} />}</S.Indicator>
+								<S.Indicator active={active}>{active && <ReactSVG src={ICONS.checkmark} />}</S.Indicator>
 							</S.Option>
 						);
 					})}

@@ -1,12 +1,31 @@
 import styled from 'styled-components';
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div<{ status: string }>`
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
+	position: relative;
+	box-shadow: ${(props) =>
+		props?.status === 'active' ? '0 4px 10px rgba(0, 0, 0, 0.4)' : '0 1px 4px rgba(0, 0, 0, 0.4)'};
+
+	${(props) =>
+		props?.status !== 'active' &&
+		`
+		&::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			width: 4px;
+			background: #e74c3c;
+			border-radius: var(--border-radius) 0 0 var(--border-radius);
+		}
+	`}
 `;
 
 export const Comment = styled.div<{ $level: number }>`
+	position: relative;
 	display: flex;
 	gap: 10px;
 	margin-left: ${(props) => `calc(${props.$level} * 30px)`};
@@ -14,7 +33,6 @@ export const Comment = styled.div<{ $level: number }>`
 	padding: 10px;
 	margin-top: ${(props) => (props.$level > 0 ? `-16px` : 0)};
 	border-radius: var(--border-radius);
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 `;
 
 export const Avatar = styled.div`
@@ -30,7 +48,10 @@ export const Avatar = styled.div`
 	}
 `;
 
-export const Content = styled.div``;
+export const Content = styled.div`
+	position: relative;
+	width: 100%;
+`;
 
 export const Meta = styled.div`
 	display: flex;
@@ -51,6 +72,7 @@ export const Date = styled.span`
 `;
 
 export const Text = styled.div`
+	width: 100%;
 	margin-top: 4px;
 `;
 
@@ -75,5 +97,59 @@ export const Action = styled.div`
 	&:hover {
 		cursor: pointer;
 		opacity: 1;
+	}
+`;
+
+export const LoadingOverlay = styled.div`
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(2px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--border-radius);
+	z-index: 10;
+`;
+
+export const Spinner = styled.div`
+	width: 30px;
+	height: 30px;
+	border: 3px solid rgba(255, 255, 255, 0.2);
+	border-top-color: rgba(var(--color-primary), 1);
+	border-radius: 50%;
+	animation: spin 0.8s linear infinite;
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+`;
+
+export const HiddenIndicator = styled.div`
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	background: rgba(231, 76, 60, 0.2);
+	color: #e74c3c;
+	padding: 2px 8px;
+	border-radius: var(--border-radius);
+	font-size: 11px;
+	font-weight: 600;
+
+	div {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	svg {
+		width: 14px;
+		height: 14px;
+		fill: #e74c3c;
 	}
 `;

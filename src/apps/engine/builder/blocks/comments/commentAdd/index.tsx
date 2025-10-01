@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { ReactSVG } from 'react-svg';
 import { $getRoot, $getSelection } from 'lexical';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
@@ -8,12 +9,11 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $insertNodes, COMMAND_PRIORITY_HIGH, KEY_ENTER_COMMAND, TextNode } from 'lexical';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-import Icon from 'engine/components/icon';
-import * as ICONS from 'engine/constants/icons';
-
+import { ICONS } from 'helpers/config';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import EmojiPicker from './emojiPicker';
 
+import EmojiPicker from './emojiPicker';
 import * as S from './styles';
 
 const MAX_EDITOR_LENGTH = 500;
@@ -25,6 +25,7 @@ function CommentEditorContent(props: any) {
 	const [canSend, setCanSend] = React.useState(false);
 	const [editorText, setEditorText] = React.useState('');
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
+	console.log('parentId: ', parentId);
 
 	const handleEmoji = (emoji: string) => {
 		editor.update(() => {
@@ -62,6 +63,7 @@ function CommentEditorContent(props: any) {
 		try {
 			const comment = await libs.createComment({
 				commentsId,
+				parentId,
 				content: plainText,
 			});
 
@@ -112,14 +114,21 @@ function CommentEditorContent(props: any) {
 		});
 	};
 
+	const handleEditorClick = (e: React.MouseEvent) => {
+		// Focus the editor when clicking on the container
+		if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('editor-input')) {
+			editor.focus();
+		}
+	};
+
 	return (
 		<>
-			<S.Editor>
+			<S.Editor onClick={handleEditorClick}>
 				<ContentEditable className="editor-input" />
 				<S.Actions>
 					<EmojiPicker onInsertEmoji={handleEmoji} />
 					<S.Send onClick={handleSubmit} $active={canSend && !isSubmitting}>
-						<Icon icon={ICONS.SEND} />
+						<ReactSVG src={ICONS.send} />
 					</S.Send>
 				</S.Actions>
 			</S.Editor>
@@ -132,6 +141,7 @@ function CommentEditorContent(props: any) {
 export default function CommentAdd(props: any) {
 	const { commentsId, parentId } = props;
 	const { profile } = usePermawebProvider();
+	const { walletAddress } = useArweaveProvider();
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 
 	const initialConfig = {
@@ -150,14 +160,15 @@ export default function CommentAdd(props: any) {
 		},
 	};
 
-	const placeholder = profile?.id
+	const isLoggedIn = Boolean(walletAddress && profile?.id);
+	const placeholder = isLoggedIn
 		? !parentId
 			? 'Write a comment...'
 			: 'Write a reply...'
 		: 'Login to write a comment...';
 
 	return (
-		<S.CommentAdd $active={Boolean(profile?.id) && !isSubmitting}>
+		<S.CommentAdd $active={isLoggedIn && !isSubmitting}>
 			<LexicalComposer initialConfig={initialConfig}>
 				<PlainTextPlugin
 					contentEditable={

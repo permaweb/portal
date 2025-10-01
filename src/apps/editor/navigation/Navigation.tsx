@@ -8,7 +8,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
-import { ASSETS, STYLING, URLS } from 'helpers/config';
+import { ICONS, STYLING, URLS } from 'helpers/config';
 import { PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
 import { formatAddress, resolvePrimaryDomain } from 'helpers/utils';
 import { checkWindowCutoff } from 'helpers/window';
@@ -39,42 +39,48 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		return [
 			{
 				path: portalProvider.current?.id ? URLS.portalBase(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.portalIcon,
+				icon: ICONS.portal,
 				label: language?.home,
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalPosts(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.posts,
+				icon: ICONS.posts,
 				label: language?.posts,
 			},
 			{
+				path: portalProvider.current?.id ? URLS.portalModeration(portalProvider.current.id) : URLS.base,
+				icon: ICONS.moderation,
+				label: language?.moderation,
+			},
+			{
 				path: portalProvider.current?.id ? URLS.portalDesign(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.design,
+				icon: ICONS.design,
 				label: language?.design,
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalMedia(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.media,
+				icon: ICONS.media,
 				label: language?.media,
+				useFill: true,
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalSetup(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.setup,
+				icon: ICONS.setup,
 				label: language?.setup,
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalUsers(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.users,
+				icon: ICONS.users,
 				label: language?.users,
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalPages(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.pages,
+				icon: ICONS.pages,
 				label: language?.pages,
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalDomains(portalProvider.current.id) : URLS.base,
-				icon: ASSETS.domains,
+				icon: ICONS.domains,
 				label: language?.domains,
 			},
 		];
@@ -148,7 +154,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 			<S.ToggleWrapper open={props.open}>
 				<IconButton
 					type={'primary'}
-					src={ASSETS.navigation}
+					src={ICONS.navigation}
 					handlePress={props.toggle}
 					dimensions={{
 						wrapper: 36.5,
@@ -166,22 +172,24 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		const content = (
 			<>
 				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
-				<S.PanelContent open={props.open} showText={showText} className={'fade-in scroll-wrapper-hidden'}>
+				<S.PanelContent open={props.open} className={'fade-in scroll-wrapper-hidden'}>
 					{paths.map((element, index) => (
-						<Link key={index} to={element.path} onClick={(e) => handleNavigate(e, element.path)}>
-							<ReactSVG src={element.icon} />
-							{showText && element.label}
-							{!showText && (
-								<S.LinkTooltip className={'info'}>
-									<span>{element.label}</span>
-								</S.LinkTooltip>
-							)}
-						</Link>
+						<S.PanelLink key={index} showText={showText} useFill={element.useFill}>
+							<Link to={element.path} onClick={(e) => handleNavigate(e, element.path)}>
+								<ReactSVG src={element.icon} />
+								{showText && element.label}
+								{!showText && (
+									<S.LinkTooltip className={'info'}>
+										<span>{element.label}</span>
+									</S.LinkTooltip>
+								)}
+							</Link>
+						</S.PanelLink>
 					))}
 				</S.PanelContent>
 				<S.PanelFooter open={props.open} showText={showText} className={'fade-in'}>
 					<Link to={URLS.docsIntro} onClick={(e) => handleNavigate(e, URLS.docsIntro)}>
-						<ReactSVG src={ASSETS.help} />
+						<ReactSVG src={ICONS.help} />
 						{showText && language?.helpCenter}
 						{!showText && (
 							<S.HelpCenterTooltip className={'info'}>
@@ -245,11 +253,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 							disabled={!portalProvider.current}
 						>
 							<span>{portalProvider.current ? portalProvider.current.name : '-'}</span>
-							<ReactSVG src={ASSETS.arrow} />
+							<ReactSVG src={ICONS.arrow} />
 							{portalProvider.updateAvailable && <S.UpdateNotification>1</S.UpdateNotification>}
 						</S.Portal>
 						{showPortalDropdown && (
-							<S.PortalDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
+							<S.PortalDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper-hidden'}>
 								<S.PDropdownHeader>
 									<p>{language?.portals}</p>
 								</S.PDropdownHeader>
@@ -282,7 +290,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 																	/>
 																) : (
 																	<S.PIndicator>
-																		<ReactSVG src={ASSETS.checkmark} />
+																		<ReactSVG src={ICONS.checkmark} />
 																	</S.PIndicator>
 																)}
 															</>
@@ -300,7 +308,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 											setShowPortalDropdown(false);
 										}}
 									>
-										<ReactSVG src={ASSETS.site} />
+										<ReactSVG src={ICONS.site} />
 										{language?.goToSite}
 									</button>
 									<button
@@ -309,31 +317,29 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 											setShowPortalDropdown(false);
 										}}
 									>
-										<ReactSVG src={ASSETS.portalIcon} />
+										<ReactSVG src={ICONS.portal} />
 										{language?.portalReturn}
 									</button>
-									{portalProvider.permissions?.updatePortalMeta && (
-										<button
-											onClick={() => {
-												portalProvider.setShowPortalManager(true);
-												setShowPortalDropdown(false);
-											}}
-										>
-											<ReactSVG src={ASSETS.write} />
-											{language?.editPortal}
-										</button>
-									)}
+									<button
+										onClick={() => {
+											portalProvider.setShowPortalManager(true);
+											setShowPortalDropdown(false);
+										}}
+									>
+										<ReactSVG src={ICONS.write} />
+										{language?.editPortal}
+									</button>
 									<button
 										onClick={() => {
 											portalProvider.setShowPortalManager(true, true);
 											setShowPortalDropdown(false);
 										}}
 									>
-										<ReactSVG src={ASSETS.add} />
+										<ReactSVG src={ICONS.add} />
 										{language?.createPortal}
 									</button>
 									<button onClick={(e: any) => handleNavigate(e, URLS.base)}>
-										<ReactSVG src={ASSETS.disconnect} />
+										<ReactSVG src={ICONS.disconnect} />
 										{language?.portalsReturn}
 									</button>
 								</S.PDropdownFooter>

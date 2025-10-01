@@ -24,7 +24,7 @@ import * as S from './global-styles';
 function App() {
 	const location = useLocation();
 	const portalProvider = usePortalProvider();
-	const { Name, Categories, Layout, Themes } = portalProvider?.portal || {};
+	const { Name, Categories, Layout, Themes, Icon } = portalProvider?.portal || {};
 	const [theme, setTheme] = React.useState<any>(
 		window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 	);
@@ -42,9 +42,10 @@ function App() {
 				try {
 					// Make a request to the current origin to get ArNS headers
 					// This works when the site is served through an ArNS gateway
-					const response = await fetch(`${window.location.protocol}//${window.location.host}`);
+					const response = await fetch(window.location.origin);
 					const resolvedId = response.headers.get('X-Arns-Resolved-Id');
 					if (resolvedId) {
+						console.log(`Resolved ID from Domain: ${resolvedId}`);
 						setPortalId(resolvedId);
 					} else {
 						console.warn('No portal ID found in URL or ArNS headers');
@@ -55,6 +56,25 @@ function App() {
 			}
 		})();
 	}, [location.pathname]);
+
+	React.useEffect(() => {
+		const txIcon = Icon;
+		if (!txIcon || !checkValidAddress(txIcon)) return;
+
+		const iconUrl = getTxEndpoint(txIcon);
+		const head = document.head;
+
+		head.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']").forEach((el) => head.removeChild(el));
+
+		const newLink = document.createElement('link');
+		newLink.rel = 'icon';
+		newLink.href = iconUrl;
+		head.appendChild(newLink);
+
+		return () => {
+			head.removeChild(newLink);
+		};
+	}, [Icon]);
 
 	// Set the portal ID in the provider
 	useSetPortalId(portalId || '');

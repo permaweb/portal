@@ -11,6 +11,7 @@ export const UserButton = styled.div`
 	flex: 1;
 	display: flex;
 	align-items: center;
+	font-family: Arial, Helvetica, sans-serif;
 
 	button {
 		border-radius: 14px;
@@ -196,6 +197,12 @@ export const NavigationEntry = styled.div<{ $disabled?: boolean }>`
 	opacity: ${(props) => (props.$disabled ? '.4' : 1)};
 	pointer-events: ${(props) => (props.$disabled ? 'none' : 'unset')};
 	user-select: 'none';
+
+	div {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
 
 	svg {
 		height: var(--font-size-default);

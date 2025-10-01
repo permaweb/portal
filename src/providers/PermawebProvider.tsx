@@ -16,6 +16,7 @@ interface PermawebContextState {
 	profile: Types.ProfileType;
 	handleInitialProfileCache: (address: string, profileId: string) => void;
 	refreshProfile: () => void;
+	setPortalRoles: (roles: string[]) => void;
 }
 
 const DEFAULT_CONTEXT = {
@@ -24,6 +25,7 @@ const DEFAULT_CONTEXT = {
 	profile: null,
 	handleInitialProfileCache(_address: string, _profileId: string) {},
 	refreshProfile() {},
+	setPortalRoles(_roles: string[]) {},
 };
 
 const PermawebContext = React.createContext<PermawebContextState>(DEFAULT_CONTEXT);
@@ -54,7 +56,9 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 			let ao: any;
 			if (aoConnection === 'mainnet') {
-				ao = connect({ MODE: 'mainnet', URL: AO_NODE.url, SCHEDULER: AO_NODE.scheduler, signer });
+				const config: any = { MODE: 'mainnet', URL: AO_NODE.url, SCHEDULER: AO_NODE.scheduler };
+				if (signer) config.signer = signer;
+				ao = connect(config);
 			} else if (import.meta.env.VITE_AO === 'legacy') {
 				ao = connect({ MODE: 'legacy' });
 			}
@@ -63,7 +67,10 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				ao: ao,
 				arweave: Arweave.init({}),
 				signer: signer,
-				node: AO_NODE,
+				node: {
+					...AO_NODE,
+					authority: 'https://ao.arweave.dev',
+				},
 			};
 
 			setDeps(dependencies);
@@ -77,9 +84,13 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		(async function () {
-			if (!arProvider.walletAddress || !libs?.getProfileByWalletAddress) {
+			if (!arProvider.walletAddress) {
 				setProfile(null);
 				setProfilePending(false);
+				return;
+			}
+
+			if (!libs?.getProfileByWalletAddress) {
 				return;
 			}
 
@@ -218,12 +229,22 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	}
 
 	function cacheProfile(address: string, profileData: any) {
-		if (profileData) localStorage.setItem(STORAGE.profileByWallet(address), JSON.stringify(profileData));
+		if (profileData) {
+			// Don't cache portal-specific roles
+			const { roles, ...profileWithoutRoles } = profileData;
+			localStorage.setItem(STORAGE.profileByWallet(address), JSON.stringify(profileWithoutRoles));
+		}
 	}
 
 	function handleInitialProfileCache(address: string, profileId: string) {
 		cacheProfile(address, { id: profileId, status: 'pending' });
 		setProfilePending(true);
+	}
+
+	function setPortalRoles(roles: string[]) {
+		if (profile) {
+			setProfile({ ...profile, roles });
+		}
 	}
 
 	return (
@@ -235,6 +256,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				handleInitialProfileCache: (address: string, profileId: string) =>
 					handleInitialProfileCache(address, profileId),
 				refreshProfile: () => setRefreshProfileTrigger((prev) => !prev),
+				setPortalRoles: (roles: string[]) => setPortalRoles(roles),
 			}}
 		>
 			{props.children}

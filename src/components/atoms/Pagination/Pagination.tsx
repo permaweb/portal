@@ -1,4 +1,4 @@
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import { Button } from '../Button';
@@ -38,7 +38,7 @@ export default function Pagination(props: Props) {
 				<S.PaginationActions>
 					<IconButton
 						type={'alt1'}
-						src={ASSETS.arrow}
+						src={ICONS.arrow}
 						handlePress={() => props.setCurrentPage((prev) => Math.max(prev - 1, 1))}
 						disabled={props.currentPage === 1 || props.totalItems === 0}
 						dimensions={{
@@ -49,7 +49,7 @@ export default function Pagination(props: Props) {
 					/>
 					<IconButton
 						type={'alt1'}
-						src={ASSETS.arrow}
+						src={ICONS.arrow}
 						handlePress={() => props.setCurrentPage((prev) => Math.min(prev + 1, props.totalPages))}
 						disabled={props.currentPage === props.totalPages || props.totalItems === 0}
 						dimensions={{

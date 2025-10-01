@@ -11,6 +11,7 @@ export type PortalDetailType = {
 	name: string;
 	logo: string | null;
 	icon: string | null;
+	owner: string | null;
 	users?: PortalUserType[];
 	pages?: PortalPageType[];
 	assets?: PortalAssetType[];
@@ -48,6 +49,7 @@ export type PortalAssetType = {
 		content?: any;
 		thumbnail?: string;
 		releaseDate?: number;
+		comments?: string;
 	};
 };
 

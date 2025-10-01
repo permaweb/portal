@@ -1,5 +1,44 @@
 import styled from 'styled-components';
 
+export const TitleWrapper = styled.div`
+	display: flex;
+	align-items: flex-start;
+	width: 100%;
+	margin-bottom: 20px;
+	gap: 16px;
+
+	h1 {
+		margin: 0 !important;
+		padding: 0 !important;
+		flex: 1;
+		min-width: 0;
+	}
+`;
+
+export const DraftDot = styled.div`
+	width: 10px;
+	height: 10px;
+	background: #eeca00;
+	border-radius: 50%;
+`;
+
+export const DraftIndicator = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	background: rgba(238, 202, 0, 0.2);
+	color: #eeca00;
+	padding: 6px 14px;
+	border-radius: var(--border-radius);
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1;
+	width: fit-content;
+	flex-shrink: 0;
+	margin-right: 40px;
+	align-self: center;
+`;
+
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -126,6 +165,7 @@ export const Post = styled.div`
 	margin-left: auto;
 	margin-right: auto;
 	z-index: 1;
+	position: relative;
 `;
 
 export const Description = styled.p`

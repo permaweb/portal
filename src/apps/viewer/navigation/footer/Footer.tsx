@@ -3,7 +3,7 @@ import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
-import { ASSETS, URLS } from 'helpers/config';
+import { ICONS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalCategoryType, PortalLinkType, PortalPageType } from 'helpers/types';
 import { checkValidAddress, getRedirect, urlify } from 'helpers/utils';
@@ -34,7 +34,7 @@ export default function Footer() {
 								return (
 									<S.LinkWrapper key={index}>
 										<Link to={link.url} target={'_href'}>
-											<ReactSVG src={link.icon ? getTxEndpoint(link.icon) : ASSETS.link} />
+											<ReactSVG src={link.icon ? getTxEndpoint(link.icon) : ICONS.link} />
 											<S.LinkTooltip className={'info'}>
 												<span>{link.title}</span>
 											</S.LinkTooltip>

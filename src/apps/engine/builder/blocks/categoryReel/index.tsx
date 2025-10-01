@@ -1,9 +1,6 @@
-// import React from 'react';
 import { NavLink } from 'react-router-dom';
-
-import Placeholder from 'components/placeholder';
-import { usePosts } from 'hooks/posts';
-import { useProfile } from 'hooks/profiles';
+import { ReactSVG } from 'react-svg';
+import { ICONS } from 'helpers/config';
 
 import * as S from './styles';
 
@@ -17,7 +14,6 @@ export default function CategoryReel(props: any) {
 	const [kill, setKill] = React.useState(false);
 	const wrapper = React.useRef(null);
 	const imageWidth = width >= 1600 ? 1700 : width >= 1150 ? 1150 : width >= 900 ? 900 : width >= 600 ? 600 : 400;
-	const { push } = useHistory();
 
 	return (
 		<div
@@ -68,7 +64,7 @@ export default function CategoryReel(props: any) {
 				</div>
 				{authenticated && (
 					<div className="featured-banner-remove" onClick={() => removeBanner()}>
-						<Icon icon={ICONS.REMOVE} />
+						<ReactSVG src={ICONS.remove} />
 					</div>
 				)}
 			</div>

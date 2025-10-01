@@ -6,12 +6,12 @@ export const Post = styled.div<{ $layout: any }>`
 	display: flex;
 	// flex-direction: ${(props: any) => (props.$layout?.flow === 'column' ? `column` : `row`)};
 	width: 100%;
-	background: var(--color-card-background);
+	// background: var(--color-card-background);
 	padding-top: 40px;
 	box-sizing: border-box;
 	border-radius: var(--border-radius);
 	gap: 20px;
-	box-shadow: ${(props: any) => (props.$layout?.shadow ? `0 4px 10px rgba(0, 0, 0, 0.4)` : `unset`)};
+	// box-shadow: ${(props: any) => (props.$layout?.shadow ? `0 4px 10px rgba(0, 0, 0, 0.4)` : `unset`)};
 	border-top: 2px solid var(--color-card-border);
 	margin-bottom: 21px;
 `;
@@ -32,6 +32,32 @@ export const Categories = styled.div`
 
 export const Category = styled.div`
 	color: var(--color-card-border-contrast);
+`;
+
+export const TitleWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	width: 100%;
+`;
+
+export const DraftDot = styled.div`
+	width: 8px;
+	height: 8px;
+	background: #eeca00;
+	border-radius: 50%;
+`;
+
+export const DraftIndicator = styled.div`
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: rgba(238, 202, 0, 0.2);
+	color: #eeca00;
+	padding: 4px 10px;
+	border-radius: var(--border-radius);
+	font-size: 11px;
+	font-weight: 600;
+	margin-left: 12px;
 `;
 
 export const Content = styled.div`
@@ -154,6 +180,12 @@ export const Avatar = styled.div`
 	border-radius: 50%;
 
 	img {
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+	}
+
+	svg {
 		width: 18px;
 		height: 18px;
 		border-radius: 50%;

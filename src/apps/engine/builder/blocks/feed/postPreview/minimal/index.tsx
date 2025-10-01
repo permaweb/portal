@@ -1,23 +1,44 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 import Placeholder from 'engine/components/placeholder';
 import useNavigate from 'engine/helpers/preview';
-import { useComments } from 'engine/hooks/comments';
 import { useProfile } from 'engine/hooks/profiles';
+import { usePortalProvider } from 'engine/providers/portalProvider';
+
+import { ICONS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
+import { checkValidAddress } from 'helpers/utils';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
 export default function PostPreview_Minimal(props: any) {
 	const navigate = useNavigate();
-	const { layout } = props;
-	const { preview, post, loading } = props;
+	const { profile: user } = usePermawebProvider();
+	const { portal } = usePortalProvider();
+	const { layout, post } = props;
 	const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || null);
+
+	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+
+	const menuEntries: MenuItem[] = [];
+
+	if (canEditPost) {
+		menuEntries.push({
+			icon: ICONS.edit,
+			label: 'Edit Post',
+			action: 'editPost',
+			postId: post?.id,
+		});
+	}
 
 	return (
 		<S.Post $layout={layout && layout.card}>
+			<ContextMenu entries={menuEntries} />
 			<S.Categories>
 				{post ? (
-					post?.metadata?.categories.map((category: any, index: number) => {
+					post?.metadata?.categories?.map((category: any, index: number) => {
 						return (
 							<React.Fragment key={index}>
 								<NavLink to={`/feed/category/${category.id}`}>
@@ -33,15 +54,27 @@ export default function PostPreview_Minimal(props: any) {
 			</S.Categories>
 			<S.Content>
 				<S.SideA>
-					<h2 className={!post ? 'loadingPlaceholder' : ''} onClick={(e) => navigate(`/post/${post?.id}`)}>
-						<span>{post ? post?.name : <Placeholder width="180" />}</span>
-					</h2>
+					<S.TitleWrapper>
+						<h2 className={!post ? 'loadingPlaceholder' : ''} onClick={(e) => navigate(`/post/${post?.id}`)}>
+							<span>{post ? post?.name : <Placeholder width="180" />}</span>
+						</h2>
+						{post?.metadata?.status === 'draft' && (
+							<S.DraftIndicator>
+								<S.DraftDot />
+								Draft
+							</S.DraftIndicator>
+						)}
+					</S.TitleWrapper>
 					<p>{post?.metadata.description}</p>
 					<S.Meta>
 						<S.SourceIcon
 							className="loadingAvatar"
 							onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-							src={!isLoadingProfile ? `https://arweave.net/${profile?.thumbnail}` : ''}
+							src={
+								!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
+									? getTxEndpoint(profile.thumbnail)
+									: ICONS.user
+							}
 						/>
 						<S.Author onClick={() => navigate(`/user/${profile.id}`)}>
 							{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}

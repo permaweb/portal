@@ -154,10 +154,33 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 
 	blockquote {
 		font-family: Georgia, serif;
-		font-style: italic;
 		font-size: 16px;
 		font-weight: 500;
 		color: ${(props) => props.theme.colors.font.alt2};
+
+		> div {
+			font-style: italic;
+		}
+
+		b,
+		strong {
+			font-weight: 700;
+		}
+
+		i,
+		em {
+			font-style: italic;
+		}
+
+		u {
+			text-decoration: underline;
+		}
+
+		s,
+		strike,
+		del {
+			text-decoration: line-through;
+		}
 	}
 
 	ol,
@@ -186,6 +209,26 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 			&::marker {
 				font-weight: ${(props) => props.theme.typography.weight.bold};
 				color: ${(props) => props.theme.colors.font.alt1};
+			}
+
+			b,
+			strong {
+				font-weight: 700;
+			}
+
+			i,
+			em {
+				font-style: italic;
+			}
+
+			u {
+				text-decoration: underline;
+			}
+
+			s,
+			strike,
+			del {
+				text-decoration: line-through;
 			}
 		}
 	}
@@ -216,6 +259,26 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 	h5,
 	h6 {
 		line-height: 1;
+
+		b,
+		strong {
+			font-weight: 700;
+		}
+
+		i,
+		em {
+			font-style: italic;
+		}
+
+		u {
+			text-decoration: underline;
+		}
+
+		s,
+		strike,
+		del {
+			text-decoration: line-through;
+		}
 	}
 
 	h1 {
@@ -322,7 +385,7 @@ export const SelectionWrapper = styled.div`
 `;
 
 export const BlockSelector = styled.div<{ blockEditMode: boolean; position?: 'above' | 'below' }>`
-	max-height: 65vh;
+	max-height: 52.5vh;
 	width: 300px;
 	position: absolute;
 	z-index: 10;
