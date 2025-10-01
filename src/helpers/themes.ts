@@ -588,6 +588,24 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			border: currentTheme.neutral9,
 			color: currentTheme.light1,
 		},
+		badge: {
+			approved: {
+				background: currentTheme.positive2,
+				color: currentTheme.light1,
+			},
+			pending: {
+				background: currentTheme.caution1,
+				color: currentTheme.light1,
+			},
+			rejected: {
+				background: currentTheme.negative2,
+				color: currentTheme.light1,
+			},
+			cancelled: {
+				background: currentTheme.negative2,
+				color: currentTheme.light1,
+			},
+		},
 		font: {
 			primary: currentTheme.neutralA1,
 			alt1: currentTheme.neutralA5,

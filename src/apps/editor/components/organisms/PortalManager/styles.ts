@@ -9,6 +9,7 @@ export const Header = styled.div`
 	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: 15px;
+	margintop: 10px;
 	h4 {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: clamp(18px, 3.25vw, 24px);
@@ -22,7 +23,7 @@ export const Body = styled.div`
 	justify-content: center;
 	flex-wrap: wrap;
 	gap: 10px;
-	padding: 20px;
+	padding: 28px 20px;
 `;
 
 export const IconWrapper = styled.div`
@@ -201,4 +202,132 @@ export const MActions = styled.div`
 	justify-content: flex-end;
 	flex-wrap: wrap;
 	gap: 15px;
+`;
+
+export const SubdomainSection = styled.div`
+	width: 100%;
+	margin: 10px 0 0 0;
+	display: grid;
+	row-gap: 12px;
+`;
+
+export const CheckRow = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 10px;
+
+	input[type='checkbox'] {
+		display: inline-block; /* override any inherited display:none */
+		appearance: checkbox; /* in case a reset removed default look */
+		height: 16px;
+		width: 16px;
+		margin: 0;
+		accent-color: ${(p) => p.theme.colors.primary1};
+	}
+
+	label {
+		color: ${(p) => p.theme.colors.font.primary};
+		font-size: ${(p) => p.theme.typography.size.small};
+		font-weight: ${(p) => p.theme.typography.weight.medium};
+		user-select: none;
+		cursor: pointer;
+	}
+`;
+
+export const SubdomainCard = styled.div`
+	width: 100%;
+	background: ${(p) => p.theme.colors.container.primary.background};
+	border: 1px solid ${(p) => p.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.alt2};
+	padding: 14px;
+	display: grid;
+	row-gap: 12px;
+`;
+
+export const SubdomainHeader = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+
+	span {
+		color: ${(p) => p.theme.colors.font.primary};
+		font-size: ${(p) => p.theme.typography.size.small};
+		font-weight: ${(p) => p.theme.typography.weight.bold};
+	}
+`;
+
+export const SubdomainActions = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 10px;
+`;
+
+export const SubdomainInput = styled.input`
+	height: ${STYLING.dimensions.form.small};
+	width: 100%;
+	border-radius: ${STYLING.dimensions.radius.primary};
+	background: ${(p) => p.theme.colors.container.primary.background};
+	color: ${(p) => p.theme.colors.font.primary};
+	border: 1px solid ${(p) => p.theme.colors.border.primary};
+	padding: 0 12px;
+	font-family: ${(p) => p.theme.typography.family.primary};
+	font-size: ${(p) => p.theme.typography.size.base};
+
+	&:focus-visible {
+		outline: 2px solid ${(p) => p.theme.colors.primary1};
+		outline-offset: 1px;
+	}
+
+	&:disabled {
+		background: ${(p) => p.theme.colors.button.primary.disabled.background};
+		color: ${(p) => p.theme.colors.button.primary.disabled.color};
+		border-color: ${(p) => p.theme.colors.button.primary.disabled.border};
+		cursor: not-allowed;
+	}
+`;
+
+export const SubdomainPreview = styled.div`
+	min-height: ${STYLING.dimensions.form.small};
+	display: flex;
+	align-items: center;
+	padding: 0 12px;
+	border-radius: ${STYLING.dimensions.radius.primary};
+	background: ${(p) => p.theme.colors.container.primary.background};
+	border: 1px dashed ${(p) => p.theme.colors.border.primary};
+	color: ${(p) => p.theme.colors.font.alt1};
+	font-family: ${(p) => p.theme.typography.family.primary};
+	font-size: ${(p) => p.theme.typography.size.base};
+`;
+
+export const SubdomainHint = styled.div`
+	font-size: ${(p) => p.theme.typography.size.xSmall};
+	color: ${(p) => p.theme.colors.font.alt1};
+	a {
+		color: ${(p) => p.theme.colors.link?.primary || p.theme.colors.font.primary};
+		text-decoration: underline;
+	}
+`;
+
+export const Validation = styled.div`
+	display: grid;
+	row-gap: 4px;
+	font-size: ${(p) => p.theme.typography.size.xSmall};
+	color: ${(p) => p.theme.colors.font.primary};
+
+	span {
+		display: block;
+		line-height: 1.4;
+	}
+`;
+
+export const Error = styled.div`
+	color: ${(p) => p.theme.colors.negative1 || '#c62828'};
+	font-size: ${(p) => p.theme.typography.size.xSmall};
+	font-weight: ${(p) => p.theme.typography.weight.medium};
+`;
+
+export const StatusLine = styled.div`
+	margin-top: 8px;
+	font-size: 12px;
+	opacity: 0.9;
 `;
