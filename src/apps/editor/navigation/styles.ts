@@ -108,10 +108,12 @@ export const HelpCenterTooltip = styled(LinkTooltip)`
 	margin: 0 0 5px 0;
 `;
 
-export const PanelContent = styled.div<{ open: boolean; showText?: boolean }>`
+export const PanelContent = styled.div<{ open: boolean }>`
 	height: calc(100vh - (${STYLING.dimensions.nav.height} + 70px));
 	padding: 0 15px 15px 15px;
+`;
 
+export const PanelLink = styled.div<{ showText?: boolean; useFill?: boolean }>`
 	a {
 		height: 40.5px;
 		display: flex;
@@ -133,6 +135,7 @@ export const PanelContent = styled.div<{ open: boolean; showText?: boolean }>`
 			width: 17.5px;
 			margin: ${(props) => (props.showText ? '6.5px 12.5px 0 0' : '4.5px 0 0 0')};
 			color: ${(props) => props.theme.colors.font.primary};
+			${(props) => props.useFill && `fill: ${props.theme.colors.font.primary};`}
 		}
 		&:hover {
 			color: ${(props) => props.theme.colors.font.primary};
@@ -290,11 +293,11 @@ export const Portal = styled.button<{ active: boolean }>`
 	}
 
 	svg {
-		height: 16.5px;
-		width: 16.5px;
+		height: 25px;
+		width: 25px;
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
-		margin: 2.5px 0px 0 12.5px;
+		margin: 5px 0px 0 7.5px;
 		transform: rotate(180deg);
 	}
 	&:hover {
@@ -344,7 +347,7 @@ export const PortalDropdown = styled.div`
 	width: 350px;
 	max-width: 80vw;
 	position: absolute;
-	top: 47.5px;
+	top: 55px;
 	left: 0;
 	padding: 11.5px 10px;
 `;

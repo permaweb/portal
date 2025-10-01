@@ -9,7 +9,6 @@ import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { ICONS, STYLING, URLS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
 import { formatAddress, resolvePrimaryDomain } from 'helpers/utils';
 import { checkWindowCutoff } from 'helpers/window';
@@ -62,6 +61,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				path: portalProvider.current?.id ? URLS.portalMedia(portalProvider.current.id) : URLS.base,
 				icon: ICONS.media,
 				label: language?.media,
+				useFill: true,
 			},
 			{
 				path: portalProvider.current?.id ? URLS.portalSetup(portalProvider.current.id) : URLS.base,
@@ -172,17 +172,19 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		const content = (
 			<>
 				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
-				<S.PanelContent open={props.open} showText={showText} className={'fade-in scroll-wrapper-hidden'}>
+				<S.PanelContent open={props.open} className={'fade-in scroll-wrapper-hidden'}>
 					{paths.map((element, index) => (
-						<Link key={index} to={element.path} onClick={(e) => handleNavigate(e, element.path)}>
-							<ReactSVG src={element.icon} />
-							{showText && element.label}
-							{!showText && (
-								<S.LinkTooltip className={'info'}>
-									<span>{element.label}</span>
-								</S.LinkTooltip>
-							)}
-						</Link>
+						<S.PanelLink key={index} showText={showText} useFill={element.useFill}>
+							<Link to={element.path} onClick={(e) => handleNavigate(e, element.path)}>
+								<ReactSVG src={element.icon} />
+								{showText && element.label}
+								{!showText && (
+									<S.LinkTooltip className={'info'}>
+										<span>{element.label}</span>
+									</S.LinkTooltip>
+								)}
+							</Link>
+						</S.PanelLink>
 					))}
 				</S.PanelContent>
 				<S.PanelFooter open={props.open} showText={showText} className={'fade-in'}>

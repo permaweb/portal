@@ -48,6 +48,7 @@ export type PortalAssetType = {
 		content?: any;
 		thumbnail?: string;
 		releaseDate?: number;
+		comments?: string;
 	};
 };
 

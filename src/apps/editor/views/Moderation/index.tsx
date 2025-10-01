@@ -146,7 +146,9 @@ export default function Moderation() {
 					<>
 						{inactiveComments.length > 0 ? (
 							<S.CommentsList>
-								<h3>Inactive Comments ({inactiveComments.length})</h3>
+								<h3>
+									${language.inactiveComments} ({inactiveComments.length})
+								</h3>
 								{inactiveComments.map((comment, index) => {
 									const profile = profiles[comment.creator];
 									const displayName = profile?.displayName || formatAddress(comment.creator, false);
@@ -171,7 +173,7 @@ export default function Moderation() {
 												<S.CommentActions>
 													<Button
 														type={'primary'}
-														label={'Activate'}
+														label={language.activate}
 														handlePress={() => activateComment(comment)}
 														disabled={updatingComment === comment.id}
 														loading={updatingComment === comment.id}
@@ -183,8 +185,8 @@ export default function Moderation() {
 								})}
 							</S.CommentsList>
 						) : (
-							<S.InfoMessage>
-								<p>No inactive comments found</p>
+							<S.InfoMessage className={'border-wrapper-alt3'}>
+								<p>{language.noInactiveCommentsFound}</p>
 							</S.InfoMessage>
 						)}
 					</>
