@@ -1,14 +1,16 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 import Placeholder from 'engine/components/placeholder';
 import Tag from 'engine/components/tag';
 import { usePost } from 'engine/hooks/posts';
 import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
-import { getTxEndpoint } from 'helpers/endpoints';
+
 import { ICONS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
+import { checkValidAddress } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 
 import Comments from '../comments';
 
@@ -85,7 +87,11 @@ export default function Post(props: any) {
 					<img
 						className="loadingAvatar"
 						onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-						src={!isLoadingProfile && profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : ''}
+						src={
+							!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
+								? getTxEndpoint(profile.thumbnail)
+								: ICONS.user
+						}
 					/>
 					<span>{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}</span>&nbsp;
 					<span>

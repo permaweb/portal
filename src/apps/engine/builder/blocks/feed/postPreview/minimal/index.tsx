@@ -1,13 +1,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 import Placeholder from 'engine/components/placeholder';
 import useNavigate from 'engine/helpers/preview';
 import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
-import { getTxEndpoint } from 'helpers/endpoints';
+
 import { ICONS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
+import { checkValidAddress } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 
 import * as S from './styles';
 
@@ -68,7 +70,11 @@ export default function PostPreview_Minimal(props: any) {
 						<S.SourceIcon
 							className="loadingAvatar"
 							onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-							src={!isLoadingProfile && profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : ''}
+							src={
+								!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
+									? getTxEndpoint(profile.thumbnail)
+									: ICONS.user
+							}
 						/>
 						<S.Author onClick={() => navigate(`/user/${profile.id}`)}>
 							{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}

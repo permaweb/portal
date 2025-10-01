@@ -5,7 +5,10 @@ import { useComments } from 'engine/hooks/comments';
 import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
-import { getRedirect } from 'helpers/utils';
+import { ICONS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
+import { checkValidAddress, getRedirect } from 'helpers/utils';
+
 import * as S from './styles';
 
 export default function PostPreview_Default(props: any) {
@@ -93,7 +96,9 @@ export default function PostPreview_Default(props: any) {
 					<S.SourceIcon
 						className="loadingAvatar"
 						onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-						src={profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : ''}
+						src={
+							profile?.thumbnail && checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : ICONS.user
+						}
 					/>
 					<S.Author onClick={() => navigate(getRedirect(`user/${profile.id}`))}>{profile?.displayName}</S.Author>
 					<S.Date>
