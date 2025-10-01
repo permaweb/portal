@@ -3,7 +3,10 @@ import { NavLink } from 'react-router-dom';
 import Placeholder from 'engine/components/placeholder';
 import { usePosts } from 'engine/hooks/posts';
 import { useProfile } from 'engine/hooks/profiles';
+
+import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
+import { checkValidAddress } from 'helpers/utils';
 
 import * as S from './styles';
 
@@ -32,7 +35,11 @@ export default function CategorySpotlight(props: any) {
 							<img
 								className="loadingAvatar"
 								onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-								src={!isLoadingProfile && profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : null}
+								src={
+									!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbanil)
+										? getTxEndpoint(profile.thumbnail)
+										: ICONS.user
+								}
 							/>
 							By <span>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</span>
 						</S.LeftSource>
@@ -70,7 +77,11 @@ export default function CategorySpotlight(props: any) {
 							<img
 								className="loadingAvatar"
 								onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-								src={!isLoadingProfile && profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : null}
+								src={
+									!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
+										? getTxEndpoint(profile.thumbnail)
+										: ICONS.user
+								}
 							/>
 							By <span>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</span>
 						</S.RightSource>

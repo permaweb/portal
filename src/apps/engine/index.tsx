@@ -42,9 +42,10 @@ function App() {
 				try {
 					// Make a request to the current origin to get ArNS headers
 					// This works when the site is served through an ArNS gateway
-					const response = await fetch(`${window.location.protocol}//${window.location.host}`);
+					const response = await fetch(window.location.origin);
 					const resolvedId = response.headers.get('X-Arns-Resolved-Id');
 					if (resolvedId) {
+						console.log(`Resolved ID from Domain: ${resolvedId}`);
 						setPortalId(resolvedId);
 					} else {
 						console.warn('No portal ID found in URL or ArNS headers');
