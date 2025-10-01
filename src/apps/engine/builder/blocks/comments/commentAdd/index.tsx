@@ -25,6 +25,7 @@ function CommentEditorContent(props: any) {
 	const [canSend, setCanSend] = React.useState(false);
 	const [editorText, setEditorText] = React.useState('');
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
+	console.log('parentId: ', parentId);
 
 	const handleEmoji = (emoji: string) => {
 		editor.update(() => {
@@ -62,6 +63,7 @@ function CommentEditorContent(props: any) {
 		try {
 			const comment = await libs.createComment({
 				commentsId,
+				parentId,
 				content: plainText,
 			});
 
