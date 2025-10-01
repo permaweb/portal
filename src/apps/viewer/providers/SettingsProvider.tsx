@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import WebFont from 'webfontloader';
 
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { darkTheme, lightTheme, theme } from 'helpers/themes';
 import { PortalThemeType } from 'helpers/types';
 import { stripFontWeights } from 'helpers/utils';
@@ -210,12 +210,12 @@ export function SettingsProvider(props: SettingsProviderProps) {
 			return {
 				light: {
 					label: 'Light Themes',
-					icon: ASSETS.light,
+					icon: ICONS.light,
 					variants: getVariants('light'),
 				},
 				dark: {
 					label: 'Dark Themes',
-					icon: ASSETS.dark,
+					icon: ICONS.dark,
 					variants: getVariants('dark'),
 				},
 			};

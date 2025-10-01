@@ -133,7 +133,6 @@ export const PanelContent = styled.div<{ open: boolean; showText?: boolean }>`
 			width: 17.5px;
 			margin: ${(props) => (props.showText ? '6.5px 12.5px 0 0' : '4.5px 0 0 0')};
 			color: ${(props) => props.theme.colors.font.primary};
-			fill: ${(props) => props.theme.colors.font.primary};
 		}
 		&:hover {
 			color: ${(props) => props.theme.colors.font.primary};
@@ -141,7 +140,6 @@ export const PanelContent = styled.div<{ open: boolean; showText?: boolean }>`
 
 			svg {
 				color: ${(props) => props.theme.colors.font.primary};
-				fill: ${(props) => props.theme.colors.font.primary};
 			}
 
 			${(props) => !props.showText && `${LinkTooltip} { display: block; }`}
@@ -184,7 +182,6 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 
 			svg {
 				color: ${(props) => props.theme.colors.font.primary};
-				fill: ${(props) => props.theme.colors.font.primary};
 			}
 
 			${(props) => !props.showText && `${HelpCenterTooltip} { display: block; }`}
@@ -298,6 +295,7 @@ export const Portal = styled.button<{ active: boolean }>`
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
 		margin: 2.5px 0px 0 12.5px;
+		transform: rotate(180deg);
 	}
 	&:hover {
 		background: ${(props) => props.theme.colors.container.primary.active};

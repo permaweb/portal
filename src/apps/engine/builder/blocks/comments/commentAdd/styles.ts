@@ -49,6 +49,8 @@ export const Editor = styled.div`
 		font-size: 14px;
 		line-height: 1.5;
 		position: relative;
+		z-index: 2;
+		cursor: text;
 	}
 
 	.editor-paragraph {
@@ -101,31 +103,13 @@ export const Actions = styled.div`
 	z-index: 1;
 `;
 
-export const Emojis = styled.div``;
-
-export const EmojisIcon = styled.div`
-	display: flex;
-	justify-content: center;
-	height: 100%;
-
-	svg {
-		width: 24px;
-		height: 24px;
-		stroke: rgba(var(--color-text), 0.6);
-	}
-
-	&:hover {
-		cursor: pointer;
-
-		svg {
-			stroke: rgba(var(--color-text), 1);
-		}
-	}
+export const Emojis = styled.div`
+	position: relative;
 `;
 
 export const EmojiPicker = styled.div`
 	position: absolute;
-	margin-top: 28px;
+	bottom: 40px;
 	right: -8px;
 	z-index: 100;
 	background: var(--color-card-background);
@@ -243,6 +227,12 @@ export const Send = styled.div<{ $active: boolean }>`
 	border-radius: 50%;
 	width: 28px;
 	height: 28px;
+
+	div {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
 
 	svg {
 		width: 18px;

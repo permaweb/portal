@@ -5,6 +5,10 @@ import Tag from 'engine/components/tag';
 import { usePost } from 'engine/hooks/posts';
 import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
+import { getTxEndpoint } from 'helpers/endpoints';
+import { ICONS } from 'helpers/config';
+import { usePermawebProvider } from 'providers/PermawebProvider';
+import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 
 import Comments from '../comments';
 
@@ -14,15 +18,29 @@ export default function Post(props: any) {
 	const { preview } = props;
 	const { postId } = useParams();
 	const { portal } = usePortalProvider();
+	const { profile: user } = usePermawebProvider();
 	const Name = portal?.Name;
 	const { post, isLoading: isLoadingPost, error } = usePost(postId || '');
 	const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || '');
 	const [content, setContent] = React.useState<any>(null);
 	const [isLoadingContent, setIsLoadingContent] = React.useState(false);
 
+	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+
 	React.useEffect(() => {
 		window.scrollTo({ top: 0, behavior: 'auto' });
 	}, []);
+
+	const menuEntries: MenuItem[] = [];
+
+	if (canEditPost) {
+		menuEntries.push({
+			icon: ICONS.edit,
+			label: 'Edit Post',
+			action: 'editPost',
+			postId: post?.id,
+		});
+	}
 
 	React.useEffect(() => {
 		if (Name && post && !document.title.includes(post.name)) {
@@ -36,7 +54,7 @@ export default function Post(props: any) {
 			setContent(post.metadata.content);
 		} else if (post?.metadata?.contentTx) {
 			setIsLoadingContent(true);
-			fetch(`https://arweave.net/${post.metadata.contentTx}`)
+			fetch(getTxEndpoint(post.metadata.contentTx))
 				.then((res) => res.json())
 				.then((data) => {
 					setContent(data);
@@ -52,13 +70,22 @@ export default function Post(props: any) {
 	return (
 		<S.Wrapper>
 			<S.Post>
-				<h1>{isLoadingPost ? <Placeholder width="180" /> : post.name}</h1>
+				<ContextMenu entries={menuEntries} />
+				<S.TitleWrapper>
+					<h1>{isLoadingPost ? <Placeholder width="180" /> : post?.name}</h1>
+					{post?.metadata?.status === 'draft' && (
+						<S.DraftIndicator>
+							<S.DraftDot />
+							Draft
+						</S.DraftIndicator>
+					)}
+				</S.TitleWrapper>
 				{post?.metadata.description && <S.Description>{post?.metadata.description}</S.Description>}
 				<S.Meta>
 					<img
 						className="loadingAvatar"
 						onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-						src={!isLoadingProfile ? `https://arweave.net/${profile?.thumbnail}` : ''}
+						src={!isLoadingProfile && profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : ''}
 					/>
 					<span>{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}</span>&nbsp;
 					<span>
@@ -70,11 +97,13 @@ export default function Post(props: any) {
 						)}
 					</span>
 				</S.Meta>
-				<S.Thumbnail
-					className="loadingThumbnail"
-					onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
-					src={!isLoadingPost ? `https://arweave.net/${post?.metadata?.thumbnail}` : ''}
-				/>
+				{!isLoadingPost && post?.metadata?.thumbnail && (
+					<S.Thumbnail
+						className="loadingThumbnail"
+						onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
+						src={!isLoadingPost && post?.metadata?.thumbnail ? getTxEndpoint(post.metadata.thumbnail) : ''}
+					/>
+				)}
 				<S.Tags>
 					{post &&
 						post?.metadata?.topics &&

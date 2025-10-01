@@ -6,16 +6,29 @@ import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { getRedirect } from 'helpers/utils';
-
 import * as S from './styles';
 
 export default function PostPreview_Default(props: any) {
 	const navigate = useNavigate();
 	const { portal } = usePortalProvider();
+	const { profile: user } = usePermawebProvider();
 	const Layout = portal?.Layout;
-	const { preview, post, loading } = props;
+	const { layout, post } = props;
 	const { profile, isLoading: isLoadingProfile } = useProfile(post?.creator || null);
 	const { comments, isLoading: isLoadingComments, error: errorComments } = useComments(post?.id || null, true);
+
+	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+
+	const menuEntries: MenuItem[] = [];
+
+	if (canEditPost) {
+		menuEntries.push({
+			icon: ICONS.edit,
+			label: 'Edit Post',
+			action: 'editPost',
+			postId: post?.id,
+		});
+	}
 
 	const Comment = (data: any) => {
 		const { data: comment } = data;
@@ -25,7 +38,7 @@ export default function PostPreview_Default(props: any) {
 			<S.Comment>
 				<S.CommentHeader>
 					<S.Avatar>
-						<img src={`https://arweave.net/${profile?.thumbnail}`} />
+						<img src={profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : ''} />
 					</S.Avatar>
 					<S.Username>{profile?.displayName || '[[displayName]]'}</S.Username>
 					<S.Date>{`${new Date(comment?.dateCreated || 'now').toLocaleDateString()} ${new Date(
@@ -39,9 +52,10 @@ export default function PostPreview_Default(props: any) {
 
 	return (
 		<S.Post $layout={Layout && Layout.card}>
+			<ContextMenu entries={menuEntries} />
 			<S.Categories>
 				{post ? (
-					post?.metadata?.categories.map((category: any, index: number) => {
+					post?.metadata?.categories?.map((category: any, index: number) => {
 						return (
 							<React.Fragment key={index}>
 								<NavLink to={getRedirect(`feed/category/${category.id}`)}>
@@ -52,29 +66,39 @@ export default function PostPreview_Default(props: any) {
 						);
 					})
 				) : (
-					<Placeholder />
+					<S.Category>Loading...</S.Category>
 				)}
 			</S.Categories>
 			<S.Content>
-				<img
-					className="loadingThumbnail"
-					onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
-					onClick={() => navigate(getRedirect(`post/${post?.id}`))}
-					src={post ? `https://arweave.net/${post?.metadata?.thumbnail}` : ''}
-				/>
-				<h2 className={!post ? 'loadingPlaceholder' : ''} onClick={(e) => navigate(getRedirect(`post/${post?.id}`))}>
-					<span>{post ? post?.name : <Placeholder width="180" />}</span>
-				</h2>
+				{post?.metadata?.thumbnail && (
+					<img
+						className="loadingThumbnail"
+						onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
+						onClick={() => navigate(getRedirect(`post/${post?.id}`))}
+						src={post?.metadata?.thumbnail ? getTxEndpoint(post.metadata.thumbnail) : ''}
+					/>
+				)}
+				<S.TitleWrapper>
+					<h2 className={!post ? 'loadingPlaceholder' : ''} onClick={() => navigate(getRedirect(`post/${post?.id}`))}>
+						<span>{post ? post?.name : 'Loading...'}</span>
+					</h2>
+					{post?.metadata?.status === 'draft' && (
+						<S.DraftIndicator>
+							<S.DraftDot />
+							Draft
+						</S.DraftIndicator>
+					)}
+				</S.TitleWrapper>
 				<S.Meta>
 					<S.SourceIcon
 						className="loadingAvatar"
 						onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-						src={profile?.thumbnail ? `https://arweave.net/${profile.thumbnail}` : ''}
+						src={profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : ''}
 					/>
 					<S.Author onClick={() => navigate(getRedirect(`user/${profile.id}`))}>{profile?.displayName}</S.Author>
 					<S.Date>
 						{isLoadingProfile ? (
-							<Placeholder width="120" />
+							<span>Loading...</span>
 						) : (
 							`${new Date(Number(post.dateCreated)).toLocaleDateString()} ${new Date(
 								Number(post.dateCreated)

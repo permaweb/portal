@@ -7,7 +7,7 @@ import { currentPostUpdate } from 'editor/store/post';
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
 import { TextArea } from 'components/atoms/TextArea';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 
@@ -43,7 +43,7 @@ export default function ArticlePostDescription() {
 							setOriginalDescription(currentDescription);
 							setShowPanel(true);
 						}}
-						icon={ASSETS.arrow}
+						icon={ICONS.arrow}
 						height={40}
 						fullWidth
 					/>

@@ -30,6 +30,7 @@ const views = (import.meta as any).glob('./views/**/index.tsx');
 const Landing = getLazyImport('Landing');
 const PortalView = getLazyImport('Portal');
 const Posts = getLazyImport('Posts');
+const Moderation = getLazyImport('Moderation');
 const PageCreate = getLazyImport('Page/Create');
 const PageEdit = getLazyImport('Page/Edit');
 const PostCreate = getLazyImport('Post/Create');
@@ -204,6 +205,7 @@ function AppContent() {
 						{getRoute(URLS.base, <Landing />)}
 						{getRoute(`${URLS.base}:portalId`, <PortalView />)}
 						{getRoute(`${URLS.base}:portalId/posts`, <Posts />)}
+						{getRoute(`${URLS.base}:portalId/moderation`, <Moderation />)}
 						{getRoute(`${URLS.base}:portalId/post/create`, <PostCreate />)}
 						{getRoute(`${URLS.base}:portalId/post/create/article`, <PostEdit />)}
 						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <PostEdit />)}

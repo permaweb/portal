@@ -5,7 +5,7 @@ import { ReactSVG } from 'react-svg';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
-import { ASSETS, URLS } from 'helpers/config';
+import { ICONS, URLS } from 'helpers/config';
 import { ArticleStatusType, PortalAssetType } from 'helpers/types';
 import { formatAddress, formatDate } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -44,7 +44,7 @@ export default function Post(props: { post: PortalAssetType }) {
 			<S.PostHeader>
 				<p>{props.post.name}</p>
 				<S.PostHeaderDetail>
-					<ReactSVG src={ASSETS.time} />
+					<ReactSVG src={ICONS.time} />
 					<span>
 						{`${formatDate(props.post.metadata?.releaseDate, 'epoch', true)} · ${
 							portalProvider.usersByPortalId?.[props.post.creator]?.username ?? formatAddress(props.post.creator, false)

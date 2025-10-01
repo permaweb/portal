@@ -503,7 +503,7 @@ export const ThemeSectionColumnAction = styled.button<{ open: boolean }>`
 	svg {
 		height: 18.5px;
 		width: 18.5px;
-		transform: rotate(${(props) => (props.open ? '360deg' : '270deg')});
+		transform: rotate(${(props) => (props.open ? '180deg' : '90deg')});
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
 		margin: 5px 0 0 0;

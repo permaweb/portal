@@ -144,7 +144,7 @@ export const DomainHeader = styled.div`
 		opacity: 0.95;
 
 		&.is-open {
-			transform: rotate(180deg);
+			transform: rotate(0deg);
 		}
 	}
 	.expand-btn:hover {
@@ -452,7 +452,7 @@ export const DomainArrow = styled.div<{ isOpen: boolean }>`
 		margin: 5px 0 0 0;
 		color: ${(props) => props.theme.colors.font.primary};
 		fill: ${(props) => props.theme.colors.font.primary};
-		transform: rotate(${(props) => (props.isOpen ? '0' : '270deg')});
+		transform: rotate(${(props) => (props.isOpen ? '180deg' : '90deg')});
 	}
 `;
 

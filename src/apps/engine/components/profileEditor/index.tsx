@@ -1,10 +1,8 @@
 import React from 'react';
+import { ReactSVG } from 'react-svg';
 import { Types } from '@permaweb/libs';
-
 import Button from 'engine/components/form/button';
-import Icon from 'engine/components/icon';
-import * as ICONS from 'engine/constants/icons';
-
+import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -148,7 +146,7 @@ export default function ProfileEditor(props: {
 		if (banner) return <img src={checkValidAddress(banner) ? getTxEndpoint(banner) : banner} />;
 		return (
 			<>
-				<Icon icon={ICONS.BANNER} />
+				<ReactSVG src={ICONS.banner} />
 				<span>{language?.uploadBanner}</span>
 			</>
 		);
@@ -158,7 +156,7 @@ export default function ProfileEditor(props: {
 		if (thumbnail) return <img src={checkValidAddress(thumbnail) ? getTxEndpoint(thumbnail) : thumbnail} />;
 		return (
 			<>
-				<Icon icon={ICONS.USER} />
+				<ReactSVG src={ICONS.user} />
 				<span>{language?.uploadAvatar}</span>
 			</>
 		);

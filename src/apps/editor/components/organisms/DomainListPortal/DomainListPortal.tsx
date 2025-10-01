@@ -5,7 +5,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { PortalDomainType, PortalPatchMapEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -74,7 +74,7 @@ function Domain(props: { domain: PortalDomainType }) {
 							<IconButton
 								type={'alt1'}
 								active={false}
-								src={ASSETS.menu}
+								src={ICONS.menu}
 								handlePress={() => setShowDropdown((prev) => !prev)}
 								disabled={false}
 								dimensions={{ wrapper: 27.5, icon: 15 }}
@@ -94,7 +94,7 @@ function Domain(props: { domain: PortalDomainType }) {
 									window.open(`https://${props.domain.name}.arweave.net`, '_blank');
 								}}
 							>
-								<ReactSVG src={ASSETS.site} />
+								<ReactSVG src={ICONS.site} />
 								<p>{language.goToSite}</p>
 							</button>
 							{!props.domain?.primary && portalProvider.permissions?.updatePortalMeta && (
@@ -105,7 +105,7 @@ function Domain(props: { domain: PortalDomainType }) {
 										setShowDropdown(false);
 									}}
 								>
-									<ReactSVG src={ASSETS.domains} />
+									<ReactSVG src={ICONS.domains} />
 									<p>{language.setPrimaryDomain}</p>
 								</button>
 							)}

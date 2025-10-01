@@ -1,16 +1,16 @@
 import React from 'react';
+import { ReactSVG } from 'react-svg';
 import { NavLink } from 'react-router-dom';
+import { getRedirect } from 'helpers/utils';
+import { ICONS } from 'helpers/config';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 import { initThemes } from 'engine/helpers/themes';
 import { defaultThemes } from 'engine/defaults/theme.defaults';
 import { defaultLayout } from 'engine/defaults/layout.defaults';
-import Icon from 'engine/components/icon';
-import * as ICONS from 'engine/constants/icons';
-import * as S from './styles';
-import { ReactSVG } from 'react-svg';
 import { GlobalStyles } from '../../../global-styles';
+
 import Search from './search';
-import { getRedirect } from 'helpers/utils';
+import * as S from './styles';
 
 export default function Navigation(props: any) {
 	const { preview, layout, content } = props;
@@ -43,7 +43,11 @@ export default function Navigation(props: any) {
 							</S.Icon>
 						)}
 						{entry.name}
-						{entry.children && entry.children.length > 0 && <Icon icon={ICONS.ARROW_DOWN} />}
+						{entry.children && entry.children.length > 0 && (
+							<S.Arrow>
+								<ReactSVG src={ICONS.arrow} />
+							</S.Arrow>
+						)}
 					</NavLink>
 					{showMenu && (
 						<S.NavigationEntryMenu $layout={layout}>

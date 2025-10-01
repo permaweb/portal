@@ -4,7 +4,7 @@ import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
 import { LanguageSelect } from 'components/molecules/LanguageSelect';
-import { ASSETS, STYLING, URLS } from 'helpers/config';
+import { ICONS, STYLING, URLS } from 'helpers/config';
 import * as windowUtils from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -89,7 +89,7 @@ export default function DocsNavigationHeader() {
 					<S.NContent>
 						<Title onClick={desktop ? undefined : () => setOpen(!open)} open={open}>
 							<p>{language?.app}</p>
-							{!desktop && <ReactSVG src={ASSETS.arrow} />}
+							{!desktop && <ReactSVG src={ICONS.arrow} />}
 						</Title>
 						<S.NList>
 							{open && renderNavItems(desktop ? null : () => setOpen(false), '', currentDocs, languageProvider.current)}

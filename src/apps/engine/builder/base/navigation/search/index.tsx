@@ -1,7 +1,7 @@
 import React from 'react';
+import { ReactSVG } from 'react-svg';
 import { useNavigate } from 'react-router-dom';
-import Icon from 'engine/components/icon';
-import * as ICONS from 'engine/constants/icons';
+import { ICONS } from 'helpers/config';
 
 import * as S from './styles';
 
@@ -31,7 +31,7 @@ export default function Search(props: any) {
 
 	return (
 		<S.Search ref={searchRef} $active={useSearch} onClick={() => setUseSearch(true)}>
-			<Icon icon={ICONS.SEARCH} />
+			<ReactSVG src={ICONS.search} />
 			<input
 				ref={inputRef}
 				type="text"

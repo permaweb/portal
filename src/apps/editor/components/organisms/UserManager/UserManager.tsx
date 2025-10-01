@@ -5,7 +5,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Select } from 'components/atoms/Select';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { PortalPatchMapEnum, SelectOptionType } from 'helpers/types';
 import { checkValidAddress, formatRoleLabel } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -146,7 +146,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 						handlePress={handleSubmit}
 						disabled={loading || !walletAddress || !checkValidAddress(walletAddress)}
 						loading={loading}
-						icon={props.user ? null : ASSETS.add}
+						icon={props.user ? null : ICONS.add}
 						iconLeftAlign
 						height={45}
 						fullWidth

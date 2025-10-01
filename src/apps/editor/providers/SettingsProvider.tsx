@@ -2,7 +2,7 @@ import React from 'react';
 import { debounce } from 'lodash';
 import { ThemeProvider } from 'styled-components';
 
-import { ASSETS, STYLING } from 'helpers/config';
+import { ICONS, STYLING } from 'helpers/config';
 import {
 	darkTheme,
 	darkThemeAlt1,
@@ -161,7 +161,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 	const AVAILABLE_THEMES = {
 		light: {
 			label: 'Light Themes',
-			icon: ASSETS.light,
+			icon: ICONS.light,
 			variants: [
 				{
 					id: 'light-primary',
@@ -191,7 +191,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		},
 		dark: {
 			label: 'Dark Themes',
-			icon: ASSETS.dark,
+			icon: ICONS.dark,
 			variants: [
 				{
 					id: 'dark-primary',

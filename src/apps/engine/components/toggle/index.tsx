@@ -1,6 +1,5 @@
-import Icon from 'engine/components/icon';
-import * as ICONS from 'engine/constants/icons';
-
+import { ReactSVG } from 'react-svg';
+import { ICONS } from 'helpers/config';
 import * as S from './styles';
 
 export default function Toggle(props: any) {
@@ -9,10 +8,10 @@ export default function Toggle(props: any) {
 			{props.theme && (
 				<>
 					<S.Icon $state={props.state}>
-						<Icon icon={ICONS.LIGHT} />
+						<ReactSVG src={ICONS.light} />
 					</S.Icon>
 					<S.Icon $state={props.state}>
-						<Icon icon={ICONS.DARK} />
+						<ReactSVG src={ICONS.dark} />
 					</S.Icon>
 				</>
 			)}

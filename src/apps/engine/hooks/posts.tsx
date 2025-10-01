@@ -6,13 +6,26 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 export const usePosts = (props?: any) => {
 	const { preview = false } = props || {};
 	const { portal } = usePortalProvider();
+	const { profile } = useProfile(props?.author || null);
+	const { profile: user } = usePermawebProvider();
 	const Posts = portal?.Posts || [];
 	const isLoading = false;
 	const error = null;
 	let filtered = Posts ? Object.values(Posts) : Posts;
 
+	// Check if user is admin or moderator
+	const canViewDrafts = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+
 	if (filtered) {
-		filtered = filtered.filter((post) => post.assetType === 'blog-post');
+		filtered = filtered.filter((post) => {
+			// Filter by asset type
+			if (post.assetType !== 'blog-post') return false;
+
+			// Filter out drafts for non-admin/non-moderator users
+			if (post.metadata?.status === 'draft' && !canViewDrafts) return false;
+
+			return true;
+		});
 	}
 
 	if (props && filtered) {
@@ -89,7 +102,6 @@ export const usePosts = (props?: any) => {
 			if (Title) break;
 		}
 	} else if (props?.author) {
-		const { profile } = useProfile(props.author);
 		Title = profile?.displayName;
 	}
 

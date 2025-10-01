@@ -17,8 +17,7 @@ import { TxAddress } from 'components/atoms/TxAddress';
 import { InsufficientBalanceCTA, PaymentSummary } from 'components/molecules/Payment';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { getArnsCost } from 'helpers/arnsCosts';
-import { ASSETS, IS_TESTNET, URLS } from 'helpers/config';
-import { PortalDomainType, PortalPatchMapEnum } from 'helpers/types';
+import { ICONS, IS_TESTNET, URLS } from 'helpers/config';
 import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -516,7 +515,7 @@ export default function Domains() {
 						<S.SectionBody>
 							<S.SearchWrapper>
 								<S.SearchInputWrapper>
-									<ReactSVG src={ASSETS.search} />
+									<ReactSVG src={ICONS.search} />
 									<FormField
 										value={domain}
 										onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDomain(e.target.value)}
@@ -540,7 +539,7 @@ export default function Domains() {
 										>
 											<p>{domainAvailable ? language.domainAvailable : language.domainUnavailable}</p>
 											<S.Indicator status={domainAvailable ? 'valid' : 'invalid'}>
-												<ReactSVG src={domainAvailable ? ASSETS.success : ASSETS.warning} />
+												<ReactSVG src={domainAvailable ? ICONS.success : ICONS.warning} />
 											</S.Indicator>
 										</S.UpdateWrapperIndicator>
 									)}
@@ -555,7 +554,7 @@ export default function Domains() {
 								<S.IndicatorLine>
 									<S.Indicator status={validateDomainName.maxChars}>
 										{validateDomainName.maxChars && (
-											<ReactSVG src={validateDomainName.maxChars === 'valid' ? ASSETS.success : ASSETS.warning} />
+											<ReactSVG src={validateDomainName.maxChars === 'valid' ? ICONS.success : ICONS.warning} />
 										)}
 									</S.Indicator>
 									<span>{language.arnsMaxCharsValidation}</span>
@@ -563,7 +562,7 @@ export default function Domains() {
 								<S.IndicatorLine>
 									<S.Indicator status={validateDomainName.specialChars}>
 										{validateDomainName.specialChars && (
-											<ReactSVG src={validateDomainName.specialChars === 'valid' ? ASSETS.success : ASSETS.warning} />
+											<ReactSVG src={validateDomainName.specialChars === 'valid' ? ICONS.success : ICONS.warning} />
 										)}
 									</S.Indicator>
 									<span>{language.arnsSpecialCharsValidation}</span>
@@ -571,7 +570,7 @@ export default function Domains() {
 								<S.IndicatorLine>
 									<S.Indicator status={validateDomainName.dashes}>
 										{validateDomainName.dashes && (
-											<ReactSVG src={validateDomainName.dashes === 'valid' ? ASSETS.success : ASSETS.warning} />
+											<ReactSVG src={validateDomainName.dashes === 'valid' ? ICONS.success : ICONS.warning} />
 										)}
 									</S.Indicator>
 									<span>{language.arnsDashesValidation}</span>
@@ -579,7 +578,7 @@ export default function Domains() {
 								<S.IndicatorLine>
 									<S.Indicator status={validateDomainName.wwwName}>
 										{validateDomainName.wwwName && (
-											<ReactSVG src={validateDomainName.wwwName === 'valid' ? ASSETS.success : ASSETS.warning} />
+											<ReactSVG src={validateDomainName.wwwName === 'valid' ? ICONS.success : ICONS.warning} />
 										)}
 									</S.Indicator>
 									<span>{language.arnsNameValidation}</span>
@@ -653,7 +652,7 @@ export default function Domains() {
 												<S.LeaseDuration active={purchaseType === 'lease'}>
 													<IconButton
 														type={'alt1'}
-														src={ASSETS.minus}
+														src={ICONS.minus}
 														handlePress={() => setLeaseDuration((prev) => prev - 1)}
 														disabled={leaseDuration <= 1 || !domainAvailable}
 														dimensions={{ wrapper: 23.5, icon: 13.5 }}
@@ -661,7 +660,7 @@ export default function Domains() {
 													<span>{`${leaseDuration} ${leaseDuration === 1 ? language.year : language.years}`}</span>
 													<IconButton
 														type={'alt1'}
-														src={ASSETS.plus}
+														src={ICONS.plus}
 														handlePress={() => setLeaseDuration((prev) => prev + 1)}
 														disabled={leaseDuration >= 5 || !domainAvailable}
 														dimensions={{ wrapper: 23.5, icon: 13.5 }}

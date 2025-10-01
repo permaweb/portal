@@ -7,15 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
-import {
-	DEFAULT_LAYOUT,
-	DEFAULT_PAGES,
-	DEFAULT_THEME,
-	PORTAL_DATA,
-	PORTAL_PATCH_MAP,
-	PORTAL_ROLES,
-	URLS,
-} from 'helpers/config';
+import { LAYOUT, PAGES, THEME, PORTAL_DATA, PORTAL_PATCH_MAP, PORTAL_ROLES, URLS } from 'helpers/config';
 import { PortalDetailType, PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
 import { checkValidAddress, getBootTag } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -170,9 +162,9 @@ export default function PortalManager(props: {
 
 					const portalUpdateId = await permawebProvider.libs.updateZone(
 						{
-							Themes: [permawebProvider.libs.mapToProcessCase(DEFAULT_THEME)],
-							Layout: permawebProvider.libs.mapToProcessCase(DEFAULT_LAYOUT),
-							Pages: permawebProvider.libs.mapToProcessCase(DEFAULT_PAGES),
+							Themes: [permawebProvider.libs.mapToProcessCase(THEME.DEFAULT)],
+							Layout: permawebProvider.libs.mapToProcessCase(LAYOUT.JOURNAL),
+							Pages: permawebProvider.libs.mapToProcessCase(PAGES.JOURNAL),
 						},
 						portalId,
 						arProvider.wallet

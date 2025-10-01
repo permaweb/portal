@@ -6,7 +6,7 @@ import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { checkValidAddress, getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -99,7 +99,7 @@ export default function ShareCredits(props: { user?: any; handleClose: () => voi
 							approvedWincAmountInput <= 0
 						}
 						loading={loading}
-						icon={props.user ? null : ASSETS.add}
+						icon={props.user ? null : ICONS.add}
 						iconLeftAlign
 						height={45}
 						fullWidth

@@ -11,7 +11,7 @@ import { ContentEditable } from 'components/atoms/ContentEditable';
 import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { Modal } from 'components/atoms/Modal';
-import { ARTICLE_BLOCKS, ASSETS } from 'helpers/config';
+import { ARTICLE_BLOCKS, ICONS } from 'helpers/config';
 import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
 import { validateUrl } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -321,7 +321,7 @@ export default function ArticleBlock(props: {
 									type={'alt3'}
 									label={language?.link}
 									handlePress={() => handleLinkModalOpen()}
-									icon={ASSETS.link}
+									icon={ICONS.link}
 									iconLeftAlign
 								/>
 							</S.SelectionWrapper>
@@ -329,7 +329,7 @@ export default function ArticleBlock(props: {
 					<IconButton
 						type={'alt1'}
 						active={false}
-						src={ASSETS.delete}
+						src={ICONS.delete}
 						handlePress={() => props.onDeleteBlock(props.block.id)}
 						dimensions={{ wrapper: 23.5, icon: 13.5 }}
 						tooltip={language?.deleteBlock}
@@ -434,7 +434,7 @@ export default function ArticleBlock(props: {
 					>
 						<S.EDragWrapper>
 							<S.EDragHandler tabIndex={-1}>
-								<ReactSVG src={ASSETS.drag} />
+								<ReactSVG src={ICONS.drag} />
 							</S.EDragHandler>
 						</S.EDragWrapper>
 						{getElement()}

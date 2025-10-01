@@ -7,7 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 
 import { IconButton } from 'components/atoms/IconButton';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { PortalCategoryType, ViewLayoutType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -129,7 +129,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 						<IconButton
 							type={'alt1'}
 							active={false}
-							src={settings.showLinkAction ? ASSETS.close : ASSETS.write}
+							src={settings.showLinkAction ? ICONS.close : ICONS.write}
 							handlePress={() => toggleLinkAction()}
 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
 							tooltip={settings.showLinkAction ? language?.close : language?.editSiteLinks}
@@ -154,7 +154,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 						<IconButton
 							type={'alt1'}
 							active={false}
-							src={settings.showCategoryAction ? ASSETS.close : ASSETS.write}
+							src={settings.showCategoryAction ? ICONS.close : ICONS.write}
 							handlePress={() => toggleCategoryAction()}
 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
 							tooltip={settings.showCategoryAction ? language?.close : language?.editSiteCategories}
@@ -179,7 +179,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 						<IconButton
 							type={'alt1'}
 							active={false}
-							src={settings.showTopicAction ? ASSETS.close : ASSETS.write}
+							src={settings.showTopicAction ? ICONS.close : ICONS.write}
 							handlePress={() => toggleTopicAction()}
 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
 							tooltip={settings.showTopicAction ? language?.close : language?.editPostTopics}

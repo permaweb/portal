@@ -12,7 +12,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import {
 	AlignmentButtonType,
@@ -41,14 +41,14 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
 		image: {
 			type: 'image',
-			icon: ASSETS.image,
+			icon: ICONS.image,
 			label: language?.image,
 			renderContent: (url) => <img src={url} />,
 			acceptType: 'image/*',
 		},
 		video: {
 			type: 'video',
-			icon: ASSETS.video,
+			icon: ICONS.video,
 			label: language?.video,
 			renderContent: (url) => <video controls src={url} />,
 			acceptType: 'video/*',
@@ -185,10 +185,10 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	};
 
 	const alignmentButtons: AlignmentButtonType[] = [
-		{ label: 'top', alignment: AlignmentEnum.ColumnReverse, icon: ASSETS.alignTop },
-		{ label: 'right', alignment: AlignmentEnum.Row, icon: ASSETS.alignRight },
-		{ label: 'bottom', alignment: AlignmentEnum.Column, icon: ASSETS.alignBottom },
-		{ label: 'left', alignment: AlignmentEnum.RowReverse, icon: ASSETS.alignLeft },
+		{ label: 'top', alignment: AlignmentEnum.ColumnReverse, icon: ICONS.alignTop },
+		{ label: 'right', alignment: AlignmentEnum.Row, icon: ICONS.alignRight },
+		{ label: 'bottom', alignment: AlignmentEnum.Column, icon: ICONS.alignBottom },
+		{ label: 'left', alignment: AlignmentEnum.RowReverse, icon: ICONS.alignLeft },
 	];
 
 	const renderAlignmentButton = ({ label, alignment: buttonAlignment, icon }: AlignmentButtonType) => (
@@ -292,7 +292,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 												<IconButton
 													type={'alt1'}
 													active={false}
-													src={ASSETS.write}
+													src={ICONS.write}
 													handlePress={() => setShowCaptionEdit(true)}
 													dimensions={{ wrapper: 23.5, icon: 13.5 }}
 													tooltip={language?.showCaptionTools}
@@ -337,7 +337,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 												}));
 												setShowCaptionEdit(false);
 											}}
-											icon={ASSETS.delete}
+											icon={ICONS.delete}
 											iconLeftAlign
 										/>
 										<Button type={'alt1'} label={language?.done} handlePress={() => setShowCaptionEdit(false)} />

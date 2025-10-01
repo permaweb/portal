@@ -13,7 +13,7 @@ export default function Comments(props: any) {
 	const { preview, commentsId } = props;
 	const { portal } = usePortalProvider();
 	const Themes = preview ? defaultThemes : portal?.Themes;
-	const { libs } = usePermawebProvider();
+	const { libs, profile } = usePermawebProvider();
 	const [comments, setComments] = React.useState(null);
 
 	React.useEffect(() => {
@@ -55,7 +55,9 @@ export default function Comments(props: any) {
 			<S.CommentList>
 				{comments &&
 					comments.map((comment: any, index: string) => {
-						return <Comment key={index} data={comment} level="0" commentsId={commentsId} />;
+						return (
+							<Comment key={`${index}-${profile?.owner || 'anon'}`} data={comment} level="0" commentsId={commentsId} />
+						);
 					})}
 			</S.CommentList>
 		</S.Comments>

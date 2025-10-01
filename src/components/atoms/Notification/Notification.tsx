@@ -1,7 +1,7 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import { Button } from '../Button';
@@ -40,7 +40,7 @@ export default function Notification(props: {
 		<S.Wrapper warning={props.type === 'warning'} className={'info'}>
 			<S.MessageWrapper>
 				<S.Icon warning={props.type === 'warning'}>
-					<ReactSVG src={props.type === 'warning' ? ASSETS.warning : ASSETS.success} />
+					<ReactSVG src={props.type === 'warning' ? ICONS.warning : ICONS.success} />
 				</S.Icon>
 				<S.Message>{props.message}</S.Message>
 			</S.MessageWrapper>

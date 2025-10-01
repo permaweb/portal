@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Icon from 'engine/components/icon';
-import * as ICONS from 'engine/constants/icons';
-import { useUI } from 'engine/hooks/portal';
+import { ReactSVG } from 'react-svg';
+import { ICONS } from 'helpers/config';
 import { usePortalProvider } from 'engine/providers/portalProvider';
-
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -122,10 +120,10 @@ export default function ZoneEditor(props: IProps) {
 		<S.Wrapper $mode={portalProvider?.editorMode} id="ZoneEditor">
 			<S.Actions $mode={portalProvider?.editorMode}>
 				<div onClick={() => portalProvider?.setEditorMode(portalProvider?.editorMode === 'mini' ? 'full' : 'mini')}>
-					<Icon icon={ICONS.ARROW_UP} />
+					<ReactSVG src={ICONS.arrow} />
 				</div>
 				<div onClick={() => portalProvider?.setEditorMode('hidden')}>
-					<Icon icon={ICONS.CLOSE} />
+					<ReactSVG src={ICONS.close} />
 				</div>
 			</S.Actions>
 			<S.Editor>

@@ -11,6 +11,7 @@ export const Search = styled.div<{ $active: boolean }>`
 		height: 14px;
 		padding: 3px;
 		margin-top: 0.5px;
+		margin-left: 0.5px;
 		color: black;
 		stroke-width: 3;
 		&:hover {

@@ -4,7 +4,7 @@ import { ArconnectSigner, TurboFactory } from '@ardrive/turbo-sdk/web';
 
 import { Accordion } from 'components/atoms/Accordion';
 import { Button } from 'components/atoms/Button';
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 import { getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -136,7 +136,7 @@ export default function TurboCredits(props: Props) {
 								type={'alt3'}
 								label={language?.add}
 								handlePress={() => props.setShowFundUpload(true)}
-								icon={ASSETS.add}
+								icon={ICONS.add}
 								iconLeftAlign
 							/>
 							<Button

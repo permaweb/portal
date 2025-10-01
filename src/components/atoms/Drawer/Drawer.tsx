@@ -1,7 +1,7 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { ASSETS } from 'helpers/config';
+import { ICONS } from 'helpers/config';
 
 import * as S from './styles';
 
@@ -17,7 +17,7 @@ export default function Drawer(props: { title: string; content: React.ReactNode;
 						<span>{props.title}</span>
 					</S.Title>
 					<S.Arrow>
-						<ReactSVG src={ASSETS.arrow} />
+						<ReactSVG src={ICONS.arrow} />
 					</S.Arrow>
 				</S.Label>
 			</S.Action>

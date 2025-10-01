@@ -5,7 +5,7 @@ import { ReactSVG } from 'react-svg';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
-import { ASSETS, URLS } from 'helpers/config';
+import { ICONS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { displayUrlName, urlify } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -47,8 +47,8 @@ export default function PageList() {
 						<S.PageWrapper key={index} className={'fade-in'}>
 							<S.PageHeader>
 								<Link to={`${getTxEndpoint(portalProvider.current.id)}/#/${urlify(key)}`} target={'_blank'}>
-									<p>{displayUrlName(key)}</p>
-									<ReactSVG src={ASSETS.newTab} />
+									<p>{key.charAt(0).toUpperCase() + key.slice(1)}</p>
+									<ReactSVG src={ICONS.newTab} />
 								</Link>
 							</S.PageHeader>
 							<S.PageDetail>

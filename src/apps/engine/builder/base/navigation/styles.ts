@@ -137,6 +137,7 @@ export const NavigationEntry = styled.div`
 export const Icon = styled.div`
 	display: flex;
 	align-items: center;
+	margin-right: 6px;
 
 	div {
 		display: flex;
@@ -146,7 +147,17 @@ export const Icon = styled.div`
 	svg {
 		height: 12px;
 	}
-	margin-right: 6px;
+`;
+
+export const Arrow = styled.div`
+	div {
+		display: flex;
+		align-items: center;
+	}
+
+	svg {
+		transform: rotate(0deg);
+	}
 `;
 
 export const LayoutButtons = styled.div`
