@@ -136,10 +136,11 @@ export const CommentFooter = styled.div`
 export const InfoMessage = styled.div`
 	width: 100%;
 	text-align: center;
-	padding: 40px;
+	padding: 15px;
 
 	p {
-		font-size: ${(props) => props.theme.typography.size.base};
-		color: ${(props) => props.theme.colors.font.primary.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		color: ${(props) => props.theme.colors.font.alt1};
+		text-transform: uppercase;
 	}
 `;

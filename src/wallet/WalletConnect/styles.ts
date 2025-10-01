@@ -247,7 +247,6 @@ export const DBodyWrapper = styled.ul`
 			width: 16.5px;
 			margin: 5.5px 9.5px 0 0;
 			color: ${(props) => props.theme.colors.font.alt1};
-			fill: ${(props) => props.theme.colors.font.alt1};
 		}
 
 		&:hover {
