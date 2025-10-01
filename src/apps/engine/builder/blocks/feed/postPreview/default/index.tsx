@@ -8,6 +8,7 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress, getRedirect } from 'helpers/utils';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
@@ -22,7 +23,7 @@ export default function PostPreview_Default(props: any) {
 
 	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
 
-	const menuEntries: MenuItem[] = [];
+	const menuEntries: any[] = [];
 
 	if (canEditPost) {
 		menuEntries.push({
@@ -55,7 +56,7 @@ export default function PostPreview_Default(props: any) {
 
 	return (
 		<S.Post $layout={Layout && Layout.card}>
-			<ContextMenu entries={menuEntries} />
+			{/* <ContextMenu entries={menuEntries} /> */}
 			<S.Categories>
 				{post ? (
 					post?.metadata?.categories?.map((category: any, index: number) => {
