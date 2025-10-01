@@ -23,6 +23,7 @@ export const loadTurboSDK = async () => {
 	if (!FEATURES.FILE_UPLOADS) {
 		throw new Error('File uploads are disabled');
 	}
+	// @ts-ignore
 	return import('@ardrive/turbo-sdk/web');
 };
 

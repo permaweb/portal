@@ -257,7 +257,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 							{portalProvider.updateAvailable && <S.UpdateNotification>1</S.UpdateNotification>}
 						</S.Portal>
 						{showPortalDropdown && (
-							<S.PortalDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
+							<S.PortalDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper-hidden'}>
 								<S.PDropdownHeader>
 									<p>{language?.portals}</p>
 								</S.PDropdownHeader>

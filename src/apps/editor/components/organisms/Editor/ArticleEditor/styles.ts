@@ -19,7 +19,7 @@ export const ToolbarWrapper = styled.div`
 	background: ${(props) => props.theme.colors.view.background};
 	padding: 10px 0;
 
-	@media (max-width: ${STYLING.cutoffs.initial}) {
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		position: relative;
 		top: auto;
 	}
@@ -30,7 +30,7 @@ export const EditorWrapper = styled.div<{ panelOpen: boolean }>`
 	padding: 0 ${(props) => (props.panelOpen ? `calc(${ARTICLE_TOOLBAR_WIDTH} + 20px)` : '0')} 0 0;
 	transition: padding-right ${transition2};
 
-	@media (max-width: ${STYLING.cutoffs.initial}) {
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		padding: 0;
 	}
 

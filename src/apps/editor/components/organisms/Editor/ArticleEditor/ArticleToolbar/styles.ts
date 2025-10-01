@@ -50,10 +50,11 @@ export const EndActions = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
-	gap: 20px;
+	gap: 15px;
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {
 		width: 100%;
+		flex-wrap: wrap;
 	}
 `;
 
@@ -96,10 +97,11 @@ export const Panel = styled.div<{ open: boolean }>`
 	padding: 13.5px 10px 10px 10px;
 	border: 1px solid ${(props) => props.theme.colors.border.primary} !important;
 
-	@media (max-width: ${STYLING.cutoffs.initial}) {
-		top: 40%;
-		left: 50%;
-		transform: translate(-50%, -40%);
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		height: calc(100vh - 20px);
+		max-width: 100%;
+		top: 10px;
+		right: 10px;
 		display: ${(props) => (props.open ? 'block' : 'none')};
 		border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
 	}
@@ -109,10 +111,16 @@ export const Panel = styled.div<{ open: boolean }>`
 	}
 `;
 
-export const PanelCloseWrapper = styled.div`
+export const PanelCloseWrapperStart = styled.div`
 	position: absolute;
+	z-index: 1;
 	top: 10px;
 	right: 10px;
+`;
+
+export const PanelCloseWrapperEnd = styled.div`
+	margin: 10px 0;
+	padding: 0 10px;
 `;
 
 export const TabWrapper = styled.div<{ label: string; icon?: string }>``;
@@ -120,4 +128,8 @@ export const TabWrapper = styled.div<{ label: string; icon?: string }>``;
 export const TabContent = styled.div`
 	margin: 20px 0 0 0;
 	max-height: calc(100vh - ${STYLING.dimensions.nav.height} - 155px);
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		max-height: calc(100vh - ${STYLING.dimensions.nav.height} - 10px);
+	}
 `;

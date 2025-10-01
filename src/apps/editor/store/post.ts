@@ -32,8 +32,56 @@ export const initStateCurrentPost: { data: PortalAssetPostType; originalData: an
 		submitDisabled: false,
 		focusedBlock: null,
 		lastAddedBlockId: null,
+		markup: {
+			bold: false,
+			italic: false,
+			underline: false,
+			strikethrough: false,
+		},
 	},
 };
+
+// Helper to check if editor state has all required fields
+function validateEditorState(state: any): boolean {
+	if (!state || typeof state !== 'object') return false;
+	if (!state.editor || typeof state.editor !== 'object') return false;
+
+	// Check for required top-level editor fields
+	const requiredEditorFields = [
+		'titleFocused',
+		'blockEditMode',
+		'toggleBlockFocus',
+		'panelOpen',
+		'loading',
+		'submitDisabled',
+		'focusedBlock',
+		'lastAddedBlockId',
+		'markup',
+	];
+
+	for (const field of requiredEditorFields) {
+		if (!(field in state.editor)) {
+			console.log(`Missing editor field: ${field}`);
+			return false;
+		}
+	}
+
+	// Check for required nested markup fields
+	if (!state.editor.markup || typeof state.editor.markup !== 'object') {
+		console.log('Missing or invalid editor.markup');
+		return false;
+	}
+
+	const requiredMarkupFields = ['bold', 'italic', 'underline', 'strikethrough'];
+	for (const field of requiredMarkupFields) {
+		if (!(field in state.editor.markup)) {
+			console.log(`Missing markup field: ${field}`);
+			return false;
+		}
+	}
+
+	return true;
+}
 
 export function currentPostUpdate(payload: { field: string; value: any }) {
 	return (dispatch: Dispatch) => {
@@ -57,9 +105,33 @@ export function currentPost(
 	state: { data: PortalAssetPostType; originalData: any; editor: any } = initStateCurrentPost,
 	action: ReduxActionType
 ) {
+	// Validate state structure and reset if fields are missing
+	if (!validateEditorState(state)) {
+		console.log('Editor state validation failed, resetting to initial state');
+		state = initStateCurrentPost;
+	}
+
 	switch (action.type) {
 		case UPDATE_CURRENT_POST:
 			const { field, value } = action.payload;
+
+			if (field.includes('.')) {
+				const [parent, child] = field.split('.');
+				if (parent in state.editor && state.editor[parent] && typeof state.editor[parent] === 'object') {
+					return {
+						...state,
+						editor: {
+							...state.editor,
+							[parent]: {
+								...state.editor[parent],
+								[child]: value,
+							},
+						},
+					};
+				}
+				return state;
+			}
+
 			if (field in state.data) {
 				return {
 					...state,

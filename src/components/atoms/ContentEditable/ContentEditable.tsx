@@ -43,6 +43,18 @@ const ContentEditable = forwardRef(
 			document.execCommand('insertText', false, text);
 		};
 
+		const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+			// Clear formatting when Enter is pressed to avoid carrying it to next block
+			if (e.key === 'Enter') {
+				// Remove all active formatting before Enter creates new block
+				['bold', 'italic', 'underline', 'strikethrough'].forEach((format) => {
+					if (document.queryCommandState(format)) {
+						document.execCommand(format, false);
+					}
+				});
+			}
+		};
+
 		const Element = props.element;
 
 		return (
@@ -51,6 +63,7 @@ const ContentEditable = forwardRef(
 				contentEditable
 				onInput={handleInput}
 				onPaste={handlePaste}
+				onKeyDown={handleKeyDown}
 				suppressContentEditableWarning={true}
 			/>
 		);

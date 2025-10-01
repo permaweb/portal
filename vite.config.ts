@@ -98,6 +98,7 @@ export default defineConfig(({ mode }) => {
 				store: path.resolve(__dirname, 'src/store'),
 				wallet: path.resolve(__dirname, 'src/wallet'),
 				wrappers: path.resolve(__dirname, 'src/wrappers'),
+				winston: path.resolve(__dirname, 'src/helpers/winston-shim.ts'),
 				process: 'vite-plugin-node-polyfills/polyfills/process-es6',
 				buffer: 'vite-plugin-node-polyfills/polyfills/buffer',
 				crypto: 'vite-plugin-node-polyfills/polyfills/crypto',
@@ -116,6 +117,7 @@ export default defineConfig(({ mode }) => {
 		},
 		optimizeDeps: {
 			include: ['buffer', 'process', 'crypto', 'stream', 'util'],
+			exclude: ['fix-esm', 'winston', '@dabh/diagnostics'],
 		},
 		build: config[app].build,
 		server: {

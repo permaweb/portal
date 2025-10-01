@@ -230,6 +230,7 @@ export default function Editor() {
 
 			if (assetId) {
 				try {
+					// TODO: If not an asset auth user then go through portal Run-Action unless external contributor
 					const assetContentUpdateId = await permawebProvider.libs.sendMessage({
 						processId: assetId,
 						wallet: arProvider.wallet,

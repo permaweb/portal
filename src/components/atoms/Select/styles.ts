@@ -71,14 +71,16 @@ export const Dropdown = styled.button<{ active: boolean }>`
 		overflow: hidden;
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		color: ${(props) =>
 			props.active ? props.theme.colors.font.primary : props.theme.colors.button.primary.color} !important;
 	}
 
 	svg {
-		height: 17.5px;
-		width: 17.5px;
+		height: 25px;
+		width: 25px;
 		margin: 5px 0 0 0;
+		transform: rotate(180deg);
 		color: ${(props) =>
 			props.active ? props.theme.colors.font.primary : props.theme.colors.button.primary.color} !important;
 	}
@@ -94,6 +96,7 @@ export const Options = styled.ul<{ top: number }>`
 	z-index: 2;
 	padding: 10px 0;
 	border-radius: ${STYLING.dimensions.radius.alt4} !important;
+	background: ${(props) => props.theme.colors.container.primary.background};
 `;
 
 export const Option = styled.li<{ active: boolean }>`

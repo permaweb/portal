@@ -43,10 +43,195 @@ export default function ArticleBlock(props: {
 	const [newLinkUrl, setNewLinkUrl] = React.useState<string>('');
 	const [showBlockSelector, setShowBlockSelector] = React.useState<boolean>(false);
 	const [showLinkModal, setShowLinkModal] = React.useState<boolean>(false);
+	const [blockSelectorPosition, setBlockSelectorPosition] = React.useState<'below' | 'above'>('below');
+
+	const prevMarkupRef = React.useRef(currentPost.editor.markup);
+	const isApplyingMarkupRef = React.useRef(false);
+	const wasEmptyRef = React.useRef(false);
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
+
+	// Apply markup formatting to selected text
+	function applyMarkup(markupType: 'bold' | 'italic' | 'underline' | 'strikethrough') {
+		if (!editableRef.current) return;
+
+		const selection = window.getSelection();
+		if (!selection || selection.rangeCount === 0) return;
+
+		// Only apply if there's a selection or cursor is in this block
+		if (!editableRef.current.contains(selection.anchorNode)) return;
+
+		// Don't allow markup in code blocks
+		if (props.block.type === 'code') {
+			return;
+		}
+
+		// Map markup types to execCommand names
+		const commandMap = {
+			bold: 'bold',
+			italic: 'italic',
+			underline: 'underline',
+			strikethrough: 'strikethrough',
+		};
+
+		// Set flag to prevent state update loop
+		isApplyingMarkupRef.current = true;
+
+		// Check if this is a selection (not just cursor position)
+		if (!selection.isCollapsed) {
+			// Check if we have mixed content by using the current Redux state
+			// If button is inactive, it means not ALL text has the formatting (mixed or none)
+			const buttonIsActive = currentPost.editor.markup[markupType];
+
+			// Only apply formatting if button is active (all text has it - remove it)
+			// or if button is inactive AND no text has it (apply it)
+			// Skip if button is inactive but some text has it (mixed state)
+
+			const range = selection.getRangeAt(0);
+			const fragment = range.cloneContents();
+			const div = document.createElement('div');
+			div.appendChild(fragment);
+
+			const tagMap = {
+				bold: ['B', 'STRONG'],
+				italic: ['I', 'EM'],
+				underline: ['U'],
+				strikethrough: ['STRIKE', 'S', 'DEL'],
+			};
+
+			const tags = tagMap[markupType];
+			const hasAnyFormatting = tags.some((tag) => div.querySelector(tag) !== null);
+
+			// If button is inactive (not all has formatting) and some parts DO have formatting = mixed state
+			// In this case, don't apply any changes
+			if (!buttonIsActive && hasAnyFormatting) {
+				// Mixed content - don't change anything
+				isApplyingMarkupRef.current = false;
+				return;
+			}
+		}
+
+		// Execute the command
+		document.execCommand(commandMap[markupType], false);
+
+		// Update block content with new HTML
+		const updatedContent = editableRef.current.innerHTML;
+		props.onChangeBlock({ id: props.block.id, content: updatedContent });
+
+		// Reset flag after a short delay
+		setTimeout(() => {
+			isApplyingMarkupRef.current = false;
+		}, 100);
+	}
+
+	// Detect active formatting at cursor/selection and update Redux state
+	const updateMarkupState = React.useCallback(() => {
+		if (!editableRef.current || isApplyingMarkupRef.current) return;
+
+		const selection = window.getSelection();
+		if (!selection || !editableRef.current.contains(selection.anchorNode)) return;
+
+		// Only update if this block is focused
+		if (currentPost.editor.focusedBlock?.id !== props.block.id) return;
+
+		// For code blocks, always set markup to false
+		if (props.block.type === 'code') {
+			const markupState = {
+				bold: false,
+				italic: false,
+				underline: false,
+				strikethrough: false,
+			};
+
+			Object.entries(markupState).forEach(([key, value]) => {
+				if (currentPost.editor.markup[key as keyof typeof markupState] !== value) {
+					handleCurrentPostUpdate({ field: `markup.${key}`, value });
+				}
+			});
+			return;
+		}
+
+		// Check formatting state for the selection
+		const markupState = {
+			bold: false,
+			italic: false,
+			underline: false,
+			strikethrough: false,
+		};
+
+		if (!selection.isCollapsed && selection.rangeCount > 0) {
+			// For selections, check if the ENTIRE selection has the formatting
+			const range = selection.getRangeAt(0);
+
+			// Map of format types to their possible HTML tags
+			const tagMap = {
+				bold: ['B', 'STRONG'],
+				italic: ['I', 'EM'],
+				underline: ['U'],
+				strikethrough: ['STRIKE', 'S', 'DEL'],
+			};
+
+			// Check each format type by walking through the selection
+			Object.keys(tagMap).forEach((formatType) => {
+				const tags = tagMap[formatType as keyof typeof tagMap];
+
+				// Create a tree walker to iterate through all text nodes in the selection
+				const fragment = range.cloneContents();
+				const div = document.createElement('div');
+				div.appendChild(fragment);
+
+				// Get all text nodes
+				const walker = document.createTreeWalker(div, NodeFilter.SHOW_TEXT, null);
+
+				let hasUnformattedText = false;
+				let node;
+
+				while ((node = walker.nextNode())) {
+					const textNode = node as Text;
+					const text = textNode.textContent || '';
+
+					// Skip empty or whitespace-only text nodes
+					if (text.trim().length === 0) continue;
+
+					// Check if this text node has a formatting ancestor
+					let hasFormatting = false;
+					let parent = textNode.parentElement;
+
+					while (parent && parent !== div) {
+						if (tags.includes(parent.tagName)) {
+							hasFormatting = true;
+							break;
+						}
+						parent = parent.parentElement;
+					}
+
+					if (!hasFormatting) {
+						hasUnformattedText = true;
+						break;
+					}
+				}
+
+				// Button is active only if ALL text has the formatting
+				markupState[formatType as keyof typeof markupState] =
+					!hasUnformattedText && div.textContent?.trim().length! > 0;
+			});
+		} else {
+			// For cursor position (no selection), use queryCommandState
+			markupState.bold = document.queryCommandState('bold');
+			markupState.italic = document.queryCommandState('italic');
+			markupState.underline = document.queryCommandState('underline');
+			markupState.strikethrough = document.queryCommandState('strikethrough');
+		}
+
+		// Update Redux only if changed to avoid loops
+		Object.entries(markupState).forEach(([key, value]) => {
+			if (currentPost.editor.markup[key as keyof typeof markupState] !== value) {
+				handleCurrentPostUpdate({ field: `markup.${key}`, value });
+			}
+		});
+	}, [currentPost.editor.focusedBlock?.id, currentPost.editor.markup, props.block.id, props.block.type]);
 
 	React.useEffect(() => {
 		const currentBlockIndex = currentPost.data?.content?.findIndex(
@@ -55,8 +240,21 @@ export default function ArticleBlock(props: {
 		const currentBlock = currentPost.data?.content?.[currentBlockIndex];
 		if (currentBlock?.id === props.block?.id) {
 			if (currentBlock.content === '/') {
+				// Determine position based on block's location in viewport
+				if (editableRef.current) {
+					const rect = editableRef.current.getBoundingClientRect();
+					const windowHeight = window.innerHeight;
+					const blockMiddle = rect.top + rect.height / 2;
+
+					// If block is in bottom half of screen, show selector above
+					setBlockSelectorPosition(blockMiddle > windowHeight / 2 ? 'above' : 'below');
+				}
+
 				setShowBlockSelector(true);
 				handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: true });
+			} else if (currentBlock.content === '-' || currentBlock.content === '- ') {
+				// Shortcut: Convert to unordered list when user types '-'
+				handleChangeBlock(ArticleBlockEnum.UnorderedList);
 			} else {
 				setShowBlockSelector(false);
 				// Only set toggleBlockFocus to false if this block was the one that had it active
@@ -75,6 +273,9 @@ export default function ArticleBlock(props: {
 			const selection = window.getSelection();
 			if (editableRef.current && editableRef.current.contains(selection?.anchorNode)) {
 				setSelectedText(selection?.toString() || '');
+				// Update markup state when selection changes
+				// Use setTimeout to ensure state updates happen after selection is finalized
+				setTimeout(() => updateMarkupState(), 0);
 			} else {
 				setSelectedText('');
 			}
@@ -85,7 +286,19 @@ export default function ArticleBlock(props: {
 		return () => {
 			document.removeEventListener('selectionchange', handleSelectionChange);
 		};
-	}, []);
+	}, [currentPost.editor.focusedBlock?.id, props.block.id, updateMarkupState]);
+
+	// Force markup state update when content changes (e.g., after applying formatting)
+	React.useEffect(() => {
+		// Only update if this block is focused and not currently applying markup
+		if (currentPost.editor.focusedBlock?.id === props.block.id && !isApplyingMarkupRef.current) {
+			// Small delay to ensure DOM has updated
+			const timeoutId = setTimeout(() => {
+				updateMarkupState();
+			}, 50);
+			return () => clearTimeout(timeoutId);
+		}
+	}, [props.block.content, currentPost.editor.focusedBlock?.id, props.block.id, updateMarkupState]);
 
 	React.useEffect(() => {
 		const handleLinkClick = (e: MouseEvent) => {
@@ -109,6 +322,191 @@ export default function ArticleBlock(props: {
 			}
 		};
 	}, []);
+
+	// Handle keyboard shortcuts for markup (Cmd/Ctrl + B/I/U/S) and Enter in lists
+	React.useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			// Only handle if this block is focused
+			if (currentPost.editor.focusedBlock?.id !== props.block.id) return;
+
+			// Handle Enter key in list items to clear formatting
+			if (e.key === 'Enter' && (props.block.type === 'ordered-list' || props.block.type === 'unordered-list')) {
+				// Don't prevent default - let the browser create the new <li>
+				// But clear all formatting after the new line is created
+				setTimeout(() => {
+					// Clear all markup state
+					['bold', 'italic', 'underline', 'strikethrough'].forEach((type) => {
+						handleCurrentPostUpdate({ field: `markup.${type}`, value: false });
+					});
+
+					// Also use execCommand to remove any lingering formatting context
+					if (editableRef.current && document.activeElement === editableRef.current) {
+						['bold', 'italic', 'underline', 'strikethrough'].forEach((format) => {
+							if (document.queryCommandState(format)) {
+								document.execCommand(format, false);
+							}
+						});
+					}
+				}, 0);
+			}
+
+			// Check for Cmd (Mac) or Ctrl (Windows/Linux)
+			if (e.metaKey || e.ctrlKey) {
+				let markupType: 'bold' | 'italic' | 'underline' | 'strikethrough' | null = null;
+
+				switch (e.key.toLowerCase()) {
+					case 'b':
+						markupType = 'bold';
+						break;
+					case 'i':
+						markupType = 'italic';
+						break;
+					case 'u':
+						markupType = 'underline';
+						break;
+					case 's':
+						markupType = 'strikethrough';
+						break;
+				}
+
+				if (markupType) {
+					e.preventDefault();
+					// Toggle the markup state in Redux
+					const currentState = currentPost.editor.markup[markupType];
+					handleCurrentPostUpdate({ field: `markup.${markupType}`, value: !currentState });
+				}
+			}
+		};
+
+		document.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [currentPost.editor.focusedBlock?.id, currentPost.editor.markup, props.block.id, props.block.type]);
+
+	// Listen for markup state changes from Redux and apply formatting
+	React.useEffect(() => {
+		const prevMarkup = prevMarkupRef.current;
+		const currentMarkup = currentPost.editor.markup;
+
+		// Only apply if this block is focused
+		if (currentPost.editor.focusedBlock?.id !== props.block.id) return;
+
+		// Check each markup type and apply if it changed
+		const markupTypes: Array<'bold' | 'italic' | 'underline' | 'strikethrough'> = [
+			'bold',
+			'italic',
+			'underline',
+			'strikethrough',
+		];
+
+		markupTypes.forEach((type) => {
+			if (prevMarkup[type] !== currentMarkup[type]) {
+				applyMarkup(type);
+			}
+		});
+
+		// Update ref with current values
+		prevMarkupRef.current = currentMarkup;
+	}, [currentPost.editor.markup, currentPost.editor.focusedBlock?.id, props.block.id]);
+
+	// Clear markup state when this block becomes focused and is empty or new
+	React.useEffect(() => {
+		if (currentPost.editor.focusedBlock?.id === props.block.id) {
+			// Small delay to ensure editable ref is ready
+			setTimeout(() => {
+				// If this is a newly added empty block, force clear all markup
+				if (props.block.id === currentPost.editor.lastAddedBlockId && !props.block.content) {
+					// Force all markup to false for new blocks
+					['bold', 'italic', 'underline', 'strikethrough'].forEach((type) => {
+						if (currentPost.editor.markup[type as keyof typeof currentPost.editor.markup]) {
+							handleCurrentPostUpdate({ field: `markup.${type}`, value: false });
+						}
+					});
+
+					// Also clear the browser's formatting state
+					if (editableRef.current) {
+						['bold', 'italic', 'underline', 'strikethrough'].forEach((format) => {
+							if (document.queryCommandState(format)) {
+								document.execCommand(format, false);
+							}
+						});
+					}
+				} else {
+					// For existing blocks, detect the actual formatting
+					updateMarkupState();
+				}
+			}, 50);
+		}
+	}, [currentPost.editor.focusedBlock?.id, props.block.id, currentPost.editor.lastAddedBlockId]);
+
+	// Clear markup toggles when block content transitions from non-empty to empty
+	React.useEffect(() => {
+		// Only check if this block is focused
+		if (currentPost.editor.focusedBlock?.id !== props.block.id) {
+			wasEmptyRef.current = false;
+			return;
+		}
+		if (!editableRef.current) return;
+
+		// Check if content is empty (empty string, just whitespace, or empty HTML tags)
+		const isEmpty =
+			!props.block.content ||
+			props.block.content.trim() === '' ||
+			props.block.content === '<br>' ||
+			props.block.content === '<li></li>' ||
+			props.block.content.replace(/<[^>]*>/g, '').trim() === '';
+
+		// Only clear formatting if content JUST became empty (transition)
+		if (isEmpty && !wasEmptyRef.current) {
+			wasEmptyRef.current = true;
+
+			// Clear ALL markup state when content becomes empty (force all to false)
+			(['bold', 'italic', 'underline', 'strikethrough'] as const).forEach((type) => {
+				handleCurrentPostUpdate({ field: `markup.${type}`, value: false });
+			});
+
+			// Nuclear option: completely reset the element's innerHTML to clear formatting context
+			// Save selection position
+			const selection = window.getSelection();
+			const wasInside = selection && editableRef.current.contains(document.activeElement);
+
+			if (wasInside) {
+				// Clear the innerHTML completely
+				editableRef.current.innerHTML = '';
+
+				// Trigger the onChange to sync with parent state
+				props.onChangeBlock({ id: props.block.id, content: '' });
+
+				// Restore focus and cursor position
+				setTimeout(() => {
+					if (editableRef.current) {
+						editableRef.current.focus();
+						const range = document.createRange();
+						const sel = window.getSelection();
+						range.selectNodeContents(editableRef.current);
+						range.collapse(true);
+						sel?.removeAllRanges();
+						sel?.addRange(range);
+
+						// Double-check: clear any formatting commands
+						['bold', 'italic', 'underline', 'strikethrough'].forEach((format) => {
+							if (document.queryCommandState(format)) {
+								document.execCommand(format, false);
+							}
+						});
+						document.execCommand('removeFormat', false);
+
+						// Force update markup state after everything is cleared
+						updateMarkupState();
+					}
+				}, 0);
+			}
+		} else if (!isEmpty) {
+			wasEmptyRef.current = false;
+		}
+	}, [props.block.content, currentPost.editor.focusedBlock?.id, props.block.id]);
 
 	function handleChangeBlock(type: ArticleBlockEnum) {
 		let content: string = '';
@@ -377,7 +775,8 @@ export default function ArticleBlock(props: {
 						<CloseHandler active={true} disabled={false} callback={handleSelectorClose}>
 							<S.BlockSelector
 								blockEditMode={currentPost.editor.blockEditMode}
-								className={'border-wrapper-primary scroll-wrapper-hidden'}
+								position={blockSelectorPosition}
+								className={'border-wrapper-alt1 scroll-wrapper-hidden'}
 							>
 								<ArticleBlocks
 									addBlock={(type: ArticleBlockEnum) => handleChangeBlock(type)}

@@ -79,6 +79,11 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		let settings: Settings;
 		if (stored) {
 			const parsedSettings = JSON.parse(stored);
+			// If not desktop, ensure navWidth is at minimum to hide overlay on load
+			const navWidth = isDesktop
+				? parsedSettings.navWidth ?? parseInt(STYLING.dimensions.nav.width)
+				: STYLING.dimensions.nav.widthMin;
+
 			settings = {
 				...parsedSettings,
 				isDesktop,
@@ -87,7 +92,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 				showCategoryAction: parsedSettings.showCategoryAction ?? false,
 				showTopicAction: parsedSettings.showTopicAction ?? false,
 				showLinkAction: parsedSettings.showLinkAction ?? false,
-				navWidth: parsedSettings.navWidth ?? parseInt(STYLING.dimensions.nav.width),
+				navWidth,
 			};
 		} else {
 			settings = {
@@ -95,6 +100,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 				theme: preferredTheme,
 				isDesktop,
 				sidebarOpen: isDesktop,
+				navWidth: isDesktop ? parseInt(STYLING.dimensions.nav.width) : STYLING.dimensions.nav.widthMin,
 			};
 		}
 
@@ -107,11 +113,25 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		const newIsDesktop = checkWindowCutoff(parseInt(STYLING.cutoffs.desktop));
 		const newWindowSize = { width: window.innerWidth, height: window.innerHeight };
 		setSettings((prevSettings) => {
+			// Determine navWidth based on desktop mode transition
+			let navWidth: number;
+			if (newIsDesktop && !prevSettings.isDesktop) {
+				// Transitioning from mobile to desktop - restore to default width
+				navWidth = parseInt(STYLING.dimensions.nav.width);
+			} else if (!newIsDesktop && prevSettings.isDesktop) {
+				// Transitioning from desktop to mobile - close to minimum width
+				navWidth = STYLING.dimensions.nav.widthMin;
+			} else {
+				// Staying in same mode - keep current width
+				navWidth = prevSettings.navWidth;
+			}
+
 			const newSettings = {
 				...prevSettings,
 				isDesktop: newIsDesktop,
 				windowSize: newWindowSize,
 				sidebarOpen: newIsDesktop ? prevSettings.sidebarOpen : false,
+				navWidth,
 			};
 			localStorage.setItem('settings', JSON.stringify(newSettings));
 			return newSettings;
