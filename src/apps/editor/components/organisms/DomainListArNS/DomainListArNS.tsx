@@ -170,15 +170,6 @@ export default function DomainListArNS() {
 		null
 	);
 	const [extendCostLoading, setExtendCostLoading] = React.useState<boolean>(false);
-	React.useEffect(() => {
-		// Fetch latest ANT version at mount for update detection
-		fetchLatestVersion()
-			.then((v) => {
-				console.log('Latest ANT version:', v);
-				return setLatestVersion(v);
-			})
-			.catch(() => {});
-	}, []);
 
 	React.useEffect(() => {
 		if (!extendModal.open || !extendModal.domain?.name || !extendModal.years) return;
