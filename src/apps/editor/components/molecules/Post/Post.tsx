@@ -46,7 +46,7 @@ export default function Post(props: { post: PortalAssetType }) {
 				<S.PostHeaderDetail>
 					<ReactSVG src={ICONS.time} />
 					<span>
-						{`${formatDate(props.post.metadata?.releaseDate, 'epoch', true)} · ${
+						{`${formatDate(props.post.metadata?.releaseDate, true)} · ${
 							portalProvider.usersByPortalId?.[props.post.creator]?.username ?? formatAddress(props.post.creator, false)
 						}`}
 					</span>

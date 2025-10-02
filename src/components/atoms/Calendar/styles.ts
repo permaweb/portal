@@ -82,8 +82,8 @@ export const Day = styled.div<{ disabled?: boolean; selected?: boolean }>`
 	${(props) =>
 		props.disabled &&
 		`
-		color: ${props.theme.colors.button.primary.disabled.color};
-		background: ${props.theme.colors.button.primary.disabled.background};
+		color: ${props.theme.colors.button.primary.disabled.color} !important;
+		background: ${props.theme.colors.button.primary.disabled.background} !important;
 	`}
 
 	${(props) =>

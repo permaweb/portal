@@ -52,7 +52,11 @@ export default function ArticleToolbarMarkup() {
 			<IconButton
 				type={'primary'}
 				src={icon}
-				handlePress={() => handleCurrentPostUpdate({ field: `markup.${markupType}`, value: !isActive })}
+				handlePress={() => {
+					// Set a flag to indicate this is a user-initiated change
+					handleCurrentPostUpdate({ field: 'markupUserInitiated', value: true });
+					handleCurrentPostUpdate({ field: `markup.${markupType}`, value: !isActive });
+				}}
 				dimensions={{
 					wrapper: 26.5,
 					icon: 17.5,

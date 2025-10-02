@@ -61,6 +61,10 @@ export default function ArticleBlocks(props: {
 			label: language.media,
 			blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image], ARTICLE_BLOCKS[ArticleBlockEnum.Video]],
 		},
+		{
+			label: language.design,
+			blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.DividerSolid], ARTICLE_BLOCKS[ArticleBlockEnum.DividerDashed]],
+		},
 	];
 
 	const escFunction = React.useCallback(
@@ -224,6 +228,14 @@ export default function ArticleBlocks(props: {
 					case 'v':
 						event.preventDefault();
 						props.addBlock(ArticleBlockEnum.Video);
+						break;
+					case 's':
+						event.preventDefault();
+						props.addBlock(ArticleBlockEnum.DividerSolid);
+						break;
+					case 'd':
+						event.preventDefault();
+						props.addBlock(ArticleBlockEnum.DividerDashed);
 						break;
 					default:
 						break;

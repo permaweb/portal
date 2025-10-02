@@ -7,6 +7,7 @@ import { currentPostUpdate } from 'editor/store/post';
 import { Button } from 'components/atoms/Button';
 import { Calendar } from 'components/atoms/Calendar';
 import { FormField } from 'components/atoms/FormField';
+import { IconButton } from 'components/atoms/IconButton';
 import { Panel } from 'components/atoms/Panel';
 import { Select } from 'components/atoms/Select';
 import { Toggle } from 'components/atoms/Toggle';
@@ -55,7 +56,7 @@ export default function ArticlePostReleaseDate() {
 
 	React.useEffect(() => {
 		if (currentPost?.data?.releaseDate) {
-			const date = new Date(currentPost.data.releaseDate);
+			const date = new Date(Number(currentPost.data.releaseDate));
 
 			setYear(date.getFullYear().toString());
 			setDay(date.getDate().toString());
@@ -77,6 +78,32 @@ export default function ArticlePostReleaseDate() {
 
 			setHours(hours.toString());
 			setMinutes(date.getMinutes().toString().padStart(2, '0'));
+			setPeriod(period);
+		} else {
+			// Set default values when no release date is set
+			const now = new Date();
+			now.setHours(now.getHours() + 1); // Default to 1 hour from now
+
+			setYear(now.getFullYear().toString());
+			setDay(now.getDate().toString());
+
+			const monthId = String(now.getMonth() + 1).padStart(2, '0');
+			const selectedMonth = monthOptions.find((m) => m.id === monthId);
+			if (selectedMonth) {
+				setMonth(selectedMonth);
+			}
+
+			let hours = now.getHours();
+			const period = hours >= 12 ? 'PM' : 'AM';
+
+			if (hours > 12) {
+				hours -= 12;
+			} else if (hours === 0) {
+				hours = 12;
+			}
+
+			setHours(hours.toString());
+			setMinutes(now.getMinutes().toString().padStart(2, '0'));
 			setPeriod(period);
 		}
 	}, [currentPost?.data?.releaseDate]);
@@ -255,20 +282,24 @@ export default function ArticlePostReleaseDate() {
 	return (
 		<>
 			<S.Wrapper>
-				<S.HeaderWrapper>
-					<div className={'info'}>
-						<p>
-							{currentPost?.data?.releaseDate
-								? formatDate(currentPost.data.releaseDate, 'iso', true)
-								: language.immediately}
-						</p>
-					</div>
-					<Button
+				<S.HeaderWrapper className={'border-wrapper-alt3'}>
+					<p>
+						<span className={'post-release-info'}>{`${language.release}:`}</span>{' '}
+						{currentPost?.data?.releaseDate ? formatDate(currentPost.data.releaseDate, true) : language.immediately}
+					</p>
+					{/* <Button
 						type={'alt4'}
 						label={language.edit}
 						handlePress={() => setShowEdit(true)}
 						icon={ICONS.date}
 						iconLeftAlign
+					/> */}
+					<IconButton
+						type={'primary'}
+						handlePress={() => setShowEdit(true)}
+						src={ICONS.date}
+						dimensions={{ wrapper: 23.5, icon: 13.5 }}
+						tooltip={language.edit}
 					/>
 				</S.HeaderWrapper>
 			</S.Wrapper>
@@ -360,7 +391,7 @@ export default function ArticlePostReleaseDate() {
 					<Button type={'primary'} label={language.cancel} handlePress={() => setShowEdit(false)} />
 					<Button type={'alt1'} label={language.save} handlePress={() => setDate()} disabled={!isFormValid} />
 				</S.EditActions>
-				{futureDateValidation.status && (
+				{futureDateValidation.status && !currentPost.data?.releaseDate && (
 					<S.ErrorMessage className={'warning'}>{futureDateValidation.message}</S.ErrorMessage>
 				)}
 			</Panel>

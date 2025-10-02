@@ -77,9 +77,9 @@ export default function Post() {
 							</Link>
 						</S.Author>
 					)}
-					{post?.metadata?.releasedDate && (
+					{post?.metadata?.releaseDate && (
 						<S.ReleasedDate>
-							<span>{formatDate(post.metadata.releasedDate, 'iso', true)}</span>
+							<span>{formatDate(post.metadata.releaseDate, true)}</span>
 						</S.ReleasedDate>
 					)}
 					{post?.metadata?.categories && (

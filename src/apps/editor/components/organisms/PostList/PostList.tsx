@@ -171,7 +171,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 											<div className={'user-line'}>
 												<User user={{ address: request.creatorId }} hideAction />
 											</div>
-											<span>{formatDate(request.dateCreated, 'epoch')}</span>
+											<span>{formatDate(request.dateCreated)}</span>
 										</S.PostActionRequestLine>
 									</S.PostActionRequest>
 								);

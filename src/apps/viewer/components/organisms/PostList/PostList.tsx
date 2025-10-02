@@ -54,9 +54,9 @@ function Post(props: { post: PortalAssetType; hideImage?: boolean }) {
 							</Link>
 						</S.Author>
 					)}
-					{props.post?.metadata?.releasedDate && (
+					{props.post?.metadata?.releaseDate && (
 						<S.ReleasedDate>
-							<span>{formatDate(props.post.metadata.releasedDate, 'iso', true)}</span>
+							<span>{formatDate(props.post.metadata.releaseDate, true)}</span>
 						</S.ReleasedDate>
 					)}
 				</S.PostEndWrapper>

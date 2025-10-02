@@ -127,13 +127,13 @@ export const Primary = styled.button<{
 		margin: auto !important;
 		color: ${(props) =>
 			props.disabled
-				? props.theme.colors.icon.alt1.disabled
+				? props.theme.colors.button.primary.disabled.color
 				: props.active
 				? props.theme.colors.button.primary.active.color
 				: props.theme.colors.button.primary.color};
 		fill: ${(props) =>
 			props.disabled
-				? props.theme.colors.icon.alt1.disabled
+				? props.theme.colors.button.primary.disabled.color
 				: props.active
 				? props.theme.colors.button.primary.active.color
 				: props.theme.colors.button.primary.color};
