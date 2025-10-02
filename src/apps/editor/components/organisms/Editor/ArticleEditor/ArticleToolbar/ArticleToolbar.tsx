@@ -11,7 +11,7 @@ import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
 import { Tabs } from 'components/atoms/Tabs';
-import { ICONS, DOM, STYLING } from 'helpers/config';
+import { DOM, ICONS, STYLING } from 'helpers/config';
 import {
 	ArticleBlockEnum,
 	PortalAssetRequestType,
@@ -229,7 +229,7 @@ export default function ArticleToolbar(props: {
 
 	const panel = React.useMemo(() => {
 		const content = currentPost.editor.panelOpen ? (
-			<S.Panel className={'border-wrapper-primary fade-in'} open={currentPost.editor.panelOpen}>
+			<S.Panel className={'border-wrapper-alt2 fade-in'} open={currentPost.editor.panelOpen}>
 				<S.PanelCloseWrapperStart>
 					<IconButton
 						type={'primary'}
@@ -252,21 +252,18 @@ export default function ArticleToolbar(props: {
 				</Tabs>
 				<S.TabContent className={'scroll-wrapper-hidden'}>
 					{getCurrentTab()}
-					{!desktop && (
-						<S.PanelCloseWrapperEnd>
-							<Button
-								type={'primary'}
-								label={language?.closeToolkit}
-								handlePress={() =>
-									handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })
-								}
-								noFocus
-								disabled={currentPost.editor.loading.active}
-								height={40}
-								fullWidth
-							/>
-						</S.PanelCloseWrapperEnd>
-					)}
+
+					<S.PanelCloseWrapperEnd>
+						<Button
+							type={'primary'}
+							label={language?.closeToolkit}
+							handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
+							noFocus
+							disabled={currentPost.editor.loading.active}
+							height={40}
+							fullWidth
+						/>
+					</S.PanelCloseWrapperEnd>
 				</S.TabContent>
 			</S.Panel>
 		) : null;

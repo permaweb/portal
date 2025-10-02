@@ -293,12 +293,11 @@ export const Portal = styled.button<{ active: boolean }>`
 	}
 
 	svg {
-		height: 25px;
-		width: 25px;
+		height: 17.5px;
+		width: 17.5px;
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
-		margin: 5px 0px 0 7.5px;
-		transform: rotate(180deg);
+		margin: 5px 0px 0 12.5px;
 	}
 	&:hover {
 		background: ${(props) => props.theme.colors.container.primary.active};
@@ -347,7 +346,7 @@ export const PortalDropdown = styled.div`
 	width: 350px;
 	max-width: 80vw;
 	position: absolute;
-	top: 55px;
+	top: 47.5px;
 	left: 0;
 	padding: 11.5px 10px;
 `;

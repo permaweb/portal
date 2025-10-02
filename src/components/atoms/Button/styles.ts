@@ -137,6 +137,7 @@ export const Primary = styled.button<{
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 		letter-spacing: 0.35px;
+		white-space: nowrap;
 		color: ${(props) =>
 			props.warning
 				? props.theme.colors.font.light1

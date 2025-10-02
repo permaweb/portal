@@ -31,6 +31,8 @@ function getElementWrapper(blockEditMode: boolean, type: ArticleBlockEnum, theme
 	switch (type) {
 		case 'image':
 		case 'video':
+		case 'divider-solid':
+		case 'divider-dashed':
 			return '';
 		case 'code':
 			return `
@@ -51,6 +53,8 @@ function getElementCursor(type: ArticleBlockEnum) {
 	switch (type) {
 		case 'image':
 		case 'video':
+		case 'divider-solid':
+		case 'divider-dashed':
 			return 'default';
 		default:
 			return 'text';
@@ -114,7 +118,6 @@ export const DefaultElementWrapper = styled.div`
 `;
 
 export const ElementWrapper = styled.div<{ blockEditMode: boolean; type: ArticleBlockEnum }>`
-	width: calc(100% - 27.5px);
 	width: ${(props) => (props.blockEditMode ? 'calc(100% - 27.5px)' : '100%')};
 	display: flex;
 	flex-direction: column;
@@ -298,6 +301,18 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 	}
 	h6 {
 		font-size: clamp(19.25px, 1.65vw, 24.75px);
+	}
+
+	.article-divider-solid {
+		height: 1px;
+		width: 100%;
+		border-top: 1px solid ${(props) => props.theme.colors.border.alt4};
+	}
+
+	.article-divider-dashed {
+		height: 1px;
+		width: 100%;
+		border-top: 1px dashed ${(props) => props.theme.colors.border.alt4};
 	}
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {

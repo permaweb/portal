@@ -22,9 +22,6 @@ export default function ArticlePost(props: {
 	return (
 		<S.Wrapper>
 			<S.Section>
-				<S.SectionHeader>
-					<p>{language?.releaseDate}</p>
-				</S.SectionHeader>
 				<S.SectionBody>
 					<ArticlePostReleaseDate />
 				</S.SectionBody>

@@ -281,18 +281,6 @@ export default function ArticleEditor(props: {
 		let content: any = null;
 
 		switch (type) {
-			case 'paragraph':
-			case 'quote':
-			case 'code':
-			case 'header-1':
-			case 'header-2':
-			case 'header-3':
-			case 'header-4':
-			case 'header-5':
-			case 'header-6':
-			case 'image':
-				content = '';
-				break;
 			case 'ordered-list':
 			case 'unordered-list':
 				content = '<li></li>';

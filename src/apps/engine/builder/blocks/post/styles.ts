@@ -92,6 +92,10 @@ export const Wrapper = styled.div`
 		font-weight: 400;
 	}
 
+	a {
+		text-decoration: underline;
+	}
+
 	blockquote {
 		position: relative;
 		font-family: Georgia, serif;

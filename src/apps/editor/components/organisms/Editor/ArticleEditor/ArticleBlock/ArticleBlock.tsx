@@ -48,6 +48,7 @@ export default function ArticleBlock(props: {
 	const prevMarkupRef = React.useRef(currentPost.editor.markup);
 	const isApplyingMarkupRef = React.useRef(false);
 	const wasEmptyRef = React.useRef(false);
+	const isUserInitiatedChangeRef = React.useRef(false);
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
@@ -255,6 +256,9 @@ export default function ArticleBlock(props: {
 			} else if (currentBlock.content === '-' || currentBlock.content === '- ') {
 				// Shortcut: Convert to unordered list when user types '-'
 				handleChangeBlock(ArticleBlockEnum.UnorderedList);
+			} else if (currentBlock.content === '+' || currentBlock.content === '+ ') {
+				// Shortcut: Convert to solid divider when user types '+'
+				handleChangeBlock(ArticleBlockEnum.DividerSolid);
 			} else {
 				setShowBlockSelector(false);
 				// Only set toggleBlockFocus to false if this block was the one that had it active
@@ -371,6 +375,8 @@ export default function ArticleBlock(props: {
 
 				if (markupType) {
 					e.preventDefault();
+					// Mark this as a user-initiated change
+					isUserInitiatedChangeRef.current = true;
 					// Toggle the markup state in Redux
 					const currentState = currentPost.editor.markup[markupType];
 					handleCurrentPostUpdate({ field: `markup.${markupType}`, value: !currentState });
@@ -393,6 +399,9 @@ export default function ArticleBlock(props: {
 		// Only apply if this block is focused
 		if (currentPost.editor.focusedBlock?.id !== props.block.id) return;
 
+		// Check if this change was user-initiated (keyboard or toolbar button)
+		const isUserInitiated = isUserInitiatedChangeRef.current || currentPost.editor.markupUserInitiated;
+
 		// Check each markup type and apply if it changed
 		const markupTypes: Array<'bold' | 'italic' | 'underline' | 'strikethrough'> = [
 			'bold',
@@ -403,13 +412,28 @@ export default function ArticleBlock(props: {
 
 		markupTypes.forEach((type) => {
 			if (prevMarkup[type] !== currentMarkup[type]) {
-				applyMarkup(type);
+				// Only apply markup if this was a user-initiated change (keyboard/toolbar)
+				// Don't apply if the change was just from updateMarkupState detecting selection
+				if (isUserInitiated) {
+					applyMarkup(type);
+				}
 			}
 		});
 
+		// Reset the flags after processing
+		isUserInitiatedChangeRef.current = false;
+		if (currentPost.editor.markupUserInitiated) {
+			handleCurrentPostUpdate({ field: 'markupUserInitiated', value: false });
+		}
+
 		// Update ref with current values
 		prevMarkupRef.current = currentMarkup;
-	}, [currentPost.editor.markup, currentPost.editor.focusedBlock?.id, props.block.id]);
+	}, [
+		currentPost.editor.markup,
+		currentPost.editor.markupUserInitiated,
+		currentPost.editor.focusedBlock?.id,
+		props.block.id,
+	]);
 
 	// Clear markup state when this block becomes focused and is empty or new
 	React.useEffect(() => {
@@ -618,7 +642,6 @@ export default function ArticleBlock(props: {
 			selection.addRange(range);
 
 			const updatedContent = editableRef.current.innerHTML;
-			console.log('Updated raw HTML content:', updatedContent);
 
 			props.onChangeBlock({ id: props.block.id, content: updatedContent });
 		}
@@ -699,6 +722,14 @@ export default function ArticleBlock(props: {
 					}
 				/>
 			);
+			break;
+		case 'divider-solid':
+			useCustom = true;
+			element = <div className={'article-divider-solid'} />;
+			break;
+		case 'divider-dashed':
+			useCustom = true;
+			element = <div className={'article-divider-dashed'} />;
 			break;
 		default:
 			element = 'p';
