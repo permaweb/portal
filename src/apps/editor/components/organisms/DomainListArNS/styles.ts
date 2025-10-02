@@ -506,3 +506,25 @@ export const DomainDetailDivider = styled.div`
 		display: none;
 	}
 `;
+
+export const DomainNameWrapper = styled.div`
+	position: relative;
+	display: inline-block;
+`;
+
+export const UpgradeBadge = styled.div`
+	position: absolute;
+	top: -18px;
+	right: -60px;
+
+	/* shrink the button to look like a badge */
+	button {
+		height: 16px;
+		background: ${(props) => props.theme.colors.roles.primary};
+		color: ${(props) => props.theme.colors.font.light1};
+		padding: 2px 6px;
+		font-size: 10px;
+		line-height: 1;
+		border-radius: 10px;
+	}
+`;

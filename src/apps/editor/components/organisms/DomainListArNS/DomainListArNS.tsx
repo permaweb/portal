@@ -1,10 +1,18 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
-
-import { ANT, ArconnectSigner, ARIO, defaultTargetManifestId } from '@ar.io/sdk';
+import { connect } from '@permaweb/aoconnect';
+import {
+	ANT,
+	ArconnectSigner,
+	ARIO,
+	defaultTargetManifestId,
+	AoANTState,
+	ANT_REGISTRY_ID,
+	ANTVersions,
+	AOProcess,
+} from '@ar.io/sdk';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
-
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
@@ -23,8 +31,41 @@ import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-
+import { TransactionEdge } from 'arweave-graphql';
 import * as S from './styles';
+
+export type ANTProcessData = {
+	state: AoANTState | null;
+	version: number;
+	processMeta: TransactionEdge['node'] | null;
+	errors?: Error[];
+};
+
+export async function fetchLatestVersion() {
+	const versionRegistry = ANTVersions.init({
+		process: new AOProcess({
+			processId: ANT_REGISTRY_ID,
+			ao: connect({
+				MODE: 'legacy',
+			}),
+		}),
+	});
+	return versionRegistry.getLatestANTVersion();
+}
+
+export function doesANTRequireUpdate({
+	ant,
+	userAddress,
+	currentModuleId,
+}: {
+	ant: ANTProcessData;
+	userAddress: string;
+	currentModuleId: string | null;
+}) {
+	if (!ant.processMeta || !ant.state?.Owner || ant?.state.Owner !== userAddress) return false;
+	if (ant.processMeta.tags.find((t: any) => t.name === 'Module' && t.value !== currentModuleId)) return true;
+	return false;
+}
 
 interface UserOwnedDomain {
 	name: string;
@@ -74,6 +115,7 @@ export default function DomainListArNS() {
 	const [showFund, setShowFund] = React.useState<boolean>(false);
 	// startTransition removed - using direct state updates for speed
 	const [expandedDetails, setExpandedDetails] = React.useState<Set<string>>(new Set());
+	const [latestVersion, setLatestVersion] = React.useState<any>();
 	// Shared timeout helper
 	function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 		return new Promise<T>((resolve, reject) => {
@@ -172,6 +214,16 @@ export default function DomainListArNS() {
 		null
 	);
 	const [extendCostLoading, setExtendCostLoading] = React.useState<boolean>(false);
+	React.useEffect(() => {
+		// Fetch latest ANT version at mount for update detection
+		fetchLatestVersion()
+			.then((v) => {
+				console.log('Latest ANT version:', v);
+				return setLatestVersion(v);
+			})
+			.catch(() => {});
+	}, []);
+
 	React.useEffect(() => {
 		if (!extendModal.open || !extendModal.domain?.name || !extendModal.years) return;
 		let cancelled = false;
@@ -293,7 +345,7 @@ export default function DomainListArNS() {
 					: (resolved as any)?.endTimestamp;
 			// Detect ANT update via module version comparison, similar to arns-react
 			const requiresAntUpdate: boolean = await detectRequiresAntUpdate(antId).catch(() => false);
-
+			console.log(resolved);
 			return {
 				name: domainName,
 				antId,
@@ -548,7 +600,8 @@ export default function DomainListArNS() {
 		return IS_TESTNET ? ARIO.testnet({ signer }) : ARIO.mainnet({ signer });
 	}
 
-	async function upgradeDomain(domain: { antId: string; name: string }) {
+	async function upgradeDomain(domain: { antId: string; name: string; userDomain: UserOwnedDomain }) {
+		console.log('Upgrading domain:', domain.userDomain);
 		const signer = new ArconnectSigner(window.arweaveWallet);
 		const ant = ANT.init({ processId: domain.antId, signer });
 
@@ -571,13 +624,6 @@ export default function DomainListArNS() {
 				}
 			},
 		});
-
-		// New result shape:
-		// {
-		//   forkedProcessId: string;
-		//   reassignedNames: Record<string, AoMessageResult>;
-		//   failedReassignedNames: Record<string, { id?: string; error: Error }>;
-		// }
 
 		const name = domain.name;
 
@@ -693,11 +739,6 @@ export default function DomainListArNS() {
 						handlePress={() => setUpgradeModal({ open: true, domain })}
 						disabled={upgradingDomains.has(domain.name)}
 					/>
-					<Button
-						type={'warning'}
-						label={language.upgradeDomain}
-						handlePress={async () => await upgradeDomain({ antId: domain.antId, name: domain.name })}
-					/>
 				</S.DomainCostActions>
 			</S.DomainCosts>
 		);
@@ -806,6 +847,9 @@ export default function DomainListArNS() {
 		sectionId: 'expiring' | 'failed' | 'assignedHere' | 'unassigned' | 'assignedElsewhere'
 	) {
 		const isOpen = expandedDetails.has(domain.antId);
+		const signer = new ArconnectSigner(window.arweaveWallet);
+		const ant = ANT.init({ processId: domain.antId, signer });
+		const checkLatestVersion = ant.isLatestVersion();
 
 		return (
 			<div key={`${sectionId}-${domain.antId}`}>
@@ -825,7 +869,24 @@ export default function DomainListArNS() {
 							<S.DomainArrow isOpen={isOpen}>
 								<ReactSVG src={ICONS.arrow} />
 							</S.DomainArrow>
-							<S.DomainName>{domain.name}</S.DomainName>
+							<S.DomainNameWrapper>
+								<S.DomainName>{domain.name}</S.DomainName>
+								{!checkLatestVersion && (
+									<S.UpgradeBadge>
+										<button
+											onClick={async () =>
+												await upgradeDomain({
+													antId: domain.antId,
+													name: domain.name,
+													userDomain: domain,
+												})
+											}
+										>
+											{language.upgradeDomain}
+										</button>
+									</S.UpgradeBadge>
+								)}
+							</S.DomainNameWrapper>
 						</S.DomainHeaderContent>
 					</S.DomainHeader>
 					<S.DomainDetail>{renderDomainActions(domain, sectionId)}</S.DomainDetail>
