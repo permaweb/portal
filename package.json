@@ -28,8 +28,8 @@
 		"deploy:engine": "VITE_APP=engine npm run build:engine && permaweb-deploy --arns-name portalenv --ttl-seconds 60 --undername engine --deploy-file ./dist/engine/bundle.js"
 	},
 	"dependencies": {
-		"@ar.io/sdk": "3.16.0-alpha.1",
-		"@ardrive/turbo-sdk": "1.30.0",
+		"@ar.io/sdk": "^3.16.0-alpha.1",
+		"@ardrive/turbo-sdk": "^1.30.0",
 		"@hello-pangea/dnd": "^17.0.0",
 		"@lexical/link": "^0.34.0",
 		"@lexical/list": "^0.34.0",
