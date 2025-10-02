@@ -26,7 +26,7 @@ export default function Header(props: any) {
 	const [logoError, setLogoError] = React.useState<{ [key: string]: boolean }>({});
 	const { settings, updateSetting } = preview
 		? (() => {
-				const [localSettings, setLocalSettings] = React.useState({ theme: 'dark' });
+				const [localSettings, setLocalSettings] = React.useState({ theme: 'light' });
 				const updateSetting = (key: string, value: any) => {
 					setLocalSettings((prev) => ({ ...prev, [key]: value }));
 				};
@@ -42,7 +42,7 @@ export default function Header(props: any) {
 			document.documentElement.setAttribute('theme', newTheme);
 		} else {
 			updateSetting('theme', newTheme);
-			document.getElementById('preview')?.setAttribute('data-theme', settings?.theme);
+			document.getElementById('preview')?.setAttribute('data-theme', newTheme);
 		}
 	}
 
@@ -102,7 +102,7 @@ export default function Header(props: any) {
 						<S.Actions>
 							<WalletConnect />
 							<S.ThemeToggle>
-								<Toggle theme state={settings?.theme === 'dark' ? true : false} setState={() => setTheme()} />
+								<Toggle theme state={settings?.theme === 'dark'} setState={() => setTheme()} />
 							</S.ThemeToggle>
 						</S.Actions>
 						<SocialLinks />
