@@ -12,13 +12,14 @@ export const CommentAdd = styled.div<{ $active: boolean }>`
 
 	.editor-placeholder {
 		position: absolute;
-		top: 0;
-		bottom: 0;
-		padding: 10px;
-		font-size: var(--font-size-large);
-		font-weight: 400;
+		top: 50%;
+		transform: translateY(-50%);
+		left: 10px;
+		font-size: var(--font-size-normal);
+		line-height: 1.5;
+		color: rgba(var(--color-text), 0.5);
+		pointer-events: none;
 		user-select: none;
-		opacity: 0.4;
 	}
 `;
 
@@ -29,28 +30,19 @@ export const Editor = styled.div`
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 	padding: 10px;
 	padding-right: 80px;
-	min-height: 30px;
-
-	> div[data-lexical-placeholder] {
-		position: absolute;
-		top: 10px;
-		left: 10px;
-		color: rgba(var(--color-text), 0.5);
-		pointer-events: none;
-		font-size: 14px;
-		user-select: none;
-		z-index: 1;
-	}
+	min-height: 24px;
+	display: flex;
+	align-items: center;
 
 	.editor-input {
 		outline: none;
-		min-height: 24px;
 		color: rgba(var(--color-text), 1);
-		font-size: 14px;
+		font-size: var(--font-size-normal);
 		line-height: 1.5;
 		position: relative;
 		z-index: 2;
 		cursor: text;
+		width: 100%;
 	}
 
 	.editor-paragraph {
@@ -76,17 +68,6 @@ export const Editor = styled.div`
 		font-family: monospace;
 		font-size: 0.9em;
 	}
-`;
-
-export const EditorPlaceholder = styled.div`
-	position: absolute;
-	top: 10px;
-	left: 10px;
-	color: rgba(var(--color-text), 0.5);
-	pointer-events: none;
-	font-size: 14px;
-	user-select: none;
-	z-index: 1;
 `;
 
 export const Actions = styled.div`
@@ -133,7 +114,7 @@ export const EmojiSearchInput = styled.input`
 	border-radius: var(--border-radius);
 	background: rgba(var(--color-text), 0.1);
 	color: rgba(var(--color-text), 1);
-	font-size: 14px;
+	font-size: var(--font-size-normal);
 	outline: none;
 	box-sizing: border-box;
 	height: 32px;
@@ -215,6 +196,35 @@ export const EmojiButton = styled.button`
 
 	&:hover {
 		background: rgba(var(--color-text), 0.1);
+	}
+`;
+
+export const CancelButton = styled.div`
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: rgba(231, 76, 60, 1);
+	border-radius: 50%;
+	width: 28px;
+	height: 28px;
+	cursor: pointer;
+	transition: transform 0.2s;
+
+	div {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	svg {
+		width: 16px;
+		height: 16px;
+		color: white;
+	}
+
+	&:hover {
+		transform: scale(1.1);
+		background: rgba(231, 76, 60, 0.9);
 	}
 `;
 

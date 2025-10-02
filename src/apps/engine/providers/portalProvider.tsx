@@ -64,7 +64,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [updating, setUpdating] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		console.log('Portal fetch check:', { portalId, hasLibs: !!permawebProvider.libs });
 		if (!portalId || !permawebProvider.libs) return;
 
 		(async () => {

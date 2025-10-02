@@ -6,8 +6,6 @@ export const Comments = styled.div`
 	flex-direction: column;
 	width: 100%;
 	max-width: 100%;
-	// background:var(--color-card-background);
-	// padding:20px;
 	box-sizing: border-box;
 	border-radius: var(--border-radius);
 	gap: 20px;

@@ -7,7 +7,14 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $insertNodes, COMMAND_PRIORITY_HIGH, KEY_ENTER_COMMAND, TextNode } from 'lexical';
+import {
+	$insertNodes,
+	COMMAND_PRIORITY_HIGH,
+	KEY_ENTER_COMMAND,
+	TextNode,
+	$createParagraphNode,
+	$createTextNode,
+} from 'lexical';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { ICONS } from 'helpers/config';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -19,13 +26,37 @@ import * as S from './styles';
 const MAX_EDITOR_LENGTH = 500;
 
 function CommentEditorContent(props: any) {
-	const { commentsId, parentId, existingComments = [], onCommentAdded, onSubmittingChange } = props;
+	const {
+		commentsId,
+		parentId,
+		existingComments = [],
+		onCommentAdded,
+		onSubmittingChange,
+		isEditMode,
+		commentId,
+		initialContent,
+		onCancel,
+	} = props;
 	const [editor] = useLexicalComposerContext();
 	const { profile, libs } = usePermawebProvider();
 	const [canSend, setCanSend] = React.useState(false);
-	const [editorText, setEditorText] = React.useState('');
+	const [editorText, setEditorText] = React.useState(initialContent || '');
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
-	console.log('parentId: ', parentId);
+
+	React.useEffect(() => {
+		if (initialContent && isEditMode) {
+			editor.update(() => {
+				const root = $getRoot();
+				root.clear();
+				const paragraph = $createParagraphNode();
+				const textNode = $createTextNode(initialContent);
+				paragraph.append(textNode);
+				root.append(paragraph);
+			});
+			setEditorText(initialContent);
+			setCanSend(true);
+		}
+	}, [initialContent, isEditMode, editor]);
 
 	const handleEmoji = (emoji: string) => {
 		editor.update(() => {
@@ -56,38 +87,48 @@ function CommentEditorContent(props: any) {
 		if (!canSend || !profile?.id || isSubmitting) return;
 
 		const plainText = editorText.trim();
-		if (!plainText || checkForDuplicate(plainText)) return;
+		if (!plainText) return;
+		if (!isEditMode && checkForDuplicate(plainText)) return;
 
 		setIsSubmitting(true);
 		onSubmittingChange?.(true);
 		try {
-			const comment = await libs.createComment({
-				commentsId,
-				parentId,
-				content: plainText,
-			});
-
-			// Clear the editor after successful submission
-			editor.update(() => {
-				const root = $getRoot();
-				root.clear();
-			});
-			setEditorText('');
-			setCanSend(false);
-
-			// Notify parent component to refresh comments
-			if (onCommentAdded && comment) {
-				onCommentAdded(comment);
+			if (isEditMode) {
+				const result = await libs.updateCommentContent({
+					commentsId,
+					commentId,
+					content: plainText,
+				});
+				if (result && onCommentAdded) {
+					onCommentAdded(plainText);
+				}
 			} else {
-				// Fallback: dispatch custom event for parent to listen to
+				const comment = await libs.createComment({
+					commentsId,
+					parentId,
+					content: plainText,
+				});
+
+				// Clear the editor after successful submission
+				editor.update(() => {
+					const root = $getRoot();
+					root.clear();
+				});
+				setEditorText('');
+				setCanSend(false);
+
 				window.dispatchEvent(
 					new CustomEvent('commentAdded', {
 						detail: { comment, commentsId },
 					})
 				);
+
+				if (onCommentAdded && comment) {
+					onCommentAdded(comment);
+				}
 			}
 		} catch (error) {
-			console.error('Failed to create comment:', error);
+			console.error('Failed to save comment:', error);
 		} finally {
 			setIsSubmitting(false);
 			onSubmittingChange?.(false);
@@ -127,6 +168,11 @@ function CommentEditorContent(props: any) {
 				<ContentEditable className="editor-input" />
 				<S.Actions>
 					<EmojiPicker onInsertEmoji={handleEmoji} />
+					{isEditMode && (
+						<S.CancelButton onClick={onCancel} title="Cancel">
+							<ReactSVG src={ICONS.close} />
+						</S.CancelButton>
+					)}
 					<S.Send onClick={handleSubmit} $active={canSend && !isSubmitting}>
 						<ReactSVG src={ICONS.send} />
 					</S.Send>
@@ -139,7 +185,7 @@ function CommentEditorContent(props: any) {
 }
 
 export default function CommentAdd(props: any) {
-	const { commentsId, parentId } = props;
+	const { commentsId, parentId, isEditMode, commentId, initialContent, onCancel, onSubmittingChange } = props;
 	const { profile } = usePermawebProvider();
 	const { walletAddress } = useArweaveProvider();
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -162,7 +208,9 @@ export default function CommentAdd(props: any) {
 
 	const isLoggedIn = Boolean(walletAddress && profile?.id);
 	const placeholder = isLoggedIn
-		? !parentId
+		? isEditMode
+			? 'Edit your comment...'
+			: !parentId
 			? 'Write a comment...'
 			: 'Write a reply...'
 		: 'Login to write a comment...';
@@ -177,7 +225,14 @@ export default function CommentAdd(props: any) {
 							parentId={parentId}
 							existingComments={props.existingComments}
 							onCommentAdded={props.onCommentAdded}
-							onSubmittingChange={setIsSubmitting}
+							onSubmittingChange={(submitting: boolean) => {
+								setIsSubmitting(submitting);
+								onSubmittingChange?.(submitting);
+							}}
+							isEditMode={isEditMode}
+							commentId={commentId}
+							initialContent={initialContent}
+							onCancel={onCancel}
 						/>
 					}
 					placeholder={<div className="editor-placeholder">{placeholder}</div>}
