@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { transition2 } from 'helpers/animations';
+import { transition4 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const ARTICLE_TOOLBAR_WIDTH = '350px';
@@ -28,7 +28,7 @@ export const ToolbarWrapper = styled.div`
 export const EditorWrapper = styled.div<{ panelOpen: boolean }>`
 	width: 100%;
 	padding: 0 ${(props) => (props.panelOpen ? `calc(${ARTICLE_TOOLBAR_WIDTH} + 20px)` : '0')} 0 0;
-	transition: padding-right ${transition2};
+	transition: padding-right ${transition4};
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		padding: 0;

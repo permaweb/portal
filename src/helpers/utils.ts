@@ -61,24 +61,15 @@ export function formatCount(count: string): string {
 	}
 }
 
-export function formatDate(dateArg: string | number | null, dateType: 'iso' | 'epoch', fullTime?: boolean) {
+export function formatDate(dateArg: string | number | null, fullTime?: boolean) {
 	if (!dateArg) {
 		return null;
 	}
 
-	let date: Date | null = null;
+	let ts = Number(dateArg);
+	// if (dateArg.toString().length === 13) ts = Number((Number(dateArg) / 1000));
 
-	switch (dateType) {
-		case 'iso':
-			date = new Date(dateArg);
-			break;
-		case 'epoch':
-			date = new Date(Number(dateArg));
-			break;
-		default:
-			date = new Date(dateArg);
-			break;
-	}
+	let date: Date | null = new Date(ts);
 
 	return fullTime
 		? `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getUTCFullYear()} at ${

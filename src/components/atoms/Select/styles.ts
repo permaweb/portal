@@ -77,10 +77,9 @@ export const Dropdown = styled.button<{ active: boolean }>`
 	}
 
 	svg {
-		height: 25px;
-		width: 25px;
+		height: 17.5px;
+		width: 17.5px;
 		margin: 5px 0 0 0;
-		transform: rotate(180deg);
 		color: ${(props) =>
 			props.active ? props.theme.colors.font.primary : props.theme.colors.button.primary.color} !important;
 	}

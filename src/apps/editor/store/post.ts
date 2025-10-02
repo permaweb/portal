@@ -32,6 +32,7 @@ export const initStateCurrentPost: { data: PortalAssetPostType; originalData: an
 		submitDisabled: false,
 		focusedBlock: null,
 		lastAddedBlockId: null,
+		markupUserInitiated: false,
 		markup: {
 			bold: false,
 			italic: false,
@@ -56,6 +57,7 @@ function validateEditorState(state: any): boolean {
 		'submitDisabled',
 		'focusedBlock',
 		'lastAddedBlockId',
+		'markupUserInitiated',
 		'markup',
 	];
 

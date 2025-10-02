@@ -10,26 +10,34 @@ export const Wrapper = styled.div`
 export const HeaderWrapper = styled.div`
 	width: 100%;
 	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	gap: 15px;
+	padding: 3.5px 3.5px 3.5px 9.5px;
+	border-radius: ${STYLING.dimensions.radius.button} !important;
 
-	.info {
-		flex: 1;
-		padding: 2.5px 15px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 7.5px;
-		border-radius: ${STYLING.dimensions.radius.alt1} !important;
-		background: ${(props) => props.theme.colors.container.alt11.background};
+	p {
+		color: ${(props) => props.theme.colors.font.primary} !important;
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-align: center;
+		text-transform: none !important;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+	}
 
-		p {
-			color: ${(props) => props.theme.colors.font.light1} !important;
-			font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
-			font-weight: ${(props) => props.theme.typography.weight.bold} !important;
-			font-family: ${(props) => props.theme.typography.family.primary} !important;
-			text-align: center;
-			text-transform: none !important;
-		}
+	.post-release-info {
+		color: ${(props) => props.theme.colors.font.alt2} !important;
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-align: center;
+		text-transform: none !important;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
 	}
 `;
 

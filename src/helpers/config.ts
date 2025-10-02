@@ -202,6 +202,18 @@ export const ARTICLE_BLOCKS = {
 		icon: ICONS.video,
 		shortcut: 'Ctrl / V',
 	},
+	[ArticleBlockEnum.DividerSolid]: {
+		type: ArticleBlockEnum.DividerSolid,
+		label: 'Solid Divider',
+		icon: ICONS.dividerSolid,
+		shortcut: 'Ctrl / S',
+	},
+	[ArticleBlockEnum.DividerDashed]: {
+		type: ArticleBlockEnum.DividerDashed,
+		label: 'Dashed Divider',
+		icon: ICONS.dividerDashed,
+		shortcut: 'Ctrl / D',
+	},
 };
 
 export const STRIPE_PUBLISHABLE_KEY =

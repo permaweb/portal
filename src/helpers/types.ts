@@ -166,6 +166,8 @@ export enum ArticleBlockEnum {
 	Header6 = 'header-6',
 	Image = 'image',
 	Video = 'video',
+	DividerSolid = 'divider-solid',
+	DividerDashed = 'divider-dashed',
 }
 
 export type ArticleBlockType = {
