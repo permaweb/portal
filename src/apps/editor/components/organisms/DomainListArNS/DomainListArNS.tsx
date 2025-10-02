@@ -1,16 +1,6 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
-import { connect } from '@permaweb/aoconnect';
-import {
-	ANT,
-	ArconnectSigner,
-	ARIO,
-	defaultTargetManifestId,
-	AoANTState,
-	ANT_REGISTRY_ID,
-	ANTVersions,
-	AOProcess,
-} from '@ar.io/sdk';
+import { ANT, ArconnectSigner, ARIO, defaultTargetManifestId } from '@ar.io/sdk';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
@@ -31,41 +21,7 @@ import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
-import { TransactionEdge } from 'arweave-graphql';
 import * as S from './styles';
-
-export type ANTProcessData = {
-	state: AoANTState | null;
-	version: number;
-	processMeta: TransactionEdge['node'] | null;
-	errors?: Error[];
-};
-
-export async function fetchLatestVersion() {
-	const versionRegistry = ANTVersions.init({
-		process: new AOProcess({
-			processId: ANT_REGISTRY_ID,
-			ao: connect({
-				MODE: 'legacy',
-			}),
-		}),
-	});
-	return versionRegistry.getLatestANTVersion();
-}
-
-export function doesANTRequireUpdate({
-	ant,
-	userAddress,
-	currentModuleId,
-}: {
-	ant: ANTProcessData;
-	userAddress: string;
-	currentModuleId: string | null;
-}) {
-	if (!ant.processMeta || !ant.state?.Owner || ant?.state.Owner !== userAddress) return false;
-	if (ant.processMeta.tags.find((t: any) => t.name === 'Module' && t.value !== currentModuleId)) return true;
-	return false;
-}
 
 interface UserOwnedDomain {
 	name: string;
