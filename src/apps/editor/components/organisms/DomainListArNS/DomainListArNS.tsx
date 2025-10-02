@@ -1,7 +1,7 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
-import { ANT, ANTRegistry, ArconnectSigner, ARIO, defaultTargetManifestId } from '@ar.io/sdk';
+import { ANT, ArconnectSigner, ARIO, defaultTargetManifestId } from '@ar.io/sdk';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -224,21 +224,22 @@ export default function DomainListArNS() {
 	// Fetch ANT Ids from registry - this includes both testnet and mainnet
 	async function fetchOwnedAntIds(ownerAddress: string): Promise<string[]> {
 		try {
-			const antRegistry = ANTRegistry.init({ processId: 'i_le_yKKPVstLTDSmkHRqf-wYphMnwB9OhleiTgMkWc' });
+			const result = await ario.getArNSRecordsForAddress({
+				address: ownerAddress,
+				limit: 100, // no pagination for now since i dont think anyone has more than 100 ants
+				sortBy: 'startTimestamp',
+				sortOrder: 'desc',
+			});
 
-			const accessControlList = await withTimeout(antRegistry.accessControlList({ address: ownerAddress }), 12000);
+			if (!result || !Array.isArray(result.items)) return [];
 
-			if (!accessControlList || typeof accessControlList !== 'object') return [];
+			const antIds = result.items
+				.map((rec: any) => rec?.processId)
+				.filter((id: any): id is string => typeof id === 'string');
 
-			if (Array.isArray((accessControlList as any).Owned)) return (accessControlList as any).Owned as string[];
-			if (Array.isArray((accessControlList as any).Controlled))
-				return (accessControlList as any).Controlled as string[];
-
-			return Object.values(accessControlList as any)
-				.filter((v: any) => Array.isArray(v))
-				.flat() as string[];
+			return antIds;
 		} catch (error) {
-			console.error('Error fetching ANT ids from registry:', error);
+			console.error('Error fetching ANT ids from ARIO:', error);
 			return [];
 		}
 	}
@@ -547,6 +548,63 @@ export default function DomainListArNS() {
 		return IS_TESTNET ? ARIO.testnet({ signer }) : ARIO.mainnet({ signer });
 	}
 
+	async function upgradeDomain(domain: { antId: string; name: string }) {
+		const signer = new ArconnectSigner(window.arweaveWallet);
+		const ant = ANT.init({ processId: domain.antId, signer });
+
+		const result = await ant.upgrade({
+			names: [domain.name],
+			skipVersionCheck: false,
+			onSigningProgress: (event, payload: any) => {
+				console.log(`${event}:`, payload);
+				if (event === 'checking-version') {
+					console.log(`Checking version: ${payload.antProcessId}`);
+				}
+				if (event === 'fetching-affiliated-names') {
+					console.log(`Fetching affiliated names: ${payload.arioProcessId}`);
+				}
+				if (event === 'reassigning-name') {
+					console.log(`Reassigning name: ${payload.name}`);
+				}
+				if (event === 'validating-names') {
+					console.log(`Validating names: ${payload.names}`);
+				}
+			},
+		});
+
+		// New result shape:
+		// {
+		//   forkedProcessId: string;
+		//   reassignedNames: Record<string, AoMessageResult>;
+		//   failedReassignedNames: Record<string, { id?: string; error: Error }>;
+		// }
+
+		const name = domain.name;
+
+		const reassigned = !!result?.reassignedNames && Object.prototype.hasOwnProperty.call(result.reassignedNames, name);
+		const failed =
+			!!result?.failedReassignedNames && Object.prototype.hasOwnProperty.call(result.failedReassignedNames, name);
+
+		if (reassigned && !failed) {
+			const msg = result.reassignedNames[name];
+			console.log('Reassigned OK:', msg);
+			if (result.forkedProcessId) {
+				console.log('Forked ANT processId:', result.forkedProcessId);
+			}
+			addNotification(`Upgrade initiated for ${name}. It may take a few minutes to complete.`, 'success');
+			return;
+		}
+
+		if (failed) {
+			const detail = result.failedReassignedNames[name];
+			console.warn('Reassignment failed:', detail);
+			addNotification(`Upgrade failed for ${name}. Please try again later.`, 'warning');
+			return;
+		}
+		console.log(result);
+		addNotification('No upgrade was needed.', 'success');
+	}
+
 	async function pollAndHydrateAfterChange(args: {
 		name: string;
 		antId: string;
@@ -634,6 +692,11 @@ export default function DomainListArNS() {
 						label={upgradingDomains.has(domain.name) ? 'Upgrading…' : 'Go Permanent'}
 						handlePress={() => setUpgradeModal({ open: true, domain })}
 						disabled={upgradingDomains.has(domain.name)}
+					/>
+					<Button
+						type={'warning'}
+						label={language.upgradeDomain}
+						handlePress={async () => await upgradeDomain({ antId: domain.antId, name: domain.name })}
 					/>
 				</S.DomainCostActions>
 			</S.DomainCosts>
