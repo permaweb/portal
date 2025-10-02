@@ -52,6 +52,7 @@ export const DomainWrapper = styled.div<{ isOpen: boolean }>`
 	width: 100%;
 	display: flex;
 	padding: 15px;
+	position: relative;
 	justify-content: space-between;
 	align-items: center;
 	flex-wrap: wrap;
@@ -62,14 +63,6 @@ export const DomainWrapper = styled.div<{ isOpen: boolean }>`
 			: props.theme.colors.container.primary.background};
 	cursor: pointer;
 	transition: all 100ms;
-
-	.validating-dot {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		opacity: 0.8;
-	}
 
 	&:hover {
 		background: ${(props) => props.theme.colors.button.primary.active.background};
@@ -84,6 +77,7 @@ export const DomainWrapper = styled.div<{ isOpen: boolean }>`
 export const DomainHeader = styled.div`
 	max-width: 60%;
 	flex: 1;
+	position: relative;
 
 	a {
 		display: flex;
@@ -112,7 +106,7 @@ export const DomainHeader = styled.div`
 		font-size: ${(props) => props.theme.typography.size.small};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		margin: 0;
-		line-height: 1; /* tighten to keep single line */
+		line-height: 1;
 		display: inline-flex;
 		align-items: center;
 	}
@@ -125,39 +119,6 @@ export const DomainHeader = styled.div`
 		margin: 2px 0;
 		overflow-x: hidden;
 		text-overflow: ellipsis;
-	}
-
-	/* Improve expand button alignment and size */
-	.expand-btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 16px;
-		height: 16px;
-		padding: 0;
-		border: none;
-		border-radius: 3px;
-		background: transparent;
-		transition: background 120ms ease-in-out, opacity 120ms ease-in-out;
-		vertical-align: middle;
-		position: relative;
-		opacity: 0.95;
-
-		&.is-open {
-			transform: rotate(0deg);
-		}
-	}
-	.expand-btn:hover {
-		background: rgba(255, 255, 255, 0.06);
-		opacity: 1;
-	}
-	.expand-btn img,
-	.expand-btn svg {
-		width: 14px;
-		height: 14px;
-		margin: 0;
-		padding: 0;
-		display: block;
 	}
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
@@ -443,16 +404,17 @@ export const DomainHeaderContent = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 12.5px;
+	position: relative;
 `;
 
 export const DomainArrow = styled.div<{ isOpen: boolean }>`
 	svg {
 		height: 15px;
 		width: 15px;
-		margin: 5px 0 0 0;
+		margin: 7.5px 0 0 0;
 		color: ${(props) => props.theme.colors.font.primary};
 		fill: ${(props) => props.theme.colors.font.primary};
-		transform: rotate(${(props) => (props.isOpen ? '180deg' : '90deg')});
+		transform: rotate(${(props) => (props.isOpen ? '0deg' : '270deg')});
 	}
 `;
 
@@ -497,6 +459,13 @@ export const DomainDetailLine = styled.div`
 	}
 `;
 
+export const DomainDetailActions = styled.div`
+	margin: 20px 0 0 0;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+`;
+
 export const DomainDetailDivider = styled.div`
 	flex: 1;
 	margin: 10px 0 0 0;
@@ -504,5 +473,32 @@ export const DomainDetailDivider = styled.div`
 
 	@media (max-width: ${STYLING.cutoffs.tablet}) {
 		display: none;
+	}
+`;
+
+export const DomainNameWrapper = styled.div`
+	position: relative;
+	display: inline-block;
+
+	.notification {
+		position: absolute;
+		top: -5px;
+		right: -22.5px;
+	}
+`;
+
+export const UpgradeBadge = styled.div`
+	position: absolute;
+	top: -18px;
+	right: -60px;
+
+	button {
+		height: 16px;
+		background: ${(props) => props.theme.colors.roles.primary};
+		color: ${(props) => props.theme.colors.font.light1};
+		padding: 2px 6px;
+		font-size: 10px;
+		line-height: 1;
+		border-radius: 10px;
 	}
 `;

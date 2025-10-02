@@ -440,6 +440,7 @@ export const language = {
 		updatingPortal: `Updating Portal`,
 		updatingPostStatus: `Updating Post Status`,
 		updatingTheme: `Updating Theme`,
+		upgradeDomain: `Upgrade Domain`,
 		upgradeToPermanentSuccessfully: `Upgraded to permanent successfully.`,
 		upload: `Upload`,
 		uploadAvatar: `Upload Avatar`,
@@ -481,6 +482,11 @@ export const language = {
 		yyyyPlaceholder: `YYYY`,
 	},
 	es: {
+		// === UNTRANSLATED START ===
+		// TODO: translate
+
+		upgradeDomain: `Upgrade Domain`,
+		// === UNTRANSLATED END ===
 		activate: `Activar`,
 		add: `Agregar`,
 		addCaption: `Agregar descripción`,

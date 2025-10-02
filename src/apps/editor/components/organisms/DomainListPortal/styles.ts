@@ -18,7 +18,6 @@ export const DomainContent = styled.div<{ isOpen: boolean }>`
 		props.isOpen
 			? props.theme.colors.button.primary.active.background
 			: props.theme.colors.container.primary.background};
-	cursor: pointer;
 	transition: all 100ms;
 	position: relative;
 

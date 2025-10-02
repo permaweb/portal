@@ -23,7 +23,6 @@ function Domain(props: { domain: PortalDomainType }) {
 	const languageProvider = useLanguageProvider();
 	const language: any = languageProvider.object[languageProvider.current];
 
-	const [isOpen, setIsOpen] = React.useState<boolean>(false);
 	const [showDropdown, setShowDropdown] = React.useState<boolean>(false);
 	const [loading, setLoading] = React.useState<boolean>(false);
 
@@ -62,7 +61,7 @@ function Domain(props: { domain: PortalDomainType }) {
 		<>
 			{loading && <Loader message={`${language.updating}...`} />}
 			<S.DomainWrapper>
-				<S.DomainContent isOpen={isOpen} onClick={() => setIsOpen((prev) => !prev)}>
+				<S.DomainContent isOpen={false}>
 					<S.DomainHeader>
 						<S.DomainHeaderContent>
 							<S.DomainName>{props.domain.name}</S.DomainName>
