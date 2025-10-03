@@ -14,13 +14,13 @@ export const PaginationActions = styled.div`
 
 	> *:first-child {
 		svg {
-			transform: rotate(270deg);
+			transform: rotate(90deg);
 		}
 	}
 
 	> *:nth-child(2) {
 		svg {
-			transform: rotate(90deg);
+			transform: rotate(270deg);
 		}
 	}
 `;
