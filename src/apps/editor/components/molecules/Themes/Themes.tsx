@@ -8,7 +8,6 @@ import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
-import { Select } from 'components/atoms/Select';
 import { ICONS, THEME } from 'helpers/config';
 import { PortalPatchMapEnum, PortalSchemeType, PortalThemeType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
