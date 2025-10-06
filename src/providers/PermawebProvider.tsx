@@ -67,10 +67,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				ao: ao,
 				arweave: Arweave.init({}),
 				signer: signer,
-				node: {
-					...AO_NODE,
-					authority: 'https://ao.arweave.dev',
-				},
+				node: { ...AO_NODE },
 			};
 
 			setDeps(dependencies);
