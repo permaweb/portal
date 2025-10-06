@@ -15,7 +15,7 @@ import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { getArnsCost } from 'helpers/arnsCosts';
 import { ICONS, IS_TESTNET } from 'helpers/config';
 import { loadCachedDomains, saveCachedDomains } from 'helpers/domainCache';
-import { PortalPatchMapEnum } from 'helpers/types';
+import { PortalPatchMapEnum, UserOwnedDomain } from 'helpers/types';
 import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useLatestANTVersion } from 'hooks/useLatestANTVersion';
@@ -26,18 +26,178 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
-interface UserOwnedDomain {
-	name: string;
-	antId: string;
-	target?: string;
-	isRedirectedToPortal: boolean;
-	// Optional metadata derived from network ArNS records
-	startTimestamp?: number;
-	recordType?: 'lease' | 'permabuy' | string;
-	endTimestamp?: number;
-	status?: 'loading' | 'resolved' | 'failed';
-	requiresAntUpdate?: boolean;
+// Shared timeout helper
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+	return new Promise<T>((resolve, reject) => {
+		const id = setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms);
+		p.then((v) => {
+			clearTimeout(id);
+			resolve(v);
+		}).catch((e) => {
+			clearTimeout(id);
+			reject(e);
+		});
+	});
 }
+
+async function detectRequiresAntUpdate(processId: string, timeoutMs = 6000): Promise<boolean> {
+	try {
+		const ant = ANT.init({ processId });
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const info: any = await withTimeout(
+			(ant as any).getInfo?.() ?? (ant as any).info?.() ?? Promise.resolve(null),
+			timeoutMs
+		);
+		// Try multiple shapes used across SDK versions
+		const modules = info?.modules || info?.moduleStates || info?.installedModules || [];
+		if (Array.isArray(modules)) {
+			for (const m of modules) {
+				const updateFlag = m?.requiresUpdate || m?.updateAvailable || m?.needsUpdate;
+				const cur = Number(m?.version ?? m?.currentVersion);
+				const latest = Number(m?.latest ?? m?.latestVersion ?? m?.recommendedVersion);
+				if (updateFlag === true) return true;
+				if (Number.isFinite(cur) && Number.isFinite(latest) && latest > cur) return true;
+			}
+			return false;
+		}
+		if (modules && typeof modules === 'object') {
+			for (const key of Object.keys(modules)) {
+				const m: any = modules[key];
+				const updateFlag = m?.requiresUpdate || m?.updateAvailable || m?.needsUpdate;
+				const cur = Number(m?.version ?? m?.currentVersion);
+				const latest = Number(m?.latest ?? m?.latestVersion ?? m?.recommendedVersion);
+				if (updateFlag === true) return true;
+				if (Number.isFinite(cur) && Number.isFinite(latest) && latest > cur) return true;
+			}
+			return false;
+		}
+		return false;
+	} catch {
+		return false;
+	}
+}
+
+// Fetch ArNS records filtered by owned ANT process ids; no pagination, limit 1000
+async function fetchNetworkArns(
+	ownedProcessIds: string[],
+	arnsByProcessIdRef: React.RefObject<any>
+): Promise<{ antIds: Set<string>; names: Set<string> }> {
+	const antIds = new Set<string>();
+	const names = new Set<string>();
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const page: any = await ario.getArNSRecords({
+		limit: 1000,
+		// Use server-side filtering to avoid scanning the full registry
+		filters: {
+			processId: Array.isArray(ownedProcessIds) && ownedProcessIds.length > 0 ? ownedProcessIds : undefined,
+		},
+	});
+
+	const items = page?.items ?? page?.records ?? [];
+	for (const it of items) {
+		if (typeof it?.processId === 'string') antIds.add(it.processId);
+		if (typeof it?.name === 'string') names.add(it.name);
+		if (typeof it?.processId === 'string') {
+			arnsByProcessIdRef.current.set(it.processId, it);
+		}
+	}
+
+	return { antIds, names };
+}
+
+// Fetch ANT Ids from registry - this includes both testnet and mainnet
+async function fetchOwnedAntIds(ownerAddress: string, ario: any): Promise<string[]> {
+	try {
+		const result = await ario.getArNSRecordsForAddress({
+			address: ownerAddress,
+			limit: 100,
+			sortBy: 'startTimestamp',
+			sortOrder: 'desc',
+		});
+
+		if (!result || !Array.isArray(result.items)) return [];
+
+		const antIds = result.items
+			.map((rec: any) => rec?.processId)
+			.filter((id: any): id is string => typeof id === 'string');
+
+		return antIds;
+	} catch (error) {
+		console.error('Error fetching ANT ids from ARIO:', error);
+		return [];
+	}
+}
+
+const createSectionsForRender = ({
+	domainsAssignedToPortal,
+	domainsAssignedElsewhere,
+	domainsUnassigned,
+	failed,
+	expiringSoon,
+	language,
+}) => {
+	return [
+		{
+			id: 'expiring' as const,
+			title: `Expiring soon (${expiringSoon.length})`,
+			subtitle: 'These domains have leases ending within 30 days. Extend or upgrade to avoid interruption.',
+			domains: expiringSoon,
+		},
+		{
+			id: 'failed' as const,
+			title: `${language.validationFailed} (${failed.length})`,
+			subtitle: language.validationFailedInfo,
+			domains: failed,
+		},
+		{
+			id: 'assignedHere' as const,
+			title: `${language.assignedToThisPortal} (${domainsAssignedToPortal.length})`,
+			subtitle: language.assignedToThisPortalInfo,
+			domains: domainsAssignedToPortal,
+		},
+		{
+			id: 'unassigned' as const,
+			title: `${language.unassigned} (${domainsUnassigned.filter((d) => d.status !== 'loading').length})`,
+			subtitle: language.unassignedInfo,
+			domains: domainsUnassigned.filter((d) => d.status !== 'loading'),
+		},
+		{
+			id: 'assignedElsewhere' as const,
+			title: `${language.assignedElsewhere} (${domainsAssignedElsewhere.length})`,
+			subtitle: language.assignedElsewhereInfo,
+			domains: domainsAssignedElsewhere,
+		},
+	];
+};
+
+const InsufficientBalanceSection = ({ extendCost, extendCostLoading, extendPaymentMethod, setShowFund }) => {
+	const arProvider = useArweaveProvider();
+	const { balance: arIOBalance } = useArIOBalance();
+	const due = IS_TESTNET || extendPaymentMethod === 'ario' ? extendCost?.mario : extendCost?.winc;
+	const bal = IS_TESTNET || extendPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+	const loadingCost = extendCostLoading || due == null;
+	const loadingBal = IS_TESTNET
+		? arIOBalance == null
+		: extendPaymentMethod === 'ario'
+		? arIOBalance == null
+		: arProvider.turboBalance == null;
+	const insufficient = !(due != null && bal != null && bal >= due);
+	const isLoading = loadingCost || loadingBal;
+	return insufficient && !isLoading ? (
+		<S.InsufficientBalanceWrapper>
+			<InsufficientBalanceCTA
+				method={IS_TESTNET ? 'ario' : extendPaymentMethod}
+				insufficient={insufficient}
+				isLoading={isLoading}
+				onGetTokens={() =>
+					window.open('https://botega.arweave.net/#/swap?to=qNvAoz0TgcH7DMg8BCVn8jF32QH5L6T29VjHxhHqqGE', '_blank')
+				}
+				onAddCredits={() => setShowFund(true)}
+			/>
+		</S.InsufficientBalanceWrapper>
+	) : null;
+};
 
 export default function DomainListArNS() {
 	const arProvider = useArweaveProvider();
@@ -75,57 +235,6 @@ export default function DomainListArNS() {
 	const [showFund, setShowFund] = React.useState<boolean>(false);
 	// startTransition removed - using direct state updates for speed
 	const [expandedDetails, setExpandedDetails] = React.useState<Set<string>>(new Set());
-
-	// Shared timeout helper
-	function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
-		return new Promise<T>((resolve, reject) => {
-			const id = setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms);
-			p.then((v) => {
-				clearTimeout(id);
-				resolve(v);
-			}).catch((e) => {
-				clearTimeout(id);
-				reject(e);
-			});
-		});
-	}
-
-	async function detectRequiresAntUpdate(processId: string, timeoutMs = 6000): Promise<boolean> {
-		try {
-			const ant = ANT.init({ processId });
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const info: any = await withTimeout(
-				(ant as any).getInfo?.() ?? (ant as any).info?.() ?? Promise.resolve(null),
-				timeoutMs
-			);
-			// Try multiple shapes used across SDK versions
-			const modules = info?.modules || info?.moduleStates || info?.installedModules || [];
-			if (Array.isArray(modules)) {
-				for (const m of modules) {
-					const updateFlag = m?.requiresUpdate || m?.updateAvailable || m?.needsUpdate;
-					const cur = Number(m?.version ?? m?.currentVersion);
-					const latest = Number(m?.latest ?? m?.latestVersion ?? m?.recommendedVersion);
-					if (updateFlag === true) return true;
-					if (Number.isFinite(cur) && Number.isFinite(latest) && latest > cur) return true;
-				}
-				return false;
-			}
-			if (modules && typeof modules === 'object') {
-				for (const key of Object.keys(modules)) {
-					const m: any = modules[key];
-					const updateFlag = m?.requiresUpdate || m?.updateAvailable || m?.needsUpdate;
-					const cur = Number(m?.version ?? m?.currentVersion);
-					const latest = Number(m?.latest ?? m?.latestVersion ?? m?.recommendedVersion);
-					if (updateFlag === true) return true;
-					if (Number.isFinite(cur) && Number.isFinite(latest) && latest > cur) return true;
-				}
-				return false;
-			}
-			return false;
-		} catch {
-			return false;
-		}
-	}
 
 	// Abort in-flight validation when inputs change/unmount
 	const validationAbortRef = React.useRef<AbortController | null>(null);
@@ -201,55 +310,6 @@ export default function DomainListArNS() {
 			cancelled = true;
 		};
 	}, [extendModal.open, extendModal.domain?.name, extendModal.years]);
-
-	// Fetch ArNS records filtered by owned ANT process ids; no pagination, limit 1000
-	async function fetchNetworkArns(ownedProcessIds: string[]): Promise<{ antIds: Set<string>; names: Set<string> }> {
-		const antIds = new Set<string>();
-		const names = new Set<string>();
-
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const page: any = await ario.getArNSRecords({
-			limit: 1000,
-			// Use server-side filtering to avoid scanning the full registry
-			filters: {
-				processId: Array.isArray(ownedProcessIds) && ownedProcessIds.length > 0 ? ownedProcessIds : undefined,
-			},
-		});
-
-		const items = page?.items ?? page?.records ?? [];
-		for (const it of items) {
-			if (typeof it?.processId === 'string') antIds.add(it.processId);
-			if (typeof it?.name === 'string') names.add(it.name);
-			if (typeof it?.processId === 'string') {
-				arnsByProcessIdRef.current.set(it.processId, it);
-			}
-		}
-
-		return { antIds, names };
-	}
-
-	// Fetch ANT Ids from registry - this includes both testnet and mainnet
-	async function fetchOwnedAntIds(ownerAddress: string): Promise<string[]> {
-		try {
-			const result = await ario.getArNSRecordsForAddress({
-				address: ownerAddress,
-				limit: 100,
-				sortBy: 'startTimestamp',
-				sortOrder: 'desc',
-			});
-
-			if (!result || !Array.isArray(result.items)) return [];
-
-			const antIds = result.items
-				.map((rec: any) => rec?.processId)
-				.filter((id: any): id is string => typeof id === 'string');
-
-			return antIds;
-		} catch (error) {
-			console.error('Error fetching ANT ids from ARIO:', error);
-			return [];
-		}
-	}
 
 	// Validate a single ANT id into a domain entry with timeout and abort support
 	async function resolveAntToDomain(args: {
@@ -368,11 +428,11 @@ export default function DomainListArNS() {
 
 	function fetchDomains() {
 		// Fetch owned first, then fetch only matching ArNS records via server-side filter
-		fetchOwnedAntIds(arProvider.walletAddress!)
+		fetchOwnedAntIds(arProvider.walletAddress!, ario)
 			.then((owned) => {
 				ownedAntIdsRef.current = owned;
 				setLoadingOwnedAnts(false);
-				return fetchNetworkArns(owned);
+				return fetchNetworkArns(owned, arnsByProcessIdRef);
 			})
 			.then((networkRecords) => {
 				allowedAntIdsRef.current = networkRecords.antIds;
@@ -1154,39 +1214,16 @@ export default function DomainListArNS() {
 			<S.Wrapper className={'fade-in'}>
 				{/* Domain Groupings */}
 				{(() => {
-					const sections = [
-						{
-							id: 'expiring' as const,
-							title: `Expiring soon (${expiringSoon.length})`,
-							subtitle: 'These domains have leases ending within 30 days. Extend or upgrade to avoid interruption.',
-							domains: expiringSoon,
-						},
-						{
-							id: 'failed' as const,
-							title: `${language.validationFailed} (${failed.length})`,
-							subtitle: language.validationFailedInfo,
-							domains: failed,
-						},
-						{
-							id: 'assignedHere' as const,
-							title: `${language.assignedToThisPortal} (${domainsAssignedToPortal.length})`,
-							subtitle: language.assignedToThisPortalInfo,
-							domains: domainsAssignedToPortal,
-						},
-						{
-							id: 'unassigned' as const,
-							title: `${language.unassigned} (${domainsUnassigned.filter((d) => d.status !== 'loading').length})`,
-							subtitle: language.unassignedInfo,
-							domains: domainsUnassigned.filter((d) => d.status !== 'loading'),
-						},
-						{
-							id: 'assignedElsewhere' as const,
-							title: `${language.assignedElsewhere} (${domainsAssignedElsewhere.length})`,
-							subtitle: language.assignedElsewhereInfo,
-							domains: domainsAssignedElsewhere,
-						},
-					];
-					return sections.filter((s) => s.domains.length > 0).map(renderSection);
+					return createSectionsForRender({
+						domainsAssignedToPortal,
+						domainsAssignedElsewhere,
+						domainsUnassigned,
+						failed,
+						expiringSoon,
+						language,
+					})
+						.filter((s) => s.domains.length > 0)
+						.map(renderSection);
 				})()}
 				{!listReady && (
 					<S.LoadingBannerWrapper>
@@ -1315,37 +1352,12 @@ export default function DomainListArNS() {
 									label={language.cancel}
 									handlePress={() => setExtendModal({ open: false, years: 1 })}
 								/>
-								{/* Insufficient balance CTA */}
-
-								{(() => {
-									const due = IS_TESTNET || extendPaymentMethod === 'ario' ? extendCost?.mario : extendCost?.winc;
-									const bal = IS_TESTNET || extendPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
-									const loadingCost = extendCostLoading || due == null;
-									const loadingBal = IS_TESTNET
-										? arIOBalance == null
-										: extendPaymentMethod === 'ario'
-										? arIOBalance == null
-										: arProvider.turboBalance == null;
-									const insufficient = !(due != null && bal != null && bal >= due);
-									const isLoading = loadingCost || loadingBal;
-									return insufficient && !isLoading ? (
-										<S.InsufficientBalanceWrapper>
-											<InsufficientBalanceCTA
-												method={IS_TESTNET ? 'ario' : extendPaymentMethod}
-												insufficient={insufficient}
-												isLoading={isLoading}
-												onGetTokens={() =>
-													window.open(
-														'https://botega.arweave.net/#/swap?to=qNvAoz0TgcH7DMg8BCVn8jF32QH5L6T29VjHxhHqqGE',
-														'_blank'
-													)
-												}
-												onAddCredits={() => setShowFund(true)}
-											/>
-										</S.InsufficientBalanceWrapper>
-									) : null;
-								})()}
-
+								<InsufficientBalanceSection
+									extendCost={extendCost}
+									extendCostLoading={extendCostLoading}
+									extendPaymentMethod={extendPaymentMethod}
+									setShowFund={setShowFund}
+								/>
 								<Button
 									type={'alt1'}
 									label={language.confirm}
@@ -1506,36 +1518,12 @@ export default function DomainListArNS() {
 							{/* Upgrade / Extend Actions */}
 							<S.UpgradeModalActions>
 								<Button type={'primary'} label={language.cancel} handlePress={() => setUpgradeModal({ open: false })} />
-								{/* Insufficient balance CTA */}
-								<S.InsufficientBalanceWrapper>
-									{(() => {
-										const entry = costsByAntId[upgradeModal.domain!.antId]?.upgrade;
-										const due = IS_TESTNET || upgradePaymentMethod === 'ario' ? entry?.mario : entry?.winc;
-										const bal = IS_TESTNET || upgradePaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
-										const loadingCost = entry == null || due == null;
-										const loadingBal = IS_TESTNET
-											? arIOBalance == null
-											: upgradePaymentMethod === 'ario'
-											? arIOBalance == null
-											: arProvider.turboBalance == null;
-										const insufficient = !(due != null && bal != null && bal >= due);
-										const isLoading = loadingCost || loadingBal;
-										return (
-											<InsufficientBalanceCTA
-												method={IS_TESTNET ? 'ario' : upgradePaymentMethod}
-												insufficient={insufficient}
-												isLoading={isLoading}
-												onGetTokens={() =>
-													window.open(
-														'https://botega.arweave.net/#/swap?to=qNvAoz0TgcH7DMg8BCVn8jF32QH5L6T29VjHxhHqqGE',
-														'_blank'
-													)
-												}
-												onAddCredits={() => setShowFund(true)}
-											/>
-										);
-									})()}
-								</S.InsufficientBalanceWrapper>
+								<InsufficientBalanceSection
+									extendCost={extendCost}
+									extendCostLoading={extendCostLoading}
+									extendPaymentMethod={extendPaymentMethod}
+									setShowFund={setShowFund}
+								/>
 								<Button
 									type={'alt1'}
 									label={language.confirm}
@@ -1577,9 +1565,6 @@ export default function DomainListArNS() {
 						</S.ModalWrapper>
 					)}
 				</Panel>
-
-				{/* Domain Assignment Confirmation Modal */}
-
 				{confirmAssignModal.open && (
 					<Modal
 						header={language.confirmDomainAssignment}

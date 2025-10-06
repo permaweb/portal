@@ -296,3 +296,16 @@ export enum LanguageEnum {
 	en = 'English',
 	es = 'Español',
 }
+
+export interface UserOwnedDomain {
+	name: string;
+	antId: string;
+	target?: string;
+	isRedirectedToPortal: boolean;
+	// Optional metadata derived from network ArNS records
+	startTimestamp?: number;
+	recordType?: 'lease' | 'permabuy' | string;
+	endTimestamp?: number;
+	status?: 'loading' | 'resolved' | 'failed';
+	requiresAntUpdate?: boolean;
+}
