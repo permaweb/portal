@@ -3,10 +3,20 @@ import styled from 'styled-components';
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 30px;
+	gap: 25px;
 `;
 
 export const Section = styled.div``;
+
+export const SectionStart = styled.div`
+	padding: 10px 0 0 0;
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+`;
+
+export const SectionEnd = styled.div`
+	padding: 0 0 10px 0;
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+`;
 
 export const SectionHeader = styled.div`
 	width: 100%;
@@ -36,6 +46,9 @@ export const SectionHeaderInput = styled(SectionHeader)`
 `;
 
 export const SectionBody = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
 	padding: 0 5px 0 10px;
 `;
 

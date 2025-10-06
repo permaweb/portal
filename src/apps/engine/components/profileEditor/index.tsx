@@ -1,7 +1,9 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
-import { Types } from '@permaweb/libs';
 import Button from 'engine/components/form/button';
+
+import { Types } from '@permaweb/libs';
+
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';

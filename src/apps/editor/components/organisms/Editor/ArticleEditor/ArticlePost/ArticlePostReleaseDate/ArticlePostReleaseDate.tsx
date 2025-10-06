@@ -282,22 +282,15 @@ export default function ArticlePostReleaseDate() {
 	return (
 		<>
 			<S.Wrapper>
-				<S.HeaderWrapper className={'border-wrapper-alt3'}>
+				<S.HeaderWrapper>
 					<p>
 						<span className={'post-release-info'}>{`${language.release}:`}</span>{' '}
 						{currentPost?.data?.releaseDate ? formatDate(currentPost.data.releaseDate, true) : language.immediately}
 					</p>
-					{/* <Button
-						type={'alt4'}
-						label={language.edit}
-						handlePress={() => setShowEdit(true)}
-						icon={ICONS.date}
-						iconLeftAlign
-					/> */}
 					<IconButton
 						type={'primary'}
 						handlePress={() => setShowEdit(true)}
-						src={ICONS.date}
+						src={ICONS.write}
 						dimensions={{ wrapper: 23.5, icon: 13.5 }}
 						tooltip={language.edit}
 					/>

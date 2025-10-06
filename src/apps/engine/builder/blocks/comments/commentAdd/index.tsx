@@ -1,21 +1,23 @@
 import * as React from 'react';
 import { ReactSVG } from 'react-svg';
-import { $getRoot, $getSelection } from 'lexical';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import {
+	$createParagraphNode,
+	$createTextNode,
+	$getRoot,
+	$getSelection,
 	$insertNodes,
 	COMMAND_PRIORITY_HIGH,
 	KEY_ENTER_COMMAND,
 	TextNode,
-	$createParagraphNode,
-	$createTextNode,
 } from 'lexical';
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+
 import { ICONS } from 'helpers/config';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';

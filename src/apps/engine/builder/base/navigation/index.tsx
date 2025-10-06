@@ -1,12 +1,14 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 import { NavLink } from 'react-router-dom';
-import { getRedirect } from 'helpers/utils';
-import { ICONS } from 'helpers/config';
-import { usePortalProvider } from 'engine/providers/portalProvider';
-import { initThemes } from 'engine/helpers/themes';
-import { defaultThemes } from 'engine/defaults/theme.defaults';
+import { ReactSVG } from 'react-svg';
 import { defaultLayout } from 'engine/defaults/layout.defaults';
+import { defaultThemes } from 'engine/defaults/theme.defaults';
+import { initThemes } from 'engine/helpers/themes';
+import { usePortalProvider } from 'engine/providers/portalProvider';
+
+import { ICONS } from 'helpers/config';
+import { getRedirect } from 'helpers/utils';
+
 import { GlobalStyles } from '../../../global-styles';
 
 import Search from './search';

@@ -1,7 +1,8 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
-import { ICONS } from 'helpers/config';
 import { usePortalProvider } from 'engine/providers/portalProvider';
+
+import { ICONS } from 'helpers/config';
 
 import * as S from './styles';
 

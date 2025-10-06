@@ -4,9 +4,11 @@ import { Topics } from 'editor/components/molecules/Topics';
 import { PortalCategoryType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
+import { ArticlePostChanges } from './ArticlePostChanges';
 import { ArticlePostContribute } from './ArticlePostContribute';
 import { ArticlePostDescription } from './ArticlePostDescription';
 import { ArticlePostReleaseDate } from './ArticlePostReleaseDate';
+import { ArticlePostStatus } from './ArticlePostStatus';
 import { ArticlePostThumbnail } from './ArticlePostThumbnail';
 import * as S from './styles';
 
@@ -23,7 +25,13 @@ export default function ArticlePost(props: {
 		<S.Wrapper>
 			<S.Section>
 				<S.SectionBody>
-					<ArticlePostReleaseDate />
+					<ArticlePostChanges />
+					<S.SectionStart>
+						<ArticlePostReleaseDate />
+					</S.SectionStart>
+					<S.SectionEnd>
+						<ArticlePostStatus />
+					</S.SectionEnd>
 				</S.SectionBody>
 			</S.Section>
 			<S.Section>

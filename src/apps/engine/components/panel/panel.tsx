@@ -1,11 +1,12 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
-import { ICONS } from 'helpers/config';
 import { CloseHandler } from 'engine/components/wrappers/closeHandler';
+
+import { ICONS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
-import { IProps } from './types';
 import * as S from './styles';
+import { IProps } from './types';
 
 export default function Panel(props: IProps) {
 	const languageProvider = useLanguageProvider();
