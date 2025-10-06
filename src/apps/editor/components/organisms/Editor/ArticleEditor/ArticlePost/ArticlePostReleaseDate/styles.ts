@@ -4,7 +4,6 @@ import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
 	width: 100%;
-	margin: 10px 0 0 0;
 `;
 
 export const HeaderWrapper = styled.div`
@@ -13,12 +12,10 @@ export const HeaderWrapper = styled.div`
 	align-items: center;
 	justify-content: space-between;
 	gap: 15px;
-	padding: 3.5px 3.5px 3.5px 9.5px;
-	border-radius: ${STYLING.dimensions.radius.button} !important;
 
 	p {
 		color: ${(props) => props.theme.colors.font.primary} !important;
-		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-align: center;
@@ -30,7 +27,7 @@ export const HeaderWrapper = styled.div`
 
 	.post-release-info {
 		color: ${(props) => props.theme.colors.font.alt2} !important;
-		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-align: center;

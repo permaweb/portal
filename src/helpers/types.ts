@@ -177,7 +177,12 @@ export type ArticleBlockType = {
 	data?: any;
 };
 
-export type ArticleStatusType = 'draft' | 'published';
+export enum ArticleStatusEnum {
+	Draft = 'draft',
+	Published = 'published',
+}
+
+export type ArticleStatusType = ArticleStatusEnum;
 
 export type ArticlePostType = {
 	id: string | null;

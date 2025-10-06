@@ -1,17 +1,18 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
-import { ICONS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
+import SocialLinks from 'engine/components/socialLinks';
 import Toggle from 'engine/components/toggle';
 import WalletConnect from 'engine/components/wallet/walletConnect';
-import SocialLinks from 'engine/components/socialLinks';
 import { defaultLayout } from 'engine/defaults/layout.defaults';
 import { defaultThemes } from 'engine/defaults/theme.defaults';
 import { initThemes } from 'engine/helpers/themes';
-import { getRedirect } from 'helpers/utils';
 import { useSettings } from 'engine/hooks/settings';
 import { usePortalProvider } from 'engine/providers/portalProvider';
+
+import { ICONS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
+import { getRedirect } from 'helpers/utils';
 
 import { GlobalStyles } from '../../../global-styles';
 

@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom';
 
-import { usePosts } from '../../../hooks/posts';
 import { getTxEndpoint } from 'helpers/endpoints';
+
+import { usePosts } from '../../../hooks/posts';
 
 import * as S from './styles';
 

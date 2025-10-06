@@ -1,4 +1,5 @@
 import React from 'react';
+import { ReactSVG } from 'react-svg';
 import { WanderConnect } from '@wanderapp/connect';
 import { Panel } from 'engine/components/panel';
 import ProfileEditor from 'engine/components/profileEditor';
@@ -13,7 +14,6 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
-import { ReactSVG } from 'react-svg';
 
 export default function WalletConnect(_props: { callback?: () => void }) {
 	const navigate = useNavigate();

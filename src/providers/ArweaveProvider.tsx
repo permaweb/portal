@@ -85,14 +85,19 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		handleWallet();
 
+		const onWalletSwitch = () => {
+			navigate(URLS.base);
+			handleWallet();
+		};
+
 		window.addEventListener('arweaveWalletLoaded', handleWallet);
-		window.addEventListener('walletSwitch', handleWallet);
 		window.addEventListener('message', onMessage);
+		window.addEventListener('walletSwitch', onWalletSwitch);
 
 		return () => {
 			window.removeEventListener('arweaveWalletLoaded', handleWallet);
-			window.removeEventListener('walletSwitch', handleWallet);
 			window.removeEventListener('message', onMessage);
+			window.removeEventListener('walletSwitch', onWalletSwitch);
 		};
 	}, []);
 
@@ -177,7 +182,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}
 
 	async function handleDisconnect(redirect: boolean) {
-		console.log('handleDisconnect');
 		if (localStorage.getItem(STORAGE.walletType)) {
 			localStorage.removeItem(STORAGE.walletType);
 		}

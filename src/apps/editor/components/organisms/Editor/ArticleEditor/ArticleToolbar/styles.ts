@@ -1,10 +1,7 @@
 import styled from 'styled-components';
 
-import { getPostStatusBackground } from 'editor/styles';
-
 import { transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
-import { ArticleStatusType } from 'helpers/types';
 
 import { ARTICLE_TOOLBAR_WIDTH } from '../styles';
 
@@ -62,28 +59,6 @@ export const SubmitWrapper = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 20px;
-`;
-
-export const StatusAction = styled.div<{ status: ArticleStatusType }>`
-	position: relative;
-
-	button {
-		padding: 0 32.5px 0 15px;
-	}
-
-	&::after {
-		content: '';
-		position: absolute;
-		width: 11.5px;
-		height: 11.5px;
-		border-radius: 50%;
-		right: 12.5px;
-		top: 50%;
-		transform: translateY(-48.5%);
-		pointer-events: none;
-		border: 1px solid ${(props) => props.theme.colors.border.primary};
-		background: ${(props) => getPostStatusBackground(props.status, props.theme)};
-	}
 `;
 
 export const Panel = styled.div<{ open: boolean }>`

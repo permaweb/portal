@@ -381,3 +381,23 @@ export function resolvePrimaryDomain(domains: PortalDomainType[], portalId: stri
 	if (domain) return `https://${domain}.${gateway}`;
 	else return `https://${gateway}/${portalId}`;
 }
+
+export const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : '-';
+
+export function hasUnsavedChanges(current: any, original: any): boolean {
+	// If there's no original data, consider it as changes (new post)
+	if (!original) return true;
+
+	// Compare all relevant fields
+	return (
+		current.title !== original.title ||
+		current.description !== original.description ||
+		current.status !== original.status ||
+		current.thumbnail !== original.thumbnail ||
+		current.releaseDate !== original.releaseDate ||
+		JSON.stringify(current.content) !== JSON.stringify(original.content) ||
+		JSON.stringify(current.categories) !== JSON.stringify(original.categories) ||
+		JSON.stringify(current.topics) !== JSON.stringify(original.topics) ||
+		JSON.stringify(current.externalRecipients) !== JSON.stringify(original.externalRecipients)
+	);
+}

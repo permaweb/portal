@@ -14,7 +14,7 @@
 	"scripts": {
 		"prepare": "husky install",
 		"clean:install": "rm -rf node_modules package-lock.json || true && npm cache clean --force && npm install",
-		"format": "NODE_OPTIONS=--max-old-space-size=6144 eslint --fix . && prettier --write .",
+		"format": "eslint --fix src/apps/editor && eslint --fix src/apps/engine && prettier --write .",
 		"lint:lang": "node ./scripts/sort-language.js --check",
 		"fix:lang": "node ./scripts/sort-language.js",
 		"start:editor:mainnet": "NODE_ENV=development VITE_APP=editor VITE_AO=mainnet vite",

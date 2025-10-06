@@ -6,10 +6,10 @@ set -euo pipefail
 # Make sure we're at repo root
 cd -P "$(git rev-parse --show-toplevel)"
 
-# Ensure language.ts keys are sorted before commit
+echo "Checking language..."
 npm run fix:lang
 
-# Format only staged files using lint-staged
-npx lint-staged --quiet
+echo "Formatting..."
+npm run format
 
-echo "✅ pre-commit checks complete"
+echo "✅ Pre-commit Checks Complete"

@@ -1,5 +1,7 @@
 import { ReactSVG } from 'react-svg';
+
 import { ICONS } from 'helpers/config';
+
 import * as S from './styles';
 
 export default function Toggle(props: any) {

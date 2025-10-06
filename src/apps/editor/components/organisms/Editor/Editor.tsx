@@ -17,7 +17,8 @@ import {
 	PortalUserType,
 	RequestUpdateType,
 } from 'helpers/types';
-import { filterDuplicates, urlify } from 'helpers/utils';
+import { filterDuplicates, hasUnsavedChanges, isMac, urlify } from 'helpers/utils';
+import { useNavigationConfirm } from 'hooks/useNavigationConfirm';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -46,29 +47,16 @@ export default function Editor() {
 
 	const isStaticPage = location.pathname.includes('page');
 
+	const hasChanges = hasUnsavedChanges(currentPost.data, currentPost.originalData);
+
+	// Enable navigation confirmation when there are unsaved changes
+	useNavigationConfirm(
+		hasChanges ? 'edit' : '',
+		language?.unsavedChangesWarning || 'You have unsaved changes. Are you sure you want to leave?'
+	);
+
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
-	};
-
-	const hasUnsavedChanges = () => {
-		const current = currentPost.data;
-		const original = currentPost.originalData;
-
-		// If there's no original data, consider it as changes (new post)
-		if (!original) return true;
-
-		// Compare all relevant fields
-		return (
-			current.title !== original.title ||
-			current.description !== original.description ||
-			current.status !== original.status ||
-			current.thumbnail !== original.thumbnail ||
-			current.releaseDate !== original.releaseDate ||
-			JSON.stringify(current.content) !== JSON.stringify(original.content) ||
-			JSON.stringify(current.categories) !== JSON.stringify(original.categories) ||
-			JSON.stringify(current.topics) !== JSON.stringify(original.topics) ||
-			JSON.stringify(current.externalRecipients) !== JSON.stringify(original.externalRecipients)
-		);
 	};
 
 	React.useEffect(() => {
@@ -77,10 +65,26 @@ export default function Editor() {
 			currentPost.data.content.length === 0 ||
 			currentPost.data.content.every((block) => !block.content || block.content.trim() === '');
 
-		const noChanges = !hasUnsavedChanges() && currentPost.data.id !== null;
+		const noChanges = !hasChanges && currentPost.data.id !== null;
 
 		handleCurrentPostUpdate({ field: 'submitDisabled', value: isEmpty || noChanges });
 	}, [currentPost.data, currentPost.originalData]);
+
+	// Keyboard shortcut: Cmd/Ctrl + Shift + S to save
+	React.useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			const modifier = isMac() ? e.metaKey : e.ctrlKey;
+			if (modifier && e.shiftKey && e.key.toLowerCase() === 's') {
+				e.preventDefault();
+				if (!currentPost.data.submitDisabled) {
+					handleSubmit();
+				}
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+		return () => window.removeEventListener('keydown', handleKeyDown);
+	}, [currentPost.data]);
 
 	/* User is a moderator and can only review existing posts, not create new ones */
 	const unauthorized =
