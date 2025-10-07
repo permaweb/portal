@@ -381,3 +381,16 @@ export function resolvePrimaryDomain(domains: PortalDomainType[], portalId: stri
 	if (domain) return `https://${domain}.${gateway}`;
 	else return `https://${gateway}/${portalId}`;
 }
+
+export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+	return new Promise<T>((resolve, reject) => {
+		const id = setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms);
+		p.then((v) => {
+			clearTimeout(id);
+			resolve(v);
+		}).catch((e) => {
+			clearTimeout(id);
+			reject(e);
+		});
+	});
+}

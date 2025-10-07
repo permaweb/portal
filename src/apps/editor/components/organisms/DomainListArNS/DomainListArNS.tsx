@@ -4,10 +4,11 @@ import { ReactSVG } from 'react-svg';
 import { ANT, ArconnectSigner, ARIO, defaultTargetManifestId } from '@ar.io/sdk';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
+import { ConfirmAssignModal } from 'editor/components/molecules/ConfirmAssignModal';
+import { ConfirmUnassignModal } from 'editor/components/molecules/ConfirmUnassignModal';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
-import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TxAddress } from 'components/atoms/TxAddress';
 import { InsufficientBalanceCTA, PaymentSummary } from 'components/molecules/Payment';
@@ -16,7 +17,7 @@ import { getArnsCost } from 'helpers/arnsCosts';
 import { ICONS, IS_TESTNET } from 'helpers/config';
 import { loadCachedDomains, saveCachedDomains } from 'helpers/domainCache';
 import { PortalPatchMapEnum, UserOwnedDomain } from 'helpers/types';
-import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
+import { getARAmountFromWinc, toReadableARIO, withTimeout } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useLatestANTVersion } from 'hooks/useLatestANTVersion';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -25,20 +26,6 @@ import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
-
-// Shared timeout helper
-function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
-	return new Promise<T>((resolve, reject) => {
-		const id = setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms);
-		p.then((v) => {
-			clearTimeout(id);
-			resolve(v);
-		}).catch((e) => {
-			clearTimeout(id);
-			reject(e);
-		});
-	});
-}
 
 async function detectRequiresAntUpdate(processId: string, timeoutMs = 6000): Promise<boolean> {
 	try {
@@ -257,99 +244,6 @@ const RenderUpgradeandCosts = (props: {
 				/>
 			</S.DomainCostActions>
 		</S.DomainCosts>
-	);
-};
-
-const ConfirmUnassignModal = (props: {
-	confirmUnassignModal: { open: boolean; domain?: UserOwnedDomain };
-	setConfirmUnassignModal: React.Dispatch<React.SetStateAction<{ open: boolean; domain?: UserOwnedDomain }>>;
-	unassignDomainFromPortal: (domain: UserOwnedDomain) => Promise<void>;
-}) => {
-	const languageProvider = useLanguageProvider();
-	const language: any = languageProvider.object[languageProvider.current];
-	return (
-		<Modal
-			header={language.removeAssignmentConfirm || 'Remove Domain Assignment'}
-			handleClose={() => props.setConfirmUnassignModal({ open: false })}
-			className={'modal-wrapper'}
-		>
-			{props.confirmUnassignModal.domain && (
-				<S.ModalWrapper>
-					<S.ModalSection>
-						<S.ModalSectionTitle>Domain</S.ModalSectionTitle>
-						<S.ModalSectionContent>{props.confirmUnassignModal.domain.name}</S.ModalSectionContent>
-					</S.ModalSection>
-					<S.ModalSection>
-						<p>{language.removeAssignmentConfirmMessage}</p>
-					</S.ModalSection>
-					<S.ModalActions>
-						<Button
-							type={'primary'}
-							label={language.cancel}
-							handlePress={() => props.setConfirmUnassignModal({ open: false })}
-						/>
-						<Button
-							type={'alt1'}
-							label={language.confirm}
-							handlePress={() => {
-								props.setConfirmUnassignModal({ open: false });
-								if (props.confirmUnassignModal.domain) {
-									props.unassignDomainFromPortal(props.confirmUnassignModal.domain);
-								}
-							}}
-						/>
-					</S.ModalActions>
-				</S.ModalWrapper>
-			)}
-		</Modal>
-	);
-};
-
-const ConfirmAssignModal = (props: {
-	confirmAssignModal: { open: boolean; domain?: UserOwnedDomain };
-	setConfirmAssignModal: React.Dispatch<React.SetStateAction<{ open: boolean; domain?: UserOwnedDomain }>>;
-	redirectDomainToPortal: (domain: UserOwnedDomain) => Promise<void>;
-	redirectingDomains: Set<string>;
-}) => {
-	const languageProvider = useLanguageProvider();
-	const language: any = languageProvider.object[languageProvider.current];
-
-	return (
-		<Modal
-			header={language.confirmDomainAssignment}
-			handleClose={() => props.setConfirmAssignModal({ open: false })}
-			className={'modal-wrapper'}
-		>
-			{props.confirmAssignModal.domain && (
-				<S.ModalWrapper>
-					<S.ModalSection>
-						<S.ModalSectionTitle>Domain</S.ModalSectionTitle>
-						<S.ModalSectionContent>{props.confirmAssignModal.domain.name}</S.ModalSectionContent>
-					</S.ModalSection>
-					<S.ModalSection>
-						<p>{language.confirmDomainAssignmentMessage}</p>
-					</S.ModalSection>
-					<S.ModalActions>
-						<Button
-							type={'primary'}
-							label={language.cancel}
-							handlePress={() => props.setConfirmAssignModal({ open: false })}
-						/>
-						<Button
-							type={'alt1'}
-							label={language.confirm}
-							handlePress={() => {
-								props.setConfirmAssignModal({ open: false });
-								if (props.confirmAssignModal.domain) {
-									props.redirectDomainToPortal(props.confirmAssignModal.domain);
-								}
-							}}
-							disabled={props.redirectingDomains.has(props.confirmAssignModal.domain.name)}
-						/>
-					</S.ModalActions>
-				</S.ModalWrapper>
-			)}
-		</Modal>
 	);
 };
 
