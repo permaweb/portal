@@ -235,7 +235,10 @@ export default function ArticleToolbar(props: {
 					<IconButton
 						type={'primary'}
 						src={ICONS.close}
-						handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
+						handlePress={() => {
+							handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
+							setCurrentTab(TABS[0]!.label);
+						}}
 						tooltip={language?.closeToolkit}
 						tooltipPosition={'bottom-right'}
 						dimensions={{
@@ -258,7 +261,10 @@ export default function ArticleToolbar(props: {
 						<Button
 							type={'primary'}
 							label={language?.closeToolkit}
-							handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
+							handlePress={() => {
+								handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
+								setCurrentTab(TABS[0]!.label);
+							}}
 							noFocus
 							disabled={currentPost.editor.loading.active}
 							height={40}
@@ -294,7 +300,10 @@ export default function ArticleToolbar(props: {
 					<Button
 						type={'primary'}
 						label={language?.toolkit}
-						handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
+						handlePress={() => {
+							handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
+							setCurrentTab(TABS[0]!.label);
+						}}
 						active={currentPost.editor.panelOpen}
 						disabled={currentPost.editor.loading.active}
 						icon={currentPost.editor.panelOpen ? ICONS.close : ICONS.tools}

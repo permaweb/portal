@@ -25,11 +25,18 @@ export default function User(props: {
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	
 	const [fetched, setFetched] = React.useState<boolean>(false);
 	const [showManageUser, setShowManageUser] = React.useState<boolean>(false);
 	const [showShareCredits, setShowShareCredits] = React.useState<boolean>(false);
 	const currentLoggedInUser =
 		arweaveProvider?.walletAddress === portalProvider.usersByPortalId?.[props.user.address]?.owner;
+	const userProfile = portalProvider.usersByPortalId?.[props.user.address] ?? { id: props.user.address };
+	const unauthorized =
+		!portalProvider?.permissions?.updateUsers || userProfile?.owner === portalProvider?.current?.owner;
+	const invitePending =
+		userProfile?.invites?.find((invite: PortalHeaderType) => invite.id === portalProvider.current?.id) !== undefined;
+	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser && !invitePending;
 
 	React.useEffect(() => {
 		(async function () {
@@ -38,12 +45,6 @@ export default function User(props: {
 		})();
 	}, [props.user, fetched]);
 
-	const userProfile = portalProvider.usersByPortalId?.[props.user.address] ?? { id: props.user.address };
-	const unauthorized =
-		!portalProvider?.permissions?.updateUsers || userProfile?.owner === portalProvider?.current?.owner;
-	const invitePending =
-		userProfile?.invites?.find((invite: PortalHeaderType) => invite.id === portalProvider.current?.id) !== undefined;
-	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser && !invitePending;
 	React.useEffect(() => {
 		if (props.onInviteDetected && !props.hideAction) {
 			props.onInviteDetected(props.user.address, invitePending);

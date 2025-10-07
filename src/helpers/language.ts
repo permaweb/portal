@@ -313,6 +313,7 @@ export const language = {
 		profileMenu: `Profile Menu`,
 		profileUpdated: `Profile Updated`,
 		profileUpdatingInfo: `Updating Your Profile`,
+		publication: `Publication`,
 		published: `Published`,
 		publishTheme: `Publish Theme`,
 		receivedApprovals: `Received Approvals`,

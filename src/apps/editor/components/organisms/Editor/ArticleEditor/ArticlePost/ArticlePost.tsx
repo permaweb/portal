@@ -4,8 +4,8 @@ import { Topics } from 'editor/components/molecules/Topics';
 import { PortalCategoryType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
-import { ArticlePostChanges } from './ArticlePostChanges';
 import { ArticlePostContribute } from './ArticlePostContribute';
+import { ArticlePostCreator } from './ArticlePostCreator';
 import { ArticlePostDescription } from './ArticlePostDescription';
 import { ArticlePostReleaseDate } from './ArticlePostReleaseDate';
 import { ArticlePostStatus } from './ArticlePostStatus';
@@ -24,22 +24,25 @@ export default function ArticlePost(props: {
 	return (
 		<S.Wrapper>
 			<S.Section>
-				<S.SectionBody>
-					<ArticlePostChanges />
-					<S.SectionStart>
-						<ArticlePostReleaseDate />
-					</S.SectionStart>
-					<S.SectionEnd>
-						<ArticlePostStatus />
-					</S.SectionEnd>
-				</S.SectionBody>
-			</S.Section>
-			<S.Section>
 				<S.SectionHeader>
 					<p>{language?.featuredImage}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
 					<ArticlePostThumbnail />
+				</S.SectionBody>
+			</S.Section>
+			<S.Section>
+				<S.SectionHeader>
+					<p>{language?.publication}</p>
+				</S.SectionHeader>
+				<S.SectionBody>
+					<S.SectionStart>
+						<ArticlePostCreator />
+					</S.SectionStart>
+					<ArticlePostReleaseDate />
+					<S.SectionEnd>
+						<ArticlePostStatus />
+					</S.SectionEnd>
 				</S.SectionBody>
 			</S.Section>
 			<S.Section>
@@ -71,7 +74,9 @@ export default function ArticlePost(props: {
 					<p>{language?.contribute}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
-					<ArticlePostContribute />
+					<S.SectionStart>
+						<ArticlePostContribute />
+					</S.SectionStart>
 				</S.SectionBody>
 			</S.ContributeSection>
 		</S.Wrapper>
