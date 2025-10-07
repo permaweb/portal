@@ -1,0 +1,59 @@
+name: On Branch Create
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - staging
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: "editor-${{ github.ref_name }}"
+      cancel-in-progress: true
+
+    env:
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      NODE_OPTIONS: --max-old-space-size=6144
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - run: npm run clean:install
+
+      # Sanitize the branch into a safe undername:
+      # - lowercase
+      # - spaces -> '-'
+      # - slashes/backslashes -> '-'
+      # - keep only [a-z0-9_.-]
+      # - collapse repeated dashes/underscores
+      # - trim leading/trailing punctuation
+      # - avoid reserved "www"
+      - name: Sanitize branch -> undername
+        id: under
+        shell: bash
+        run: |
+          BR="${{ github.ref_name }}"
+          U=$(echo "$BR" | tr '[:upper:]' '[:lower:]' \
+              | sed -E 's/[[:space:]]+/-/g; s#[/\\]+#-#g; s#[^a-z0-9_.-]##g; s/[-_]{2,}/-/g; s/^[-_.]+|[-_.]+$//g;')
+          if [ -z "$U" ]; then
+            echo "Sanitization produced empty undername; failing."
+            exit 1
+          fi
+          if [ "$U" = "www" ]; then U="w-$(date +%s)"; fi
+          echo "value=$U" >> "$GITHUB_OUTPUT"
+          echo "Sanitized undername: $U"
+
+      # Runs your package.json script and passes the sanitized branch via npm flag,
+      # which sets $npm_config_branch for your script.
+      - name: Deploy editor (per-branch)
+        run: npm run deploy:editor:branch --branch="${{ steps.under.outputs.value }}"
+
