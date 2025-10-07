@@ -1,7 +1,7 @@
 name: On Branch Delete
 
 on:
-  delete
+  delete:
 
 jobs:
   delete:
