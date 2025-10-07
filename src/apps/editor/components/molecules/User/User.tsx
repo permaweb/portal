@@ -25,7 +25,7 @@ export default function User(props: {
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	
+
 	const [fetched, setFetched] = React.useState<boolean>(false);
 	const [showManageUser, setShowManageUser] = React.useState<boolean>(false);
 	const [showShareCredits, setShowShareCredits] = React.useState<boolean>(false);

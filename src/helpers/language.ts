@@ -486,6 +486,7 @@ export const language = {
 		// === UNTRANSLATED START ===
 		// TODO: translate
 
+		publication: `Publication`,
 		upgradeDomain: `Upgrade Domain`,
 		// === UNTRANSLATED END ===
 		activate: `Activar`,

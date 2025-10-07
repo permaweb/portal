@@ -13,7 +13,6 @@ export const GlobalStyles = createGlobalStyle`
     line-height: 1.5;    
 
     color-scheme: light dark;
-    background-color: #242424;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -52,7 +51,8 @@ export const GlobalStyles = createGlobalStyle`
     place-items: center;
     height: 100%;
     width: 100%;    
-    overflow-y: scroll;
+    overflow-y: auto;
+		background: rgba(var(--color-background), 1);
   }
 
   #portal {
@@ -60,6 +60,7 @@ export const GlobalStyles = createGlobalStyle`
     height: 100%;
     width: 100%;
   }
+
   #preview {
     font-size: 13px;
   }
