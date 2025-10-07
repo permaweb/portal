@@ -84,7 +84,7 @@ async function fetchNetworkArns(
 ): Promise<{ antIds: Set<string>; names: Set<string> }> {
 	const antIds = new Set<string>();
 	const names = new Set<string>();
-
+	const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const page: any = await ario.getArNSRecords({
 		limit: 1000,
@@ -107,7 +107,8 @@ async function fetchNetworkArns(
 }
 
 // Fetch ANT Ids from registry - this includes both testnet and mainnet
-async function fetchOwnedAntIds(ownerAddress: string, ario: any): Promise<string[]> {
+async function fetchOwnedAntIds(ownerAddress: string): Promise<string[]> {
+	const ario = IS_TESTNET ? ARIO.testnet() : ARIO.mainnet();
 	try {
 		const result = await ario.getArNSRecordsForAddress({
 			address: ownerAddress,
@@ -197,6 +198,159 @@ const InsufficientBalanceSection = ({ extendCost, extendCostLoading, extendPayme
 			/>
 		</S.InsufficientBalanceWrapper>
 	) : null;
+};
+
+const RenderUpgradeandCosts = (props: {
+	domain: UserOwnedDomain;
+	costsByAntId: Record<
+		string,
+		{
+			extend?: { winc: number; mario: number; fiatUSD: string | null };
+			upgrade?: { winc: number; mario: number; fiatUSD: string | null };
+		}
+	>;
+	extendingDomains: Set<string>;
+	upgradingDomains: Set<string>;
+	setExtendModal: React.Dispatch<React.SetStateAction<{ open: boolean; domain?: UserOwnedDomain; years: number }>>;
+	setUpgradeModal: React.Dispatch<React.SetStateAction<{ open: boolean; domain?: UserOwnedDomain }>>;
+}) => {
+	const portalProvider = usePortalProvider();
+	const { balance: arIOBalance } = useArIOBalance();
+	if (props.domain.recordType !== 'lease') return null;
+	const canModifyDomains = portalProvider.permissions?.updatePortalMeta;
+	if (!canModifyDomains) return null;
+
+	const entry = props.costsByAntId[props.domain.antId];
+	const valueText = (c?: { winc: number; mario: number; fiatUSD: string | null }) => {
+		if (IS_TESTNET) return c ? `${toReadableARIO(c.mario)} tario` : '…';
+		if (!c) return '…';
+		const creditsText = `${getARAmountFromWinc(c.winc)} Credits${c.fiatUSD ? ` ($${c.fiatUSD})` : ''}`;
+		const showArio = !!(arIOBalance && arIOBalance > 0);
+		return showArio ? `${creditsText} • ${toReadableARIO(c.mario)} ARIO` : creditsText;
+	};
+	return (
+		<S.DomainCosts>
+			<div className={'details-grid'}>
+				<S.DomainDetailLine>
+					<div className={'label'}>Extend (1 Year)</div>
+					<S.DomainDetailDivider />
+					<div className={'value'}>{valueText(entry?.extend)}</div>
+				</S.DomainDetailLine>
+				<S.DomainDetailLine>
+					<div className={'label'}>Go Permanent</div>
+					<S.DomainDetailDivider />
+					<div className={'value'}>{valueText(entry?.upgrade)}</div>
+				</S.DomainDetailLine>
+			</div>
+			<S.DomainCostActions>
+				<Button
+					type={'primary'}
+					label={props.extendingDomains.has(props.domain.name) ? 'Extending…' : 'Extend Lease'}
+					handlePress={() => props.setExtendModal({ open: true, domain: props.domain, years: 1 })}
+					disabled={props.extendingDomains.has(props.domain.name)}
+				/>
+				<Button
+					type={'alt1'}
+					label={props.upgradingDomains.has(props.domain.name) ? 'Upgrading…' : 'Go Permanent'}
+					handlePress={() => props.setUpgradeModal({ open: true, domain: props.domain })}
+					disabled={props.upgradingDomains.has(props.domain.name)}
+				/>
+			</S.DomainCostActions>
+		</S.DomainCosts>
+	);
+};
+
+const ConfirmUnassignModal = (props: {
+	confirmUnassignModal: { open: boolean; domain?: UserOwnedDomain };
+	setConfirmUnassignModal: React.Dispatch<React.SetStateAction<{ open: boolean; domain?: UserOwnedDomain }>>;
+	unassignDomainFromPortal: (domain: UserOwnedDomain) => Promise<void>;
+}) => {
+	const languageProvider = useLanguageProvider();
+	const language: any = languageProvider.object[languageProvider.current];
+	return (
+		<Modal
+			header={language.removeAssignmentConfirm || 'Remove Domain Assignment'}
+			handleClose={() => props.setConfirmUnassignModal({ open: false })}
+			className={'modal-wrapper'}
+		>
+			{props.confirmUnassignModal.domain && (
+				<S.ModalWrapper>
+					<S.ModalSection>
+						<S.ModalSectionTitle>Domain</S.ModalSectionTitle>
+						<S.ModalSectionContent>{props.confirmUnassignModal.domain.name}</S.ModalSectionContent>
+					</S.ModalSection>
+					<S.ModalSection>
+						<p>{language.removeAssignmentConfirmMessage}</p>
+					</S.ModalSection>
+					<S.ModalActions>
+						<Button
+							type={'primary'}
+							label={language.cancel}
+							handlePress={() => props.setConfirmUnassignModal({ open: false })}
+						/>
+						<Button
+							type={'alt1'}
+							label={language.confirm}
+							handlePress={() => {
+								props.setConfirmUnassignModal({ open: false });
+								if (props.confirmUnassignModal.domain) {
+									props.unassignDomainFromPortal(props.confirmUnassignModal.domain);
+								}
+							}}
+						/>
+					</S.ModalActions>
+				</S.ModalWrapper>
+			)}
+		</Modal>
+	);
+};
+
+const ConfirmAssignModal = (props: {
+	confirmAssignModal: { open: boolean; domain?: UserOwnedDomain };
+	setConfirmAssignModal: React.Dispatch<React.SetStateAction<{ open: boolean; domain?: UserOwnedDomain }>>;
+	redirectDomainToPortal: (domain: UserOwnedDomain) => Promise<void>;
+	redirectingDomains: Set<string>;
+}) => {
+	const languageProvider = useLanguageProvider();
+	const language: any = languageProvider.object[languageProvider.current];
+
+	return (
+		<Modal
+			header={language.confirmDomainAssignment}
+			handleClose={() => props.setConfirmAssignModal({ open: false })}
+			className={'modal-wrapper'}
+		>
+			{props.confirmAssignModal.domain && (
+				<S.ModalWrapper>
+					<S.ModalSection>
+						<S.ModalSectionTitle>Domain</S.ModalSectionTitle>
+						<S.ModalSectionContent>{props.confirmAssignModal.domain.name}</S.ModalSectionContent>
+					</S.ModalSection>
+					<S.ModalSection>
+						<p>{language.confirmDomainAssignmentMessage}</p>
+					</S.ModalSection>
+					<S.ModalActions>
+						<Button
+							type={'primary'}
+							label={language.cancel}
+							handlePress={() => props.setConfirmAssignModal({ open: false })}
+						/>
+						<Button
+							type={'alt1'}
+							label={language.confirm}
+							handlePress={() => {
+								props.setConfirmAssignModal({ open: false });
+								if (props.confirmAssignModal.domain) {
+									props.redirectDomainToPortal(props.confirmAssignModal.domain);
+								}
+							}}
+							disabled={props.redirectingDomains.has(props.confirmAssignModal.domain.name)}
+						/>
+					</S.ModalActions>
+				</S.ModalWrapper>
+			)}
+		</Modal>
+	);
 };
 
 export default function DomainListArNS() {
@@ -428,7 +582,7 @@ export default function DomainListArNS() {
 
 	function fetchDomains() {
 		// Fetch owned first, then fetch only matching ArNS records via server-side filter
-		fetchOwnedAntIds(arProvider.walletAddress!, ario)
+		fetchOwnedAntIds(arProvider.walletAddress!)
 			.then((owned) => {
 				ownedAntIdsRef.current = owned;
 				setLoadingOwnedAnts(false);
@@ -792,53 +946,6 @@ export default function DomainListArNS() {
 		return false;
 	}
 
-	// Removed in-modal cost fetching; we reuse costs already shown in details
-
-	function renderUpgradeandCosts(domain: UserOwnedDomain) {
-		if (domain.recordType !== 'lease') return null;
-		const canModifyDomains = portalProvider.permissions?.updatePortalMeta;
-		if (!canModifyDomains) return null;
-
-		const entry = costsByAntId[domain.antId];
-		const valueText = (c?: { winc: number; mario: number; fiatUSD: string | null }) => {
-			if (IS_TESTNET) return c ? `${toReadableARIO(c.mario)} tario` : '…';
-			if (!c) return '…';
-			const creditsText = `${getARAmountFromWinc(c.winc)} Credits${c.fiatUSD ? ` ($${c.fiatUSD})` : ''}`;
-			const showArio = !!(arIOBalance && arIOBalance > 0);
-			return showArio ? `${creditsText} • ${toReadableARIO(c.mario)} ARIO` : creditsText;
-		};
-		return (
-			<S.DomainCosts>
-				<div className={'details-grid'}>
-					<S.DomainDetailLine>
-						<div className={'label'}>Extend (1 Year)</div>
-						<S.DomainDetailDivider />
-						<div className={'value'}>{valueText(entry?.extend)}</div>
-					</S.DomainDetailLine>
-					<S.DomainDetailLine>
-						<div className={'label'}>Go Permanent</div>
-						<S.DomainDetailDivider />
-						<div className={'value'}>{valueText(entry?.upgrade)}</div>
-					</S.DomainDetailLine>
-				</div>
-				<S.DomainCostActions>
-					<Button
-						type={'primary'}
-						label={extendingDomains.has(domain.name) ? 'Extending…' : 'Extend Lease'}
-						handlePress={() => setExtendModal({ open: true, domain, years: 1 })}
-						disabled={extendingDomains.has(domain.name)}
-					/>
-					<Button
-						type={'alt1'}
-						label={upgradingDomains.has(domain.name) ? 'Upgrading…' : 'Go Permanent'}
-						handlePress={() => setUpgradeModal({ open: true, domain })}
-						disabled={upgradingDomains.has(domain.name)}
-					/>
-				</S.DomainCostActions>
-			</S.DomainCosts>
-		);
-	}
-
 	function renderDomainActions(
 		domain: UserOwnedDomain,
 		sectionId: 'expiring' | 'failed' | 'assignedHere' | 'unassigned' | 'assignedElsewhere'
@@ -1051,7 +1158,14 @@ export default function DomainListArNS() {
 								</S.DomainDetailLine>
 							)}
 						</div>
-						{renderUpgradeandCosts(domain)}
+						<RenderUpgradeandCosts
+							domain={domain}
+							costsByAntId={costsByAntId}
+							extendingDomains={extendingDomains}
+							upgradingDomains={upgradingDomains}
+							setExtendModal={setExtendModal}
+							setUpgradeModal={setUpgradeModal}
+						/>
 					</S.DomainDetails>
 				)}
 			</div>
@@ -1566,82 +1680,21 @@ export default function DomainListArNS() {
 					)}
 				</Panel>
 				{confirmAssignModal.open && (
-					<Modal
-						header={language.confirmDomainAssignment}
-						handleClose={() => setConfirmAssignModal({ open: false })}
-						className={'modal-wrapper'}
-					>
-						{confirmAssignModal.domain && (
-							<S.ModalWrapper>
-								<S.ModalSection>
-									<S.ModalSectionTitle>Domain</S.ModalSectionTitle>
-									<S.ModalSectionContent>{confirmAssignModal.domain.name}</S.ModalSectionContent>
-								</S.ModalSection>
-								<S.ModalSection>
-									<p>{language.confirmDomainAssignmentMessage}</p>
-								</S.ModalSection>
-								<S.ModalActions>
-									<Button
-										type={'primary'}
-										label={language.cancel}
-										handlePress={() => setConfirmAssignModal({ open: false })}
-									/>
-									<Button
-										type={'alt1'}
-										label={language.confirm}
-										handlePress={() => {
-											setConfirmAssignModal({ open: false });
-											if (confirmAssignModal.domain) {
-												redirectDomainToPortal(confirmAssignModal.domain);
-											}
-										}}
-										disabled={redirectingDomains.has(confirmAssignModal.domain.name)}
-									/>
-								</S.ModalActions>
-							</S.ModalWrapper>
-						)}
-					</Modal>
+					<ConfirmAssignModal
+						confirmAssignModal={confirmAssignModal}
+						setConfirmAssignModal={setConfirmAssignModal}
+						redirectDomainToPortal={redirectDomainToPortal}
+						redirectingDomains={redirectingDomains}
+					/>
 				)}
-
-				{/* Domain Unassignment Confirmation Modal */}
 
 				{confirmUnassignModal.open && (
-					<Modal
-						header={language.removeAssignmentConfirm || 'Remove Domain Assignment'}
-						handleClose={() => setConfirmUnassignModal({ open: false })}
-						className={'modal-wrapper'}
-					>
-						{confirmUnassignModal.domain && (
-							<S.ModalWrapper>
-								<S.ModalSection>
-									<S.ModalSectionTitle>Domain</S.ModalSectionTitle>
-									<S.ModalSectionContent>{confirmUnassignModal.domain.name}</S.ModalSectionContent>
-								</S.ModalSection>
-								<S.ModalSection>
-									<p>{language.removeAssignmentConfirmMessage}</p>
-								</S.ModalSection>
-								<S.ModalActions>
-									<Button
-										type={'primary'}
-										label={language.cancel}
-										handlePress={() => setConfirmUnassignModal({ open: false })}
-									/>
-									<Button
-										type={'alt1'}
-										label={language.confirm}
-										handlePress={() => {
-											setConfirmUnassignModal({ open: false });
-											if (confirmUnassignModal.domain) {
-												unassignDomainFromPortal(confirmUnassignModal.domain);
-											}
-										}}
-									/>
-								</S.ModalActions>
-							</S.ModalWrapper>
-						)}
-					</Modal>
+					<ConfirmUnassignModal
+						confirmUnassignModal={confirmUnassignModal}
+						setConfirmUnassignModal={setConfirmUnassignModal}
+						unassignDomainFromPortal={unassignDomainFromPortal}
+					/>
 				)}
-				{/* Turbo Top-up Modal */}
 				<Panel
 					open={showFund}
 					width={575}
