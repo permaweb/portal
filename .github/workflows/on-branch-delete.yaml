@@ -1,8 +1,7 @@
 name: On Branch Delete
 
 on:
-  delete: {}
-  workflow_dispatch: {}
+  delete
 
 jobs:
   release-undername:
