@@ -1,0 +1,54 @@
+name: On Branch Delete
+
+on:
+  delete: {}
+  workflow_dispatch: {}
+
+jobs:
+  release-undername:
+    # only act on branch deletions (ignore tag deletes)
+    if: ${{ github.event.ref_type == 'branch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      ARNS_NAME: portalenv
+      NODE_OPTIONS: --max-old-space-size=2048
+
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      # Sanitize the deleted branch name => undername
+      - name: Sanitize branch -> undername
+        id: under
+        shell: bash
+        run: |
+          BR="${{ github.event.ref }}"  # raw branch name from the delete payload
+          U=$(echo "$BR" | tr '[:upper:]' '[:lower:]' \
+              | sed -E 's/[[:space:]]+/-/g; s#[/\\]+#-#g; s#[^a-z0-9_.-]##g; s/[-_]{2,}/-/g; s/^[-_.]+|[-_.]+$//g;')
+          if [ -z "$U" ]; then
+            echo "Sanitization produced empty undername; failing."
+            exit 1
+          fi
+          if [ "$U" = "www" ]; then U="w-$(date +%s)"; fi
+          # Optional: hard cap length
+          U="${U:0:51}"
+          echo "value=$U" >> "$GITHUB_OUTPUT"
+          echo "Sanitized undername: $U"
+
+      - name: Release undername from ArNS
+        env:
+          UNDERNAME: ${{ steps.under.outputs.value }}
+        run: node scripts/release-undername.js

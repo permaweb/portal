@@ -1,4 +1,4 @@
-name: On Branch Create
+name: On Branch Push
 
 on:
   push:
