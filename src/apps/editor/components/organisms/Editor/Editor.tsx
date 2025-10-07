@@ -254,7 +254,7 @@ export default function Editor() {
 								{ name: 'Forward-Action', value: 'Update-Asset' },
 								{ name: 'Exclude-Index', value: excludeFromIndex },
 							],
-							data: { Input: data }
+							data: { Input: data },
 						});
 					}
 

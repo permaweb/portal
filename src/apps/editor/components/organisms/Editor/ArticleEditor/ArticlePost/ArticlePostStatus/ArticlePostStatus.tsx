@@ -38,7 +38,7 @@ export default function ArticlePostStatus() {
 	const currentUser = portalProvider.current?.users?.find(
 		(user: PortalUserType) => user.address === permawebProvider.profile?.id
 	);
-	
+
 	const submitUnauthorized =
 		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions?.postAutoIndex;
 	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
