@@ -1,8 +1,8 @@
+
 name: On Branch Delete
 
-on:
-  delete: {}
-  workflow_dispatch: {}
+on: delete
+
 
 jobs:
   release:
@@ -62,3 +62,4 @@ jobs:
         env:
           UNDERNAME: ${{ steps.under.outputs.value }}
         run: node scripts/release-undername.js
+
