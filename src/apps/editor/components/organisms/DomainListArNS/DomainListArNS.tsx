@@ -11,7 +11,7 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Panel } from 'components/atoms/Panel';
 import { TxAddress } from 'components/atoms/TxAddress';
-import { InsufficientBalanceCTA, PaymentSummary } from 'components/molecules/Payment';
+import { PaymentSummary } from 'components/molecules/Payment';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { getArnsCost } from 'helpers/arnsCosts';
 import { ICONS, IS_TESTNET } from 'helpers/config';
@@ -26,6 +26,8 @@ import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
+import { InsufficientBalanceSection } from 'editor/components/molecules/InsufficientBalanceSection';
+import { RenderUpgradeAndCosts } from 'editor/components/molecules/RenderUpgradeAndCosts';
 
 async function detectRequiresAntUpdate(processId: string, timeoutMs = 6000): Promise<boolean> {
 	try {
@@ -157,94 +159,6 @@ const createSectionsForRender = ({
 			domains: domainsAssignedElsewhere,
 		},
 	];
-};
-
-const InsufficientBalanceSection = ({ extendCost, extendCostLoading, extendPaymentMethod, setShowFund }) => {
-	const arProvider = useArweaveProvider();
-	const { balance: arIOBalance } = useArIOBalance();
-	const due = IS_TESTNET || extendPaymentMethod === 'ario' ? extendCost?.mario : extendCost?.winc;
-	const bal = IS_TESTNET || extendPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
-	const loadingCost = extendCostLoading || due == null;
-	const loadingBal = IS_TESTNET
-		? arIOBalance == null
-		: extendPaymentMethod === 'ario'
-		? arIOBalance == null
-		: arProvider.turboBalance == null;
-	const insufficient = !(due != null && bal != null && bal >= due);
-	const isLoading = loadingCost || loadingBal;
-	return insufficient && !isLoading ? (
-		<S.InsufficientBalanceWrapper>
-			<InsufficientBalanceCTA
-				method={IS_TESTNET ? 'ario' : extendPaymentMethod}
-				insufficient={insufficient}
-				isLoading={isLoading}
-				onGetTokens={() =>
-					window.open('https://botega.arweave.net/#/swap?to=qNvAoz0TgcH7DMg8BCVn8jF32QH5L6T29VjHxhHqqGE', '_blank')
-				}
-				onAddCredits={() => setShowFund(true)}
-			/>
-		</S.InsufficientBalanceWrapper>
-	) : null;
-};
-
-const RenderUpgradeandCosts = (props: {
-	domain: UserOwnedDomain;
-	costsByAntId: Record<
-		string,
-		{
-			extend?: { winc: number; mario: number; fiatUSD: string | null };
-			upgrade?: { winc: number; mario: number; fiatUSD: string | null };
-		}
-	>;
-	extendingDomains: Set<string>;
-	upgradingDomains: Set<string>;
-	setExtendModal: React.Dispatch<React.SetStateAction<{ open: boolean; domain?: UserOwnedDomain; years: number }>>;
-	setUpgradeModal: React.Dispatch<React.SetStateAction<{ open: boolean; domain?: UserOwnedDomain }>>;
-}) => {
-	const portalProvider = usePortalProvider();
-	const { balance: arIOBalance } = useArIOBalance();
-	if (props.domain.recordType !== 'lease') return null;
-	const canModifyDomains = portalProvider.permissions?.updatePortalMeta;
-	if (!canModifyDomains) return null;
-
-	const entry = props.costsByAntId[props.domain.antId];
-	const valueText = (c?: { winc: number; mario: number; fiatUSD: string | null }) => {
-		if (IS_TESTNET) return c ? `${toReadableARIO(c.mario)} tario` : '…';
-		if (!c) return '…';
-		const creditsText = `${getARAmountFromWinc(c.winc)} Credits${c.fiatUSD ? ` ($${c.fiatUSD})` : ''}`;
-		const showArio = !!(arIOBalance && arIOBalance > 0);
-		return showArio ? `${creditsText} • ${toReadableARIO(c.mario)} ARIO` : creditsText;
-	};
-	return (
-		<S.DomainCosts>
-			<div className={'details-grid'}>
-				<S.DomainDetailLine>
-					<div className={'label'}>Extend (1 Year)</div>
-					<S.DomainDetailDivider />
-					<div className={'value'}>{valueText(entry?.extend)}</div>
-				</S.DomainDetailLine>
-				<S.DomainDetailLine>
-					<div className={'label'}>Go Permanent</div>
-					<S.DomainDetailDivider />
-					<div className={'value'}>{valueText(entry?.upgrade)}</div>
-				</S.DomainDetailLine>
-			</div>
-			<S.DomainCostActions>
-				<Button
-					type={'primary'}
-					label={props.extendingDomains.has(props.domain.name) ? 'Extending…' : 'Extend Lease'}
-					handlePress={() => props.setExtendModal({ open: true, domain: props.domain, years: 1 })}
-					disabled={props.extendingDomains.has(props.domain.name)}
-				/>
-				<Button
-					type={'alt1'}
-					label={props.upgradingDomains.has(props.domain.name) ? 'Upgrading…' : 'Go Permanent'}
-					handlePress={() => props.setUpgradeModal({ open: true, domain: props.domain })}
-					disabled={props.upgradingDomains.has(props.domain.name)}
-				/>
-			</S.DomainCostActions>
-		</S.DomainCosts>
-	);
 };
 
 export default function DomainListArNS() {
@@ -1052,7 +966,7 @@ export default function DomainListArNS() {
 								</S.DomainDetailLine>
 							)}
 						</div>
-						<RenderUpgradeandCosts
+						<RenderUpgradeAndCosts
 							domain={domain}
 							costsByAntId={costsByAntId}
 							extendingDomains={extendingDomains}
