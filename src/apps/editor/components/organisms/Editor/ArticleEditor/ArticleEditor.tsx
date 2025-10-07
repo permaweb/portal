@@ -59,7 +59,7 @@ export default function ArticleEditor(props: {
 							value: { active: true, message: `${language?.loadingPost}...` },
 						});
 						try {
-							const response = await permawebProvider.libs.getAtomicAsset(assetId);
+							const response = await permawebProvider.libs.getAtomicAsset(assetId)
 
 							const postData = {
 								id: assetId as string | null,
@@ -75,6 +75,7 @@ export default function ArticleEditor(props: {
 								dateCreated: null,
 								lastUpdate: null,
 								releaseDate: response?.metadata?.releaseDate,
+								authUsers: response?.authUsers || []
 							};
 
 							// Update current data

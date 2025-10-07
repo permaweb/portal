@@ -162,7 +162,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		if (user?.roles) {
 			const hasPermission = (permissonKeys: string | string[]) => {
 				const keys = Array.isArray(permissonKeys) ? permissonKeys : [permissonKeys];
-				const allowedRoles = keys.flatMap((key) => permissions?.[key] ?? []);
+				const allowedRoles = keys.flatMap((key) => permissions?.[key]?.roles ?? permissions?.[key] ?? []);
 				return user.roles.some((role) => allowedRoles.includes(role));
 			};
 

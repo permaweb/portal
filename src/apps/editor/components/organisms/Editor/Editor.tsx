@@ -234,14 +234,29 @@ export default function Editor() {
 
 			if (assetId) {
 				try {
-					// TODO: If not an asset auth user then go through portal Run-Action unless external contributor
-					const assetContentUpdateId = await permawebProvider.libs.sendMessage({
-						processId: assetId,
-						wallet: arProvider.wallet,
-						action: 'Update-Asset',
-						tags: [{ name: 'Exclude-Index', value: excludeFromIndex }],
-						data: data,
-					});
+					/* If user is authorized in the asset then send update directly, otherwise forward it through the portal */
+					let assetContentUpdateId = null;
+					if (currentPost.data?.authUsers && currentPost.data.authUsers.includes(arProvider.walletAddress)) {
+						assetContentUpdateId = await permawebProvider.libs.sendMessage({
+							processId: assetId,
+							wallet: arProvider.wallet,
+							action: 'Update-Asset',
+							tags: [{ name: 'Exclude-Index', value: excludeFromIndex }],
+							data: data,
+						});
+					} else {
+						assetContentUpdateId = await permawebProvider.libs.sendMessage({
+							processId: portalProvider.current.id,
+							wallet: arProvider.wallet,
+							action: 'Run-Action',
+							tags: [
+								{ name: 'Forward-To', value: assetId },
+								{ name: 'Forward-Action', value: 'Update-Asset' },
+								{ name: 'Exclude-Index', value: excludeFromIndex },
+							],
+							data: { Input: data }
+						});
+					}
 
 					if (isStaticPage) {
 						const currentPages = portalProvider.current?.pages || {};

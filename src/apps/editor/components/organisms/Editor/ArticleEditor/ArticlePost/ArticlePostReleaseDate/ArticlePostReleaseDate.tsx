@@ -1,6 +1,8 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
+import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPostUpdate } from 'editor/store/post';
 
@@ -12,18 +14,23 @@ import { Panel } from 'components/atoms/Panel';
 import { Select } from 'components/atoms/Select';
 import { Toggle } from 'components/atoms/Toggle';
 import { ICONS } from 'helpers/config';
-import { SelectOptionType } from 'helpers/types';
+import { PortalUserType, SelectOptionType } from 'helpers/types';
 import { formatDate } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
 export default function ArticlePostReleaseDate() {
+	const { assetId } = useParams<{ assetId?: string }>();
+
 	const dispatch = useDispatch();
 
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
 
+	const permawebProvider = usePermawebProvider();
+	const portalProvider = usePortalProvider();
 	const { addNotification } = useNotifications();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -279,6 +286,16 @@ export default function ArticlePostReleaseDate() {
 		});
 	};
 
+	/* If a contributor visits a post that they did not create, then disable updates */
+	const currentUser = portalProvider.current?.users?.find(
+		(user: PortalUserType) => user.address === permawebProvider.profile?.id
+	);
+
+	const submitUnauthorized =
+		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions?.postAutoIndex;
+	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
+	const releaseDateDisabled = requestUnauthorized || submitUnauthorized || currentPost.editor.loading.active;
+
 	return (
 		<>
 			<S.Wrapper>
@@ -291,6 +308,7 @@ export default function ArticlePostReleaseDate() {
 						type={'primary'}
 						handlePress={() => setShowEdit(true)}
 						src={ICONS.write}
+						disabled={releaseDateDisabled}
 						dimensions={{ wrapper: 23.5, icon: 13.5 }}
 						tooltip={language.edit}
 					/>

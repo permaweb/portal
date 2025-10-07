@@ -139,7 +139,6 @@ export default function Post(props: any) {
 							case 'image':
 								return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
 							case 'video':
-								console.log('Vid: ', entry);
 								return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
 							case 'paragraph':
 								return <p key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;

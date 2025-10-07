@@ -54,7 +54,7 @@ export default defineConfig(({ mode }) => {
 			},
 		},
 		engine: {
-			port: 5000,
+			port: 4000,
 			build: {
 				outDir: path.resolve(__dirname, `dist/${app}`),
 				emptyOutDir: true,
