@@ -316,7 +316,7 @@ export default function Editor() {
 							name: currentPost.data.title,
 							description: currentPost.data.description,
 							topics: currentPost.data.topics,
-							creator: permawebProvider.profile.id,
+							creator: currentPost.data.creator ?? permawebProvider.profile.id,
 							data: dataSrc,
 							contentType: ASSET_UPLOAD.contentType,
 							assetType: ASSET_UPLOAD.ansType,

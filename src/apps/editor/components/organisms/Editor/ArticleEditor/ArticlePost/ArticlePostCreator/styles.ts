@@ -32,7 +32,7 @@ export const HeaderWrapper = styled.div`
 		overflow: hidden;
 	}
 
-	.post-status-info {
+	.post-creator-info {
 		color: ${(props) => props.theme.colors.font.alt2} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
@@ -90,4 +90,11 @@ export const Option = styled.li<{ active: boolean }>`
 	&:hover {
 		background: ${(props) => props.theme.colors.container.primary.active};
 	}
+`;
+
+export const Divider = styled.div`
+	height: 1px;
+	width: 100%;
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+	margin: 7.5px 0 10px 0;
 `;

@@ -51,35 +51,35 @@ export default function ArticlePostStatus() {
 					<span className={'post-status-info'}>{`${language.status}:`}</span> {capitalize(currentPost?.data?.status)}
 					<S.StatusIndicator status={currentPost?.data?.status} />
 				</p>
-				<IconButton
-					type={'primary'}
-					handlePress={() => setShowDropdown(true)}
-					src={ICONS.write}
-					disabled={statusDisabled}
-					dimensions={{ wrapper: 23.5, icon: 13.5 }}
-					tooltip={language.edit}
-				/>
-			</S.HeaderWrapper>
-			{showDropdown && (
 				<CloseHandler active={showDropdown} disabled={!showDropdown} callback={() => setShowDropdown(false)}>
-					<S.Dropdown className="border-wrapper-alt1 scroll-wrapper-hidden">
-						{Object.values(ArticleStatusEnum).map((status: ArticleStatusEnum, index: number) => (
-							<S.Option
-								active={status === currentPost?.data?.status}
-								key={index}
-								onClick={() => {
-									if (status !== currentPost?.data?.status) {
-										handleCurrentPostUpdate({ field: 'status', value: status });
-									}
-									setShowDropdown(false);
-								}}
-							>
-								{capitalize(status)}
-							</S.Option>
-						))}
-					</S.Dropdown>
+					<IconButton
+						type={'primary'}
+						handlePress={() => setShowDropdown((prev) => !prev)}
+						src={showDropdown ? ICONS.close : ICONS.write}
+						disabled={statusDisabled}
+						dimensions={{ wrapper: 23.5, icon: 13.5 }}
+						tooltip={showDropdown ? null : language.edit}
+					/>
+					{showDropdown && (
+						<S.Dropdown className={'border-wrapper-alt1 scroll-wrapper-hidden'}>
+							{Object.values(ArticleStatusEnum).map((status: ArticleStatusEnum, index: number) => (
+								<S.Option
+									active={status === currentPost?.data?.status}
+									key={index}
+									onClick={() => {
+										if (status !== currentPost?.data?.status) {
+											handleCurrentPostUpdate({ field: 'status', value: status });
+										}
+										setShowDropdown(false);
+									}}
+								>
+									{capitalize(status)}
+								</S.Option>
+							))}
+						</S.Dropdown>
+					)}
 				</CloseHandler>
-			)}
+			</S.HeaderWrapper>
 		</S.Wrapper>
 	);
 }

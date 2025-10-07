@@ -9,12 +9,13 @@ export const Wrapper = styled.div`
 export const Section = styled.div``;
 
 export const SectionStart = styled.div`
-	padding: 10px 0 0 0;
+	padding: 7.5px 0 0 0;
+	margin: 7.5px 0 0 0;
 	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
 export const SectionEnd = styled.div`
-	padding: 0 0 10px 0;
+	padding: 0 0 7.5px 0;
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 

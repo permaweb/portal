@@ -18,6 +18,7 @@ import {
 	AlignmentButtonType,
 	AlignmentEnum,
 	MediaConfigType,
+	PortalPatchMapEnum,
 	PortalUploadOptionType,
 	PortalUploadType,
 } from 'helpers/types';
@@ -134,6 +135,8 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 				);
 
 				console.log(`Media update: ${mediaUpdateId}`);
+
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Media);
 			}
 
 			setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(tx) }));
