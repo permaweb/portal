@@ -151,6 +151,10 @@ export default function Post(props: any) {
 								return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
 							case 'ordered-list':
 								return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+							case 'divider-solid':
+								return <div key={entry.id} className="article-divider-solid" />;
+							case 'divider-dashed':
+								return <div key={entry.id} className="article-divider-dashed" />;
 							default:
 								return <b key={entry.id}>{JSON.stringify(entry)}</b>;
 						}

@@ -159,6 +159,20 @@ export const Wrapper = styled.div`
 	.portal-image-column-reverse {
 		flex-direction: column-reverse;
 	}
+
+	.article-divider-solid {
+		height: 1px;
+		width: 100%;
+		border-top: 1px solid rgba(var(--color-border), 0.4);
+		margin: 20px 0;
+	}
+
+	.article-divider-dashed {
+		height: 1px;
+		width: 100%;
+		border-top: 1px dashed rgba(var(--color-border), 0.4);
+		margin: 20px 0;
+	}
 `;
 
 export const Post = styled.div`
