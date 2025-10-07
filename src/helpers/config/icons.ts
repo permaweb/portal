@@ -5,8 +5,7 @@ export const ICONS = {
 	alignBottom: getTxEndpoint('kx2grnSUx7D7Y96EJIjTy11WJB8I8rZl4T8x3IVK3wM'),
 	alignLeft: getTxEndpoint('jHhvPhSRsf_19R9X0vza0a9J5N6n4pJKYHpCv_3r3z4'),
 	alignRight: getTxEndpoint('iaB67b8vGXFCFbupRCK4wgk_0fLSGmAuUs9ghbZLKHM'),
-	alignTop: getTxEndpoint('ipK9O_qhzkDCa1E0iCn_rt3g9TSxkmHZzYcywsx8tNw'),
-	arrow_old: getTxEndpoint('-6sVfmeNGSFDFe3uguyeCo5qY7aa__n8tpi_Dg238SM'),
+	alignTop: getTxEndpoint('ipK9O_qhzkDCa1E0iCn_rt3g9TSxkmHZzYcywsx8tNw'),	
 	arrow: getTxEndpoint('ghFL1fzQ2C1eEAnqSVvfAMP5Jikx7NKSPP5neoNPALw'),
 	arrows: getTxEndpoint('9WYuWYKP1eE6kcmrW6IPCCnwqFvKX4DtWD0hVn2RRPo'),
 	article: getTxEndpoint('upm3OCUmKcVpgCP6QCsMDspuUovC4WamRXql4iaFo9A'),
@@ -56,8 +55,7 @@ export const ICONS = {
 	listOrdered: getTxEndpoint('LCGDNvNEerXlE8vE65J6XRuAMm54u2zNAyvwQbyoBEs'),
 	listUnordered: getTxEndpoint('lSpJ-R6JoI9J814Iy2JJZWnrkvKU8iFqVIWtVsmI4Os'),
 	logo: getTxEndpoint('aj9U65nFbuzped5y1XuLdo75TnR4TOuhx1AHmRottqg'),
-	media: getTxEndpoint('357HeJjvG10nK28juQ8YMp6DlvHhGbmU7pOvZphEhUk'),
-	menu_old: getTxEndpoint('oNQieZTWPPGWcFiVClN5xsAdtDYBMKb5ZXXI30MFxQY'),
+	media: getTxEndpoint('357HeJjvG10nK28juQ8YMp6DlvHhGbmU7pOvZphEhUk'),	
 	menu: getTxEndpoint('0La3-o2_gGMDbkfV4zVVUMjTYQ7Cn9YWQ2JO-FbjAIk'),
 	minus: getTxEndpoint('N5qqt8CLoSEfYj4_jon7MoEDlsgl_XrdMTIx4ny7InM'),
 	moderation: getTxEndpoint('-u5guQLJg-_G9N8BFP-hpwmWRRlUb4wyGRZGqdvT3Zc'),
@@ -96,6 +94,11 @@ export const ICONS = {
 	wallet_old: getTxEndpoint('_t97i0BzskALIFERWR6iDs_uX7U6bbd4-3Pqq3HDkfI'),
 	warning: getTxEndpoint('BASlMnOWcLCcLUSrO2wUybQL_06231dLONeVkdTWs3o'),
 	write: getTxEndpoint('SUWTk8Qtcub9EsP5PDF6-vzgKsP5Irg1bB9b8NImDDk'),
+
+	ENGINE: {
+		arrow: getTxEndpoint('-6sVfmeNGSFDFe3uguyeCo5qY7aa__n8tpi_Dg238SM'),
+		menu: getTxEndpoint('oNQieZTWPPGWcFiVClN5xsAdtDYBMKb5ZXXI30MFxQY'),
+	}
 };
 
 export const ICONS_SOCIAL = {

@@ -51,7 +51,7 @@ export default function ContextMenu({ entries, children }: ContextMenuProps) {
 				<div onClick={() => setOpenMenu(!openMenu)}>{children}</div>
 			) : (
 				<S.IconWrapper onClick={() => setOpenMenu(!openMenu)}>
-					<ReactSVG src={ICONS.menu} />
+					<ReactSVG src={ICONS.ENGINE.menu} />
 				</S.IconWrapper>
 			)}
 			{openMenu && (

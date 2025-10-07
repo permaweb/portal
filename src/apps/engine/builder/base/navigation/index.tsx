@@ -47,7 +47,7 @@ export default function Navigation(props: any) {
 						{entry.name}
 						{entry.children && entry.children.length > 0 && (
 							<S.Arrow>
-								<ReactSVG src={ICONS.arrow} />
+								<ReactSVG src={ICONS.ENGINE.arrow} />
 							</S.Arrow>
 						)}
 					</NavLink>
