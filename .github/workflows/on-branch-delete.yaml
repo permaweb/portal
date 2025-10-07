@@ -1,4 +1,3 @@
-
 name: On Branch Delete
 
 on:
@@ -63,4 +62,3 @@ jobs:
         env:
           UNDERNAME: ${{ steps.under.outputs.value }}
         run: node scripts/release-undername.js
-
