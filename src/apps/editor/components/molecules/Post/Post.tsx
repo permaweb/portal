@@ -30,14 +30,19 @@ export default function Post(props: { post: PortalAssetType }) {
 
 	React.useEffect(() => {
 		(async function () {
-			if (!fetched && props.post.creator) {
+			if (!fetched && props.post.creator && props.post.creator !== portalProvider.current?.id) {
 				portalProvider.fetchPortalUserProfile({
 					address: props.post.creator,
 				});
 			}
 			setFetched(true);
 		})();
-	}, [props.post?.creator, fetched]);
+	}, [props.post?.creator, portalProvider.current?.id, fetched]);
+
+	const creatorName =
+		props.post?.creator === portalProvider.current?.id
+			? portalProvider.current?.name
+			: portalProvider.usersByPortalId?.[props.post?.creator]?.username ?? formatAddress(props.post?.creator, false);
 
 	return props.post ? (
 		<S.PostWrapper className={'fade-in'}>
@@ -45,11 +50,7 @@ export default function Post(props: { post: PortalAssetType }) {
 				<p>{props.post.name}</p>
 				<S.PostHeaderDetail>
 					<ReactSVG src={ICONS.time} />
-					<span>
-						{`${formatDate(props.post.metadata?.releaseDate, true)} · ${
-							portalProvider.usersByPortalId?.[props.post.creator]?.username ?? formatAddress(props.post.creator, false)
-						}`}
-					</span>
+					<span>{`${formatDate(props.post.metadata?.releaseDate, true)} · ${creatorName}`}</span>
 				</S.PostHeaderDetail>
 			</S.PostHeader>
 			<S.PostDetail>

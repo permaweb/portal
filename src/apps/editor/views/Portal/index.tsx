@@ -55,7 +55,7 @@ export default function Portal() {
 				<S.SectionWrapper>
 					<S.PostsSection>
 						<S.SectionBody>
-							<PostList type={'header'} />
+							<PostList type={'header'} pageCount={5} />
 						</S.SectionBody>
 					</S.PostsSection>
 					<S.DesignSection className={'border-wrapper-alt2'}>
