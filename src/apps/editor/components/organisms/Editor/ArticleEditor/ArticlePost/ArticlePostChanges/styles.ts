@@ -10,7 +10,8 @@ export const StatusIndicator = styled.div<{ hasChanges: boolean }>`
 	width: 11.5px;
 	height: 11.5px;
 	border-radius: 50%;
-	background: ${(props) => (props.hasChanges ? props.theme.colors.indicator.neutral : props.theme.colors.container.alt11.background)};
+	background: ${(props) =>
+		props.hasChanges ? props.theme.colors.indicator.neutral : props.theme.colors.container.alt11.background};
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 

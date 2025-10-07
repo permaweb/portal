@@ -5,7 +5,7 @@ export const ICONS = {
 	alignBottom: getTxEndpoint('kx2grnSUx7D7Y96EJIjTy11WJB8I8rZl4T8x3IVK3wM'),
 	alignLeft: getTxEndpoint('jHhvPhSRsf_19R9X0vza0a9J5N6n4pJKYHpCv_3r3z4'),
 	alignRight: getTxEndpoint('iaB67b8vGXFCFbupRCK4wgk_0fLSGmAuUs9ghbZLKHM'),
-	alignTop: getTxEndpoint('ipK9O_qhzkDCa1E0iCn_rt3g9TSxkmHZzYcywsx8tNw'),	
+	alignTop: getTxEndpoint('ipK9O_qhzkDCa1E0iCn_rt3g9TSxkmHZzYcywsx8tNw'),
 	arrow: getTxEndpoint('ghFL1fzQ2C1eEAnqSVvfAMP5Jikx7NKSPP5neoNPALw'),
 	arrows: getTxEndpoint('9WYuWYKP1eE6kcmrW6IPCCnwqFvKX4DtWD0hVn2RRPo'),
 	article: getTxEndpoint('upm3OCUmKcVpgCP6QCsMDspuUovC4WamRXql4iaFo9A'),
@@ -55,7 +55,7 @@ export const ICONS = {
 	listOrdered: getTxEndpoint('LCGDNvNEerXlE8vE65J6XRuAMm54u2zNAyvwQbyoBEs'),
 	listUnordered: getTxEndpoint('lSpJ-R6JoI9J814Iy2JJZWnrkvKU8iFqVIWtVsmI4Os'),
 	logo: getTxEndpoint('aj9U65nFbuzped5y1XuLdo75TnR4TOuhx1AHmRottqg'),
-	media: getTxEndpoint('357HeJjvG10nK28juQ8YMp6DlvHhGbmU7pOvZphEhUk'),	
+	media: getTxEndpoint('357HeJjvG10nK28juQ8YMp6DlvHhGbmU7pOvZphEhUk'),
 	menu: getTxEndpoint('0La3-o2_gGMDbkfV4zVVUMjTYQ7Cn9YWQ2JO-FbjAIk'),
 	minus: getTxEndpoint('N5qqt8CLoSEfYj4_jon7MoEDlsgl_XrdMTIx4ny7InM'),
 	moderation: getTxEndpoint('-u5guQLJg-_G9N8BFP-hpwmWRRlUb4wyGRZGqdvT3Zc'),
@@ -70,8 +70,7 @@ export const ICONS = {
 	posts: getTxEndpoint('scJ-YfxBggKURU_lF7eLLrKSe9L7cBD1GB1bcIpzKJI'),
 	quotes: getTxEndpoint('2D6HWs0jkqXe4aBVkJv2OTnaZ-heyGYzUJwDxp-Dqaw'),
 	remove: getTxEndpoint('M9Jt7UeAdfLPAZfZpbrG1UHaQLFFf8d9t2iHueOpwC0'),
-	reply: getTxEndpoint('MRv0PNi9dfNgZToEzadBagBU_HhGhukkIT1ZEJ2OMSM'),
-	search_old: getTxEndpoint('UnDIcovg6SbgqTLIZ-N-g12wCMT3EOceHkPcoYHd6_g'),
+	reply: getTxEndpoint('MRv0PNi9dfNgZToEzadBagBU_HhGhukkIT1ZEJ2OMSM'),	
 	search: getTxEndpoint('yRgUeadiTV769j2tbEg2HnpXUohA_3M2oFZsHwNRqOU'),
 	send: getTxEndpoint('xw3wfZmsj6K3YOA7IJDbWoW2ysIT1D5OHV141etlk8M'),
 	settings: getTxEndpoint('e3jdELVw-3jNIOCbWTYCh1fuH4zIa7tDqmOqE6HyizY'),
@@ -97,8 +96,9 @@ export const ICONS = {
 
 	ENGINE: {
 		arrow: getTxEndpoint('-6sVfmeNGSFDFe3uguyeCo5qY7aa__n8tpi_Dg238SM'),
+		search: getTxEndpoint('UnDIcovg6SbgqTLIZ-N-g12wCMT3EOceHkPcoYHd6_g'),
 		menu: getTxEndpoint('oNQieZTWPPGWcFiVClN5xsAdtDYBMKb5ZXXI30MFxQY'),
-	}
+	},
 };
 
 export const ICONS_SOCIAL = {

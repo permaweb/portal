@@ -37,6 +37,7 @@ export const STORAGE = {
 	profileByWallet: (id: string) => `profile-by-wallet-${id}`,
 	portal: (id: string) => `portal-${id}`,
 	profile: (id: string) => `profile-${id}`,
+	moderation: (id: string) => `moderation-${id}`,
 };
 
 export const STYLING = {

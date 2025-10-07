@@ -14,8 +14,7 @@ export default function ArticlePostChanges() {
 		currentPost.data.content.length === 0 ||
 		currentPost.data.content.every((block) => !block.content || block.content.trim() === '');
 
-	const hasChanges =
-		hasUnsavedChanges(currentPost.data, currentPost.originalData) && !isEmpty;
+	const hasChanges = hasUnsavedChanges(currentPost.data, currentPost.originalData) && !isEmpty;
 
 	return (
 		<S.Wrapper>

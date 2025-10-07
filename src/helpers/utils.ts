@@ -363,6 +363,15 @@ export function cacheProfile(address: string, profileData: any) {
 	localStorage.setItem(STORAGE.profile(address), JSON.stringify(profileData));
 }
 
+export function getCachedModeration(id: string) {
+	const cached = localStorage.getItem(STORAGE.moderation(id));
+	return cached ? JSON.parse(cached) : null;
+}
+
+export function cacheModeration(id: string, moderationData: any) {
+	localStorage.setItem(STORAGE.moderation(id), JSON.stringify(moderationData));
+}
+
 export function stripAnsiChars(input: string) {
 	if (!input) return null;
 	const ansiRegex = /\x1B\[[0-9;]*m/g;
@@ -382,7 +391,7 @@ export function resolvePrimaryDomain(domains: PortalDomainType[], portalId: stri
 	else return `https://${gateway}/${portalId}`;
 }
 
-export const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : '-';
+export const capitalize = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : '-');
 
 export function hasUnsavedChanges(current: any, original: any): boolean {
 	// If there's no original data, consider it as changes (new post)

@@ -32,7 +32,7 @@ export default function Search(props: any) {
 
 	return (
 		<S.Search ref={searchRef} $active={useSearch} onClick={() => setUseSearch(true)}>
-			<ReactSVG src={ICONS.search} />
+			<ReactSVG src={ICONS.ENGINE.search} />
 			<input
 				ref={inputRef}
 				type="text"

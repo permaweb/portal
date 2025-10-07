@@ -20,7 +20,7 @@ export default function ArticleToolbarMarkup() {
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
-	
+
 	const modKey = isMac ? 'Cmd' : 'Ctrl';
 
 	function getMarkupAction(markupType: 'bold' | 'italic' | 'underline' | 'strikethrough') {
