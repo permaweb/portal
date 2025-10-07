@@ -1,11 +1,11 @@
 name: On Branch Delete
 
-on: delete
+on:
+  delete
 
 jobs:
-  release-undername:
-    # only act on branch deletions (ignore tag deletes)
-    if: ${{ github.event.ref_type == 'branch' }}
+  delete:
+    if: github.event.ref_type == 'branch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
