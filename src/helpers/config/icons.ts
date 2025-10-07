@@ -70,7 +70,7 @@ export const ICONS = {
 	posts: getTxEndpoint('scJ-YfxBggKURU_lF7eLLrKSe9L7cBD1GB1bcIpzKJI'),
 	quotes: getTxEndpoint('2D6HWs0jkqXe4aBVkJv2OTnaZ-heyGYzUJwDxp-Dqaw'),
 	remove: getTxEndpoint('M9Jt7UeAdfLPAZfZpbrG1UHaQLFFf8d9t2iHueOpwC0'),
-	reply: getTxEndpoint('MRv0PNi9dfNgZToEzadBagBU_HhGhukkIT1ZEJ2OMSM'),	
+	reply: getTxEndpoint('MRv0PNi9dfNgZToEzadBagBU_HhGhukkIT1ZEJ2OMSM'),
 	search: getTxEndpoint('yRgUeadiTV769j2tbEg2HnpXUohA_3M2oFZsHwNRqOU'),
 	send: getTxEndpoint('xw3wfZmsj6K3YOA7IJDbWoW2ysIT1D5OHV141etlk8M'),
 	settings: getTxEndpoint('e3jdELVw-3jNIOCbWTYCh1fuH4zIa7tDqmOqE6HyizY'),

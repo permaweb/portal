@@ -6,7 +6,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { formatAddress, getCachedModeration, cacheModeration } from 'helpers/utils';
+import { cacheModeration, formatAddress, getCachedModeration } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -27,7 +27,16 @@ export default function Moderation() {
 		fetchInactiveComments();
 	}, [portalProvider.current?.assets]);
 
-	async function fetchInactiveComments() {
+	React.useEffect(() => {
+		if (portalProvider.current?.id && permawebProvider.libs) {
+			const cached = getCachedModeration(portalProvider.current.id);
+			if (cached) {
+				fetchInactiveComments(true);
+			}
+		}
+	}, [portalProvider.current?.id]);
+
+	async function fetchInactiveComments(backgroundRefresh = false) {
 		console.log('Starting fetchInactiveComments...');
 		console.log('Portal assets:', portalProvider.current?.assets);
 		console.log('Libs available:', !!permawebProvider.libs);
@@ -37,15 +46,17 @@ export default function Moderation() {
 			return;
 		}
 
-		const cached = getCachedModeration(portalProvider.current.id);
-		if (cached) {
-			console.log('Using cached moderation data');
-			setInactiveComments(cached.inactiveComments || []);
-			setProfiles(cached.profiles || {});
-			return;
+		if (!backgroundRefresh) {
+			const cached = getCachedModeration(portalProvider.current.id);
+			if (cached) {
+				console.log('Using cached moderation data');
+				setInactiveComments(cached.inactiveComments || []);
+				setProfiles(cached.profiles || {});
+				return;
+			}
 		}
 
-		setLoading(true);
+		if (!backgroundRefresh) setLoading(true);
 		const allInactiveComments = [];
 
 		try {
@@ -104,7 +115,7 @@ export default function Moderation() {
 		} catch (error) {
 			console.error('Error fetching comments:', error);
 		} finally {
-			setLoading(false);
+			if (!backgroundRefresh) setLoading(false);
 		}
 	}
 
