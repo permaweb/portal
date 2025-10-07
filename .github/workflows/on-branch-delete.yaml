@@ -1,7 +1,6 @@
 name: On Branch Delete
 
-on:
-  delete
+on: delete
 
 jobs:
   release-undername:
