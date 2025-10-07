@@ -43,7 +43,6 @@ export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	// background:rgba(var(--color-background),1);
 	z-index: 1;
 
 	h1,
@@ -128,6 +127,7 @@ export const Wrapper = styled.div`
 	.portal-media-wrapper {
 		display: flex;
 		flex-direction: column;
+		margin: 10px 0 20px 0;
 		gap: 6px;
 
 		p {
@@ -179,9 +179,10 @@ export const Post = styled.div`
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	max-width: 1200px;
+	max-width: 950px;
 	margin-left: auto;
 	margin-right: auto;
+	padding: 20px 0 0 0;
 	z-index: 1;
 	position: relative;
 `;
@@ -189,7 +190,6 @@ export const Post = styled.div`
 export const Description = styled.p`
 	font-size: var(--font-size-large);
 	font-weight: 600 !important;
-	opacity: 0.6;
 	margin-bottom: var(--spacing-l);
 `;
 
@@ -208,11 +208,12 @@ export const Meta = styled.div`
 	span {
 		font-size: var(--font-size-default);
 		font-weight: 600;
-		opacity: 0.6;
 	}
 `;
 
-export const Thumbnail = styled.img``;
+export const Thumbnail = styled.img`
+	border-radius: 10px;
+`;
 
 export const Tags = styled.div`
 	display: flex;

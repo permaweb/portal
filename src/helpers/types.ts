@@ -74,6 +74,7 @@ export type PortalAssetPostType = {
 	dateCreated: number | null;
 	lastUpdate: number | null;
 	releaseDate: number | null;
+	authUsers: string[];
 };
 
 export type PortalUserType = {

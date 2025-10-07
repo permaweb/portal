@@ -75,6 +75,7 @@ export default function ArticleEditor(props: {
 								dateCreated: null,
 								lastUpdate: null,
 								releaseDate: response?.metadata?.releaseDate,
+								authUsers: response?.authUsers || [],
 							};
 
 							// Update current data

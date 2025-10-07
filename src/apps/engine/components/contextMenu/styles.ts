@@ -15,15 +15,25 @@ export const IconWrapper = styled.div`
 	width: 28px;
 	height: 28px;
 	border-radius: 50%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	> * {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
 
 	div {
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
+
 	svg {
 		width: 18px;
-		height: 18px;
+		padding-left: 4px;
 	}
 
 	&:hover {
@@ -36,7 +46,6 @@ export const MenuEntries = styled.div`
 	position: relative;
 	background: var(--color-card-background);
 	border: 1px solid var(--color-card-border);
-	padding: 2px 2px;
 	backdrop-filter: blur(5px);
 	z-index: 99;
 `;
