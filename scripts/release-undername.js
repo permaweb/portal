@@ -13,7 +13,7 @@ import { ANT, ARIO, ArweaveSigner } from '@ar.io/sdk';
 			process.exit(1);
 		}
 
-    const jsonString = atob(process.env.DEPLOY_KEY);
+		const jsonString = atob(process.env.DEPLOY_KEY);
 		const jwk = JSON.parse(jsonString);
 		const signer = new ArweaveSigner(jwk);
 

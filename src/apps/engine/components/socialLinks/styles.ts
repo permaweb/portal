@@ -36,7 +36,7 @@ export const LinksList = styled.div<{ $isFooter?: boolean }>`
 		height: 20px;
 		fill: rgba(var(--color-text), 1);
 		width: unset;
-		
+
 		&:hover {
 			transform: scale(1.2);
 			transition: transform 0.2s;
