@@ -103,7 +103,8 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 				let newLink: { Url: string; Title: string; Icon?: string } = { Url: newLinkUrl, Title: newLinkTitle };
 
 				if (newLinkIcon) {
-					if (newLinkIcon.startsWith('data:image/svg+xml')) newLink.Icon = await permawebProvider.libs.resolveTransaction(newLinkIcon);
+					if (newLinkIcon.startsWith('data:image/svg+xml'))
+						newLink.Icon = await permawebProvider.libs.resolveTransaction(newLinkIcon);
 					else newLink.Icon = newLinkIcon;
 				}
 

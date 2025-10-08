@@ -2,9 +2,9 @@ name: On Branch Push
 
 on:
   push:
-    branches-ignore:
-      - main
-      - staging
+    branches:
+      - 'feat/**'
+      - 'feature/**'
   workflow_dispatch: {}
 
 jobs:
