@@ -2,7 +2,7 @@ name: On Branch Push
 
 on:
   push:
-     branches:
+    branches:
       - 'feat/**'
       - 'feature/**'
   workflow_dispatch: {}
