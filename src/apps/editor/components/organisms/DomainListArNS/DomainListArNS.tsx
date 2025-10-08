@@ -11,13 +11,12 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Panel } from 'components/atoms/Panel';
 import { TxAddress } from 'components/atoms/TxAddress';
-import { PaymentSummary } from 'components/molecules/Payment';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { getArnsCost } from 'helpers/arnsCosts';
 import { ICONS, IS_TESTNET } from 'helpers/config';
 import { loadCachedDomains, saveCachedDomains } from 'helpers/domainCache';
 import { PortalPatchMapEnum, UserOwnedDomain } from 'helpers/types';
-import { getARAmountFromWinc, toReadableARIO, withTimeout } from 'helpers/utils';
+import { withTimeout } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useLatestANTVersion } from 'hooks/useLatestANTVersion';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -26,8 +25,9 @@ import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
-import { InsufficientBalanceSection } from 'editor/components/molecules/InsufficientBalanceSection';
 import { RenderUpgradeAndCosts } from 'editor/components/molecules/RenderUpgradeAndCosts';
+import { PaymentInfoPanel } from 'editor/components/molecules/PaymentInfoPanel';
+import { ExtendDomainPanel } from 'editor/components/molecules/ExtendDomainPanel';
 
 async function detectRequiresAntUpdate(processId: string, timeoutMs = 6000): Promise<boolean> {
 	try {
@@ -634,12 +634,6 @@ export default function DomainListArNS() {
 		[getAntInstance]
 	);
 
-	async function getSignedArio() {
-		await window.arweaveWallet?.connect(['SIGN_TRANSACTION', 'ACCESS_ADDRESS', 'ACCESS_PUBLIC_KEY', 'DISPATCH']);
-		const signer = new ArconnectSigner(window.arweaveWallet);
-		return IS_TESTNET ? ARIO.testnet({ signer }) : ARIO.mainnet({ signer });
-	}
-
 	async function upgradeDomain(domain: { antId: string; name: string; userDomain: UserOwnedDomain }) {
 		setAntUpdating(true);
 		try {
@@ -1152,341 +1146,36 @@ export default function DomainListArNS() {
 						<p>{language.fetchingYourDomains}…</p>
 					</S.LoadingBannerWrapper>
 				)}
-				<Panel
-					open={extendModal.open && portalProvider.permissions?.updatePortalMeta}
-					width={520}
-					header={'Extend Lease'}
-					handleClose={() => setExtendModal({ open: false, years: 1 })}
-					className={'modal-wrapper'}
-				>
-					{extendModal.domain && portalProvider.permissions?.updatePortalMeta && (
-						<S.ModalWrapper>
-							<S.ModalSection>
-								<S.ModalSectionTitle>Domain</S.ModalSectionTitle>
-								<S.ModalSectionContent>{extendModal.domain.name}</S.ModalSectionContent>
-							</S.ModalSection>
-							<S.ModalSection>
-								<S.ModalSectionTitle>Years</S.ModalSectionTitle>
-								<S.ModalYearSelector>
-									{[1, 2, 3, 4, 5].map((y) => (
-										<Button
-											key={y}
-											type={extendModal.years === y ? 'alt1' : 'primary'}
-											label={`${y}`}
-											handlePress={() => setExtendModal((p) => ({ ...p, years: y }))}
-										/>
-									))}
-								</S.ModalYearSelector>
-							</S.ModalSection>
-							{/* Pay-with options */}
-							{/* {!IS_TESTNET && (
-							<S.PaymentSelectorWrapper>
-								<PayWithSelector
-									method={extendPaymentMethod}
-									onChange={setExtendPaymentMethod}
-									arioSelectable={!!(arIOBalance && arIOBalance > 0)}
-								/>
-							</S.PaymentSelectorWrapper>
-						)} */}
-
-							{/* Summary: total due, current balance, final balance */}
-							<S.PaymentSummaryWrapper>
-								<S.ModalCostSection>
-									<S.ModalSectionTitle>Costs</S.ModalSectionTitle>
-									<div>
-										{IS_TESTNET ? (
-											<S.DomainDetailLine>
-												<S.ModalCostLabel>Amount</S.ModalCostLabel>
-												<S.DomainDetailDivider />
-												<S.ModalCostValue>
-													{extendCostLoading ? (
-														<S.LoadingIndicator>Fetching…</S.LoadingIndicator>
-													) : extendCost?.mario != null ? (
-														`${toReadableARIO(extendCost.mario)} tario`
-													) : (
-														'—'
-													)}
-												</S.ModalCostValue>
-											</S.DomainDetailLine>
-										) : (
-											<>
-												<S.DomainDetailLine>
-													<S.ModalCostLabel>Credits</S.ModalCostLabel>
-													<S.DomainDetailDivider />
-													<S.ModalCostValue>
-														{extendCostLoading ? (
-															<S.LoadingIndicator>Fetching…</S.LoadingIndicator>
-														) : (
-															(() => {
-																const credits =
-																	extendCost?.winc != null ? `${getARAmountFromWinc(extendCost.winc)} Credits` : '—';
-																const usd = extendCost?.fiatUSD ? ` ($${extendCost.fiatUSD})` : '';
-																return `${credits}${usd}`;
-															})()
-														)}
-													</S.ModalCostValue>
-												</S.DomainDetailLine>
-												{!!(arIOBalance && arIOBalance > 0) && (
-													<S.DomainDetailLine>
-														<S.ModalCostLabel>ARIO</S.ModalCostLabel>
-														<S.DomainDetailDivider />
-														<S.ModalCostValue>
-															{extendCostLoading ? (
-																<S.LoadingIndicator>Fetching…</S.LoadingIndicator>
-															) : extendCost?.mario != null ? (
-																`${toReadableARIO(extendCost.mario)} ARIO`
-															) : (
-																'—'
-															)}
-														</S.ModalCostValue>
-													</S.DomainDetailLine>
-												)}
-											</>
-										)}
-									</div>
-								</S.ModalCostSection>
-								{(() => {
-									const due = IS_TESTNET || extendPaymentMethod === 'ario' ? extendCost?.mario : extendCost?.winc;
-									const unit = IS_TESTNET ? 'tario' : extendPaymentMethod === 'ario' ? 'ARIO' : 'Credits';
-									const bal = IS_TESTNET || extendPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
-									const loadingCost = extendCostLoading || due == null;
-									const loadingBal = IS_TESTNET
-										? arIOBalance == null
-										: extendPaymentMethod === 'ario'
-										? arIOBalance == null
-										: arProvider.turboBalance == null;
-									return (
-										<PaymentSummary
-											method={IS_TESTNET ? 'ario' : extendPaymentMethod}
-											unitLabel={unit}
-											loadingCost={loadingCost}
-											loadingBalance={loadingBal}
-											cost={due}
-											balance={bal}
-										/>
-									);
-								})()}
-							</S.PaymentSummaryWrapper>
-							{/* Actions below */}
-							<S.ModalActions>
-								<Button
-									type={'primary'}
-									label={language.cancel}
-									handlePress={() => setExtendModal({ open: false, years: 1 })}
-								/>
-								<InsufficientBalanceSection
-									extendCost={extendCost}
-									extendCostLoading={extendCostLoading}
-									extendPaymentMethod={extendPaymentMethod}
-									setShowFund={setShowFund}
-								/>
-								<Button
-									type={'alt1'}
-									label={language.confirm}
-									handlePress={async () => {
-										if (!extendModal.domain) return;
-										setExtendingDomains((s) => new Set([...s, extendModal.domain!.name]));
-										setExtendModal({ open: false, years: 1 });
-										try {
-											const signed = await getSignedArio();
-											await signed.extendLease({
-												name: extendModal.domain.name,
-												years: extendModal.years,
-												...(IS_TESTNET ? {} : extendPaymentMethod === 'turbo' ? { fundFrom: 'turbo' } : {}),
-											});
-											const previousEnd = userOwnedDomains.find(
-												(d) => d.antId === extendModal.domain!.antId
-											)?.endTimestamp;
-											await pollAndHydrateAfterChange({
-												name: extendModal.domain.name,
-												antId: extendModal.domain.antId,
-												previousEndTimestamp: previousEnd,
-											});
-											addNotification(language.leaseExtendedSuccessfully, 'success');
-										} catch (e) {
-											console.error('Extend lease failed:', e);
-											addNotification(language.errorExtendingLease, 'warning');
-										} finally {
-											setExtendingDomains((s) => {
-												const next = new Set(s);
-												next.delete(extendModal.domain!.name);
-												return next;
-											});
-										}
-									}}
-									disabled={(() => {
-										const due = IS_TESTNET || extendPaymentMethod === 'ario' ? extendCost?.mario : extendCost?.winc;
-										const bal = IS_TESTNET || extendPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
-										return due == null || bal == null || bal < due || extendingDomains.has(extendModal.domain!.name);
-									})()}
-								/>
-							</S.ModalActions>
-						</S.ModalWrapper>
-					)}
-				</Panel>
+				<ExtendDomainPanel
+					extendModal={extendModal}
+					setExtendModal={setExtendModal}
+					extendCost={extendCost}
+					extendCostLoading={extendCostLoading}
+					extendPaymentMethod={extendPaymentMethod}
+					setExtendPaymentMethod={_setExtendPaymentMethod}
+					setShowFund={setShowFund}
+					extendingDomains={extendingDomains}
+					setExtendingDomains={setExtendingDomains}
+					userOwnedDomains={userOwnedDomains}
+					pollAndHydrateAfterChange={pollAndHydrateAfterChange}
+				/>
 
 				{/* Upgrade to Permanent Modal with live costs */}
-				<Panel
-					open={upgradeModal.open && portalProvider.permissions?.updatePortalMeta}
-					width={520}
-					header={'Go Permanent'}
-					handleClose={() => setUpgradeModal({ open: false })}
-					className={'modal-wrapper'}
-				>
-					{upgradeModal.domain && portalProvider.permissions?.updatePortalMeta && (
-						<S.ModalWrapper>
-							<S.ModalSection>
-								<S.ModalSectionTitle>Domain</S.ModalSectionTitle>
-								<S.ModalSectionContent>{upgradeModal.domain.name}</S.ModalSectionContent>
-							</S.ModalSection>
-							{/* Pay-with options */}
-							{/* {!IS_TESTNET && (
-							<S.PaymentSelectorWrapper>
-								<PayWithSelector
-									method={upgradePaymentMethod}
-									onChange={setUpgradePaymentMethod}
-									arioSelectable={!!(arIOBalance && arIOBalance > 0)}
-								/>
-							</S.PaymentSelectorWrapper>
-						)} */}
-
-							{/* Summary: total due, current balance, final balance */}
-							<S.PaymentSummaryWrapper>
-								<S.ModalCostSection>
-									<S.ModalSectionTitle>Costs</S.ModalSectionTitle>
-									<div>
-										{IS_TESTNET ? (
-											<S.DomainDetailLine>
-												<S.ModalCostLabel>Amount</S.ModalCostLabel>
-												<S.DomainDetailDivider />
-												<S.ModalCostValue>
-													{(() => {
-														const entry = costsByAntId[upgradeModal.domain.antId]?.upgrade;
-														if (!entry || entry.mario == null)
-															return (
-																<S.LoadingIndicator>
-																	<Loader xSm /> Fetching…
-																</S.LoadingIndicator>
-															);
-														return `${toReadableARIO(entry.mario)} tario`;
-													})()}
-												</S.ModalCostValue>
-											</S.DomainDetailLine>
-										) : (
-											<>
-												<S.DomainDetailLine>
-													<S.ModalCostLabel>Credits</S.ModalCostLabel>
-													<S.DomainDetailDivider />
-													<S.ModalCostValue>
-														{(() => {
-															const entry = costsByAntId[upgradeModal.domain.antId]?.upgrade;
-															if (!entry || entry.winc == null)
-																return (
-																	<S.LoadingIndicator>
-																		<Loader xSm /> Fetching…
-																	</S.LoadingIndicator>
-																);
-															const credits = `${getARAmountFromWinc(entry.winc)} Credits`;
-															const usd = entry?.fiatUSD ? ` ($${entry.fiatUSD})` : '';
-															return `${credits}${usd}`;
-														})()}
-													</S.ModalCostValue>
-												</S.DomainDetailLine>
-												{!!(arIOBalance && arIOBalance > 0) && (
-													<S.DomainDetailLine>
-														<S.ModalCostLabel>ARIO</S.ModalCostLabel>
-														<S.DomainDetailDivider />
-														<S.ModalCostValue>
-															{(() => {
-																const entry = costsByAntId[upgradeModal.domain.antId]?.upgrade;
-																if (!entry || entry.mario == null)
-																	return (
-																		<S.LoadingIndicator>
-																			<Loader xSm /> Fetching…
-																		</S.LoadingIndicator>
-																	);
-																return `${toReadableARIO(entry.mario)} ARIO`;
-															})()}
-														</S.ModalCostValue>
-													</S.DomainDetailLine>
-												)}
-											</>
-										)}
-									</div>
-								</S.ModalCostSection>
-								{(() => {
-									const entry = costsByAntId[upgradeModal.domain!.antId]?.upgrade;
-									const due = IS_TESTNET || upgradePaymentMethod === 'ario' ? entry?.mario : entry?.winc;
-									const unit = IS_TESTNET ? 'tario' : upgradePaymentMethod === 'ario' ? 'ARIO' : 'Credits';
-									const bal = IS_TESTNET || upgradePaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
-									const loadingCost = entry == null || due == null;
-									const loadingBal = IS_TESTNET
-										? arIOBalance == null
-										: upgradePaymentMethod === 'ario'
-										? arIOBalance == null
-										: arProvider.turboBalance == null;
-									return (
-										<PaymentSummary
-											method={IS_TESTNET ? 'ario' : upgradePaymentMethod}
-											unitLabel={unit}
-											loadingCost={loadingCost}
-											loadingBalance={loadingBal}
-											cost={due}
-											balance={bal}
-										/>
-									);
-								})()}
-							</S.PaymentSummaryWrapper>
-							{/* Upgrade / Extend Actions */}
-							<S.UpgradeModalActions>
-								<Button type={'primary'} label={language.cancel} handlePress={() => setUpgradeModal({ open: false })} />
-								<InsufficientBalanceSection
-									extendCost={extendCost}
-									extendCostLoading={extendCostLoading}
-									extendPaymentMethod={extendPaymentMethod}
-									setShowFund={setShowFund}
-								/>
-								<Button
-									type={'alt1'}
-									label={language.confirm}
-									handlePress={async () => {
-										if (!upgradeModal.domain) return;
-										setUpgradingDomains((s) => new Set([...s, upgradeModal.domain!.name]));
-										setUpgradeModal({ open: false });
-										try {
-											const signed = await getSignedArio();
-											await signed.upgradeRecord({
-												name: upgradeModal.domain.name,
-												...(IS_TESTNET ? {} : upgradePaymentMethod === 'turbo' ? { fundFrom: 'turbo' } : {}),
-											});
-											await pollAndHydrateAfterChange({
-												name: upgradeModal.domain.name,
-												antId: upgradeModal.domain.antId,
-												shouldStop: (rec) => rec?.type === 'permabuy' || rec?.recordType === 'permabuy',
-											});
-											addNotification(language.upgradeToPermanentSuccessfully, 'success');
-										} catch (e) {
-											console.error('Upgrade failed:', e);
-											addNotification(language.errorUpgradingRecord, 'warning');
-										} finally {
-											setUpgradingDomains((s) => {
-												const next = new Set(s);
-												next.delete(upgradeModal.domain!.name);
-												return next;
-											});
-										}
-									}}
-									disabled={(() => {
-										const entry = costsByAntId[upgradeModal.domain!.antId]?.upgrade;
-										const due = IS_TESTNET || upgradePaymentMethod === 'ario' ? entry?.mario : entry?.winc;
-										const bal = IS_TESTNET || upgradePaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
-										return due == null || bal == null || bal < due || upgradingDomains.has(upgradeModal.domain!.name);
-									})()}
-								/>
-							</S.UpgradeModalActions>
-						</S.ModalWrapper>
-					)}
-				</Panel>
+				<PaymentInfoPanel
+					costsByAntId={costsByAntId}
+					upgradeModal={upgradeModal}
+					setUpgradeModal={setUpgradeModal}
+					extendCost={extendCost}
+					extendCostLoading={extendCostLoading}
+					extendPaymentMethod={extendPaymentMethod}
+					setExtendPaymentMethod={_setExtendPaymentMethod}
+					upgradePaymentMethod={upgradePaymentMethod}
+					setUpgradePaymentMethod={_setUpgradePaymentMethod}
+					setShowFund={setShowFund}
+					upgradingDomains={upgradingDomains}
+					setUpgradingDomains={setUpgradingDomains}
+					pollAndHydrateAfterChange={pollAndHydrateAfterChange}
+				/>
 				{confirmAssignModal.open && (
 					<ConfirmAssignModal
 						confirmAssignModal={confirmAssignModal}
