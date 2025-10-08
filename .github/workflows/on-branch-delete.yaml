@@ -1,0 +1,62 @@
+name: On Branch Delete
+
+on: delete
+
+jobs:
+  release:
+    # ensure it's a branch, not a tag
+    if: ${{ github.event.ref_type == 'branch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    env:
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      ARNS_NAME: portalenv
+      NODE_OPTIONS: --max-old-space-size=2048
+
+    steps:
+      # On delete events, the branch no longer exists—check out default
+      - name: Checkout default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Debug event (temporary)
+        run: |
+          echo "Event: $GITHUB_EVENT_NAME"
+          echo "Ref:   ${{ github.event.ref }}"
+          echo "Type:  ${{ github.event.ref_type }}"
+          echo "Default branch: ${{ github.event.repository.default_branch }}"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      # Sanitize the deleted branch name -> undername
+      - name: Sanitize branch -> undername
+        id: under
+        shell: bash
+        run: |
+          BR="${{ github.event.ref }}"  # raw ref of the deleted branch
+          U=$(echo "$BR" | tr '[:upper:]' '[:lower:]' \
+              | sed -E 's/[[:space:]]+/-/g; s#[/\\]+#-#g; s#[^a-z0-9_.-]##g; s/[-_]{2,}/-/g; s/^[-_.]+|[-_.]+$//g;')
+          if [ -z "$U" ]; then
+            echo "Sanitization produced empty undername; failing."
+            exit 1
+          fi
+          [ "$U" = "www" ] && U="w-$(date +%s)"
+          U="${U:0:51}"
+          echo "value=$U" >> "$GITHUB_OUTPUT"
+          echo "Sanitized undername: $U"
+
+      - name: Release undername from ArNS
+        env:
+          UNDERNAME: ${{ steps.under.outputs.value }}
+        run: node scripts/release-undername.js
