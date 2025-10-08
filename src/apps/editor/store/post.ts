@@ -22,6 +22,7 @@ export const initStateCurrentPost: { data: PortalAssetPostType; originalData: an
 		lastUpdate: null,
 		releaseDate: null,
 		authUsers: [],
+		url: null,
 	},
 	originalData: null,
 	editor: {

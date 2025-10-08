@@ -40,8 +40,6 @@ export const HeaderWrapper = styled.div`
 		text-align: center;
 		text-transform: none !important;
 		white-space: nowrap;
-		text-overflow: ellipsis;
-		overflow: hidden;
 	}
 
 	> * {

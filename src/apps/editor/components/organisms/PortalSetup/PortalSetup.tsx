@@ -132,7 +132,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 							src={settings.showLinkAction ? ICONS.close : ICONS.write}
 							handlePress={() => toggleLinkAction()}
 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
-							tooltip={settings.showLinkAction ? language?.close : language?.editSiteLinks}
+							tooltip={settings.showLinkAction ? language?.close : language?.editSocialLinks}
 							tooltipPosition={'bottom-right'}
 							noFocus
 						/>

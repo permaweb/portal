@@ -34,7 +34,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 	const { addNotification } = useNotifications();
 	const [showPrefills, setShowPrefills] = React.useState<boolean>(false);
 	const [editMode, setEditMode] = React.useState<boolean>(false);
-	const [selectedLinks, setSelectedLinks] = React.useState<PortalLinkType[]>([]);
+	const [selectedLinks, setSelectedLinks] = React.useState<number[]>([]);
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState<boolean>(false);
 	const [newLinkUrl, setNewLinkUrl] = React.useState<string>('');
 	const [newLinkTitle, setNewLinkTitle] = React.useState<string>('');
@@ -57,12 +57,12 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 		!newLinkTitle ||
 		linkLoading;
 
-	const handleSelect = (link: PortalLinkType) => {
-		const isSelected = selectedLinks.some((selectedLink) => selectedLink.url === link.url);
+	const handleSelect = (index: number) => {
+		const isSelected = selectedLinks.includes(index);
 		if (isSelected) {
-			setSelectedLinks(selectedLinks.filter((selectedLink) => selectedLink.url !== link.url));
+			setSelectedLinks(selectedLinks.filter((selectedIndex) => selectedIndex !== index));
 		} else {
-			setSelectedLinks([...selectedLinks, link]);
+			setSelectedLinks([...selectedLinks, index]);
 		}
 	};
 
@@ -70,9 +70,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 		if (!unauthorized && arProvider.wallet && portalProvider.current?.links && selectedLinks?.length) {
 			setLinkLoading(true);
 			try {
-				const updatedLinks = linkOptions.filter(
-					(link) => !selectedLinks.some((selectedLink) => selectedLink.url === link.url)
-				);
+				const updatedLinks = linkOptions.filter((_link, index) => !selectedLinks.includes(index));
 
 				const linkUpdateId = await permawebProvider.libs.updateZone(
 					{ Links: permawebProvider.libs.mapToProcessCase(updatedLinks) },
@@ -191,10 +189,10 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 		return (
 			<>
 				{linkOptions.map((link: PortalLinkType, index: number) => {
-					const isSelected = selectedLinks.some((selectedLink) => selectedLink.url === link.url);
+					const isSelected = selectedLinks.includes(index);
 					return (
 						<S.LinkWrapper key={index} editMode={editMode} active={isSelected}>
-							<button onClick={() => (editMode ? handleSelect(link) : window.open(link.url, '_blank'))}>
+							<button onClick={() => (editMode ? handleSelect(index) : window.open(link.url, '_blank'))}>
 								<ReactSVG src={link.icon ? getTxEndpoint(link.icon) : ICONS.link} />
 								<S.LinkTooltip className={'info'}>
 									<span>{link.title}</span>
@@ -370,7 +368,8 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 						<S.ModalBodyWrapper>
 							<p>{language?.linkDeleteConfirmationInfo}</p>
 							<S.ModalBodyElements>
-								{selectedLinks.map((link: PortalLinkType, index: number) => {
+								{selectedLinks.map((linkIndex: number, index: number) => {
+									const link = linkOptions[linkIndex];
 									return (
 										<S.ModalBodyElement key={index}>
 											<span>{`· ${link.title.toUpperCase()}`}</span>

@@ -6,17 +6,18 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPostUpdate } from 'editor/store/post';
 
+import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { ICONS } from 'helpers/config';
 import { PortalUserType } from 'helpers/types';
-import { checkValidAddress, formatAddress } from 'helpers/utils';
+import { checkValidAddress, urlify } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
-export default function ArticlePostCreator() {
+export default function ArticlePostURL() {
 	const { assetId } = useParams<{ assetId?: string }>();
 
 	const dispatch = useDispatch();
@@ -29,13 +30,18 @@ export default function ArticlePostCreator() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [usersFetched, setUsersFetched] = React.useState<{ [address: string]: boolean }>({});
-	const [showDropdown, setShowDropdown] = React.useState<boolean>(false);
+	const [showForm, setShowForm] = React.useState<boolean>(false);
+	const [urlValue, setUrlValue] = React.useState<string>(currentPost.data?.url || '');
 
 	React.useEffect(() => {
-		if (!assetId && !currentPost.data?.creator && permawebProvider.profile?.id) {
-			dispatch(currentPostUpdate({ field: 'creator', value: permawebProvider.profile.id }));
-		}
-	}, [currentPost.data?.creator, permawebProvider.profile.id]);
+		setUrlValue(currentPost.data?.url || '');
+	}, [currentPost.data?.url]);
+
+	React.useEffect(() => {
+		const generatedUrl = urlify(currentPost.data.title);
+		setUrlValue(generatedUrl);
+		handleCurrentPostUpdate({ field: 'url', value: generatedUrl });
+	}, [currentPost.data?.title]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -67,6 +73,12 @@ export default function ArticlePostCreator() {
 		dispatch(currentPostUpdate(updatedField));
 	};
 
+	const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value;
+		setUrlValue(value);
+		handleCurrentPostUpdate({ field: 'url', value: urlify(value) });
+	};
+
 	/* If a contributor visits a post that they did not create, then disable updates */
 	const currentUser = portalProvider.current?.users?.find(
 		(user: PortalUserType) => user.address === permawebProvider.profile?.id
@@ -75,59 +87,34 @@ export default function ArticlePostCreator() {
 	const submitUnauthorized =
 		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions?.postAutoIndex;
 	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
-	const creatorDisabled = requestUnauthorized || submitUnauthorized || currentPost.editor.loading.active;
-
-	const creator = portalProvider.usersByPortalId?.[currentPost.data.creator] ?? { id: currentPost.data.creator };
+	const urlDisabled = requestUnauthorized || submitUnauthorized || currentPost.editor.loading.active;
 
 	return (
 		<S.Wrapper>
 			<S.HeaderWrapper>
 				<p>
-					<span className={'post-creator-info'}>{`${language.author}:`}</span>{' '}
-					{creator?.name ?? creator?.username ?? '-'}
+					<span className={'post-url-info'}>{`${language.url}:`}</span> {currentPost.data?.url || '-'}
 				</p>
-				<CloseHandler active={showDropdown} disabled={!showDropdown} callback={() => setShowDropdown(false)}>
+				<CloseHandler active={showForm} disabled={!showForm} callback={() => setShowForm(false)}>
 					<IconButton
 						type={'primary'}
-						handlePress={() => setShowDropdown((prev) => !prev)}
-						src={showDropdown ? ICONS.close : ICONS.write}
-						disabled={creatorDisabled}
+						handlePress={() => setShowForm((prev) => !prev)}
+						src={showForm ? ICONS.close : ICONS.write}
+						disabled={urlDisabled}
 						dimensions={{ wrapper: 23.5, icon: 13.5 }}
-						tooltip={showDropdown ? null : language.edit}
+						tooltip={showForm ? null : language.edit}
 					/>
-					{showDropdown && (
-						<S.Dropdown className={'border-wrapper-alt1 scroll-wrapper-hidden'}>
-							{portalProvider.current?.users
-								?.filter((user: PortalUserType) => user.type !== 'wallet')
-								.map((user: PortalUserType, index: number) => {
-									const userProfile = portalProvider.usersByPortalId?.[user.address] ?? { id: user.address };
-									return (
-										<S.Option
-											active={user.address === currentPost?.data?.creator}
-											key={index}
-											onClick={() => {
-												if (user.address !== currentPost?.data?.creator) {
-													handleCurrentPostUpdate({ field: 'creator', value: user.address });
-												}
-												setShowDropdown(false);
-											}}
-										>
-											{userProfile.username ?? formatAddress(userProfile.id, false)}
-										</S.Option>
-									);
-								})}
-							<S.Option
-								active={portalProvider.current?.id === currentPost?.data?.creator}
-								onClick={() => {
-									if (portalProvider.current?.id !== currentPost?.data?.creator) {
-										handleCurrentPostUpdate({ field: 'creator', value: portalProvider.current?.id });
-									}
-									setShowDropdown(false);
-								}}
-							>
-								{portalProvider.current?.name ?? formatAddress(portalProvider.current?.id, false)}
-							</S.Option>
-						</S.Dropdown>
+					{showForm && (
+						<S.Form>
+							<FormField
+								value={urlValue}
+								onChange={handleUrlChange}
+								invalid={{ status: false, message: null }}
+								disabled={urlDisabled}
+								placeholder={language.enterUrl || 'Enter URL'}
+								autoFocus={true}
+							/>
+						</S.Form>
 					)}
 				</CloseHandler>
 			</S.HeaderWrapper>

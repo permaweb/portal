@@ -214,6 +214,9 @@ export default function Editor() {
 				'Metadata.Content',
 			]);
 
+			const url = currentPost.data.url || urlify(currentPost.data.title);
+			const releaseDate = currentPost.data.releaseDate ?? new Date().getTime().toString();
+
 			let data: any = permawebProvider.libs.mapToProcessCase({
 				name: currentPost.data.title,
 				description: currentPost.data.description,
@@ -221,7 +224,8 @@ export default function Editor() {
 				content: currentPost.data.content,
 				topics: currentPost.data.topics,
 				categories: currentPost.data.categories,
-				releaseDate: currentPost.data.releaseDate ?? new Date().getTime().toString(),
+				url: url,
+				releaseDate: releaseDate,
 			});
 
 			if (currentPost.data.thumbnail) {
@@ -321,7 +325,8 @@ export default function Editor() {
 							contentType: ASSET_UPLOAD.contentType,
 							assetType: ASSET_UPLOAD.ansType,
 							metadata: {
-								releaseDate: currentPost.data.releaseDate ?? new Date().getTime().toString(),
+								url: url,
+								releaseDate: releaseDate,
 								originPortal: portalProvider.current.id,
 							},
 							users: getAssetAuthUsers(),
@@ -569,6 +574,35 @@ export default function Editor() {
 			valid = false;
 			message = 'Tags are required';
 			missingFieldsFound.push(message);
+		}
+
+		// Check for duplicate title or URL
+		if (portalProvider.current?.assets) {
+			const existingPosts = portalProvider.current.assets.filter((asset: any) => asset.id !== currentPost.data.id);
+
+			// Check for duplicate title
+			if (currentPost.data.title) {
+				const duplicateTitle = existingPosts.some(
+					(asset: any) => asset.name?.toLowerCase() === currentPost.data.title.toLowerCase()
+				);
+				if (duplicateTitle) {
+					valid = false;
+					message = 'Post title already exists';
+					missingFieldsFound.push(message);
+				}
+			}
+
+			// Check for duplicate URL
+			if (currentPost.data.url) {
+				const duplicateUrl = existingPosts.some(
+					(asset: any) => asset.metadata?.url?.toLowerCase() === currentPost.data.url.toLowerCase()
+				);
+				if (duplicateUrl) {
+					valid = false;
+					message = 'Post URL already exists';
+					missingFieldsFound.push(message);
+				}
+			}
 		}
 
 		if (!valid) {
