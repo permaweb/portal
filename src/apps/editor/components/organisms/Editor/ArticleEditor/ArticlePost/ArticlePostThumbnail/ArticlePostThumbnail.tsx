@@ -12,6 +12,7 @@ import { Modal } from 'components/atoms/Modal';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
+import { PortalPatchMapEnum } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -70,8 +71,27 @@ export default function ArticlePostThumbnail() {
 		try {
 			const tx = await permawebProvider.libs.resolveTransaction(thumbnailData);
 			handleCurrentPostUpdate({ field: 'thumbnail', value: tx });
+
 			addNotification(`${language?.thumbnailUpdated}!`, 'success');
 			handleClear(null);
+
+			const data: any = {
+				tx: tx,
+				type: 'image',
+				dateUploaded: Date.now().toString(),
+			};
+
+			const updatedMedia = [...portalProvider.current.uploads, data];
+
+			const mediaUpdateId = await permawebProvider.libs.updateZone(
+				{ Uploads: permawebProvider.libs.mapToProcessCase(updatedMedia) },
+				portalProvider.current.id,
+				arProvider.wallet
+			);
+
+			console.log(`Media update: ${mediaUpdateId}`);
+
+			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Media);
 		} catch (e: any) {
 			handleClear(e.message ?? 'Error uploading thumbnail');
 		}
