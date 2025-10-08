@@ -1,12 +1,12 @@
-import React from 'react';
 import { ReactSVG } from 'react-svg';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS_SOCIAL } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
 
 import * as S from './styles';
 
-function getSocialIcon(url: string): string | null {
+function getSocialIcon(url: string, icon: string): string | null {
 	const lowerUrl = url.toLowerCase();
 	if (lowerUrl.includes('twitter.com') || lowerUrl.includes('x.com')) return ICONS_SOCIAL.X;
 	if (lowerUrl.includes('github.com')) return ICONS_SOCIAL.GITHUB;
@@ -28,7 +28,7 @@ function getSocialIcon(url: string): string | null {
 	if (lowerUrl.includes('vk.com')) return ICONS_SOCIAL.VK;
 	if (lowerUrl.includes('wechat.com')) return ICONS_SOCIAL.WECHAT;
 	if (lowerUrl.includes('whatsapp.com')) return ICONS_SOCIAL.WHATSAPP;
-	return null;
+	return getTxEndpoint(icon) || null;
 }
 
 interface SocialLinksProps {
@@ -45,7 +45,7 @@ export default function SocialLinks({ isFooter = false }: SocialLinksProps) {
 		<S.Links $isFooter={isFooter}>
 			<S.LinksList $isFooter={isFooter}>
 				{Links.map((link: any, index: number) => {
-					const icon = getSocialIcon(link.url);
+					const icon = getSocialIcon(link.url, link.icon);
 					return icon ? (
 						<a key={index} href={link.url} target="_blank" rel="noreferrer" title={link.title}>
 							<ReactSVG src={icon} />
