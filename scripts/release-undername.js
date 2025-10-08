@@ -1,4 +1,5 @@
-import { ANT, ARIO, ArweaveSigner } from '@ar.io/sdk';
+#!/usr/bin/env node
+const { ANT, ARIO, ArweaveSigner } = require('@ar.io/sdk');
 
 (async () => {
 	try {
@@ -13,7 +14,7 @@ import { ANT, ARIO, ArweaveSigner } from '@ar.io/sdk';
 			process.exit(1);
 		}
 
-		const jsonString = atob(process.env.DEPLOY_KEY);
+    const jsonString = atob(process.env.DEPLOY_KEY);
 		const jwk = JSON.parse(jsonString);
 		const signer = new ArweaveSigner(jwk);
 
