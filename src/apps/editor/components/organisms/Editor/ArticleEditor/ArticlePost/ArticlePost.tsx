@@ -10,6 +10,7 @@ import { ArticlePostDescription } from './ArticlePostDescription';
 import { ArticlePostReleaseDate } from './ArticlePostReleaseDate';
 import { ArticlePostStatus } from './ArticlePostStatus';
 import { ArticlePostThumbnail } from './ArticlePostThumbnail';
+import { ArticlePostURL } from './ArticlePostURL';
 import * as S from './styles';
 
 export default function ArticlePost(props: {
@@ -40,8 +41,9 @@ export default function ArticlePost(props: {
 						<ArticlePostCreator />
 					</S.SectionStart>
 					<ArticlePostReleaseDate />
+					<ArticlePostStatus />
 					<S.SectionEnd>
-						<ArticlePostStatus />
+						<ArticlePostURL />
 					</S.SectionEnd>
 				</S.SectionBody>
 			</S.Section>
