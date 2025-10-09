@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
 import { ICONS } from 'helpers/config';
+import { getRedirect } from 'helpers/utils';
 
 import * as S from './styles';
 
@@ -39,7 +40,7 @@ export default function Search(props: any) {
 				value={useSearch ? term : ''}
 				onChange={(e) => setTerm(e.target.value)}
 				onKeyDown={(e) => {
-					if (e.key === 'Enter') navigate(`/search/${encodeURIComponent(term)}`);
+					if (e.key === 'Enter') navigate(getRedirect(`search/${encodeURIComponent(term)}`));
 				}}
 			/>
 		</S.Search>

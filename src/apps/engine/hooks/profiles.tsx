@@ -1,11 +1,11 @@
 import React from 'react';
 import Placeholder from 'engine/components/placeholder';
 
-import { cacheProfile, getCachedProfile } from 'helpers/utils';
+import { cacheProfile, checkValidAddress, getCachedProfile, urlify } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 export const useProfile = (profileId: string) => {
-	const { libs, profile: currentUserProfile } = usePermawebProvider();
+	const permawebProvider = usePermawebProvider();
 	const [profile, setProfile] = React.useState(null);
 	const [isLoading, setIsLoading] = React.useState(false);
 	const [error, setError] = React.useState(null);
@@ -13,41 +13,93 @@ export const useProfile = (profileId: string) => {
 	React.useEffect(() => {
 		if (!profileId) {
 			setProfile(null);
+			setIsLoading(false);
 			return;
 		}
 
-		if (!libs) {
+		if (!permawebProvider.libs) {
+			setIsLoading(false);
+			return;
+		}
+
+		// Check if it's the current user's profile
+		if (
+			permawebProvider.profile &&
+			(profileId === permawebProvider.profile.id || profileId === urlify(permawebProvider.profile.username))
+		) {
+			setProfile(permawebProvider.profile);
+			setIsLoading(false);
+			return;
+		}
+
+		// Determine the actual process ID
+		let processId;
+		if (checkValidAddress(profileId)) {
+			processId = profileId;
+		} else {
+			// Search through cached profiles to find ID by username
+			const urlifiedProfileId = urlify(profileId);
+			for (let i = 0; i < localStorage.length; i++) {
+				const key = localStorage.key(i);
+				if (key && key.startsWith('profile-')) {
+					try {
+						const cachedProfile = JSON.parse(localStorage.getItem(key));
+						if (
+							cachedProfile &&
+							(urlify(cachedProfile.username) === urlifiedProfileId ||
+								urlify(cachedProfile.displayName) === urlifiedProfileId)
+						) {
+							processId = cachedProfile.id;
+							break;
+						}
+					} catch (e) {
+						// Skip invalid JSON entries
+					}
+				}
+			}
+		}
+
+		// If we couldn't determine a processId, we can't fetch the profile
+		if (!processId) {
 			setProfile(null);
+			setIsLoading(false);
+			setError(new Error('Invalid profile ID'));
 			return;
 		}
 
-		if (currentUserProfile && profileId === currentUserProfile.id) {
-			setProfile(currentUserProfile);
-			return;
-		}
-
-		const cached = getCachedProfile(profileId);
+		// Check cache by process ID
+		const cached = getCachedProfile(processId);
 		if (cached) {
 			setProfile(cached);
+			setIsLoading(false);
 			return;
 		}
 
-		const cachedByWallet = localStorage.getItem(`profile-by-wallet-${profileId}`);
+		// Check cache by wallet address
+		const cachedByWallet = localStorage.getItem(`profile-by-wallet-${processId}`);
 		if (cachedByWallet) {
-			const parsed = JSON.parse(cachedByWallet);
-			setProfile(parsed);
-			return;
+			try {
+				const parsed = JSON.parse(cachedByWallet);
+				setProfile(parsed);
+				setIsLoading(false);
+				return;
+			} catch (e) {
+				console.error('Failed to parse cached profile:', e);
+			}
 		}
 
+		// Fetch from API
 		setIsLoading(true);
 		setError(null);
 
-		libs
-			.getProfileById(profileId)
+		permawebProvider.libs
+			.getProfileById(processId)
 			.then((fetchedProfile: any) => {
 				if (fetchedProfile) {
-					cacheProfile(profileId, fetchedProfile);
+					cacheProfile(processId, fetchedProfile);
 					setProfile(fetchedProfile);
+				} else {
+					setProfile(null);
 				}
 				setIsLoading(false);
 			})
@@ -56,12 +108,15 @@ export const useProfile = (profileId: string) => {
 				setError(err);
 				setIsLoading(false);
 
-				const cachedFallback = getCachedProfile(profileId);
+				// Try fallback cache
+				const cachedFallback = getCachedProfile(processId);
 				if (cachedFallback) {
 					setProfile(cachedFallback);
+				} else {
+					setProfile(null);
 				}
 			});
-	}, [profileId, libs, currentUserProfile]);
+	}, [profileId, permawebProvider.libs, permawebProvider.profile]);
 
 	if (!profileId || isLoading || !profile) {
 		return {
@@ -70,7 +125,7 @@ export const useProfile = (profileId: string) => {
 				thumbnail: '',
 				id: profileId || '',
 			},
-			isLoading: !Boolean(profileId) || isLoading,
+			isLoading: Boolean(profileId) && isLoading,
 			error,
 		};
 	}

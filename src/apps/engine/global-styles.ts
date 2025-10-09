@@ -30,7 +30,7 @@ export const GlobalStyles = createGlobalStyle`
     --spacing-vertical: 2rem;
     --spacing-width: 36px;
 
-    --font-size-xxxlarge: calc(1em * 2.4);
+    --font-size-xxxlarge: calc(1em * 3.4);
     --font-size-xxlarge: calc(1em * 2);
     --font-size-xlarge: calc(1em * 1.5);
     --font-size-large: calc(1em * 1.2);

@@ -144,6 +144,8 @@ export const Comments = styled.div`
 	flex-direction: column;
 	gap: 20px;
 	flex: 1;
+	max-width: 950px;
+	margin: 0 auto;
 
 	h3 {
 		margin: 0;

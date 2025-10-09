@@ -6,7 +6,7 @@ import { useProfile } from 'engine/hooks/profiles';
 
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, getRedirect } from 'helpers/utils';
 
 import * as S from './styles';
 
@@ -19,7 +19,7 @@ export default function CategorySpotlight(props: any) {
 		const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || null);
 
 		return (
-			<NavLink to={`post/${post.id}`} className={isLoadingPosts ? 'disabledLink' : ''}>
+			<NavLink to={getRedirect(`post/${post.id}`)} className={isLoadingPosts ? 'disabledLink' : ''}>
 				<S.LeftEntry>
 					<S.LeftThumbnail>
 						<img
@@ -54,7 +54,7 @@ export default function CategorySpotlight(props: any) {
 		const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || null);
 
 		return (
-			<NavLink to={`post/${post?.id}`} className={isLoadingPosts ? 'disabledLink' : ''}>
+			<NavLink to={getRedirect(`post/${post?.id}`)} className={isLoadingPosts ? 'disabledLink' : ''}>
 				<S.RightEntry>
 					<S.RightThumbnail>
 						<img

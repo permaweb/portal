@@ -85,13 +85,13 @@ export default function Builder(props: any) {
 			case 'image':
 				return <Image key={index} title={element.title} uri={element.uri} />;
 
-			// Other
-			case 'static':
-				return <StaticPage content={element.content} />;
-			case 'authors':
-				return <StaticPage content={element.content} />;
-			case 'podcasts':
-				return <StaticPage content={element.content} background={false} />;
+			// // Other
+			// case 'static':
+			// 	return <StaticPage content={element.content} />;
+			// case 'authors':
+			// 	return <StaticPage content={element.content} />;
+			// case 'podcasts':
+			// 	return <StaticPage content={element.content} background={false} />;
 			case 'link':
 				return <Link key={index} target={element.target} to={element.uri} label={element.text} />;
 			case 'label':

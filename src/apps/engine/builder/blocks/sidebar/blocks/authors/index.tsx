@@ -4,6 +4,7 @@ import { useAuthors } from 'engine/hooks/posts';
 import { useProfile } from 'engine/hooks/profiles';
 
 import Title from 'components/title';
+import { getRedirect } from 'helpers/utils';
 
 import * as S from './styles';
 
@@ -16,7 +17,7 @@ export default function SidebarAuthors() {
 		if (!profile) return null;
 
 		return (
-			<S.FNEntry $level={1} onClick={() => navigate(`/user/${userId}`)}>
+			<S.FNEntry $level={1} onClick={() => navigate(getRedirect(`author/${userId}`))}>
 				{profile?.displayName || userId}
 			</S.FNEntry>
 		);

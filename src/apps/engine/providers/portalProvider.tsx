@@ -6,15 +6,7 @@ import { defaultThemes } from 'engine/defaults/theme.defaults';
 import WebFont from 'webfontloader';
 
 import { PortalPermissionsType, PortalUserType } from 'helpers/types';
-import {
-	areAssetsEqual,
-	cachePortal,
-	cacheProfile,
-	getCachedPortal,
-	getCachedProfile,
-	getPortalAssets,
-	getPortalUsers,
-} from 'helpers/utils';
+import { cachePortal, getCachedPortal, getPortalUsers } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -61,7 +53,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [portal, setPortal] = React.useState(null);
 	const [permissions, setPermissions] = React.useState<PortalPermissionsType | null>(null);
 	const [editorMode, setEditorMode] = React.useState('hidden');
-	const [updating, setUpdating] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
 		if (!portalId || !permawebProvider.libs) return;
@@ -110,6 +101,24 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					setPermissions({ base: false });
 				}
 
+				// Sort posts by release date and filter out future posts
+				const sortedPosts = posts?.index
+					? [...posts.index]
+							.filter((post) => {
+								const releaseDate = post.metadata?.releaseDate || post.dateCreated;
+								const postDate = new Date(Number(releaseDate));
+								const now = new Date();
+								// Only include posts that have been released (not in the future)
+								return postDate <= now;
+							})
+							.sort((a, b) => {
+								const aDate = a.metadata?.releaseDate || a.dateCreated;
+								const bDate = b.metadata?.releaseDate || b.dateCreated;
+								// Sort descending (newest first)
+								return Number(bDate) - Number(aDate);
+							})
+					: [];
+
 				const zone = {
 					...defaultPortal,
 					...cached,
@@ -123,7 +132,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					categories: navigation?.categories,
 					topics: navigation?.topics,
 					links: navigation?.links,
-					posts: posts?.index ? [...posts.index].reverse() : [],
+					posts: sortedPosts,
 					users: portalUsers,
 				};
 
@@ -138,8 +147,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const Fonts = zone?.fonts;
 				const Icon = zone?.icon;
 
-				const portalData = { Name, Categories, Layout, Pages, Themes, Posts, Links, Logo, Fonts, Icon };
-				console.log('portalData: ', portalData);
+				const portalData = { Id: portalId, Name, Categories, Layout, Pages, Themes, Posts, Links, Logo, Fonts, Icon };
 				setPortal(portalData);
 				if (portalId && portalData) cachePortal(portalId, portalData);
 			} catch (err) {
