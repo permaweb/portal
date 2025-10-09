@@ -9,8 +9,8 @@ export const Comments = styled.div`
 	box-sizing: border-box;
 	border-radius: var(--border-radius);
 	gap: 20px;
-	// box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-	margin-top: 20px;
+	max-width: 950px;
+	margin: 20px auto 0 auto;
 
 	h2 {
 		margin: 0;

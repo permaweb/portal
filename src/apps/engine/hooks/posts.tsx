@@ -2,12 +2,12 @@ import React from 'react';
 import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
+import { checkValidAddress } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 export const usePosts = (props?: any) => {
-	const { preview = false } = props || {};
 	const { portal } = usePortalProvider();
-	const { profile } = useProfile(props?.author || null);
+	const { profile: authorProfile } = useProfile(props?.author || null);
 	const { profile: user } = usePermawebProvider();
 	const Posts = portal?.Posts || [];
 	const isLoading = false;
@@ -33,7 +33,8 @@ export const usePosts = (props?: any) => {
 		filtered = filtered.filter((post) => {
 			const m = post.metadata ?? {};
 
-			if (props.author && post.creator !== props.author) return false;
+			// Use the resolved profile ID instead of the username
+			if (props.author && authorProfile?.id && post.creator !== authorProfile.id) return false;
 			if (props.category && !m.categories?.some((c) => c.name === props.category || c.id === props.category))
 				return false;
 			if (props.tags && !props.tags.some((t: string) => post.metadata?.topics?.includes(t))) return false;
@@ -103,7 +104,7 @@ export const usePosts = (props?: any) => {
 			if (Title) break;
 		}
 	} else if (props?.author) {
-		Title = profile?.displayName;
+		Title = authorProfile?.displayName;
 	}
 
 	return {
@@ -114,21 +115,29 @@ export const usePosts = (props?: any) => {
 	};
 };
 
-export const usePost = (txId: any) => {
+export const usePost = (id: any) => {
 	const { libs } = usePermawebProvider();
+	const { portal } = usePortalProvider();
+	const { Posts } = portal;
 	const [fullPost, setFullPost] = React.useState<any>(undefined);
 	const [isLoading, setIsLoading] = React.useState(true);
 	const [error, setError] = React.useState<any>(undefined);
 
 	React.useEffect(() => {
-		if (!txId || !libs) {
-			setIsLoading(!txId ? false : true);
+		if (!id || !libs) {
+			setIsLoading(!id ? false : true);
 			return;
 		}
 
-		setIsLoading(true);
+		let postId = checkValidAddress(id) ? id : null;
+
+		if (!postId && Posts && Array.isArray(Posts)) {
+			const found = Posts.find((p) => p.metadata?.url === id);
+			if (found) postId = found.id;
+		}
+
 		libs
-			.getAtomicAsset(txId)
+			.getAtomicAsset(postId)
 			.then((fetchedPost: any) => {
 				setFullPost(fetchedPost);
 				setIsLoading(false);
@@ -138,7 +147,7 @@ export const usePost = (txId: any) => {
 				setError(err);
 				setIsLoading(false);
 			});
-	}, [txId, libs]);
+	}, [id, libs, checkValidAddress(id) ? null : Posts]);
 
 	return {
 		post: fullPost,

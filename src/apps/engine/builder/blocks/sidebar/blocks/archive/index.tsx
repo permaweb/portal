@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Title from 'engine/components/title';
 import { useArchive } from 'engine/hooks/posts';
 
+import { getRedirect } from 'helpers/utils';
+
 import * as S from './styles';
 
 export default function SidebarArchive(props: any) {
@@ -36,7 +38,11 @@ export default function SidebarArchive(props: any) {
 						].map((month, index) => {
 							if (!archive[year][month]) return null;
 							return (
-								<S.FNEntry key={month} $level={1} onClick={() => navigate(`/feed/date/${year}/${11 - index + 1}`)}>
+								<S.FNEntry
+									key={month}
+									$level={1}
+									onClick={() => navigate(getRedirect(`feed/date/${year}/${11 - index + 1}`))}
+								>
 									{month}
 								</S.FNEntry>
 							);

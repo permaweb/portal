@@ -19,7 +19,7 @@ export default function Page() {
 		pageId = 'feed';
 	} else if ('postId' in params) {
 		pageId = 'post';
-	} else if ('user' in params) {
+	} else if ('author' in params) {
 		pageId = 'user';
 	} else if ('search' in params) {
 		pageId = 'search';

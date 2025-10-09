@@ -8,7 +8,7 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS, STORAGE } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, getRedirect } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -159,7 +159,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 						<S.NavigationEntry
 							onClick={() => {
 								setShowUserMenu(false);
-								navigate(`user/${profile.id}`);
+								navigate(getRedirect(`author/${profile.id}`));
 							}}
 						>
 							<ReactSVG src={ICONS.user} />
