@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
@@ -7,6 +8,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { ICONS } from 'helpers/config';
 import { PortalDomainType, PortalPatchMapEnum } from 'helpers/types';
+import { getCurrentGateway } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -57,40 +59,44 @@ function Domain(props: { domain: PortalDomainType }) {
 		}
 	}
 
+	const currentUrl = `https://${props.domain.name}.${getCurrentGateway()}`;
+
 	return (
 		<>
 			{loading && <Loader message={`${language.updating}...`} />}
 			<S.DomainWrapper>
-				<S.DomainContent isOpen={false}>
-					<S.DomainHeader>
-						<S.DomainHeaderContent>
-							<S.DomainName>{props.domain.name}</S.DomainName>
-						</S.DomainHeaderContent>
-					</S.DomainHeader>
-					<S.DomainDetail>
-						{props.domain?.primary && <S.DomainBadge>{language.primaryDomain}</S.DomainBadge>}
-						<S.DomainActions>
-							<IconButton
-								type={'alt1'}
-								active={false}
-								src={ICONS.menu}
-								handlePress={() => setShowDropdown((prev) => !prev)}
-								disabled={false}
-								dimensions={{ wrapper: 27.5, icon: 15 }}
-								tooltip={showDropdown ? null : language?.showDomainActions}
-								tooltipPosition={'bottom-right'}
-								noFocus
-							/>
-						</S.DomainActions>
-					</S.DomainDetail>
-				</S.DomainContent>
+				<Link to={currentUrl} target={'_blank'}>
+					<S.DomainContent isOpen={false}>
+						<S.DomainHeader>
+							<S.DomainHeaderContent>
+								<S.DomainName>{props.domain.name}</S.DomainName>
+							</S.DomainHeaderContent>
+						</S.DomainHeader>
+						<S.DomainDetail>
+							{props.domain?.primary && <S.DomainBadge>{language.primaryDomain}</S.DomainBadge>}
+							<S.DomainActions>
+								<IconButton
+									type={'alt1'}
+									active={false}
+									src={ICONS.menu}
+									handlePress={() => setShowDropdown((prev) => !prev)}
+									disabled={false}
+									dimensions={{ wrapper: 27.5, icon: 15 }}
+									tooltip={showDropdown ? null : language?.showDomainActions}
+									tooltipPosition={'bottom-right'}
+									noFocus
+								/>
+							</S.DomainActions>
+						</S.DomainDetail>
+					</S.DomainContent>
+				</Link>
 				{showDropdown && (
 					<CloseHandler active={showDropdown} disabled={!showDropdown} callback={() => setShowDropdown(false)}>
 						<S.DomainActionsDropdown className={'border-wrapper-alt1 fade-in'}>
 							<button
 								onClick={(e: any) => {
 									e.stopPropagation();
-									window.open(`https://${props.domain.name}.arweave.net`, '_blank');
+									window.open(currentUrl, '_blank');
 								}}
 							>
 								<ReactSVG src={ICONS.site} />

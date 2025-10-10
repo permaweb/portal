@@ -77,6 +77,7 @@ export const Tooltip = styled.div<{ position: string }>`
 		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		white-space: nowrap !important;
+		text-decoration: none !important;
 	}
 `;
 

@@ -18,7 +18,7 @@ export const Content = styled.div`
 `;
 
 export const Header = styled.h2`
-	font-size: 28px;
+	font-size: ${(props) => props.theme.typography.size.xxLg};
 	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 
@@ -30,5 +30,5 @@ export const Divider = styled.div`
 `;
 
 export const Message = styled.p`
-	font-size: 18px;
+	font-size: ${(props) => props.theme.typography.size.small};
 `;

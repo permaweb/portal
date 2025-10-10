@@ -85,6 +85,7 @@ export const language = {
 		create: `Create`,
 		created: `Created`,
 		createPage: `Create a Page`,
+		createPageInfo: `Create an Info Page`,
 		createPortal: `Create a New Portal`,
 		createPost: `Create a Post`,
 		createProfile: `Create Your Profile`,
@@ -197,6 +198,7 @@ export const language = {
 		images: `Images`,
 		immediately: `Immediately`,
 		inactiveComments: `Inactive Comments`,
+		infoPages: `Info Pages`,
 		insertFromUrl: `Insert From URL`,
 		insufficientBalance: `Insufficient Balance. Add credits to continue.`,
 		insufficientBalanceMessage: `Insufficient Balance. Add credits to continue.`,
@@ -219,6 +221,7 @@ export const language = {
 		linksUpdated: `Links Updated`,
 		loading: `Loading`,
 		loadingDataFor: `Loading Data For:`,
+		loadingPage: `Loading Page`,
 		loadingPortal: `Loading Your Portal`,
 		loadingPost: `Loading Post`,
 		loggingIn: `Logging In`,
@@ -479,6 +482,7 @@ export const language = {
 		year: `Year`,
 		years: `Years`,
 		youAreInvited: `You're Invited`,
+		yourRecords: `Your Records`,
 		yourUploadBalance: `Your Upload Balance`,
 		yyyyPlaceholder: `YYYY`,
 	},
@@ -486,8 +490,12 @@ export const language = {
 		// === UNTRANSLATED START ===
 		// TODO: translate
 
+		createPageInfo: `Create an Info Page`,
+		infoPages: `Info Pages`,
+		loadingPage: `Loading Page`,
 		publication: `Publication`,
 		upgradeDomain: `Upgrade Domain`,
+		yourRecords: `Your Records`,
 		// === UNTRANSLATED END ===
 		activate: `Activar`,
 		add: `Agregar`,

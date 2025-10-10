@@ -50,6 +50,7 @@ export type PortalAssetType = {
 		thumbnail?: string;
 		releaseDate?: number;
 		comments?: string;
+		url?: string;
 	};
 };
 

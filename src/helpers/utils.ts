@@ -1,7 +1,7 @@
 import Arweave from 'arweave';
 import { ARIOToken, mARIOToken } from '@ar.io/sdk';
 
-import { STORAGE, URLS } from './config';
+import { FALLBACK_GATEWAY, STORAGE, URLS } from './config';
 import { PortalAssetType, PortalDomainType, PortalUserType } from './types';
 
 export function checkValidAddress(address: string | null) {
@@ -378,14 +378,15 @@ export function stripAnsiChars(input: string) {
 	return input.toString().replace(ansiRegex, '');
 }
 
-function getCurrentGateway() {
+export function getCurrentGateway() {
+	if (window.location.hostname === 'localhost') return FALLBACK_GATEWAY;
 	const { host } = window.location;
 	const parts = host.split('.');
 	return `${parts[1]}.${parts[2]}`;
 }
 
 export function resolvePrimaryDomain(domains: PortalDomainType[], portalId: string) {
-	const gateway = window.location.hostname === 'localhost' ? 'arweave.net' : getCurrentGateway();
+	const gateway = window.location.hostname === 'localhost' ? FALLBACK_GATEWAY : getCurrentGateway();
 	const domain = domains?.find((domain) => domain.primary)?.name || domains?.[0]?.name;
 	if (domain) return `https://${domain}.${gateway}`;
 	else return `https://${gateway}/${portalId}`;

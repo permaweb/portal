@@ -49,7 +49,7 @@ export default function Domains() {
 
 				{showAdditionalRecords && (
 					<S.DomainsWrapper>
-						<h6>Your Records</h6>
+						<h6>{language.yourRecords}</h6>
 						<S.DomainsArNS className={'border-wrapper-alt2'}>
 							<DomainListArNS />
 						</S.DomainsArNS>

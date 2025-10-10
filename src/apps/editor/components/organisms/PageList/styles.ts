@@ -6,6 +6,14 @@ export const Wrapper = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
+	gap: 25px;
+`;
+
+export const PagesWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 
 	> * {
 		&:not(:last-child) {
@@ -14,13 +22,41 @@ export const Wrapper = styled.div`
 	}
 `;
 
+export const InfoPagesWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+`;
+
+export const InfoPagesHeader = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: 0 0 15px 0;
+
+	h6 {
+		font-size: ${(props) => props.theme.typography.size.xxLg} !important;
+		color: ${(props) => props.theme.colors.font.alt1};
+	}
+`;
+
 export const PageWrapper = styled.div`
 	display: flex;
-	padding: 12.5px 15px;
+	padding: 15px;
 	justify-content: space-between;
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 20px;
+	transition: all 100ms;
+
+	&:hover {
+		background: ${(props) => props.theme.colors.button.primary.active.background};
+		p {
+			text-decoration: underline;
+			text-decoration-thickness: 1.25px;
+		}
+	}
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		flex-direction: column;
@@ -30,32 +66,23 @@ export const PageWrapper = styled.div`
 
 export const PageHeader = styled.div`
 	max-width: 50%;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 20px;
+	display: flex;
+	align-items: center;
+	gap: 5px;
 
-	a {
-		display: flex;
-		align-items: center;
-		gap: 5px;
-
-		&:hover {
-			svg {
-				color: ${(props) => props.theme.colors.font.alt1};
-				fill: ${(props) => props.theme.colors.font.alt1};
-			}
-			p {
-				color: ${(props) => props.theme.colors.font.alt1};
-			}
-		}
-
-		svg {
-			color: ${(props) => props.theme.colors.font.primary};
-			fill: ${(props) => props.theme.colors.font.primary};
-		}
+	svg {
+		color: ${(props) => props.theme.colors.font.primary};
+		fill: ${(props) => props.theme.colors.font.primary};
 	}
 
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-size: ${(props) => props.theme.typography.size.small};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		white-space: nowrap;
 		overflow-x: hidden;

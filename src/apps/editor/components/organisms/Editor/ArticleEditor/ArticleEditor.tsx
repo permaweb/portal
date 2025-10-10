@@ -56,7 +56,10 @@ export default function ArticleEditor(props: {
 						dispatch(currentPostClear());
 						handleCurrentPostUpdate({
 							field: 'loading',
-							value: { active: true, message: `${language?.loadingPost}...` },
+							value: {
+								active: true,
+								message: `${props.staticPage ? language?.loadingPage : language?.loadingPost}...`,
+							},
 						});
 						try {
 							const response = await permawebProvider.libs.getAtomicAsset(assetId);

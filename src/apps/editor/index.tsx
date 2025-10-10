@@ -31,8 +31,10 @@ const Landing = getLazyImport('Landing');
 const PortalView = getLazyImport('Portal');
 const Posts = getLazyImport('Posts');
 const Moderation = getLazyImport('Moderation');
-const PageCreate = getLazyImport('Page/Create');
-const PageEdit = getLazyImport('Page/Edit');
+const PageCreateMain = getLazyImport('Page/Create/Main');
+const PageEditMain = getLazyImport('Page/Edit/Main');
+const PageCreateInfo = getLazyImport('Page/Create/Info');
+const PageEditInfo = getLazyImport('Page/Edit/Info');
 const PostCreate = getLazyImport('Post/Create');
 const PostEdit = getLazyImport('Post/Edit');
 const Setup = getLazyImport('Setup');
@@ -209,8 +211,10 @@ function AppContent() {
 						{getRoute(`${URLS.base}:portalId/post/create`, <PostCreate />)}
 						{getRoute(`${URLS.base}:portalId/post/create/article`, <PostEdit />)}
 						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <PostEdit />)}
-						{getRoute(`${URLS.base}:portalId/page/create`, <PageCreate />)}
-						{getRoute(`${URLS.base}:portalId/page/edit/:assetId`, <PageEdit />)}
+						{getRoute(`${URLS.base}:portalId/page/create/main`, <PageCreateMain />)}
+						{getRoute(`${URLS.base}:portalId/page/edit/main/:assetId`, <PageEditMain />)}
+						{getRoute(`${URLS.base}:portalId/page/create/info`, <PageCreateInfo />)}
+						{getRoute(`${URLS.base}:portalId/page/edit/info/:assetId`, <PageEditInfo />)}
 						{getRoute(`${URLS.base}:portalId/setup`, <Setup />)}
 						{getRoute(`${URLS.base}:portalId/design`, <Design />)}
 						{getRoute(`${URLS.base}:portalId/design/:active`, <Design />)}
