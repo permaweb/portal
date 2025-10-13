@@ -13,7 +13,6 @@ export const GlobalStyles = createGlobalStyle`
     line-height: 1.5;    
 
     color-scheme: light dark;
-    background-color: #242424;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -31,7 +30,7 @@ export const GlobalStyles = createGlobalStyle`
     --spacing-vertical: 2rem;
     --spacing-width: 36px;
 
-    --font-size-xxxlarge: calc(1em * 2.4);
+    --font-size-xxxlarge: calc(1em * 3.4);
     --font-size-xxlarge: calc(1em * 2);
     --font-size-xlarge: calc(1em * 1.5);
     --font-size-large: calc(1em * 1.2);
@@ -52,7 +51,8 @@ export const GlobalStyles = createGlobalStyle`
     place-items: center;
     height: 100%;
     width: 100%;    
-    overflow-y: scroll;
+    overflow-y: auto;
+		background: rgba(var(--color-background), 1);
   }
 
   #portal {
@@ -60,6 +60,7 @@ export const GlobalStyles = createGlobalStyle`
     height: 100%;
     width: 100%;
   }
+
   #preview {
     font-size: 13px;
   }

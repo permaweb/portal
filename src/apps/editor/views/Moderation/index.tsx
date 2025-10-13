@@ -6,7 +6,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { formatAddress } from 'helpers/utils';
+import { cacheModeration, formatAddress, getCachedModeration } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -27,17 +27,36 @@ export default function Moderation() {
 		fetchInactiveComments();
 	}, [portalProvider.current?.assets]);
 
-	async function fetchInactiveComments() {
+	React.useEffect(() => {
+		if (portalProvider.current?.id && permawebProvider.libs) {
+			const cached = getCachedModeration(portalProvider.current.id);
+			if (cached) {
+				fetchInactiveComments(true);
+			}
+		}
+	}, [portalProvider.current?.id]);
+
+	async function fetchInactiveComments(backgroundRefresh = false) {
 		console.log('Starting fetchInactiveComments...');
 		console.log('Portal assets:', portalProvider.current?.assets);
 		console.log('Libs available:', !!permawebProvider.libs);
 
-		if (!portalProvider.current?.assets || !permawebProvider.libs) {
-			console.log('Missing requirements - assets or libs');
+		if (!portalProvider.current?.assets || !permawebProvider.libs || !portalProvider.current?.id) {
+			console.log('Missing requirements - assets, libs, or portal id');
 			return;
 		}
 
-		setLoading(true);
+		if (!backgroundRefresh) {
+			const cached = getCachedModeration(portalProvider.current.id);
+			if (cached) {
+				console.log('Using cached moderation data');
+				setInactiveComments(cached.inactiveComments || []);
+				setProfiles(cached.profiles || {});
+				return;
+			}
+		}
+
+		if (!backgroundRefresh) setLoading(true);
 		const allInactiveComments = [];
 
 		try {
@@ -85,14 +104,18 @@ export default function Moderation() {
 			console.log(`Total inactive comments found: ${allInactiveComments.length}`, allInactiveComments);
 			setInactiveComments(allInactiveComments);
 
-			// Fetch profiles for comment authors
 			if (allInactiveComments.length > 0) {
 				fetchProfiles(allInactiveComments);
+			} else {
+				cacheModeration(portalProvider.current.id, {
+					inactiveComments: allInactiveComments,
+					profiles: {},
+				});
 			}
 		} catch (error) {
 			console.error('Error fetching comments:', error);
 		} finally {
-			setLoading(false);
+			if (!backgroundRefresh) setLoading(false);
 		}
 	}
 
@@ -102,18 +125,21 @@ export default function Moderation() {
 
 		for (const creator of uniqueCreators) {
 			try {
-				// Try to get profile by wallet address first
 				const profile = await permawebProvider.libs.getProfileByWalletAddress(creator);
 				if (profile) {
 					profileMap[creator] = profile;
 				}
 			} catch (e) {
-				// If profile fetch fails, just use the address
 				console.log(`Could not fetch profile for ${creator}, will show address`);
 			}
 		}
 
 		setProfiles(profileMap);
+
+		cacheModeration(portalProvider.current.id, {
+			inactiveComments: comments,
+			profiles: profileMap,
+		});
 	}
 
 	async function activateComment(comment: any) {
@@ -127,8 +153,15 @@ export default function Moderation() {
 				status: 'active',
 			});
 
-			// Remove from inactive list
-			setInactiveComments((prev) => prev.filter((c) => c.id !== comment.id));
+			const updatedComments = inactiveComments.filter((c) => c.id !== comment.id);
+			setInactiveComments(updatedComments);
+
+			if (portalProvider.current?.id) {
+				cacheModeration(portalProvider.current.id, {
+					inactiveComments: updatedComments,
+					profiles,
+				});
+			}
 		} catch (error) {
 			console.error('Error activating comment:', error);
 		} finally {

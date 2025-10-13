@@ -1,7 +1,9 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 import { useNavigate } from 'react-router-dom';
+import { ReactSVG } from 'react-svg';
+
 import { ICONS } from 'helpers/config';
+import { getRedirect } from 'helpers/utils';
 
 import * as S from './styles';
 
@@ -31,14 +33,14 @@ export default function Search(props: any) {
 
 	return (
 		<S.Search ref={searchRef} $active={useSearch} onClick={() => setUseSearch(true)}>
-			<ReactSVG src={ICONS.search} />
+			<ReactSVG src={ICONS.ENGINE.search} />
 			<input
 				ref={inputRef}
 				type="text"
 				value={useSearch ? term : ''}
 				onChange={(e) => setTerm(e.target.value)}
 				onKeyDown={(e) => {
-					if (e.key === 'Enter') navigate(`/search/${encodeURIComponent(term)}`);
+					if (e.key === 'Enter') navigate(getRedirect(`search/${encodeURIComponent(term)}`));
 				}}
 			/>
 		</S.Search>

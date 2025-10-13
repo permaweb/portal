@@ -19,6 +19,7 @@ import {
 	PortalUserType,
 	RequestUpdateType,
 } from 'helpers/types';
+import { isMac } from 'helpers/utils';
 import { checkWindowCutoff, hideDocumentBody, showDocumentBody } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -189,7 +190,6 @@ export default function ArticleToolbar(props: {
 
 	const primaryDisabled = submitUnauthorized || currentPost.editor.loading.active || currentPost.editor.submitDisabled;
 	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
-	const statusDisabled = requestUnauthorized || submitUnauthorized || currentPost.editor.loading.active;
 
 	function getSubmit() {
 		if (isCurrentRequest) {
@@ -222,6 +222,7 @@ export default function ArticleToolbar(props: {
 				handlePress={props.handleSubmit}
 				active={false}
 				disabled={primaryDisabled}
+				tooltip={(isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
 				noFocus
 			/>
 		);
@@ -234,7 +235,10 @@ export default function ArticleToolbar(props: {
 					<IconButton
 						type={'primary'}
 						src={ICONS.close}
-						handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
+						handlePress={() => {
+							handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
+							setCurrentTab(TABS[0]!.label);
+						}}
 						tooltip={language?.closeToolkit}
 						tooltipPosition={'bottom-right'}
 						dimensions={{
@@ -257,7 +261,10 @@ export default function ArticleToolbar(props: {
 						<Button
 							type={'primary'}
 							label={language?.closeToolkit}
-							handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
+							handlePress={() => {
+								handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
+								setCurrentTab(TABS[0]!.label);
+							}}
 							noFocus
 							disabled={currentPost.editor.loading.active}
 							height={40}
@@ -293,7 +300,10 @@ export default function ArticleToolbar(props: {
 					<Button
 						type={'primary'}
 						label={language?.toolkit}
-						handlePress={() => handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen })}
+						handlePress={() => {
+							handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
+							setCurrentTab(TABS[0]!.label);
+						}}
 						active={currentPost.editor.panelOpen}
 						disabled={currentPost.editor.loading.active}
 						icon={currentPost.editor.panelOpen ? ICONS.close : ICONS.tools}
@@ -314,26 +324,6 @@ export default function ArticleToolbar(props: {
 						tooltip={'CTRL + L'}
 						noFocus
 					/>
-					{!props.staticPage && (
-						<S.StatusAction status={currentPost.data.status}>
-							<Button
-								type={'primary'}
-								label={currentPost.data?.status?.toUpperCase() ?? '-'}
-								handlePress={() =>
-									handleCurrentPostUpdate({
-										field: 'status',
-										value: currentPost.data.status === 'draft' ? 'published' : 'draft',
-									})
-								}
-								active={false}
-								disabled={statusDisabled}
-								tooltip={
-									statusDisabled ? null : `Mark as ${currentPost.data.status === 'draft' ? 'published' : 'draft'}`
-								}
-								noFocus
-							/>
-						</S.StatusAction>
-					)}
 					<S.SubmitWrapper>{getSubmit()}</S.SubmitWrapper>
 				</S.EndActions>
 			</S.Wrapper>

@@ -16,9 +16,6 @@ export default function Comments(props: any) {
 	const { libs } = usePermawebProvider();
 	const [comments, setComments] = React.useState(null);
 
-	console.log('comments: ', comments);
-	console.log('libs: ', libs);
-
 	const organizeComments = React.useCallback((commentsList: any[]) => {
 		if (!commentsList || commentsList.length === 0) return [];
 

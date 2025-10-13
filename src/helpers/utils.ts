@@ -363,6 +363,15 @@ export function cacheProfile(address: string, profileData: any) {
 	localStorage.setItem(STORAGE.profile(address), JSON.stringify(profileData));
 }
 
+export function getCachedModeration(id: string) {
+	const cached = localStorage.getItem(STORAGE.moderation(id));
+	return cached ? JSON.parse(cached) : null;
+}
+
+export function cacheModeration(id: string, moderationData: any) {
+	localStorage.setItem(STORAGE.moderation(id), JSON.stringify(moderationData));
+}
+
 export function stripAnsiChars(input: string) {
 	if (!input) return null;
 	const ansiRegex = /\x1B\[[0-9;]*m/g;
@@ -392,5 +401,24 @@ export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 			clearTimeout(id);
 			reject(e);
 		});
-	});
+});
+  
+export const capitalize = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : '-');
+
+export function hasUnsavedChanges(current: any, original: any): boolean {
+	// If there's no original data, consider it as changes (new post)
+	if (!original) return true;
+
+	// Compare all relevant fields
+	return (
+		current.title !== original.title ||
+		current.description !== original.description ||
+		current.status !== original.status ||
+		current.thumbnail !== original.thumbnail ||
+		current.releaseDate !== original.releaseDate ||
+		JSON.stringify(current.content) !== JSON.stringify(original.content) ||
+		JSON.stringify(current.categories) !== JSON.stringify(original.categories) ||
+		JSON.stringify(current.topics) !== JSON.stringify(original.topics) ||
+		JSON.stringify(current.externalRecipients) !== JSON.stringify(original.externalRecipients)
+	);
 }

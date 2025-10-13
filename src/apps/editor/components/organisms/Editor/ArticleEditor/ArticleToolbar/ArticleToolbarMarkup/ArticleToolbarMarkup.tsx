@@ -5,6 +5,7 @@ import { currentPostUpdate } from 'editor/store/post';
 
 import { IconButton } from 'components/atoms/IconButton';
 import { ICONS } from 'helpers/config';
+import { isMac } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -20,7 +21,6 @@ export default function ArticleToolbarMarkup() {
 		dispatch(currentPostUpdate(updatedField));
 	};
 
-	const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPod|iPad/.test(navigator.platform);
 	const modKey = isMac ? 'Cmd' : 'Ctrl';
 
 	function getMarkupAction(markupType: 'bold' | 'italic' | 'underline' | 'strikethrough') {
@@ -42,7 +42,7 @@ export default function ArticleToolbarMarkup() {
 				break;
 			case 'strikethrough':
 				icon = ICONS.strikethrough;
-				tooltip = `${language?.strikethrough || 'Strikethrough'} (${modKey} + S)`;
+				tooltip = `${language?.strikethrough || 'Strikethrough'} (${modKey} + X)`;
 				break;
 		}
 

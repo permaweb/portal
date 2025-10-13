@@ -1,6 +1,6 @@
 import { Dispatch } from 'redux';
 
-import { PortalAssetPostType, ReduxActionType } from 'helpers/types';
+import { ArticleStatusEnum, PortalAssetPostType, ReduxActionType } from 'helpers/types';
 
 const UPDATE_CURRENT_POST = 'UPDATE_CURRENT_POST';
 const SET_ORIGINAL_DATA = 'SET_ORIGINAL_DATA';
@@ -13,7 +13,7 @@ export const initStateCurrentPost: { data: PortalAssetPostType; originalData: an
 		description: '',
 		content: null,
 		creator: null,
-		status: 'draft',
+		status: ArticleStatusEnum.Draft,
 		categories: [],
 		topics: [],
 		externalRecipients: [],
@@ -21,6 +21,8 @@ export const initStateCurrentPost: { data: PortalAssetPostType; originalData: an
 		dateCreated: null,
 		lastUpdate: null,
 		releaseDate: null,
+		authUsers: [],
+		url: null,
 	},
 	originalData: null,
 	editor: {

@@ -17,7 +17,8 @@ import {
 	PortalUserType,
 	RequestUpdateType,
 } from 'helpers/types';
-import { filterDuplicates, urlify } from 'helpers/utils';
+import { filterDuplicates, hasUnsavedChanges, isMac, urlify } from 'helpers/utils';
+import { useNavigationConfirm } from 'hooks/useNavigationConfirm';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -46,29 +47,16 @@ export default function Editor() {
 
 	const isStaticPage = location.pathname.includes('page');
 
+	const hasChanges = hasUnsavedChanges(currentPost.data, currentPost.originalData);
+
+	// Enable navigation confirmation when there are unsaved changes
+	useNavigationConfirm(
+		hasChanges ? 'edit' : '',
+		language?.unsavedChangesWarning || 'You have unsaved changes. Are you sure you want to leave?'
+	);
+
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
-	};
-
-	const hasUnsavedChanges = () => {
-		const current = currentPost.data;
-		const original = currentPost.originalData;
-
-		// If there's no original data, consider it as changes (new post)
-		if (!original) return true;
-
-		// Compare all relevant fields
-		return (
-			current.title !== original.title ||
-			current.description !== original.description ||
-			current.status !== original.status ||
-			current.thumbnail !== original.thumbnail ||
-			current.releaseDate !== original.releaseDate ||
-			JSON.stringify(current.content) !== JSON.stringify(original.content) ||
-			JSON.stringify(current.categories) !== JSON.stringify(original.categories) ||
-			JSON.stringify(current.topics) !== JSON.stringify(original.topics) ||
-			JSON.stringify(current.externalRecipients) !== JSON.stringify(original.externalRecipients)
-		);
 	};
 
 	React.useEffect(() => {
@@ -77,10 +65,26 @@ export default function Editor() {
 			currentPost.data.content.length === 0 ||
 			currentPost.data.content.every((block) => !block.content || block.content.trim() === '');
 
-		const noChanges = !hasUnsavedChanges() && currentPost.data.id !== null;
+		const noChanges = !hasChanges && currentPost.data.id !== null;
 
 		handleCurrentPostUpdate({ field: 'submitDisabled', value: isEmpty || noChanges });
 	}, [currentPost.data, currentPost.originalData]);
+
+	// Keyboard shortcut: Cmd/Ctrl + Shift + S to save
+	React.useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			const modifier = isMac() ? e.metaKey : e.ctrlKey;
+			if (modifier && e.shiftKey && e.key.toLowerCase() === 's') {
+				e.preventDefault();
+				if (!currentPost.data.submitDisabled) {
+					handleSubmit();
+				}
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+		return () => window.removeEventListener('keydown', handleKeyDown);
+	}, [currentPost.data]);
 
 	/* User is a moderator and can only review existing posts, not create new ones */
 	const unauthorized =
@@ -210,6 +214,9 @@ export default function Editor() {
 				'Metadata.Content',
 			]);
 
+			const url = currentPost.data.url || urlify(currentPost.data.title);
+			const releaseDate = currentPost.data.releaseDate ?? new Date().getTime().toString();
+
 			let data: any = permawebProvider.libs.mapToProcessCase({
 				name: currentPost.data.title,
 				description: currentPost.data.description,
@@ -217,7 +224,8 @@ export default function Editor() {
 				content: currentPost.data.content,
 				topics: currentPost.data.topics,
 				categories: currentPost.data.categories,
-				releaseDate: currentPost.data.releaseDate ?? new Date().getTime().toString(),
+				url: url,
+				releaseDate: releaseDate,
 			});
 
 			if (currentPost.data.thumbnail) {
@@ -230,14 +238,29 @@ export default function Editor() {
 
 			if (assetId) {
 				try {
-					// TODO: If not an asset auth user then go through portal Run-Action unless external contributor
-					const assetContentUpdateId = await permawebProvider.libs.sendMessage({
-						processId: assetId,
-						wallet: arProvider.wallet,
-						action: 'Update-Asset',
-						tags: [{ name: 'Exclude-Index', value: excludeFromIndex }],
-						data: data,
-					});
+					/* If user is authorized in the asset then send update directly, otherwise forward it through the portal */
+					let assetContentUpdateId = null;
+					if (currentPost.data?.authUsers && currentPost.data.authUsers.includes(arProvider.walletAddress)) {
+						assetContentUpdateId = await permawebProvider.libs.sendMessage({
+							processId: assetId,
+							wallet: arProvider.wallet,
+							action: 'Update-Asset',
+							tags: [{ name: 'Exclude-Index', value: excludeFromIndex }],
+							data: data,
+						});
+					} else {
+						assetContentUpdateId = await permawebProvider.libs.sendMessage({
+							processId: portalProvider.current.id,
+							wallet: arProvider.wallet,
+							action: 'Run-Action',
+							tags: [
+								{ name: 'Forward-To', value: assetId },
+								{ name: 'Forward-Action', value: 'Update-Asset' },
+								{ name: 'Exclude-Index', value: excludeFromIndex },
+							],
+							data: { Input: data },
+						});
+					}
 
 					if (isStaticPage) {
 						const currentPages = portalProvider.current?.pages || {};
@@ -297,12 +320,13 @@ export default function Editor() {
 							name: currentPost.data.title,
 							description: currentPost.data.description,
 							topics: currentPost.data.topics,
-							creator: permawebProvider.profile.id,
+							creator: currentPost.data.creator ?? permawebProvider.profile.id,
 							data: dataSrc,
 							contentType: ASSET_UPLOAD.contentType,
 							assetType: ASSET_UPLOAD.ansType,
 							metadata: {
-								releaseDate: currentPost.data.releaseDate ?? new Date().getTime().toString(),
+								url: url,
+								releaseDate: releaseDate,
 								originPortal: portalProvider.current.id,
 							},
 							users: getAssetAuthUsers(),
@@ -550,6 +574,35 @@ export default function Editor() {
 			valid = false;
 			message = 'Tags are required';
 			missingFieldsFound.push(message);
+		}
+
+		// Check for duplicate title or URL
+		if (portalProvider.current?.assets) {
+			const existingPosts = portalProvider.current.assets.filter((asset: any) => asset.id !== currentPost.data.id);
+
+			// Check for duplicate title
+			if (currentPost.data.title) {
+				const duplicateTitle = existingPosts.some(
+					(asset: any) => asset.name?.toLowerCase() === currentPost.data.title.toLowerCase()
+				);
+				if (duplicateTitle) {
+					valid = false;
+					message = 'Post title already exists';
+					missingFieldsFound.push(message);
+				}
+			}
+
+			// Check for duplicate URL
+			if (currentPost.data.url) {
+				const duplicateUrl = existingPosts.some(
+					(asset: any) => asset.metadata?.url?.toLowerCase() === currentPost.data.url.toLowerCase()
+				);
+				if (duplicateUrl) {
+					valid = false;
+					message = 'Post URL already exists';
+					missingFieldsFound.push(message);
+				}
+			}
 		}
 
 		if (!valid) {

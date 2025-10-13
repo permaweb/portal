@@ -54,9 +54,9 @@ export const Logo = styled.div<{ $layout: any }>`
 	display: flex;
 	width: 100%;
 	justify-content: ${(props) =>
-		props.$layout.positionX === 'center' ? 'center' : props.$layout.positionX === 'left' ? 'flex-start' : 'flex-end'};
+		props.$layout.positionX === 'center' ? 'center' : props.$layout.positionX === 'left' ? 'flex-start' : 'center'};
 	align-items: ${(props) =>
-		props.$layout.positionY === 'center' ? 'center' : props.$layout.positionY === 'top' ? 'flex-start' : 'flex-end'};
+		props.$layout.positionY === 'center' ? 'center' : props.$layout.positionY === 'top' ? 'flex-start' : 'center'};
 	z-index: 1;
 
 	a {

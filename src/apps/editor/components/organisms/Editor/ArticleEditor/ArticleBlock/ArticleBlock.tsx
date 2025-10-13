@@ -327,7 +327,7 @@ export default function ArticleBlock(props: {
 		};
 	}, []);
 
-	// Handle keyboard shortcuts for markup (Cmd/Ctrl + B/I/U/S) and Enter in lists
+	// Handle keyboard shortcuts for markup (Cmd/Ctrl + B/I/U/X) and Enter in lists
 	React.useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			// Only handle if this block is focused
@@ -368,7 +368,7 @@ export default function ArticleBlock(props: {
 					case 'u':
 						markupType = 'underline';
 						break;
-					case 's':
+					case 'x':
 						markupType = 'strikethrough';
 						break;
 				}

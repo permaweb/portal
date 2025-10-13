@@ -30,21 +30,16 @@ export const LinksList = styled.div<{ $isFooter?: boolean }>`
 	display: flex;
 	margin-left: ${(props) => (props.$isFooter ? '0' : 'auto')};
 	align-items: ${(props) => (props.$isFooter ? 'center' : 'flex-end')};
-	gap: 10px;
+	gap: 15px;
 	margin-bottom: ${(props) => (props.$isFooter ? '0' : '12px')};
 	svg {
 		height: 20px;
 		fill: rgba(var(--color-text), 1);
 		width: unset;
+
 		&:hover {
-			fill: revert-layer;
 			transform: scale(1.2);
 			transition: transform 0.2s;
-			color: rgba(var(--color-text), 1);
-
-			path {
-				fill: revert-layer;
-			}
 		}
 	}
 

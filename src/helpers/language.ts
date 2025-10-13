@@ -134,7 +134,7 @@ export const language = {
 		editProfile: `Edit Your Profile`,
 		editReleaseDate: `Edit Release Date`,
 		editSiteCategories: `Edit Site Categories`,
-		editSiteLinks: `Edit Site Links`,
+		editSocialLinks: `Edit Social Links`,
 		editThemeName: `Edit Theme Name`,
 		effectiveBalance: `Effective Balance`,
 		emojiSearch: `Search emojis...`,
@@ -313,6 +313,7 @@ export const language = {
 		profileMenu: `Profile Menu`,
 		profileUpdated: `Profile Updated`,
 		profileUpdatingInfo: `Updating Your Profile`,
+		publication: `Publication`,
 		published: `Published`,
 		publishTheme: `Publish Theme`,
 		receivedApprovals: `Received Approvals`,
@@ -485,6 +486,7 @@ export const language = {
 		// === UNTRANSLATED START ===
 		// TODO: translate
 
+		publication: `Publication`,
 		upgradeDomain: `Upgrade Domain`,
 		// === UNTRANSLATED END ===
 		activate: `Activar`,
@@ -621,7 +623,7 @@ export const language = {
 		editProfile: `Editar tu perfil`,
 		editReleaseDate: `Editar fecha de lanzamiento`,
 		editSiteCategories: `Editar categorías del sitio`,
-		editSiteLinks: `Editar enlaces del sitio`,
+		editSocialLinks: `Editar enlaces sociales`,
 		editThemeName: `Editar nombre del tema`,
 		effectiveBalance: `Saldo efectivo`,
 		emojiSearch: `Buscar emojis...`,

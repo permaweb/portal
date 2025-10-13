@@ -5,9 +5,12 @@ import { PortalCategoryType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import { ArticlePostContribute } from './ArticlePostContribute';
+import { ArticlePostCreator } from './ArticlePostCreator';
 import { ArticlePostDescription } from './ArticlePostDescription';
 import { ArticlePostReleaseDate } from './ArticlePostReleaseDate';
+import { ArticlePostStatus } from './ArticlePostStatus';
 import { ArticlePostThumbnail } from './ArticlePostThumbnail';
+import { ArticlePostURL } from './ArticlePostURL';
 import * as S from './styles';
 
 export default function ArticlePost(props: {
@@ -22,16 +25,26 @@ export default function ArticlePost(props: {
 	return (
 		<S.Wrapper>
 			<S.Section>
-				<S.SectionBody>
-					<ArticlePostReleaseDate />
-				</S.SectionBody>
-			</S.Section>
-			<S.Section>
 				<S.SectionHeader>
 					<p>{language?.featuredImage}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
 					<ArticlePostThumbnail />
+				</S.SectionBody>
+			</S.Section>
+			<S.Section>
+				<S.SectionHeader>
+					<p>{language?.publication}</p>
+				</S.SectionHeader>
+				<S.SectionBody>
+					<S.SectionStart>
+						<ArticlePostCreator />
+					</S.SectionStart>
+					<ArticlePostReleaseDate />
+					<ArticlePostStatus />
+					<S.SectionEnd>
+						<ArticlePostURL />
+					</S.SectionEnd>
 				</S.SectionBody>
 			</S.Section>
 			<S.Section>
@@ -63,7 +76,9 @@ export default function ArticlePost(props: {
 					<p>{language?.contribute}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
-					<ArticlePostContribute />
+					<S.SectionStart>
+						<ArticlePostContribute />
+					</S.SectionStart>
 				</S.SectionBody>
 			</S.ContributeSection>
 		</S.Wrapper>

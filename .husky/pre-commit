@@ -6,10 +6,29 @@ set -euo pipefail
 # Make sure we're at repo root
 cd -P "$(git rev-parse --show-toplevel)"
 
-# Ensure language.ts keys are sorted before commit
+# Load nvm if available to ensure node/npm are in PATH
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+echo "Checking language..."
 npm run fix:lang
+git add -u
 
-# Format only staged files using lint-staged
-npx lint-staged --quiet
+echo "Formatting staged files..."
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
 
-echo "✅ pre-commit checks complete"
+if [ -n "$STAGED_FILES" ]; then
+  # Lint staged JS/TS files
+  STAGED_JS_FILES=$(echo "$STAGED_FILES" | grep -E '\.(js|jsx|ts|tsx)$' | grep -E '^src/(apps/editor|apps/engine)/' || true)
+  if [ -n "$STAGED_JS_FILES" ]; then
+    echo "$STAGED_JS_FILES" | xargs npx eslint --fix
+  fi
+
+  # Format all staged files with prettier
+  echo "$STAGED_FILES" | xargs npx prettier --write --ignore-unknown
+
+  # Re-stage the formatted files
+  echo "$STAGED_FILES" | xargs git add
+fi
+
+echo "✅ Pre-commit Checks Complete"

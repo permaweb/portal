@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ReactSVG } from 'react-svg';
+
 import { ICONS } from 'helpers/config';
 
 import * as S from './styles';

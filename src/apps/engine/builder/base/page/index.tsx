@@ -1,7 +1,9 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { usePortalProvider } from 'engine/providers/portalProvider';
+
 import Builder from '../../';
+
 import * as S from './styles';
 
 export default function Page() {
@@ -17,7 +19,7 @@ export default function Page() {
 		pageId = 'feed';
 	} else if ('postId' in params) {
 		pageId = 'post';
-	} else if ('user' in params) {
+	} else if ('author' in params) {
 		pageId = 'user';
 	} else if ('search' in params) {
 		pageId = 'search';

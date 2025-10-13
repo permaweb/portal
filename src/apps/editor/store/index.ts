@@ -15,6 +15,7 @@ const persistConfig = {
 		// Validate that the currentPost state has all required fields
 		if (state?.currentPost) {
 			const editor = state.currentPost.editor;
+			const data = state.currentPost.data;
 
 			// Check if markup field exists
 			if (!editor?.markup) {
@@ -33,6 +34,30 @@ const persistConfig = {
 					return Promise.resolve({
 						...state,
 						currentPost: initStateCurrentPost,
+					});
+				}
+			}
+
+			// Check if all data fields from initStateCurrentPost exist, add missing ones
+			if (data) {
+				const missingFields: string[] = [];
+				const updatedData = { ...data };
+
+				for (const field in initStateCurrentPost.data) {
+					if (!(field in data)) {
+						missingFields.push(field);
+						updatedData[field] = initStateCurrentPost.data[field as keyof typeof initStateCurrentPost.data];
+					}
+				}
+
+				if (missingFields.length > 0) {
+					console.log(`Missing data fields: ${missingFields.join(', ')}, adding with default values`);
+					return Promise.resolve({
+						...state,
+						currentPost: {
+							...state.currentPost,
+							data: updatedData,
+						},
 					});
 				}
 			}

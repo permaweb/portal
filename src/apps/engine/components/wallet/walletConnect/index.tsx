@@ -1,4 +1,5 @@
 import React from 'react';
+import { ReactSVG } from 'react-svg';
 import { WanderConnect } from '@wanderapp/connect';
 import { Panel } from 'engine/components/panel';
 import ProfileEditor from 'engine/components/profileEditor';
@@ -7,13 +8,12 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS, STORAGE } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, getRedirect } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
-import { ReactSVG } from 'react-svg';
 
 export default function WalletConnect(_props: { callback?: () => void }) {
 	const navigate = useNavigate();
@@ -159,7 +159,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 						<S.NavigationEntry
 							onClick={() => {
 								setShowUserMenu(false);
-								navigate(`user/${profile.id}`);
+								navigate(getRedirect(`author/${profile.id}`));
 							}}
 						>
 							<ReactSVG src={ICONS.user} />

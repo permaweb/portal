@@ -1,0 +1,123 @@
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+
+import { usePortalProvider } from 'editor/providers/PortalProvider';
+import { EditorStoreRootState } from 'editor/store';
+import { currentPostUpdate } from 'editor/store/post';
+
+import { FormField } from 'components/atoms/FormField';
+import { IconButton } from 'components/atoms/IconButton';
+import { ICONS } from 'helpers/config';
+import { PortalUserType } from 'helpers/types';
+import { checkValidAddress, urlify } from 'helpers/utils';
+import { useLanguageProvider } from 'providers/LanguageProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
+import { CloseHandler } from 'wrappers/CloseHandler';
+
+import * as S from './styles';
+
+export default function ArticlePostURL() {
+	const { assetId } = useParams<{ assetId?: string }>();
+
+	const dispatch = useDispatch();
+
+	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
+
+	const permawebProvider = usePermawebProvider();
+	const portalProvider = usePortalProvider();
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
+
+	const [usersFetched, setUsersFetched] = React.useState<{ [address: string]: boolean }>({});
+	const [showForm, setShowForm] = React.useState<boolean>(false);
+	const [urlValue, setUrlValue] = React.useState<string>(currentPost.data?.url || '');
+
+	React.useEffect(() => {
+		setUrlValue(currentPost.data?.url || '');
+	}, [currentPost.data?.url]);
+
+	React.useEffect(() => {
+		const generatedUrl = urlify(currentPost.data.title);
+		setUrlValue(generatedUrl);
+		handleCurrentPostUpdate({ field: 'url', value: generatedUrl });
+	}, [currentPost.data?.title]);
+
+	React.useEffect(() => {
+		(async function () {
+			if (
+				currentPost.data?.creator &&
+				checkValidAddress(currentPost.data?.creator) &&
+				!usersFetched[currentPost.data.creator]
+			) {
+				portalProvider.fetchPortalUserProfile({ address: currentPost.data.creator });
+				setUsersFetched((prev) => ({ ...prev, [currentPost.data.creator]: true }));
+			}
+		})();
+	}, [currentPost.data?.creator, usersFetched]);
+
+	React.useEffect(() => {
+		(async function () {
+			if (portalProvider.current?.users) {
+				portalProvider.current.users.forEach((user: PortalUserType) => {
+					if (!usersFetched[user.address] && user.type !== 'wallet') {
+						portalProvider.fetchPortalUserProfile(user);
+						setUsersFetched((prev) => ({ ...prev, [user.address]: true }));
+					}
+				});
+			}
+		})();
+	}, [portalProvider.current?.users, usersFetched]);
+
+	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
+		dispatch(currentPostUpdate(updatedField));
+	};
+
+	const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value;
+		setUrlValue(value);
+		handleCurrentPostUpdate({ field: 'url', value: urlify(value) });
+	};
+
+	/* If a contributor visits a post that they did not create, then disable updates */
+	const currentUser = portalProvider.current?.users?.find(
+		(user: PortalUserType) => user.address === permawebProvider.profile?.id
+	);
+
+	const submitUnauthorized =
+		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions?.postAutoIndex;
+	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
+	const urlDisabled = requestUnauthorized || submitUnauthorized || currentPost.editor.loading.active;
+
+	return (
+		<S.Wrapper>
+			<S.HeaderWrapper>
+				<p>
+					<span className={'post-url-info'}>{`${language.url}:`}</span> {currentPost.data?.url || '-'}
+				</p>
+				<CloseHandler active={showForm} disabled={!showForm} callback={() => setShowForm(false)}>
+					<IconButton
+						type={'primary'}
+						handlePress={() => setShowForm((prev) => !prev)}
+						src={showForm ? ICONS.close : ICONS.write}
+						disabled={urlDisabled}
+						dimensions={{ wrapper: 23.5, icon: 13.5 }}
+						tooltip={showForm ? null : language.edit}
+					/>
+					{showForm && (
+						<S.Form>
+							<FormField
+								value={urlValue}
+								onChange={handleUrlChange}
+								invalid={{ status: false, message: null }}
+								disabled={urlDisabled}
+								placeholder={language.enterUrl || 'Enter URL'}
+								autoFocus={true}
+							/>
+						</S.Form>
+					)}
+				</CloseHandler>
+			</S.HeaderWrapper>
+		</S.Wrapper>
+	);
+}
