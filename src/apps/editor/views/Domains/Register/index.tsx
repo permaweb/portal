@@ -18,6 +18,7 @@ import { InsufficientBalanceCTA, PaymentSummary } from 'components/molecules/Pay
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { getArnsCost } from 'helpers/arnsCosts';
 import { ICONS, IS_TESTNET, URLS } from 'helpers/config';
+import { PortalPatchMapEnum } from 'helpers/types';
 import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useArweaveProvider } from 'providers/ArweaveProvider';

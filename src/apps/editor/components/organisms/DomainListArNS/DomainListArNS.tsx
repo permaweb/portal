@@ -3,9 +3,12 @@ import { ReactSVG } from 'react-svg';
 
 import { ANT, ArconnectSigner, ARIO, defaultTargetManifestId } from '@ar.io/sdk';
 
-import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { ConfirmAssignModal } from 'editor/components/molecules/ConfirmAssignModal';
 import { ConfirmUnassignModal } from 'editor/components/molecules/ConfirmUnassignModal';
+import { ExtendDomainPanel } from 'editor/components/molecules/ExtendDomainPanel';
+import { PaymentInfoPanel } from 'editor/components/molecules/PaymentInfoPanel';
+import { RenderUpgradeAndCosts } from 'editor/components/molecules/RenderUpgradeAndCosts';
+import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
@@ -16,7 +19,7 @@ import { getArnsCost } from 'helpers/arnsCosts';
 import { ICONS, IS_TESTNET } from 'helpers/config';
 import { loadCachedDomains, saveCachedDomains } from 'helpers/domainCache';
 import { PortalPatchMapEnum, UserOwnedDomain } from 'helpers/types';
-import { getARAmountFromWinc, toReadableARIO, withTimeout } from 'helpers/utils';
+import { withTimeout } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useLatestANTVersion } from 'hooks/useLatestANTVersion';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -25,9 +28,6 @@ import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
-import { RenderUpgradeAndCosts } from 'editor/components/molecules/RenderUpgradeAndCosts';
-import { PaymentInfoPanel } from 'editor/components/molecules/PaymentInfoPanel';
-import { ExtendDomainPanel } from 'editor/components/molecules/ExtendDomainPanel';
 
 async function detectRequiresAntUpdate(processId: string, timeoutMs = 6000): Promise<boolean> {
 	try {
