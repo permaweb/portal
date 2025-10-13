@@ -76,3 +76,12 @@ export const ModalCostValue = styled.div`
 	font-size: ${(props) => props.theme.typography.size.xSmall};
 	font-weight: ${(props) => props.theme.typography.weight.xBold};
 `;
+
+export const ModalActions = styled.div`
+	display: flex;
+	gap: 15px;
+	margin: 15px 0 0 0;
+	justify-content: flex-end;
+	align-items: center;
+	flex-wrap: wrap;
+`;

@@ -1,7 +1,7 @@
 import { Modal } from 'components/atoms/Modal';
 import { UserOwnedDomain } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-import S from './styles';
+import * as S from './styles';
 import { Button } from 'components/atoms/Button';
 
 const ConfirmAssignModal = (props: {
