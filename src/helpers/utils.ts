@@ -392,7 +392,7 @@ export function resolvePrimaryDomain(domains: PortalDomainType[], portalId: stri
 	else return `https://${gateway}/${portalId}`;
 }
 
-export const capitalize = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : '-');
+export const capitalize = (str: string) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : '-');
 
 export function hasUnsavedChanges(current: any, original: any): boolean {
 	// If there's no original data, consider it as changes (new post)
@@ -410,4 +410,17 @@ export function hasUnsavedChanges(current: any, original: any): boolean {
 		JSON.stringify(current.topics) !== JSON.stringify(original.topics) ||
 		JSON.stringify(current.externalRecipients) !== JSON.stringify(original.externalRecipients)
 	);
+}
+
+export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+	return new Promise<T>((resolve, reject) => {
+		const id = setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms);
+		p.then((v) => {
+			clearTimeout(id);
+			resolve(v);
+		}).catch((e) => {
+			clearTimeout(id);
+			reject(e);
+		});
+	});
 }
