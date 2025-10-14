@@ -33,10 +33,6 @@ export const EditorWrapper = styled.div<{ panelOpen: boolean }>`
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		padding: 0;
 	}
-
-	@media (min-width: ${STYLING.cutoffs.maxEditor}) {
-		transition: none;
-	}
 `;
 
 export const Editor = styled.div<{ blockEditMode: boolean }>`

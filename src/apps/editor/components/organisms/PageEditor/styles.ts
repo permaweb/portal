@@ -1,14 +1,29 @@
 import styled from 'styled-components';
 
-import { open, transition1 } from 'helpers/animations';
+import { STYLING } from 'helpers/config';
+
+export const PAGE_TOOLBAR_WIDTH = '350px';
 
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	width: 100%;
+	gap: 25px;
+	position: relative;
 `;
 
-export const Preview = styled.div`
-	margin-top: 20px;
-	padding: 15px;
+export const ToolbarWrapper = styled.div`
+	position: sticky;
+	top: ${STYLING.dimensions.nav.height};
+	z-index: 1;
+	background: ${(props) => props.theme.colors.view.background};
+	padding: 10px 0;
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		position: relative;
+		top: auto;
+	}
+`;
+
+export const EditorWrapper = styled.div`
+	width: 100%;
 `;

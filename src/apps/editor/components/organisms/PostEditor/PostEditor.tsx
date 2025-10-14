@@ -27,7 +27,7 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { ArticleEditor } from './ArticleEditor';
 import * as S from './styles';
 
-export default function Editor() {
+export default function PostEditor() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { assetId } = useParams<{ assetId?: string }>();
@@ -76,7 +76,7 @@ export default function Editor() {
 			const modifier = isMac() ? e.metaKey : e.ctrlKey;
 			if (modifier && e.shiftKey && e.key.toLowerCase() === 's') {
 				e.preventDefault();
-				if (!currentPost.data.submitDisabled) {
+				if (!currentPost.editor.submitDisabled) {
 					handleSubmit();
 				}
 			}
@@ -84,7 +84,7 @@ export default function Editor() {
 
 		window.addEventListener('keydown', handleKeyDown);
 		return () => window.removeEventListener('keydown', handleKeyDown);
-	}, [currentPost.data]);
+	}, [currentPost.editor]);
 
 	/* User is a moderator and can only review existing posts, not create new ones */
 	const unauthorized =

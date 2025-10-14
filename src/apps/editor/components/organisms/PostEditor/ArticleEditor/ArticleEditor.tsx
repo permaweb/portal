@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 
+import { ArticleBlock } from 'editor/components/molecules/ArticleBlock';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPostClear, currentPostUpdate, setOriginalData } from 'editor/store/post';
@@ -14,7 +15,6 @@ import { checkValidAddress } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
-import { ArticleBlock } from './ArticleBlock';
 import { ArticleToolbar } from './ArticleToolbar';
 import * as S from './styles';
 

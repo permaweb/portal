@@ -61,7 +61,7 @@ export type PortalAssetRequestType = {
 	dateCreated?: string;
 };
 
-export type PortalAssetPostType = {
+export type PortalAssetPostReduxType = {
 	id: null;
 	title: '';
 	description: '';
@@ -77,6 +77,12 @@ export type PortalAssetPostType = {
 	releaseDate: number | null;
 	authUsers: string[];
 	url: string | null;
+};
+
+export type PortalPageReduxType = {
+	id: null;
+	title: '';
+	content: null;
 };
 
 export type PortalUserType = {

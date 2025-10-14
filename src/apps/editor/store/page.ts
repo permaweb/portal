@@ -1,28 +1,16 @@
 import { Dispatch } from 'redux';
 
-import { ArticleStatusEnum, PortalAssetPostReduxType, ReduxActionType } from 'helpers/types';
+import { PortalPageReduxType, ReduxActionType } from 'helpers/types';
 
-const UPDATE_CURRENT_POST = 'UPDATE_CURRENT_POST';
+const UPDATE_CURRENT_PAGE = 'UPDATE_CURRENT_PAGE';
 const SET_ORIGINAL_DATA = 'SET_ORIGINAL_DATA';
-const CLEAR_CURRENT_POST = 'CLEAR_CURRENT_POST';
+const CLEAR_CURRENT_PAGE = 'CLEAR_CURRENT_PAGE ';
 
-export const initStateCurrentPost: { data: PortalAssetPostReduxType; originalData: any; editor: any } = {
+export const initStateCurrentPage: { data: PortalPageReduxType; originalData: any; editor: any } = {
 	data: {
 		id: null,
 		title: '',
-		description: '',
 		content: null,
-		creator: null,
-		status: ArticleStatusEnum.Draft,
-		categories: [],
-		topics: [],
-		externalRecipients: [],
-		thumbnail: null,
-		dateCreated: null,
-		lastUpdate: null,
-		releaseDate: null,
-		authUsers: [],
-		url: null,
 	},
 	originalData: null,
 	editor: {
@@ -87,15 +75,15 @@ function validateEditorState(state: any): boolean {
 	return true;
 }
 
-export function currentPostUpdate(payload: { field: string; value: any }) {
+export function currentPageUpdate(payload: { field: string; value: any }) {
 	return (dispatch: Dispatch) => {
-		dispatch({ type: UPDATE_CURRENT_POST, payload: payload });
+		dispatch({ type: UPDATE_CURRENT_PAGE, payload: payload });
 	};
 }
 
-export function currentPostClear() {
+export function currentPageClear() {
 	return (dispatch: Dispatch) => {
-		dispatch({ type: CLEAR_CURRENT_POST });
+		dispatch({ type: CLEAR_CURRENT_PAGE });
 	};
 }
 
@@ -105,18 +93,18 @@ export function setOriginalData(data: any) {
 	};
 }
 
-export function currentPost(
-	state: { data: PortalAssetPostReduxType; originalData: any; editor: any } = initStateCurrentPost,
+export function currentPage(
+	state: { data: PortalPageReduxType; originalData: any; editor: any } = initStateCurrentPage,
 	action: ReduxActionType
 ) {
 	// Validate state structure and reset if fields are missing
 	if (!validateEditorState(state)) {
 		console.log('Editor state validation failed, resetting to initial state');
-		state = initStateCurrentPost;
+		state = initStateCurrentPage;
 	}
 
 	switch (action.type) {
-		case UPDATE_CURRENT_POST:
+		case UPDATE_CURRENT_PAGE:
 			const { field, value } = action.payload;
 
 			if (field.includes('.')) {
@@ -159,10 +147,10 @@ export function currentPost(
 				...state,
 				originalData: { ...action.payload },
 			};
-		case CLEAR_CURRENT_POST:
+		case CLEAR_CURRENT_PAGE:
 			return {
 				...state,
-				data: { ...initStateCurrentPost.data },
+				data: { ...initStateCurrentPage.data },
 				originalData: null,
 			};
 		default:

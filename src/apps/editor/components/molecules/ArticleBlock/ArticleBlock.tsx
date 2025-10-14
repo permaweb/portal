@@ -475,12 +475,13 @@ export default function ArticleBlock(props: {
 		if (!editableRef.current) return;
 
 		// Check if content is empty (empty string, just whitespace, or empty HTML tags)
+		// Note: <li></li> is NOT considered empty as it's the valid initial state for lists
 		const isEmpty =
-			!props.block.content ||
-			props.block.content.trim() === '' ||
-			props.block.content === '<br>' ||
-			props.block.content === '<li></li>' ||
-			props.block.content.replace(/<[^>]*>/g, '').trim() === '';
+			(!props.block.content ||
+				props.block.content.trim() === '' ||
+				props.block.content === '<br>' ||
+				props.block.content.replace(/<[^>]*>/g, '').trim() === '') &&
+			!props.block.content.includes('<li>');
 
 		// Only clear formatting if content JUST became empty (transition)
 		if (isEmpty && !wasEmptyRef.current) {

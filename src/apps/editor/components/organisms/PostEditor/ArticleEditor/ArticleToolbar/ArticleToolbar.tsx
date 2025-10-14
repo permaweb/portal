@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { debounce } from 'lodash';
 
+import { ArticleBlocks } from 'editor/components/molecules/ArticleBlocks';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPostUpdate } from 'editor/store/post';
@@ -24,7 +25,6 @@ import { checkWindowCutoff, hideDocumentBody, showDocumentBody } from 'helpers/w
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
-import { ArticleBlocks } from '../ArticleBlocks';
 import { ArticlePost } from '../ArticlePost';
 
 import { ArticleToolbarMarkup } from './ArticleToolbarMarkup';
@@ -52,9 +52,10 @@ export default function ArticleToolbar(props: {
 	if (!props.staticPage) TABS.push({ label: language?.post });
 	TABS.push({ label: language?.blocks });
 
-	const titleRef = React.useRef<any>(null);
 	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.label);
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
+
+	const titleRef = React.useRef<any>(null);
 	const prevDesktopRef = React.useRef<boolean>(desktop);
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
@@ -222,7 +223,7 @@ export default function ArticleToolbar(props: {
 				handlePress={props.handleSubmit}
 				active={false}
 				disabled={primaryDisabled}
-				tooltip={(isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
+				tooltip={primaryDisabled ? null : (isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
 				noFocus
 			/>
 		);
