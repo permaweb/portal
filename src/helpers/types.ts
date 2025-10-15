@@ -76,6 +76,7 @@ export type PortalAssetPostType = {
 	lastUpdate: number | null;
 	releaseDate: number | null;
 	authUsers: string[];
+	url: string | null;
 };
 
 export type PortalUserType = {
@@ -302,4 +303,17 @@ export type BasicAlignmentType = 'left' | 'center' | 'right' | 'top' | 'bottom';
 export enum LanguageEnum {
 	en = 'English',
 	es = 'Español',
+}
+
+export interface UserOwnedDomain {
+	name: string;
+	antId: string;
+	target?: string;
+	isRedirectedToPortal: boolean;
+	// Optional metadata derived from network ArNS records
+	startTimestamp?: number;
+	recordType?: 'lease' | 'permabuy' | string;
+	endTimestamp?: number;
+	status?: 'loading' | 'resolved' | 'failed';
+	requiresAntUpdate?: boolean;
 }

@@ -5,7 +5,7 @@ import { useProfile } from 'engine/hooks/profiles';
 
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, getRedirect } from 'helpers/utils';
 
 import * as S from './styles';
 
@@ -16,7 +16,7 @@ export default function PostSpotlight(props: any) {
 
 	return (
 		<S.Wrapper id="PostSpotlight">
-			<NavLink to={`/post/${post?.id}`} className={isLoadingPost ? 'disabledLink' : ''}>
+			<NavLink to={getRedirect(`post/${post?.id}`)} className={isLoadingPost ? 'disabledLink' : ''}>
 				<S.Thumbnail>
 					<img
 						className="loadingThumbnail"

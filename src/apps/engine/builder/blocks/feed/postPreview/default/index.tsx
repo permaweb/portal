@@ -7,7 +7,7 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress, getRedirect } from 'helpers/utils';
+import { checkValidAddress, getRedirect, urlify } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -22,6 +22,11 @@ export default function PostPreview_Default(props: any) {
 	const { comments, isLoading: isLoadingComments, error: errorComments } = useComments(post?.id || null, true);
 
 	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+
+	// Check if post creator is the portal itself
+	const isPortalCreator = post?.creator === portal?.id;
+	const displayName = isPortalCreator ? portal?.name : profile?.displayName;
+	const displayThumbnail = isPortalCreator ? portal?.logo : profile?.thumbnail;
 
 	const menuEntries: any[] = [];
 
@@ -83,7 +88,10 @@ export default function PostPreview_Default(props: any) {
 					/>
 				)}
 				<S.TitleWrapper>
-					<h2 className={!post ? 'loadingPlaceholder' : ''} onClick={() => navigate(getRedirect(`post/${post?.id}`))}>
+					<h2
+						className={!post ? 'loadingPlaceholder' : ''}
+						onClick={() => navigate(getRedirect(`post/${post?.metadata?.url ?? post?.id}`))}
+					>
 						<span>{post ? post?.name : 'Loading...'}</span>
 					</h2>
 					{post?.metadata?.status === 'draft' && (
@@ -97,17 +105,23 @@ export default function PostPreview_Default(props: any) {
 					<S.SourceIcon
 						className="loadingAvatar"
 						onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-						src={
-							profile?.thumbnail && checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : ICONS.user
-						}
+						src={displayThumbnail && checkValidAddress(displayThumbnail) ? getTxEndpoint(displayThumbnail) : ICONS.user}
 					/>
-					<S.Author onClick={() => navigate(getRedirect(`user/${profile.id}`))}>{profile?.displayName}</S.Author>
+					<S.Author
+						onClick={() =>
+							!isPortalCreator &&
+							navigate(getRedirect(`author/${profile.username ? urlify(profile.username) : profile.id}`))
+						}
+						style={{ cursor: isPortalCreator ? 'default' : 'pointer' }}
+					>
+						{displayName}
+					</S.Author>
 					<S.Date>
 						{isLoadingProfile ? (
 							<span>Loading...</span>
 						) : (
-							`${new Date(Number(post.dateCreated)).toLocaleDateString()} ${new Date(
-								Number(post.dateCreated)
+							`${new Date(Number(post.metadata?.releaseDate)).toLocaleDateString()} ${new Date(
+								Number(post.metadata?.releaseDate)
 							).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
 						)}
 					</S.Date>

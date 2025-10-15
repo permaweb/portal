@@ -54,7 +54,7 @@ export default function ArticlePostCreator() {
 		(async function () {
 			if (portalProvider.current?.users) {
 				portalProvider.current.users.forEach((user: PortalUserType) => {
-					if (!usersFetched[user.address]) {
+					if (!usersFetched[user.address] && user.type !== 'wallet') {
 						portalProvider.fetchPortalUserProfile(user);
 						setUsersFetched((prev) => ({ ...prev, [user.address]: true }));
 					}

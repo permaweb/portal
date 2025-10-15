@@ -28,7 +28,7 @@ function getSocialIcon(url: string, icon: string): string | null {
 	if (lowerUrl.includes('vk.com')) return ICONS_SOCIAL.VK;
 	if (lowerUrl.includes('wechat.com')) return ICONS_SOCIAL.WECHAT;
 	if (lowerUrl.includes('whatsapp.com')) return ICONS_SOCIAL.WHATSAPP;
-	return getTxEndpoint(icon) || null;
+	return icon || null;
 }
 
 interface SocialLinksProps {
@@ -46,11 +46,11 @@ export default function SocialLinks({ isFooter = false }: SocialLinksProps) {
 			<S.LinksList $isFooter={isFooter}>
 				{Links.map((link: any, index: number) => {
 					const icon = getSocialIcon(link.url, link.icon);
-					return icon ? (
+					return (
 						<a key={index} href={link.url} target="_blank" rel="noreferrer" title={link.title}>
-							<ReactSVG src={icon} />
+							<ReactSVG src={getTxEndpoint(icon ?? ICONS_SOCIAL.DEFAULT_ICON)} />
 						</a>
-					) : null;
+					);
 				})}
 			</S.LinksList>
 		</S.Links>

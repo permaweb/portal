@@ -18,8 +18,8 @@ export default function Content(props: any) {
 					<Route path=":portalId/feed/date/:year/:month" element={<Page />} />
 					<Route path=":portalId/feed/network/:network" element={<Page />} />
 					<Route path=":portalId/search/:search" element={<Page />} />
-					<Route path=":portalId/user/:user" element={<Page />} />
-					<Route path=":portalId/user/:user/posts" element={<Page />} />
+					<Route path=":portalId/author/:user" element={<Page />} />
+					<Route path=":portalId/author/:user/posts" element={<Page />} />
 					<Route path=":portalId/static/:pageId" element={<Page />} />
 					<Route path=":portalId" element={<Page />} />
 
@@ -30,8 +30,8 @@ export default function Content(props: any) {
 					<Route path="feed/date/:year/:month" element={<Page />} />
 					<Route path="feed/network/:network" element={<Page />} />
 					<Route path="search/:search" element={<Page />} />
-					<Route path="user/:user" element={<Page />} />
-					<Route path="user/:user/posts" element={<Page />} />
+					<Route path="author/:user" element={<Page />} />
+					<Route path="author/:user/posts" element={<Page />} />
 					<Route path="static/:pageId" element={<Page />} />
 					<Route path="*" element={<Page />} />
 				</Routes>
