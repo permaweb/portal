@@ -198,6 +198,15 @@ export type ArticlePostType = {
 	title: string | null;
 };
 
+export type PageBlockEnum = any; // TODO
+
+export type PageBlockType = {
+	type: string;
+	layout: any;
+	content: any[];
+	width: number;
+};
+
 export type TagType = { name: string; value: string };
 
 export type TagFilterType = { name: string; values: string[]; match?: string };

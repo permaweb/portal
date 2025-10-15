@@ -8,6 +8,7 @@ export const language = {
 		addFunds: `Add Funds`,
 		addLink: `Add a link`,
 		address: `Address`,
+		addSection: `Add Section`,
 		addTheme: `Add a theme`,
 		addTo: `Add To `,
 		addTopic: `Add a tag`,
@@ -101,6 +102,7 @@ export const language = {
 		delete: `Delete`,
 		deleteBlock: `Delete Block`,
 		deleteCaption: `Delete Caption`,
+		deleteSection: `Delete Section`,
 		description: `Description`,
 		descriptionUpdated: `Description Updated`,
 		design: `Design`,
@@ -490,7 +492,9 @@ export const language = {
 		// === UNTRANSLATED START ===
 		// TODO: translate
 
+		addSection: `Add Section`,
 		createPageInfo: `Create an Info Page`,
+		deleteSection: `Delete Section`,
 		infoPages: `Info Pages`,
 		loadingPage: `Loading Page`,
 		publication: `Publication`,

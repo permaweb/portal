@@ -6,11 +6,12 @@ import { EditorStoreRootState } from 'editor/store';
 import { currentPageUpdate } from 'editor/store/page';
 
 import { Button } from 'components/atoms/Button';
+import { ICONS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-export default function PageToolbar(props: { handleSubmit: () => void }) {
+export default function PageToolbar(props: { handleSubmit: () => void; addSection: (type: string) => void }) {
 	const dispatch = useDispatch();
 
 	const currentPage = useSelector((state: EditorStoreRootState) => state.currentPage);
@@ -53,20 +54,17 @@ export default function PageToolbar(props: { handleSubmit: () => void }) {
 					iconLeftAlign
 					tooltip={'CTRL + K'}
 					noFocus
-				/>
+				/> */}
 				<Button
 					type={'primary'}
-					label={language?.layout}
-					handlePress={() =>
-						handleCurrentPostUpdate({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode })
-					}
-					active={currentPost.editor.blockEditMode}
-					disabled={currentPost.editor.loading.active}
-					icon={currentPost.editor.blockEditMode ? ICONS.close : ICONS.layout}
+					label={language?.addSection}
+					handlePress={() => props.addSection('default')}
+					disabled={currentPage.editor.loading.active}
+					icon={ICONS.add}
 					iconLeftAlign
-					tooltip={'CTRL + L'}
+					tooltip={null}
 					noFocus
-				/> */}
+				/>
 				<S.SubmitWrapper>
 					<Button
 						type={'alt1'}
