@@ -67,7 +67,7 @@ export default function PostPreview_Default(props: any) {
 					post?.metadata?.categories?.map((category: any, index: number) => {
 						return (
 							<React.Fragment key={index}>
-								<NavLink to={getRedirect(`feed/category/${category.id}`)}>
+								<NavLink to={getRedirect(`feed/category/${category.name}`)}>
 									<S.Category>{category.name}</S.Category>
 								</NavLink>
 								{index < post.metadata.categories.length - 1 && <>,&nbsp;</>}
