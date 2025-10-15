@@ -13,7 +13,7 @@ export default function Content(props: any) {
 				<Routes>
 					<Route path=":portalId/post/:postId" element={<Page />} />
 					<Route path=":portalId/feed/:pageId" element={<Page />} />
-					<Route path=":portalId/feed/category/:category" element={<Page />} />
+					<Route path=":portalId/feed/category/:categoryName" element={<Page />} />
 					<Route path=":portalId/feed/tag/:tag" element={<Page />} />
 					<Route path=":portalId/feed/date/:year/:month" element={<Page />} />
 					<Route path=":portalId/feed/network/:network" element={<Page />} />
@@ -25,7 +25,7 @@ export default function Content(props: any) {
 
 					<Route path="post/:postId" element={<Page />} />
 					<Route path="feed/:pageId" element={<Page />} />
-					<Route path="feed/category/:category" element={<Page />} />
+					<Route path="feed/category/:categoryName" element={<Page />} />
 					<Route path="feed/tag/:tag" element={<Page />} />
 					<Route path="feed/date/:year/:month" element={<Page />} />
 					<Route path="feed/network/:network" element={<Page />} />

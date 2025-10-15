@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { PostList } from 'viewer/components/organisms/PostList';
 import { usePortalProvider } from 'viewer/providers/PortalProvider';
@@ -12,8 +12,8 @@ import { scrollTo } from 'helpers/window';
 import * as S from './styles';
 
 export default function Category() {
-	const { categoryId } = useParams<{ categoryId?: string }>();
-
+	const location = useLocation();
+	const categoryId = (location.state as { categoryId?: string })?.categoryId;
 	const portalProvider = usePortalProvider();
 
 	const [currentCategory, setCurrentCategory] = React.useState<PortalCategoryType | null>(null);
