@@ -74,6 +74,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const overview = permawebProvider.libs.mapFromProcessCase(
 					await permawebProvider.libs.readState({ processId: portalId, path: 'overview' })
 				);
+
 				const presentation = permawebProvider.libs.mapFromProcessCase(
 					await permawebProvider.libs.readState({ processId: portalId, path: 'presentation' })
 				);
@@ -116,6 +117,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					name: overview?.name,
 					logo: overview?.logo,
 					icon: overview?.icon,
+					moderation: overview?.moderation,
 					layout: presentation?.layout,
 					pages: presentation?.pages,
 					themes: presentation?.themes,
@@ -137,8 +139,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const Logo = zone?.logo;
 				const Fonts = zone?.fonts;
 				const Icon = zone?.icon;
+				const Moderation = zone?.moderation;
 
-				const portalData = { Name, Categories, Layout, Pages, Themes, Posts, Links, Logo, Fonts, Icon };
+				const portalData = { Name, Categories, Layout, Pages, Themes, Posts, Links, Logo, Fonts, Icon, Moderation };
 				console.log('portalData: ', portalData);
 				setPortal(portalData);
 				if (portalId && portalData) cachePortal(portalId, portalData);

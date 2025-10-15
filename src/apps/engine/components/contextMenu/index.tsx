@@ -67,6 +67,7 @@ export default function ContextMenu({ entries, children }: ContextMenuProps) {
 							} else if (entry.onClick) {
 								entry.onClick();
 							}
+							setOpenMenu(false);
 						};
 						return (
 							<S.MenuEntry key={index} onClick={handleClick}>

@@ -200,6 +200,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									logo: null,
 									icon: null,
 									owner: null,
+									moderation: null,
 									assets: null,
 									requests: null,
 									categories: null,
@@ -248,6 +249,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									updatedPortal.logo = data.logo ?? updatedPortal.logo;
 									updatedPortal.icon = data.icon ?? updatedPortal.icon;
 									updatedPortal.owner = data.owner ?? updatedPortal.owner;
+									updatedPortal.moderation = data.moderation ?? updatedPortal.moderation;
 									break;
 								case 'users':
 									updatedPortal.roleOptions = data.roleOptions ?? updatedPortal.roleOptions;

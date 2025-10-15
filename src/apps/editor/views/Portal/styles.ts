@@ -38,6 +38,7 @@ export const SectionHeader = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	background: ${(props) => props.theme.colors.container.alt1.background};
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
@@ -48,27 +49,26 @@ export const SectionHeader = styled.div`
 
 export const SectionBody = styled.div`
 	width: 100%;
+	background: ${(props) => props.theme.colors.container.primary.background};
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
-export const DesignSection = styled(Section)`
-	> :first-child {
-		padding: 12.5px 15px 0 15px;
+export const DesignSection = styled(Section)``;
+
+export const SetupSection = styled(Section)``;
+
+export const PostsSection = styled(Section)`
+	${SectionBody} {
+		background: transparent;
+		border-top: none;
 	}
 `;
 
-export const SetupSection = styled(Section)`
-	> :first-child {
-		padding: 12.5px 10px 0 15px;
+export const DomainSection = styled(Section)``;
+
+export const UsersSection = styled(Section)`
+	${SectionBody} {
+		background: transparent;
+		border-top: none;
 	}
 `;
-
-export const PostsSection = styled(Section)``;
-
-export const DomainSection = styled(Section)`
-	> :first-child {
-		padding: 12.5px 15px 15px 15px;
-		border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
-	}
-`;
-
-export const UsersSection = styled(Section)``;

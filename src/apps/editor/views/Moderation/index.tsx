@@ -4,6 +4,7 @@ import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { Checkbox } from 'components/atoms/Checkbox';
 import { Loader } from 'components/atoms/Loader';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { cacheModeration, formatAddress, getCachedModeration } from 'helpers/utils';
@@ -18,14 +19,25 @@ export default function Moderation() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [loading, setLoading] = React.useState(false);
+	const [loadingSubscriptions, setLoadingSubscriptions] = React.useState(false);
+	const [loadingUsers, setLoadingUsers] = React.useState(false);
+	const [loadingComments, setLoadingComments] = React.useState(false);
 	const [inactiveComments, setInactiveComments] = React.useState<any[]>([]);
 	const [profiles, setProfiles] = React.useState<{ [key: string]: any }>({});
 	const [updatingComment, setUpdatingComment] = React.useState<string | null>(null);
+	const [externalPortals, setExternalPortals] = React.useState<{ id: string; name: string }[]>([]);
+	const [selectedPortals, setSelectedPortals] = React.useState<Set<string>>(new Set());
+	const [moderatedUsers, setModeratedUsers] = React.useState<any[]>([]);
+	const [moderatedComments, setModeratedComments] = React.useState<any[]>([]);
+
+	console.log('moderatedComments: ', moderatedComments)
+	console.log('moderatedUsers: ', moderatedUsers)
 
 	React.useEffect(() => {
 		fetchInactiveComments();
-	}, [portalProvider.current?.assets]);
+		extractExternalPortals();
+		fetchModerationEntries();
+	}, [portalProvider.current?.assets, portalProvider.current?.id]);
 
 	React.useEffect(() => {
 		if (portalProvider.current?.id && permawebProvider.libs) {
@@ -37,55 +49,35 @@ export default function Moderation() {
 	}, [portalProvider.current?.id]);
 
 	async function fetchInactiveComments(backgroundRefresh = false) {
-		console.log('Starting fetchInactiveComments...');
-		console.log('Portal assets:', portalProvider.current?.assets);
-		console.log('Libs available:', !!permawebProvider.libs);
-
 		if (!portalProvider.current?.assets || !permawebProvider.libs || !portalProvider.current?.id) {
-			console.log('Missing requirements - assets, libs, or portal id');
 			return;
 		}
 
 		if (!backgroundRefresh) {
 			const cached = getCachedModeration(portalProvider.current.id);
 			if (cached) {
-				console.log('Using cached moderation data');
 				setInactiveComments(cached.inactiveComments || []);
 				setProfiles(cached.profiles || {});
 				return;
 			}
 		}
 
-		if (!backgroundRefresh) setLoading(true);
+		if (!backgroundRefresh) {
+			setLoadingComments(true);
+		}
 		const allInactiveComments = [];
 
 		try {
-			console.log(`Checking ${portalProvider.current.assets.length} posts...`);
-
 			for (const post of portalProvider.current.assets) {
-				console.log(`Post ${post.id}: has comments process = ${post.metadata?.comments}`);
-
 				if (post.metadata?.comments) {
-					// Fetch comments from the comment process using the correct method
 					try {
-						console.log(`Fetching comments for post ${post.id} from process ${post.metadata.comments}...`);
 						const comments = await permawebProvider.libs.getComments({
 							commentsId: post.metadata.comments,
 						});
 
-						console.log(`Got ${comments?.length || 0} comments for post ${post.id}:`, comments);
-
 						if (comments && Array.isArray(comments)) {
-							// Show all comments with their status for debugging
-							comments.forEach((c) =>
-								console.log(`Comment status: ${c.status}, content: ${c.content?.substring(0, 50)}`)
-							);
-
-							// Filter for inactive comments
 							const inactive = comments.filter((comment) => comment.status === 'inactive');
-							console.log(`Found ${inactive.length} inactive comments for post ${post.id}`);
 
-							// Add post info to each comment
 							inactive.forEach((comment) => {
 								allInactiveComments.push({
 									...comment,
@@ -101,7 +93,6 @@ export default function Moderation() {
 				}
 			}
 
-			console.log(`Total inactive comments found: ${allInactiveComments.length}`, allInactiveComments);
 			setInactiveComments(allInactiveComments);
 
 			if (allInactiveComments.length > 0) {
@@ -115,7 +106,9 @@ export default function Moderation() {
 		} catch (error) {
 			console.error('Error fetching comments:', error);
 		} finally {
-			if (!backgroundRefresh) setLoading(false);
+			if (!backgroundRefresh) {
+				setLoadingComments(false);
+			}
 		}
 	}
 
@@ -130,7 +123,7 @@ export default function Moderation() {
 					profileMap[creator] = profile;
 				}
 			} catch (e) {
-				console.log(`Could not fetch profile for ${creator}, will show address`);
+				// Profile fetch failed, will use address
 			}
 		}
 
@@ -139,6 +132,196 @@ export default function Moderation() {
 		cacheModeration(portalProvider.current.id, {
 			inactiveComments: comments,
 			profiles: profileMap,
+		});
+	}
+
+	async function fetchModerationEntries() {
+		if (!portalProvider.current?.moderation || !permawebProvider.libs) return;
+
+		setLoadingUsers(true);
+		setLoadingComments(true);
+
+		try {
+			// Fetch profile entries
+			const userEntries = await permawebProvider.libs.getModerationEntries({
+				moderationId: portalProvider.current.moderation,
+				targetType: 'profile',
+				status: 'blocked'
+			});
+			console.log('userEntries: ', userEntries)
+
+			// Filter to only include actual profile entries (API sometimes returns mixed types)
+			const profileEntries = (userEntries || []).filter((entry: any) =>
+				(entry.targetType === 'profile' || entry.TargetType === 'profile')
+			);
+
+			if (profileEntries && profileEntries.length > 0) {
+				const userProfiles = await Promise.all(
+					profileEntries.map(async (entry: any) => {
+						const targetId = entry.targetId || entry.TargetId;
+						const moderator = entry.moderator || entry.Moderator;
+						try {
+							const profile = await permawebProvider.libs.getProfileByWalletAddress(targetId);
+
+							// Fetch moderator profile
+							let moderatorProfile = null;
+							if (moderator) {
+								try {
+									moderatorProfile = await permawebProvider.libs.getProfileByWalletAddress(moderator);
+								} catch (e) {
+									// Profile fetch failed
+								}
+							}
+
+							return {
+								...entry,
+								targetId: targetId,
+								profile: profile || { address: targetId },
+								moderatorProfile: moderatorProfile
+							};
+						} catch (e) {
+							return {
+								...entry,
+								targetId: targetId,
+								profile: { address: targetId },
+								moderatorProfile: null
+							};
+						}
+					})
+				);
+				setModeratedUsers(userProfiles);
+			} else {
+				setModeratedUsers([]);
+			}
+			setLoadingUsers(false);
+
+			// Fetch comment entries
+			const commentEntries = await permawebProvider.libs.getModerationEntries({
+				moderationId: portalProvider.current.moderation,
+				targetType: 'comment',
+				status: 'blocked'
+			});
+
+			// Filter to only include actual comment entries (API sometimes returns mixed types)
+			const actualCommentEntries = (commentEntries || []).filter((entry: any) =>
+				(entry.targetType === 'comment' || entry.TargetType === 'comment')
+			);
+
+			if (actualCommentEntries && actualCommentEntries.length > 0) {
+				const commentsWithContent = await Promise.all(
+					actualCommentEntries.map(async (entry: any) => {
+						try {
+							const targetContext = entry.targetContext || entry.TargetContext;
+							const targetId = entry.targetId || entry.TargetId;
+							const moderator = entry.moderator || entry.Moderator;
+
+							if (targetContext) {
+								const comments = await permawebProvider.libs.getComments({
+									commentsId: targetContext,
+								});
+								const comment = comments?.find((c: any) => c.id === targetId);
+								if (comment) {
+									// Fetch author profile
+									let authorProfile = null;
+									if (comment.creator) {
+										try {
+											authorProfile = await permawebProvider.libs.getProfileByWalletAddress(comment.creator);
+										} catch (e) {
+											// Profile fetch failed
+										}
+									}
+
+									// Fetch moderator profile (who blocked it)
+									let moderatorProfile = null;
+									if (moderator) {
+										try {
+											moderatorProfile = await permawebProvider.libs.getProfileByWalletAddress(moderator);
+										} catch (e) {
+											// Profile fetch failed
+										}
+									}
+
+									return {
+										...entry,
+										comment: comment,
+										authorProfile: authorProfile,
+										moderatorProfile: moderatorProfile,
+										postTitle: portalProvider.current?.assets?.find((a: any) => a.metadata?.comments === targetContext)?.name
+									};
+								}
+							}
+							return entry;
+						} catch (e) {
+							console.error('Error fetching comment content:', e);
+							return entry;
+						}
+					})
+				);
+				setModeratedComments(commentsWithContent);
+			} else {
+				setModeratedComments([]);
+			}
+			setLoadingComments(false);
+		} catch (e) {
+			console.error('Error fetching moderation entries:', e);
+			setModeratedUsers([]);
+			setModeratedComments([]);
+			setLoadingUsers(false);
+			setLoadingComments(false);
+		}
+	}
+
+	async function extractExternalPortals() {
+		if (!portalProvider.current?.assets || !permawebProvider.libs) return;
+
+		setLoadingSubscriptions(true);
+
+		const portalIds = new Set<string>();
+
+		// Find all unique external portals from post metadata
+		for (const asset of portalProvider.current.assets) {
+			const metadata = asset.metadata as any;
+			if (metadata?.originPortal) {
+				if (metadata.originPortal !== portalProvider.current.id) {
+					portalIds.add(metadata.originPortal);
+				}
+			}
+		}
+
+		const portalsWithNames: { id: string; name: string }[] = [];
+
+		// Fetch portal names
+		for (const portalId of portalIds) {
+			try {
+				const portalData = permawebProvider.libs.mapFromProcessCase(
+					await permawebProvider.libs.readState({ processId: portalId, path: 'overview' })
+				);
+
+				portalsWithNames.push({
+					id: portalId,
+					name: portalData?.name || portalData?.store?.name || portalId
+				});
+			} catch (e) {
+				portalsWithNames.push({
+					id: portalId,
+					name: formatAddress(portalId, false)
+				});
+			}
+		}
+
+		setExternalPortals(portalsWithNames);
+		setLoadingSubscriptions(false);
+	}
+
+	function togglePortalSelection(portalId: string) {
+		setSelectedPortals((prev) => {
+			const newSet = new Set(prev);
+			if (newSet.has(portalId)) {
+				newSet.delete(portalId);
+			} else {
+				newSet.add(portalId);
+			}
+			return newSet;
 		});
 	}
 
@@ -173,16 +356,138 @@ export default function Moderation() {
 		<S.Wrapper className={'fade-in'}>
 			<ViewHeader header={language?.moderation} />
 			<S.BodyWrapper>
-				{loading ? (
-					<Loader />
-				) : (
-					<>
-						{inactiveComments.length > 0 ? (
-							<S.CommentsList>
-								<h3>
-									${language.inactiveComments} ({inactiveComments.length})
-								</h3>
-								{inactiveComments.map((comment, index) => {
+				<>
+					<S.SectionWrapper>
+							{/* Subscriptions Section */}
+							<S.SubscriptionsSection>
+								<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+									<S.SectionHeader>
+										<p>Subscriptions ({externalPortals.length})</p>
+									</S.SectionHeader>
+									<S.SectionBody>
+										{loadingSubscriptions ? (
+											<Loader relative />
+										) : externalPortals.length > 0 ? (
+											<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+												{externalPortals.map((portal) => (
+													<div key={portal.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+														<Checkbox
+															checked={selectedPortals.has(portal.id)}
+															handleSelect={() => togglePortalSelection(portal.id)}
+															disabled={false}
+														/>
+														<span>{portal.name}</span>
+													</div>
+												))}
+											</div>
+										) : (
+											<S.InfoMessage>
+												<p>No subscriptions found</p>
+											</S.InfoMessage>
+										)}
+									</S.SectionBody>
+								</div>
+							</S.SubscriptionsSection>
+
+							{/* Users Section */}
+							<S.UsersSection>
+								<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+									<S.SectionHeader>
+										<p>Users ({moderatedUsers.length})</p>
+									</S.SectionHeader>
+									<S.SectionBody>
+										{loadingUsers ? (
+											<Loader relative />
+										) : moderatedUsers.length > 0 ? (
+											<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+												{moderatedUsers.map((user) => {
+													const moderator = user.moderator || user.Moderator;
+													const moderatorName = user.moderatorProfile?.displayName ||
+														(moderator ? formatAddress(moderator, false) : 'Unknown');
+													const dateCreated = user.dateCreated || user.DateCreated;
+													const reason = user.reason || user.Reason;
+													return (
+													<div
+														key={user.targetId}
+														style={{
+															display: 'flex',
+															alignItems: 'flex-start',
+															justifyContent: 'space-between',
+															padding: '12px',
+															background: 'var(--theme-container-primary-background)',
+															border: '1px solid var(--theme-border-primary)',
+															borderRadius: '8px',
+															gap: '12px'
+														}}
+													>
+														<div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: 1 }}>
+															{user.profile?.thumbnail && (
+																<img
+																	src={getTxEndpoint(user.profile.thumbnail)}
+																	alt=""
+																	style={{ width: '40px', height: '40px', borderRadius: '50%', minWidth: '40px' }}
+																/>
+															)}
+															<div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+																<strong>{user.profile?.displayName || formatAddress(user.targetId, false)}</strong>
+																<div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', fontSize: 'var(--theme-typography-size-small)', color: 'var(--theme-font-primary-alt2)' }}>
+																	{dateCreated && <span>{new Date(dateCreated).toLocaleDateString()}</span>}
+																	<span>•</span>
+																	<span style={{ fontStyle: 'italic' }}>Blocked by {moderatorName}</span>
+																	{reason && (
+																		<>
+																			<span>•</span>
+																			<span style={{ fontStyle: 'italic' }}>Reason: {reason}</span>
+																		</>
+																	)}
+																</div>
+															</div>
+														</div>
+														<Button
+															type={'alt3'}
+															label={'Unblock'}
+															handlePress={async () => {
+																try {
+																	console.log('user: ', user)
+																	const targetId = user.targetId;
+																	await permawebProvider.libs.removeModerationEntry({
+																		moderationId: portalProvider.current.moderation,
+																		targetType: 'profile',
+																		targetId: targetId,
+																	});
+																	fetchModerationEntries();
+																} catch (e) {
+																	console.error('Error unblocking user:', e);
+																}
+															}}
+														/>
+													</div>
+													);
+												})}
+											</div>
+										) : (
+											<S.InfoMessage>
+												<p>No moderated users</p>
+											</S.InfoMessage>
+										)}
+									</S.SectionBody>
+								</div>
+							</S.UsersSection>
+						</S.SectionWrapper>
+
+						<S.SectionWrapper>
+							{/* Comments Section */}
+							<S.CommentsSection>
+								<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+									<S.SectionHeader>
+										<p>Comments ({inactiveComments.length + moderatedComments.length})</p>
+									</S.SectionHeader>
+									<S.SectionBody>
+										{loadingComments ? (
+											<Loader relative />
+										) : (inactiveComments.length > 0 || moderatedComments.length > 0) ? (
+										<S.CommentsList>
+										{inactiveComments.map((comment, index) => {
 									const profile = profiles[comment.creator];
 									const displayName = profile?.displayName || formatAddress(comment.creator, false);
 									return (
@@ -216,14 +521,106 @@ export default function Moderation() {
 										</S.CommentItem>
 									);
 								})}
-							</S.CommentsList>
-						) : (
-							<S.InfoMessage className={'border-wrapper-alt3'}>
-								<p>{language.noInactiveCommentsFound}</p>
-							</S.InfoMessage>
-						)}
-					</>
-				)}
+										{/* Moderated/Blocked Comments */}
+										{moderatedComments.map((comment, index) => {
+											const displayName = comment.authorProfile?.displayName ||
+												formatAddress(comment.comment?.creator, false);
+											const reason = comment.reason || comment.Reason;
+											const moderator = comment.moderator || comment.Moderator;
+											const moderatorName = comment.moderatorProfile?.displayName ||
+												(moderator ? formatAddress(moderator, false) : 'Unknown');
+											return (
+											<S.CommentItem key={`moderated-${index}`} $blocked={true}>
+												<S.CommentRow>
+													<S.Avatar>
+														{comment.authorProfile?.thumbnail && (
+															<img src={getTxEndpoint(comment.authorProfile.thumbnail)} alt={displayName} />
+														)}
+													</S.Avatar>
+													<S.CommentContent>
+														<S.CommentMeta>
+															<S.AuthorInfo>
+																<strong>{displayName}</strong>
+																{comment.postTitle && <span>commented on {comment.postTitle}</span>}
+															</S.AuthorInfo>
+														</S.CommentMeta>
+														<S.CommentMeta>
+															<S.AuthorInfo>
+																<span style={{ color: 'var(--theme-font-primary-alt2)', fontSize: 'var(--theme-typography-size-small)' }}>
+																	{comment.comment?.dateCreated && new Date(comment.comment.dateCreated).toLocaleDateString()}
+																</span>
+																<span>•</span>
+																<S.BlockedReason>Blocked by {moderatorName}</S.BlockedReason>
+																{reason && (
+																	<>
+																		<span>•</span>
+																		<S.BlockedReason>Reason: {reason}</S.BlockedReason>
+																	</>
+																)}
+															</S.AuthorInfo>
+														</S.CommentMeta>
+														<S.CommentText>
+															{comment.comment?.content || 'Comment content not available'}
+														</S.CommentText>
+													</S.CommentContent>
+													<S.CommentActions>
+														<Button
+															type={'alt3'}
+															label={'Block Author'}
+															handlePress={async () => {
+																try {
+																	const authorId = comment.comment?.creator;
+																	if (authorId && permawebProvider.profile?.id) {
+																		console.log('authorId: ', authorId)
+																		await permawebProvider.libs.addModerationEntry({
+																			moderationId: portalProvider.current.moderation,
+																			targetType: 'profile',
+																			targetId: authorId,
+																			status: 'blocked',
+																			moderator: permawebProvider.profile.id,
+																			reason: 'default',
+																		});
+																		fetchModerationEntries();
+																	}
+																} catch (e) {
+																	console.error('Error blocking user:', e);
+																}
+															}}
+															disabled={!comment.comment?.creator}
+														/>
+														<Button
+															type={'alt3'}
+															label={'Unblock Comment'}
+															handlePress={async () => {
+																try {
+																	const targetId = comment.targetId || comment.TargetId;
+																	await permawebProvider.libs.removeModerationEntry({
+																		moderationId: portalProvider.current.moderation,
+																		targetType: 'comment',
+																		targetId: targetId,
+																	});
+																	fetchModerationEntries();
+																} catch (e) {
+																	console.error('Error unblocking comment:', e);
+																}
+															}}
+														/>
+													</S.CommentActions>
+												</S.CommentRow>
+											</S.CommentItem>
+											);
+										})}
+										</S.CommentsList>
+									) : (
+										<S.InfoMessage>
+											<p>{language?.noCommentsToModerate || 'No comments to moderate'}</p>
+										</S.InfoMessage>
+									)}
+									</S.SectionBody>
+								</div>
+							</S.CommentsSection>
+					</S.SectionWrapper>
+				</>
 			</S.BodyWrapper>
 		</S.Wrapper>
 	);

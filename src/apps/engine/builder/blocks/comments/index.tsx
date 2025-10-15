@@ -1,9 +1,8 @@
 import React from 'react';
 import { defaultThemes } from 'engine/defaults/theme.defaults';
 import { initThemes } from 'engine/helpers/themes';
+import { useComments } from 'engine/hooks/comments';
 import { usePortalProvider } from 'engine/providers/portalProvider';
-
-import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import Comment from './comment';
 import CommentAdd from './commentAdd';
@@ -13,11 +12,7 @@ export default function Comments(props: any) {
 	const { preview, commentsId } = props;
 	const { portal } = usePortalProvider();
 	const Themes = preview ? defaultThemes : portal?.Themes;
-	const { libs } = usePermawebProvider();
-	const [comments, setComments] = React.useState(null);
-
-	console.log('comments: ', comments);
-	console.log('libs: ', libs);
+	const { comments: fetchedComments } = useComments(commentsId);
 
 	const organizeComments = React.useCallback((commentsList: any[]) => {
 		if (!commentsList || commentsList.length === 0) return [];
@@ -57,38 +52,14 @@ export default function Comments(props: any) {
 		return [...pinnedComments, ...rootComments];
 	}, []);
 
+	const comments = React.useMemo(() => organizeComments(fetchedComments), [fetchedComments, organizeComments]);
+
 	React.useEffect(() => {
 		if (preview) {
 			initThemes(Themes);
 			document.getElementById('preview')?.setAttribute('data-theme', 'dark');
 		}
 	}, []);
-
-	const fetchComments = React.useCallback(async () => {
-		if (libs && commentsId) {
-			try {
-				const comments = await libs.getComments({ commentsId });
-				const organized = organizeComments(comments);
-				setComments(organized);
-			} catch (e) {
-				console.error(e);
-			}
-		}
-	}, [libs, commentsId, organizeComments]);
-
-	React.useEffect(() => {
-		fetchComments();
-	}, [fetchComments]);
-
-	React.useEffect(() => {
-		const handleCommentAdded = (e: any) => {
-			if (e.detail.commentsId === commentsId) {
-				fetchComments();
-			}
-		};
-		window.addEventListener('commentAdded', handleCommentAdded);
-		return () => window.removeEventListener('commentAdded', handleCommentAdded);
-	}, [commentsId, fetchComments]);
 
 	return (
 		<S.Comments>

@@ -12,6 +12,7 @@ export type PortalDetailType = {
 	logo: string | null;
 	icon: string | null;
 	owner: string | null;
+	moderation?: string | null;
 	users?: PortalUserType[];
 	pages?: PortalPageType[];
 	assets?: PortalAssetType[];

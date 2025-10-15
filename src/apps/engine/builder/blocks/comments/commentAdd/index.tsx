@@ -88,7 +88,12 @@ function CommentEditorContent(props: any) {
 	const handleSubmit = async () => {
 		if (!canSend || !profile?.id || isSubmitting) return;
 
-		const plainText = editorText.trim();
+		let plainText = '';
+		editor.getEditorState().read(() => {
+			const root = $getRoot();
+			plainText = root.getTextContent().trim();
+		});
+
 		if (!plainText) return;
 		if (!isEditMode && checkForDuplicate(plainText)) return;
 
