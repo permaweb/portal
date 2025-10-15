@@ -131,7 +131,7 @@ export default function PortalManager(props: {
 							tags: tags,
 							data: PORTAL_DATA(),
 							spawnModeration: true,
-							authUsers: [arProvider.walletAddress]
+							authUsers: [arProvider.walletAddress],
 						},
 						(status: any) => console.log(status)
 					);

@@ -260,7 +260,15 @@ export const PORTAL_DATA = () => `
 `;
 
 export const PORTAL_PATCH_MAP = {
-	[PortalPatchMapEnum.Overview]: ['Owner', 'Version', 'Authorities', 'Store.Name', 'Store.Icon', 'Store.Logo', 'Store.Moderation'],
+	[PortalPatchMapEnum.Overview]: [
+		'Owner',
+		'Version',
+		'Authorities',
+		'Store.Name',
+		'Store.Icon',
+		'Store.Logo',
+		'Store.Moderation',
+	],
 	[PortalPatchMapEnum.Users]: ['Roles', 'RoleOptions', 'Permissions'],
 	[PortalPatchMapEnum.Navigation]: ['Store.Categories', 'Store.Topics', 'Store.Links', 'Store.Domains'],
 	[PortalPatchMapEnum.Presentation]: ['Store.Layout', 'Store.Pages', 'Store.Themes', 'Store.Fonts'],

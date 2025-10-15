@@ -54,7 +54,8 @@ export const useProfile = (profileId: string) => {
 			.catch((err: any) => {
 				console.error('Error fetching profile by ID:', err);
 
-				return libs.getProfileByWalletAddress(profileId)
+				return libs
+					.getProfileByWalletAddress(profileId)
 					.then((fetchedProfile: any) => {
 						if (fetchedProfile && fetchedProfile.id) {
 							cacheProfile(profileId, fetchedProfile);

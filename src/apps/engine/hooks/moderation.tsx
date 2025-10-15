@@ -1,5 +1,6 @@
 import React from 'react';
 import { usePortalProvider } from 'engine/providers/portalProvider';
+
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 export const useModeration = () => {
@@ -19,19 +20,21 @@ export const useModeration = () => {
 
 		setIsLoading(true);
 
-		const commentPromise = libs.getModerationEntries({ moderationId, targetType: 'comment', status: 'blocked' })
-			.then(entries => entries)
-			.catch(err => {
+		const commentPromise = libs
+			.getModerationEntries({ moderationId, targetType: 'comment', status: 'blocked' })
+			.then((entries) => entries)
+			.catch((err) => {
 				console.error('Error fetching comment entries:', err);
 				return [];
 			});
 
-		const userPromise = libs.getModerationEntries({ moderationId, targetType: 'profile', status: 'blocked' })
-			.then(entries => entries)
-			.catch(err => {
+		const userPromise = libs
+			.getModerationEntries({ moderationId, targetType: 'profile', status: 'blocked' })
+			.then((entries) => entries)
+			.catch((err) => {
 				console.error('Error fetching user entries:', err);
 				return [];
-			});			
+			});
 
 		Promise.all([commentPromise, userPromise])
 			.then(([commentEntries, userEntries]) => {

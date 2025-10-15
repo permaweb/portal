@@ -30,8 +30,8 @@ export default function Moderation() {
 	const [moderatedUsers, setModeratedUsers] = React.useState<any[]>([]);
 	const [moderatedComments, setModeratedComments] = React.useState<any[]>([]);
 
-	console.log('moderatedComments: ', moderatedComments)
-	console.log('moderatedUsers: ', moderatedUsers)
+	console.log('moderatedComments: ', moderatedComments);
+	console.log('moderatedUsers: ', moderatedUsers);
 
 	React.useEffect(() => {
 		fetchInactiveComments();
@@ -146,13 +146,13 @@ export default function Moderation() {
 			const userEntries = await permawebProvider.libs.getModerationEntries({
 				moderationId: portalProvider.current.moderation,
 				targetType: 'profile',
-				status: 'blocked'
+				status: 'blocked',
 			});
-			console.log('userEntries: ', userEntries)
+			console.log('userEntries: ', userEntries);
 
 			// Filter to only include actual profile entries (API sometimes returns mixed types)
-			const profileEntries = (userEntries || []).filter((entry: any) =>
-				(entry.targetType === 'profile' || entry.TargetType === 'profile')
+			const profileEntries = (userEntries || []).filter(
+				(entry: any) => entry.targetType === 'profile' || entry.TargetType === 'profile'
 			);
 
 			if (profileEntries && profileEntries.length > 0) {
@@ -177,14 +177,14 @@ export default function Moderation() {
 								...entry,
 								targetId: targetId,
 								profile: profile || { address: targetId },
-								moderatorProfile: moderatorProfile
+								moderatorProfile: moderatorProfile,
 							};
 						} catch (e) {
 							return {
 								...entry,
 								targetId: targetId,
 								profile: { address: targetId },
-								moderatorProfile: null
+								moderatorProfile: null,
 							};
 						}
 					})
@@ -199,12 +199,12 @@ export default function Moderation() {
 			const commentEntries = await permawebProvider.libs.getModerationEntries({
 				moderationId: portalProvider.current.moderation,
 				targetType: 'comment',
-				status: 'blocked'
+				status: 'blocked',
 			});
 
 			// Filter to only include actual comment entries (API sometimes returns mixed types)
-			const actualCommentEntries = (commentEntries || []).filter((entry: any) =>
-				(entry.targetType === 'comment' || entry.TargetType === 'comment')
+			const actualCommentEntries = (commentEntries || []).filter(
+				(entry: any) => entry.targetType === 'comment' || entry.TargetType === 'comment'
 			);
 
 			if (actualCommentEntries && actualCommentEntries.length > 0) {
@@ -246,7 +246,8 @@ export default function Moderation() {
 										comment: comment,
 										authorProfile: authorProfile,
 										moderatorProfile: moderatorProfile,
-										postTitle: portalProvider.current?.assets?.find((a: any) => a.metadata?.comments === targetContext)?.name
+										postTitle: portalProvider.current?.assets?.find((a: any) => a.metadata?.comments === targetContext)
+											?.name,
 									};
 								}
 							}
@@ -299,12 +300,12 @@ export default function Moderation() {
 
 				portalsWithNames.push({
 					id: portalId,
-					name: portalData?.name || portalData?.store?.name || portalId
+					name: portalData?.name || portalData?.store?.name || portalId,
 				});
 			} catch (e) {
 				portalsWithNames.push({
 					id: portalId,
-					name: formatAddress(portalId, false)
+					name: formatAddress(portalId, false),
 				});
 			}
 		}
@@ -358,55 +359,56 @@ export default function Moderation() {
 			<S.BodyWrapper>
 				<>
 					<S.SectionWrapper>
-							{/* Subscriptions Section */}
-							<S.SubscriptionsSection>
-								<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
-									<S.SectionHeader>
-										<p>Subscriptions ({externalPortals.length})</p>
-									</S.SectionHeader>
-									<S.SectionBody>
-										{loadingSubscriptions ? (
-											<Loader relative />
-										) : externalPortals.length > 0 ? (
-											<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-												{externalPortals.map((portal) => (
-													<div key={portal.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-														<Checkbox
-															checked={selectedPortals.has(portal.id)}
-															handleSelect={() => togglePortalSelection(portal.id)}
-															disabled={false}
-														/>
-														<span>{portal.name}</span>
-													</div>
-												))}
-											</div>
-										) : (
-											<S.InfoMessage>
-												<p>No subscriptions found</p>
-											</S.InfoMessage>
-										)}
-									</S.SectionBody>
-								</div>
-							</S.SubscriptionsSection>
+						{/* Subscriptions Section */}
+						<S.SubscriptionsSection>
+							<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+								<S.SectionHeader>
+									<p>Subscriptions ({externalPortals.length})</p>
+								</S.SectionHeader>
+								<S.SectionBody>
+									{loadingSubscriptions ? (
+										<Loader relative />
+									) : externalPortals.length > 0 ? (
+										<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+											{externalPortals.map((portal) => (
+												<div key={portal.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+													<Checkbox
+														checked={selectedPortals.has(portal.id)}
+														handleSelect={() => togglePortalSelection(portal.id)}
+														disabled={false}
+													/>
+													<span>{portal.name}</span>
+												</div>
+											))}
+										</div>
+									) : (
+										<S.InfoMessage>
+											<p>No subscriptions found</p>
+										</S.InfoMessage>
+									)}
+								</S.SectionBody>
+							</div>
+						</S.SubscriptionsSection>
 
-							{/* Users Section */}
-							<S.UsersSection>
-								<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
-									<S.SectionHeader>
-										<p>Users ({moderatedUsers.length})</p>
-									</S.SectionHeader>
-									<S.SectionBody>
-										{loadingUsers ? (
-											<Loader relative />
-										) : moderatedUsers.length > 0 ? (
-											<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-												{moderatedUsers.map((user) => {
-													const moderator = user.moderator || user.Moderator;
-													const moderatorName = user.moderatorProfile?.displayName ||
-														(moderator ? formatAddress(moderator, false) : 'Unknown');
-													const dateCreated = user.dateCreated || user.DateCreated;
-													const reason = user.reason || user.Reason;
-													return (
+						{/* Users Section */}
+						<S.UsersSection>
+							<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+								<S.SectionHeader>
+									<p>Users ({moderatedUsers.length})</p>
+								</S.SectionHeader>
+								<S.SectionBody>
+									{loadingUsers ? (
+										<Loader relative />
+									) : moderatedUsers.length > 0 ? (
+										<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+											{moderatedUsers.map((user) => {
+												const moderator = user.moderator || user.Moderator;
+												const moderatorName =
+													user.moderatorProfile?.displayName ||
+													(moderator ? formatAddress(moderator, false) : 'Unknown');
+												const dateCreated = user.dateCreated || user.DateCreated;
+												const reason = user.reason || user.Reason;
+												return (
 													<div
 														key={user.targetId}
 														style={{
@@ -417,7 +419,7 @@ export default function Moderation() {
 															background: 'var(--theme-container-primary-background)',
 															border: '1px solid var(--theme-border-primary)',
 															borderRadius: '8px',
-															gap: '12px'
+															gap: '12px',
 														}}
 													>
 														<div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: 1 }}>
@@ -430,7 +432,16 @@ export default function Moderation() {
 															)}
 															<div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
 																<strong>{user.profile?.displayName || formatAddress(user.targetId, false)}</strong>
-																<div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', fontSize: 'var(--theme-typography-size-small)', color: 'var(--theme-font-primary-alt2)' }}>
+																<div
+																	style={{
+																		display: 'flex',
+																		gap: '6px',
+																		alignItems: 'center',
+																		flexWrap: 'wrap',
+																		fontSize: 'var(--theme-typography-size-small)',
+																		color: 'var(--theme-font-primary-alt2)',
+																	}}
+																>
 																	{dateCreated && <span>{new Date(dateCreated).toLocaleDateString()}</span>}
 																	<span>•</span>
 																	<span style={{ fontStyle: 'italic' }}>Blocked by {moderatorName}</span>
@@ -448,7 +459,7 @@ export default function Moderation() {
 															label={'Unblock'}
 															handlePress={async () => {
 																try {
-																	console.log('user: ', user)
+																	console.log('user: ', user);
 																	const targetId = user.targetId;
 																	await permawebProvider.libs.removeModerationEntry({
 																		moderationId: portalProvider.current.moderation,
@@ -462,163 +473,171 @@ export default function Moderation() {
 															}}
 														/>
 													</div>
-													);
-												})}
-											</div>
-										) : (
-											<S.InfoMessage>
-												<p>No moderated users</p>
-											</S.InfoMessage>
-										)}
-									</S.SectionBody>
-								</div>
-							</S.UsersSection>
-						</S.SectionWrapper>
+												);
+											})}
+										</div>
+									) : (
+										<S.InfoMessage>
+											<p>No moderated users</p>
+										</S.InfoMessage>
+									)}
+								</S.SectionBody>
+							</div>
+						</S.UsersSection>
+					</S.SectionWrapper>
 
-						<S.SectionWrapper>
-							{/* Comments Section */}
-							<S.CommentsSection>
-								<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
-									<S.SectionHeader>
-										<p>Comments ({inactiveComments.length + moderatedComments.length})</p>
-									</S.SectionHeader>
-									<S.SectionBody>
-										{loadingComments ? (
-											<Loader relative />
-										) : (inactiveComments.length > 0 || moderatedComments.length > 0) ? (
+					<S.SectionWrapper>
+						{/* Comments Section */}
+						<S.CommentsSection>
+							<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+								<S.SectionHeader>
+									<p>Comments ({inactiveComments.length + moderatedComments.length})</p>
+								</S.SectionHeader>
+								<S.SectionBody>
+									{loadingComments ? (
+										<Loader relative />
+									) : inactiveComments.length > 0 || moderatedComments.length > 0 ? (
 										<S.CommentsList>
-										{inactiveComments.map((comment, index) => {
-									const profile = profiles[comment.creator];
-									const displayName = profile?.displayName || formatAddress(comment.creator, false);
-									return (
-										<S.CommentItem key={index}>
-											<S.CommentRow>
-												<S.Avatar>
-													{profile?.thumbnail && <img src={getTxEndpoint(profile.thumbnail)} alt={displayName} />}
-												</S.Avatar>
-												<S.CommentContent>
-													<S.CommentMeta>
-														<S.AuthorInfo>
-															<strong>{displayName}</strong>
-															<span>commented on {comment.postTitle}</span>
-															<S.CommentDate>
-																• {comment.dateCreated ? new Date(comment.dateCreated).toLocaleDateString() : 'N/A'}
-															</S.CommentDate>
-														</S.AuthorInfo>
-													</S.CommentMeta>
-													<S.CommentText>{comment.content}</S.CommentText>
-												</S.CommentContent>
-												<S.CommentActions>
-													<Button
-														type={'primary'}
-														label={language.activate}
-														handlePress={() => activateComment(comment)}
-														disabled={updatingComment === comment.id}
-														loading={updatingComment === comment.id}
-													/>
-												</S.CommentActions>
-											</S.CommentRow>
-										</S.CommentItem>
-									);
-								})}
-										{/* Moderated/Blocked Comments */}
-										{moderatedComments.map((comment, index) => {
-											const displayName = comment.authorProfile?.displayName ||
-												formatAddress(comment.comment?.creator, false);
-											const reason = comment.reason || comment.Reason;
-											const moderator = comment.moderator || comment.Moderator;
-											const moderatorName = comment.moderatorProfile?.displayName ||
-												(moderator ? formatAddress(moderator, false) : 'Unknown');
-											return (
-											<S.CommentItem key={`moderated-${index}`} $blocked={true}>
-												<S.CommentRow>
-													<S.Avatar>
-														{comment.authorProfile?.thumbnail && (
-															<img src={getTxEndpoint(comment.authorProfile.thumbnail)} alt={displayName} />
-														)}
-													</S.Avatar>
-													<S.CommentContent>
-														<S.CommentMeta>
-															<S.AuthorInfo>
-																<strong>{displayName}</strong>
-																{comment.postTitle && <span>commented on {comment.postTitle}</span>}
-															</S.AuthorInfo>
-														</S.CommentMeta>
-														<S.CommentMeta>
-															<S.AuthorInfo>
-																<span style={{ color: 'var(--theme-font-primary-alt2)', fontSize: 'var(--theme-typography-size-small)' }}>
-																	{comment.comment?.dateCreated && new Date(comment.comment.dateCreated).toLocaleDateString()}
-																</span>
-																<span>•</span>
-																<S.BlockedReason>Blocked by {moderatorName}</S.BlockedReason>
-																{reason && (
-																	<>
-																		<span>•</span>
-																		<S.BlockedReason>Reason: {reason}</S.BlockedReason>
-																	</>
+											{inactiveComments.map((comment, index) => {
+												const profile = profiles[comment.creator];
+												const displayName = profile?.displayName || formatAddress(comment.creator, false);
+												return (
+													<S.CommentItem key={index}>
+														<S.CommentRow>
+															<S.Avatar>
+																{profile?.thumbnail && <img src={getTxEndpoint(profile.thumbnail)} alt={displayName} />}
+															</S.Avatar>
+															<S.CommentContent>
+																<S.CommentMeta>
+																	<S.AuthorInfo>
+																		<strong>{displayName}</strong>
+																		<span>commented on {comment.postTitle}</span>
+																		<S.CommentDate>
+																			•{' '}
+																			{comment.dateCreated ? new Date(comment.dateCreated).toLocaleDateString() : 'N/A'}
+																		</S.CommentDate>
+																	</S.AuthorInfo>
+																</S.CommentMeta>
+																<S.CommentText>{comment.content}</S.CommentText>
+															</S.CommentContent>
+															<S.CommentActions>
+																<Button
+																	type={'primary'}
+																	label={language.activate}
+																	handlePress={() => activateComment(comment)}
+																	disabled={updatingComment === comment.id}
+																	loading={updatingComment === comment.id}
+																/>
+															</S.CommentActions>
+														</S.CommentRow>
+													</S.CommentItem>
+												);
+											})}
+											{/* Moderated/Blocked Comments */}
+											{moderatedComments.map((comment, index) => {
+												const displayName =
+													comment.authorProfile?.displayName || formatAddress(comment.comment?.creator, false);
+												const reason = comment.reason || comment.Reason;
+												const moderator = comment.moderator || comment.Moderator;
+												const moderatorName =
+													comment.moderatorProfile?.displayName ||
+													(moderator ? formatAddress(moderator, false) : 'Unknown');
+												return (
+													<S.CommentItem key={`moderated-${index}`} $blocked={true}>
+														<S.CommentRow>
+															<S.Avatar>
+																{comment.authorProfile?.thumbnail && (
+																	<img src={getTxEndpoint(comment.authorProfile.thumbnail)} alt={displayName} />
 																)}
-															</S.AuthorInfo>
-														</S.CommentMeta>
-														<S.CommentText>
-															{comment.comment?.content || 'Comment content not available'}
-														</S.CommentText>
-													</S.CommentContent>
-													<S.CommentActions>
-														<Button
-															type={'alt3'}
-															label={'Block Author'}
-															handlePress={async () => {
-																try {
-																	const authorId = comment.comment?.creator;
-																	if (authorId && permawebProvider.profile?.id) {
-																		console.log('authorId: ', authorId)
-																		await permawebProvider.libs.addModerationEntry({
-																			moderationId: portalProvider.current.moderation,
-																			targetType: 'profile',
-																			targetId: authorId,
-																			status: 'blocked',
-																			moderator: permawebProvider.profile.id,
-																			reason: 'default',
-																		});
-																		fetchModerationEntries();
-																	}
-																} catch (e) {
-																	console.error('Error blocking user:', e);
-																}
-															}}
-															disabled={!comment.comment?.creator}
-														/>
-														<Button
-															type={'alt3'}
-															label={'Unblock Comment'}
-															handlePress={async () => {
-																try {
-																	const targetId = comment.targetId || comment.TargetId;
-																	await permawebProvider.libs.removeModerationEntry({
-																		moderationId: portalProvider.current.moderation,
-																		targetType: 'comment',
-																		targetId: targetId,
-																	});
-																	fetchModerationEntries();
-																} catch (e) {
-																	console.error('Error unblocking comment:', e);
-																}
-															}}
-														/>
-													</S.CommentActions>
-												</S.CommentRow>
-											</S.CommentItem>
-											);
-										})}
+															</S.Avatar>
+															<S.CommentContent>
+																<S.CommentMeta>
+																	<S.AuthorInfo>
+																		<strong>{displayName}</strong>
+																		{comment.postTitle && <span>commented on {comment.postTitle}</span>}
+																	</S.AuthorInfo>
+																</S.CommentMeta>
+																<S.CommentMeta>
+																	<S.AuthorInfo>
+																		<span
+																			style={{
+																				color: 'var(--theme-font-primary-alt2)',
+																				fontSize: 'var(--theme-typography-size-small)',
+																			}}
+																		>
+																			{comment.comment?.dateCreated &&
+																				new Date(comment.comment.dateCreated).toLocaleDateString()}
+																		</span>
+																		<span>•</span>
+																		<S.BlockedReason>Blocked by {moderatorName}</S.BlockedReason>
+																		{reason && (
+																			<>
+																				<span>•</span>
+																				<S.BlockedReason>Reason: {reason}</S.BlockedReason>
+																			</>
+																		)}
+																	</S.AuthorInfo>
+																</S.CommentMeta>
+																<S.CommentText>
+																	{comment.comment?.content || 'Comment content not available'}
+																</S.CommentText>
+															</S.CommentContent>
+															<S.CommentActions>
+																<Button
+																	type={'alt3'}
+																	label={'Block Author'}
+																	handlePress={async () => {
+																		try {
+																			const authorId = comment.comment?.creator;
+																			if (authorId && permawebProvider.profile?.id) {
+																				console.log('authorId: ', authorId);
+																				await permawebProvider.libs.addModerationEntry({
+																					moderationId: portalProvider.current.moderation,
+																					targetType: 'profile',
+																					targetId: authorId,
+																					status: 'blocked',
+																					moderator: permawebProvider.profile.id,
+																					reason: 'default',
+																				});
+																				fetchModerationEntries();
+																			}
+																		} catch (e) {
+																			console.error('Error blocking user:', e);
+																		}
+																	}}
+																	disabled={!comment.comment?.creator}
+																/>
+																<Button
+																	type={'alt3'}
+																	label={'Unblock Comment'}
+																	handlePress={async () => {
+																		try {
+																			const targetId = comment.targetId || comment.TargetId;
+																			await permawebProvider.libs.removeModerationEntry({
+																				moderationId: portalProvider.current.moderation,
+																				targetType: 'comment',
+																				targetId: targetId,
+																			});
+																			fetchModerationEntries();
+																		} catch (e) {
+																			console.error('Error unblocking comment:', e);
+																		}
+																	}}
+																/>
+															</S.CommentActions>
+														</S.CommentRow>
+													</S.CommentItem>
+												);
+											})}
 										</S.CommentsList>
 									) : (
 										<S.InfoMessage>
 											<p>{language?.noCommentsToModerate || 'No comments to moderate'}</p>
 										</S.InfoMessage>
 									)}
-									</S.SectionBody>
-								</div>
-							</S.CommentsSection>
+								</S.SectionBody>
+							</div>
+						</S.CommentsSection>
 					</S.SectionWrapper>
 				</>
 			</S.BodyWrapper>

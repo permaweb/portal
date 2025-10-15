@@ -1,7 +1,8 @@
 import React from 'react';
-import { useModeration } from './moderation';
 
 import { usePermawebProvider } from 'providers/PermawebProvider';
+
+import { useModeration } from './moderation';
 
 export const useComments = (rootId: any, root: boolean = false) => {
 	const { libs } = usePermawebProvider();
@@ -55,7 +56,7 @@ export const useComments = (rootId: any, root: boolean = false) => {
 	React.useEffect(() => {
 		const handleCommentAdded = (e: any) => {
 			if (e.detail.commentsId === rootId) {
-				setRefetchTrigger(prev => prev + 1);
+				setRefetchTrigger((prev) => prev + 1);
 			}
 		};
 		window.addEventListener('commentAdded', handleCommentAdded);
