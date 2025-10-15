@@ -1,6 +1,8 @@
 import * as S from './styles';
 
-// TODO
+// TODO: Use portal post data
+// TODO: Render based on layout prop
+// TODO: Allow change layout
 export default function FeedBlock(props: { block: any }) {
 	return (
 		<S.Wrapper>

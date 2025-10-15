@@ -68,7 +68,6 @@ export default function PageEditor() {
 	};
 
 	function getBlock(block: PageBlockType | ArticleBlockType, index: number) {
-		console.log(block);
 		if (articleBlockTypes.includes(block.type)) {
 			return <p key={index}>Article Block</p>;
 		} else return <PageBlock id={index.toString()} block={block as PageBlockType} key={index} index={index} />;

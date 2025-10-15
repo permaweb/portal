@@ -332,3 +332,5 @@ export interface UserOwnedDomain {
 	status?: 'loading' | 'resolved' | 'failed';
 	requiresAntUpdate?: boolean;
 }
+
+export type ArticleBlocksContextType = 'toolbar' | 'inline' | 'grid';

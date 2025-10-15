@@ -24,6 +24,7 @@ import * as S from './styles';
 
 export default function ArticleBlock(props: {
 	index: number;
+	context: 'post' | 'page';
 	block: ArticleBlockType;
 	onChangeBlock: (args: { id: string; content: string; type?: any; data?: any }) => void;
 	onDeleteBlock: (id: string) => void;
@@ -31,7 +32,16 @@ export default function ArticleBlock(props: {
 }) {
 	const dispatch = useDispatch();
 
-	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
+	const currentReducer = useSelector((state: EditorStoreRootState) => {
+		switch (props.context) {
+			case 'post':
+				return state.currentPost;
+			case 'page':
+				return state.currentPage;
+			default:
+				return state.currentPost;
+		}
+	});
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -45,7 +55,7 @@ export default function ArticleBlock(props: {
 	const [showLinkModal, setShowLinkModal] = React.useState<boolean>(false);
 	const [blockSelectorPosition, setBlockSelectorPosition] = React.useState<'below' | 'above'>('below');
 
-	const prevMarkupRef = React.useRef(currentPost.editor.markup);
+	const prevMarkupRef = React.useRef(currentReducer.editor.markup);
 	const isApplyingMarkupRef = React.useRef(false);
 	const wasEmptyRef = React.useRef(false);
 	const isUserInitiatedChangeRef = React.useRef(false);
@@ -84,7 +94,7 @@ export default function ArticleBlock(props: {
 		if (!selection.isCollapsed) {
 			// Check if we have mixed content by using the current Redux state
 			// If button is inactive, it means not ALL text has the formatting (mixed or none)
-			const buttonIsActive = currentPost.editor.markup[markupType];
+			const buttonIsActive = currentReducer.editor.markup[markupType];
 
 			// Only apply formatting if button is active (all text has it - remove it)
 			// or if button is inactive AND no text has it (apply it)
@@ -135,7 +145,7 @@ export default function ArticleBlock(props: {
 		if (!selection || !editableRef.current.contains(selection.anchorNode)) return;
 
 		// Only update if this block is focused
-		if (currentPost.editor.focusedBlock?.id !== props.block.id) return;
+		if (currentReducer.editor.focusedBlock?.id !== props.block.id) return;
 
 		// For code blocks, always set markup to false
 		if (props.block.type === 'code') {
@@ -147,7 +157,7 @@ export default function ArticleBlock(props: {
 			};
 
 			Object.entries(markupState).forEach(([key, value]) => {
-				if (currentPost.editor.markup[key as keyof typeof markupState] !== value) {
+				if (currentReducer.editor.markup[key as keyof typeof markupState] !== value) {
 					handleCurrentPostUpdate({ field: `markup.${key}`, value });
 				}
 			});
@@ -228,17 +238,17 @@ export default function ArticleBlock(props: {
 
 		// Update Redux only if changed to avoid loops
 		Object.entries(markupState).forEach(([key, value]) => {
-			if (currentPost.editor.markup[key as keyof typeof markupState] !== value) {
+			if (currentReducer.editor.markup[key as keyof typeof markupState] !== value) {
 				handleCurrentPostUpdate({ field: `markup.${key}`, value });
 			}
 		});
-	}, [currentPost.editor.focusedBlock?.id, currentPost.editor.markup, props.block.id, props.block.type]);
+	}, [currentReducer.editor.focusedBlock?.id, currentReducer.editor.markup, props.block.id, props.block.type]);
 
 	React.useEffect(() => {
-		const currentBlockIndex = currentPost.data?.content?.findIndex(
-			(block: ArticleBlockType) => block?.id === currentPost.editor?.focusedBlock?.id
+		const currentBlockIndex = currentReducer.data?.content?.findIndex(
+			(block: ArticleBlockType) => block?.id === currentReducer.editor?.focusedBlock?.id
 		);
-		const currentBlock = currentPost.data?.content?.[currentBlockIndex];
+		const currentBlock = currentReducer.data?.content?.[currentBlockIndex];
 		if (currentBlock?.id === props.block?.id) {
 			if (currentBlock.content === '/') {
 				// Determine position based on block's location in viewport
@@ -262,7 +272,7 @@ export default function ArticleBlock(props: {
 			} else {
 				setShowBlockSelector(false);
 				// Only set toggleBlockFocus to false if this block was the one that had it active
-				if (currentPost.editor.toggleBlockFocus) {
+				if (currentReducer.editor.toggleBlockFocus) {
 					handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: false });
 				}
 			}
@@ -270,7 +280,7 @@ export default function ArticleBlock(props: {
 			setShowBlockSelector(false);
 			// Don't interfere with toggleBlockFocus if this block is not the focused one
 		}
-	}, [props.block?.id, currentPost.data?.content, currentPost.editor?.focusedBlock]);
+	}, [props.block?.id, currentReducer.data?.content, currentReducer.editor?.focusedBlock]);
 
 	React.useEffect(() => {
 		const handleSelectionChange = () => {
@@ -290,19 +300,19 @@ export default function ArticleBlock(props: {
 		return () => {
 			document.removeEventListener('selectionchange', handleSelectionChange);
 		};
-	}, [currentPost.editor.focusedBlock?.id, props.block.id, updateMarkupState]);
+	}, [currentReducer.editor.focusedBlock?.id, props.block.id, updateMarkupState]);
 
 	// Force markup state update when content changes (e.g., after applying formatting)
 	React.useEffect(() => {
 		// Only update if this block is focused and not currently applying markup
-		if (currentPost.editor.focusedBlock?.id === props.block.id && !isApplyingMarkupRef.current) {
+		if (currentReducer.editor.focusedBlock?.id === props.block.id && !isApplyingMarkupRef.current) {
 			// Small delay to ensure DOM has updated
 			const timeoutId = setTimeout(() => {
 				updateMarkupState();
 			}, 50);
 			return () => clearTimeout(timeoutId);
 		}
-	}, [props.block.content, currentPost.editor.focusedBlock?.id, props.block.id, updateMarkupState]);
+	}, [props.block.content, currentReducer.editor.focusedBlock?.id, props.block.id, updateMarkupState]);
 
 	React.useEffect(() => {
 		const handleLinkClick = (e: MouseEvent) => {
@@ -331,7 +341,7 @@ export default function ArticleBlock(props: {
 	React.useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			// Only handle if this block is focused
-			if (currentPost.editor.focusedBlock?.id !== props.block.id) return;
+			if (currentReducer.editor.focusedBlock?.id !== props.block.id) return;
 
 			// Handle Enter key in list items to clear formatting
 			if (e.key === 'Enter' && (props.block.type === 'ordered-list' || props.block.type === 'unordered-list')) {
@@ -378,7 +388,7 @@ export default function ArticleBlock(props: {
 					// Mark this as a user-initiated change
 					isUserInitiatedChangeRef.current = true;
 					// Toggle the markup state in Redux
-					const currentState = currentPost.editor.markup[markupType];
+					const currentState = currentReducer.editor.markup[markupType];
 					handleCurrentPostUpdate({ field: `markup.${markupType}`, value: !currentState });
 				}
 			}
@@ -389,18 +399,18 @@ export default function ArticleBlock(props: {
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [currentPost.editor.focusedBlock?.id, currentPost.editor.markup, props.block.id, props.block.type]);
+	}, [currentReducer.editor.focusedBlock?.id, currentReducer.editor.markup, props.block.id, props.block.type]);
 
 	// Listen for markup state changes from Redux and apply formatting
 	React.useEffect(() => {
 		const prevMarkup = prevMarkupRef.current;
-		const currentMarkup = currentPost.editor.markup;
+		const currentMarkup = currentReducer.editor.markup;
 
 		// Only apply if this block is focused
-		if (currentPost.editor.focusedBlock?.id !== props.block.id) return;
+		if (currentReducer.editor.focusedBlock?.id !== props.block.id) return;
 
 		// Check if this change was user-initiated (keyboard or toolbar button)
-		const isUserInitiated = isUserInitiatedChangeRef.current || currentPost.editor.markupUserInitiated;
+		const isUserInitiated = isUserInitiatedChangeRef.current || currentReducer.editor.markupUserInitiated;
 
 		// Check each markup type and apply if it changed
 		const markupTypes: Array<'bold' | 'italic' | 'underline' | 'strikethrough'> = [
@@ -422,29 +432,29 @@ export default function ArticleBlock(props: {
 
 		// Reset the flags after processing
 		isUserInitiatedChangeRef.current = false;
-		if (currentPost.editor.markupUserInitiated) {
+		if (currentReducer.editor.markupUserInitiated) {
 			handleCurrentPostUpdate({ field: 'markupUserInitiated', value: false });
 		}
 
 		// Update ref with current values
 		prevMarkupRef.current = currentMarkup;
 	}, [
-		currentPost.editor.markup,
-		currentPost.editor.markupUserInitiated,
-		currentPost.editor.focusedBlock?.id,
+		currentReducer.editor.markup,
+		currentReducer.editor.markupUserInitiated,
+		currentReducer.editor.focusedBlock?.id,
 		props.block.id,
 	]);
 
 	// Clear markup state when this block becomes focused and is empty or new
 	React.useEffect(() => {
-		if (currentPost.editor.focusedBlock?.id === props.block.id) {
+		if (currentReducer.editor.focusedBlock?.id === props.block.id) {
 			// Small delay to ensure editable ref is ready
 			setTimeout(() => {
 				// If this is a newly added empty block, force clear all markup
-				if (props.block.id === currentPost.editor.lastAddedBlockId && !props.block.content) {
+				if (props.block.id === currentReducer.editor.lastAddedBlockId && !props.block.content) {
 					// Force all markup to false for new blocks
 					['bold', 'italic', 'underline', 'strikethrough'].forEach((type) => {
-						if (currentPost.editor.markup[type as keyof typeof currentPost.editor.markup]) {
+						if (currentReducer.editor.markup[type as keyof typeof currentReducer.editor.markup]) {
 							handleCurrentPostUpdate({ field: `markup.${type}`, value: false });
 						}
 					});
@@ -463,12 +473,12 @@ export default function ArticleBlock(props: {
 				}
 			}, 50);
 		}
-	}, [currentPost.editor.focusedBlock?.id, props.block.id, currentPost.editor.lastAddedBlockId]);
+	}, [currentReducer.editor.focusedBlock?.id, props.block.id, currentReducer.editor.lastAddedBlockId]);
 
 	// Clear markup toggles when block content transitions from non-empty to empty
 	React.useEffect(() => {
 		// Only check if this block is focused
-		if (currentPost.editor.focusedBlock?.id !== props.block.id) {
+		if (currentReducer.editor.focusedBlock?.id !== props.block.id) {
 			wasEmptyRef.current = false;
 			return;
 		}
@@ -531,7 +541,7 @@ export default function ArticleBlock(props: {
 		} else if (!isEmpty) {
 			wasEmptyRef.current = false;
 		}
-	}, [props.block.content, currentPost.editor.focusedBlock?.id, props.block.id]);
+	}, [props.block.content, currentReducer.editor.focusedBlock?.id, props.block.id]);
 
 	function handleChangeBlock(type: ArticleBlockEnum) {
 		let content: string = '';
@@ -744,7 +754,7 @@ export default function ArticleBlock(props: {
 					<span>{ARTICLE_BLOCKS[props.block.type].label}</span>
 				</S.EToolbarHeader>
 				<S.EToolbarActions>
-					{currentPost?.editor.focusedBlock?.id === props.block.id &&
+					{currentReducer?.editor.focusedBlock?.id === props.block.id &&
 						(selectedText?.length || textToConvert.length) > 0 && (
 							<S.SelectionWrapper className={'fade-in'}>
 								<Button
@@ -774,20 +784,20 @@ export default function ArticleBlock(props: {
 	const invalidLink = newLinkUrl?.length > 0 && !validateUrl(newLinkUrl);
 
 	function getElement() {
-		const ToolbarWrapper: any = currentPost?.editor.blockEditMode ? S.ElementToolbarWrapper : S.ElementToolbarToggle;
+		const ToolbarWrapper: any = currentReducer?.editor.blockEditMode ? S.ElementToolbarWrapper : S.ElementToolbarToggle;
 
 		return (
 			<>
 				<S.ElementWrapper
 					type={props.block.type}
-					blockEditMode={currentPost?.editor.blockEditMode}
+					blockEditMode={currentReducer?.editor.blockEditMode}
 					onFocus={props.onFocus}
 					className={'fade-in'}
 				>
 					<ToolbarWrapper className={'fade-in'} type={props.block.type}>
 						{getElementToolbar()}
 					</ToolbarWrapper>
-					<S.Element blockEditMode={currentPost?.editor.blockEditMode} type={props.block.type}>
+					<S.Element blockEditMode={currentReducer?.editor.blockEditMode} type={props.block.type}>
 						{useCustom ? (
 							element
 						) : (
@@ -796,17 +806,17 @@ export default function ArticleBlock(props: {
 								element={element}
 								value={props.block.content}
 								onChange={(newContent: any) => props.onChangeBlock({ id: props.block.id, content: newContent })}
-								autoFocus={props.block?.id === currentPost?.editor.lastAddedBlockId}
+								autoFocus={props.block?.id === currentReducer?.editor.lastAddedBlockId}
 							/>
 						)}
 					</S.Element>
-					{!currentPost?.editor.blockEditMode && (
+					{!currentReducer?.editor.blockEditMode && (
 						<S.ElementIndicatorDivider type={props.block.type} className={'fade-in'} />
 					)}
 					{showBlockSelector && (
 						<CloseHandler active={true} disabled={false} callback={handleSelectorClose}>
 							<S.BlockSelector
-								blockEditMode={currentPost.editor.blockEditMode}
+								blockEditMode={currentReducer.editor.blockEditMode}
 								position={blockSelectorPosition}
 								className={'border-wrapper-alt1 scroll-wrapper-hidden'}
 							>
@@ -852,7 +862,7 @@ export default function ArticleBlock(props: {
 		);
 	}
 
-	if (currentPost.editor.blockEditMode) {
+	if (currentReducer.editor.blockEditMode) {
 		return (
 			<Draggable draggableId={props.block.id} index={props.index}>
 				{(provided) => (

@@ -6,7 +6,7 @@ import { EditorStoreRootState } from 'editor/store';
 import { currentPostUpdate } from 'editor/store/post';
 
 import { ARTICLE_BLOCKS } from 'helpers/config';
-import { ArticleBlockEnum } from 'helpers/types';
+import { ArticleBlockEnum, ArticleBlocksContextType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -14,7 +14,7 @@ import * as S from './styles';
 export default function ArticleBlocks(props: {
 	addBlock: (type: ArticleBlockEnum) => void;
 	handleClose?: () => void;
-	context?: 'toolbar' | 'inline';
+	context?: ArticleBlocksContextType;
 }) {
 	const dispatch = useDispatch();
 
@@ -263,9 +263,13 @@ export default function ArticleBlocks(props: {
 	}
 
 	return (
-		<S.BADropdownBody onKeyDown={handleKeyDown}>
+		<S.BADropdownBody onKeyDown={handleKeyDown} context={props.context}>
 			{BLOCK_TYPES.map((section: any, sectionIndex: number) => (
-				<S.BADropdownSection key={section.label}>
+				<S.BADropdownSection
+					key={section.label}
+					context={props.context}
+					className={props.context === 'grid' ? 'border-wrapper-alt3' : ''}
+				>
 					<S.BADropdownSectionHeader>
 						<p>{section.label}</p>
 					</S.BADropdownSectionHeader>

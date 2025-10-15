@@ -137,3 +137,7 @@ export const SubElementHeader = styled.div`
 `;
 
 export const SubElementBody = styled.div``;
+
+export const BlockSelector = styled.div`
+	width: 100%;
+`;

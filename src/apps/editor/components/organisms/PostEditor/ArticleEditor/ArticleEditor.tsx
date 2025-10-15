@@ -366,6 +366,7 @@ export default function ArticleEditor(props: {
 										{currentPost.data.content.map((block: ArticleBlockType, index: number) => (
 											<ArticleBlock
 												index={index}
+												context={'post'}
 												key={block.id}
 												block={block}
 												onChangeBlock={handleBlockChange}

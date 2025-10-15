@@ -1,14 +1,22 @@
 import styled from 'styled-components';
 
 import { STYLING } from 'helpers/config';
+import { ArticleBlocksContextType } from 'helpers/types';
 
-export const BADropdownBody = styled.div`
+export const BADropdownBody = styled.div<{ context: ArticleBlocksContextType }>`
 	display: flex;
-	flex-direction: column;
+	flex-direction: ${(props) => (props.context === 'grid' ? 'row' : 'column')};
+	flex-wrap: wrap;
 	gap: 10px;
 `;
 
-export const BADropdownSection = styled.div``;
+export const BADropdownSection = styled.div<{ context: ArticleBlocksContextType }>`
+	min-width: ${(props) => (props.context === 'grid' ? '265px' : '0')};
+	flex: 1;
+	max-width: 100%;
+	padding: ${(props) => (props.context === 'grid' ? '10px' : '0')};
+	border-radius: ${STYLING.dimensions.radius.primary};
+`;
 
 export const BADropdownSectionHeader = styled.div`
 	width: 100%;
@@ -34,7 +42,7 @@ export const BADropdownAction = styled.div`
 		padding: 0 10px;
 		span {
 			color: ${(props) => props.theme.colors.font.primary};
-			font-size: ${(props) => props.theme.typography.size.xSmall};
+			font-size: ${(props) => props.theme.typography.size.xxSmall};
 			font-weight: ${(props) => props.theme.typography.weight.medium};
 			font-family: ${(props) => props.theme.typography.family.primary};
 			display: block;

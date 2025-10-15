@@ -58,7 +58,7 @@ export default function PageToolbar(props: { handleSubmit: () => void; addSectio
 				<Button
 					type={'primary'}
 					label={language?.addSection}
-					handlePress={() => props.addSection('default')}
+					handlePress={() => props.addSection('row')}
 					disabled={currentPage.editor.loading.active}
 					icon={ICONS.add}
 					iconLeftAlign

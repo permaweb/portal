@@ -10,9 +10,15 @@ import { PageBlockType } from 'helpers/types';
 import { capitalize } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
+import { ArticleBlocks } from '../ArticleBlocks';
+
 import { FeedBlock } from './FeedBlock';
 import * as S from './styles';
 
+// TODO: Row / column select
+// TODO: Block width resize
+// TODO: Delete block
+// TODO: Article block
 export default function PageBlock(props: { id: string; block: PageBlockType; index: number }) {
 	const currentPage = useSelector((state: EditorStoreRootState) => state.currentPage);
 
@@ -59,7 +65,7 @@ export default function PageBlock(props: { id: string; block: PageBlockType; ind
 			case 'feed':
 				return <FeedBlock block={block} />;
 			default:
-				return <p>Default block</p>;
+				return null;
 		}
 	}
 
@@ -77,16 +83,22 @@ export default function PageBlock(props: { id: string; block: PageBlockType; ind
 					{getElementToolbar()}
 				</ToolbarWrapper>
 				<S.Element blockEditMode={currentPage?.editor.blockEditMode} type={props.block.type}>
-					{props.block.content.map((subBlock: any, index: number) => {
-						return (
-							<S.SubElementWrapper key={index} width={subBlock.width}>
-								<S.SubElementHeader>
-									<p>{capitalize(subBlock.type)}</p>
-								</S.SubElementHeader>
-								<S.SubElementBody>{getSubElement(subBlock)}</S.SubElementBody>
-							</S.SubElementWrapper>
-						);
-					})}
+					{props.block.content?.length ? (
+						props.block.content.map((subBlock: any, index: number) => {
+							return (
+								<S.SubElementWrapper key={index} width={subBlock.width}>
+									<S.SubElementHeader>
+										<p>{capitalize(subBlock.type)}</p>
+									</S.SubElementHeader>
+									<S.SubElementBody>{getSubElement(subBlock)}</S.SubElementBody>
+								</S.SubElementWrapper>
+							);
+						})
+					) : (
+						<S.BlockSelector>
+							<ArticleBlocks addBlock={() => {}} context={'grid'} />
+						</S.BlockSelector>
+					)}
 				</S.Element>
 			</S.ElementWrapper>
 		);
