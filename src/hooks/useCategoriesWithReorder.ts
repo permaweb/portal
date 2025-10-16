@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { PortalCategoryType, PortalPatchMapEnum } from 'helpers/types';
+import { PortalCategoryMetaType, PortalCategoryType, PortalPatchMapEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -137,6 +137,51 @@ export function useCategoriesWithReorder(props: {
 				setNewCategoryName('');
 			} catch (e: any) {
 				addNotification(e.message ?? 'Error adding category', 'warning');
+			}
+			setCategoryLoading(false);
+		}
+	};
+
+	const updateCategory = async (categoryId: string, metadata: PortalCategoryMetaType) => {
+		if (!props.unauthorized && props.portalId && arProvider.wallet) {
+			setCategoryLoading(true);
+			try {
+				const updateMeta = (categories: PortalCategoryType[]): PortalCategoryType[] => {
+					return categories.map((category) => {
+						if (category.id === categoryId) {
+							return {
+								...category,
+								metadata: {
+									...category.metadata,
+									...metadata,
+								},
+							};
+						} else if (category.children) {
+							return {
+								...category,
+								children: updateMeta(category.children),
+							};
+						}
+						return category;
+					});
+				};
+
+				const updatedCategories = updateMeta(categoryOptions);
+
+				const categoryUpdateId = await permawebProvider.libs.updateZone(
+					{ Categories: permawebProvider.libs.mapToProcessCase(updatedCategories) },
+					props.portalId,
+					arProvider.wallet
+				);
+
+				props.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
+
+				console.log(`Categories update: ${categoryUpdateId}`);
+
+				setCategoryOptions(updatedCategories);
+				addNotification(`${language?.categoryUpdated}!`, 'success');
+			} catch (e: any) {
+				addNotification(e.message ?? 'Error updating category', 'warning');
 			}
 			setCategoryLoading(false);
 		}
@@ -530,5 +575,6 @@ export function useCategoriesWithReorder(props: {
 		mouseX,
 		setMouseX,
 		reconstructHierarchy,
+		updateCategory,
 	};
 }

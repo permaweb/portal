@@ -6,6 +6,7 @@ import { useTheme } from 'styled-components';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
 import { ICONS, STYLING } from 'helpers/config';
@@ -31,6 +32,30 @@ export default function Categories(props: {
 	const language = languageProvider.object[languageProvider.current];
 	const theme = useTheme();
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta && !props.skipAuthCheck;
+	const [openMetadata, setOpenMetadata] = React.useState<{
+		open: boolean;
+		categoryId: string | null;
+	}>({ open: false, categoryId: null });
+
+	type TemplateOption = { label: string; value: string };
+
+	const [hidden, setHidden] = React.useState<boolean>(false);
+	const [description, setDescription] = React.useState<string>('');
+	const [template, setTemplate] = React.useState<string>('');
+
+	const templateOptions: TemplateOption[] = [];
+
+	const onToggleHidden = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setHidden(e.target.checked);
+	};
+
+	const onChangeDescription = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setDescription(e.target.value);
+	};
+
+	const onChangeTemplate = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		setTemplate(e.target.value);
+	};
 
 	const {
 		addCategory,
@@ -43,6 +68,7 @@ export default function Categories(props: {
 		categoryLoading,
 		showDeleteConfirmation,
 		setShowDeleteConfirmation,
+		updateCategory,
 		deleteCategories,
 		handleSelectCategory,
 		flattenCategories,
@@ -67,6 +93,15 @@ export default function Categories(props: {
 		portalCategories: portalProvider.current?.categories || [],
 		refreshCurrentPortal: portalProvider.refreshCurrentPortal,
 	});
+
+	const fieldsDisabled = hidden || categoryLoading;
+
+	function openCategorySettings(categoryId: string) {
+		setOpenMetadata({
+			open: true,
+			categoryId,
+		});
+	}
 
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
@@ -185,6 +220,26 @@ export default function Categories(props: {
 										const active =
 											props.categories?.find((c: PortalCategoryType) => item.category.id === c.id) !== undefined;
 										const isSelected = selectedIds.has(item.category.id);
+										const disabled = unauthorized || categoryLoading || isDragging;
+
+										const onChipClick = () => {
+											if (!disabled) handleSelectCategory(item.category.id);
+										};
+
+										const onChipKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+											if (disabled) return;
+											if (e.key === 'Enter' || e.key === ' ') {
+												e.preventDefault();
+												handleSelectCategory(item.category.id);
+											}
+										};
+
+										const onOpenSettings: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+											e.stopPropagation();
+											if (disabled) return;
+											openCategorySettings(item.category.id); // wire to your modal later
+										};
+
 										return (
 											<React.Fragment key={item.category.id}>
 												<Draggable draggableId={item.category.id} index={index}>
@@ -227,14 +282,28 @@ export default function Categories(props: {
 																		<ReactSVG src={ICONS.drag} />
 																	</S.CategoryDragHandle>
 																	<S.CategoryContent>
-																		<Button
-																			type={'alt3'}
-																			label={item.category.name}
-																			handlePress={() => handleSelectCategory(item.category.id)}
-																			active={active}
-																			disabled={unauthorized || categoryLoading || isDragging}
-																			icon={active ? ICONS.close : ICONS.add}
-																		/>
+																		<S.CategoryPill
+																			role="button"
+																			tabIndex={disabled ? -1 : 0}
+																			aria-pressed={active}
+																			aria-disabled={disabled}
+																			$active={!!active}
+																			$disabled={!!disabled}
+																			onClick={onChipClick}
+																			onKeyDown={onChipKeyDown}
+																		>
+																			<S.CategoryIcon src={active ? ICONS.close : ICONS.add} />
+																			<S.CategoryLabel>{item.category.name}</S.CategoryLabel>
+																			<S.CategorySettingsBtn
+																				type="button"
+																				aria-label="Category settings"
+																				title="Settings"
+																				onClick={onOpenSettings}
+																				$disabled={!!disabled}
+																			>
+																				<S.CategoryIcon src={ICONS.settings} />
+																			</S.CategorySettingsBtn>
+																		</S.CategoryPill>
 																		{snapshot.isDragging && selectedIds.size > 1 && (
 																			<div className={'notification'}>
 																				<span>{selectedIds.size}</span>
@@ -366,6 +435,81 @@ export default function Categories(props: {
 					</S.CategoriesFooter>
 				)}
 			</S.Wrapper>
+			{openMetadata.open && (
+				<Modal
+					header={'Category Metadata'}
+					handleClose={() =>
+						setOpenMetadata({
+							open: false,
+							categoryId: null,
+						})
+					}
+				>
+					<S.ModalWrapper>
+						<S.ModalBodyWrapper>
+							<S.ModalForm>
+								<S.FieldRow>
+									<S.FieldLabel htmlFor="field-description">{language?.description ?? 'Description'}</S.FieldLabel>
+									<S.TextInput
+										id="field-description"
+										placeholder={language?.descriptionPlaceholder ?? 'Add a short description to display on hover'}
+										value={description}
+										onChange={onChangeDescription}
+										disabled={fieldsDisabled}
+									/>
+								</S.FieldRow>
+								<S.FieldRow>
+									<S.FieldLabel htmlFor="field-template">{language?.template ?? 'Template'}</S.FieldLabel>
+									<S.Select
+										id="field-template"
+										value={template}
+										onChange={onChangeTemplate}
+										disabled={fieldsDisabled || !templateOptions.length}
+									>
+										<option value="" disabled>
+											{language?.templatePlaceholder ?? 'Select a template'}
+										</option>
+										{templateOptions.map((opt) => (
+											<option key={opt.value} value={opt.value}>
+												{opt.label}
+											</option>
+										))}
+									</S.Select>
+								</S.FieldRow>
+								<S.FieldRow>
+									<S.FieldLabel htmlFor="field-hidden">{language?.hidden ?? 'Hidden'}</S.FieldLabel>
+									<S.Inline>
+										<Checkbox checked={hidden} disabled={false} handleSelect={() => setHidden((prev) => !prev)} />
+										<span id="field-hidden-help">
+											{language?.hiddenHelp ?? 'If checked, this category won’t be visible.'}
+										</span>
+									</S.Inline>
+								</S.FieldRow>
+							</S.ModalForm>
+						</S.ModalBodyWrapper>
+						<S.ModalActionsWrapper>
+							<Button
+								type={'primary'}
+								label={language?.cancel}
+								handlePress={() =>
+									setOpenMetadata({
+										open: false,
+										categoryId: null,
+									})
+								}
+								disabled={categoryLoading}
+							/>
+							<Button
+								type={'primary'}
+								label={'Save Changes'}
+								handlePress={() => updateCategory(openMetadata.categoryId, { hidden, description, template })}
+								disabled={categoryLoading}
+								loading={categoryLoading}
+							/>
+						</S.ModalActionsWrapper>
+					</S.ModalWrapper>
+				</Modal>
+			)}
 			{showDeleteConfirmation && (
 				<Modal header={language?.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
 					<S.ModalWrapper>
