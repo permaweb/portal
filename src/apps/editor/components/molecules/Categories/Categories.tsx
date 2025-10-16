@@ -35,27 +35,14 @@ export default function Categories(props: {
 	const [openMetadata, setOpenMetadata] = React.useState<{
 		open: boolean;
 		categoryId: string | null;
+		description?: string;
+		template?: string;
+		hidden?: boolean;
 	}>({ open: false, categoryId: null });
 
 	type TemplateOption = { label: string; value: string };
 
-	const [hidden, setHidden] = React.useState<boolean>(false);
-	const [description, setDescription] = React.useState<string>('');
-	const [template, setTemplate] = React.useState<string>('');
-
 	const templateOptions: TemplateOption[] = [];
-
-	const onToggleHidden = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setHidden(e.target.checked);
-	};
-
-	const onChangeDescription = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setDescription(e.target.value);
-	};
-
-	const onChangeTemplate = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setTemplate(e.target.value);
-	};
 
 	const {
 		addCategory,
@@ -94,12 +81,13 @@ export default function Categories(props: {
 		refreshCurrentPortal: portalProvider.refreshCurrentPortal,
 	});
 
-	const fieldsDisabled = hidden || categoryLoading;
-
-	function openCategorySettings(categoryId: string) {
+	function openCategorySettings(category: PortalCategoryType) {
 		setOpenMetadata({
 			open: true,
-			categoryId,
+			categoryId: category.id,
+			description: category?.metadata?.description,
+			template: category?.metadata?.template,
+			hidden: category?.metadata?.hidden,
 		});
 	}
 
@@ -217,8 +205,10 @@ export default function Categories(props: {
 							<div ref={provided.innerRef} {...provided.droppableProps}>
 								<S.CategoriesList>
 									{flattened.map((item, index) => {
+										console.log('Rendering category item:', item);
 										const active =
-											props.categories?.find((c: PortalCategoryType) => item.category.id === c.id) !== undefined;
+											props.categories?.find((c: PortalCategoryType) => item.category.id === c.id) !== undefined ||
+											item.category?.metadata?.hidden;
 										const isSelected = selectedIds.has(item.category.id);
 										const disabled = unauthorized || categoryLoading || isDragging;
 
@@ -237,8 +227,10 @@ export default function Categories(props: {
 										const onOpenSettings: React.MouseEventHandler<HTMLButtonElement> = (e) => {
 											e.stopPropagation();
 											if (disabled) return;
-											openCategorySettings(item.category.id); // wire to your modal later
+											openCategorySettings(item.category); // wire to your modal later
 										};
+
+										const fieldsDisabled = item?.category?.metadata?.hidden || categoryLoading;
 
 										return (
 											<React.Fragment key={item.category.id}>
@@ -315,6 +307,113 @@ export default function Categories(props: {
 														);
 													}}
 												</Draggable>
+												{openMetadata.open && (
+													<Modal
+														header={'Category Metadata'}
+														handleClose={() =>
+															setOpenMetadata({
+																open: false,
+																categoryId: null,
+																description: undefined,
+																template: undefined,
+																hidden: undefined,
+															})
+														}
+													>
+														<S.ModalWrapper>
+															<S.ModalBodyWrapper>
+																<S.ModalForm>
+																	<S.FieldRow>
+																		<S.FieldLabel htmlFor="field-description">
+																			{language?.description ?? 'Description'}
+																		</S.FieldLabel>
+																		<S.TextInput
+																			id="field-description"
+																			placeholder={
+																				language?.descriptionPlaceholder ??
+																				'Add a short description to display on hover'
+																			}
+																			value={openMetadata.description ?? item.category?.metadata?.description ?? ''}
+																			onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+																				setOpenMetadata((prev) => ({
+																					...prev,
+																					description: e.target.value,
+																				}));
+																			}}
+																			disabled={fieldsDisabled}
+																		/>
+																	</S.FieldRow>
+																	<S.FieldRow>
+																		<S.FieldLabel htmlFor="field-template">
+																			{language?.template ?? 'Template'}
+																		</S.FieldLabel>
+																		<S.Select
+																			id="field-template"
+																			value={openMetadata.template ?? item.category?.metadata?.template ?? ''}
+																			onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+																				setOpenMetadata((prev) => ({ ...prev, template: e.target.value }));
+																			}}
+																			disabled={fieldsDisabled || !templateOptions.length}
+																		>
+																			<option value="" disabled>
+																				{language?.templatePlaceholder ?? 'Select a template'}
+																			</option>
+																			{templateOptions.map((opt) => (
+																				<option key={opt.value} value={opt.value}>
+																					{opt.label}
+																				</option>
+																			))}
+																		</S.Select>
+																	</S.FieldRow>
+																	<S.FieldRow>
+																		<S.FieldLabel htmlFor="field-hidden">{language?.hidden ?? 'Hidden'}</S.FieldLabel>
+																		<S.Inline>
+																			<Checkbox
+																				checked={openMetadata.hidden ?? item.category?.metadata?.hidden ?? false}
+																				disabled={false}
+																				handleSelect={() =>
+																					setOpenMetadata((prev) => ({
+																						...prev,
+																						hidden: !(prev?.hidden ?? item.category?.metadata?.hidden),
+																					}))
+																				}
+																			/>
+																			<span id="field-hidden-help">
+																				{language?.hiddenHelp ?? 'If checked, this category won’t be visible.'}
+																			</span>
+																		</S.Inline>
+																	</S.FieldRow>
+																</S.ModalForm>
+															</S.ModalBodyWrapper>
+															<S.ModalActionsWrapper>
+																<Button
+																	type={'primary'}
+																	label={language?.cancel}
+																	handlePress={() =>
+																		setOpenMetadata({
+																			open: false,
+																			categoryId: null,
+																		})
+																	}
+																	disabled={categoryLoading}
+																/>
+																<Button
+																	type={'primary'}
+																	label={'Save Changes'}
+																	handlePress={() =>
+																		updateCategory(openMetadata.categoryId, {
+																			description: openMetadata.description,
+																			template: openMetadata.template,
+																			hidden: openMetadata.hidden,
+																		})
+																	}
+																	disabled={categoryLoading}
+																	loading={categoryLoading}
+																/>
+															</S.ModalActionsWrapper>
+														</S.ModalWrapper>
+													</Modal>
+												)}
 												{(() => {
 													const shouldShow = showChildDropZone && dragOverId === item.category.id;
 													return shouldShow ? <S.ChildDropZone visible={true} level={item.level} /> : null;
@@ -435,81 +534,7 @@ export default function Categories(props: {
 					</S.CategoriesFooter>
 				)}
 			</S.Wrapper>
-			{openMetadata.open && (
-				<Modal
-					header={'Category Metadata'}
-					handleClose={() =>
-						setOpenMetadata({
-							open: false,
-							categoryId: null,
-						})
-					}
-				>
-					<S.ModalWrapper>
-						<S.ModalBodyWrapper>
-							<S.ModalForm>
-								<S.FieldRow>
-									<S.FieldLabel htmlFor="field-description">{language?.description ?? 'Description'}</S.FieldLabel>
-									<S.TextInput
-										id="field-description"
-										placeholder={language?.descriptionPlaceholder ?? 'Add a short description to display on hover'}
-										value={description}
-										onChange={onChangeDescription}
-										disabled={fieldsDisabled}
-									/>
-								</S.FieldRow>
-								<S.FieldRow>
-									<S.FieldLabel htmlFor="field-template">{language?.template ?? 'Template'}</S.FieldLabel>
-									<S.Select
-										id="field-template"
-										value={template}
-										onChange={onChangeTemplate}
-										disabled={fieldsDisabled || !templateOptions.length}
-									>
-										<option value="" disabled>
-											{language?.templatePlaceholder ?? 'Select a template'}
-										</option>
-										{templateOptions.map((opt) => (
-											<option key={opt.value} value={opt.value}>
-												{opt.label}
-											</option>
-										))}
-									</S.Select>
-								</S.FieldRow>
-								<S.FieldRow>
-									<S.FieldLabel htmlFor="field-hidden">{language?.hidden ?? 'Hidden'}</S.FieldLabel>
-									<S.Inline>
-										<Checkbox checked={hidden} disabled={false} handleSelect={() => setHidden((prev) => !prev)} />
-										<span id="field-hidden-help">
-											{language?.hiddenHelp ?? 'If checked, this category won’t be visible.'}
-										</span>
-									</S.Inline>
-								</S.FieldRow>
-							</S.ModalForm>
-						</S.ModalBodyWrapper>
-						<S.ModalActionsWrapper>
-							<Button
-								type={'primary'}
-								label={language?.cancel}
-								handlePress={() =>
-									setOpenMetadata({
-										open: false,
-										categoryId: null,
-									})
-								}
-								disabled={categoryLoading}
-							/>
-							<Button
-								type={'primary'}
-								label={'Save Changes'}
-								handlePress={() => updateCategory(openMetadata.categoryId, { hidden, description, template })}
-								disabled={categoryLoading}
-								loading={categoryLoading}
-							/>
-						</S.ModalActionsWrapper>
-					</S.ModalWrapper>
-				</Modal>
-			)}
+
 			{showDeleteConfirmation && (
 				<Modal header={language?.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
 					<S.ModalWrapper>

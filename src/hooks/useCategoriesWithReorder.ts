@@ -81,6 +81,7 @@ export function useCategoriesWithReorder(props: {
 					id: Date.now().toString(),
 					name: newCategoryName,
 					parent: effectiveParent,
+					metadata: {},
 				};
 
 				const isDuplicate = (categories: PortalCategoryType[], name: string): boolean => {
