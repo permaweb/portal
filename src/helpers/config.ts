@@ -1,11 +1,17 @@
-import { LAYOUT_JOURNAL } from './config/layouts';
-import { PAGES_JOURNAL } from './config/pages';
+import { LAYOUT_JOURNAL, LAYOUT_BLOG } from './config/layouts';
+import { PAGES_JOURNAL, PAGES_BLOG } from './config/pages';
 import { THEME_DEFAULT } from './config/themes';
 import { ArticleBlockEnum, PortalPatchMapEnum } from './types';
 
-export const PAGES = { JOURNAL: PAGES_JOURNAL };
+export const PAGES = {
+	JOURNAL: PAGES_JOURNAL,
+	BLOG: PAGES_BLOG,
+};
 export const THEME = { DEFAULT: THEME_DEFAULT };
-export const LAYOUT = { JOURNAL: LAYOUT_JOURNAL };
+export const LAYOUT = {
+	JOURNAL: LAYOUT_JOURNAL,
+	BLOG: LAYOUT_BLOG,
+};
 
 import { ICONS, ICONS_SOCIAL } from './config/icons';
 export { ICONS, ICONS_SOCIAL };
