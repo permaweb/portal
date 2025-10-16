@@ -10,6 +10,7 @@ import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
 import { ICONS, STYLING } from 'helpers/config';
+import { PAGES_JOURNAL } from 'helpers/config/pages';
 import { PortalCategoryType } from 'helpers/types';
 import { useCategoriesWithReorder } from 'hooks/useCategoriesWithReorder';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -349,18 +350,19 @@ export default function Categories(props: {
 																		</S.FieldLabel>
 																		<S.Select
 																			id="field-template"
+																			defaultValue="feed"
 																			value={openMetadata.template ?? item.category?.metadata?.template ?? ''}
 																			onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
 																				setOpenMetadata((prev) => ({ ...prev, template: e.target.value }));
 																			}}
-																			disabled={fieldsDisabled || !templateOptions.length}
+																			disabled={fieldsDisabled}
 																		>
 																			<option value="" disabled>
 																				{language?.templatePlaceholder ?? 'Select a template'}
 																			</option>
-																			{templateOptions.map((opt) => (
-																				<option key={opt.value} value={opt.value}>
-																					{opt.label}
+																			{Object.keys(PAGES_JOURNAL).map((opt) => (
+																				<option key={opt} value={opt}>
+																					{opt}
 																				</option>
 																			))}
 																		</S.Select>
