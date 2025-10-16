@@ -207,13 +207,13 @@ export default function Categories(props: {
 									{flattened.map((item, index) => {
 										console.log('Rendering category item:', item);
 										const active =
-											props.categories?.find((c: PortalCategoryType) => item.category.id === c.id) !== undefined ||
-											item.category?.metadata?.hidden;
+											props.categories?.find((c: PortalCategoryType) => item.category.id === c.id) !== undefined;
 										const isSelected = selectedIds.has(item.category.id);
 										const disabled = unauthorized || categoryLoading || isDragging;
+										const addDisabled = unauthorized || categoryLoading || isDragging || item.category.metadata?.hidden;
 
 										const onChipClick = () => {
-											if (!disabled) handleSelectCategory(item.category.id);
+											if (!addDisabled) handleSelectCategory(item.category.id);
 										};
 
 										const onChipKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
@@ -280,7 +280,7 @@ export default function Categories(props: {
 																			aria-pressed={active}
 																			aria-disabled={disabled}
 																			$active={!!active}
-																			$disabled={!!disabled}
+																			$disabled={!!addDisabled}
 																			onClick={onChipClick}
 																			onKeyDown={onChipKeyDown}
 																		>
