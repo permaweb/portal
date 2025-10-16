@@ -123,11 +123,12 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 		font-size: ${(props) =>
 			props.isIcon ? props.theme.typography.size.xxxxSmall : props.theme.typography.size.xxxSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
+		${(props) => (props.isIcon ? 'line-height: 1; padding: 0 2px; text-align: center;' : '')}
 	}
 	svg {
 		height: 20px;
 		width: 20px;
-		margin: 0 0 5px 0;
+		margin: ${(props) => (props.isIcon ? '0 0 2px 0' : '0 0 5px 0')};
 		color: ${(props) => props.theme.colors.font.primary};
 		fill: ${(props) => props.theme.colors.font.primary};
 	}

@@ -117,6 +117,24 @@ export const THEME_DEFAULT = {
 			},
 		},
 	},
+	post: {
+		colors: {
+			background: {
+				light: '255,255,255',
+				dark: '25,25,25',
+			},
+			border: {
+				light: 'border',
+				dark: 'border',
+			},
+		},
+		preferences: {
+			opacity: {
+				light: 1,
+				dark: 0.9,
+			},
+		},
+	},
 	card: {
 		colors: {
 			background: {

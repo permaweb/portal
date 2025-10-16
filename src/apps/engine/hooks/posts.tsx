@@ -49,7 +49,7 @@ export const usePosts = (props?: any) => {
 			}
 			if (props.search) {
 				const haystack = [
-					post.title,
+					post.name,
 					post.description,
 					post.creator,
 					m.topics?.join(' '),

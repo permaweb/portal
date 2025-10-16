@@ -373,8 +373,6 @@ export default function MediaLibrary(props: {
 							handlePress={() => (inputRef && inputRef.current ? inputRef.current.click() : {})}
 							disabled={unauthorized}
 							loading={false}
-							icon={ICONS.upload}
-							iconLeftAlign
 						/>
 					</S.HeaderActions>
 				</S.Header>

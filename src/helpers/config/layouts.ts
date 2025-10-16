@@ -118,7 +118,7 @@ export const LAYOUT_BLOG = {
 			padding: '14px',
 			verticalAlign: 'center',
 			border: {
-				top: false,
+				top: true,
 				sides: false,
 				bottom: false,
 			},

@@ -45,7 +45,7 @@ export function initThemes(Themes: any[]) {
 		const g = parseInt(rgba[1]);
 		const b = parseInt(rgba[2]);
 		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-		return luminance > 0.5 ? '0,0,0' : '255,255,255';
+		return luminance > 0.6 ? '0,0,0' : '255,255,255';
 	}
 
 	function setScheme(theme: any, scheme: string) {
@@ -55,7 +55,9 @@ export function initThemes(Themes: any[]) {
 			'--color-text': theme.basics.colors.text[scheme],
 			'--color-background': theme.basics.colors.background[scheme],
 			'--color-primary': theme.basics.colors.primary[scheme],
+			'--color-primary-contrast': getContrastColor(theme.basics.colors.primary[scheme]),
 			'--color-secondary': theme.basics.colors.secondary[scheme],
+			'--color-secondary-contrast': getContrastColor(theme.basics.colors.secondary[scheme]),
 			'--color-border': theme.basics.colors.border[scheme],
 
 			// Header
@@ -75,6 +77,19 @@ export function initThemes(Themes: any[]) {
 
 			// Content
 			'--color-content-background': `rgba(${theme.content.colors.background[scheme]},${theme.content.preferences.opacity[scheme]})`,
+
+			// Posts
+			...(theme?.post
+				? {
+						'--color-post-background': `rgba(${getColor(theme, scheme, theme.post.colors.background[scheme])},${
+							theme.post.preferences.opacity[scheme]
+						})`,
+						'--color-post-border': `rgba(${getColor(theme, scheme, theme.post.colors.border[scheme])},1)`,
+						'--color-post-border-contrast': `rgba(${getContrastColor(
+							getColor(theme, scheme, theme.post.colors.border[scheme])
+						)},1)`,
+				  }
+				: {}),
 
 			// Cards
 			'--color-card-background': `rgba(${getColor(theme, scheme, theme.card.colors.background[scheme])},${
