@@ -36,6 +36,7 @@ export const Panel = styled.nav<{ open: boolean; width?: number }>`
 		props.open ? props.theme.colors.container.alt1.background : props.theme.colors.view.background};
 	border-right: 1px solid
 		${(props) => (props.open ? props.theme.colors.border.primary : props.theme.colors.border.alt9)};
+	box-shadow: ${(props) => props.theme.colors.shadow.primary} 0px 1px 2px 0.5px;
 `;
 
 export const ResizeHandle = styled.div`
@@ -204,7 +205,9 @@ export const Header = styled.header<{ navigationOpen: boolean; navWidth?: number
 		padding: 0 20px;
 	}
 	z-index: 2;
-	background: ${(props) => props.theme.colors.view.background};
+	background: ${(props) => `${props.theme.colors.view.background}E6`};
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		padding: 0 20px 0 10px;
