@@ -3,7 +3,6 @@ import type { PortalLayout } from './layout.types';
 export const defaultLayout: PortalLayout = {
 	basics: {
 		gradient: true,
-		wallpaper: '',
 		borderRadius: 0,
 	},
 	header: {

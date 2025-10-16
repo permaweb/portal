@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import Placeholder from 'engine/components/placeholder';
 import { usePosts } from 'engine/hooks/posts';
 import { useProfile } from 'engine/hooks/profiles';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
@@ -11,12 +12,20 @@ import { checkValidAddress, getRedirect } from 'helpers/utils';
 import * as S from './styles';
 
 export default function CategorySpotlight(props: any) {
+	const { portal } = usePortalProvider();
 	const { category, tag } = props;
-	const { Posts, isLoading: isLoadingPosts } = usePosts({ category });
+
+	// Use the first category if category is null
+	const defaultCategory =
+		!category && portal?.Categories && portal.Categories.length > 0
+			? portal.Categories[0]?.name || portal.Categories[0]?.id
+			: category;
+
+	const { Posts, isLoading: isLoadingPosts } = usePosts({ category: defaultCategory });
 
 	const LeftRow = (props: any) => {
 		const { post, index } = props;
-		const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || null);
+		const { profile, isLoading: isLoadingProfile } = useProfile(post?.creator || null);
 
 		return (
 			<NavLink to={getRedirect(`post/${post.id}`)} className={isLoadingPosts ? 'disabledLink' : ''}>
@@ -36,7 +45,7 @@ export default function CategorySpotlight(props: any) {
 								className="loadingAvatar"
 								onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
 								src={
-									!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbanil)
+									!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
 										? getTxEndpoint(profile.thumbnail)
 										: ICONS.user
 								}
@@ -51,7 +60,7 @@ export default function CategorySpotlight(props: any) {
 
 	const RightRow = (props: any) => {
 		const { post, index } = props;
-		const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || null);
+		const { profile, isLoading: isLoadingProfile } = useProfile(post?.creator || null);
 
 		return (
 			<NavLink to={getRedirect(`post/${post?.id}`)} className={isLoadingPosts ? 'disabledLink' : ''}>
@@ -93,7 +102,7 @@ export default function CategorySpotlight(props: any) {
 
 	return (
 		<S.CategorySpotlight>
-			<h1>{isLoadingPosts ? <Placeholder width="200" /> : tag ? `#{tag}` : `${category}`}</h1>
+			<h1>{isLoadingPosts ? <Placeholder width="200" /> : tag ? `#{tag}` : `${defaultCategory}`}</h1>
 			<S.CategorySpotlightGrid>
 				<S.Left>
 					{Object.values(Posts || [0, 1, 2, 3, 4, 5])

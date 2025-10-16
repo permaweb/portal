@@ -88,7 +88,6 @@ function CommentEditorContent(props: any) {
 	const handleSubmit = async () => {
 		if (!canSend || !profile?.id || isSubmitting) return;
 
-		// Get the current editor state directly to avoid timing issues
 		let plainText = '';
 		editor.getEditorState().read(() => {
 			const root = $getRoot();

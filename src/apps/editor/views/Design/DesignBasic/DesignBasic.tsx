@@ -16,29 +16,73 @@ export default function DesignBasic() {
 	return (
 		<S.BodyWrapper>
 			<S.SectionWrapper>
-				<S.Section className={'border-wrapper-alt2'}>
-					<S.SectionHeader>
-						<p>{language?.fonts}</p>
-					</S.SectionHeader>
-					<Fonts />
+				<S.Section>
+					<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+						<S.SectionHeader>
+							<p>{language?.fonts}</p>
+						</S.SectionHeader>
+						<S.SectionBody>
+							<Fonts />
+						</S.SectionBody>
+					</div>
 				</S.Section>
-				<Media portal={portalProvider.current} type={'logo'} />
-				<S.Section className={'border-wrapper-alt2'}>
-					<Media portal={portalProvider.current} type={'icon'} />
+				<S.Section>
+					<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+						<S.SectionHeader>
+							<p>{language?.images}</p>
+						</S.SectionHeader>
+						<S.SectionBody>
+							<div>
+								<S.MediaTitleWrapper>
+									<S.MediaTitle>{language?.logo}</S.MediaTitle>
+									<S.MediaInfo>{language?.recommended}: 500x280px (16:9)</S.MediaInfo>
+								</S.MediaTitleWrapper>
+								<S.MediaEntry>
+									<Media portal={portalProvider.current} type={'logo'} />
+								</S.MediaEntry>
+							</div>
+							<div>
+								<S.MediaTitleWrapper>
+									<S.MediaTitle>{language?.icon} (Favicon)</S.MediaTitle>
+									<S.MediaInfo>{language?.recommended}: 32x32px (1:1)</S.MediaInfo>
+								</S.MediaTitleWrapper>
+								<S.MediaEntry>
+									<Media portal={portalProvider.current} type={'icon'} />
+								</S.MediaEntry>
+							</div>
+							<div>
+								<S.MediaTitleWrapper>
+									<S.MediaTitle>{language?.wallpaper}</S.MediaTitle>
+									<S.MediaInfo>{language?.recommended}: 1920x1080px (16:9)</S.MediaInfo>
+								</S.MediaTitleWrapper>
+								<S.MediaEntryWallpaper>
+									<Media portal={portalProvider.current} type={'wallpaper'} />
+								</S.MediaEntryWallpaper>
+							</div>
+						</S.SectionBody>
+					</div>
 				</S.Section>
 			</S.SectionWrapper>
 			<S.SectionWrapper>
-				<S.Section className={'border-wrapper-alt2'}>
-					<S.SectionHeader>
-						<p>{language?.layout}</p>
-					</S.SectionHeader>
-					<Layout />
+				<S.Section>
+					<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+						<S.SectionHeader>
+							<p>{language?.layout}</p>
+						</S.SectionHeader>
+						<S.SectionBody>
+							<Layout />
+						</S.SectionBody>
+					</div>
 				</S.Section>
-				<S.Section className={'border-wrapper-alt2'}>
-					<S.SectionHeader>
-						<p>{language?.themes}</p>
-					</S.SectionHeader>
-					<Themes />
+				<S.Section>
+					<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+						<S.SectionHeader>
+							<p>{language?.themes}</p>
+						</S.SectionHeader>
+						<S.SectionBody>
+							<Themes />
+						</S.SectionBody>
+					</div>
 				</S.Section>
 				{!portalProvider?.permissions?.updatePortalMeta && (
 					<S.InfoWrapper className={'warning'}>

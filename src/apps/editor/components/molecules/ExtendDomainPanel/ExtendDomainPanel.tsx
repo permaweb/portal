@@ -1,16 +1,20 @@
 import { ArconnectSigner, ARIO } from '@ar.io/sdk';
+
 import { usePortalProvider } from 'editor/providers/PortalProvider';
+
+import { Button } from 'components/atoms/Button';
+import { Panel } from 'components/atoms/Panel';
+import { PaymentSummary } from 'components/molecules/Payment';
 import { IS_TESTNET } from 'helpers/config';
 import { UserOwnedDomain } from 'helpers/types';
+import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
-import { Panel } from 'components/atoms/Panel';
-import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
-import { PaymentSummary } from 'components/molecules/Payment';
-import { Button } from 'components/atoms/Button';
+
 import { InsufficientBalanceSection } from '../InsufficientBalanceSection';
+
 import * as S from './styles';
 
 const ExtendDomainPanel = (props: {

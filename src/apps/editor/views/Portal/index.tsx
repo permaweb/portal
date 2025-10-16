@@ -58,46 +58,52 @@ export default function Portal() {
 							<PostList type={'header'} pageCount={5} />
 						</S.SectionBody>
 					</S.PostsSection>
-					<S.DesignSection className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<p>{language?.design}</p>
-							<Button
-								type={'alt3'}
-								label={language?.designLink}
-								handlePress={() => navigate(URLS.portalDesign(portalProvider.current.id))}
-							/>
-						</S.SectionHeader>
-						<S.SectionBody>
-							<PortalDesign />
-						</S.SectionBody>
+					<S.DesignSection>
+						<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+							<S.SectionHeader>
+								<p>{language?.design}</p>
+								<Button
+									type={'alt3'}
+									label={language?.designLink}
+									handlePress={() => navigate(URLS.portalDesign(portalProvider.current.id))}
+								/>
+							</S.SectionHeader>
+							<S.SectionBody>
+								<PortalDesign />
+							</S.SectionBody>
+						</div>
 					</S.DesignSection>
-					<S.DomainSection className={'border-wrapper-alt3'}>
-						<S.SectionHeader>
-							<p>{language?.domains}</p>
-							<Button
-								type={'alt3'}
-								label={language?.domainsLink}
-								handlePress={() => navigate(URLS.portalDomains(portalProvider.current.id))}
-							/>
-						</S.SectionHeader>
-						<S.SectionBody>
-							<DomainListPortal type={'header'} />
-						</S.SectionBody>
+					<S.DomainSection>
+						<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+							<S.SectionHeader>
+								<p>{language?.domains}</p>
+								<Button
+									type={'alt3'}
+									label={language?.domainsLink}
+									handlePress={() => navigate(URLS.portalDomains(portalProvider.current.id))}
+								/>
+							</S.SectionHeader>
+							<S.SectionBody>
+								<DomainListPortal type={'header'} />
+							</S.SectionBody>
+						</div>
 					</S.DomainSection>
 				</S.SectionWrapper>
 				<S.SectionWrapper>
-					<S.SetupSection className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<p>{language?.setup}</p>
-							<Button
-								type={'alt3'}
-								label={language?.setupLink}
-								handlePress={() => navigate(URLS.portalSetup(portalProvider.current.id))}
-							/>
-						</S.SectionHeader>
-						<S.SectionBody>
-							<PortalSetup type={'header'} />
-						</S.SectionBody>
+					<S.SetupSection>
+						<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
+							<S.SectionHeader>
+								<p>{language?.setup}</p>
+								<Button
+									type={'alt3'}
+									label={language?.setupLink}
+									handlePress={() => navigate(URLS.portalSetup(portalProvider.current.id))}
+								/>
+							</S.SectionHeader>
+							<S.SectionBody>
+								<PortalSetup type={'header'} />
+							</S.SectionBody>
+						</div>
 					</S.SetupSection>
 					<S.UsersSection>
 						<S.SectionBody>

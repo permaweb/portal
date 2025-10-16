@@ -17,15 +17,10 @@ export const UserWrapper = styled.div<{ hideAction: boolean; isCurrent: boolean;
 	&:hover {
 		cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
 		background: ${(props) =>
-			props.hideAction || props.disabled
-				? props.isCurrent
-					? props.theme.colors.container.alt1.background
-					: props.theme.colors.view.background
-				: props.theme.colors.container.alt2.background};
+			props.hideAction || props.disabled ? 'transparent' : props.theme.colors.container.alt2.background};
 	}
 
-	background: ${(props) =>
-		props.isCurrent ? props.theme.colors.container.alt1.background : props.theme.colors.view.background};
+	background: transparent;
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		flex-direction: column;

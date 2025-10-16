@@ -2,7 +2,9 @@ import React from 'react';
 import { ReactSVG } from 'react-svg';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 import Placeholder from 'engine/components/placeholder';
+import { useModeration } from 'engine/hooks/moderation';
 import { useProfile } from 'engine/hooks/profiles';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
@@ -24,6 +26,12 @@ export default function Comment(props: any) {
 	const [isUpdating, setIsUpdating] = React.useState(false);
 	const [isEditSubmitting, setIsEditSubmitting] = React.useState(false);
 	const { profile: user, libs } = usePermawebProvider();
+	const { portal, portalId } = usePortalProvider();
+	const moderationId = portal?.Moderation;
+	const { blockedComments, blockedUsers } = useModeration();
+
+	const isCommentBlocked = blockedComments.has(commentData.id);
+	const isUserBlocked = blockedUsers.has(commentData.creator);
 
 	const canEditCommentStatus = user?.owner && ['Admin', 'Moderator'].some((r) => user?.roles?.includes(r));
 	const canRemoveComment =
@@ -34,12 +42,113 @@ export default function Comment(props: any) {
 		canEditCommentStatus && (!commentData.parentId || commentData.depth === 0 || commentData.depth === -1);
 	const showMenu = canEditCommentStatus || canRemoveComment || canEditComment;
 
-	function handleUserMute() {
-		console.log('Mute user: ', profile?.id);
+	async function handleUserBlock() {
+		if (!moderationId || !libs || !commentData.creator || !user?.owner) return;
+
+		setIsUpdating(true);
+		try {
+			const result = await libs.addModerationEntry({
+				moderationId: moderationId,
+				targetType: 'profile',
+				targetId: commentData.creator,
+				status: 'blocked',
+				targetContext: commentsId,
+				moderator: user.owner,
+				reason: 'default',
+			});
+			console.log('User blocked:', commentData.creator, result);
+			window.dispatchEvent(
+				new CustomEvent('commentAdded', {
+					detail: { commentsId },
+				})
+			);
+		} catch (error) {
+			console.error('Error blocking user:', error);
+		} finally {
+			setIsUpdating(false);
+		}
 	}
 
-	function handleUserBlock() {
-		console.log('Block user: ', profile?.id);
+	async function handleCommentBlock() {
+		if (!moderationId || !libs || !commentData.id || !user?.owner) return;
+
+		setIsUpdating(true);
+		try {
+			console.log('Blocking comment:', {
+				moderationId,
+				targetType: 'comment',
+				targetId: commentData.id,
+				status: 'blocked',
+				targetContext: commentsId,
+				moderator: user.owner,
+				reason: 'default',
+			});
+			const result = await libs.addModerationEntry({
+				moderationId: moderationId,
+				targetType: 'comment',
+				targetId: commentData.id,
+				status: 'blocked',
+				targetContext: commentsId,
+				moderator: user.owner,
+				reason: 'default',
+			});
+			console.log('Block result:', result);
+			window.dispatchEvent(
+				new CustomEvent('commentAdded', {
+					detail: { commentsId },
+				})
+			);
+		} catch (error) {
+			console.error('Error blocking comment:', error);
+		} finally {
+			setIsUpdating(false);
+		}
+	}
+
+	async function handleUserUnblock() {
+		if (!moderationId || !libs || !commentData.creator || !user?.owner) return;
+
+		setIsUpdating(true);
+		try {
+			const result = await libs.removeModerationEntry({
+				moderationId: moderationId,
+				targetType: 'profile',
+				targetId: commentData.creator,
+			});
+			console.log('User unblocked:', commentData.creator, result);
+			window.dispatchEvent(
+				new CustomEvent('commentAdded', {
+					detail: { commentsId },
+				})
+			);
+		} catch (error) {
+			console.error('Error unblocking user:', error);
+		} finally {
+			setIsUpdating(false);
+		}
+	}
+
+	async function handleCommentUnblock() {
+		if (!moderationId || !libs || !commentData.id || !user?.owner) return;
+
+		setIsUpdating(true);
+		try {
+			const result = await libs.removeModerationEntry({
+				moderationId: moderationId,
+				targetType: 'comment',
+				targetId: commentData.id,
+			});
+			console.log('Comment unblocked:', commentData.id, result);
+			window.dispatchEvent(
+				new CustomEvent('commentAdded', {
+					detail: { commentsId },
+				})
+			);
+		} catch (error) {
+			console.error('Error unblocking comment:', error);
+		} finally {
+			setIsUpdating(false);
+		}
 	}
 
 	async function handleCommentRemove() {
@@ -129,22 +238,35 @@ export default function Comment(props: any) {
 	}
 
 	if (canEditCommentStatus) {
-		menuEntries.push({
-			icon: commentData.status === 'active' ? ICONS.hide : ICONS.show,
-			label: commentData.status === 'active' ? 'Hide Comment' : 'Unhide Comment',
-			onClick: () => handleCommentStatus(commentData.status === 'active' ? 'inactive' : 'active'),
-		});
+		if (isCommentBlocked) {
+			menuEntries.push({
+				icon: ICONS.close,
+				label: 'Unblock Comment',
+				onClick: handleCommentUnblock,
+			});
+		} else {
+			menuEntries.push({
+				icon: ICONS.close,
+				label: 'Block Comment',
+				onClick: handleCommentBlock,
+			});
+		}
+
+		if (isUserBlocked) {
+			menuEntries.push({
+				icon: ICONS.close,
+				label: 'Unblock User',
+				onClick: handleUserUnblock,
+			});
+		} else {
+			menuEntries.push({
+				icon: ICONS.close,
+				label: 'Block User',
+				onClick: handleUserBlock,
+			});
+		}
 	}
 
-	if (canRemoveComment) {
-		menuEntries.push({
-			icon: ICONS.remove,
-			label: 'Remove Comment',
-			onClick: handleCommentRemove,
-		});
-	}
-
-	// Re-check visibility when user changes
 	if (!commentData) return null;
 	// Explicitly check if user is logged in and has permission for hidden comments
 	const hasModPermission = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
@@ -188,6 +310,18 @@ export default function Comment(props: any) {
 							<S.HiddenIndicator>
 								<ReactSVG src={ICONS.hide} />
 								Hidden
+							</S.HiddenIndicator>
+						)}
+						{isCommentBlocked && (
+							<S.HiddenIndicator>
+								<ReactSVG src={ICONS.close} />
+								Blocked Comment
+							</S.HiddenIndicator>
+						)}
+						{!isCommentBlocked && isUserBlocked && (
+							<S.HiddenIndicator>
+								<ReactSVG src={ICONS.close} />
+								Blocked User
 							</S.HiddenIndicator>
 						)}
 						<S.Date>

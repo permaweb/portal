@@ -1,5 +1,6 @@
-import { STYLING } from 'helpers/config';
 import styled from 'styled-components';
+
+import { STYLING } from 'helpers/config';
 
 export const DomainWrapper = styled.div<{ isOpen: boolean }>`
 	width: 100%;

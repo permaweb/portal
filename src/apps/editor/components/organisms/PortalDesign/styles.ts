@@ -50,3 +50,16 @@ export const PanelActionsWrapper = styled.div`
 	gap: 20px;
 	margin: 20px 0;
 `;
+
+export const MediaWrapper = styled.div`
+	width: 100%;
+	margin-bottom: 30px;
+`;
+
+export const MediaTitle = styled.p`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-size: ${(props) => props.theme.typography.size.small};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	margin: 0 0 15px 0;
+`;

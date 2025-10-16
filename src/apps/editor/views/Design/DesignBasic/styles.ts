@@ -25,19 +25,27 @@ export const SectionWrapper = styled.div`
 export const Section = styled.div`
 	height: fit-content;
 	width: 100%;
-	padding: 17.5px 15px 15px 15px;
 `;
 
 export const SectionHeader = styled.div`
-	margin: 0 0 17.5px 0;
+	padding: 12.5px 15px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: ${(props) => props.theme.colors.container.alt1.background};
 	p {
-		color: ${(props) => props.theme.colors.font.alt1};
+		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
+		font-size: ${(props) => props.theme.typography.size.base};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
-		text-transform: uppercase;
-		line-height: 1;
 	}
+`;
+
+export const SectionBody = styled.div`
+	width: 100%;
+	padding: 15px;
+	background: ${(props) => props.theme.colors.container.primary.background};
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
 export const InfoWrapper = styled.div`
@@ -47,4 +55,45 @@ export const InfoWrapper = styled.div`
 	span {
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 	}
+`;
+
+export const MediaEntry = styled.div`
+	width: 100%;
+	padding: 12px;
+	background: ${(props) => props.theme.colors.button.primary.background};
+	border: 1px solid ${(props) => props.theme.colors.button.primary.border};
+	border-radius: 8px;
+	margin-top: 10px;
+	margin-bottom: 20px;
+`;
+
+export const MediaEntryWallpaper = styled.div`
+	width: 100%;
+	padding: 12px;
+	background: ${(props) => props.theme.colors.button.primary.background};
+	border: 1px solid ${(props) => props.theme.colors.button.primary.border};
+	border-radius: 8px;
+	margin-top: 10px;
+	margin-bottom: 20px;
+`;
+
+export const MediaTitleWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: 0 0 5px 0;
+`;
+
+export const MediaTitle = styled.p`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	margin: 0;
+`;
+
+export const MediaInfo = styled.span`
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: ${(props) => props.theme.typography.size.xxxxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 `;

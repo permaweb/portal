@@ -126,8 +126,14 @@ export default function PortalManager(props: {
 					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
 					if (data.Icon) tags.push(getBootTag('Icon', data.Icon));
 
-					const portalId = await permawebProvider.libs.createZone({ tags: tags, data: PORTAL_DATA() }, (status: any) =>
-						console.log(status)
+					const portalId = await permawebProvider.libs.createZone(
+						{
+							tags: tags,
+							data: PORTAL_DATA(),
+							spawnModeration: true,
+							authUsers: [arProvider.walletAddress],
+						},
+						(status: any) => console.log(status)
 					);
 
 					console.log(`Portal ID: ${portalId}`);

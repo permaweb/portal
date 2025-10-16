@@ -53,35 +53,53 @@ export default function Layout() {
 	}, [portalProvider.current]);
 
 	React.useEffect(() => {
-		if (portalProvider.current?.pages) {
-			setActiveName((portalProvider.current?.pages as any).feed?.content?.[0]?.content?.[0]?.layout || 'journal');
+		if (portalProvider.current) {
+			const currentPages = portalProvider.current?.pages as any;
+			const hasPostSpotlight = currentPages?.home?.content?.some((row: any) =>
+				row.content?.some((item: any) => item.type === 'postSpotlight')
+			);
+			const hasCategorySpotlight = currentPages?.home?.content?.some((row: any) =>
+				row.content?.some((item: any) => item.type === 'categorySpotlight')
+			);
+
+			if (hasPostSpotlight && hasCategorySpotlight) {
+				setActiveName('blog');
+			} else if (JSON.stringify(portalProvider.current?.layout) === JSON.stringify(LAYOUT.JOURNAL)) {
+				setActiveName('journal');
+			} else {
+				setActiveName(currentPages?.feed?.content?.[0]?.content?.[0]?.layout || 'journal');
+			}
 		}
-	}, [portalProvider.current?.pages]);
+	}, [portalProvider.current]);
 
-	// Function to update the feed layout
 	function handleLayoutOptionChange(optionName: string) {
-		const layoutValue = optionName.toLowerCase();
-
-		// Update the pages state with the new layout value
-		const updatedPages = {
-			...pages,
-			Feed: {
-				...pages.feed,
-				content: [
-					{
-						...pages.feed.content[0],
-						content: [
-							{
-								...pages.feed.content[0].content[0],
-								layout: layoutValue,
-							},
-						],
-					},
-				],
-			},
-		};
-
-		setPages(updatedPages);
+		if (optionName === 'blog') {
+			setLayout(LAYOUT.BLOG);
+			setPages(PAGES.BLOG);
+		} else if (optionName === 'journal') {
+			setLayout(LAYOUT.JOURNAL);
+			setPages(PAGES.JOURNAL);
+		} else {
+			const layoutValue = optionName.toLowerCase();
+			const updatedPages = {
+				...pages,
+				Feed: {
+					...pages.feed,
+					content: [
+						{
+							...pages.feed.content[0],
+							content: [
+								{
+									...pages.feed.content[0].content[0],
+									layout: layoutValue,
+								},
+							],
+						},
+					],
+				},
+			};
+			setPages(updatedPages);
+		}
 		setActiveName(optionName);
 	}
 

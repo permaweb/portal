@@ -1,9 +1,11 @@
-import { Button } from 'components/atoms/Button';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
+
+import { Button } from 'components/atoms/Button';
 import { IS_TESTNET } from 'helpers/config';
 import { UserOwnedDomain } from 'helpers/types';
 import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
+
 import * as S from './styles';
 
 const RenderUpgradeAndCosts = (props: {

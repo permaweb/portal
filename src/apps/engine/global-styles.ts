@@ -175,7 +175,7 @@ export const PageWrapper = styled.div`
 	min-height: 100%;
 `;
 
-export const Page = styled.div<{ $layout: any }>`
+export const Page = styled.div<{ $layout: any; wallpaper: any }>`
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -184,6 +184,7 @@ export const Page = styled.div<{ $layout: any }>`
 	background-color: rgba(var(--color-background), 1);
 	background-attachment: fixed;
 	background-size: cover;
+	background-image: ${(props) => (props?.wallpaper ? `url('${props.wallpaper}')` : 'unset')};
 	color: rgba(var(--color-text), 1);
 
 	${(props: any) =>
@@ -196,7 +197,7 @@ export const Page = styled.div<{ $layout: any }>`
         background: linear-gradient(90deg, rgba(var(--color-background),.8) 0%, rgba(var(--color-background),.98) 20%, rgba(var(--color-background),.98) 80%, rgba(var(--color-background),.8) 100%);
         width: 100%;
         height: 100%;
-        display: ${(props: any) => (props.$layout.wallpaper !== 'none' ? `block` : `none`)};
+        display: ${(props: any) => (props.wallpaper ? `block` : `none`)};
       }
   `};
 `;

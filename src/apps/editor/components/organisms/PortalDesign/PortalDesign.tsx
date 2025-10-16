@@ -40,9 +40,24 @@ export default function PortalDesign() {
 				header = language?.fonts;
 				component = <Fonts />;
 				break;
-			case 'logo':
-				header = language?.siteLogo;
-				component = <Media portal={portalProvider.current} type={'logo'} />;
+			case 'images':
+				header = language?.images;
+				component = (
+					<>
+						<S.MediaWrapper>
+							<S.MediaTitle>{language?.logo}</S.MediaTitle>
+							<Media portal={portalProvider.current} type={'logo'} />
+						</S.MediaWrapper>
+						<S.MediaWrapper>
+							<S.MediaTitle>{language?.icon} (Favicon)</S.MediaTitle>
+							<Media portal={portalProvider.current} type={'icon'} />
+						</S.MediaWrapper>
+						<S.MediaWrapper>
+							<S.MediaTitle>{language?.wallpaper}</S.MediaTitle>
+							<Media portal={portalProvider.current} type={'wallpaper'} />
+						</S.MediaWrapper>
+					</>
+				);
 				break;
 			default:
 				header = null;
@@ -55,7 +70,7 @@ export default function PortalDesign() {
 				open={showPanel}
 				header={header}
 				handleClose={() => setShowPanel(false)}
-				width={500}
+				width={panelType === 'images' ? 700 : 500}
 				closeHandlerDisabled={true}
 			>
 				<S.PanelBodyWrapper>
@@ -95,7 +110,7 @@ export default function PortalDesign() {
 			<S.Wrapper>
 				{getAction(language?.themes, 'themes')}
 				{getAction(language?.fonts, 'fonts')}
-				{getAction(language?.siteLogo, 'logo')}
+				{getAction(language?.images, 'images')}
 			</S.Wrapper>
 			{panel}
 		</>
