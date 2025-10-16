@@ -120,7 +120,7 @@ export default function UserList(props: { type: ViewLayoutType }) {
 	const users = React.useMemo(() => {
 		if (!portalProvider.current?.users) {
 			return (
-				<S.LoadingWrapper type={props.type}>
+				<S.LoadingWrapper type={props.type} className={'border-wrapper-alt2'}>
 					<p>{`${language?.gettingUsers}...`}</p>
 				</S.LoadingWrapper>
 			);
@@ -128,14 +128,14 @@ export default function UserList(props: { type: ViewLayoutType }) {
 
 		if (processedUsers.length === 0) {
 			return (
-				<S.WrapperEmpty type={props.type}>
+				<S.WrapperEmpty type={props.type} className={'border-wrapper-alt2'}>
 					<p>{language?.noUsersFound}</p>
 				</S.WrapperEmpty>
 			);
 		}
 
 		return portalProvider.current?.id ? (
-			<S.UsersWrapper type={props.type}>
+			<S.UsersWrapper type={props.type} className={'border-wrapper-alt2'}>
 				{pageUsers.map((user: PortalUserType) => (
 					<S.UserWrapper key={user.address}>
 						<User user={user} onInviteDetected={handleInviteDetected} />
