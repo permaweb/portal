@@ -33,16 +33,31 @@ export default function DesignBasic() {
 						</S.SectionHeader>
 						<S.SectionBody>
 							<div>
-								<S.MediaTitle>{language?.logo}</S.MediaTitle>
+								<S.MediaTitleWrapper>
+									<S.MediaTitle>{language?.logo}</S.MediaTitle>
+									<S.MediaInfo>{language?.recommended}: 500x280px (16:9)</S.MediaInfo>
+								</S.MediaTitleWrapper>
 								<S.MediaEntry>
 									<Media portal={portalProvider.current} type={'logo'} />
 								</S.MediaEntry>
 							</div>
 							<div>
-								<S.MediaTitle>{language?.icon}</S.MediaTitle>
+								<S.MediaTitleWrapper>
+									<S.MediaTitle>{language?.icon} (Favicon)</S.MediaTitle>
+									<S.MediaInfo>{language?.recommended}: 32x32px (1:1)</S.MediaInfo>
+								</S.MediaTitleWrapper>
 								<S.MediaEntry>
 									<Media portal={portalProvider.current} type={'icon'} />
 								</S.MediaEntry>
+							</div>
+							<div>
+								<S.MediaTitleWrapper>
+									<S.MediaTitle>{language?.wallpaper}</S.MediaTitle>
+									<S.MediaInfo>{language?.recommended}: 1920x1080px (16:9)</S.MediaInfo>
+								</S.MediaTitleWrapper>
+								<S.MediaEntryWallpaper>
+									<Media portal={portalProvider.current} type={'wallpaper'} />
+								</S.MediaEntryWallpaper>
 							</div>
 						</S.SectionBody>
 					</div>

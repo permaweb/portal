@@ -5,6 +5,7 @@ import { defaultPages } from 'engine/defaults/pages.defaults';
 import { defaultThemes } from 'engine/defaults/theme.defaults';
 import WebFont from 'webfontloader';
 
+import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalPermissionsType, PortalUserType } from 'helpers/types';
 import { cachePortal, getCachedPortal, getPortalUsers } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -81,7 +82,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 				const portalUsers = users?.roles ? getPortalUsers(users.roles) : null;
 
-				// Only consider user logged in if they have a wallet address
 				const userIdentifier = arProvider.walletAddress
 					? permawebProvider.profile?.id || arProvider.walletAddress
 					: null;
@@ -126,6 +126,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					name: overview?.name,
 					logo: overview?.logo,
 					icon: overview?.icon,
+					wallpaper: overview?.wallpaper,
 					moderation: overview?.moderation,
 					layout: presentation?.layout,
 					pages: presentation?.pages,
@@ -146,11 +147,25 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const Themes = zone?.themes;
 				const Links = zone?.links;
 				const Logo = zone?.logo;
-				const Fonts = zone?.fonts;
 				const Icon = zone?.icon;
+				const Wallpaper = zone?.wallpaper ? getTxEndpoint(zone?.wallpaper) : undefined;
+				const Fonts = zone?.fonts;
 				const Moderation = zone?.moderation;
 
-				const portalData = { Name, Categories, Layout, Pages, Themes, Posts, Links, Logo, Fonts, Icon, Moderation };
+				const portalData = {
+					Name,
+					Categories,
+					Layout,
+					Pages,
+					Themes,
+					Posts,
+					Links,
+					Logo,
+					Fonts,
+					Icon,
+					Wallpaper,
+					Moderation,
+				};
 				console.log('portalData: ', portalData);
 				setPortal(portalData);
 				if (portalId && portalData) cachePortal(portalId, portalData);

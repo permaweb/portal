@@ -22,10 +22,11 @@ import { WalletBlock } from 'wallet/WalletBlock';
 import * as S from './styles';
 
 const ALLOWED_MEDIA_TYPES = 'image/png, image/jpeg, image/svg+xml, image/gif';
+const ALLOWED_ICON_TYPES = 'image/png, image/jpeg, image/svg+xml, image/gif, image/x-icon, image/vnd.microsoft.icon';
 
 export default function Media(props: {
 	portal: PortalDetailType | null;
-	type: 'icon' | 'logo';
+	type: 'icon' | 'logo' | 'wallpaper';
 	handleUpdate?: () => void;
 	onMediaUpload?: (mediaId: string) => void;
 	hideActions?: boolean;
@@ -48,7 +49,8 @@ export default function Media(props: {
 
 	React.useEffect(() => {
 		if (props.portal) {
-			const mediaValue = props.type === 'icon' ? props.portal.icon : props.portal.logo;
+			const mediaValue =
+				props.type === 'icon' ? props.portal.icon : props.type === 'logo' ? props.portal.logo : props.portal.wallpaper;
 			setMedia(mediaValue && checkValidAddress(mediaValue) ? mediaValue : null);
 		} else {
 			setMedia(null);
@@ -61,8 +63,13 @@ export default function Media(props: {
 				const result = await calculateUploadCost(media);
 
 				if (result) {
-					if (!result.requiresConfirmation) {
-						const mediaValue = props.type === 'icon' ? props.portal?.icon : props.portal?.logo;
+					if (!result.requiresConfirmation && props.type === 'icon') {
+						const mediaValue =
+							props.type === 'icon'
+								? props.portal?.icon
+								: props.type === 'logo'
+								? props.portal?.logo
+								: props.portal?.wallpaper;
 						if (!mediaValue) await handleSubmit();
 					}
 					console.log(result);
@@ -85,7 +92,7 @@ export default function Media(props: {
 						Name: portalProvider.current.name,
 					};
 
-					const mediaKey = props.type === 'icon' ? 'Icon' : 'Logo';
+					const mediaKey = props.type === 'icon' ? 'Icon' : props.type === 'logo' ? 'Logo' : 'Wallpaper';
 
 					if (media && !opts?.remove) {
 						try {
@@ -102,7 +109,12 @@ export default function Media(props: {
 
 					console.log(`Portal update: ${portalUpdateId}`);
 
-					response = props.type === 'icon' ? `${language?.iconUpdated}!` : `${language?.logoUpdated}!`;
+					response =
+						props.type === 'icon'
+							? `${language?.iconUpdated}!`
+							: props.type === 'logo'
+							? `${language?.logoUpdated}!`
+							: `${language?.wallpaperUpdated}!`;
 
 					if (opts?.remove) setMedia(null);
 
@@ -134,7 +146,12 @@ export default function Media(props: {
 
 	function handleRemoveMedia() {
 		setShowRemoveConfirmation(false);
-		const currentMedia = props.type === 'icon' ? portalProvider.current?.icon : portalProvider.current?.logo;
+		const currentMedia =
+			props.type === 'icon'
+				? portalProvider.current?.icon
+				: props.type === 'logo'
+				? portalProvider.current?.logo
+				: portalProvider.current?.wallpaper;
 
 		if (currentMedia && checkValidAddress(currentMedia)) {
 			handleSubmit({ remove: true });
@@ -166,6 +183,10 @@ export default function Media(props: {
 			const mediaSrc =
 				media instanceof File ? URL.createObjectURL(media) : checkValidAddress(media) ? getTxEndpoint(media) : media;
 
+			const isSvg =
+				(media instanceof File && media.type === 'image/svg+xml') ||
+				(typeof media === 'string' && props.type === 'logo');
+
 			return (
 				<>
 					<S.RemoveWrapper className={'fade-in'}>
@@ -181,13 +202,18 @@ export default function Media(props: {
 							tooltipPosition={'bottom-right'}
 						/>
 					</S.RemoveWrapper>
-					<img src={mediaSrc} />
+					{isSvg ? <ReactSVG src={mediaSrc} /> : <img src={mediaSrc} />}
 				</>
 			);
 		}
 
-		const assetSrc = props.type === 'icon' ? ICONS.icon : ICONS.image;
-		const uploadText = props.type === 'icon' ? language?.uploadIcon : language?.uploadLogo;
+		const assetSrc = props.type === 'icon' ? ICONS.icon : props.type === 'logo' ? ICONS.image : ICONS.image;
+		const uploadText =
+			props.type === 'icon'
+				? language?.uploadIcon
+				: props.type === 'logo'
+				? language?.uploadLogo
+				: language?.uploadWallpaper;
 
 		return (
 			<>
@@ -202,7 +228,12 @@ export default function Media(props: {
 		else {
 			const isIcon = props.type === 'icon';
 			const hasMedia = media !== null;
-			const currentMedia = isIcon ? portalProvider.current?.icon : portalProvider.current?.logo;
+			const currentMedia =
+				props.type === 'icon'
+					? portalProvider.current?.icon
+					: props.type === 'logo'
+					? portalProvider.current?.logo
+					: portalProvider.current?.wallpaper;
 
 			return (
 				<>
@@ -213,6 +244,7 @@ export default function Media(props: {
 									<S.LInput
 										hasMedia={hasMedia}
 										isIcon={isIcon}
+										mediaType={props.type}
 										onClick={() => mediaInputRef.current.click()}
 										disabled={unauthorized || loading}
 									>
@@ -223,36 +255,31 @@ export default function Media(props: {
 										type={'file'}
 										onChange={handleFileChange}
 										disabled={unauthorized || loading}
-										accept={ALLOWED_MEDIA_TYPES}
+										accept={props.type === 'icon' ? ALLOWED_ICON_TYPES : ALLOWED_MEDIA_TYPES}
 									/>
 								</S.FileInputWrapper>
 							</S.PWrapper>
-							{isIcon && (
-								<S.SActions>
-									<p>{language?.siteIconInfo}</p>
-									{!props.hideActions && (
-										<S.SAction>
-											<Button
-												type={'alt3'}
-												label={language?.cancel}
-												handlePress={() => {
-													setMedia(currentMedia && checkValidAddress(currentMedia) ? currentMedia : null);
-												}}
-												disabled={!media || (typeof media === 'string' && checkValidAddress(media)) || !currentMedia}
-												loading={false}
-											/>
-											<Button
-												type={'alt4'}
-												label={language?.save}
-												handlePress={() => handleSubmit()}
-												disabled={
-													unauthorized || loading || !media || (typeof media === 'string' && checkValidAddress(media))
-												}
-												loading={false}
-											/>
-										</S.SAction>
-									)}
-								</S.SActions>
+							{isIcon && !props.hideActions && (
+								<S.SAction>
+									<Button
+										type={'alt3'}
+										label={language?.cancel}
+										handlePress={() => {
+											setMedia(currentMedia && checkValidAddress(currentMedia) ? currentMedia : null);
+										}}
+										disabled={!media || (typeof media === 'string' && checkValidAddress(media)) || !currentMedia}
+										loading={false}
+									/>
+									<Button
+										type={'alt4'}
+										label={language?.save}
+										handlePress={() => handleSubmit()}
+										disabled={
+											unauthorized || loading || !media || (typeof media === 'string' && checkValidAddress(media))
+										}
+										loading={false}
+									/>
+								</S.SAction>
 							)}
 							{!isIcon && !props.hideActions && (
 								<S.SAction>
@@ -296,12 +323,24 @@ export default function Media(props: {
 					)}
 					{showRemoveConfirmation && (
 						<Modal
-							header={isIcon ? language?.removeIcon : language?.removeLogo}
+							header={
+								props.type === 'icon'
+									? language?.removeIcon
+									: props.type === 'logo'
+									? language?.removeLogo
+									: language?.removeWallpaper
+							}
 							handleClose={() => setShowRemoveConfirmation(false)}
 						>
 							<S.MWrapper>
 								<S.MInfo>
-									<p>{isIcon ? language?.iconDeleteConfirmationInfo : language?.logoDeleteConfirmationInfo}</p>
+									<p>
+										{props.type === 'icon'
+											? language?.iconDeleteConfirmationInfo
+											: props.type === 'logo'
+											? language?.logoDeleteConfirmationInfo
+											: language?.wallpaperDeleteConfirmationInfo}
+									</p>
 								</S.MInfo>
 								<S.MActions>
 									<Button
@@ -313,7 +352,13 @@ export default function Media(props: {
 									/>
 									<Button
 										type={'primary'}
-										label={isIcon ? language?.iconDeleteConfirmation : language?.logoDeleteConfirmation}
+										label={
+											props.type === 'icon'
+												? language?.iconDeleteConfirmation
+												: props.type === 'logo'
+												? language?.logoDeleteConfirmation
+												: language?.wallpaperDeleteConfirmation
+										}
 										handlePress={() => handleRemoveMedia()}
 										disabled={unauthorized || loading}
 										loading={false}

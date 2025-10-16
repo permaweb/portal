@@ -267,6 +267,7 @@ export const PORTAL_PATCH_MAP = {
 		'Store.Name',
 		'Store.Icon',
 		'Store.Logo',
+		'Store.Wallpaper',
 		'Store.Moderation',
 	],
 	[PortalPatchMapEnum.Users]: ['Roles', 'RoleOptions', 'Permissions'],

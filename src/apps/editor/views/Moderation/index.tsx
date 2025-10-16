@@ -30,9 +30,6 @@ export default function Moderation() {
 	const [moderatedUsers, setModeratedUsers] = React.useState<any[]>([]);
 	const [moderatedComments, setModeratedComments] = React.useState<any[]>([]);
 
-	console.log('moderatedComments: ', moderatedComments);
-	console.log('moderatedUsers: ', moderatedUsers);
-
 	React.useEffect(() => {
 		fetchInactiveComments();
 		extractExternalPortals();
@@ -148,7 +145,6 @@ export default function Moderation() {
 				targetType: 'profile',
 				status: 'blocked',
 			});
-			console.log('userEntries: ', userEntries);
 
 			// Filter to only include actual profile entries (API sometimes returns mixed types)
 			const profileEntries = (userEntries || []).filter(

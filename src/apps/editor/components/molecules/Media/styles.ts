@@ -60,7 +60,7 @@ export const CWrapper = styled.div`
 
 export const FileInputWrapper = styled.div`
 	display: flex;
-	justify-content: center;
+	justify-content: flex-start;
 	position: relative;
 	width: 100%;
 `;
@@ -73,17 +73,29 @@ export const RemoveWrapper = styled.div`
 	display: none;
 `;
 
-export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled: boolean }>`
+export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled: boolean; mediaType?: string }>`
 	${(props) =>
 		props.isIcon
 			? `
-		height: 100px;
-		width: 100px;
+		height: 64px;
+		width: 64px;
+	`
+			: props.mediaType === 'logo'
+			? props.hasMedia
+				? `
+		max-height: 160px;
+		width: auto;
+		height: auto;
+	`
+				: `
+		height: 160px;
+		width: auto;
+		aspect-ratio: 16 / 9;
 	`
 			: `
-		height: ${props.hasMedia ? 'auto' : '170px'};
-		max-height: 200px;
 		width: 100%;
+		aspect-ratio: 16 / 9;
+		height: auto;
 	`}
 	position: relative;
 	background: ${(props) =>
@@ -98,7 +110,7 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 			: props.disabled
 			? `1px dashed ${props.theme.colors.button.primary.disabled.border}`
 			: `1px dashed ${props.theme.colors.border.primary}`};
-	border-radius: ${STYLING.dimensions.radius.alt2};
+	border-radius: ${(props) => (props.hasMedia && props.mediaType === 'logo' ? '0' : STYLING.dimensions.radius.alt2)};
 	z-index: 1;
 	overflow: hidden;
 	display: flex;
@@ -116,14 +128,37 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 		height: 20px;
 		width: 20px;
 		margin: 0 0 5px 0;
-		color: ${(props) => props.theme.colors.icon.primary.fill};
-		fill: ${(props) => props.theme.colors.icon.primary.fill};
+		color: ${(props) => props.theme.colors.font.primary};
+		fill: ${(props) => props.theme.colors.font.primary};
 	}
+
 	img {
 		height: 100%;
 		width: 100%;
-		object-fit: contain;
+		object-fit: ${(props) => (props.mediaType === 'wallpaper' ? 'cover' : 'contain')};
 	}
+
+	${(props) =>
+		props.hasMedia
+			? `
+		> div:not(.fade-in) {
+			height: 100%;
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: ${props.theme.colors.font.primary};
+
+			svg {
+				height: 100%;
+				width: 100%;
+				max-height: 100%;
+				max-width: 100%;
+				color: ${props.theme.colors.font.primary};
+			}
+		}
+	`
+			: ''}
 	&:hover {
 		border: 1px dashed
 			${(props) =>
@@ -203,6 +238,7 @@ export const SAction = styled.div`
 	flex-wrap: wrap;
 	gap: 15px;
 	position: relative;
+	margin-top: auto;
 `;
 
 export const MWrapper = styled.div`
