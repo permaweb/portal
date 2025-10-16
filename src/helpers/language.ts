@@ -241,6 +241,7 @@ export const language = {
 		mediaUploaded: `Media Uploaded`,
 		mediaUploadInfo: `Insert media from a URL, upload new media, or choose from your library.`,
 		missingPostFields: `Some required fields are missing from this post.`,
+		mmPlaceholder: `MM`,
 		moderation: `Moderation`,
 		month: `Month`,
 		more: `More`,
