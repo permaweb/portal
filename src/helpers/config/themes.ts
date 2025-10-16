@@ -120,8 +120,8 @@ export const THEME_DEFAULT = {
 	post: {
 		colors: {
 			background: {
-				light: '255,255,255',
-				dark: '25,25,25',
+				light: '238,238,238',
+				dark: '38,38,38',
 			},
 			border: {
 				light: 'border',
