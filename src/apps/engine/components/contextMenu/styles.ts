@@ -45,7 +45,7 @@ export const IconWrapper = styled.div`
 export const MenuEntries = styled.div`
 	position: relative;
 	background: var(--color-card-background);
-	border: 1px solid var(--color-card-border);
+	border: 1px solid rgba(var(--color-text), 0.1);
 	backdrop-filter: blur(5px);
 	z-index: 99;
 `;
@@ -74,5 +74,5 @@ export const MenuEntry = styled.div`
 export const MenuSpacer = styled.div`
 	margin-bottom: 3px;
 	padding-bottom: 3px;
-	border-bottom: 1px solid var(--color-card-border);
+	border-bottom: 1px solid rgba(var(--color-text), 0.1);
 `;

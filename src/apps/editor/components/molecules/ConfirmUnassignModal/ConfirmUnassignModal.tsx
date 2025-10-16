@@ -1,8 +1,9 @@
+import { Button } from 'components/atoms/Button';
 import { Modal } from 'components/atoms/Modal';
 import { UserOwnedDomain } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+
 import * as S from './styles';
-import { Button } from 'components/atoms/Button';
 
 const ConfirmUnassignModal = (props: {
 	confirmUnassignModal: { open: boolean; domain?: UserOwnedDomain };

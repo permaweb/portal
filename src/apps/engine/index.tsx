@@ -24,7 +24,7 @@ import * as S from './global-styles';
 function App() {
 	const location = useLocation();
 	const portalProvider = usePortalProvider();
-	const { Name, Categories, Layout, Themes, Icon } = portalProvider?.portal || {};
+	const { Name, Categories, Layout, Themes, Icon, Wallpaper } = portalProvider?.portal || {};
 	const [theme, setTheme] = React.useState<any>(
 		window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 	);
@@ -126,7 +126,7 @@ function App() {
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />
 			<S.PageWrapper>
-				<S.Page $layout={Layout?.basics} id="Page">
+				<S.Page $layout={Layout?.basics} wallpaper={Wallpaper} id="Page">
 					<Header
 						name={Name}
 						layout={Layout?.header?.layout}

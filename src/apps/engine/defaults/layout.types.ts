@@ -1,7 +1,6 @@
 export declare type PortalLayout = {
 	basics: {
 		gradient: boolean;
-		wallpaper: string;
 		borderRadius: number;
 	};
 	header: {

@@ -11,7 +11,9 @@ export type PortalDetailType = {
 	name: string;
 	logo: string | null;
 	icon: string | null;
+	wallpaper: string | null;
 	owner: string | null;
+	moderation?: string | null;
 	users?: PortalUserType[];
 	pages?: PortalPageType[];
 	assets?: PortalAssetType[];
@@ -311,7 +313,7 @@ export type MediaConfigType = {
 	acceptType: string;
 };
 
-export type DesignPanelType = 'themes' | 'fonts' | 'logo';
+export type DesignPanelType = 'themes' | 'fonts' | 'images';
 
 export type BasicAlignmentType = 'left' | 'center' | 'right' | 'top' | 'bottom';
 

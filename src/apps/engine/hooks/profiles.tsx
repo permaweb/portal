@@ -104,17 +104,28 @@ export const useProfile = (profileId: string) => {
 				setIsLoading(false);
 			})
 			.catch((err: any) => {
-				console.error('Error fetching profile:', err);
-				setError(err);
-				setIsLoading(false);
+				console.error('Error fetching profile by ID:', err);
 
-				// Try fallback cache
-				const cachedFallback = getCachedProfile(processId);
-				if (cachedFallback) {
-					setProfile(cachedFallback);
-				} else {
-					setProfile(null);
-				}
+				return permawebProvider.libs
+					.getProfileByWalletAddress(profileId)
+					.then((fetchedProfile: any) => {
+						if (fetchedProfile && fetchedProfile.id) {
+							cacheProfile(profileId, fetchedProfile);
+							localStorage.setItem(`profile-by-wallet-${profileId}`, JSON.stringify(fetchedProfile));
+							setProfile(fetchedProfile);
+						}
+						setIsLoading(false);
+					})
+					.catch((walletErr: any) => {
+						console.error('Error fetching profile by wallet:', walletErr);
+						setError(walletErr);
+						setIsLoading(false);
+
+						const cachedFallback = getCachedProfile(profileId);
+						if (cachedFallback) {
+							setProfile(cachedFallback);
+						}
+					});
 			});
 	}, [profileId, permawebProvider.libs, permawebProvider.profile]);
 

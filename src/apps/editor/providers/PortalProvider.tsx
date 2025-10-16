@@ -192,6 +192,16 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 							await permawebProvider.libs.readState({ processId: currentId, path: key })
 						);
 
+						if (key === 'overview') {
+							console.log('Overview data fetched:', data);
+
+							// Check if wallpaper is undefined and update patch map if needed
+							if (data.wallpaper === undefined && permawebProvider.libs?.updateZonePatchMap) {
+								console.log('Updating patch map to include Wallpaper');
+								await permawebProvider.libs.updateZonePatchMap(PORTAL_PATCH_MAP, currentId);
+							}
+						}
+
 						setCurrent((prevPortal) => {
 							if (!prevPortal) {
 								const newPortal: PortalDetailType = {
@@ -199,7 +209,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									name: null,
 									logo: null,
 									icon: null,
+									wallpaper: null,
 									owner: null,
+									moderation: null,
 									assets: null,
 									requests: null,
 									categories: null,
@@ -247,7 +259,10 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									updatedPortal.name = data.name ?? updatedPortal.name;
 									updatedPortal.logo = data.logo ?? updatedPortal.logo;
 									updatedPortal.icon = data.icon ?? updatedPortal.icon;
+									updatedPortal.wallpaper = data.wallpaper ?? updatedPortal.wallpaper;
+									console.log('Updated wallpaper in portal:', updatedPortal.wallpaper, 'from data:', data.wallpaper);
 									updatedPortal.owner = data.owner ?? updatedPortal.owner;
+									updatedPortal.moderation = data.moderation ?? updatedPortal.moderation;
 									break;
 								case 'users':
 									updatedPortal.roleOptions = data.roleOptions ?? updatedPortal.roleOptions;

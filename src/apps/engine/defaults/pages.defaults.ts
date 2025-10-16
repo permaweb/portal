@@ -42,6 +42,22 @@ export const defaultPages = {
 			},
 		],
 	},
+	search: {
+		type: 'grid',
+		content: [
+			{
+				type: 'row',
+				width: 'page',
+				content: [
+					{
+						type: 'feed',
+						layout: 'journal',
+						width: 3,
+					},
+				],
+			},
+		],
+	},
 	user: {
 		type: 'grid',
 		content: [

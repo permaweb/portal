@@ -37,7 +37,6 @@ export const UsersWrapper = styled.div<{ type: ViewLayoutType }>`
 	display: flex;
 	flex-direction: column;
 
-	background: ${(props) => props.theme.colors.container.primary.background};
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
 
 	border-top-left-radius: ${(props) => (props.type === 'header' ? '0' : STYLING.dimensions.radius.alt2)};
@@ -69,7 +68,6 @@ export const UserWrapper = styled.div`
 export const WrapperEmpty = styled.div<{ type: ViewLayoutType }>`
 	width: 100%;
 	padding: 12.5px 15px;
-	background: ${(props) => props.theme.colors.container.primary.background};
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-top-left-radius: ${(props) => (props.type === 'header' ? '0' : STYLING.dimensions.radius.alt2)};
 	border-top-right-radius: ${(props) => (props.type === 'header' ? '0' : STYLING.dimensions.radius.alt2)};

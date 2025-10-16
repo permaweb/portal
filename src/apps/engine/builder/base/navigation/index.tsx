@@ -38,7 +38,7 @@ export default function Navigation(props: any) {
 					onPointerEnter={() => (entry.children && entry.children.length > 0 ? setShowMenu(true) : {})}
 					onPointerLeave={() => setShowMenu(false)}
 				>
-					<NavLink to={getRedirect(`feed/category/${entry.id}`)}>
+					<NavLink to={getRedirect(`feed/category/${entry.name}`)}>
 						{entry.icon && (
 							<S.Icon>
 								<ReactSVG src={`/img/icons/${entry.Icon}.svg`} />
@@ -55,7 +55,7 @@ export default function Navigation(props: any) {
 						<S.NavigationEntryMenu $layout={layout}>
 							{entry.children.map((entry: any, key: any) => {
 								return (
-									<NavLink to={getRedirect(`feed/category/${entry.id}`)} key={key}>
+									<NavLink to={getRedirect(`feed/category/${entry.name}`)} key={key}>
 										<S.NavigationSubEntry>{entry.name}</S.NavigationSubEntry>
 									</NavLink>
 								);

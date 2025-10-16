@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 
+import { STYLING } from 'helpers/config';
+
 export const Wrapper = styled.div`
 	width: 100%;
 `;
@@ -7,8 +9,48 @@ export const Wrapper = styled.div`
 export const BodyWrapper = styled.div`
 	width: 100%;
 	display: flex;
+	flex-wrap: wrap;
+	gap: 25px;
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		flex-direction: column;
+	}
+`;
+
+export const SectionWrapper = styled.div`
+	width: calc(50% - 12.5px);
+	display: flex;
 	flex-direction: column;
-	gap: 15px;
+	gap: 25px;
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		width: 100%;
+	}
+`;
+
+export const Section = styled.div`
+	width: 100%;
+`;
+
+export const SectionHeader = styled.div`
+	padding: 12.5px 15px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.base};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+	}
+`;
+
+export const SectionBody = styled.div`
+	width: 100%;
+	padding: 15px;
+	background: ${(props) => props.theme.colors.container.primary.background};
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
 export const InfoWrapper = styled.div`
@@ -25,15 +67,9 @@ export const CommentsList = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-
-	h3 {
-		margin: 0 0 10px 0;
-		font-size: ${(props) => props.theme.typography.size.lg};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-	}
 `;
 
-export const CommentItem = styled.div`
+export const CommentItem = styled.div<{ $blocked?: boolean }>`
 	width: 100%;
 	padding: 12px;
 	background: ${(props) => props.theme.colors.container.primary.background};
@@ -102,6 +138,26 @@ export const CommentDate = styled.span`
 	margin-left: 4px;
 `;
 
+export const BlockedBadge = styled.span`
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	background: rgba(255, 95, 31, 0.15);
+	border: 1px solid rgba(255, 95, 31, 0.3);
+	border-radius: 4px;
+	font-size: ${(props) => props.theme.typography.size.xxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
+	color: var(--theme-warning);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+`;
+
+export const BlockedReason = styled.span`
+	color: ${(props) => props.theme.colors.font.primary.alt2};
+	font-size: ${(props) => props.theme.typography.size.small};
+	font-style: italic;
+`;
+
 export const CommentText = styled.div`
 	color: ${(props) => props.theme.colors.font.primary.base};
 	font-size: ${(props) => props.theme.typography.size.base};
@@ -111,6 +167,7 @@ export const CommentText = styled.div`
 export const CommentActions = styled.div`
 	display: flex;
 	align-items: center;
+	gap: 8px;
 `;
 
 export const CommentHeader = styled.div`
@@ -135,8 +192,7 @@ export const CommentFooter = styled.div`
 
 export const InfoMessage = styled.div`
 	width: 100%;
-	text-align: center;
-	padding: 15px;
+	text-align: left;
 
 	p {
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
@@ -144,3 +200,7 @@ export const InfoMessage = styled.div`
 		text-transform: uppercase;
 	}
 `;
+
+export const SubscriptionsSection = styled(Section)``;
+export const UsersSection = styled(Section)``;
+export const CommentsSection = styled(Section)``;
