@@ -136,11 +136,18 @@ export type PortalUserRoleType = 'Admin' | 'Contributor' | 'ExternalContributor'
 
 export type RequestUpdateType = 'Approve' | 'Reject';
 
+export type PortalCategoryMetaType = {
+	hidden?: boolean;
+	description?: string;
+	template?: string;
+};
+
 export type PortalCategoryType = {
 	id: string;
 	name: string;
 	parent?: string;
 	children?: PortalCategoryType[];
+	metadata: PortalCategoryMetaType;
 };
 
 export type PortalPermissionsType = {

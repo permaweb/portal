@@ -217,3 +217,28 @@ export const NavigationSubEntry = styled.div`
 		background: rgba(var(--color-navigation-text), 0.1);
 	}
 `;
+
+export const NavItem = styled.div`
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+`;
+
+export const Tooltip = styled.div`
+	position: absolute;
+	bottom: -180%;
+	left: -40%;
+	color: rgba(var(--color-text), 1);
+	background: rgba(var(--color-footer-background), 1);
+	font-size: 12px;
+	padding: 6px 8px;
+	border-radius: 6px;
+	white-space: nowrap;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s ease;
+
+	${NavItem}:hover & {
+		opacity: 1;
+	}
+`;

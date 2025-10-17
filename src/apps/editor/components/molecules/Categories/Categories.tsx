@@ -6,10 +6,13 @@ import { useTheme } from 'styled-components';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
+import { Select } from 'components/atoms/Select';
 import { ICONS, STYLING } from 'helpers/config';
-import { PortalCategoryType } from 'helpers/types';
+import { PAGES_JOURNAL } from 'helpers/config/pages';
+import { PortalCategoryType, SelectOptionType } from 'helpers/types';
 import { useCategoriesWithReorder } from 'hooks/useCategoriesWithReorder';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -31,6 +34,15 @@ export default function Categories(props: {
 	const language = languageProvider.object[languageProvider.current];
 	const theme = useTheme();
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta && !props.skipAuthCheck;
+	const [openMetadata, setOpenMetadata] = React.useState<{
+		open: boolean;
+		categoryId: string | null;
+		description?: string;
+		template?: string;
+		hidden?: boolean;
+	}>({ open: false, categoryId: null });
+
+	type TemplateOption = { label: string; value: string };
 
 	const {
 		addCategory,
@@ -43,6 +55,7 @@ export default function Categories(props: {
 		categoryLoading,
 		showDeleteConfirmation,
 		setShowDeleteConfirmation,
+		updateCategory,
 		deleteCategories,
 		handleSelectCategory,
 		flattenCategories,
@@ -67,6 +80,16 @@ export default function Categories(props: {
 		portalCategories: portalProvider.current?.categories || [],
 		refreshCurrentPortal: portalProvider.refreshCurrentPortal,
 	});
+
+	function openCategorySettings(category: PortalCategoryType) {
+		setOpenMetadata({
+			open: true,
+			categoryId: category.id,
+			description: category?.metadata?.description,
+			template: category?.metadata?.template,
+			hidden: category?.metadata?.hidden,
+		});
+	}
 
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
@@ -182,9 +205,45 @@ export default function Categories(props: {
 							<div ref={provided.innerRef} {...provided.droppableProps}>
 								<S.CategoriesList>
 									{flattened.map((item, index) => {
+										console.log('Rendering category item:', item);
 										const active =
 											props.categories?.find((c: PortalCategoryType) => item.category.id === c.id) !== undefined;
 										const isSelected = selectedIds.has(item.category.id);
+										const disabled = unauthorized || categoryLoading || isDragging;
+										const addDisabled = unauthorized || categoryLoading || isDragging || item.category.metadata?.hidden;
+
+										const onChipClick = () => {
+											if (!addDisabled) handleSelectCategory(item.category.id);
+										};
+
+										const onChipKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+											if (disabled) return;
+											if (e.key === 'Enter' || e.key === ' ') {
+												e.preventDefault();
+												handleSelectCategory(item.category.id);
+											}
+										};
+
+										const onOpenSettings: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+											e.stopPropagation();
+											if (disabled) return;
+											openCategorySettings(item.category); // wire to your modal later
+										};
+
+										const fieldsDisabled = item?.category?.metadata?.hidden || categoryLoading;
+
+										const resolvedTemplate = openMetadata.template ?? item.category?.metadata?.template ?? 'feed';
+
+										const templateOptions: SelectOptionType[] = React.useMemo(
+											() => Object.keys(PAGES_JOURNAL).map((k) => ({ id: k, label: k })),
+											[]
+										);
+										const activeTemplate = templateOptions.find((o) => o.id === resolvedTemplate) ?? templateOptions[1];
+
+										const handleTemplateChange = (opt: SelectOptionType) => {
+											setOpenMetadata((prev) => ({ ...prev, template: opt.id }));
+										};
+
 										return (
 											<React.Fragment key={item.category.id}>
 												<Draggable draggableId={item.category.id} index={index}>
@@ -227,14 +286,28 @@ export default function Categories(props: {
 																		<ReactSVG src={ICONS.drag} />
 																	</S.CategoryDragHandle>
 																	<S.CategoryContent>
-																		<Button
-																			type={'alt3'}
-																			label={item.category.name}
-																			handlePress={() => handleSelectCategory(item.category.id)}
-																			active={active}
-																			disabled={unauthorized || categoryLoading || isDragging}
-																			icon={active ? ICONS.close : ICONS.add}
-																		/>
+																		<S.CategoryPill
+																			role="button"
+																			tabIndex={disabled ? -1 : 0}
+																			aria-pressed={active}
+																			aria-disabled={disabled}
+																			$active={!!active}
+																			$disabled={!!addDisabled}
+																			onClick={onChipClick}
+																			onKeyDown={onChipKeyDown}
+																		>
+																			<S.CategoryIcon src={active ? ICONS.close : ICONS.add} />
+																			<S.CategoryLabel>{item.category.name}</S.CategoryLabel>
+																			<S.CategorySettingsBtn
+																				type="button"
+																				aria-label="Category settings"
+																				title="Settings"
+																				onClick={onOpenSettings}
+																				$disabled={!!disabled}
+																			>
+																				<S.CategoryIcon src={ICONS.settings} />
+																			</S.CategorySettingsBtn>
+																		</S.CategoryPill>
 																		{snapshot.isDragging && selectedIds.size > 1 && (
 																			<div className={'notification'}>
 																				<span>{selectedIds.size}</span>
@@ -246,6 +319,100 @@ export default function Categories(props: {
 														);
 													}}
 												</Draggable>
+												{openMetadata.open && (
+													<Modal
+														header={'Category Metadata'}
+														handleClose={() =>
+															setOpenMetadata({
+																open: false,
+																categoryId: null,
+																description: undefined,
+																template: undefined,
+																hidden: undefined,
+															})
+														}
+													>
+														<S.ModalWrapper>
+															<S.ModalBodyWrapper>
+																<S.ModalForm>
+																	<S.FieldRow>
+																		<S.FieldLabel htmlFor="field-hidden">{language?.hidden ?? 'Hidden'}</S.FieldLabel>
+																		<S.Inline>
+																			<Checkbox
+																				checked={openMetadata.hidden ?? item.category?.metadata?.hidden ?? false}
+																				disabled={false}
+																				handleSelect={() =>
+																					setOpenMetadata((prev) => ({
+																						...prev,
+																						hidden: !(prev?.hidden ?? item.category?.metadata?.hidden),
+																					}))
+																				}
+																			/>
+																			<span id="field-hidden-help">
+																				{language?.hiddenHelp ?? 'If checked, this category won’t be visible.'}
+																			</span>
+																		</S.Inline>
+																	</S.FieldRow>
+																	<Select
+																		label={language?.template ?? 'Template'}
+																		activeOption={activeTemplate}
+																		setActiveOption={handleTemplateChange}
+																		options={templateOptions}
+																		disabled={fieldsDisabled}
+																	/>
+																	<FormField
+																		label={language?.description ?? 'Description'}
+																		placeholder={
+																			language?.descriptionPlaceholder ?? 'Add a short description to display on hover'
+																		}
+																		value={openMetadata.description ?? item.category?.metadata?.description ?? ''}
+																		onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+																			setOpenMetadata((prev) => ({
+																				...prev,
+																				description: e.target.value,
+																			}));
+																		}}
+																		invalid={{ status: false, message: null }}
+																		disabled={fieldsDisabled}
+																	/>
+																</S.ModalForm>
+															</S.ModalBodyWrapper>
+															<S.ModalActionsWrapper>
+																<Button
+																	type={'primary'}
+																	label={language?.cancel}
+																	handlePress={() =>
+																		setOpenMetadata({
+																			open: false,
+																			categoryId: null,
+																		})
+																	}
+																	disabled={categoryLoading}
+																/>
+																<Button
+																	type={'primary'}
+																	label={'Save Changes'}
+																	handlePress={async () => {
+																		await updateCategory(openMetadata.categoryId, {
+																			description: openMetadata.description,
+																			template: openMetadata.template,
+																			hidden: openMetadata.hidden,
+																		});
+																		setOpenMetadata({
+																			open: false,
+																			categoryId: null,
+																			description: undefined,
+																			template: undefined,
+																			hidden: undefined,
+																		});
+																	}}
+																	disabled={categoryLoading}
+																	loading={categoryLoading}
+																/>
+															</S.ModalActionsWrapper>
+														</S.ModalWrapper>
+													</Modal>
+												)}
 												{(() => {
 													const shouldShow = showChildDropZone && dragOverId === item.category.id;
 													return shouldShow ? <S.ChildDropZone visible={true} level={item.level} /> : null;
@@ -366,6 +533,7 @@ export default function Categories(props: {
 					</S.CategoriesFooter>
 				)}
 			</S.Wrapper>
+
 			{showDeleteConfirmation && (
 				<Modal header={language?.confirmDeletion} handleClose={() => setShowDeleteConfirmation(false)}>
 					<S.ModalWrapper>
