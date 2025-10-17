@@ -180,7 +180,7 @@ export function useCategoriesWithReorder(props: {
 				console.log(`Categories update: ${categoryUpdateId}`);
 
 				setCategoryOptions(updatedCategories);
-				addNotification(`${language?.categoryUpdated}!`, 'success');
+				addNotification(`Updated Category Metadata Successfully!`, 'success');
 			} catch (e: any) {
 				addNotification(e.message ?? 'Error updating category', 'warning');
 			}

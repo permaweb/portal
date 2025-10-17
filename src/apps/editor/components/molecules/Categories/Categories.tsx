@@ -402,13 +402,20 @@ export default function Categories(props: {
 																<Button
 																	type={'primary'}
 																	label={'Save Changes'}
-																	handlePress={() =>
-																		updateCategory(openMetadata.categoryId, {
+																	handlePress={async () => {
+																		await updateCategory(openMetadata.categoryId, {
 																			description: openMetadata.description,
 																			template: openMetadata.template,
 																			hidden: openMetadata.hidden,
-																		})
-																	}
+																		});
+																		setOpenMetadata({
+																			open: false,
+																			categoryId: null,
+																			description: undefined,
+																			template: undefined,
+																			hidden: undefined,
+																		});
+																	}}
 																	disabled={categoryLoading}
 																	loading={categoryLoading}
 																/>
