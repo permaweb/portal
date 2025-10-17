@@ -53,15 +53,18 @@ export default function Navigation(props: any) {
 							)}
 						</NavLink>
 
-						{entry.description && <S.Tooltip>{entry.description}</S.Tooltip>}
+						{entry?.metadata?.description && <S.Tooltip>{entry?.metadata?.description}</S.Tooltip>}
 					</S.NavItem>
 					{showMenu && (
 						<S.NavigationEntryMenu $layout={layout}>
 							{entry.children.map((entry: any, key: any) => {
 								return (
-									<NavLink to={getRedirect(`feed/category/${entry.name}`)} key={key}>
-										<S.NavigationSubEntry>{entry.name}</S.NavigationSubEntry>
-									</NavLink>
+									<S.NavItem>
+										<NavLink to={getRedirect(`feed/category/${entry.name}`)} key={key}>
+											<S.NavigationSubEntry>{entry.name}</S.NavigationSubEntry>
+										</NavLink>
+										{entry.description && <S.Tooltip>{entry.description}</S.Tooltip>}
+									</S.NavItem>
 								);
 							})}
 						</S.NavigationEntryMenu>

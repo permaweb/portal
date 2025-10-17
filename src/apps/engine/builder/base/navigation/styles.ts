@@ -226,20 +226,17 @@ export const NavItem = styled.div`
 
 export const Tooltip = styled.div`
 	position: absolute;
-	bottom: 120%;
-	left: 50%;
-	transform: translateX(-50%);
-	background: ${(p) => p.theme.colors.container.alt3};
-	color: ${(p) => p.theme.colors.font.primary};
-	font-size: ${(p) => p.theme.typography.size.xSmall};
+	bottom: -180%;
+	left: -40%;
+	color: rgba(var(--color-text), 1);
+	background: rgba(var(--color-footer-background), 1);
+	font-size: 12px;
 	padding: 6px 8px;
 	border-radius: 6px;
 	white-space: nowrap;
 	opacity: 0;
 	pointer-events: none;
 	transition: opacity 0.2s ease;
-	border: 1px solid ${(p) => p.theme.colors.border.primary};
-	box-shadow: ${(p) => p.theme.colors.shadow.sm};
 
 	${NavItem}:hover & {
 		opacity: 1;
