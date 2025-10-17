@@ -29,7 +29,7 @@ export default function Navigation(props: any) {
 
 	const NavigationEntry = ({ index, entry }: any) => {
 		const [showMenu, setShowMenu] = React.useState(false);
-
+		if (entry.metadata.hidden) return null;
 		return (
 			<>
 				{preview && <GlobalStyles />}
@@ -38,26 +38,33 @@ export default function Navigation(props: any) {
 					onPointerEnter={() => (entry.children && entry.children.length > 0 ? setShowMenu(true) : {})}
 					onPointerLeave={() => setShowMenu(false)}
 				>
-					<NavLink to={getRedirect(`feed/category/${entry.name}`)}>
-						{entry.icon && (
-							<S.Icon>
-								<ReactSVG src={`/img/icons/${entry.Icon}.svg`} />
-							</S.Icon>
-						)}
-						{entry.name}
-						{entry.children && entry.children.length > 0 && (
-							<S.Arrow>
-								<ReactSVG src={ICONS.ENGINE.arrow} />
-							</S.Arrow>
-						)}
-					</NavLink>
+					<S.NavItem>
+						<NavLink to={getRedirect(`feed/category/${entry.name}`)}>
+							{entry.icon && (
+								<S.Icon>
+									<ReactSVG src={`/img/icons/${entry.Icon}.svg`} />
+								</S.Icon>
+							)}
+							{entry.name}
+							{entry.children && entry.children.length > 0 && (
+								<S.Arrow>
+									<ReactSVG src={ICONS.ENGINE.arrow} />
+								</S.Arrow>
+							)}
+						</NavLink>
+
+						{entry?.metadata?.description && <S.Tooltip>{entry?.metadata?.description}</S.Tooltip>}
+					</S.NavItem>
 					{showMenu && (
 						<S.NavigationEntryMenu $layout={layout}>
 							{entry.children.map((entry: any, key: any) => {
 								return (
-									<NavLink to={getRedirect(`feed/category/${entry.name}`)} key={key}>
-										<S.NavigationSubEntry>{entry.name}</S.NavigationSubEntry>
-									</NavLink>
+									<S.NavItem>
+										<NavLink to={getRedirect(`feed/category/${entry.name}`)} key={key}>
+											<S.NavigationSubEntry>{entry.name}</S.NavigationSubEntry>
+										</NavLink>
+										{entry.description && <S.Tooltip>{entry.description}</S.Tooltip>}
+									</S.NavItem>
 								);
 							})}
 						</S.NavigationEntryMenu>
