@@ -29,7 +29,7 @@ export default function Navigation(props: any) {
 
 	const NavigationEntry = ({ index, entry }: any) => {
 		const [showMenu, setShowMenu] = React.useState(false);
-		if (entry.metadata.hidden) return null;
+		if (entry?.metadata?.hidden) return null;
 		return (
 			<>
 				{preview && <GlobalStyles />}
