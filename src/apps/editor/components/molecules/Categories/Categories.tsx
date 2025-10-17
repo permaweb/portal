@@ -9,9 +9,10 @@ import { Button } from 'components/atoms/Button';
 import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
+import { Select } from 'components/atoms/Select';
 import { ICONS, STYLING } from 'helpers/config';
 import { PAGES_JOURNAL } from 'helpers/config/pages';
-import { PortalCategoryType } from 'helpers/types';
+import { PortalCategoryType, SelectOptionType } from 'helpers/types';
 import { useCategoriesWithReorder } from 'hooks/useCategoriesWithReorder';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -42,8 +43,6 @@ export default function Categories(props: {
 	}>({ open: false, categoryId: null });
 
 	type TemplateOption = { label: string; value: string };
-
-	const templateOptions: TemplateOption[] = [];
 
 	const {
 		addCategory,
@@ -233,6 +232,18 @@ export default function Categories(props: {
 
 										const fieldsDisabled = item?.category?.metadata?.hidden || categoryLoading;
 
+										const resolvedTemplate = openMetadata.template ?? item.category?.metadata?.template ?? 'feed';
+
+										const templateOptions: SelectOptionType[] = React.useMemo(
+											() => Object.keys(PAGES_JOURNAL).map((k) => ({ id: k, label: k })),
+											[]
+										);
+										const activeTemplate = templateOptions.find((o) => o.id === resolvedTemplate) ?? templateOptions[1];
+
+										const handleTemplateChange = (opt: SelectOptionType) => {
+											setOpenMetadata((prev) => ({ ...prev, template: opt.id }));
+										};
+
 										return (
 											<React.Fragment key={item.category.id}>
 												<Draggable draggableId={item.category.id} index={index}>
@@ -325,49 +336,6 @@ export default function Categories(props: {
 															<S.ModalBodyWrapper>
 																<S.ModalForm>
 																	<S.FieldRow>
-																		<S.FieldLabel htmlFor="field-description">
-																			{language?.description ?? 'Description'}
-																		</S.FieldLabel>
-																		<S.TextInput
-																			id="field-description"
-																			placeholder={
-																				language?.descriptionPlaceholder ??
-																				'Add a short description to display on hover'
-																			}
-																			value={openMetadata.description ?? item.category?.metadata?.description ?? ''}
-																			onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-																				setOpenMetadata((prev) => ({
-																					...prev,
-																					description: e.target.value,
-																				}));
-																			}}
-																			disabled={fieldsDisabled}
-																		/>
-																	</S.FieldRow>
-																	<S.FieldRow>
-																		<S.FieldLabel htmlFor="field-template">
-																			{language?.template ?? 'Template'}
-																		</S.FieldLabel>
-																		<S.Select
-																			id="field-template"
-																			defaultValue="feed"
-																			value={openMetadata.template ?? item.category?.metadata?.template ?? ''}
-																			onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-																				setOpenMetadata((prev) => ({ ...prev, template: e.target.value }));
-																			}}
-																			disabled={fieldsDisabled}
-																		>
-																			<option value="" disabled>
-																				{language?.templatePlaceholder ?? 'Select a template'}
-																			</option>
-																			{Object.keys(PAGES_JOURNAL).map((opt) => (
-																				<option key={opt} value={opt}>
-																					{opt}
-																				</option>
-																			))}
-																		</S.Select>
-																	</S.FieldRow>
-																	<S.FieldRow>
 																		<S.FieldLabel htmlFor="field-hidden">{language?.hidden ?? 'Hidden'}</S.FieldLabel>
 																		<S.Inline>
 																			<Checkbox
@@ -385,6 +353,28 @@ export default function Categories(props: {
 																			</span>
 																		</S.Inline>
 																	</S.FieldRow>
+																	<Select
+																		label={language?.template ?? 'Template'}
+																		activeOption={activeTemplate}
+																		setActiveOption={handleTemplateChange}
+																		options={templateOptions}
+																		disabled={fieldsDisabled}
+																	/>
+																	<FormField
+																		label={language?.description ?? 'Description'}
+																		placeholder={
+																			language?.descriptionPlaceholder ?? 'Add a short description to display on hover'
+																		}
+																		value={openMetadata.description ?? item.category?.metadata?.description ?? ''}
+																		onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+																			setOpenMetadata((prev) => ({
+																				...prev,
+																				description: e.target.value,
+																			}));
+																		}}
+																		invalid={{ status: false, message: null }}
+																		disabled={fieldsDisabled}
+																	/>
 																</S.ModalForm>
 															</S.ModalBodyWrapper>
 															<S.ModalActionsWrapper>
