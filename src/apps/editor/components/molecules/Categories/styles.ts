@@ -1,4 +1,3 @@
-import { ReactSVG } from 'react-svg';
 import styled from 'styled-components';
 
 import { STYLING } from 'helpers/config';
@@ -269,6 +268,25 @@ export const CategoryContent = styled.div`
 	}
 `;
 
+export const CategoryRow = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 5px;
+
+	button:last-child {
+		opacity: 0;
+		transition: opacity 100ms;
+
+		span {
+			font-size: ${(props) => props.theme.typography.size.xxxxSmall} !important;
+		}
+	}
+
+	&:hover button:last-child {
+		opacity: 1;
+	}
+`;
+
 export const ChildDropZone = styled.div<{ visible: boolean; level: number }>`
 	height: ${(props) => (props.visible ? '25px' : '0px')};
 	margin-left: ${(props) => `${((props.level + 1) * 20 + 32).toString()}px`};
@@ -293,60 +311,34 @@ export const ChildDropZone = styled.div<{ visible: boolean; level: number }>`
 	}
 `;
 
-export const CategoryPill = styled.div<{ $active: boolean; $disabled: boolean }>`
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	padding: 6px 12px;
-	border-radius: 9999px;
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
-	background: ${(props) =>
-		props.$active ? props.theme.colors.container.primary.active : props.theme.colors.container.alt2};
-	color: ${(props) => (props.$active ? props.theme.colors.contrast.primary : props.theme.colors.font.primary)};
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-weight: ${(props) => props.theme.typography.weight.medium};
-	cursor: ${(props) => (props.$disabled ? 'not-allowed' : 'pointer')};
-	opacity: ${(props) => (props.$disabled ? 0.6 : 1)};
-	user-select: none;
-
-	&:hover {
-		${(props) => !props.$disabled && `box-shadow: ${props.theme.colors.shadow.sm};`}
-	}
-
-	&:focus-visible {
-		outline: 2px solid ${(props) => props.theme.colors.primary};
-		outline-offset: 2px;
-	}
-`;
-
-export const CategoryIcon = styled(ReactSVG)`
-	width: 16px;
-	height: 16px;
-	flex: 0 0 16px;
-	pointer-events: none;
-`;
-
-export const CategoryLabel = styled.span`
-	line-height: 1;
-	white-space: nowrap;
-`;
-
 export const CategorySettingsBtn = styled.button<{ $disabled?: boolean }>`
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	width: 20px;
 	height: 20px;
-	margin-left: 4px;
 	border: none;
 	background: transparent;
-	padding: 0;
+	padding: 4px;
+	border-radius: ${STYLING.dimensions.radius.alt4};
 	cursor: ${(props) => (props.$disabled ? 'not-allowed' : 'pointer')};
-	opacity: ${(props) => (props.$disabled ? 0.6 : 0.9)};
+	opacity: ${(props) => (props.$disabled ? 0.5 : 1)};
+	transition: all 100ms;
+
+	svg {
+		width: 16px;
+		height: 16px;
+		color: ${(props) => props.theme.colors.font.alt1};
+		fill: ${(props) => props.theme.colors.font.alt1};
+	}
+
+	&:hover:not(:disabled) {
+		background: ${(props) => props.theme.colors.container.primary.active};
+	}
 
 	&:focus-visible {
 		outline: 2px solid ${(props) => props.theme.colors.indicator.active};
-		border-radius: 9999px;
+		border-radius: ${STYLING.dimensions.radius.alt4};
 	}
 `;
 
@@ -357,15 +349,11 @@ export const ModalForm = styled.div`
 `;
 
 export const FieldRow = styled.div`
-	display: grid;
-	grid-template-columns: 160px 1fr;
+	display: flex;
 	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
 	gap: 10px;
-
-	@media (max-width: 640px) {
-		grid-template-columns: 1fr;
-		gap: 6px;
-	}
 `;
 
 export const FieldLabel = styled.label`
@@ -375,47 +363,15 @@ export const FieldLabel = styled.label`
 	user-select: none;
 `;
 
-export const Checkbox = styled.input.attrs({ type: 'checkbox' })`
-	width: 16px;
-	height: 16px;
-	accent-color: ${(p) => p.theme.colors.indicator.active};
-	cursor: pointer;
-`;
-
-export const TextInput = styled.input.attrs({ type: 'text' })`
-	width: 100%;
-	padding: 8px 10px;
-	border: 1px solid ${(p) => p.theme.colors.border.primary};
-	border-radius: 8px;
-	background: ${(p) => p.theme.colors.container.alt1};
-	color: ${(p) => p.theme.colors.font.primary};
-	font-family: ${(p) => p.theme.typography.family.primary};
-	font-size: ${(p) => p.theme.typography.size.small};
-
-	&:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-`;
-
-export const Select = styled.select`
-	width: 100%;
-	padding: 8px 10px;
-	border: 1px solid ${(p) => p.theme.colors.border.primary};
-	border-radius: 8px;
-	background: ${(p) => p.theme.colors.container.alt1};
-	color: ${(p) => p.theme.colors.font.primary};
-	font-family: ${(p) => p.theme.typography.family.primary};
-	font-size: ${(p) => p.theme.typography.size.small};
-
-	&:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-`;
-
 export const Inline = styled.div`
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
+	gap: 7.5px;
+
+	span {
+		color: ${(props) => props.theme.colors.font.alt1} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
 `;

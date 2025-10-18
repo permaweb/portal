@@ -6,15 +6,15 @@ import { EditorStoreRootState } from 'editor/store';
 import { currentPageUpdate } from 'editor/store/page';
 import { currentPostUpdate } from 'editor/store/post';
 
-import { ARTICLE_BLOCKS } from 'helpers/config';
-import { ArticleBlockEnum, ArticleBlocksContextType } from 'helpers/types';
+import { PAGE_BLOCKS } from 'helpers/config';
+import { ArticleBlocksContextType, PageBlockEnum } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-export default function ArticleBlocks(props: {
+export default function PageBlocks(props: {
 	type: 'post' | 'page';
-	addBlock: (type: ArticleBlockEnum) => void;
+	addBlock: (type: PageBlockEnum) => void;
 	handleClose?: () => void;
 	context?: ArticleBlocksContextType;
 }) {
@@ -57,36 +57,11 @@ export default function ArticleBlocks(props: {
 
 	const BLOCK_TYPES: {
 		label: string;
-		blocks: { type: ArticleBlockEnum; label: string; icon: string }[];
+		blocks: { type: PageBlockEnum; label: string; icon: string }[];
 	}[] = [
 		{
-			label: language.text,
-			blocks: [
-				ARTICLE_BLOCKS[ArticleBlockEnum.Paragraph],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Quote],
-				ARTICLE_BLOCKS[ArticleBlockEnum.OrderedList],
-				ARTICLE_BLOCKS[ArticleBlockEnum.UnorderedList],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Code],
-			],
-		},
-		{
-			label: language.headers,
-			blocks: [
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header1],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header2],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header3],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header4],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header5],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header6],
-			],
-		},
-		{
-			label: language.media,
-			blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image], ARTICLE_BLOCKS[ArticleBlockEnum.Video]],
-		},
-		{
-			label: language.design,
-			blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.DividerSolid], ARTICLE_BLOCKS[ArticleBlockEnum.DividerDashed]],
+			label: language.dynamicElements,
+			blocks: [PAGE_BLOCKS[PageBlockEnum.Feed]],
 		},
 	];
 
@@ -182,7 +157,7 @@ export default function ArticleBlocks(props: {
 					if (focusedButton) {
 						const blockType = focusedButton.getAttribute('data-block-type');
 						if (blockType) {
-							props.addBlock(blockType as ArticleBlockEnum);
+							props.addBlock(blockType as PageBlockEnum);
 						}
 					}
 				}
@@ -191,88 +166,88 @@ export default function ArticleBlocks(props: {
 		[focusedIndex, props.addBlock]
 	);
 
-	React.useEffect(() => {
-		let ctrlSlashPressed = false;
+	// React.useEffect(() => {
+	// 	let ctrlSlashPressed = false;
 
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.ctrlKey && event.key === '/') {
-				ctrlSlashPressed = true;
-				event.preventDefault();
-			} else if (ctrlSlashPressed) {
-				switch (event.key.toLowerCase()) {
-					case '1':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header1);
-						break;
-					case '2':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header2);
-						break;
-					case '3':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header3);
-						break;
-					case '4':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header4);
-						break;
-					case '5':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header5);
-						break;
-					case '6':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header6);
-						break;
-					case 'p':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Paragraph);
-						break;
-					case 'q':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Quote);
-						break;
-					case 'c':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Code);
-						break;
-					case 'n':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.OrderedList);
-						break;
-					case 'b':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.UnorderedList);
-						break;
-					case 'i':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Image);
-						break;
-					case 'v':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Video);
-						break;
-					case 's':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.DividerSolid);
-						break;
-					case 'd':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.DividerDashed);
-						break;
-					default:
-						break;
-				}
-				ctrlSlashPressed = false;
-			}
-		};
+	// 	const handleKeyDown = (event: KeyboardEvent) => {
+	// 		if (event.ctrlKey && event.key === '/') {
+	// 			ctrlSlashPressed = true;
+	// 			event.preventDefault();
+	// 		} else if (ctrlSlashPressed) {
+	// 			switch (event.key.toLowerCase()) {
+	// 				case '1':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.Header1);
+	// 					break;
+	// 				case '2':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.Header2);
+	// 					break;
+	// 				case '3':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.Header3);
+	// 					break;
+	// 				case '4':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.Header4);
+	// 					break;
+	// 				case '5':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.Header5);
+	// 					break;
+	// 				case '6':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.Header6);
+	// 					break;
+	// 				case 'p':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.Paragraph);
+	// 					break;
+	// 				case 'q':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.Quote);
+	// 					break;
+	// 				case 'c':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.Code);
+	// 					break;
+	// 				case 'n':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.OrderedList);
+	// 					break;
+	// 				case 'b':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.UnorderedList);
+	// 					break;
+	// 				case 'i':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.Image);
+	// 					break;
+	// 				case 'v':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.Video);
+	// 					break;
+	// 				case 's':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.DividerSolid);
+	// 					break;
+	// 				case 'd':
+	// 					event.preventDefault();
+	// 					props.addBlock(ArticleBlockEnum.DividerDashed);
+	// 					break;
+	// 				default:
+	// 					break;
+	// 			}
+	// 			ctrlSlashPressed = false;
+	// 		}
+	// 	};
 
-		document.addEventListener('keydown', handleKeyDown);
+	// 	document.addEventListener('keydown', handleKeyDown);
 
-		return () => {
-			document.removeEventListener('keydown', handleKeyDown);
-		};
-	}, [props.addBlock]);
+	// 	return () => {
+	// 		document.removeEventListener('keydown', handleKeyDown);
+	// 	};
+	// }, [props.addBlock]);
 
 	function getShortcut(shortcut: string) {
 		const keys = shortcut.split(' ');

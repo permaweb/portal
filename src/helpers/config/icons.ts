@@ -31,6 +31,7 @@ export const ICONS = {
 	drag: getTxEndpoint('BfwMIGxk7WTqI3rYOyzM0DQXAfo_n4I4yyBbTsqe_QE'),
 	edit: getTxEndpoint('oxEYDrxH1LBAUaFqp6JXSB646ME4lKCg1x2F5rjrqtA'),
 	emoji: getTxEndpoint('C2MUFWq2viimo5wNIcmF2C38vIl1Umof29W0fs4HpP8'),
+	feed: getTxEndpoint('yO54tQmMZpZfjfFDRJYbduNG2YHWlo2SbePn5ItydHs'),
 	filter: getTxEndpoint('S7PKyYrmK3EbqWBTAHG66B9rzeVXXkL3VzmyE6jU8Io'),
 	fullscreen: getTxEndpoint('eW1yhAoA__WirNKXh6uykdz0DmU033qkUS2fqiZjsok'),
 	header1: getTxEndpoint('Me8rAW3kmQxPclDnl7lupTXyWg2t3vV3yfFdCzyXbNA'),

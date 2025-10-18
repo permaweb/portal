@@ -13,6 +13,7 @@ import { Select } from 'components/atoms/Select';
 import { ICONS, STYLING } from 'helpers/config';
 import { PAGES_JOURNAL } from 'helpers/config/pages';
 import { PortalCategoryType, SelectOptionType } from 'helpers/types';
+import { capitalize } from 'helpers/utils';
 import { useCategoriesWithReorder } from 'hooks/useCategoriesWithReorder';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -197,6 +198,9 @@ export default function Categories(props: {
 
 		if (props.allowReorder && portalProvider.permissions?.updatePortalMeta) {
 			const flattened = flattenCategories(categoryOptions);
+			const currentCategory = openMetadata.categoryId
+				? flattened.find((item) => item.category.id === openMetadata.categoryId)?.category
+				: null;
 
 			return (
 				<S.CategoryOptionsWrapper>
@@ -267,10 +271,9 @@ export default function Categories(props: {
 																	...provided.draggableProps.style,
 																	...(isSelected && !snapshot.isDragging && isDragging
 																		? {
-																				// transform: 'scale(1)',
 																				backgroundColor: theme.colors.container.primary.active,
 																				borderRadius: STYLING.dimensions.radius.alt2,
-																				transition: 'all 200ms ease',
+																				transition: 'all 100ms ease',
 																				zIndex: 999,
 																				pointerEvents: 'none',
 																		  }
@@ -286,28 +289,22 @@ export default function Categories(props: {
 																		<ReactSVG src={ICONS.drag} />
 																	</S.CategoryDragHandle>
 																	<S.CategoryContent>
-																		<S.CategoryPill
-																			role="button"
-																			tabIndex={disabled ? -1 : 0}
-																			aria-pressed={active}
-																			aria-disabled={disabled}
-																			$active={!!active}
-																			$disabled={!!addDisabled}
-																			onClick={onChipClick}
-																			onKeyDown={onChipKeyDown}
-																		>
-																			<S.CategoryIcon src={active ? ICONS.close : ICONS.add} />
-																			<S.CategoryLabel>{item.category.name}</S.CategoryLabel>
-																			<S.CategorySettingsBtn
-																				type="button"
-																				aria-label="Category settings"
-																				title="Settings"
-																				onClick={onOpenSettings}
-																				$disabled={!!disabled}
-																			>
-																				<S.CategoryIcon src={ICONS.settings} />
-																			</S.CategorySettingsBtn>
-																		</S.CategoryPill>
+																		<S.CategoryRow>
+																			<Button
+																				type={'alt3'}
+																				label={item.category.name}
+																				handlePress={() => handleSelectCategory(item.category.id)}
+																				active={active}
+																				disabled={unauthorized || categoryLoading || isDragging}
+																				icon={active ? ICONS.close : ICONS.add}
+																			/>
+																			<Button
+																				type={'alt3'}
+																				label={language.edit}
+																				handlePress={onOpenSettings}
+																				disabled={!!disabled}
+																			/>
+																		</S.CategoryRow>
 																		{snapshot.isDragging && selectedIds.size > 1 && (
 																			<div className={'notification'}>
 																				<span>{selectedIds.size}</span>
@@ -319,100 +316,6 @@ export default function Categories(props: {
 														);
 													}}
 												</Draggable>
-												{openMetadata.open && (
-													<Modal
-														header={'Category Metadata'}
-														handleClose={() =>
-															setOpenMetadata({
-																open: false,
-																categoryId: null,
-																description: undefined,
-																template: undefined,
-																hidden: undefined,
-															})
-														}
-													>
-														<S.ModalWrapper>
-															<S.ModalBodyWrapper>
-																<S.ModalForm>
-																	<S.FieldRow>
-																		<S.FieldLabel htmlFor="field-hidden">{language?.hidden ?? 'Hidden'}</S.FieldLabel>
-																		<S.Inline>
-																			<Checkbox
-																				checked={openMetadata.hidden ?? item.category?.metadata?.hidden ?? false}
-																				disabled={false}
-																				handleSelect={() =>
-																					setOpenMetadata((prev) => ({
-																						...prev,
-																						hidden: !(prev?.hidden ?? item.category?.metadata?.hidden),
-																					}))
-																				}
-																			/>
-																			<span id="field-hidden-help">
-																				{language?.hiddenHelp ?? 'If checked, this category won’t be visible.'}
-																			</span>
-																		</S.Inline>
-																	</S.FieldRow>
-																	<Select
-																		label={language?.template ?? 'Template'}
-																		activeOption={activeTemplate}
-																		setActiveOption={handleTemplateChange}
-																		options={templateOptions}
-																		disabled={fieldsDisabled}
-																	/>
-																	<FormField
-																		label={language?.description ?? 'Description'}
-																		placeholder={
-																			language?.descriptionPlaceholder ?? 'Add a short description to display on hover'
-																		}
-																		value={openMetadata.description ?? item.category?.metadata?.description ?? ''}
-																		onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-																			setOpenMetadata((prev) => ({
-																				...prev,
-																				description: e.target.value,
-																			}));
-																		}}
-																		invalid={{ status: false, message: null }}
-																		disabled={fieldsDisabled}
-																	/>
-																</S.ModalForm>
-															</S.ModalBodyWrapper>
-															<S.ModalActionsWrapper>
-																<Button
-																	type={'primary'}
-																	label={language?.cancel}
-																	handlePress={() =>
-																		setOpenMetadata({
-																			open: false,
-																			categoryId: null,
-																		})
-																	}
-																	disabled={categoryLoading}
-																/>
-																<Button
-																	type={'primary'}
-																	label={'Save Changes'}
-																	handlePress={async () => {
-																		await updateCategory(openMetadata.categoryId, {
-																			description: openMetadata.description,
-																			template: openMetadata.template,
-																			hidden: openMetadata.hidden,
-																		});
-																		setOpenMetadata({
-																			open: false,
-																			categoryId: null,
-																			description: undefined,
-																			template: undefined,
-																			hidden: undefined,
-																		});
-																	}}
-																	disabled={categoryLoading}
-																	loading={categoryLoading}
-																/>
-															</S.ModalActionsWrapper>
-														</S.ModalWrapper>
-													</Modal>
-												)}
 												{(() => {
 													const shouldShow = showChildDropZone && dragOverId === item.category.id;
 													return shouldShow ? <S.ChildDropZone visible={true} level={item.level} /> : null;
@@ -425,6 +328,105 @@ export default function Categories(props: {
 							</div>
 						)}
 					</Droppable>
+					{openMetadata.open && currentCategory && (
+						<Modal
+							header={'Category Metadata'}
+							handleClose={() =>
+								setOpenMetadata({
+									open: false,
+									categoryId: null,
+									description: undefined,
+									template: undefined,
+									hidden: undefined,
+								})
+							}
+						>
+							<S.ModalWrapper>
+								<S.ModalBodyWrapper>
+									<S.ModalForm>
+										<S.FieldRow>
+											<S.FieldLabel htmlFor="field-hidden">{language?.hidden ?? 'Hidden'}</S.FieldLabel>
+											<S.Inline>
+												<Checkbox
+													checked={openMetadata.hidden ?? currentCategory?.metadata?.hidden ?? false}
+													disabled={false}
+													handleSelect={() =>
+														setOpenMetadata((prev) => ({
+															...prev,
+															hidden: !(prev?.hidden ?? currentCategory?.metadata?.hidden),
+														}))
+													}
+												/>
+												<span id="field-hidden-help">
+													{language?.hiddenHelp ?? `If checked, this category won't be visible.`}
+												</span>
+											</S.Inline>
+										</S.FieldRow>
+										<Select
+											label={language?.template ?? 'Template'}
+											activeOption={
+												Object.keys(PAGES_JOURNAL)
+													.map((k) => ({ id: k, label: k }))
+													.find(
+														(o) => o.id === (openMetadata.template ?? currentCategory?.metadata?.template ?? 'feed')
+													) ?? { id: 'feed', label: 'Feed' }
+											}
+											setActiveOption={(opt: SelectOptionType) => {
+												setOpenMetadata((prev) => ({ ...prev, template: opt.id }));
+											}}
+											options={Object.keys(PAGES_JOURNAL).map((k) => ({ id: k, label: capitalize(k) }))}
+											disabled={currentCategory?.metadata?.hidden || categoryLoading}
+										/>
+										<FormField
+											label={language?.description ?? 'Description'}
+											value={openMetadata.description ?? currentCategory?.metadata?.description ?? ''}
+											onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+												setOpenMetadata((prev) => ({
+													...prev,
+													description: e.target.value,
+												}));
+											}}
+											invalid={{ status: false, message: null }}
+											disabled={currentCategory?.metadata?.hidden || categoryLoading}
+										/>
+									</S.ModalForm>
+								</S.ModalBodyWrapper>
+								<S.ModalActionsWrapper>
+									<Button
+										type={'primary'}
+										label={language?.cancel}
+										handlePress={() =>
+											setOpenMetadata({
+												open: false,
+												categoryId: null,
+											})
+										}
+										disabled={categoryLoading}
+									/>
+									<Button
+										type={'alt1'}
+										label={'Save Changes'}
+										handlePress={async () => {
+											await updateCategory(openMetadata.categoryId, {
+												description: openMetadata.description,
+												template: openMetadata.template,
+												hidden: openMetadata.hidden,
+											});
+											setOpenMetadata({
+												open: false,
+												categoryId: null,
+												description: undefined,
+												template: undefined,
+												hidden: undefined,
+											});
+										}}
+										disabled={categoryLoading}
+										loading={categoryLoading}
+									/>
+								</S.ModalActionsWrapper>
+							</S.ModalWrapper>
+						</Modal>
+					)}
 				</S.CategoryOptionsWrapper>
 			);
 		}

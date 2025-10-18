@@ -41,6 +41,14 @@ export default function PageList() {
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	function renderPageList(pages: any) {
+		if (Object.entries(pages).length === 0) {
+			return (
+				<S.WrapperEmpty className={'border-wrapper-alt2'}>
+					<p>{language?.noPagesFound}</p>
+				</S.WrapperEmpty>
+			);
+		}
+
 		return (
 			<S.PagesWrapper className={'border-wrapper-alt2'}>
 				{Object.entries(pages).map(([key], index) => {
@@ -83,13 +91,13 @@ export default function PageList() {
 	const pages = React.useMemo(() => {
 		if (!portalProvider.current?.pages) {
 			return (
-				<S.LoadingWrapper>
+				<S.LoadingWrapper className={'border-wrapper-alt2'}>
 					<p>{`${language?.gettingPages}...`}</p>
 				</S.LoadingWrapper>
 			);
 		} else if (portalProvider.current?.pages.length === 0) {
 			return (
-				<S.WrapperEmpty>
+				<S.WrapperEmpty className={'border-wrapper-alt2'}>
 					<p>{language?.noPagesFound}</p>
 				</S.WrapperEmpty>
 			);
@@ -98,22 +106,20 @@ export default function PageList() {
 		return portalProvider.current?.id ? (
 			<S.Wrapper>
 				{renderPageList(mainPages)}
-				{Object.keys(staticPages || {}).length > 0 && (
-					<S.InfoPagesWrapper>
-						<S.InfoPagesHeader>
-							<h6>{language.infoPages}</h6>
-							<Button
-								type={'alt3'}
-								label={language?.createPageInfo}
-								handlePress={() => navigate(URLS.pageCreateInfo(portalProvider.current.id))}
-								disabled={unauthorized || !portalProvider.current}
-								icon={ICONS.add}
-								iconLeftAlign
-							/>
-						</S.InfoPagesHeader>
-						{renderPageList(staticPages)}
-					</S.InfoPagesWrapper>
-				)}
+				<S.InfoPagesWrapper>
+					<S.InfoPagesHeader>
+						<h6>{language.infoPages}</h6>
+						<Button
+							type={'alt3'}
+							label={language?.createPageInfo}
+							handlePress={() => navigate(URLS.pageCreateInfo(portalProvider.current.id))}
+							disabled={unauthorized || !portalProvider.current}
+							icon={ICONS.add}
+							iconLeftAlign
+						/>
+					</S.InfoPagesHeader>
+					{renderPageList(staticPages)}
+				</S.InfoPagesWrapper>
 			</S.Wrapper>
 		) : null;
 	}, [portalProvider.current?.id, portalProvider.current?.pages, languageProvider.current]);

@@ -4,6 +4,7 @@ import { ReactSVG } from 'react-svg';
 import { Draggable } from '@hello-pangea/dnd';
 
 import { EditorStoreRootState } from 'editor/store';
+import { currentPageUpdate } from 'editor/store/page';
 import { currentPostUpdate } from 'editor/store/post';
 
 import { Button } from 'components/atoms/Button';
@@ -24,7 +25,7 @@ import * as S from './styles';
 
 export default function ArticleBlock(props: {
 	index: number;
-	context: 'post' | 'page';
+	type: 'post' | 'page';
 	block: ArticleBlockType;
 	onChangeBlock: (args: { id: string; content: string; type?: any; data?: any }) => void;
 	onDeleteBlock: (id: string) => void;
@@ -33,7 +34,7 @@ export default function ArticleBlock(props: {
 	const dispatch = useDispatch();
 
 	const currentReducer = useSelector((state: EditorStoreRootState) => {
-		switch (props.context) {
+		switch (props.type) {
 			case 'post':
 				return state.currentPost;
 			case 'page':
@@ -60,8 +61,20 @@ export default function ArticleBlock(props: {
 	const wasEmptyRef = React.useRef(false);
 	const isUserInitiatedChangeRef = React.useRef(false);
 
-	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
-		dispatch(currentPostUpdate(updatedField));
+	const handleCurrentReducerUpdate = (updatedField: { field: string; value: any }) => {
+		let currentReducerUpdate = null;
+		switch (props.type) {
+			case 'post':
+				currentReducerUpdate = currentPostUpdate;
+				break;
+			case 'page':
+				currentReducerUpdate = currentPageUpdate;
+				break;
+			default:
+				currentReducerUpdate = currentPostUpdate;
+				break;
+		}
+		dispatch(currentReducerUpdate(updatedField));
 	};
 
 	// Apply markup formatting to selected text
@@ -158,7 +171,7 @@ export default function ArticleBlock(props: {
 
 			Object.entries(markupState).forEach(([key, value]) => {
 				if (currentReducer.editor.markup[key as keyof typeof markupState] !== value) {
-					handleCurrentPostUpdate({ field: `markup.${key}`, value });
+					handleCurrentReducerUpdate({ field: `markup.${key}`, value });
 				}
 			});
 			return;
@@ -239,7 +252,7 @@ export default function ArticleBlock(props: {
 		// Update Redux only if changed to avoid loops
 		Object.entries(markupState).forEach(([key, value]) => {
 			if (currentReducer.editor.markup[key as keyof typeof markupState] !== value) {
-				handleCurrentPostUpdate({ field: `markup.${key}`, value });
+				handleCurrentReducerUpdate({ field: `markup.${key}`, value });
 			}
 		});
 	}, [currentReducer.editor.focusedBlock?.id, currentReducer.editor.markup, props.block.id, props.block.type]);
@@ -262,7 +275,7 @@ export default function ArticleBlock(props: {
 				}
 
 				setShowBlockSelector(true);
-				handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: true });
+				handleCurrentReducerUpdate({ field: 'toggleBlockFocus', value: true });
 			} else if (currentBlock.content === '-' || currentBlock.content === '- ') {
 				// Shortcut: Convert to unordered list when user types '-'
 				handleChangeBlock(ArticleBlockEnum.UnorderedList);
@@ -273,7 +286,7 @@ export default function ArticleBlock(props: {
 				setShowBlockSelector(false);
 				// Only set toggleBlockFocus to false if this block was the one that had it active
 				if (currentReducer.editor.toggleBlockFocus) {
-					handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: false });
+					handleCurrentReducerUpdate({ field: 'toggleBlockFocus', value: false });
 				}
 			}
 		} else {
@@ -350,7 +363,7 @@ export default function ArticleBlock(props: {
 				setTimeout(() => {
 					// Clear all markup state
 					['bold', 'italic', 'underline', 'strikethrough'].forEach((type) => {
-						handleCurrentPostUpdate({ field: `markup.${type}`, value: false });
+						handleCurrentReducerUpdate({ field: `markup.${type}`, value: false });
 					});
 
 					// Also use execCommand to remove any lingering formatting context
@@ -389,7 +402,7 @@ export default function ArticleBlock(props: {
 					isUserInitiatedChangeRef.current = true;
 					// Toggle the markup state in Redux
 					const currentState = currentReducer.editor.markup[markupType];
-					handleCurrentPostUpdate({ field: `markup.${markupType}`, value: !currentState });
+					handleCurrentReducerUpdate({ field: `markup.${markupType}`, value: !currentState });
 				}
 			}
 		};
@@ -433,7 +446,7 @@ export default function ArticleBlock(props: {
 		// Reset the flags after processing
 		isUserInitiatedChangeRef.current = false;
 		if (currentReducer.editor.markupUserInitiated) {
-			handleCurrentPostUpdate({ field: 'markupUserInitiated', value: false });
+			handleCurrentReducerUpdate({ field: 'markupUserInitiated', value: false });
 		}
 
 		// Update ref with current values
@@ -455,7 +468,7 @@ export default function ArticleBlock(props: {
 					// Force all markup to false for new blocks
 					['bold', 'italic', 'underline', 'strikethrough'].forEach((type) => {
 						if (currentReducer.editor.markup[type as keyof typeof currentReducer.editor.markup]) {
-							handleCurrentPostUpdate({ field: `markup.${type}`, value: false });
+							handleCurrentReducerUpdate({ field: `markup.${type}`, value: false });
 						}
 					});
 
@@ -499,7 +512,7 @@ export default function ArticleBlock(props: {
 
 			// Clear ALL markup state when content becomes empty (force all to false)
 			(['bold', 'italic', 'underline', 'strikethrough'] as const).forEach((type) => {
-				handleCurrentPostUpdate({ field: `markup.${type}`, value: false });
+				handleCurrentReducerUpdate({ field: `markup.${type}`, value: false });
 			});
 
 			// Nuclear option: completely reset the element's innerHTML to clear formatting context
@@ -570,8 +583,8 @@ export default function ArticleBlock(props: {
 
 		props.onChangeBlock({ id: props.block.id, type: type, content: content });
 		setShowBlockSelector(false);
-		handleCurrentPostUpdate({ field: 'toggleBlockFocus', value: false });
-		handleCurrentPostUpdate({ field: 'lastAddedBlockId', value: props.block.id });
+		handleCurrentReducerUpdate({ field: 'toggleBlockFocus', value: false });
+		handleCurrentReducerUpdate({ field: 'lastAddedBlockId', value: props.block.id });
 
 		// Focus the ContentEditable after block type change
 		setTimeout(() => {
@@ -821,6 +834,7 @@ export default function ArticleBlock(props: {
 								className={'border-wrapper-alt1 scroll-wrapper-hidden'}
 							>
 								<ArticleBlocks
+									type={props.type}
 									addBlock={(type: ArticleBlockEnum) => handleChangeBlock(type)}
 									handleClose={handleSelectorClose}
 									context={'inline'}

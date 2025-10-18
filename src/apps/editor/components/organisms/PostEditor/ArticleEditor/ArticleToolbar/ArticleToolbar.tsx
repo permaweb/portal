@@ -163,7 +163,7 @@ export default function ArticleToolbar(props: {
 	function getCurrentTab() {
 		switch (currentTab) {
 			case 'Blocks':
-				return <ArticleBlocks addBlock={props.addBlock} context={'toolbar'} />;
+				return <ArticleBlocks type={'post'} addBlock={props.addBlock} context={'toolbar'} />;
 			case 'Post':
 				return (
 					<ArticlePost

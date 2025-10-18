@@ -193,6 +193,7 @@ export type ArticleBlockType = {
 	type: ArticleBlockEnum;
 	content: string;
 	data?: any;
+	width?: number;
 };
 
 export enum ArticleStatusEnum {
@@ -207,10 +208,23 @@ export type ArticlePostType = {
 	title: string | null;
 };
 
-export type PageBlockEnum = any; // TODO
+export enum PageSectionEnum {
+	Row = 'row',
+}
+
+export enum PageBlockEnum {
+	Feed = 'feed',
+}
+
+export type PageSectionType = {
+	type: PageSectionEnum;
+	layout: any;
+	content: any[];
+	width: number;
+};
 
 export type PageBlockType = {
-	type: string;
+	type: PageBlockEnum;
 	layout: any;
 	content: any[];
 	width: number;

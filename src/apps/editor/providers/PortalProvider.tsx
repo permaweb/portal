@@ -202,7 +202,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			const posts = parsePortalResponseValue(response.posts ?? {});
 			const requests = parsePortalResponseValue(response.requests ?? {});
 
-			// Handle authorities and updates
 			if (overview.wallpaper === undefined && permawebProvider.libs?.updateZonePatchMap) {
 				permawebProvider.libs.updateZonePatchMap(PORTAL_PATCH_MAP, currentId);
 			}
@@ -224,7 +223,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				overview.version !== CurrentZoneVersion && arProvider.wallet && arProvider.walletAddress === overview.owner
 			);
 
-			// Build portal state
 			const portalState: PortalDetailType = {
 				id: currentId,
 				name: overview.name ?? null,
@@ -249,7 +247,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				domains: navigation.domains ?? [],
 			};
 
-			// Set permissions
 			if (permawebProvider.profile?.id && portalState.users) {
 				setPermissions(getUserPermissions(permawebProvider.profile.id, portalState.users, portalState.permissions));
 			}
@@ -261,142 +258,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		}
 		setUpdating(false);
 	};
-
-	// const fetchPortal = async (opts?: { patchKey?: string }) => {
-	// 	if (currentId) {
-	// 		const patchKeys = opts?.patchKey ? [opts.patchKey] : Object.keys(PORTAL_PATCH_MAP);
-
-	// 		setUpdating(true);
-	// 		await Promise.all(
-	// 			patchKeys.map(async (key) => {
-	// 				try {
-	// 					const data = permawebProvider.libs.mapFromProcessCase(
-	// 						await permawebProvider.libs.readState({ processId: currentId, path: key })
-	// 					);
-
-	// 					if (key === 'overview') {
-	// 						console.log('Overview data fetched:', data);
-
-	// 						// Check if wallpaper is undefined and update patch map if needed
-	// 						if (data.wallpaper === undefined && permawebProvider.libs?.updateZonePatchMap) {
-	// 							console.log('Updating patch map to include Wallpaper');
-	// 							await permawebProvider.libs.updateZonePatchMap(PORTAL_PATCH_MAP, currentId);
-	// 						}
-	// 					}
-
-	// 					setCurrent((prevPortal) => {
-	// 						if (!prevPortal) {
-	// 							const newPortal: PortalDetailType = {
-	// 								id: currentId,
-	// 								name: null,
-	// 								logo: null,
-	// 								icon: null,
-	// 								wallpaper: null,
-	// 								owner: null,
-	// 								moderation: null,
-	// 								assets: null,
-	// 								requests: null,
-	// 								categories: null,
-	// 								topics: null,
-	// 								links: null,
-	// 								uploads: null,
-	// 								fonts: null,
-	// 								themes: null,
-	// 								users: null,
-	// 								pages: null,
-	// 								layout: null,
-	// 								roleOptions: null,
-	// 								permissions: null,
-	// 								domains: null,
-	// 							};
-	// 							prevPortal = newPortal;
-	// 						}
-
-	// 						const updatedPortal = { ...prevPortal };
-
-	// 						switch (key) {
-	// 							case 'overview':
-	// 								if (
-	// 									data.authorities &&
-	// 									!data.authorities.includes(AO_NODE.authority) &&
-	// 									permawebProvider.libs?.updateZoneAuthorities &&
-	// 									!authoritiesRef.current
-	// 								) {
-	// 									authoritiesRef.current = true;
-	// 									permawebProvider.libs.updateZoneAuthorities({
-	// 										zoneId: currentId,
-	// 										authorityId: AO_NODE.authority,
-	// 									});
-	// 								}
-
-	// 								/* Check for portal version update */
-	// 								if (
-	// 									data.version !== CurrentZoneVersion &&
-	// 									arProvider.wallet &&
-	// 									arProvider.walletAddress === data.owner
-	// 								) {
-	// 									setUpdateAvailable(true);
-	// 								} else setUpdateAvailable(false);
-
-	// 								updatedPortal.name = data.name ?? updatedPortal.name;
-	// 								updatedPortal.logo = data.logo ?? updatedPortal.logo;
-	// 								updatedPortal.icon = data.icon ?? updatedPortal.icon;
-	// 								updatedPortal.wallpaper = data.wallpaper ?? updatedPortal.wallpaper;
-	// 								console.log('Updated wallpaper in portal:', updatedPortal.wallpaper, 'from data:', data.wallpaper);
-	// 								updatedPortal.owner = data.owner ?? updatedPortal.owner;
-	// 								updatedPortal.moderation = data.moderation ?? updatedPortal.moderation;
-	// 								break;
-	// 							case 'users':
-	// 								updatedPortal.roleOptions = data.roleOptions ?? updatedPortal.roleOptions;
-	// 								updatedPortal.permissions = data.permissions ?? updatedPortal.permissions;
-	// 								if (data.roles) {
-	// 									updatedPortal.users = getPortalUsers(data.roles);
-	// 									if (permawebProvider.profile?.id && updatedPortal.users) {
-	// 										setPermissions(
-	// 											getUserPermissions(
-	// 												permawebProvider.profile.id,
-	// 												updatedPortal.users,
-	// 												data.permissions ?? updatedPortal.permissions
-	// 											)
-	// 										);
-	// 									}
-	// 								}
-	// 								break;
-	// 							case 'presentation':
-	// 								updatedPortal.layout = data.layout ?? updatedPortal.layout;
-	// 								updatedPortal.pages = data.pages ?? updatedPortal.pages;
-	// 								updatedPortal.themes = data.themes ?? updatedPortal.themes;
-	// 								updatedPortal.fonts = data.fonts ?? updatedPortal.fonts;
-	// 								break;
-	// 							case 'navigation':
-	// 								updatedPortal.categories = data.categories ?? updatedPortal.categories ?? [];
-	// 								updatedPortal.topics = data.topics ?? updatedPortal.topics ?? [];
-	// 								updatedPortal.links = data.links ?? updatedPortal.links ?? [];
-	// 								updatedPortal.domains = data.domains ?? updatedPortal.domains ?? [];
-	// 								break;
-	// 							case 'media':
-	// 								updatedPortal.uploads = data.uploads ?? updatedPortal.uploads ?? [];
-	// 								break;
-	// 							case 'posts':
-	// 								updatedPortal.assets = getPortalAssets(data?.index);
-	// 								break;
-	// 							case 'requests':
-	// 								updatedPortal.requests = data?.indexRequests ?? updatedPortal.requests;
-	// 								break;
-	// 						}
-
-	// 						cachePortal(currentId, updatedPortal);
-
-	// 						return updatedPortal;
-	// 					});
-	// 				} catch (e) {
-	// 					console.warn(`Failed to fetch patch data for ${key}:`, e);
-	// 				}
-	// 			})
-	// 		);
-	// 		setUpdating(false);
-	// 	}
-	// };
 
 	function getUserPermissions(address: string, users: PortalUserType[], permissions: PortalPermissionsType) {
 		const user = users?.find((user: PortalUserType) => user.address === address);

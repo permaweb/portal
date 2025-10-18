@@ -8,7 +8,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPageUpdate } from 'editor/store/page';
 
-import { ArticleBlockEnum, ArticleBlockType, PageBlockType } from 'helpers/types';
+import { PageSectionEnum, PageSectionType } from 'helpers/types';
 import { capitalize } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -25,11 +25,14 @@ export default function PageEditor() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const articleBlockTypes = Object.keys(ArticleBlockEnum).map((key) => ArticleBlockEnum[key]);
-
 	const handleCurrentPageUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPageUpdate(updatedField));
 	};
+
+	// /* Disable article block edit which is only needed in the post editor */
+	// React.useEffect(() => {
+	// 	handleCurrentPageUpdate({ field: 'blockEditMode', value: true });
+	// }, []);
 
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
@@ -41,18 +44,25 @@ export default function PageEditor() {
 		}
 	}, [pageId, portalProvider.current?.id, portalProvider.current?.pages]);
 
-	const addSection = (type: string) => {
+	const addSection = (type: PageSectionEnum) => {
 		if (currentPage.editor.loading.active) return;
 
-		const newBlock: PageBlockType = {
-			type,
+		const newSection: PageSectionType = {
+			type: type,
 			layout: null,
 			content: [],
 			width: 1,
 		};
 
-		const updatedBlocks = [...(currentPage.data.content || []), newBlock];
-		handleCurrentPageUpdate({ field: 'content', value: updatedBlocks });
+		const updatedSections = [...(currentPage.data.content || []), newSection];
+		handleCurrentPageUpdate({ field: 'content', value: updatedSections });
+	};
+
+	const handleSectionChange = (updatedSection: PageSectionType, sectionIndex: number) => {
+		const updatedSections = [...currentPage.data.content].map((section, index) =>
+			index === sectionIndex ? { ...updatedSection } : section
+		);
+		handleCurrentPageUpdate({ field: 'content', value: updatedSections });
 	};
 
 	const onDragEnd = (result: any) => {
@@ -66,12 +76,6 @@ export default function PageEditor() {
 
 		handleCurrentPageUpdate({ field: 'content', value: items });
 	};
-
-	function getBlock(block: PageBlockType | ArticleBlockType, index: number) {
-		if (articleBlockTypes.includes(block.type)) {
-			return <p key={index}>Article Block</p>;
-		} else return <PageBlock id={index.toString()} block={block as PageBlockType} key={index} index={index} />;
-	}
 
 	return (
 		<S.Wrapper>
@@ -88,9 +92,15 @@ export default function PageEditor() {
 									ref={provided.innerRef}
 									blockEditMode={currentPage.editor.blockEditMode}
 								>
-									{currentPage.data.content.map((block: PageBlockType | ArticleBlockType, index: number) =>
-										getBlock(block, index)
-									)}
+									{currentPage.data.content.map((section: PageSectionType, index: number) => (
+										<PageBlock
+											key={index}
+											id={index.toString()}
+											index={index}
+											block={section as PageSectionType}
+											onChangeSection={handleSectionChange}
+										/>
+									))}
 									{provided.placeholder}
 								</S.Editor>
 							)}
@@ -98,7 +108,7 @@ export default function PageEditor() {
 					</DragDropContext>
 				) : (
 					<S.BlocksEmpty className={'fade-in'}>
-						<span>{language?.blocksEmpty}</span>
+						<span>TODO: Add Section</span>
 					</S.BlocksEmpty>
 				)}
 			</S.EditorWrapper>

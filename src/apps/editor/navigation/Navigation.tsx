@@ -50,9 +50,9 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 			if (!ticking) {
 				window.requestAnimationFrame(() => {
 					const parts = window.location.href.split('/');
-					const isPostPage = parts.some((part) => part === 'post');
+					const isEditorPage = parts.some((part) => part === 'post' || part === 'page');
 					header.style.borderBottom =
-						!isPostPage && lastScrollY > 0 ? `1px solid ${borderColor}` : '1px solid transparent';
+						!isEditorPage && lastScrollY > 0 ? `1px solid ${borderColor}` : '1px solid transparent';
 					ticking = false;
 				});
 				ticking = true;

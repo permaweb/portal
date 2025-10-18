@@ -40,21 +40,6 @@ export default function PageToolbar(props: { handleSubmit: () => void; addSectio
 				/>
 			</S.TitleWrapper>
 			<S.EndActions>
-				{/* <ArticleToolbarMarkup />
-				<Button
-					type={'primary'}
-					label={language?.toolkit}
-					handlePress={() => {
-						handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
-						setCurrentTab(TABS[0]!.label);
-					}}
-					active={currentPost.editor.panelOpen}
-					disabled={currentPost.editor.loading.active}
-					icon={currentPost.editor.panelOpen ? ICONS.close : ICONS.tools}
-					iconLeftAlign
-					tooltip={'CTRL + K'}
-					noFocus
-				/> */}
 				<Button
 					type={'primary'}
 					label={language?.addSection}

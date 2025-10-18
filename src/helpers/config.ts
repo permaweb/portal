@@ -1,7 +1,7 @@
-import { LAYOUT_JOURNAL, LAYOUT_BLOG } from './config/layouts';
-import { PAGES_JOURNAL, PAGES_BLOG } from './config/pages';
+import { LAYOUT_BLOG, LAYOUT_JOURNAL } from './config/layouts';
+import { PAGES_BLOG, PAGES_JOURNAL } from './config/pages';
 import { THEME_DEFAULT } from './config/themes';
-import { ArticleBlockEnum, PortalPatchMapEnum } from './types';
+import { ArticleBlockEnum, PageBlockEnum, PortalPatchMapEnum } from './types';
 
 export const PAGES = {
 	JOURNAL: PAGES_JOURNAL,
@@ -133,6 +133,14 @@ function createURLs() {
 }
 
 export const URLS = createURLs();
+
+export const PAGE_BLOCKS = {
+	[PageBlockEnum.Feed]: {
+		type: PageBlockEnum.Feed,
+		label: 'Post Feed',
+		icon: ICONS.feed,
+	},
+};
 
 export const ARTICLE_BLOCKS = {
 	[ArticleBlockEnum.Paragraph]: {

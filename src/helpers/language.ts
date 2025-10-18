@@ -2,6 +2,7 @@ export const language = {
 	en: {
 		activate: `Activate`,
 		add: `Add`,
+		addBlock: `Add a block`,
 		addCaption: `Add a caption`,
 		addCategory: `Add a category`,
 		addCredits: `Add Credits`,
@@ -128,6 +129,7 @@ export const language = {
 		domainUnavailable: `This domain is not available`,
 		done: `Done`,
 		draft: `Draft`,
+		dynamicElements: `Dynamic Elements`,
 		edit: `Edit`,
 		editCaption: `Edit Caption`,
 		editDescription: `Edit Description`,
@@ -501,9 +503,11 @@ export const language = {
 		// === UNTRANSLATED START ===
 		// TODO: translate
 
+		addBlock: `Add a block`,
 		addSection: `Add Section`,
 		createPageInfo: `Create an Info Page`,
 		deleteSection: `Delete Section`,
+		dynamicElements: `Dynamic Elements`,
 		infoPages: `Info Pages`,
 		loadingPage: `Loading Page`,
 		publication: `Publication`,
