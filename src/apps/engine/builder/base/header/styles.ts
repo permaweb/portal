@@ -61,16 +61,19 @@ export const Logo = styled.div<{ $layout: any }>`
 
 	a {
 		height: ${(props) => props.$layout.size};
+		width: auto;
+		flex-shrink: 0;
 
 		div {
 			height: 100%;
+			width: auto;
 		}
 	}
 	svg,
 	img {
 		display: ${(props) => (props.$layout?.display ? 'inline-block' : 'none')};
 		height: 100%;
-		width: fit-content;
+		width: auto;
 		color: rgba(var(--color-text), 1);
 
 		&:hover {
