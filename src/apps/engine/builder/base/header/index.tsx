@@ -57,7 +57,7 @@ export default function Header(props: any) {
 		return (
 			<ReactSVG
 				src={url}
-				beforeInjection={(svg) => {
+				beforeInjection={(_svg) => {
 					if (logoError[txId]) {
 						setLogoError((prev) => ({ ...prev, [txId]: false }));
 					}
@@ -80,9 +80,9 @@ export default function Header(props: any) {
 	return (
 		<>
 			{preview && <GlobalStyles />}
-			<S.Header $layout={layout} theme={settings?.theme} id="Header">
+			<S.Header $layout={layout} theme={settings?.theme as any} id="Header">
 				<S.HeaderContentWrapper $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
-					<S.HeaderContent>
+					<S.HeaderContent $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
 						{Logo ? (
 							<S.Logo $layout={content.logo}>
 								{Logo ? (
