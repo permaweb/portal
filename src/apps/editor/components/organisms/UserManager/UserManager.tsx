@@ -41,14 +41,17 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 	React.useEffect(() => {
 		if (portalProvider.current?.roleOptions) {
 			const roleOrder = Object.keys(roleDescriptions);
+			const isSuperAdmin = portalProvider?.permissions?.isSuperAdmin;
 
 			const options = Object.values(portalProvider.current.roleOptions)
+				// filter out 'admin' role if not super admin
+				.filter((role) => isSuperAdmin || role !== 'Admin')
 				.map((role) => ({ id: role, label: formatRoleLabel(role) }))
 				.sort((a, b) => roleOrder.indexOf(a.id) - roleOrder.indexOf(b.id));
 
 			setRoleOptions(options);
 		}
-	}, [portalProvider.current?.roleOptions]);
+	}, [portalProvider.current?.roleOptions, portalProvider?.permissions?.isSuperAdmin]);
 
 	React.useEffect(() => {
 		if (roleOptions?.length) {
@@ -62,7 +65,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 			if (props.user.roles) {
 				const activeRole = props.user.roles[0];
 				setRole(roleOptions.find((role) => role.id === activeRole));
-				if (activeRole === 'Admin' && walletAddress !== arProvider.wallet) {
+				if (activeRole === 'Admin' && portalProvider?.permissions?.isSuperAdmin === false) {
 					setUnauthorized(true);
 				}
 			}

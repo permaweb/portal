@@ -151,6 +151,7 @@ export type PortalPermissionsType = {
 	postRequestIndex?: boolean;
 	updatePostRequestStatus?: boolean;
 	externalContributor?: boolean;
+	isSuperAdmin?: boolean;
 };
 
 export enum PortalPatchMapEnum {
