@@ -42,3 +42,101 @@ export const ActionsWrapper = styled.div`
 	justify-content: flex-end;
 	margin: 10px 0 0 0;
 `;
+
+export const TransferHeader = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: 10px;
+	padding: 6px 0;
+`;
+
+export const TransferTitle = styled.h4`
+	margin: 0;
+	padding: 0;
+	font-size: ${(p) => p.theme.typography.size.xSmall};
+	font-family: ${(p) => p.theme.typography.family.primary};
+	font-weight: ${(p) => p.theme.typography.weight.xBold};
+	color: ${(p) => p.theme.colors.font.primary};
+`;
+
+export const TableViewport = styled.div`
+	width: 100%;
+	overflow-x: auto;
+	margin-top: 8px;
+	border: 1px solid ${(p) => p.theme.colors.border.primary};
+	border-radius: 10px;
+	background: ${(p) => p.theme.colors.container.alt2};
+`;
+
+export const TransferTable = styled.table`
+	width: 100%;
+	border-collapse: collapse;
+	min-width: 720px;
+`;
+
+export const TableHead = styled.thead`
+	background: ${(p) => p.theme.colors.container.alt1};
+`;
+
+export const TableHeaderCell = styled.th`
+	text-align: left;
+	padding: 10px 12px;
+	font-size: ${(p) => p.theme.typography.size.xxSmall};
+	font-family: ${(p) => p.theme.typography.family.primary};
+	font-weight: ${(p) => p.theme.typography.weight.bold};
+	color: ${(p) => p.theme.colors.font.alt1};
+	border-bottom: 1px solid ${(p) => p.theme.colors.border.primary};
+	text-transform: uppercase;
+	white-space: nowrap;
+`;
+
+export const TableBody = styled.tbody``;
+
+export const TableRow = styled.tr`
+	border-top: 1px solid ${(p) => p.theme.colors.border.primary};
+
+	&:hover {
+		background: ${(p) => p.theme.colors.row.hover};
+	}
+`;
+
+export const TableCell = styled.td`
+	padding: 10px 12px;
+	font-size: ${(p) => p.theme.typography.size.xSmall};
+	font-family: ${(p) => p.theme.typography.family.primary};
+	font-weight: ${(p) => p.theme.typography.weight.medium};
+	color: ${(p) => p.theme.colors.font.primary};
+	vertical-align: middle;
+	word-break: break-all;
+`;
+
+export const StateBadge = styled.span<{ $state?: string }>`
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: ${(p) => p.theme.typography.size.xxxSmall};
+	font-weight: ${(p) => p.theme.typography.weight.bold};
+	text-transform: capitalize;
+	background: ${(p) => {
+		switch (p.$state) {
+			case 'pending':
+				return p.theme.colors.indicator.neutral;
+			case 'accepted':
+				return p.theme.colors.status.success;
+			case 'rejected':
+				return p.theme.colors.status.error;
+			case 'cancelled':
+				return p.theme.colors.status.warning;
+			default:
+				return p.theme.colors.container.alt3;
+		}
+	}};
+	color: ${(p) => p.theme.colors.contrast};
+`;
+
+export const ActionsCell = styled(TableCell)`
+	white-space: nowrap;
+`;
