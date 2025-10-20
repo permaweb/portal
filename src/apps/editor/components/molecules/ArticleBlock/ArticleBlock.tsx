@@ -61,6 +61,8 @@ export default function ArticleBlock(props: {
 	const wasEmptyRef = React.useRef(false);
 	const isUserInitiatedChangeRef = React.useRef(false);
 
+	const isBlockEditMode = currentReducer?.editor.blockEditMode && props.type === 'post';
+
 	const handleCurrentReducerUpdate = (updatedField: { field: string; value: any }) => {
 		let currentReducerUpdate = null;
 		switch (props.type) {
@@ -797,20 +799,20 @@ export default function ArticleBlock(props: {
 	const invalidLink = newLinkUrl?.length > 0 && !validateUrl(newLinkUrl);
 
 	function getElement() {
-		const ToolbarWrapper: any = currentReducer?.editor.blockEditMode ? S.ElementToolbarWrapper : S.ElementToolbarToggle;
+		const ToolbarWrapper: any = isBlockEditMode ? S.ElementToolbarWrapper : S.ElementToolbarToggle;
 
 		return (
 			<>
 				<S.ElementWrapper
 					type={props.block.type}
-					blockEditMode={currentReducer?.editor.blockEditMode}
+					blockEditMode={isBlockEditMode}
 					onFocus={props.onFocus}
 					className={'fade-in'}
 				>
 					<ToolbarWrapper className={'fade-in'} type={props.block.type}>
 						{getElementToolbar()}
 					</ToolbarWrapper>
-					<S.Element blockEditMode={currentReducer?.editor.blockEditMode} type={props.block.type}>
+					<S.Element blockEditMode={isBlockEditMode || props.type === 'page'} type={props.block.type}>
 						{useCustom ? (
 							element
 						) : (
@@ -823,13 +825,11 @@ export default function ArticleBlock(props: {
 							/>
 						)}
 					</S.Element>
-					{!currentReducer?.editor.blockEditMode && (
-						<S.ElementIndicatorDivider type={props.block.type} className={'fade-in'} />
-					)}
+					{!isBlockEditMode && <S.ElementIndicatorDivider type={props.block.type} className={'fade-in'} />}
 					{showBlockSelector && (
 						<CloseHandler active={true} disabled={false} callback={handleSelectorClose}>
 							<S.BlockSelector
-								blockEditMode={currentReducer.editor.blockEditMode}
+								blockEditMode={isBlockEditMode || props.type === 'page'}
 								position={blockSelectorPosition}
 								className={'border-wrapper-alt1 scroll-wrapper-hidden'}
 							>
@@ -876,7 +876,7 @@ export default function ArticleBlock(props: {
 		);
 	}
 
-	if (currentReducer.editor.blockEditMode) {
+	if (isBlockEditMode) {
 		return (
 			<Draggable draggableId={props.block.id} index={props.index}>
 				{(provided) => (

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 
-import { PageBlock } from 'editor/components/molecules/PageBlock';
+import { PageSection } from 'editor/components/molecules/PageSection';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPageUpdate } from 'editor/store/page';
@@ -29,11 +29,6 @@ export default function PageEditor() {
 		dispatch(currentPageUpdate(updatedField));
 	};
 
-	// /* Disable article block edit which is only needed in the post editor */
-	// React.useEffect(() => {
-	// 	handleCurrentPageUpdate({ field: 'blockEditMode', value: true });
-	// }, []);
-
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
 			if (pageId && portalProvider.current?.pages?.[pageId]) {
@@ -58,6 +53,13 @@ export default function PageEditor() {
 		handleCurrentPageUpdate({ field: 'content', value: updatedSections });
 	};
 
+	const deleteSection = (index: number) => {
+		if (currentPage.editor.loading.active) return;
+
+		const updatedSections = (currentPage.data.content || []).filter((_, i) => i !== index);
+		handleCurrentPageUpdate({ field: 'content', value: updatedSections });
+	};
+
 	const handleSectionChange = (updatedSection: PageSectionType, sectionIndex: number) => {
 		const updatedSections = [...currentPage.data.content].map((section, index) =>
 			index === sectionIndex ? { ...updatedSection } : section
@@ -70,6 +72,7 @@ export default function PageEditor() {
 			return;
 		}
 
+		// Handle section reordering
 		const items = Array.from(currentPage.data.content);
 		const [reorderedItem] = items.splice(result.source.index, 1);
 		items.splice(result.destination.index, 0, reorderedItem);
@@ -93,12 +96,13 @@ export default function PageEditor() {
 									blockEditMode={currentPage.editor.blockEditMode}
 								>
 									{currentPage.data.content.map((section: PageSectionType, index: number) => (
-										<PageBlock
+										<PageSection
 											key={index}
 											id={index.toString()}
 											index={index}
-											block={section as PageSectionType}
+											section={section as PageSectionType}
 											onChangeSection={handleSectionChange}
+											onDeleteSection={deleteSection}
 										/>
 									))}
 									{provided.placeholder}
@@ -108,7 +112,7 @@ export default function PageEditor() {
 					</DragDropContext>
 				) : (
 					<S.BlocksEmpty className={'fade-in'}>
-						<span>TODO: Add Section</span>
+						<span>Add Section</span>
 					</S.BlocksEmpty>
 				)}
 			</S.EditorWrapper>

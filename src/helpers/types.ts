@@ -210,6 +210,7 @@ export type ArticlePostType = {
 
 export enum PageSectionEnum {
 	Row = 'row',
+	Column = 'column',
 }
 
 export enum PageBlockEnum {

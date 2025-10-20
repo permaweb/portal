@@ -1,14 +1,14 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { ReactSVG } from 'react-svg';
-import { Draggable } from '@hello-pangea/dnd';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 import { EditorStoreRootState } from 'editor/store';
 
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Panel } from 'components/atoms/Panel';
-import { ICONS } from 'helpers/config';
+import { ARTICLE_BLOCKS, ICONS, PAGE_BLOCKS } from 'helpers/config';
 import { ArticleBlockEnum, ArticleBlockType, PageBlockEnum, PageBlockType, PageSectionType } from 'helpers/types';
 import { capitalize } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -22,13 +22,14 @@ import * as S from './styles';
 
 // TODO: Row / column select
 // TODO: Block width resize
-// TODO: Delete block
-// TODO: Article block
-export default function PageBlock(props: {
+// TODO: Custom HTML ArticleBlock
+// TODO: Block / Text Alignment
+export default function PageSection(props: {
 	id: string;
 	index: number;
-	block: PageSectionType;
-	onChangeSection: (block: PageSectionType, index: number) => void;
+	section: PageSectionType;
+	onChangeSection: (section: PageSectionType, index: number) => void;
+	onDeleteSection: (index: number) => void;
 }) {
 	const currentPage = useSelector((state: EditorStoreRootState) => state.currentPage);
 
@@ -43,21 +44,9 @@ export default function PageBlock(props: {
 		return (
 			<S.ElementToolbar tabIndex={-1}>
 				<S.EToolbarHeader>
-					<span>{props.block?.type ? capitalize(props.block.type) : '-'}</span>
+					<span>{props.section?.type ? capitalize(props.section.type) : '-'}</span>
 				</S.EToolbarHeader>
 				<S.EToolbarActions>
-					{/* {currentPost?.editor.focusedBlock?.id === props.block.id &&
-						(selectedText?.length || textToConvert.length) > 0 && (
-							<S.SelectionWrapper className={'fade-in'}>
-								<Button
-									type={'alt3'}
-									label={language?.link}
-									handlePress={() => handleLinkModalOpen()}
-									icon={ICONS.link}
-									iconLeftAlign
-								/>
-							</S.SelectionWrapper>
-						)} */}
 					<IconButton
 						type={'alt1'}
 						active={false}
@@ -72,8 +61,7 @@ export default function PageBlock(props: {
 						type={'alt1'}
 						active={false}
 						src={ICONS.delete}
-						handlePress={() => {}}
-						// handlePress={() => props.onDeleteBlock(props.block.id)}
+						handlePress={() => props.onDeleteSection(props.index)}
 						dimensions={{ wrapper: 23.5, icon: 13.5 }}
 						tooltip={language?.deleteSection}
 						tooltipPosition={'bottom-right'}
@@ -110,8 +98,8 @@ export default function PageBlock(props: {
 		};
 
 		const updatedSection = {
-			...props.block,
-			content: [...(props.block.content ?? []), newBlock],
+			...props.section,
+			content: [...(props.section.content ?? []), newBlock],
 		};
 
 		props.onChangeSection(updatedSection, props.index);
@@ -119,34 +107,52 @@ export default function PageBlock(props: {
 		if (showSelector) setShowSelector(false);
 	};
 
-	const handleBlockChange = (args: { id: string; content: string; type?: any; data?: any }) => {
-		console.log(args);
-		console.log(props.block);
-		// const updatedBlocks = [...currentPost.data.content].map((block) =>
-		// 	block.id === args.id
-		// 		? { ...block, content: args.content, type: args.type ?? block.type, data: args.data ?? block.data ?? null }
-		// 		: block
-		// );
-		// handleCurrentPostUpdate({ field: 'content', value: updatedBlocks });
+	const handleArticleBlockChange = (args: { id: string; content: string; type?: any; data?: any }) => {
+		const updatedBlocks = [...props.section.content].map((block) =>
+			block.id === args.id
+				? { ...block, content: args.content, type: args.type ?? block.type, data: args.data ?? block.data ?? null }
+				: block
+		);
+
+		const updatedSection = {
+			...props.section,
+			content: updatedBlocks,
+		};
+
+		props.onChangeSection(updatedSection, props.index);
 	};
 
-	const deleteBlock = (id: string) => {
-		console.log(id);
-		// const updatedBlocks = [...currentPost.data.content].filter((block) => block.id !== id);
-		// const deletedIndex = [...currentPost.data.content].findIndex((block) => block.id === id);
+	const deleteBlock = (index: number) => {
+		const updatedBlocks = (props.section.content || []).filter((_, i) => i !== index);
 
-		// if (deletedIndex > 0) {
-		// 	handleCurrentPostUpdate({ field: 'focusedBlock', value: updatedBlocks[deletedIndex - 1] });
-		// } else if (updatedBlocks.length > 0) {
-		// 	handleCurrentPostUpdate({ field: 'focusedBlock', value: updatedBlocks[0] });
-		// } else {
-		// 	handleCurrentPostUpdate({ field: 'focusedBlock', value: null });
-		// }
+		const updatedSection = {
+			...props.section,
+			content: updatedBlocks,
+		};
 
-		// handleCurrentPostUpdate({ field: 'content', value: updatedBlocks });
+		props.onChangeSection(updatedSection, props.index);
 	};
 
-	function getSubElement(block: any, index: number) {
+	const handleBlockDragEnd = (result: any) => {
+		console.log('Block drag end in section', props.id, result);
+
+		if (!result.destination) return;
+
+		const items = Array.from(props.section.content || []);
+		const [reorderedItem] = items.splice(result.source.index, 1);
+		items.splice(result.destination.index, 0, reorderedItem);
+
+		console.log('Reordered items:', items);
+
+		const updatedSection = {
+			...props.section,
+			content: items,
+		};
+
+		props.onChangeSection(updatedSection, props.index);
+	};
+
+	function getBlock(block: any, index: number) {
 		if (!block) return null;
 
 		if (articleBlockTypes.includes(block.type)) {
@@ -156,9 +162,8 @@ export default function PageBlock(props: {
 					type={'page'}
 					key={block.id}
 					block={block}
-					onChangeBlock={handleBlockChange}
-					onDeleteBlock={deleteBlock}
-					// onFocus={() => handleCurrentPageUpdate({ field: 'focusedBlock', value: block })}
+					onChangeBlock={handleArticleBlockChange}
+					onDeleteBlock={() => {}}
 					onFocus={() => {}}
 				/>
 			);
@@ -171,33 +176,75 @@ export default function PageBlock(props: {
 		}
 	}
 
-	console.log(currentPage);
+	function getBlockLabel(type: string) {
+		if (ARTICLE_BLOCKS[type]) return ARTICLE_BLOCKS[type].label;
+		if (PAGE_BLOCKS[type]) return PAGE_BLOCKS[type].label;
+		return type;
+	}
 
 	function getElement() {
 		const ToolbarWrapper: any = currentPage?.editor.blockEditMode ? S.ElementToolbarWrapper : S.ElementToolbarToggle;
 
 		return (
 			<S.ElementWrapper
-				type={props.block.type}
+				type={props.section.type}
 				blockEditMode={currentPage?.editor.blockEditMode}
-				// onFocus={props.onFocus}
 				className={'fade-in'}
 			>
-				<ToolbarWrapper className={'fade-in'} type={props.block.type}>
+				<ToolbarWrapper className={'fade-in'} type={props.section.type}>
 					{getElementToolbar()}
 				</ToolbarWrapper>
-				<S.Element blockEditMode={currentPage?.editor.blockEditMode} type={props.block.type}>
-					{props.block.content?.length ? (
-						props.block.content.map((subBlock: any, index: number) => {
-							return (
-								<S.SubElementWrapper key={index} width={subBlock?.width ?? 1}>
-									{/* <S.SubElementHeader>
-										<p>{capitalize(subBlock.type)}</p>
-									</S.SubElementHeader> */}
-									<S.SubElementBody>{getSubElement(subBlock, index)}</S.SubElementBody>
-								</S.SubElementWrapper>
-							);
-						})
+				<S.Element blockEditMode={currentPage?.editor.blockEditMode} type={props.section.type}>
+					{props.section.content?.length ? (
+						<DragDropContext onDragEnd={handleBlockDragEnd}>
+							<Droppable droppableId={`section-${props.id}`} direction={props.section.type === 'column' ? 'vertical' : 'horizontal'}>
+								{(provided, _snapshot) => (
+									<div ref={provided.innerRef} {...provided.droppableProps} style={{ display: 'flex', gap: '10px', flexDirection: props.section.type ?? 'row', width: '100%', flexWrap: 'nowrap' }}>
+										{props.section.content.map((block: any, index: number) => {
+											return (
+												<Draggable
+													key={block.id}
+													draggableId={`block-${block.id}`}
+													index={index}
+													isDragDisabled={!currentPage?.editor.blockEditMode}
+												>
+													{(provided, _snapshot) => (
+														<S.SubElementWrapper
+															ref={provided.innerRef}
+															{...provided.draggableProps}
+															width={block?.width ?? 1}
+														>
+															<S.SubElementHeader {...provided.dragHandleProps}>
+																<S.SubElementHeaderAction>
+																	<S.EDragWrapper>
+																		<S.EDragHandler tabIndex={-1}>
+																			<ReactSVG src={ICONS.drag} />
+																		</S.EDragHandler>
+																	</S.EDragWrapper>
+																	<p>{getBlockLabel(block.type)}</p>
+																</S.SubElementHeaderAction>
+																<IconButton
+																	type={'alt1'}
+																	active={false}
+																	src={ICONS.delete}
+																	handlePress={() => deleteBlock(index)}
+																	dimensions={{ wrapper: 23.5, icon: 13.5 }}
+																	tooltip={language?.deleteBlock}
+																	tooltipPosition={'bottom-right'}
+																	noFocus
+																/>
+															</S.SubElementHeader>
+															<S.SubElementBody>{getBlock(block, index)}</S.SubElementBody>
+														</S.SubElementWrapper>
+													)}
+												</Draggable>
+											);
+										})}
+										{provided.placeholder}
+									</div>
+								)}
+							</Droppable>
+						</DragDropContext>
 					) : (
 						<S.BlockSelector>
 							<PageBlocks type={'page'} addBlock={addBlock} context={'grid'} />
@@ -209,7 +256,7 @@ export default function PageBlock(props: {
 		);
 	}
 
-	let section;
+	let section: React.ReactNode;
 	if (currentPage.editor.blockEditMode) {
 		section = (
 			<Draggable draggableId={props.id} index={props.index}>
@@ -217,11 +264,9 @@ export default function PageBlock(props: {
 					<S.ElementDragWrapper
 						ref={provided.innerRef}
 						{...provided.draggableProps}
-						{...provided.dragHandleProps}
-						// onFocus={props.onFocus}
 						tabIndex={-1}
 					>
-						<S.EDragWrapper>
+						<S.EDragWrapper {...provided.dragHandleProps}>
 							<S.EDragHandler tabIndex={-1}>
 								<ReactSVG src={ICONS.drag} />
 							</S.EDragHandler>

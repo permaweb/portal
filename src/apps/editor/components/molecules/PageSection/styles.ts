@@ -115,7 +115,7 @@ export const SubElementWrapper = styled.div<{ width: number }>`
 	display: flex;
 	flex: ${(props) => props.width};
 	flex-direction: column;
-	gap: 15px;
+	gap: 10px;
 	background: ${(props) => props.theme.colors.container.alt1.background};
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-radius: ${STYLING.dimensions.radius.primary};
@@ -123,6 +123,16 @@ export const SubElementWrapper = styled.div<{ width: number }>`
 `;
 
 export const SubElementHeader = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+`;
+
+export const SubElementHeaderAction = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 7.5px;
+
 	p {
 		color: ${(props) => props.theme.colors.font.alt1} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
