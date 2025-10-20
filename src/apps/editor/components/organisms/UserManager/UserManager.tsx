@@ -27,7 +27,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 
 	const [roleOptions, setRoleOptions] = React.useState<{ id: string; label: string }[] | null>(null);
 	const [role, setRole] = React.useState<SelectOptionType | null>(null);
-
+	const [unauthorized, setUnauthorized] = React.useState<boolean>(false);
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
 
@@ -62,6 +62,9 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 			if (props.user.roles) {
 				const activeRole = props.user.roles[0];
 				setRole(roleOptions.find((role) => role.id === activeRole));
+				if (activeRole === 'Admin' && walletAddress !== arProvider.wallet) {
+					setUnauthorized(true);
+				}
 			}
 		}
 	}, [props.user, roleOptions]);
@@ -144,7 +147,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 						type={'alt1'}
 						label={props.user ? language?.save : language?.add}
 						handlePress={handleSubmit}
-						disabled={loading || !walletAddress || !checkValidAddress(walletAddress)}
+						disabled={loading || !walletAddress || !checkValidAddress(walletAddress) || unauthorized}
 						loading={loading}
 						icon={props.user ? null : ICONS.add}
 						iconLeftAlign

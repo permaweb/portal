@@ -285,6 +285,7 @@ export const PORTAL_PATCH_MAP = {
 };
 
 export const PORTAL_ROLES = {
+	SuperAdmin: 'Super Admin',
 	ADMIN: 'Admin',
 	CONTRIBUTOR: 'Contributor',
 	MODERATOR: 'Moderator',

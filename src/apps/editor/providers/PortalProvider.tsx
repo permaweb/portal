@@ -328,6 +328,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				return user.roles.some((role) => allowedRoles.includes(role));
 			};
 
+			const isSuperAdmin = user.roles.length === 1 && user.roles[0] === 'SuperAdmin';
 			const isExternalContributor = user.roles.length === 1 && user.roles[0] === 'ExternalContributor';
 
 			return {
@@ -338,6 +339,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				postRequestIndex: hasPermission('Add-Index-Request'),
 				updatePostRequestStatus: hasPermission('Update-Index-Request'),
 				externalContributor: isExternalContributor,
+				superAdmin: isSuperAdmin,
 			};
 		}
 

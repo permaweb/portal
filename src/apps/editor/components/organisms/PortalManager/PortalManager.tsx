@@ -140,10 +140,15 @@ export default function PortalManager(props: {
 
 					const rolesUpdate = await permawebProvider.libs.setZoneRoles(
 						[
-							{ granteeId: arProvider.walletAddress, roles: [PORTAL_ROLES.ADMIN], type: 'wallet', sendInvite: false },
+							{
+								granteeId: arProvider.walletAddress,
+								roles: [PORTAL_ROLES.SuperAdmin],
+								type: 'wallet',
+								sendInvite: false,
+							},
 							{
 								granteeId: permawebProvider.profile.id,
-								roles: [PORTAL_ROLES.ADMIN],
+								roles: [PORTAL_ROLES.SuperAdmin],
 								type: 'process',
 								sendInvite: false,
 							},
