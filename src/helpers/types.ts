@@ -125,7 +125,7 @@ export type PortalDomainType = {
 
 export type PortalUploadOptionType = 'image' | 'video';
 
-export type PortalUserRoleType = 'SuperAdmin' | 'Admin' | 'Contributor' | 'ExternalContributor' | 'Moderator';
+export type PortalUserRoleType = 'Owner' | 'Admin' | 'Contributor' | 'ExternalContributor' | 'Moderator';
 
 export type RequestUpdateType = 'Approve' | 'Reject';
 
@@ -151,7 +151,6 @@ export type PortalPermissionsType = {
 	postRequestIndex?: boolean;
 	updatePostRequestStatus?: boolean;
 	externalContributor?: boolean;
-	isSuperAdmin?: boolean;
 };
 
 export enum PortalPatchMapEnum {

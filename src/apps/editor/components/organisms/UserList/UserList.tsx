@@ -70,21 +70,28 @@ export default function UserList(props: { type: ViewLayoutType }) {
 	// Build the full (filtered + sorted) list once
 	const processedUsers = React.useMemo<PortalUserType[]>(() => {
 		const users = portalProvider.current?.users ?? [];
-		if (users.length === 0) return [];
+		if (!users.length) return [];
+
+		const ownerAddress = portalProvider.current?.owner;
+		const currentUserId = permawebProvider.profile?.id;
 
 		return users
 			.filter((user) => user.type === 'process')
 			.sort((a, b) => {
-				// current user first
-				if (a.address === permawebProvider.profile?.id) return -1;
-				if (b.address === permawebProvider.profile?.id) return 1;
+				// owner first
+				if (a.address === ownerAddress && b.address !== ownerAddress) return -1;
+				if (b.address === ownerAddress && a.address !== ownerAddress) return 1;
+
+				// current user next
+				if (a.address === currentUserId && b.address !== currentUserId) return -1;
+				if (b.address === currentUserId && a.address !== currentUserId) return 1;
 
 				// then by role priority
 				const aRolePriority = getRolePriority(a);
 				const bRolePriority = getRolePriority(b);
 				return aRolePriority - bRolePriority;
 			});
-	}, [portalProvider.current?.users, permawebProvider.profile?.id]);
+	}, [portalProvider.current?.users, portalProvider.current?.owner, permawebProvider.profile?.id]);
 
 	// Re-clamp the current page when the data changes
 	const totalPages = React.useMemo(
