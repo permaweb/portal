@@ -55,40 +55,40 @@ export default function ArticleBlocks(props: {
 		dispatch(currentReducerUpdate(updatedField));
 	};
 
-	const BLOCK_TYPES: {
-		label: string;
-		blocks: { type: ArticleBlockEnum; label: string; icon: string }[];
-	}[] = [
-		{
-			label: language.text,
-			blocks: [
-				ARTICLE_BLOCKS[ArticleBlockEnum.Paragraph],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Quote],
-				ARTICLE_BLOCKS[ArticleBlockEnum.OrderedList],
-				ARTICLE_BLOCKS[ArticleBlockEnum.UnorderedList],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Code],
-			],
-		},
-		{
-			label: language.headers,
-			blocks: [
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header1],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header2],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header3],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header4],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header5],
-				ARTICLE_BLOCKS[ArticleBlockEnum.Header6],
-			],
-		},
-		{
-			label: language.media,
-			blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image], ARTICLE_BLOCKS[ArticleBlockEnum.Video]],
-		},
-		{
-			label: language.design,
-			blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.DividerSolid], ARTICLE_BLOCKS[ArticleBlockEnum.DividerDashed]],
-		},
-	];
+	const BLOCK_TYPES = React.useMemo(
+		() => [
+			{
+				label: language.text,
+				blocks: [
+					ARTICLE_BLOCKS[ArticleBlockEnum.Paragraph],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Quote],
+					ARTICLE_BLOCKS[ArticleBlockEnum.OrderedList],
+					ARTICLE_BLOCKS[ArticleBlockEnum.UnorderedList],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Code],
+				],
+			},
+			{
+				label: language.headers,
+				blocks: [
+					ARTICLE_BLOCKS[ArticleBlockEnum.Header1],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Header2],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Header3],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Header4],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Header5],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Header6],
+				],
+			},
+			{
+				label: language.media,
+				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image], ARTICLE_BLOCKS[ArticleBlockEnum.Video]],
+			},
+			{
+				label: language.design,
+				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.DividerSolid], ARTICLE_BLOCKS[ArticleBlockEnum.DividerDashed]],
+			},
+		],
+		[language.text, language.headers, language.media, language.design]
+	);
 
 	const escFunction = React.useCallback(
 		(e: any) => {
@@ -286,11 +286,11 @@ export default function ArticleBlocks(props: {
 	}
 
 	return (
-		<S.BADropdownBody onKeyDown={handleKeyDown} context={props.context}>
+		<S.BADropdownBody onKeyDown={handleKeyDown} $context={props.context}>
 			{BLOCK_TYPES.map((section: any, sectionIndex: number) => (
 				<S.BADropdownSection
 					key={section.label}
-					context={props.context}
+					$context={props.context}
 					className={props.context === 'grid' ? 'border-wrapper-alt3' : ''}
 				>
 					<S.BADropdownSectionHeader>

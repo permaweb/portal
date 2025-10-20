@@ -55,15 +55,15 @@ export default function PageBlocks(props: {
 		dispatch(currentReducerUpdate(updatedField));
 	};
 
-	const BLOCK_TYPES: {
-		label: string;
-		blocks: { type: PageBlockEnum; label: string; icon: string }[];
-	}[] = [
-		{
-			label: language.dynamicElements,
-			blocks: [PAGE_BLOCKS[PageBlockEnum.Feed]],
-		},
-	];
+	const BLOCK_TYPES = React.useMemo(
+		() => [
+			{
+				label: language.dynamicElements,
+				blocks: [PAGE_BLOCKS[PageBlockEnum.Feed]],
+			},
+		],
+		[language.dynamicElements]
+	);
 
 	const escFunction = React.useCallback(
 		(e: any) => {
@@ -178,11 +178,11 @@ export default function PageBlocks(props: {
 	}
 
 	return (
-		<S.BADropdownBody onKeyDown={handleKeyDown} context={props.context}>
+		<S.BADropdownBody onKeyDown={handleKeyDown} $context={props.context}>
 			{BLOCK_TYPES.map((section: any, sectionIndex: number) => (
 				<S.BADropdownSection
 					key={section.label}
-					context={props.context}
+					$context={props.context}
 					className={props.context === 'grid' ? 'border-wrapper-alt3' : ''}
 				>
 					<S.BADropdownSectionHeader>

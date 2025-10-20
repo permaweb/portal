@@ -94,6 +94,7 @@ export default function PageSection(props: {
 			id: Date.now().toString(),
 			type: type as ArticleBlockEnum,
 			content: content,
+			layout: { separation: true },
 			width: 1,
 		};
 
@@ -197,9 +198,16 @@ export default function PageSection(props: {
 				<S.Element blockEditMode={currentPage?.editor.blockEditMode} type={props.section.type}>
 					{props.section.content?.length ? (
 						<DragDropContext onDragEnd={handleBlockDragEnd}>
-							<Droppable droppableId={`section-${props.id}`} direction={props.section.type === 'column' ? 'vertical' : 'horizontal'}>
+							<Droppable
+								droppableId={`section-${props.id}`}
+								direction={props.section.type === 'column' ? 'vertical' : 'horizontal'}
+							>
 								{(provided, _snapshot) => (
-									<div ref={provided.innerRef} {...provided.droppableProps} style={{ display: 'flex', gap: '10px', flexDirection: props.section.type ?? 'row', width: '100%', flexWrap: 'nowrap' }}>
+									<S.DroppableContainer
+										ref={provided.innerRef}
+										{...provided.droppableProps}
+										$direction={props.section.type ?? 'row'}
+									>
 										{props.section.content.map((block: any, index: number) => {
 											return (
 												<Draggable
@@ -241,7 +249,7 @@ export default function PageSection(props: {
 											);
 										})}
 										{provided.placeholder}
-									</div>
+									</S.DroppableContainer>
 								)}
 							</Droppable>
 						</DragDropContext>
@@ -261,11 +269,7 @@ export default function PageSection(props: {
 		section = (
 			<Draggable draggableId={props.id} index={props.index}>
 				{(provided) => (
-					<S.ElementDragWrapper
-						ref={provided.innerRef}
-						{...provided.draggableProps}
-						tabIndex={-1}
-					>
+					<S.ElementDragWrapper ref={provided.innerRef} {...provided.draggableProps} tabIndex={-1}>
 						<S.EDragWrapper {...provided.dragHandleProps}>
 							<S.EDragHandler tabIndex={-1}>
 								<ReactSVG src={ICONS.drag} />

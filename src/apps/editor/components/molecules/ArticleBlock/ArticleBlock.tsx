@@ -295,7 +295,12 @@ export default function ArticleBlock(props: {
 			setShowBlockSelector(false);
 			// Don't interfere with toggleBlockFocus if this block is not the focused one
 		}
-	}, [props.block?.id, currentReducer.data?.content, currentReducer.editor?.focusedBlock]);
+	}, [
+		props.block?.id,
+		props.block?.content,
+		currentReducer.editor?.focusedBlock?.id,
+		currentReducer.editor?.focusedBlock?.content,
+	]);
 
 	React.useEffect(() => {
 		const handleSelectionChange = () => {

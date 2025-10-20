@@ -194,6 +194,7 @@ export type ArticleBlockType = {
 	content: string;
 	data?: any;
 	width?: number;
+	layout?: any;
 };
 
 export enum ArticleStatusEnum {

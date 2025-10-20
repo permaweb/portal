@@ -3,18 +3,18 @@ import styled from 'styled-components';
 import { STYLING } from 'helpers/config';
 import { ArticleBlocksContextType } from 'helpers/types';
 
-export const BADropdownBody = styled.div<{ context: ArticleBlocksContextType }>`
+export const BADropdownBody = styled.div<{ $context: ArticleBlocksContextType }>`
 	display: flex;
-	flex-direction: ${(props) => (props.context === 'grid' ? 'row' : 'column')};
+	flex-direction: ${(props) => (props.$context === 'grid' ? 'row' : 'column')};
 	flex-wrap: wrap;
 	gap: 10px;
 `;
 
-export const BADropdownSection = styled.div<{ context: ArticleBlocksContextType }>`
-	min-width: ${(props) => (props.context === 'grid' ? '265px' : '0')};
+export const BADropdownSection = styled.div<{ $context: ArticleBlocksContextType }>`
+	min-width: ${(props) => (props.$context === 'grid' ? '265px' : '0')};
 	flex: 1;
 	max-width: 100%;
-	padding: ${(props) => (props.context === 'grid' ? '15px 10px 10px 10px' : '0')};
+	padding: ${(props) => (props.$context === 'grid' ? '15px 10px 10px 10px' : '0')};
 	border-radius: ${STYLING.dimensions.radius.primary};
 `;
 

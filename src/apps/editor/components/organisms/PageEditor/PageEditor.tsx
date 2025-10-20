@@ -8,9 +8,13 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPageUpdate } from 'editor/store/page';
 
+import { Loader } from 'components/atoms/Loader';
 import { PageSectionEnum, PageSectionType } from 'helpers/types';
 import { capitalize } from 'helpers/utils';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import { PageToolbar } from './PageToolbar';
 import * as S from './styles';
@@ -21,9 +25,13 @@ export default function PageEditor() {
 
 	const currentPage = useSelector((state: EditorStoreRootState) => state.currentPage);
 
+	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+
+	const { addNotification } = useNotifications();
 
 	const handleCurrentPageUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPageUpdate(updatedField));
@@ -80,42 +88,76 @@ export default function PageEditor() {
 		handleCurrentPageUpdate({ field: 'content', value: items });
 	};
 
+	async function handleSubmit() {
+		if (
+			arProvider.wallet &&
+			permawebProvider.profile?.id &&
+			portalProvider.current?.id &&
+			portalProvider.permissions?.updatePortalMeta
+		) {
+			handleCurrentPageUpdate({ field: 'loading', value: { active: true, message: `${language?.saving}...` } });
+
+			try {
+				const updatedPages: any = { ...portalProvider.current?.pages };
+				updatedPages[currentPage.data.id] = { content: currentPage.data.content, type: 'grid' };
+				console.log(updatedPages);
+				const portalUpdateId = await permawebProvider.libs.updateZone(
+					{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
+					portalProvider.current.id,
+					arProvider.wallet
+				);
+
+				console.log(`Portal update: ${portalUpdateId}`);
+
+				addNotification(`${language?.pageSaved}!`, 'success');
+			} catch (e: any) {
+				console.error(e);
+				addNotification(e.message ?? 'Error saving page', 'warning');
+			}
+
+			handleCurrentPageUpdate({ field: 'loading', value: { active: false, message: null } });
+		}
+	}
+
 	return (
-		<S.Wrapper>
-			<S.ToolbarWrapper>
-				<PageToolbar handleSubmit={() => console.log('Save Page')} addSection={addSection} />
-			</S.ToolbarWrapper>
-			<S.EditorWrapper>
-				{currentPage.data.content?.length ? (
-					<DragDropContext onDragEnd={onDragEnd}>
-						<Droppable droppableId={'blocks'}>
-							{(provided) => (
-								<S.Editor
-									{...provided.droppableProps}
-									ref={provided.innerRef}
-									blockEditMode={currentPage.editor.blockEditMode}
-								>
-									{currentPage.data.content.map((section: PageSectionType, index: number) => (
-										<PageSection
-											key={index}
-											id={index.toString()}
-											index={index}
-											section={section as PageSectionType}
-											onChangeSection={handleSectionChange}
-											onDeleteSection={deleteSection}
-										/>
-									))}
-									{provided.placeholder}
-								</S.Editor>
-							)}
-						</Droppable>
-					</DragDropContext>
-				) : (
-					<S.BlocksEmpty className={'fade-in'}>
-						<span>Add Section</span>
-					</S.BlocksEmpty>
-				)}
-			</S.EditorWrapper>
-		</S.Wrapper>
+		<>
+			<S.Wrapper>
+				<S.ToolbarWrapper>
+					<PageToolbar handleSubmit={handleSubmit} addSection={addSection} />
+				</S.ToolbarWrapper>
+				<S.EditorWrapper>
+					{currentPage.data.content?.length ? (
+						<DragDropContext onDragEnd={onDragEnd}>
+							<Droppable droppableId={'blocks'}>
+								{(provided) => (
+									<S.Editor
+										{...provided.droppableProps}
+										ref={provided.innerRef}
+										blockEditMode={currentPage.editor.blockEditMode}
+									>
+										{currentPage.data.content.map((section: PageSectionType, index: number) => (
+											<PageSection
+												key={index}
+												id={index.toString()}
+												index={index}
+												section={section as PageSectionType}
+												onChangeSection={handleSectionChange}
+												onDeleteSection={deleteSection}
+											/>
+										))}
+										{provided.placeholder}
+									</S.Editor>
+								)}
+							</Droppable>
+						</DragDropContext>
+					) : (
+						<S.BlocksEmpty className={'fade-in'}>
+							<span>Add Section</span>
+						</S.BlocksEmpty>
+					)}
+				</S.EditorWrapper>
+			</S.Wrapper>
+			{currentPage.editor.loading.active && <Loader message={currentPage.editor.loading.message} />}
+		</>
 	);
 }

@@ -59,6 +59,12 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const config = mediaConfig[props.type];
 
 	const inputRef = React.useRef(null);
+	const prevPropsDataRef = React.useRef<{
+		url?: string | null;
+		caption: string | null;
+		alignment: AlignmentEnum | null;
+	}>();
+	const isInternalUpdateRef = React.useRef(false);
 
 	const [mediaData, setMediaData] = React.useState<{
 		url?: string | null;
@@ -79,10 +85,22 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const [uploadDisabled, setUploadDisabled] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		if (props.data && props.data !== mediaData) {
+		if (
+			props.data &&
+			!isInternalUpdateRef.current &&
+			(props.data.url !== prevPropsDataRef.current?.url ||
+				props.data.caption !== prevPropsDataRef.current?.caption ||
+				props.data.alignment !== prevPropsDataRef.current?.alignment)
+		) {
 			setMediaData(props.data);
+			prevPropsDataRef.current = {
+				url: props.data.url,
+				caption: props.data.caption,
+				alignment: props.data.alignment,
+			};
 		}
-	}, [props.data]);
+		isInternalUpdateRef.current = false;
+	}, [props.data?.url, props.data?.caption, props.data?.alignment]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -101,9 +119,11 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	}, [mediaData, portalProvider.current?.id, arProvider.wallet, calculateUploadCost]);
 
 	React.useEffect(() => {
-		if (mediaData?.url && validateUrl(mediaData.url) && mediaData.url.startsWith('https://'))
+		if (mediaData?.url && validateUrl(mediaData.url) && mediaData.url.startsWith('https://')) {
+			isInternalUpdateRef.current = true;
 			props.onChange(buildContent(mediaData), mediaData);
-	}, [mediaData]);
+		}
+	}, [mediaData?.url, mediaData?.caption, mediaData?.alignment]);
 
 	function buildContent(data: any) {
 		return `

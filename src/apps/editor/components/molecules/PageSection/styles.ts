@@ -167,3 +167,11 @@ export const BlockSelectorActions = styled.div`
 		margin: 10px 0 0 0;
 	}
 `;
+
+export const DroppableContainer = styled.div<{ $direction: 'row' | 'column' }>`
+	display: flex;
+	gap: 10px;
+	flex-direction: ${(props) => props.$direction};
+	width: 100%;
+	flex-wrap: nowrap;
+`;
