@@ -226,6 +226,7 @@ export default function Editor() {
 				categories: currentPost.data.categories,
 				url: url,
 				releaseDate: releaseDate,
+				originPortal: portalProvider.current.id,
 			});
 
 			if (currentPost.data.thumbnail) {
