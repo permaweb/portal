@@ -2,7 +2,7 @@ import React from 'react';
 
 import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
-import { ICONS, DOM } from 'helpers/config';
+import { DOM, ICONS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 

@@ -200,14 +200,13 @@ export const Header = styled.header<{ navigationOpen: boolean; navWidth?: number
 	transition: padding-left ${transition2};
 	position: fixed;
 	top: 0;
+	border-bottom: 1px solid transparent;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		padding: 0 20px;
 	}
 	z-index: 2;
-	background: ${(props) => `${props.theme.colors.view.background}E6`};
-	backdrop-filter: blur(6px);
-	-webkit-backdrop-filter: blur(6px);
+	background: ${(props) => props.theme.colors.view.background};
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		padding: 0 20px 0 10px;

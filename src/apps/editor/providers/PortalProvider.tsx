@@ -193,11 +193,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						);
 
 						if (key === 'overview') {
-							console.log('Overview data fetched:', data);
-
 							// Check if wallpaper is undefined and update patch map if needed
 							if (data.wallpaper === undefined && permawebProvider.libs?.updateZonePatchMap) {
-								console.log('Updating patch map to include Wallpaper');
 								await permawebProvider.libs.updateZonePatchMap(PORTAL_PATCH_MAP, currentId);
 							}
 						}
@@ -260,7 +257,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									updatedPortal.logo = data.logo ?? updatedPortal.logo;
 									updatedPortal.icon = data.icon ?? updatedPortal.icon;
 									updatedPortal.wallpaper = data.wallpaper ?? updatedPortal.wallpaper;
-									console.log('Updated wallpaper in portal:', updatedPortal.wallpaper, 'from data:', data.wallpaper);
 									updatedPortal.owner = data.owner ?? updatedPortal.owner;
 									updatedPortal.moderation = data.moderation ?? updatedPortal.moderation;
 									break;
