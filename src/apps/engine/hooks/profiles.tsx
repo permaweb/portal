@@ -1,10 +1,12 @@
 import React from 'react';
 import Placeholder from 'engine/components/placeholder';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { cacheProfile, checkValidAddress, getCachedProfile, urlify } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 export const useProfile = (profileId: string) => {
+	const portalProvider = usePortalProvider();
 	const permawebProvider = usePermawebProvider();
 	const [profile, setProfile] = React.useState(null);
 	const [isLoading, setIsLoading] = React.useState(false);
@@ -28,6 +30,16 @@ export const useProfile = (profileId: string) => {
 			(profileId === permawebProvider.profile.id || profileId === urlify(permawebProvider.profile.username))
 		) {
 			setProfile(permawebProvider.profile);
+			setIsLoading(false);
+			return;
+		}
+
+		if (profileId === portalProvider.portalId) {
+			setProfile({
+				name: portalProvider.portal?.Name,
+				displayName: portalProvider.portal?.Name,
+				thumbnail: portalProvider.portal?.Icon,
+			});
 			setIsLoading(false);
 			return;
 		}
@@ -127,7 +139,7 @@ export const useProfile = (profileId: string) => {
 						}
 					});
 			});
-	}, [profileId, permawebProvider.libs, permawebProvider.profile]);
+	}, [profileId, permawebProvider.libs, permawebProvider.profile, portalProvider.portalId]);
 
 	if (!profileId || isLoading || !profile) {
 		return {
