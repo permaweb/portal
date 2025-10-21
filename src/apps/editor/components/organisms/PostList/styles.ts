@@ -45,16 +45,13 @@ export const PostsHeaderFilterWrapper = styled.div`
 
 export const PostsHeaderFilterDropdown = styled.div`
 	max-height: 52.5vh;
-	width: 315px;
+	width: 325px;
 	max-width: 75vw;
 	padding: 15px;
 	position: absolute;
 	z-index: 2;
 	top: 32.5px;
 	right: 0;
-	background: ${(props) => props.theme.colors.container.alt1.background} !important;
-	box-shadow: none !important;
-	border-radius: ${STYLING.dimensions.radius.alt2} !important;
 `;
 
 export const PostsActions = styled.div<{ dropdown: boolean }>`
@@ -76,11 +73,12 @@ export const PostsActionsSectionHeader = styled.div`
 	padding: 0 0 7.5px 0;
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 	p {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		text-transform: uppercase;
+		color: ${(props) => props.theme.colors.font.alt1} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		text-transform: uppercase !important;
+		text-align: left !important;
 	}
 `;
 

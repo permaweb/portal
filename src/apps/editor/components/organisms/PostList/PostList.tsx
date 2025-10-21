@@ -5,6 +5,7 @@ import { User } from 'editor/components/molecules/User';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { Drawer } from 'components/atoms/Drawer';
 import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
 import { Panel } from 'components/atoms/Panel';
@@ -204,7 +205,11 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 					<Button
 						type={props.type === 'detail' ? 'primary' : 'alt3'}
 						label={language?.requests}
-						handlePress={() => setShowRequests((prev) => !prev)}
+						handlePress={(e: any) => {
+							e.preventDefault();
+							e.stopPropagation();
+							setShowRequests((prev) => !prev);
+						}}
 					/>
 
 					{portalProvider.current?.requests?.length > 0 && (
@@ -225,65 +230,72 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 		);
 	}
 
-	function getHeader() {
-		switch (props.type) {
-			case 'header':
-				return (
-					<S.PostsHeaderDetails className={'border-wrapper-alt3'}>
-						<p>{`${language?.posts} (${portalProvider.current?.assets?.length ?? '0'})`}</p>
-						<S.PostsHeaderDetailsActions>
-							<Button
-								type={'alt3'}
-								label={language?.postsLink}
-								handlePress={() => navigate(URLS.portalPosts(portalProvider.current.id))}
-							/>
-							{getRequests()}
-							<S.PostsHeaderFilterWrapper>
-								<CloseHandler
-									callback={() => setShowFilterActions(false)}
-									active={showFilterActions}
-									disabled={!showFilterActions}
-								>
-									<Button
-										type={'alt4'}
-										label={language?.filter}
-										handlePress={() => setShowFilterActions(!showFilterActions)}
-										icon={ICONS.filter}
-										iconLeftAlign
-									/>
-									{showFilterActions && (
-										<S.PostsHeaderFilterDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
-											{getActions(true)}
-										</S.PostsHeaderFilterDropdown>
-									)}
-								</CloseHandler>
-							</S.PostsHeaderFilterWrapper>
-						</S.PostsHeaderDetailsActions>
-					</S.PostsHeaderDetails>
-				);
-			case 'detail':
-				return getActions(false);
-			default:
-				return null;
-		}
+	function getPosts() {
+		return (
+			<>
+				<Posts paginatedPosts={paginatedPosts} type={props.type} />
+				<S.PostsFooter>
+					<Pagination
+						totalItems={assets.length}
+						totalPages={totalPages}
+						currentPage={currentPage}
+						currentRange={currentRange}
+						setCurrentPage={setCurrentPage}
+						showRange={true}
+						showControls={true}
+						iconButtons={true}
+					/>
+				</S.PostsFooter>
+			</>
+		);
 	}
 
 	return (
 		<S.Wrapper>
-			{getHeader()}
-			<Posts paginatedPosts={paginatedPosts} type={props.type} />
-			<S.PostsFooter>
-				<Pagination
-					totalItems={assets.length}
-					totalPages={totalPages}
-					currentPage={currentPage}
-					currentRange={currentRange}
-					setCurrentPage={setCurrentPage}
-					showRange={true}
-					showControls={true}
-					iconButtons={true}
+			{props.type === 'header' ? (
+				<Drawer
+					title={language?.posts}
+					content={getPosts()}
+					actions={[
+						<Button
+							type={'alt3'}
+							label={language?.postsLink}
+							handlePress={() => navigate(URLS.portalPosts(portalProvider.current.id))}
+						/>,
+						getRequests(),
+						<S.PostsHeaderFilterWrapper>
+							<CloseHandler
+								callback={() => setShowFilterActions(false)}
+								active={showFilterActions}
+								disabled={!showFilterActions}
+							>
+								<Button
+									type={'alt4'}
+									label={language?.filter}
+									handlePress={(e: any) => {
+										e.preventDefault();
+										e.stopPropagation();
+										setShowFilterActions(!showFilterActions);
+									}}
+									icon={ICONS.filter}
+									iconLeftAlign
+								/>
+								{showFilterActions && (
+									<S.PostsHeaderFilterDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
+										{getActions(true)}
+									</S.PostsHeaderFilterDropdown>
+								)}
+							</CloseHandler>
+						</S.PostsHeaderFilterWrapper>,
+					]}
+					noContentWrapper
 				/>
-			</S.PostsFooter>
+			) : (
+				<>
+					{getActions(false)}
+					{getPosts()}
+				</>
+			)}
 		</S.Wrapper>
 	);
 }

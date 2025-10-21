@@ -1,5 +1,5 @@
-import { LAYOUT_JOURNAL, LAYOUT_BLOG } from './config/layouts';
-import { PAGES_JOURNAL, PAGES_BLOG } from './config/pages';
+import { LAYOUT_BLOG, LAYOUT_JOURNAL } from './config/layouts';
+import { PAGES_BLOG, PAGES_JOURNAL } from './config/pages';
 import { THEME_DEFAULT } from './config/themes';
 import { ArticleBlockEnum, PortalPatchMapEnum } from './types';
 

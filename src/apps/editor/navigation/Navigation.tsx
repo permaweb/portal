@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import { debounce } from 'lodash';
+import { useTheme } from 'styled-components';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -29,11 +30,40 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	const language = languageProvider.object[languageProvider.current];
 	const { addNotification } = useNotifications();
 	const { navWidth, setNavWidth } = useNavigation();
+	const theme = useTheme();
 
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
 	const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
 	const [portalUpdating, setPortalUpdating] = React.useState<boolean>(false);
 	const [isResizing, setIsResizing] = React.useState<boolean>(false);
+
+	React.useEffect(() => {
+		const header = document.getElementById('navigation-header');
+		if (!header) return;
+
+		let lastScrollY = 0;
+		let ticking = false;
+		const borderColor = theme.colors.border.primary;
+
+		const handleScroll = () => {
+			lastScrollY = window.scrollY;
+			if (!ticking) {
+				window.requestAnimationFrame(() => {
+					const parts = window.location.href.split('/');
+					const isEditorPage = parts.some((part) => part === 'post' || part === 'page');
+					header.style.borderBottom =
+						!isEditorPage && lastScrollY > 0 ? `1px solid ${borderColor}` : '1px solid transparent';
+					ticking = false;
+				});
+				ticking = true;
+			}
+		};
+
+		window.addEventListener('scroll', handleScroll, { passive: true });
+		handleScroll();
+
+		return () => window.removeEventListener('scroll', handleScroll);
+	}, [theme.colors.border.primary]);
 
 	const paths = React.useMemo(() => {
 		return [
@@ -372,7 +402,12 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		<>
 			{portalUpdating && <Loader message={`${language.updatingPortal}...`} />}
 			{panel}
-			<S.Header navigationOpen={navWidth > STYLING.dimensions.nav.widthMin} navWidth={navWidth} className={'fade-in'}>
+			<S.Header
+				id={'navigation-header'}
+				navigationOpen={navWidth > STYLING.dimensions.nav.widthMin}
+				navWidth={navWidth}
+				className={'fade-in'}
+			>
 				<S.Content>
 					<S.C1Wrapper>
 						{!props.open && !desktop && navigationToggle}

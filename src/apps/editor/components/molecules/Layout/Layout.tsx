@@ -31,7 +31,7 @@ export default function Layout() {
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	// Layout options for feed content
-	const options = [{ name: 'journal' }, { name: 'blog' }, { name: 'documentation' }];
+	const options = [{ name: 'journal' }, { name: 'blog' }];
 
 	const [activeName, setActiveName] = React.useState<string>('');
 

@@ -210,7 +210,7 @@ export default function Media(props: {
 		const assetSrc = props.type === 'icon' ? ICONS.icon : props.type === 'logo' ? ICONS.image : ICONS.image;
 		const uploadText =
 			props.type === 'icon'
-				? language?.uploadIcon
+				? language?.upload
 				: props.type === 'logo'
 				? language?.uploadLogo
 				: language?.uploadWallpaper;

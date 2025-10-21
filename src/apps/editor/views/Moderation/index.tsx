@@ -5,6 +5,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Checkbox } from 'components/atoms/Checkbox';
+import { Drawer } from 'components/atoms/Drawer';
 import { Loader } from 'components/atoms/Loader';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { cacheModeration, formatAddress, getCachedModeration } from 'helpers/utils';
@@ -357,12 +358,10 @@ export default function Moderation() {
 					<S.SectionWrapper>
 						{/* Subscriptions Section */}
 						<S.SubscriptionsSection>
-							<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
-								<S.SectionHeader>
-									<p>Subscriptions ({externalPortals.length})</p>
-								</S.SectionHeader>
-								<S.SectionBody>
-									{loadingSubscriptions ? (
+							<Drawer
+								title={`Subscriptions (${externalPortals.length})`}
+								content={
+									loadingSubscriptions ? (
 										<Loader relative />
 									) : externalPortals.length > 0 ? (
 										<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -381,19 +380,18 @@ export default function Moderation() {
 										<S.InfoMessage>
 											<p>No subscriptions found</p>
 										</S.InfoMessage>
-									)}
-								</S.SectionBody>
-							</div>
+									)
+								}
+								padContent
+							/>
 						</S.SubscriptionsSection>
 
 						{/* Users Section */}
 						<S.UsersSection>
-							<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
-								<S.SectionHeader>
-									<p>Users ({moderatedUsers.length})</p>
-								</S.SectionHeader>
-								<S.SectionBody>
-									{loadingUsers ? (
+							<Drawer
+								title={`Users (${moderatedUsers.length})`}
+								content={
+									loadingUsers ? (
 										<Loader relative />
 									) : moderatedUsers.length > 0 ? (
 										<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -476,21 +474,20 @@ export default function Moderation() {
 										<S.InfoMessage>
 											<p>No moderated users</p>
 										</S.InfoMessage>
-									)}
-								</S.SectionBody>
-							</div>
+									)
+								}
+								padContent
+							/>
 						</S.UsersSection>
 					</S.SectionWrapper>
 
 					<S.SectionWrapper>
 						{/* Comments Section */}
 						<S.CommentsSection>
-							<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
-								<S.SectionHeader>
-									<p>Comments ({inactiveComments.length + moderatedComments.length})</p>
-								</S.SectionHeader>
-								<S.SectionBody>
-									{loadingComments ? (
+							<Drawer
+								title={`Comments (${inactiveComments.length + moderatedComments.length})`}
+								content={
+									loadingComments ? (
 										<Loader relative />
 									) : inactiveComments.length > 0 || moderatedComments.length > 0 ? (
 										<S.CommentsList>
@@ -630,9 +627,10 @@ export default function Moderation() {
 										<S.InfoMessage>
 											<p>{language?.noCommentsToModerate || 'No comments to moderate'}</p>
 										</S.InfoMessage>
-									)}
-								</S.SectionBody>
-							</div>
+									)
+								}
+								padContent
+							/>
 						</S.CommentsSection>
 					</S.SectionWrapper>
 				</>

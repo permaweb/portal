@@ -77,19 +77,19 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 	${(props) =>
 		props.isIcon
 			? `
-		height: 64px;
-		width: 64px;
+		height: 80px;
+		width: 80px;
 	`
 			: props.mediaType === 'logo'
 			? props.hasMedia
 				? `
-		max-height: 160px;
-		width: auto;
+		max-height: 180px;
+		width: 100%;
 		height: auto;
 	`
 				: `
-		height: 160px;
-		width: auto;
+		height: 180px;
+		width: 100%;
 		aspect-ratio: 16 / 9;
 	`
 			: `
