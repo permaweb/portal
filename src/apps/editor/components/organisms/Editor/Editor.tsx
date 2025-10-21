@@ -324,11 +324,6 @@ export default function Editor() {
 							data: dataSrc,
 							contentType: ASSET_UPLOAD.contentType,
 							assetType: ASSET_UPLOAD.ansType,
-							metadata: {
-								url: url,
-								releaseDate: releaseDate,
-								originPortal: portalProvider.current.id,
-							},
 							users: getAssetAuthUsers(),
 							spawnComments: true,
 						},
