@@ -224,6 +224,7 @@ export default function Editor() {
 				content: currentPost.data.content,
 				topics: currentPost.data.topics,
 				categories: currentPost.data.categories,
+				creator: currentPost.data.creator,
 				url: url,
 				releaseDate: releaseDate,
 				originPortal: portalProvider.current.id,
