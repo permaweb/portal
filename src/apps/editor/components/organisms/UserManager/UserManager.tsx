@@ -65,6 +65,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 			if (props.user.roles) {
 				const activeRole = props.user.roles[0];
 				setRole(roleOptions.find((role) => role.id === activeRole));
+				setUnauthorized(false);
 				if (activeRole === 'Admin' && portalProvider?.current?.owner !== arProvider.walletAddress) {
 					// only super admins can change admin's role
 					setUnauthorized(true);
