@@ -52,11 +52,40 @@ export default function Users() {
 		});
 	}, [transferRequests, currentWalletAddress]);
 
+	const [inviteProfiles, setInviteProfiles] = React.useState<Record<string, any>>({});
+
+	React.useEffect(() => {
+		const loadProfiles = async () => {
+			const profiles: Record<string, any> = {};
+
+			for (const request of pendingOwnershipInvites) {
+				const inviterAddress = request.From ?? request.from;
+				if (!inviterAddress) continue;
+
+				// avoid refetching same address
+				if (!profiles[inviterAddress]) {
+					try {
+						const profile = await permawebProvider.fetchProfile(inviterAddress);
+						profiles[inviterAddress] = profile;
+					} catch (err) {
+						console.error('Failed to fetch profile for', inviterAddress, err);
+					}
+				}
+			}
+
+			setInviteProfiles(profiles);
+		};
+
+		if (pendingOwnershipInvites?.length > 0) {
+			loadProfiles();
+		}
+	}, [pendingOwnershipInvites]);
+
 	async function handleAcceptOwnershipInvite() {
 		if (!portalProvider.current?.id) return;
 		try {
 			setLoading(true);
-			await permawebProvider.libs.transferOwnership({
+			await permawebProvider.libs.transferZoneOwnership({
 				zoneId: portalProvider.current.id,
 				op: 'Accept',
 			});
@@ -75,7 +104,7 @@ export default function Users() {
 		if (!portalProvider.current?.id) return;
 		try {
 			setLoading(true);
-			await permawebProvider.libs.transferOwnership({
+			await permawebProvider.libs.transferZoneOwnership({
 				zoneId: portalProvider.current.id,
 				op: 'Reject',
 			});
@@ -92,34 +121,18 @@ export default function Users() {
 
 	function getTransferInvitesModal() {
 		const hasInvites = pendingOwnershipInvites.length > 0;
-
-		const headerText = hasInvites
-			? language?.youHaveOwnershipInvites ?? 'You have ownership transfer invites'
-			: language?.noOwnershipInvites ?? 'No ownership transfer invites';
-
-		const descriptionText = hasInvites
-			? language?.ownershipInvitesInfo ?? 'You can accept to become the new owner, or reject the invite.'
-			: language?.ownershipInvitesEmptyInfo ?? 'When someone invites you to take ownership, it will appear here.';
-
 		return (
-			<Modal header={headerText} handleClose={() => setShowTransferInvitesModal(false)}>
+			<Modal header={'Transfer Invites'} handleClose={() => setShowTransferInvitesModal(false)}>
 				<S.TransferInvitesWrapper>
-					<S.TransferInvitesDescription>
-						<p>{descriptionText}</p>
-					</S.TransferInvitesDescription>
-
 					{hasInvites && (
 						<S.TransferInvitesList className="scroll-wrapper">
 							{pendingOwnershipInvites.map((request: any, index: number) => {
 								const inviterAddress = request.From ?? request.from;
-
+								const inviterUsername = inviteProfiles[inviterAddress].username;
 								return (
 									<S.TransferInviteRow key={`${inviterAddress}-${index}`}>
 										<S.TransferInviteMeta>
-											<strong>
-												{language?.fromLabel ?? 'From'}: {inviterAddress} is inviting you to take ownership of the
-												current portal.
-											</strong>
+											<strong>{inviterUsername} is inviting you to take ownership of the current portal.</strong>
 										</S.TransferInviteMeta>
 										<S.TransferInviteActions>
 											<Button

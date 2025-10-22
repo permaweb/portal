@@ -27,6 +27,7 @@ export const HeaderAction = styled.div`
 		display: flex;
 		gap: 7.5px;
 		margin-top: 8px;
+		margin-right: 18px;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
@@ -110,13 +111,11 @@ export const TransferInvitesList = styled.div`
 `;
 
 export const TransferInviteRow = styled.div`
-	display: grid;
-	grid-template-columns: 2fr 1fr auto;
+	display: flex;
+	flex-direction: column;
 	gap: 10px;
 	align-items: center;
 	padding: 10px 12px;
-	border: 1px solid ${(p) => p.theme.colors.border.primary};
-	border-radius: 10px;
 	background: ${(p) => p.theme.colors.container.alt2};
 `;
 

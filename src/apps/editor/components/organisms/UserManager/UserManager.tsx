@@ -41,17 +41,17 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 	React.useEffect(() => {
 		if (portalProvider.current?.roleOptions) {
 			const roleOrder = Object.keys(roleDescriptions);
-			const isSuperAdmin = portalProvider?.current.owner === arProvider.walletAddress;
 
-			const options = Object.values(portalProvider.current.roleOptions)
-				// filter out 'admin' role if not super admin
-				.filter((role) => isSuperAdmin || role !== 'Admin')
-				.map((role) => ({ id: role, label: formatRoleLabel(role) }))
+			let options = Object.values(portalProvider.current.roleOptions)
+				.map((role) => ({
+					id: role,
+					label: formatRoleLabel(role),
+				}))
 				.sort((a, b) => roleOrder.indexOf(a.id) - roleOrder.indexOf(b.id));
 
 			setRoleOptions(options);
 		}
-	}, [portalProvider.current?.roleOptions, portalProvider?.permissions?.isSuperAdmin]);
+	}, [portalProvider.current?.roleOptions, portalProvider.current?.owner, arProvider.walletAddress]);
 
 	React.useEffect(() => {
 		if (roleOptions?.length) {
@@ -69,6 +69,13 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 					// only super admins can change admin's role
 					setUnauthorized(true);
 				}
+			}
+		}
+		if (!props.user && roleOptions) {
+			const isOwner = portalProvider?.current?.owner === arProvider.walletAddress;
+			if (!isOwner) {
+				let options = roleOptions?.filter((role) => role.id !== 'Admin') || null;
+				setRoleOptions(options);
 			}
 		}
 	}, [props.user, roleOptions]);
@@ -122,7 +129,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 						setWalletAddress(e.target.value);
 					}}
 					invalid={{ status: walletAddress ? !checkValidAddress(walletAddress) : false, message: null }}
-					disabled={loading || (props.user && props.user?.owner !== null)}
+					disabled={loading || (props.user && props.user?.owner !== null) || unauthorized}
 					sm
 					hideErrorMessage
 				/>
@@ -131,7 +138,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 					activeOption={role}
 					setActiveOption={(option) => setRole(option)}
 					options={roleOptions}
-					disabled={loading}
+					disabled={loading || unauthorized}
 				/>
 				{role && (
 					<S.InfoWrapper className={'border-wrapper-alt3'}>

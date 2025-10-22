@@ -31,15 +31,16 @@ export default function User(props: {
 	const [showManageUser, setShowManageUser] = React.useState<boolean>(false);
 	const [showManageOwner, setShowManageOwner] = React.useState<boolean>(false);
 	const [showShareCredits, setShowShareCredits] = React.useState<boolean>(false);
+
 	const currentLoggedInUser =
 		arweaveProvider?.walletAddress === portalProvider.usersByPortalId?.[props.user.address]?.owner;
+	const isCurrentLoggedInUserPortalOwner = portalProvider.current?.owner === arweaveProvider?.walletAddress;
 	const isPortalOwner = portalProvider.current?.owner === portalProvider.usersByPortalId?.[props.user.address]?.owner;
 	const userProfile = portalProvider.usersByPortalId?.[props.user.address] ?? { id: props.user.address };
 	const unauthorized = !portalProvider?.permissions?.updateUsers;
 	const invitePending =
 		userProfile?.invites?.find((invite: PortalHeaderType) => invite.id === portalProvider.current?.id) !== undefined;
 	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser && !invitePending;
-
 	React.useEffect(() => {
 		(async function () {
 			if (!fetched) portalProvider.fetchPortalUserProfile(props.user);
@@ -60,12 +61,14 @@ export default function User(props: {
 				className={'fade-in'}
 				onClick={() => {
 					if (props.hideAction || unauthorized) return;
-
-					if (!isPortalOwner) {
-						setShowManageUser(true);
-					} else {
+					if (
+						portalProvider.usersByPortalId?.[props.user.address].owner === arweaveProvider.walletAddress &&
+						isCurrentLoggedInUserPortalOwner
+					) {
 						setShowManageOwner(true);
+						return;
 					}
+					setShowManageUser(true);
 				}}
 				disabled={unauthorized}
 				hideAction={props.hideAction}

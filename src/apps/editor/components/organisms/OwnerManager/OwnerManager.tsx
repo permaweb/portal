@@ -56,7 +56,8 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 		if (arProvider.wallet && portalProvider.current?.id) {
 			setLoading(true);
 			try {
-				await permawebProvider.libs.transferOwnership({
+				console.log(permawebProvider.libs);
+				await permawebProvider.libs.transferZoneOwnership({
 					zoneId: portalProvider.current.id,
 					op: 'Invite',
 					to: walletAddress,
@@ -85,7 +86,7 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 		if (!portalProvider.current?.id) return;
 		try {
 			setLoading(true);
-			await permawebProvider.libs.transferOwnership({
+			await permawebProvider.libs.transferZoneOwnership({
 				zoneId: portalProvider.current.id,
 				op: 'Cancel',
 				to: inviteeAddress,
@@ -119,7 +120,7 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 					<Button
 						type={'alt1'}
 						label={language?.transferOwnership}
-						handlePress={() => {}}
+						handlePress={handleSubmit}
 						disabled={loading || !walletAddress || !checkValidAddress(walletAddress)}
 						loading={loading}
 						iconLeftAlign
@@ -146,10 +147,7 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 						<S.TableHead>
 							<tr>
 								<S.TableHeaderCell>Invitee (To)</S.TableHeaderCell>
-								<S.TableHeaderCell>Inviter (From)</S.TableHeaderCell>
 								<S.TableHeaderCell>State</S.TableHeaderCell>
-								<S.TableHeaderCell>Created At</S.TableHeaderCell>
-								<S.TableHeaderCell>Last Updated</S.TableHeaderCell>
 								<S.TableHeaderCell>Final Event</S.TableHeaderCell>
 								<S.TableHeaderCell>Action</S.TableHeaderCell>
 							</tr>
@@ -165,9 +163,6 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 								transferRequests.map((transferItem: any, index: number) => {
 									const stateValue = transferItem.State ?? transferItem.state;
 									const inviteeAddress = transferItem.To ?? transferItem.to;
-									const inviterAddress = transferItem.From ?? transferItem.from;
-									const createdAt = transferItem.CreatedAt ?? transferItem.createdAt;
-									const updatedAt = transferItem.UpdatedAt ?? transferItem.updatedAt;
 									const acceptedAt = transferItem.AcceptedAt ?? transferItem.acceptedAt;
 									const rejectedAt = transferItem.RejectedAt ?? transferItem.rejectedAt;
 									const cancelledAt = transferItem.CancelledAt ?? transferItem.cancelledAt;
@@ -185,12 +180,9 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 									return (
 										<S.TableRow key={`${inviteeAddress}-${index}`}>
 											<S.TableCell>{inviteeAddress}</S.TableCell>
-											<S.TableCell>{inviterAddress}</S.TableCell>
 											<S.TableCell>
 												<S.StateBadge $state={stateValue}>{stateValue}</S.StateBadge>
 											</S.TableCell>
-											<S.TableCell>{formatTimestamp(createdAt)}</S.TableCell>
-											<S.TableCell>{formatTimestamp(updatedAt)}</S.TableCell>
 											<S.TableCell>
 												{finalEventLabel}
 												{finalEventTimestamp ? ` • ${formatTimestamp(finalEventTimestamp)}` : ''}

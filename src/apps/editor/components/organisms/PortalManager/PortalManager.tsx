@@ -130,7 +130,7 @@ export default function PortalManager(props: {
 						{
 							tags: tags,
 							data: PORTAL_DATA(),
-							spawnModeration: true,
+							spawnModeration: false,
 							authUsers: [arProvider.walletAddress],
 						},
 						(status: any) => console.log(status)
@@ -142,13 +142,13 @@ export default function PortalManager(props: {
 						[
 							{
 								granteeId: arProvider.walletAddress,
-								roles: [PORTAL_ROLES.SuperAdmin],
+								roles: [PORTAL_ROLES.ADMIN],
 								type: 'wallet',
 								sendInvite: false,
 							},
 							{
 								granteeId: permawebProvider.profile.id,
-								roles: [PORTAL_ROLES.SuperAdmin],
+								roles: [PORTAL_ROLES.ADMIN],
 								type: 'process',
 								sendInvite: false,
 							},
