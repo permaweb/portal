@@ -86,6 +86,10 @@ export default function ArticleBlocks(props: {
 				label: language.design,
 				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.DividerSolid], ARTICLE_BLOCKS[ArticleBlockEnum.DividerDashed]],
 			},
+			{
+				label: language.custom,
+				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.HTML]],
+			},
 		],
 		[language.text, language.headers, language.media, language.design]
 	);
@@ -259,6 +263,10 @@ export default function ArticleBlocks(props: {
 					case 'd':
 						event.preventDefault();
 						props.addBlock(ArticleBlockEnum.DividerDashed);
+						break;
+					case 'h':
+						event.preventDefault();
+						props.addBlock(ArticleBlockEnum.HTML);
 						break;
 					default:
 						break;

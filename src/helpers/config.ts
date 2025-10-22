@@ -233,6 +233,12 @@ export const ARTICLE_BLOCKS = {
 		icon: ICONS.dividerDashed,
 		shortcut: 'Ctrl / D',
 	},
+	[ArticleBlockEnum.HTML]: {
+		type: ArticleBlockEnum.HTML,
+		label: 'HTML',
+		icon: ICONS.html,
+		shortcut: 'Ctrl / H',
+	},
 };
 
 export const STRIPE_PUBLISHABLE_KEY =

@@ -31,4 +31,4 @@ if [ -n "$STAGED_FILES" ]; then
   echo "$STAGED_FILES" | xargs git add
 fi
 
-echo "✅ Pre-commit Checks Complete"
+echo "Pre-commit Checks Complete"

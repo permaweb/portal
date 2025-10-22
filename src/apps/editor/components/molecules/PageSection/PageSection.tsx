@@ -20,10 +20,10 @@ import { PageBlocks } from '../PageBlocks';
 import { FeedBlock } from './FeedBlock';
 import * as S from './styles';
 
-// TODO: Row / column select
 // TODO: Block width resize
 // TODO: Custom HTML ArticleBlock
 // TODO: Block / Text Alignment
+// TODO: Row / column select
 export default function PageSection(props: {
 	id: string;
 	index: number;

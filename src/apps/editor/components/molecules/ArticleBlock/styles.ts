@@ -33,6 +33,7 @@ function getElementWrapper(blockEditMode: boolean, type: ArticleBlockEnum, theme
 		case 'video':
 		case 'divider-solid':
 		case 'divider-dashed':
+		case 'html':
 			return '';
 		case 'code':
 			return `
@@ -55,6 +56,7 @@ function getElementCursor(type: ArticleBlockEnum) {
 		case 'video':
 		case 'divider-solid':
 		case 'divider-dashed':
+		case 'html':
 			return 'default';
 		default:
 			return 'text';

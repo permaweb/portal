@@ -425,3 +425,27 @@ export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 		});
 	});
 }
+
+export function isValidHTML(content: string) {
+	if (!content || typeof content !== 'string') {
+		return false;
+	}
+
+	try {
+		const parser = new DOMParser();
+		const doc = parser.parseFromString(content, 'text/html');
+
+		// Check for parser errors
+		const parseError = doc.querySelector('parsererror');
+		if (parseError) {
+			return false;
+		}
+
+		// Additional validation: ensure content has at least one valid element
+		const hasValidContent = doc.body && (doc.body.children.length > 0 || doc.body.textContent?.trim().length);
+
+		return !!hasValidContent;
+	} catch (error) {
+		return false;
+	}
+}

@@ -20,6 +20,7 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 
 import { ArticleBlocks } from '../ArticleBlocks';
 
+import { HTMLBlock } from './CustomBlocks/HTMLBlock';
 import { MediaBlock } from './CustomBlocks/MediaBlock';
 import * as S from './styles';
 
@@ -761,6 +762,15 @@ export default function ArticleBlock(props: {
 		case 'divider-dashed':
 			useCustom = true;
 			element = <div className={'article-divider-dashed'} />;
+			break;
+		case 'html':
+			useCustom = true;
+			element = (
+				<HTMLBlock
+					content={props.block.content}
+					onChange={(newContent: any) => props.onChangeBlock({ id: props.block.id, content: newContent })}
+				/>
+			);
 			break;
 		default:
 			element = 'p';
