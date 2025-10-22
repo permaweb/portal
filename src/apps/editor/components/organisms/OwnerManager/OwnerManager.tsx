@@ -29,13 +29,6 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 	const [transferRequests, setTransferRequests] = React.useState<any[]>([]);
 	const [isTransfersRefreshing, setIsTransfersRefreshing] = React.useState<boolean>(false);
 
-	const formatTimestamp = React.useCallback((ts?: number | string) => {
-		if (!ts && ts !== 0) return '-';
-		const asNumber = typeof ts === 'string' ? parseInt(ts, 10) : ts;
-		if (!asNumber || Number.isNaN(asNumber)) return '-';
-		return new Date(asNumber).toLocaleString();
-	}, []);
-
 	// Fetch transfer requests from the Zone (GetFullState -> Transfers)
 	async function loadTransferRequests() {
 		if (!portalProvider.current?.id) return;
@@ -43,6 +36,7 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 			setIsTransfersRefreshing(true);
 			const zoneState = await permawebProvider.libs.getZone(portalProvider.current.id);
 			const transfersFromState = zoneState?.transfers ?? zoneState?.Transfers ?? [];
+			console.log('Loaded transfer requests:', transfersFromState);
 			setTransferRequests(Array.isArray(transfersFromState) ? transfersFromState : []);
 		} catch (error: any) {
 			console.error(error);
@@ -80,6 +74,35 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 		loadTransferRequests();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [portalProvider.current?.id]);
+
+	const [inviteProfiles, setInviteProfiles] = React.useState<Record<string, any>>({});
+
+	React.useEffect(() => {
+		const loadProfiles = async () => {
+			const profiles: Record<string, any> = {};
+
+			for (const request of transferRequests) {
+				const inviterAddress = request.From ?? request.from;
+				if (!inviterAddress) continue;
+
+				// avoid refetching same address
+				if (!profiles[inviterAddress]) {
+					try {
+						const profile = await permawebProvider.fetchProfile(inviterAddress);
+						profiles[inviterAddress] = profile;
+					} catch (err) {
+						console.error('Failed to fetch profile for', inviterAddress, err);
+					}
+				}
+			}
+
+			setInviteProfiles(profiles);
+		};
+
+		if (transferRequests?.length > 0) {
+			loadProfiles();
+		}
+	}, [transferRequests]);
 
 	// Cancel a pending invite
 	async function handleCancelTransferInvite(inviteeAddress: string) {
@@ -148,7 +171,6 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 							<tr>
 								<S.TableHeaderCell>Invitee (To)</S.TableHeaderCell>
 								<S.TableHeaderCell>State</S.TableHeaderCell>
-								<S.TableHeaderCell>Final Event</S.TableHeaderCell>
 								<S.TableHeaderCell>Action</S.TableHeaderCell>
 							</tr>
 						</S.TableHead>
@@ -163,29 +185,13 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 								transferRequests.map((transferItem: any, index: number) => {
 									const stateValue = transferItem.State ?? transferItem.state;
 									const inviteeAddress = transferItem.To ?? transferItem.to;
-									const acceptedAt = transferItem.AcceptedAt ?? transferItem.acceptedAt;
-									const rejectedAt = transferItem.RejectedAt ?? transferItem.rejectedAt;
-									const cancelledAt = transferItem.CancelledAt ?? transferItem.cancelledAt;
-
-									const finalEventLabel = acceptedAt
-										? 'Accepted'
-										: rejectedAt
-										? 'Rejected'
-										: cancelledAt
-										? 'Cancelled'
-										: '-';
-
-									const finalEventTimestamp = acceptedAt || rejectedAt || cancelledAt;
+									const inviteeUsername = inviteProfiles[inviteeAddress]?.username ?? inviteeAddress;
 
 									return (
 										<S.TableRow key={`${inviteeAddress}-${index}`}>
-											<S.TableCell>{inviteeAddress}</S.TableCell>
+											<S.TableCell>{inviteeUsername}</S.TableCell>
 											<S.TableCell>
 												<S.StateBadge $state={stateValue}>{stateValue}</S.StateBadge>
-											</S.TableCell>
-											<S.TableCell>
-												{finalEventLabel}
-												{finalEventTimestamp ? ` • ${formatTimestamp(finalEventTimestamp)}` : ''}
 											</S.TableCell>
 											<S.ActionsCell>
 												<Button

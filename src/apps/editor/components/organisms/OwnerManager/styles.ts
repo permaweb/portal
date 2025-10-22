@@ -125,11 +125,11 @@ export const StateBadge = styled.span<{ $state?: string }>`
 			case 'pending':
 				return p.theme.colors.indicator.neutral;
 			case 'accepted':
-				return p.theme.colors.status.success;
+				return p.theme.colors.indicator.base;
 			case 'rejected':
-				return p.theme.colors.status.error;
+				return p.theme.colors.warning.primary;
 			case 'cancelled':
-				return p.theme.colors.status.warning;
+				return p.theme.colors.warning.primary;
 			default:
 				return p.theme.colors.container.alt3;
 		}
