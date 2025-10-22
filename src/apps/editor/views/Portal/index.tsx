@@ -9,6 +9,7 @@ import { UserList } from 'editor/components/organisms/UserList';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { Drawer } from 'components/atoms/Drawer';
 import { ICONS, URLS } from 'helpers/config';
 import { resolvePrimaryDomain } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -59,51 +60,45 @@ export default function Portal() {
 						</S.SectionBody>
 					</S.PostsSection>
 					<S.DesignSection>
-						<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
-							<S.SectionHeader>
-								<p>{language?.design}</p>
+						<Drawer
+							title={language?.design}
+							content={<PortalDesign />}
+							actions={[
 								<Button
 									type={'alt3'}
 									label={language?.designLink}
 									handlePress={() => navigate(URLS.portalDesign(portalProvider.current.id))}
-								/>
-							</S.SectionHeader>
-							<S.SectionBody>
-								<PortalDesign />
-							</S.SectionBody>
-						</div>
+								/>,
+							]}
+						/>
 					</S.DesignSection>
 					<S.DomainSection>
-						<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
-							<S.SectionHeader>
-								<p>{language?.domains}</p>
+						<Drawer
+							title={language?.domains}
+							content={<DomainListPortal type={'header'} />}
+							actions={[
 								<Button
 									type={'alt3'}
 									label={language?.domainsLink}
 									handlePress={() => navigate(URLS.portalDomains(portalProvider.current.id))}
-								/>
-							</S.SectionHeader>
-							<S.SectionBody>
-								<DomainListPortal type={'header'} />
-							</S.SectionBody>
-						</div>
+								/>,
+							]}
+						/>
 					</S.DomainSection>
 				</S.SectionWrapper>
 				<S.SectionWrapper>
 					<S.SetupSection>
-						<div className={'border-wrapper-alt2'} style={{ width: '100%', overflow: 'hidden' }}>
-							<S.SectionHeader>
-								<p>{language?.setup}</p>
+						<Drawer
+							title={language?.setup}
+							content={<PortalSetup type={'header'} />}
+							actions={[
 								<Button
 									type={'alt3'}
 									label={language?.setupLink}
 									handlePress={() => navigate(URLS.portalSetup(portalProvider.current.id))}
-								/>
-							</S.SectionHeader>
-							<S.SectionBody>
-								<PortalSetup type={'header'} />
-							</S.SectionBody>
-						</div>
+								/>,
+							]}
+						/>
 					</S.SetupSection>
 					<S.UsersSection>
 						<S.SectionBody>

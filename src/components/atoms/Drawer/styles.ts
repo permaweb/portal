@@ -1,21 +1,44 @@
 import styled from 'styled-components';
 
-import { open, transition3 } from 'helpers/animations';
+import { open, transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.div`
-	background: ${(props) => props.theme.colors.accordion.background};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
-	border-radius: ${STYLING.dimensions.radius.primary};
-	overflow: hidden;
-`;
+export const Wrapper = styled.div``;
 
-export const Action = styled.button`
+export const Action = styled.div<{ open: boolean; noContentWrapper?: boolean }>`
 	height: 55.5px;
 	width: 100%;
+	transition: all 100ms;
+	background: ${(props) => props.theme.colors.button.primary.background};
+	border-top-left-radius: calc(${STYLING.dimensions.radius.alt2} - 1.5px);
+	border-top-right-radius: calc(${STYLING.dimensions.radius.alt2} - 1.5px);
+	border-bottom-left-radius: ${(props) => (props.open ? '0' : `calc(${STYLING.dimensions.radius.alt2} - 1.5px)`)};
+	border-bottom-right-radius: ${(props) => (props.open ? '0' : `calc(${STYLING.dimensions.radius.alt2} - 1.5px)`)};
+	border-top: ${(props) => (props.noContentWrapper ? `1px solid ${props.theme.colors.border.primary}` : 'none')};
+	border-left: ${(props) => (props.noContentWrapper ? `1px solid ${props.theme.colors.border.primary}` : 'none')};
+	border-right: ${(props) => (props.noContentWrapper ? `1px solid ${props.theme.colors.border.primary}` : 'none')};
+	border-bottom: ${(props) =>
+		props.noContentWrapper && !props.open ? `1px solid ${props.theme.colors.border.primary}` : 'none'};
+
+	box-shadow: ${(props) =>
+		props.noContentWrapper && !props.open ? `${props.theme.colors.shadow.primary} 0px 1px 2px 0.5px` : 'none'};
+
 	&:hover {
-		background: ${(props) => props.theme.colors.accordion.hover};
+		background: ${(props) => props.theme.colors.button.primary.active.background};
+		cursor: pointer;
 	}
+`;
+
+export const HeaderEnd = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
+`;
+
+export const HeaderActions = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12.5px;
 `;
 
 export const Label = styled.div`
@@ -24,23 +47,27 @@ export const Label = styled.div`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 2.5px 20px 0 20px;
-	span {
+	padding: 2.5px 15px 0 15px;
+	p {
 		font-size: ${(props) => props.theme.typography.size.base};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
-		color: ${(props) => props.theme.colors.accordion.color};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		color: ${(props) => props.theme.colors.font.primary};
 		padding: 0 0 2.5px 0;
 	}
 	svg {
 		width: 17.5px !important;
-		fill: ${(props) => props.theme.colors.accordion.color};
+		fill: ${(props) => props.theme.colors.font.primary};
+		color: ${(props) => props.theme.colors.font.primary};
 	}
 `;
 
-export const Arrow = styled.div`
+export const Arrow = styled.div<{ open: boolean }>`
 	margin: 2.5px 0 0 0;
 	svg {
-		transform: rotate(270deg);
+		transform: rotate(${(props) => (props.open ? '0deg' : '270deg')});
+		fill: ${(props) => props.theme.colors.font.primary};
+		color: ${(props) => props.theme.colors.font.primary};
 	}
 `;
 
@@ -52,9 +79,8 @@ export const Title = styled.div`
 	}
 `;
 
-export const Content = styled.div`
-	animation: ${open} ${transition3};
-	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
-	border-bottom-left-radius: ${STYLING.dimensions.radius.primary};
-	border-bottom-right-radius: ${STYLING.dimensions.radius.primary};
+export const Content = styled.div<{ padContent?: boolean; noContentWrapper?: boolean }>`
+	animation: ${open} ${transition2};
+	border-top: ${(props) => (props.noContentWrapper ? 'none' : `1px solid ${props.theme.colors.border.primary}`)};
+	padding: ${(props) => (props.padContent ? '15px' : '0')};
 `;

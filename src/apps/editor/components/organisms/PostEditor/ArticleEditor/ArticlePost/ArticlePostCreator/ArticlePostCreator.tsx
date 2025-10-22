@@ -42,13 +42,14 @@ export default function ArticlePostCreator() {
 			if (
 				currentPost.data?.creator &&
 				checkValidAddress(currentPost.data?.creator) &&
-				!usersFetched[currentPost.data.creator]
+				!usersFetched[currentPost.data.creator] &&
+				currentPost.data.creator !== portalProvider.current?.id
 			) {
 				portalProvider.fetchPortalUserProfile({ address: currentPost.data.creator });
 				setUsersFetched((prev) => ({ ...prev, [currentPost.data.creator]: true }));
 			}
 		})();
-	}, [currentPost.data?.creator, usersFetched]);
+	}, [currentPost.data?.creator, portalProvider.current?.id, usersFetched]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -77,7 +78,12 @@ export default function ArticlePostCreator() {
 	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
 	const creatorDisabled = requestUnauthorized || submitUnauthorized || currentPost.editor.loading.active;
 
-	const creator = portalProvider.usersByPortalId?.[currentPost.data.creator] ?? { id: currentPost.data.creator };
+	const creator =
+		currentPost.data.creator === portalProvider.current?.id
+			? {
+					name: portalProvider.current?.name,
+			  }
+			: portalProvider.usersByPortalId?.[currentPost.data.creator] ?? { id: currentPost.data.creator };
 
 	return (
 		<S.Wrapper>

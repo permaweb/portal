@@ -59,21 +59,13 @@ export const InfoWrapper = styled.div`
 
 export const MediaEntry = styled.div`
 	width: 100%;
-	padding: 12px;
-	background: ${(props) => props.theme.colors.button.primary.background};
-	border: 1px solid ${(props) => props.theme.colors.button.primary.border};
-	border-radius: 8px;
-	margin-top: 10px;
+	margin-top: 12.5px;
 	margin-bottom: 20px;
 `;
 
 export const MediaEntryWallpaper = styled.div`
 	width: 100%;
-	padding: 12px;
-	background: ${(props) => props.theme.colors.button.primary.background};
-	border: 1px solid ${(props) => props.theme.colors.button.primary.border};
-	border-radius: 8px;
-	margin-top: 10px;
+	margin-top: 12.5px;
 	margin-bottom: 20px;
 `;
 
@@ -95,5 +87,5 @@ export const MediaTitle = styled.p`
 export const MediaInfo = styled.span`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xxxxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.medium};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
 `;

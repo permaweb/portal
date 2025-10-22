@@ -10,7 +10,7 @@ import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { ICONS } from 'helpers/config';
 import { PortalUserType } from 'helpers/types';
-import { checkValidAddress, urlify } from 'helpers/utils';
+import { urlify } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
@@ -29,7 +29,6 @@ export default function ArticlePostURL() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [usersFetched, setUsersFetched] = React.useState<{ [address: string]: boolean }>({});
 	const [showForm, setShowForm] = React.useState<boolean>(false);
 	const [urlValue, setUrlValue] = React.useState<string>(currentPost.data?.url || '');
 
@@ -42,32 +41,6 @@ export default function ArticlePostURL() {
 		setUrlValue(generatedUrl);
 		handleCurrentPostUpdate({ field: 'url', value: generatedUrl });
 	}, [currentPost.data?.title]);
-
-	React.useEffect(() => {
-		(async function () {
-			if (
-				currentPost.data?.creator &&
-				checkValidAddress(currentPost.data?.creator) &&
-				!usersFetched[currentPost.data.creator]
-			) {
-				portalProvider.fetchPortalUserProfile({ address: currentPost.data.creator });
-				setUsersFetched((prev) => ({ ...prev, [currentPost.data.creator]: true }));
-			}
-		})();
-	}, [currentPost.data?.creator, usersFetched]);
-
-	React.useEffect(() => {
-		(async function () {
-			if (portalProvider.current?.users) {
-				portalProvider.current.users.forEach((user: PortalUserType) => {
-					if (!usersFetched[user.address] && user.type !== 'wallet') {
-						portalProvider.fetchPortalUserProfile(user);
-						setUsersFetched((prev) => ({ ...prev, [user.address]: true }));
-					}
-				});
-			}
-		})();
-	}, [portalProvider.current?.users, usersFetched]);
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));

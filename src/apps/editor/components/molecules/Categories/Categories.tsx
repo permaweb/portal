@@ -82,6 +82,11 @@ export default function Categories(props: {
 		refreshCurrentPortal: portalProvider.refreshCurrentPortal,
 	});
 
+	const templateOptions: SelectOptionType[] = React.useMemo(
+		() => Object.keys(PAGES_JOURNAL).map((k) => ({ id: k, label: k })),
+		[]
+	);
+
 	function openCategorySettings(category: PortalCategoryType) {
 		setOpenMetadata({
 			open: true,
@@ -209,7 +214,6 @@ export default function Categories(props: {
 							<div ref={provided.innerRef} {...provided.droppableProps}>
 								<S.CategoriesList>
 									{flattened.map((item, index) => {
-										console.log('Rendering category item:', item);
 										const active =
 											props.categories?.find((c: PortalCategoryType) => item.category.id === c.id) !== undefined;
 										const isSelected = selectedIds.has(item.category.id);
@@ -238,10 +242,6 @@ export default function Categories(props: {
 
 										const resolvedTemplate = openMetadata.template ?? item.category?.metadata?.template ?? 'feed';
 
-										const templateOptions: SelectOptionType[] = React.useMemo(
-											() => Object.keys(PAGES_JOURNAL).map((k) => ({ id: k, label: k })),
-											[]
-										);
 										const activeTemplate = templateOptions.find((o) => o.id === resolvedTemplate) ?? templateOptions[1];
 
 										const handleTemplateChange = (opt: SelectOptionType) => {
@@ -295,14 +295,14 @@ export default function Categories(props: {
 																				label={item.category.name}
 																				handlePress={() => handleSelectCategory(item.category.id)}
 																				active={active}
-																				disabled={unauthorized || categoryLoading || isDragging}
+																				disabled={disabled}
 																				icon={active ? ICONS.close : ICONS.add}
 																			/>
 																			<Button
 																				type={'alt3'}
 																				label={language.edit}
 																				handlePress={onOpenSettings}
-																				disabled={!!disabled}
+																				disabled={disabled}
 																			/>
 																		</S.CategoryRow>
 																		{snapshot.isDragging && selectedIds.size > 1 && (

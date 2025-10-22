@@ -405,6 +405,7 @@ export function hasUnsavedChanges(current: any, original: any): boolean {
 		current.status !== original.status ||
 		current.thumbnail !== original.thumbnail ||
 		current.releaseDate !== original.releaseDate ||
+		current.creator !== original.creator ||
 		JSON.stringify(current.content) !== JSON.stringify(original.content) ||
 		JSON.stringify(current.categories) !== JSON.stringify(original.categories) ||
 		JSON.stringify(current.topics) !== JSON.stringify(original.topics) ||

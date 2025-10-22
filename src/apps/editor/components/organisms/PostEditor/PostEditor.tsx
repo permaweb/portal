@@ -224,8 +224,10 @@ export default function PostEditor() {
 				content: currentPost.data.content,
 				topics: currentPost.data.topics,
 				categories: currentPost.data.categories,
+				creator: currentPost.data.creator,
 				url: url,
 				releaseDate: releaseDate,
+				originPortal: portalProvider.current.id,
 			});
 
 			if (currentPost.data.thumbnail) {
@@ -324,11 +326,6 @@ export default function PostEditor() {
 							data: dataSrc,
 							contentType: ASSET_UPLOAD.contentType,
 							assetType: ASSET_UPLOAD.ansType,
-							metadata: {
-								url: url,
-								releaseDate: releaseDate,
-								originPortal: portalProvider.current.id,
-							},
 							users: getAssetAuthUsers(),
 							spawnComments: true,
 						},

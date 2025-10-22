@@ -5,6 +5,7 @@ import { User } from 'editor/components/molecules/User';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { Drawer } from 'components/atoms/Drawer';
 import { Pagination } from 'components/atoms/Pagination';
 import { URLS } from 'helpers/config';
 import { PortalUserType, ViewLayoutType } from 'helpers/types';
@@ -44,28 +45,6 @@ export default function UserList(props: { type: ViewLayoutType }) {
 		const highestRole = user.roles.find((role) => roleOrder.includes(role));
 		return highestRole ? roleOrder.indexOf(highestRole) : roleOrder.length;
 	};
-
-	function getHeader() {
-		switch (props.type) {
-			case 'header':
-				return (
-					<S.UsersHeaderDetails className={'border-wrapper-alt3'}>
-						<p>{language?.users}</p>
-						<S.UsersHeaderDetailsActions>
-							<Button
-								type={'alt3'}
-								label={language?.usersLink}
-								handlePress={() => navigate(URLS.portalUsers(portalProvider.current.id))}
-							/>
-						</S.UsersHeaderDetailsActions>
-					</S.UsersHeaderDetails>
-				);
-			case 'detail':
-				return null;
-			default:
-				return null;
-		}
-	}
 
 	// Build the full (filtered + sorted) list once
 	const processedUsers = React.useMemo<PortalUserType[]>(() => {
@@ -151,25 +130,47 @@ export default function UserList(props: { type: ViewLayoutType }) {
 		processedUsers.length,
 		pageUsers,
 		handleInviteDetected,
-		usersWithPendingInvites, // Kept in deps in case UI reacts to this later
+		usersWithPendingInvites,
 	]);
+
+	function getUsers() {
+		return (
+			<>
+				{users}
+				<S.UsersFooter>
+					<Pagination
+						totalItems={processedUsers.length}
+						totalPages={totalPages}
+						currentPage={currentPage}
+						currentRange={currentRange}
+						setCurrentPage={setCurrentPage}
+						showRange={true}
+						showControls={true}
+						iconButtons={true}
+					/>
+				</S.UsersFooter>
+			</>
+		);
+	}
 
 	return (
 		<S.Wrapper>
-			{getHeader()}
-			{users}
-			<S.UsersFooter>
-				<Pagination
-					totalItems={processedUsers.length}
-					totalPages={totalPages}
-					currentPage={currentPage}
-					currentRange={currentRange}
-					setCurrentPage={setCurrentPage}
-					showRange={true}
-					showControls={true}
-					iconButtons={true}
+			{props.type === 'header' ? (
+				<Drawer
+					title={language?.users}
+					content={getUsers()}
+					actions={[
+						<Button
+							type={'alt3'}
+							label={language?.usersLink}
+							handlePress={() => navigate(URLS.portalUsers(portalProvider.current.id))}
+						/>,
+					]}
+					noContentWrapper
 				/>
-			</S.UsersFooter>
+			) : (
+				getUsers()
+			)}
 		</S.Wrapper>
 	);
 }
