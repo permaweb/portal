@@ -120,6 +120,35 @@ export const SubElementWrapper = styled.div<{ width: number }>`
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	padding: 15px;
+	position: relative;
+	max-width: 100%;
+	overflow: visible;
+`;
+
+export const ResizeHandle = styled.div<{ $side: 'left' | 'right' }>`
+	position: absolute;
+	top: 0;
+	right: ${(props) => (props.$side === 'right' ? '-5px' : 'auto')};
+	left: ${(props) => (props.$side === 'left' ? '-5px' : 'auto')};
+	width: 10px;
+	height: 100%;
+	cursor: col-resize;
+	z-index: 0;
+	transition: all 100ms;
+
+	&:hover::after,
+	&:active::after {
+		content: '';
+		position: absolute;
+		top: 4px;
+		left: ${(props) => (props.$side === 'left' ? 'calc(50% + 1px)' : 'calc(50% - 1px)')};
+		transform: translateX(-50%);
+		width: 2px;
+		height: calc(100% - 8px);
+		background: ${(props) => props.theme.colors.border.alt7};
+		border-radius: 2px;
+		z-index: 1;
+	}
 `;
 
 export const SubElementHeader = styled.div`
@@ -146,7 +175,26 @@ export const SubElementHeaderAction = styled.div`
 	}
 `;
 
-export const SubElementBody = styled.div``;
+export const SubElementBody = styled.div`
+	width: 100%;
+`;
+
+export const NestedSectionWrapper = styled.div`
+	width: 100%;
+	position: relative;
+	contain: layout style;
+
+	/* Prevent nested section content from overflowing during drag */
+	> * {
+		max-width: 100%;
+	}
+
+	/* Constrain nested section when being dragged */
+	[data-rbd-draggable-context-id] {
+		max-width: 100%;
+		overflow: hidden;
+	}
+`;
 
 export const BlockSelector = styled.div`
 	width: 100%;

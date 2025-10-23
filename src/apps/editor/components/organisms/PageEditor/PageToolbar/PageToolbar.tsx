@@ -11,6 +11,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
+// TODO: Layout shortcut
 export default function PageToolbar(props: { handleSubmit: () => void; addSection: (type: string) => void }) {
 	const dispatch = useDispatch();
 
@@ -40,6 +41,19 @@ export default function PageToolbar(props: { handleSubmit: () => void; addSectio
 				/>
 			</S.TitleWrapper>
 			<S.EndActions>
+				<Button
+					type={'primary'}
+					label={language?.layout}
+					handlePress={() =>
+						handleCurrentPageUpdate({ field: 'blockEditMode', value: !currentPage.editor.blockEditMode })
+					}
+					active={currentPage.editor.blockEditMode}
+					disabled={currentPage.editor.loading.active}
+					icon={currentPage.editor.blockEditMode ? ICONS.close : ICONS.layout}
+					iconLeftAlign
+					tooltip={'CTRL + L'}
+					noFocus
+				/>
 				<Button
 					type={'primary'}
 					label={language?.addSection}

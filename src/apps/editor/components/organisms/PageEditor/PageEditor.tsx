@@ -122,7 +122,7 @@ export default function PageEditor() {
 	return (
 		<>
 			<S.Wrapper>
-				<S.ToolbarWrapper>
+				<S.ToolbarWrapper id={'toolbar-wrapper'}>
 					<PageToolbar handleSubmit={handleSubmit} addSection={addSection} />
 				</S.ToolbarWrapper>
 				<S.EditorWrapper>

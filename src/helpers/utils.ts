@@ -449,3 +449,8 @@ export function isValidHTML(content: string) {
 		return false;
 	}
 }
+
+export function cleanHTMLContent(content: string): string {
+	if (!content) return '';
+	return content.replace(/[\n\t]+/g, '').trim();
+}

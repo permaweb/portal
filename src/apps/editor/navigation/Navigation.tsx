@@ -51,8 +51,9 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				window.requestAnimationFrame(() => {
 					const parts = window.location.href.split('/');
 					const isEditorPage = parts.some((part) => part === 'post' || part === 'page');
-					header.style.borderBottom =
-						!isEditorPage && lastScrollY > 0 ? `1px solid ${borderColor}` : '1px solid transparent';
+					if (!isEditorPage) {
+						header.style.borderBottom = lastScrollY > 0 ? `1px solid ${borderColor}` : '1px solid transparent';
+					}
 					ticking = false;
 				});
 				ticking = true;

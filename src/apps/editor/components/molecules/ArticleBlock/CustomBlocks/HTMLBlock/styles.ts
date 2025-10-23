@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 
+import { STYLING } from 'helpers/config';
+
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -22,6 +24,7 @@ export const PreviewPlaceholder = styled.div`
 	gap: 15px;
 	align-items: center;
 	justify-content: center;
+	border-radius: ${STYLING.dimensions.radius.alt4} !important;
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};

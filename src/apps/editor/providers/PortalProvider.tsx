@@ -132,7 +132,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 										name: cached.name ?? portal.name ?? 'None',
 										logo: cached.logo ?? portal.logo ?? 'None',
 										icon: cached.icon ?? portal.icon ?? 'None',
-										users: cached.users ?? portal.users ?? [],
+										users: cached.users ?? portal.roles ?? [],
 									};
 								}
 								return portal;

@@ -16,6 +16,7 @@ export const ToolbarWrapper = styled.div`
 	top: ${STYLING.dimensions.nav.height};
 	z-index: 1;
 	background: ${(props) => props.theme.colors.view.background};
+	border-bottom: 1px solid transparent;
 	padding: 10px 0;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
@@ -40,7 +41,7 @@ export const Editor = styled.div<{ blockEditMode: boolean }>`
 	}
 
 	> * {
-		margin: ${(props) => (props.blockEditMode ? '0 0 30px 0' : '0 0 30px 0')};
+		margin: ${(props) => (props.blockEditMode ? '0 0 40px 0' : '0 0 40px 0')};
 	}
 `;
 

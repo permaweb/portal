@@ -344,7 +344,7 @@ export default function ArticleEditor(props: {
 	return (
 		<>
 			<S.Wrapper>
-				<S.ToolbarWrapper>
+				<S.ToolbarWrapper id={'toolbar-wrapper'}>
 					<ArticleToolbar
 						addBlock={(type: ArticleBlockEnum) => addBlock(type)}
 						handleInitAddBlock={(e) => handleKeyAddBlock(e)}

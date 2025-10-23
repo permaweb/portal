@@ -12,7 +12,6 @@ export const InputWrapper = styled.div`
 	flex-direction: column;
 	position: relative;
 	padding: 10px 20px 17.5px 20px;
-	border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
 `;
 
 export const InputOverlay = styled.div`

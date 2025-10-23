@@ -4,7 +4,7 @@ import parse from 'html-react-parser';
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
 import { CodeEditor } from 'components/molecules/CodeEditor';
-import { isValidHTML } from 'helpers/utils';
+import { cleanHTMLContent, isValidHTML } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -119,7 +119,7 @@ export default function HTMLBlock(props: { content: any; onChange: any }) {
 			<S.PreviewElement isFullScreen={isFullScreen}>
 				<CodeEditor
 					initialData={props.content}
-					setEditorData={(content: string) => props.onChange(content)}
+					setEditorData={(content: string) => props.onChange(cleanHTMLContent(content))}
 					language={'html'}
 					loading={false}
 					noFullScreen
@@ -145,11 +145,11 @@ export default function HTMLBlock(props: { content: any; onChange: any }) {
 	return (
 		<>
 			<S.Wrapper>
-				<S.PreviewWrapper className={isValidHTML(props.content) && !editorOpen ? 'fade-in' : 'border-wrapper-alt3'}>
+				<S.PreviewWrapper>
 					{!editorOpen && isValidHTML(props.content) && props.content ? (
 						<HTMLPreviewErrorBoundary>{parse(props.content)}</HTMLPreviewErrorBoundary>
 					) : (
-						<S.PreviewPlaceholder>
+						<S.PreviewPlaceholder className={'border-wrapper-alt3'}>
 							<span>{editorOpen ? 'Editing...' : 'HTML Preview'}</span>
 						</S.PreviewPlaceholder>
 					)}

@@ -210,6 +210,7 @@ export default function CodeEditor(props: {
 							fontSize: currentTheme.typography.size.xxxSmall,
 							fontWeight: '600',
 							scrollBeyondLastLine: false,
+							colorDecorators: false,
 							scrollbar: {
 								verticalSliderSize: 8,
 								horizontalSliderSize: 8,
