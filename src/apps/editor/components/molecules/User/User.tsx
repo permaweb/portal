@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { OwnerManager } from 'editor/components/organisms/OwnerManager';
 import { UserManager } from 'editor/components/organisms/UserManager';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -28,16 +29,18 @@ export default function User(props: {
 
 	const [fetched, setFetched] = React.useState<boolean>(false);
 	const [showManageUser, setShowManageUser] = React.useState<boolean>(false);
+	const [showManageOwner, setShowManageOwner] = React.useState<boolean>(false);
 	const [showShareCredits, setShowShareCredits] = React.useState<boolean>(false);
+
 	const currentLoggedInUser =
 		arweaveProvider?.walletAddress === portalProvider.usersByPortalId?.[props.user.address]?.owner;
+	const isCurrentLoggedInUserPortalOwner = portalProvider.current?.owner === arweaveProvider?.walletAddress;
+	const isPortalOwner = portalProvider.current?.owner === portalProvider.usersByPortalId?.[props.user.address]?.owner;
 	const userProfile = portalProvider.usersByPortalId?.[props.user.address] ?? { id: props.user.address };
-	const unauthorized =
-		!portalProvider?.permissions?.updateUsers || userProfile?.owner === portalProvider?.current?.owner;
+	const unauthorized = !portalProvider?.permissions?.updateUsers;
 	const invitePending =
 		userProfile?.invites?.find((invite: PortalHeaderType) => invite.id === portalProvider.current?.id) !== undefined;
 	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser && !invitePending;
-
 	React.useEffect(() => {
 		(async function () {
 			if (!fetched) portalProvider.fetchPortalUserProfile(props.user);
@@ -56,7 +59,19 @@ export default function User(props: {
 			<S.UserWrapper
 				key={props.user.address}
 				className={'fade-in'}
-				onClick={() => (props.hideAction || unauthorized ? {} : setShowManageUser((prev) => !prev))}
+				onClick={() => {
+					if (props.hideAction || unauthorized) return;
+					if (
+						portalProvider.usersByPortalId?.[props.user.address].owner === arweaveProvider.walletAddress &&
+						isCurrentLoggedInUserPortalOwner
+					) {
+						setShowManageOwner(true);
+						return;
+					}
+					if (portalProvider.usersByPortalId?.[props.user.address].owner !== arweaveProvider.walletAddress) {
+						setShowManageUser(true);
+					}
+				}}
 				disabled={unauthorized}
 				hideAction={props.hideAction}
 				isCurrent={currentLoggedInUser && !props.hideAction}
@@ -87,14 +102,22 @@ export default function User(props: {
 								/>
 							</S.UserActions>
 						)}
-						{props.user.roles && (
-							<S.UserActions>
-								{props.user.roles.map((role) => (
-									<S.UserRole key={role} role={role}>
-										<span>{formatRoleLabel(role)}</span>
-									</S.UserRole>
-								))}
-							</S.UserActions>
+						{isPortalOwner ? (
+							<S.UserRole key="Owner" role="Owner">
+								<span>Owner</span>
+							</S.UserRole>
+						) : (
+							<>
+								{props.user.roles && (
+									<S.UserActions>
+										{props.user.roles.map((role) => (
+											<S.UserRole key={role} role={role}>
+												<span>{formatRoleLabel(role)}</span>
+											</S.UserRole>
+										))}
+									</S.UserActions>
+								)}
+							</>
 						)}
 					</S.UserDetail>
 				)}
@@ -133,6 +156,15 @@ export default function User(props: {
 					/>
 				</Panel>
 			)}
+			<Panel
+				open={showManageOwner}
+				width={575}
+				header={language?.manageOwner}
+				handleClose={() => setShowManageOwner((prev) => !prev)}
+				closeHandlerDisabled
+			>
+				<OwnerManager handleClose={() => setShowManageOwner(false)} />
+			</Panel>
 		</>
 	);
 }

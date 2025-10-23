@@ -124,7 +124,13 @@ export default function MediaLibrary(props: {
 	async function handleUpload() {
 		setMediaLoading(true);
 		try {
-			const tx = await permawebProvider.libs.resolveTransaction(mediaData);
+			let tx: string;
+			try {
+				tx = await permawebProvider.libs.resolveTransaction(mediaData);
+			} catch (e) {
+				console.error('Upload failed', e);
+				throw new Error('Failed to upload media to Permaweb');
+			}
 
 			const mediaType = getMediaType(mediaData);
 

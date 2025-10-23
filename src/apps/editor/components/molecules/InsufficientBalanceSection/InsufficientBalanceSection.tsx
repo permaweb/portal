@@ -7,13 +7,14 @@ const InsufficientBalanceSection = ({ extendCost, extendCostLoading, extendPayme
 	const arProvider = useArweaveProvider();
 	const { balance: arIOBalance } = useArIOBalance();
 	const due = IS_TESTNET || extendPaymentMethod === 'ario' ? extendCost?.mario : extendCost?.winc;
-	const bal = IS_TESTNET || extendPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+	const bal =
+		IS_TESTNET || extendPaymentMethod === 'ario' ? arIOBalance : Number(arProvider.turboBalanceObj.effectiveBalance);
 	const loadingCost = extendCostLoading || due == null;
 	const loadingBal = IS_TESTNET
 		? arIOBalance == null
 		: extendPaymentMethod === 'ario'
 		? arIOBalance == null
-		: arProvider.turboBalance == null;
+		: arProvider.turboBalanceObj.effectiveBalance == null;
 	const insufficient = !(due != null && bal != null && bal >= due);
 	const isLoading = loadingCost || loadingBal;
 	return insufficient && !isLoading ? (

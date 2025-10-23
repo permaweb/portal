@@ -130,7 +130,7 @@ export default function PortalManager(props: {
 						{
 							tags: tags,
 							data: PORTAL_DATA(),
-							spawnModeration: true,
+							spawnModeration: false,
 							authUsers: [arProvider.walletAddress],
 						},
 						(status: any) => console.log(status)
@@ -140,7 +140,12 @@ export default function PortalManager(props: {
 
 					const rolesUpdate = await permawebProvider.libs.setZoneRoles(
 						[
-							{ granteeId: arProvider.walletAddress, roles: [PORTAL_ROLES.ADMIN], type: 'wallet', sendInvite: false },
+							{
+								granteeId: arProvider.walletAddress,
+								roles: [PORTAL_ROLES.ADMIN],
+								type: 'wallet',
+								sendInvite: false,
+							},
 							{
 								granteeId: permawebProvider.profile.id,
 								roles: [PORTAL_ROLES.ADMIN],

@@ -132,7 +132,7 @@ export type PortalDomainType = {
 
 export type PortalUploadOptionType = 'image' | 'video';
 
-export type PortalUserRoleType = 'Admin' | 'Contributor' | 'ExternalContributor' | 'Moderator';
+export type PortalUserRoleType = 'Owner' | 'Admin' | 'Contributor' | 'ExternalContributor' | 'Moderator';
 
 export type RequestUpdateType = 'Approve' | 'Reject';
 
