@@ -19,7 +19,6 @@ export default function Media() {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	console.log(arProvider.turboBalanceObj);
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 
 	return (
