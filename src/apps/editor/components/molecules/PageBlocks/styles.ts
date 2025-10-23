@@ -4,6 +4,7 @@ import { STYLING } from 'helpers/config';
 import { ArticleBlocksContextType } from 'helpers/types';
 
 export const BADropdownBody = styled.div<{ $context: ArticleBlocksContextType }>`
+	width: 100%;
 	display: flex;
 	flex-direction: ${(props) => (props.$context === 'grid' ? 'row' : 'column')};
 	flex-wrap: wrap;

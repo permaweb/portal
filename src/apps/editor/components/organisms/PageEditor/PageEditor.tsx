@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 
-import { PageSection } from 'editor/components/molecules/PageSection';
+import { PageSection, ResizeContext } from 'editor/components/molecules/PageSection';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPageUpdate } from 'editor/store/page';
@@ -24,6 +24,7 @@ export default function PageEditor() {
 	const { pageId } = useParams<{ pageId?: string }>();
 
 	const currentPage = useSelector((state: EditorStoreRootState) => state.currentPage);
+	const [resizingBlockId, setResizingBlockId] = React.useState<string | null>(null);
 
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -125,37 +126,39 @@ export default function PageEditor() {
 				<S.ToolbarWrapper id={'toolbar-wrapper'}>
 					<PageToolbar handleSubmit={handleSubmit} addSection={addSection} />
 				</S.ToolbarWrapper>
-				<S.EditorWrapper>
-					{currentPage.data.content?.length ? (
-						<DragDropContext onDragEnd={onDragEnd}>
-							<Droppable droppableId={'blocks'}>
-								{(provided) => (
-									<S.Editor
-										{...provided.droppableProps}
-										ref={provided.innerRef}
-										blockEditMode={currentPage.editor.blockEditMode}
-									>
-										{currentPage.data.content.map((section: PageSectionType, index: number) => (
-											<PageSection
-												key={index}
-												id={index.toString()}
-												index={index}
-												section={section as PageSectionType}
-												onChangeSection={handleSectionChange}
-												onDeleteSection={deleteSection}
-											/>
-										))}
-										{provided.placeholder}
-									</S.Editor>
-								)}
-							</Droppable>
-						</DragDropContext>
-					) : (
-						<S.BlocksEmpty className={'fade-in'}>
-							<span>Add Section</span>
-						</S.BlocksEmpty>
-					)}
-				</S.EditorWrapper>
+				<ResizeContext.Provider value={{ resizingBlockId, setResizingBlockId }}>
+					<S.EditorWrapper>
+						{currentPage.data.content?.length ? (
+							<DragDropContext onDragEnd={onDragEnd}>
+								<Droppable droppableId={'blocks'}>
+									{(provided) => (
+										<S.Editor
+											{...provided.droppableProps}
+											ref={provided.innerRef}
+											blockEditMode={currentPage.editor.blockEditMode}
+										>
+											{currentPage.data.content.map((section: PageSectionType, index: number) => (
+												<PageSection
+													key={index}
+													id={index.toString()}
+													index={index}
+													section={section as PageSectionType}
+													onChangeSection={handleSectionChange}
+													onDeleteSection={deleteSection}
+												/>
+											))}
+											{provided.placeholder}
+										</S.Editor>
+									)}
+								</Droppable>
+							</DragDropContext>
+						) : (
+							<S.BlocksEmpty className={'fade-in'}>
+								<span>Add Section</span>
+							</S.BlocksEmpty>
+						)}
+					</S.EditorWrapper>
+				</ResizeContext.Provider>
 			</S.Wrapper>
 			{currentPage.editor.loading.active && <Loader message={currentPage.editor.loading.message} />}
 		</>

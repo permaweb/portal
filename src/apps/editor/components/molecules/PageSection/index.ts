@@ -1,1 +1,1 @@
-export { default as PageSection } from './PageSection';
+export { default as PageSection, ResizeContext } from './PageSection';

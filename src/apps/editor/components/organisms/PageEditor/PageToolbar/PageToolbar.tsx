@@ -29,6 +29,23 @@ export default function PageToolbar(props: { handleSubmit: () => void; addSectio
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
+	React.useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.ctrlKey) {
+				if (event.key.toLowerCase() === 'l') {
+					event.preventDefault();
+					handleCurrentPageUpdate({ field: 'blockEditMode', value: !currentPage.editor.blockEditMode });
+				}
+			}
+		};
+
+		document.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [currentPage.editor.blockEditMode]);
+
 	return (
 		<S.Wrapper>
 			<S.TitleWrapper>

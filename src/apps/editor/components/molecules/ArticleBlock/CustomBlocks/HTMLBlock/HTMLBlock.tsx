@@ -4,7 +4,7 @@ import parse from 'html-react-parser';
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
 import { CodeEditor } from 'components/molecules/CodeEditor';
-import { cleanHTMLContent, isValidHTML } from 'helpers/utils';
+import { isValidHTML } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -119,7 +119,7 @@ export default function HTMLBlock(props: { content: any; onChange: any }) {
 			<S.PreviewElement isFullScreen={isFullScreen}>
 				<CodeEditor
 					initialData={props.content}
-					setEditorData={(content: string) => props.onChange(cleanHTMLContent(content))}
+					setEditorData={(content: string) => props.onChange(content)}
 					language={'html'}
 					loading={false}
 					noFullScreen

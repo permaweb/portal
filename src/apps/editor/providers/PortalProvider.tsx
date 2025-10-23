@@ -210,9 +210,10 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			const posts = parsePortalResponseValue(response.posts ?? {});
 			const requests = parsePortalResponseValue(response.requests ?? {});
 
-			if (overview.wallpaper === undefined && permawebProvider.libs?.updateZonePatchMap) {
-				permawebProvider.libs.updateZonePatchMap(PORTAL_PATCH_MAP, currentId);
-			}
+			// TODO
+			// if (overview.wallpaper === undefined && permawebProvider.libs?.updateZonePatchMap) {
+			// 	permawebProvider.libs.updateZonePatchMap(PORTAL_PATCH_MAP, currentId);
+			// }
 
 			if (
 				overview.authorities &&

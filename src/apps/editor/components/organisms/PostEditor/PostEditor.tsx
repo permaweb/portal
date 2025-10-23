@@ -27,6 +27,8 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { ArticleEditor } from './ArticleEditor';
 import * as S from './styles';
 
+// TODO: Show unsaved changes
+// TODO: Image resizer
 export default function PostEditor() {
 	const navigate = useNavigate();
 	const location = useLocation();

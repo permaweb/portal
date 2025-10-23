@@ -62,7 +62,8 @@ export default function ArticleBlock(props: {
 	const wasEmptyRef = React.useRef(false);
 	const isUserInitiatedChangeRef = React.useRef(false);
 
-	const isBlockEditMode = currentReducer?.editor.blockEditMode && props.type === 'post';
+	const isBlockEditMode = currentReducer?.editor.blockEditMode;
+	const isBlockEditDisabled = props.type === 'page';
 
 	const handleCurrentReducerUpdate = (updatedField: { field: string; value: any }) => {
 		let currentReducerUpdate = null;
@@ -814,20 +815,21 @@ export default function ArticleBlock(props: {
 	const invalidLink = newLinkUrl?.length > 0 && !validateUrl(newLinkUrl);
 
 	function getElement() {
-		const ToolbarWrapper: any = isBlockEditMode ? S.ElementToolbarWrapper : S.ElementToolbarToggle;
+		const ToolbarWrapper: any =
+			isBlockEditMode && !isBlockEditDisabled ? S.ElementToolbarWrapper : S.ElementToolbarToggle;
 
 		return (
 			<>
 				<S.ElementWrapper
 					type={props.block.type}
-					blockEditMode={isBlockEditMode}
+					blockEditMode={isBlockEditMode && !isBlockEditDisabled}
 					onFocus={props.onFocus}
 					className={'fade-in'}
 				>
 					<ToolbarWrapper className={'fade-in'} type={props.block.type}>
 						{getElementToolbar()}
 					</ToolbarWrapper>
-					<S.Element blockEditMode={isBlockEditMode || props.type === 'page'} type={props.block.type}>
+					<S.Element blockEditMode={isBlockEditMode} type={props.block.type}>
 						{useCustom ? (
 							element
 						) : (
@@ -844,7 +846,7 @@ export default function ArticleBlock(props: {
 					{showBlockSelector && (
 						<CloseHandler active={true} disabled={false} callback={handleSelectorClose}>
 							<S.BlockSelector
-								blockEditMode={isBlockEditMode || props.type === 'page'}
+								blockEditMode={isBlockEditMode}
 								position={blockSelectorPosition}
 								className={'border-wrapper-alt1 scroll-wrapper-hidden'}
 							>
@@ -891,7 +893,7 @@ export default function ArticleBlock(props: {
 		);
 	}
 
-	if (isBlockEditMode) {
+	if (isBlockEditMode && !isBlockEditDisabled) {
 		return (
 			<Draggable draggableId={props.block.id} index={props.index}>
 				{(provided) => (

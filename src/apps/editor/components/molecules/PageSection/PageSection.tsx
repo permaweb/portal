@@ -5,6 +5,15 @@ import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 import { EditorStoreRootState } from 'editor/store';
 
+// Context to track global resize state across all sections
+export const ResizeContext = React.createContext<{
+	resizingBlockId: string | null;
+	setResizingBlockId: (id: string | null) => void;
+}>({
+	resizingBlockId: null,
+	setResizingBlockId: () => {},
+});
+
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Panel } from 'components/atoms/Panel';
@@ -22,10 +31,15 @@ import * as S from './styles';
 
 // TODO: Block width resize (Done)
 // TODO: Custom HTML ArticleBlock (Done)
-// TODO: Block / Text Alignment
+// TODO: Layout mode (Done)
 // TODO: Row / column select (Done)
-// TODO: Nested sections for grid layout ?
+// TODO: Nested sections for grid layout (Done)
+// TODO: Block / Text Alignment
 // TODO: Nested section rearrange is messed up
+// TODO: Spacer article block
+// TODO: Disabled on unsaved changes
+// TODO: Show unsaved changes
+// TODO: Post / Category Spotlight Elements
 export default function PageSection(props: {
 	id: string;
 	index: number;
@@ -34,6 +48,8 @@ export default function PageSection(props: {
 	onDeleteSection: (index: number) => void;
 }) {
 	const currentPage = useSelector((state: EditorStoreRootState) => state.currentPage);
+	const { resizingBlockId: globalResizingBlockId, setResizingBlockId: setGlobalResizingBlockId } =
+		React.useContext(ResizeContext);
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -99,7 +115,7 @@ export default function PageSection(props: {
 						src={ICONS.layout}
 						handlePress={toggleSectionLayout}
 						dimensions={{ wrapper: 23.5, icon: 13.5 }}
-						tooltip={`Toggle Layout (${props.section.type === PageSectionEnum.Row ? 'Column' : 'Row'})`}
+						tooltip={`${props.section.type === PageSectionEnum.Row ? 'Column' : 'Row'} Layout`}
 						tooltipPosition={'bottom-right'}
 						noFocus
 					/>
@@ -271,10 +287,24 @@ export default function PageSection(props: {
 			isLast,
 			side,
 		});
+
+		// Set global resize state
+		setGlobalResizingBlockId(blockId);
 	};
 
 	React.useEffect(() => {
 		if (!resizingBlock) return;
+
+		// Create a style element to override cursor globally
+		const styleElement = document.createElement('style');
+		styleElement.id = 'resize-cursor-override';
+		styleElement.innerHTML = `
+			* {
+				cursor: col-resize !important;
+			}
+		`;
+		document.head.appendChild(styleElement);
+		document.body.style.userSelect = 'none';
 
 		const handleMouseMove = (e: MouseEvent) => {
 			if (!resizingBlock) return;
@@ -301,6 +331,13 @@ export default function PageSection(props: {
 
 		const handleMouseUp = () => {
 			setResizingBlock(null);
+			setGlobalResizingBlockId(null);
+			// Remove the style element and restore user select
+			const styleEl = document.getElementById('resize-cursor-override');
+			if (styleEl) {
+				styleEl.remove();
+			}
+			document.body.style.userSelect = '';
 		};
 
 		document.addEventListener('mousemove', handleMouseMove);
@@ -309,6 +346,12 @@ export default function PageSection(props: {
 		return () => {
 			document.removeEventListener('mousemove', handleMouseMove);
 			document.removeEventListener('mouseup', handleMouseUp);
+			// Cleanup in case component unmounts during resize
+			const styleEl = document.getElementById('resize-cursor-override');
+			if (styleEl) {
+				styleEl.remove();
+			}
+			document.body.style.userSelect = '';
 		};
 	}, [resizingBlock, props.section, props.index]);
 
@@ -409,7 +452,7 @@ export default function PageSection(props: {
 							<Droppable
 								droppableId={`section-${props.id}`}
 								direction={props.section.type === 'column' ? 'vertical' : 'horizontal'}
-								type="BLOCK"
+								type={`BLOCK-${props.id}`}
 							>
 								{(provided, _snapshot) => (
 									<S.DroppableContainer
@@ -417,88 +460,101 @@ export default function PageSection(props: {
 										{...provided.droppableProps}
 										$direction={props.section.type ?? ('row' as any)}
 									>
-										{props.section.content.map((block: any, index: number) => {
-											return (
-												<Draggable
-													key={block.id}
-													draggableId={`block-${block.id}`}
-													index={index}
-													isDragDisabled={!currentPage?.editor.blockEditMode}
-												>
-													{(provided, _snapshot) => (
-														<S.SubElementWrapper
-															ref={provided.innerRef}
-															{...provided.draggableProps}
-															width={block?.width ?? 1}
-														>
-															{currentPage?.editor.blockEditMode && props.section.type !== 'column' && (
-																<>
-																	{/* Left handle for middle and last elements (when multiple blocks exist) */}
-																	{(props.section.content?.length || 0) > 1 && index > 0 && (
-																		<S.ResizeHandle
-																			onMouseDown={(e) =>
-																				handleResizeStart(e, block.id, block?.width ?? 1, false, 'left')
-																			}
-																			$side="left"
-																		/>
+										{(props.section.content || [])
+											.filter((block) => block)
+											.map((block: any, index: number) => {
+												return (
+													<Draggable
+														key={block.id}
+														draggableId={`block-${block.id}`}
+														index={index}
+														isDragDisabled={!currentPage?.editor.blockEditMode}
+													>
+														{(provided, _snapshot) => (
+															<S.SubElementWrapper
+																ref={provided.innerRef}
+																{...provided.draggableProps}
+																blockEditMode={currentPage.editor.blockEditMode}
+																width={block?.width ?? 1}
+															>
+																{currentPage?.editor.blockEditMode &&
+																	props.section.type !== 'column' &&
+																	(!globalResizingBlockId || globalResizingBlockId === block.id) && (
+																		<>
+																			{/* Left handle for middle and last elements (when multiple blocks exist) */}
+																			{(props.section.content?.length || 0) > 1 && index > 0 && (
+																				<S.ResizeHandle
+																					onMouseDown={(e) =>
+																						handleResizeStart(e, block.id, block?.width ?? 1, false, 'left')
+																					}
+																					$side={'left'}
+																				/>
+																			)}
+																			{/* Right handle for first and middle elements */}
+																			{index < (props.section.content?.length || 0) - 1 && (
+																				<S.ResizeHandle
+																					onMouseDown={(e) =>
+																						handleResizeStart(e, block.id, block?.width ?? 1, false, 'right')
+																					}
+																					$side={'right'}
+																				/>
+																			)}
+																		</>
 																	)}
-																	{/* Right handle for first and middle elements */}
-																	{index < (props.section.content?.length || 0) - 1 && (
-																		<S.ResizeHandle
-																			onMouseDown={(e) =>
-																				handleResizeStart(e, block.id, block?.width ?? 1, false, 'right')
-																			}
-																			$side="right"
-																		/>
-																	)}
-																</>
-															)}
 
-															<S.SubElementHeader {...provided.dragHandleProps}>
-																<S.SubElementHeaderAction>
-																	<S.EDragWrapper>
-																		<S.EDragHandler tabIndex={-1}>
-																			<ReactSVG src={ICONS.drag} />
-																		</S.EDragHandler>
-																	</S.EDragWrapper>
-																	<p>{getBlockLabel(block.type)}</p>
-																</S.SubElementHeaderAction>
-																<IconButton
-																	type={'alt1'}
-																	active={false}
-																	src={ICONS.delete}
-																	handlePress={() => deleteBlock(index)}
-																	dimensions={{ wrapper: 23.5, icon: 13.5 }}
-																	tooltip={language?.deleteBlock}
-																	tooltipPosition={'bottom-right'}
-																	noFocus
-																/>
-															</S.SubElementHeader>
+																{currentPage.editor.blockEditMode &&
+																	(block.type === 'section' ? (
+																		<S.NestedSectionDragHandle {...provided.dragHandleProps}>
+																			<S.EDragHandler tabIndex={-1}>
+																				<ReactSVG src={ICONS.drag} />
+																			</S.EDragHandler>
+																		</S.NestedSectionDragHandle>
+																	) : (
+																		<S.SubElementHeader {...provided.dragHandleProps}>
+																			<S.SubElementHeaderAction>
+																				<S.EDragWrapper>
+																					<S.EDragHandler tabIndex={-1}>
+																						<ReactSVG src={ICONS.drag} />
+																					</S.EDragHandler>
+																				</S.EDragWrapper>
+																				<p>{getBlockLabel(block.type)}</p>
+																			</S.SubElementHeaderAction>
+																			<IconButton
+																				type={'alt1'}
+																				active={false}
+																				src={ICONS.delete}
+																				handlePress={() => deleteBlock(index)}
+																				dimensions={{ wrapper: 23.5, icon: 13.5 }}
+																				tooltip={language?.deleteBlock}
+																				tooltipPosition={'bottom-right'}
+																				noFocus
+																			/>
+																		</S.SubElementHeader>
+																	))}
 
-															<S.SubElementBody>{getBlock(block, index)}</S.SubElementBody>
-														</S.SubElementWrapper>
-													)}
-												</Draggable>
-											);
-										})}
+																<S.SubElementBody>{getBlock(block, index)}</S.SubElementBody>
+															</S.SubElementWrapper>
+														)}
+													</Draggable>
+												);
+											})}
 										{provided.placeholder}
 									</S.DroppableContainer>
 								)}
 							</Droppable>
 						</DragDropContext>
 					) : (
-						<S.BlockSelector>
-							<IconButton
-								type={'alt1'}
+						<S.BlocksEmpty>
+							<Button
+								type={'primary'}
+								label={language?.addBlock}
 								active={false}
-								src={ICONS.plus}
 								handlePress={() => setShowSelector((prev) => !prev)}
-								dimensions={{ wrapper: 23.5, icon: 13.5 }}
-								tooltip={language?.addBlock}
-								tooltipPosition={'bottom-left'}
+								icon={ICONS.add}
+								iconLeftAlign
 								noFocus
 							/>
-						</S.BlockSelector>
+						</S.BlocksEmpty>
 					)}
 				</S.Element>
 			</S.ElementWrapper>
@@ -530,7 +586,6 @@ export default function PageSection(props: {
 				header={language?.addBlock}
 				handleClose={() => setShowSelector(false)}
 				width={500}
-				closeHandlerDisabled={true}
 				className={'modal-wrapper'}
 			>
 				<S.BlockSelectorColumn>

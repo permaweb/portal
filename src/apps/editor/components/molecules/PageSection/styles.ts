@@ -111,15 +111,15 @@ export const EToolbarActions = styled.div`
 	margin: 0 0 0 auto;
 `;
 
-export const SubElementWrapper = styled.div<{ width: number }>`
+export const SubElementWrapper = styled.div<{ blockEditMode: boolean; width: number }>`
 	display: flex;
 	flex: ${(props) => props.width};
 	flex-direction: column;
 	gap: 10px;
-	background: ${(props) => props.theme.colors.container.alt1.background};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	background: ${(props) => (props.blockEditMode ? props.theme.colors.container.alt1.background : 'transparent')};
+	border: 1px solid ${(props) => (props.blockEditMode ? props.theme.colors.border.primary : 'transparent')};
 	border-radius: ${STYLING.dimensions.radius.primary};
-	padding: 15px;
+	padding: ${(props) => (props.blockEditMode ? '15px' : '0')};
 	position: relative;
 	max-width: 100%;
 	overflow: visible;
@@ -145,9 +145,14 @@ export const ResizeHandle = styled.div<{ $side: 'left' | 'right' }>`
 		transform: translateX(-50%);
 		width: 2px;
 		height: calc(100% - 8px);
-		background: ${(props) => props.theme.colors.border.alt7};
+		background: ${(props) => props.theme.colors.border.alt5};
 		border-radius: 2px;
 		z-index: 1;
+	}
+
+	/* Maintain resize cursor during active resize on entire document */
+	&:active {
+		cursor: col-resize;
 	}
 `;
 
@@ -155,6 +160,18 @@ export const SubElementHeader = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+`;
+
+export const NestedSectionDragHandle = styled.div`
+	display: flex;
+	align-items: center;
+	padding: 5px 0;
+	margin-bottom: 5px;
+	cursor: grab;
+
+	&:active {
+		cursor: grabbing;
+	}
 `;
 
 export const SubElementHeaderAction = styled.div`
@@ -182,23 +199,29 @@ export const SubElementBody = styled.div`
 export const NestedSectionWrapper = styled.div`
 	width: 100%;
 	position: relative;
-	contain: layout style;
+	overflow: hidden;
+	contain: layout style paint;
 
-	/* Prevent nested section content from overflowing during drag */
+	/* Ensure nested sections don't break layout during drag */
 	> * {
+		width: 100%;
 		max-width: 100%;
+		position: relative;
 	}
+`;
 
-	/* Constrain nested section when being dragged */
-	[data-rbd-draggable-context-id] {
-		max-width: 100%;
-		overflow: hidden;
-	}
+export const BlocksEmpty = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 `;
 
 export const BlockSelector = styled.div`
 	width: 100%;
 	display: flex;
+	align-items: center;
+	justify-content: center;
 	gap: 10px;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
@@ -211,15 +234,16 @@ export const BlockSelectorColumn = styled(BlockSelector)`
 `;
 
 export const BlockSelectorActions = styled.div`
+	width: 100%;
 	button {
 		margin: 10px 0 0 0;
 	}
 `;
 
-export const DroppableContainer = styled.div<{ $direction: 'row' | 'column' }>`
+export const DroppableContainer = styled.div<{ $direction: 'row' | 'column' | 'grid' }>`
 	display: flex;
 	gap: 10px;
-	flex-direction: ${(props) => props.$direction};
+	flex-direction: ${(props) => (props.$direction === 'grid' ? 'row' : props.$direction)};
 	width: 100%;
-	flex-wrap: nowrap;
+	flex-wrap: ${(props) => (props.$direction === 'grid' ? 'wrap' : 'nowrap')};
 `;

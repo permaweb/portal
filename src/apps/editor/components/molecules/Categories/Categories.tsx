@@ -43,8 +43,6 @@ export default function Categories(props: {
 		hidden?: boolean;
 	}>({ open: false, categoryId: null });
 
-	type TemplateOption = { label: string; value: string };
-
 	const {
 		addCategory,
 		categoryOptions,
@@ -81,11 +79,6 @@ export default function Categories(props: {
 		portalCategories: portalProvider.current?.categories || [],
 		refreshCurrentPortal: portalProvider.refreshCurrentPortal,
 	});
-
-	const templateOptions: SelectOptionType[] = React.useMemo(
-		() => Object.keys(PAGES_JOURNAL).map((k) => ({ id: k, label: k })),
-		[]
-	);
 
 	function openCategorySettings(category: PortalCategoryType) {
 		setOpenMetadata({
@@ -218,34 +211,11 @@ export default function Categories(props: {
 											props.categories?.find((c: PortalCategoryType) => item.category.id === c.id) !== undefined;
 										const isSelected = selectedIds.has(item.category.id);
 										const disabled = unauthorized || categoryLoading || isDragging;
-										const addDisabled = unauthorized || categoryLoading || isDragging || item.category.metadata?.hidden;
-
-										const onChipClick = () => {
-											if (!addDisabled) handleSelectCategory(item.category.id);
-										};
-
-										const onChipKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
-											if (disabled) return;
-											if (e.key === 'Enter' || e.key === ' ') {
-												e.preventDefault();
-												handleSelectCategory(item.category.id);
-											}
-										};
 
 										const onOpenSettings: React.MouseEventHandler<HTMLButtonElement> = (e) => {
 											e.stopPropagation();
 											if (disabled) return;
-											openCategorySettings(item.category); // wire to your modal later
-										};
-
-										const fieldsDisabled = item?.category?.metadata?.hidden || categoryLoading;
-
-										const resolvedTemplate = openMetadata.template ?? item.category?.metadata?.template ?? 'feed';
-
-										const activeTemplate = templateOptions.find((o) => o.id === resolvedTemplate) ?? templateOptions[1];
-
-										const handleTemplateChange = (opt: SelectOptionType) => {
-											setOpenMetadata((prev) => ({ ...prev, template: opt.id }));
+											openCategorySettings(item.category);
 										};
 
 										return (

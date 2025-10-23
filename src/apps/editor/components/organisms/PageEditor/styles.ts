@@ -41,7 +41,7 @@ export const Editor = styled.div<{ blockEditMode: boolean }>`
 	}
 
 	> * {
-		margin: ${(props) => (props.blockEditMode ? '0 0 40px 0' : '0 0 40px 0')};
+		margin: ${(props) => (props.blockEditMode ? '0 0 40px 0' : '0 0 60px 0')};
 	}
 `;
 

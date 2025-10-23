@@ -224,7 +224,7 @@ export const ModalCaptionActionWrapper = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
-	gap: 20px;
+	gap: 15px;
 	margin: 10px 0 0 0;
 `;
 
