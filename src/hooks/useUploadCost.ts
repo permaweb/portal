@@ -30,8 +30,7 @@ export function useUploadCost() {
 				const uploadInWinc = Number((await uploadPriceResponse.json()).winc);
 
 				setUploadCost(uploadInWinc);
-
-				if (uploadInWinc > arProvider.turboBalance) {
+				if (uploadInWinc > Number(arProvider.turboBalanceObj.effectiveBalance)) {
 					addNotification('Insufficient balance for upload', 'warning');
 					setInsufficientBalance(true);
 					return { requiresConfirmation: true, cost: uploadInWinc, hasInsufficientBalance: true };
@@ -44,7 +43,7 @@ export function useUploadCost() {
 				return null;
 			}
 		},
-		[arProvider.wallet, arProvider.turboBalance]
+		[arProvider.wallet, arProvider.turboBalanceObj]
 	);
 
 	const clearUploadState = React.useCallback(() => {

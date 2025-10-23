@@ -156,13 +156,16 @@ const PaymentInfoPanel = (props: {
 							const entry = props.costsByAntId[props.upgradeModal.domain!.antId]?.upgrade;
 							const due = IS_TESTNET || props.upgradePaymentMethod === 'ario' ? entry?.mario : entry?.winc;
 							const unit = IS_TESTNET ? 'tario' : props.upgradePaymentMethod === 'ario' ? 'ARIO' : 'Credits';
-							const bal = IS_TESTNET || props.upgradePaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+							const bal =
+								IS_TESTNET || props.upgradePaymentMethod === 'ario'
+									? arIOBalance
+									: Number(arProvider.turboBalanceObj.effectiveBalance);
 							const loadingCost = entry == null || due == null;
 							const loadingBal = IS_TESTNET
 								? arIOBalance == null
 								: props.upgradePaymentMethod === 'ario'
 								? arIOBalance == null
-								: arProvider.turboBalance == null;
+								: arProvider.turboBalanceObj.effectiveBalance == null;
 
 							return (
 								<PaymentSummary
@@ -225,7 +228,10 @@ const PaymentInfoPanel = (props: {
 							disabled={(() => {
 								const entry = props.costsByAntId[props.upgradeModal.domain!.antId]?.upgrade;
 								const due = IS_TESTNET || props.upgradePaymentMethod === 'ario' ? entry?.mario : entry?.winc;
-								const bal = IS_TESTNET || props.upgradePaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+								const bal =
+									IS_TESTNET || props.upgradePaymentMethod === 'ario'
+										? arIOBalance
+										: Number(arProvider.turboBalanceObj.effectiveBalance);
 								return (
 									due == null || bal == null || bal < due || props.upgradingDomains.has(props.upgradeModal.domain!.name)
 								);

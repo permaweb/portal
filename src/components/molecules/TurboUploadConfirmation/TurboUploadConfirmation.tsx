@@ -36,7 +36,9 @@ export default function TurboUploadConfirmation(props: {
 							<p>
 								<span>{`${language?.yourUploadBalance}:`}</span>
 								&nbsp;
-								{arProvider.turboBalance ? `${getARAmountFromWinc(arProvider.turboBalance)} ${language?.credits}` : '-'}
+								{arProvider.turboBalanceObj.effectiveBalance
+									? `${getARAmountFromWinc(Number(arProvider.turboBalanceObj.effectiveBalance))} ${language?.credits}`
+									: '-'}
 							</p>
 						</S.InputActionsInfoLine>
 						<S.InputActionsInfoLine>
@@ -51,8 +53,10 @@ export default function TurboUploadConfirmation(props: {
 							<p>
 								<span>{`${language?.remainingAfterUpload}:`}</span>
 								&nbsp;
-								{arProvider.turboBalance && props.uploadCost
-									? `${getARAmountFromWinc(arProvider.turboBalance - props.uploadCost)} ${language?.credits}`
+								{arProvider.turboBalanceObj.effectiveBalance && props.uploadCost
+									? `${getARAmountFromWinc(Number(arProvider.turboBalanceObj.effectiveBalance) - props.uploadCost)} ${
+											language?.credits
+									  }`
 									: '-'}
 							</p>
 						</S.InputActionsInfoLine>

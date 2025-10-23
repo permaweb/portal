@@ -125,8 +125,8 @@ export default function TurboCredits(props: Props) {
 					onExpandedChange={setExpanded}
 					title={
 						<p>
-							{arProvider.turboBalance !== null
-								? `${getARAmountFromWinc(arProvider.turboBalance)} ${language?.credits}`
+							{arProvider.turboBalanceObj.effectiveBalance
+								? `${getARAmountFromWinc(Number(arProvider?.turboBalanceObj?.effectiveBalance))} ${language?.credits}`
 								: `${language?.loading}...`}
 						</p>
 					}
