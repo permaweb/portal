@@ -190,11 +190,12 @@ export default function Domains() {
 		}
 
 		// Choose balance based on selected payment method / network
-		const currentBalance = IS_TESTNET || paymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+		const currentBalance =
+			IS_TESTNET || paymentMethod === 'ario' ? arIOBalance : Number(arProvider.turboBalanceObj.effectiveBalance);
 		setInsufficientBalance((currentBalance ?? 0) < (purchaseAmount ?? 0));
 	}, [
 		arIOBalance,
-		arProvider.turboBalance,
+		arProvider.turboBalanceObj,
 		turboCreditBuyAmount,
 		turboCreditLeaseAmount,
 		arioCostBuyAmount,
@@ -731,8 +732,10 @@ export default function Domains() {
 											? arIOBalance !== null && !arIOBalanceLoading
 												? `${toReadableARIO(arIOBalance)} ARIO`
 												: `${language?.loading}...`
-											: arProvider.turboBalance !== null
-											? `${getARAmountFromWinc(arProvider.turboBalance)} ${language?.credits}`
+											: arProvider.turboBalanceObj.effectiveBalance
+											? `${getARAmountFromWinc(Number(arProvider.turboBalanceObj.effectiveBalance))} ${
+													language?.credits
+											  }`
 											: `${language?.loading}...`}
 									</p>
 								</S.CheckoutLine>
@@ -906,12 +909,13 @@ export default function Domains() {
 											: payTokens
 											? arioCostLeaseAmount == null
 											: turboCreditLeaseAmount == null);
-									const bal = confirmPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+									const bal =
+										confirmPaymentMethod === 'ario' ? arIOBalance : Number(arProvider.turboBalanceObj.effectiveBalance);
 									const loadingBal = IS_TESTNET
 										? arIOBalance == null || arIOBalanceLoading
 										: confirmPaymentMethod === 'ario'
 										? arIOBalance == null || arIOBalanceLoading
-										: arProvider.turboBalance == null;
+										: arProvider.turboBalanceObj.effectiveBalance == null;
 
 									return (
 										<PaymentSummary
@@ -940,7 +944,8 @@ export default function Domains() {
 							<InsufficientBalanceCTA
 								method={IS_TESTNET ? 'ario' : confirmPaymentMethod}
 								insufficient={(() => {
-									const bal = confirmPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+									const bal =
+										confirmPaymentMethod === 'ario' ? arIOBalance : Number(arProvider.turboBalanceObj.effectiveBalance);
 									const due =
 										confirmPaymentMethod === 'ario'
 											? purchaseType === 'buy'
@@ -966,7 +971,7 @@ export default function Domains() {
 										? arIOBalance == null || arIOBalanceLoading
 										: confirmPaymentMethod === 'ario'
 										? arIOBalance == null || arIOBalanceLoading
-										: arProvider.turboBalance == null;
+										: arProvider.turboBalanceObj.effectiveBalance == null;
 									return loadingCost || loadingBal;
 								})()}
 								onGetTokens={() =>
@@ -996,7 +1001,8 @@ export default function Domains() {
 											: purchaseType === 'buy'
 											? turboCreditBuyAmount
 											: turboCreditLeaseAmount;
-									const bal = confirmPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+									const bal =
+										confirmPaymentMethod === 'ario' ? arIOBalance : Number(arProvider.turboBalanceObj.effectiveBalance);
 									if (due == null || bal == null) return true;
 									return bal < due;
 								})()}

@@ -19,7 +19,7 @@ export default function Media() {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-
+	console.log(arProvider.turboBalanceObj);
 	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 
 	return (
@@ -30,8 +30,8 @@ export default function Media() {
 					actions={[
 						<S.CreditsWrapper className={'border-wrapper-alt3'}>
 							<p>
-								{arProvider.turboBalance !== null
-									? `${getARAmountFromWinc(arProvider.turboBalance)} ${language?.credits}`
+								{arProvider.turboBalanceObj.effectiveBalance
+									? `${getARAmountFromWinc(Number(arProvider.turboBalanceObj.effectiveBalance))} ${language?.credits}`
 									: `${language?.loading}...`}
 							</p>
 						</S.CreditsWrapper>,

@@ -160,14 +160,17 @@ const ExtendDomainPanel = (props: {
 
 							const unit = IS_TESTNET ? 'tario' : props.extendPaymentMethod === 'ario' ? 'ARIO' : 'Credits';
 
-							const bal = IS_TESTNET || props.extendPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+							const bal =
+								IS_TESTNET || props.extendPaymentMethod === 'ario'
+									? arIOBalance
+									: Number(arProvider.turboBalanceObj.effectiveBalance);
 
 							const loadingCost = props.extendCostLoading || due == null;
 							const loadingBal = IS_TESTNET
 								? arIOBalance == null
 								: props.extendPaymentMethod === 'ario'
 								? arIOBalance == null
-								: arProvider.turboBalance == null;
+								: arProvider.turboBalanceObj.effectiveBalance == null;
 
 							return (
 								<PaymentSummary
@@ -240,7 +243,10 @@ const ExtendDomainPanel = (props: {
 								const due =
 									IS_TESTNET || props.extendPaymentMethod === 'ario' ? props.extendCost?.mario : props.extendCost?.winc;
 
-								const bal = IS_TESTNET || props.extendPaymentMethod === 'ario' ? arIOBalance : arProvider.turboBalance;
+								const bal =
+									IS_TESTNET || props.extendPaymentMethod === 'ario'
+										? arIOBalance
+										: Number(arProvider.turboBalanceObj.effectiveBalance);
 
 								return (
 									due == null || bal == null || bal < due || props.extendingDomains.has(props.extendModal.domain!.name)
