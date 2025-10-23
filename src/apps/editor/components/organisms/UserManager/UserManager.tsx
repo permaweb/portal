@@ -27,7 +27,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 
 	const [roleOptions, setRoleOptions] = React.useState<{ id: string; label: string }[] | null>(null);
 	const [role, setRole] = React.useState<SelectOptionType | null>(null);
-
+	const [unauthorized, setUnauthorized] = React.useState<boolean>(false);
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
 
@@ -42,13 +42,16 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 		if (portalProvider.current?.roleOptions) {
 			const roleOrder = Object.keys(roleDescriptions);
 
-			const options = Object.values(portalProvider.current.roleOptions)
-				.map((role) => ({ id: role, label: formatRoleLabel(role) }))
+			let options = Object.values(portalProvider.current.roleOptions)
+				.map((role) => ({
+					id: role,
+					label: formatRoleLabel(role),
+				}))
 				.sort((a, b) => roleOrder.indexOf(a.id) - roleOrder.indexOf(b.id));
 
 			setRoleOptions(options);
 		}
-	}, [portalProvider.current?.roleOptions]);
+	}, [portalProvider.current?.roleOptions, portalProvider.current?.owner, arProvider.walletAddress]);
 
 	React.useEffect(() => {
 		if (roleOptions?.length) {
@@ -62,6 +65,18 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 			if (props.user.roles) {
 				const activeRole = props.user.roles[0];
 				setRole(roleOptions.find((role) => role.id === activeRole));
+				setUnauthorized(false);
+				if (activeRole === 'Admin' && portalProvider?.current?.owner !== arProvider.walletAddress) {
+					// only super admins can change admin's role
+					setUnauthorized(true);
+				}
+			}
+		}
+		if (!props.user && roleOptions) {
+			const isOwner = portalProvider?.current?.owner === arProvider.walletAddress;
+			if (!isOwner) {
+				let options = roleOptions?.filter((role) => role.id !== 'Admin') || null;
+				setRoleOptions(options);
 			}
 		}
 	}, [props.user, roleOptions]);
@@ -115,7 +130,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 						setWalletAddress(e.target.value);
 					}}
 					invalid={{ status: walletAddress ? !checkValidAddress(walletAddress) : false, message: null }}
-					disabled={loading || (props.user && props.user?.owner !== null)}
+					disabled={loading || (props.user && props.user?.owner !== null) || unauthorized}
 					sm
 					hideErrorMessage
 				/>
@@ -124,7 +139,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 					activeOption={role}
 					setActiveOption={(option) => setRole(option)}
 					options={roleOptions}
-					disabled={loading}
+					disabled={loading || unauthorized}
 				/>
 				{role && (
 					<S.InfoWrapper className={'border-wrapper-alt3'}>
@@ -144,7 +159,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 						type={'alt1'}
 						label={props.user ? language?.save : language?.add}
 						handlePress={handleSubmit}
-						disabled={loading || !walletAddress || !checkValidAddress(walletAddress)}
+						disabled={loading || !walletAddress || !checkValidAddress(walletAddress) || unauthorized}
 						loading={loading}
 						icon={props.user ? null : ICONS.add}
 						iconLeftAlign

@@ -88,6 +88,8 @@ export const UserActions = styled.div`
 
 function getRoleBackground(theme: DefaultTheme, role: PortalUserRoleType) {
 	switch (role) {
+		case 'Owner':
+			return theme.colors.roles.primary;
 		case 'Admin':
 			return theme.colors.roles.primary;
 		case 'Contributor':
