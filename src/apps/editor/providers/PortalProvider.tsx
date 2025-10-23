@@ -70,7 +70,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const language = languageProvider.object[languageProvider.current];
 	const { addNotification } = useNotifications();
 
-	const hasFetchedMeta = React.useRef(false);
 	const authoritiesRef = React.useRef(false);
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
@@ -102,39 +101,48 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			const profilePortals = permawebProvider.profile?.portals ?? [];
 			setPortals(profilePortals);
 			setInvites(permawebProvider.profile?.invites ?? []);
-			if (!hasFetchedMeta.current) {
-				hasFetchedMeta.current = true;
-				if (profilePortals.length > 0) {
-					(async () => {
-						const updated = await Promise.all(
-							profilePortals.map(async (portal: PortalHeaderType) => {
-								const cached = getCachedPortal(portal.id);
+			if (profilePortals.length > 0) {
+				(async () => {
+					const updated = await Promise.all(
+						profilePortals.map(async (portal: PortalHeaderType) => {
+							// Always fetch fresh data for portal metadata
+							try {
+								const data = permawebProvider.libs.mapFromProcessCase(
+									await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Overview })
+								);
 
-								let data = cached;
-								if (!data) {
-									data = permawebProvider.libs.mapFromProcessCase(
-										await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Overview })
-									);
-
-									data.users = permawebProvider.libs.mapFromProcessCase(
-										await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Users })
-									);
-								}
+								const users = permawebProvider.libs.mapFromProcessCase(
+									await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Users })
+								);
 
 								return {
 									...portal,
 									name: data.name ?? data.store?.name ?? 'None',
 									logo: data.logo ?? data.store?.logo ?? 'None',
 									icon: data.icon ?? data.store?.icon ?? 'None',
-									users: data.users ?? getPortalUsers(data.roles),
+									users: users.users ?? getPortalUsers(users.roles),
 								};
-							})
-						);
-						setPortals(updated);
-					})();
-				} else {
-					setPermissions({ base: false });
-				}
+							} catch (e) {
+								console.warn(`Failed to fetch portal metadata for ${portal.id}:`, e);
+								// Fall back to cached data if fetch fails
+								const cached = getCachedPortal(portal.id);
+								if (cached) {
+									return {
+										...portal,
+										name: cached.name ?? portal.name ?? 'None',
+										logo: cached.logo ?? portal.logo ?? 'None',
+										icon: cached.icon ?? portal.icon ?? 'None',
+										users: cached.users ?? portal.users ?? [],
+									};
+								}
+								return portal;
+							}
+						})
+					);
+					setPortals(updated);
+				})();
+			} else {
+				setPermissions({ base: false });
 			}
 		}
 	}, [
