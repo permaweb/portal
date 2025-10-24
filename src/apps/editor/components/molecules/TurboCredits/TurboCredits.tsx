@@ -9,6 +9,7 @@ import { getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
@@ -68,9 +69,10 @@ function aggregateByAddress(approvals: TurboApproval[] = []): AggregatedApproval
 
 export default function TurboCredits(props: Props) {
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	const [expanded, setExpanded] = React.useState<boolean>(false);
+	const [expanded, setExpanded] = React.useState<boolean>(props.allowExpandApprovals ?? false);
 	const [givenProfiles, setGivenProfiles] = React.useState<Record<string, any>>({});
 	const [showGivenBreakdown, setShowGivenBreakdown] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
@@ -124,7 +126,8 @@ export default function TurboCredits(props: Props) {
 				if (givenProfiles[addr]) continue; // already loaded
 
 				try {
-					const profile = await arProvider.fetchProfile(addr);
+					const profile = await permawebProvider.fetchProfile(addr);
+					console.log('Fetched profile for', addr, profile);
 					profiles[addr] = profile;
 				} catch (err) {
 					console.error('Failed to fetch profile for', addr, err);
@@ -199,14 +202,15 @@ export default function TurboCredits(props: Props) {
 								<S.ApprovalsCount
 									clickable={props.allowExpandApprovals}
 									onClick={() => {
-										if (props.allowExpandApprovals) setShowGivenBreakdown((s) => !s);
+										if (!props.allowExpandApprovals) return;
+										setShowGivenBreakdown((s) => !s);
 									}}
 								>
 									({givenApprovalsCount})
 								</S.ApprovalsCount>
 							</p>
 						</S.MetaRow>
-						{props.allowExpandApprovals && showGivenBreakdown && (
+						{showGivenBreakdown && (
 							<S.ApprovalsWrapper>
 								<S.ApprovalsHeaderRow>
 									<p>Address</p>
@@ -216,7 +220,7 @@ export default function TurboCredits(props: Props) {
 								</S.ApprovalsHeaderRow>
 								{givenAggregated.map((g) => {
 									const remaining = g.totalApproved - g.totalUsed;
-									const username = givenProfiles[g.address].username ?? g.address;
+									const username = givenProfiles[g.address].displayname;
 									return (
 										<S.ApprovalRow key={g.address}>
 											<S.Address>{username}</S.Address>
