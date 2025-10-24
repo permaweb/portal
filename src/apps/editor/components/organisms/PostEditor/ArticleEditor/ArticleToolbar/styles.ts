@@ -58,7 +58,7 @@ export const EndActions = styled.div`
 export const SubmitWrapper = styled.div`
 	display: flex;
 	align-items: center;
-	gap: 20px;
+	gap: 15px;
 `;
 
 export const Panel = styled.div<{ open: boolean }>`

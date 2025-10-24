@@ -195,7 +195,7 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 											</S.TableCell>
 											<S.ActionsCell>
 												<Button
-													type="primary"
+													type={'primary'}
 													label={language?.cancel ?? 'Cancel'}
 													handlePress={() => handleCancelTransferInvite(inviteeAddress)}
 													disabled={loading || stateValue !== 'pending'}

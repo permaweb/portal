@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+import { transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const PAGE_TOOLBAR_WIDTH = '350px';
@@ -11,13 +12,16 @@ export const Wrapper = styled.div`
 	position: relative;
 `;
 
-export const ToolbarWrapper = styled.div`
-	position: sticky;
+export const ToolbarWrapper = styled.div<{ navWidth: number }>`
+	width: calc(100vw - (${(props) => `${props.navWidth}px`} + 15px));
+	position: fixed;
 	top: ${STYLING.dimensions.nav.height};
+	left: ${(props) => `${props.navWidth}px`};
+	transition: left ${transition2};
 	z-index: 1;
 	background: ${(props) => props.theme.colors.view.background};
-	border-bottom: 1px solid transparent;
-	padding: 10px 0;
+	border: 1px solid ${(props) => props.theme.colors.view.background};
+	padding: 10px 20px 15px 25px;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		position: relative;
@@ -27,6 +31,7 @@ export const ToolbarWrapper = styled.div`
 
 export const EditorWrapper = styled.div`
 	width: 100%;
+	margin: ${STYLING.dimensions.nav.height} 0 0 0;
 `;
 
 export const Editor = styled.div<{ blockEditMode: boolean }>`

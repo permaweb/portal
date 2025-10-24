@@ -188,7 +188,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [refreshCurrentTrigger, refreshFields]);
 
-	const parsePortalResponseValue = (data: string) => permawebProvider.libs.mapFromProcessCase(JSON.parse(data));
+	const parseProcessResponseValue = (data: string) => permawebProvider.libs.mapFromProcessCase(JSON.parse(data));
 
 	const fetchPortal = async (opts?: { patchKey?: string }) => {
 		if (!currentId) return;
@@ -202,17 +202,20 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				})
 			);
 
-			const overview = parsePortalResponseValue(response.overview ?? {});
-			const users = parsePortalResponseValue(response.users ?? {});
-			const presentation = parsePortalResponseValue(response.presentation ?? {});
-			const navigation = parsePortalResponseValue(response.navigation ?? {});
-			const media = parsePortalResponseValue(response.media ?? {});
-			const posts = parsePortalResponseValue(response.posts ?? {});
-			const requests = parsePortalResponseValue(response.requests ?? {});
+			const parseField = (key: PortalPatchMapEnum) =>
+				opts?.patchKey === key ? response : response[key] ? parseProcessResponseValue(response[key]) : null;
+
+			const overview = parseField(PortalPatchMapEnum.Overview);
+			const users = parseField(PortalPatchMapEnum.Users);
+			const navigation = parseField(PortalPatchMapEnum.Navigation);
+			const presentation = parseField(PortalPatchMapEnum.Presentation);
+			const media = parseField(PortalPatchMapEnum.Media);
+			const posts = parseField(PortalPatchMapEnum.Posts);
+			const requests = parseField(PortalPatchMapEnum.Requests);
 
 			if (
-				overview.authorities &&
-				!overview.authorities.includes(AO_NODE.authority) &&
+				overview?.authorities &&
+				!overview?.authorities.includes(AO_NODE.authority) &&
 				permawebProvider.libs?.updateZoneAuthorities &&
 				!authoritiesRef.current
 			) {
@@ -224,31 +227,31 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			}
 
 			setUpdateAvailable(
-				overview.version !== CurrentZoneVersion && arProvider.wallet && arProvider.walletAddress === overview.owner
+				overview?.version !== CurrentZoneVersion && arProvider.wallet && arProvider.walletAddress === overview?.owner
 			);
 
 			const portalState: PortalDetailType = {
 				id: currentId,
-				name: overview.name ?? null,
-				logo: overview.logo ?? null,
-				icon: overview.icon ?? null,
-				wallpaper: overview.wallpaper ?? null,
-				owner: overview.owner ?? null,
-				moderation: overview.moderation ?? null,
-				assets: getPortalAssets(posts.index),
-				requests: requests.indexRequests ?? null,
-				categories: navigation.categories ?? [],
-				topics: navigation.topics ?? [],
-				links: navigation.links ?? [],
-				uploads: media.uploads ?? [],
-				fonts: presentation.fonts ?? null,
-				themes: presentation.themes ?? null,
-				users: users.roles ? getPortalUsers(users.roles) : null,
-				pages: presentation.pages ?? null,
-				layout: presentation.layout ?? null,
-				roleOptions: users.roleOptions ?? null,
-				permissions: users.permissions ?? null,
-				domains: navigation.domains ?? [],
+				name: overview?.name ?? current?.name ?? null,
+				logo: overview?.logo ?? current?.logo ?? null,
+				icon: overview?.icon ?? current?.icon ?? null,
+				wallpaper: overview?.wallpaper ?? current?.wallpaper ?? null,
+				owner: overview?.owner ?? current?.owner ?? null,
+				moderation: overview?.moderation ?? current?.moderation ?? null,
+				assets: posts?.index ? getPortalAssets(posts.index) : current?.assets ?? [],
+				requests: requests?.indexRequests ?? current?.requests ?? null,
+				categories: navigation?.categories ?? current?.categories ?? [],
+				topics: navigation?.topics ?? current?.topics ?? [],
+				links: navigation?.links ?? current?.links ?? [],
+				uploads: media?.uploads ?? current?.uploads ?? [],
+				fonts: presentation?.fonts ?? current?.fonts ?? null,
+				themes: presentation?.themes ?? current?.themes ?? null,
+				pages: presentation?.pages ?? current?.pages ?? null,
+				layout: presentation?.layout ?? current?.layout ?? null,
+				users: users?.roles ? getPortalUsers(users.roles) : current?.users ?? null,
+				roleOptions: users?.roleOptions ?? current?.roleOptions ?? null,
+				permissions: users?.permissions ?? current?.permissions ?? null,
+				domains: navigation?.domains ?? current?.domains ?? [],
 			};
 
 			if (permawebProvider.profile?.id && portalState.users) {

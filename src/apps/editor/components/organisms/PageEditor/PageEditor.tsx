@@ -5,6 +5,7 @@ import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 
 import { PageSection, ResizeContext } from 'editor/components/molecules/PageSection';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
+import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPageUpdate } from 'editor/store/page';
 
@@ -24,7 +25,6 @@ export default function PageEditor() {
 	const { pageId } = useParams<{ pageId?: string }>();
 
 	const currentPage = useSelector((state: EditorStoreRootState) => state.currentPage);
-	const [resizingBlockId, setResizingBlockId] = React.useState<string | null>(null);
 
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -33,6 +33,9 @@ export default function PageEditor() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const { addNotification } = useNotifications();
+	const { settings } = useSettingsProvider();
+
+	const [resizingBlockId, setResizingBlockId] = React.useState<string | null>(null);
 
 	const handleCurrentPageUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPageUpdate(updatedField));
@@ -123,7 +126,7 @@ export default function PageEditor() {
 	return (
 		<>
 			<S.Wrapper>
-				<S.ToolbarWrapper id={'toolbar-wrapper'}>
+				<S.ToolbarWrapper id={'toolbar-wrapper'} navWidth={settings.navWidth}>
 					<PageToolbar handleSubmit={handleSubmit} addSection={addSection} />
 				</S.ToolbarWrapper>
 				<ResizeContext.Provider value={{ resizingBlockId, setResizingBlockId }}>

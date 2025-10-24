@@ -77,6 +77,8 @@ export const ICONS = {
 	show: getTxEndpoint('uqYcReQQa_ndg9qPJN5d9hqgSrAfcWPeNAAs5gBwRN4'),
 	signout: getTxEndpoint('WSd2O4e-s6rnY-3c6NUrLCMEysx4iM51bcyOVxGsbEA'),
 	site: getTxEndpoint('gAG4DPY73lacgyiBnXXCgaolI40yxh3CRcrS86TASoA'),
+	spacerHorizontal: getTxEndpoint('WvKp16RhEeKA9hYrPXxeOK5ALuN1MQUY0QDFoVIlg3c'),
+	spacerVertical: getTxEndpoint('T2TDl6c6WAlC32DBhI8NIY_v24lPfGkOmWY2SUgxj3I'),
 	strikethrough: getTxEndpoint('JF2GMxtrO8fQU1NIQTcxDAv2nIAnDhZ_vKICXDVf_tc'),
 	success: getTxEndpoint('mVnNwxm-F6CV043zVtORE-EaMWfd2j8w6HHX70IcVbI'),
 	time: getTxEndpoint('EDfjYP_Fq8XycJ92uVeLDCmOCUMoSoPVbAhfE1ZwCJE'),

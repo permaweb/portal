@@ -225,19 +225,26 @@ export const ARTICLE_BLOCKS = {
 		type: ArticleBlockEnum.DividerSolid,
 		label: 'Solid Divider',
 		icon: ICONS.dividerSolid,
-		shortcut: 'Ctrl / S',
 	},
 	[ArticleBlockEnum.DividerDashed]: {
 		type: ArticleBlockEnum.DividerDashed,
 		label: 'Dashed Divider',
 		icon: ICONS.dividerDashed,
-		shortcut: 'Ctrl / D',
+	},
+	[ArticleBlockEnum.SpacerHorizontal]: {
+		type: ArticleBlockEnum.SpacerHorizontal,
+		label: 'Horizontal Spacer',
+		icon: ICONS.spacerHorizontal,
+	},
+	[ArticleBlockEnum.SpacerVertical]: {
+		type: ArticleBlockEnum.SpacerVertical,
+		label: 'Vertical Spacer',
+		icon: ICONS.spacerVertical,
 	},
 	[ArticleBlockEnum.HTML]: {
 		type: ArticleBlockEnum.HTML,
 		label: 'HTML',
 		icon: ICONS.html,
-		shortcut: 'Ctrl / H',
 	},
 };
 

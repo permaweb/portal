@@ -5,7 +5,6 @@ import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 import { EditorStoreRootState } from 'editor/store';
 
-// Context to track global resize state across all sections
 export const ResizeContext = React.createContext<{
 	resizingBlockId: string | null;
 	setResizingBlockId: (id: string | null) => void;
@@ -30,7 +29,6 @@ import { FeedBlock } from './FeedBlock';
 import * as S from './styles';
 
 // TODO: Block / Text Alignment
-// TODO: Spacer article block
 // TODO: Disabled on unsaved changes
 // TODO: Show unsaved changes
 // TODO: Post / Category Spotlight Elements

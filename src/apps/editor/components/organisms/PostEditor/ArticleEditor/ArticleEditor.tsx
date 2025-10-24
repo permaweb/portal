@@ -317,10 +317,15 @@ export default function ArticleEditor(props: {
 		handleCurrentPostUpdate({ field: 'lastAddedBlockId', value: newBlock.id });
 	};
 
-	const handleBlockChange = (args: { id: string; content: string; type?: any; data?: any }) => {
+	const handleBlockChange = (args: { id: string; content?: string; type?: any; data?: any }) => {
 		const updatedBlocks = [...currentPost.data.content].map((block) =>
 			block.id === args.id
-				? { ...block, content: args.content, type: args.type ?? block.type, data: args.data ?? block.data ?? null }
+				? {
+						...block,
+						content: args.content ?? block.content ?? null,
+						type: args.type ?? block.type,
+						data: args.data ?? block.data ?? null,
+				  }
 				: block
 		);
 		handleCurrentPostUpdate({ field: 'content', value: updatedBlocks });
@@ -344,7 +349,7 @@ export default function ArticleEditor(props: {
 	return (
 		<>
 			<S.Wrapper>
-				<S.ToolbarWrapper id={'toolbar-wrapper'}>
+				<S.ToolbarWrapper>
 					<ArticleToolbar
 						addBlock={(type: ArticleBlockEnum) => addBlock(type)}
 						handleInitAddBlock={(e) => handleKeyAddBlock(e)}

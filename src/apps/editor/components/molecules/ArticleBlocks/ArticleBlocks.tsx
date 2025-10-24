@@ -84,7 +84,12 @@ export default function ArticleBlocks(props: {
 			},
 			{
 				label: language.design,
-				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.DividerSolid], ARTICLE_BLOCKS[ArticleBlockEnum.DividerDashed]],
+				blocks: [
+					ARTICLE_BLOCKS[ArticleBlockEnum.DividerSolid],
+					ARTICLE_BLOCKS[ArticleBlockEnum.DividerDashed],
+					ARTICLE_BLOCKS[ArticleBlockEnum.SpacerVertical],
+					ARTICLE_BLOCKS[ArticleBlockEnum.SpacerHorizontal],
+				],
 			},
 			{
 				label: language.custom,
@@ -255,18 +260,6 @@ export default function ArticleBlocks(props: {
 					case 'v':
 						event.preventDefault();
 						props.addBlock(ArticleBlockEnum.Video);
-						break;
-					case 's':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.DividerSolid);
-						break;
-					case 'd':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.DividerDashed);
-						break;
-					case 'h':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.HTML);
 						break;
 					default:
 						break;

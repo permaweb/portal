@@ -20,15 +20,17 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 
 import { ArticleBlocks } from '../ArticleBlocks';
 
+import { DividerBlock } from './CustomBlocks/DividerBlock';
 import { HTMLBlock } from './CustomBlocks/HTMLBlock';
 import { MediaBlock } from './CustomBlocks/MediaBlock';
+import { SpacerBlock } from './CustomBlocks/SpacerBlock';
 import * as S from './styles';
 
 export default function ArticleBlock(props: {
 	index: number;
 	type: 'post' | 'page';
 	block: ArticleBlockType;
-	onChangeBlock: (args: { id: string; content: string; type?: any; data?: any }) => void;
+	onChangeBlock: (args: { id: string; content?: string; type?: any; data?: any }) => void;
 	onDeleteBlock: (id: string) => void;
 	onFocus: () => void;
 }) {
@@ -736,7 +738,7 @@ export default function ArticleBlock(props: {
 				<MediaBlock
 					type={'image'}
 					content={props.block.content}
-					data={props.block.data ?? null}
+					data={props.block.data}
 					onChange={(newContent: any, data: any) =>
 						props.onChangeBlock({ id: props.block.id, content: newContent, data: data })
 					}
@@ -749,7 +751,7 @@ export default function ArticleBlock(props: {
 				<MediaBlock
 					type={'video'}
 					content={props.block.content}
-					data={props.block.data ?? null}
+					data={props.block.data}
 					onChange={(newContent: any, data: any) =>
 						props.onChangeBlock({ id: props.block.id, content: newContent, data: data })
 					}
@@ -758,11 +760,33 @@ export default function ArticleBlock(props: {
 			break;
 		case 'divider-solid':
 			useCustom = true;
-			element = <div className={'article-divider-solid'} />;
+			element = <DividerBlock type={'solid'} />;
 			break;
 		case 'divider-dashed':
 			useCustom = true;
-			element = <div className={'article-divider-dashed'} />;
+			element = <DividerBlock type={'dashed'} />;
+			break;
+		case 'spacer-horizontal':
+			useCustom = true;
+			element = (
+				<SpacerBlock
+					type={props.type}
+					direction={'horizontal'}
+					data={props.block.data}
+					onChange={(data: any) => props.onChangeBlock({ id: props.block.id, data: data })}
+				/>
+			);
+			break;
+		case 'spacer-vertical':
+			useCustom = true;
+			element = (
+				<SpacerBlock
+					type={props.type}
+					direction={'vertical'}
+					data={props.block.data}
+					onChange={(data: any) => props.onChangeBlock({ id: props.block.id, data: data })}
+				/>
+			);
 			break;
 		case 'html':
 			useCustom = true;
@@ -900,12 +924,11 @@ export default function ArticleBlock(props: {
 					<S.ElementDragWrapper
 						ref={provided.innerRef}
 						{...provided.draggableProps}
-						{...provided.dragHandleProps}
 						onFocus={props.onFocus}
 						tabIndex={-1}
 					>
 						<S.EDragWrapper>
-							<S.EDragHandler tabIndex={-1}>
+							<S.EDragHandler {...provided.dragHandleProps} tabIndex={-1}>
 								<ReactSVG src={ICONS.drag} />
 							</S.EDragHandler>
 						</S.EDragWrapper>

@@ -30,7 +30,7 @@ export const ElementWrapper = styled.div<{ blockEditMode: boolean; type: PageSec
 `;
 
 export const Element = styled.div<{ blockEditMode: boolean; type: PageSectionEnum }>`
-	${(props) => getElementWrapper(props.blockEditMode, props.type, props.theme)};
+	/* ${(props) => getElementWrapper(props.blockEditMode, props.type, props.theme)}; */
 	cursor: ${(props) => getElementCursor(props.type)};
 	display: flex;
 	gap: 10px;
@@ -115,8 +115,9 @@ export const SubElementWrapper = styled.div<{ blockEditMode: boolean; width: num
 	display: flex;
 	flex: ${(props) => props.width};
 	flex-direction: column;
-	gap: 10px;
-	background: ${(props) => (props.blockEditMode ? props.theme.colors.container.alt1.background : 'transparent')};
+	gap: 5px;
+	background: ${(props) => (props.blockEditMode ? props.theme.colors.container.primary.background : 'transparent')};
+	box-shadow: ${(props) => (props.blockEditMode ? `${props.theme.colors.shadow.primary} 0px 1px 5px 0.5px` : 'none')};
 	border: 1px solid ${(props) => (props.blockEditMode ? props.theme.colors.border.primary : 'transparent')};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	padding: ${(props) => (props.blockEditMode ? '12.5px 15px 15px 12.5px' : '0')};
@@ -150,7 +151,6 @@ export const ResizeHandle = styled.div<{ $side: 'left' | 'right' }>`
 		z-index: 1;
 	}
 
-	/* Maintain resize cursor during active resize on entire document */
 	&:active {
 		cursor: col-resize;
 	}
@@ -178,6 +178,7 @@ export const SubElementHeaderAction = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 7.5px;
+	width: 100%;
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1} !important;
@@ -187,7 +188,7 @@ export const SubElementHeaderAction = styled.div`
 		display: block;
 		white-space: nowrap;
 		text-overflow: ellipsis;
-		max-width: 100%;
+		max-width: 75%;
 		overflow: hidden;
 	}
 `;

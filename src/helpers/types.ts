@@ -186,6 +186,8 @@ export enum ArticleBlockEnum {
 	Video = 'video',
 	DividerSolid = 'divider-solid',
 	DividerDashed = 'divider-dashed',
+	SpacerHorizontal = 'spacer-horizontal',
+	SpacerVertical = 'spacer-vertical',
 	HTML = 'html',
 }
 

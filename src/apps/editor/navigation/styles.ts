@@ -47,15 +47,15 @@ export const Panel = styled.nav<{ open: boolean; width?: number }>`
 export const ResizeHandle = styled.div`
 	position: absolute;
 	top: 0;
-	right: 0;
-	width: 4px;
+	right: -2px;
+	width: 3px;
 	height: 100%;
 	cursor: col-resize;
 	background: transparent;
-	transition: background 200ms ease;
+	transition: background 100ms ease;
 
 	&:hover {
-		background: ${(props) => props.theme.colors.border.alt2};
+		background: ${(props) => props.theme.colors.border.alt5};
 	}
 `;
 
@@ -64,7 +64,7 @@ export const PanelHeader = styled.div`
 	width: 100%;
 	display: flex;
 	align-items: center;
-	padding: 0 15px;
+	padding: 0 15px 0 16.5px;
 `;
 
 export const ToggleWrapper = styled.div<{ open: boolean }>`
