@@ -18,6 +18,13 @@ type Props = {
 	allowExpandApprovals?: boolean;
 	setShowFundUpload: (show: boolean) => void;
 };
+type AggregatedApproval = {
+	address: string;
+	count: number;
+	totalApproved: bigint;
+	totalUsed: bigint;
+	approvals: TurboApproval[];
+};
 
 interface TurboApproval {
 	approvalDataItemId: string;
@@ -31,14 +38,6 @@ interface TurboApproval {
 function sumApprovals(approvals: TurboApproval[] = []) {
 	return approvals.reduce((acc, a) => acc + BigInt(a.approvedWincAmount), BigInt(0));
 }
-
-type AggregatedApproval = {
-	address: string;
-	count: number;
-	totalApproved: bigint;
-	totalUsed: bigint;
-	approvals: TurboApproval[];
-};
 
 function aggregateByAddress(approvals: TurboApproval[] = []): AggregatedApproval[] {
 	const map = new Map<string, AggregatedApproval>();
