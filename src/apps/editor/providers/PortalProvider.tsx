@@ -6,7 +6,7 @@ import { CurrentZoneVersion } from '@permaweb/libs';
 import { PortalManager } from 'editor/components/organisms/PortalManager';
 
 import { Panel } from 'components/atoms/Panel';
-import { AO_NODE, PORTAL_PATCH_MAP } from 'helpers/config';
+import { AO_NODE } from 'helpers/config';
 import {
 	PortalDetailType,
 	PortalHeaderType,
@@ -209,11 +209,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			const media = parsePortalResponseValue(response.media ?? {});
 			const posts = parsePortalResponseValue(response.posts ?? {});
 			const requests = parsePortalResponseValue(response.requests ?? {});
-
-			// TODO
-			// if (overview.wallpaper === undefined && permawebProvider.libs?.updateZonePatchMap) {
-			// 	permawebProvider.libs.updateZonePatchMap(PORTAL_PATCH_MAP, currentId);
-			// }
 
 			if (
 				overview.authorities &&

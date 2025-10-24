@@ -184,12 +184,12 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		return (
 			<S.ToggleWrapper open={props.open}>
 				<IconButton
-					type={'primary'}
+					type={props.open ? 'primary' : 'alt1'}
 					src={ICONS.navigation}
 					handlePress={props.toggle}
 					dimensions={{
-						wrapper: 36.5,
-						icon: 23.5,
+						wrapper: 33.5,
+						icon: 19.5,
 					}}
 					tooltip={props.open ? language?.sidebarClose : language?.sidebarOpen}
 					tooltipPosition={props.open ? 'right' : 'bottom-left'}
@@ -234,9 +234,13 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 		if (desktop) {
 			return (
-				<S.Panel open={props.open && navWidth > STYLING.dimensions.nav.widthMin} className={'fade-in'} width={navWidth}>
-					{content}
-					<S.ResizeHandle onMouseDown={handleResizeStart} />
+				<S.Panel open={props.open} className={'fade-in'} width={props.open ? navWidth : 0}>
+					{props.open && (
+						<>
+							{content}
+							<S.ResizeHandle onMouseDown={handleResizeStart} />
+						</>
+					)}
 				</S.Panel>
 			);
 		} else {
@@ -405,13 +409,13 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 			{panel}
 			<S.Header
 				id={'navigation-header'}
-				navigationOpen={navWidth > STYLING.dimensions.nav.widthMin}
-				navWidth={navWidth}
+				navigationOpen={props.open}
+				navWidth={props.open ? navWidth : 0}
 				className={'fade-in'}
 			>
 				<S.Content>
 					<S.C1Wrapper>
-						{!props.open && !desktop && navigationToggle}
+						{!props.open && navigationToggle}
 						{portal}
 					</S.C1Wrapper>
 					<S.ActionsWrapper>

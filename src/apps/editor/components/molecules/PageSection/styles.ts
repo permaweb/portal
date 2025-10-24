@@ -119,7 +119,7 @@ export const SubElementWrapper = styled.div<{ blockEditMode: boolean; width: num
 	background: ${(props) => (props.blockEditMode ? props.theme.colors.container.alt1.background : 'transparent')};
 	border: 1px solid ${(props) => (props.blockEditMode ? props.theme.colors.border.primary : 'transparent')};
 	border-radius: ${STYLING.dimensions.radius.primary};
-	padding: ${(props) => (props.blockEditMode ? '15px' : '0')};
+	padding: ${(props) => (props.blockEditMode ? '12.5px 15px 15px 12.5px' : '0')};
 	position: relative;
 	max-width: 100%;
 	overflow: visible;
@@ -227,6 +227,18 @@ export const BlockSelector = styled.div`
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		flex-direction: column;
 	}
+`;
+
+export const PageBlocks = styled.div`
+	height: 100%;
+	width: 265px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+`;
+
+export const ArticleBlocks = styled.div`
+	width: calc(100% - 265px);
 `;
 
 export const BlockSelectorColumn = styled(BlockSelector)`

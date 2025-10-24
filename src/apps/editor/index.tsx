@@ -14,7 +14,7 @@ import { persistor, store } from 'editor/store';
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Portal } from 'components/atoms/Portal';
-import { DOM, STYLING, URLS } from 'helpers/config';
+import { DOM, URLS } from 'helpers/config';
 import { preloadAllAssets } from 'helpers/preloader';
 import { GlobalStyle } from 'helpers/styles';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
@@ -165,25 +165,19 @@ function AppContent() {
 				<>
 					{!portalProvider.current && <Loader message={`${language?.loadingPortal}...`} />}
 					<Navigation
-						open={navWidth > STYLING.dimensions.nav.widthMin}
+						open={navWidth > 0}
 						toggle={() => {
-							if (navWidth > STYLING.dimensions.nav.widthMin) {
-								// Set to minimum width
-								setNavWidth(STYLING.dimensions.nav.widthMin);
+							if (navWidth > 0) {
+								setNavWidth(0);
 							} else {
-								// Expand to default width
 								setNavWidth(260);
 							}
 						}}
 					/>
-					<S.View
-						className={'max-view-wrapper'}
-						navigationOpen={navWidth > STYLING.dimensions.nav.widthMin}
-						navWidth={navWidth}
-					>
+					<S.View className={'max-view-wrapper'} navigationOpen={navWidth > 0} navWidth={navWidth}>
 						{element}
 					</S.View>
-					<S.Footer navigationOpen={navWidth > STYLING.dimensions.nav.widthMin} navWidth={navWidth}>
+					<S.Footer navigationOpen={navWidth > 0} navWidth={navWidth}>
 						<p>
 							{language?.app} {new Date().getFullYear()}
 						</p>

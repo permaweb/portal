@@ -118,6 +118,7 @@ export const PageActions = styled.div`
 `;
 
 export const WrapperEmpty = styled.div`
+	width: 100%;
 	padding: 12.5px 15px;
 
 	p {

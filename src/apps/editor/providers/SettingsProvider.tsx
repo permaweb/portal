@@ -80,9 +80,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		if (stored) {
 			const parsedSettings = JSON.parse(stored);
 			// If not desktop, ensure navWidth is at minimum to hide overlay on load
-			const navWidth = isDesktop
-				? parsedSettings.navWidth ?? parseInt(STYLING.dimensions.nav.width)
-				: STYLING.dimensions.nav.widthMin;
+			const navWidth = isDesktop ? parsedSettings.navWidth ?? parseInt(STYLING.dimensions.nav.width) : 0;
 
 			settings = {
 				...parsedSettings,
@@ -100,7 +98,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 				theme: preferredTheme,
 				isDesktop,
 				sidebarOpen: isDesktop,
-				navWidth: isDesktop ? parseInt(STYLING.dimensions.nav.width) : STYLING.dimensions.nav.widthMin,
+				navWidth: isDesktop ? parseInt(STYLING.dimensions.nav.width) : 0,
 			};
 		}
 
@@ -120,7 +118,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 				navWidth = parseInt(STYLING.dimensions.nav.width);
 			} else if (!newIsDesktop && prevSettings.isDesktop) {
 				// Transitioning from desktop to mobile - close to minimum width
-				navWidth = STYLING.dimensions.nav.widthMin;
+				navWidth = 0;
 			} else {
 				// Staying in same mode - keep current width
 				navWidth = prevSettings.navWidth;

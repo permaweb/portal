@@ -31,6 +31,11 @@ export const Panel = styled.nav<{ open: boolean; width?: number }>`
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		transform: translateX(${(props) => (props.open ? '0' : '-100%')});
 	}
+
+	@media (min-width: ${STYLING.cutoffs.desktop}) {
+		display: ${(props) => (props.open ? 'block' : 'none')};
+	}
+
 	transition: transform ${transition2}, width ${transition1};
 	background: ${(props) =>
 		props.open ? props.theme.colors.container.alt1.background : props.theme.colors.view.background};
@@ -196,7 +201,11 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 export const Header = styled.header<{ navigationOpen: boolean; navWidth?: number }>`
 	height: ${STYLING.dimensions.nav.height};
 	width: 100%;
-	padding: 0 20px 0 calc(${(props) => (props.navWidth ? `${props.navWidth}px` : STYLING.dimensions.nav.width)} + 10px);
+	padding: 0 20px 0
+		calc(
+			${(props) => (props.navWidth !== undefined ? `${props.navWidth}px` : STYLING.dimensions.nav.width)} +
+				${(props) => (props.navigationOpen ? '10px' : '25px')}
+		);
 	transition: padding-left ${transition2};
 	position: fixed;
 	top: 0;
@@ -209,7 +218,7 @@ export const Header = styled.header<{ navigationOpen: boolean; navWidth?: number
 	background: ${(props) => props.theme.colors.view.background};
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		padding: 0 20px 0 10px;
+		padding: 0 20px 0 15px;
 	}
 `;
 

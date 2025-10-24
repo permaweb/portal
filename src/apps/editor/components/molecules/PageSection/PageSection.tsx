@@ -29,13 +29,7 @@ import { PageBlocks } from '../PageBlocks';
 import { FeedBlock } from './FeedBlock';
 import * as S from './styles';
 
-// TODO: Block width resize (Done)
-// TODO: Custom HTML ArticleBlock (Done)
-// TODO: Layout mode (Done)
-// TODO: Row / column select (Done)
-// TODO: Nested sections for grid layout (Done)
 // TODO: Block / Text Alignment
-// TODO: Nested section rearrange is messed up
 // TODO: Spacer article block
 // TODO: Disabled on unsaved changes
 // TODO: Show unsaved changes
@@ -46,6 +40,7 @@ export default function PageSection(props: {
 	section: PageSectionType;
 	onChangeSection: (section: PageSectionType, index: number) => void;
 	onDeleteSection: (index: number) => void;
+	parentDragHandleProps?: any;
 }) {
 	const currentPage = useSelector((state: EditorStoreRootState) => state.currentPage);
 	const { resizingBlockId: globalResizingBlockId, setResizingBlockId: setGlobalResizingBlockId } =
@@ -112,7 +107,7 @@ export default function PageSection(props: {
 					<IconButton
 						type={'alt1'}
 						active={false}
-						src={ICONS.layout}
+						src={props.section.type === PageSectionEnum.Row ? ICONS.columns : ICONS.rows}
 						handlePress={toggleSectionLayout}
 						dimensions={{ wrapper: 23.5, icon: 13.5 }}
 						tooltip={`${props.section.type === PageSectionEnum.Row ? 'Column' : 'Row'} Layout`}
@@ -392,6 +387,7 @@ export default function PageSection(props: {
 						section={block.content}
 						onChangeSection={(updatedNestedSection) => handleNestedSectionChange(updatedNestedSection, block.id)}
 						onDeleteSection={() => deleteNestedSection(block.id)}
+						parentDragHandleProps={block.parentDragHandleProps}
 					/>
 				</S.NestedSectionWrapper>
 			);
@@ -502,37 +498,39 @@ export default function PageSection(props: {
 																		</>
 																	)}
 
-																{currentPage.editor.blockEditMode &&
-																	(block.type === 'section' ? (
-																		<S.NestedSectionDragHandle {...provided.dragHandleProps}>
-																			<S.EDragHandler tabIndex={-1}>
-																				<ReactSVG src={ICONS.drag} />
-																			</S.EDragHandler>
-																		</S.NestedSectionDragHandle>
-																	) : (
-																		<S.SubElementHeader {...provided.dragHandleProps}>
-																			<S.SubElementHeaderAction>
-																				<S.EDragWrapper>
-																					<S.EDragHandler tabIndex={-1}>
-																						<ReactSVG src={ICONS.drag} />
-																					</S.EDragHandler>
-																				</S.EDragWrapper>
-																				<p>{getBlockLabel(block.type)}</p>
-																			</S.SubElementHeaderAction>
-																			<IconButton
-																				type={'alt1'}
-																				active={false}
-																				src={ICONS.delete}
-																				handlePress={() => deleteBlock(index)}
-																				dimensions={{ wrapper: 23.5, icon: 13.5 }}
-																				tooltip={language?.deleteBlock}
-																				tooltipPosition={'bottom-right'}
-																				noFocus
-																			/>
-																		</S.SubElementHeader>
-																	))}
+																{block.type !== 'section' && currentPage.editor.blockEditMode && (
+																	<S.SubElementHeader {...provided.dragHandleProps}>
+																		<S.SubElementHeaderAction>
+																			<S.EDragWrapper>
+																				<S.EDragHandler tabIndex={-1}>
+																					<ReactSVG src={ICONS.drag} />
+																				</S.EDragHandler>
+																			</S.EDragWrapper>
+																			<p>{getBlockLabel(block.type)}</p>
+																		</S.SubElementHeaderAction>
+																		<IconButton
+																			type={'alt1'}
+																			active={false}
+																			src={ICONS.delete}
+																			handlePress={() => deleteBlock(index)}
+																			dimensions={{ wrapper: 23.5, icon: 13.5 }}
+																			tooltip={language?.deleteBlock}
+																			tooltipPosition={'bottom-right'}
+																			noFocus
+																		/>
+																	</S.SubElementHeader>
+																)}
 
-																<S.SubElementBody>{getBlock(block, index)}</S.SubElementBody>
+																<S.SubElementBody>
+																	{getBlock(
+																		{
+																			...block,
+																			parentDragHandleProps:
+																				block.type === 'section' ? provided.dragHandleProps : undefined,
+																		},
+																		index
+																	)}
+																</S.SubElementBody>
 															</S.SubElementWrapper>
 														)}
 													</Draggable>
@@ -544,17 +542,21 @@ export default function PageSection(props: {
 							</Droppable>
 						</DragDropContext>
 					) : (
-						<S.BlocksEmpty>
-							<Button
-								type={'primary'}
-								label={language?.addBlock}
-								active={false}
-								handlePress={() => setShowSelector((prev) => !prev)}
-								icon={ICONS.add}
-								iconLeftAlign
-								noFocus
-							/>
-						</S.BlocksEmpty>
+						<S.BlockSelector>
+							<S.ArticleBlocks>
+								<ArticleBlocks type={'page'} addBlock={addBlock} context={'grid'} />
+							</S.ArticleBlocks>
+							<S.PageBlocks>
+								<PageBlocks type={'page'} addBlock={addBlock} context={'grid'} />
+								<Button
+									type={'alt1'}
+									label={language.addSection}
+									handlePress={() => addBlock('section')}
+									height={42.5}
+									fullWidth
+								/>
+							</S.PageBlocks>
+						</S.BlockSelector>
 					)}
 				</S.Element>
 			</S.ElementWrapper>
@@ -567,7 +569,7 @@ export default function PageSection(props: {
 			<Draggable draggableId={props.id} index={props.index}>
 				{(provided) => (
 					<S.ElementDragWrapper ref={provided.innerRef} {...provided.draggableProps} tabIndex={-1}>
-						<S.EDragWrapper {...provided.dragHandleProps}>
+						<S.EDragWrapper {...(props.parentDragHandleProps || provided.dragHandleProps)}>
 							<S.EDragHandler tabIndex={-1}>
 								<ReactSVG src={ICONS.drag} />
 							</S.EDragHandler>
@@ -594,7 +596,7 @@ export default function PageSection(props: {
 					<S.BlockSelectorActions>
 						<Button
 							type={'alt1'}
-							label={'Add Nested Section'}
+							label={language.addSection}
 							handlePress={() => addBlock('section')}
 							height={42.5}
 							fullWidth

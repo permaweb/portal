@@ -175,6 +175,8 @@ export const Alt1 = styled(Primary)`
 				: props.theme.colors.button.primary.color};
 	}
 
+	box-shadow: ${(props) => props.theme.colors.shadow.primary} 0px 1px 2px 0.5px;
+
 	&:hover {
 		background: ${(props) =>
 			props.disabled

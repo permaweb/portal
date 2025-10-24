@@ -6,7 +6,6 @@ import { STYLING } from 'helpers/config';
 export const Wrapper = styled.div``;
 
 export const Action = styled.div<{ open: boolean; noContentWrapper?: boolean }>`
-	height: 55.5px;
 	width: 100%;
 	transition: all 100ms;
 	background: ${(props) => props.theme.colors.button.primary.background};
@@ -22,7 +21,7 @@ export const Action = styled.div<{ open: boolean; noContentWrapper?: boolean }>`
 
 	box-shadow: ${(props) =>
 		props.noContentWrapper && !props.open ? `${props.theme.colors.shadow.primary} 0px 1px 2px 0.5px` : 'none'};
-
+	padding: 15px 0;
 	&:hover {
 		background: ${(props) => props.theme.colors.button.primary.active.background};
 		cursor: pointer;
@@ -31,7 +30,6 @@ export const Action = styled.div<{ open: boolean; noContentWrapper?: boolean }>`
 
 export const HeaderEnd = styled.div`
 	display: flex;
-	flex-wrap: wrap;
 	gap: 15px;
 `;
 
@@ -45,6 +43,8 @@ export const Label = styled.div`
 	height: 100%;
 	width: 100%;
 	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
 	justify-content: space-between;
 	align-items: center;
 	padding: 2.5px 15px 0 15px;
