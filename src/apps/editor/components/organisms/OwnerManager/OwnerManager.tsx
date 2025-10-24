@@ -30,7 +30,6 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 		if (arProvider.wallet && portalProvider.current?.id) {
 			setLoading(true);
 			try {
-				console.log(permawebProvider.libs);
 				await permawebProvider.libs.transferZoneOwnership({
 					zoneId: portalProvider.current.id,
 					op: 'Invite',
@@ -72,7 +71,6 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 
 			setInviteProfiles(profiles);
 		};
-		console.log(portalProvider.transfers);
 		if (portalProvider.transfers?.length > 0) {
 			loadProfiles();
 		}
@@ -89,7 +87,7 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 				to: inviteeAddress,
 			});
 			addNotification('Transfer invite cancelled', 'success');
-			await loadTransferRequests();
+			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Transfers);
 		} catch (error: any) {
 			console.error(error);
 			addNotification(error?.message ?? 'Error cancelling transfer invite', 'warning');

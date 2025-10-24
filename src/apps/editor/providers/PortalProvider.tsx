@@ -122,8 +122,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									await permawebProvider.libs.getState({ processId: portal.id, path: PortalPatchMapEnum.Transfers })
 								);
 
-								console.log('Fetched portal metadata for', portal.id, data, users, transfers);
-
 								return {
 									...portal,
 									name: data.name ?? data.store?.name ?? 'None',
@@ -210,8 +208,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						const data = permawebProvider.libs.mapFromProcessCase(
 							await permawebProvider.libs.readState({ processId: currentId, path: key })
 						);
-
-						console.log(`Fetched patch data for ${key}:`, data);
 
 						if (key === 'overview') {
 							// Check if wallpaper is undefined and update patch map if needed
