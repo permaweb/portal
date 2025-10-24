@@ -48,11 +48,10 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 		const sorted = Object.values(raw)
 			.map((role) => ({ id: role, label: formatRoleLabel(role) }))
 			.sort((a, b) => roleOrder.indexOf(a.id) - roleOrder.indexOf(b.id));
-
 		setRole(sorted[1]);
 		// hide Admin for non-owners
-		return isOwner && props.user ? sorted : sorted.filter((r) => r.id !== 'Admin');
-	}, [portalProvider.current?.roleOptions, isOwner, arProvider.walletAddress, props.user]);
+		return isOwner ? sorted : sorted.filter((r) => r.id !== 'Admin');
+	}, [portalProvider.current.owner, isOwner, arProvider.walletAddress, props.user]);
 
 	React.useEffect(() => {
 		if (props.user && roleOptions) {

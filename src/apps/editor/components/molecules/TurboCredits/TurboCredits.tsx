@@ -126,7 +126,6 @@ export default function TurboCredits(props: Props) {
 
 				try {
 					const profile = await permawebProvider.fetchProfile(addr);
-					console.log('Fetched profile for', addr, profile);
 					profiles[addr] = profile;
 				} catch (err) {
 					console.error('Failed to fetch profile for', addr, err);

@@ -32,6 +32,7 @@ interface PortalContextState {
 	invites: PortalHeaderType[] | null;
 	current: PortalDetailType | null;
 	permissions: PortalPermissionsType | null;
+	transfers: any;
 	showPortalManager: boolean;
 	setShowPortalManager: (toggle: boolean, useNew?: boolean) => void;
 	refreshCurrentPortal: (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => void;
@@ -46,6 +47,7 @@ const DEFAULT_CONTEXT = {
 	invites: null,
 	current: null,
 	permissions: null,
+	transfers: null,
 	showPortalManager: false,
 	setShowPortalManager(_toggle: boolean) {},
 	refreshCurrentPortal() {},
@@ -79,6 +81,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [currentId, setCurrentId] = React.useState<string | null>(null);
 	const [current, setCurrent] = React.useState<PortalDetailType | null>(null);
 	const [permissions, setPermissions] = React.useState<PortalPermissionsType | null>(null);
+	const [transfers, setTransfers] = React.useState<any>([]);
 
 	const [refreshCurrentTrigger, setRefreshCurrentTrigger] = React.useState<boolean>(false);
 	const [refreshFields, setRefreshFields] = React.useState<PortalPatchMapEnum[] | null>(null);
@@ -115,12 +118,19 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Users })
 								);
 
+								const transfers = permawebProvider.libs.mapFromProcessCase(
+									await permawebProvider.libs.getState({ processId: portal.id, path: PortalPatchMapEnum.Transfers })
+								);
+
+								console.log('Fetched portal metadata for', portal.id, data, users, transfers);
+
 								return {
 									...portal,
 									name: data.name ?? data.store?.name ?? 'None',
 									logo: data.logo ?? data.store?.logo ?? 'None',
 									icon: data.icon ?? data.store?.icon ?? 'None',
 									users: users.users ?? getPortalUsers(users.roles),
+									transfers: transfers.transfers ?? [],
 								};
 							} catch (e) {
 								console.warn(`Failed to fetch portal metadata for ${portal.id}:`, e);
@@ -132,7 +142,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 										name: cached.name ?? portal.name ?? 'None',
 										logo: cached.logo ?? portal.logo ?? 'None',
 										icon: cached.icon ?? portal.icon ?? 'None',
-										users: cached.users ?? portal.users ?? [],
+										users: cached.users ?? [],
+										transfers: cached.transfers ?? [],
 									};
 								}
 								return portal;
@@ -199,6 +210,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						const data = permawebProvider.libs.mapFromProcessCase(
 							await permawebProvider.libs.readState({ processId: currentId, path: key })
 						);
+
+						console.log(`Fetched patch data for ${key}:`, data);
 
 						if (key === 'overview') {
 							// Check if wallpaper is undefined and update patch map if needed
@@ -304,6 +317,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									break;
 								case 'requests':
 									updatedPortal.requests = data?.indexRequests ?? updatedPortal.requests;
+									break;
+								case 'transfers':
+									setTransfers(data?.transfers ?? []);
 									break;
 							}
 
@@ -413,6 +429,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				usersByPortalId: usersByPortalId,
 				updating,
 				updateAvailable,
+				transfers,
 			}}
 		>
 			{props.children}
