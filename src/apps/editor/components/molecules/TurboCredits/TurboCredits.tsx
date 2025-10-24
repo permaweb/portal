@@ -71,6 +71,7 @@ export default function TurboCredits(props: Props) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const [expanded, setExpanded] = React.useState<boolean>(false);
+	const [givenProfiles, setGivenProfiles] = React.useState<Record<string, any>>({});
 	const [showGivenBreakdown, setShowGivenBreakdown] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
 
@@ -112,6 +113,33 @@ export default function TurboCredits(props: Props) {
 			arProvider.refreshTurboBalance();
 		}
 	}
+
+	React.useEffect(() => {
+		const loadProfiles = async () => {
+			const profiles: Record<string, any> = {};
+
+			for (const g of givenAggregated) {
+				const addr = g.address;
+				if (!addr) continue;
+				if (givenProfiles[addr]) continue; // already loaded
+
+				try {
+					const profile = await arProvider.fetchProfile(addr);
+					profiles[addr] = profile;
+				} catch (err) {
+					console.error('Failed to fetch profile for', addr, err);
+				}
+			}
+
+			if (Object.keys(profiles).length) {
+				setGivenProfiles((prev) => ({ ...prev, ...profiles }));
+			}
+		};
+
+		if (givenAggregated?.length > 0) {
+			loadProfiles();
+		}
+	}, [givenAggregated]);
 
 	return (
 		<S.DBalanceWrapper showBorderBottom={props.showBorderBottom}>
@@ -171,7 +199,7 @@ export default function TurboCredits(props: Props) {
 								<S.ApprovalsCount
 									clickable={props.allowExpandApprovals}
 									onClick={() => {
-										if (props.allowExpandApprovals && totalGivenBig > 0) setShowGivenBreakdown((s) => !s);
+										if (props.allowExpandApprovals) setShowGivenBreakdown((s) => !s);
 									}}
 								>
 									({givenApprovalsCount})
@@ -188,9 +216,10 @@ export default function TurboCredits(props: Props) {
 								</S.ApprovalsHeaderRow>
 								{givenAggregated.map((g) => {
 									const remaining = g.totalApproved - g.totalUsed;
+									const username = givenProfiles[g.address].username ?? g.address;
 									return (
 										<S.ApprovalRow key={g.address}>
-											<S.Address>{g.address}</S.Address>
+											<S.Address>{username}</S.Address>
 											<S.Num>{getARAmountFromWinc(Number(g.totalApproved))}&nbsp;Credits</S.Num>
 											<S.Num>{getARAmountFromWinc(Number(remaining))}&nbsp;Credits</S.Num>
 											<S.Actions>
