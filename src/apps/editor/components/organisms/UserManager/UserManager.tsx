@@ -25,7 +25,6 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 
 	const [walletAddress, setWalletAddress] = React.useState<string>('');
 
-	const [roleOptions, setRoleOptions] = React.useState<{ id: string; label: string }[] | null>(null);
 	const [role, setRole] = React.useState<SelectOptionType | null>(null);
 	const [unauthorized, setUnauthorized] = React.useState<boolean>(false);
 	const [loading, setLoading] = React.useState<boolean>(false);
@@ -38,33 +37,35 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 		ExternalContributor: language?.roleDescriptionExternalContributor || [],
 	};
 
-	React.useEffect(() => {
-		if (portalProvider.current?.roleOptions) {
-			const roleOrder = Object.keys(roleDescriptions);
+	const isOwner = portalProvider?.current?.owner === arProvider.walletAddress;
 
-			let options = Object.values(portalProvider.current.roleOptions)
-				.map((role) => ({
-					id: role,
-					label: formatRoleLabel(role),
-				}))
-				.sort((a, b) => roleOrder.indexOf(a.id) - roleOrder.indexOf(b.id));
+	const roleOptions = React.useMemo(() => {
+		const raw = portalProvider.current?.roleOptions;
+		if (!raw) return [];
 
-			setRoleOptions(options);
-		}
-	}, [portalProvider.current?.roleOptions, portalProvider.current?.owner, arProvider.walletAddress]);
+		const roleOrder = Object.keys(roleDescriptions);
 
-	React.useEffect(() => {
-		if (roleOptions?.length) {
-			setRole(roleOptions[0]);
-		}
-	}, [roleOptions]);
+		const sorted = Object.values(raw)
+			.map((role) => ({ id: role, label: formatRoleLabel(role) }))
+			.sort((a, b) => roleOrder.indexOf(a.id) - roleOrder.indexOf(b.id));
+		setRole(sorted[1]);
+		// hide Admin for non-owners
+		return isOwner ? sorted : sorted.filter((r) => r.id !== 'Admin');
+	}, [portalProvider.current.owner, isOwner, arProvider.walletAddress, props.user]);
 
 	React.useEffect(() => {
 		if (props.user && roleOptions) {
 			if (props.user.owner && checkValidAddress(props.user.owner)) setWalletAddress(props.user.owner);
 			if (props.user.roles) {
 				const activeRole = props.user.roles[0];
-				setRole(roleOptions.find((role) => role.id === activeRole));
+				if (roleOptions.find((role) => role.id === activeRole)) {
+					setRole(roleOptions.find((role) => role.id === activeRole));
+				} else {
+					setRole({
+						id: 'Admin',
+						label: 'Admin',
+					});
+				}
 				setUnauthorized(false);
 				if (activeRole === 'Admin' && portalProvider?.current?.owner !== arProvider.walletAddress) {
 					// only super admins can change admin's role
@@ -72,14 +73,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				}
 			}
 		}
-		if (!props.user && roleOptions) {
-			const isOwner = portalProvider?.current?.owner === arProvider.walletAddress;
-			if (!isOwner) {
-				let options = roleOptions?.filter((role) => role.id !== 'Admin') || null;
-				setRoleOptions(options);
-			}
-		}
-	}, [props.user, roleOptions]);
+	}, [props.user]);
 
 	async function handleSubmit() {
 		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {

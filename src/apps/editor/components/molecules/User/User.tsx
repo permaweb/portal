@@ -1,4 +1,5 @@
 import React from 'react';
+import { ArconnectSigner, TurboFactory } from '@ardrive/turbo-sdk';
 
 import { OwnerManager } from 'editor/components/organisms/OwnerManager';
 import { UserManager } from 'editor/components/organisms/UserManager';
@@ -8,7 +9,7 @@ import { Avatar } from 'components/atoms/Avatar';
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
 import { PortalHeaderType, PortalUserType } from 'helpers/types';
-import { formatAddress, formatRoleLabel } from 'helpers/utils';
+import { formatAddress, formatRoleLabel, getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -31,7 +32,7 @@ export default function User(props: {
 	const [showManageUser, setShowManageUser] = React.useState<boolean>(false);
 	const [showManageOwner, setShowManageOwner] = React.useState<boolean>(false);
 	const [showShareCredits, setShowShareCredits] = React.useState<boolean>(false);
-
+	const [totalRemaining, setTotalRemaining] = React.useState<number | null>(null);
 	const currentLoggedInUser =
 		arweaveProvider?.walletAddress === portalProvider.usersByPortalId?.[props.user.address]?.owner;
 	const isCurrentLoggedInUserPortalOwner = portalProvider.current?.owner === arweaveProvider?.walletAddress;
@@ -47,12 +48,45 @@ export default function User(props: {
 			setFetched(true);
 		})();
 	}, [props.user, fetched]);
+	const signer = new ArconnectSigner(arweaveProvider.wallet);
+	const turbo = TurboFactory.authenticated({ signer });
 
 	React.useEffect(() => {
 		if (props.onInviteDetected && !props.hideAction) {
 			props.onInviteDetected(props.user.address, invitePending);
 		}
 	}, [props.onInviteDetected, props.user.address, props.hideAction, invitePending]);
+
+	React.useEffect(() => {
+		const run = async () => {
+			const userAddr = portalProvider.usersByPortalId?.[props.user?.address]?.owner;
+			if (!props.user || !userAddr) return;
+
+			try {
+				const { receivedApprovals } = await turbo.getCreditShareApprovals({
+					userAddress: userAddr,
+				});
+
+				if (receivedApprovals && receivedApprovals.length > 0) {
+					// compute sum(approvedWincAmount - usedWincAmount)
+					const total = receivedApprovals.reduce((sum, a) => {
+						const approved = BigInt(a.approvedWincAmount);
+						const used = BigInt(a.usedWincAmount);
+						return sum + Number(approved - used);
+					}, 0);
+
+					setTotalRemaining(total);
+				} else {
+					setTotalRemaining(0);
+				}
+			} catch (err) {
+				console.error('Failed to fetch approvals:', err);
+				setTotalRemaining(null);
+			}
+		};
+
+		run();
+	}, [props.user?.address, portalProvider.usersByPortalId]);
 
 	return (
 		<>
@@ -86,6 +120,15 @@ export default function User(props: {
 							<S.PendingInvite className={'border-wrapper-alt3'}>
 								<span>{language.invitePending}</span>
 								<S.Indicator />
+							</S.PendingInvite>
+						)}
+						{totalRemaining !== 0 && (
+							<S.PendingInvite className={'border-wrapper-alt3'}>
+								{totalRemaining > 0 ? (
+									<span>{getARAmountFromWinc(totalRemaining)} available credits</span>
+								) : (
+									<span>No credits approved</span>
+								)}
 							</S.PendingInvite>
 						)}
 						{canShareCredits && (

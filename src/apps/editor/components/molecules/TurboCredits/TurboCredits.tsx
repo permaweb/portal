@@ -9,6 +9,7 @@ import { getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
@@ -16,6 +17,13 @@ type Props = {
 	showBorderBottom?: boolean;
 	allowExpandApprovals?: boolean;
 	setShowFundUpload: (show: boolean) => void;
+};
+type AggregatedApproval = {
+	address: string;
+	count: number;
+	totalApproved: bigint;
+	totalUsed: bigint;
+	approvals: TurboApproval[];
 };
 
 interface TurboApproval {
@@ -30,14 +38,6 @@ interface TurboApproval {
 function sumApprovals(approvals: TurboApproval[] = []) {
 	return approvals.reduce((acc, a) => acc + BigInt(a.approvedWincAmount), BigInt(0));
 }
-
-type AggregatedApproval = {
-	address: string;
-	count: number;
-	totalApproved: bigint;
-	totalUsed: bigint;
-	approvals: TurboApproval[];
-};
 
 function aggregateByAddress(approvals: TurboApproval[] = []): AggregatedApproval[] {
 	const map = new Map<string, AggregatedApproval>();
@@ -68,9 +68,11 @@ function aggregateByAddress(approvals: TurboApproval[] = []): AggregatedApproval
 
 export default function TurboCredits(props: Props) {
 	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	const [expanded, setExpanded] = React.useState<boolean>(false);
+	const [expanded, setExpanded] = React.useState<boolean>(props.allowExpandApprovals ?? false);
+	const [givenProfiles, setGivenProfiles] = React.useState<Record<string, any>>({});
 	const [showGivenBreakdown, setShowGivenBreakdown] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
 
@@ -112,6 +114,33 @@ export default function TurboCredits(props: Props) {
 			arProvider.refreshTurboBalance();
 		}
 	}
+
+	React.useEffect(() => {
+		const loadProfiles = async () => {
+			const profiles: Record<string, any> = {};
+
+			for (const g of givenAggregated) {
+				const addr = g.address;
+				if (!addr) continue;
+				if (givenProfiles[addr]) continue; // already loaded
+
+				try {
+					const profile = await permawebProvider.fetchProfile(addr);
+					profiles[addr] = profile;
+				} catch (err) {
+					console.error('Failed to fetch profile for', addr, err);
+				}
+			}
+
+			if (Object.keys(profiles).length) {
+				setGivenProfiles((prev) => ({ ...prev, ...profiles }));
+			}
+		};
+
+		if (givenAggregated?.length > 0) {
+			loadProfiles();
+		}
+	}, [givenAggregated]);
 
 	return (
 		<S.DBalanceWrapper showBorderBottom={props.showBorderBottom}>
@@ -171,14 +200,15 @@ export default function TurboCredits(props: Props) {
 								<S.ApprovalsCount
 									clickable={props.allowExpandApprovals}
 									onClick={() => {
-										if (props.allowExpandApprovals && totalGivenBig > 0) setShowGivenBreakdown((s) => !s);
+										if (!props.allowExpandApprovals) return;
+										setShowGivenBreakdown((s) => !s);
 									}}
 								>
 									({givenApprovalsCount})
 								</S.ApprovalsCount>
 							</p>
 						</S.MetaRow>
-						{props.allowExpandApprovals && showGivenBreakdown && (
+						{showGivenBreakdown && (
 							<S.ApprovalsWrapper>
 								<S.ApprovalsHeaderRow>
 									<p>Address</p>
@@ -188,9 +218,10 @@ export default function TurboCredits(props: Props) {
 								</S.ApprovalsHeaderRow>
 								{givenAggregated.map((g) => {
 									const remaining = g.totalApproved - g.totalUsed;
+									const username = givenProfiles[g.address].displayname;
 									return (
 										<S.ApprovalRow key={g.address}>
-											<S.Address>{g.address}</S.Address>
+											<S.Address>{username}</S.Address>
 											<S.Num>{getARAmountFromWinc(Number(g.totalApproved))}&nbsp;Credits</S.Num>
 											<S.Num>{getARAmountFromWinc(Number(remaining))}&nbsp;Credits</S.Num>
 											<S.Actions>

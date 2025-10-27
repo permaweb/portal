@@ -9,6 +9,7 @@ import { Button } from 'components/atoms/Button';
 import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { ICONS } from 'helpers/config';
+import { PortalPatchMapEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -28,29 +29,16 @@ export default function Users() {
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [showAddUser, setShowAddUser] = React.useState<boolean>(false);
 	const [showTransferInvitesModal, setShowTransferInvitesModal] = React.useState<boolean>(false);
-	const [transferRequests, setTransferRequests] = React.useState<any[]>([]);
-
-	async function loadTransferRequests() {
-		if (!portalProvider.current?.id) return;
-		try {
-			const zoneState = await permawebProvider.libs.getZone(portalProvider.current.id);
-			const transfersFromState = zoneState?.transfers ?? zoneState?.Transfers ?? [];
-			setTransferRequests(Array.isArray(transfersFromState) ? transfersFromState : []);
-		} catch (error: any) {
-			console.error(error);
-			addNotification(error?.message ?? 'Failed to load ownership transfer requests', 'warning');
-		}
-	}
 
 	const currentWalletAddress = arProvider.walletAddress;
 
 	const pendingOwnershipInvites = React.useMemo(() => {
-		return (transferRequests ?? []).filter((request: any) => {
+		return (portalProvider.transfers ?? []).filter((request: any) => {
 			const inviteeAddress = request.To ?? request.to;
 			const stateValue = (request.State ?? request.state)?.toLowerCase?.();
 			return inviteeAddress === currentWalletAddress && stateValue === 'pending';
 		});
-	}, [transferRequests, currentWalletAddress]);
+	}, [portalProvider.transfers, currentWalletAddress]);
 
 	const [inviteProfiles, setInviteProfiles] = React.useState<Record<string, any>>({});
 
@@ -90,7 +78,7 @@ export default function Users() {
 				op: 'Accept',
 			});
 			addNotification(language?.inviteAccepted ?? 'Ownership invite accepted', 'success');
-			await loadTransferRequests();
+			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Transfers);
 			setShowTransferInvitesModal(false);
 		} catch (error: any) {
 			console.error(error);
@@ -109,7 +97,7 @@ export default function Users() {
 				op: 'Reject',
 			});
 			addNotification(language?.inviteRejected ?? 'Ownership invite rejected', 'success');
-			await loadTransferRequests();
+			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Transfers);
 			setShowTransferInvitesModal(false);
 		} catch (error: any) {
 			console.error(error);
@@ -159,11 +147,6 @@ export default function Users() {
 			</Modal>
 		);
 	}
-
-	React.useEffect(() => {
-		loadTransferRequests();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [portalProvider.current?.id]);
 
 	return (
 		<>
