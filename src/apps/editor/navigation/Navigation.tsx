@@ -72,55 +72,58 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	}, [theme.colors.border.primary]);
 
 	const paths = React.useMemo(() => {
+		const hash = window.location.hash;
+		const parts = hash.split('/').filter(Boolean);
+		const currentId = parts[1];
 		return [
 			{
-				path: portalProvider.current?.id ? URLS.portalBase(portalProvider.current.id) : URLS.base,
+				path: currentId ? URLS.portalBase(currentId) : URLS.base,
 				icon: ICONS.portal,
 				label: language?.home,
 			},
 			{
-				path: portalProvider.current?.id ? URLS.portalPosts(portalProvider.current.id) : URLS.base,
+				path: currentId ? URLS.portalPosts(currentId) : URLS.base,
 				icon: ICONS.posts,
 				label: language?.posts,
 			},
 			{
-				path: portalProvider.current?.id ? URLS.portalModeration(portalProvider.current.id) : URLS.base,
+				path: currentId ? URLS.portalModeration(currentId) : URLS.base,
 				icon: ICONS.moderation,
 				label: language?.moderation,
 			},
 			{
-				path: portalProvider.current?.id ? URLS.portalDesign(portalProvider.current.id) : URLS.base,
+				path: currentId ? URLS.portalDesign(currentId) : URLS.base,
 				icon: ICONS.design,
 				label: language?.design,
 			},
 			{
-				path: portalProvider.current?.id ? URLS.portalMedia(portalProvider.current.id) : URLS.base,
+				path: currentId ? URLS.portalMedia(currentId) : URLS.base,
 				icon: ICONS.media,
 				label: language?.media,
 				useFill: true,
 			},
 			{
-				path: portalProvider.current?.id ? URLS.portalSetup(portalProvider.current.id) : URLS.base,
+				path: currentId ? URLS.portalSetup(currentId) : URLS.base,
 				icon: ICONS.setup,
 				label: language?.setup,
 			},
 			{
-				path: portalProvider.current?.id ? URLS.portalUsers(portalProvider.current.id) : URLS.base,
+				path: currentId ? URLS.portalUsers(currentId) : URLS.base,
 				icon: ICONS.users,
 				label: language?.users,
 			},
 			{
-				path: portalProvider.current?.id ? URLS.portalPages(portalProvider.current.id) : URLS.base,
+				path: currentId ? URLS.portalPages(currentId) : URLS.base,
 				icon: ICONS.pages,
 				label: language?.pages,
 			},
 			{
-				path: portalProvider.current?.id ? URLS.portalDomains(portalProvider.current.id) : URLS.base,
+				path: currentId ? URLS.portalDomains(currentId) : URLS.base,
 				icon: ICONS.domains,
 				label: language?.domains,
 			},
 		];
-	}, [portalProvider.current?.id, languageProvider?.current]);
+	}, [languageProvider?.current]);
 
 	function handleWindowResize() {
 		if (checkWindowCutoff(parseInt(STYLING.cutoffs.desktop))) {
@@ -205,6 +208,9 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 	const panel = React.useMemo(() => {
 		const showText = navWidth > 120;
+		const hash = window.location.hash;
+		const parts = hash.split('/').filter(Boolean);
+		const currentId = parts[1];
 		const content = (
 			<>
 				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
@@ -306,10 +312,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										{portalProvider.portals.map((portal: PortalHeaderType) => {
 											const hash = window.location.hash;
 											const parts = hash.split('/').filter(Boolean);
+											const currentId = parts[1] || ''; // portal id
 											let section = parts[2] || ''; // say design, posts, media, setup etc sub navigation
 											let afterSection = parts[3] || ''; // say post id or page id
 											if (afterSection) section = ''; // special case for editor
-											const active = portalProvider.current ? portalProvider.current.id === portal.id : false;
+											const active = portalProvider.current ? currentId === portal.id : false;
 											const path = `${URLS.base}${portal.id}/${section}`;
 											return (
 												<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>

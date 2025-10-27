@@ -281,7 +281,7 @@ export const ApprovalsWrapper = styled.div`
 
 export const ApprovalsHeaderRow = styled.div`
 	display: grid;
-	grid-template-columns: 1fr 1.2fr 1.2fr 0.6fr auto;
+	grid-template-columns: 1.2fr 1.2fr 1.2fr 0.6fr auto;
 	gap: 8px;
 	font-weight: 600;
 	font-size: ${(p) => p.theme.typography.size.xSmall};
@@ -291,7 +291,7 @@ export const ApprovalsHeaderRow = styled.div`
 
 export const ApprovalRow = styled.div`
 	display: grid;
-	grid-template-columns: 1.6fr 0.6fr 1fr auto;
+	grid-template-columns: 0.6fr 0.6fr 0.6fr auto;
 	gap: 8px;
 	align-items: center;
 	padding: 8px 0;
@@ -315,12 +315,11 @@ export const Address = styled.div`
 	min-width: 0; /* allow ellipsis in grid */
 	font-family: monospace;
 	overflow: hidden;
-	text-overflow: ellipsis;
 	white-space: nowrap;
 `;
 
 export const Num = styled.div`
-	justify-self: end; /* right-align within the grid cell */
+	justify-self: center; /* right-align within the grid cell */
 	white-space: nowrap; /* keep "0.1688 Credits" on one line */
 `;
 

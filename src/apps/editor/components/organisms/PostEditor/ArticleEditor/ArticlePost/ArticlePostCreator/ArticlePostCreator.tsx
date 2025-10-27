@@ -10,6 +10,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { ICONS } from 'helpers/config';
 import { PortalUserType } from 'helpers/types';
 import { checkValidAddress, formatAddress } from 'helpers/utils';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
@@ -22,7 +23,7 @@ export default function ArticlePostCreator() {
 	const dispatch = useDispatch();
 
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
-
+	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
@@ -85,6 +86,21 @@ export default function ArticlePostCreator() {
 			  }
 			: portalProvider.usersByPortalId?.[currentPost.data.creator] ?? { id: currentPost.data.creator };
 
+	const authors = React.useMemo(() => {
+		const authorsList: string[] = [];
+		portalProvider.current?.users
+			?.filter((user: PortalUserType) => user.type !== 'wallet')
+			.forEach((user: PortalUserType) => {
+				if (
+					!authorsList.includes(user.address) &&
+					portalProvider.usersByPortalId?.[user.address]?.['owner'] === arProvider.walletAddress
+				) {
+					authorsList.push(user.address);
+				}
+			});
+		return authorsList;
+	}, [portalProvider.current, portalProvider.current?.users]);
+
 	return (
 		<S.Wrapper>
 			<S.HeaderWrapper>
@@ -103,25 +119,23 @@ export default function ArticlePostCreator() {
 					/>
 					{showDropdown && (
 						<S.Dropdown className={'border-wrapper-alt1 scroll-wrapper-hidden'}>
-							{portalProvider.current?.users
-								?.filter((user: PortalUserType) => user.type !== 'wallet')
-								.map((user: PortalUserType, index: number) => {
-									const userProfile = portalProvider.usersByPortalId?.[user.address] ?? { id: user.address };
-									return (
-										<S.Option
-											active={user.address === currentPost?.data?.creator}
-											key={index}
-											onClick={() => {
-												if (user.address !== currentPost?.data?.creator) {
-													handleCurrentPostUpdate({ field: 'creator', value: user.address });
-												}
-												setShowDropdown(false);
-											}}
-										>
-											{userProfile.username ?? formatAddress(userProfile.id, false)}
-										</S.Option>
-									);
-								})}
+							{authors.map((address: string, index: number) => {
+								const userProfile = portalProvider.usersByPortalId?.[address] ?? { id: address };
+								return (
+									<S.Option
+										active={address === currentPost?.data?.creator}
+										key={index}
+										onClick={() => {
+											if (address !== currentPost?.data?.creator) {
+												handleCurrentPostUpdate({ field: 'creator', value: address });
+											}
+											setShowDropdown(false);
+										}}
+									>
+										{userProfile.username ?? formatAddress(userProfile.id, false)}
+									</S.Option>
+								);
+							})}
 							<S.Option
 								active={portalProvider.current?.id === currentPost?.data?.creator}
 								onClick={() => {
