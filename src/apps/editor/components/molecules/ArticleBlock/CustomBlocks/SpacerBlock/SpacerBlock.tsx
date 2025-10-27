@@ -10,7 +10,7 @@ import * as S from './styles';
 
 const DEFAULT_HEIGHT = 50;
 const DEFAULT_WIDTH = 1;
-const MIN_HEIGHT = 20;
+const MIN_HEIGHT = 40;
 const MIN_WIDTH = 1;
 
 export default function SpacerBlock(props: {

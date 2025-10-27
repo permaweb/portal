@@ -394,7 +394,7 @@ export function resolvePrimaryDomain(domains: PortalDomainType[], portalId: stri
 
 export const capitalize = (str: string) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : '-');
 
-export function hasUnsavedChanges(current: any, original: any): boolean {
+export function hasUnsavedPostChanges(current: any, original: any): boolean {
 	// If there's no original data, consider it as changes (new post)
 	if (!original) return true;
 
@@ -411,6 +411,14 @@ export function hasUnsavedChanges(current: any, original: any): boolean {
 		JSON.stringify(current.topics) !== JSON.stringify(original.topics) ||
 		JSON.stringify(current.externalRecipients) !== JSON.stringify(original.externalRecipients)
 	);
+}
+
+export function hasUnsavedPageChanges(current: any, original: any): boolean {
+	// If there's no original data, consider it as changes (new page)
+	if (!original) return true;
+
+	// Compare all relevant fields
+	return current.title !== original.title || JSON.stringify(current.content) !== JSON.stringify(original.content);
 }
 
 export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {

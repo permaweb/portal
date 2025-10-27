@@ -179,7 +179,7 @@ export const lightThemeAlt2 = {
 	negative1: '#F16A82',
 	negative2: '#EE4463',
 	neutral1: '#FEFEFE',
-	neutral2: '#F9F9F9',
+	neutral2: '#F7F7F7',
 	neutral3: '#F0F0F0',
 	neutral4: '#C9C9C9',
 	neutral5: '#BFBFBF',

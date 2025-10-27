@@ -92,8 +92,6 @@ export const BADropdownAction = styled.div`
 		}
 
 		&:disabled {
-			background: ${(props) => props.theme.colors.container.primary.background};
-
 			span {
 				color: ${(props) => props.theme.colors.font.primary};
 			}

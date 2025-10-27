@@ -142,6 +142,53 @@ export const ContentWrapper = styled.div`
 	gap: 15px;
 `;
 
+export const MediaResizeWrapper = styled.div<{ width?: number | null }>`
+	position: relative;
+	width: ${(props) => (props.width ? `${props.width}px` : '100%')};
+	max-width: 100%;
+	justify-self: center;
+
+	> .portal-media-wrapper {
+		width: 100%;
+		max-width: 100%;
+		box-sizing: border-box;
+
+		> img,
+		> video {
+			max-width: 100%;
+		}
+	}
+`;
+
+export const ResizeHandle = styled.div<{ side: 'left' | 'right' }>`
+	position: absolute;
+	${(props) => props.side}: 0;
+	top: 0;
+	bottom: 0;
+	width: 5px;
+	cursor: ew-resize;
+	opacity: 0;
+	transition: opacity 100ms ease;
+	z-index: 10;
+
+	&:hover {
+		opacity: 1;
+	}
+
+	&::after {
+		height: 40px;
+		width: 3.5px;
+		content: '';
+		position: absolute;
+		${(props) => props.side}: 0;
+		top: 45%;
+		transform: translateY(-50%);
+		background: ${(props) => props.theme.colors.contrast.color};
+		border: 1px solid ${(props) => props.theme.colors.contrast.border};
+		border-radius: 2px;
+	}
+`;
+
 export const Content = styled.div`
 	.portal-media-wrapper {
 		display: flex;
@@ -206,6 +253,7 @@ export const Content = styled.div`
 `;
 
 export const CaptionEmpty = styled.div`
+	margin: 10px 0 0 0;
 	p {
 		color: ${(props) => props.theme.colors.font.alt3};
 		font-size: ${(props) => props.theme.typography.size.small} !important;

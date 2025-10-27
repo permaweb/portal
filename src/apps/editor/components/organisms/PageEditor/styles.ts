@@ -24,8 +24,11 @@ export const ToolbarWrapper = styled.div<{ navWidth: number }>`
 	padding: 10px 20px 15px 25px;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		width: 100%;
 		position: relative;
 		top: auto;
+		left: auto;
+		padding: 0;
 	}
 `;
 

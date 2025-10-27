@@ -19,6 +19,7 @@ export const Wrapper = styled.div`
 export const TitleWrapper = styled.div`
 	width: calc(50% - 10px);
 	overflow: hidden;
+	position: relative;
 	input {
 		width: 100%;
 		display: block;
@@ -36,6 +37,21 @@ export const TitleWrapper = styled.div`
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {
 		width: 100%;
+	}
+`;
+
+export const UpdateWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 7.5px;
+	padding: 3.5px 7.5px 3.5px 7.5px !important;
+	border: 1px solid ${(props) => props.theme.colors.border.alt1};
+
+	.indicator {
+		height: 10px;
+		width: 10px;
+		border-radius: 50%;
+		background: ${(props) => props.theme.colors.indicator.neutral};
 	}
 `;
 

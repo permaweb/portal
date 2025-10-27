@@ -59,22 +59,27 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const config = mediaConfig[props.type];
 
 	const inputRef = React.useRef(null);
+	const mediaRef = React.useRef<HTMLDivElement>(null);
 	const prevPropsDataRef = React.useRef<{
 		url?: string | null;
 		caption: string | null;
 		alignment: AlignmentEnum | null;
+		width?: number | null;
 	}>();
 	const isInternalUpdateRef = React.useRef(false);
+	const isResizingRef = React.useRef(false);
 
 	const [mediaData, setMediaData] = React.useState<{
 		url?: string | null;
 		file?: File | null;
 		caption: string | null;
 		alignment: AlignmentEnum | null;
+		width?: number | null;
 	}>({
 		url: null,
 		caption: null,
 		alignment: AlignmentEnum.Column,
+		width: null,
 	});
 	const [showCaptionEdit, setShowCaptionEdit] = React.useState<boolean>(false);
 	const [showMediaLibrary, setShowMediaLibrary] = React.useState<boolean>(false);
@@ -90,17 +95,19 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			!isInternalUpdateRef.current &&
 			(props.data.url !== prevPropsDataRef.current?.url ||
 				props.data.caption !== prevPropsDataRef.current?.caption ||
-				props.data.alignment !== prevPropsDataRef.current?.alignment)
+				props.data.alignment !== prevPropsDataRef.current?.alignment ||
+				props.data.width !== prevPropsDataRef.current?.width)
 		) {
 			setMediaData(props.data);
 			prevPropsDataRef.current = {
 				url: props.data.url,
 				caption: props.data.caption,
 				alignment: props.data.alignment,
+				width: props.data.width,
 			};
 		}
 		isInternalUpdateRef.current = false;
-	}, [props.data?.url, props.data?.caption, props.data?.alignment]);
+	}, [props.data?.url, props.data?.caption, props.data?.alignment, props.data?.width]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -123,7 +130,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			isInternalUpdateRef.current = true;
 			props.onChange(buildContent(mediaData), mediaData);
 		}
-	}, [mediaData?.url, mediaData?.caption, mediaData?.alignment]);
+	}, [mediaData?.url, mediaData?.caption, mediaData?.alignment, mediaData?.width]);
 
 	function buildContent(data: any) {
 		return `
@@ -226,6 +233,39 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		/>
 	);
 
+	const handleResizeStart = (e: React.MouseEvent, side: 'left' | 'right') => {
+		e.preventDefault();
+		e.stopPropagation();
+		isResizingRef.current = true;
+
+		const startX = e.clientX;
+		const startWidth = mediaRef.current?.offsetWidth || 0;
+
+		const handleMouseMove = (moveEvent: MouseEvent) => {
+			if (!isResizingRef.current) return;
+
+			const deltaX = moveEvent.clientX - startX;
+			const newWidth =
+				side === 'right'
+					? Math.max(200, Math.min(startWidth + deltaX, 1200))
+					: Math.max(200, Math.min(startWidth - deltaX, 1200));
+
+			setMediaData((prevContent) => ({
+				...prevContent,
+				width: newWidth,
+			}));
+		};
+
+		const handleMouseUp = () => {
+			isResizingRef.current = false;
+			document.removeEventListener('mousemove', handleMouseMove);
+			document.removeEventListener('mouseup', handleMouseUp);
+		};
+
+		document.addEventListener('mousemove', handleMouseMove);
+		document.addEventListener('mouseup', handleMouseUp);
+	};
+
 	function getInputWrapper() {
 		if (showUploadConfirmation) {
 			return (
@@ -296,42 +336,46 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					<>
 						<S.ContentWrapper>
 							<S.Content>
-								<div className={`portal-media-wrapper ${mediaData.alignment}`}>
-									{mediaData.url && config.renderContent(mediaData.url)}
-									{mediaData?.caption !== null && (
-										<S.CaptionWrapper
-											editMode={false}
-											useColumn={
-												mediaData.alignment === AlignmentEnum.Row || mediaData.alignment === AlignmentEnum.RowReverse
-											}
-										>
-											<ContentEditable
-												element={'p'}
-												value={mediaData?.caption ?? ''}
-												onChange={(value: string) => setMediaData({ ...mediaData, caption: value })}
-												autoFocus
-											/>
-											<S.CaptionToolsInline editMode={false}>
-												<IconButton
-													type={'alt1'}
-													active={false}
-													src={ICONS.write}
-													handlePress={() => setShowCaptionEdit(true)}
-													dimensions={{ wrapper: 23.5, icon: 13.5 }}
-													tooltip={language?.showCaptionTools}
-													tooltipPosition={'bottom-right'}
-													noFocus
+								<S.MediaResizeWrapper ref={mediaRef} width={mediaData.width}>
+									<S.ResizeHandle side="left" onMouseDown={(e) => handleResizeStart(e, 'left')} />
+									<div className={`portal-media-wrapper ${mediaData.alignment}`}>
+										{mediaData.url && config.renderContent(mediaData.url)}
+										{mediaData?.caption !== null && (
+											<S.CaptionWrapper
+												editMode={false}
+												useColumn={
+													mediaData.alignment === AlignmentEnum.Row || mediaData.alignment === AlignmentEnum.RowReverse
+												}
+											>
+												<ContentEditable
+													element={'p'}
+													value={mediaData?.caption ?? ''}
+													onChange={(value: string) => setMediaData({ ...mediaData, caption: value })}
+													autoFocus
 												/>
-											</S.CaptionToolsInline>
-										</S.CaptionWrapper>
+												<S.CaptionToolsInline editMode={false}>
+													<IconButton
+														type={'alt1'}
+														active={false}
+														src={ICONS.write}
+														handlePress={() => setShowCaptionEdit(true)}
+														dimensions={{ wrapper: 23.5, icon: 13.5 }}
+														tooltip={language?.showCaptionTools}
+														tooltipPosition={'bottom-right'}
+														noFocus
+													/>
+												</S.CaptionToolsInline>
+											</S.CaptionWrapper>
+										)}
+									</div>
+									{mediaData?.caption === null && (
+										<S.CaptionEmpty>
+											<p onClick={() => setMediaData({ ...mediaData, caption: '' })}>{language?.addCaption}</p>
+										</S.CaptionEmpty>
 									)}
-								</div>
+									<S.ResizeHandle side="right" onMouseDown={(e) => handleResizeStart(e, 'right')} />
+								</S.MediaResizeWrapper>
 							</S.Content>
-							{mediaData?.caption === null && (
-								<S.CaptionEmpty>
-									<p onClick={() => setMediaData({ ...mediaData, caption: '' })}>{language?.addCaption}</p>
-								</S.CaptionEmpty>
-							)}
 						</S.ContentWrapper>
 						{showCaptionEdit && (
 							<Modal header={language?.editCaption} handleClose={() => setShowCaptionEdit(false)}>

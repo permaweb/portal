@@ -7,11 +7,12 @@ import { currentPageUpdate } from 'editor/store/page';
 
 import { Button } from 'components/atoms/Button';
 import { ICONS } from 'helpers/config';
+import { hasUnsavedPageChanges, isMac } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
+import { PageToolbarMarkup } from './PageToolbarMarkup';
 import * as S from './styles';
 
-// TODO: Layout shortcut
 export default function PageToolbar(props: { handleSubmit: () => void; addSection: (type: string) => void }) {
 	const dispatch = useDispatch();
 
@@ -28,6 +29,8 @@ export default function PageToolbar(props: { handleSubmit: () => void; addSectio
 	const titleRef = React.useRef<any>(null);
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+
+	const hasChanges = hasUnsavedPageChanges(currentPage.data, currentPage.originalData);
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -46,6 +49,8 @@ export default function PageToolbar(props: { handleSubmit: () => void; addSectio
 		};
 	}, [currentPage.editor.blockEditMode]);
 
+	const primaryDisabled = unauthorized || !hasChanges || currentPage.editor.loading.active;
+
 	return (
 		<S.Wrapper>
 			<S.TitleWrapper>
@@ -58,6 +63,13 @@ export default function PageToolbar(props: { handleSubmit: () => void; addSectio
 				/>
 			</S.TitleWrapper>
 			<S.EndActions>
+				{hasChanges && !currentPage.editor.loading.active && (
+					<S.UpdateWrapper className={'info'}>
+						<span>{language.unsavedChanges}</span>
+						<div className={'indicator'} />
+					</S.UpdateWrapper>
+				)}
+				<PageToolbarMarkup />
 				<Button
 					type={'primary'}
 					label={language?.layout}
@@ -87,7 +99,8 @@ export default function PageToolbar(props: { handleSubmit: () => void; addSectio
 						label={language?.save}
 						handlePress={props.handleSubmit}
 						active={false}
-						disabled={unauthorized}
+						disabled={primaryDisabled}
+						tooltip={primaryDisabled ? null : (isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
 						noFocus
 					/>
 				</S.SubmitWrapper>

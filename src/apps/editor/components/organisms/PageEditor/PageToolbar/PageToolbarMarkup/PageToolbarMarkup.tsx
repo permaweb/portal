@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 
 import { EditorStoreRootState } from 'editor/store';
-import { currentPostUpdate } from 'editor/store/post';
+import { currentPageUpdate } from 'editor/store/page';
 
 import { IconButton } from 'components/atoms/IconButton';
 import { ICONS } from 'helpers/config';
@@ -10,21 +10,21 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-export default function ArticleToolbarMarkup() {
+export default function PageToolbarMarkup() {
 	const dispatch = useDispatch();
-	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
+	const currentPage = useSelector((state: EditorStoreRootState) => state.currentPage);
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
-		dispatch(currentPostUpdate(updatedField));
+	const handleCurrentPageUpdate = (updatedField: { field: string; value: any }) => {
+		dispatch(currentPageUpdate(updatedField));
 	};
 
 	const modKey = isMac ? 'Cmd' : 'Ctrl';
 
 	// Get current text alignment from focused block
-	const focusedBlock = currentPost.editor.focusedBlock;
+	const focusedBlock = currentPage.editor.focusedBlock;
 	const currentAlignment = focusedBlock?.data?.textAlign || 'left';
 
 	function getMarkupAction(markupType: 'bold' | 'italic' | 'underline' | 'strikethrough') {
@@ -50,7 +50,7 @@ export default function ArticleToolbarMarkup() {
 				break;
 		}
 
-		const isActive = currentPost.editor.markup[markupType];
+		const isActive = currentPage.editor.markup[markupType];
 
 		return (
 			<IconButton
@@ -58,8 +58,8 @@ export default function ArticleToolbarMarkup() {
 				src={icon}
 				handlePress={() => {
 					// Set a flag to indicate this is a user-initiated change
-					handleCurrentPostUpdate({ field: 'markupUserInitiated', value: true });
-					handleCurrentPostUpdate({ field: `markup.${markupType}`, value: !isActive });
+					handleCurrentPageUpdate({ field: 'markupUserInitiated', value: true });
+					handleCurrentPageUpdate({ field: `markup.${markupType}`, value: !isActive });
 				}}
 				dimensions={{
 					wrapper: 26.5,
@@ -99,24 +99,31 @@ export default function ArticleToolbarMarkup() {
 				handlePress={() => {
 					if (!focusedBlock) return;
 
-					// Update the focused block's data with the new alignment
-					const updatedContent = currentPost.data.content?.map((block: any) => {
-						if (block.id === focusedBlock.id) {
-							return {
-								...block,
-								data: {
-									...block.data,
-									textAlign: alignmentType,
-								},
-							};
-						}
-						return block;
+					// Find and update the block in the nested page section structure
+					const updatedContent = currentPage.data.content?.map((section: any) => {
+						const updatedBlocks = section.content?.map((block: any) => {
+							if (block.id === focusedBlock.id) {
+								return {
+									...block,
+									data: {
+										...block.data,
+										textAlign: alignmentType,
+									},
+								};
+							}
+							return block;
+						});
+
+						return {
+							...section,
+							content: updatedBlocks,
+						};
 					});
 
-					handleCurrentPostUpdate({ field: 'content', value: updatedContent });
+					handleCurrentPageUpdate({ field: 'content', value: updatedContent });
 
 					// Update the focused block in editor state as well
-					handleCurrentPostUpdate({
+					handleCurrentPageUpdate({
 						field: 'focusedBlock',
 						value: {
 							...focusedBlock,

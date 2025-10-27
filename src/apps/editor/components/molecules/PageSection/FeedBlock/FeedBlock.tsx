@@ -1,32 +1,51 @@
+import React from 'react';
+
+import { usePortalProvider } from 'editor/providers/PortalProvider';
+
+import { getTxEndpoint } from 'helpers/endpoints';
+import { PortalAssetType } from 'helpers/types';
+
 import * as S from './styles';
 
-// TODO: Use portal post data
+const FALLBACK_DATA = {
+	category: 'Category',
+	title: `Post Title`,
+	description: `Post Description`,
+};
+
 // TODO: Render based on layout prop
 // TODO: Allow change layout
 export default function FeedBlock(props: { block: any }) {
+	const portalProvider = usePortalProvider();
+	const [posts, setPosts] = React.useState<PortalAssetType[]>([]);
+
+	React.useEffect(() => {
+		if (portalProvider.current?.assets && portalProvider.current.assets.length > 0) {
+			setPosts(portalProvider.current.assets);
+		}
+	}, [portalProvider.current?.assets]);
+
+	const displayPost = posts.length > 0 ? posts[0] : null;
+	const categoryName = displayPost?.metadata?.categories?.[0]?.name || FALLBACK_DATA.category;
+	const postTitle = displayPost?.name || FALLBACK_DATA.title;
+	const postDescription = displayPost?.metadata?.description || FALLBACK_DATA.description;
+	const postThumbnail = displayPost?.metadata?.thumbnail;
+
 	return (
 		<S.Wrapper>
 			<S.CategoryWrapper>
 				<S.CategoryHeader>
-					<p>Arweave</p>
+					<p>{categoryName}</p>
 				</S.CategoryHeader>
 				<S.CategoryBody>
 					<S.PostWrapper>
 						<S.PostInfo>
-							<p>How Arweave’s storage endowment ensures permanent data storage</p>
-							<span>
-								Since Arweave’s launch seven years ago, not a single token has been reissued from the endowment. This
-								means the token supply continues to shrink as usage increases. Learn more about the storage endowment in
-								this article.
-							</span>
+							<p>{postTitle}</p>
+							<span>{postDescription}</span>
 						</S.PostInfo>
-						{props.block?.layout === 'journal' && (
+						{props.block?.layout === 'journal' && postThumbnail && (
 							<S.PostImage>
-								<img
-									src={
-										'https://t6nx4suobmbhecmiulx67ivgvbodi75egwlyiokfzull57nps6na.arweave.net/n5t-So4LAnIJiKLv76KmqFw0f6Q1l4Q5Rc0Wvv2vl5o'
-									}
-								/>
+								<img src={getTxEndpoint(postThumbnail)} alt={postTitle} />
 							</S.PostImage>
 						)}
 					</S.PostWrapper>

@@ -73,6 +73,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const { addNotification } = useNotifications();
 
 	const authoritiesRef = React.useRef(false);
+	const portalsRequestRef = React.useRef(false);
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
 	const [invites, setInvites] = React.useState<PortalHeaderType[] | null>(null);
@@ -81,7 +82,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [currentId, setCurrentId] = React.useState<string | null>(null);
 	const [current, setCurrent] = React.useState<PortalDetailType | null>(null);
 	const [permissions, setPermissions] = React.useState<PortalPermissionsType | null>(null);
-	const [transfers, setTransfers] = React.useState<any>([]);
+	const [transfers, _setTransfers] = React.useState<any>([]);
 
 	const [refreshCurrentTrigger, setRefreshCurrentTrigger] = React.useState<boolean>(false);
 	const [refreshFields, setRefreshFields] = React.useState<PortalPatchMapEnum[] | null>(null);
@@ -94,17 +95,19 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		setCurrent(null);
 		setPortals(null);
+		portalsRequestRef.current = false;
 		if (!arProvider.walletAddress) {
 			setPermissions(null);
 		}
 	}, [arProvider.walletAddress]);
 
 	React.useEffect(() => {
-		if (permawebProvider.profile?.id) {
+		if (permawebProvider.profile?.id && !portalsRequestRef.current) {
 			const profilePortals = permawebProvider.profile?.portals ?? [];
 			setPortals(profilePortals);
 			setInvites(permawebProvider.profile?.invites ?? []);
 			if (profilePortals.length > 0) {
+				portalsRequestRef.current = true;
 				(async () => {
 					const updated = await Promise.all(
 						profilePortals.map(async (portal: PortalHeaderType) => {

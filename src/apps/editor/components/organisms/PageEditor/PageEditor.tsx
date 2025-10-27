@@ -7,11 +7,11 @@ import { PageSection, ResizeContext } from 'editor/components/molecules/PageSect
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 import { EditorStoreRootState } from 'editor/store';
-import { currentPageUpdate } from 'editor/store/page';
+import { currentPageUpdate, setOriginalData } from 'editor/store/page';
 
 import { Loader } from 'components/atoms/Loader';
 import { PageSectionEnum, PageSectionType } from 'helpers/types';
-import { capitalize } from 'helpers/utils';
+import { capitalize, isMac } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -20,6 +20,7 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { PageToolbar } from './PageToolbar';
 import * as S from './styles';
 
+// TODO: Clear redux on new page
 export default function PageEditor() {
 	const dispatch = useDispatch();
 	const { pageId } = useParams<{ pageId?: string }>();
@@ -44,12 +45,38 @@ export default function PageEditor() {
 	React.useEffect(() => {
 		if (portalProvider.current?.id) {
 			if (pageId && portalProvider.current?.pages?.[pageId]) {
-				handleCurrentPageUpdate({ field: 'id', value: pageId });
-				handleCurrentPageUpdate({ field: 'title', value: capitalize(pageId) });
-				handleCurrentPageUpdate({ field: 'content', value: portalProvider.current?.pages?.[pageId].content });
+				const pageData = {
+					id: pageId,
+					title: capitalize(pageId),
+					content: portalProvider.current?.pages?.[pageId].content,
+				};
+
+				// Update current data
+				Object.keys(pageData).forEach((key) => {
+					handleCurrentPageUpdate({ field: key, value: pageData[key as keyof typeof pageData] });
+				});
+
+				// Set original data for comparison
+				dispatch(setOriginalData(pageData as any));
 			}
 		}
 	}, [pageId, portalProvider.current?.id, portalProvider.current?.pages]);
+
+	// Keyboard shortcut: Cmd/Ctrl + Shift + S to save
+	React.useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			const modifier = isMac() ? e.metaKey : e.ctrlKey;
+			if (modifier && e.shiftKey && e.key.toLowerCase() === 's') {
+				e.preventDefault();
+				if (!currentPage.editor.submitDisabled) {
+					handleSubmit();
+				}
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+		return () => window.removeEventListener('keydown', handleKeyDown);
+	}, [currentPage.editor]);
 
 	const addSection = (type: PageSectionEnum) => {
 		if (currentPage.editor.loading.active) return;
@@ -104,7 +131,7 @@ export default function PageEditor() {
 			try {
 				const updatedPages: any = { ...portalProvider.current?.pages };
 				updatedPages[currentPage.data.id] = { content: currentPage.data.content, type: 'grid' };
-				console.log(updatedPages);
+
 				const portalUpdateId = await permawebProvider.libs.updateZone(
 					{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
 					portalProvider.current.id,

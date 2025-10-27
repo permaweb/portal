@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux';
 
 import { EditorStoreRootState } from 'editor/store';
 
-import { hasUnsavedChanges } from 'helpers/utils';
+import { hasUnsavedPostChanges } from 'helpers/utils';
 
 import * as S from './styles';
 
@@ -14,7 +14,7 @@ export default function ArticlePostChanges() {
 		currentPost.data.content.length === 0 ||
 		currentPost.data.content.every((block) => !block.content || block.content.trim() === '');
 
-	const hasChanges = hasUnsavedChanges(currentPost.data, currentPost.originalData) && !isEmpty;
+	const hasChanges = hasUnsavedPostChanges(currentPost.data, currentPost.originalData) && !isEmpty;
 
 	return (
 		<S.Wrapper>

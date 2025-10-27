@@ -138,10 +138,11 @@ export const ElementDragWrapper = styled.div`
 	position: relative;
 `;
 
-export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEnum }>`
+export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEnum; textAlign?: string }>`
 	${(props) => getElementWrapper(props.blockEditMode, props.type, props.theme)};
 
 	cursor: ${(props) => getElementCursor(props.type)};
+	text-align: ${(props) => props.textAlign || 'left'};
 
 	p {
 		font-size: 15px;

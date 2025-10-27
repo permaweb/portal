@@ -403,7 +403,9 @@ export default function ArticleBlock(props: {
 						markupType = 'underline';
 						break;
 					case 'x':
-						markupType = 'strikethrough';
+						if (e.shiftKey) {
+							markupType = 'strikethrough';
+						}
 						break;
 				}
 
@@ -853,7 +855,7 @@ export default function ArticleBlock(props: {
 					<ToolbarWrapper className={'fade-in'} type={props.block.type}>
 						{getElementToolbar()}
 					</ToolbarWrapper>
-					<S.Element blockEditMode={isBlockEditMode} type={props.block.type}>
+					<S.Element blockEditMode={isBlockEditMode} type={props.block.type} textAlign={props.block.data?.textAlign}>
 						{useCustom ? (
 							element
 						) : (

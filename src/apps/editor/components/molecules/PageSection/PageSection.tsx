@@ -1,9 +1,10 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ReactSVG } from 'react-svg';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 import { EditorStoreRootState } from 'editor/store';
+import { currentPageUpdate } from 'editor/store/page';
 
 export const ResizeContext = React.createContext<{
 	resizingBlockId: string | null;
@@ -28,10 +29,7 @@ import { PageBlocks } from '../PageBlocks';
 import { FeedBlock } from './FeedBlock';
 import * as S from './styles';
 
-// TODO: Block / Text Alignment
-// TODO: Disabled on unsaved changes
-// TODO: Show unsaved changes
-// TODO: Post / Category Spotlight Elements
+// TODO: Post / Category Spotlight Elements / Single Post / Sidebar
 export default function PageSection(props: {
 	id: string;
 	index: number;
@@ -40,12 +38,17 @@ export default function PageSection(props: {
 	onDeleteSection: (index: number) => void;
 	parentDragHandleProps?: any;
 }) {
+	const dispatch = useDispatch();
 	const currentPage = useSelector((state: EditorStoreRootState) => state.currentPage);
 	const { resizingBlockId: globalResizingBlockId, setResizingBlockId: setGlobalResizingBlockId } =
 		React.useContext(ResizeContext);
 
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+
+	const handleCurrentPageUpdate = (updatedField: { field: string; value: any }) => {
+		dispatch(currentPageUpdate(updatedField));
+	};
 
 	const [showSelector, setShowSelector] = React.useState<boolean>(false);
 	const [resizingBlock, setResizingBlock] = React.useState<{
@@ -400,7 +403,7 @@ export default function PageSection(props: {
 					block={block}
 					onChangeBlock={handleArticleBlockChange}
 					onDeleteBlock={() => {}}
-					onFocus={() => {}}
+					onFocus={() => handleCurrentPageUpdate({ field: 'focusedBlock', value: block })}
 				/>
 			);
 		}
@@ -496,8 +499,11 @@ export default function PageSection(props: {
 																		</>
 																	)}
 
-																{block.type !== 'section' && currentPage.editor.blockEditMode && (
-																	<S.SubElementHeader {...provided.dragHandleProps}>
+																{currentPage.editor.blockEditMode && (
+																	<S.SubElementHeader
+																		{...provided.dragHandleProps}
+																		style={block.type === 'section' ? { display: 'none' } : undefined}
+																	>
 																		<S.SubElementHeaderAction>
 																			<S.EDragWrapper>
 																				<S.EDragHandler tabIndex={-1}>

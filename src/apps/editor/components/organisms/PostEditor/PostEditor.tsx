@@ -17,7 +17,7 @@ import {
 	PortalUserType,
 	RequestUpdateType,
 } from 'helpers/types';
-import { filterDuplicates, hasUnsavedChanges, isMac, urlify } from 'helpers/utils';
+import { filterDuplicates, hasUnsavedPostChanges, isMac, urlify } from 'helpers/utils';
 import { useNavigationConfirm } from 'hooks/useNavigationConfirm';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -27,8 +27,6 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { ArticleEditor } from './ArticleEditor';
 import * as S from './styles';
 
-// TODO: Show unsaved changes
-// TODO: Image resizer
 export default function PostEditor() {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -49,7 +47,7 @@ export default function PostEditor() {
 
 	const isStaticPage = location.pathname.includes('page');
 
-	const hasChanges = hasUnsavedChanges(currentPost.data, currentPost.originalData);
+	const hasChanges = hasUnsavedPostChanges(currentPost.data, currentPost.originalData);
 
 	// Enable navigation confirmation when there are unsaved changes
 	useNavigationConfirm(

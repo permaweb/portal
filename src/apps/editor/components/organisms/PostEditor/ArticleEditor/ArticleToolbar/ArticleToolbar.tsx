@@ -20,7 +20,7 @@ import {
 	PortalUserType,
 	RequestUpdateType,
 } from 'helpers/types';
-import { isMac } from 'helpers/utils';
+import { hasUnsavedPostChanges, isMac } from 'helpers/utils';
 import { checkWindowCutoff, hideDocumentBody, showDocumentBody } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -57,6 +57,12 @@ export default function ArticleToolbar(props: {
 
 	const titleRef = React.useRef<any>(null);
 	const prevDesktopRef = React.useRef<boolean>(desktop);
+
+	const hasChanges = hasUnsavedPostChanges(currentPost.data, currentPost.originalData);
+	const isEmpty =
+		!currentPost.data.content ||
+		currentPost.data.content.length === 0 ||
+		currentPost.data.content.every((block) => !block.content || block.content.trim() === '');
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
@@ -297,6 +303,12 @@ export default function ArticleToolbar(props: {
 					/>
 				</S.TitleWrapper>
 				<S.EndActions>
+					{hasChanges && !isEmpty && !currentPost.editor.loading.active && (
+						<S.UpdateWrapper className={'info'}>
+							<span>{language.unsavedChanges}</span>
+							<div className={'indicator'} />
+						</S.UpdateWrapper>
+					)}
 					<ArticleToolbarMarkup />
 					<Button
 						type={'primary'}
