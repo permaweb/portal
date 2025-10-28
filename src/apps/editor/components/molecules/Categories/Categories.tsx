@@ -218,34 +218,11 @@ export default function Categories(props: {
 											props.categories?.find((c: PortalCategoryType) => item.category.id === c.id) !== undefined;
 										const isSelected = selectedIds.has(item.category.id);
 										const disabled = unauthorized || categoryLoading || isDragging;
-										const addDisabled = unauthorized || categoryLoading || isDragging || item.category.metadata?.hidden;
-
-										const onChipClick = () => {
-											if (!addDisabled) handleSelectCategory(item.category.id);
-										};
-
-										const onChipKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
-											if (disabled) return;
-											if (e.key === 'Enter' || e.key === ' ') {
-												e.preventDefault();
-												handleSelectCategory(item.category.id);
-											}
-										};
 
 										const onOpenSettings: React.MouseEventHandler<HTMLButtonElement> = (e) => {
 											e.stopPropagation();
 											if (disabled) return;
-											openCategorySettings(item.category); // wire to your modal later
-										};
-
-										const fieldsDisabled = item?.category?.metadata?.hidden || categoryLoading;
-
-										const resolvedTemplate = openMetadata.template ?? item.category?.metadata?.template ?? 'feed';
-
-										const activeTemplate = templateOptions.find((o) => o.id === resolvedTemplate) ?? templateOptions[1];
-
-										const handleTemplateChange = (opt: SelectOptionType) => {
-											setOpenMetadata((prev) => ({ ...prev, template: opt.id }));
+											openCategorySettings(item.category);
 										};
 
 										return (
@@ -441,6 +418,12 @@ export default function Categories(props: {
 	function getCategoryAdd() {
 		return (
 			<S.CategoriesAction>
+				<S.Info>
+					{getEffectiveParentId() &&
+						`You are adding as a child to the category "${
+							findCategoryById(categoryOptions ?? [], getEffectiveParentId())?.name ?? ''
+						}".`}
+				</S.Info>
 				<S.CategoriesAddAction
 					onSubmit={addCategory}
 					onKeyDownCapture={(e) => {
@@ -451,13 +434,7 @@ export default function Categories(props: {
 				>
 					<Button
 						type={'alt4'}
-						label={
-							getEffectiveParentId()
-								? `${language?.addTo ?? 'Add to'} ${
-										findCategoryById(categoryOptions ?? [], getEffectiveParentId())?.name ?? ''
-								  }`
-								: language?.add
-						}
+						label={language?.add}
 						handlePress={addCategory}
 						disabled={unauthorized || !newCategoryName || categoryLoading}
 						loading={categoryLoading}
