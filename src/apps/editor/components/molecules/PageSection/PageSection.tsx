@@ -33,7 +33,6 @@ export const ResizeContext = React.createContext<{
 	setResizingBlockId: () => {},
 });
 
-// TODO: Sidebar
 export default function PageSection(props: {
 	id: string;
 	index: number;
