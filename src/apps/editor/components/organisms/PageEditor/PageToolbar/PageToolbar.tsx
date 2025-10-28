@@ -49,7 +49,8 @@ export default function PageToolbar(props: { handleSubmit: () => void; addSectio
 		};
 	}, [currentPage.editor.blockEditMode]);
 
-	const primaryDisabled = unauthorized || !hasChanges || currentPage.editor.loading.active;
+	const primaryDisabled =
+		unauthorized || !hasChanges || currentPage.editor.loading.active || currentPage.editor.submitDisabled;
 
 	return (
 		<S.Wrapper>

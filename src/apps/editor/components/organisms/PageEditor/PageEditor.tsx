@@ -7,11 +7,11 @@ import { PageSection, ResizeContext } from 'editor/components/molecules/PageSect
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 import { EditorStoreRootState } from 'editor/store';
-import { currentPageUpdate, setOriginalData } from 'editor/store/page';
+import { currentPageClear, currentPageUpdate, setOriginalData } from 'editor/store/page';
 
 import { Loader } from 'components/atoms/Loader';
 import { PageSectionEnum, PageSectionType } from 'helpers/types';
-import { capitalize, isMac } from 'helpers/utils';
+import { capitalize, isMac, urlify } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -20,7 +20,6 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { PageToolbar } from './PageToolbar';
 import * as S from './styles';
 
-// TODO: Clear redux on new page
 export default function PageEditor() {
 	const dispatch = useDispatch();
 	const { pageId } = useParams<{ pageId?: string }>();
@@ -37,30 +36,89 @@ export default function PageEditor() {
 	const { settings } = useSettingsProvider();
 
 	const [resizingBlockId, setResizingBlockId] = React.useState<string | null>(null);
+	const [hasBodyOverflow, setHasBodyOverflow] = React.useState(false);
+
+	React.useEffect(() => {
+		const checkOverflow = () => {
+			const hasOverflow =
+				document.documentElement.scrollHeight > document.documentElement.clientHeight ||
+				window.innerHeight < document.documentElement.scrollHeight;
+			setHasBodyOverflow(hasOverflow);
+		};
+
+		checkOverflow();
+		window.addEventListener('resize', checkOverflow);
+		const observer = new MutationObserver(checkOverflow);
+		observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+
+		return () => {
+			window.removeEventListener('resize', checkOverflow);
+			observer.disconnect();
+		};
+	}, []);
 
 	const handleCurrentPageUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPageUpdate(updatedField));
 	};
 
 	React.useEffect(() => {
+		const isEmpty =
+			!currentPage.data.content ||
+			currentPage.data.content.length === 0 ||
+			currentPage.data.content.every((section) => !section.content || section.content.length === 0);
+
+		const noTitle = !currentPage.data.title || currentPage.data.title.trim() === '';
+
+		handleCurrentPageUpdate({ field: 'submitDisabled', value: isEmpty || noTitle });
+	}, [currentPage.data.content, currentPage.data.title]);
+
+	const previousPageIdRef = React.useRef<string | undefined>(undefined);
+
+	React.useEffect(() => {
 		if (portalProvider.current?.id) {
 			if (pageId && portalProvider.current?.pages?.[pageId]) {
-				const pageData = {
-					id: pageId,
-					title: capitalize(pageId),
-					content: portalProvider.current?.pages?.[pageId].content,
-				};
+				const hasCurrentPageData = currentPage.data.id === pageId && currentPage.data.title;
+				const pageIdChanged = previousPageIdRef.current !== pageId;
 
-				// Update current data
-				Object.keys(pageData).forEach((key) => {
-					handleCurrentPageUpdate({ field: key, value: pageData[key as keyof typeof pageData] });
-				});
+				if (!hasCurrentPageData || pageIdChanged) {
+					dispatch(currentPageClear());
 
-				// Set original data for comparison
-				dispatch(setOriginalData(pageData as any));
+					const pageData = {
+						id: pageId,
+						title: capitalize(pageId),
+						content: portalProvider.current?.pages?.[pageId].content,
+					};
+
+					// Update current data
+					Object.keys(pageData).forEach((key) => {
+						handleCurrentPageUpdate({ field: key, value: pageData[key as keyof typeof pageData] });
+					});
+
+					// Set original data for comparison
+					dispatch(setOriginalData(pageData as any));
+				}
+			} else {
+				// Clear the page if we're creating a new page (pageId is undefined)
+				// but have content from an existing page (currentPage.data.id exists)
+				// This handles the case where user navigates from editing an existing page to creating new
+				if (currentPage.data.id) dispatch(currentPageClear());
 			}
+			previousPageIdRef.current = pageId;
 		}
 	}, [pageId, portalProvider.current?.id, portalProvider.current?.pages]);
+
+	// Auto-add empty section when no content exists
+	React.useEffect(() => {
+		if (!currentPage.data.content || currentPage.data.content.length === 0) {
+			const newSection: PageSectionType = {
+				type: PageSectionEnum.Row,
+				layout: null,
+				content: [],
+				width: 1,
+			};
+			handleCurrentPageUpdate({ field: 'content', value: [newSection] });
+		}
+	}, [currentPage.data.content]);
 
 	// Keyboard shortcut: Cmd/Ctrl + Shift + S to save
 	React.useEffect(() => {
@@ -130,7 +188,9 @@ export default function PageEditor() {
 
 			try {
 				const updatedPages: any = { ...portalProvider.current?.pages };
-				updatedPages[currentPage.data.id] = { content: currentPage.data.content, type: 'grid' };
+
+				const updatedId = currentPage.data.id ?? urlify(currentPage.data.title);
+				updatedPages[updatedId] = { content: currentPage.data.content, type: 'grid' };
 
 				const portalUpdateId = await permawebProvider.libs.updateZone(
 					{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
@@ -153,40 +213,36 @@ export default function PageEditor() {
 	return (
 		<>
 			<S.Wrapper>
-				<S.ToolbarWrapper id={'toolbar-wrapper'} navWidth={settings.navWidth}>
-					<PageToolbar handleSubmit={handleSubmit} addSection={addSection} />
+				<S.ToolbarWrapper id={'toolbar-wrapper'} navWidth={settings.navWidth} hasBodyOverflow={hasBodyOverflow}>
+					<S.ToolbarContent className={'max-view-wrapper'} navWidth={settings.navWidth}>
+						<PageToolbar handleSubmit={handleSubmit} addSection={addSection} />
+					</S.ToolbarContent>
 				</S.ToolbarWrapper>
 				<ResizeContext.Provider value={{ resizingBlockId, setResizingBlockId }}>
 					<S.EditorWrapper>
-						{currentPage.data.content?.length ? (
-							<DragDropContext onDragEnd={onDragEnd}>
-								<Droppable droppableId={'blocks'}>
-									{(provided) => (
-										<S.Editor
-											{...provided.droppableProps}
-											ref={provided.innerRef}
-											blockEditMode={currentPage.editor.blockEditMode}
-										>
-											{currentPage.data.content.map((section: PageSectionType, index: number) => (
-												<PageSection
-													key={index}
-													id={index.toString()}
-													index={index}
-													section={section as PageSectionType}
-													onChangeSection={handleSectionChange}
-													onDeleteSection={deleteSection}
-												/>
-											))}
-											{provided.placeholder}
-										</S.Editor>
-									)}
-								</Droppable>
-							</DragDropContext>
-						) : (
-							<S.BlocksEmpty className={'fade-in'}>
-								<span>Add Section</span>
-							</S.BlocksEmpty>
-						)}
+						<DragDropContext onDragEnd={onDragEnd}>
+							<Droppable droppableId={'blocks'}>
+								{(provided) => (
+									<S.Editor
+										{...provided.droppableProps}
+										ref={provided.innerRef}
+										blockEditMode={currentPage.editor.blockEditMode}
+									>
+										{currentPage.data.content?.map((section: PageSectionType, index: number) => (
+											<PageSection
+												key={index}
+												id={index.toString()}
+												index={index}
+												section={section as PageSectionType}
+												onChangeSection={handleSectionChange}
+												onDeleteSection={deleteSection}
+											/>
+										))}
+										{provided.placeholder}
+									</S.Editor>
+								)}
+							</Droppable>
+						</DragDropContext>
 					</S.EditorWrapper>
 				</ResizeContext.Provider>
 			</S.Wrapper>

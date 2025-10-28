@@ -1,20 +1,7 @@
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import { STYLING } from 'helpers/config';
 import { PageSectionEnum } from 'helpers/types';
-
-function getElementPadding(_type: PageSectionEnum) {
-	return '10px';
-}
-
-function getElementWrapper(blockEditMode: boolean, type: PageSectionEnum, theme: DefaultTheme) {
-	return `
-		padding: ${blockEditMode ? getElementPadding(type) : '0'};
-		background: ${blockEditMode ? theme.colors.container.primary.background : 'transparent'};
-		border: 1px solid ${blockEditMode ? theme.colors.border.primary : 'transparent'};
-		border-radius: ${blockEditMode ? STYLING.dimensions.radius.primary : '0'};
-	`;
-}
 
 function getElementCursor(_type: PageSectionEnum) {
 	return 'default';
@@ -30,11 +17,14 @@ export const ElementWrapper = styled.div<{ blockEditMode: boolean; type: PageSec
 `;
 
 export const Element = styled.div<{ blockEditMode: boolean; type: PageSectionEnum }>`
-	/* ${(props) => getElementWrapper(props.blockEditMode, props.type, props.theme)}; */
 	cursor: ${(props) => getElementCursor(props.type)};
 	display: flex;
 	gap: 10px;
 	flex-direction: ${(props) => props.type ?? 'row'};
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		flex-direction: column;
+	}
 `;
 
 export const DefaultElementWrapper = styled.div`
@@ -63,7 +53,7 @@ export const EDragHandler = styled.div`
 
 	svg {
 		width: 17.5px;
-		margin: 5px 0 0 0;
+		margin: 5px 0 0 -3px;
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
 	}
@@ -259,4 +249,8 @@ export const DroppableContainer = styled.div<{ $direction: 'row' | 'column' | 'g
 	flex-direction: ${(props) => (props.$direction === 'grid' ? 'row' : props.$direction)};
 	width: 100%;
 	flex-wrap: ${(props) => (props.$direction === 'grid' ? 'wrap' : 'nowrap')};
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		flex-direction: column;
+	}
 `;

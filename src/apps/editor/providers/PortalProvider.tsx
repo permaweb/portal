@@ -122,7 +122,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								);
 
 								const transfers = permawebProvider.libs.mapFromProcessCase(
-									await permawebProvider.libs.getState({ processId: portal.id, path: PortalPatchMapEnum.Transfers })
+									await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Transfers })
 								);
 
 								return {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
+import { useTheme } from 'styled-components';
 
 import { ProfileManager } from 'editor/components/organisms/ProfileManager';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
@@ -23,6 +24,7 @@ import * as S from './styles';
 
 export default function Landing() {
 	const navigate = useNavigate();
+	const theme = useTheme();
 
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -34,6 +36,31 @@ export default function Landing() {
 	const [showInvites, setShowInvites] = React.useState<boolean>(false);
 	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 	const [pendingPortalId, setPendingPortalId] = React.useState<string | null>(null);
+
+	React.useEffect(() => {
+		const header = document.getElementById('landing-header');
+		if (!header) return;
+
+		let lastScrollY = 0;
+		let ticking = false;
+		const borderColor = theme.colors.border.primary;
+
+		const handleScroll = () => {
+			lastScrollY = window.scrollY;
+			if (!ticking) {
+				window.requestAnimationFrame(() => {
+					header.style.borderBottom = lastScrollY > 0 ? `1px solid ${borderColor}` : '1px solid transparent';
+					ticking = false;
+				});
+				ticking = true;
+			}
+		};
+
+		window.addEventListener('scroll', handleScroll, { passive: true });
+		handleScroll();
+
+		return () => window.removeEventListener('scroll', handleScroll);
+	}, [theme.colors.border.primary]);
 
 	React.useEffect(() => {
 		if (pendingPortalId && permawebProvider.profile?.portals) {
@@ -247,7 +274,7 @@ export default function Landing() {
 	return (
 		<>
 			<S.Wrapper>
-				<S.HeaderWrapper>
+				<S.HeaderWrapper id={'landing-header'}>
 					<S.HeaderContent>
 						<S.HeaderActionsWrapper>
 							<S.HeaderAction>

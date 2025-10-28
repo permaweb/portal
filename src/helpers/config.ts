@@ -140,6 +140,11 @@ export const PAGE_BLOCKS = {
 		label: 'Post Feed',
 		icon: ICONS.feed,
 	},
+	[PageBlockEnum.Post]: {
+		type: PageBlockEnum.Post,
+		label: 'Post',
+		icon: ICONS.post,
+	},
 };
 
 export const ARTICLE_BLOCKS = {

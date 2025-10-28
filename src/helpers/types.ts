@@ -221,9 +221,11 @@ export enum PageSectionEnum {
 
 export enum PageBlockEnum {
 	Feed = 'feed',
+	Post = 'post',
 }
 
 export type PageSectionType = {
+	id?: string;
 	type: PageSectionEnum;
 	layout: any;
 	content: any[];

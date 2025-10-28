@@ -414,8 +414,15 @@ export function hasUnsavedPostChanges(current: any, original: any): boolean {
 }
 
 export function hasUnsavedPageChanges(current: any, original: any): boolean {
-	// If there's no original data, consider it as changes (new page)
-	if (!original) return true;
+	// If there's no original data, check if there's content (new page)
+	if (!original) {
+		// If it's a new page with no content, don't show as having changes
+		const isEmpty =
+			!current.content ||
+			current.content.length === 0 ||
+			current.content.every((section: any) => !section.content || section.content.length === 0);
+		return !isEmpty;
+	}
 
 	// Compare all relevant fields
 	return current.title !== original.title || JSON.stringify(current.content) !== JSON.stringify(original.content);

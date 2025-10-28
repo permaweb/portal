@@ -17,7 +17,7 @@ export const Wrapper = styled.div`
 `;
 
 export const TitleWrapper = styled.div`
-	width: calc(50% - 10px);
+	width: calc(35% - 10px);
 	overflow: hidden;
 	position: relative;
 	input {
@@ -44,8 +44,7 @@ export const UpdateWrapper = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 7.5px;
-	padding: 3.5px 7.5px 3.5px 7.5px !important;
-	border: 1px solid ${(props) => props.theme.colors.border.alt1};
+	padding: 5.5px 7.5px !important;
 
 	.indicator {
 		height: 10px;
@@ -65,6 +64,7 @@ export const EndActions = styled.div`
 	@media (max-width: ${STYLING.cutoffs.initial}) {
 		width: 100%;
 		flex-wrap: wrap;
+		justify-content: center;
 	}
 `;
 

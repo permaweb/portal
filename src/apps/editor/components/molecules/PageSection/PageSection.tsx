@@ -6,19 +6,11 @@ import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPageUpdate } from 'editor/store/page';
 
-export const ResizeContext = React.createContext<{
-	resizingBlockId: string | null;
-	setResizingBlockId: (id: string | null) => void;
-}>({
-	resizingBlockId: null,
-	setResizingBlockId: () => {},
-});
-
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Panel } from 'components/atoms/Panel';
 import { ARTICLE_BLOCKS, ICONS, PAGE_BLOCKS } from 'helpers/config';
-import { ArticleBlockEnum, PageBlockEnum, PageSectionEnum, PageSectionType } from 'helpers/types';
+import { ArticleBlockEnum, PageBlockEnum, PageBlockType, PageSectionEnum, PageSectionType } from 'helpers/types';
 import { capitalize } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -27,9 +19,18 @@ import { ArticleBlocks } from '../ArticleBlocks';
 import { PageBlocks } from '../PageBlocks';
 
 import { FeedBlock } from './FeedBlock';
+import { PostBlock } from './PostBlock';
 import * as S from './styles';
 
-// TODO: Post / Category Spotlight Elements / Single Post / Sidebar
+export const ResizeContext = React.createContext<{
+	resizingBlockId: string | null;
+	setResizingBlockId: (id: string | null) => void;
+}>({
+	resizingBlockId: null,
+	setResizingBlockId: () => {},
+});
+
+// TODO: Post / Category Spotlight Elements / Sidebar
 export default function PageSection(props: {
 	id: string;
 	index: number;
@@ -99,6 +100,8 @@ export default function PageSection(props: {
 	};
 
 	function getElementToolbar() {
+		const isOnlySection = currentPage.data.content?.length === 1;
+
 		return (
 			<S.ElementToolbar tabIndex={-1}>
 				<S.EToolbarHeader>
@@ -125,16 +128,18 @@ export default function PageSection(props: {
 						tooltipPosition={'bottom-right'}
 						noFocus
 					/>
-					<IconButton
-						type={'alt1'}
-						active={false}
-						src={ICONS.delete}
-						handlePress={() => props.onDeleteSection(props.index)}
-						dimensions={{ wrapper: 23.5, icon: 13.5 }}
-						tooltip={language?.deleteSection}
-						tooltipPosition={'bottom-right'}
-						noFocus
-					/>
+					{!isOnlySection && (
+						<IconButton
+							type={'alt1'}
+							active={false}
+							src={ICONS.delete}
+							handlePress={() => props.onDeleteSection(props.index)}
+							dimensions={{ wrapper: 23.5, icon: 13.5 }}
+							tooltip={language?.deleteSection}
+							tooltipPosition={'bottom-right'}
+							noFocus
+						/>
+					)}
 				</S.EToolbarActions>
 			</S.ElementToolbar>
 		);
@@ -157,7 +162,6 @@ export default function PageSection(props: {
 					content: [],
 					width: 1,
 				},
-				layout: { separation: true },
 				width: 1,
 			};
 		} else if (articleBlockTypes.includes(type)) {
@@ -175,7 +179,6 @@ export default function PageSection(props: {
 				id: Date.now().toString(),
 				type: type as ArticleBlockEnum,
 				content: content,
-				layout: { separation: true },
 				width: 1,
 			};
 		} else {
@@ -183,7 +186,6 @@ export default function PageSection(props: {
 				id: Date.now().toString(),
 				type: type as PageBlockEnum,
 				content: content,
-				layout: { separation: true },
 				width: 1,
 			};
 		}
@@ -204,6 +206,18 @@ export default function PageSection(props: {
 				? { ...block, content: args.content, type: args.type ?? block.type, data: args.data ?? block.data ?? null }
 				: block
 		);
+
+		const updatedSection = {
+			...props.section,
+			content: updatedBlocks,
+		};
+
+		props.onChangeSection(updatedSection, props.index);
+	};
+
+	const handlePageBlockChange = (block: PageBlockType, index: number) => {
+		const updatedBlocks = [...props.section.content];
+		updatedBlocks[index] = block;
 
 		const updatedSection = {
 			...props.section,
@@ -409,7 +423,9 @@ export default function PageSection(props: {
 		}
 		switch (block.type) {
 			case 'feed':
-				return <FeedBlock block={block} />;
+				return <FeedBlock index={index} block={block} onChangeBlock={handlePageBlockChange} />;
+			case 'post':
+				return <PostBlock index={index} block={block} onChangeBlock={handlePageBlockChange} />;
 			default:
 				return null;
 		}
@@ -478,7 +494,6 @@ export default function PageSection(props: {
 																	props.section.type !== 'column' &&
 																	(!globalResizingBlockId || globalResizingBlockId === block.id) && (
 																		<>
-																			{/* Left handle for middle and last elements (when multiple blocks exist) */}
 																			{(props.section.content?.length || 0) > 1 && index > 0 && (
 																				<S.ResizeHandle
 																					onMouseDown={(e) =>
@@ -487,7 +502,6 @@ export default function PageSection(props: {
 																					$side={'left'}
 																				/>
 																			)}
-																			{/* Right handle for first and middle elements */}
 																			{index < (props.section.content?.length || 0) - 1 && (
 																				<S.ResizeHandle
 																					onMouseDown={(e) =>

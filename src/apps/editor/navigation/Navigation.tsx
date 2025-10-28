@@ -208,9 +208,6 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 	const panel = React.useMemo(() => {
 		const showText = navWidth > 120;
-		const hash = window.location.hash;
-		const parts = hash.split('/').filter(Boolean);
-		const currentId = parts[1];
 		const content = (
 			<>
 				<S.PanelHeader>{navigationToggle}</S.PanelHeader>

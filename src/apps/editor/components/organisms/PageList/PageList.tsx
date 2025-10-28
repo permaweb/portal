@@ -5,7 +5,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { ICONS, URLS } from 'helpers/config';
-import { resolvePrimaryDomain, urlify } from 'helpers/utils';
+import { displayUrlName, resolvePrimaryDomain, urlify } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -65,7 +65,7 @@ export default function PageList() {
 						>
 							<S.PageWrapper className={'fade-in'}>
 								<S.PageHeader>
-									<p>{key.charAt(0).toUpperCase() + key.slice(1)}</p>
+									<p>{displayUrlName(key)}</p>
 								</S.PageHeader>
 								<S.PageDetail>
 									<S.PageActions>

@@ -72,10 +72,6 @@ export const ToggleWrapper = styled.div<{ open: boolean }>`
 	display: flex;
 	align-items: center;
 	gap: 7.5px;
-
-	button {
-		cursor: ${(props) => (props.open ? 'w-resize' : 'e-resize')} !important;
-	}
 `;
 
 export const Logo = styled.div`

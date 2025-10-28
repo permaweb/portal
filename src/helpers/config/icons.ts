@@ -68,6 +68,7 @@ export const ICONS = {
 	quotes: getTxEndpoint('2D6HWs0jkqXe4aBVkJv2OTnaZ-heyGYzUJwDxp-Dqaw'),
 	remove: getTxEndpoint('M9Jt7UeAdfLPAZfZpbrG1UHaQLFFf8d9t2iHueOpwC0'),
 	reply: getTxEndpoint('MRv0PNi9dfNgZToEzadBagBU_HhGhukkIT1ZEJ2OMSM'),
+	rotate: getTxEndpoint('o6b5WZGWf7ChLoZPnj8IVZipD19RtM-Yxg1AC4vs12E'),
 	rows: getTxEndpoint('xXDS2irAA7MlbTRl0xkXov8hllsFHjGuf-vIGfg0NLk'),
 	search: getTxEndpoint('yRgUeadiTV769j2tbEg2HnpXUohA_3M2oFZsHwNRqOU'),
 	send: getTxEndpoint('xw3wfZmsj6K3YOA7IJDbWoW2ysIT1D5OHV141etlk8M'),
