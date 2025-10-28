@@ -411,6 +411,12 @@ export default function Categories(props: {
 	function getCategoryAdd() {
 		return (
 			<S.CategoriesAction>
+				<S.Info>
+					{getEffectiveParentId() &&
+						`You are adding as a child to the category "${
+							findCategoryById(categoryOptions ?? [], getEffectiveParentId())?.name ?? ''
+						}".`}
+				</S.Info>
 				<S.CategoriesAddAction
 					onSubmit={addCategory}
 					onKeyDownCapture={(e) => {
@@ -421,13 +427,7 @@ export default function Categories(props: {
 				>
 					<Button
 						type={'alt4'}
-						label={
-							getEffectiveParentId()
-								? `${language?.addTo ?? 'Add to'} ${
-										findCategoryById(categoryOptions ?? [], getEffectiveParentId())?.name ?? ''
-								  }`
-								: language?.add
-						}
+						label={language?.add}
 						handlePress={addCategory}
 						disabled={unauthorized || !newCategoryName || categoryLoading}
 						loading={categoryLoading}

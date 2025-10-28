@@ -363,6 +363,11 @@ export const FieldLabel = styled.label`
 	user-select: none;
 `;
 
+export const Info = styled.label`
+	font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+	color: ${(props) => props.theme.colors.font.alt1};
+`;
+
 export const Inline = styled.div`
 	display: inline-flex;
 	align-items: center;
