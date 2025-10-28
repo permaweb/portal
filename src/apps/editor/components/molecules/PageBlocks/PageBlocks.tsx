@@ -59,7 +59,13 @@ export default function PageBlocks(props: {
 		() => [
 			{
 				label: language.dynamicElements,
-				blocks: [PAGE_BLOCKS[PageBlockEnum.Feed]],
+				blocks: [
+					PAGE_BLOCKS[PageBlockEnum.Feed],
+					PAGE_BLOCKS[PageBlockEnum.Post],
+					PAGE_BLOCKS[PageBlockEnum.PostSpotlight],
+					PAGE_BLOCKS[PageBlockEnum.CategorySpotlight],
+					PAGE_BLOCKS[PageBlockEnum.Sidebar],
+				],
 			},
 		],
 		[language.dynamicElements]

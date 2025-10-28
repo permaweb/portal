@@ -53,7 +53,7 @@ export const EDragHandler = styled.div`
 
 	svg {
 		width: 17.5px;
-		margin: 5px 0 0 -3px;
+		margin: 5px 0 0 0;
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
 	}

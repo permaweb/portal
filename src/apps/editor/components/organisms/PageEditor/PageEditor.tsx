@@ -83,10 +83,28 @@ export default function PageEditor() {
 				if (!hasCurrentPageData || pageIdChanged) {
 					dispatch(currentPageClear());
 
+					const content = portalProvider.current?.pages?.[pageId].content;
+
+					/* Add IDs to any elements missing them */
+					if (Array.isArray(content)) {
+						const makeId = () =>
+							typeof crypto?.randomUUID === 'function'
+								? crypto.randomUUID()
+								: `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+						for (const section of content) {
+							if (Array.isArray(section.content)) {
+								for (const block of section.content) {
+									if (!block.id) block.id = makeId();
+								}
+							}
+						}
+					}
+
 					const pageData = {
 						id: pageId,
 						title: capitalize(pageId),
-						content: portalProvider.current?.pages?.[pageId].content,
+						content: content,
 					};
 
 					// Update current data

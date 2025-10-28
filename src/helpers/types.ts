@@ -222,6 +222,9 @@ export enum PageSectionEnum {
 export enum PageBlockEnum {
 	Feed = 'feed',
 	Post = 'post',
+	PostSpotlight = 'postSpotlight',
+	CategorySpotlight = 'categorySpotlight',
+	Sidebar = 'sidebar',
 }
 
 export type PageSectionType = {

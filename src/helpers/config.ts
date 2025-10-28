@@ -143,7 +143,22 @@ export const PAGE_BLOCKS = {
 	[PageBlockEnum.Post]: {
 		type: PageBlockEnum.Post,
 		label: 'Post',
-		icon: ICONS.post,
+		icon: ICONS.posts,
+	},
+	[PageBlockEnum.PostSpotlight]: {
+		type: PageBlockEnum.PostSpotlight,
+		label: 'Featured Post',
+		icon: ICONS.featuredPost,
+	},
+	[PageBlockEnum.CategorySpotlight]: {
+		type: PageBlockEnum.CategorySpotlight,
+		label: 'Featured Category',
+		icon: ICONS.featuredCategory,
+	},
+	[PageBlockEnum.Sidebar]: {
+		type: PageBlockEnum.Sidebar,
+		label: 'Sidebar',
+		icon: ICONS.sidebar,
 	},
 };
 

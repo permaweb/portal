@@ -18,8 +18,11 @@ import { ArticleBlock } from '../ArticleBlock';
 import { ArticleBlocks } from '../ArticleBlocks';
 import { PageBlocks } from '../PageBlocks';
 
+import { CategorySpotlightBlock } from './CategorySpotlightBlock';
 import { FeedBlock } from './FeedBlock';
 import { PostBlock } from './PostBlock';
+import { PostSpotlightBlock } from './PostSpotlightBlock';
+import { SidebarBlock } from './SidebarBlock';
 import * as S from './styles';
 
 export const ResizeContext = React.createContext<{
@@ -30,7 +33,7 @@ export const ResizeContext = React.createContext<{
 	setResizingBlockId: () => {},
 });
 
-// TODO: Post / Category Spotlight Elements / Sidebar
+// TODO: Sidebar
 export default function PageSection(props: {
 	id: string;
 	index: number;
@@ -393,7 +396,6 @@ export default function PageSection(props: {
 		if (!block) return null;
 
 		if (block.type === 'section') {
-			// Render nested section recursively
 			return (
 				<S.NestedSectionWrapper key={block.id}>
 					<PageSection
@@ -423,9 +425,17 @@ export default function PageSection(props: {
 		}
 		switch (block.type) {
 			case 'feed':
-				return <FeedBlock index={index} block={block} onChangeBlock={handlePageBlockChange} />;
+				return <FeedBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
 			case 'post':
-				return <PostBlock index={index} block={block} onChangeBlock={handlePageBlockChange} />;
+				return <PostBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
+			case 'postSpotlight':
+				return <PostSpotlightBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
+			case 'categorySpotlight':
+				return (
+					<CategorySpotlightBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />
+				);
+			case 'sidebar':
+				return <SidebarBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
 			default:
 				return null;
 		}
