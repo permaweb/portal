@@ -48,7 +48,7 @@ export default function ProfileManager(props: {
 
 	React.useEffect(() => {
 		setUsername(props.profile?.username ?? '');
-		setName(props.profile?.displayName ?? '');
+		setName(props.profile.displayName ?? props.profile?.displayname ?? '');
 		setDescription(props.profile?.description ?? '');
 
 		if (!bannerRemoved) {
