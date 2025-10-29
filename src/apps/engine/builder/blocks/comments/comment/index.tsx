@@ -50,14 +50,6 @@ export default function Comment(props: any) {
 	const canPinComment =
 		(userIsAdmin || userIsModerator) && (!commentData.parentId || commentData.depth === 0 || commentData.depth === -1);
 
-	console.log('Portal check:', {
-		portalId,
-		commentCreator: commentData.creator,
-		profileId: profile?.id,
-		commentAuthorIsPortal,
-		shouldHighlightAuthor,
-	});
-
 	async function handleUserBlock() {
 		if (!moderationId || !libs || !commentData.creator || !user?.owner) return;
 
@@ -201,7 +193,7 @@ export default function Comment(props: any) {
 
 	const menuEntries: MenuItem[] = [];
 
-	if (commentAuthorIsActiveUser && !isEditMode) {
+	if ((commentAuthorIsActiveUser || (userIsAdmin && commentAuthorIsPortal)) && !isEditMode) {
 		menuEntries.push({
 			icon: ICONS.edit,
 			label: 'Edit Comment',
