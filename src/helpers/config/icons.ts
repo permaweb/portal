@@ -93,6 +93,7 @@ export const ICONS = {
 	wallet_old: getTxEndpoint('_t97i0BzskALIFERWR6iDs_uX7U6bbd4-3Pqq3HDkfI'),
 	warning: getTxEndpoint('BASlMnOWcLCcLUSrO2wUybQL_06231dLONeVkdTWs3o'),
 	write: getTxEndpoint('SUWTk8Qtcub9EsP5PDF6-vzgKsP5Irg1bB9b8NImDDk'),
+	admin: getTxEndpoint('L6_7B3Qbpnye2pHGNS-8TS310s2uWzRgeQH6fqHS37o'),
 
 	ENGINE: {
 		arrow: getTxEndpoint('-6sVfmeNGSFDFe3uguyeCo5qY7aa__n8tpi_Dg238SM'),
