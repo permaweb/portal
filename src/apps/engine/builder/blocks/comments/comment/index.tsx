@@ -9,7 +9,7 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
-import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvider';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import CommentAdd from '../commentAdd';
@@ -209,7 +209,7 @@ export default function Comment(props: any) {
 
 	if (canPinComment) {
 		menuEntries.push({
-			icon: commentData.depth === -1 ? ICONS.close : ICONS.alignTop,
+			icon: commentData.depth === -1 ? ICONS.unpin : ICONS.pin,
 			label: commentData.depth === -1 ? 'Unpin Comment' : 'Pin Comment',
 			onClick: handlePinComment,
 		});
@@ -218,13 +218,13 @@ export default function Comment(props: any) {
 	if (userIsAdmin || userIsModerator) {
 		if (isCommentBlocked) {
 			menuEntries.push({
-				icon: ICONS.close,
+				icon: ICONS.commentUnblock,
 				label: 'Unblock Comment',
 				onClick: handleCommentUnblock,
 			});
 		} else {
 			menuEntries.push({
-				icon: ICONS.close,
+				icon: ICONS.commentBlock,
 				label: 'Block Comment',
 				onClick: handleCommentBlock,
 			});
@@ -232,13 +232,13 @@ export default function Comment(props: any) {
 
 		if (isUserBlocked) {
 			menuEntries.push({
-				icon: ICONS.close,
+				icon: ICONS.userUnblock,
 				label: 'Unblock User',
 				onClick: handleUserUnblock,
 			});
 		} else {
 			menuEntries.push({
-				icon: ICONS.close,
+				icon: ICONS.userBlock,
 				label: 'Block User',
 				onClick: handleUserBlock,
 			});
@@ -284,7 +284,7 @@ export default function Comment(props: any) {
 						)}
 						{commentData.depth === -1 && (
 							<S.PinnedIndicator>
-								<ReactSVG src={ICONS.alignTop} />
+								<ReactSVG src={ICONS.pin} />
 								Pinned
 							</S.PinnedIndicator>
 						)}
