@@ -21,6 +21,10 @@ export const PostWrapper = styled.div`
 
 	&:hover {
 		background: ${(props) => props.theme.colors.container.alt2.background};
+		p {
+			text-decoration: underline;
+			text-decoration-thickness: 1.25px;
+		}
 	}
 `;
 
@@ -91,7 +95,7 @@ export const PostStatus = styled.div<{ status: ArticleStatusType }>`
 	align-items: center;
 	gap: 7.5px;
 
-	p {
+	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;

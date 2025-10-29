@@ -6,7 +6,7 @@ import { CurrentZoneVersion } from '@permaweb/libs';
 import { PortalManager } from 'editor/components/organisms/PortalManager';
 
 import { Panel } from 'components/atoms/Panel';
-import { AO_NODE, PORTAL_PATCH_MAP } from 'helpers/config';
+import { AO_NODE } from 'helpers/config';
 import {
 	PortalDetailType,
 	PortalHeaderType,
@@ -73,6 +73,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const { addNotification } = useNotifications();
 
 	const authoritiesRef = React.useRef(false);
+	const portalsRequestRef = React.useRef(false);
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
 	const [invites, setInvites] = React.useState<PortalHeaderType[] | null>(null);
@@ -81,7 +82,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [currentId, setCurrentId] = React.useState<string | null>(null);
 	const [current, setCurrent] = React.useState<PortalDetailType | null>(null);
 	const [permissions, setPermissions] = React.useState<PortalPermissionsType | null>(null);
-	const [transfers, setTransfers] = React.useState<any>([]);
+	const [transfers, _setTransfers] = React.useState<any>([]);
 
 	const [refreshCurrentTrigger, setRefreshCurrentTrigger] = React.useState<boolean>(false);
 	const [refreshFields, setRefreshFields] = React.useState<PortalPatchMapEnum[] | null>(null);
@@ -94,17 +95,19 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		setCurrent(null);
 		setPortals(null);
+		portalsRequestRef.current = false;
 		if (!arProvider.walletAddress) {
 			setPermissions(null);
 		}
 	}, [arProvider.walletAddress]);
 
 	React.useEffect(() => {
-		if (permawebProvider.profile?.id) {
+		if (permawebProvider.profile?.id && !portalsRequestRef.current) {
 			const profilePortals = permawebProvider.profile?.portals ?? [];
 			setPortals(profilePortals);
 			setInvites(permawebProvider.profile?.invites ?? []);
 			if (profilePortals.length > 0) {
+				portalsRequestRef.current = true;
 				(async () => {
 					const updated = await Promise.all(
 						profilePortals.map(async (portal: PortalHeaderType) => {
@@ -119,7 +122,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								);
 
 								const transfers = permawebProvider.libs.mapFromProcessCase(
-									await permawebProvider.libs.getState({ processId: portal.id, path: PortalPatchMapEnum.Transfers })
+									await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Transfers })
 								);
 
 								return {
@@ -140,8 +143,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 										name: cached.name ?? portal.name ?? 'None',
 										logo: cached.logo ?? portal.logo ?? 'None',
 										icon: cached.icon ?? portal.icon ?? 'None',
-										users: cached.users ?? [],
-										transfers: cached.transfers ?? [],
+										users: cached.users ?? portal.roles ?? [],
 									};
 								}
 								return portal;
@@ -197,139 +199,82 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [refreshCurrentTrigger, refreshFields]);
 
+	const parseProcessResponseValue = (data: string) => permawebProvider.libs.mapFromProcessCase(JSON.parse(data));
+
 	const fetchPortal = async (opts?: { patchKey?: string }) => {
-		if (currentId) {
-			const patchKeys = opts?.patchKey ? [opts.patchKey] : Object.keys(PORTAL_PATCH_MAP);
+		if (!currentId) return;
 
-			setUpdating(true);
-			await Promise.all(
-				patchKeys.map(async (key) => {
-					try {
-						const data = permawebProvider.libs.mapFromProcessCase(
-							await permawebProvider.libs.readState({ processId: currentId, path: key })
-						);
-
-						if (key === 'overview') {
-							// Check if wallpaper is undefined and update patch map if needed
-							if (data.wallpaper === undefined && permawebProvider.libs?.updateZonePatchMap) {
-								await permawebProvider.libs.updateZonePatchMap(PORTAL_PATCH_MAP, currentId);
-							}
-						}
-
-						setCurrent((prevPortal) => {
-							if (!prevPortal) {
-								const newPortal: PortalDetailType = {
-									id: currentId,
-									name: null,
-									logo: null,
-									icon: null,
-									wallpaper: null,
-									owner: null,
-									moderation: null,
-									assets: null,
-									requests: null,
-									categories: null,
-									topics: null,
-									links: null,
-									uploads: null,
-									fonts: null,
-									themes: null,
-									users: null,
-									pages: null,
-									layout: null,
-									roleOptions: null,
-									permissions: null,
-									domains: null,
-								};
-								prevPortal = newPortal;
-							}
-
-							const updatedPortal = { ...prevPortal };
-
-							switch (key) {
-								case 'overview':
-									if (
-										data.authorities &&
-										!data.authorities.includes(AO_NODE.authority) &&
-										permawebProvider.libs?.updateZoneAuthorities &&
-										!authoritiesRef.current
-									) {
-										authoritiesRef.current = true;
-										permawebProvider.libs.updateZoneAuthorities({
-											zoneId: currentId,
-											authorityId: AO_NODE.authority,
-										});
-									}
-
-									/* Check for portal version update */
-									if (
-										data.version !== CurrentZoneVersion &&
-										arProvider.wallet &&
-										arProvider.walletAddress === data.owner
-									) {
-										setUpdateAvailable(true);
-									} else setUpdateAvailable(false);
-
-									updatedPortal.name = data.name ?? updatedPortal.name;
-									updatedPortal.logo = data.logo ?? updatedPortal.logo;
-									updatedPortal.icon = data.icon ?? updatedPortal.icon;
-									updatedPortal.wallpaper = data.wallpaper ?? updatedPortal.wallpaper;
-									updatedPortal.owner = data.owner ?? updatedPortal.owner;
-									updatedPortal.moderation = data.moderation ?? updatedPortal.moderation;
-									break;
-								case 'users':
-									updatedPortal.roleOptions = data.roleOptions ?? updatedPortal.roleOptions;
-									updatedPortal.permissions = data.permissions ?? updatedPortal.permissions;
-									if (data.roles) {
-										updatedPortal.users = getPortalUsers(data.roles);
-										if (permawebProvider.profile?.id && updatedPortal.users) {
-											setPermissions(
-												getUserPermissions(
-													permawebProvider.profile.id,
-													updatedPortal.users,
-													data.permissions ?? updatedPortal.permissions
-												)
-											);
-										}
-									}
-									break;
-								case 'presentation':
-									updatedPortal.layout = data.layout ?? updatedPortal.layout;
-									updatedPortal.pages = data.pages ?? updatedPortal.pages;
-									updatedPortal.themes = data.themes ?? updatedPortal.themes;
-									updatedPortal.fonts = data.fonts ?? updatedPortal.fonts;
-									break;
-								case 'navigation':
-									updatedPortal.categories = data.categories ?? updatedPortal.categories ?? [];
-									updatedPortal.topics = data.topics ?? updatedPortal.topics ?? [];
-									updatedPortal.links = data.links ?? updatedPortal.links ?? [];
-									updatedPortal.domains = data.domains ?? updatedPortal.domains ?? [];
-									break;
-								case 'media':
-									updatedPortal.uploads = data.uploads ?? updatedPortal.uploads ?? [];
-									break;
-								case 'posts':
-									updatedPortal.assets = getPortalAssets(data?.index);
-									break;
-								case 'requests':
-									updatedPortal.requests = data?.indexRequests ?? updatedPortal.requests;
-									break;
-								case 'transfers':
-									setTransfers(data?.transfers ?? []);
-									break;
-							}
-
-							cachePortal(currentId, updatedPortal);
-
-							return updatedPortal;
-						});
-					} catch (e) {
-						console.warn(`Failed to fetch patch data for ${key}:`, e);
-					}
+		setUpdating(true);
+		try {
+			const response = permawebProvider.libs.mapFromProcessCase(
+				await permawebProvider.libs.readState({
+					processId: currentId,
+					path: opts?.patchKey,
 				})
 			);
-			setUpdating(false);
+
+			const parseField = (key: PortalPatchMapEnum) =>
+				opts?.patchKey === key ? response : response[key] ? parseProcessResponseValue(response[key]) : null;
+
+			const overview = parseField(PortalPatchMapEnum.Overview);
+			const users = parseField(PortalPatchMapEnum.Users);
+			const navigation = parseField(PortalPatchMapEnum.Navigation);
+			const presentation = parseField(PortalPatchMapEnum.Presentation);
+			const media = parseField(PortalPatchMapEnum.Media);
+			const posts = parseField(PortalPatchMapEnum.Posts);
+			const requests = parseField(PortalPatchMapEnum.Requests);
+
+			if (
+				overview?.authorities &&
+				!overview?.authorities.includes(AO_NODE.authority) &&
+				permawebProvider.libs?.updateZoneAuthorities &&
+				!authoritiesRef.current
+			) {
+				authoritiesRef.current = true;
+				permawebProvider.libs.updateZoneAuthorities({
+					zoneId: currentId,
+					authorityId: AO_NODE.authority,
+				});
+			}
+
+			setUpdateAvailable(
+				overview?.version !== CurrentZoneVersion && arProvider.wallet && arProvider.walletAddress === overview?.owner
+			);
+
+			const portalState: PortalDetailType = {
+				id: currentId,
+				name: overview?.name ?? current?.name ?? null,
+				logo: overview?.logo ?? current?.logo ?? null,
+				icon: overview?.icon ?? current?.icon ?? null,
+				wallpaper: overview?.wallpaper ?? current?.wallpaper ?? null,
+				owner: overview?.owner ?? current?.owner ?? null,
+				moderation: overview?.moderation ?? current?.moderation ?? null,
+				assets: posts?.index ? getPortalAssets(posts.index) : current?.assets ?? [],
+				requests: requests?.indexRequests ?? current?.requests ?? null,
+				categories: navigation?.categories ?? current?.categories ?? [],
+				topics: navigation?.topics ?? current?.topics ?? [],
+				links: navigation?.links ?? current?.links ?? [],
+				uploads: media?.uploads ?? current?.uploads ?? [],
+				fonts: presentation?.fonts ?? current?.fonts ?? null,
+				themes: presentation?.themes ?? current?.themes ?? null,
+				pages: presentation?.pages ?? current?.pages ?? null,
+				layout: presentation?.layout ?? current?.layout ?? null,
+				users: users?.roles ? getPortalUsers(users.roles) : current?.users ?? null,
+				roleOptions: users?.roleOptions ?? current?.roleOptions ?? null,
+				permissions: users?.permissions ?? current?.permissions ?? null,
+				domains: navigation?.domains ?? current?.domains ?? [],
+			};
+
+			if (permawebProvider.profile?.id && portalState.users) {
+				setPermissions(getUserPermissions(permawebProvider.profile.id, portalState.users, portalState.permissions));
+			}
+
+			cachePortal(currentId, portalState);
+			setCurrent(portalState);
+		} catch (e: any) {
+			console.error('Failed to fetch portal data', e);
 		}
+		setUpdating(false);
 	};
 
 	function getUserPermissions(address: string, users: PortalUserType[], permissions: PortalPermissionsType) {

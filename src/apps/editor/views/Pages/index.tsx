@@ -27,14 +27,14 @@ export default function Pages() {
 					<Button
 						type={'alt1'}
 						label={language?.createPage}
-						handlePress={() => navigate(URLS.pageCreate(portalProvider.current.id))}
+						handlePress={() => navigate(URLS.pageCreateMain(portalProvider.current.id))}
 						disabled={unauthorized || !portalProvider.current}
 						icon={ICONS.add}
 						iconLeftAlign
 					/>,
 				]}
 			/>
-			<S.BodyWrapper className={'border-wrapper-alt2'}>
+			<S.BodyWrapper>
 				<PageList />
 			</S.BodyWrapper>
 		</S.Wrapper>

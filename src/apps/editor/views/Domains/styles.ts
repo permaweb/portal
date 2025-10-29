@@ -15,6 +15,7 @@ export const BodyWrapper = styled.div`
 export const DomainsWrapper = styled.div`
 	h6 {
 		font-size: ${(props) => props.theme.typography.size.xxLg} !important;
+		color: ${(props) => props.theme.colors.font.alt1};
 		margin: 0 0 15px 0;
 	}
 `;

@@ -14,7 +14,7 @@ import { persistor, store } from 'editor/store';
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Portal } from 'components/atoms/Portal';
-import { DOM, STYLING, URLS } from 'helpers/config';
+import { DOM, URLS } from 'helpers/config';
 import { preloadAllAssets } from 'helpers/preloader';
 import { GlobalStyle } from 'helpers/styles';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
@@ -31,8 +31,10 @@ const Landing = getLazyImport('Landing');
 const PortalView = getLazyImport('Portal');
 const Posts = getLazyImport('Posts');
 const Moderation = getLazyImport('Moderation');
-const PageCreate = getLazyImport('Page/Create');
-const PageEdit = getLazyImport('Page/Edit');
+const PageCreateMain = getLazyImport('Page/Create/Main');
+const PageEditMain = getLazyImport('Page/Edit/Main');
+const PageCreateInfo = getLazyImport('Page/Create/Info');
+const PageEditInfo = getLazyImport('Page/Edit/Info');
 const PostCreate = getLazyImport('Post/Create');
 const PostEdit = getLazyImport('Post/Edit');
 const Setup = getLazyImport('Setup');
@@ -163,25 +165,19 @@ function AppContent() {
 				<>
 					{!portalProvider.current && <Loader message={`${language?.loadingPortal}...`} />}
 					<Navigation
-						open={navWidth > STYLING.dimensions.nav.widthMin}
+						open={navWidth > 0}
 						toggle={() => {
-							if (navWidth > STYLING.dimensions.nav.widthMin) {
-								// Set to minimum width
-								setNavWidth(STYLING.dimensions.nav.widthMin);
+							if (navWidth > 0) {
+								setNavWidth(0);
 							} else {
-								// Expand to default width
 								setNavWidth(260);
 							}
 						}}
 					/>
-					<S.View
-						className={'max-view-wrapper'}
-						navigationOpen={navWidth > STYLING.dimensions.nav.widthMin}
-						navWidth={navWidth}
-					>
+					<S.View className={'max-view-wrapper'} navigationOpen={navWidth > 0} navWidth={navWidth}>
 						{element}
 					</S.View>
-					<S.Footer navigationOpen={navWidth > STYLING.dimensions.nav.widthMin} navWidth={navWidth}>
+					<S.Footer navigationOpen={navWidth > 0} navWidth={navWidth}>
 						<p>
 							{language?.app} {new Date().getFullYear()}
 						</p>
@@ -209,8 +205,10 @@ function AppContent() {
 						{getRoute(`${URLS.base}:portalId/post/create`, <PostCreate />)}
 						{getRoute(`${URLS.base}:portalId/post/create/article`, <PostEdit />)}
 						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <PostEdit />)}
-						{getRoute(`${URLS.base}:portalId/page/create`, <PageCreate />)}
-						{getRoute(`${URLS.base}:portalId/page/edit/:assetId`, <PageEdit />)}
+						{getRoute(`${URLS.base}:portalId/page/create/main`, <PageCreateMain />)}
+						{getRoute(`${URLS.base}:portalId/page/edit/main/:pageId`, <PageEditMain />)}
+						{getRoute(`${URLS.base}:portalId/page/create/info`, <PageCreateInfo />)}
+						{getRoute(`${URLS.base}:portalId/page/edit/info/:assetId`, <PageEditInfo />)}
 						{getRoute(`${URLS.base}:portalId/setup`, <Setup />)}
 						{getRoute(`${URLS.base}:portalId/design`, <Design />)}
 						{getRoute(`${URLS.base}:portalId/design/:active`, <Design />)}

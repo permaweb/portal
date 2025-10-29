@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
@@ -7,7 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { ICONS, URLS } from 'helpers/config';
 import { ArticleStatusType, PortalAssetType } from 'helpers/types';
-import { formatAddress, formatDate } from 'helpers/utils';
+import { formatAddress, formatDate, resolvePrimaryDomain } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -45,30 +45,41 @@ export default function Post(props: { post: PortalAssetType }) {
 			: portalProvider.usersByPortalId?.[props.post?.creator]?.username ?? formatAddress(props.post?.creator, false);
 
 	return props.post ? (
-		<S.PostWrapper className={'fade-in'}>
-			<S.PostHeader>
-				<p>{props.post.name}</p>
-				<S.PostHeaderDetail>
-					<ReactSVG src={ICONS.time} />
-					<span>{`${formatDate(props.post.metadata?.releaseDate, true)} · ${creatorName}`}</span>
-				</S.PostHeaderDetail>
-			</S.PostHeader>
-			<S.PostDetail>
-				<S.PostActions>
-					<Button
-						type={'alt3'}
-						label={language?.edit}
-						handlePress={() => navigate(`${URLS.postEditArticle(portalProvider.current.id)}${props.post.id}`)}
-						disabled={unauthorized}
-					/>
-				</S.PostActions>
-				{props.post.metadata?.status && (
-					<S.PostStatus status={props.post.metadata?.status as ArticleStatusType}>
-						<p>{props.post.metadata.status}</p>
-						<div id={'post-status'} />
-					</S.PostStatus>
-				)}
-			</S.PostDetail>
-		</S.PostWrapper>
+		<Link
+			to={`${resolvePrimaryDomain(portalProvider.current?.domains, portalProvider.current?.id)}/#/post/${
+				props.post.metadata?.url ?? props.post?.id
+			}`}
+			target={'_blank'}
+		>
+			<S.PostWrapper className={'fade-in'}>
+				<S.PostHeader>
+					<p>{props.post.name}</p>
+					<S.PostHeaderDetail>
+						<ReactSVG src={ICONS.time} />
+						<span>{`${formatDate(props.post.metadata?.releaseDate, true)} · ${creatorName}`}</span>
+					</S.PostHeaderDetail>
+				</S.PostHeader>
+				<S.PostDetail>
+					<S.PostActions>
+						<Button
+							type={'alt3'}
+							label={language?.edit}
+							handlePress={(e: any) => {
+								e.preventDefault();
+								e.stopPropagation();
+								navigate(`${URLS.postEditArticle(portalProvider.current.id)}${props.post.id}`);
+							}}
+							disabled={unauthorized}
+						/>
+					</S.PostActions>
+					{props.post.metadata?.status && (
+						<S.PostStatus status={props.post.metadata?.status as ArticleStatusType}>
+							<span>{props.post.metadata.status}</span>
+							<div id={'post-status'} />
+						</S.PostStatus>
+					)}
+				</S.PostDetail>
+			</S.PostWrapper>
+		</Link>
 	) : null;
 }

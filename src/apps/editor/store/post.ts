@@ -1,12 +1,12 @@
 import { Dispatch } from 'redux';
 
-import { ArticleStatusEnum, PortalAssetPostType, ReduxActionType } from 'helpers/types';
+import { ArticleStatusEnum, PortalAssetPostReduxType, ReduxActionType } from 'helpers/types';
 
 const UPDATE_CURRENT_POST = 'UPDATE_CURRENT_POST';
 const SET_ORIGINAL_DATA = 'SET_ORIGINAL_DATA';
 const CLEAR_CURRENT_POST = 'CLEAR_CURRENT_POST';
 
-export const initStateCurrentPost: { data: PortalAssetPostType; originalData: any; editor: any } = {
+export const initStateCurrentPost: { data: PortalAssetPostReduxType; originalData: any; editor: any } = {
 	data: {
 		id: null,
 		title: '',
@@ -106,7 +106,7 @@ export function setOriginalData(data: any) {
 }
 
 export function currentPost(
-	state: { data: PortalAssetPostType; originalData: any; editor: any } = initStateCurrentPost,
+	state: { data: PortalAssetPostReduxType; originalData: any; editor: any } = initStateCurrentPost,
 	action: ReduxActionType
 ) {
 	// Validate state structure and reset if fields are missing

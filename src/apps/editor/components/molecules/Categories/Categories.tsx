@@ -43,8 +43,6 @@ export default function Categories(props: {
 		hidden?: boolean;
 	}>({ open: false, categoryId: null });
 
-	type TemplateOption = { label: string; value: string };
-
 	const {
 		addCategory,
 		categoryOptions,
@@ -81,11 +79,6 @@ export default function Categories(props: {
 		portalCategories: portalProvider.current?.categories || [],
 		refreshCurrentPortal: portalProvider.refreshCurrentPortal,
 	});
-
-	const templateOptions: SelectOptionType[] = React.useMemo(
-		() => Object.keys(PAGES_JOURNAL).map((k) => ({ id: k, label: k })),
-		[]
-	);
 
 	function openCategorySettings(category: PortalCategoryType) {
 		setOpenMetadata({

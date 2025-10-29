@@ -31,6 +31,11 @@ export const Panel = styled.nav<{ open: boolean; width?: number }>`
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		transform: translateX(${(props) => (props.open ? '0' : '-100%')});
 	}
+
+	@media (min-width: ${STYLING.cutoffs.desktop}) {
+		display: ${(props) => (props.open ? 'block' : 'none')};
+	}
+
 	transition: transform ${transition2}, width ${transition1};
 	background: ${(props) =>
 		props.open ? props.theme.colors.container.alt1.background : props.theme.colors.view.background};
@@ -42,15 +47,15 @@ export const Panel = styled.nav<{ open: boolean; width?: number }>`
 export const ResizeHandle = styled.div`
 	position: absolute;
 	top: 0;
-	right: 0;
-	width: 4px;
+	right: -2px;
+	width: 3px;
 	height: 100%;
 	cursor: col-resize;
 	background: transparent;
-	transition: background 200ms ease;
+	transition: background 100ms ease;
 
 	&:hover {
-		background: ${(props) => props.theme.colors.border.alt2};
+		background: ${(props) => props.theme.colors.border.alt5};
 	}
 `;
 
@@ -59,7 +64,7 @@ export const PanelHeader = styled.div`
 	width: 100%;
 	display: flex;
 	align-items: center;
-	padding: 0 15px;
+	padding: 0 15px 0 16.5px;
 `;
 
 export const ToggleWrapper = styled.div<{ open: boolean }>`
@@ -67,10 +72,6 @@ export const ToggleWrapper = styled.div<{ open: boolean }>`
 	display: flex;
 	align-items: center;
 	gap: 7.5px;
-
-	button {
-		cursor: ${(props) => (props.open ? 'w-resize' : 'e-resize')} !important;
-	}
 `;
 
 export const Logo = styled.div`
@@ -196,7 +197,11 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 export const Header = styled.header<{ navigationOpen: boolean; navWidth?: number }>`
 	height: ${STYLING.dimensions.nav.height};
 	width: 100%;
-	padding: 0 20px 0 calc(${(props) => (props.navWidth ? `${props.navWidth}px` : STYLING.dimensions.nav.width)} + 10px);
+	padding: 0 20px 0
+		calc(
+			${(props) => (props.navWidth !== undefined ? `${props.navWidth}px` : STYLING.dimensions.nav.width)} +
+				${(props) => (props.navigationOpen ? '10px' : '25px')}
+		);
 	transition: padding-left ${transition2};
 	position: fixed;
 	top: 0;
@@ -209,7 +214,7 @@ export const Header = styled.header<{ navigationOpen: boolean; navWidth?: number
 	background: ${(props) => props.theme.colors.view.background};
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		padding: 0 20px 0 10px;
+		padding: 0 20px 0 15px;
 	}
 `;
 

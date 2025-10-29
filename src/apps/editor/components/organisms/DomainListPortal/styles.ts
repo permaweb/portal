@@ -23,6 +23,10 @@ export const DomainContent = styled.div<{ isOpen: boolean }>`
 
 	&:hover {
 		background: ${(props) => props.theme.colors.button.primary.active.background};
+		span {
+			text-decoration: underline;
+			text-decoration-thickness: 1.25px;
+		}
 	}
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
@@ -78,13 +82,13 @@ export const DomainHeader = styled.div`
 		}
 	}
 
-	h4 {
+	span {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		margin: 0;
-		line-height: 1; /* tighten to keep single line */
+		line-height: 1;
 		display: inline-flex;
 		align-items: center;
 	}
@@ -121,7 +125,7 @@ export const DomainArrow = styled.div<{ isOpen: boolean }>`
 	}
 `;
 
-export const DomainName = styled.h4``;
+export const DomainName = styled.span``;
 
 export const DomainDetail = styled.div`
 	display: flex;

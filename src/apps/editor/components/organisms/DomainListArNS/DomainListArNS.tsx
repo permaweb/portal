@@ -322,7 +322,7 @@ export default function DomainListArNS() {
 					: (resolved as any)?.endTimestamp;
 			// Detect ANT update via module version comparison, similar to arns-react
 			const requiresAntUpdate: boolean = await detectRequiresAntUpdate(antId).catch(() => false);
-			console.log(resolved);
+
 			return {
 				name: domainName,
 				antId,

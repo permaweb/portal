@@ -52,6 +52,7 @@ export type PortalAssetType = {
 		thumbnail?: string;
 		releaseDate?: number;
 		comments?: string;
+		url?: string;
 	};
 };
 
@@ -62,7 +63,7 @@ export type PortalAssetRequestType = {
 	dateCreated?: string;
 };
 
-export type PortalAssetPostType = {
+export type PortalAssetPostReduxType = {
 	id: null;
 	title: '';
 	description: '';
@@ -78,6 +79,12 @@ export type PortalAssetPostType = {
 	releaseDate: number | null;
 	authUsers: string[];
 	url: string | null;
+};
+
+export type PortalPageReduxType = {
+	id: null;
+	title: '';
+	content: null;
 };
 
 export type PortalUserType = {
@@ -180,6 +187,9 @@ export enum ArticleBlockEnum {
 	Video = 'video',
 	DividerSolid = 'divider-solid',
 	DividerDashed = 'divider-dashed',
+	SpacerHorizontal = 'spacer-horizontal',
+	SpacerVertical = 'spacer-vertical',
+	HTML = 'html',
 }
 
 export type ArticleBlockType = {
@@ -187,6 +197,8 @@ export type ArticleBlockType = {
 	type: ArticleBlockEnum;
 	content: string;
 	data?: any;
+	width?: number;
+	layout?: any;
 };
 
 export enum ArticleStatusEnum {
@@ -199,6 +211,35 @@ export type ArticleStatusType = ArticleStatusEnum;
 export type ArticlePostType = {
 	id: string | null;
 	title: string | null;
+};
+
+export enum PageSectionEnum {
+	Row = 'row',
+	Column = 'column',
+	Grid = 'grid',
+}
+
+export enum PageBlockEnum {
+	Feed = 'feed',
+	Post = 'post',
+	PostSpotlight = 'postSpotlight',
+	CategorySpotlight = 'categorySpotlight',
+	Sidebar = 'sidebar',
+}
+
+export type PageSectionType = {
+	id?: string;
+	type: PageSectionEnum;
+	layout: any;
+	content: any[];
+	width: number;
+};
+
+export type PageBlockType = {
+	type: PageBlockEnum;
+	layout: any;
+	content: any[];
+	width: number;
 };
 
 export type TagType = { name: string; value: string };
@@ -326,3 +367,5 @@ export interface UserOwnedDomain {
 	status?: 'loading' | 'resolved' | 'failed';
 	requiresAntUpdate?: boolean;
 }
+
+export type ArticleBlocksContextType = 'toolbar' | 'inline' | 'grid';

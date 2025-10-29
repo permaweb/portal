@@ -3,6 +3,7 @@ import { ReactSVG } from 'react-svg';
 
 import { ICONS } from 'helpers/config';
 import { SelectOptionType } from 'helpers/types';
+import { capitalize } from 'helpers/utils';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
@@ -29,7 +30,7 @@ export default function Select(props: {
 				)}
 				<S.Dropdown active={active} disabled={props.disabled} onClick={() => setActive(!active)}>
 					{props.icon && <ReactSVG src={props.icon} />}
-					{!props.hideActiveOption && <span>{props.activeOption.label}</span>}
+					{!props.hideActiveOption && <span>{capitalize(props.activeOption.label)}</span>}
 					<ReactSVG src={ICONS.arrow} />
 				</S.Dropdown>
 				{active && (

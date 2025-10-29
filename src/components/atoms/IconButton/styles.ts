@@ -77,6 +77,7 @@ export const Tooltip = styled.div<{ position: string }>`
 		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		white-space: nowrap !important;
+		text-decoration: none !important;
 	}
 `;
 
@@ -173,6 +174,8 @@ export const Alt1 = styled(Primary)`
 				? props.theme.colors.button.primary.disabled.color
 				: props.theme.colors.button.primary.color};
 	}
+
+	box-shadow: ${(props) => props.theme.colors.shadow.primary} 0px 1px 2px 0.5px;
 
 	&:hover {
 		background: ${(props) =>

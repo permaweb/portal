@@ -3,6 +3,7 @@ import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import thunk from 'redux-thunk';
 
+import { currentPage } from './page';
 import { currentPost, initStateCurrentPost } from './post';
 
 declare const window: any;
@@ -67,7 +68,7 @@ const persistConfig = {
 	},
 };
 
-const rootReducer = combineReducers({ currentPost });
+const rootReducer = combineReducers({ currentPage, currentPost });
 
 export type EditorStoreRootState = ReturnType<typeof store.getState>;
 const persistedReducer = persistReducer<any, any>(persistConfig, rootReducer);

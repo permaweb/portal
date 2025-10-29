@@ -1,7 +1,7 @@
 import Arweave from 'arweave';
 import { ARIOToken, mARIOToken } from '@ar.io/sdk';
 
-import { STORAGE, URLS } from './config';
+import { FALLBACK_GATEWAY, STORAGE, URLS } from './config';
 import { PortalAssetType, PortalDomainType, PortalUserType } from './types';
 
 export function checkValidAddress(address: string | null) {
@@ -378,14 +378,15 @@ export function stripAnsiChars(input: string) {
 	return input.toString().replace(ansiRegex, '');
 }
 
-function getCurrentGateway() {
+export function getCurrentGateway() {
+	if (window.location.hostname === 'localhost') return FALLBACK_GATEWAY;
 	const { host } = window.location;
 	const parts = host.split('.');
 	return `${parts[1]}.${parts[2]}`;
 }
 
 export function resolvePrimaryDomain(domains: PortalDomainType[], portalId: string) {
-	const gateway = window.location.hostname === 'localhost' ? 'arweave.net' : getCurrentGateway();
+	const gateway = window.location.hostname === 'localhost' ? FALLBACK_GATEWAY : getCurrentGateway();
 	const domain = domains?.find((domain) => domain.primary)?.name || domains?.[0]?.name;
 	if (domain) return `https://${domain}.${gateway}`;
 	else return `https://${gateway}/${portalId}`;
@@ -393,7 +394,7 @@ export function resolvePrimaryDomain(domains: PortalDomainType[], portalId: stri
 
 export const capitalize = (str: string) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : '-');
 
-export function hasUnsavedChanges(current: any, original: any): boolean {
+export function hasUnsavedPostChanges(current: any, original: any): boolean {
 	// If there's no original data, consider it as changes (new post)
 	if (!original) return true;
 
@@ -412,6 +413,21 @@ export function hasUnsavedChanges(current: any, original: any): boolean {
 	);
 }
 
+export function hasUnsavedPageChanges(current: any, original: any): boolean {
+	// If there's no original data, check if there's content (new page)
+	if (!original) {
+		// If it's a new page with no content, don't show as having changes
+		const isEmpty =
+			!current.content ||
+			current.content.length === 0 ||
+			current.content.every((section: any) => !section.content || section.content.length === 0);
+		return !isEmpty;
+	}
+
+	// Compare all relevant fields
+	return current.title !== original.title || JSON.stringify(current.content) !== JSON.stringify(original.content);
+}
+
 export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 	return new Promise<T>((resolve, reject) => {
 		const id = setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms);
@@ -423,4 +439,33 @@ export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 			reject(e);
 		});
 	});
+}
+
+export function isValidHTML(content: string) {
+	if (!content || typeof content !== 'string') {
+		return false;
+	}
+
+	try {
+		const parser = new DOMParser();
+		const doc = parser.parseFromString(content, 'text/html');
+
+		// Check for parser errors
+		const parseError = doc.querySelector('parsererror');
+		if (parseError) {
+			return false;
+		}
+
+		// Additional validation: ensure content has at least one valid element
+		const hasValidContent = doc.body && (doc.body.children.length > 0 || doc.body.textContent?.trim().length);
+
+		return !!hasValidContent;
+	} catch (error) {
+		return false;
+	}
+}
+
+export function cleanHTMLContent(content: string): string {
+	if (!content) return '';
+	return content.replace(/[\n\t]+/g, '').trim();
 }

@@ -1,7 +1,7 @@
 import { LAYOUT_BLOG, LAYOUT_JOURNAL } from './config/layouts';
 import { PAGES_BLOG, PAGES_JOURNAL } from './config/pages';
 import { THEME_DEFAULT } from './config/themes';
-import { ArticleBlockEnum, PortalPatchMapEnum } from './types';
+import { ArticleBlockEnum, PageBlockEnum, PortalPatchMapEnum } from './types';
 
 export const PAGES = {
 	JOURNAL: PAGES_JOURNAL,
@@ -91,6 +91,8 @@ function createURLs() {
 	const postEditBase = (portalId: string) => `${base}${portalId}/${post}edit/`;
 
 	const pageBase = (portalId: string) => `${portalBase(portalId)}page/`;
+	const pageCreate = (portalId: string) => `${pageBase(portalId)}create/`;
+	const pageEdit = (portalId: string) => `${pageBase(portalId)}edit/`;
 
 	const docsBase = `${base}docs/`;
 
@@ -113,8 +115,10 @@ function createURLs() {
 		post: (postId: string) => `post/${postId}`,
 		postCreate: (portalId: string) => `${postCreateBase(portalId)}`,
 		postEdit: (portalId: string) => `${postEditBase(portalId)}`,
-		pageCreate: (portalId: string) => `${pageBase(portalId)}create/`,
-		pageEdit: (portalId: string) => `${pageBase(portalId)}edit/`,
+		pageCreateMain: (portalId: string) => `${pageCreate(portalId)}main`,
+		pageEditMain: (portalId: string) => `${pageEdit(portalId)}main`,
+		pageCreateInfo: (portalId: string) => `${pageCreate(portalId)}info`,
+		pageEditInfo: (portalId: string) => `${pageEdit(portalId)}info`,
 		postCreateArticle: (portalId: string) => `${postCreateBase(portalId)}article/`,
 		postCreateImage: (portalId: string) => `${postCreateBase(portalId)}image/`,
 		postCreateVideo: (portalId: string) => `${postCreateBase(portalId)}video/`,
@@ -129,6 +133,34 @@ function createURLs() {
 }
 
 export const URLS = createURLs();
+
+export const PAGE_BLOCKS = {
+	[PageBlockEnum.Feed]: {
+		type: PageBlockEnum.Feed,
+		label: 'Post Feed',
+		icon: ICONS.feed,
+	},
+	[PageBlockEnum.Post]: {
+		type: PageBlockEnum.Post,
+		label: 'Post',
+		icon: ICONS.posts,
+	},
+	[PageBlockEnum.PostSpotlight]: {
+		type: PageBlockEnum.PostSpotlight,
+		label: 'Featured Post',
+		icon: ICONS.featuredPost,
+	},
+	[PageBlockEnum.CategorySpotlight]: {
+		type: PageBlockEnum.CategorySpotlight,
+		label: 'Featured Category',
+		icon: ICONS.featuredCategory,
+	},
+	[PageBlockEnum.Sidebar]: {
+		type: PageBlockEnum.Sidebar,
+		label: 'Sidebar',
+		icon: ICONS.sidebar,
+	},
+};
 
 export const ARTICLE_BLOCKS = {
 	[ArticleBlockEnum.Paragraph]: {
@@ -213,13 +245,26 @@ export const ARTICLE_BLOCKS = {
 		type: ArticleBlockEnum.DividerSolid,
 		label: 'Solid Divider',
 		icon: ICONS.dividerSolid,
-		shortcut: 'Ctrl / S',
 	},
 	[ArticleBlockEnum.DividerDashed]: {
 		type: ArticleBlockEnum.DividerDashed,
 		label: 'Dashed Divider',
 		icon: ICONS.dividerDashed,
-		shortcut: 'Ctrl / D',
+	},
+	[ArticleBlockEnum.SpacerHorizontal]: {
+		type: ArticleBlockEnum.SpacerHorizontal,
+		label: 'Horizontal Spacer',
+		icon: ICONS.spacerHorizontal,
+	},
+	[ArticleBlockEnum.SpacerVertical]: {
+		type: ArticleBlockEnum.SpacerVertical,
+		label: 'Vertical Spacer',
+		icon: ICONS.spacerVertical,
+	},
+	[ArticleBlockEnum.HTML]: {
+		type: ArticleBlockEnum.HTML,
+		label: 'HTML',
+		icon: ICONS.html,
 	},
 };
 
@@ -227,6 +272,8 @@ export const STRIPE_PUBLISHABLE_KEY =
 	'pk_live_51JUAtwC8apPOWkDLMQqNF9sPpfneNSPnwX8YZ8y1FNDl6v94hZIwzgFSYl27bWE4Oos8CLquunUswKrKcaDhDO6m002Yj9AeKj';
 
 export const PAYMENT_URL = 'https://payment.ardrive.io';
+
+export const FALLBACK_GATEWAY = 'arweave.net';
 
 export const UPLOAD = {
 	node1: 'https://up.arweave.net',
