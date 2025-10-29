@@ -159,7 +159,7 @@ export default function Post(props: any) {
 						}
 					})}
 			</S.Post>
-			<Comments commentsId={post?.metadata?.comments} />
+			<Comments commentsId={post?.metadata?.comments} postAuthorId={post?.creator} />
 		</S.Wrapper>
 	);
 }
