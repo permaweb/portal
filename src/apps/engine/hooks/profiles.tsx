@@ -2,6 +2,7 @@ import React from 'react';
 import Placeholder from 'engine/components/placeholder';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
+import { ICONS } from 'helpers/config';
 import { cacheProfile, checkValidAddress, getCachedProfile, urlify } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -24,10 +25,10 @@ export const useProfile = (profileId: string) => {
 			return;
 		}
 
-		// Check if it's the current user's profile
 		if (
 			permawebProvider.profile &&
-			(profileId === permawebProvider.profile.id || profileId === urlify(permawebProvider.profile.username))
+			(profileId === permawebProvider.profile.id ||
+				(permawebProvider.profile.username && profileId === urlify(permawebProvider.profile.username)))
 		) {
 			setProfile(permawebProvider.profile);
 			setIsLoading(false);
@@ -35,10 +36,15 @@ export const useProfile = (profileId: string) => {
 		}
 
 		if (profileId === portalProvider.portalId) {
+			const portalIconUrl = ICONS.portal;
+			const portalIconId = portalIconUrl.split('/').pop();
 			setProfile({
 				name: portalProvider.portal?.Name,
 				displayName: portalProvider.portal?.Name,
-				thumbnail: portalProvider.portal?.Icon,
+				thumbnail:
+					portalProvider.portal?.Icon && portalProvider.portal.Icon !== 'None'
+						? portalProvider.portal.Icon
+						: portalIconId,
 			});
 			setIsLoading(false);
 			return;

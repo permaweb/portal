@@ -9,6 +9,7 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import CommentAdd from '../commentAdd';
@@ -16,12 +17,13 @@ import CommentAdd from '../commentAdd';
 import * as S from './styles';
 
 export default function Comment(props: any) {
-	const { data, level, commentsId } = props;
+	const languageProvider = useLanguageProvider();
+	const language = languageProvider.object[languageProvider.current];
+	const { data, level, commentsId, postAuthorId } = props;
 	const { profile, isLoading: isLoadingProfile } = useProfile(data?.creator || '');
 	const [showEditor, setShowEditor] = React.useState(false);
 	const [showReplies, setShowReplies] = React.useState(false);
 	const [isEditMode, setIsEditMode] = React.useState(false);
-	const [editContent, setEditContent] = React.useState(data?.content || '');
 	const [commentData, setCommentData] = React.useState(data);
 	const [isUpdating, setIsUpdating] = React.useState(false);
 	const [isEditSubmitting, setIsEditSubmitting] = React.useState(false);
@@ -33,14 +35,20 @@ export default function Comment(props: any) {
 	const isCommentBlocked = blockedComments.has(commentData.id);
 	const isUserBlocked = blockedUsers.has(commentData.creator);
 
-	const canEditCommentStatus = user?.owner && ['Admin', 'Moderator'].some((r) => user?.roles?.includes(r));
-	const canRemoveComment =
-		(user?.owner && ['Admin', 'Moderator'].some((r) => user?.roles?.includes(r))) ||
-		commentData.creator === user?.owner;
-	const canEditComment = user?.owner && commentData.creator === user?.owner;
+	const userIsAdmin = ['Admin'].some((r) => user?.roles?.includes(r));
+	const userIsModerator = ['Moderator'].some((r) => user?.roles?.includes(r));
+	// const userIsContributor = ['Contributor'].some((r) => user?.roles?.includes(r));
+
+	const commentAuthorPortalUser = portal?.Users?.find((u: any) => u.address === commentData.creator);
+	const commentAuthorIsAdmin = commentAuthorPortalUser?.roles?.includes('Admin');
+	const commentAuthorIsModerator = commentAuthorPortalUser?.roles?.includes('Moderator');
+	const commentAuthorIsContributor = commentAuthorPortalUser?.roles?.includes('Contributor');
+	const commentAuthorIsActiveUser = commentData.creator === user?.owner;
+	const commentAuthorIsPostAuthor = postAuthorId === profile?.id;
+	const commentAuthorIsPortal = commentData.creator === portalId;
+	const shouldHighlightAuthor = commentAuthorIsPostAuthor || commentAuthorIsPortal;
 	const canPinComment =
-		canEditCommentStatus && (!commentData.parentId || commentData.depth === 0 || commentData.depth === -1);
-	const showMenu = canEditCommentStatus || canRemoveComment || canEditComment;
+		(userIsAdmin || userIsModerator) && (!commentData.parentId || commentData.depth === 0 || commentData.depth === -1);
 
 	async function handleUserBlock() {
 		if (!moderationId || !libs || !commentData.creator || !user?.owner) return;
@@ -151,35 +159,6 @@ export default function Comment(props: any) {
 		}
 	}
 
-	async function handleCommentRemove() {
-		setIsUpdating(true);
-		try {
-			await libs.removeComment({
-				commentsId: commentsId,
-				commentId: commentData.id,
-			});
-		} finally {
-			setIsUpdating(false);
-		}
-	}
-
-	async function handleCommentStatus(status: string) {
-		setIsUpdating(true);
-		try {
-			console.log('libs: ', libs);
-			const updateId = await libs.updateCommentStatus({
-				commentsId: commentsId,
-				commentId: commentData.id,
-				status: status,
-			});
-			if (updateId) {
-				setCommentData({ ...commentData, status: status });
-			}
-		} finally {
-			setIsUpdating(false);
-		}
-	}
-
 	async function handlePinComment() {
 		setIsUpdating(true);
 		try {
@@ -214,39 +193,38 @@ export default function Comment(props: any) {
 
 	const menuEntries: MenuItem[] = [];
 
-	if (canEditComment && !isEditMode) {
+	if ((commentAuthorIsActiveUser || (userIsAdmin && commentAuthorIsPortal)) && !isEditMode) {
 		menuEntries.push({
 			icon: ICONS.edit,
 			label: 'Edit Comment',
 			onClick: () => {
 				setIsEditMode(true);
-				setEditContent(commentData.content);
+				// setEditContent(commentData.content);
 			},
 		});
-		// Add spacer after edit if there are other options
-		if (canEditCommentStatus || canRemoveComment) {
+		if (canPinComment) {
 			menuEntries.push({ type: 'spacer' });
 		}
 	}
 
 	if (canPinComment) {
 		menuEntries.push({
-			icon: commentData.depth === -1 ? ICONS.close : ICONS.alignTop,
+			icon: commentData.depth === -1 ? ICONS.unpin : ICONS.pin,
 			label: commentData.depth === -1 ? 'Unpin Comment' : 'Pin Comment',
 			onClick: handlePinComment,
 		});
 	}
 
-	if (canEditCommentStatus) {
+	if (userIsAdmin || userIsModerator) {
 		if (isCommentBlocked) {
 			menuEntries.push({
-				icon: ICONS.close,
+				icon: ICONS.commentUnblock,
 				label: 'Unblock Comment',
 				onClick: handleCommentUnblock,
 			});
 		} else {
 			menuEntries.push({
-				icon: ICONS.close,
+				icon: ICONS.commentBlock,
 				label: 'Block Comment',
 				onClick: handleCommentBlock,
 			});
@@ -254,13 +232,13 @@ export default function Comment(props: any) {
 
 		if (isUserBlocked) {
 			menuEntries.push({
-				icon: ICONS.close,
+				icon: ICONS.userUnblock,
 				label: 'Unblock User',
 				onClick: handleUserUnblock,
 			});
 		} else {
 			menuEntries.push({
-				icon: ICONS.close,
+				icon: ICONS.userBlock,
 				label: 'Block User',
 				onClick: handleUserBlock,
 			});
@@ -268,7 +246,6 @@ export default function Comment(props: any) {
 	}
 
 	if (!commentData) return null;
-	// Explicitly check if user is logged in and has permission for hidden comments
 	const hasModPermission = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
 	if (commentData.status !== 'active' && !hasModPermission) return null;
 
@@ -293,7 +270,12 @@ export default function Comment(props: any) {
 				</S.Avatar>
 				<S.Content>
 					<S.Meta>
-						<S.Username>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</S.Username>
+						<S.Username isPostAuthor={shouldHighlightAuthor}>
+							{isLoadingProfile ? <Placeholder /> : profile?.displayName}
+							{(commentAuthorIsAdmin || commentAuthorIsPortal) && <ReactSVG src={ICONS.admin} title={language.admin} />}
+							{commentAuthorIsModerator && <ReactSVG src={ICONS.moderator} title={language.moderator} />}
+							{commentAuthorIsContributor && <ReactSVG src={ICONS.contributor} title={language.contributor} />}
+						</S.Username>
 						{isEditMode && (
 							<S.EditingIndicator>
 								<ReactSVG src={ICONS.edit} />
@@ -302,7 +284,7 @@ export default function Comment(props: any) {
 						)}
 						{commentData.depth === -1 && (
 							<S.PinnedIndicator>
-								<ReactSVG src={ICONS.alignTop} />
+								<ReactSVG src={ICONS.pin} />
 								Pinned
 							</S.PinnedIndicator>
 						)}
@@ -368,7 +350,7 @@ export default function Comment(props: any) {
 								onSubmittingChange={setIsEditSubmitting}
 								onCancel={() => {
 									setIsEditMode(false);
-									setEditContent(commentData.content);
+									// setEditContent(commentData.content);
 								}}
 							/>
 						</S.EditContainer>
@@ -403,7 +385,13 @@ export default function Comment(props: any) {
 			{showReplies && commentData.replies && commentData.replies.length > 0 && (
 				<>
 					{commentData.replies.map((reply: any, index: number) => (
-						<Comment key={`${reply.id}-${index}`} data={reply} level={parseInt(level) + 1} commentsId={commentsId} />
+						<Comment
+							key={`${reply.id}-${index}`}
+							data={reply}
+							level={parseInt(level) + 1}
+							commentsId={commentsId}
+							postAuthorId={postAuthorId}
+						/>
 					))}
 				</>
 			)}

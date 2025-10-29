@@ -9,7 +9,7 @@ import CommentAdd from './commentAdd';
 import * as S from './styles';
 
 export default function Comments(props: any) {
-	const { preview, commentsId } = props;
+	const { preview, commentsId, postAuthorId } = props;
 	const { portal } = usePortalProvider();
 	const Themes = preview ? defaultThemes : portal?.Themes;
 	const { comments: fetchedComments } = useComments(commentsId);
@@ -68,7 +68,15 @@ export default function Comments(props: any) {
 			<S.CommentList>
 				{comments &&
 					comments.map((comment: any, index: number) => {
-						return <Comment key={`${comment.id}-${index}`} data={comment} level={0} commentsId={commentsId} />;
+						return (
+							<Comment
+								key={`${comment.id}-${index}`}
+								data={comment}
+								level={0}
+								commentsId={commentsId}
+								postAuthorId={postAuthorId}
+							/>
+						);
 					})}
 			</S.CommentList>
 		</S.Comments>

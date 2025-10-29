@@ -1,4 +1,17 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+
+const slideDown = keyframes`
+	from {
+		opacity: 0;
+		transform: scaleY(0);
+		transform-origin: top;
+	}
+	to {
+		opacity: 1;
+		transform: scaleY(1);
+		transform-origin: top;
+	}
+`;
 
 export const Menu = styled.div`
 	position: absolute;
@@ -15,9 +28,6 @@ export const IconWrapper = styled.div`
 	width: 28px;
 	height: 28px;
 	border-radius: 50%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
 
 	> * {
 		display: flex;
@@ -33,7 +43,6 @@ export const IconWrapper = styled.div`
 
 	svg {
 		width: 18px;
-		padding-left: 4px;
 	}
 
 	&:hover {
@@ -44,10 +53,13 @@ export const IconWrapper = styled.div`
 
 export const MenuEntries = styled.div`
 	position: relative;
-	background: var(--color-card-background);
-	border: 1px solid rgba(var(--color-text), 0.1);
+	background: var(--color-navigation-background);
 	backdrop-filter: blur(5px);
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 	z-index: 99;
+	padding: 4px;
+	animation: ${slideDown} 0.2s ease-out forwards;
+	transform-origin: top center;
 `;
 
 export const MenuEntry = styled.div`
