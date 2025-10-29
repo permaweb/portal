@@ -193,26 +193,40 @@ export default function ArticleToolbar(props: {
 
 	function getSubmit() {
 		if (isCurrentRequest) {
-			return (
-				<>
+			if (!requestUnauthorized) {
+				return (
+					<>
+						<Button
+							type={'warning'}
+							label={language?.reject}
+							handlePress={() => props.handleRequestUpdate('Reject')}
+							active={false}
+							disabled={primaryDisabled || requestUnauthorized}
+							noFocus
+						/>
+						<Button
+							type={'indicator'}
+							label={language?.approve}
+							handlePress={() => props.handleRequestUpdate('Approve')}
+							active={false}
+							disabled={primaryDisabled || requestUnauthorized}
+							noFocus
+						/>
+					</>
+				);
+			} else {
+				return (
 					<Button
-						type={'warning'}
-						label={language?.reject}
-						handlePress={() => props.handleRequestUpdate('Reject')}
+						type={'alt1'}
+						label={language?.save}
+						handlePress={props.handleSubmit}
 						active={false}
-						disabled={primaryDisabled || requestUnauthorized}
+						disabled={primaryDisabled}
+						tooltip={(isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
 						noFocus
 					/>
-					<Button
-						type={'indicator'}
-						label={language?.approve}
-						handlePress={() => props.handleRequestUpdate('Approve')}
-						active={false}
-						disabled={primaryDisabled || requestUnauthorized}
-						noFocus
-					/>
-				</>
-			);
+				);
+			}
 		}
 
 		return (
