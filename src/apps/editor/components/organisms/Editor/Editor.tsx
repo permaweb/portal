@@ -239,6 +239,7 @@ export default function Editor() {
 			}
 
 			if (assetId) {
+				//incase we are editing an existing post
 				try {
 					/* If user is authorized in the asset then send update directly, otherwise forward it through the portal */
 					let assetContentUpdateId = null;
@@ -314,10 +315,11 @@ export default function Editor() {
 				}
 			} else {
 				try {
-					const assetDataFetch = await fetch(getTxEndpoint(ASSET_UPLOAD.src.data));
+					const assetDataFetch = await fetch(getTxEndpoint(ASSET_UPLOAD.src.data)); // Fetch empty asset template
 					const dataSrc = await assetDataFetch.text();
 
 					const assetId = await permawebProvider.libs.createAtomicAsset(
+						// Create new asset
 						{
 							name: currentPost.data.title,
 							description: currentPost.data.description,
@@ -377,8 +379,9 @@ export default function Editor() {
 
 					/* Index post in the current portal this user is contributing to */
 					let internalIndexAction = null;
-					if (portalProvider.permissions.postAutoIndex) internalIndexAction = 'Add-Index-Id';
-					else if (portalProvider.permissions.postRequestIndex) internalIndexAction = 'Add-Index-Request';
+					if (portalProvider.permissions.postAutoIndex)
+						internalIndexAction = 'Add-Index-Id'; // directly add post index if user has permission
+					else if (portalProvider.permissions.postRequestIndex) internalIndexAction = 'Add-Index-Request'; // otherwise request index if user has permission
 
 					if (internalIndexAction) {
 						const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
