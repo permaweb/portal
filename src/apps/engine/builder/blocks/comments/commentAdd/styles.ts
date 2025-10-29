@@ -1,6 +1,19 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
-export const CommentAdd = styled.div<{ $active: boolean }>`
+const slideDown = keyframes`
+	from {
+		opacity: 0;
+		transform: scaleY(0);
+		transform-origin: top;
+	}
+	to {
+		opacity: 1;
+		transform: scaleY(1);
+		transform-origin: top;
+	}
+`;
+
+export const CommentAdd = styled.div<{ $active: boolean; $hasIcon?: boolean }>`
 	display: flex;
 	flex-direction: column;
 	position: relative;
@@ -14,7 +27,7 @@ export const CommentAdd = styled.div<{ $active: boolean }>`
 		position: absolute;
 		top: 50%;
 		transform: translateY(-50%);
-		left: 10px;
+		left: ${(props) => (props.$hasIcon ? '42px' : '10px')};
 		font-size: var(--font-size-normal);
 		line-height: 1.5;
 		color: rgba(var(--color-text), 0.5);
@@ -28,8 +41,7 @@ export const Editor = styled.div`
 	background: var(--color-card-background);
 	border-radius: var(--border-radius);
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-	padding: 10px;
-	padding-right: 80px;
+	padding: 8px 80px 8px 10px;
 	min-height: 24px;
 	display: flex;
 	align-items: center;
@@ -225,6 +237,64 @@ export const CancelButton = styled.div`
 	&:hover {
 		transform: scale(1.1);
 		background: rgba(231, 76, 60, 0.9);
+	}
+`;
+
+export const AuthorSelector = styled.div`
+	display: flex;
+	position: relative;
+	margin-right: 8px;
+`;
+
+export const AuthorIcon = styled.img`
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	cursor: pointer;
+	object-fit: cover;
+`;
+
+export const AuthorDropdown = styled.div`
+	position: absolute;
+	top: calc(100% + 8px);
+	left: 0;
+	background: var(--color-navigation-background);
+	backdrop-filter: blur(5px);
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+	padding: 4px;
+	min-width: 150px;
+	z-index: 1000;
+	animation: ${slideDown} 0.2s ease-out forwards;
+	transform-origin: top center;
+`;
+
+export const AuthorOption = styled.div<{ $active: boolean }>`
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px 4px 6px;
+	margin-bottom: 2px;
+	cursor: pointer;
+	background: ${(props) => (props.$active ? 'rgba(var(--color-primary), 0.15)' : 'transparent')};
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+
+	&:hover {
+		background: ${(props) => (props.$active ? 'rgba(var(--color-primary), 0.2)' : 'rgba(var(--color-text), 0.1)')};
+	}
+
+	img {
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+
+	span {
+		color: rgba(var(--color-text), 1);
+		font-size: var(--font-size-normal);
 	}
 `;
 

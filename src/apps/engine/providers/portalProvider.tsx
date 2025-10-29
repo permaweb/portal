@@ -151,6 +151,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const Wallpaper = zone?.wallpaper ? getTxEndpoint(zone?.wallpaper) : undefined;
 				const Fonts = zone?.fonts;
 				const Moderation = zone?.moderation;
+				const Users = zone?.users;
 
 				const portalData = {
 					Name,
@@ -165,6 +166,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					Icon,
 					Wallpaper,
 					Moderation,
+					Users,
 				};
 				console.log('portalData: ', portalData);
 				setPortal(portalData);

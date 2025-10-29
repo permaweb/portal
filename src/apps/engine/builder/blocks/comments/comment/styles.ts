@@ -54,9 +54,26 @@ export const Meta = styled.div`
 	gap: 10px;
 `;
 
-export const Username = styled.span`
-	color: rgba(var(--color-primary), 1);
+export const Username = styled.span<{ isPostAuthor: boolean }>`
+	display: flex;
+	align-content: center;
+	justify-content: center;
+	color: ${(props) =>
+		!props.isPostAuthor ? `rgba(var(--color-primary), 1)` : `rgba(var(--color-primary-contrast), 1)`};
+	background-color: ${(props) => (!props.isPostAuthor ? `unset` : `rgba(var(--color-primary), 1)`)};
+	padding: ${(props) => (!props.isPostAuthor ? 0 : `0 4px`)};
 	font-weight: 600;
+
+	div {
+		div {
+			svg {
+				margin-left: 5px;
+				width: 12px;
+				height: 12px;
+				margin-bottom: -1.5px;
+			}
+		}
+	}
 `;
 
 export const Date = styled.span`

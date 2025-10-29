@@ -223,8 +223,7 @@ export default function Comment(props: any) {
 				setEditContent(commentData.content);
 			},
 		});
-		// Add spacer after edit if there are other options
-		if (canEditCommentStatus || canRemoveComment) {
+		if (canPinComment || canEditCommentStatus) {
 			menuEntries.push({ type: 'spacer' });
 		}
 	}
@@ -293,7 +292,7 @@ export default function Comment(props: any) {
 				</S.Avatar>
 				<S.Content>
 					<S.Meta>
-						<S.Username>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</S.Username>
+						<S.Username isPostAuthor={false}>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</S.Username>
 						{isEditMode && (
 							<S.EditingIndicator>
 								<ReactSVG src={ICONS.edit} />
