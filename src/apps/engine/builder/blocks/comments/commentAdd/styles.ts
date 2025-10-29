@@ -26,7 +26,6 @@ export const CommentAdd = styled.div<{ $active: boolean; $hasIcon?: boolean }>`
 	.editor-placeholder {
 		position: absolute;
 		top: 50%;
-		margin-left: 32px;
 		transform: translateY(-50%);
 		left: ${(props) => (props.$hasIcon ? '42px' : '10px')};
 		font-size: var(--font-size-normal);

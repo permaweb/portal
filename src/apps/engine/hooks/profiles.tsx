@@ -25,10 +25,10 @@ export const useProfile = (profileId: string) => {
 			return;
 		}
 
-		// Check if it's the current user's profile
 		if (
 			permawebProvider.profile &&
-			(profileId === permawebProvider.profile.id || profileId === urlify(permawebProvider.profile.username))
+			(profileId === permawebProvider.profile.id ||
+				(permawebProvider.profile.username && profileId === urlify(permawebProvider.profile.username)))
 		) {
 			setProfile(permawebProvider.profile);
 			setIsLoading(false);

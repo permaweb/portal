@@ -306,7 +306,15 @@ export default function CommentAdd(props: any) {
 	const { commentsId, parentId, isEditMode, commentId, initialContent, onCancel, onSubmittingChange } = props;
 	const { profile } = usePermawebProvider();
 	const { walletAddress } = useArweaveProvider();
+	const { portalId } = usePortalProvider();
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+	const hasAuthorIcon = Boolean(
+		portalId &&
+			!isEditMode &&
+			profile?.roles &&
+			(profile.roles.includes('Admin') || profile.roles.includes('Moderator'))
+	);
 
 	const initialConfig = {
 		namespace: 'CommentEditor',
@@ -334,7 +342,7 @@ export default function CommentAdd(props: any) {
 		: 'Login to write a comment...';
 
 	return (
-		<S.CommentAdd $active={isLoggedIn && !isSubmitting}>
+		<S.CommentAdd $active={isLoggedIn && !isSubmitting} $hasIcon={hasAuthorIcon}>
 			<LexicalComposer initialConfig={initialConfig}>
 				<PlainTextPlugin
 					contentEditable={
