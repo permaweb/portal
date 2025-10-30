@@ -21,6 +21,7 @@ import * as S from './styles';
 export default function ArticleEditor(props: {
 	handleSubmit: () => void;
 	handleRequestUpdate: (updateType: RequestUpdateType) => void;
+	handleStatusUpdate?: (status: 'Pending' | 'Review') => void;
 	staticPage?: boolean;
 }) {
 	const navigate = useNavigate();
@@ -45,6 +46,7 @@ export default function ArticleEditor(props: {
 		(async function () {
 			if (portalProvider.current?.id) {
 				if (assetId) {
+					console.log('Loading post with assetId:', assetId);
 					if (!checkValidAddress(assetId)) navigate(URLS.postCreateArticle(portalProvider.current.id));
 
 					const hasCurrentPostData = currentPost.data.id === assetId && currentPost.data.title;
@@ -97,6 +99,7 @@ export default function ArticleEditor(props: {
 					// Clear the post if we're creating a new post (assetId is undefined)
 					// but have content from an existing post (currentPost.data.id exists)
 					// This handles the case where user navigates from editing an existing post to creating new
+					console.log('Clearing current post for new post creation');
 					if (currentPost.data.id) dispatch(currentPostClear());
 				}
 				previousAssetIdRef.current = assetId;
@@ -354,6 +357,7 @@ export default function ArticleEditor(props: {
 						addBlock={(type: ArticleBlockEnum) => addBlock(type)}
 						handleInitAddBlock={(e) => handleKeyAddBlock(e)}
 						handleSubmit={props.handleSubmit}
+						handleStatusUpdate={props.handleStatusUpdate}
 						handleRequestUpdate={props.handleRequestUpdate}
 						staticPage={props.staticPage}
 					/>

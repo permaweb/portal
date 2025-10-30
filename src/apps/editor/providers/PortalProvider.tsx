@@ -240,7 +240,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			setUpdateAvailable(
 				overview?.version !== CurrentZoneVersion && arProvider.wallet && arProvider.walletAddress === overview?.owner
 			);
-
+			console.log(requests?.indexRequests);
 			const portalState: PortalDetailType = {
 				id: currentId,
 				name: overview?.name ?? current?.name ?? null,
@@ -281,7 +281,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		const user = users?.find((user: PortalUserType) => user.address === address);
 
 		if (!user) return { base: false };
-
+		console.log(permissions, user);
 		if (user?.roles) {
 			const hasPermission = (permissonKeys: string | string[]) => {
 				const keys = Array.isArray(permissonKeys) ? permissonKeys : [permissonKeys];
@@ -298,6 +298,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				postAutoIndex: hasPermission('Add-Index-Id'),
 				postRequestIndex: hasPermission('Add-Index-Request'),
 				updatePostRequestStatus: hasPermission('Update-Index-Request'),
+				updatePostStatus: hasPermission('Update-Status-Index-Request'),
 				externalContributor: isExternalContributor,
 			};
 		}

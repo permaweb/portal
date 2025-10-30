@@ -162,9 +162,8 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 											<p>{request.name}</p>
 											<Button
 												type={'alt4'}
-												label={language.reviewPost}
+												label={language.checkPost}
 												handlePress={() => handleReviewRedirect(request.id)}
-												disabled={unauthorized}
 												icon={ICONS.newTab}
 											/>
 										</S.PostActionRequestLine>

@@ -258,10 +258,10 @@ export const InfoWrapper = styled.div`
 	justify-content: center;
 	span {
 		display: block;
-		max-width: 95%;
+		max-width: 100%;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
 	}
 `;
 
