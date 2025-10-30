@@ -1,6 +1,7 @@
 import { Select } from 'components/atoms/Select';
 import { ICONS } from 'helpers/config';
-import { LanguageEnum, SelectOptionType } from 'helpers/types';
+import { LanguageEnum } from 'helpers/language';
+import { SelectOptionType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';

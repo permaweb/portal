@@ -11,7 +11,7 @@ import { Avatar } from 'components/atoms/Avatar';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { ICONS } from 'helpers/config';
-import { LanguageEnum } from 'helpers/types';
+import { LanguageEnum } from 'helpers/language';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
