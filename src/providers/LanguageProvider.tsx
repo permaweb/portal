@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { language } from 'helpers/language';
-import { LanguageEnum } from 'helpers/types';
+import { loadLanguage, loadLanguageAsync, LanguageEnum, LanguageTranslations } from 'helpers/language';
 
 interface LanguageContextState {
 	current: LanguageEnum;
@@ -33,17 +32,33 @@ export function LanguageProvider(props: LanguageProviderProps) {
 		return (savedLanguage as LanguageEnum) || (defaultLanguage as any);
 	});
 
+	const [currentTranslations, setCurrentTranslations] = React.useState<LanguageTranslations>(() => {
+		return loadLanguage(current as string);
+	});
+
+	React.useEffect(() => {
+		loadLanguageAsync(current as string).then((loadedTranslations) => {
+			setCurrentTranslations(loadedTranslations);
+		});
+	}, [current]);
+
 	const handleLanguageChange = (newLanguage: LanguageEnum) => {
 		setCurrent(newLanguage);
 		localStorage.setItem('appLanguage', newLanguage);
 	};
+
+	const languageObject = React.useMemo(() => {
+		return {
+			[current]: currentTranslations,
+		};
+	}, [currentTranslations, current]);
 
 	return (
 		<LanguageContext.Provider
 			value={{
 				current,
 				setCurrent: handleLanguageChange,
-				object: language,
+				object: languageObject,
 			}}
 		>
 			{props.children}

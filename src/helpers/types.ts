@@ -351,11 +351,6 @@ export type DesignPanelType = 'themes' | 'fonts' | 'images';
 
 export type BasicAlignmentType = 'left' | 'center' | 'right' | 'top' | 'bottom';
 
-export enum LanguageEnum {
-	en = 'English',
-	es = 'Español',
-}
-
 export interface UserOwnedDomain {
 	name: string;
 	antId: string;
