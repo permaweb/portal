@@ -193,11 +193,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}
 
 	async function handleArConnect() {
-		console.log('[ArweaveProvider] handleArConnect called:', {
-			walletAddress,
-			walletExists: !!window.arweaveWallet,
-			walletName: window.arweaveWallet?.walletName,
-		});
 		if (!walletAddress) {
 			if (window.arweaveWallet) {
 				try {

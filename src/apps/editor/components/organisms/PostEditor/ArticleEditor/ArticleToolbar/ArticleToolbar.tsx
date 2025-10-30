@@ -50,10 +50,10 @@ export default function ArticleToolbar(props: {
 
 	const TABS = [];
 
-	if (!props.staticPage) TABS.push({ label: language?.post });
-	TABS.push({ label: language?.blocks });
+	if (!props.staticPage) TABS.push({ label: language?.post, id: 'post' });
+	TABS.push({ label: language?.blocks, id: 'blocks' });
 
-	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.label);
+	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.id);
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
 
 	const titleRef = React.useRef<any>(null);
@@ -169,9 +169,9 @@ export default function ArticleToolbar(props: {
 
 	function getCurrentTab() {
 		switch (currentTab) {
-			case 'Blocks':
+			case 'blocks':
 				return <ArticleBlocks type={'post'} addBlock={props.addBlock} context={'toolbar'} />;
-			case 'Post':
+			case 'post':
 				return (
 					<ArticlePost
 						categories={currentPost.data.categories}
@@ -275,7 +275,7 @@ export default function ArticleToolbar(props: {
 						src={ICONS.close}
 						handlePress={() => {
 							handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
-							setCurrentTab(TABS[0]!.label);
+							setCurrentTab(TABS[0]!.id);
 						}}
 						tooltip={language?.closeToolkit}
 						tooltipPosition={'bottom-right'}
@@ -287,8 +287,14 @@ export default function ArticleToolbar(props: {
 						disabled={currentPost.editor.loading.active}
 					/>
 				</S.PanelCloseWrapperStart>
-				<Tabs onTabPropClick={(label: string) => setCurrentTab(label)} type={'alt1'}>
-					{TABS.map((tab: { label: string; icon?: string }, index: number) => {
+				<Tabs
+					onTabPropClick={(label: string) => {
+						const tab = TABS.find((t) => t.label === label);
+						if (tab) setCurrentTab(tab.id);
+					}}
+					type={'alt1'}
+				>
+					{TABS.map((tab: { label: string; id: string; icon?: string }, index: number) => {
 						return <S.TabWrapper key={index} label={tab.label} icon={tab.icon ? tab.icon : null} />;
 					})}
 				</Tabs>
@@ -301,7 +307,7 @@ export default function ArticleToolbar(props: {
 							label={language?.closeToolkit}
 							handlePress={() => {
 								handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
-								setCurrentTab(TABS[0]!.label);
+								setCurrentTab(TABS[0]!.id);
 							}}
 							noFocus
 							disabled={currentPost.editor.loading.active}
@@ -357,7 +363,7 @@ export default function ArticleToolbar(props: {
 						label={language?.toolkit}
 						handlePress={() => {
 							handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
-							setCurrentTab(TABS[0]!.label);
+							setCurrentTab(TABS[0]!.id);
 						}}
 						active={currentPost.editor.panelOpen}
 						disabled={currentPost.editor.loading.active}
