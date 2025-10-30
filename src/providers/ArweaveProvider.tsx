@@ -85,17 +85,54 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		handleWallet();
 
-		const onWalletSwitch = () => {
-			navigate(URLS.base);
+		const onWalletSwitch = async () => {
+			setAuth(null);
+			setWallet(null);
+			setWalletAddress(null);
+			setWalletType(null);
+			setArBalance(null);
+			setTurboBalance(null);
+			setTurboBalanceObj({
+				winc: '0',
+				balance: '0',
+				controlledWinc: '0',
+				effectiveBalance: '0',
+				givenApprovals: [],
+				receivedApprovals: [],
+			});
+
+			if (window.arweaveWallet) {
+				try {
+					await window.arweaveWallet.connect(WALLET_PERMISSIONS as any);
+					const address = await window.arweaveWallet.getActiveAddress();
+					setWalletAddress(address);
+					setWallet(window.arweaveWallet);
+					if (window?.wanderInstance?.authInfo?.authType) {
+						setWalletType(window.wanderInstance.authInfo.authType);
+						localStorage.setItem(STORAGE.walletType, window.wanderInstance.authInfo.authType);
+					} else {
+						const storedWalletType = localStorage.getItem(STORAGE.walletType) || WalletEnum.wander;
+						setWalletType(storedWalletType as WalletEnum);
+					}
+				} catch (e) {
+					console.error('Error switching wallet:', e);
+				}
+			}
+		};
+
+		const onArweaveWalletLoaded = () => {
+			if (window.arweaveWallet?.walletName !== 'Wander Connect' && window.wanderInstance) {
+				(window.wanderInstance as any).windowArweaveWallet = window.arweaveWallet;
+			}
 			handleWallet();
 		};
 
-		window.addEventListener('arweaveWalletLoaded', handleWallet);
+		window.addEventListener('arweaveWalletLoaded', onArweaveWalletLoaded);
 		window.addEventListener('message', onMessage);
 		window.addEventListener('walletSwitch', onWalletSwitch);
 
 		return () => {
-			window.removeEventListener('arweaveWalletLoaded', handleWallet);
+			window.removeEventListener('arweaveWalletLoaded', onArweaveWalletLoaded);
 			window.removeEventListener('message', onMessage);
 			window.removeEventListener('walletSwitch', onWalletSwitch);
 		};
@@ -156,11 +193,18 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}
 
 	async function handleArConnect() {
+		console.log('[ArweaveProvider] handleArConnect called:', {
+			walletAddress,
+			walletExists: !!window.arweaveWallet,
+			walletName: window.arweaveWallet?.walletName,
+		});
 		if (!walletAddress) {
 			if (window.arweaveWallet) {
 				try {
 					await window.arweaveWallet.connect(WALLET_PERMISSIONS as any);
-					setWalletAddress(await window.arweaveWallet.getActiveAddress());
+					const address = await window.arweaveWallet.getActiveAddress();
+					console.log('[ArweaveProvider] Connected to wallet:', address);
+					setWalletAddress(address);
 					setWallet(window.arweaveWallet);
 					if (window?.wanderInstance?.authInfo?.authType) {
 						setWalletType(window.wanderInstance.authInfo.authType);
@@ -175,8 +219,10 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 						localStorage.setItem(STORAGE.walletType, defaultType);
 					}
 				} catch (e: any) {
-					console.error(e);
+					console.error('[ArweaveProvider] Connection error:', e);
 				}
+			} else {
+				console.log('[ArweaveProvider] No wallet available');
 			}
 		}
 	}
@@ -297,7 +343,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					(data.data.authStatus === 'not-authenticated' && data.data.authType !== 'null' && data.data.authType !== null)
 				) {
 					if (data.data.authStatus === 'onboarding') {
-						// Keep modal open during onboarding
 						setAuth(data.data);
 						if (!window.wanderInstance.isOpen) {
 							window.wanderInstance.open();
@@ -305,8 +350,19 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					} else if (data.data.authStatus !== 'loading') {
 						window.wanderInstance.close();
 						setAuth(data.data);
-						if (data.data.authStatus === 'authenticated' || data.data.authType === 'NATIVE_WALLET') {
-							setAuth(data.data);
+						if (data.data.authType === 'NATIVE_WALLET') {
+							Promise.resolve().then(() => {
+								if (
+									window.arweaveWallet?.walletName === 'Wander Connect' &&
+									(window.wanderInstance as any).windowArweaveWallet
+								) {
+									window.arweaveWallet = (window.wanderInstance as any).windowArweaveWallet;
+								}
+								if (window.arweaveWallet?.walletName !== 'Wander Connect') {
+									handleArConnect();
+								}
+							});
+						} else if (data.data.authStatus === 'authenticated') {
 							handleArConnect();
 						}
 					} else {

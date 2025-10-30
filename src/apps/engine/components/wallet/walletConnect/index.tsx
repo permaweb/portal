@@ -34,6 +34,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 
 	React.useEffect(() => {
 		if (!instance) {
+			console.log('TICK');
 			try {
 				const wanderInstance = new WanderConnect({
 					clientId: 'FREE_TRIAL',
