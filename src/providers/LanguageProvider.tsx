@@ -2,9 +2,11 @@ import React from 'react';
 
 import { loadLanguage, loadLanguageAsync, LanguageEnum, LanguageTranslations } from 'helpers/language';
 
+type LanguageKey = keyof typeof LanguageEnum;
+
 interface LanguageContextState {
-	current: LanguageEnum;
-	setCurrent: (current: LanguageEnum) => void;
+	current: LanguageKey;
+	setCurrent: (current: LanguageKey) => void;
 	object: any;
 }
 
@@ -13,8 +15,8 @@ interface LanguageProviderProps {
 }
 
 const LanguageContext = React.createContext<LanguageContextState>({
-	current: LanguageEnum.en,
-	setCurrent(current: LanguageEnum) {
+	current: 'en',
+	setCurrent(current: LanguageKey) {
 		console.log('Language changed to:', current);
 	},
 	object: null,
@@ -25,43 +27,55 @@ export function useLanguageProvider(): LanguageContextState {
 }
 
 export function LanguageProvider(props: LanguageProviderProps) {
-	const defaultLanguage = Object.keys(LanguageEnum)[0];
+	const defaultLanguage = Object.keys(LanguageEnum)[0] as LanguageKey;
 
-	const [current, setCurrent] = React.useState<LanguageEnum>(() => {
+	const [current, setCurrent] = React.useState<LanguageKey>(() => {
 		const savedLanguage = localStorage.getItem('appLanguage');
-		return (savedLanguage as LanguageEnum) || (defaultLanguage as any);
+		return (savedLanguage as LanguageKey) || defaultLanguage;
 	});
 
-	const [currentTranslations, setCurrentTranslations] = React.useState<LanguageTranslations>(() => {
-		return loadLanguage(current as string);
+	const [translations, setTranslations] = React.useState<{ [key: string]: LanguageTranslations }>(() => {
+		const enTranslations = loadLanguage('en');
+		return {
+			en: enTranslations,
+			es: enTranslations,
+			de: enTranslations,
+		};
 	});
+
+	const [isLoading, setIsLoading] = React.useState(current !== 'en');
 
 	React.useEffect(() => {
-		loadLanguageAsync(current as string).then((loadedTranslations) => {
-			setCurrentTranslations(loadedTranslations);
-		});
-	}, [current]);
+		const loadTranslations = async () => {
+			setIsLoading(true);
+			const enTrans = await loadLanguageAsync('en');
+			const esTrans = await loadLanguageAsync('es');
+			const deTrans = await loadLanguageAsync('de');
 
-	const handleLanguageChange = (newLanguage: LanguageEnum) => {
+			setTranslations({
+				en: enTrans,
+				es: esTrans,
+				de: deTrans,
+			});
+			setIsLoading(false);
+		};
+
+		loadTranslations();
+	}, []);
+
+	const handleLanguageChange = React.useCallback((newLanguage: LanguageKey) => {
 		setCurrent(newLanguage);
 		localStorage.setItem('appLanguage', newLanguage);
-	};
+	}, []);
 
-	const languageObject = React.useMemo(() => {
-		return {
-			[current]: currentTranslations,
-		};
-	}, [currentTranslations, current]);
-
-	return (
-		<LanguageContext.Provider
-			value={{
-				current,
-				setCurrent: handleLanguageChange,
-				object: languageObject,
-			}}
-		>
-			{props.children}
-		</LanguageContext.Provider>
+	const contextValue = React.useMemo(
+		() => ({
+			current,
+			setCurrent: handleLanguageChange,
+			object: translations,
+		}),
+		[current, translations, handleLanguageChange]
 	);
+
+	return <LanguageContext.Provider value={contextValue}>{props.children}</LanguageContext.Provider>;
 }
