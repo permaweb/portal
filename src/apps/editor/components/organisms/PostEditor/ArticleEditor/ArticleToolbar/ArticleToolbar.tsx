@@ -193,11 +193,13 @@ export default function ArticleToolbar(props: {
 	);
 	const submitUnauthorized =
 		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions?.postAutoIndex;
+	console.log(portalProvider.current?.requests);
 	const isCurrentRequest =
 		!!assetId && portalProvider.current?.requests?.some((request: PortalAssetRequestType) => request.id === assetId);
 	const currentRequest =
 		isCurrentRequest &&
 		portalProvider.current?.requests?.find((request: PortalAssetRequestType) => request.id === assetId);
+	console.log('currentRequest', currentRequest);
 	const primaryDisabled = submitUnauthorized || currentPost.editor.loading.active || currentPost.editor.submitDisabled;
 	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
 
@@ -219,7 +221,7 @@ export default function ArticleToolbar(props: {
 							label={language?.approve}
 							handlePress={() => props.handleRequestUpdate('Approve')}
 							active={false}
-							disabled={primaryDisabled || requestUnauthorized || currentRequest?.status === 'Review'}
+							disabled={primaryDisabled || requestUnauthorized || currentRequest?.status !== 'Review'}
 							noFocus
 						/>
 					</>
@@ -232,7 +234,7 @@ export default function ArticleToolbar(props: {
 							label={language?.save}
 							handlePress={props.handleSubmit}
 							active={false}
-							disabled={primaryDisabled}
+							disabled={primaryDisabled || currentRequest?.status !== 'Pending'}
 							tooltip={primaryDisabled ? null : (isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
 							noFocus
 						/>
@@ -346,14 +348,9 @@ export default function ArticleToolbar(props: {
 							<div className={'indicator'} />
 						</S.UpdateWrapper>
 					)}
-					{currentRequest?.status ? (
+					{currentRequest?.status && (
 						<S.UpdateWrapper className={'info'}>
 							<span>{currentRequest?.status}</span>
-							<div className={'indicator'} />
-						</S.UpdateWrapper>
-					) : (
-						<S.UpdateWrapper className={'info'}>
-							<span>Pending</span>
 							<div className={'indicator'} />
 						</S.UpdateWrapper>
 					)}

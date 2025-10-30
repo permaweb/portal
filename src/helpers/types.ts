@@ -158,6 +158,7 @@ export type PortalPermissionsType = {
 	postAutoIndex?: boolean;
 	postRequestIndex?: boolean;
 	updatePostRequestStatus?: boolean;
+	updatePostStatus?: boolean;
 	externalContributor?: boolean;
 };
 

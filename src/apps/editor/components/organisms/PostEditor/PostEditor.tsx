@@ -34,7 +34,7 @@ export default function PostEditor() {
 	const dispatch = useDispatch();
 
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
-
+	console.log({ currentPost });
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
@@ -104,8 +104,7 @@ export default function PostEditor() {
 				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
 				return;
 			}
-
-			if (!portalProvider.permissions?.updatePostRequestStatus) {
+			if (!portalProvider.permissions?.updatePostStatus) {
 				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
 				addNotification(language?.unauthorized, 'warning');
 				return;
@@ -117,6 +116,7 @@ export default function PostEditor() {
 
 			if (isCurrentRequest) {
 				try {
+					console.log('Updating post status...', status);
 					const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
 						processId: portalProvider.current.id,
 						wallet: arProvider.wallet,
@@ -132,6 +132,7 @@ export default function PostEditor() {
 						message: zoneIndexUpdateId,
 					});
 
+					portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Requests);
 					if (zoneIndexResult?.Messages?.length > 0) {
 						addNotification(`${language?.postStatusUpdated}!`, 'success');
 					} else {
