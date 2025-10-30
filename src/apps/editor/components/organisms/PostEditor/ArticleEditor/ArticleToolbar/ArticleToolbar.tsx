@@ -34,6 +34,7 @@ export default function ArticleToolbar(props: {
 	addBlock: (type: ArticleBlockEnum) => void;
 	handleInitAddBlock: (e: any) => void;
 	handleSubmit: () => void;
+	handleStatusUpdate: (status: 'Pending' | 'Review') => void;
 	handleRequestUpdate: (updateType: RequestUpdateType) => void;
 	staticPage?: boolean;
 }) {
@@ -194,32 +195,62 @@ export default function ArticleToolbar(props: {
 		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions?.postAutoIndex;
 	const isCurrentRequest =
 		!!assetId && portalProvider.current?.requests?.some((request: PortalAssetRequestType) => request.id === assetId);
-
+	const currentRequest =
+		isCurrentRequest &&
+		portalProvider.current?.requests?.find((request: PortalAssetRequestType) => request.id === assetId);
 	const primaryDisabled = submitUnauthorized || currentPost.editor.loading.active || currentPost.editor.submitDisabled;
 	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
 
 	function getSubmit() {
 		if (isCurrentRequest) {
-			return (
-				<>
-					<Button
-						type={'warning'}
-						label={language?.reject}
-						handlePress={() => props.handleRequestUpdate('Reject')}
-						active={false}
-						disabled={primaryDisabled || requestUnauthorized}
-						noFocus
-					/>
-					<Button
-						type={'indicator'}
-						label={language?.approve}
-						handlePress={() => props.handleRequestUpdate('Approve')}
-						active={false}
-						disabled={primaryDisabled || requestUnauthorized}
-						noFocus
-					/>
-				</>
-			);
+			if (!requestUnauthorized) {
+				return (
+					<>
+						<Button
+							type={'warning'}
+							label={language?.reject}
+							handlePress={() => props.handleRequestUpdate('Reject')}
+							active={false}
+							disabled={primaryDisabled || requestUnauthorized || currentRequest?.status !== 'Review'}
+							noFocus
+						/>
+						<Button
+							type={'indicator'}
+							label={language?.approve}
+							handlePress={() => props.handleRequestUpdate('Approve')}
+							active={false}
+							disabled={primaryDisabled || requestUnauthorized || currentRequest?.status === 'Review'}
+							noFocus
+						/>
+					</>
+				);
+			} else {
+				return (
+					<>
+						<Button
+							type={'alt1'}
+							label={language?.save}
+							handlePress={props.handleSubmit}
+							active={false}
+							disabled={primaryDisabled}
+							tooltip={primaryDisabled ? null : (isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
+							noFocus
+						/>
+						{currentRequest?.status && (
+							<Button
+								type={'alt1'}
+								label={currentRequest?.status === 'Pending' ? 'Submit For Review ' : 'Remove From Review'}
+								handlePress={() =>
+									props.handleStatusUpdate(currentRequest?.status === 'Pending' ? 'Review' : 'Pending')
+								}
+								active={false}
+								disabled={primaryDisabled}
+								noFocus
+							/>
+						)}
+					</>
+				);
+			}
 		}
 
 		return (
@@ -306,6 +337,17 @@ export default function ArticleToolbar(props: {
 					{hasChanges && !isEmpty && !currentPost.editor.loading.active && (
 						<S.UpdateWrapper className={'info'}>
 							<span>{language.unsavedChanges}</span>
+							<div className={'indicator'} />
+						</S.UpdateWrapper>
+					)}
+					{currentRequest?.status ? (
+						<S.UpdateWrapper className={'info'}>
+							<span>{currentRequest?.status}</span>
+							<div className={'indicator'} />
+						</S.UpdateWrapper>
+					) : (
+						<S.UpdateWrapper className={'info'}>
+							<span>Pending</span>
 							<div className={'indicator'} />
 						</S.UpdateWrapper>
 					)}

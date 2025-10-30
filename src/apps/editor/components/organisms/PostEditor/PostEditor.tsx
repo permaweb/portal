@@ -69,7 +69,7 @@ export default function PostEditor() {
 
 		const isCurrentRequest =
 			!!assetId && portalProvider.current?.requests?.some((request: PortalAssetRequestType) => request.id === assetId);
-
+		console.log({ isEmpty, noChanges, isCurrentRequest, assetId, currentPostDataId: currentPost.data.id, hasChanges });
 		handleCurrentPostUpdate({ field: 'submitDisabled', value: (isEmpty || noChanges) && !isCurrentRequest });
 	}, [currentPost.data, currentPost.originalData, portalProvider.current?.requests]);
 
@@ -92,6 +92,59 @@ export default function PostEditor() {
 	/* User is a moderator and can only review existing posts, not create new ones */
 	const unauthorized =
 		!assetId && !portalProvider.permissions?.postAutoIndex && !portalProvider.permissions?.postRequestIndex;
+
+	async function handleStatusUpdate(status: 'Pending' | 'Review') {
+		if (assetId && arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
+			handleCurrentPostUpdate({
+				field: 'loading',
+				value: { active: true, message: `${language?.updatingPostStatus}...` },
+			});
+
+			if (!validateSubmit()) {
+				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
+				return;
+			}
+
+			if (!portalProvider.permissions?.updatePostRequestStatus) {
+				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
+				addNotification(language?.unauthorized, 'warning');
+				return;
+			}
+
+			const isCurrentRequest = portalProvider.current?.requests?.some(
+				(request: PortalAssetRequestType) => request.id === assetId
+			);
+
+			if (isCurrentRequest) {
+				try {
+					const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
+						processId: portalProvider.current.id,
+						wallet: arProvider.wallet,
+						action: 'Update-Status-Index-Request',
+						tags: [
+							{ name: 'Index-Id', value: assetId },
+							{ name: 'Status', value: status },
+						],
+					});
+
+					const zoneIndexResult = await permawebProvider.deps.ao.result({
+						process: portalProvider.current.id,
+						message: zoneIndexUpdateId,
+					});
+
+					if (zoneIndexResult?.Messages?.length > 0) {
+						addNotification(`${language?.postStatusUpdated}!`, 'success');
+					} else {
+						addNotification(language?.errorUpdatingPost, 'warning');
+					}
+				} catch (e: any) {
+					addNotification(e.message ?? 'Error updating post status', 'warning');
+				}
+			}
+
+			handleSubmitUpdate();
+		}
+	}
 
 	async function handleRequestUpdate(updateType: RequestUpdateType) {
 		if (assetId && arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
@@ -245,27 +298,17 @@ export default function PostEditor() {
 				try {
 					/* If user is authorized in the asset then send update directly, otherwise forward it through the portal */
 					let assetContentUpdateId = null;
-					if (currentPost.data?.authUsers && currentPost.data.authUsers.includes(arProvider.walletAddress)) {
-						assetContentUpdateId = await permawebProvider.libs.sendMessage({
-							processId: assetId,
-							wallet: arProvider.wallet,
-							action: 'Update-Asset',
-							tags: [{ name: 'Exclude-Index', value: excludeFromIndex }],
-							data: data,
-						});
-					} else {
-						assetContentUpdateId = await permawebProvider.libs.sendMessage({
-							processId: portalProvider.current.id,
-							wallet: arProvider.wallet,
-							action: 'Run-Action',
-							tags: [
-								{ name: 'Forward-To', value: assetId },
-								{ name: 'Forward-Action', value: 'Update-Asset' },
-								{ name: 'Exclude-Index', value: excludeFromIndex },
-							],
-							data: { Input: data },
-						});
-					}
+					assetContentUpdateId = await permawebProvider.libs.sendMessage({
+						processId: portalProvider.current.id,
+						wallet: arProvider.wallet,
+						action: 'Update-Asset-Through-Zone',
+						tags: [
+							{ name: 'Forward-To', value: assetId },
+							{ name: 'Forward-Action', value: 'Update-Asset' },
+							{ name: 'Exclude-Index', value: excludeFromIndex },
+						],
+						data: { Input: data },
+					});
 
 					if (isStaticPage) {
 						const currentPages = portalProvider.current?.pages || {};
@@ -316,6 +359,7 @@ export default function PostEditor() {
 					addNotification(e.message ?? language?.errorUpdatingPost, 'warning');
 				}
 			} else {
+				console.log('going here');
 				try {
 					const assetDataFetch = await fetch(getTxEndpoint(ASSET_UPLOAD.src.data));
 					const dataSrc = await assetDataFetch.text();
@@ -627,7 +671,12 @@ export default function PostEditor() {
 					</S.MessageWrapper>
 				</div>
 			)}
-			<ArticleEditor handleSubmit={handleSubmit} handleRequestUpdate={handleRequestUpdate} staticPage={isStaticPage} />
+			<ArticleEditor
+				handleSubmit={handleSubmit}
+				handleRequestUpdate={handleRequestUpdate}
+				handleStatusUpdate={handleStatusUpdate}
+				staticPage={isStaticPage}
+			/>
 			{showReview && (
 				<Modal header={language?.reviewPostDetails} handleClose={() => setShowReview(false)}>
 					<S.ModalWrapper>
