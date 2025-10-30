@@ -53,6 +53,12 @@ export function LanguageProvider(props: LanguageProviderProps) {
 		};
 	}, [currentTranslations, current]);
 
+	const languageObject = React.useMemo(() => {
+		return {
+			[current]: currentTranslations,
+		};
+	}, [currentTranslations, current]);
+
 	return (
 		<LanguageContext.Provider
 			value={{
