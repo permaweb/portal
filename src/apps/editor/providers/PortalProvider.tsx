@@ -104,38 +104,38 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		if (permawebProvider.profile?.id && !portalsRequestRef.current) {
 			const profilePortals = permawebProvider.profile?.portals ?? [];
+
 			setPortals(profilePortals);
 			setInvites(permawebProvider.profile?.invites ?? []);
+
 			if (profilePortals.length > 0) {
 				portalsRequestRef.current = true;
 				(async () => {
 					const updated = await Promise.all(
 						profilePortals.map(async (portal: PortalHeaderType) => {
-							// Always fetch fresh data for portal metadata
 							try {
-								const data = permawebProvider.libs.mapFromProcessCase(
-									await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Overview })
+								const response = permawebProvider.libs.mapFromProcessCase(
+									await permawebProvider.libs.readState({ processId: portal.id })
 								);
 
-								const users = permawebProvider.libs.mapFromProcessCase(
-									await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Users })
-								);
+								const parseField = (key: PortalPatchMapEnum) => parseProcessResponseValue(response[key]);
 
-								const transfers = permawebProvider.libs.mapFromProcessCase(
-									await permawebProvider.libs.readState({ processId: portal.id, path: PortalPatchMapEnum.Transfers })
-								);
+								const overview = parseField(PortalPatchMapEnum.Overview);
+								const users = parseField(PortalPatchMapEnum.Users);
+								const transfers = parseField(PortalPatchMapEnum.Transfers);
+
+								console.log(overview, users, transfers);
 
 								return {
 									...portal,
-									name: data.name ?? data.store?.name ?? 'None',
-									logo: data.logo ?? data.store?.logo ?? 'None',
-									icon: data.icon ?? data.store?.icon ?? 'None',
+									name: overview.name ?? overview.store?.name ?? 'None',
+									logo: overview.logo ?? overview.store?.logo ?? 'None',
+									icon: overview.icon ?? overview.store?.icon ?? 'None',
 									users: users.users ?? getPortalUsers(users.roles),
 									transfers: transfers.transfers ?? [],
 								};
 							} catch (e) {
 								console.warn(`Failed to fetch portal metadata for ${portal.id}:`, e);
-								// Fall back to cached data if fetch fails
 								const cached = getCachedPortal(portal.id);
 								if (cached) {
 									return {
@@ -240,7 +240,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			setUpdateAvailable(
 				overview?.version !== CurrentZoneVersion && arProvider.wallet && arProvider.walletAddress === overview?.owner
 			);
-			console.log(requests?.indexRequests);
+
 			const portalState: PortalDetailType = {
 				id: currentId,
 				name: overview?.name ?? current?.name ?? null,
@@ -281,7 +281,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		const user = users?.find((user: PortalUserType) => user.address === address);
 
 		if (!user) return { base: false };
-		console.log(permissions, user);
+
 		if (user?.roles) {
 			const hasPermission = (permissonKeys: string | string[]) => {
 				const keys = Array.isArray(permissonKeys) ? permissonKeys : [permissonKeys];

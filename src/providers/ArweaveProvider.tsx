@@ -227,6 +227,16 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 			localStorage.removeItem(STORAGE.walletType);
 		}
 
+		setAuth(null);
+		setWallet(null);
+		setWalletAddress(null);
+		setWalletType(null);
+		setArBalance(null);
+		setTurboBalance(null);
+		setTurboBalanceObj(null);
+
+		if (redirect) navigate(URLS.base);
+
 		if (window?.wanderInstance && walletType !== 'NATIVE_WALLET') {
 			try {
 				window.wanderInstance.signOut();
@@ -242,16 +252,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				console.error('Error disconnecting wallet:', e);
 			}
 		}
-
-		setAuth(null);
-		setWallet(null);
-		setWalletAddress(null);
-		setWalletType(null);
-		setArBalance(null);
-		setTurboBalance(null);
-		setTurboBalanceObj(null);
-
-		if (redirect) navigate(URLS.base);
 	}
 
 	async function getARBalance() {
@@ -365,7 +365,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					}
 				} else if (data.data.authStatus === 'not-authenticated') {
 					setAuth(data.data);
-					if (localStorage.getItem(STORAGE.walletType)) handleArConnect();
 				}
 			} else if (data.type === 'embedded_request') {
 				if (window.wanderInstance.pendingRequests !== 0) {

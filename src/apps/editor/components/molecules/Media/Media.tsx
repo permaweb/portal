@@ -61,19 +61,7 @@ export default function Media(props: {
 		(async function () {
 			if (media instanceof File && arProvider.wallet) {
 				const result = await calculateUploadCost(media);
-
-				if (result) {
-					if (!result.requiresConfirmation && props.type === 'icon') {
-						const mediaValue =
-							props.type === 'icon'
-								? props.portal?.icon
-								: props.type === 'logo'
-								? props.portal?.logo
-								: props.portal?.wallpaper;
-						if (!mediaValue) await handleSubmit();
-					}
-					console.log(result);
-				}
+				if (result && !result.requiresConfirmation) await handleSubmit();
 			}
 		})();
 	}, [media, props.portal, arProvider.wallet, calculateUploadCost]);
@@ -81,7 +69,7 @@ export default function Media(props: {
 	const unauthorized = props.portal?.id && !portalProvider.permissions?.updatePortalMeta;
 
 	async function handleSubmit(opts?: { remove?: boolean }) {
-		if (!unauthorized && arProvider.wallet && permawebProvider.profile?.id) {
+		if (!unauthorized && arProvider.wallet) {
 			setLoading(true);
 
 			try {
@@ -210,7 +198,7 @@ export default function Media(props: {
 		const assetSrc = props.type === 'icon' ? ICONS.icon : props.type === 'logo' ? ICONS.image : ICONS.image;
 		const uploadText =
 			props.type === 'icon'
-				? language?.upload
+				? language?.uploadIcon
 				: props.type === 'logo'
 				? language?.uploadLogo
 				: language?.uploadWallpaper;
@@ -309,14 +297,13 @@ export default function Media(props: {
 						<Modal
 							header={`${language?.upload} ${media instanceof File ? media.name : 'Media'}`}
 							handleClose={() => handleClearUpload()}
-							className={'modal-wrapper'}
+							className={'modal-wrapper scroll-wrapper-hidden'}
 						>
 							<TurboUploadConfirmation
 								uploadCost={uploadCost}
 								uploadDisabled={unauthorized || loading}
 								handleUpload={handleSubmit}
 								handleCancel={() => handleClearUpload()}
-								message={'-'}
 								insufficientBalance={insufficientBalance}
 							/>
 						</Modal>

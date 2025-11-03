@@ -18,6 +18,10 @@ import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
 
+// TODO: Log user in directly if portal id = profile id and is the only portal (Done)
+// TODO: Add invites to portal view (Done)
+// TODO: Keep portal / profile data in sync if theyre equal
+// TODO: Profile / portal patch map - Update patch map in config to use profile meta firleds, add patch map update if not equal to current map (Add patch map state to overview key to compare)
 export default function PortalManager(props: {
 	portal: PortalDetailType | null;
 	handleClose: () => void;
@@ -51,7 +55,7 @@ export default function PortalManager(props: {
 	}, [props.portal]);
 
 	async function handleSubmit() {
-		if (arProvider.wallet && permawebProvider.profile?.id) {
+		if (arProvider.wallet) {
 			setLoading(true);
 
 			try {
@@ -80,7 +84,7 @@ export default function PortalManager(props: {
 					data.Icon = 'None';
 				}
 
-				if (props.portal?.id && portalProvider.permissions?.updatePortalMeta) {
+				if (props.portal?.id && portalProvider.permissions?.updatePortalMeta && permawebProvider.profile?.id) {
 					const portalsUpdateData = portalProvider.portals
 						.filter((portal: PortalHeaderType) => portal.id !== props.portal.id)
 						.map((portal: PortalHeaderType) => ({
@@ -126,6 +130,22 @@ export default function PortalManager(props: {
 					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
 					if (data.Icon) tags.push(getBootTag('Icon', data.Icon));
 
+					/* Check if the user already has a profile to write the portal data in to, 
+						Or else treat this portal as the user profile */
+					let profileId = permawebProvider.profile?.id;
+					if (!profileId) {
+						console.log('No profile found for wallet, creating portal as profile');
+
+						tags.push({ name: 'Zone-Type', value: 'User' });
+
+						tags.push(getBootTag('Username', data.Name));
+						tags.push(getBootTag('DisplayName', data.Name));
+						tags.push(getBootTag('Description', data.Name));
+
+						if (data.Logo) tags.push(getBootTag('Banner', data.Logo));
+						if (data.Icon) tags.push(getBootTag('Thumbnail', data.Icon));
+					}
+
 					const portalId = await permawebProvider.libs.createZone(
 						{
 							tags: tags,
@@ -138,6 +158,9 @@ export default function PortalManager(props: {
 
 					console.log(`Portal ID: ${portalId}`);
 
+					/* Use this portal as the profile if one doesn't exist yet */
+					if (!profileId) profileId = portalId;
+
 					const rolesUpdate = await permawebProvider.libs.setZoneRoles(
 						[
 							{
@@ -147,7 +170,7 @@ export default function PortalManager(props: {
 								sendInvite: false,
 							},
 							{
-								granteeId: permawebProvider.profile.id,
+								granteeId: profileId,
 								roles: [PORTAL_ROLES.ADMIN],
 								type: 'process',
 								sendInvite: false,
@@ -167,7 +190,7 @@ export default function PortalManager(props: {
 
 					profileUpdateId = await permawebProvider.libs.updateZone(
 						{ Portals: permawebProvider.libs.mapToProcessCase(updatedPortals) },
-						permawebProvider.profile.id,
+						profileId,
 						arProvider.wallet
 					);
 
