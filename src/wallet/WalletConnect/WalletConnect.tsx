@@ -106,7 +106,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 		} else if (arProvider.walletAddress) {
 			if (profile) {
 				setIsLoading(false);
-				setLabel(profile.displayName || 'My Profile');
+				setLabel(profile.displayName ?? profile?.displayname ?? 'My Profile');
 			} else {
 				// Wallet connected but no profile
 				setIsLoading(false);

@@ -58,6 +58,7 @@ export type PortalAssetType = {
 
 export type PortalAssetRequestType = {
 	id: string;
+	status: string;
 	name?: string;
 	creatorId?: string;
 	dateCreated?: string;
@@ -157,6 +158,7 @@ export type PortalPermissionsType = {
 	postAutoIndex?: boolean;
 	postRequestIndex?: boolean;
 	updatePostRequestStatus?: boolean;
+	updatePostStatus?: boolean;
 	externalContributor?: boolean;
 };
 
