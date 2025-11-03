@@ -30,80 +30,151 @@ export default function ArticleEditor(props: {
 	const dispatch = useDispatch();
 
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
-
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	const [viewMode, setViewMode] = React.useState<'original' | 'new'>('new');
+	const [originalData, setOriginalDataState] = React.useState({});
+	const [newChanges, setNewChanges] = React.useState({});
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
 	};
 
+	const switchBetweenOriginal = (viewMode: 'original' | 'new') => {
+		setViewMode(viewMode);
+		if (viewMode === 'original') {
+			// Revert to original data
+			Object.keys(originalData).forEach((key) => {
+				handleCurrentPostUpdate({ field: key, value: originalData[key as keyof typeof originalData] });
+			});
+		} else {
+			Object.keys(newChanges).forEach((key) => {
+				handleCurrentPostUpdate({ field: key, value: newChanges[key as keyof typeof newChanges] });
+			});
+		}
+	};
+
 	const previousAssetIdRef = React.useRef<string | undefined>(undefined);
+
+	async function loadPostData() {
+		if (portalProvider.current?.id) {
+			if (assetId) {
+				console.log('Loading post with assetId:', assetId);
+				if (!checkValidAddress(assetId)) navigate(URLS.postCreateArticle(portalProvider.current.id));
+
+				const hasCurrentPostData = currentPost.data.id === assetId && currentPost.data.title;
+
+				// Always load if the assetId has changed, even if we have some post data
+				const assetIdChanged = previousAssetIdRef.current !== assetId;
+
+				if (!hasCurrentPostData || assetIdChanged) {
+					dispatch(currentPostClear());
+					handleCurrentPostUpdate({
+						field: 'loading',
+						value: {
+							active: true,
+							message: `${props.staticPage ? language?.loadingPage : language?.loadingPost}...`,
+						},
+					});
+					const request: any = portalProvider.current.requests.find((req) => req.id === assetId);
+
+					try {
+						let source: any = null;
+						let assetData = await permawebProvider.libs.getAtomicAsset(assetId);
+
+						if (request && request.payload?.input) {
+							// If request already exists, use it as the source
+							source = request;
+						} else {
+							// Otherwise, fetch from permaweb
+							source = assetData;
+						}
+
+						const meta = request && request?.payload?.input ? request.payload?.input || {} : source.metadata || {};
+						if (!source) throw new Error('No source data found');
+
+						if (request) {
+							setViewMode('new');
+							setNewChanges({
+								id: assetId || null,
+								title: meta.name || source.name || '',
+								creator: meta.creator || source.creator || null,
+								status: meta.status || 'draft',
+								categories: meta.categories || [],
+								topics: meta.topics || [],
+								content: meta.content || null,
+								thumbnail: meta.thumbnail || null,
+								description: meta.description || '',
+								externalRecipients: [],
+								dateCreated: source.createdAt || null,
+								lastUpdate: source.updatedAt || null,
+								releaseDate: meta.releaseDate || null,
+								authUsers: source.authUsers || [],
+							});
+							setOriginalDataState({
+								id: assetId || null,
+								title: assetData.metadata.name || source.name || '',
+								creator: assetData.metadata.creator || source.creator || null,
+								status: assetData.metadata.status || 'draft',
+								categories: assetData.metadata.categories || [],
+								topics: assetData.metadata.topics || [],
+								content: assetData.metadata.content || null,
+								thumbnail: assetData.metadata.thumbnail || null,
+								description: assetData.metadata.description || '',
+								externalRecipients: [],
+								dateCreated: source.createdAt || null,
+								lastUpdate: source.updatedAt || null,
+								releaseDate: assetData.metadata.releaseDate || null,
+								authUsers: source.authUsers || [],
+							});
+						}
+
+						const postData = {
+							id: assetId || null,
+							title: meta.name || source.name || '',
+							creator: meta.creator || source.creator || null,
+							status: meta.status || 'draft',
+							categories: meta.categories || [],
+							topics: meta.topics || [],
+							content: meta.content || null,
+							thumbnail: meta.thumbnail || null,
+							description: meta.description || '',
+							externalRecipients: [],
+							dateCreated: source.createdAt || null,
+							lastUpdate: source.updatedAt || null,
+							releaseDate: meta.releaseDate || null,
+							authUsers: source.authUsers || [],
+						};
+
+						// Update current data
+						Object.keys(postData).forEach((key) => {
+							handleCurrentPostUpdate({ field: key, value: postData[key as keyof typeof postData] });
+						});
+
+						// Set original data for comparison
+						dispatch(setOriginalData(postData as any));
+					} catch (e) {
+						console.error(e);
+					}
+
+					handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
+				}
+			} else {
+				// Clear the post if we're creating a new post (assetId is undefined)
+				// but have content from an existing post (currentPost.data.id exists)
+				// This handles the case where user navigates from editing an existing post to creating new
+				console.log('Clearing current post for new post creation');
+				if (currentPost.data.id) dispatch(currentPostClear());
+			}
+			previousAssetIdRef.current = assetId;
+		}
+	}
 
 	React.useEffect(() => {
 		(async function () {
-			if (portalProvider.current?.id) {
-				if (assetId) {
-					console.log('Loading post with assetId:', assetId);
-					if (!checkValidAddress(assetId)) navigate(URLS.postCreateArticle(portalProvider.current.id));
-
-					const hasCurrentPostData = currentPost.data.id === assetId && currentPost.data.title;
-
-					// Always load if the assetId has changed, even if we have some post data
-					const assetIdChanged = previousAssetIdRef.current !== assetId;
-
-					if (!hasCurrentPostData || assetIdChanged) {
-						dispatch(currentPostClear());
-						handleCurrentPostUpdate({
-							field: 'loading',
-							value: {
-								active: true,
-								message: `${props.staticPage ? language?.loadingPage : language?.loadingPost}...`,
-							},
-						});
-						try {
-							const response = await permawebProvider.libs.getAtomicAsset(assetId);
-
-							const postData = {
-								id: assetId as string | null,
-								title: response?.name || '',
-								creator: response?.creator || null,
-								status: response?.metadata?.status || 'draft',
-								categories: response?.metadata?.categories || [],
-								topics: response?.metadata?.topics || [],
-								content: response?.metadata?.content || null,
-								thumbnail: response?.metadata?.thumbnail || null,
-								description: response?.metadata?.description || '',
-								externalRecipients: [],
-								dateCreated: null,
-								lastUpdate: null,
-								releaseDate: response?.metadata?.releaseDate,
-								authUsers: response?.authUsers || [],
-							};
-
-							// Update current data
-							Object.keys(postData).forEach((key) => {
-								handleCurrentPostUpdate({ field: key, value: postData[key as keyof typeof postData] });
-							});
-
-							// Set original data for comparison
-							dispatch(setOriginalData(postData as any));
-						} catch (e: any) {
-							console.error(e);
-						}
-						handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
-					}
-				} else {
-					// Clear the post if we're creating a new post (assetId is undefined)
-					// but have content from an existing post (currentPost.data.id exists)
-					// This handles the case where user navigates from editing an existing post to creating new
-					console.log('Clearing current post for new post creation');
-					if (currentPost.data.id) dispatch(currentPostClear());
-				}
-				previousAssetIdRef.current = assetId;
-			}
+			await loadPostData();
 		})();
 	}, [assetId, portalProvider.current?.id]);
 
@@ -355,10 +426,12 @@ export default function ArticleEditor(props: {
 				<S.ToolbarWrapper>
 					<ArticleToolbar
 						addBlock={(type: ArticleBlockEnum) => addBlock(type)}
+						viewMode={viewMode}
 						handleInitAddBlock={(e) => handleKeyAddBlock(e)}
 						handleSubmit={props.handleSubmit}
 						handleStatusUpdate={props.handleStatusUpdate}
 						handleRequestUpdate={props.handleRequestUpdate}
+						handleSwitchOriginal={switchBetweenOriginal}
 						staticPage={props.staticPage}
 					/>
 				</S.ToolbarWrapper>

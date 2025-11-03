@@ -32,10 +32,12 @@ import * as S from './styles';
 
 export default function ArticleToolbar(props: {
 	addBlock: (type: ArticleBlockEnum) => void;
+	viewMode: 'original' | 'new';
 	handleInitAddBlock: (e: any) => void;
-	handleSubmit: () => void;
+	handleSubmit: (reviewStatus?: string) => void;
 	handleStatusUpdate: (status: 'Pending' | 'Review') => void;
 	handleRequestUpdate: (updateType: RequestUpdateType) => void;
+	handleSwitchOriginal: (viewmode: 'original' | 'new') => void;
 	staticPage?: boolean;
 }) {
 	const dispatch = useDispatch();
@@ -187,19 +189,22 @@ export default function ArticleToolbar(props: {
 		}
 	}
 
+	const isAssetIdPresentInAssets = React.useMemo(() => {
+		return portalProvider.current?.assets?.some((asset: any) => asset.id === assetId);
+	}, [assetId, portalProvider.current?.assets]);
+
 	/* If a contributor visits a post that they did not create, then disable updates */
 	const currentUser = portalProvider.current?.users?.find(
 		(user: PortalUserType) => user.address === permawebProvider.profile?.id
 	);
 	const submitUnauthorized =
 		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions?.postAutoIndex;
-	console.log(portalProvider.current?.requests);
 	const isCurrentRequest =
 		!!assetId && portalProvider.current?.requests?.some((request: PortalAssetRequestType) => request.id === assetId);
 	const currentRequest =
 		isCurrentRequest &&
 		portalProvider.current?.requests?.find((request: PortalAssetRequestType) => request.id === assetId);
-	console.log('currentRequest', currentRequest);
+	console.log({ currentRequest });
 	const primaryDisabled = submitUnauthorized || currentPost.editor.loading.active || currentPost.editor.submitDisabled;
 	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
 
@@ -208,6 +213,14 @@ export default function ArticleToolbar(props: {
 			if (!requestUnauthorized) {
 				return (
 					<>
+						<Button
+							type={'primary'}
+							label={language?.changes}
+							handlePress={() => props.handleSwitchOriginal(props.viewMode === 'original' ? 'new' : 'original')}
+							icon={props.viewMode === 'original' ? ICONS.close : ICONS.help}
+							iconLeftAlign
+							noFocus
+						/>
 						<Button
 							type={'warning'}
 							label={language?.reject}
@@ -232,7 +245,11 @@ export default function ArticleToolbar(props: {
 						<Button
 							type={'alt1'}
 							label={language?.save}
-							handlePress={props.handleSubmit}
+							handlePress={() =>
+								currentRequest?.status === 'Pending' && !isAssetIdPresentInAssets
+									? props.handleSubmit('Auto')
+									: props.handleSubmit()
+							}
 							active={false}
 							disabled={primaryDisabled || currentRequest?.status !== 'Pending'}
 							tooltip={primaryDisabled ? null : (isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
@@ -241,7 +258,7 @@ export default function ArticleToolbar(props: {
 						{currentRequest?.status && (
 							<Button
 								type={'alt1'}
-								label={currentRequest?.status === 'Pending' ? 'Submit For Review ' : 'Remove From Review'}
+								label={currentRequest?.status === 'Pending' ? language?.submitForReview : language?.markAsPending}
 								handlePress={() =>
 									props.handleStatusUpdate(currentRequest?.status === 'Pending' ? 'Review' : 'Pending')
 								}
@@ -259,7 +276,10 @@ export default function ArticleToolbar(props: {
 			<Button
 				type={'alt1'}
 				label={language?.save}
-				handlePress={props.handleSubmit}
+				handlePress={() =>
+					// contributors need to save using the approve workflow - this will trigger the request approval process
+					portalProvider.permissions?.postAutoIndex ? props.handleSubmit('Auto') : props.handleSubmit()
+				}
 				active={false}
 				disabled={primaryDisabled}
 				tooltip={primaryDisabled ? null : (isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}

@@ -34,7 +34,6 @@ export default function PostEditor() {
 	const dispatch = useDispatch();
 
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
-	console.log({ currentPost });
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
@@ -253,7 +252,7 @@ export default function PostEditor() {
 		}
 	}
 
-	async function handleSubmit() {
+	async function handleSubmit(reviewStatus?: 'Auto') {
 		if (arProvider.wallet && permawebProvider.profile?.id && portalProvider.current?.id) {
 			handleCurrentPostUpdate({ field: 'loading', value: { active: true, message: `${language?.saving}...` } });
 
@@ -299,17 +298,32 @@ export default function PostEditor() {
 				try {
 					/* If user is authorized in the asset then send update directly, otherwise forward it through the portal */
 					let assetContentUpdateId = null;
-					assetContentUpdateId = await permawebProvider.libs.sendMessage({
-						processId: portalProvider.current.id,
-						wallet: arProvider.wallet,
-						action: 'Update-Asset-Through-Zone',
-						tags: [
-							{ name: 'Forward-To', value: assetId },
-							{ name: 'Forward-Action', value: 'Update-Asset' },
-							{ name: 'Exclude-Index', value: excludeFromIndex },
-						],
-						data: { Input: data },
-					});
+					if (reviewStatus === 'Auto') {
+						// directly save if it is not in review mode or from non contributor
+						assetContentUpdateId = await permawebProvider.libs.sendMessage({
+							processId: portalProvider.current.id,
+							wallet: arProvider.wallet,
+							action: 'Run-Action',
+							tags: [
+								{ name: 'Forward-To', value: assetId },
+								{ name: 'Forward-Action', value: 'Update-Asset' },
+								{ name: 'Exclude-Index', value: excludeFromIndex },
+							],
+							data: { Input: data },
+						});
+					} else {
+						assetContentUpdateId = await permawebProvider.libs.sendMessage({
+							processId: portalProvider.current.id,
+							wallet: arProvider.wallet,
+							action: 'Update-Asset-Through-Zone',
+							tags: [
+								{ name: 'Forward-To', value: assetId },
+								{ name: 'Forward-Action', value: 'Update-Asset' },
+								{ name: 'Exclude-Index', value: excludeFromIndex },
+							],
+							data: { Input: data },
+						});
+					}
 
 					if (isStaticPage) {
 						const currentPages = portalProvider.current?.pages || {};
@@ -352,6 +366,7 @@ export default function PostEditor() {
 					portalProvider.refreshCurrentPortal([
 						...(isStaticPage ? [PortalPatchMapEnum.Presentation] : []),
 						PortalPatchMapEnum.Posts,
+						PortalPatchMapEnum.Requests,
 					]);
 
 					// Update original data to reflect the saved state
@@ -464,7 +479,7 @@ export default function PostEditor() {
 
 								console.log(`Asset index update: ${assetIndexUpdateId}`);
 
-								portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Posts);
+								portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Posts, PortalPatchMapEnum.Requests]);
 							}
 						} else {
 							portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Requests);
@@ -518,7 +533,7 @@ export default function PostEditor() {
 										});
 
 										console.log(`Asset index update: ${assetIndexUpdateId}`);
-										portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Posts);
+										portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Posts, PortalPatchMapEnum.Requests]);
 									}
 								}
 							}
