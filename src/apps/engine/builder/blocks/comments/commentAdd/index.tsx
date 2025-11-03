@@ -7,6 +7,8 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
+import ModalPortal from 'engine/components/modalPortal';
+import ProfileEditor from 'engine/components/profileEditor';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 import {
 	$createParagraphNode,
@@ -23,6 +25,7 @@ import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
+import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import EmojiPicker from './emojiPicker';
@@ -44,6 +47,7 @@ function CommentEditorContent(props: any) {
 	} = props;
 	const [editor] = useLexicalComposerContext();
 	const arProvider = useArweaveProvider();
+	const languageProvider = useLanguageProvider();
 	const { profile, libs } = usePermawebProvider();
 	const { portal, portalId } = usePortalProvider();
 	const [canSend, setCanSend] = React.useState(false);
@@ -52,7 +56,8 @@ function CommentEditorContent(props: any) {
 	const [postAsPortal, setPostAsPortal] = React.useState(false);
 	const [showAuthorDropdown, setShowAuthorDropdown] = React.useState(false);
 	const dropdownRef = React.useRef<HTMLDivElement>(null);
-
+	const [showProfileManage, setShowProfileManage] = React.useState(false);
+	const language = languageProvider.object?.[languageProvider.current] ?? null;
 	React.useEffect(() => {
 		if (initialContent && isEditMode) {
 			editor.update(() => {
@@ -107,6 +112,10 @@ function CommentEditorContent(props: any) {
 	}, [editor, canSend]);
 
 	const handleSubmit = async () => {
+		if (!profile?.id) {
+			setShowProfileManage(true);
+			return;
+		}
 		if (!canSend || isSubmitting) return;
 
 		let plainText = '';
@@ -296,8 +305,38 @@ function CommentEditorContent(props: any) {
 					</S.Send>
 				</S.Actions>
 			</S.Editor>
+
 			<OnChangePlugin onChange={handleEditorChange} />
 			<HistoryPlugin />
+			{showProfileManage && (
+				<ModalPortal>
+					<S.ModalOverlay
+						onClick={() => {
+							setShowProfileManage(false);
+						}}
+					>
+						<S.ModalContent
+							role="dialog"
+							aria-modal="true"
+							aria-label="Manage Profile"
+							onClick={(e) => e.stopPropagation()}
+						>
+							<S.ModalHeader>
+								<S.ModalTitle>Create Profile</S.ModalTitle>
+								<S.CloseButton
+									onClick={() => {
+										setShowProfileManage(false);
+									}}
+									aria-label="Close"
+								>
+									×
+								</S.CloseButton>
+							</S.ModalHeader>
+							<ProfileEditor profile={null} handleClose={() => setShowProfileManage(false)} handleUpdate={null} />
+						</S.ModalContent>
+					</S.ModalOverlay>
+				</ModalPortal>
+			)}
 		</>
 	);
 }

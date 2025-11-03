@@ -327,3 +327,53 @@ export const Send = styled.div<{ $active: boolean }>`
 		transform: scale(1.1);
 	}
 `;
+
+export const ModalOverlay = styled.div`
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.55);
+	backdrop-filter: blur(2px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* very high to beat any in-app layers */
+	z-index: 2147483000;
+`;
+
+export const ModalContent = styled.div`
+	background: var(--color-card-background);
+	color: rgba(var(--color-text), 1);
+	border-radius: var(--border-radius);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+	width: min(720px, 92vw);
+	max-height: 90vh;
+	overflow: auto;
+	padding: 16px;
+`;
+
+export const ModalHeader = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+`;
+
+export const ModalTitle = styled.h3`
+	margin: 0;
+	font-size: var(--font-size-h4, 1.25rem);
+	line-height: 1.2;
+`;
+
+export const CloseButton = styled.button`
+	border: none;
+	background: transparent;
+	color: rgba(var(--color-text), 1);
+	font-size: 1.5rem;
+	line-height: 1;
+	cursor: pointer;
+	padding: 4px 6px;
+
+	&:hover {
+		opacity: 0.85;
+	}
+`;
