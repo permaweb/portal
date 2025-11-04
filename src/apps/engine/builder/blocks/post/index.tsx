@@ -45,10 +45,42 @@ export default function Post(props: any) {
 	}
 
 	React.useEffect(() => {
-		if (Name && post && !document.title.includes(post.name)) {
-			// @ts-ignore
-			document.title = `${post.name} - ${Name}`;
-		}
+		if (!post || !Name) return;
+
+		const title = `${post.name} - ${Name}`;
+		const description = post?.metadata.description || 'Read this post on our portal.';
+		const image = post.metadata?.thumbnail ? getTxEndpoint(post.metadata?.thumbnail) : undefined;
+		const url = window.location.href;
+
+		document.title = title;
+
+		const created: HTMLMetaElement[] = [];
+
+		const ensureMeta = (attr: string, key: string, value: string) => {
+			let tag = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+			if (!tag) {
+				tag = document.createElement('meta');
+				tag.setAttribute(attr, key);
+				document.head.appendChild(tag);
+				created.push(tag);
+			}
+			tag.setAttribute('content', value);
+		};
+
+		ensureMeta('property', 'og:title', title);
+		ensureMeta('property', 'og:description', description);
+		if (image) ensureMeta('property', 'og:image', image);
+		ensureMeta('property', 'og:url', url);
+
+		ensureMeta('name', 'twitter:title', title);
+		ensureMeta('name', 'twitter:description', description);
+		if (image) ensureMeta('name', 'twitter:image', image);
+		ensureMeta('name', 'twitter:url', url);
+
+		return () => {
+			// when navigating away, remove the tags we created
+			created.forEach((tag) => tag.remove());
+		};
 	}, [Name, post]);
 
 	React.useEffect(() => {
