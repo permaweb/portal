@@ -89,8 +89,57 @@ function App() {
 	}, [Themes]);
 
 	React.useEffect(() => {
-		if (portalProvider.portal?.Name) document.title = portalProvider.portal.Name;
-	}, [portalProvider.portal?.Name]);
+		const portal = portalProvider.portal;
+		if (!portal?.Name) return;
+
+		const { Name, Logo, Posts } = portal;
+
+		// Title
+		const title = Name;
+		document.title = title;
+
+		// Counts
+		const postCount = Array.isArray(Posts) ? Posts.length : 0;
+		const authorCount = Array.isArray(Posts) ? new Set(Posts.map((p: any) => p?.creator).filter(Boolean)).size : 0;
+
+		const description = `${Name} has ${postCount} ${postCount === 1 ? 'post' : 'posts'} by ${authorCount} ${
+			authorCount === 1 ? 'author' : 'authors'
+		}`;
+
+		// OG image from Logo
+		const image = Logo ? (checkValidAddress(Logo) ? getTxEndpoint(Logo) : Logo) : undefined;
+
+		const url = window.location.href;
+
+		// Track only tags we create this run, so we can clean them up
+		const created: HTMLMetaElement[] = [];
+
+		const ensureMeta = (attr: 'name' | 'property', key: string, value: string) => {
+			let tag = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+			if (!tag) {
+				tag = document.createElement('meta');
+				tag.setAttribute(attr, key);
+				document.head.appendChild(tag);
+				created.push(tag);
+			}
+			tag.setAttribute('content', value);
+		};
+
+		// Open Graph
+		ensureMeta('property', 'og:title', title);
+		ensureMeta('property', 'og:description', description);
+		ensureMeta('property', 'og:url', url);
+		if (image) ensureMeta('property', 'og:image', image);
+
+		ensureMeta('name', 'twitter:title', title);
+		ensureMeta('name', 'twitter:description', description);
+		if (image) ensureMeta('name', 'twitter:image', image);
+
+		return () => {
+			// remove only the tags we created (don’t touch global/base tags)
+			created.forEach((tag) => tag.remove());
+		};
+	}, [portalProvider.portal]);
 
 	React.useEffect(() => {
 		const txIcon = portalProvider.portal?.icon;
