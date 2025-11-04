@@ -7,7 +7,6 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
-import ModalPortal from 'engine/components/modalPortal';
 import ProfileEditor from 'engine/components/profileEditor';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 import {
@@ -21,6 +20,7 @@ import {
 	TextNode,
 } from 'lexical';
 
+import { Portal } from 'components/atoms/Portal';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
@@ -309,7 +309,7 @@ function CommentEditorContent(props: any) {
 			<OnChangePlugin onChange={handleEditorChange} />
 			<HistoryPlugin />
 			{showProfileManage && (
-				<ModalPortal>
+				<Portal>
 					<S.ModalOverlay
 						onClick={() => {
 							setShowProfileManage(false);
@@ -335,7 +335,7 @@ function CommentEditorContent(props: any) {
 							<ProfileEditor profile={null} handleClose={() => setShowProfileManage(false)} handleUpdate={null} />
 						</S.ModalContent>
 					</S.ModalOverlay>
-				</ModalPortal>
+				</Portal>
 			)}
 		</>
 	);
