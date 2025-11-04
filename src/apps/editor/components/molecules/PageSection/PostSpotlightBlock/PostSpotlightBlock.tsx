@@ -36,11 +36,7 @@ export default function PostSpotlightBlock(_props: {
 		<S.Wrapper>
 			<S.PostWrapper>
 				<S.PostContent>
-					{postThumbnail && (
-						<S.PostImage>
-							<img src={getTxEndpoint(postThumbnail)} alt={postTitle} />
-						</S.PostImage>
-					)}
+					<S.PostImage>{postThumbnail && <img src={getTxEndpoint(postThumbnail)} alt={postTitle} />}</S.PostImage>
 					<S.PostInfo>
 						<p>{postCategory}</p>
 						<h1>
