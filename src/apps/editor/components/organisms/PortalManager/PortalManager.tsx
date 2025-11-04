@@ -21,7 +21,7 @@ import * as S from './styles';
 // TODO: Log user in directly if portal id = profile id and is the only portal (Done)
 // TODO: Add invites to portal view (Done)
 // TODO: Keep portal / profile data in sync if theyre equal
-// TODO: Profile / portal patch map - Update patch map in config to use profile meta firleds, add patch map update if not equal to current map (Add patch map state to overview key to compare)
+// TODO: Profile / portal patch map - Update patch map in config to use profile meta fields, add patch map update if not equal to current map (Add patch map state to overview key to compare)
 export default function PortalManager(props: {
 	portal: PortalDetailType | null;
 	handleClose: () => void;

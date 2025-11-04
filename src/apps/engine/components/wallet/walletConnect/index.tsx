@@ -86,7 +86,6 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
-
 	React.useEffect(() => {
 		if (auth) {
 			const status = auth.authStatus;
@@ -174,7 +173,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 						<ReactSVG src={ICONS.comments} />
 						{language.myComments}
 					</S.NavigationEntry>
-					{auth.authType !== 'NATIVE_WALLET' && (
+					{auth?.authType !== 'NATIVE_WALLET' && (
 						<S.NavigationEntry onClick={() => window.wanderInstance.open()}>
 							<ReactSVG src={ICONS.wallet} />
 							{language.myWallet}
