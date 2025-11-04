@@ -1,4 +1,4 @@
-import { ICONS_SOCIAL, ICONS } from './config';
+import { ICONS, ICONS_SOCIAL } from './config';
 
 export class AssetPreloader {
 	private preloadedAssets = new Set<string>();
@@ -81,7 +81,7 @@ export class AssetPreloader {
 	async preloadAllAssets(): Promise<void> {
 		const allAssets = [...Object.values(ICONS_SOCIAL), ...Object.values(ICONS)];
 
-		const preloadPromises = allAssets.map((url) => this.preloadAsset(url));
+		const preloadPromises = allAssets.map((url: any) => this.preloadAsset(url));
 
 		try {
 			await Promise.allSettled(preloadPromises);

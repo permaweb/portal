@@ -39,7 +39,6 @@ export const DHeader = styled.div`
 export const DElements = styled.div`
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: 10px;
 

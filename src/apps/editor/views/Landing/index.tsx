@@ -14,7 +14,7 @@ import { LanguageSelect } from 'components/molecules/LanguageSelect';
 import { ICONS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalHeaderType } from 'helpers/types';
-import { checkValidAddress, formatAddress } from 'helpers/utils';
+import { checkValidAddress, formatAddress, isOnlyPortal } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -62,6 +62,12 @@ export default function Landing() {
 		return () => window.removeEventListener('scroll', handleScroll);
 	}, [theme.colors.border.primary]);
 
+	/* Log in directly if the user's profile is the portal itself */
+	React.useEffect(() => {
+		if (isOnlyPortal(portalProvider.portals, permawebProvider.profile?.id))
+			navigate(`${URLS.base}${portalProvider.portals[0].id}`);
+	}, [portalProvider.portals, permawebProvider.profile?.id]);
+
 	React.useEffect(() => {
 		if (pendingPortalId && permawebProvider.profile?.portals) {
 			const hasJoinedPortal = permawebProvider.profile.portals.find(
@@ -95,9 +101,9 @@ export default function Landing() {
 				permawebProvider.refreshProfile();
 			} catch (e: any) {
 				console.error(e);
-				setLoading(false);
 				setPendingPortalId(null);
 			}
+			setLoading(false);
 		}
 	}
 
@@ -109,7 +115,7 @@ export default function Landing() {
 		} else if (!permawebProvider.profile) {
 			header = `${language?.gettingInfo}...`;
 		} else if (!permawebProvider.profile.id) {
-			header = language?.createProfile;
+			header = language?.createFirstPortal;
 		} else {
 			header = `${language?.welcome}, ${
 				permawebProvider.profile.username ?? formatAddress(arProvider.walletAddress, false)
@@ -132,16 +138,10 @@ export default function Landing() {
 		let icon: string = null;
 		let action: () => void | null = null;
 
-		if (!arProvider.wallet || (permawebProvider.profile && !permawebProvider.profile.id)) {
+		if (!arProvider.wallet) {
 			disabled = false;
 			label = language?.connect || 'Connect Wallet';
 			icon = ICONS.wallet;
-
-			if (permawebProvider.profile && !permawebProvider.profile.id) {
-				label = language?.createProfile || 'Create Profile';
-				icon = ICONS.user;
-				action = () => setShowProfileManager(true);
-			}
 
 			content = (
 				<S.PortalsHeaderWrapper>
@@ -241,7 +241,7 @@ export default function Landing() {
 				content = (
 					<>
 						<S.PortalsListWrapper className={'scroll-wrapper'}>
-							{portalProvider.invites.map((portal: any) => {
+							{portalProvider.invites.map((portal: PortalHeaderType) => {
 								return (
 									<button key={portal.id} onClick={() => joinPortal(portal.id)}>
 										{portal.icon && checkValidAddress(portal.icon) ? (

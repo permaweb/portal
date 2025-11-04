@@ -70,7 +70,7 @@ export const InputActionsMessage = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
-	margin: 5px 0 15px 0;
+	margin: 5px 0 0 0;
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};

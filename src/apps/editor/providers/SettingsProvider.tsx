@@ -52,9 +52,9 @@ const defaultSettings: Settings = {
 	sidebarOpen: true,
 	isDesktop: true,
 	windowSize: { width: window.innerWidth, height: window.innerHeight },
-	showCategoryAction: true,
-	showTopicAction: true,
-	showLinkAction: true,
+	showCategoryAction: false,
+	showTopicAction: false,
+	showLinkAction: false,
 	navWidth: parseInt(STYLING.dimensions.nav.width),
 };
 
