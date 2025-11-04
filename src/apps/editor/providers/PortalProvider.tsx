@@ -6,7 +6,7 @@ import { CurrentZoneVersion } from '@permaweb/libs';
 import { PortalManager } from 'editor/components/organisms/PortalManager';
 
 import { Panel } from 'components/atoms/Panel';
-import { AO_NODE } from 'helpers/config';
+import { AO_NODE, PORTAL_PATCH_MAP } from 'helpers/config';
 import {
 	PortalDetailType,
 	PortalHeaderType,
@@ -21,6 +21,7 @@ import {
 	getCachedProfile,
 	getPortalAssets,
 	getPortalUsers,
+	isEqual,
 } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -73,6 +74,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const { addNotification } = useNotifications();
 
 	const authoritiesRef = React.useRef(false);
+	const patchMapRef = React.useRef(false);
 	const portalsRequestRef = React.useRef(false);
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
@@ -120,17 +122,20 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 								const parseField = (key: PortalPatchMapEnum) => parseProcessResponseValue(response[key]);
 
-								const overview = parseField(PortalPatchMapEnum.Overview);
-								const users = parseField(PortalPatchMapEnum.Users);
-								const transfers = parseField(PortalPatchMapEnum.Transfers);
+								let overview: any = {};
+								if (response?.overview) overview = parseField(PortalPatchMapEnum.Overview);
 
-								console.log(overview, users, transfers);
+								let users: any = {};
+								if (response?.users) users = parseField(PortalPatchMapEnum.Users);
+
+								let transfers: any = {};
+								if (response?.transfers) transfers = parseField(PortalPatchMapEnum.Transfers);
 
 								return {
 									...portal,
 									name: overview.name ?? overview.store?.name ?? 'None',
-									logo: overview.logo ?? overview.store?.logo ?? 'None',
-									icon: overview.icon ?? overview.store?.icon ?? 'None',
+									logo: overview.banner ?? overview.logo ?? overview.store?.logo ?? 'None',
+									icon: overview.thumbnail ?? overview.icon ?? overview.store?.icon ?? 'None',
 									users: users.users ?? getPortalUsers(users.roles),
 									transfers: transfers.transfers ?? [],
 								};
@@ -224,6 +229,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			const posts = parseField(PortalPatchMapEnum.Posts);
 			const requests = parseField(PortalPatchMapEnum.Requests);
 
+			/* Check for node updates and add the new node address as an authority */
 			if (
 				overview?.authorities &&
 				!overview?.authorities.includes(AO_NODE.authority) &&
@@ -237,6 +243,17 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				});
 			}
 
+			/* Check for updates in the portal patch map */
+			if (
+				(!overview?.patchMap || !isEqual(overview?.patchMap, PORTAL_PATCH_MAP)) &&
+				permawebProvider.libs?.updateZonePatchMap &&
+				!patchMapRef.current
+			) {
+				patchMapRef.current = true;
+				const t = await permawebProvider.libs.updateZonePatchMap({ ...PORTAL_PATCH_MAP }, currentId);
+				console.log(t);
+			}
+
 			setUpdateAvailable(
 				overview?.version !== CurrentZoneVersion && arProvider.wallet && arProvider.walletAddress === overview?.owner
 			);
@@ -244,8 +261,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			const portalState: PortalDetailType = {
 				id: currentId,
 				name: overview?.name ?? current?.name ?? null,
-				logo: overview?.logo ?? current?.logo ?? null,
-				icon: overview?.icon ?? current?.icon ?? null,
+				logo: overview?.banner ?? overview?.logo ?? current?.logo ?? null,
+				icon: overview?.thumbnail ?? overview?.icon ?? current?.icon ?? null,
 				wallpaper: overview?.wallpaper ?? current?.wallpaper ?? null,
 				owner: overview?.owner ?? current?.owner ?? null,
 				moderation: overview?.moderation ?? current?.moderation ?? null,

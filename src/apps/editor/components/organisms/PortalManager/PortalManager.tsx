@@ -18,10 +18,6 @@ import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
 
-// TODO: Log user in directly if portal id = profile id and is the only portal (Done)
-// TODO: Add invites to portal view (Done)
-// TODO: Keep portal / profile data in sync if theyre equal
-// TODO: Profile / portal patch map - Update patch map in config to use profile meta fields, add patch map update if not equal to current map (Add patch map state to overview key to compare)
 export default function PortalManager(props: {
 	portal: PortalDetailType | null;
 	handleClose: () => void;
@@ -66,22 +62,22 @@ export default function PortalManager(props: {
 
 				if (logoId && checkValidAddress(logoId)) {
 					try {
-						data.Logo = await permawebProvider.libs.resolveTransaction(logoId);
+						data.Banner = await permawebProvider.libs.resolveTransaction(logoId);
 					} catch (e: any) {
 						console.error(`Failed to resolve logo: ${e.message}`);
 					}
 				} else {
-					data.Logo = 'None';
+					data.Banner = 'None';
 				}
 
 				if (iconId && checkValidAddress(iconId)) {
 					try {
-						data.Icon = await permawebProvider.libs.resolveTransaction(iconId);
+						data.Thumbnail = await permawebProvider.libs.resolveTransaction(iconId);
 					} catch (e: any) {
 						console.error(`Failed to resolve icon: ${e.message}`);
 					}
 				} else {
-					data.Icon = 'None';
+					data.Thumbnail = 'None';
 				}
 
 				if (props.portal?.id && portalProvider.permissions?.updatePortalMeta && permawebProvider.profile?.id) {
@@ -90,8 +86,8 @@ export default function PortalManager(props: {
 						.map((portal: PortalHeaderType) => ({
 							Id: portal.id,
 							Name: portal.name,
-							Logo: portal.logo,
-							Icon: portal.icon,
+							Banner: portal.banner ?? portal.logo,
+							Thumbnail: portal.thumbnail ?? portal.icon,
 						}));
 					portalsUpdateData.push({ Id: props.portal.id, ...data });
 
@@ -127,8 +123,8 @@ export default function PortalManager(props: {
 						tags.push(getPatchMapTag(key, PORTAL_PATCH_MAP[key]));
 					}
 
-					if (data.Logo) tags.push(getBootTag('Logo', data.Logo));
-					if (data.Icon) tags.push(getBootTag('Icon', data.Icon));
+					if (data.Banner) tags.push(getBootTag('Banner', data.Banner));
+					if (data.Thumbnail) tags.push(getBootTag('Thumbnail', data.Thumbnail));
 
 					/* Check if the user already has a profile to write the portal data in to, 
 						Or else treat this portal as the user profile */
@@ -141,9 +137,6 @@ export default function PortalManager(props: {
 						tags.push(getBootTag('Username', data.Name));
 						tags.push(getBootTag('DisplayName', data.Name));
 						tags.push(getBootTag('Description', data.Name));
-
-						if (data.Logo) tags.push(getBootTag('Banner', data.Logo));
-						if (data.Icon) tags.push(getBootTag('Thumbnail', data.Icon));
 					}
 
 					const portalId = await permawebProvider.libs.createZone(
@@ -209,6 +202,7 @@ export default function PortalManager(props: {
 					response = `${language?.portalCreated}!`;
 
 					navigate(URLS.portalBase(portalId));
+					window.location.reload();
 				}
 
 				if (profileUpdateId) console.log(`Profile update: ${profileUpdateId}`);
