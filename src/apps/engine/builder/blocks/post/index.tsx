@@ -9,6 +9,15 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
+import {
+	buildHtmlDoc,
+	contentToInnerHtml,
+	contentToMarkdown,
+	downloadBlob,
+	downloadPdfFromHtml,
+	escapeHtml,
+	htmlDocToPlainText,
+} from 'helpers/export-options';
 import { checkValidAddress } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -43,6 +52,94 @@ export default function Post(props: any) {
 			postId: post?.id,
 		});
 	}
+
+	const safe = (fn: () => void) => () => {
+		if (!exportDisabled) fn();
+	};
+
+	menuEntries.push(
+		{
+			icon: ICONS.tools, // swap to your real icon
+			label: 'Download as PDF',
+			onClick: safe(() => handleDownload('pdf')),
+		},
+		{
+			icon: ICONS.tools,
+			label: 'Download as Word (.doc)',
+			onClick: safe(() => handleDownload('word')),
+		},
+		{
+			icon: ICONS.tools,
+			label: 'Download as Markdown (.md)',
+			onClick: safe(() => handleDownload('markdown')),
+		},
+		{
+			icon: ICONS.tools,
+			label: 'Download as Text (.txt)',
+			onClick: safe(() => handleDownload('text')),
+		},
+		{
+			icon: ICONS.tools,
+			label: 'Download as HTML (.html)',
+			onClick: safe(() => handleDownload('html')),
+		}
+	);
+
+	const titleForExport = post?.name ? String(post.name) : 'post';
+	const exportDisabled = isLoadingPost || isLoadingContent || !content || !Array.isArray(content);
+
+	const handleDownload = async (fmt: 'html' | 'markdown' | 'text' | 'word' | 'pdf') => {
+		if (exportDisabled) return;
+
+		const author = !isLoadingProfile ? profile?.displayName || '' : '';
+		const dt = post?.dateCreated ? new Date(Number(post.dateCreated)) : null;
+		const dateStr = dt ? dt.toLocaleString() : '';
+		const tags: string[] = post?.metadata?.topics || [];
+
+		const headerHtml = `
+    <h1>${escapeHtml(post?.name || '')}</h1>
+    <div class="meta">
+      ${author ? escapeHtml(author) : ''} ${dateStr ? ` • ${escapeHtml(dateStr)}` : ''}
+    </div>
+    ${post?.metadata?.description ? `<p>${escapeHtml(post.metadata.description)}</p>` : ''}
+    ${
+			tags.length
+				? `<div class="tags">${tags.map((t) => `<span class="tag">${escapeHtml(String(t))}</span>`).join(' ')}</div>`
+				: ''
+		}
+  `;
+
+		const bodyInner = headerHtml + '\n' + contentToInnerHtml(content);
+		const fullHtml = buildHtmlDoc(`${post?.name || 'Post'} - ${portal?.Name || ''}`, bodyInner);
+
+		switch (fmt) {
+			case 'html':
+				downloadBlob(`${titleForExport}.html`, 'text/html;charset=utf-8', fullHtml);
+				break;
+			case 'markdown': {
+				const md =
+					`# ${post?.name || ''}\n\n` +
+					(post?.metadata?.description ? `${post.metadata.description}\n\n` : '') +
+					(tags.length ? `Tags: ${tags.join(', ')}\n\n` : '') +
+					contentToMarkdown(content);
+				downloadBlob(`${titleForExport}.md`, 'text/markdown;charset=utf-8', md);
+				break;
+			}
+			case 'text': {
+				const text = htmlDocToPlainText(fullHtml);
+				downloadBlob(`${titleForExport}.txt`, 'text/plain;charset=utf-8', text);
+				break;
+			}
+			case 'word': {
+				downloadBlob(`${titleForExport}.doc`, 'application/msword;charset=utf-8', fullHtml);
+				break;
+			}
+			case 'pdf': {
+				await downloadPdfFromHtml(fullHtml, `${titleForExport}.pdf`);
+				break;
+			}
+		}
+	};
 
 	React.useEffect(() => {
 		if (!post || !Name) return;
@@ -100,7 +197,7 @@ export default function Post(props: any) {
 				});
 		}
 	}, [post]);
-
+	console.log('post content', content);
 	return (
 		<S.Wrapper>
 			<S.Post>
