@@ -53,35 +53,35 @@ export default function Post(props: any) {
 		});
 	}
 
+	const titleForExport = post?.name ? String(post.name) : 'post';
+	const exportDisabled = isLoadingPost || isLoadingContent || !content || !Array.isArray(content);
+
 	const safe = (fn: () => void) => () => {
 		if (!exportDisabled) fn();
 	};
 
 	menuEntries.push(
 		{
-			icon: ICONS.tools,
-			label: 'Download as PDF',
+			icon: null,
+			label: 'Download .pdf',
 			onClick: safe(() => handleDownload('pdf')),
 		},
 		{
-			icon: ICONS.tools,
-			label: 'Download as Markdown (.md)',
+			icon: null,
+			label: 'Download .md',
 			onClick: safe(() => handleDownload('markdown')),
 		},
 		{
-			icon: ICONS.tools,
-			label: 'Download as Text (.txt)',
+			icon: null,
+			label: 'Download .txt',
 			onClick: safe(() => handleDownload('text')),
 		},
 		{
-			icon: ICONS.tools,
-			label: 'Download as HTML (.html)',
+			icon: null,
+			label: 'Download .html',
 			onClick: safe(() => handleDownload('html')),
 		}
 	);
-
-	const titleForExport = post?.name ? String(post.name) : 'post';
-	const exportDisabled = isLoadingPost || isLoadingContent || !content || !Array.isArray(content);
 
 	const handleDownload = async (fmt: 'html' | 'markdown' | 'text' | 'word' | 'pdf') => {
 		if (exportDisabled) return;
@@ -196,7 +196,6 @@ export default function Post(props: any) {
 				});
 		}
 	}, [post]);
-	console.log('post content', content);
 	return (
 		<S.Wrapper>
 			<S.Post>
@@ -212,7 +211,6 @@ export default function Post(props: any) {
 							</S.DraftIndicator>
 						)}
 					</S.TitleWrapper>
-
 					{post?.metadata.description && <S.Description>{post?.metadata.description}</S.Description>}
 					<S.Meta>
 						<img

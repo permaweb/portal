@@ -179,8 +179,22 @@ export function contentToMarkdown(content: any[]): string {
  */
 export function htmlDocToPlainText(html: string) {
 	const doc = new DOMParser().parseFromString(html || '', 'text/html');
-
 	doc.querySelectorAll('style, script, noscript, head, meta, link').forEach((n) => n.remove());
+
+	// handle ordered and unordered lists
+	doc.querySelectorAll('ol').forEach((ol) => {
+		let index = 1;
+		ol.querySelectorAll('li').forEach((li) => {
+			const prefix = `${index}. `;
+			li.insertAdjacentText('afterbegin', prefix);
+			index++;
+		});
+	});
+	doc.querySelectorAll('ul').forEach((ul) => {
+		ul.querySelectorAll('li').forEach((li) => {
+			li.insertAdjacentText('afterbegin', '• ');
+		});
+	});
 
 	const blockSelectors = [
 		'h1',
@@ -206,6 +220,7 @@ export function htmlDocToPlainText(html: string) {
 		'nav',
 		'hr',
 	].join(',');
+
 	doc.querySelectorAll(blockSelectors).forEach((el) => {
 		el.insertAdjacentText('beforebegin', '\n');
 		el.insertAdjacentText('afterend', '\n');
