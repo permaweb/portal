@@ -1,5 +1,3 @@
-import html2pdf from 'html2pdf.js';
-
 /**
  * Download arbitrary data as a file.
  */
@@ -221,29 +219,4 @@ export function htmlDocToPlainText(html: string) {
 		.trim();
 
 	return text;
-}
-
-export async function downloadPdfFromHtml(html: string, filename: string) {
-	try {
-		await html2pdf()
-			.from(html)
-			.set({
-				filename,
-				margin: 10,
-				image: { type: 'jpeg', quality: 0.98 },
-				html2canvas: { scale: 2, useCORS: true },
-				jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-			})
-			.save();
-	} catch {
-		// Fallback: open printable window and let user Save as PDF
-		const w = window.open('', '_blank');
-		if (w) {
-			w.document.open();
-			w.document.write(html.replace('</body>', '<script>window.onload=()=>window.print()</script></body>'));
-			w.document.close();
-		} else {
-			alert('Popup blocked. Enable popups to print/save PDF, or install html2pdf.js for direct download.');
-		}
-	}
 }

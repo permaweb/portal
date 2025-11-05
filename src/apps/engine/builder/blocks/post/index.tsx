@@ -15,7 +15,6 @@ import {
 	contentToInnerHtml,
 	contentToMarkdown,
 	downloadBlob,
-	downloadPdfFromHtml,
 	escapeHtml,
 	htmlDocToPlainText,
 } from 'helpers/export-options';
@@ -60,14 +59,9 @@ export default function Post(props: any) {
 
 	menuEntries.push(
 		{
-			icon: ICONS.tools, // swap to your real icon
+			icon: ICONS.tools,
 			label: 'Download as PDF',
 			onClick: safe(() => handleDownload('pdf')),
-		},
-		{
-			icon: ICONS.tools,
-			label: 'Download as Word (.doc)',
-			onClick: safe(() => handleDownload('word')),
 		},
 		{
 			icon: ICONS.tools,
@@ -207,16 +201,18 @@ export default function Post(props: any) {
 		<S.Wrapper>
 			<S.Post>
 				<ContextMenu entries={menuEntries} />
-				{post?.metadata?.status === 'draft' && (
-					<S.DraftIndicator>
-						<S.DraftDot />
-						Draft
-					</S.DraftIndicator>
-				)}
+
 				<div ref={targetRef}>
 					<S.TitleWrapper>
 						<h1>{isLoadingPost ? <Placeholder width="180" /> : post?.name}</h1>
+						{post?.metadata?.status === 'draft' && (
+							<S.DraftIndicator>
+								<S.DraftDot />
+								Draft
+							</S.DraftIndicator>
+						)}
 					</S.TitleWrapper>
+
 					{post?.metadata.description && <S.Description>{post?.metadata.description}</S.Description>}
 					<S.Meta>
 						<img
