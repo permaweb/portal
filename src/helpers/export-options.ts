@@ -1,5 +1,8 @@
 import html2pdf from 'html2pdf.js';
 
+/**
+ * Download arbitrary data as a file.
+ */
 export function downloadBlob(filename: string, mime: string, data: string | Uint8Array) {
 	const blob = new Blob([data], { type: mime });
 	const url = URL.createObjectURL(blob);
@@ -12,25 +15,31 @@ export function downloadBlob(filename: string, mime: string, data: string | Uint
 	URL.revokeObjectURL(url);
 }
 
-// Build a full HTML document around your post
+/**
+ * Build a complete HTML document string around a provided inner HTML.
+ * Minimal styles for readable export.
+ */
 export function buildHtmlDoc(title: string, bodyInnerHtml: string) {
 	return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>${title}</title>
+<title>${escapeHtml(title)}</title>
 <style>
   body { font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; line-height:1.6; padding:24px; }
-  img, video { max-width:100%; height:auto; }
-  h1,h2,h3,h4,h5,h6 { margin: 1.2em 0 .4em; }
+  img, video { max-width:100%; height:auto; display:block; }
+  h1,h2,h3,h4,h5,h6 { margin: 1.2em 0 .4em; line-height:1.25; }
   p,blockquote,ul,ol,code,pre { margin: .6em 0; }
+  ul, ol { padding-left: 1.25rem; }
   blockquote { border-left: 4px solid #ddd; padding-left: 12px; color: #555; }
   .meta { color:#666; font-size: 0.9rem; margin-bottom: 12px; }
   .tags { margin-top: 8px; }
   .tag { display:inline-block; padding:2px 8px; border:1px solid #ddd; border-radius:999px; font-size:.8rem; margin-right:6px; }
   .divider-solid { border-top: 2px solid #eee; margin: 16px 0; }
   .divider-dashed { border-top: 2px dashed #ddd; margin: 16px 0; }
+  pre, code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  pre { background:#fafafa; border:1px solid #eee; border-radius:6px; padding:12px; overflow:auto; }
 </style>
 </head>
 <body>
@@ -38,6 +47,9 @@ ${bodyInnerHtml}
 </body></html>`;
 }
 
+/**
+ * Convert your block-array into inner HTML (no outer html/head).
+ */
 export function contentToInnerHtml(content: any[]): string {
 	return content
 		.map((entry: any) => {
@@ -55,10 +67,6 @@ export function contentToInnerHtml(content: any[]): string {
 					return `<h5>${c}</h5>`;
 				case 'header-6':
 					return `<h6>${c}</h6>`;
-				case 'image':
-					return `<div>${c}</div>`;
-				case 'video':
-					return `<div>${c}</div>`;
 				case 'paragraph':
 					return `<p>${c}</p>`;
 				case 'quote':
@@ -69,6 +77,10 @@ export function contentToInnerHtml(content: any[]): string {
 					return `<ul>${c}</ul>`;
 				case 'ordered-list':
 					return `<ol>${c}</ol>`;
+				case 'image':
+					return `<div>${c}</div>`;
+				case 'video':
+					return `<div>${c}</div>`;
 				case 'divider-solid':
 					return `<div class="divider-solid"></div>`;
 				case 'divider-dashed':
@@ -80,15 +92,20 @@ export function contentToInnerHtml(content: any[]): string {
 		.join('');
 }
 
+/**
+ * Escape plain text into HTML.
+ */
 export function escapeHtml(s: string) {
 	return s.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]!));
 }
 
-// Convert to Markdown (lightweight mapping)
+/**
+ * Lightweight HTML(ish) blocks -> Markdown.
+ */
 export function contentToMarkdown(content: any[]): string {
 	const htmlToText = (html: string) => {
 		const div = document.createElement('div');
-		div.innerHTML = html;
+		div.innerHTML = html || '';
 		return (div.textContent || div.innerText || '').trim();
 	};
 
@@ -118,7 +135,6 @@ export function contentToMarkdown(content: any[]): string {
 				case 'code':
 					return '```\n' + text + '\n```';
 				case 'unordered-list': {
-					// assume entry.content contains <li> items; extract and prefix with "- "
 					const div = document.createElement('div');
 					div.innerHTML = entry.content || '';
 					const items = Array.from(div.querySelectorAll('li')).map((li) => `- ${li.textContent?.trim() || ''}`);
@@ -148,7 +164,7 @@ export function contentToMarkdown(content: any[]): string {
 				}
 				case 'divider-solid':
 				case 'divider-dashed':
-					return '\n---\n';
+					return '---';
 				default:
 					return '';
 			}
@@ -157,29 +173,70 @@ export function contentToMarkdown(content: any[]): string {
 		.join('\n\n');
 }
 
+/**
+ * HTML -> Plain text with clean structure:
+ * - strips style/script/head/link/meta/noscript
+ * - inserts newlines around block elements
+ * - collapses whitespace
+ */
 export function htmlDocToPlainText(html: string) {
-	const div = document.createElement('div');
-	div.innerHTML = html;
-	return (div.textContent || div.innerText || '').trim();
+	const doc = new DOMParser().parseFromString(html || '', 'text/html');
+
+	doc.querySelectorAll('style, script, noscript, head, meta, link').forEach((n) => n.remove());
+
+	const blockSelectors = [
+		'h1',
+		'h2',
+		'h3',
+		'h4',
+		'h5',
+		'h6',
+		'p',
+		'blockquote',
+		'pre',
+		'code',
+		'ul',
+		'ol',
+		'li',
+		'div',
+		'section',
+		'article',
+		'header',
+		'footer',
+		'main',
+		'aside',
+		'nav',
+		'hr',
+	].join(',');
+	doc.querySelectorAll(blockSelectors).forEach((el) => {
+		el.insertAdjacentText('beforebegin', '\n');
+		el.insertAdjacentText('afterend', '\n');
+	});
+
+	let text = doc.body.textContent || '';
+	text = text
+		.replace(/\r/g, '')
+		.replace(/\n{3,}/g, '\n\n')
+		.replace(/[ \t]+\n/g, '\n')
+		.trim();
+
+	return text;
 }
 
-// Try PDF via html2pdf.js if available; else open print
 export async function downloadPdfFromHtml(html: string, filename: string) {
 	try {
-		const wrapper = document.createElement('div');
-		wrapper.innerHTML = html;
 		await html2pdf()
-			.from(wrapper)
+			.from(html)
 			.set({
 				filename,
 				margin: 10,
 				image: { type: 'jpeg', quality: 0.98 },
-				html2canvas: { scale: 2 },
+				html2canvas: { scale: 2, useCORS: true },
 				jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
 			})
 			.save();
 	} catch {
-		// fallback: open printable window and let user Save as PDF
+		// Fallback: open printable window and let user Save as PDF
 		const w = window.open('', '_blank');
 		if (w) {
 			w.document.open();

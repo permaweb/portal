@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { usePDF } from 'react-to-pdf';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 import Placeholder from 'engine/components/placeholder';
 import Tag from 'engine/components/tag';
@@ -35,7 +36,7 @@ export default function Post(props: any) {
 	const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || '');
 	const [content, setContent] = React.useState<any>(null);
 	const [isLoadingContent, setIsLoadingContent] = React.useState(false);
-
+	const { toPDF, targetRef } = usePDF({ filename: post?.name ? `${post.name}.pdf` : 'post.pdf' });
 	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
 
 	React.useEffect(() => {
@@ -135,7 +136,11 @@ export default function Post(props: any) {
 				break;
 			}
 			case 'pdf': {
-				await downloadPdfFromHtml(fullHtml, `${titleForExport}.pdf`);
+				toPDF({
+					page: { format: 'a4', margin: 30 },
+					canvas: { useCORS: true },
+					filename: `${titleForExport}.pdf`,
+				});
 				break;
 			}
 		}
@@ -202,91 +207,93 @@ export default function Post(props: any) {
 		<S.Wrapper>
 			<S.Post>
 				<ContextMenu entries={menuEntries} />
-				<S.TitleWrapper>
-					<h1>{isLoadingPost ? <Placeholder width="180" /> : post?.name}</h1>
-					{post?.metadata?.status === 'draft' && (
-						<S.DraftIndicator>
-							<S.DraftDot />
-							Draft
-						</S.DraftIndicator>
-					)}
-				</S.TitleWrapper>
-				{post?.metadata.description && <S.Description>{post?.metadata.description}</S.Description>}
-				<S.Meta>
-					<img
-						className="loadingAvatar"
-						onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-						src={
-							!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
-								? getTxEndpoint(profile.thumbnail)
-								: ICONS.user
-						}
-					/>
-					<span>{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}</span>&nbsp;
-					<span>
-						• {isLoadingPost ? <Placeholder width="40" /> : new Date(Number(post?.dateCreated)).toLocaleDateString()}{' '}
-						{isLoadingPost ? (
-							<Placeholder width="30" />
-						) : (
-							new Date(Number(post?.dateCreated)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-						)}
-					</span>
-				</S.Meta>
-				{!isLoadingPost && post?.metadata?.thumbnail && (
-					<S.Thumbnail
-						className="loadingThumbnail"
-						onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
-						src={!isLoadingPost && post?.metadata?.thumbnail ? getTxEndpoint(post.metadata.thumbnail) : ''}
-					/>
+				{post?.metadata?.status === 'draft' && (
+					<S.DraftIndicator>
+						<S.DraftDot />
+						Draft
+					</S.DraftIndicator>
 				)}
-				<S.Tags>
-					{post &&
-						post?.metadata?.topics &&
-						post?.metadata?.topics.map((topic: any, index: number) => {
-							return <Tag key={index} tag={topic} />;
+				<div ref={targetRef}>
+					<S.TitleWrapper>
+						<h1>{isLoadingPost ? <Placeholder width="180" /> : post?.name}</h1>
+					</S.TitleWrapper>
+					{post?.metadata.description && <S.Description>{post?.metadata.description}</S.Description>}
+					<S.Meta>
+						<img
+							className="loadingAvatar"
+							onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
+							src={
+								!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
+									? getTxEndpoint(profile.thumbnail)
+									: ICONS.user
+							}
+						/>
+						<span>{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}</span>&nbsp;
+						<span>
+							• {isLoadingPost ? <Placeholder width="40" /> : new Date(Number(post?.dateCreated)).toLocaleDateString()}{' '}
+							{isLoadingPost ? (
+								<Placeholder width="30" />
+							) : (
+								new Date(Number(post?.dateCreated)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+							)}
+						</span>
+					</S.Meta>
+					{!isLoadingPost && post?.metadata?.thumbnail && (
+						<S.Thumbnail
+							className="loadingThumbnail"
+							onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
+							src={!isLoadingPost && post?.metadata?.thumbnail ? getTxEndpoint(post.metadata.thumbnail) : ''}
+						/>
+					)}
+					<S.Tags>
+						{post &&
+							post?.metadata?.topics &&
+							post?.metadata?.topics.map((topic: any, index: number) => {
+								return <Tag key={index} tag={topic} />;
+							})}
+					</S.Tags>
+					{isLoadingContent && <p>Loading content...</p>}
+					{!isLoadingPost &&
+						!isLoadingContent &&
+						content &&
+						Array.isArray(content) &&
+						content.map((entry) => {
+							switch (entry.type) {
+								case 'header-1':
+									return <h1 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'header-2':
+									return <h2 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'header-3':
+									return <h3 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'header-4':
+									return <h4 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'header-5':
+									return <h5 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'header-6':
+									return <h6 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'image':
+									return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'video':
+									return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'paragraph':
+									return <p key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'quote':
+									return <blockquote key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'code':
+									return <code key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'unordered-list':
+									return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'ordered-list':
+									return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'divider-solid':
+									return <div key={entry.id} className="article-divider-solid" />;
+								case 'divider-dashed':
+									return <div key={entry.id} className="article-divider-dashed" />;
+								default:
+									return <b key={entry.id}>{JSON.stringify(entry)}</b>;
+							}
 						})}
-				</S.Tags>
-				{isLoadingContent && <p>Loading content...</p>}
-				{!isLoadingPost &&
-					!isLoadingContent &&
-					content &&
-					Array.isArray(content) &&
-					content.map((entry) => {
-						switch (entry.type) {
-							case 'header-1':
-								return <h1 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'header-2':
-								return <h2 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'header-3':
-								return <h3 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'header-4':
-								return <h4 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'header-5':
-								return <h5 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'header-6':
-								return <h6 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'image':
-								return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'video':
-								return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'paragraph':
-								return <p key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'quote':
-								return <blockquote key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'code':
-								return <code key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'unordered-list':
-								return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'ordered-list':
-								return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'divider-solid':
-								return <div key={entry.id} className="article-divider-solid" />;
-							case 'divider-dashed':
-								return <div key={entry.id} className="article-divider-dashed" />;
-							default:
-								return <b key={entry.id}>{JSON.stringify(entry)}</b>;
-						}
-					})}
+				</div>
 			</S.Post>
 			<Comments commentsId={post?.metadata?.comments} postAuthorId={post?.creator} />
 		</S.Wrapper>
