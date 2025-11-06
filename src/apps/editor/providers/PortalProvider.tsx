@@ -120,7 +120,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									await permawebProvider.libs.readState({ processId: portal.id })
 								);
 
-								const parseField = (key: PortalPatchMapEnum) => parseProcessResponseValue(response[key]);
+								const parseField = (key: PortalPatchMapEnum) => response[key];
 
 								let overview: any = {};
 								if (response?.overview) overview = parseField(PortalPatchMapEnum.Overview);
@@ -204,8 +204,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [refreshCurrentTrigger, refreshFields]);
 
-	const parseProcessResponseValue = (data: string) => permawebProvider.libs.mapFromProcessCase(JSON.parse(data));
-
 	const fetchPortal = async (opts?: { patchKey?: string }) => {
 		if (!currentId) return;
 
@@ -219,7 +217,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			);
 
 			const parseField = (key: PortalPatchMapEnum) =>
-				opts?.patchKey === key ? response : response[key] ? parseProcessResponseValue(response[key]) : null;
+				opts?.patchKey === key ? response : response[key] ? response[key] : null;
 
 			const overview = parseField(PortalPatchMapEnum.Overview);
 			const users = parseField(PortalPatchMapEnum.Users);
@@ -228,6 +226,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			const media = parseField(PortalPatchMapEnum.Media);
 			const posts = parseField(PortalPatchMapEnum.Posts);
 			const requests = parseField(PortalPatchMapEnum.Requests);
+
+			console.dir(overview);
 
 			/* Check for node updates and add the new node address as an authority */
 			if (
