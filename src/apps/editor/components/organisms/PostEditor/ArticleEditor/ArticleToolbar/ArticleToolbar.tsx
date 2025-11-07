@@ -12,6 +12,7 @@ import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
 import { Tabs } from 'components/atoms/Tabs';
+import { PostRenderer } from 'components/molecules/PostRenderer';
 import { DOM, ICONS, STYLING } from 'helpers/config';
 import {
 	ArticleBlockEnum,
@@ -57,7 +58,7 @@ export default function ArticleToolbar(props: {
 
 	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.id);
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
-
+	const [previewOpen, setPreviewOpen] = React.useState(false);
 	const titleRef = React.useRef<any>(null);
 	const prevDesktopRef = React.useRef<boolean>(desktop);
 
@@ -236,6 +237,15 @@ export default function ArticleToolbar(props: {
 							disabled={primaryDisabled || requestUnauthorized || currentRequest?.status !== 'Review'}
 							noFocus
 						/>
+						<Button
+							type={'alt1'}
+							label={language?.preview ?? 'Preview'}
+							handlePress={() => setPreviewOpen(true)}
+							active={false}
+							disabled={currentPost.editor.loading.active}
+							noFocus
+							icon={ICONS.show}
+						/>
 					</>
 				);
 			} else {
@@ -266,24 +276,44 @@ export default function ArticleToolbar(props: {
 								noFocus
 							/>
 						)}
+						<Button
+							type={'alt1'}
+							label={language?.preview ?? 'Preview'}
+							handlePress={() => setPreviewOpen(true)}
+							active={false}
+							disabled={currentPost.editor.loading.active}
+							noFocus
+							icon={ICONS.show}
+						/>
 					</>
 				);
 			}
 		}
 
 		return (
-			<Button
-				type={'alt1'}
-				label={language?.save}
-				handlePress={() =>
-					// contributors need to save using the approve workflow - this will trigger the request approval process
-					portalProvider.permissions?.postAutoIndex ? props.handleSubmit('Auto') : props.handleSubmit()
-				}
-				active={false}
-				disabled={primaryDisabled}
-				tooltip={primaryDisabled ? null : (isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
-				noFocus
-			/>
+			<>
+				<Button
+					type={'alt1'}
+					label={language?.save}
+					handlePress={() =>
+						// contributors need to save using the approve workflow - this will trigger the request approval process
+						portalProvider.permissions?.postAutoIndex ? props.handleSubmit('Auto') : props.handleSubmit()
+					}
+					active={false}
+					disabled={primaryDisabled}
+					tooltip={primaryDisabled ? null : (isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
+					noFocus
+				/>
+				<Button
+					type={'alt1'}
+					label={language?.preview ?? 'Preview'}
+					handlePress={() => setPreviewOpen(true)}
+					active={false}
+					disabled={currentPost.editor.loading.active}
+					noFocus
+					icon={ICONS.show}
+				/>
+			</>
 		);
 	}
 
@@ -348,6 +378,134 @@ export default function ArticleToolbar(props: {
 		return content;
 	}, [currentPost.editor.panelOpen, currentTab, props.addBlock, desktop, currentPost.editor.loading.active]);
 
+	const previewPost = React.useMemo(() => {
+		const d = currentPost.data;
+		return {
+			name: d?.title || '',
+			dateCreated: d?.dateCreated || Date.now(),
+			creator: d?.creator,
+			metadata: {
+				status: (d?.status?.toLowerCase?.() as 'draft' | 'published') || 'draft',
+				description: d?.description || '',
+				thumbnail: d?.thumbnail || undefined,
+				topics: d?.topics || [],
+			},
+		} as any;
+	}, [currentPost.data]);
+
+	// Reuse the editor content as-is
+	const previewContent = React.useMemo(() => currentPost.data?.content || [], [currentPost.data?.content]);
+
+	// Use the logged-in user's profile for author display in preview
+	const previewProfile = React.useMemo(() => {
+		const p = permawebProvider.profile;
+		return {
+			displayName: p?.displayName || p?.handle || p?.id || 'Author',
+			thumbnail: p?.thumbnail || p?.avatar || undefined,
+		};
+	}, [permawebProvider.profile]);
+
+	function getThemeVars(theme: any, scheme: 'light' | 'dark') {
+		function getColor(theme: any, scheme: string, value: string) {
+			switch (value) {
+				case 'primary':
+					return theme.basics.colors.primary[scheme];
+				case 'secondary':
+					return theme.basics.colors.secondary[scheme];
+				case 'background':
+					return theme.basics.colors.background[scheme];
+				case 'text':
+					return theme.basics.colors.text[scheme];
+				case 'border':
+					return theme.basics.colors.border[scheme];
+				default:
+					return value;
+			}
+		}
+
+		function getContrastColor(bg: string) {
+			const rgba = bg.replace(/^rgba?\(|\s+|\)$/g, '').split(',');
+			const [r, g, b] = rgba.map(Number);
+			const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+			return luminance > 0.6 ? '0,0,0' : '255,255,255';
+		}
+
+		const vars: Record<string, string> = {
+			'--color-text': theme.basics.colors.text[scheme],
+			'--color-background': theme.basics.colors.background[scheme],
+			'--color-primary': theme.basics.colors.primary[scheme],
+			'--color-primary-contrast': getContrastColor(theme.basics.colors.primary[scheme]),
+			'--color-secondary': theme.basics.colors.secondary[scheme],
+			'--color-secondary-contrast': getContrastColor(theme.basics.colors.secondary[scheme]),
+			'--color-border': theme.basics.colors.border[scheme],
+			'--color-header-background': getColor(theme, scheme, theme.header.colors.background[scheme]),
+			'--color-content-background': `rgba(${theme.content.colors.background[scheme]},${theme.content.preferences.opacity[scheme]})`,
+			'--color-post-background': `rgba(${getColor(theme, scheme, theme.post.colors.background[scheme])},${
+				theme.post.preferences.opacity[scheme]
+			})`,
+			'--color-card-background': `rgba(${getColor(theme, scheme, theme.card.colors.background[scheme])},${
+				theme.card.preferences.opacity[scheme]
+			})`,
+			'--border-radius': `${theme.basics.preferences?.borderRadius ?? 8}px`,
+		};
+		return vars;
+	}
+
+	const activeTheme = portalProvider.current.themes.find((t: any) => t.active);
+	const scheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+	const themeVars = getThemeVars(activeTheme, scheme);
+
+	const previewModal = React.useMemo(() => {
+		if (!previewOpen) return null;
+
+		const contentEl = (
+			<S.Overlay className="overlay" onClick={() => setPreviewOpen(false)}>
+				<S.PreviewCard
+					className="border-wrapper-alt2 fade-in"
+					onClick={(e) => e.stopPropagation()}
+					style={Object.fromEntries(Object.entries(themeVars))}
+				>
+					<S.PreviewHeader>
+						<IconButton
+							type={'primary'}
+							src={ICONS.close}
+							handlePress={() => setPreviewOpen(false)}
+							tooltip={language?.close ?? 'Close'}
+							tooltipPosition={'bottom-right'}
+							dimensions={{ icon: 12.5, wrapper: 28 }}
+							noFocus
+						/>
+					</S.PreviewHeader>
+
+					<PostRenderer
+						isLoadingPost={false}
+						isLoadingProfile={false}
+						isLoadingContent={false}
+						post={previewPost}
+						profile={previewProfile}
+						content={previewContent}
+					/>
+				</S.PreviewCard>
+			</S.Overlay>
+		);
+
+		return (
+			<Portal node={DOM.overlay}>
+				<div
+					onClick={() => setPreviewOpen(false)}
+					style={{
+						position: 'fixed',
+						inset: 0,
+						background: 'rgba(0,0,0,0.5)',
+						zIndex: 1000,
+					}}
+				>
+					{contentEl}
+				</div>
+			</Portal>
+		);
+	}, [previewOpen, previewPost, previewProfile, previewContent, language]);
+
 	return (
 		<>
 			<S.Wrapper>
@@ -405,6 +563,7 @@ export default function ArticleToolbar(props: {
 				</S.EndActions>
 			</S.Wrapper>
 			{panel}
+			{previewModal}
 		</>
 	);
 }

@@ -34,7 +34,12 @@ export default function Post(props: any) {
 	const [content, setContent] = React.useState<any>(null);
 	const [isLoadingContent, setIsLoadingContent] = React.useState(false);
 	const { toPDF, targetRef } = usePDF({ filename: post?.name ? `${post.name}.pdf` : 'post.pdf' });
-	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+	const roles = Array.isArray(user?.roles)
+		? user.roles
+		: user?.roles
+		? [user.roles] // if it’s a single string
+		: [];
+	const canEditPost = user?.owner && roles && ['Admin', 'Moderator'].some((r) => roles?.includes(r));
 
 	React.useEffect(() => {
 		window.scrollTo({ top: 0, behavior: 'auto' });

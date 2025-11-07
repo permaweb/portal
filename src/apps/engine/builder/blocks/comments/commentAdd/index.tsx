@@ -234,64 +234,61 @@ function CommentEditorContent(props: any) {
 	const userIcon =
 		profile?.thumbnail && checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : ICONS.user;
 	const portalIcon = portal?.Icon && checkValidAddress(portal.Icon) ? getTxEndpoint(portal.Icon) : ICONS.portal;
-
+	const roles = Array.isArray(profile?.roles) ? profile.roles : profile?.roles ? [profile.roles] : [];
 	return (
 		<>
 			<S.Editor onClick={handleEditorClick}>
-				{portalId &&
-					!isEditMode &&
-					profile?.roles &&
-					(profile.roles.includes('Admin') || profile.roles.includes('Moderator')) && (
-						<S.AuthorSelector ref={dropdownRef}>
-							<S.AuthorIcon
-								onClick={(e: React.MouseEvent) => {
-									e.stopPropagation();
-									setShowAuthorDropdown(!showAuthorDropdown);
-								}}
-								src={authorIcon}
-								onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-									e.currentTarget.src = postAsPortal ? ICONS.portal : ICONS.user;
-								}}
-								alt={postAsPortal ? portal?.Name || 'Portal' : profile?.displayName || 'User'}
-							/>
-							{showAuthorDropdown && (
-								<S.AuthorDropdown>
-									<S.AuthorOption
-										onClick={() => {
-											setPostAsPortal(false);
-											setShowAuthorDropdown(false);
+				{portalId && !isEditMode && roles && (roles.includes('Admin') || roles.includes('Moderator')) && (
+					<S.AuthorSelector ref={dropdownRef}>
+						<S.AuthorIcon
+							onClick={(e: React.MouseEvent) => {
+								e.stopPropagation();
+								setShowAuthorDropdown(!showAuthorDropdown);
+							}}
+							src={authorIcon}
+							onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+								e.currentTarget.src = postAsPortal ? ICONS.portal : ICONS.user;
+							}}
+							alt={postAsPortal ? portal?.Name || 'Portal' : profile?.displayName || 'User'}
+						/>
+						{showAuthorDropdown && (
+							<S.AuthorDropdown>
+								<S.AuthorOption
+									onClick={() => {
+										setPostAsPortal(false);
+										setShowAuthorDropdown(false);
+									}}
+									$active={!postAsPortal}
+								>
+									<img
+										src={userIcon}
+										onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+											e.currentTarget.src = ICONS.user;
 										}}
-										$active={!postAsPortal}
-									>
-										<img
-											src={userIcon}
-											onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-												e.currentTarget.src = ICONS.user;
-											}}
-											alt={profile?.displayName || 'User'}
-										/>
-										<span>{profile?.displayName || 'User'}</span>
-									</S.AuthorOption>
-									<S.AuthorOption
-										onClick={() => {
-											setPostAsPortal(true);
-											setShowAuthorDropdown(false);
+										alt={profile?.displayName || 'User'}
+									/>
+									<span>{profile?.displayName || 'User'}</span>
+								</S.AuthorOption>
+								<S.AuthorOption
+									onClick={() => {
+										setPostAsPortal(true);
+										setShowAuthorDropdown(false);
+									}}
+									$active={postAsPortal}
+								>
+									<img
+										src={portalIcon}
+										onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+											e.currentTarget.src = ICONS.portal;
 										}}
-										$active={postAsPortal}
-									>
-										<img
-											src={portalIcon}
-											onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-												e.currentTarget.src = ICONS.portal;
-											}}
-											alt={portal?.Name || 'Portal'}
-										/>
-										<span>{portal?.Name || 'Portal'}</span>
-									</S.AuthorOption>
-								</S.AuthorDropdown>
-							)}
-						</S.AuthorSelector>
-					)}
+										alt={portal?.Name || 'Portal'}
+									/>
+									<span>{portal?.Name || 'Portal'}</span>
+								</S.AuthorOption>
+							</S.AuthorDropdown>
+						)}
+					</S.AuthorSelector>
+				)}
 				<ContentEditable className="editor-input" />
 				<S.Actions>
 					<EmojiPicker onInsertEmoji={handleEmoji} />
@@ -348,12 +345,9 @@ export default function CommentAdd(props: any) {
 	const { portalId } = usePortalProvider();
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-	const hasAuthorIcon = Boolean(
-		portalId &&
-			!isEditMode &&
-			profile?.roles &&
-			(profile.roles.includes('Admin') || profile.roles.includes('Moderator'))
-	);
+	const roles = Array.isArray(profile?.roles) ? profile.roles : profile?.roles ? [profile.roles] : [];
+
+	const hasAuthorIcon = Boolean(portalId && !isEditMode && roles.some((r) => ['Admin', 'Moderator'].includes(r)));
 
 	const initialConfig = {
 		namespace: 'CommentEditor',
