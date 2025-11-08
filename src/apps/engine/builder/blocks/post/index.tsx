@@ -2,12 +2,11 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { usePDF } from 'react-to-pdf';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
-import Placeholder from 'engine/components/placeholder';
-import Tag from 'engine/components/tag';
 import { usePost } from 'engine/hooks/posts';
 import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
+import { PostRenderer } from 'components/molecules/PostRenderer';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import {
@@ -18,7 +17,6 @@ import {
 	escapeHtml,
 	htmlDocToPlainText,
 } from 'helpers/export-options';
-import { checkValidAddress } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import Comments from '../comments';
@@ -36,7 +34,12 @@ export default function Post(props: any) {
 	const [content, setContent] = React.useState<any>(null);
 	const [isLoadingContent, setIsLoadingContent] = React.useState(false);
 	const { toPDF, targetRef } = usePDF({ filename: post?.name ? `${post.name}.pdf` : 'post.pdf' });
-	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+	const roles = Array.isArray(user?.roles)
+		? user.roles
+		: user?.roles
+		? [user.roles] // if it’s a single string
+		: [];
+	const canEditPost = user?.owner && roles && ['Admin', 'Moderator'].some((r) => roles?.includes(r));
 
 	React.useEffect(() => {
 		window.scrollTo({ top: 0, behavior: 'auto' });
@@ -202,91 +205,14 @@ export default function Post(props: any) {
 				<ContextMenu entries={menuEntries} />
 
 				<div ref={targetRef}>
-					<S.TitleWrapper>
-						<h1>{isLoadingPost ? <Placeholder width="180" /> : post?.name}</h1>
-						{post?.metadata?.status === 'draft' && (
-							<S.DraftIndicator>
-								<S.DraftDot />
-								Draft
-							</S.DraftIndicator>
-						)}
-					</S.TitleWrapper>
-					{post?.metadata.description && <S.Description>{post?.metadata.description}</S.Description>}
-					<S.Meta>
-						<img
-							className="loadingAvatar"
-							onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-							src={
-								!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
-									? getTxEndpoint(profile.thumbnail)
-									: ICONS.user
-							}
-						/>
-						<span>{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}</span>&nbsp;
-						<span>
-							• {isLoadingPost ? <Placeholder width="40" /> : new Date(Number(post?.dateCreated)).toLocaleDateString()}{' '}
-							{isLoadingPost ? (
-								<Placeholder width="30" />
-							) : (
-								new Date(Number(post?.dateCreated)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-							)}
-						</span>
-					</S.Meta>
-					{!isLoadingPost && post?.metadata?.thumbnail && (
-						<S.Thumbnail
-							className="loadingThumbnail"
-							onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
-							src={!isLoadingPost && post?.metadata?.thumbnail ? getTxEndpoint(post.metadata.thumbnail) : ''}
-						/>
-					)}
-					<S.Tags>
-						{post &&
-							post?.metadata?.topics &&
-							post?.metadata?.topics.map((topic: any, index: number) => {
-								return <Tag key={index} tag={topic} />;
-							})}
-					</S.Tags>
-					{isLoadingContent && <p>Loading content...</p>}
-					{!isLoadingPost &&
-						!isLoadingContent &&
-						content &&
-						Array.isArray(content) &&
-						content.map((entry) => {
-							switch (entry.type) {
-								case 'header-1':
-									return <h1 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'header-2':
-									return <h2 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'header-3':
-									return <h3 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'header-4':
-									return <h4 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'header-5':
-									return <h5 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'header-6':
-									return <h6 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'image':
-									return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'video':
-									return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'paragraph':
-									return <p key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'quote':
-									return <blockquote key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'code':
-									return <code key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'unordered-list':
-									return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'ordered-list':
-									return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-								case 'divider-solid':
-									return <div key={entry.id} className="article-divider-solid" />;
-								case 'divider-dashed':
-									return <div key={entry.id} className="article-divider-dashed" />;
-								default:
-									return <b key={entry.id}>{JSON.stringify(entry)}</b>;
-							}
-						})}
+					<PostRenderer
+						isLoadingPost={isLoadingPost}
+						isLoadingProfile={isLoadingProfile}
+						isLoadingContent={isLoadingContent}
+						post={post}
+						profile={profile}
+						content={content}
+					/>
 				</div>
 			</S.Post>
 			<Comments commentsId={post?.metadata?.comments} postAuthorId={post?.creator} />

@@ -3,7 +3,7 @@ import { ReactSVG } from 'react-svg';
 
 import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
-import { ICONS, DOM } from 'helpers/config';
+import { DOM, ICONS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -15,6 +15,7 @@ export default function Modal(props: {
 	allowOverflow?: boolean;
 	status?: 'success' | 'warning';
 	className?: string;
+	width?: number;
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -53,7 +54,7 @@ export default function Modal(props: {
 	return (
 		<Portal node={DOM.overlay}>
 			<S.Wrapper noHeader={!props.header} top={window ? (window as any).pageYOffset : 0}>
-				<S.Container noHeader={!props.header}>
+				<S.Container noHeader={!props.header} width={props.width}>
 					{props.header && (
 						<S.Header>
 							<S.LT>

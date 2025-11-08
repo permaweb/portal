@@ -15,7 +15,13 @@ export const usePosts = (props?: any) => {
 	let filtered = Posts ? Object.values(Posts) : Posts;
 
 	// Check if user is admin or moderator
-	const canViewDrafts = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+	const roles = Array.isArray(user?.roles)
+		? user.roles
+		: user?.roles
+		? [user.roles] // if it’s a single string
+		: [];
+
+	const canViewDrafts = !!user?.owner && roles.some((r) => ['Admin', 'Moderator'].includes(r));
 
 	if (filtered) {
 		filtered = filtered.filter((post) => {

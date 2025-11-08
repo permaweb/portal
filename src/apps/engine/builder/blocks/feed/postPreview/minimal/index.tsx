@@ -19,8 +19,12 @@ export default function PostPreview_Minimal(props: any) {
 	const { portal } = usePortalProvider();
 	const { layout, post } = props;
 	const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || null);
-
-	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+	const roles = Array.isArray(user?.roles)
+		? user.roles
+		: user?.roles
+		? [user.roles] // if it’s a single string
+		: [];
+	const canEditPost = user?.owner && roles && ['Admin', 'Moderator'].some((r) => roles?.includes(r));
 
 	// Check if post creator is the portal itself
 	const isPortalCreator = post?.creator === portal?.id;
