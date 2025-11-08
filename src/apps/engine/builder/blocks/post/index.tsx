@@ -131,7 +131,7 @@ export default function Post(props: any) {
 			}
 			case 'pdf': {
 				toPDF({
-					page: { format: 'a4', margin: 30 },
+					page: { format: 'a4', margin: { top: 20, right: 10, bottom: 20, left: 10 } },
 					canvas: { useCORS: true },
 					filename: `${titleForExport}.pdf`,
 				});

@@ -204,7 +204,6 @@ export default function ArticleToolbar(props: {
 	const currentRequest =
 		isCurrentRequest &&
 		portalProvider.current?.requests?.find((request: PortalAssetRequestType) => request.id === assetId);
-	console.log({ currentRequest });
 	const primaryDisabled = submitUnauthorized || currentPost.editor.loading.active || currentPost.editor.submitDisabled;
 	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
 
