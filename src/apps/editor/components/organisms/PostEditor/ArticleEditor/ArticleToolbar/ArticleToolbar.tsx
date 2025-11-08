@@ -10,6 +10,7 @@ import { currentPostUpdate } from 'editor/store/post';
 
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
+import { Modal } from 'components/atoms/Modal';
 import { Portal } from 'components/atoms/Portal';
 import { Tabs } from 'components/atoms/Tabs';
 import { PostRenderer } from 'components/molecules/PostRenderer';
@@ -238,15 +239,6 @@ export default function ArticleToolbar(props: {
 							disabled={primaryDisabled || requestUnauthorized || currentRequest?.status !== 'Review'}
 							noFocus
 						/>
-						<Button
-							type={'alt1'}
-							label={language?.preview ?? 'Preview'}
-							handlePress={() => setPreviewOpen(true)}
-							active={false}
-							disabled={currentPost.editor.loading.active}
-							noFocus
-							icon={ICONS.show}
-						/>
 					</>
 				);
 			} else {
@@ -297,22 +289,13 @@ export default function ArticleToolbar(props: {
 					type={'alt1'}
 					label={language?.save}
 					handlePress={() =>
-						// contributors need to save using the approve workflow - this will trigger the request approval process
+						// Contributors need to save using the approve workflow - this will trigger the request approval process
 						portalProvider.permissions?.postAutoIndex ? props.handleSubmit('Auto') : props.handleSubmit()
 					}
 					active={false}
 					disabled={primaryDisabled}
 					tooltip={primaryDisabled ? null : (isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
 					noFocus
-				/>
-				<Button
-					type={'alt1'}
-					label={language?.preview ?? 'Preview'}
-					handlePress={() => setPreviewOpen(true)}
-					active={false}
-					disabled={currentPost.editor.loading.active}
-					noFocus
-					icon={ICONS.show}
 				/>
 			</>
 		);
@@ -397,14 +380,23 @@ export default function ArticleToolbar(props: {
 	// Reuse the editor content as-is
 	const previewContent = React.useMemo(() => currentPost.data?.content || [], [currentPost.data?.content]);
 
-	// Use the logged-in user's profile for author display in preview
+	// Fetch the creator's profile for preview
+	React.useEffect(() => {
+		const creatorId = currentPost.data?.creator;
+		if (creatorId && !portalProvider.usersByPortalId[creatorId]) {
+			portalProvider.fetchPortalUserProfile({ address: creatorId } as PortalUserType);
+		}
+	}, [currentPost.data?.creator, portalProvider]);
+
+	// Use the creator's profile for author display in preview
 	const previewProfile = React.useMemo(() => {
-		const p = permawebProvider.profile;
+		const creatorId = currentPost.data?.creator;
+		const p = creatorId ? portalProvider.usersByPortalId[creatorId] : permawebProvider.profile;
 		return {
 			displayName: p?.displayName || p?.handle || p?.id || 'Author',
 			thumbnail: p?.thumbnail || p?.avatar || undefined,
 		};
-	}, [permawebProvider.profile]);
+	}, [currentPost.data?.creator, portalProvider.usersByPortalId, permawebProvider.profile]);
 
 	const scheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 	const activeTheme = portalProvider.current.themes.find((t: any) => t.active);
@@ -413,25 +405,14 @@ export default function ArticleToolbar(props: {
 	const previewModal = React.useMemo(() => {
 		if (!previewOpen) return null;
 
-		const contentEl = (
-			<S.Overlay className="overlay" onClick={() => setPreviewOpen(false)}>
-				<S.PreviewCard
-					className="border-wrapper-alt2 fade-in"
-					onClick={(e) => e.stopPropagation()}
-					style={Object.fromEntries(Object.entries(themeVars))}
-				>
-					<S.PreviewHeader>
-						<IconButton
-							type={'primary'}
-							src={ICONS.close}
-							handlePress={() => setPreviewOpen(false)}
-							tooltip={language?.close ?? 'Close'}
-							tooltipPosition={'bottom-right'}
-							dimensions={{ icon: 12.5, wrapper: 28 }}
-							noFocus
-						/>
-					</S.PreviewHeader>
-
+		return (
+			<Modal
+				header={language?.preview ?? 'Preview'}
+				handleClose={() => setPreviewOpen(false)}
+				width={900}
+				className={'scroll-wrapper-hidden'}
+			>
+				<S.PreviewCard style={Object.fromEntries(Object.entries(themeVars))}>
 					<PostRenderer
 						isLoadingPost={false}
 						isLoadingProfile={false}
@@ -441,25 +422,9 @@ export default function ArticleToolbar(props: {
 						content={previewContent}
 					/>
 				</S.PreviewCard>
-			</S.Overlay>
+			</Modal>
 		);
-
-		return (
-			<Portal node={DOM.overlay}>
-				<div
-					onClick={() => setPreviewOpen(false)}
-					style={{
-						position: 'fixed',
-						inset: 0,
-						background: 'rgba(0,0,0,0.5)',
-						zIndex: 1000,
-					}}
-				>
-					{contentEl}
-				</div>
-			</Portal>
-		);
-	}, [previewOpen, previewPost, previewProfile, previewContent, language]);
+	}, [previewOpen, previewPost, previewProfile, previewContent, language, themeVars]);
 
 	return (
 		<>
@@ -513,6 +478,16 @@ export default function ArticleToolbar(props: {
 						iconLeftAlign
 						tooltip={'CTRL + L'}
 						noFocus
+					/>
+					<Button
+						type={'primary'}
+						label={language?.preview ?? 'Preview'}
+						handlePress={() => setPreviewOpen(true)}
+						active={false}
+						disabled={currentPost.editor.loading.active}
+						noFocus
+						icon={ICONS.show}
+						iconLeftAlign
 					/>
 					<S.SubmitWrapper>{getSubmit()}</S.SubmitWrapper>
 				</S.EndActions>

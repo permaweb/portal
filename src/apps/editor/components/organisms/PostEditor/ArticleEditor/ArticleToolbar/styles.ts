@@ -133,16 +133,12 @@ export const Overlay = styled.div`
 `;
 
 export const PreviewCard = styled.div`
+	width: 100%;
 	max-width: 920px;
-	width: calc(100% - 32px);
-	margin: 40px auto;
 	background: ${(p) => p.theme.colors.container?.primary};
-	border-radius: 12px;
-	box-shadow: ${(p) => p.theme.colors.shadow?.level3 || '0 10px 30px rgba(0,0,0,0.15)'};
-	max-height: 80vh;
 	overflow: auto;
 	position: relative;
-	padding: 24px;
+	padding: 0 20px 20px 20px;
 
 	h1,
 	h2,

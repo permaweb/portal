@@ -760,22 +760,28 @@ export function getThemeVars(theme: any, scheme: 'light' | 'dark') {
 	}
 
 	const vars: Record<string, string> = {
-		'--color-text': theme.basics.colors.text[scheme],
-		'--color-background': theme.basics.colors.background[scheme],
-		'--color-primary': theme.basics.colors.primary[scheme],
-		'--color-primary-contrast': getContrastColor(theme.basics.colors.primary[scheme]),
-		'--color-secondary': theme.basics.colors.secondary[scheme],
-		'--color-secondary-contrast': getContrastColor(theme.basics.colors.secondary[scheme]),
-		'--color-border': theme.basics.colors.border[scheme],
-		'--color-header-background': getColor(theme, scheme, theme.header.colors.background[scheme]),
-		'--color-content-background': `rgba(${theme.content.colors.background[scheme]},${theme.content.preferences.opacity[scheme]})`,
-		'--color-post-background': `rgba(${getColor(theme, scheme, theme.post.colors.background[scheme])},${
-			theme.post.preferences.opacity[scheme]
+		'--color-text': theme.basics?.colors?.text?.[scheme] ?? '0,0,0',
+		'--color-background': theme.basics?.colors?.background?.[scheme] ?? '255,255,255',
+		'--color-primary': theme.basics?.colors?.primary?.[scheme] ?? '0,122,255',
+		'--color-primary-contrast': getContrastColor(theme.basics?.colors?.primary?.[scheme] ?? '0,122,255'),
+		'--color-secondary': theme.basics?.colors?.secondary?.[scheme] ?? '128,128,128',
+		'--color-secondary-contrast': getContrastColor(theme.basics?.colors?.secondary?.[scheme] ?? '128,128,128'),
+		'--color-border': theme.basics?.colors?.border?.[scheme] ?? '200,200,200',
+		'--color-header-background': getColor(theme, scheme, theme.header?.colors?.background?.[scheme] ?? 'inherit'),
+		'--color-content-background': `rgba(${theme.content?.colors?.background?.[scheme] ?? '255,255,255'},${
+			theme.content?.preferences?.opacity?.[scheme] ?? 1
 		})`,
-		'--color-card-background': `rgba(${getColor(theme, scheme, theme.card.colors.background[scheme])},${
-			theme.card.preferences.opacity[scheme]
-		})`,
-		'--border-radius': `${theme.basics.preferences?.borderRadius ?? 8}px`,
+		'--color-post-background': `rgba(${getColor(
+			theme,
+			scheme,
+			theme.post?.colors?.background?.[scheme] ?? 'inherit'
+		)},${theme.post?.preferences?.opacity?.[scheme] ?? 1})`,
+		'--color-card-background': `rgba(${getColor(
+			theme,
+			scheme,
+			theme.card?.colors?.background?.[scheme] ?? 'inherit'
+		)},${theme.card?.preferences?.opacity?.[scheme] ?? 1})`,
+		'--border-radius': `${theme.basics?.preferences?.borderRadius ?? 8}px`,
 	};
 	return vars;
 }

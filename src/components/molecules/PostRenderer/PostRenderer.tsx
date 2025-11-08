@@ -1,8 +1,10 @@
 import Placeholder from 'engine/components/placeholder';
+import Tag from 'engine/components/tag';
+
+import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
-import { ICONS } from 'helpers/config';
-import Tag from 'engine/components/tag';
+
 import * as S from './styles';
 
 type ContentEntryType =

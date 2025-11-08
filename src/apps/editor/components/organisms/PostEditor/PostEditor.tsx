@@ -68,7 +68,6 @@ export default function PostEditor() {
 
 		const isCurrentRequest =
 			!!assetId && portalProvider.current?.requests?.some((request: PortalAssetRequestType) => request.id === assetId);
-		console.log({ isEmpty, noChanges, isCurrentRequest, assetId, currentPostDataId: currentPost.data.id, hasChanges });
 		handleCurrentPostUpdate({ field: 'submitDisabled', value: (isEmpty || noChanges) && !isCurrentRequest });
 	}, [currentPost.data, currentPost.originalData, portalProvider.current?.requests]);
 
