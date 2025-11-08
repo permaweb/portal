@@ -45,7 +45,6 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	const [deps, setDeps] = React.useState<any>(null);
 	const [libs, setLibs] = React.useState<any>(null);
 	const [profile, setProfile] = React.useState<Types.ProfileType | null>(null);
-	const [refreshProfileTrigger, setRefreshProfileTrigger] = React.useState<boolean>(false);
 	const [profilePending, setProfilePending] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
@@ -141,42 +140,19 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [arProvider.walletAddress, profilePending]);
 
-	React.useEffect(() => {
-		(async function () {
-			if (arProvider.wallet && arProvider.walletAddress) {
-				const fetchProfileUntilChange = async () => {
-					let changeDetected = false;
-					let tries = 0;
-					const maxTries = 10;
-
-					while (!changeDetected && tries < maxTries) {
-						try {
-							const existingProfile = profile;
-							const newProfile = await resolveProfile(arProvider.walletAddress);
-
-							if (newProfile && JSON.stringify(existingProfile) !== JSON.stringify(newProfile)) {
-								setProfile(newProfile);
-								cacheProfile(arProvider.walletAddress, newProfile);
-								changeDetected = true;
-							} else {
-								await new Promise((resolve) => setTimeout(resolve, 1000));
-								tries++;
-							}
-						} catch (error) {
-							console.error(error);
-							break;
-						}
-					}
-
-					if (!changeDetected) {
-						console.warn(`No changes detected after ${maxTries} attempts`);
-					}
-				};
-
-				await fetchProfileUntilChange();
+	const refreshProfile = React.useCallback(async () => {
+		if (arProvider.wallet && arProvider.walletAddress) {
+			try {
+				const newProfile = await resolveProfile(arProvider.walletAddress, { hydrate: true });
+				if (newProfile) {
+					setProfile(newProfile);
+					cacheProfile(arProvider.walletAddress, newProfile);
+				}
+			} catch (error) {
+				console.error(error);
 			}
-		})();
-	}, [refreshProfileTrigger]);
+		}
+	}, [arProvider.wallet, arProvider.walletAddress, profile]);
 
 	/* Determine if the current authority has changed and if it is present in the profile.
 		If it's not then add it to the profile authorities list
@@ -194,7 +170,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 						authorityId: AO_NODE.authority,
 					});
 
-					setRefreshProfileTrigger((prev) => !prev);
+					await refreshProfile();
 				}
 			} catch (e: any) {
 				console.error('Failed to update profile authorities:', e);
@@ -202,12 +178,12 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [profile?.id, AO_NODE.authority, libs?.updateZoneAuthorities]);
 
-	async function resolveProfile(address: string) {
+	async function resolveProfile(address: string, opts?: { hydrate?: boolean }): Promise<Types.ProfileType | undefined> {
 		if (libs) {
 			try {
 				let fetchedProfile: any;
 				const cachedProfile = getCachedProfile(address);
-				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
+				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id, opts);
 				else fetchedProfile = await libs.getProfileByWalletAddress(address);
 				let profileToUse = { ...fetchedProfile };
 
@@ -253,7 +229,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				profile: profile,
 				handleInitialProfileCache: (address: string, profileId: string) =>
 					handleInitialProfileCache(address, profileId),
-				refreshProfile: () => setRefreshProfileTrigger((prev) => !prev),
+				refreshProfile: refreshProfile,
 				setPortalRoles: (roles: string[]) => setPortalRoles(roles),
 				fetchProfile: resolveProfile,
 			}}
