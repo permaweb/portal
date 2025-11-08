@@ -94,6 +94,18 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [showPortalManager, setShowPortalManager] = React.useState<boolean>(false);
 	const [createNewPortal, setCreateNewPortal] = React.useState<boolean>(false);
 
+	const parseField = React.useCallback(
+		(key: PortalPatchMapEnum, response: any, patchKey?: string) => {
+			const value = patchKey === key ? response : response[key];
+			try {
+				return permawebProvider.libs.mapFromProcessCase(JSON.parse(value));
+			} catch {
+				return value || null;
+			}
+		},
+		[permawebProvider.libs]
+	);
+
 	React.useEffect(() => {
 		setCurrent(null);
 		setPortals(null);
@@ -120,16 +132,14 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									await permawebProvider.libs.readState({ processId: portal.id })
 								);
 
-								const parseField = (key: PortalPatchMapEnum) => response[key];
-
 								let overview: any = {};
-								if (response?.overview) overview = parseField(PortalPatchMapEnum.Overview);
+								if (response?.overview) overview = parseField(PortalPatchMapEnum.Overview, response);
 
 								let users: any = {};
-								if (response?.users) users = parseField(PortalPatchMapEnum.Users);
+								if (response?.users) users = parseField(PortalPatchMapEnum.Users, response);
 
 								let transfers: any = {};
-								if (response?.transfers) transfers = parseField(PortalPatchMapEnum.Transfers);
+								if (response?.transfers) transfers = parseField(PortalPatchMapEnum.Transfers, response);
 
 								return {
 									...portal,
@@ -213,21 +223,17 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				await permawebProvider.libs.readState({
 					processId: currentId,
 					path: opts?.patchKey,
+					hydrate: !!opts?.patchKey,
 				})
 			);
 
-			const parseField = (key: PortalPatchMapEnum) =>
-				opts?.patchKey === key ? response : response[key] ? response[key] : null;
-
-			const overview = parseField(PortalPatchMapEnum.Overview);
-			const users = parseField(PortalPatchMapEnum.Users);
-			const navigation = parseField(PortalPatchMapEnum.Navigation);
-			const presentation = parseField(PortalPatchMapEnum.Presentation);
-			const media = parseField(PortalPatchMapEnum.Media);
-			const posts = parseField(PortalPatchMapEnum.Posts);
-			const requests = parseField(PortalPatchMapEnum.Requests);
-
-			console.dir(overview);
+			const overview = parseField(PortalPatchMapEnum.Overview, response, opts?.patchKey);
+			const users = parseField(PortalPatchMapEnum.Users, response, opts?.patchKey);
+			const navigation = parseField(PortalPatchMapEnum.Navigation, response, opts?.patchKey);
+			const presentation = parseField(PortalPatchMapEnum.Presentation, response, opts?.patchKey);
+			const media = parseField(PortalPatchMapEnum.Media, response, opts?.patchKey);
+			const posts = parseField(PortalPatchMapEnum.Posts, response, opts?.patchKey);
+			const requests = parseField(PortalPatchMapEnum.Requests, response, opts?.patchKey);
 
 			/* Check for node updates and add the new node address as an authority */
 			if (
@@ -340,7 +346,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				}
 
 				try {
-					const freshProfile = await permawebProvider.libs.getProfileById(user.address);
+					const freshProfile = await permawebProvider.libs.getProfileById(user.address, { hydrate: true });
 					if (freshProfile) {
 						profile = freshProfile;
 						cacheProfile(user.address, profile);

@@ -17,17 +17,10 @@ import { ICONS, ICONS_SOCIAL } from './config/icons';
 export { ICONS, ICONS_SOCIAL };
 
 export const AO_NODE = {
-	url: 'http://localhost:8734',
-	authority: 'mYJTM8VpIibDLuyGLQTcbcPy-LeOY48qzECADTUYfWc',
-	scheduler: 'mYJTM8VpIibDLuyGLQTcbcPy-LeOY48qzECADTUYfWc',
+	url: 'https://hb.portalinto.com',
+	authority: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
+	scheduler: 'NoZH3pueH0Cih6zjSNu_KRAcmg4ZJV1aGHKi0Pi5_Hc',
 };
-
-// TODO
-// export const AO_NODE = {
-// 	url: 'https://hb.portalinto.com',
-// 	authority: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
-// 	scheduler: 'NoZH3pueH0Cih6zjSNu_KRAcmg4ZJV1aGHKi0Pi5_Hc',
-// };
 
 export const IS_TESTNET = import.meta.env.VITE_ARIO_TESTNET === 'true';
 
