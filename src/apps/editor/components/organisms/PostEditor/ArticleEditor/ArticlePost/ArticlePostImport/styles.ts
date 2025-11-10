@@ -46,5 +46,4 @@ export const PanelActions = styled.div`
 	align-items: center;
 	justify-content: flex-end;
 	gap: 15px;
-	margin: 10px 0 0 0;
 `;

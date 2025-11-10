@@ -249,7 +249,7 @@ export default function ArticlePostImport() {
 		if (!file) return;
 
 		if (!file.name.endsWith('.md')) {
-			addNotification('Please upload a markdown (.md) file', 'warning');
+			addNotification(language.markdownFileOnly, 'warning');
 			return;
 		}
 
@@ -258,18 +258,16 @@ export default function ArticlePostImport() {
 			const text = await file.text();
 			const blocks = parseMarkdownToBlocks(text);
 
-			// Append to existing content instead of overwriting
 			const existingContent = currentPost.data.content || [];
 			const updatedContent = [...existingContent, ...blocks];
 
-			// Update Redux state with appended blocks
 			dispatch(currentPostUpdate({ field: 'content', value: updatedContent }));
 
-			addNotification('Markdown content imported successfully', 'success');
+			addNotification(language.markdownImportSuccess, 'success');
 			setShowOptions(false);
 		} catch (e: any) {
 			console.error(e);
-			addNotification(e.message ?? 'Error importing markdown file', 'warning');
+			addNotification(e.message ?? language.markdownImportError, 'warning');
 		} finally {
 			setLoading(false);
 			// Reset file input
@@ -279,23 +277,25 @@ export default function ArticlePostImport() {
 		}
 	};
 
-	// TODO: Hydrate asset
 	React.useEffect(() => {
 		if (checkValidAddress(assetId)) {
 			(async function () {
 				setLoading(true);
 				try {
-					// const assetData = await permawebProvider.libs.getAtomicAsset(assetId);
-					const response = permawebProvider.libs.mapFromProcessCase(
-						await permawebProvider.libs.readState({ processId: assetId, hydrate: true })
-					);
-
+					const response = await permawebProvider.libs.getAtomicAsset(assetId);
 					console.log(response);
-					addNotification('Content Imported', 'success');
+					if (response?.metadata?.content) {
+						const existingContent = currentPost.data.content || [];
+						const updatedContent = [...existingContent, ...response.metadata.content];
+
+						dispatch(currentPostUpdate({ field: 'content', value: updatedContent }));
+					}
+					addNotification(language.contentImported, 'success');
 				} catch (e: any) {
 					console.error(e);
-					addNotification(e.message ?? 'Error Importing Post', 'warning');
+					addNotification(e.message ?? language.errorImportingPost, 'warning');
 				}
+				setShowOptions(false);
 				setLoading(false);
 				setAssetId('');
 			})();
