@@ -18,10 +18,11 @@ export default function DesignBasic() {
 		<S.BodyWrapper>
 			<S.SectionWrapper>
 				<S.Section>
-					<Drawer title={language?.fonts} content={<Fonts />} padContent />
+					<Drawer drawerKey="design-fonts" title={language?.fonts} content={<Fonts />} padContent />
 				</S.Section>
 				<S.Section>
 					<Drawer
+						drawerKey="design-images"
 						title={language?.images}
 						content={
 							<>
@@ -60,10 +61,10 @@ export default function DesignBasic() {
 			</S.SectionWrapper>
 			<S.SectionWrapper>
 				<S.Section>
-					<Drawer title={language?.layout} content={<Layout />} padContent />
+					<Drawer drawerKey="design-layout" title={language?.layout} content={<Layout />} padContent />
 				</S.Section>
 				<S.Section>
-					<Drawer title={language?.themes} content={<Themes />} padContent />
+					<Drawer drawerKey="design-themes" title={language?.themes} content={<Themes />} padContent />
 				</S.Section>
 				{!portalProvider?.permissions?.updatePortalMeta && (
 					<S.InfoWrapper className={'warning'}>

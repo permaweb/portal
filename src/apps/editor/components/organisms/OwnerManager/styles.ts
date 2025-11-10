@@ -6,6 +6,13 @@ export const Wrapper = styled.div`
 	flex-direction: column;
 	gap: 15px;
 	padding: 0 20px 20px 20px;
+
+	p {
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		color: ${(props) => props.theme.colors.font.alt1};
+	}
 `;
 
 export const InfoWrapper = styled.div`
@@ -63,11 +70,10 @@ export const TransferTitle = styled.h4`
 
 export const TableViewport = styled.div`
 	width: 100%;
-	overflow-x: auto;
 	margin-top: 8px;
 	border: 1px solid ${(p) => p.theme.colors.border.primary};
 	border-radius: 10px;
-	background: ${(p) => p.theme.colors.container.alt2};
+	background: ${(p) => p.theme.colors.container.alt1.background};
 `;
 
 export const TransferTable = styled.table`

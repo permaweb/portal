@@ -359,10 +359,11 @@ export default function Moderation() {
 						{/* Subscriptions Section */}
 						<S.SubscriptionsSection>
 							<Drawer
+								drawerKey="moderation-subscriptions"
 								title={`Subscriptions (${externalPortals.length})`}
 								content={
 									loadingSubscriptions ? (
-										<Loader relative />
+										<Loader sm relative />
 									) : externalPortals.length > 0 ? (
 										<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
 											{externalPortals.map((portal) => (
@@ -389,10 +390,11 @@ export default function Moderation() {
 						{/* Users Section */}
 						<S.UsersSection>
 							<Drawer
+								drawerKey="moderation-users"
 								title={`Users (${moderatedUsers.length})`}
 								content={
 									loadingUsers ? (
-										<Loader relative />
+										<Loader sm relative />
 									) : moderatedUsers.length > 0 ? (
 										<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
 											{moderatedUsers.map((user) => {
@@ -485,10 +487,11 @@ export default function Moderation() {
 						{/* Comments Section */}
 						<S.CommentsSection>
 							<Drawer
+								drawerKey="moderation-comments"
 								title={`Comments (${inactiveComments.length + moderatedComments.length})`}
 								content={
 									loadingComments ? (
-										<Loader relative />
+										<Loader sm relative />
 									) : inactiveComments.length > 0 || moderatedComments.length > 0 ? (
 										<S.CommentsList>
 											{inactiveComments.map((comment, index) => {

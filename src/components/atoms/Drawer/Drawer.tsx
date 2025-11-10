@@ -1,6 +1,8 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 
+import { useSettingsProvider } from 'editor/providers/SettingsProvider';
+
 import { ICONS } from 'helpers/config';
 
 import * as S from './styles';
@@ -12,12 +14,23 @@ export default function Drawer(props: {
 	actions?: React.ReactNode[];
 	noContentWrapper?: boolean;
 	padContent?: boolean;
+	drawerKey?: string;
 }) {
-	const [open, setOpen] = React.useState<boolean>(true);
+	const settingsProvider = useSettingsProvider();
+	const persistedState = props.drawerKey ? settingsProvider.settings.drawerStates[props.drawerKey] : undefined;
+	const [open, setOpen] = React.useState<boolean>(persistedState !== undefined ? persistedState : true);
+
+	const handleToggle = () => {
+		const newState = !open;
+		setOpen(newState);
+		if (props.drawerKey) {
+			settingsProvider.updateDrawerState(props.drawerKey, newState);
+		}
+	};
 
 	return (
 		<S.Wrapper className={props.noContentWrapper ? '' : 'border-wrapper-alt2'}>
-			<S.Action onClick={() => setOpen(!open)} open={open} noContentWrapper={props.noContentWrapper}>
+			<S.Action onClick={handleToggle} open={open} noContentWrapper={props.noContentWrapper}>
 				<S.Label>
 					<S.Title>
 						{props.icon && <ReactSVG src={props.icon} />}
