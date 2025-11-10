@@ -7,6 +7,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { ArticlePostContribute } from './ArticlePostContribute';
 import { ArticlePostCreator } from './ArticlePostCreator';
 import { ArticlePostDescription } from './ArticlePostDescription';
+import { ArticlePostImport } from './ArticlePostImport';
 import { ArticlePostReleaseDate } from './ArticlePostReleaseDate';
 import { ArticlePostStatus } from './ArticlePostStatus';
 import { ArticlePostThumbnail } from './ArticlePostThumbnail';
@@ -24,6 +25,14 @@ export default function ArticlePost(props: {
 
 	return (
 		<S.Wrapper>
+			<S.Section>
+				<S.SectionHeader>
+					<p>{language?.importFromExistingPost}</p>
+				</S.SectionHeader>
+				<S.SectionBody>
+					<ArticlePostImport />
+				</S.SectionBody>
+			</S.Section>
 			<S.Section>
 				<S.SectionHeader>
 					<p>{language?.featuredImage}</p>

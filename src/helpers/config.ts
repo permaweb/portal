@@ -16,10 +16,17 @@ export const LAYOUT = {
 import { ICONS, ICONS_SOCIAL } from './config/icons';
 export { ICONS, ICONS_SOCIAL };
 
+// TODO
+// export const AO_NODE = {
+// 	url: 'https://hb.portalinto.com',
+// 	authority: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
+// 	scheduler: 'NoZH3pueH0Cih6zjSNu_KRAcmg4ZJV1aGHKi0Pi5_Hc',
+// };
+
 export const AO_NODE = {
-	url: 'https://hb.portalinto.com',
-	authority: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
-	scheduler: 'NoZH3pueH0Cih6zjSNu_KRAcmg4ZJV1aGHKi0Pi5_Hc',
+	url: 'http://localhost:8734',
+	authority: 'mYJTM8VpIibDLuyGLQTcbcPy-LeOY48qzECADTUYfWc',
+	scheduler: 'mYJTM8VpIibDLuyGLQTcbcPy-LeOY48qzECADTUYfWc',
 };
 
 export const IS_TESTNET = import.meta.env.VITE_ARIO_TESTNET === 'true';

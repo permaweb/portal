@@ -2,9 +2,9 @@ import styled from 'styled-components';
 
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.div<{ sm: boolean | undefined }>`
+export const Wrapper = styled.div<{ sm: boolean | undefined; noMargin?: boolean }>`
 	width: 100%;
-	margin: 10px 0;
+	margin: ${(props) => (props.noMargin ? '0' : '10px 0')};
 	display: flex;
 	flex-direction: column;
 	position: relative;
@@ -20,6 +20,7 @@ export const TWrapper = styled.div`
 	align-items: center;
 	padding: 0 2.5px 0 0;
 	button {
+		margin: 0 -7.5px 0 0 !important;
 		svg {
 			margin: 0 0 1.5px 0;
 		}
