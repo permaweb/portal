@@ -258,7 +258,7 @@ export default function ArticlePostImport() {
 			const text = await file.text();
 			const blocks = parseMarkdownToBlocks(text);
 
-			const existingContent = currentPost.data.content || [];
+			const existingContent = currentPost.data?.content || [];
 			const updatedContent = [...existingContent, ...blocks];
 
 			dispatch(currentPostUpdate({ field: 'content', value: updatedContent }));
@@ -289,6 +289,10 @@ export default function ArticlePostImport() {
 						const updatedContent = [...existingContent, ...response.metadata.content];
 
 						dispatch(currentPostUpdate({ field: 'content', value: updatedContent }));
+
+						if (response.name) dispatch(currentPostUpdate({ field: 'title', value: response.name }));
+						if (response.metadata.thumbnail)
+							dispatch(currentPostUpdate({ field: 'thumbnail', value: response.metadata.thumbnail }));
 					}
 					addNotification(language.contentImported, 'success');
 				} catch (e: any) {
