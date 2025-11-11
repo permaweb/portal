@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { usePDF } from 'react-to-pdf';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 import Placeholder from 'engine/components/placeholder';
 import Tag from 'engine/components/tag';
@@ -9,6 +10,14 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
+import {
+	buildHtmlDoc,
+	contentToInnerHtml,
+	contentToMarkdown,
+	downloadBlob,
+	escapeHtml,
+	htmlDocToPlainText,
+} from 'helpers/export-options';
 import { checkValidAddress } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -26,7 +35,7 @@ export default function Post(props: any) {
 	const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || '');
 	const [content, setContent] = React.useState<any>(null);
 	const [isLoadingContent, setIsLoadingContent] = React.useState(false);
-
+	const { toPDF, targetRef } = usePDF({ filename: post?.name ? `${post.name}.pdf` : 'post.pdf' });
 	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
 
 	React.useEffect(() => {
@@ -44,11 +53,130 @@ export default function Post(props: any) {
 		});
 	}
 
-	React.useEffect(() => {
-		if (Name && post && !document.title.includes(post.name)) {
-			// @ts-ignore
-			document.title = `${post.name} - ${Name}`;
+	const titleForExport = post?.name ? String(post.name) : 'post';
+	const exportDisabled = isLoadingPost || isLoadingContent || !content || !Array.isArray(content);
+
+	const safe = (fn: () => void) => () => {
+		if (!exportDisabled) fn();
+	};
+
+	menuEntries.push(
+		{
+			icon: null,
+			label: 'Download .pdf',
+			onClick: safe(() => handleDownload('pdf')),
+		},
+		{
+			icon: null,
+			label: 'Download .md',
+			onClick: safe(() => handleDownload('markdown')),
+		},
+		{
+			icon: null,
+			label: 'Download .txt',
+			onClick: safe(() => handleDownload('text')),
+		},
+		{
+			icon: null,
+			label: 'Download .html',
+			onClick: safe(() => handleDownload('html')),
 		}
+	);
+
+	const handleDownload = async (fmt: 'html' | 'markdown' | 'text' | 'word' | 'pdf') => {
+		if (exportDisabled) return;
+
+		const author = !isLoadingProfile ? profile?.displayName || '' : '';
+		const dt = post?.dateCreated ? new Date(Number(post.dateCreated)) : null;
+		const dateStr = dt ? dt.toLocaleString() : '';
+		const tags: string[] = post?.metadata?.topics || [];
+
+		const headerHtml = `
+    <h1>${escapeHtml(post?.name || '')}</h1>
+    <div class="meta">
+      ${author ? escapeHtml(author) : ''} ${dateStr ? ` • ${escapeHtml(dateStr)}` : ''}
+    </div>
+    ${post?.metadata?.description ? `<p>${escapeHtml(post.metadata.description)}</p>` : ''}
+    ${
+			tags.length
+				? `<div class="tags">${tags.map((t) => `<span class="tag">${escapeHtml(String(t))}</span>`).join(' ')}</div>`
+				: ''
+		}
+  `;
+
+		const bodyInner = headerHtml + '\n' + contentToInnerHtml(content);
+		const fullHtml = buildHtmlDoc(`${post?.name || 'Post'} - ${portal?.Name || ''}`, bodyInner);
+
+		switch (fmt) {
+			case 'html':
+				downloadBlob(`${titleForExport}.html`, 'text/html;charset=utf-8', fullHtml);
+				break;
+			case 'markdown': {
+				const md =
+					`# ${post?.name || ''}\n\n` +
+					(post?.metadata?.description ? `${post.metadata.description}\n\n` : '') +
+					(tags.length ? `Tags: ${tags.join(', ')}\n\n` : '') +
+					contentToMarkdown(content);
+				downloadBlob(`${titleForExport}.md`, 'text/markdown;charset=utf-8', md);
+				break;
+			}
+			case 'text': {
+				const text = htmlDocToPlainText(fullHtml);
+				downloadBlob(`${titleForExport}.txt`, 'text/plain;charset=utf-8', text);
+				break;
+			}
+			case 'word': {
+				downloadBlob(`${titleForExport}.doc`, 'application/msword;charset=utf-8', fullHtml);
+				break;
+			}
+			case 'pdf': {
+				toPDF({
+					page: { format: 'a4', margin: 30 },
+					canvas: { useCORS: true },
+					filename: `${titleForExport}.pdf`,
+				});
+				break;
+			}
+		}
+	};
+
+	React.useEffect(() => {
+		if (!post || !Name) return;
+
+		const title = `${post.name} - ${Name}`;
+		const description = post?.metadata.description || 'Read this post on our portal.';
+		const image = post.metadata?.thumbnail ? getTxEndpoint(post.metadata?.thumbnail) : undefined;
+		const url = window.location.href;
+
+		document.title = title;
+
+		const created: HTMLMetaElement[] = [];
+
+		const ensureMeta = (attr: string, key: string, value: string) => {
+			let tag = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+			if (!tag) {
+				tag = document.createElement('meta');
+				tag.setAttribute(attr, key);
+				document.head.appendChild(tag);
+				created.push(tag);
+			}
+			tag.setAttribute('content', value);
+		};
+
+		ensureMeta('property', 'og:title', title);
+		ensureMeta('property', 'og:description', description);
+		if (image) ensureMeta('property', 'og:image', image);
+		ensureMeta('property', 'og:url', url);
+
+		ensureMeta('name', 'twitter:title', title);
+		ensureMeta('name', 'twitter:description', description);
+		if (image) ensureMeta('name', 'twitter:image', image);
+		ensureMeta('name', 'twitter:url', url);
+
+		return () => {
+			// when navigating away, remove the tags we created
+			created.forEach((tag) => tag.remove());
+		};
 	}, [Name, post]);
 
 	React.useEffect(() => {
@@ -68,96 +196,98 @@ export default function Post(props: any) {
 				});
 		}
 	}, [post]);
-
 	return (
 		<S.Wrapper>
 			<S.Post>
 				<ContextMenu entries={menuEntries} />
-				<S.TitleWrapper>
-					<h1>{isLoadingPost ? <Placeholder width="180" /> : post?.name}</h1>
-					{post?.metadata?.status === 'draft' && (
-						<S.DraftIndicator>
-							<S.DraftDot />
-							Draft
-						</S.DraftIndicator>
-					)}
-				</S.TitleWrapper>
-				{post?.metadata.description && <S.Description>{post?.metadata.description}</S.Description>}
-				<S.Meta>
-					<img
-						className="loadingAvatar"
-						onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-						src={
-							!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
-								? getTxEndpoint(profile.thumbnail)
-								: ICONS.user
-						}
-					/>
-					<span>{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}</span>&nbsp;
-					<span>
-						• {isLoadingPost ? <Placeholder width="40" /> : new Date(Number(post?.dateCreated)).toLocaleDateString()}{' '}
-						{isLoadingPost ? (
-							<Placeholder width="30" />
-						) : (
-							new Date(Number(post?.dateCreated)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+				<div ref={targetRef}>
+					<S.TitleWrapper>
+						<h1>{isLoadingPost ? <Placeholder width="180" /> : post?.name}</h1>
+						{post?.metadata?.status === 'draft' && (
+							<S.DraftIndicator>
+								<S.DraftDot />
+								Draft
+							</S.DraftIndicator>
 						)}
-					</span>
-				</S.Meta>
-				{!isLoadingPost && post?.metadata?.thumbnail && (
-					<S.Thumbnail
-						className="loadingThumbnail"
-						onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
-						src={!isLoadingPost && post?.metadata?.thumbnail ? getTxEndpoint(post.metadata.thumbnail) : ''}
-					/>
-				)}
-				<S.Tags>
-					{post &&
-						post?.metadata?.topics &&
-						post?.metadata?.topics.map((topic: any, index: number) => {
-							return <Tag key={index} tag={topic} />;
+					</S.TitleWrapper>
+					{post?.metadata.description && <S.Description>{post?.metadata.description}</S.Description>}
+					<S.Meta>
+						<img
+							className="loadingAvatar"
+							onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
+							src={
+								!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
+									? getTxEndpoint(profile.thumbnail)
+									: ICONS.user
+							}
+						/>
+						<span>{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}</span>&nbsp;
+						<span>
+							• {isLoadingPost ? <Placeholder width="40" /> : new Date(Number(post?.dateCreated)).toLocaleDateString()}{' '}
+							{isLoadingPost ? (
+								<Placeholder width="30" />
+							) : (
+								new Date(Number(post?.dateCreated)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+							)}
+						</span>
+					</S.Meta>
+					{!isLoadingPost && post?.metadata?.thumbnail && (
+						<S.Thumbnail
+							className="loadingThumbnail"
+							onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
+							src={!isLoadingPost && post?.metadata?.thumbnail ? getTxEndpoint(post.metadata.thumbnail) : ''}
+						/>
+					)}
+					<S.Tags>
+						{post &&
+							post?.metadata?.topics &&
+							post?.metadata?.topics.map((topic: any, index: number) => {
+								return <Tag key={index} tag={topic} />;
+							})}
+					</S.Tags>
+					{isLoadingContent && <p>Loading content...</p>}
+					{!isLoadingPost &&
+						!isLoadingContent &&
+						content &&
+						Array.isArray(content) &&
+						content.map((entry) => {
+							switch (entry.type) {
+								case 'header-1':
+									return <h1 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'header-2':
+									return <h2 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'header-3':
+									return <h3 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'header-4':
+									return <h4 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'header-5':
+									return <h5 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'header-6':
+									return <h6 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'image':
+									return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'video':
+									return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'paragraph':
+									return <p key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'quote':
+									return <blockquote key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'code':
+									return <code key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'unordered-list':
+									return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'ordered-list':
+									return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
+								case 'divider-solid':
+									return <div key={entry.id} className="article-divider-solid" />;
+								case 'divider-dashed':
+									return <div key={entry.id} className="article-divider-dashed" />;
+								default:
+									return <b key={entry.id}>{JSON.stringify(entry)}</b>;
+							}
 						})}
-				</S.Tags>
-				{isLoadingContent && <p>Loading content...</p>}
-				{!isLoadingPost &&
-					!isLoadingContent &&
-					content &&
-					Array.isArray(content) &&
-					content.map((entry) => {
-						switch (entry.type) {
-							case 'header-1':
-								return <h1 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'header-2':
-								return <h2 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'header-3':
-								return <h3 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'header-4':
-								return <h4 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'header-5':
-								return <h5 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'header-6':
-								return <h6 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'image':
-								return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'video':
-								return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'paragraph':
-								return <p key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'quote':
-								return <blockquote key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'code':
-								return <code key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'unordered-list':
-								return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'ordered-list':
-								return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content }} />;
-							case 'divider-solid':
-								return <div key={entry.id} className="article-divider-solid" />;
-							case 'divider-dashed':
-								return <div key={entry.id} className="article-divider-dashed" />;
-							default:
-								return <b key={entry.id}>{JSON.stringify(entry)}</b>;
-						}
-					})}
+				</div>
 			</S.Post>
 			<Comments commentsId={post?.metadata?.comments} postAuthorId={post?.creator} />
 		</S.Wrapper>

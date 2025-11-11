@@ -358,6 +358,12 @@ export const PortalDropdown = styled.div`
 	padding: 11.5px 10px;
 `;
 
+export const PDropdownInvites = styled.div`
+	margin: 7.5px 0 0 0;
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+	padding: 10px 0 0 0;
+`;
+
 export const PDropdownHeader = styled.div`
 	padding: 0 7.5px;
 	p {
@@ -378,6 +384,7 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 		height: 40px;
 		width: 100%;
 		display: flex;
+		gap: 20px;
 		align-items: center;
 		justify-content: space-between;
 		cursor: pointer;
@@ -385,6 +392,7 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 		border-radius: ${STYLING.dimensions.radius.alt4};
 		transition: all 100ms;
 		padding: 0 10px;
+
 		p {
 			color: ${(props) => props.theme.colors.font.primary} !important;
 			font-size: ${(props) => props.theme.typography.size.xSmall} !important;
@@ -396,6 +404,7 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 			max-width: 85%;
 			overflow: hidden;
 		}
+
 		svg {
 			height: 17.5px;
 			width: 17.5px;
@@ -403,11 +412,63 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 			color: ${(props) => props.theme.colors.font.alt1};
 			fill: ${(props) => props.theme.colors.font.alt1};
 		}
+
 		img {
 			height: 22.5px;
 			width: 22.5px;
 			margin: 0 12.5px 0 0;
 		}
+
+		&:hover {
+			background: ${(props) => props.theme.colors.container.primary.active};
+		}
+	}
+`;
+
+export const PDropdownAction = styled.div`
+	button {
+		height: 40px;
+		width: 100%;
+		display: flex;
+		gap: 20px;
+		align-items: center;
+		justify-content: space-between;
+		cursor: pointer;
+		background: transparent;
+		border-radius: ${STYLING.dimensions.radius.alt4};
+		transition: all 100ms;
+		padding: 0 10px;
+
+		p {
+			color: ${(props) => props.theme.colors.font.primary} !important;
+			font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
+			font-family: ${(props) => props.theme.typography.family.primary} !important;
+			display: block;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			max-width: 85%;
+			overflow: hidden;
+		}
+
+		.info {
+			padding: 2.5px 7.5px !important;
+		}
+
+		svg {
+			height: 17.5px;
+			width: 17.5px;
+			margin: 2.5px 0 0 0;
+			color: ${(props) => props.theme.colors.font.alt1};
+			fill: ${(props) => props.theme.colors.font.alt1};
+		}
+
+		img {
+			height: 22.5px;
+			width: 22.5px;
+			margin: 0 12.5px 0 0;
+		}
+
 		&:hover {
 			background: ${(props) => props.theme.colors.container.primary.active};
 		}

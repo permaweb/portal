@@ -44,6 +44,7 @@ export const HeaderContent = styled.div<{ $layout: any; maxWidth: number }>`
 	position: relative;
 	width: 100%;
 	height: 100%;
+	background: red;
 `;
 
 export const Logo = styled.div<{ $layout: any }>`

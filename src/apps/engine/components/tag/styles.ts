@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const Tag = styled.div`
-	background: rgba(var(--color-background), 1);
+	background: rgba(var(--color-primary), 1);
 	color: rgba(var(--color-primary-contrast), 1);
 	border: 1px solid rgba(var(--color-border), 1);
 	border-radius: var(--border-radius);

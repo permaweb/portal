@@ -89,6 +89,7 @@ export const Wrapper = styled.div`
 	p {
 		font-size: var(--font-size-large);
 		font-weight: 400;
+		color: rgba(var(--color-primary), 1);
 	}
 
 	a {
@@ -122,6 +123,12 @@ export const Wrapper = styled.div`
 		font-weight: 600;
 		display: block;
 		padding: 12px 15px;
+	}
+
+	ul,
+	li,
+	ol {
+		color: rgba(var(--color-primary), 1);
 	}
 
 	.portal-media-wrapper {
@@ -188,6 +195,7 @@ export const Post = styled.div`
 `;
 
 export const Description = styled.p`
+	color: rgba(var(--color-primary), 1);
 	font-size: var(--font-size-large);
 	font-weight: 600 !important;
 	margin-bottom: var(--spacing-l);
@@ -197,6 +205,7 @@ export const Meta = styled.div`
 	display: flex;
 	align-items: center;
 	margin-bottom: 10px;
+	color: rgba(var(--color-primary), 1);
 
 	img {
 		width: 20px;

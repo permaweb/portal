@@ -40,6 +40,11 @@ export default function IconButton(props: {
 					wrapper: S.Alt1,
 				};
 				break;
+			case 'alt2':
+				buttonObj = {
+					wrapper: S.Alt2,
+				};
+				break;
 			default:
 				buttonObj = {
 					wrapper: S.Primary,

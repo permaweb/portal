@@ -1,4 +1,9 @@
 export const es = {
+	// === UNTRANSLATED START ===
+	// TODO: translate
+	createFirstPortal: `Create Your First Portal`,
+	joinPortal: `Join Portal`,
+	// === UNTRANSLATED END ===
 	activate: `Activar`,
 	add: `Agregar`,
 	addBlock: 'Agregar un bloque',
@@ -247,10 +252,10 @@ export const es = {
 	logoDeleteConfirmation: `Sí, eliminar logo`,
 	logoDeleteConfirmationInfo: `¿Estás seguro de que deseas eliminar el logo de tu sitio?`,
 	logoUpdated: `Logo actualizado`,
-	markAsPending: `Marcar como pendiente`,
 	manage: `Administrar`,
 	manageOwner: `Administrar propietario`,
 	manageUser: `Administrar usuario`,
+	markAsPending: `Marcar como pendiente`,
 	max: `Máximo`,
 	maxCharsReached: `Límite de caracteres alcanzado`,
 	media: `Medios`,

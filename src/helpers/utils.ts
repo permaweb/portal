@@ -2,7 +2,7 @@ import Arweave from 'arweave';
 import { ARIOToken, mARIOToken } from '@ar.io/sdk';
 
 import { FALLBACK_GATEWAY, STORAGE, URLS } from './config';
-import { PortalAssetType, PortalDomainType, PortalUserType } from './types';
+import { PortalAssetType, PortalDomainType, PortalHeaderType, PortalUserType } from './types';
 
 export function checkValidAddress(address: string | null) {
 	if (!address) return false;
@@ -468,4 +468,10 @@ export function isValidHTML(content: string) {
 export function cleanHTMLContent(content: string): string {
 	if (!content) return '';
 	return content.replace(/[\n\t]+/g, '').trim();
+}
+
+export function isOnlyPortal(portals: PortalHeaderType[], profileId: string): boolean {
+	if (!portals || portals.length === 0) return false;
+	if (portals.length === 1 && portals[0].id === profileId) return true;
+	return false;
 }

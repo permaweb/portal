@@ -46,6 +46,7 @@ export default function Media(props: {
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [showRemoveConfirmation, setShowRemoveConfirmation] = React.useState<boolean>(false);
+	const [contentType, setContentType] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
 		if (props.portal) {
@@ -59,40 +60,42 @@ export default function Media(props: {
 
 	React.useEffect(() => {
 		(async function () {
-			if (media instanceof File && arProvider.wallet) {
-				const result = await calculateUploadCost(media);
-
-				if (result) {
-					if (!result.requiresConfirmation && props.type === 'icon') {
-						const mediaValue =
-							props.type === 'icon'
-								? props.portal?.icon
-								: props.type === 'logo'
-								? props.portal?.logo
-								: props.portal?.wallpaper;
-						if (!mediaValue) await handleSubmit();
-					}
-					console.log(result);
+			if (checkValidAddress(media as any)) {
+				try {
+					const response = await fetch(getTxEndpoint(media as string));
+					const contentTypeHeader = response.headers.get('Content-Type');
+					setContentType(contentTypeHeader);
+				} catch (e: any) {
+					console.error(e);
 				}
 			}
 		})();
-	}, [media, props.portal, arProvider.wallet, calculateUploadCost]);
+	}, [media]);
+
+	React.useEffect(() => {
+		(async function () {
+			if (props.hideActions && media instanceof File && arProvider.wallet) {
+				const result = await calculateUploadCost(media);
+				if (result && !result.requiresConfirmation) await handleSubmit();
+			}
+		})();
+	}, [media, props.portal, props.hideActions, arProvider.wallet, calculateUploadCost]);
 
 	const unauthorized = props.portal?.id && !portalProvider.permissions?.updatePortalMeta;
 
 	async function handleSubmit(opts?: { remove?: boolean }) {
-		if (!unauthorized && arProvider.wallet && permawebProvider.profile?.id) {
+		if (arProvider.wallet) {
 			setLoading(true);
 
 			try {
 				let response: string | null;
 
-				if (props.portal?.id) {
+				if (props.portal?.id && !unauthorized) {
 					let data: any = {
 						Name: portalProvider.current.name,
 					};
 
-					const mediaKey = props.type === 'icon' ? 'Icon' : props.type === 'logo' ? 'Logo' : 'Wallpaper';
+					const mediaKey = props.type === 'icon' ? 'Thumbnail' : props.type === 'logo' ? 'Banner' : 'Wallpaper';
 
 					if (media && !opts?.remove) {
 						try {
@@ -183,9 +186,7 @@ export default function Media(props: {
 			const mediaSrc =
 				media instanceof File ? URL.createObjectURL(media) : checkValidAddress(media) ? getTxEndpoint(media) : media;
 
-			const isSvg =
-				(media instanceof File && media.type === 'image/svg+xml') ||
-				(typeof media === 'string' && props.type === 'logo');
+			const isSvg = (media instanceof File && media.type === 'image/svg+xml') || contentType?.includes('svg');
 
 			return (
 				<>
@@ -210,7 +211,7 @@ export default function Media(props: {
 		const assetSrc = props.type === 'icon' ? ICONS.icon : props.type === 'logo' ? ICONS.image : ICONS.image;
 		const uploadText =
 			props.type === 'icon'
-				? language?.upload
+				? language?.uploadIcon
 				: props.type === 'logo'
 				? language?.uploadLogo
 				: language?.uploadWallpaper;
@@ -309,14 +310,13 @@ export default function Media(props: {
 						<Modal
 							header={`${language?.upload} ${media instanceof File ? media.name : 'Media'}`}
 							handleClose={() => handleClearUpload()}
-							className={'modal-wrapper'}
+							className={'modal-wrapper scroll-wrapper-hidden'}
 						>
 							<TurboUploadConfirmation
 								uploadCost={uploadCost}
 								uploadDisabled={unauthorized || loading}
 								handleUpload={handleSubmit}
 								handleCancel={() => handleClearUpload()}
-								message={'-'}
 								insufficientBalance={insufficientBalance}
 							/>
 						</Modal>

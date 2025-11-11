@@ -11,7 +11,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { ICONS, STYLING, URLS } from 'helpers/config';
 import { PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
-import { formatAddress, resolvePrimaryDomain } from 'helpers/utils';
+import { formatAddress, isOnlyPortal, resolvePrimaryDomain } from 'helpers/utils';
 import { checkWindowCutoff } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -34,7 +34,9 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
 	const [showPortalDropdown, setShowPortalDropdown] = React.useState<boolean>(false);
+	const [loading, setLoading] = React.useState<boolean>(false);
 	const [portalUpdating, setPortalUpdating] = React.useState<boolean>(false);
+	const [pendingPortalId, setPendingPortalId] = React.useState<string | null>(null);
 	const [isResizing, setIsResizing] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
@@ -70,6 +72,23 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 		return () => window.removeEventListener('scroll', handleScroll);
 	}, [theme.colors.border.primary]);
+
+	React.useEffect(() => {
+		if (pendingPortalId && permawebProvider.profile?.portals) {
+			setLoading(true);
+			const hasJoinedPortal = permawebProvider.profile.portals.find(
+				(portal: PortalHeaderType) => portal.id === pendingPortalId
+			);
+
+			if (hasJoinedPortal) {
+				navigate(`${URLS.base}${pendingPortalId}`);
+				setLoading(false);
+				setPendingPortalId(null);
+
+				window.location.reload();
+			}
+		}
+	}, [pendingPortalId, permawebProvider.profile?.portals, navigate]);
 
 	const paths = React.useMemo(() => {
 		const hash = window.location.hash;
@@ -281,6 +300,31 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		}
 	}
 
+	async function joinPortal(portalId: string) {
+		if (portalId && permawebProvider.profile?.id) {
+			setShowPortalDropdown(false);
+			setLoading(true);
+			try {
+				const profileUpdateId = await permawebProvider.libs.joinZone(
+					{
+						zoneToJoinId: portalId,
+						storePath: 'Portals',
+					},
+					permawebProvider.profile.id
+				);
+
+				console.log(`Profile update: ${profileUpdateId}`);
+
+				setPendingPortalId(portalId);
+				permawebProvider.refreshProfile();
+			} catch (e: any) {
+				console.error(e);
+				setPendingPortalId(null);
+			}
+			setLoading(false);
+		}
+	}
+
 	const portal = React.useMemo(() => {
 		if (portalProvider.current?.id) {
 			return (
@@ -297,7 +341,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						>
 							<span>{portalProvider.current ? portalProvider.current.name : '-'}</span>
 							<ReactSVG src={ICONS.arrow} />
-							{portalProvider.updateAvailable && <S.UpdateNotification>1</S.UpdateNotification>}
+							{(portalProvider.updateAvailable || portalProvider.invites?.length > 0) && (
+								<S.UpdateNotification>
+									{(portalProvider.updateAvailable ? 1 : 0) + (portalProvider.invites?.length || 0)}
+								</S.UpdateNotification>
+							)}
 						</S.Portal>
 						{showPortalDropdown && (
 							<S.PortalDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper-hidden'}>
@@ -309,12 +357,17 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										{portalProvider.portals.map((portal: PortalHeaderType) => {
 											const hash = window.location.hash;
 											const parts = hash.split('/').filter(Boolean);
-											const currentId = parts[1] || ''; // portal id
-											let section = parts[2] || ''; // say design, posts, media, setup etc sub navigation
-											let afterSection = parts[3] || ''; // say post id or page id
-											if (afterSection) section = ''; // special case for editor
+
+											const currentId = parts[1] || ''; // Portal ID
+
+											let section = parts[2] || ''; // Sub-Navigation, Posts, Media, Setup, Etc
+											let afterSection = parts[3] || ''; // Post ID / Page ID
+
+											if (afterSection) section = ''; // Special case for Editor
+
 											const active = portalProvider.current ? currentId === portal.id : false;
 											const path = `${URLS.base}${portal.id}/${section}`;
+
 											return (
 												<S.PDropdownLink key={portal.id} active={active} onClick={() => setShowPortalDropdown(false)}>
 													<Link to={path} onClick={(e) => handleNavigate(e, path)}>
@@ -324,7 +377,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 																{portalProvider.updateAvailable ? (
 																	<Button
 																		type={'alt4'}
-																		label={`1 ${language.updateAvailable}`}
+																		label={`${language.updateAvailable}`}
 																		handlePress={(e: any) => {
 																			e.stopPropagation();
 																			e.preventDefault();
@@ -344,6 +397,32 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 											);
 										})}
 									</S.PDropdownBody>
+								)}
+								{portalProvider.invites?.length > 0 && (
+									<S.PDropdownInvites>
+										<S.PDropdownHeader>
+											<p>{language?.invites}</p>
+										</S.PDropdownHeader>
+										<S.PDropdownBody>
+											{portalProvider.invites.map((portal: PortalHeaderType) => {
+												return (
+													<S.PDropdownAction key={portal.id} onClick={() => setShowPortalDropdown(false)}>
+														<button
+															onClick={(e) => {
+																e.stopPropagation();
+																joinPortal(portal.id);
+															}}
+														>
+															<p>{portal.name ?? formatAddress(portal.id, false)}</p>
+															<div className={'info'}>
+																<span className={'join-portal-info'}>{language?.joinPortal}</span>
+															</div>
+														</button>
+													</S.PDropdownAction>
+												);
+											})}
+										</S.PDropdownBody>
+									</S.PDropdownInvites>
 								)}
 								<S.PDropdownFooter>
 									<button
@@ -382,10 +461,12 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										<ReactSVG src={ICONS.add} />
 										{language?.createPortal}
 									</button>
-									<button onClick={(e: any) => handleNavigate(e, URLS.base)}>
-										<ReactSVG src={ICONS.disconnect} />
-										{language?.portalsReturn}
-									</button>
+									{!isOnlyPortal(portalProvider.portals, permawebProvider.profile?.id) && (
+										<button onClick={(e: any) => handleNavigate(e, URLS.base)}>
+											<ReactSVG src={ICONS.disconnect} />
+											{language?.portalsReturn}
+										</button>
+									)}
 								</S.PDropdownFooter>
 							</S.PortalDropdown>
 						)}
@@ -409,11 +490,13 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		portalProvider.current?.id,
 		portalProvider.current?.name,
 		portalProvider.updating,
+		permawebProvider.profile?.id,
 		languageProvider?.current,
 	]);
 
 	return (
 		<>
+			{loading && <Loader message={`${language?.loading}...`} />}
 			{portalUpdating && <Loader message={`${language.updatingPortal}...`} />}
 			{panel}
 			<S.Header

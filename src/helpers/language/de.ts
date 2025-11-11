@@ -1,4 +1,9 @@
 export const de = {
+	// === UNTRANSLATED START ===
+	// TODO: translate
+	createFirstPortal: `Create Your First Portal`,
+	joinPortal: `Join Portal`,
+	// === UNTRANSLATED END ===
 	activate: `Aktivieren`,
 	add: `Hinzufügen`,
 	addBlock: `Block hinzufügen`,
@@ -64,9 +69,9 @@ export const de = {
 	checkoutCurrentBalance: `Aktuelles Guthaben:`,
 	checkoutDomainName: `Domain-Name:`,
 	checkoutFinalBalance: `Endguthaben:`,
-	checkPost: `Beitrag überprüfen`,
 	checkoutRegistrationPeriod: `Registrierungszeitraum:`,
 	checkoutTotalDue: `Gesamt fällig:`,
+	checkPost: `Beitrag überprüfen`,
 	chooseAppearance: `Design auswählen`,
 	choosePayment: `Zahlungsart wählen`,
 	clear: `Löschen`,
@@ -247,10 +252,10 @@ export const de = {
 	logoDeleteConfirmation: `Ja, Logo entfernen`,
 	logoDeleteConfirmationInfo: `Möchten Sie Ihr Website-Logo wirklich entfernen?`,
 	logoUpdated: `Logo aktualisiert`,
-	markAsPending: `Als ausstehend markieren`,
 	manage: `Verwalten`,
 	manageOwner: `Eigentümer verwalten`,
 	manageUser: `Benutzer verwalten`,
+	markAsPending: `Als ausstehend markieren`,
 	max: `Max`,
 	maxCharsReached: `Maximale Zeichenanzahl erreicht`,
 	media: `Medien`,
@@ -428,8 +433,8 @@ export const de = {
 	sortNewestToOldest: `Neueste zuerst`,
 	sortOldestToNewest: `Älteste zuerst`,
 	status: `Status`,
-	submitForReview: `Zur Überprüfung einreichen`,
 	submit: `Absenden`,
+	submitForReview: `Zur Überprüfung einreichen`,
 	successfullyFunded: `Aufgeladen`,
 	successfullyRevokedCredits: `Credits widerrufen`,
 	switchTo: `Wechseln zu`,

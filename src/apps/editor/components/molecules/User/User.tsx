@@ -146,7 +146,7 @@ export default function User(props: {
 							</S.UserActions>
 						)}
 						{isPortalOwner ? (
-							<S.UserRole key="Owner" role="Owner">
+							<S.UserRole key={'Owner'} role={'Owner'}>
 								<span>Owner</span>
 							</S.UserRole>
 						) : (
