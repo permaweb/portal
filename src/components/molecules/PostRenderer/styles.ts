@@ -134,8 +134,9 @@ export const Wrapper = styled.div`
 	.portal-media-wrapper {
 		display: flex;
 		flex-direction: column;
-		margin: 10px 0 20px 0;
+		margin: 10px auto 20px auto;
 		gap: 6px;
+		width: 100%;
 
 		p {
 			width: 100%;

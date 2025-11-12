@@ -20,15 +20,19 @@ type ContentEntryType =
 	| 'paragraph'
 	| 'quote'
 	| 'code'
+	| 'html'
 	| 'unordered-list'
 	| 'ordered-list'
 	| 'divider-solid'
-	| 'divider-dashed';
+	| 'divider-dashed'
+	| 'spacer-horizontal'
+	| 'spacer-vertical';
 
 type ContentEntry = {
 	id: string | number;
 	type: ContentEntryType;
 	content?: string;
+	data?: any;
 };
 
 type PostMeta = {
@@ -156,6 +160,8 @@ export default function PostRenderer(props: PostRendererProps) {
 							return <blockquote key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						case 'code':
 							return <code key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+						case 'html':
+							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						case 'unordered-list':
 							return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						case 'ordered-list':
@@ -164,6 +170,10 @@ export default function PostRenderer(props: PostRendererProps) {
 							return <div key={entry.id} className="article-divider-solid" />;
 						case 'divider-dashed':
 							return <div key={entry.id} className="article-divider-dashed" />;
+						case 'spacer-vertical':
+							return <div key={entry.id} style={{ height: `${entry.data?.height || 50}px` }} />;
+						case 'spacer-horizontal':
+							return <div key={entry.id} style={{ flex: entry.data?.width || 1 }} />;
 						default:
 							return <b key={entry.id}>{JSON.stringify(entry)}</b>;
 					}
