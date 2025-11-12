@@ -26,6 +26,7 @@ export default function Comment(props: any) {
 	const [commentData, setCommentData] = React.useState(data);
 	const [isUpdating, setIsUpdating] = React.useState(false);
 	const [isEditSubmitting, setIsEditSubmitting] = React.useState(false);
+	const prevReplyCountRef = React.useRef(data?.replies?.length || 0);
 	const { profile: user, libs } = usePermawebProvider();
 	const { portal, portalId } = usePortalProvider();
 	const moderationId = portal?.Moderation;
@@ -33,6 +34,15 @@ export default function Comment(props: any) {
 
 	const isCommentBlocked = blockedComments.has(commentData.id);
 	const isUserBlocked = blockedUsers.has(commentData.creator);
+
+	React.useEffect(() => {
+		setCommentData(data);
+		const currentReplyCount = data?.replies?.length || 0;
+		if (currentReplyCount > prevReplyCountRef.current) {
+			setShowReplies(true);
+		}
+		prevReplyCountRef.current = currentReplyCount;
+	}, [data]);
 
 	const userIsAdmin = ['Admin'].some((r) => user?.roles?.includes(r));
 	const userIsModerator = ['Moderator'].some((r) => user?.roles?.includes(r));
