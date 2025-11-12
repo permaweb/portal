@@ -29,19 +29,6 @@ export const Comment = styled.div<{ $level: number; $status?: string }>`
 	`}
 `;
 
-export const Avatar = styled.div`
-	flex-shrink: 0;
-	width: 46px;
-	height: 46px;
-	background: rgba(var(--color-text), 0.5);
-	border-radius: 50%;
-	img {
-		width: 46px;
-		height: 46px;
-		border-radius: 50%;
-	}
-`;
-
 export const Content = styled.div`
 	position: relative;
 	width: 100%;
@@ -246,7 +233,7 @@ export const RepliesToggle = styled.button<{ $level: number }>`
 	background: transparent;
 	border: none;
 	outline: none;
-	color: rgba(var(--color-primary), 1);
+	color: rgba(var(--color-text), 0.8);
 	font-size: var(--font-size-normal);
 	font-weight: 600;
 	cursor: pointer;
@@ -254,6 +241,7 @@ export const RepliesToggle = styled.button<{ $level: number }>`
 
 	&:hover {
 		opacity: 0.8;
+		color: rgba(var(--color-text), 1);
 	}
 
 	&:focus {

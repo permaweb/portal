@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import Avatar from 'engine/components/avatar';
 import useNavigate from 'engine/helpers/preview';
 import { useComments } from 'engine/hooks/comments';
 import { useProfile } from 'engine/hooks/profiles';
@@ -20,8 +21,12 @@ export default function PostPreview_Default(props: any) {
 	const { layout, post } = props;
 	const { profile, isLoading: isLoadingProfile } = useProfile(post?.creator || null);
 	const { comments, isLoading: isLoadingComments, error: errorComments } = useComments(post?.id || null, true);
-
-	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+	const roles = Array.isArray(user?.roles)
+		? user.roles
+		: user?.roles
+		? [user.roles] // if it’s a single string
+		: [];
+	const canEditPost = user?.owner && roles && ['Admin', 'Moderator'].some((r) => roles?.includes(r));
 
 	// Check if post creator is the portal itself
 	const isPortalCreator = post?.creator === portal?.id;
@@ -46,9 +51,7 @@ export default function PostPreview_Default(props: any) {
 		return (
 			<S.Comment>
 				<S.CommentHeader>
-					<S.Avatar>
-						<img src={profile?.thumbnail ? getTxEndpoint(profile.thumbnail) : ''} />
-					</S.Avatar>
+					<Avatar profile={profile} isLoading={isLoadingProfile} size={18} />
 					<S.Username>{profile?.displayName || '[[displayName]]'}</S.Username>
 					<S.Date>{`${new Date(comment?.dateCreated || 'now').toLocaleDateString()} ${new Date(
 						comment.dateCreated
@@ -102,11 +105,6 @@ export default function PostPreview_Default(props: any) {
 					)}
 				</S.TitleWrapper>
 				<S.Meta>
-					<S.SourceIcon
-						className="loadingAvatar"
-						onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-						src={displayThumbnail && checkValidAddress(displayThumbnail) ? getTxEndpoint(displayThumbnail) : ICONS.user}
-					/>
 					<S.Author
 						onClick={() =>
 							!isPortalCreator &&
@@ -114,6 +112,15 @@ export default function PostPreview_Default(props: any) {
 						}
 						style={{ cursor: isPortalCreator ? 'default' : 'pointer' }}
 					>
+						<Avatar
+							src={
+								displayThumbnail && checkValidAddress(displayThumbnail) ? getTxEndpoint(displayThumbnail) : undefined
+							}
+							profile={isPortalCreator ? { id: portal?.id } : profile}
+							isLoading={isLoadingProfile}
+							size={20}
+							hoverable={true}
+						/>
 						{displayName}
 					</S.Author>
 					<S.Date>

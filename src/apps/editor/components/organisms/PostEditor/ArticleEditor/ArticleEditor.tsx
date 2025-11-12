@@ -61,7 +61,6 @@ export default function ArticleEditor(props: {
 	async function loadPostData() {
 		if (portalProvider.current?.id) {
 			if (assetId) {
-				console.log('Loading post with assetId:', assetId);
 				if (!checkValidAddress(assetId)) navigate(URLS.postCreateArticle(portalProvider.current.id));
 
 				const hasCurrentPostData = currentPost.data.id === assetId && currentPost.data.title;
@@ -78,7 +77,7 @@ export default function ArticleEditor(props: {
 							message: `${props.staticPage ? language?.loadingPage : language?.loadingPost}...`,
 						},
 					});
-					const request: any = portalProvider.current.requests.find((req) => req.id === assetId);
+					const request: any = portalProvider.current?.requests?.find((req) => req.id === assetId);
 
 					try {
 						let source: any = null;

@@ -1,5 +1,6 @@
 // import React from 'react';
 import { NavLink } from 'react-router-dom';
+import Avatar from 'engine/components/avatar';
 import Placeholder from 'engine/components/placeholder';
 import { usePosts } from 'engine/hooks/posts';
 import { useProfile } from 'engine/hooks/profiles';
@@ -41,15 +42,7 @@ export default function CategorySpotlight(props: any) {
 					<S.LeftMeta>
 						<S.LeftTitle>{isLoadingPosts ? <Placeholder /> : post.name}</S.LeftTitle>
 						<S.LeftSource>
-							<img
-								className="loadingAvatar"
-								onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-								src={
-									!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
-										? getTxEndpoint(profile.thumbnail)
-										: ICONS.user
-								}
-							/>
+							<Avatar profile={profile} isLoading={isLoadingProfile} size={18} />
 							By <span>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</span>
 						</S.LeftSource>
 					</S.LeftMeta>
@@ -83,15 +76,7 @@ export default function CategorySpotlight(props: any) {
 							</span>
 						</S.RightTitle>
 						<S.RightSource>
-							<img
-								className="loadingAvatar"
-								onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-								src={
-									!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
-										? getTxEndpoint(profile.thumbnail)
-										: ICONS.user
-								}
-							/>
+							<Avatar profile={profile} isLoading={isLoadingProfile} size={18} />
 							By <span>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</span>
 						</S.RightSource>
 					</S.RightThumbnail>

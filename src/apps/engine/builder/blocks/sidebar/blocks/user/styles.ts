@@ -32,10 +32,7 @@ export const Avatar = styled.div`
 	bottom: -12px;
 	left: 10px;
 
-	img {
-		width: 52px;
-		height: 52px;
-		border-radius: 50%;
+	> div {
 		box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.6), 0 4px 10px 0 rgba(0, 0, 0, 0.6);
 	}
 `;

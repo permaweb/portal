@@ -89,7 +89,7 @@ export const Wrapper = styled.div`
 	p {
 		font-size: var(--font-size-large);
 		font-weight: 400;
-		color: rgba(var(--color-text), 1);
+		color: rgba(var(--color-primary), 1);
 	}
 
 	a {
@@ -217,6 +217,24 @@ export const Meta = styled.div`
 	span {
 		font-size: var(--font-size-default);
 		font-weight: 600;
+	}
+`;
+
+export const Author = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: rgba(var(--color-text), 1);
+	font-size: var(--font-size-default);
+	font-weight: 600;
+
+	&:hover {
+		cursor: pointer;
+		color: rgba(var(--color-primary), 1);
+
+		> div {
+			--avatar-opacity: 0.8;
+		}
 	}
 `;
 

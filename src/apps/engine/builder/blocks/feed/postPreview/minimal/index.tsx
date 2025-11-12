@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import Avatar from 'engine/components/avatar';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 import Placeholder from 'engine/components/placeholder';
 import useNavigate from 'engine/helpers/preview';
@@ -19,8 +20,12 @@ export default function PostPreview_Minimal(props: any) {
 	const { portal } = usePortalProvider();
 	const { layout, post } = props;
 	const { profile, isLoading: isLoadingProfile, error: errorProfile } = useProfile(post?.creator || null);
-
-	const canEditPost = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+	const roles = Array.isArray(user?.roles)
+		? user.roles
+		: user?.roles
+		? [user.roles] // if it’s a single string
+		: [];
+	const canEditPost = user?.owner && roles && ['Admin', 'Moderator'].some((r) => roles?.includes(r));
 
 	// Check if post creator is the portal itself
 	const isPortalCreator = post?.creator === portal?.id;
@@ -75,15 +80,6 @@ export default function PostPreview_Minimal(props: any) {
 					</S.TitleWrapper>
 					<p>{post?.metadata.description}</p>
 					<S.Meta>
-						<S.SourceIcon
-							className="loadingAvatar"
-							onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-							src={
-								!isLoadingProfile && displayThumbnail && checkValidAddress(displayThumbnail)
-									? getTxEndpoint(displayThumbnail)
-									: ICONS.user
-							}
-						/>
 						<S.Author
 							onClick={() =>
 								!isPortalCreator &&
@@ -91,6 +87,15 @@ export default function PostPreview_Minimal(props: any) {
 							}
 							style={{ cursor: isPortalCreator ? 'default' : 'pointer' }}
 						>
+							<Avatar
+								src={
+									displayThumbnail && checkValidAddress(displayThumbnail) ? getTxEndpoint(displayThumbnail) : undefined
+								}
+								profile={isPortalCreator ? { id: portal?.id } : profile}
+								isLoading={isLoadingProfile}
+								size={20}
+								hoverable={true}
+							/>
 							{isLoadingProfile ? <Placeholder width="100" /> : displayName}
 						</S.Author>
 						<S.Date>

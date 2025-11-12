@@ -1,5 +1,6 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
+import Avatar from 'engine/components/avatar';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 import Placeholder from 'engine/components/placeholder';
 import { useModeration } from 'engine/hooks/moderation';
@@ -7,8 +8,6 @@ import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -257,17 +256,7 @@ export default function Comment(props: any) {
 						<S.Spinner />
 					</S.LoadingOverlay>
 				)}
-				<S.Avatar>
-					<img
-						className="loadingAvatar"
-						onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-						src={
-							!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
-								? getTxEndpoint(profile.thumbnail)
-								: ICONS.user
-						}
-					/>
-				</S.Avatar>
+				<Avatar profile={profile} isLoading={isLoadingProfile} />
 				<S.Content>
 					<S.Meta>
 						<S.Username isPostAuthor={shouldHighlightAuthor}>
