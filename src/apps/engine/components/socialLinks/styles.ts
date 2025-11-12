@@ -11,13 +11,12 @@ export const Links = styled.div<{ $isFooter?: boolean }>`
 		margin: 10px 0;
 	`
 			: `
-		position: absolute;
-		top: 0;
-		right: 0;
 		display: flex;
+    align-items: center;
 		width: fit-content;
 		height: 100%;
 		z-index: 1;
+    gap: var(--spacing-s);
 
 		@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
 			left: 0;
@@ -28,10 +27,10 @@ export const Links = styled.div<{ $isFooter?: boolean }>`
 
 export const LinksList = styled.div<{ $isFooter?: boolean }>`
 	display: flex;
-	margin-left: ${(props) => (props.$isFooter ? '0' : 'auto')};
-	align-items: ${(props) => (props.$isFooter ? 'center' : 'flex-end')};
+	margin-left: ${(props) => (props.$isFooter ? '0' : '10px')};
+	margin-top: ${(props) => (props.$isFooter ? '0' : '5px')};
+	align-items: center;
 	gap: 15px;
-	margin-bottom: ${(props) => (props.$isFooter ? '0' : '12px')};
 	svg {
 		height: 20px;
 		fill: rgba(var(--color-text), 1);
@@ -44,7 +43,6 @@ export const LinksList = styled.div<{ $isFooter?: boolean }>`
 	}
 
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-		margin-bottom: ${(props) => (props.$isFooter ? '0' : '6px')};
 		svg {
 			height: 16px;
 		}

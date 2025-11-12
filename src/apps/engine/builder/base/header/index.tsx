@@ -100,13 +100,13 @@ export default function Header(props: any) {
 								<h1>{name}</h1>
 							</NavLink>
 						)}
-						<S.Actions>
+						<S.Actions $isLogo={Boolean(Logo)}>
 							<WalletConnect />
 							<S.ThemeToggle>
 								<Toggle theme state={settings?.theme === 'dark'} setState={() => setTheme()} />
 							</S.ThemeToggle>
+							<SocialLinks />
 						</S.Actions>
-						<SocialLinks />
 					</S.HeaderContent>
 				</S.HeaderContentWrapper>
 			</S.Header>

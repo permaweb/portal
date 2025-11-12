@@ -24,8 +24,6 @@ import {
 } from 'lexical';
 
 import { ICONS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
