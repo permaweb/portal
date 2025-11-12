@@ -8,6 +8,7 @@ import { useSettingsProvider as useEditorSettingsProvider } from 'editor/provide
 import { useSettingsProvider as useViewerSettingsProvider } from 'viewer/providers/SettingsProvider';
 
 import { Avatar } from 'components/atoms/Avatar';
+import { Checkbox } from 'components/atoms/Checkbox';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { ICONS } from 'helpers/config';
@@ -240,27 +241,52 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 					handleClose={() => setShowThemeSelector(false)}
 				>
 					<S.MWrapper className={'modal-wrapper'}>
-						{Object.entries(availableThemes).map(([key, theme]: any) => (
-							<S.MSection key={key}>
-								<S.ThemeSectionHeader>
-									<ReactSVG src={theme.icon} />
-									<p>{theme.label}</p>
-								</S.ThemeSectionHeader>
-								<S.ThemeSectionBody>
-									{theme.variants.map((variant: any) => (
-										<S.MSectionBodyElement key={variant.id} onClick={() => updateSettings('theme', variant.id as any)}>
-											<S.Preview background={variant.background} accent={variant.accent1}>
-												<div id={'preview-accent-1'} />
-											</S.Preview>
-											<div>
-												<S.Indicator active={settings.theme === variant.id} />
-												<p>{variant.name}</p>
-											</div>
-										</S.MSectionBodyElement>
-									))}
-								</S.ThemeSectionBody>
-							</S.MSection>
-						))}
+						<S.SystemSyncWrapper>
+							<Checkbox
+								checked={settings.syncWithSystem}
+								handleSelect={() => updateSettings('syncWithSystem', !settings.syncWithSystem)}
+								disabled={false}
+							/>
+							<span>{language?.syncWithSystem || 'Sync With System'}</span>
+						</S.SystemSyncWrapper>
+						{Object.entries(availableThemes).map(([key, theme]: any) => {
+							const isLightScheme = key === 'light';
+							const preferredTheme = isLightScheme ? settings.preferredLightTheme : settings.preferredDarkTheme;
+
+							// Use singular form when sync is enabled
+							const themeLabel = settings.syncWithSystem ? (isLightScheme ? 'Light Theme' : 'Dark Theme') : theme.label;
+
+							return (
+								<S.MSection key={key}>
+									<S.ThemeSectionHeader>
+										<ReactSVG src={theme.icon} />
+										<p>{themeLabel}</p>
+									</S.ThemeSectionHeader>
+									<S.ThemeSectionBody>
+										{theme.variants.map((variant: any) => {
+											const isActive = settings.syncWithSystem
+												? preferredTheme === variant.id
+												: settings.theme === variant.id;
+
+											return (
+												<S.MSectionBodyElement
+													key={variant.id}
+													onClick={() => updateSettings('theme', variant.id as any)}
+												>
+													<S.Preview background={variant.background} accent={variant.accent1}>
+														<div id={'preview-accent-1'} />
+													</S.Preview>
+													<div>
+														<S.Indicator active={isActive} />
+														<p>{variant.name}</p>
+													</div>
+												</S.MSectionBodyElement>
+											);
+										})}
+									</S.ThemeSectionBody>
+								</S.MSection>
+							);
+						})}
 					</S.MWrapper>
 				</Panel>
 			)}

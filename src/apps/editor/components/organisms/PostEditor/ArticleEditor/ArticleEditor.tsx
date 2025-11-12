@@ -231,7 +231,7 @@ export default function ArticleEditor(props: {
 					}
 				}
 				if (event.key === 'Backspace' && currentPost.editor.focusedBlock && !currentPost.editor.titleFocused) {
-					const currentBlockIndex = currentPost.data.content.findIndex(
+					const currentBlockIndex = currentPost?.data?.content?.findIndex(
 						(block: ArticleBlockType) => block.id === currentPost.editor.focusedBlock.id
 					);
 					const currentBlock = currentPost.data.content[currentBlockIndex];
@@ -277,7 +277,7 @@ export default function ArticleEditor(props: {
 					}
 				}
 				if (currentPost.editor.focusedBlock && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
-					const currentBlockIndex = currentPost.data.content.findIndex(
+					const currentBlockIndex = currentPost?.data?.content?.findIndex(
 						(block: ArticleBlockType) => block.id === currentPost.editor.focusedBlock.id
 					);
 					const currentBlock = currentPost.data.content[currentBlockIndex];

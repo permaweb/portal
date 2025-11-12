@@ -283,6 +283,20 @@ export const MWrapper = styled.div`
 	gap: 20px;
 `;
 
+export const SystemSyncWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 10px;
+
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
+`;
+
 export const MSection = styled.div``;
 
 export const ThemeSectionHeader = styled.div`

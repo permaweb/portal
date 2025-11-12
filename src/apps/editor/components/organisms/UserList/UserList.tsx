@@ -164,6 +164,7 @@ export default function UserList(props: { type: ViewLayoutType }) {
 		<S.Wrapper>
 			{props.type === 'header' ? (
 				<Drawer
+					drawerKey="portal-users"
 					title={language?.users}
 					content={getUsers()}
 					actions={[

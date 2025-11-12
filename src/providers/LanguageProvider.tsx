@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useSettingsProvider } from 'editor/providers/SettingsProvider';
+
 import { loadLanguage, loadLanguageAsync, LanguageEnum, LanguageTranslations } from 'helpers/language';
 
 type LanguageKey = keyof typeof LanguageEnum;
@@ -27,11 +29,11 @@ export function useLanguageProvider(): LanguageContextState {
 }
 
 export function LanguageProvider(props: LanguageProviderProps) {
+	const settingsProvider = useSettingsProvider();
 	const defaultLanguage = Object.keys(LanguageEnum)[0] as LanguageKey;
 
 	const [current, setCurrent] = React.useState<LanguageKey>(() => {
-		const savedLanguage = localStorage.getItem('appLanguage');
-		return (savedLanguage as LanguageKey) || defaultLanguage;
+		return (settingsProvider.settings.language as LanguageKey) || defaultLanguage;
 	});
 
 	const [translations, setTranslations] = React.useState<{ [key: string]: LanguageTranslations }>(() => {
@@ -63,10 +65,21 @@ export function LanguageProvider(props: LanguageProviderProps) {
 		loadTranslations();
 	}, []);
 
-	const handleLanguageChange = React.useCallback((newLanguage: LanguageKey) => {
-		setCurrent(newLanguage);
-		localStorage.setItem('appLanguage', newLanguage);
-	}, []);
+	// Sync language state with settings provider
+	React.useEffect(() => {
+		const settingsLanguage = settingsProvider.settings.language as LanguageKey;
+		if (settingsLanguage && settingsLanguage !== current) {
+			setCurrent(settingsLanguage);
+		}
+	}, [settingsProvider.settings.language, current]);
+
+	const handleLanguageChange = React.useCallback(
+		(newLanguage: LanguageKey) => {
+			setCurrent(newLanguage);
+			settingsProvider.updateSettings('language', newLanguage);
+		},
+		[settingsProvider]
+	);
 
 	const contextValue = React.useMemo(
 		() => ({
