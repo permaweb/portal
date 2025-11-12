@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import Avatar from 'engine/components/avatar';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
@@ -8,6 +9,7 @@ import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS } from 'helpers/config';
+import { getRedirect, urlify } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -16,6 +18,7 @@ import CommentAdd from '../commentAdd';
 import * as S from './styles';
 
 export default function Comment(props: any) {
+	const navigate = useNavigate();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const { data, level, commentsId, postAuthorId } = props;
@@ -26,6 +29,7 @@ export default function Comment(props: any) {
 	const [commentData, setCommentData] = React.useState(data);
 	const [isUpdating, setIsUpdating] = React.useState(false);
 	const [isEditSubmitting, setIsEditSubmitting] = React.useState(false);
+	const [showPortalMenu, setShowPortalMenu] = React.useState(false);
 	const prevReplyCountRef = React.useRef(data?.replies?.length || 0);
 	const { profile: user, libs } = usePermawebProvider();
 	const { portal, portalId } = usePortalProvider();
@@ -200,6 +204,29 @@ export default function Comment(props: any) {
 		}
 	}
 
+	function handleProfileClick() {
+		if (isLoadingProfile || !profile) return;
+
+		if (commentAuthorIsAdmin || commentAuthorIsModerator || commentAuthorIsContributor) {
+			navigate(getRedirect(`author/${profile.username ? urlify(profile.username) : profile.id}`));
+		} else if (profile.portals && profile.portals.length > 0) {
+			setShowPortalMenu(!showPortalMenu);
+		} else {
+			navigate(getRedirect(`author/${profile.username ? urlify(profile.username) : profile.id}`));
+		}
+	}
+
+	const portalMenuEntries: MenuItem[] = React.useMemo(() => {
+		if (!profile?.portals || profile.portals.length === 0) return [];
+		return profile.portals.map((portal: any) => ({
+			label: portal.Name || portal.id,
+			onClick: () => {
+				window.open(`https://portal.arweave.net/#/${portal.id}`, '_blank');
+				setShowPortalMenu(false);
+			},
+		}));
+	}, [profile]);
+
 	const menuEntries: MenuItem[] = [];
 
 	if ((commentAuthorIsActiveUser || (userIsAdmin && commentAuthorIsPortal)) && !isEditMode) {
@@ -266,15 +293,28 @@ export default function Comment(props: any) {
 						<S.Spinner />
 					</S.LoadingOverlay>
 				)}
-				<Avatar profile={profile} isLoading={isLoadingProfile} />
+				<S.AvatarWrapper onClick={handleProfileClick}>
+					<Avatar profile={profile} isLoading={isLoadingProfile} />
+				</S.AvatarWrapper>
 				<S.Content>
 					<S.Meta>
-						<S.Username isPostAuthor={shouldHighlightAuthor}>
-							{isLoadingProfile ? <Placeholder /> : profile?.displayName}
-							{(commentAuthorIsAdmin || commentAuthorIsPortal) && <ReactSVG src={ICONS.admin} title={language.admin} />}
-							{commentAuthorIsModerator && <ReactSVG src={ICONS.moderator} title={language.moderator} />}
-							{commentAuthorIsContributor && <ReactSVG src={ICONS.contributor} title={language.contributor} />}
-						</S.Username>
+						<S.UsernameWrapper>
+							<S.Username isPostAuthor={shouldHighlightAuthor} onClick={handleProfileClick}>
+								{isLoadingProfile ? <Placeholder /> : profile?.displayName}
+								{(commentAuthorIsAdmin || commentAuthorIsPortal) && (
+									<ReactSVG src={ICONS.admin} title={language.admin} />
+								)}
+								{commentAuthorIsModerator && <ReactSVG src={ICONS.moderator} title={language.moderator} />}
+								{commentAuthorIsContributor && <ReactSVG src={ICONS.contributor} title={language.contributor} />}
+							</S.Username>
+							{portalMenuEntries.length > 0 && (
+								<ContextMenu entries={portalMenuEntries}>
+									<S.PortalMenuTrigger $active={showPortalMenu}>
+										<ReactSVG src={ICONS.portal} />
+									</S.PortalMenuTrigger>
+								</ContextMenu>
+							)}
+						</S.UsernameWrapper>
 						{isEditMode && (
 							<S.EditingIndicator>
 								<ReactSVG src={ICONS.edit} />

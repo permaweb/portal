@@ -34,11 +34,26 @@ export const Content = styled.div`
 	width: 100%;
 `;
 
+export const AvatarWrapper = styled.div`
+	cursor: pointer;
+	transition: opacity 0.2s;
+
+	&:hover {
+		opacity: 0.8;
+	}
+`;
+
 export const Meta = styled.div`
 	display: flex;
 	align-items: flex-end;
 	font-size: var(--font-size-normal);
 	gap: 10px;
+`;
+
+export const UsernameWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 6px;
 `;
 
 export const Username = styled.span<{ isPostAuthor: boolean }>`
@@ -50,6 +65,12 @@ export const Username = styled.span<{ isPostAuthor: boolean }>`
 	background-color: ${(props) => (!props.isPostAuthor ? `unset` : `rgba(var(--color-primary), 1)`)};
 	padding: ${(props) => (!props.isPostAuthor ? 0 : `0 4px`)};
 	font-weight: 600;
+	cursor: pointer;
+	transition: opacity 0.2s;
+
+	&:hover {
+		opacity: 0.8;
+	}
 
 	div {
 		div {
@@ -60,6 +81,33 @@ export const Username = styled.span<{ isPostAuthor: boolean }>`
 				margin-bottom: -1.5px;
 			}
 		}
+	}
+`;
+
+export const PortalMenuTrigger = styled.div<{ $active: boolean }>`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	cursor: pointer;
+	opacity: ${(props) => (props.$active ? 1 : 0.6)};
+	transition: opacity 0.2s;
+
+	&:hover {
+		opacity: 1;
+	}
+
+	div {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	svg {
+		width: 14px;
+		height: 14px;
+		fill: rgba(var(--color-primary), 1);
 	}
 `;
 
