@@ -9,7 +9,7 @@ export default function Content(props: any) {
 
 	return (
 		<S.ContentWrapper id="Content">
-			<S.Content $layout={layout.content} maxWidth={layout?.basics?.maxWidth}>
+			<S.Content $layout={layout?.content} maxWidth={layout?.basics?.maxWidth}>
 				<Routes>
 					<Route path=":portalId/post/:postId" element={<Page />} />
 					<Route path=":portalId/feed/:pageId" element={<Page />} />

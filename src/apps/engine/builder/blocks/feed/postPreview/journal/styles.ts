@@ -136,9 +136,17 @@ export const Source = styled.div`
 `;
 
 export const Author = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 6px;
+
 	&:hover {
 		cursor: pointer;
 		color: rgba(var(--color-primary), 1);
+
+		> div {
+			--avatar-opacity: 0.8;
+		}
 	}
 `;
 
@@ -175,25 +183,6 @@ export const CommentText = styled.div`
 	opacity: 0.8;
 `;
 
-export const Avatar = styled.div`
-	width: 18px;
-	height: 18px;
-	background: rgba(var(--color-text), 0.5);
-	border-radius: 50%;
-
-	img {
-		width: 18px;
-		height: 18px;
-		border-radius: 50%;
-	}
-
-	svg {
-		width: 18px;
-		height: 18px;
-		border-radius: 50%;
-	}
-`;
-
 export const Username = styled.div`
 	font-size: var(--font-size-default);
 	font-weight: 800;
@@ -202,4 +191,5 @@ export const Username = styled.div`
 export const Date = styled.div`
 	font-size: 12px;
 	opacity: 0.6;
+	margin-top: 2px;
 `;

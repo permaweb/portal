@@ -1,15 +1,14 @@
 #!/usr/bin/env node
 /*
- Sort keys inside src/helpers/language.ts for each locale object (en and all others).
+ Sort keys inside src/helpers/language/*.ts for each locale file.
  - Stable preserves values intact
  - Maintains original indentation and spacing
- - Injects missing keys from 'en' as an UNTRANSLATED block for any non-en locale
  - --check exits with code 1 if changes would be made
 */
 const fs = require('fs');
 const path = require('path');
 
-const FILE = path.join(__dirname, '..', 'src', 'helpers', 'language.ts');
+const LANG_DIR = path.join(__dirname, '..', 'src', 'helpers', 'language');
 const CHECK_ONLY = process.argv.includes('--check');
 
 function readFileSafe(p) {
@@ -68,42 +67,58 @@ function findBalancedBlock(src, startIndex) {
 	return null;
 }
 
-function escapeRegExp(s) {
-	return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function findlanguageBlock(src) {
-	// Locate the main language object: const language = { ... }
-	const decl = src.match(/language\s*=\s*\{/);
+function findExportBlock(src) {
+	const decl = src.match(/export\s+const\s+\w+\s*=\s*\{/);
 	if (!decl) return null;
 	const braceIdx = src.indexOf('{', decl.index);
 	const bal = findBalancedBlock(src, braceIdx);
 	if (!bal) return null;
-	return { start: braceIdx, end: bal.end };
+	return { start: decl.index, end: bal.end };
 }
 
-function sortSection(section) {
-	// section looks like: "en: {\n  <indent><key>: <value>, ...\n}\n"
-	const braceStart = section.indexOf('{');
-	if (braceStart < 0) return section;
-	const bal = findBalancedBlock(section, braceStart);
-	if (!bal) return section;
-	const before = section.slice(0, bal.start + 1); // include '{'
-	let inside = section.slice(bal.start + 1, bal.end);
-	const after = section.slice(bal.end); // includes '}' and trailing
+function extractKeyValues(content) {
+	const braceStart = content.indexOf('{');
+	if (braceStart < 0) return {};
+	const bal = findBalancedBlock(content, braceStart);
+	if (!bal) return {};
+	const inside = content.slice(bal.start + 1, bal.end);
 
-	// Detect indent used by first entry
 	const indentMatch = inside.match(/\n([ \t]+)[a-zA-Z0-9_]+:/);
-	const indent = indentMatch ? indentMatch[1] : '\t\t';
+	const indent = indentMatch ? indentMatch[1] : '\t';
 	const indentEsc = indent.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-	// Build entry regex using detected indent; stop at next key on same indent or at a closing brace line
 	const entryRe = new RegExp(
-		`(\\n${indentEsc}[a-zA-Z0-9_]+:[\\s\\S]*?)(?=\\n${indentEsc}[a-zA-Z0-9_]+:|\\n[\\ \t]*\\}|$)`,
+		`\\n${indentEsc}([a-zA-Z0-9_]+):([\\s\\S]*?)(?=\\n${indentEsc}[a-zA-Z0-9_]+:|\\n[\\ \\t]*\\}|$)`,
+		'g'
+	);
+
+	const keyValues = {};
+	let m;
+	while ((m = entryRe.exec(inside)) !== null) {
+		const key = m[1];
+		const val = m[2].trim().replace(/,+$/, '');
+		keyValues[key] = val;
+	}
+	return keyValues;
+}
+
+function sortExportObject(content, isEnglish, enKeyValues) {
+	const braceStart = content.indexOf('{');
+	if (braceStart < 0) return content;
+	const bal = findBalancedBlock(content, braceStart);
+	if (!bal) return content;
+	const before = content.slice(0, bal.start + 1);
+	let inside = content.slice(bal.start + 1, bal.end);
+	const after = content.slice(bal.end);
+
+	const indentMatch = inside.match(/\n([ \t]+)[a-zA-Z0-9_]+:/);
+	const indent = indentMatch ? indentMatch[1] : '\t';
+	const indentEsc = indent.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	const entryRe = new RegExp(
+		`(\\n${indentEsc}[a-zA-Z0-9_]+:[\\s\\S]*?)(?=\\n${indentEsc}[a-zA-Z0-9_]+:|\\n[\\ \\t]*\\}|$)`,
 		'g'
 	);
 	const keyRe = new RegExp(`\\n${indentEsc}([a-zA-Z0-9_]+):`);
 
-	// Remove prior untranslated markers if present (robust to indentation and CRLF)
 	inside = inside.replace(
 		/(?:\r?\n)[ \t]*\/\/ === UNTRANSLATED START ===[\s\S]*?(?:\r?\n)[ \t]*\/\/ === UNTRANSLATED END ===/g,
 		''
@@ -117,23 +132,23 @@ function sortSection(section) {
 		if (!k) continue;
 		entries.push({ key: k[1], chunk });
 	}
-	if (entries.length === 0) return section; // nothing to sort
+	if (entries.length === 0) return content;
 
-	// Determine locale code (e.g., en:, es:, fr:, pt_BR:, etc.) from section
-	const localeMatch = section.match(/\n[ \t]*([a-zA-Z_\-]+):/);
-	const localeCode = localeMatch ? localeMatch[1] : null;
-
-	// Build key set for existing entries
 	const existingKeys = new Set(entries.map((e) => e.key));
 
-	// If we have en section and a global enKeys, use it; otherwise skip pinning
 	let headerBlock = '';
-	if (localeCode && global.enKeyValues && localeCode !== 'en') {
-		const enKeys = Object.keys(global.enKeyValues);
+	if (!isEnglish && enKeyValues) {
+		const enKeys = Object.keys(enKeyValues);
 		const missing = enKeys.filter((k) => !existingKeys.has(k));
 		if (missing.length > 0) {
-			const missingEntries = missing.map((k) => `\n${indent}${k}: ${global.enKeyValues[k]},`).join('');
-			headerBlock = `\n${indent}// === UNTRANSLATED START ===\n${indent}// TODO: translate\n${missingEntries}\n${indent}// === UNTRANSLATED END ===`;
+			missing.sort((a, b) => a.localeCompare(b));
+			const missingEntries = missing
+				.map((k) => {
+					const val = enKeyValues[k];
+					return `\n${indent}${k}: ${val}${val.endsWith(',') ? '' : ','}`;
+				})
+				.join('');
+			headerBlock = `\n${indent}// === UNTRANSLATED START ===\n${indent}// TODO: translate${missingEntries}\n${indent}// === UNTRANSLATED END ===`;
 		}
 	}
 
@@ -143,85 +158,62 @@ function sortSection(section) {
 }
 
 function run() {
-	const original = readFileSafe(FILE);
-	let output = original;
+	if (!fs.existsSync(LANG_DIR)) {
+		console.error(`Language directory not found: ${LANG_DIR}`);
+		process.exit(1);
+	}
 
-	// Identify language block and locale keys
-	const lang = findlanguageBlock(output);
-	if (!lang) {
-		console.error('Could not locate language object in language.ts');
-	} else {
-		const langBlock = output.slice(lang.start, lang.end + 1);
-		const localeRe = /\n[ \t]*([a-zA-Z_\-]+):\s*\{/g;
-		const localesSet = new Set();
-		let m;
-		while ((m = localeRe.exec(langBlock)) !== null) {
-			const key = m[1];
-			localesSet.add(key);
+	const files = fs.readdirSync(LANG_DIR).filter((f) => f.endsWith('.ts') && f !== 'index.ts');
+	if (files.length === 0) {
+		console.log('No language files found');
+		return;
+	}
+
+	const enFile = 'en.ts';
+	const otherFiles = files.filter((f) => f !== enFile).sort();
+	const orderedFiles = files.includes(enFile) ? [enFile, ...otherFiles] : files;
+
+	let enKeyValues = null;
+	if (files.includes(enFile)) {
+		const enPath = path.join(LANG_DIR, enFile);
+		const enContent = readFileSafe(enPath);
+		enKeyValues = extractKeyValues(enContent);
+	}
+
+	let needsSorting = false;
+	const results = [];
+
+	for (const file of orderedFiles) {
+		const filePath = path.join(LANG_DIR, file);
+		const original = readFileSafe(filePath);
+		const exportBlock = findExportBlock(original);
+
+		if (!exportBlock) {
+			console.warn(`No export statement found in ${file}`);
+			continue;
 		}
-		const locales = Array.from(localesSet);
-		// Always process 'en' first, then others in alpha order
-		const others = locales.filter((l) => l !== 'en').sort((a, b) => a.localeCompare(b));
-		const ordered = (locales.includes('en') ? ['en'] : []).concat(others);
 
-		// Build en key-value map for missing key detection
-		if (locales.includes('en')) {
-			const enRe = new RegExp(`\n[ \t]*en:\\s*\\{`);
-			const enMatch = output.match(enRe);
-			if (enMatch) {
-				const enBrace = output.indexOf('{', enMatch.index);
-				const enBal = findBalancedBlock(output, enBrace);
-				if (enBal) {
-					const enBlock = output.slice(enMatch.index, enBal.end + 1);
-					const enInside = enBlock.slice(enBlock.indexOf('{') + 1, enBlock.lastIndexOf('}'));
-					const indentMatch = enInside.match(/\n([ \t]+)[a-zA-Z0-9_]+:/);
-					const indent = indentMatch ? indentMatch[1] : '\t\t';
-					const indentEsc = indent.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-					const entryRe = new RegExp(
-						`\\n${indentEsc}([a-zA-Z0-9_]+):([\\s\\S]*?)(?=\\n${indentEsc}[a-zA-Z0-9_]+:|\\n[\\ \\t]*\\}|$)`,
-						'g'
-					);
-					global.enKeyValues = {};
-					let mm;
-					while ((mm = entryRe.exec(enInside)) !== null) {
-						const key = mm[1];
-						const val = mm[2].trim().replace(/,+$/, '');
-						global.enKeyValues[key] = val.endsWith(',') ? val : val;
-					}
-					// Replace en first so subsequent locale scans see stable ordering
-					const sortedEn = sortSection(enBlock);
-					output = output.slice(0, enMatch.index) + sortedEn + output.slice(enBal.end + 1);
-				}
+		const isEnglish = file === enFile;
+		const sorted = sortExportObject(original, isEnglish, enKeyValues);
+
+		if (sorted !== original) {
+			needsSorting = true;
+			if (!CHECK_ONLY) {
+				fs.writeFileSync(filePath, sorted);
+				results.push(`${file} sorted`);
+			} else {
+				results.push(`${file} needs sorting`);
 			}
-		}
-
-		// Now process all other locales present
-		for (const locale of others) {
-			// Re-find block fresh in the latest output each iteration
-			const langNow = findlanguageBlock(output);
-			if (!langNow) break;
-			const sectionRe = new RegExp(`\n[ \t]*${escapeRegExp(locale)}:\\s*\\{`);
-			const sectionMatch = output.slice(langNow.start, langNow.end + 1).match(sectionRe);
-			if (!sectionMatch) continue;
-			const absStart = output.indexOf(sectionMatch[0], langNow.start);
-			const braceIdx = output.indexOf('{', absStart);
-			const secBal = findBalancedBlock(output, braceIdx);
-			if (!secBal) continue;
-			const section = output.slice(absStart, secBal.end + 1);
-			const sorted = sortSection(section);
-			output = output.slice(0, absStart) + sorted + output.slice(secBal.end + 1);
+		} else {
+			results.push(`${file} already sorted`);
 		}
 	}
 
-	if (output !== original) {
-		if (CHECK_ONLY) {
-			console.error('language.ts needs sorting');
-			process.exit(1);
-		}
-		fs.writeFileSync(FILE, output);
-		console.log('language.ts sorted');
-	} else {
-		console.log('language.ts already sorted');
+	results.forEach((r) => console.log(r));
+
+	if (needsSorting && CHECK_ONLY) {
+		console.error('\nLanguage files need sorting');
+		process.exit(1);
 	}
 }
 

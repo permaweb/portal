@@ -133,8 +133,9 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	}, [mediaData?.url, mediaData?.caption, mediaData?.alignment, mediaData?.width]);
 
 	function buildContent(data: any) {
+		const widthStyle = data.width ? ` style="width: ${data.width}px; max-width: 100%;"` : '';
 		return `
-			<div class="portal-media-wrapper ${data.alignment}">
+			<div class="portal-media-wrapper ${data.alignment}"${widthStyle}>
 				<img src="${data.url}"/>
 				${data.caption ? `<p>${data.caption}</p>` : ''}
 			</div>

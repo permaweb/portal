@@ -23,8 +23,12 @@ export const Header = styled.div<{ $layout: any; theme: any }>`
 	user-select: none;
 	box-sizing: border-box;
 
+	h1 {
+		margin: 0;
+	}
+
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-		padding: 0 var(--spacing-xxs);
+		// padding: 0 var(--spacing-xxs);
 	}
 `;
 
@@ -44,6 +48,7 @@ export const HeaderContent = styled.div<{ $layout: any; maxWidth: number }>`
 	position: relative;
 	width: 100%;
 	height: 100%;
+	box-sizing: border-box;
 `;
 
 export const Logo = styled.div<{ $layout: any }>`

@@ -48,6 +48,7 @@ export const PostImage = styled.div`
 	justify-content: center;
 	background: ${(props) => props.theme.colors.container.alt1.background};
 	border-radius: ${STYLING.dimensions.radius.primary};
+	aspect-ratio: 16/8;
 
 	img {
 		height: 100%;

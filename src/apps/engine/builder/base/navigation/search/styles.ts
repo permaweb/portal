@@ -40,6 +40,5 @@ export const SearchResults = styled.div<{ $active: boolean }>`
 	display: ${(props) => (props.$active ? 'visible' : 'none')};
 	width: 100%;
 	padding: 4px;
-	background: red;
 	box-sizing: border-box;
 `;

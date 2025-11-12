@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import Avatar from 'engine/components/avatar';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 import Placeholder from 'engine/components/placeholder';
 import useNavigate from 'engine/helpers/preview';
@@ -79,15 +80,6 @@ export default function PostPreview_Minimal(props: any) {
 					</S.TitleWrapper>
 					<p>{post?.metadata.description}</p>
 					<S.Meta>
-						<S.SourceIcon
-							className="loadingAvatar"
-							onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-							src={
-								!isLoadingProfile && displayThumbnail && checkValidAddress(displayThumbnail)
-									? getTxEndpoint(displayThumbnail)
-									: ICONS.user
-							}
-						/>
 						<S.Author
 							onClick={() =>
 								!isPortalCreator &&
@@ -95,6 +87,15 @@ export default function PostPreview_Minimal(props: any) {
 							}
 							style={{ cursor: isPortalCreator ? 'default' : 'pointer' }}
 						>
+							<Avatar
+								src={
+									displayThumbnail && checkValidAddress(displayThumbnail) ? getTxEndpoint(displayThumbnail) : undefined
+								}
+								profile={isPortalCreator ? { id: portal?.id } : profile}
+								isLoading={isLoadingProfile}
+								size={20}
+								hoverable={true}
+							/>
 							{isLoadingProfile ? <Placeholder width="100" /> : displayName}
 						</S.Author>
 						<S.Date>
