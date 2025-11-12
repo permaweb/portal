@@ -1,9 +1,4 @@
 export const de = {
-	// === UNTRANSLATED START ===
-	// TODO: translate
-	createFirstPortal: `Create Your First Portal`,
-	joinPortal: `Join Portal`,
-	// === UNTRANSLATED END ===
 	activate: `Aktivieren`,
 	add: `Hinzufügen`,
 	addBlock: `Block hinzufügen`,
@@ -99,6 +94,7 @@ export const de = {
 	costToUpload: `Upload-Kosten`,
 	create: `Erstellen`,
 	created: `Erstellt`,
+	createFirstPortal: `Erstes Portal erstellen`,
 	createPage: `Seite erstellen`,
 	createPageInfo: `Info-Seite erstellen`,
 	createPortal: `Portal erstellen`,
@@ -227,6 +223,7 @@ export const de = {
 	invitePending: `Einladung ausstehend`,
 	invites: `Einladungen`,
 	invitesInfo: `Die folgenden Portale haben Sie eingeladen beizutreten! Klicken Sie auf ein Portal um loszulegen.`,
+	joinPortal: `Portal beitreten`,
 	journal: `Journal`,
 	language: `Sprache`,
 	larger: `Größer`,
