@@ -19,6 +19,67 @@ export function updateThemeStyles(theme: string, styles: Record<string, string>)
 	sheet.insertRule(rule, sheet.cssRules.length);
 }
 
+export function getContrastColor(bg: string): string {
+	const rgba = bg.replace(/^rgba?\(|\s+|\)$/g, '').split(',');
+	const r = parseInt(rgba[0]);
+	const g = parseInt(rgba[1]);
+	const b = parseInt(rgba[2]);
+	const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+	return luminance > 0.6 ? '0,0,0' : '255,255,255';
+}
+
+export function generateColorFromId(id?: string): string {
+	if (!id) return '128, 128, 128';
+
+	let hash = 0;
+	for (let i = 0; i < id.length; i++) {
+		hash = id.charCodeAt(i) + ((hash << 5) - hash);
+	}
+
+	const hue = Math.abs(hash % 360);
+	const saturation = 65;
+	const lightness = 50;
+
+	const c = ((1 - Math.abs((2 * lightness) / 100 - 1)) * saturation) / 100;
+	const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
+	const m = lightness / 100 - c / 2;
+
+	let r = 0,
+		g = 0,
+		b = 0;
+	if (hue >= 0 && hue < 60) {
+		r = c;
+		g = x;
+		b = 0;
+	} else if (hue >= 60 && hue < 120) {
+		r = x;
+		g = c;
+		b = 0;
+	} else if (hue >= 120 && hue < 180) {
+		r = 0;
+		g = c;
+		b = x;
+	} else if (hue >= 180 && hue < 240) {
+		r = 0;
+		g = x;
+		b = c;
+	} else if (hue >= 240 && hue < 300) {
+		r = x;
+		g = 0;
+		b = c;
+	} else {
+		r = c;
+		g = 0;
+		b = x;
+	}
+
+	const red = Math.round((r + m) * 255);
+	const green = Math.round((g + m) * 255);
+	const blue = Math.round((b + m) * 255);
+
+	return `${red}, ${green}, ${blue}`;
+}
+
 export function initThemes(Themes: any[]) {
 	const activeTheme = Themes.find((e: any) => e.active);
 
@@ -39,20 +100,12 @@ export function initThemes(Themes: any[]) {
 		}
 	}
 
-	function getContrastColor(bg) {
-		const rgba = bg.replace(/^rgba?\(|\s+|\)$/g, '').split(',');
-		const r = parseInt(rgba[0]);
-		const g = parseInt(rgba[1]);
-		const b = parseInt(rgba[2]);
-		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-		return luminance > 0.6 ? '0,0,0' : '255,255,255';
-	}
-
 	function setScheme(theme: any, scheme: string) {
 		if (!theme.basics) return null;
 		updateThemeStyles(scheme, {
 			// Basics
 			'--color-text': theme.basics.colors.text[scheme],
+			'--color-text-contrast': getContrastColor(theme.basics.colors.text[scheme]),
 			'--color-background': theme.basics.colors.background[scheme],
 			'--color-primary': theme.basics.colors.primary[scheme],
 			'--color-primary-contrast': getContrastColor(theme.basics.colors.primary[scheme]),

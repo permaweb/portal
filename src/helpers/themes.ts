@@ -614,6 +614,7 @@ export function getThemeVars(theme: any, scheme: 'light' | 'dark') {
 
 	const vars: Record<string, string> = {
 		'--color-text': theme.basics?.colors?.text?.[scheme] ?? '0,0,0',
+		'--color-text-contrast': getContrastColor(theme.basics?.colors?.text?.[scheme] ?? '0,0,0'),
 		'--color-background': theme.basics?.colors?.background?.[scheme] ?? '255,255,255',
 		'--color-primary': theme.basics?.colors?.primary?.[scheme] ?? '0,122,255',
 		'--color-primary-contrast': getContrastColor(theme.basics?.colors?.primary?.[scheme] ?? '0,122,255'),

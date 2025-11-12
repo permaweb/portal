@@ -89,7 +89,7 @@ export const Wrapper = styled.div`
 	p {
 		font-size: var(--font-size-large);
 		font-weight: 400;
-		color: rgba(var(--color-primary), 1);
+		color: rgba(var(--color-text), 1);
 	}
 
 	a {

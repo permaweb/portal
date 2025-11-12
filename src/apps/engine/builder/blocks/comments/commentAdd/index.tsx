@@ -7,8 +7,10 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
+import Avatar from 'engine/components/avatar';
 import ModalPortal from 'engine/components/modalPortal';
 import ProfileEditor from 'engine/components/profileEditor';
+import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 import {
 	$createParagraphNode,
@@ -22,8 +24,6 @@ import {
 } from 'lexical';
 
 import { ICONS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -50,6 +50,7 @@ function CommentEditorContent(props: any) {
 	const languageProvider = useLanguageProvider();
 	const { profile, libs } = usePermawebProvider();
 	const { portal, portalId } = usePortalProvider();
+	const { profile: portalProfile } = useProfile(portalId);
 	const [canSend, setCanSend] = React.useState(false);
 	const [editorText, setEditorText] = React.useState(initialContent || '');
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -223,34 +224,20 @@ function CommentEditorContent(props: any) {
 		}
 	};
 
-	const authorIcon = postAsPortal
-		? portal?.Icon && checkValidAddress(portal.Icon)
-			? getTxEndpoint(portal.Icon)
-			: ICONS.portal
-		: profile?.thumbnail && checkValidAddress(profile.thumbnail)
-		? getTxEndpoint(profile.thumbnail)
-		: ICONS.user;
-
-	const userIcon =
-		profile?.thumbnail && checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : ICONS.user;
-	const portalIcon = portal?.Icon && checkValidAddress(portal.Icon) ? getTxEndpoint(portal.Icon) : ICONS.portal;
 	const roles = Array.isArray(profile?.roles) ? profile.roles : profile?.roles ? [profile.roles] : [];
 	return (
 		<>
 			<S.Editor onClick={handleEditorClick}>
 				{portalId && !isEditMode && roles && (roles.includes('Admin') || roles.includes('Moderator')) && (
 					<S.AuthorSelector ref={dropdownRef}>
-						<S.AuthorIcon
+						<S.AuthorIconWrapper
 							onClick={(e: React.MouseEvent) => {
 								e.stopPropagation();
 								setShowAuthorDropdown(!showAuthorDropdown);
 							}}
-							src={authorIcon}
-							onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-								e.currentTarget.src = postAsPortal ? ICONS.portal : ICONS.user;
-							}}
-							alt={postAsPortal ? portal?.Name || 'Portal' : profile?.displayName || 'User'}
-						/>
+						>
+							{postAsPortal ? <Avatar profile={portalProfile} size={24} /> : <Avatar profile={profile} size={24} />}
+						</S.AuthorIconWrapper>
 						{showAuthorDropdown && (
 							<S.AuthorDropdown>
 								<S.AuthorOption
@@ -260,13 +247,7 @@ function CommentEditorContent(props: any) {
 									}}
 									$active={!postAsPortal}
 								>
-									<img
-										src={userIcon}
-										onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-											e.currentTarget.src = ICONS.user;
-										}}
-										alt={profile?.displayName || 'User'}
-									/>
+									<Avatar profile={profile} size={20} />
 									<span>{profile?.displayName || 'User'}</span>
 								</S.AuthorOption>
 								<S.AuthorOption
@@ -276,13 +257,7 @@ function CommentEditorContent(props: any) {
 									}}
 									$active={postAsPortal}
 								>
-									<img
-										src={portalIcon}
-										onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-											e.currentTarget.src = ICONS.portal;
-										}}
-										alt={portal?.Name || 'Portal'}
-									/>
+									<Avatar profile={portalProfile} size={20} />
 									<span>{portal?.Name || 'Portal'}</span>
 								</S.AuthorOption>
 							</S.AuthorDropdown>

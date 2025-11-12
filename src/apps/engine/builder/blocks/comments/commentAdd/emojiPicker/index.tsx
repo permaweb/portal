@@ -259,7 +259,6 @@ export default function EmojiPicker({ onInsertEmoji }: EmojiPickerProps) {
 		'🍿': ['popcorn', 'food', 'movie', 'theater', 'films', 'snack'],
 		'🍩': ['doughnut', 'food', 'dessert', 'snack', 'sweet', 'donut'],
 		'🍪': ['cookie', 'food', 'snack', 'oreo', 'chocolate', 'sweet', 'dessert'],
-		'🎯': ['target', 'game', 'play', 'bar'],
 		'⚽': ['soccer', 'sports', 'football'],
 		'🏀': ['basketball', 'sports', 'balls'],
 		'🏈': ['football', 'sports', 'balls', 'NFL'],

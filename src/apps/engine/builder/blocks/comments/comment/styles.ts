@@ -29,22 +29,18 @@ export const Comment = styled.div<{ $level: number; $status?: string }>`
 	`}
 `;
 
-export const Avatar = styled.div`
-	flex-shrink: 0;
-	width: 46px;
-	height: 46px;
-	background: rgba(var(--color-text), 0.5);
-	border-radius: 50%;
-	img {
-		width: 46px;
-		height: 46px;
-		border-radius: 50%;
-	}
-`;
-
 export const Content = styled.div`
 	position: relative;
 	width: 100%;
+`;
+
+export const AvatarWrapper = styled.div`
+	cursor: pointer;
+	transition: opacity 0.2s;
+
+	&:hover {
+		opacity: 0.8;
+	}
 `;
 
 export const Meta = styled.div`
@@ -52,6 +48,12 @@ export const Meta = styled.div`
 	align-items: flex-end;
 	font-size: var(--font-size-normal);
 	gap: 10px;
+`;
+
+export const UsernameWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 6px;
 `;
 
 export const Username = styled.span<{ isPostAuthor: boolean }>`
@@ -63,6 +65,12 @@ export const Username = styled.span<{ isPostAuthor: boolean }>`
 	background-color: ${(props) => (!props.isPostAuthor ? `unset` : `rgba(var(--color-primary), 1)`)};
 	padding: ${(props) => (!props.isPostAuthor ? 0 : `0 4px`)};
 	font-weight: 600;
+	cursor: pointer;
+	transition: opacity 0.2s;
+
+	&:hover {
+		opacity: 0.8;
+	}
 
 	div {
 		div {
@@ -73,6 +81,33 @@ export const Username = styled.span<{ isPostAuthor: boolean }>`
 				margin-bottom: -1.5px;
 			}
 		}
+	}
+`;
+
+export const PortalMenuTrigger = styled.div<{ $active: boolean }>`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	cursor: pointer;
+	opacity: ${(props) => (props.$active ? 1 : 0.6)};
+	transition: opacity 0.2s;
+
+	&:hover {
+		opacity: 1;
+	}
+
+	div {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	svg {
+		width: 14px;
+		height: 14px;
+		fill: rgba(var(--color-primary), 1);
 	}
 `;
 
@@ -246,7 +281,7 @@ export const RepliesToggle = styled.button<{ $level: number }>`
 	background: transparent;
 	border: none;
 	outline: none;
-	color: rgba(var(--color-primary), 1);
+	color: rgba(var(--color-text), 0.8);
 	font-size: var(--font-size-normal);
 	font-weight: 600;
 	cursor: pointer;
@@ -254,6 +289,7 @@ export const RepliesToggle = styled.button<{ $level: number }>`
 
 	&:hover {
 		opacity: 0.8;
+		color: rgba(var(--color-text), 1);
 	}
 
 	&:focus {

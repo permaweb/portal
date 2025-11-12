@@ -1,9 +1,10 @@
+import { useNavigate } from 'react-router-dom';
+import Avatar from 'engine/components/avatar';
 import Placeholder from 'engine/components/placeholder';
 import Tag from 'engine/components/tag';
 
-import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress } from 'helpers/utils';
+import { getRedirect, urlify } from 'helpers/utils';
 
 import * as S from './styles';
 
@@ -19,15 +20,19 @@ type ContentEntryType =
 	| 'paragraph'
 	| 'quote'
 	| 'code'
+	| 'html'
 	| 'unordered-list'
 	| 'ordered-list'
 	| 'divider-solid'
-	| 'divider-dashed';
+	| 'divider-dashed'
+	| 'spacer-horizontal'
+	| 'spacer-vertical';
 
 type ContentEntry = {
 	id: string | number;
 	type: ContentEntryType;
 	content?: string;
+	data?: any;
 };
 
 type PostMeta = {
@@ -58,6 +63,7 @@ type PostRendererProps = {
 };
 
 export default function PostRenderer(props: PostRendererProps) {
+	const navigate = useNavigate();
 	const isLoadingPost = !!props.isLoadingPost;
 	const isLoadingProfile = !!props.isLoadingProfile;
 	const isLoadingContent = !!props.isLoadingContent;
@@ -67,6 +73,12 @@ export default function PostRenderer(props: PostRendererProps) {
 	const content = props.content ?? null;
 
 	const dateMs = post?.dateCreated !== undefined && post?.dateCreated !== null ? Number(post.dateCreated) : undefined;
+
+	const handleAuthorClick = () => {
+		if (profile?.id) {
+			navigate(getRedirect(`author/${profile.username ? urlify(profile.username) : profile.id}`));
+		}
+	};
 
 	return (
 		<>
@@ -84,17 +96,11 @@ export default function PostRenderer(props: PostRendererProps) {
 			{post?.metadata?.description && <S.Description>{post.metadata.description}</S.Description>}
 
 			<S.Meta>
-				<img
-					className="loadingAvatar"
-					onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-					src={
-						!isLoadingProfile && profile?.thumbnail && checkValidAddress(profile.thumbnail)
-							? getTxEndpoint(profile.thumbnail)
-							: ICONS.user
-					}
-					alt=""
-				/>
-				<span>{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}</span>&nbsp;
+				<S.Author onClick={handleAuthorClick}>
+					<Avatar profile={profile} isLoading={isLoadingProfile} size={20} hoverable={true} />
+					{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}
+				</S.Author>
+				&nbsp;
 				<span>
 					•{' '}
 					{isLoadingPost ? (
@@ -154,6 +160,8 @@ export default function PostRenderer(props: PostRendererProps) {
 							return <blockquote key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						case 'code':
 							return <code key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+						case 'html':
+							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						case 'unordered-list':
 							return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						case 'ordered-list':
@@ -162,6 +170,10 @@ export default function PostRenderer(props: PostRendererProps) {
 							return <div key={entry.id} className="article-divider-solid" />;
 						case 'divider-dashed':
 							return <div key={entry.id} className="article-divider-dashed" />;
+						case 'spacer-vertical':
+							return <div key={entry.id} style={{ height: `${entry.data?.height || 50}px` }} />;
+						case 'spacer-horizontal':
+							return <div key={entry.id} style={{ flex: entry.data?.width || 1 }} />;
 						default:
 							return <b key={entry.id}>{JSON.stringify(entry)}</b>;
 					}

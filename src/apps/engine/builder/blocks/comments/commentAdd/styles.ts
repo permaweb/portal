@@ -246,12 +246,8 @@ export const AuthorSelector = styled.div`
 	margin-right: 8px;
 `;
 
-export const AuthorIcon = styled.img`
-	width: 24px;
-	height: 24px;
-	border-radius: 50%;
+export const AuthorIconWrapper = styled.div`
 	cursor: pointer;
-	object-fit: cover;
 `;
 
 export const AuthorDropdown = styled.div`
@@ -285,7 +281,7 @@ export const AuthorOption = styled.div<{ $active: boolean }>`
 		background: ${(props) => (props.$active ? 'rgba(var(--color-primary), 0.2)' : 'rgba(var(--color-text), 0.1)')};
 	}
 
-	img {
+	> div:first-child {
 		width: 20px;
 		height: 20px;
 		border-radius: 50%;

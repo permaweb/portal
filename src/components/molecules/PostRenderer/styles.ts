@@ -134,8 +134,9 @@ export const Wrapper = styled.div`
 	.portal-media-wrapper {
 		display: flex;
 		flex-direction: column;
-		margin: 10px 0 20px 0;
+		margin: 10px auto 20px auto;
 		gap: 6px;
+		width: 100%;
 
 		p {
 			width: 100%;
@@ -217,6 +218,24 @@ export const Meta = styled.div`
 	span {
 		font-size: var(--font-size-default);
 		font-weight: 600;
+	}
+`;
+
+export const Author = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: rgba(var(--color-text), 1);
+	font-size: var(--font-size-default);
+	font-weight: 600;
+
+	&:hover {
+		cursor: pointer;
+		color: rgba(var(--color-primary), 1);
+
+		> div {
+			--avatar-opacity: 0.8;
+		}
 	}
 `;
 
