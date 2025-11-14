@@ -24,6 +24,7 @@ import { DividerBlock } from './CustomBlocks/DividerBlock';
 import { HTMLBlock } from './CustomBlocks/HTMLBlock';
 import { MediaBlock } from './CustomBlocks/MediaBlock';
 import { SpacerBlock } from './CustomBlocks/SpacerBlock';
+import { TableBlock } from './CustomBlocks/TableBlock';
 import * as S from './styles';
 
 export default function ArticleBlock(props: {
@@ -787,6 +788,18 @@ export default function ArticleBlock(props: {
 					direction={'vertical'}
 					data={props.block.data}
 					onChange={(data: any) => props.onChangeBlock({ id: props.block.id, data: data })}
+				/>
+			);
+			break;
+		case 'table':
+			useCustom = true;
+			element = (
+				<TableBlock
+					content={props.block.content}
+					data={props.block.data}
+					onChange={(newContent: string, data: any) =>
+						props.onChangeBlock({ id: props.block.id, content: newContent, data })
+					}
 				/>
 			);
 			break;

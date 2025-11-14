@@ -1,4 +1,17 @@
 export const de = {
+	// === UNTRANSLATED START ===
+	// TODO: translate
+	contentImported: `Content Imported`,
+	errorImportingPost: `Error Importing Post`,
+	import: `Import`,
+	importFromExistingPost: `Import From Existing Post`,
+	importFromExistingPostInfo: `Imported post data will not overwrite any existing content in this post. Select from the existing options below.`,
+	markdown: `Markdown`,
+	markdownFileOnly: `Please upload a markdown (.md) file`,
+	markdownImportError: `Error importing markdown file`,
+	markdownImportSuccess: `Markdown content imported successfully`,
+	postId: `Post ID`,
+	// === UNTRANSLATED END ===
 	activate: `Aktivieren`,
 	add: `Hinzufügen`,
 	addBlock: `Block hinzufügen`,
@@ -418,6 +431,7 @@ export const de = {
 	shareCredits: `Credits teilen`,
 	showCaptionTools: `Bildunterschrift-Tools anzeigen`,
 	showDomainActions: `Aktionen anzeigen`,
+	showImageTools: `Bild-Tools anzeigen`,
 	showingRange: (start: number, end: number, total: number) => `${start} - ${end} von ${total}`,
 	showYourRecords: `Einträge anzeigen`,
 	sidebarClose: `Sidebar schließen`,

@@ -30,6 +30,24 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
+type ImageSize = 'small' | 'medium' | 'large';
+
+const SIZE_PRESETS: Record<ImageSize, number> = {
+	small: 360,
+	medium: 640,
+	large: 960,
+};
+
+function snapWidthToPreset(width?: number | null): ImageSize | null {
+	if (!width) return null;
+	const entries = Object.entries(SIZE_PRESETS) as [ImageSize, number][];
+	let best: [ImageSize, number] = entries[0];
+	for (const e of entries) {
+		if (Math.abs(e[1] - width) < Math.abs(best[1] - width)) best = e;
+	}
+	return best[0];
+}
+
 export default function MediaBlock(props: { type: 'image' | 'video'; content: any; data: any; onChange: any }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -361,7 +379,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 														src={ICONS.write}
 														handlePress={() => setShowCaptionEdit(true)}
 														dimensions={{ wrapper: 23.5, icon: 13.5 }}
-														tooltip={language?.showCaptionTools}
+														tooltip={language?.showImageTools}
 														tooltipPosition={'bottom-right'}
 														noFocus
 													/>
@@ -379,7 +397,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 							</S.Content>
 						</S.ContentWrapper>
 						{showCaptionEdit && (
-							<Modal header={language?.editCaption} handleClose={() => setShowCaptionEdit(false)}>
+							<Modal header={'Image tools'} handleClose={() => setShowCaptionEdit(false)}>
 								<S.ModalCaptionWrapper className={'modal-wrapper'}>
 									<FormField
 										value={mediaData?.caption || ''}
@@ -392,6 +410,27 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 									<S.ContentActionsWrapper alignment={mediaData.alignment}>
 										<span>{language?.alignCaption}</span>
 										<S.ContentActions useColumn={false}>{alignmentButtons.map(renderAlignmentButton)}</S.ContentActions>
+									</S.ContentActionsWrapper>
+									<S.ContentActionsWrapper alignment={mediaData.alignment}>
+										<span>{language?.imageSize ?? 'Image size'}</span>
+										<S.ContentActions useColumn={false}>
+											{(['small', 'medium', 'large'] as ImageSize[]).map((key) => (
+												<Button
+													key={key}
+													type={'alt3'}
+													label={
+														key === 'small'
+															? language?.small ?? 'Small'
+															: key === 'medium'
+															? language?.medium ?? 'Medium'
+															: language?.large ?? 'Large'
+													}
+													handlePress={() => setMediaData((prev) => ({ ...prev, width: SIZE_PRESETS[key] }))}
+													active={snapWidthToPreset(mediaData.width) === key}
+													iconLeftAlign
+												/>
+											))}
+										</S.ContentActions>
 									</S.ContentActionsWrapper>
 									<S.ModalCaptionActionWrapper>
 										<Button

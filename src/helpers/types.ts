@@ -194,6 +194,7 @@ export enum ArticleBlockEnum {
 	SpacerHorizontal = 'spacer-horizontal',
 	SpacerVertical = 'spacer-vertical',
 	HTML = 'html',
+	Table = 'table',
 }
 
 export type ArticleBlockType = {
