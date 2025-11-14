@@ -59,7 +59,14 @@ export default function TableBlock(props: {
 			)
 			.join('')}</tbody>`;
 		const caption = data.caption ? `<caption>${escapeTd(data.caption)}</caption>` : '';
-		return `<table class="portal-table">${caption}${head}${body}</table>`;
+		return `<table class="portal-table" style="border-collapse: collapse; width: 100%; border: 1px solid #ccc;">${caption}${head}${body}
+		<style>
+      .portal-table th, .portal-table td {
+        border: 1px solid #ccc;
+        padding: 6px 8px;
+      }
+		</style>
+		</table>`;
 	}
 
 	function escapeTd(s: string) {
