@@ -65,6 +65,7 @@ export default function ArticleBlocks(props: {
 					ARTICLE_BLOCKS[ArticleBlockEnum.OrderedList],
 					ARTICLE_BLOCKS[ArticleBlockEnum.UnorderedList],
 					ARTICLE_BLOCKS[ArticleBlockEnum.Code],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Table],
 				],
 			},
 			{
