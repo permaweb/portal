@@ -26,7 +26,8 @@ type ContentEntryType =
 	| 'divider-solid'
 	| 'divider-dashed'
 	| 'spacer-horizontal'
-	| 'spacer-vertical';
+	| 'spacer-vertical'
+	| 'table';
 
 type ContentEntry = {
 	id: string | number;
@@ -174,6 +175,8 @@ export default function PostRenderer(props: PostRendererProps) {
 							return <div key={entry.id} style={{ height: `${entry.data?.height || 50}px` }} />;
 						case 'spacer-horizontal':
 							return <div key={entry.id} style={{ flex: entry.data?.width || 1 }} />;
+						case 'table':
+							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						default:
 							return <b key={entry.id}>{JSON.stringify(entry)}</b>;
 					}
