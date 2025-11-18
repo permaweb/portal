@@ -28,6 +28,9 @@ type ThemeType =
 
 interface Settings {
 	theme: ThemeType;
+	syncWithSystem: boolean;
+	preferredLightTheme: ThemeType;
+	preferredDarkTheme: ThemeType;
 	sidebarOpen: boolean;
 	isDesktop: boolean;
 	windowSize: { width: number; height: number };
@@ -35,11 +38,14 @@ interface Settings {
 	showTopicAction: boolean;
 	showLinkAction: boolean;
 	navWidth: number;
+	drawerStates: { [key: string]: boolean };
+	language: string;
 }
 
 interface SettingsContextState {
 	settings: Settings;
 	updateSettings: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
+	updateDrawerState: (key: string, isOpen: boolean) => void;
 	availableThemes: any;
 }
 
@@ -49,6 +55,9 @@ interface SettingsProviderProps {
 
 const defaultSettings: Settings = {
 	theme: window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark-primary' : 'light-primary',
+	syncWithSystem: true,
+	preferredLightTheme: 'light-primary',
+	preferredDarkTheme: 'dark-primary',
 	sidebarOpen: true,
 	isDesktop: true,
 	windowSize: { width: window.innerWidth, height: window.innerHeight },
@@ -56,11 +65,14 @@ const defaultSettings: Settings = {
 	showTopicAction: false,
 	showLinkAction: false,
 	navWidth: parseInt(STYLING.dimensions.nav.width),
+	drawerStates: {},
+	language: 'en',
 };
 
 const SettingsContext = React.createContext<SettingsContextState>({
 	settings: defaultSettings,
 	updateSettings: () => {},
+	updateDrawerState: () => {},
 	availableThemes: null,
 });
 
@@ -91,6 +103,11 @@ export function SettingsProvider(props: SettingsProviderProps) {
 				showTopicAction: parsedSettings.showTopicAction ?? false,
 				showLinkAction: parsedSettings.showLinkAction ?? false,
 				navWidth,
+				drawerStates: parsedSettings.drawerStates ?? {},
+				language: parsedSettings.language ?? 'en',
+				syncWithSystem: parsedSettings.syncWithSystem ?? true,
+				preferredLightTheme: parsedSettings.preferredLightTheme ?? 'light-primary',
+				preferredDarkTheme: parsedSettings.preferredDarkTheme ?? 'dark-primary',
 			};
 		} else {
 			settings = {
@@ -159,7 +176,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 			'light-alt-1': '#FEFEFE',
 			'light-alt-2': '#FCFCFC',
 			'dark-primary': '#1B1B1B',
-			'dark-high-contrast': '#191A1E',
+			'dark-high-contrast': '#0e0e10',
 			'dark-alt-1': '#16161C',
 			'dark-alt-2': '#17191F',
 		};
@@ -168,9 +185,77 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		document.body.style.backgroundColor = backgroundColor;
 	}, [settings.theme]);
 
+	// Listen for system theme changes when syncWithSystem is enabled
+	React.useEffect(() => {
+		if (!settings.syncWithSystem) return;
+
+		const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+		const handleChange = (e: MediaQueryListEvent) => {
+			const newTheme = e.matches ? settings.preferredDarkTheme : settings.preferredLightTheme;
+			setSettings((prevSettings) => {
+				const newSettings = { ...prevSettings, theme: newTheme };
+				localStorage.setItem('settings', JSON.stringify(newSettings));
+				return newSettings;
+			});
+		};
+
+		mediaQuery.addEventListener('change', handleChange);
+		return () => mediaQuery.removeEventListener('change', handleChange);
+	}, [settings.syncWithSystem, settings.preferredLightTheme, settings.preferredDarkTheme]);
+
 	const updateSettings = <K extends keyof Settings>(key: K, value: Settings[K]) => {
 		setSettings((prevSettings) => {
-			const newSettings = { ...prevSettings, [key]: value };
+			let newSettings = { ...prevSettings, [key]: value };
+
+			// When changing theme and syncWithSystem is enabled, update the preferred theme
+			if (key === 'theme' && prevSettings.syncWithSystem) {
+				const themeValue = value as ThemeType;
+				const isLightTheme = themeValue.startsWith('light-');
+				const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+				if (isLightTheme) {
+					newSettings.preferredLightTheme = themeValue;
+					// Only apply the theme if system is currently in light mode
+					if (!systemIsDark) {
+						newSettings.theme = themeValue;
+					} else {
+						// Keep the current dark theme
+						newSettings.theme = prevSettings.theme;
+					}
+				} else {
+					newSettings.preferredDarkTheme = themeValue;
+					// Only apply the theme if system is currently in dark mode
+					if (systemIsDark) {
+						newSettings.theme = themeValue;
+					} else {
+						// Keep the current light theme
+						newSettings.theme = prevSettings.theme;
+					}
+				}
+			}
+
+			// When disabling syncWithSystem, keep the current theme
+			if (key === 'syncWithSystem' && value === false) {
+				// Current theme stays as is
+			}
+
+			// When enabling syncWithSystem, switch to the appropriate preferred theme
+			if (key === 'syncWithSystem' && value === true) {
+				const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				newSettings.theme = isDark ? prevSettings.preferredDarkTheme : prevSettings.preferredLightTheme;
+			}
+
+			localStorage.setItem('settings', JSON.stringify(newSettings));
+			return newSettings;
+		});
+	};
+
+	const updateDrawerState = (key: string, isOpen: boolean) => {
+		setSettings((prevSettings) => {
+			const newSettings = {
+				...prevSettings,
+				drawerStates: { ...prevSettings.drawerStates, [key]: isOpen },
+			};
 			localStorage.setItem('settings', JSON.stringify(newSettings));
 			return newSettings;
 		});
@@ -264,7 +349,12 @@ export function SettingsProvider(props: SettingsProviderProps) {
 
 	return (
 		<SettingsContext.Provider
-			value={{ settings: settings, updateSettings: updateSettings, availableThemes: AVAILABLE_THEMES }}
+			value={{
+				settings: settings,
+				updateSettings: updateSettings,
+				updateDrawerState: updateDrawerState,
+				availableThemes: AVAILABLE_THEMES,
+			}}
 		>
 			<ThemeProvider theme={getTheme()}>{props.children}</ThemeProvider>
 		</SettingsContext.Provider>

@@ -90,7 +90,7 @@ export const Options = styled.ul<{ top: number }>`
 	min-width: 240px;
 	width: 100%;
 	position: absolute;
-	top: ${(props) => `${props.top.toString()}px`};
+	top: ${(props) => `${props.top.toString()}px`} !important;
 	right: 0;
 	z-index: 2;
 	padding: 10px 0;

@@ -61,6 +61,7 @@ export default function Portal() {
 					</S.PostsSection>
 					<S.DesignSection>
 						<Drawer
+							drawerKey="portal-design"
 							title={language?.design}
 							content={<PortalDesign />}
 							actions={[
@@ -74,6 +75,7 @@ export default function Portal() {
 					</S.DesignSection>
 					<S.DomainSection>
 						<Drawer
+							drawerKey="portal-domains"
 							title={language?.domains}
 							content={<DomainListPortal type={'header'} />}
 							actions={[
@@ -89,6 +91,7 @@ export default function Portal() {
 				<S.SectionWrapper>
 					<S.SetupSection>
 						<Drawer
+							drawerKey="portal-setup"
 							title={language?.setup}
 							content={<PortalSetup type={'header'} />}
 							actions={[

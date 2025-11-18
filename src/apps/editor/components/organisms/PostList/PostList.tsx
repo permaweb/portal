@@ -253,6 +253,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 		<S.Wrapper>
 			{props.type === 'header' ? (
 				<Drawer
+					drawerKey="portal-posts"
 					title={language?.posts}
 					content={getPosts()}
 					actions={[

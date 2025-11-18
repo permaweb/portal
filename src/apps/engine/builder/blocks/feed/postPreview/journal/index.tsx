@@ -123,7 +123,7 @@ export default function PostPreview_Journal(props: any) {
 							/>
 							{isLoadingProfile ? <Placeholder width="100" /> : displayName}
 						</S.Author>
-						<S.Date id="Date">
+						<S.Date>
 							{isLoadingProfile ? (
 								<Placeholder width="120" />
 							) : (

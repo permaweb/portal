@@ -82,7 +82,7 @@ export default function Header(props: any) {
 			{preview && <GlobalStyles />}
 			<S.Header $layout={layout} theme={settings?.theme as any} id="Header">
 				<S.HeaderContentWrapper $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
-					<S.HeaderContent id="HeaderContent" $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
+					<S.HeaderContent $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
 						{Logo ? (
 							<S.Logo $layout={content.logo}>
 								{Logo ? (

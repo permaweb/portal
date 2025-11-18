@@ -26,7 +26,8 @@ type ContentEntryType =
 	| 'divider-solid'
 	| 'divider-dashed'
 	| 'spacer-horizontal'
-	| 'spacer-vertical';
+	| 'spacer-vertical'
+	| 'table';
 
 type ContentEntry = {
 	id: string | number;
@@ -140,32 +141,88 @@ export default function PostRenderer(props: PostRendererProps) {
 				content.map((entry) => {
 					switch (entry.type) {
 						case 'header-1':
-							return <h1 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+							return (
+								<h1
+									key={entry.id}
+									dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+									style={{ ...entry.data }}
+								/>
+							);
 						case 'header-2':
-							return <h2 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+							return (
+								<h2
+									key={entry.id}
+									dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+									style={{ ...entry.data }}
+								/>
+							);
 						case 'header-3':
-							return <h3 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+							return (
+								<h3
+									key={entry.id}
+									dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+									style={{ ...entry.data }}
+								/>
+							);
 						case 'header-4':
-							return <h4 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+							return (
+								<h4
+									key={entry.id}
+									dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+									style={{ ...entry.data }}
+								/>
+							);
 						case 'header-5':
-							return <h5 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+							return (
+								<h5
+									key={entry.id}
+									dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+									style={{ ...entry.data }}
+								/>
+							);
 						case 'header-6':
-							return <h6 key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+							return (
+								<h6
+									key={entry.id}
+									dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+									style={{ ...entry.data }}
+								/>
+							);
 						case 'image':
 						case 'video':
 							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						case 'paragraph':
-							return <p key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+							return (
+								<p key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} style={{ ...entry.data }} />
+							);
 						case 'quote':
-							return <blockquote key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+							return (
+								<blockquote
+									key={entry.id}
+									dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+									style={{ ...entry.data }}
+								/>
+							);
 						case 'code':
 							return <code key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						case 'html':
 							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						case 'unordered-list':
-							return <ul key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+							return (
+								<ul
+									key={entry.id}
+									dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+									style={{ ...entry.data }}
+								/>
+							);
 						case 'ordered-list':
-							return <ol key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+							return (
+								<ol
+									key={entry.id}
+									dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+									style={{ ...entry.data }}
+								/>
+							);
 						case 'divider-solid':
 							return <div key={entry.id} className="article-divider-solid" />;
 						case 'divider-dashed':
@@ -174,6 +231,8 @@ export default function PostRenderer(props: PostRendererProps) {
 							return <div key={entry.id} style={{ height: `${entry.data?.height || 50}px` }} />;
 						case 'spacer-horizontal':
 							return <div key={entry.id} style={{ flex: entry.data?.width || 1 }} />;
+						case 'table':
+							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						default:
 							return <b key={entry.id}>{JSON.stringify(entry)}</b>;
 					}

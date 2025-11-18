@@ -147,6 +147,12 @@ export const MediaResizeWrapper = styled.div<{ width?: number | null }>`
 	width: ${(props) => (props.width ? `${props.width}px` : '100%')};
 	max-width: 100%;
 	justify-self: center;
+	border: 1px solid transparent;
+	transition: border-color 0.2s ease;
+
+	&:hover {
+		border-color: ${(props) => props.theme.colors.border.primary};
+	}
 
 	> .portal-media-wrapper {
 		width: 100%;

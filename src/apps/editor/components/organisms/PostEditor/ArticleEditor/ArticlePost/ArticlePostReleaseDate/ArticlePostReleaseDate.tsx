@@ -330,6 +330,7 @@ export default function ArticlePostReleaseDate() {
 								setActiveOption={handleMonthChange}
 								options={monthOptions}
 								disabled={false}
+								dropdownTop={47.5}
 							/>
 							<FormField
 								value={day}

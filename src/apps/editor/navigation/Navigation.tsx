@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import { debounce } from 'lodash';
 import { useTheme } from 'styled-components';
@@ -24,6 +24,7 @@ import * as S from './styles';
 
 export default function Navigation(props: { open: boolean; toggle: () => void }) {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const portalProvider = usePortalProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
@@ -71,7 +72,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		handleScroll();
 
 		return () => window.removeEventListener('scroll', handleScroll);
-	}, [theme.colors.border.primary]);
+	}, [location.pathname, theme.colors.border.primary]);
 
 	React.useEffect(() => {
 		if (pendingPortalId && permawebProvider.profile?.portals) {

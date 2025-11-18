@@ -27,6 +27,7 @@ export default function FormField(props: {
 	autoFocus?: boolean;
 	hideErrorMessage?: boolean;
 	required?: boolean;
+	noMargin?: boolean;
 }) {
 	const [showTooltip, setShowTooltip] = React.useState<boolean>(false);
 
@@ -47,7 +48,7 @@ export default function FormField(props: {
 					</S.Tooltip>
 				</Modal>
 			)}
-			<S.Wrapper sm={props.sm}>
+			<S.Wrapper sm={props.sm} noMargin={props.noMargin}>
 				{(props.label || props.tooltip) && (
 					<S.TWrapper>
 						{props.label && <S.Label>{props.required ? formatRequiredField(props.label) : props.label}</S.Label>}
@@ -55,7 +56,7 @@ export default function FormField(props: {
 							<IconButton
 								type={'primary'}
 								active={false}
-								src={ICONS.info}
+								src={ICONS.tooltip}
 								handlePress={() => setShowTooltip(!showTooltip)}
 								dimensions={{ wrapper: 22.5, icon: 13.5 }}
 							/>

@@ -99,7 +99,7 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 	return (
 		<>
 			<S.Wrapper>
-				{language?.transferOwnershipDescription}
+				<p>{language?.transferOwnershipDescription}</p>
 				<FormField
 					label={language?.walletAddress}
 					value={walletAddress}
@@ -129,7 +129,7 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 				</S.TransferHeader>
 
 				{/* Transfer history table */}
-				<S.TableViewport>
+				<S.TableViewport className={'scroll-wrapper-hidden'}>
 					<S.TransferTable>
 						<S.TableHead>
 							<tr>
@@ -141,9 +141,7 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 						<S.TableBody>
 							{portalProvider.transfers?.length === 0 ? (
 								<S.TableRow>
-									<S.TableCell colSpan={7} style={{ opacity: 0.7 }}>
-										{language?.noTransfers ?? 'No transfer records yet.'}
-									</S.TableCell>
+									<S.TableCell colSpan={7}>{language?.noTransfers ?? 'No transfer records yet.'}</S.TableCell>
 								</S.TableRow>
 							) : (
 								portalProvider?.transfers?.map((transferItem: any, index: number) => {
