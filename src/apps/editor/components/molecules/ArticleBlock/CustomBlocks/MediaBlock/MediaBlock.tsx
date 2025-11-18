@@ -152,12 +152,14 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 
 	function buildContent(data: any) {
 		const widthStyle = data.width ? ` style="width: ${data.width}px; max-width: 100%;"` : '';
+		const mediaTag = props.type === 'video' ? `<video controls src="${data.url}"></video>` : `<img src="${data.url}"/>`;
+
 		return `
-			<div class="portal-media-wrapper ${data.alignment}"${widthStyle}>
-				<img src="${data.url}"/>
-				${data.caption ? `<p>${data.caption}</p>` : ''}
-			</div>
-		`;
+    <div class="portal-media-wrapper ${data.alignment}"${widthStyle}>
+      ${mediaTag}
+      ${data.caption ? `<p>${data.caption}</p>` : ''}
+    </div>
+  `;
 	}
 
 	async function handleUpload() {
@@ -379,7 +381,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 														src={ICONS.write}
 														handlePress={() => setShowCaptionEdit(true)}
 														dimensions={{ wrapper: 23.5, icon: 13.5 }}
-														tooltip={language?.showImageTools}
+														tooltip={language?.showMediaTools}
 														tooltipPosition={'bottom-right'}
 														noFocus
 													/>
@@ -397,7 +399,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 							</S.Content>
 						</S.ContentWrapper>
 						{showCaptionEdit && (
-							<Modal header={'Image tools'} handleClose={() => setShowCaptionEdit(false)}>
+							<Modal header={'Media Tools'} handleClose={() => setShowCaptionEdit(false)}>
 								<S.ModalCaptionWrapper className={'modal-wrapper'}>
 									<FormField
 										value={mediaData?.caption || ''}
@@ -412,7 +414,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 										<S.ContentActions useColumn={false}>{alignmentButtons.map(renderAlignmentButton)}</S.ContentActions>
 									</S.ContentActionsWrapper>
 									<S.ContentActionsWrapper alignment={mediaData.alignment}>
-										<span>{language?.imageSize ?? 'Image size'}</span>
+										<span>{'Size'}</span>
 										<S.ContentActions useColumn={false}>
 											{(['small', 'medium', 'large'] as ImageSize[]).map((key) => (
 												<Button
