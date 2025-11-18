@@ -214,10 +214,40 @@ export default function PostRenderer(props: PostRendererProps) {
 									style={{ ...entry.data }}
 								/>
 							);
-						case 'code':
-							return <code key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+						case 'code': {
+							const handleCopy = () => {
+								const tempDiv = document.createElement('div');
+								tempDiv.innerHTML = entry.content || '';
+								const textContent = tempDiv.textContent || tempDiv.innerText || '';
+								navigator.clipboard.writeText(textContent).then(() => {
+									const button = document.querySelector(`[data-code-id="${entry.id}"]`) as HTMLButtonElement;
+									if (button) {
+										const originalText = button.textContent;
+										button.textContent = 'Copied!';
+										setTimeout(() => {
+											button.textContent = originalText;
+										}, 2000);
+									}
+								});
+							};
+
+							return (
+								<div key={entry.id} className="portal-code-wrapper">
+									<button data-code-id={entry.id} onClick={handleCopy}>
+										Copy
+									</button>
+									<code dangerouslySetInnerHTML={{ __html: entry.content || '' }} />
+								</div>
+							);
+						}
 						case 'html':
-							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+							return (
+								<div
+									key={entry.id}
+									className="portal-html-wrapper"
+									dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+								/>
+							);
 						case 'unordered-list':
 							return (
 								<ul
