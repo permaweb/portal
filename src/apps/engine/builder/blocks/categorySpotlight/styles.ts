@@ -113,6 +113,8 @@ export const LeftMeta = styled.div`
 
 export const LeftSource = styled.div`
 	display: flex;
+	align-items: center;
+	gap: 6px;
 	font-size: 12px;
 	text-transform: uppercase;
 	color: rgba(var(--color-secondary), 1);
@@ -122,10 +124,8 @@ export const LeftSource = styled.div`
 		width: 18px;
 		height: 18px;
 		border-radius: 50%;
-		margin-right: 6px;
 	}
 	span {
-		margin-left: 4px;
 		font-weight: 800;
 	}
 `;
@@ -188,7 +188,9 @@ export const RightTitle = styled.div`
 export const RightSource = styled.div`
 	position: absolute;
 	display: flex;
+	align-items: center;
 	justify-content: center;
+	gap: 6px;
 	bottom: 16px;
 	margin-left: 10px;
 	background: rgba(0, 0, 0, 0.6);
@@ -200,10 +202,8 @@ export const RightSource = styled.div`
 		width: 18px;
 		height: 18px;
 		border-radius: 50%;
-		margin-right: 6px;
 	}
 	span {
-		margin-left: 4px;
 		font-weight: 800;
 	}
 `;

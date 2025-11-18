@@ -114,6 +114,8 @@ export const Type = styled.div`
 
 export const Meta = styled.div`
 	display: flex;
+	align-items: center;
+	gap: 6px;
 	text-transform: uppercase;
 	font-size: 12px;
 	font-weight: 600;
@@ -124,12 +126,10 @@ export const Meta = styled.div`
 		width: 18px;
 		height: 18px;
 		border-radius: 50%;
-		margin-right: 6px;
 		background-color: rgba(var(--color-text), 1);
 	}
 
 	span {
-		margin-left: 4px;
 		height: 100%;
 		&:first-of-type {
 			font-weight: 900;
