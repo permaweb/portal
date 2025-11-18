@@ -48,6 +48,20 @@ function snapWidthToPreset(width?: number | null): ImageSize | null {
 	return best[0];
 }
 
+function getFlexDirection(alignment?: AlignmentEnum | null): 'row' | 'row-reverse' | 'column' | 'column-reverse' {
+	switch (alignment) {
+		case AlignmentEnum.Row:
+			return 'row';
+		case AlignmentEnum.RowReverse:
+			return 'row-reverse';
+		case AlignmentEnum.ColumnReverse:
+			return 'column-reverse';
+		case AlignmentEnum.Column:
+		default:
+			return 'column';
+	}
+}
+
 export default function MediaBlock(props: { type: 'image' | 'video'; content: any; data: any; onChange: any }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -151,15 +165,18 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	}, [mediaData?.url, mediaData?.caption, mediaData?.alignment, mediaData?.width]);
 
 	function buildContent(data: any) {
-		const widthStyle = data.width ? ` style="width: ${data.width}px; max-width: 100%;"` : '';
+		const flexDirection = getFlexDirection(data.alignment);
+		const widthPart = data.width ? `width: ${data.width}px; max-width: 100%;` : 'max-width: 100%;';
+		const styleAttr = ` style="display: flex; flex-direction: ${flexDirection}; ${widthPart}"`;
+
 		const mediaTag = props.type === 'video' ? `<video controls src="${data.url}"></video>` : `<img src="${data.url}"/>`;
 
 		return `
-    <div class="portal-media-wrapper ${data.alignment}"${widthStyle}>
-      ${mediaTag}
-      ${data.caption ? `<p>${data.caption}</p>` : ''}
-    </div>
-  `;
+		<div class="portal-media-wrapper ${data.alignment}"${styleAttr}>
+			${mediaTag}
+			${data.caption ? `<p>${data.caption}</p>` : ''}
+		</div>
+	`;
 	}
 
 	async function handleUpload() {
