@@ -94,7 +94,7 @@ export const ICONS = {
 	spacerVertical: getTxEndpoint('T2TDl6c6WAlC32DBhI8NIY_v24lPfGkOmWY2SUgxj3I'),
 	strikethrough: getTxEndpoint('JF2GMxtrO8fQU1NIQTcxDAv2nIAnDhZ_vKICXDVf_tc'),
 	success: getTxEndpoint('mVnNwxm-F6CV043zVtORE-EaMWfd2j8w6HHX70IcVbI'),
-	text: getTxEndpoint('Hcx1u0Kv4reO94swiIQ3R6LsTGWM271UXrFVCQWZMhM'),
+	text: getTxEndpoint('Z895K6bbJkvtAgzHvSWtRKQkdZjMuCDGQm_SrpQZLQM'),
 	textAlignCenter: getTxEndpoint('bY58YiCJ8QKwvnS0G1211-49pWiBXdKPZYqOf7O_sqk'),
 	textAlignLeft: getTxEndpoint('WRT-fR9Dqu1sRyIIEQK61MFxV00CM5xl10mFlCa9VN0'),
 	textAlignRight: getTxEndpoint('AHlJlwWMZYw2TSIzlfN5JSQOrT4PfnFD19Y_C67V9nM'),

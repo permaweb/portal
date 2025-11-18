@@ -66,7 +66,7 @@ export default function ArticleBlocks(props: {
 					ARTICLE_BLOCKS[ArticleBlockEnum.UnorderedList],
 					ARTICLE_BLOCKS[ArticleBlockEnum.Code],
 					ARTICLE_BLOCKS[ArticleBlockEnum.Table],
-				],
+				].filter(Boolean),
 			},
 			{
 				label: language.headers,
@@ -77,11 +77,11 @@ export default function ArticleBlocks(props: {
 					ARTICLE_BLOCKS[ArticleBlockEnum.Header4],
 					ARTICLE_BLOCKS[ArticleBlockEnum.Header5],
 					ARTICLE_BLOCKS[ArticleBlockEnum.Header6],
-				],
+				].filter(Boolean),
 			},
 			{
 				label: language.media,
-				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image], ARTICLE_BLOCKS[ArticleBlockEnum.Video]],
+				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image], ARTICLE_BLOCKS[ArticleBlockEnum.Video]].filter(Boolean),
 			},
 			{
 				label: language.design,
@@ -90,11 +90,11 @@ export default function ArticleBlocks(props: {
 					ARTICLE_BLOCKS[ArticleBlockEnum.DividerDashed],
 					ARTICLE_BLOCKS[ArticleBlockEnum.SpacerVertical],
 					ARTICLE_BLOCKS[ArticleBlockEnum.SpacerHorizontal],
-				],
+				].filter(Boolean),
 			},
 			{
 				label: language.custom,
-				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.HTML]],
+				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.HTML]].filter(Boolean),
 			},
 		],
 		[language.text, language.headers, language.media, language.design]

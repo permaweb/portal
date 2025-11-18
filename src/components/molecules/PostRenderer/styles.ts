@@ -133,38 +133,33 @@ export const Wrapper = styled.div`
 
 	.portal-media-wrapper {
 		display: flex;
-		flex-direction: column;
-		margin: 10px auto 20px auto;
-		gap: 6px;
-		width: 100%;
+		margin-top: 10px;
+		margin-bottom: 20px;
 
 		p {
-			width: 100%;
 			text-align: center;
 			margin-top: 0;
 			color: rgba(var(--color-primary), 1);
 		}
 
 		img {
-			width: 100%;
 			border-radius: 10px;
 		}
 
 		video {
-			width: 100%;
 		}
 	}
 
-	.portal-image-row {
-		/* Default Flex */
+	.portal-media-row {
+		flex-direction: row;
 	}
-	.portal-image-row-reverse {
+	.portal-media-row-reverse {
 		flex-direction: row-reverse;
 	}
-	.portal-image-column {
+	.portal-media-column {
 		flex-direction: column;
 	}
-	.portal-image-column-reverse {
+	.portal-media-column-reverse {
 		flex-direction: column-reverse;
 	}
 

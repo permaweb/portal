@@ -189,8 +189,19 @@ export default function PostRenderer(props: PostRendererProps) {
 								/>
 							);
 						case 'image':
-						case 'video':
-							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+						case 'video': {
+							let modifiedContent = entry.content || '';
+							let marginStyle = 'margin-left: auto; margin-right: auto;';
+
+							if (modifiedContent.includes('justify-content: flex-start')) {
+								marginStyle = 'margin-left: 0; margin-right: auto;';
+							} else if (modifiedContent.includes('justify-content: flex-end')) {
+								marginStyle = 'margin-left: auto; margin-right: 0;';
+							}
+
+							modifiedContent = modifiedContent.replace(/style="([^"]*)"/, `style="$1 ${marginStyle}"`);
+							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: modifiedContent }} />;
+						}
 						case 'paragraph':
 							return (
 								<p key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} style={{ ...entry.data }} />
