@@ -206,7 +206,6 @@ export const Meta = styled.div`
 	display: flex;
 	align-items: center;
 	margin-bottom: 10px;
-	color: rgba(var(--color-primary), 1);
 
 	img {
 		width: 20px;
@@ -218,6 +217,7 @@ export const Meta = styled.div`
 	span {
 		font-size: var(--font-size-default);
 		font-weight: 600;
+		opacity: 0.6;
 	}
 `;
 
@@ -240,6 +240,7 @@ export const Author = styled.div`
 `;
 
 export const Thumbnail = styled.img`
+	width: 100%;
 	border-radius: 10px;
 `;
 
