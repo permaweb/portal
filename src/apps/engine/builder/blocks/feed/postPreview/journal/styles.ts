@@ -189,7 +189,8 @@ export const Username = styled.div`
 `;
 
 export const Date = styled.div`
+	display: flex;
+	align-items: center;
 	font-size: 12px;
 	opacity: 0.6;
-	margin-top: 2px;
 `;
