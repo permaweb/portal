@@ -88,3 +88,33 @@ export const MenuSpacer = styled.div`
 	padding-bottom: 3px;
 	border-bottom: 1px solid rgba(var(--color-text), 0.1);
 `;
+
+export const MenuEntryWithSubmenu = styled.div`
+	position: relative;
+`;
+
+export const SubmenuArrow = styled.span`
+	display: flex;
+	align-items: center;
+	margin-left: auto;
+	padding-left: 10px;
+
+	svg {
+		width: 10px;
+		height: 10px;
+		transform: rotate(90deg);
+	}
+`;
+
+export const Submenu = styled.div`
+	position: absolute;
+	left: 100%;
+	top: 0;
+	background: var(--color-navigation-background);
+	backdrop-filter: blur(5px);
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+	padding: 4px;
+	min-width: 120px;
+	animation: ${slideDown} 0.2s ease-out forwards;
+	z-index: 100;
+`;

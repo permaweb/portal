@@ -63,28 +63,32 @@ export default function Post(props: any) {
 		if (!exportDisabled) fn();
 	};
 
-	menuEntries.push(
-		{
-			icon: null,
-			label: 'Download .pdf',
-			onClick: safe(() => handleDownload('pdf')),
-		},
-		{
-			icon: null,
-			label: 'Download .md',
-			onClick: safe(() => handleDownload('markdown')),
-		},
-		{
-			icon: null,
-			label: 'Download .txt',
-			onClick: safe(() => handleDownload('text')),
-		},
-		{
-			icon: null,
-			label: 'Download .html',
-			onClick: safe(() => handleDownload('html')),
-		}
-	);
+	menuEntries.push({
+		icon: ICONS.download,
+		label: 'Download',
+		submenu: [
+			{
+				icon: ICONS.pdf,
+				label: 'PDF',
+				onClick: safe(() => handleDownload('pdf')),
+			},
+			{
+				icon: ICONS.markdown,
+				label: 'Markdown',
+				onClick: safe(() => handleDownload('markdown')),
+			},
+			{
+				icon: ICONS.text,
+				label: 'Text',
+				onClick: safe(() => handleDownload('text')),
+			},
+			{
+				icon: ICONS.html,
+				label: 'HTML',
+				onClick: safe(() => handleDownload('html')),
+			},
+		],
+	});
 
 	const handleDownload = async (fmt: 'html' | 'markdown' | 'text' | 'word' | 'pdf') => {
 		if (exportDisabled) return;
