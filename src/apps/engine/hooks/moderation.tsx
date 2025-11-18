@@ -10,7 +10,13 @@ export const useModeration = () => {
 	const [blockedUsers, setBlockedUsers] = React.useState<Set<string>>(new Set());
 	const [isLoading, setIsLoading] = React.useState(false);
 
-	const isModerator = profile?.owner && profile?.roles && ['Admin', 'Moderator'].some((r) => profile.roles.includes(r));
+	const roles = Array.isArray(profile?.roles)
+		? profile.roles
+		: profile?.roles
+		? [profile.roles] // handle single string cases
+		: [];
+
+	const isModerator = !!profile?.owner && roles.some((r) => ['Admin', 'Moderator'].includes(r));
 	const moderationId = portal?.Moderation;
 
 	const fetchModerationEntries = React.useCallback(() => {

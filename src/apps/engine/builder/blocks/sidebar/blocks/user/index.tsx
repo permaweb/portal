@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import Avatar from 'engine/components/avatar';
 import { useProfile } from 'engine/hooks/profiles';
 
 import { getTxEndpoint } from 'helpers/endpoints';
@@ -60,14 +61,17 @@ export default function SidebarUser() {
 		<S.SidebarUserWrapper>
 			<S.Header>
 				<S.Banner>
-					{profile.banner && (
-						<img src={checkValidAddress(profile.banner) ? getTxEndpoint(profile.banner) : profile.banner} />
+					{profile.banner && checkValidAddress(profile.banner) && (
+						<img
+							src={getTxEndpoint(profile.banner)}
+							onError={(e) => {
+								e.currentTarget.style.display = 'none';
+							}}
+						/>
 					)}
 				</S.Banner>
 				<S.Avatar>
-					{profile.thumbnail && (
-						<img src={checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : profile.thumbnail} />
-					)}
+					<Avatar profile={profile} size={52} />
 				</S.Avatar>
 				<S.Name>{profile.displayName}</S.Name>
 			</S.Header>

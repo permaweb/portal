@@ -66,7 +66,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const overview = permawebProvider.libs.mapFromProcessCase(
 					await permawebProvider.libs.readState({ processId: portalId, path: 'overview' })
 				);
-
 				const presentation = permawebProvider.libs.mapFromProcessCase(
 					await permawebProvider.libs.readState({ processId: portalId, path: 'presentation' })
 				);
@@ -119,13 +118,12 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								return Number(bDate) - Number(aDate);
 							})
 					: [];
-
 				const zone = {
 					...defaultPortal,
 					...cached,
 					name: overview?.name,
-					logo: overview?.logo,
-					icon: overview?.icon,
+					logo: overview?.banner,
+					icon: overview?.thumbnail,
 					wallpaper: overview?.wallpaper,
 					moderation: overview?.moderation,
 					layout: presentation?.layout,

@@ -23,8 +23,12 @@ export const Header = styled.div<{ $layout: any; theme: any }>`
 	user-select: none;
 	box-sizing: border-box;
 
+	h1 {
+		margin: 0;
+	}
+
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-		padding: 0 var(--spacing-xxs);
+		// padding: 0 var(--spacing-xxs);
 	}
 `;
 
@@ -93,10 +97,11 @@ export const Logo = styled.div<{ $layout: any }>`
 	}
 `;
 
-export const Actions = styled.div`
+export const Actions = styled.div<{ $isLogo: boolean }>`
 	position: absolute;
 	display: flex;
-	top: 10px;
+	align-items: center;
+	top: ${(props) => (props.$isLogo ? '40px' : '10px')};
 	right: 0;
 	z-index: 2;
 `;

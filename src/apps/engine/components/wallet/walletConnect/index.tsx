@@ -1,6 +1,7 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 import { WanderConnect } from '@wanderapp/connect';
+import Avatar from 'engine/components/avatar';
 import { Panel } from 'engine/components/panel';
 import ProfileEditor from 'engine/components/profileEditor';
 import useNavigate from 'engine/helpers/preview';
@@ -138,13 +139,9 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 								/>
 							)}
 						</S.Banner>
-						<S.Avatar>
-							<img
-								className="missingAvatar"
-								onLoad={(e) => e.currentTarget.classList.remove('missingAvatar')}
-								src={avatar}
-							/>
-						</S.Avatar>
+						<S.AvatarWrapper>
+							<Avatar profile={profile} size={52} />
+						</S.AvatarWrapper>
 						<S.DisplayName>{profile?.displayName ? profile.displayName : 'My Profile'}</S.DisplayName>
 						<S.DAddress>
 							{shorten(arProvider.walletAddress)}

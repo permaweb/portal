@@ -10,9 +10,12 @@ import { currentPostUpdate } from 'editor/store/post';
 
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
+import { Modal } from 'components/atoms/Modal';
 import { Portal } from 'components/atoms/Portal';
 import { Tabs } from 'components/atoms/Tabs';
+import { PostRenderer } from 'components/molecules/PostRenderer';
 import { DOM, ICONS, STYLING } from 'helpers/config';
+import { getThemeVars } from 'helpers/themes';
 import {
 	ArticleBlockEnum,
 	PortalAssetRequestType,
@@ -57,7 +60,7 @@ export default function ArticleToolbar(props: {
 
 	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.id);
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
-
+	const [previewOpen, setPreviewOpen] = React.useState(false);
 	const titleRef = React.useRef<any>(null);
 	const prevDesktopRef = React.useRef<boolean>(desktop);
 
@@ -204,7 +207,6 @@ export default function ArticleToolbar(props: {
 	const currentRequest =
 		isCurrentRequest &&
 		portalProvider.current?.requests?.find((request: PortalAssetRequestType) => request.id === assetId);
-	console.log({ currentRequest });
 	const primaryDisabled = submitUnauthorized || currentPost.editor.loading.active || currentPost.editor.submitDisabled;
 	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
 
@@ -267,24 +269,35 @@ export default function ArticleToolbar(props: {
 								noFocus
 							/>
 						)}
+						<Button
+							type={'alt1'}
+							label={language?.preview ?? 'Preview'}
+							handlePress={() => setPreviewOpen(true)}
+							active={false}
+							disabled={currentPost.editor.loading.active}
+							noFocus
+							icon={ICONS.show}
+						/>
 					</>
 				);
 			}
 		}
 
 		return (
-			<Button
-				type={'alt1'}
-				label={language?.save}
-				handlePress={() =>
-					// contributors need to save using the approve workflow - this will trigger the request approval process
-					portalProvider.permissions?.postAutoIndex ? props.handleSubmit('Auto') : props.handleSubmit()
-				}
-				active={false}
-				disabled={primaryDisabled}
-				tooltip={primaryDisabled ? null : (isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
-				noFocus
-			/>
+			<>
+				<Button
+					type={'alt1'}
+					label={language?.save}
+					handlePress={() =>
+						// Contributors need to save using the approve workflow - this will trigger the request approval process
+						portalProvider.permissions?.postAutoIndex ? props.handleSubmit('Auto') : props.handleSubmit()
+					}
+					active={false}
+					disabled={primaryDisabled}
+					tooltip={primaryDisabled ? null : (isMac ? 'Cmd' : 'CTRL') + ' + Shift + S'}
+					noFocus
+				/>
+			</>
 		);
 	}
 
@@ -349,6 +362,70 @@ export default function ArticleToolbar(props: {
 		return content;
 	}, [currentPost.editor.panelOpen, currentTab, props.addBlock, desktop, currentPost.editor.loading.active]);
 
+	const previewPost = React.useMemo(() => {
+		const d = currentPost.data;
+		return {
+			name: d?.title || '',
+			dateCreated: d?.dateCreated || Date.now(),
+			creator: d?.creator,
+			metadata: {
+				status: (d?.status?.toLowerCase?.() as 'draft' | 'published') || 'draft',
+				description: d?.description || '',
+				thumbnail: d?.thumbnail || undefined,
+				topics: d?.topics || [],
+			},
+		} as any;
+	}, [currentPost.data]);
+
+	// Reuse the editor content as-is
+	const previewContent = React.useMemo(() => currentPost.data?.content || [], [currentPost.data?.content]);
+
+	// Fetch the creator's profile for preview
+	React.useEffect(() => {
+		const creatorId = currentPost.data?.creator;
+		if (creatorId && !portalProvider.usersByPortalId[creatorId]) {
+			portalProvider.fetchPortalUserProfile({ address: creatorId } as PortalUserType);
+		}
+	}, [currentPost.data?.creator, portalProvider]);
+
+	// Use the creator's profile for author display in preview
+	const previewProfile = React.useMemo(() => {
+		const creatorId = currentPost.data?.creator;
+		const p = creatorId ? portalProvider.usersByPortalId[creatorId] : permawebProvider.profile;
+		return {
+			displayName: p?.displayName || p?.handle || p?.id || 'Author',
+			thumbnail: p?.thumbnail || p?.avatar || undefined,
+		};
+	}, [currentPost.data?.creator, portalProvider.usersByPortalId, permawebProvider.profile]);
+
+	const scheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+	const activeTheme = portalProvider.current.themes.find((t: any) => t.active);
+	const themeVars = getThemeVars(activeTheme, scheme);
+
+	const previewModal = React.useMemo(() => {
+		if (!previewOpen) return null;
+
+		return (
+			<Modal
+				header={language?.preview ?? 'Preview'}
+				handleClose={() => setPreviewOpen(false)}
+				width={900}
+				className={'scroll-wrapper-hidden'}
+			>
+				<S.PreviewCard style={Object.fromEntries(Object.entries(themeVars))}>
+					<PostRenderer
+						isLoadingPost={false}
+						isLoadingProfile={false}
+						isLoadingContent={false}
+						post={previewPost}
+						profile={previewProfile}
+						content={previewContent}
+					/>
+				</S.PreviewCard>
+			</Modal>
+		);
+	}, [previewOpen, previewPost, previewProfile, previewContent, language, themeVars]);
+
 	return (
 		<>
 			<S.Wrapper>
@@ -402,10 +479,21 @@ export default function ArticleToolbar(props: {
 						tooltip={'CTRL + L'}
 						noFocus
 					/>
+					<Button
+						type={'primary'}
+						label={language?.preview ?? 'Preview'}
+						handlePress={() => setPreviewOpen(true)}
+						active={false}
+						disabled={currentPost.editor.loading.active}
+						noFocus
+						icon={ICONS.show}
+						iconLeftAlign
+					/>
 					<S.SubmitWrapper>{getSubmit()}</S.SubmitWrapper>
 				</S.EndActions>
 			</S.Wrapper>
 			{panel}
+			{previewModal}
 		</>
 	);
 }

@@ -42,12 +42,14 @@ export default function User(props: {
 	const invitePending =
 		userProfile?.invites?.find((invite: PortalHeaderType) => invite.id === portalProvider.current?.id) !== undefined;
 	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser && !invitePending;
+
 	React.useEffect(() => {
 		(async function () {
 			if (!fetched) portalProvider.fetchPortalUserProfile(props.user);
 			setFetched(true);
 		})();
 	}, [props.user, fetched]);
+
 	const signer = new ArconnectSigner(arweaveProvider.wallet);
 	const turbo = TurboFactory.authenticated({ signer });
 
@@ -68,7 +70,6 @@ export default function User(props: {
 				});
 
 				if (receivedApprovals && receivedApprovals.length > 0) {
-					// compute sum(approvedWincAmount - usedWincAmount)
 					const total = receivedApprovals.reduce((sum, a) => {
 						const approved = BigInt(a.approvedWincAmount);
 						const used = BigInt(a.usedWincAmount);

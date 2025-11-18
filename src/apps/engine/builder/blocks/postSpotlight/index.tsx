@@ -1,10 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import Avatar from 'engine/components/avatar';
 import Placeholder from 'engine/components/placeholder';
 import { usePost, usePosts } from 'engine/hooks/posts';
 import { useProfile } from 'engine/hooks/profiles';
 
-import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress, getRedirect } from 'helpers/utils';
 
@@ -83,11 +83,7 @@ export default function PostSpotlight(props: any) {
 						</span>
 					</h2>
 					<S.Meta>
-						<img
-							className="loadingAvatar"
-							onLoad={(e) => e.currentTarget.classList.remove('loadingAvatar')}
-							src={checkValidAddress(profile?.thumbnail) ? getTxEndpoint(profile?.thumbnail) : ICONS.user}
-						/>
+						<Avatar profile={profile} isLoading={isLoadingProfile} size={18} />
 						By
 						<span>{isLoadingProfile ? <Placeholder width="60" /> : profile?.displayName}</span>
 						<span>
