@@ -142,17 +142,19 @@ export const ContentWrapper = styled.div`
 	gap: 15px;
 `;
 
-export const MediaResizeWrapper = styled.div<{ width?: number | null }>`
+export const MediaResizeWrapper = styled.div<{
+	width?: number | null;
+	align?: 'left' | 'center' | 'right';
+}>`
 	position: relative;
 	width: ${(props) => (props.width ? `${props.width}px` : '100%')};
 	max-width: 100%;
-	justify-self: center;
-	border: 1px solid transparent;
-	transition: border-color 0.2s ease;
 
-	&:hover {
-		border-color: ${(props) => props.theme.colors.border.primary};
-	}
+	/* Horizontal alignment when used inside a CSS grid or block layout */
+	justify-self: ${(props) => (props.align === 'left' ? 'start' : props.align === 'right' ? 'end' : 'center')};
+
+	margin-left: ${(props) => (props.align === 'left' ? '0' : props.align === 'center' ? 'auto' : 'auto')};
+	margin-right: ${(props) => (props.align === 'right' ? '0' : props.align === 'center' ? 'auto' : 'auto')};
 
 	> .portal-media-wrapper {
 		width: 100%;
@@ -162,6 +164,8 @@ export const MediaResizeWrapper = styled.div<{ width?: number | null }>`
 		> img,
 		> video {
 			max-width: 100%;
+			height: auto;
+			display: block;
 		}
 	}
 `;

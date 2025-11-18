@@ -48,6 +48,32 @@ function snapWidthToPreset(width?: number | null): ImageSize | null {
 	return best[0];
 }
 
+function getFlexDirection(alignment?: AlignmentEnum | null): 'row' | 'row-reverse' | 'column' | 'column-reverse' {
+	switch (alignment) {
+		case AlignmentEnum.Row:
+			return 'row';
+		case AlignmentEnum.RowReverse:
+			return 'row-reverse';
+		case AlignmentEnum.ColumnReverse:
+			return 'column-reverse';
+		case AlignmentEnum.Column:
+		default:
+			return 'column';
+	}
+}
+
+function getJustifyContent(alignment?: 'left' | 'center' | 'right' | null): 'flex-start' | 'center' | 'flex-end' {
+	switch (alignment) {
+		case 'left':
+			return 'flex-start';
+		case 'right':
+			return 'flex-end';
+		case 'center':
+		default:
+			return 'center';
+	}
+}
+
 export default function MediaBlock(props: { type: 'image' | 'video'; content: any; data: any; onChange: any }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -83,6 +109,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		caption: string | null;
 		alignment: AlignmentEnum | null;
 		width?: number | null;
+		mediaAlign?: 'left' | 'center' | 'right' | null;
 	}>();
 	const isInternalUpdateRef = React.useRef(false);
 	const isResizingRef = React.useRef(false);
@@ -93,11 +120,13 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		caption: string | null;
 		alignment: AlignmentEnum | null;
 		width?: number | null;
+		mediaAlign?: 'left' | 'center' | 'right' | null;
 	}>({
 		url: null,
 		caption: null,
 		alignment: AlignmentEnum.Column,
 		width: null,
+		mediaAlign: 'center',
 	});
 	const [showCaptionEdit, setShowCaptionEdit] = React.useState<boolean>(false);
 	const [showMediaLibrary, setShowMediaLibrary] = React.useState<boolean>(false);
@@ -114,7 +143,8 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			(props.data.url !== prevPropsDataRef.current?.url ||
 				props.data.caption !== prevPropsDataRef.current?.caption ||
 				props.data.alignment !== prevPropsDataRef.current?.alignment ||
-				props.data.width !== prevPropsDataRef.current?.width)
+				props.data.width !== prevPropsDataRef.current?.width ||
+				props.data.mediaAlign !== prevPropsDataRef.current?.mediaAlign)
 		) {
 			setMediaData(props.data);
 			prevPropsDataRef.current = {
@@ -122,10 +152,11 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 				caption: props.data.caption,
 				alignment: props.data.alignment,
 				width: props.data.width,
+				mediaAlign: props.data.mediaAlign,
 			};
 		}
 		isInternalUpdateRef.current = false;
-	}, [props.data?.url, props.data?.caption, props.data?.alignment, props.data?.width]);
+	}, [props.data?.url, props.data?.caption, props.data?.alignment, props.data?.width, props.data?.mediaAlign]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -148,16 +179,22 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			isInternalUpdateRef.current = true;
 			props.onChange(buildContent(mediaData), mediaData);
 		}
-	}, [mediaData?.url, mediaData?.caption, mediaData?.alignment, mediaData?.width]);
+	}, [mediaData?.url, mediaData?.caption, mediaData?.alignment, mediaData?.width, mediaData?.mediaAlign]);
 
 	function buildContent(data: any) {
-		const widthStyle = data.width ? ` style="width: ${data.width}px; max-width: 100%;"` : '';
+		const flexDirection = getFlexDirection(data.alignment);
+		const justifyContent = getJustifyContent(data.mediaAlign);
+		const widthPart = data.width ? `width: ${data.width}px; max-width: 100%;` : 'max-width: 100%;';
+		const styleAttr = ` style="display: flex; flex-direction: ${flexDirection}; justify-content: ${justifyContent}; ${widthPart}"`;
+
+		const mediaTag = props.type === 'video' ? `<video controls src="${data.url}"></video>` : `<img src="${data.url}"/>`;
+
 		return `
-			<div class="portal-media-wrapper ${data.alignment}"${widthStyle}>
-				<img src="${data.url}"/>
-				${data.caption ? `<p>${data.caption}</p>` : ''}
-			</div>
-		`;
+    <div class="portal-media-wrapper ${data.alignment}"${styleAttr}>
+      ${mediaTag}
+      ${data.caption ? `<p>${data.caption}</p>` : ''}
+    </div>
+  `;
 	}
 
 	async function handleUpload() {
@@ -355,9 +392,16 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					<>
 						<S.ContentWrapper>
 							<S.Content>
-								<S.MediaResizeWrapper ref={mediaRef} width={mediaData.width}>
+								<S.MediaResizeWrapper ref={mediaRef} width={mediaData.width} align={mediaData.mediaAlign ?? 'center'}>
 									<S.ResizeHandle side="left" onMouseDown={(e) => handleResizeStart(e, 'left')} />
-									<div className={`portal-media-wrapper ${mediaData.alignment}`}>
+									<div
+										className={`portal-media-wrapper ${mediaData.alignment}`}
+										style={{
+											display: 'flex',
+											flexDirection: getFlexDirection(mediaData.alignment),
+											justifyContent: getJustifyContent(mediaData.mediaAlign ?? 'center'),
+										}}
+									>
 										{mediaData.url && config.renderContent(mediaData.url)}
 										{mediaData?.caption !== null && (
 											<S.CaptionWrapper
@@ -379,7 +423,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 														src={ICONS.write}
 														handlePress={() => setShowCaptionEdit(true)}
 														dimensions={{ wrapper: 23.5, icon: 13.5 }}
-														tooltip={language?.showImageTools}
+														tooltip={language?.showMediaTools}
 														tooltipPosition={'bottom-right'}
 														noFocus
 													/>
@@ -397,7 +441,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 							</S.Content>
 						</S.ContentWrapper>
 						{showCaptionEdit && (
-							<Modal header={'Image tools'} handleClose={() => setShowCaptionEdit(false)}>
+							<Modal header={'Media Tools'} handleClose={() => setShowCaptionEdit(false)}>
 								<S.ModalCaptionWrapper className={'modal-wrapper'}>
 									<FormField
 										value={mediaData?.caption || ''}
@@ -412,7 +456,28 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 										<S.ContentActions useColumn={false}>{alignmentButtons.map(renderAlignmentButton)}</S.ContentActions>
 									</S.ContentActionsWrapper>
 									<S.ContentActionsWrapper alignment={mediaData.alignment}>
-										<span>{language?.imageSize ?? 'Image size'}</span>
+										<span>{language?.mediaAlign ?? 'Media alignment'}</span>
+										<S.ContentActions useColumn={false}>
+											{(['left', 'center', 'right'] as const).map((key) => (
+												<Button
+													key={key}
+													type={'alt3'}
+													label={
+														key === 'left'
+															? language?.left ?? 'Left'
+															: key === 'center'
+															? language?.center ?? 'Center'
+															: language?.right ?? 'Right'
+													}
+													handlePress={() => setMediaData((prev) => ({ ...prev, mediaAlign: key }))}
+													active={(mediaData.mediaAlign ?? 'center') === key}
+													iconLeftAlign
+												/>
+											))}
+										</S.ContentActions>
+									</S.ContentActionsWrapper>
+									<S.ContentActionsWrapper alignment={mediaData.alignment}>
+										<span>{language?.imageSize ?? language?.mediaSize ?? 'Media size'}</span>
 										<S.ContentActions useColumn={false}>
 											{(['small', 'medium', 'large'] as ImageSize[]).map((key) => (
 												<Button
