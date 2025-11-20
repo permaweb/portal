@@ -249,6 +249,15 @@ export const Content = styled.div`
 		width: calc(100% - 312.5px);
 	}
 
+	.portal-media-wrapper.force-column {
+		flex-direction: column !important;
+
+		img,
+		video {
+			width: 100% !important;
+		}
+	}
+
 	.portal-media-row-reverse {
 		flex-direction: row-reverse;
 	}

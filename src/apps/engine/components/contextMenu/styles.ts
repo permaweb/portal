@@ -16,7 +16,7 @@ const slideDown = keyframes`
 export const Menu = styled.div`
 	position: absolute;
 	right: 0;
-	top: 3px;
+	top: var(--spacing-s);
 	width: fit-content;
 `;
 
@@ -52,7 +52,9 @@ export const IconWrapper = styled.div`
 `;
 
 export const MenuEntries = styled.div`
-	position: relative;
+	position: absolute;
+	top: 100%;
+	right: 0;
 	background: var(--color-navigation-background);
 	backdrop-filter: blur(5px);
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
@@ -60,6 +62,12 @@ export const MenuEntries = styled.div`
 	padding: 4px;
 	animation: ${slideDown} 0.2s ease-out forwards;
 	transform-origin: top center;
+
+	&.up {
+		top: auto;
+		bottom: 100%;
+		transform-origin: bottom center;
+	}
 `;
 
 export const MenuEntry = styled.div`
@@ -117,4 +125,9 @@ export const Submenu = styled.div`
 	min-width: 120px;
 	animation: ${slideDown} 0.2s ease-out forwards;
 	z-index: 100;
+
+	&.left {
+		left: auto;
+		right: 100%;
+	}
 `;

@@ -42,6 +42,11 @@ export const HeaderContentWrapper = styled.div<{ $layout: any; maxWidth: number 
 	max-height: 100%;
 	padding: ${(props) => (props.$layout.padding ? props.$layout.padding : `0`)};
 	box-sizing: border-box;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		padding-left: var(--spacing-xxs);
+		padding-right: var(--spacing-xxs);
+	}
 `;
 
 export const HeaderContent = styled.div<{ $layout: any; maxWidth: number }>`

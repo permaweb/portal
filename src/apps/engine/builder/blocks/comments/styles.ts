@@ -1,3 +1,4 @@
+import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
 export const Comments = styled.div`
@@ -15,6 +16,11 @@ export const Comments = styled.div`
 	h2 {
 		margin: 0;
 		font-size: 22px;
+	}
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		padding-left: var(--spacing-xxs);
+		padding-right: var(--spacing-xxs);
 	}
 `;
 

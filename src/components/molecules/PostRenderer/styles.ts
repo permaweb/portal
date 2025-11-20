@@ -6,6 +6,8 @@ export const TitleWrapper = styled.div`
 	width: 100%;
 	margin-bottom: 20px;
 	gap: 16px;
+	padding-right: 28px;
+	box-sizing: border-box;
 
 	h1 {
 		margin: 0 !important;

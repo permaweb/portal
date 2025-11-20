@@ -29,7 +29,11 @@ interface ContextMenuProps {
 export default function ContextMenu({ entries, children }: ContextMenuProps) {
 	const [openMenu, setOpenMenu] = React.useState(false);
 	const [openSubmenu, setOpenSubmenu] = React.useState<number | null>(null);
+	const [submenuDirection, setSubmenuDirection] = React.useState<'right' | 'left'>('right');
+	const [menuVerticalDirection, setMenuVerticalDirection] = React.useState<'down' | 'up'>('down');
 	const menuRef = React.useRef<HTMLDivElement>(null);
+	const submenuRef = React.useRef<HTMLDivElement>(null);
+	const menuEntriesRef = React.useRef<HTMLDivElement>(null);
 	const { portalId } = usePortalProvider();
 
 	React.useEffect(() => {
@@ -48,17 +52,36 @@ export default function ContextMenu({ entries, children }: ContextMenuProps) {
 
 	if (entries.length === 0) return null;
 
+	const handleMenuToggle = () => {
+		const newOpenState = !openMenu;
+		setOpenMenu(newOpenState);
+
+		if (newOpenState) {
+			setTimeout(() => {
+				if (menuEntriesRef.current) {
+					const rect = menuEntriesRef.current.getBoundingClientRect();
+					const viewportHeight = window.innerHeight;
+					if (rect.bottom > viewportHeight) {
+						setMenuVerticalDirection('up');
+					} else {
+						setMenuVerticalDirection('down');
+					}
+				}
+			}, 0);
+		}
+	};
+
 	return (
 		<S.Menu ref={menuRef}>
 			{children ? (
-				<div onClick={() => setOpenMenu(!openMenu)}>{children}</div>
+				<div onClick={handleMenuToggle}>{children}</div>
 			) : (
-				<S.IconWrapper onClick={() => setOpenMenu(!openMenu)}>
+				<S.IconWrapper onClick={handleMenuToggle}>
 					<ReactSVG src={ICONS.ENGINE.menu} />
 				</S.IconWrapper>
 			)}
 			{openMenu && (
-				<S.MenuEntries>
+				<S.MenuEntries ref={menuEntriesRef} className={menuVerticalDirection === 'up' ? 'up' : ''}>
 					{entries.map((item, index) => {
 						if ('type' in item && item.type === 'spacer') {
 							return <S.MenuSpacer key={index} />;
@@ -66,10 +89,25 @@ export default function ContextMenu({ entries, children }: ContextMenuProps) {
 						const entry = item as MenuEntry;
 
 						if (entry.submenu) {
+							const handleMouseEnter = () => {
+								setOpenSubmenu(index);
+								setTimeout(() => {
+									if (submenuRef.current) {
+										const rect = submenuRef.current.getBoundingClientRect();
+										const viewportWidth = window.innerWidth;
+										if (rect.right > viewportWidth) {
+											setSubmenuDirection('left');
+										} else {
+											setSubmenuDirection('right');
+										}
+									}
+								}, 0);
+							};
+
 							return (
 								<S.MenuEntryWithSubmenu
 									key={index}
-									onMouseEnter={() => setOpenSubmenu(index)}
+									onMouseEnter={handleMouseEnter}
 									onMouseLeave={() => setOpenSubmenu(null)}
 								>
 									<S.MenuEntry>
@@ -80,7 +118,7 @@ export default function ContextMenu({ entries, children }: ContextMenuProps) {
 										</S.SubmenuArrow>
 									</S.MenuEntry>
 									{openSubmenu === index && (
-										<S.Submenu>
+										<S.Submenu ref={submenuRef} className={submenuDirection === 'left' ? 'left' : ''}>
 											{entry.submenu.map((subitem, subindex) => {
 												const handleSubClick = () => {
 													if (subitem.onClick) {

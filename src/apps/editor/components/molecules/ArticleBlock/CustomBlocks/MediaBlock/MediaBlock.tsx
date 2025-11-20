@@ -395,7 +395,12 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 								<S.MediaResizeWrapper ref={mediaRef} width={mediaData.width} align={mediaData.mediaAlign ?? 'center'}>
 									<S.ResizeHandle side="left" onMouseDown={(e) => handleResizeStart(e, 'left')} />
 									<div
-										className={`portal-media-wrapper ${mediaData.alignment}`}
+										className={`portal-media-wrapper ${mediaData.alignment} ${
+											mediaData.width &&
+											(mediaData.alignment === AlignmentEnum.Row || mediaData.alignment === AlignmentEnum.RowReverse)
+												? 'force-column'
+												: ''
+										}`}
 										style={{
 											display: 'flex',
 											flexDirection: getFlexDirection(mediaData.alignment),

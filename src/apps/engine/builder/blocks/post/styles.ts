@@ -1,3 +1,4 @@
+import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
 export const TitleWrapper = styled.div`
@@ -162,10 +163,15 @@ export const Wrapper = styled.div`
 			cursor: pointer;
 			transition: all 0.2s;
 			font-family: system-ui, -apple-system, sans-serif;
+			outline: none;
 
 			&:hover {
 				background: rgba(var(--color-text), 0.15);
 				color: rgba(var(--color-text), 0.9);
+			}
+
+			&:focus {
+				outline: none;
 			}
 		}
 	}
@@ -217,6 +223,7 @@ export const Wrapper = styled.div`
 		display: flex;
 		margin-top: 10px;
 		margin-bottom: 20px;
+		max-width: 100%;
 
 		p {
 			margin-top: 6px;
@@ -227,12 +234,14 @@ export const Wrapper = styled.div`
 
 		img {
 			width: 100%;
+			max-width: 100%;
 			height: auto;
 			border-radius: 10px;
 		}
 
 		video {
 			width: 100%;
+			max-width: 100%;
 			height: auto;
 		}
 	}
@@ -250,6 +259,15 @@ export const Wrapper = styled.div`
 			margin-top: 0;
 			max-width: 300px;
 			text-align: left;
+		}
+
+		@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+			flex-direction: column !important;
+
+			p {
+				max-width: 100%;
+				text-align: center;
+			}
 		}
 	}
 
@@ -288,9 +306,15 @@ export const Post = styled.div`
 	max-width: 950px;
 	margin-left: auto;
 	margin-right: auto;
-	padding: 20px 0 0 0;
+	padding: var(--spacing-s) 0 0 0;
 	z-index: 1;
 	position: relative;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		padding-left: var(--spacing-xxs);
+		padding-right: var(--spacing-xxs);
+		box-sizing: border-box;
+	}
 `;
 
 export const Description = styled.p`
