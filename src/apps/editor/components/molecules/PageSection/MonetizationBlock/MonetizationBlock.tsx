@@ -30,44 +30,120 @@ export default function MonetizationBlock(props: {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const monetization: any = portalProvider.current?.monetization?.monetization;
+	const MOCK_MONETIZATION = {
+		enabled: true,
+		walletAddress: '1LlNJkDO11_IQcXRDp53-ycYDy2nVVAsaKpjkbbvS1k', // or any test wallet
+		tokenAddress: 'AR',
+	};
+
+	const monetization: any = MOCK_MONETIZATION; //portalProvider.current?.monetization;
 
 	const data: MonetizationButtonBlockData = React.useMemo(() => {
-		const raw = (props.block?.data as MonetizationButtonBlockData) ?? {};
+		const raw = (props.block.data as MonetizationButtonBlockData) ?? {};
 		return {
 			label: raw.label ?? '',
+			amount: raw.amount ?? '',
 			variant: raw.variant ?? 'primary',
 		};
-	}, [props.block?.data]);
+	}, [props.block.data]);
 
 	const label = data.label || language?.defaultMonetizationLabel || 'Support this portal';
+	const amount = data.amount || '';
 	const variant = data.variant || 'primary';
 
-	function updateData(next: MonetizationButtonBlockData) {
+	// Keep block.content in sync with data + global monetization state
+	React.useEffect(() => {
+		// If monetization is disabled, we can clear the HTML.
+		// The engine won't render buttons when disabled anyway.
+		if (!monetization?.enabled) {
+			if (props.block.content !== null || props.block.data !== data) {
+				props.onChangeBlock(
+					{
+						...props.block,
+						content: null,
+						data: { ...data },
+					},
+					props.index
+				);
+			}
+			return;
+		}
+
+		const html = buildHtml({
+			label,
+			amount,
+			variant,
+			token: 'AR',
+		});
+
+		if (props.block.content !== html || props.block.data !== data) {
+			props.onChangeBlock(
+				{
+					...props.block,
+					content: html,
+					data: { ...data },
+				},
+				props.index
+			);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [monetization?.enabled, monetization?.walletAddress, label, amount, variant]);
+
+	function buildHtml(args: { label: string; amount: string; variant: string; token: string }) {
+		const safeLabel = (args.label ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+		const safeAmount = (args.amount ?? '').replace(/"/g, '&quot;');
+		const safeVariant = (args.variant ?? '').replace(/"/g, '&quot;');
+		const safeToken = (args.token ?? '').replace(/"/g, '&quot;');
+
+		// The viewer/engine can:
+		// - Check data-monetization="ar"
+		// - Read data-amount / data-variant
+		// - Use portal.monetization.walletAddress to send AR
+		return `
+			<div
+				class="portal-monetization-button"
+				data-monetization="${safeToken}"
+				data-amount="${safeAmount}"
+				data-variant="${safeVariant}"
+			>
+				<button>${safeLabel}</button>
+			</div>
+		`;
+	}
+
+	function handleLabelChange(event: React.ChangeEvent<HTMLInputElement>) {
+		const next = { ...data, label: event.target.value };
 		props.onChangeBlock(
 			{
 				...props.block,
-				// We no longer store any HTML here – engine will render this block
-				// based only on `type === 'monetizationButton'` and `block.data`.
 				data: next,
-				content: null,
 			},
 			props.index
 		);
 	}
 
-	function handleLabelChange(event: React.ChangeEvent<HTMLInputElement>) {
-		updateData({
-			...data,
-			label: event.target.value,
-		});
+	function handleAmountChange(event: React.ChangeEvent<HTMLInputElement>) {
+		const next = { ...data, amount: event.target.value };
+		props.onChangeBlock(
+			{
+				...props.block,
+				data: next,
+			},
+			props.index
+		);
 	}
 
 	function handleVariantChange(nextId: string) {
-		updateData({
-			...data,
-			variant: nextId as MonetizationButtonBlockData['variant'],
-		});
+		const next = { ...data, variant: nextId as MonetizationButtonBlockData['variant'] };
+
+		props.onChangeBlock(
+			{
+				...props.block,
+				data: next,
+			},
+			props.index
+		);
 	}
 
 	// UX messages depending on global config
@@ -104,10 +180,7 @@ export default function MonetizationBlock(props: {
 	}
 
 	return (
-		<S.Wrapper className={'border-wrapper-alt2'}>
-			<S.Header>
-				<S.Title>{language?.monetizationButton ?? 'Monetization button'}</S.Title>
-			</S.Header>
+		<S.Wrapper>
 			<S.Body>
 				<S.Row>
 					<S.FieldColumn>

@@ -61,6 +61,32 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [portalProvider.current?.id]);
 
+	const ownerWallet = (portalProvider.current as any)?.ownerWallet || (portalProvider.current as any)?.owner || '';
+
+	const [monetization, setMonetization] = React.useState<MonetizationConfig>(() => {
+		const existing = (portalProvider.current as any)?.monetization as MonetizationConfig | undefined;
+		if (existing) return existing;
+
+		return {
+			enabled: false,
+			walletAddress: ownerWallet,
+			tokenAddress: 'AR',
+		};
+	});
+
+	React.useEffect(() => {
+		const existing = (portalProvider.current as any)?.monetization as MonetizationConfig | undefined;
+		if (existing) {
+			setMonetization(existing);
+		} else {
+			setMonetization((prev) => ({
+				...prev,
+				walletAddress: ownerWallet || prev.walletAddress,
+			}));
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [portalProvider.current?.id]);
+
 	const toggleCategoryAction = () => {
 		updateSettings('showCategoryAction', !settings.showCategoryAction);
 	};
@@ -243,48 +269,79 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 		);
 	}
 
-	async function handleSaveMonetization() {
-		if (!portalProvider.current?.id || !portalProvider.permissions?.updatePortalMeta) {
-			return;
-		}
-		if (!arProvider.wallet || !permawebProvider.libs) {
-			addNotification(language?.walletNotConnected ?? 'Connect a wallet to update monetization.', 'warning');
-			return;
-		}
-
+	function handleSaveMonetization() {
 		const payload: MonetizationConfig = {
 			enabled: monetization.enabled,
-			walletAddress: monetization.walletAddress.trim(),
-			tokenAddress: monetization.tokenAddress || 'AR',
+			walletAddress: monetization.walletAddress,
+			tokenAddress: monetization.tokenAddress,
 		};
 
-		setSavingMonetization(true);
+		// TODO: wire this to updateZone / AO when ready
+		// For now, just log so we can see the shape.
+		console.log('Monetization config to save:', payload);
+	}
 
-		try {
-			const body: any = {
-				Monetization: permawebProvider.libs.mapToProcessCase
-					? permawebProvider.libs.mapToProcessCase(payload)
-					: payload,
-			};
+	function monetizationSection() {
+		const canEdit = !!portalProvider.permissions?.updatePortalMeta;
+		const fieldsDisabled = !monetization.enabled || !canEdit;
 
-			const updateId = await permawebProvider.libs.updateZone(body, portalProvider.current.id, arProvider.wallet);
+		return (
+			<S.Section type={props.type} className={'border-wrapper-alt2'}>
+				<S.SectionHeader>
+					<p>{language?.monetization ?? 'Monetization'}</p>
+				</S.SectionHeader>
 
-			console.log('Monetization update:', updateId);
+				<S.MonetizationBodyWrapper>
+					<div className="monetization-row">
+						<span className="field-label">{language?.enableMonetization ?? 'Enable AR monetization'}</span>
+						<Button
+							type={monetization.enabled ? 'primary' : 'alt1'}
+							label={monetization.enabled ? language?.on ?? 'On' : language?.off ?? 'Off'}
+							handlePress={() =>
+								canEdit &&
+								setMonetization((prev) => ({
+									...prev,
+									enabled: !prev.enabled,
+								}))
+							}
+							disabled={!canEdit}
+						/>
+					</div>
 
-			// update in-memory portal
-			(portalProvider.current as any).monetization = payload;
+					<FormField
+						label={language?.walletAddress ?? 'Wallet address'}
+						value={monetization.walletAddress}
+						onChange={(e: any) =>
+							setMonetization((prev) => ({
+								...prev,
+								walletAddress: e.target.value,
+							}))
+						}
+						invalid={{ status: false, message: null }}
+						disabled={fieldsDisabled}
+						hideErrorMessage
+					/>
 
-			if (portalProvider.refreshCurrentPortal) {
-				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Monetization);
-			}
+					<FormField
+						label={language?.tokenAddress ?? 'Token'}
+						value={monetization.tokenAddress}
+						onChange={() => {}}
+						invalid={{ status: false, message: null }}
+						disabled={true} // fixed to AR for v1
+						hideErrorMessage
+					/>
 
-			addNotification(language?.monetizationSaved ?? 'Monetization settings saved.', 'success');
-		} catch (e: any) {
-			console.error(e);
-			addNotification(e?.message ?? 'Error saving monetization settings.', 'warning');
-		} finally {
-			setSavingMonetization(false);
-		}
+					<div className="monetization-actions">
+						<Button
+							type={'primary'}
+							label={language?.save ?? 'Save'}
+							handlePress={handleSaveMonetization}
+							disabled={!canEdit}
+						/>
+					</div>
+				</S.MonetizationBodyWrapper>
+			</S.Section>
+		);
 	}
 
 	return (
@@ -298,6 +355,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 				<S.SectionWrapper type={props.type}>
 					{props.type === 'header' ? topicSection() : categorySection()}
 					{props.type === 'detail' && mediaSection()}
+					{props.type === 'detail' && monetizationSection()}
 					{props.type === 'detail' && !portalProvider?.permissions?.updateUsers && (
 						<S.InfoWrapper className={'warning'}>
 							<span>{language?.unauthorizedPortalUpdate}</span>
