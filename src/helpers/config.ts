@@ -160,6 +160,11 @@ export const PAGE_BLOCKS = {
 		label: 'Sidebar',
 		icon: ICONS.sidebar,
 	},
+	[PageBlockEnum.MonetizationButton]: {
+		type: PageBlockEnum.MonetizationButton,
+		label: 'Monetization Button',
+		icon: ICONS.tools,
+	},
 };
 
 export const ARTICLE_BLOCKS = {

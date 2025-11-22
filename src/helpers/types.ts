@@ -30,6 +30,7 @@ export type PortalDetailType = {
 	fonts?: PortalFontsType;
 	themes?: PortalThemeType[];
 	layout?: any;
+	monetization?: any;
 };
 
 export type PortalAssetType = {
@@ -230,6 +231,7 @@ export enum PageBlockEnum {
 	PostSpotlight = 'postSpotlight',
 	CategorySpotlight = 'categorySpotlight',
 	Sidebar = 'sidebar',
+	MonetizationButton = 'monetizationButton',
 }
 
 export type PageSectionType = {

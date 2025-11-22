@@ -20,6 +20,7 @@ import { PageBlocks } from '../PageBlocks';
 
 import { CategorySpotlightBlock } from './CategorySpotlightBlock';
 import { FeedBlock } from './FeedBlock';
+import { MonetizationBlock } from './MonetizationBlock';
 import { PostBlock } from './PostBlock';
 import { PostSpotlightBlock } from './PostSpotlightBlock';
 import { SidebarBlock } from './SidebarBlock';
@@ -435,6 +436,8 @@ export default function PageSection(props: {
 				);
 			case 'sidebar':
 				return <SidebarBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
+			case 'monetizationButton':
+				return <MonetizationBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
 			default:
 				return null;
 		}
