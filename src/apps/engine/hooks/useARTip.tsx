@@ -1,9 +1,11 @@
 import React from 'react';
+import { usePortalProvider } from 'engine/providers/PortalProvider';
 
 import Arweave from 'arweave';
 
 import { WalletEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 const arweave = Arweave.init({
 	host: 'arweave.net',
@@ -12,8 +14,10 @@ const arweave = Arweave.init({
 });
 
 export function useArTip() {
+	const portalProvider = usePortalProvider();
 	const { wallet, walletAddress, handleConnect } = useArweaveProvider();
-
+	const { Name } = portalProvider?.portal || {};
+	const { profile } = usePermawebProvider();
 	const sendTip = React.useCallback(
 		async (to: string, amount: string | undefined, location = 'page') => {
 			if (!walletAddress || !wallet) {
@@ -33,9 +37,12 @@ export function useArTip() {
 				undefined
 			);
 			tx.addTag('App-Name', 'Portal');
+			tx.addTag('Portal-Name', Name);
 			tx.addTag('Token-Symbol', 'AR');
 			tx.addTag('Amount', quantity);
 			tx.addTag('From-Address', walletAddress);
+			tx.addTag('From-Profile', profile?.username);
+			tx.addTag('From-Name', profile?.displayname ?? profile.displayName);
 			tx.addTag('To-Address', to);
 			tx.addTag('Type', 'Tip');
 			tx.addTag('Location', location);
