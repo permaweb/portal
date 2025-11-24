@@ -2,7 +2,7 @@
 import React from 'react';
 import Button from 'engine/components/form/button';
 import { useArTip } from 'engine/hooks/useARTip';
-import { usePortalProvider } from 'engine/providers/PortalProvider';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 
 type MonetizationSettings = {
 	enabled: boolean;
