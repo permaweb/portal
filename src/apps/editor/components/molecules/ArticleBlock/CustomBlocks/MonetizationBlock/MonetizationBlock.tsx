@@ -31,8 +31,7 @@ export default function PostMonetizationBlock(props: {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	// v1: portal meta
-	const monetization: any = portalProvider.current?.monetization.monetization;
+	const monetization: any = portalProvider.current?.monetization?.monetization;
 
 	const data: MonetizationButtonBlockData = React.useMemo(() => {
 		const raw = (props.block.data as MonetizationButtonBlockData) ?? {};
