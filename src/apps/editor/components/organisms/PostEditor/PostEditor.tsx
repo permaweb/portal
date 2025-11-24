@@ -490,24 +490,27 @@ export default function PostEditor() {
 					if (currentPost.data?.externalRecipients?.length > 0) {
 						for (const portalId of currentPost.data.externalRecipients) {
 							const externalPortal = portalProvider.portals.find((portal: PortalHeaderType) => portal.id === portalId);
-
 							if (externalPortal) {
-								const hasExternalAdminAccess = externalPortal.roles
-									?.find((user: PortalUserType) => user.address === permawebProvider.profile.id)
-									?.roles?.includes('Admin');
-
+								const hasExternalAdminAccess = externalPortal?.users?.some(
+									(u: PortalUserType) => u.address === permawebProvider.profile.id && u.roles?.includes('Admin')
+								);
 								let externalIndexAction = 'Add-Index-Request';
 								if (hasExternalAdminAccess) externalIndexAction = 'Add-Index-Id';
+
+								let tags = [
+									{ name: 'Forward-To', value: externalPortal.id },
+									{ name: 'Forward-Action', value: externalIndexAction },
+									{ name: 'Index-Id', value: assetId },
+								];
+								if (!hasExternalAdminAccess) {
+									tags.push({ name: 'Status', value: 'Review' });
+								}
 
 								const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
 									processId: permawebProvider.profile.id,
 									wallet: arProvider.wallet,
 									action: 'Run-Action',
-									tags: [
-										{ name: 'Forward-To', value: externalPortal.id },
-										{ name: 'Forward-Action', value: externalIndexAction },
-										{ name: 'Index-Id', value: assetId },
-									],
+									tags: tags,
 								});
 
 								console.log(`External zone index update: ${zoneIndexUpdateId}`);
