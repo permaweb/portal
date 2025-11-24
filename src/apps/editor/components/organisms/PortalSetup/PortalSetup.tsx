@@ -10,8 +10,11 @@ import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { ICONS } from 'helpers/config';
-import { PortalCategoryType, ViewLayoutType } from 'helpers/types';
+import { PortalCategoryType, PortalPatchMapEnum, ViewLayoutType } from 'helpers/types';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { useNotifications } from 'providers/NotificationProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import { MediaLibrary } from '../MediaLibrary';
 
@@ -29,9 +32,11 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 	const language = languageProvider.object[languageProvider.current];
 
 	const { settings, updateSettings } = useSettingsProvider();
-
+	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
+	const { addNotification } = useNotifications();
 	const ownerWallet = (portalProvider.current as any)?.ownerWallet || (portalProvider.current as any)?.owner || '';
-
+	const [savingMonetization, setSavingMonetization] = React.useState(false);
 	const [monetization, setMonetization] = React.useState<MonetizationConfig>(() => {
 		const existing = (portalProvider.current as any)?.monetization as MonetizationConfig | undefined;
 		if (existing) return existing;
@@ -238,16 +243,48 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 		);
 	}
 
-	function handleSaveMonetization() {
+	async function handleSaveMonetization() {
+		if (!portalProvider.current?.id || !portalProvider.permissions?.updatePortalMeta) {
+			return;
+		}
+		if (!arProvider.wallet || !permawebProvider.libs) {
+			addNotification(language?.walletNotConnected ?? 'Connect a wallet to update monetization.', 'warning');
+			return;
+		}
+
 		const payload: MonetizationConfig = {
 			enabled: monetization.enabled,
-			walletAddress: monetization.walletAddress,
-			tokenAddress: monetization.tokenAddress,
+			walletAddress: monetization.walletAddress.trim(),
+			tokenAddress: monetization.tokenAddress || 'AR',
 		};
 
-		// TODO: wire this to updateZone / AO when ready
-		// For now, just log so we can see the shape.
-		console.log('Monetization config to save:', payload);
+		setSavingMonetization(true);
+
+		try {
+			const body: any = {
+				Monetization: permawebProvider.libs.mapToProcessCase
+					? permawebProvider.libs.mapToProcessCase(payload)
+					: payload,
+			};
+
+			const updateId = await permawebProvider.libs.updateZone(body, portalProvider.current.id, arProvider.wallet);
+
+			console.log('Monetization update:', updateId);
+
+			// update in-memory portal
+			(portalProvider.current as any).monetization = payload;
+
+			if (portalProvider.refreshCurrentPortal) {
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Monetization);
+			}
+
+			addNotification(language?.monetizationSaved ?? 'Monetization settings saved.', 'success');
+		} catch (e: any) {
+			console.error(e);
+			addNotification(e?.message ?? 'Error saving monetization settings.', 'warning');
+		} finally {
+			setSavingMonetization(false);
+		}
 	}
 
 	function monetizationSection() {
@@ -303,9 +340,11 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 					<div className="monetization-actions">
 						<Button
 							type={'primary'}
-							label={language?.save ?? 'Save'}
+							label={savingMonetization ? language?.saving ?? 'Saving...' : language?.save ?? 'Save'}
 							handlePress={handleSaveMonetization}
-							disabled={!canEdit}
+							disabled={
+								savingMonetization || !portalProvider.permissions?.updatePortalMeta || !portalProvider.current?.id
+							}
 						/>
 					</div>
 				</S.MonetizationBodyWrapper>

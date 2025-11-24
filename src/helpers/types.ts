@@ -174,6 +174,7 @@ export enum PortalPatchMapEnum {
 	Posts = 'posts',
 	Requests = 'requests',
 	Transfers = 'transfers',
+	Monetization = 'monetization',
 }
 
 export enum ArticleBlockEnum {

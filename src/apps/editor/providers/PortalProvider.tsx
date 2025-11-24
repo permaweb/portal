@@ -234,6 +234,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			const media = parseField(PortalPatchMapEnum.Media, response, opts?.patchKey);
 			const posts = parseField(PortalPatchMapEnum.Posts, response, opts?.patchKey);
 			const requests = parseField(PortalPatchMapEnum.Requests, response, opts?.patchKey);
+			const monetization = parseField(PortalPatchMapEnum.Monetization, response, opts?.patchKey);
 
 			/* Check for node updates and add the new node address as an authority */
 			if (
@@ -286,6 +287,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				roleOptions: users?.roleOptions ?? current?.roleOptions ?? null,
 				permissions: users?.permissions ?? current?.permissions ?? null,
 				domains: navigation?.domains ?? current?.domains ?? [],
+				monetization: monetization ?? current?.monetization ?? null,
 			};
 
 			if (permawebProvider.profile?.id && portalState.users) {
