@@ -5,14 +5,14 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Select } from 'components/atoms/Select';
-import { PageBlockType, SelectOptionType } from 'helpers/types';
+import { SelectOptionType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
 type MonetizationButtonBlockData = {
 	label?: string;
-	amount?: string; // store as string, parse in engine if needed
+	amount?: string;
 	variant?: 'primary' | 'alt1' | 'alt2';
 };
 
@@ -22,27 +22,28 @@ const BUTTON_STYLE_OPTIONS: SelectOptionType[] = [
 	{ id: 'alt2', label: 'Alt 2' },
 ];
 
-export default function MonetizationBlock(props: {
+export default function PostMonetizationBlock(props: {
 	index: number;
-	block: PageBlockType;
-	onChangeBlock: (block: PageBlockType, index: number) => void;
+	block: any;
+	onChangeBlock: (block: any, index: number) => void;
 }) {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	// v1: portal meta
 	const monetization: any = portalProvider.current?.monetization.monetization;
 
 	const data: MonetizationButtonBlockData = React.useMemo(() => {
-		const raw = (props.block?.data as MonetizationButtonBlockData) ?? {};
+		const raw = (props.block.data as MonetizationButtonBlockData) ?? {};
 		return {
 			label: raw.label ?? '',
 			amount: raw.amount ?? '',
 			variant: raw.variant ?? 'primary',
 		};
-	}, [props.block?.data]);
+	}, [props.block.data]);
 
-	const label = data.label || language?.defaultMonetizationLabel || 'Support this portal';
+	const label = data.label || language?.defaultMonetizationLabel || 'Support this post';
 	const amount = data.amount || '';
 	const variant = data.variant || 'primary';
 
@@ -50,63 +51,53 @@ export default function MonetizationBlock(props: {
 		props.onChangeBlock(
 			{
 				...props.block,
-				// We no longer store any HTML here – engine will render this block
-				// based only on `type === 'monetizationButton'` and `block.data`.
 				data: next,
-				content: null,
+				content: null, // engine renders from data, not HTML
 			},
 			props.index
 		);
 	}
 
-	function handleLabelChange(event: React.ChangeEvent<HTMLInputElement>) {
-		updateData({
-			...data,
-			label: event.target.value,
-		});
+	function handleLabelChange(e: React.ChangeEvent<HTMLInputElement>) {
+		updateData({ ...data, label: e.target.value });
 	}
 
-	function handleAmountChange(event: React.ChangeEvent<HTMLInputElement>) {
-		updateData({
-			...data,
-			amount: event.target.value,
-		});
+	function handleAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
+		updateData({ ...data, amount: e.target.value });
 	}
 
-	function handleVariantChange(nextId: string) {
-		updateData({
-			...data,
-			variant: nextId as MonetizationButtonBlockData['variant'],
-		});
+	function handleVariantSelect(nextId: string) {
+		updateData({ ...data, variant: nextId as MonetizationButtonBlockData['variant'] });
 	}
 
-	// UX messages depending on global config
+	// If monetization disabled in settings → block disabled
 	if (!monetization?.enabled) {
 		return (
-			<S.Wrapper className={'border-wrapper-alt2'}>
+			<S.Wrapper className="border-wrapper-alt2">
 				<S.Header>
 					<S.Title>{language?.monetizationButton ?? 'Monetization button'}</S.Title>
 				</S.Header>
-				<S.InfoMessage className={'warning'}>
+				<S.InfoMessage className="warning">
 					<span>
 						{language?.monetizationDisabledMessage ??
-							'Monetization is disabled in portal settings. Enable it in the Setup tab to use this block.'}
+							'Monetization is disabled in portal settings. Enable it in Setup → Monetization to use this block.'}
 					</span>
 				</S.InfoMessage>
 			</S.Wrapper>
 		);
 	}
 
+	// If no wallet → also block disabled
 	if (!monetization?.walletAddress) {
 		return (
-			<S.Wrapper className={'border-wrapper-alt2'}>
+			<S.Wrapper className="border-wrapper-alt2">
 				<S.Header>
 					<S.Title>{language?.monetizationButton ?? 'Monetization button'}</S.Title>
 				</S.Header>
-				<S.InfoMessage className={'warning'}>
+				<S.InfoMessage className="warning">
 					<span>
 						{language?.monetizationNoWalletMessage ??
-							'No payout wallet is configured. Add a wallet address in Setup → Monetization to use this block.'}
+							'No payout wallet is configured. Add a wallet in Setup → Monetization.'}
 					</span>
 				</S.InfoMessage>
 			</S.Wrapper>
@@ -114,10 +105,7 @@ export default function MonetizationBlock(props: {
 	}
 
 	return (
-		<S.Wrapper className={'border-wrapper-alt2'}>
-			<S.Header>
-				<S.Title>{language?.monetizationButton ?? 'Monetization button'}</S.Title>
-			</S.Header>
+		<S.Wrapper className="border-wrapper-alt2">
 			<S.Body>
 				<S.Row>
 					<S.FieldColumn>
@@ -126,8 +114,8 @@ export default function MonetizationBlock(props: {
 							value={data.label ?? ''}
 							onChange={handleLabelChange}
 							invalid={{ status: false, message: null }}
-							disabled={false}
 							hideErrorMessage
+							disabled={false}
 							sm
 						/>
 					</S.FieldColumn>
@@ -136,15 +124,16 @@ export default function MonetizationBlock(props: {
 				<S.Row>
 					<S.FieldColumn>
 						<FormField
-							label={language?.amountInAr ?? 'Amount in AR (optional)'}
+							label={language?.amountInAr ?? 'Amount (AR, optional)'}
 							value={data.amount ?? ''}
 							onChange={handleAmountChange}
 							invalid={{ status: false, message: null }}
-							disabled={false}
 							hideErrorMessage
+							disabled={false}
 							sm
 						/>
 					</S.FieldColumn>
+
 					<S.FieldColumn>
 						<S.LabelRow>
 							<span>{language?.buttonStyle ?? 'Button style'}</span>
@@ -152,7 +141,7 @@ export default function MonetizationBlock(props: {
 
 						<Select
 							activeOption={BUTTON_STYLE_OPTIONS.find((o) => o.id === variant) ?? BUTTON_STYLE_OPTIONS[0]}
-							setActiveOption={(opt) => handleVariantChange(opt.id)}
+							setActiveOption={(opt) => handleVariantSelect(opt.id)}
 							options={BUTTON_STYLE_OPTIONS}
 							disabled={false}
 						/>
@@ -164,7 +153,7 @@ export default function MonetizationBlock(props: {
 						<S.LabelRow>
 							<span>{language?.preview ?? 'Preview'}</span>
 						</S.LabelRow>
-						<Button type={variant} label={label} handlePress={() => {}} disabled={true} />
+						<Button type={variant} label={label} handlePress={() => {}} disabled />
 					</S.FieldColumn>
 				</S.Row>
 			</S.Body>

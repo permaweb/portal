@@ -7,6 +7,7 @@ import { getTxEndpoint } from 'helpers/endpoints';
 import { getRedirect, urlify } from 'helpers/utils';
 
 import * as S from './styles';
+import MonetizationButton from 'engine/builder/blocks/monetizationButton';
 
 type ContentEntryType =
 	| 'header-1'
@@ -27,7 +28,8 @@ type ContentEntryType =
 	| 'divider-dashed'
 	| 'spacer-horizontal'
 	| 'spacer-vertical'
-	| 'table';
+	| 'table'
+	| 'monetizationButton';
 
 type ContentEntry = {
 	id: string | number;
@@ -274,6 +276,8 @@ export default function PostRenderer(props: PostRendererProps) {
 							return <div key={entry.id} style={{ flex: entry.data?.width || 1 }} />;
 						case 'table':
 							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
+						case 'monetizationButton':
+							return <MonetizationButton key={entry.id} element={entry} preview={false} />;
 						default:
 							return <b key={entry.id}>{JSON.stringify(entry)}</b>;
 					}

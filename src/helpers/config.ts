@@ -276,6 +276,11 @@ export const ARTICLE_BLOCKS = {
 		label: 'Table',
 		icon: ICONS.menu,
 	},
+	[ArticleBlockEnum.MonetizationButton]: {
+		type: ArticleBlockEnum.MonetizationButton,
+		label: 'Monetization Button',
+		icon: ICONS.tools,
+	},
 };
 
 export const STRIPE_PUBLISHABLE_KEY =
