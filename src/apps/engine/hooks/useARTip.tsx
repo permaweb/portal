@@ -1,5 +1,5 @@
 import React from 'react';
-import { usePortalProvider } from 'engine/providers/PortalProvider';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import Arweave from 'arweave';
 
