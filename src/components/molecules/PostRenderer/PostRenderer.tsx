@@ -63,6 +63,7 @@ type PostRendererProps = {
 	post?: PostType | null;
 	profile?: ProfileType | null;
 	content?: ContentEntry[] | null;
+	isPreview?: boolean;
 };
 
 export default function PostRenderer(props: PostRendererProps) {
@@ -277,7 +278,9 @@ export default function PostRenderer(props: PostRendererProps) {
 						case 'table':
 							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						case 'monetizationButton':
-							return <MonetizationButton key={entry.id} element={entry} preview={false} />;
+							return (
+								<MonetizationButton key={entry.id} element={entry} preview={props.isPreview ?? false} location="post" />
+							);
 						default:
 							return <b key={entry.id}>{JSON.stringify(entry)}</b>;
 					}

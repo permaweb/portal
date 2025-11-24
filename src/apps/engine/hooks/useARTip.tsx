@@ -15,35 +15,33 @@ export function useArTip() {
 	const { wallet, walletAddress, handleConnect } = useArweaveProvider();
 
 	const sendTip = React.useCallback(
-		async (to: string, amount: string | undefined) => {
-			// 1) Make sure wallet is connected
+		async (to: string, amount: string | undefined, location = 'page') => {
 			if (!walletAddress || !wallet) {
-				await handleConnect(WalletEnum.wander); // or whatever default type you prefer
+				await handleConnect(WalletEnum.wander);
 			}
 
 			const activeWallet = wallet || (window as any).arweaveWallet;
 			if (!activeWallet) throw new Error('No Arweave wallet available');
 
-			// 2) Convert AR amount → winston
 			const quantity = amount && amount.trim() !== '' ? arweave.ar.arToWinston(amount) : '0';
 
-			// 3) Create transaction
 			const tx = await arweave.createTransaction(
 				{
 					target: to,
 					quantity,
 				},
-				undefined // from is inferred from wallet
+				undefined
 			);
-
-			// Optional tags
-			tx.addTag('App-Name', 'Portal-Monetization');
+			tx.addTag('App-Name', 'Portal');
+			tx.addTag('Token-Symbol', 'AR');
+			tx.addTag('Amount', quantity);
+			tx.addTag('From-Address', walletAddress);
+			tx.addTag('To-Address', to);
 			tx.addTag('Type', 'Tip');
+			tx.addTag('Location', location);
 
-			// 4) Sign with ArConnect/Wander bridge
 			await activeWallet.sign(tx);
 
-			// 5) Post via SDK
 			const res = await arweave.transactions.post(tx);
 			console.log('[ArTip] tx posted', tx.id, res);
 

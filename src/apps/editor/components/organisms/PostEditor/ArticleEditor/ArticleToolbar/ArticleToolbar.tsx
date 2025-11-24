@@ -420,6 +420,7 @@ export default function ArticleToolbar(props: {
 						post={previewPost}
 						profile={previewProfile}
 						content={previewContent}
+						isPreview={true}
 					/>
 				</S.PreviewCard>
 			</Modal>

@@ -16,7 +16,7 @@ type MonetizationButtonBlockData = {
 	variant?: 'primary' | 'alt1' | 'alt2';
 };
 
-export default function MonetizationButton(props: { element: any; preview: boolean }) {
+export default function MonetizationButton(props: { element: any; preview: boolean; location?: 'page' | 'post' }) {
 	const { portal } = usePortalProvider();
 	const { sendTip } = useArTip();
 	const monetization = portal?.Monetization as MonetizationSettings | undefined;
@@ -39,10 +39,10 @@ export default function MonetizationButton(props: { element: any; preview: boole
 	if (!enabled || !walletAddress) return null;
 
 	const handleClick = async () => {
-		if (props.preview) return; // keep preview non-interactive
+		if (props.preview) return;
 
 		try {
-			await sendTip(walletAddress, amount);
+			await sendTip(walletAddress, amount, props.location === 'post' ? 'post' : 'page');
 		} catch (e) {
 			console.error('[MonetizationButton] tip failed', e);
 		}
