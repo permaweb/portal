@@ -19,7 +19,7 @@ export { ICONS, ICONS_SOCIAL };
 export const AO_NODE = {
 	url: 'https://hb.portalinto.com',
 	authority: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
-	scheduler: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
+	scheduler: 'n_XZJhUnmldNFo4dhajoPZWhBXuJk-OcQr5JQ49c4Zo',
 };
 
 export const IS_TESTNET = import.meta.env.VITE_ARIO_TESTNET === 'true';
