@@ -211,7 +211,7 @@ export const darkThemeHighContrast = {
 	neutral3: '#1d1e23',
 	neutral4: '#2a2c33',
 	neutral5: '#40434b',
-	neutral6: '#b0b2b9ff',
+	neutral6: '#d6d6e3',
 	neutral7: '#62656d',
 	neutral8: '#6e7179',
 	neutral9: '#7d7f87',
