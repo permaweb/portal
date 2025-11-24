@@ -235,7 +235,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			const posts = parseField(PortalPatchMapEnum.Posts, response, opts?.patchKey);
 			const requests = parseField(PortalPatchMapEnum.Requests, response, opts?.patchKey);
 			const monetization = parseField(PortalPatchMapEnum.Monetization, response, opts?.patchKey);
-
+			console.log(monetization);
 			/* Check for node updates and add the new node address as an authority */
 			if (
 				overview?.authorities &&

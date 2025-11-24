@@ -10,6 +10,7 @@ import Image from './blocks/image';
 // import StaticPage from './static';
 import Link from './blocks/link';
 import MediaSpotlight from './blocks/mediaSpotlight';
+import MonetizationButton from './blocks/monetizationButton';
 import Post from './blocks/post';
 import PostSpotlight from './blocks/postSpotlight';
 import Reel from './blocks/reel';
@@ -96,6 +97,8 @@ export default function Builder(props: any) {
 				return <Link key={index} target={element.target} to={element.uri} label={element.text} />;
 			case 'label':
 				return element.text;
+			case 'monetizationButton':
+				return <MonetizationButton key={index} element={element} preview={preview} />;
 			default:
 				return null;
 		}

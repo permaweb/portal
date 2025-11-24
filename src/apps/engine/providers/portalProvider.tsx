@@ -78,6 +78,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const users = permawebProvider.libs.mapFromProcessCase(
 					await permawebProvider.libs.readState({ processId: portalId, path: 'users' })
 				);
+				const monetization = permawebProvider.libs.mapFromProcessCase(
+					await permawebProvider.libs.readState({ processId: portalId, path: 'monetization' })
+				);
 
 				const portalUsers = users?.roles ? getPortalUsers(users.roles) : null;
 
@@ -135,6 +138,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					links: navigation?.links,
 					posts: sortedPosts,
 					users: portalUsers,
+					monetization: monetization,
 				};
 
 				const Name = zone?.name;
@@ -150,7 +154,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const Fonts = zone?.fonts;
 				const Moderation = zone?.moderation;
 				const Users = zone?.users;
-
+				const Monetization = zone?.monetization?.monetization;
 				const portalData = {
 					Name,
 					Categories,
@@ -165,6 +169,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					Wallpaper,
 					Moderation,
 					Users,
+					Monetization,
 				};
 				console.log('portalData: ', portalData);
 				setPortal(portalData);

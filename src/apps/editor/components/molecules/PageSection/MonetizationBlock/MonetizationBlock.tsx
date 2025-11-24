@@ -36,8 +36,8 @@ export default function MonetizationBlock(props: {
 		walletAddress: '1LlNJkDO11_IQcXRDp53-ycYDy2nVVAsaKpjkbbvS1k', // or any test wallet
 		tokenAddress: 'AR',
 	};
-
-	const monetization: any = MOCK_MONETIZATION; //portalProvider.current?.monetization;
+	console.log('Using MOCK_MONETIZATION in MonetizationBlock', portalProvider.current?.monetization.monetization);
+	const monetization: any = portalProvider.current?.monetization?.monetization;
 
 	const data: MonetizationButtonBlockData = React.useMemo(() => {
 		const raw = (props.block.data as MonetizationButtonBlockData) ?? {};

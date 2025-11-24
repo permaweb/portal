@@ -38,7 +38,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 	const ownerWallet = (portalProvider.current as any)?.ownerWallet || (portalProvider.current as any)?.owner || '';
 	const [savingMonetization, setSavingMonetization] = React.useState(false);
 	const [monetization, setMonetization] = React.useState<MonetizationConfig>(() => {
-		const existing = (portalProvider.current as any)?.monetization as MonetizationConfig | undefined;
+		const existing = (portalProvider.current as any)?.monetization?.monetization as MonetizationConfig | undefined;
 		if (existing) return existing;
 
 		return {
@@ -49,7 +49,7 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 	});
 
 	React.useEffect(() => {
-		const existing = (portalProvider.current as any)?.monetization as MonetizationConfig | undefined;
+		const existing = (portalProvider.current as any)?.monetization?.monetization as MonetizationConfig | undefined;
 		if (existing) {
 			setMonetization(existing);
 		} else {

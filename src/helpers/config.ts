@@ -342,6 +342,7 @@ export const PORTAL_PATCH_MAP = {
 	[PortalPatchMapEnum.Posts]: ['Store.Index'],
 	[PortalPatchMapEnum.Requests]: ['Store.IndexRequests'],
 	[PortalPatchMapEnum.Transfers]: ['Transfers'],
+	[PortalPatchMapEnum.Monetization]: ['Store.Monetization'],
 };
 
 export const PORTAL_ROLES = {
