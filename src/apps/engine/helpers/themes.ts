@@ -217,7 +217,10 @@ export function initThemes(Themes: any[]) {
 			)},1)`,
 
 			// Links
-			...(theme?.links
+			...(theme?.links?.colors?.default &&
+			theme?.links?.colors?.hover &&
+			theme?.links?.preferences?.default &&
+			theme?.links?.preferences?.hover
 				? {
 						'--color-link-default': `rgba(${getColor(theme, scheme, theme.links.colors.default[scheme])},1)`,
 						'--color-link-hover': `rgba(${getColor(theme, scheme, theme.links.colors.hover[scheme])},1)`,
