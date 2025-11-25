@@ -215,6 +215,20 @@ export function initThemes(Themes: any[]) {
 				scheme,
 				theme.buttons.primary.hover.colors.border[scheme]
 			)},1)`,
+
+			// Links
+			...(theme?.links
+				? {
+						'--color-link-default': `rgba(${getColor(theme, scheme, theme.links.colors.default[scheme])},1)`,
+						'--color-link-hover': `rgba(${getColor(theme, scheme, theme.links.colors.hover[scheme])},1)`,
+						'--link-text-decoration-default': theme.links.preferences.default.underline ? 'underline' : 'none',
+						'--link-text-decoration-hover': theme.links.preferences.hover.underline ? 'underline' : 'none',
+						'--link-font-weight-default': theme.links.preferences.default.bold ? 'bold' : 'normal',
+						'--link-font-weight-hover': theme.links.preferences.hover.bold ? 'bold' : 'normal',
+						'--link-font-style-default': theme.links.preferences.default.cursive ? 'italic' : 'normal',
+						'--link-font-style-hover': theme.links.preferences.hover.cursive ? 'italic' : 'normal',
+				  }
+				: {}),
 		});
 
 		if (theme.basics.preferences)

@@ -66,13 +66,17 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   a {
-    font-weight: 500;
-    color: rgba(var(--color-text), 1);
-    text-decoration: inherit;
+    color: var(--color-link-default, rgba(var(--color-text), 1));
+    text-decoration: var(--link-text-decoration-default, inherit);
+    font-weight: var(--link-font-weight-default, 500);
+    font-style: var(--link-font-style-default, normal);
   }
 
   a:hover {
-    color: rgba(var(--color-primary), 1);
+    color: var(--color-link-hover, rgba(var(--color-primary), 1));
+    text-decoration: var(--link-text-decoration-hover, inherit);
+    font-weight: var(--link-font-weight-hover, 500);
+    font-style: var(--link-font-style-hover, normal);
   }
 
   h1 {
@@ -152,10 +156,6 @@ export const GlobalStyles = createGlobalStyle`
     :root {
       color: #213547;
       background-color: #ffffff;
-    }
-
-    a:hover {
-      color: #747bff;
     }
 
     button {

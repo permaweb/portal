@@ -217,6 +217,9 @@ export const SelectorWrapper = styled.div`
 
 export const SelectorHeader = styled.div`
 	margin: 0 0 15px 0;
+	display: flex;
+	align-items: center;
+	gap: 10px;
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
@@ -224,6 +227,68 @@ export const SelectorHeader = styled.div`
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		text-transform: uppercase;
 		line-height: 1;
+	}
+`;
+
+export const KeyBadge = styled.span`
+	padding: 3px 8px;
+	background: ${(props) => props.theme.colors.button.primary.background};
+	color: ${(props) => props.theme.colors.font.primary};
+	border: 1px solid ${(props) => props.theme.colors.button.primary.border};
+	border-radius: ${STYLING.dimensions.radius.alt3};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-size: ${(props) => props.theme.typography.size.xxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+`;
+
+export const KeyReferenceInfo = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	height: ${STYLING.dimensions.form.small};
+	padding: 8px 12px;
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	border: 1px solid ${(props) => props.theme.colors.form.border};
+	border-radius: ${STYLING.dimensions.radius.alt3};
+
+	span {
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		color: ${(props) => props.theme.colors.font.alt1};
+		line-height: 1;
+
+		&:first-child {
+			color: ${(props) => props.theme.colors.font.primary};
+		}
+	}
+`;
+
+export const SelectorColorSwatches = styled.div`
+	display: flex;
+	gap: 7.5px;
+	flex-wrap: wrap;
+`;
+
+export const SelectorColorSwatch = styled.button<{ background: string; $isSelected?: boolean }>`
+	height: 35px;
+	width: 35px;
+	background: ${(props) => props.background};
+	border: 2px solid ${(props) => (props.$isSelected ? '#5E66DB' : props.theme.colors.border.primary)};
+	border-radius: ${STYLING.dimensions.radius.primary};
+	cursor: pointer;
+	transition: all 100ms;
+
+	&:hover {
+		transform: scale(1.1);
+		border-color: ${(props) => (props.$isSelected ? '#5E66DB' : props.theme.colors.border.alt1)};
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 `;
 
@@ -361,9 +426,34 @@ export const ThemeRowWrapper = styled.div``;
 
 export const ThemeRow = styled.div`
 	display: flex;
-	width: 100%;
-	justify-content: space-between;
+	align-items: center;
 	gap: 15px;
+`;
+
+export const ThemeResetButton = styled.div<{ $hasChanges: boolean }>`
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	opacity: ${(props) => (props.$hasChanges ? 1 : 0.5)};
+	transition: opacity 0.2s ease;
+
+	&:hover {
+		opacity: 1;
+	}
+
+	.reset-active {
+		background: #5e66db !important;
+		border-color: #5e66db !important;
+
+		&:hover {
+			background: #4a52b0 !important;
+		}
+	}
+`;
+
+export const ThemeResetButtonPlaceholder = styled.div`
+	width: 20px;
+	flex-shrink: 0;
 `;
 
 export const ThemeRowHeader = styled.div`
@@ -464,6 +554,7 @@ export const ThemeVariantsWrapper = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 20px;
+	margin-left: auto;
 `;
 
 export const ThemeSectionColumnWrapper = styled.div`
@@ -542,12 +633,29 @@ export const ThemeSectionColumn = styled.div`
 	}
 `;
 
+export const ThemeSectionLabel = styled.div`
+	padding: 15px 0 7.5px 0;
+	font-size: ${(props) => props.theme.typography.size.xxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	color: ${(props) => props.theme.colors.font.alt1};
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+	opacity: 0.7;
+
+	&:first-of-type {
+		padding-top: 7.5px;
+	}
+`;
+
 export const ThemeSectionHeader = styled.div`
 	padding: 0 0 7.5px 0 !important;
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.alt1} !important;
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
+	gap: 15px;
+
 	span {
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
@@ -560,9 +668,10 @@ export const ThemeSectionHeaderVariants = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 20px;
+	margin-left: auto;
 
 	span {
-		width: 135px;
+		width: 125px;
 		display: flex;
 		align-items: center;
 		gap: 7.5px;
@@ -591,3 +700,276 @@ export const ButtonPreview = styled.button<{ theme: any }>`
 `;
 
 export const ThemePreview = styled.div``;
+
+export const ShadowEditorGrid = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	margin: 15px 0;
+`;
+
+export const ShadowEditorRow = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 15px;
+
+	label {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		text-transform: uppercase;
+		min-width: 110px;
+		flex-shrink: 0;
+	}
+
+	> div {
+		flex: 1;
+		width: auto;
+		max-width: none;
+	}
+
+	input[type='number'],
+	input[type='color'] {
+		flex: 1;
+		height: ${STYLING.dimensions.form.small};
+		color: ${(props) => props.theme.colors.font.primary};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.base};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		background: ${(props) => props.theme.colors.form.background};
+		border: 1px solid ${(props) => props.theme.colors.form.border};
+		border-radius: ${STYLING.dimensions.radius.alt3};
+		padding: 0 10px;
+		&:focus {
+			outline: 0;
+			border: 1px solid ${(props) => props.theme.colors.form.valid.outline};
+			outline: 0.5px solid ${(props) => props.theme.colors.form.valid.outline};
+		}
+		&:disabled {
+			background: ${(props) => props.theme.colors.form.disabled.background};
+			color: ${(props) => props.theme.colors.form.disabled.label};
+		}
+	}
+
+	input[type='color'] {
+		padding: 2px;
+		cursor: pointer;
+	}
+
+	input[type='range'] {
+		flex: 1;
+		height: 8px;
+		background: ${(props) => props.theme.colors.form.background};
+		border-radius: 5px;
+		outline: none;
+		cursor: pointer;
+
+		&::-webkit-slider-thumb {
+			appearance: none;
+			width: 18px;
+			height: 18px;
+			background: ${(props) => props.theme.colors.button.primary.background};
+			border: 2px solid ${(props) => props.theme.colors.button.primary.border};
+			border-radius: 50%;
+			cursor: pointer;
+		}
+
+		&::-moz-range-thumb {
+			width: 18px;
+			height: 18px;
+			background: ${(props) => props.theme.colors.button.primary.background};
+			border: 2px solid ${(props) => props.theme.colors.button.primary.border};
+			border-radius: 50%;
+			cursor: pointer;
+		}
+	}
+
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		min-width: 40px;
+	}
+`;
+
+export const ShadowColorWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex: 1;
+`;
+
+export const ShadowColorPreview = styled.div<{ background: string; disabled?: boolean }>`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: ${STYLING.dimensions.form.small};
+	background: ${(props) => props.background};
+	border: 1px solid ${(props) => props.theme.colors.form.border};
+	border-radius: ${STYLING.dimensions.radius.alt3};
+	cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+	transition: border-color 0.2s ease;
+
+	&:hover {
+		border-color: ${(props) => !props.disabled && props.theme.colors.form.valid.outline};
+	}
+
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		text-shadow: 0 0 2px rgba(0, 0, 0, 0.5), 0 0 4px rgba(255, 255, 255, 0.5);
+	}
+`;
+
+export const ShadowPreview = styled.div<{ shadow: string; backgroundColor: string }>`
+	width: 100%;
+	height: 100px;
+	background: rgba(${(props) => props.backgroundColor}, 1);
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.primary};
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 10px 0;
+	position: relative;
+
+	&::after {
+		content: '';
+		position: absolute;
+		width: 60px;
+		height: 60px;
+		background: ${(props) => props.theme.colors.container.alt1.background};
+		border-radius: ${STYLING.dimensions.radius.primary};
+		box-shadow: ${(props) => props.shadow};
+	}
+`;
+
+export const RangeWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	width: 125px;
+	height: 40px;
+	max-width: 125px;
+
+	input[type='range'] {
+		flex: 1;
+		min-width: 0;
+		height: 6px;
+		appearance: none;
+		background: ${(props) => props.theme.colors.form.background};
+		border: 1px solid ${(props) => props.theme.colors.form.border};
+		border-radius: 10px;
+		outline: none;
+		cursor: pointer;
+
+		&::-webkit-slider-thumb {
+			appearance: none;
+			width: 16px;
+			height: 16px;
+			background: ${(props) => props.theme.colors.button.primary.background};
+			border: 2px solid ${(props) => props.theme.colors.button.primary.border};
+			border-radius: 50%;
+			cursor: pointer;
+			transition: all 0.2s ease;
+
+			&:hover {
+				transform: scale(1.1);
+			}
+		}
+
+		&::-moz-range-thumb {
+			width: 16px;
+			height: 16px;
+			background: ${(props) => props.theme.colors.button.primary.background};
+			border: 2px solid ${(props) => props.theme.colors.button.primary.border};
+			border-radius: 50%;
+			cursor: pointer;
+			transition: all 0.2s ease;
+
+			&:hover {
+				transform: scale(1.1);
+			}
+		}
+
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
+	}
+
+	span {
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		color: ${(props) => props.theme.colors.font.primary};
+		width: 28px;
+		min-width: 28px;
+		max-width: 28px;
+		text-align: right;
+		flex-shrink: 0;
+	}
+`;
+
+export const ToggleWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 10px;
+	width: 125px;
+	height: 40px;
+
+	span {
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		color: ${(props) => props.theme.colors.font.alt1};
+		min-width: 25px;
+		text-transform: uppercase;
+	}
+
+	input[type='checkbox'] {
+		width: 40px;
+		height: 20px;
+		appearance: none;
+		background: ${(props) => props.theme.colors.form.background};
+		border: 1px solid ${(props) => props.theme.colors.form.border};
+		border-radius: 20px;
+		position: relative;
+		cursor: pointer;
+		transition: all 0.2s ease;
+
+		&::before {
+			content: '';
+			position: absolute;
+			width: 16px;
+			height: 16px;
+			border-radius: 50%;
+			background: ${(props) => props.theme.colors.font.alt1};
+			top: 1px;
+			left: 1px;
+			transition: all 0.2s ease;
+		}
+
+		&:checked {
+			background: ${(props) => props.theme.colors.button.primary.background};
+			border-color: ${(props) => props.theme.colors.button.primary.border};
+		}
+
+		&:checked::before {
+			left: 21px;
+			background: ${(props) => props.theme.colors.font.primary};
+		}
+
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
+	}
+`;
