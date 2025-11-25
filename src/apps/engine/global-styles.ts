@@ -66,17 +66,7 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   a {
-    color: var(--color-link-default, rgba(var(--color-text), 1));
-    text-decoration: var(--link-text-decoration-default, inherit);
-    font-weight: var(--link-font-weight-default, 500);
-    font-style: var(--link-font-style-default, normal);
-  }
-
-  a:hover {
-    color: var(--color-link-hover, rgba(var(--color-primary), 1));
-    text-decoration: var(--link-text-decoration-hover, inherit);
-    font-weight: var(--link-font-weight-hover, 500);
-    font-style: var(--link-font-style-hover, normal);
+    text-decoration: none;
   }
 
   h1 {
