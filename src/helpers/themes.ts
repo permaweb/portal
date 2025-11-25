@@ -637,5 +637,22 @@ export function getThemeVars(theme: any, scheme: 'light' | 'dark') {
 		)},${theme.card?.preferences?.opacity?.[scheme] ?? 1})`,
 		'--border-radius': `${theme.basics?.preferences?.borderRadius ?? 8}px`,
 	};
+
+	if (
+		theme?.links?.colors?.default &&
+		theme?.links?.colors?.hover &&
+		theme?.links?.preferences?.default &&
+		theme?.links?.preferences?.hover
+	) {
+		vars['--color-link-default'] = `rgba(${getColor(theme, scheme, theme.links.colors.default[scheme])},1)`;
+		vars['--color-link-hover'] = `rgba(${getColor(theme, scheme, theme.links.colors.hover[scheme])},1)`;
+		vars['--link-text-decoration-default'] = theme.links.preferences.default.underline ? 'underline' : 'none';
+		vars['--link-text-decoration-hover'] = theme.links.preferences.hover.underline ? 'underline' : 'none';
+		vars['--link-font-weight-default'] = theme.links.preferences.default.bold ? 'bold' : 'normal';
+		vars['--link-font-weight-hover'] = theme.links.preferences.hover.bold ? 'bold' : 'normal';
+		vars['--link-font-style-default'] = theme.links.preferences.default.cursive ? 'italic' : 'normal';
+		vars['--link-font-style-hover'] = theme.links.preferences.hover.cursive ? 'italic' : 'normal';
+	}
+
 	return vars;
 }
