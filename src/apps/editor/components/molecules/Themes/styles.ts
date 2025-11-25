@@ -708,10 +708,29 @@ export const ShadowEditorGrid = styled.div`
 	margin: 15px 0;
 `;
 
-export const ShadowEditorRow = styled.div`
+export const ShadowToggleRow = styled.div`
+	display: flex;
+	align-items: center;
+	margin-bottom: 20px;
+
+	label {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		text-transform: uppercase;
+	}
+
+	> div {
+		margin-left: auto;
+	}
+`;
+
+export const ShadowEditorRow = styled.div<{ $disabled?: boolean }>`
 	display: flex;
 	align-items: center;
 	gap: 15px;
+	opacity: ${(props) => (props.$disabled ? 0.4 : 1)};
 
 	label {
 		color: ${(props) => props.theme.colors.font.alt1};
@@ -812,6 +831,7 @@ export const ShadowColorPreview = styled.div<{ background: string; disabled?: bo
 	border-radius: ${STYLING.dimensions.radius.alt3};
 	cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 	transition: border-color 0.2s ease;
+	opacity: ${(props) => (props.disabled ? 0.4 : 1)};
 
 	&:hover {
 		border-color: ${(props) => !props.disabled && props.theme.colors.form.valid.outline};
@@ -920,7 +940,7 @@ export const RangeWrapper = styled.div`
 export const ToggleWrapper = styled.div`
 	display: flex;
 	align-items: center;
-	justify-content: flex-start;
+	justify-content: flex-end;
 	gap: 10px;
 	width: 125px;
 	height: 40px;

@@ -47,6 +47,7 @@ function Color(props: {
 		opacity: '1',
 	});
 	const [showShadowColorPicker, setShowShadowColorPicker] = React.useState<boolean>(false);
+	const [shadowEnabled, setShadowEnabled] = React.useState<boolean>(true);
 
 	function getColor(basics: any, value: string) {
 		if (!basics || !value) return null;
@@ -133,6 +134,7 @@ function Color(props: {
 			} else if (isShadowValue(props.value)) {
 				setTextValue(props.value);
 				setShadowConfig(parseShadow(props.value));
+				setShadowEnabled(props.value !== 'none' && props.value !== 'unset');
 			} else {
 				setTextValue(props.value);
 			}
@@ -301,15 +303,27 @@ function Color(props: {
 					handleClose={() => setShowTextInput(false)}
 				>
 					<S.SelectorWrapper>
+						<S.ShadowToggleRow>
+							<label>Shadow</label>
+							<S.ToggleWrapper>
+								<input
+									type="checkbox"
+									checked={shadowEnabled}
+									onChange={(e) => setShadowEnabled(e.target.checked)}
+									disabled={props.disabled}
+								/>
+								<span>{shadowEnabled ? 'ON' : 'OFF'}</span>
+							</S.ToggleWrapper>
+						</S.ShadowToggleRow>
 						<S.ShadowEditorGrid>
-							<S.ShadowEditorRow>
+							<S.ShadowEditorRow $disabled={!shadowEnabled}>
 								<label>X Offset</label>
 								<S.RangeWrapper>
 									<input
 										type="range"
 										value={shadowConfig.x}
 										onChange={(e) => setShadowConfig({ ...shadowConfig, x: e.target.value })}
-										disabled={props.disabled}
+										disabled={props.disabled || !shadowEnabled}
 										min="-50"
 										max="50"
 										step="1"
@@ -317,14 +331,14 @@ function Color(props: {
 									<span>{shadowConfig.x}px</span>
 								</S.RangeWrapper>
 							</S.ShadowEditorRow>
-							<S.ShadowEditorRow>
+							<S.ShadowEditorRow $disabled={!shadowEnabled}>
 								<label>Y Offset</label>
 								<S.RangeWrapper>
 									<input
 										type="range"
 										value={shadowConfig.y}
 										onChange={(e) => setShadowConfig({ ...shadowConfig, y: e.target.value })}
-										disabled={props.disabled}
+										disabled={props.disabled || !shadowEnabled}
 										min="-50"
 										max="50"
 										step="1"
@@ -332,14 +346,14 @@ function Color(props: {
 									<span>{shadowConfig.y}px</span>
 								</S.RangeWrapper>
 							</S.ShadowEditorRow>
-							<S.ShadowEditorRow>
+							<S.ShadowEditorRow $disabled={!shadowEnabled}>
 								<label>Blur</label>
 								<S.RangeWrapper>
 									<input
 										type="range"
 										value={shadowConfig.blur}
 										onChange={(e) => setShadowConfig({ ...shadowConfig, blur: e.target.value })}
-										disabled={props.disabled}
+										disabled={props.disabled || !shadowEnabled}
 										min="0"
 										max="100"
 										step="1"
@@ -347,14 +361,14 @@ function Color(props: {
 									<span>{shadowConfig.blur}px</span>
 								</S.RangeWrapper>
 							</S.ShadowEditorRow>
-							<S.ShadowEditorRow>
+							<S.ShadowEditorRow $disabled={!shadowEnabled}>
 								<label>Spread</label>
 								<S.RangeWrapper>
 									<input
 										type="range"
 										value={shadowConfig.spread}
 										onChange={(e) => setShadowConfig({ ...shadowConfig, spread: e.target.value })}
-										disabled={props.disabled}
+										disabled={props.disabled || !shadowEnabled}
 										min="-50"
 										max="50"
 										step="1"
@@ -362,26 +376,26 @@ function Color(props: {
 									<span>{shadowConfig.spread}px</span>
 								</S.RangeWrapper>
 							</S.ShadowEditorRow>
-							<S.ShadowEditorRow>
+							<S.ShadowEditorRow $disabled={!shadowEnabled}>
 								<label>Color</label>
 								<S.ShadowColorWrapper>
 									<S.ShadowColorPreview
 										background={shadowConfig.color}
-										onClick={() => !props.disabled && setShowShadowColorPicker(true)}
-										disabled={props.disabled}
+										onClick={() => !props.disabled && shadowEnabled && setShowShadowColorPicker(true)}
+										disabled={props.disabled || !shadowEnabled}
 									>
 										<span>{shadowConfig.color.toUpperCase()}</span>
 									</S.ShadowColorPreview>
 								</S.ShadowColorWrapper>
 							</S.ShadowEditorRow>
-							<S.ShadowEditorRow>
+							<S.ShadowEditorRow $disabled={!shadowEnabled}>
 								<label>Opacity</label>
 								<S.RangeWrapper>
 									<input
 										type="range"
 										value={shadowConfig.opacity}
 										onChange={(e) => setShadowConfig({ ...shadowConfig, opacity: e.target.value })}
-										disabled={props.disabled}
+										disabled={props.disabled || !shadowEnabled}
 										min="0"
 										max="1"
 										step="0.01"
@@ -391,7 +405,7 @@ function Color(props: {
 							</S.ShadowEditorRow>
 						</S.ShadowEditorGrid>
 						<S.ShadowPreview
-							shadow={shadowConfigToString(shadowConfig)}
+							shadow={shadowEnabled ? shadowConfigToString(shadowConfig) : 'none'}
 							backgroundColor={props.basics?.background?.[props.scheme] || '128,128,128'}
 						/>
 						<S.SelectorActions>
@@ -402,6 +416,7 @@ function Color(props: {
 									label={language?.close}
 									handlePress={() => {
 										setShadowConfig(parseShadow(props.value));
+										setShadowEnabled(props.value !== 'none' && props.value !== 'unset');
 										setShowTextInput(false);
 									}}
 									disabled={props.loading}
@@ -410,7 +425,7 @@ function Color(props: {
 									type={'alt1'}
 									label={language?.save}
 									handlePress={() => {
-										const shadowStr = shadowConfigToString(shadowConfig);
+										const shadowStr = shadowEnabled ? shadowConfigToString(shadowConfig) : 'none';
 										props.onChange(shadowStr);
 										setTextValue(shadowStr);
 										setShowTextInput(false);
