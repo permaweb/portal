@@ -499,6 +499,20 @@ function Color(props: {
 	);
 }
 
+// Helper function to resolve color keys to RGB values for display
+function resolveColorForDisplay(colorValue: string | undefined, scheme: 'light' | 'dark', basicsColors: any): string {
+	if (!colorValue) return scheme === 'light' ? '0,0,0' : '255,255,255';
+
+	// Check if it's a basic color key
+	const basicColorKeys = ['primary', 'secondary', 'background', 'text', 'border'];
+	if (basicColorKeys.includes(colorValue)) {
+		return basicsColors?.[colorValue]?.[scheme] || (scheme === 'light' ? '0,0,0' : '255,255,255');
+	}
+
+	// Otherwise, assume it's already an RGB string
+	return colorValue;
+}
+
 const ThemeSection = React.memo(function ThemeSection(props: any) {
 	const portalProvider = usePortalProvider();
 	const { theme, setTheme, name, setName, section, loading, originalTheme } = props;
@@ -678,17 +692,19 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 																fontWeight: theme.links?.preferences?.default?.bold ? 'bold' : 'normal',
 																fontStyle: theme.links?.preferences?.default?.cursive ? 'italic' : 'normal',
 																fontSize: '14px',
-																color: `rgba(${
-																	props.theme.basics?.colors?.[theme.links?.colors?.default?.light || 'text']?.light ||
-																	'0,0,0'
-																},1)`,
+																color: `rgba(${resolveColorForDisplay(
+																	theme.links?.colors?.default?.light,
+																	'light',
+																	props.theme.basics?.colors
+																)},1)`,
 																transition: 'all 0.2s ease',
 															}}
 															onMouseEnter={(e) => {
-																e.currentTarget.style.color = `rgba(${
-																	props.theme.basics?.colors?.[theme.links?.colors?.hover?.light || 'text']?.light ||
-																	'0,0,0'
-																},1)`;
+																e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+																	theme.links?.colors?.hover?.light,
+																	'light',
+																	props.theme.basics?.colors
+																)},1)`;
 																e.currentTarget.style.textDecoration = theme.links?.preferences?.hover?.underline
 																	? 'underline'
 																	: 'none';
@@ -700,10 +716,11 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 																	: 'normal';
 															}}
 															onMouseLeave={(e) => {
-																e.currentTarget.style.color = `rgba(${
-																	props.theme.basics?.colors?.[theme.links?.colors?.default?.light || 'text']?.light ||
-																	'0,0,0'
-																},1)`;
+																e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+																	theme.links?.colors?.default?.light,
+																	'light',
+																	props.theme.basics?.colors
+																)},1)`;
 																e.currentTarget.style.textDecoration = theme.links?.preferences?.default?.underline
 																	? 'underline'
 																	: 'none';
@@ -743,17 +760,19 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 																fontWeight: theme.links?.preferences?.default?.bold ? 'bold' : 'normal',
 																fontStyle: theme.links?.preferences?.default?.cursive ? 'italic' : 'normal',
 																fontSize: '14px',
-																color: `rgba(${
-																	props.theme.basics?.colors?.[theme.links?.colors?.default?.dark || 'text']?.dark ||
-																	'255,255,255'
-																},1)`,
+																color: `rgba(${resolveColorForDisplay(
+																	theme.links?.colors?.default?.dark,
+																	'dark',
+																	props.theme.basics?.colors
+																)},1)`,
 																transition: 'all 0.2s ease',
 															}}
 															onMouseEnter={(e) => {
-																e.currentTarget.style.color = `rgba(${
-																	props.theme.basics?.colors?.[theme.links?.colors?.hover?.dark || 'text']?.dark ||
-																	'255,255,255'
-																},1)`;
+																e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+																	theme.links?.colors?.hover?.dark,
+																	'dark',
+																	props.theme.basics?.colors
+																)},1)`;
 																e.currentTarget.style.textDecoration = theme.links?.preferences?.hover?.underline
 																	? 'underline'
 																	: 'none';
@@ -765,10 +784,11 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 																	: 'normal';
 															}}
 															onMouseLeave={(e) => {
-																e.currentTarget.style.color = `rgba(${
-																	props.theme.basics?.colors?.[theme.links?.colors?.default?.dark || 'text']?.dark ||
-																	'255,255,255'
-																},1)`;
+																e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+																	theme.links?.colors?.default?.dark,
+																	'dark',
+																	props.theme.basics?.colors
+																)},1)`;
 																e.currentTarget.style.textDecoration = theme.links?.preferences?.default?.underline
 																	? 'underline'
 																	: 'none';
@@ -1011,13 +1031,17 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 													const updatedTheme = {
 														...theme,
 														links: {
-															...theme.links,
 															colors: {
 																...theme.links?.colors,
 																default: {
 																	...theme.links?.colors?.default,
 																	[linksScheme]: newValue,
 																},
+																hover: theme.links?.colors?.hover || { light: 'text', dark: 'text' },
+															},
+															preferences: theme.links?.preferences || {
+																default: { underline: true, cursive: false, bold: false },
+																hover: { underline: true, cursive: false, bold: false },
 															},
 														},
 													};
@@ -1039,12 +1063,20 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 														const updatedTheme = {
 															...theme,
 															links: {
-																...theme.links,
+																colors: theme.links?.colors || {
+																	default: { light: 'text', dark: 'text' },
+																	hover: { light: 'text', dark: 'text' },
+																},
 																preferences: {
 																	...theme.links?.preferences,
 																	default: {
 																		...theme.links?.preferences?.default,
 																		bold: !theme.links?.preferences?.default?.bold,
+																	},
+																	hover: theme.links?.preferences?.hover || {
+																		underline: true,
+																		cursive: false,
+																		bold: false,
 																	},
 																},
 															},
@@ -1062,12 +1094,20 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 														const updatedTheme = {
 															...theme,
 															links: {
-																...theme.links,
+																colors: theme.links?.colors || {
+																	default: { light: 'text', dark: 'text' },
+																	hover: { light: 'text', dark: 'text' },
+																},
 																preferences: {
 																	...theme.links?.preferences,
 																	default: {
 																		...theme.links?.preferences?.default,
 																		cursive: !theme.links?.preferences?.default?.cursive,
+																	},
+																	hover: theme.links?.preferences?.hover || {
+																		underline: true,
+																		cursive: false,
+																		bold: false,
 																	},
 																},
 															},
@@ -1085,12 +1125,20 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 														const updatedTheme = {
 															...theme,
 															links: {
-																...theme.links,
+																colors: theme.links?.colors || {
+																	default: { light: 'text', dark: 'text' },
+																	hover: { light: 'text', dark: 'text' },
+																},
 																preferences: {
 																	...theme.links?.preferences,
 																	default: {
 																		...theme.links?.preferences?.default,
 																		underline: !theme.links?.preferences?.default?.underline,
+																	},
+																	hover: theme.links?.preferences?.hover || {
+																		underline: true,
+																		cursive: false,
+																		bold: false,
 																	},
 																},
 															},
@@ -1118,13 +1166,17 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 													const updatedTheme = {
 														...theme,
 														links: {
-															...theme.links,
 															colors: {
 																...theme.links?.colors,
+																default: theme.links?.colors?.default || { light: 'text', dark: 'text' },
 																hover: {
 																	...theme.links?.colors?.hover,
 																	[linksScheme]: newValue,
 																},
+															},
+															preferences: theme.links?.preferences || {
+																default: { underline: true, cursive: false, bold: false },
+																hover: { underline: true, cursive: false, bold: false },
 															},
 														},
 													};
@@ -1146,9 +1198,17 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 														const updatedTheme = {
 															...theme,
 															links: {
-																...theme.links,
+																colors: theme.links?.colors || {
+																	default: { light: 'text', dark: 'text' },
+																	hover: { light: 'text', dark: 'text' },
+																},
 																preferences: {
 																	...theme.links?.preferences,
+																	default: theme.links?.preferences?.default || {
+																		underline: true,
+																		cursive: false,
+																		bold: false,
+																	},
 																	hover: {
 																		...theme.links?.preferences?.hover,
 																		bold: !theme.links?.preferences?.hover?.bold,
@@ -1169,9 +1229,17 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 														const updatedTheme = {
 															...theme,
 															links: {
-																...theme.links,
+																colors: theme.links?.colors || {
+																	default: { light: 'text', dark: 'text' },
+																	hover: { light: 'text', dark: 'text' },
+																},
 																preferences: {
 																	...theme.links?.preferences,
+																	default: theme.links?.preferences?.default || {
+																		underline: true,
+																		cursive: false,
+																		bold: false,
+																	},
 																	hover: {
 																		...theme.links?.preferences?.hover,
 																		cursive: !theme.links?.preferences?.hover?.cursive,
@@ -1192,9 +1260,17 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 														const updatedTheme = {
 															...theme,
 															links: {
-																...theme.links,
+																colors: theme.links?.colors || {
+																	default: { light: 'text', dark: 'text' },
+																	hover: { light: 'text', dark: 'text' },
+																},
 																preferences: {
 																	...theme.links?.preferences,
+																	default: theme.links?.preferences?.default || {
+																		underline: true,
+																		cursive: false,
+																		bold: false,
+																	},
 																	hover: {
 																		...theme.links?.preferences?.hover,
 																		underline: !theme.links?.preferences?.hover?.underline,
@@ -1235,11 +1311,11 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 									href="#"
 									onClick={(e) => e.preventDefault()}
 									style={{
-										color: `rgba(${(() => {
-											const colorKey = theme.links?.colors?.default?.[linksScheme] || 'text';
-											const colorValue = props.theme.basics?.colors?.[colorKey]?.[linksScheme];
-											return colorValue || (linksScheme === 'light' ? '0,0,0' : '255,255,255');
-										})()},1)`,
+										color: `rgba(${resolveColorForDisplay(
+											theme.links?.colors?.default?.[linksScheme],
+											linksScheme,
+											props.theme.basics?.colors
+										)},1)`,
 										textDecoration: theme.links?.preferences?.default?.underline ? 'underline' : 'none',
 										fontWeight: theme.links?.preferences?.default?.bold ? 'bold' : 'normal',
 										fontStyle: theme.links?.preferences?.default?.cursive ? 'italic' : 'normal',
@@ -1247,11 +1323,11 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 										transition: 'all 0.2s ease',
 									}}
 									onMouseEnter={(e) => {
-										const colorKey = theme.links?.colors?.hover?.[linksScheme] || 'text';
-										const colorValue =
-											props.theme.basics?.colors?.[colorKey]?.[linksScheme] ||
-											(linksScheme === 'light' ? '0,0,0' : '255,255,255');
-										e.currentTarget.style.color = `rgba(${colorValue},1)`;
+										e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+											theme.links?.colors?.hover?.[linksScheme],
+											linksScheme,
+											props.theme.basics?.colors
+										)},1)`;
 										e.currentTarget.style.textDecoration = theme.links?.preferences?.hover?.underline
 											? 'underline'
 											: 'none';
@@ -1259,11 +1335,11 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 										e.currentTarget.style.fontStyle = theme.links?.preferences?.hover?.cursive ? 'italic' : 'normal';
 									}}
 									onMouseLeave={(e) => {
-										const colorKey = theme.links?.colors?.default?.[linksScheme] || 'text';
-										const colorValue =
-											props.theme.basics?.colors?.[colorKey]?.[linksScheme] ||
-											(linksScheme === 'light' ? '0,0,0' : '255,255,255');
-										e.currentTarget.style.color = `rgba(${colorValue},1)`;
+										e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+											theme.links?.colors?.default?.[linksScheme],
+											linksScheme,
+											props.theme.basics?.colors
+										)},1)`;
 										e.currentTarget.style.textDecoration = theme.links?.preferences?.default?.underline
 											? 'underline'
 											: 'none';
