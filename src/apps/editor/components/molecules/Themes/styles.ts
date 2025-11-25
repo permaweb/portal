@@ -719,10 +719,11 @@ export const ShadowToggleRow = styled.div`
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		text-transform: uppercase;
+		flex: 1;
 	}
 
 	> div {
-		margin-left: auto;
+		justify-content: flex-end;
 	}
 `;
 
@@ -940,7 +941,7 @@ export const RangeWrapper = styled.div`
 export const ToggleWrapper = styled.div`
 	display: flex;
 	align-items: center;
-	justify-content: flex-end;
+	justify-content: flex-start;
 	gap: 10px;
 	width: 125px;
 	height: 40px;

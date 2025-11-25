@@ -1019,6 +1019,7 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 											tooltip={'Reset'}
 											tooltipPosition={'left'}
 											noFocus
+											className={hasChanges ? 'reset-active' : ''}
 										/>
 									</S.ThemeResetButton>
 								</S.ThemeRow>
