@@ -4,6 +4,7 @@ import { WanderConnect } from '@wanderapp/connect';
 
 import { TurboCredits } from 'editor/components/molecules/TurboCredits';
 import { ProfileManager } from 'editor/components/organisms/ProfileManager';
+import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { useSettingsProvider as useEditorSettingsProvider } from 'editor/providers/SettingsProvider';
 import { useSettingsProvider as useViewerSettingsProvider } from 'viewer/providers/SettingsProvider';
 
@@ -22,6 +23,7 @@ import * as S from './styles';
 
 export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engine'; callback?: () => void }) {
 	const arProvider = useArweaveProvider();
+	const portalProvider = usePortalProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -185,10 +187,12 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 										{backupsNeeded > 0 && <S.MenuBadge>{backupsNeeded}</S.MenuBadge>}
 									</li>
 								)}
-								<li onClick={() => setShowProfileManager(true)}>
-									<ReactSVG src={ICONS.write} />
-									{language?.profile}
-								</li>
+								{permawebProvider.profile?.id !== portalProvider?.current?.id && (
+									<li onClick={() => setShowProfileManager(true)}>
+										<ReactSVG src={ICONS.write} />
+										{language?.profile}
+									</li>
+								)}
 								<li onClick={() => setShowLanguageSelector(true)}>
 									<ReactSVG src={ICONS.language} />
 									{language?.language}
