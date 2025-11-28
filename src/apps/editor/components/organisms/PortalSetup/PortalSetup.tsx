@@ -6,25 +6,14 @@ import { Topics } from 'editor/components/molecules/Topics';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 
-import { Button } from 'components/atoms/Button';
-import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { ICONS } from 'helpers/config';
-import { PortalCategoryType, PortalPatchMapEnum, ViewLayoutType } from 'helpers/types';
-import { useArweaveProvider } from 'providers/ArweaveProvider';
+import { PortalCategoryType, ViewLayoutType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-import { useNotifications } from 'providers/NotificationProvider';
-import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import { MediaLibrary } from '../MediaLibrary';
 
 import * as S from './styles';
-
-type MonetizationConfig = {
-	enabled: boolean;
-	walletAddress: string;
-	tokenAddress: string;
-};
 
 export default function PortalSetup(props: { type: ViewLayoutType }) {
 	const portalProvider = usePortalProvider();
@@ -32,60 +21,6 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 	const language = languageProvider.object[languageProvider.current];
 
 	const { settings, updateSettings } = useSettingsProvider();
-	const arProvider = useArweaveProvider();
-	const permawebProvider = usePermawebProvider();
-	const { addNotification } = useNotifications();
-	const ownerWallet = (portalProvider.current as any)?.ownerWallet || (portalProvider.current as any)?.owner || '';
-	const [savingMonetization, setSavingMonetization] = React.useState(false);
-	const [monetization, setMonetization] = React.useState<MonetizationConfig>(() => {
-		const existing = (portalProvider.current as any)?.monetization?.monetization as MonetizationConfig | undefined;
-		if (existing) return existing;
-
-		return {
-			enabled: false,
-			walletAddress: ownerWallet,
-			tokenAddress: 'AR',
-		};
-	});
-
-	React.useEffect(() => {
-		const existing = (portalProvider.current as any)?.monetization?.monetization as MonetizationConfig | undefined;
-		if (existing) {
-			setMonetization(existing);
-		} else {
-			setMonetization((prev) => ({
-				...prev,
-				walletAddress: ownerWallet || prev.walletAddress,
-			}));
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [portalProvider.current?.id]);
-
-	const ownerWallet = (portalProvider.current as any)?.ownerWallet || (portalProvider.current as any)?.owner || '';
-
-	const [monetization, setMonetization] = React.useState<MonetizationConfig>(() => {
-		const existing = (portalProvider.current as any)?.monetization as MonetizationConfig | undefined;
-		if (existing) return existing;
-
-		return {
-			enabled: false,
-			walletAddress: ownerWallet,
-			tokenAddress: 'AR',
-		};
-	});
-
-	React.useEffect(() => {
-		const existing = (portalProvider.current as any)?.monetization as MonetizationConfig | undefined;
-		if (existing) {
-			setMonetization(existing);
-		} else {
-			setMonetization((prev) => ({
-				...prev,
-				walletAddress: ownerWallet || prev.walletAddress,
-			}));
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [portalProvider.current?.id]);
 
 	const toggleCategoryAction = () => {
 		updateSettings('showCategoryAction', !settings.showCategoryAction);
@@ -267,18 +202,6 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 				{getMediaAction()}
 			</S.Section>
 		);
-	}
-
-	function handleSaveMonetization() {
-		const payload: MonetizationConfig = {
-			enabled: monetization.enabled,
-			walletAddress: monetization.walletAddress,
-			tokenAddress: monetization.tokenAddress,
-		};
-
-		// TODO: wire this to updateZone / AO when ready
-		// For now, just log so we can see the shape.
-		console.log('Monetization config to save:', payload);
 	}
 
 	return (
