@@ -117,13 +117,14 @@ export function initThemes(Themes: any[]) {
 			'--color-header-background': getColor(theme, scheme, theme.header.colors.background[scheme]),
 			'--color-header-opacity': theme.header.preferences.opacity[scheme],
 			'--color-header-border': getColor(theme, scheme, theme.header.colors.border[scheme]),
+			'--preference-header-shadow': theme.header?.preferences?.shadow?.[scheme] || 'none',
 
 			// Navigation
 			'--color-navigation-background': `rgba(${theme.navigation.colors.background[scheme]}, ${theme.navigation.preferences.opacity[scheme]})`,
 			'--color-navigation-border': getColor(theme, scheme, theme.navigation.colors.border[scheme]),
 			'--color-navigation-text': getColor(theme, scheme, theme.navigation.colors.text[scheme]),
 			'--color-navigation-text-hover': getColor(theme, scheme, theme.navigation.colors.hover[scheme]),
-			'--shadow-navigation-entry': theme.navigation.preferences.shadow[scheme],
+			'--preference-navigation-shadow': theme.navigation?.preferences?.shadow?.[scheme] || 'none',
 
 			// Footer
 			'--color-footer-background': getColor(theme, scheme, theme.footer.colors.background[scheme]),
@@ -215,6 +216,25 @@ export function initThemes(Themes: any[]) {
 				scheme,
 				theme.buttons.primary.hover.colors.border[scheme]
 			)},1)`,
+
+			// Links
+			...(theme?.links?.colors?.default &&
+			theme?.links?.colors?.hover &&
+			theme?.links?.preferences?.default &&
+			theme?.links?.preferences?.hover
+				? {
+						'--color-link-default': `rgba(${getColor(theme, scheme, theme.links.colors.default[scheme])},1)`,
+						'--color-link-hover': `rgba(${getColor(theme, scheme, theme.links.colors.hover[scheme])},1)`,
+						'--preference-link-text-decoration-default': theme.links.preferences.default.underline
+							? 'underline'
+							: 'none',
+						'--preference-link-text-decoration-hover': theme.links.preferences.hover.underline ? 'underline' : 'none',
+						'--preference-link-font-weight-default': theme.links.preferences.default.bold ? 'bold' : 'normal',
+						'--preference-link-font-weight-hover': theme.links.preferences.hover.bold ? 'bold' : 'normal',
+						'--preference-link-font-style-default': theme.links.preferences.default.cursive ? 'italic' : 'normal',
+						'--preference-link-font-style-hover': theme.links.preferences.hover.cursive ? 'italic' : 'normal',
+				  }
+				: {}),
 		});
 
 		if (theme.basics.preferences)

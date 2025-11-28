@@ -23,7 +23,7 @@ export const Navigation = styled.div<{ $layout: any; maxWidth: number }>`
 		props.$layout.border.sides ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`};
 	border-right: ${(props) =>
 		props.$layout.border.sides ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`};
-	box-shadow: var(--shadow-navigation);
+	box-shadow: var(--preference-navigation-shadow);
 	user-select: none;
 	box-sizing: border-box;
 

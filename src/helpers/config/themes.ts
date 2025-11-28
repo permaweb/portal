@@ -26,7 +26,30 @@ export const THEME_DEFAULT = {
 		},
 		preferences: {
 			borderRadius: 0,
-			wallpaper: undefined,
+		},
+	},
+	links: {
+		colors: {
+			default: {
+				light: 'text',
+				dark: 'text',
+			},
+			hover: {
+				light: 'text',
+				dark: 'text',
+			},
+		},
+		preferences: {
+			default: {
+				underline: true,
+				cursive: false,
+				bold: false,
+			},
+			hover: {
+				underline: true,
+				cursive: false,
+				bold: false,
+			},
 		},
 	},
 	header: {
@@ -39,10 +62,6 @@ export const THEME_DEFAULT = {
 				light: 'border',
 				dark: 'border',
 			},
-			shadow: {
-				light: 'rgba(0, 0, 0, 0.4)',
-				dark: 'rgba(0, 0, 0, 0.4)',
-			},
 		},
 		preferences: {
 			opacity: {
@@ -50,8 +69,8 @@ export const THEME_DEFAULT = {
 				dark: 0.4,
 			},
 			shadow: {
-				light: '0 4px 10px',
-				dark: '0 4px 10px',
+				light: '0px 4px 10px rgba(0, 0, 0, 0.4)',
+				dark: '0px 4px 10px rgba(0, 0, 0, 0.4)',
 			},
 			gradient: {
 				light: true,

@@ -6,6 +6,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
+import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { ICONS, THEME } from 'helpers/config';
@@ -34,38 +35,125 @@ function Color(props: {
 
 	const [value, setValue] = React.useState<string | null>(null);
 	const [showSelector, setShowSelector] = React.useState<boolean>(false);
+	const [textValue, setTextValue] = React.useState<string>('');
+	const [showTextInput, setShowTextInput] = React.useState<boolean>(false);
+
+	const [shadowConfig, setShadowConfig] = React.useState({
+		x: '0',
+		y: '0',
+		blur: '0',
+		spread: '0',
+		color: '#000000',
+		opacity: '1',
+	});
+	const [showShadowColorPicker, setShowShadowColorPicker] = React.useState<boolean>(false);
+	const [shadowEnabled, setShadowEnabled] = React.useState<boolean>(true);
 
 	function getColor(basics: any, value: string) {
+		if (!basics || !value) return null;
+
 		switch (value) {
 			case 'primary':
-				return basics.primary[props.scheme];
+				return basics.primary?.[props.scheme];
 			case 'secondary':
-				return basics.secondary[props.scheme];
+				return basics.secondary?.[props.scheme];
 			case 'background':
-				return basics.background[props.scheme];
+				return basics.background?.[props.scheme];
 			case 'text':
-				return basics.text[props.scheme];
+				return basics.text?.[props.scheme];
 			case 'border':
-				return basics.border[props.scheme];
+				return basics.border?.[props.scheme];
 			default:
 				return value;
 		}
 	}
 
+	const isColorValue = (val: string) => {
+		if (!val) return false;
+		const isBasicKey = ['primary', 'secondary', 'background', 'text', 'border'].includes(val);
+		const isRgb = /^\d+,\s*\d+,\s*\d+$/.test(val);
+		return isBasicKey || isRgb;
+	};
+
+	const isShadowValue = (val: string) => {
+		return val && typeof val === 'string' && (val.includes('px') || val === 'none' || val === 'unset');
+	};
+
+	const parseShadow = (shadowStr: string) => {
+		if (!shadowStr || shadowStr === 'none' || shadowStr === 'unset') {
+			return { x: '0', y: '0', blur: '0', spread: '0', color: '#000000', opacity: '0' };
+		}
+
+		const matchWithColor = shadowStr.match(
+			/([-\d.]+)px\s+([-\d.]+)px\s+([-\d.]+)px(?:\s+([-\d.]+)px)?\s+rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/
+		);
+		if (matchWithColor) {
+			const [, x, y, blur, spread, r, g, b, a] = matchWithColor;
+			const color = rgbToHex(parseInt(r), parseInt(g), parseInt(b));
+			return {
+				x: x || '0',
+				y: y || '0',
+				blur: blur || '0',
+				spread: spread || '0',
+				color,
+				opacity: a || '1',
+			};
+		}
+
+		const matchSimple = shadowStr.match(/([-\d.]+)px\s+([-\d.]+)px\s+([-\d.]+)px(?:\s+([-\d.]+)px)?/);
+		if (matchSimple) {
+			const [, x, y, blur, spread] = matchSimple;
+			return {
+				x: x || '0',
+				y: y || '0',
+				blur: blur || '0',
+				spread: spread || '0',
+				color: '#000000',
+				opacity: '0.5',
+			};
+		}
+
+		return { x: '0', y: '0', blur: '0', spread: '0', color: '#000000', opacity: '1' };
+	};
+
+	const shadowConfigToString = (config: typeof shadowConfig) => {
+		if (parseFloat(config.opacity) === 0) return 'none';
+		const rgb = hexToRgb(config.color);
+		const rgbArray = rgb.split(',').map(Number);
+		const spreadPart = parseFloat(config.spread) !== 0 ? ` ${config.spread}px` : '';
+		return `${config.x}px ${config.y}px ${config.blur}px${spreadPart} rgba(${rgbArray[0]}, ${rgbArray[1]}, ${rgbArray[2]}, ${config.opacity})`;
+	};
+
 	React.useEffect(() => {
 		if (props.value) {
-			const absoluteValue = getColor(props.basics, props.value);
-			setValue(parseRgbStringToHex(absoluteValue));
+			if (isColorValue(props.value) && props.basics) {
+				const absoluteValue = getColor(props.basics, props.value);
+				if (absoluteValue) {
+					setValue(parseRgbStringToHex(absoluteValue));
+				}
+			} else if (isShadowValue(props.value)) {
+				setTextValue(props.value);
+				setShadowConfig(parseShadow(props.value));
+				setShadowEnabled(props.value !== 'none' && props.value !== 'unset');
+			} else {
+				setTextValue(props.value);
+			}
 		}
-	}, [props.value]);
+	}, [props.value, props.basics, props.scheme]);
 
 	function parseRgbStringToHex(rgbString: string) {
-		const [r, g, b] = rgbString.split(',').map(Number);
+		if (!rgbString) return '#000000';
+		const parts = rgbString.split(',').map(Number);
+		if (parts.length !== 3 || parts.some(isNaN)) return '#000000';
+		const [r, g, b] = parts;
 		return rgbToHex(r, g, b);
 	}
 
 	function rgbToHex(r: number, g: number, b: number) {
-		const toHex = (value: number) => value.toString(16).padStart(2, '0');
+		const toHex = (value: number) => {
+			if (isNaN(value) || value === undefined) return '00';
+			return value.toString(16).padStart(2, '0');
+		};
 		return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 	}
 
@@ -88,19 +176,37 @@ function Color(props: {
 		return luminance > 0.5 ? 'black' : 'white';
 	}
 
+	const isColor = isColorValue(props.value);
+	const isShadow = isShadowValue(props.value);
+	const isBasicColorKey = ['primary', 'secondary', 'background', 'text', 'border'].includes(props.value);
+	const displayText = isColor
+		? isBasicColorKey
+			? props.value.toUpperCase()
+			: value
+			? value.toUpperCase()
+			: '-'
+		: isShadow
+		? textValue === 'none' || textValue === 'unset'
+			? textValue.toUpperCase()
+			: 'SHADOW'
+		: textValue || '-';
+
 	return (
 		<>
 			<S.ColorWrapper>
 				<S.ColorBody
-					onClick={() => setShowSelector(true)}
+					onClick={() => {
+						if (isColor) setShowSelector(true);
+						else setShowTextInput(true);
+					}}
 					disabled={props.disabled}
-					background={value}
+					background={isColor ? value : '#808080'}
 					height={props.height}
 					width={props.width}
 					maxWidth={props.maxWidth}
-					text={value ? getColorContrast(value) : undefined}
+					text={isColor && value ? getColorContrast(value) : 'white'}
 				>
-					<span>{`${value ? value.toUpperCase() : '-'}`}</span>
+					<span>{displayText}</span>
 				</S.ColorBody>
 			</S.ColorWrapper>
 			{showSelector && (
@@ -111,16 +217,67 @@ function Color(props: {
 						</S.SelectorHeader>
 						<S.SelectorFlexWrapper>
 							<S.SelectorPreview background={value} />
-							<HexColorPicker color={value} onChange={(newValue: string) => setValue(newValue)} />
+							<HexColorPicker
+								color={value}
+								onChange={(newValue: string) => {
+									setValue(newValue);
+									props.onChange(newValue);
+								}}
+							/>
 						</S.SelectorFlexWrapper>
 						<S.SelectorActions>
-							<HexColorInput color={value} onChange={(newValue: string) => setValue(newValue)} />
+							<S.SelectorFlexActions>
+								{isBasicColorKey ? (
+									<input
+										type="text"
+										value={props.value}
+										disabled
+										style={{
+											textAlign: 'center',
+											textTransform: 'uppercase',
+											fontWeight: 'bold',
+											padding: '0 10px',
+										}}
+									/>
+								) : (
+									<HexColorInput
+										color={value}
+										onChange={(newValue: string) => {
+											setValue(newValue);
+											props.onChange(newValue);
+										}}
+									/>
+								)}
+								<S.SelectorColorSwatches>
+									{props.basics &&
+										Object.entries(props.basics).map(([key, colorSchemes]: any) => {
+											if (!colorSchemes || typeof colorSchemes !== 'object') return null;
+											const rgbColor = colorSchemes[props.scheme];
+											if (!rgbColor) return null;
+											const hexColor = parseRgbStringToHex(rgbColor);
+											const isSelected = isBasicColorKey && props.value === key;
+											return (
+												<S.SelectorColorSwatch
+													key={key}
+													background={hexColor}
+													$isSelected={isSelected}
+													onClick={() => {
+														props.onChange(key);
+													}}
+													disabled={props.disabled}
+													title={key.charAt(0).toUpperCase() + key.slice(1)}
+												/>
+											);
+										})}
+								</S.SelectorColorSwatches>
+							</S.SelectorFlexActions>
 							<S.SelectorFlexActions>
 								<Button
 									type={'primary'}
 									label={language?.close}
 									handlePress={() => {
-										setValue(parseRgbStringToHex(props.value));
+										const absoluteValue = getColor(props.basics, props.value);
+										setValue(parseRgbStringToHex(absoluteValue));
 										setShowSelector(false);
 									}}
 									disabled={props.loading}
@@ -140,13 +297,240 @@ function Color(props: {
 					</S.SelectorWrapper>
 				</Modal>
 			)}
+			{showTextInput && isShadow && (
+				<Modal
+					header={props.label.charAt(0).toUpperCase() + props.label.slice(1)}
+					handleClose={() => setShowTextInput(false)}
+				>
+					<S.SelectorWrapper>
+						<S.ShadowToggleRow>
+							<label>Shadow</label>
+							<S.ToggleWrapper>
+								<input
+									type="checkbox"
+									checked={shadowEnabled}
+									onChange={(e) => setShadowEnabled(e.target.checked)}
+									disabled={props.disabled}
+								/>
+								<span>{shadowEnabled ? 'ON' : 'OFF'}</span>
+							</S.ToggleWrapper>
+						</S.ShadowToggleRow>
+						<S.ShadowEditorGrid>
+							<S.ShadowEditorRow $disabled={!shadowEnabled}>
+								<label>X Offset</label>
+								<S.RangeWrapper>
+									<input
+										type="range"
+										value={shadowConfig.x}
+										onChange={(e) => setShadowConfig({ ...shadowConfig, x: e.target.value })}
+										disabled={props.disabled || !shadowEnabled}
+										min="-50"
+										max="50"
+										step="1"
+									/>
+									<span>{shadowConfig.x}px</span>
+								</S.RangeWrapper>
+							</S.ShadowEditorRow>
+							<S.ShadowEditorRow $disabled={!shadowEnabled}>
+								<label>Y Offset</label>
+								<S.RangeWrapper>
+									<input
+										type="range"
+										value={shadowConfig.y}
+										onChange={(e) => setShadowConfig({ ...shadowConfig, y: e.target.value })}
+										disabled={props.disabled || !shadowEnabled}
+										min="-50"
+										max="50"
+										step="1"
+									/>
+									<span>{shadowConfig.y}px</span>
+								</S.RangeWrapper>
+							</S.ShadowEditorRow>
+							<S.ShadowEditorRow $disabled={!shadowEnabled}>
+								<label>Blur</label>
+								<S.RangeWrapper>
+									<input
+										type="range"
+										value={shadowConfig.blur}
+										onChange={(e) => setShadowConfig({ ...shadowConfig, blur: e.target.value })}
+										disabled={props.disabled || !shadowEnabled}
+										min="0"
+										max="100"
+										step="1"
+									/>
+									<span>{shadowConfig.blur}px</span>
+								</S.RangeWrapper>
+							</S.ShadowEditorRow>
+							<S.ShadowEditorRow $disabled={!shadowEnabled}>
+								<label>Spread</label>
+								<S.RangeWrapper>
+									<input
+										type="range"
+										value={shadowConfig.spread}
+										onChange={(e) => setShadowConfig({ ...shadowConfig, spread: e.target.value })}
+										disabled={props.disabled || !shadowEnabled}
+										min="-50"
+										max="50"
+										step="1"
+									/>
+									<span>{shadowConfig.spread}px</span>
+								</S.RangeWrapper>
+							</S.ShadowEditorRow>
+							<S.ShadowEditorRow $disabled={!shadowEnabled}>
+								<label>Color</label>
+								<S.ShadowColorWrapper>
+									<S.ShadowColorPreview
+										background={shadowConfig.color}
+										onClick={() => !props.disabled && shadowEnabled && setShowShadowColorPicker(true)}
+										disabled={props.disabled || !shadowEnabled}
+									>
+										<span>{shadowConfig.color.toUpperCase()}</span>
+									</S.ShadowColorPreview>
+								</S.ShadowColorWrapper>
+							</S.ShadowEditorRow>
+							<S.ShadowEditorRow $disabled={!shadowEnabled}>
+								<label>Opacity</label>
+								<S.RangeWrapper>
+									<input
+										type="range"
+										value={shadowConfig.opacity}
+										onChange={(e) => setShadowConfig({ ...shadowConfig, opacity: e.target.value })}
+										disabled={props.disabled || !shadowEnabled}
+										min="0"
+										max="1"
+										step="0.01"
+									/>
+									<span>{shadowConfig.opacity}</span>
+								</S.RangeWrapper>
+							</S.ShadowEditorRow>
+						</S.ShadowEditorGrid>
+						<S.ShadowPreview
+							shadow={shadowEnabled ? shadowConfigToString(shadowConfig) : 'none'}
+							backgroundColor={props.basics?.background?.[props.scheme] || '128,128,128'}
+						/>
+						<S.SelectorActions>
+							<div></div>
+							<S.SelectorFlexActions>
+								<Button
+									type={'primary'}
+									label={language?.close}
+									handlePress={() => {
+										setShadowConfig(parseShadow(props.value));
+										setShadowEnabled(props.value !== 'none' && props.value !== 'unset');
+										setShowTextInput(false);
+									}}
+									disabled={props.loading}
+								/>
+								<Button
+									type={'alt1'}
+									label={language?.save}
+									handlePress={() => {
+										const shadowStr = shadowEnabled ? shadowConfigToString(shadowConfig) : 'none';
+										props.onChange(shadowStr);
+										setTextValue(shadowStr);
+										setShowTextInput(false);
+									}}
+									disabled={props.disabled}
+									loading={props.loading}
+								/>
+							</S.SelectorFlexActions>
+						</S.SelectorActions>
+					</S.SelectorWrapper>
+				</Modal>
+			)}
+			{showShadowColorPicker && (
+				<Modal header={language?.colorPicker} handleClose={() => setShowShadowColorPicker(false)}>
+					<S.SelectorWrapper>
+						<S.SelectorHeader>
+							<p>Shadow Color</p>
+						</S.SelectorHeader>
+						<S.SelectorFlexWrapper>
+							<S.SelectorPreview background={shadowConfig.color} />
+							<HexColorPicker
+								color={shadowConfig.color}
+								onChange={(newColor: string) => setShadowConfig({ ...shadowConfig, color: newColor })}
+							/>
+						</S.SelectorFlexWrapper>
+						<S.SelectorActions>
+							<div>
+								<HexColorInput
+									color={shadowConfig.color}
+									onChange={(newColor: string) => setShadowConfig({ ...shadowConfig, color: newColor })}
+								/>
+							</div>
+							<S.SelectorFlexActions>
+								<Button
+									type={'primary'}
+									label={language?.close}
+									handlePress={() => setShowShadowColorPicker(false)}
+									disabled={props.loading}
+								/>
+							</S.SelectorFlexActions>
+						</S.SelectorActions>
+					</S.SelectorWrapper>
+				</Modal>
+			)}
+			{showTextInput && !isShadow && (
+				<Modal header={`Edit ${props.label}`} handleClose={() => setShowTextInput(false)}>
+					<S.SelectorWrapper>
+						<S.SelectorHeader>
+							<p>{props.label}</p>
+						</S.SelectorHeader>
+						<FormField
+							value={textValue}
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTextValue(e.target.value)}
+							invalid={{ status: false, message: null }}
+							disabled={props.disabled}
+							hideErrorMessage
+						/>
+						<S.SelectorActions>
+							<div></div>
+							<S.SelectorFlexActions>
+								<Button
+									type={'primary'}
+									label={language?.close}
+									handlePress={() => {
+										setTextValue(props.value);
+										setShowTextInput(false);
+									}}
+									disabled={props.loading}
+								/>
+								<Button
+									type={'alt1'}
+									label={language?.save}
+									handlePress={() => {
+										props.onChange(textValue);
+										setShowTextInput(false);
+									}}
+									disabled={!textValue || textValue === props.value || props.disabled}
+									loading={props.loading}
+								/>
+							</S.SelectorFlexActions>
+						</S.SelectorActions>
+					</S.SelectorWrapper>
+				</Modal>
+			)}
 		</>
 	);
 }
 
+// Helper function to resolve color keys to RGB values for display
+function resolveColorForDisplay(colorValue: string | undefined, scheme: 'light' | 'dark', basicsColors: any): string {
+	if (!colorValue) return scheme === 'light' ? '0,0,0' : '255,255,255';
+
+	// Check if it's a basic color key
+	const basicColorKeys = ['primary', 'secondary', 'background', 'text', 'border'];
+	if (basicColorKeys.includes(colorValue)) {
+		return basicsColors?.[colorValue]?.[scheme] || (scheme === 'light' ? '0,0,0' : '255,255,255');
+	}
+
+	// Otherwise, assume it's already an RGB string
+	return colorValue;
+}
+
 const ThemeSection = React.memo(function ThemeSection(props: any) {
 	const portalProvider = usePortalProvider();
-	const { theme, setTheme, name, setName, section, loading } = props;
+	const { theme, setTheme, name, setName, section, loading, originalTheme } = props;
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
@@ -154,6 +538,8 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 	// Local state for name editing to prevent re-renders
 	const [localName, setLocalName] = React.useState(theme.name || '');
 	const [open, setOpen] = React.useState<boolean>(false);
+	const [showLinksModal, setShowLinksModal] = React.useState<boolean>(false);
+	const [linksScheme, setLinksScheme] = React.useState<'light' | 'dark'>('light');
 
 	// Update local name when theme changes from outside
 	React.useEffect(() => {
@@ -168,7 +554,18 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 		...Object.entries(theme[section]?.colors || {}).filter(([k]) => !order.includes(k)),
 	]);
 
-	function handleThemeChange(section: string, type: string, scheme: string | null, key: string, newValue: string) {
+	const preferences = theme[section]?.preferences || {};
+	const validPreferences = Object.entries(preferences).filter(
+		([_, value]: any) => typeof value === 'object' && value.light !== undefined
+	);
+
+	function handleThemeChange(
+		section: string,
+		type: string,
+		scheme: string | null,
+		key: string,
+		newValue: string | boolean | number
+	) {
 		const updatedTheme = {
 			...props.theme,
 			[section]: {
@@ -185,6 +582,24 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 
 		setTheme(updatedTheme);
 		// if (props.published) props.onThemeChange(updatedTheme, false);
+	}
+
+	function handleReset(section: string, type: string, key: string) {
+		const savedValue = originalTheme?.[section]?.[type]?.[key.toLowerCase()];
+		if (!savedValue) return;
+
+		const updatedTheme = {
+			...props.theme,
+			[section]: {
+				...props.theme[section],
+				[type]: {
+					...props.theme[section][type],
+					[key.toLowerCase()]: savedValue,
+				},
+			},
+		};
+
+		setTheme(updatedTheme);
 	}
 
 	return (
@@ -206,8 +621,357 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 								<ReactSVG src={ICONS.dark} /> {'Dark'.toUpperCase()}
 							</span>
 						</S.ThemeSectionHeaderVariants>
+						<S.ThemeResetButtonPlaceholder />
 					</S.ThemeSectionHeader>
 					{Object.entries(sortedSection).map(([key, value]: any) => {
+						const originalValue = originalTheme?.[section]?.colors?.[key.toLowerCase()];
+						const hasChanges = JSON.stringify(originalValue) !== JSON.stringify(value);
+
+						return (
+							<React.Fragment key={key}>
+								<S.ThemeRowWrapper>
+									<S.ThemeRow>
+										<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
+										<S.ThemeVariantsWrapper>
+											<S.ThemeLight colors={props.theme.basics?.colors}>
+												<S.ThemeValue>
+													<Color
+														key={`${key}-light`}
+														label={key}
+														value={value.light}
+														basics={props.theme.basics?.colors}
+														scheme={'light'}
+														onChange={(newColor) => handleThemeChange(section, 'colors', 'light', key, newColor)}
+														loading={loading}
+														disabled={unauthorized}
+														width={125}
+													/>
+												</S.ThemeValue>
+											</S.ThemeLight>
+											<S.ThemeDark colors={props.theme.basics?.colors}>
+												<S.ThemeValue>
+													<Color
+														key={`${key}-dark`}
+														label={key}
+														value={value.dark}
+														basics={props.theme.basics?.colors}
+														scheme={'dark'}
+														onChange={(newColor) => handleThemeChange(section, 'colors', 'dark', key, newColor)}
+														loading={loading}
+														disabled={unauthorized}
+														width={125}
+													/>
+												</S.ThemeValue>
+											</S.ThemeDark>
+										</S.ThemeVariantsWrapper>
+										<S.ThemeResetButton $hasChanges={hasChanges}>
+											<IconButton
+												type={'alt1'}
+												active={false}
+												src={ICONS.reset}
+												handlePress={() => handleReset(section, 'colors', key)}
+												disabled={unauthorized || !hasChanges}
+												dimensions={{ wrapper: 20, icon: 11 }}
+												tooltip={'Reset'}
+												tooltipPosition={'left'}
+												noFocus
+												className={hasChanges ? 'reset-active' : ''}
+											/>
+										</S.ThemeResetButton>
+									</S.ThemeRow>
+								</S.ThemeRowWrapper>
+								{section === 'basics' && key === 'text' && (
+									<S.ThemeRowWrapper>
+										<S.ThemeRow>
+											<S.ThemeKey>Links</S.ThemeKey>
+											<S.ThemeVariantsWrapper>
+												<S.ThemeLight colors={props.theme.basics?.colors}>
+													<S.ThemeValue>
+														<button
+															onClick={() => {
+																setLinksScheme('light');
+																setShowLinksModal(true);
+															}}
+															disabled={unauthorized}
+															style={{
+																width: '125px',
+																height: '40px',
+																background: `rgba(${props.theme.basics?.colors?.background?.light || '255,255,255'},1)`,
+																border: `1px solid rgba(${props.theme.basics?.colors?.border?.light || '0,0,0'},0.2)`,
+																borderRadius: '7.5px',
+																cursor: 'pointer',
+																display: 'flex',
+																alignItems: 'center',
+																justifyContent: 'center',
+																textDecoration: theme.links?.preferences?.default?.underline ? 'underline' : 'none',
+																fontWeight: theme.links?.preferences?.default?.bold ? 'bold' : 'normal',
+																fontStyle: theme.links?.preferences?.default?.cursive ? 'italic' : 'normal',
+																fontSize: '14px',
+																color: `rgba(${resolveColorForDisplay(
+																	theme.links?.colors?.default?.light,
+																	'light',
+																	props.theme.basics?.colors
+																)},1)`,
+																transition: 'all 0.2s ease',
+															}}
+															onMouseEnter={(e) => {
+																e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+																	theme.links?.colors?.hover?.light,
+																	'light',
+																	props.theme.basics?.colors
+																)},1)`;
+																e.currentTarget.style.textDecoration = theme.links?.preferences?.hover?.underline
+																	? 'underline'
+																	: 'none';
+																e.currentTarget.style.fontWeight = theme.links?.preferences?.hover?.bold
+																	? 'bold'
+																	: 'normal';
+																e.currentTarget.style.fontStyle = theme.links?.preferences?.hover?.cursive
+																	? 'italic'
+																	: 'normal';
+															}}
+															onMouseLeave={(e) => {
+																e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+																	theme.links?.colors?.default?.light,
+																	'light',
+																	props.theme.basics?.colors
+																)},1)`;
+																e.currentTarget.style.textDecoration = theme.links?.preferences?.default?.underline
+																	? 'underline'
+																	: 'none';
+																e.currentTarget.style.fontWeight = theme.links?.preferences?.default?.bold
+																	? 'bold'
+																	: 'normal';
+																e.currentTarget.style.fontStyle = theme.links?.preferences?.default?.cursive
+																	? 'italic'
+																	: 'normal';
+															}}
+														>
+															Example Link
+														</button>
+													</S.ThemeValue>
+												</S.ThemeLight>
+												<S.ThemeDark colors={props.theme.basics?.colors}>
+													<S.ThemeValue>
+														<button
+															onClick={() => {
+																setLinksScheme('dark');
+																setShowLinksModal(true);
+															}}
+															disabled={unauthorized}
+															style={{
+																width: '125px',
+																height: '40px',
+																background: `rgba(${props.theme.basics?.colors?.background?.dark || '0,0,0'},1)`,
+																border: `1px solid rgba(${
+																	props.theme.basics?.colors?.border?.dark || '255,255,255'
+																},0.2)`,
+																borderRadius: '7.5px',
+																cursor: 'pointer',
+																display: 'flex',
+																alignItems: 'center',
+																justifyContent: 'center',
+																textDecoration: theme.links?.preferences?.default?.underline ? 'underline' : 'none',
+																fontWeight: theme.links?.preferences?.default?.bold ? 'bold' : 'normal',
+																fontStyle: theme.links?.preferences?.default?.cursive ? 'italic' : 'normal',
+																fontSize: '14px',
+																color: `rgba(${resolveColorForDisplay(
+																	theme.links?.colors?.default?.dark,
+																	'dark',
+																	props.theme.basics?.colors
+																)},1)`,
+																transition: 'all 0.2s ease',
+															}}
+															onMouseEnter={(e) => {
+																e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+																	theme.links?.colors?.hover?.dark,
+																	'dark',
+																	props.theme.basics?.colors
+																)},1)`;
+																e.currentTarget.style.textDecoration = theme.links?.preferences?.hover?.underline
+																	? 'underline'
+																	: 'none';
+																e.currentTarget.style.fontWeight = theme.links?.preferences?.hover?.bold
+																	? 'bold'
+																	: 'normal';
+																e.currentTarget.style.fontStyle = theme.links?.preferences?.hover?.cursive
+																	? 'italic'
+																	: 'normal';
+															}}
+															onMouseLeave={(e) => {
+																e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+																	theme.links?.colors?.default?.dark,
+																	'dark',
+																	props.theme.basics?.colors
+																)},1)`;
+																e.currentTarget.style.textDecoration = theme.links?.preferences?.default?.underline
+																	? 'underline'
+																	: 'none';
+																e.currentTarget.style.fontWeight = theme.links?.preferences?.default?.bold
+																	? 'bold'
+																	: 'normal';
+																e.currentTarget.style.fontStyle = theme.links?.preferences?.default?.cursive
+																	? 'italic'
+																	: 'normal';
+															}}
+														>
+															Example Link
+														</button>
+													</S.ThemeValue>
+												</S.ThemeDark>
+											</S.ThemeVariantsWrapper>
+											<S.ThemeResetButton
+												$hasChanges={JSON.stringify(originalTheme?.links) !== JSON.stringify(theme.links)}
+											>
+												<IconButton
+													type={'alt1'}
+													active={false}
+													src={ICONS.reset}
+													handlePress={() => {
+														const savedValue = originalTheme?.links;
+														if (!savedValue) return;
+														setTheme({ ...theme, links: savedValue });
+													}}
+													disabled={
+														unauthorized || JSON.stringify(originalTheme?.links) === JSON.stringify(theme.links)
+													}
+													dimensions={{ wrapper: 20, icon: 11 }}
+													tooltip={'Reset'}
+													tooltipPosition={'left'}
+													noFocus
+													className={
+														JSON.stringify(originalTheme?.links) !== JSON.stringify(theme.links) ? 'reset-active' : ''
+													}
+												/>
+											</S.ThemeResetButton>
+										</S.ThemeRow>
+									</S.ThemeRowWrapper>
+								)}
+							</React.Fragment>
+						);
+					})}
+					{validPreferences.map(([key, value]: any) => {
+						const isBoolean = typeof value.light === 'boolean';
+						const isNumeric = typeof value.light === 'number';
+						const originalValue = originalTheme?.[section]?.preferences?.[key.toLowerCase()];
+						const hasChanges = JSON.stringify(originalValue) !== JSON.stringify(value);
+
+						if (isNumeric) {
+							return (
+								<S.ThemeRowWrapper key={key}>
+									<S.ThemeRow>
+										<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
+										<S.ThemeVariantsWrapper>
+											<S.ThemeLight colors={props.theme.basics?.colors}>
+												<S.ThemeValue>
+													<S.RangeWrapper>
+														<input
+															type="range"
+															value={value.light}
+															onChange={(e) =>
+																handleThemeChange(section, 'preferences', 'light', key, parseFloat(e.target.value))
+															}
+															disabled={unauthorized}
+															min="0"
+															max="1"
+															step="0.01"
+														/>
+														<span>{value.light}</span>
+													</S.RangeWrapper>
+												</S.ThemeValue>
+											</S.ThemeLight>
+											<S.ThemeDark colors={props.theme.basics?.colors}>
+												<S.ThemeValue>
+													<S.RangeWrapper>
+														<input
+															type="range"
+															value={value.dark}
+															onChange={(e) =>
+																handleThemeChange(section, 'preferences', 'dark', key, parseFloat(e.target.value))
+															}
+															disabled={unauthorized}
+															min="0"
+															max="1"
+															step="0.01"
+														/>
+														<span>{value.dark}</span>
+													</S.RangeWrapper>
+												</S.ThemeValue>
+											</S.ThemeDark>
+										</S.ThemeVariantsWrapper>
+										<S.ThemeResetButton $hasChanges={hasChanges}>
+											<IconButton
+												type={'alt1'}
+												active={false}
+												src={ICONS.reset}
+												handlePress={() => handleReset(section, 'preferences', key)}
+												disabled={unauthorized || !hasChanges}
+												dimensions={{ wrapper: 20, icon: 11 }}
+												tooltip={'Reset'}
+												tooltipPosition={'left'}
+												noFocus
+												className={hasChanges ? 'reset-active' : ''}
+											/>
+										</S.ThemeResetButton>
+									</S.ThemeRow>
+								</S.ThemeRowWrapper>
+							);
+						}
+
+						if (isBoolean) {
+							return (
+								<S.ThemeRowWrapper key={key}>
+									<S.ThemeRow>
+										<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
+										<S.ThemeVariantsWrapper>
+											<S.ThemeLight colors={props.theme.basics?.colors}>
+												<S.ThemeValue>
+													<S.ToggleWrapper>
+														<input
+															type="checkbox"
+															checked={value.light}
+															onChange={(e) =>
+																handleThemeChange(section, 'preferences', 'light', key, e.target.checked)
+															}
+															disabled={unauthorized}
+														/>
+														<span>{value.light ? 'ON' : 'OFF'}</span>
+													</S.ToggleWrapper>
+												</S.ThemeValue>
+											</S.ThemeLight>
+											<S.ThemeDark colors={props.theme.basics?.colors}>
+												<S.ThemeValue>
+													<S.ToggleWrapper>
+														<input
+															type="checkbox"
+															checked={value.dark}
+															onChange={(e) => handleThemeChange(section, 'preferences', 'dark', key, e.target.checked)}
+															disabled={unauthorized}
+														/>
+														<span>{value.dark ? 'ON' : 'OFF'}</span>
+													</S.ToggleWrapper>
+												</S.ThemeValue>
+											</S.ThemeDark>
+										</S.ThemeVariantsWrapper>
+										<S.ThemeResetButton $hasChanges={hasChanges}>
+											<IconButton
+												type={'alt1'}
+												active={false}
+												src={ICONS.reset}
+												handlePress={() => handleReset(section, 'preferences', key)}
+												disabled={unauthorized || !hasChanges}
+												dimensions={{ wrapper: 20, icon: 11 }}
+												tooltip={'Reset'}
+												tooltipPosition={'left'}
+												noFocus
+												className={hasChanges ? 'reset-active' : ''}
+											/>
+										</S.ThemeResetButton>
+									</S.ThemeRow>
+								</S.ThemeRowWrapper>
+							);
+						}
+
 						return (
 							<S.ThemeRowWrapper key={key}>
 								<S.ThemeRow>
@@ -221,7 +985,7 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 													value={value.light}
 													basics={props.theme.basics?.colors}
 													scheme={'light'}
-													onChange={(newColor) => handleThemeChange('basics', 'colors', 'light', key, newColor)}
+													onChange={(newValue) => handleThemeChange(section, 'preferences', 'light', key, newValue)}
 													loading={loading}
 													disabled={unauthorized}
 													width={125}
@@ -236,7 +1000,7 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 													value={value.dark}
 													basics={props.theme.basics?.colors}
 													scheme={'dark'}
-													onChange={(newColor) => handleThemeChange('basics', 'colors', 'dark', key, newColor)}
+													onChange={(newValue) => handleThemeChange(section, 'preferences', 'dark', key, newValue)}
 													loading={loading}
 													disabled={unauthorized}
 													width={125}
@@ -244,11 +1008,383 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 											</S.ThemeValue>
 										</S.ThemeDark>
 									</S.ThemeVariantsWrapper>
+									<S.ThemeResetButton $hasChanges={hasChanges}>
+										<IconButton
+											type={'alt1'}
+											active={false}
+											src={ICONS.reset}
+											handlePress={() => handleReset(section, 'preferences', key)}
+											disabled={unauthorized || !hasChanges}
+											dimensions={{ wrapper: 20, icon: 11 }}
+											tooltip={'Reset'}
+											tooltipPosition={'left'}
+											noFocus
+											className={hasChanges ? 'reset-active' : ''}
+										/>
+									</S.ThemeResetButton>
 								</S.ThemeRow>
 							</S.ThemeRowWrapper>
 						);
 					})}
 				</S.ThemeSectionColumn>
+			)}
+			{showLinksModal && (
+				<Modal header={'Links'} handleClose={() => setShowLinksModal(false)}>
+					<S.ModalWrapper>
+						<S.ModalBodyWrapper>
+							<div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+								<div>
+									<S.ThemeSectionLabel style={{ marginBottom: '15px' }}>Default</S.ThemeSectionLabel>
+									<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+										<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+											<S.ThemeKey>Color</S.ThemeKey>
+											<Color
+												label={'color'}
+												value={theme.links?.colors?.default?.[linksScheme] || 'text'}
+												basics={props.theme.basics?.colors}
+												scheme={linksScheme}
+												onChange={(newValue) => {
+													const updatedTheme = {
+														...theme,
+														links: {
+															colors: {
+																...theme.links?.colors,
+																default: {
+																	...theme.links?.colors?.default,
+																	[linksScheme]: newValue,
+																},
+																hover: theme.links?.colors?.hover || { light: 'text', dark: 'text' },
+															},
+															preferences: theme.links?.preferences || {
+																default: { underline: true, cursive: false, bold: false },
+																hover: { underline: true, cursive: false, bold: false },
+															},
+														},
+													};
+													setTheme(updatedTheme);
+												}}
+												loading={loading}
+												disabled={unauthorized}
+												width={125}
+											/>
+										</div>
+										<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+											<S.ThemeKey>Style</S.ThemeKey>
+											<div style={{ display: 'flex', gap: '10px' }}>
+												<IconButton
+													type={'alt1'}
+													active={theme.links?.preferences?.default?.bold || false}
+													src={ICONS.bold}
+													handlePress={() => {
+														const updatedTheme = {
+															...theme,
+															links: {
+																colors: theme.links?.colors || {
+																	default: { light: 'text', dark: 'text' },
+																	hover: { light: 'text', dark: 'text' },
+																},
+																preferences: {
+																	...theme.links?.preferences,
+																	default: {
+																		...theme.links?.preferences?.default,
+																		bold: !theme.links?.preferences?.default?.bold,
+																	},
+																	hover: theme.links?.preferences?.hover || {
+																		underline: true,
+																		cursive: false,
+																		bold: false,
+																	},
+																},
+															},
+														};
+														setTheme(updatedTheme);
+													}}
+													disabled={unauthorized}
+													dimensions={{ wrapper: 32, icon: 16 }}
+												/>
+												<IconButton
+													type={'alt1'}
+													active={theme.links?.preferences?.default?.cursive || false}
+													src={ICONS.italic}
+													handlePress={() => {
+														const updatedTheme = {
+															...theme,
+															links: {
+																colors: theme.links?.colors || {
+																	default: { light: 'text', dark: 'text' },
+																	hover: { light: 'text', dark: 'text' },
+																},
+																preferences: {
+																	...theme.links?.preferences,
+																	default: {
+																		...theme.links?.preferences?.default,
+																		cursive: !theme.links?.preferences?.default?.cursive,
+																	},
+																	hover: theme.links?.preferences?.hover || {
+																		underline: true,
+																		cursive: false,
+																		bold: false,
+																	},
+																},
+															},
+														};
+														setTheme(updatedTheme);
+													}}
+													disabled={unauthorized}
+													dimensions={{ wrapper: 32, icon: 16 }}
+												/>
+												<IconButton
+													type={'alt1'}
+													active={theme.links?.preferences?.default?.underline || false}
+													src={ICONS.underline}
+													handlePress={() => {
+														const updatedTheme = {
+															...theme,
+															links: {
+																colors: theme.links?.colors || {
+																	default: { light: 'text', dark: 'text' },
+																	hover: { light: 'text', dark: 'text' },
+																},
+																preferences: {
+																	...theme.links?.preferences,
+																	default: {
+																		...theme.links?.preferences?.default,
+																		underline: !theme.links?.preferences?.default?.underline,
+																	},
+																	hover: theme.links?.preferences?.hover || {
+																		underline: true,
+																		cursive: false,
+																		bold: false,
+																	},
+																},
+															},
+														};
+														setTheme(updatedTheme);
+													}}
+													disabled={unauthorized}
+													dimensions={{ wrapper: 32, icon: 16 }}
+												/>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div>
+									<S.ThemeSectionLabel style={{ marginBottom: '15px' }}>Hover</S.ThemeSectionLabel>
+									<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+										<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+											<S.ThemeKey>Color</S.ThemeKey>
+											<Color
+												label={'color'}
+												value={theme.links?.colors?.hover?.[linksScheme] || 'text'}
+												basics={props.theme.basics?.colors}
+												scheme={linksScheme}
+												onChange={(newValue) => {
+													const updatedTheme = {
+														...theme,
+														links: {
+															colors: {
+																...theme.links?.colors,
+																default: theme.links?.colors?.default || { light: 'text', dark: 'text' },
+																hover: {
+																	...theme.links?.colors?.hover,
+																	[linksScheme]: newValue,
+																},
+															},
+															preferences: theme.links?.preferences || {
+																default: { underline: true, cursive: false, bold: false },
+																hover: { underline: true, cursive: false, bold: false },
+															},
+														},
+													};
+													setTheme(updatedTheme);
+												}}
+												loading={loading}
+												disabled={unauthorized}
+												width={125}
+											/>
+										</div>
+										<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+											<S.ThemeKey>Style</S.ThemeKey>
+											<div style={{ display: 'flex', gap: '10px' }}>
+												<IconButton
+													type={'alt1'}
+													active={theme.links?.preferences?.hover?.bold || false}
+													src={ICONS.bold}
+													handlePress={() => {
+														const updatedTheme = {
+															...theme,
+															links: {
+																colors: theme.links?.colors || {
+																	default: { light: 'text', dark: 'text' },
+																	hover: { light: 'text', dark: 'text' },
+																},
+																preferences: {
+																	...theme.links?.preferences,
+																	default: theme.links?.preferences?.default || {
+																		underline: true,
+																		cursive: false,
+																		bold: false,
+																	},
+																	hover: {
+																		...theme.links?.preferences?.hover,
+																		bold: !theme.links?.preferences?.hover?.bold,
+																	},
+																},
+															},
+														};
+														setTheme(updatedTheme);
+													}}
+													disabled={unauthorized}
+													dimensions={{ wrapper: 32, icon: 16 }}
+												/>
+												<IconButton
+													type={'alt1'}
+													active={theme.links?.preferences?.hover?.cursive || false}
+													src={ICONS.italic}
+													handlePress={() => {
+														const updatedTheme = {
+															...theme,
+															links: {
+																colors: theme.links?.colors || {
+																	default: { light: 'text', dark: 'text' },
+																	hover: { light: 'text', dark: 'text' },
+																},
+																preferences: {
+																	...theme.links?.preferences,
+																	default: theme.links?.preferences?.default || {
+																		underline: true,
+																		cursive: false,
+																		bold: false,
+																	},
+																	hover: {
+																		...theme.links?.preferences?.hover,
+																		cursive: !theme.links?.preferences?.hover?.cursive,
+																	},
+																},
+															},
+														};
+														setTheme(updatedTheme);
+													}}
+													disabled={unauthorized}
+													dimensions={{ wrapper: 32, icon: 16 }}
+												/>
+												<IconButton
+													type={'alt1'}
+													active={theme.links?.preferences?.hover?.underline || false}
+													src={ICONS.underline}
+													handlePress={() => {
+														const updatedTheme = {
+															...theme,
+															links: {
+																colors: theme.links?.colors || {
+																	default: { light: 'text', dark: 'text' },
+																	hover: { light: 'text', dark: 'text' },
+																},
+																preferences: {
+																	...theme.links?.preferences,
+																	default: theme.links?.preferences?.default || {
+																		underline: true,
+																		cursive: false,
+																		bold: false,
+																	},
+																	hover: {
+																		...theme.links?.preferences?.hover,
+																		underline: !theme.links?.preferences?.hover?.underline,
+																	},
+																},
+															},
+														};
+														setTheme(updatedTheme);
+													}}
+													disabled={unauthorized}
+													dimensions={{ wrapper: 32, icon: 16 }}
+												/>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div
+								style={{
+									width: '100%',
+									padding: '30px',
+									background: `rgba(${
+										props.theme.basics?.colors?.background?.[linksScheme] ||
+										(linksScheme === 'light' ? '255,255,255' : '0,0,0')
+									},1)`,
+									border: `1px solid rgba(${
+										props.theme.basics?.colors?.border?.[linksScheme] ||
+										(linksScheme === 'light' ? '0,0,0' : '255,255,255')
+									},0.2)`,
+									borderRadius: '7.5px',
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									marginTop: '30px',
+								}}
+							>
+								<a
+									href="#"
+									onClick={(e) => e.preventDefault()}
+									style={{
+										color: `rgba(${resolveColorForDisplay(
+											theme.links?.colors?.default?.[linksScheme],
+											linksScheme,
+											props.theme.basics?.colors
+										)},1)`,
+										textDecoration: theme.links?.preferences?.default?.underline ? 'underline' : 'none',
+										fontWeight: theme.links?.preferences?.default?.bold ? 'bold' : 'normal',
+										fontStyle: theme.links?.preferences?.default?.cursive ? 'italic' : 'normal',
+										fontSize: '16px',
+										transition: 'all 0.2s ease',
+									}}
+									onMouseEnter={(e) => {
+										e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+											theme.links?.colors?.hover?.[linksScheme],
+											linksScheme,
+											props.theme.basics?.colors
+										)},1)`;
+										e.currentTarget.style.textDecoration = theme.links?.preferences?.hover?.underline
+											? 'underline'
+											: 'none';
+										e.currentTarget.style.fontWeight = theme.links?.preferences?.hover?.bold ? 'bold' : 'normal';
+										e.currentTarget.style.fontStyle = theme.links?.preferences?.hover?.cursive ? 'italic' : 'normal';
+									}}
+									onMouseLeave={(e) => {
+										e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+											theme.links?.colors?.default?.[linksScheme],
+											linksScheme,
+											props.theme.basics?.colors
+										)},1)`;
+										e.currentTarget.style.textDecoration = theme.links?.preferences?.default?.underline
+											? 'underline'
+											: 'none';
+										e.currentTarget.style.fontWeight = theme.links?.preferences?.default?.bold ? 'bold' : 'normal';
+										e.currentTarget.style.fontStyle = theme.links?.preferences?.default?.cursive ? 'italic' : 'normal';
+									}}
+								>
+									Example Link
+								</a>
+							</div>
+						</S.ModalBodyWrapper>
+						<S.ModalActionsWrapper>
+							<Button
+								type={'primary'}
+								label={language?.close}
+								handlePress={() => setShowLinksModal(false)}
+								disabled={loading}
+							/>
+							<Button
+								type={'alt1'}
+								label={language?.save}
+								handlePress={() => {
+									setShowLinksModal(false);
+								}}
+								disabled={loading}
+							/>
+						</S.ModalActionsWrapper>
+					</S.ModalWrapper>
+				</Modal>
 			)}
 		</S.ThemeSectionColumnWrapper>
 	);
@@ -317,6 +1453,7 @@ function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpd
 				<ThemeSection
 					theme={theme}
 					setTheme={setTheme}
+					originalTheme={originalTheme}
 					section={'basics'}
 					loading={props.loading}
 					onNameChange={setPendingNameChange}
@@ -324,6 +1461,7 @@ function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpd
 				<ThemeSection
 					theme={theme}
 					setTheme={setTheme}
+					originalTheme={originalTheme}
 					section={'header'}
 					loading={props.loading}
 					onNameChange={setPendingNameChange}
@@ -331,6 +1469,23 @@ function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpd
 				<ThemeSection
 					theme={theme}
 					setTheme={setTheme}
+					originalTheme={originalTheme}
+					section={'navigation'}
+					loading={props.loading}
+					onNameChange={setPendingNameChange}
+				/>
+				<ThemeSection
+					theme={theme}
+					setTheme={setTheme}
+					originalTheme={originalTheme}
+					section={'post'}
+					loading={props.loading}
+					onNameChange={setPendingNameChange}
+				/>
+				<ThemeSection
+					theme={theme}
+					setTheme={setTheme}
+					originalTheme={originalTheme}
 					section={'footer'}
 					loading={props.loading}
 					onNameChange={setPendingNameChange}
@@ -338,6 +1493,7 @@ function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpd
 				<ThemeSection
 					theme={theme}
 					setTheme={setTheme}
+					originalTheme={originalTheme}
 					section={'card'}
 					loading={props.loading}
 					onNameChange={setPendingNameChange}
