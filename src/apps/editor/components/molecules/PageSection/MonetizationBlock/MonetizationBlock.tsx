@@ -42,13 +42,11 @@ export default function MonetizationBlock(props: {
 		const raw = (props.block.data as MonetizationButtonBlockData) ?? {};
 		return {
 			label: raw.label ?? '',
-			amount: raw.amount ?? '',
 			variant: raw.variant ?? 'primary',
 		};
 	}, [props.block.data]);
 
 	const label = data.label || language?.defaultMonetizationLabel || 'Support this portal';
-	const amount = data.amount || '';
 	const variant = data.variant || 'primary';
 
 	// Keep block.content in sync with data + global monetization state
@@ -123,15 +121,11 @@ export default function MonetizationBlock(props: {
 		);
 	}
 
-	function handleAmountChange(event: React.ChangeEvent<HTMLInputElement>) {
-		const next = { ...data, amount: event.target.value };
-		props.onChangeBlock(
-			{
-				...props.block,
-				data: next,
-			},
-			props.index
-		);
+	function handleLabelChange(event: React.ChangeEvent<HTMLInputElement>) {
+		updateData({
+			...data,
+			label: event.target.value,
+		});
 	}
 
 	function handleVariantChange(nextId: string) {
