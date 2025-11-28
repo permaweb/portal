@@ -140,3 +140,64 @@ export const InfoWrapper = styled.div`
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 	}
 `;
+
+export const MonetizationBodyWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 12px 0;
+
+	.monetization-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+
+		.field-label {
+			font-size: 0.9rem;
+			color: ${(p) => p.theme.colors.font.alt2};
+		}
+	}
+
+	.monetization-subsection {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin-top: 8px;
+
+		.monetization-subheader {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			span {
+				font-weight: ${(p) => p.theme.typography.weight.medium};
+			}
+		}
+	}
+
+	.monetization-button-row {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+		gap: 8px;
+		align-items: flex-end;
+	}
+
+	.monetization-toggle-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+
+		label {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			font-size: 0.9rem;
+		}
+	}
+
+	.monetization-actions {
+		margin-top: 12px;
+		display: flex;
+		justify-content: flex-end;
+	}
+`;

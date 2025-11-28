@@ -94,7 +94,9 @@ export default function ArticleBlocks(props: {
 			},
 			{
 				label: language.custom,
-				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.HTML]].filter(Boolean),
+				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.HTML], ARTICLE_BLOCKS[ArticleBlockEnum.MonetizationButton]].filter(
+					Boolean
+				),
 			},
 		],
 		[language.text, language.headers, language.media, language.design]

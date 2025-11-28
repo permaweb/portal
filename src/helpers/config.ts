@@ -14,6 +14,7 @@ export const LAYOUT = {
 };
 
 import { ICONS, ICONS_SOCIAL } from './config/icons';
+import { PortalMonetization } from 'editor/components/organisms/PortalMonetization';
 export { ICONS, ICONS_SOCIAL };
 
 export const AO_NODE = {
@@ -125,6 +126,7 @@ function createURLs() {
 		postEditArticle: (portalId: string) => `${postEditBase(portalId)}article/`,
 		postEditImage: (portalId: string) => `${postEditBase(portalId)}image/`,
 		postEditVideo: (portalId: string) => `${postEditBase(portalId)}video/`,
+		portalMonetization: (portalId: string) => `${portalBase(portalId)}monetization/`,
 		docs: docsBase,
 		docsIntro: `${docsBase}overview/introduction`,
 		docsEditor: `${docsBase}posts/editor`,
@@ -159,6 +161,11 @@ export const PAGE_BLOCKS = {
 		type: PageBlockEnum.Sidebar,
 		label: 'Sidebar',
 		icon: ICONS.sidebar,
+	},
+	[PageBlockEnum.MonetizationButton]: {
+		type: PageBlockEnum.MonetizationButton,
+		label: 'Monetization Button',
+		icon: ICONS.tools,
 	},
 };
 
@@ -271,6 +278,11 @@ export const ARTICLE_BLOCKS = {
 		label: 'Table',
 		icon: ICONS.menu,
 	},
+	[ArticleBlockEnum.MonetizationButton]: {
+		type: ArticleBlockEnum.MonetizationButton,
+		label: 'Monetization Button',
+		icon: ICONS.tools,
+	},
 };
 
 export const STRIPE_PUBLISHABLE_KEY =
@@ -337,6 +349,7 @@ export const PORTAL_PATCH_MAP = {
 	[PortalPatchMapEnum.Posts]: ['Store.Index'],
 	[PortalPatchMapEnum.Requests]: ['Store.IndexRequests'],
 	[PortalPatchMapEnum.Transfers]: ['Transfers'],
+	[PortalPatchMapEnum.Monetization]: ['Store.Monetization'],
 };
 
 export const PORTAL_ROLES = {

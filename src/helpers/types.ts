@@ -30,6 +30,7 @@ export type PortalDetailType = {
 	fonts?: PortalFontsType;
 	themes?: PortalThemeType[];
 	layout?: any;
+	monetization?: any;
 };
 
 export type PortalAssetType = {
@@ -173,6 +174,7 @@ export enum PortalPatchMapEnum {
 	Posts = 'posts',
 	Requests = 'requests',
 	Transfers = 'transfers',
+	Monetization = 'monetization',
 }
 
 export enum ArticleBlockEnum {
@@ -195,6 +197,7 @@ export enum ArticleBlockEnum {
 	SpacerVertical = 'spacer-vertical',
 	HTML = 'html',
 	Table = 'table',
+	MonetizationButton = 'monetizationButton',
 }
 
 export type ArticleBlockType = {
@@ -230,6 +233,7 @@ export enum PageBlockEnum {
 	PostSpotlight = 'postSpotlight',
 	CategorySpotlight = 'categorySpotlight',
 	Sidebar = 'sidebar',
+	MonetizationButton = 'monetizationButton',
 }
 
 export type PageSectionType = {

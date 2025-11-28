@@ -23,6 +23,7 @@ import { ArticleBlocks } from '../ArticleBlocks';
 import { DividerBlock } from './CustomBlocks/DividerBlock';
 import { HTMLBlock } from './CustomBlocks/HTMLBlock';
 import { MediaBlock } from './CustomBlocks/MediaBlock';
+import { PostMonetizationBlock } from './CustomBlocks/MonetizationBlock';
 import { SpacerBlock } from './CustomBlocks/SpacerBlock';
 import { TableBlock } from './CustomBlocks/TableBlock';
 import * as S from './styles';
@@ -811,6 +812,10 @@ export default function ArticleBlock(props: {
 					onChange={(newContent: any) => props.onChangeBlock({ id: props.block.id, content: newContent })}
 				/>
 			);
+			break;
+		case 'monetizationButton':
+			useCustom = true;
+			element = <PostMonetizationBlock index={props.index} block={props.block} onChangeBlock={props.onChangeBlock} />;
 			break;
 		default:
 			element = 'p';

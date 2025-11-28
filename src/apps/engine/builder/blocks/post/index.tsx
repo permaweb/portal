@@ -216,6 +216,7 @@ export default function Post(props: any) {
 						post={post}
 						profile={profile}
 						content={content}
+						isPreview={false}
 					/>
 				</div>
 			</S.Post>
