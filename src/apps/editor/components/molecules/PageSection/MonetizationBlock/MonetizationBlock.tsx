@@ -12,7 +12,6 @@ import * as S from './styles';
 
 type MonetizationButtonBlockData = {
 	label?: string;
-	amount?: string; // store as string, parse in engine if needed
 	variant?: 'primary' | 'alt1' | 'alt2';
 };
 
@@ -37,13 +36,11 @@ export default function MonetizationBlock(props: {
 		const raw = (props.block?.data as MonetizationButtonBlockData) ?? {};
 		return {
 			label: raw.label ?? '',
-			amount: raw.amount ?? '',
 			variant: raw.variant ?? 'primary',
 		};
 	}, [props.block?.data]);
 
 	const label = data.label || language?.defaultMonetizationLabel || 'Support this portal';
-	const amount = data.amount || '';
 	const variant = data.variant || 'primary';
 
 	function updateData(next: MonetizationButtonBlockData) {
@@ -63,13 +60,6 @@ export default function MonetizationBlock(props: {
 		updateData({
 			...data,
 			label: event.target.value,
-		});
-	}
-
-	function handleAmountChange(event: React.ChangeEvent<HTMLInputElement>) {
-		updateData({
-			...data,
-			amount: event.target.value,
 		});
 	}
 
@@ -134,17 +124,6 @@ export default function MonetizationBlock(props: {
 				</S.Row>
 
 				<S.Row>
-					<S.FieldColumn>
-						<FormField
-							label={language?.amountInAr ?? 'Amount in AR (optional)'}
-							value={data.amount ?? ''}
-							onChange={handleAmountChange}
-							invalid={{ status: false, message: null }}
-							disabled={false}
-							hideErrorMessage
-							sm
-						/>
-					</S.FieldColumn>
 					<S.FieldColumn>
 						<S.LabelRow>
 							<span>{language?.buttonStyle ?? 'Button style'}</span>

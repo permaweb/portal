@@ -287,71 +287,6 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 		}
 	}
 
-	function monetizationSection() {
-		const canEdit = !!portalProvider.permissions?.updatePortalMeta;
-		const fieldsDisabled = !monetization.enabled || !canEdit;
-
-		return (
-			<S.Section type={props.type} className={'border-wrapper-alt2'}>
-				<S.SectionHeader>
-					<p>{language?.monetization ?? 'Monetization'}</p>
-				</S.SectionHeader>
-
-				<S.MonetizationBodyWrapper>
-					<div className="monetization-row">
-						<span className="field-label">{language?.enableMonetization ?? 'Enable AR monetization'}</span>
-						<Button
-							type={monetization.enabled ? 'primary' : 'alt1'}
-							label={monetization.enabled ? language?.on ?? 'On' : language?.off ?? 'Off'}
-							handlePress={() =>
-								canEdit &&
-								setMonetization((prev) => ({
-									...prev,
-									enabled: !prev.enabled,
-								}))
-							}
-							disabled={!canEdit}
-						/>
-					</div>
-
-					<FormField
-						label={language?.walletAddress ?? 'Wallet address'}
-						value={monetization.walletAddress}
-						onChange={(e: any) =>
-							setMonetization((prev) => ({
-								...prev,
-								walletAddress: e.target.value,
-							}))
-						}
-						invalid={{ status: false, message: null }}
-						disabled={fieldsDisabled}
-						hideErrorMessage
-					/>
-
-					<FormField
-						label={language?.tokenAddress ?? 'Token'}
-						value={monetization.tokenAddress}
-						onChange={() => {}}
-						invalid={{ status: false, message: null }}
-						disabled={true} // fixed to AR for v1
-						hideErrorMessage
-					/>
-
-					<div className="monetization-actions">
-						<Button
-							type={'primary'}
-							label={savingMonetization ? language?.saving ?? 'Saving...' : language?.save ?? 'Save'}
-							handlePress={handleSaveMonetization}
-							disabled={
-								savingMonetization || !portalProvider.permissions?.updatePortalMeta || !portalProvider.current?.id
-							}
-						/>
-					</div>
-				</S.MonetizationBodyWrapper>
-			</S.Section>
-		);
-	}
-
 	return (
 		<>
 			<S.Wrapper type={props.type}>
@@ -363,7 +298,6 @@ export default function PortalSetup(props: { type: ViewLayoutType }) {
 				<S.SectionWrapper type={props.type}>
 					{props.type === 'header' ? topicSection() : categorySection()}
 					{props.type === 'detail' && mediaSection()}
-					{props.type === 'detail' && monetizationSection()}
 					{props.type === 'detail' && !portalProvider?.permissions?.updateUsers && (
 						<S.InfoWrapper className={'warning'}>
 							<span>{language?.unauthorizedPortalUpdate}</span>

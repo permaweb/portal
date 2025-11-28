@@ -142,6 +142,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				icon: ICONS.domains,
 				label: language?.domains,
 			},
+			{
+				path: currentId ? URLS.portalMonetization(currentId) : URLS.base,
+				icon: ICONS.setup,
+				label: 'Monetization',
+			},
 		];
 	}, [languageProvider?.current]);
 

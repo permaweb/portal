@@ -14,12 +14,13 @@ export const LAYOUT = {
 };
 
 import { ICONS, ICONS_SOCIAL } from './config/icons';
+import { PortalMonetization } from 'editor/components/organisms/PortalMonetization';
 export { ICONS, ICONS_SOCIAL };
 
 export const AO_NODE = {
 	url: 'https://hb.portalinto.com',
 	authority: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
-	scheduler: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
+	scheduler: 'n_XZJhUnmldNFo4dhajoPZWhBXuJk-OcQr5JQ49c4Zo',
 };
 
 export const IS_TESTNET = import.meta.env.VITE_ARIO_TESTNET === 'true';
@@ -125,6 +126,7 @@ function createURLs() {
 		postEditArticle: (portalId: string) => `${postEditBase(portalId)}article/`,
 		postEditImage: (portalId: string) => `${postEditBase(portalId)}image/`,
 		postEditVideo: (portalId: string) => `${postEditBase(portalId)}video/`,
+		portalMonetization: (portalId: string) => `${portalBase(portalId)}monetization/`,
 		docs: docsBase,
 		docsIntro: `${docsBase}overview/introduction`,
 		docsEditor: `${docsBase}posts/editor`,

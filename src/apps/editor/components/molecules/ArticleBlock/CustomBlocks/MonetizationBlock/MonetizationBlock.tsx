@@ -12,7 +12,6 @@ import * as S from './styles';
 
 type MonetizationButtonBlockData = {
 	label?: string;
-	amount?: string;
 	variant?: 'primary' | 'alt1' | 'alt2';
 };
 
@@ -37,13 +36,11 @@ export default function PostMonetizationBlock(props: {
 		const raw = (props.block.data as MonetizationButtonBlockData) ?? {};
 		return {
 			label: raw.label ?? '',
-			amount: raw.amount ?? '',
 			variant: raw.variant ?? 'primary',
 		};
 	}, [props.block.data]);
 
 	const label = data.label || language?.defaultMonetizationLabel || 'Support this post';
-	const amount = data.amount || '';
 	const variant = data.variant || 'primary';
 
 	function updateData(next: MonetizationButtonBlockData) {
@@ -59,10 +56,6 @@ export default function PostMonetizationBlock(props: {
 
 	function handleLabelChange(e: React.ChangeEvent<HTMLInputElement>) {
 		updateData({ ...data, label: e.target.value });
-	}
-
-	function handleAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
-		updateData({ ...data, amount: e.target.value });
 	}
 
 	function handleVariantSelect(nextId: string) {
@@ -121,18 +114,6 @@ export default function PostMonetizationBlock(props: {
 				</S.Row>
 
 				<S.Row>
-					<S.FieldColumn>
-						<FormField
-							label={language?.amountInAr ?? 'Amount (AR, optional)'}
-							value={data.amount ?? ''}
-							onChange={handleAmountChange}
-							invalid={{ status: false, message: null }}
-							hideErrorMessage
-							disabled={false}
-							sm
-						/>
-					</S.FieldColumn>
-
 					<S.FieldColumn>
 						<S.LabelRow>
 							<span>{language?.buttonStyle ?? 'Button style'}</span>
