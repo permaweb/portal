@@ -144,7 +144,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 			},
 			{
 				path: currentId ? URLS.portalMonetization(currentId) : URLS.base,
-				icon: ICONS.setup,
+				icon: ICONS.money,
 				label: 'Monetization',
 			},
 		];

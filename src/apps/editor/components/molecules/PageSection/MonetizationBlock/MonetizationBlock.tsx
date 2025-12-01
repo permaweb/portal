@@ -150,7 +150,7 @@ export default function MonetizationBlock(props: {
 				<S.InfoMessage className={'warning'}>
 					<span>
 						{language?.monetizationDisabledMessage ??
-							'Monetization is disabled in portal settings. Enable it in the Setup tab to use this block.'}
+							'Monetization is disabled in portal settings. Enable it through Monetization tab to use this block.'}
 					</span>
 				</S.InfoMessage>
 			</S.Wrapper>
@@ -166,7 +166,7 @@ export default function MonetizationBlock(props: {
 				<S.InfoMessage className={'warning'}>
 					<span>
 						{language?.monetizationNoWalletMessage ??
-							'No payout wallet is configured. Add a wallet address in Setup → Monetization to use this block.'}
+							'No payout wallet is configured, so monetization cannot be used. Please set up a wallet in the Monetization tab to use this block.'}
 					</span>
 				</S.InfoMessage>
 			</S.Wrapper>

@@ -2,6 +2,7 @@ import React from 'react';
 
 import Arweave from 'arweave';
 
+import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
@@ -276,19 +277,22 @@ export default function Monetization() {
 
 	return (
 		<S.Wrapper>
-			<S.HeaderRow>
-				{hasMonetization && (
-					<S.Summary>
-						<span>{language?.totalReceived ?? 'Total received:'}</span>
-						<strong>{totalReceivedAr} AR</strong>
-					</S.Summary>
-				)}
-			</S.HeaderRow>
-
-			{/* Monetization config */}
+			<ViewHeader
+				header={language?.monetization ?? 'Monetization'}
+				actions={[
+					<>
+						{hasMonetization && (
+							<S.Summary>
+								<span>{language?.totalReceived ?? 'Total received:'}</span>
+								<strong>{totalReceivedAr} AR</strong>
+							</S.Summary>
+						)}
+					</>,
+				]}
+			/>
 			<S.Section>
 				<S.SectionHeader>
-					<span>{language?.monetizationConfig ?? 'Monetization config'}</span>
+					<span>Configuration</span>
 				</S.SectionHeader>
 
 				<S.ConfigForm>
