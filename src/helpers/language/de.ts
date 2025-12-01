@@ -459,6 +459,7 @@ export const de = {
 	themesUpdated: `Themes aktualisiert`,
 	thumbnailUpdated: `Thumbnail aktualisiert`,
 	time: `Zeit`,
+	tips: `Tipps`,
 	toolkit: `Toolkit`,
 	top: `Oben`,
 	topicAdded: `Tag hinzugefügt`,

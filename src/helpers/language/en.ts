@@ -456,6 +456,7 @@ export const en = {
 	themesUpdated: `Themes Updated`,
 	thumbnailUpdated: `Thumbnail Updated`,
 	time: `Time`,
+	tips: `Tips`,
 	toolkit: `Toolkit`,
 	top: `Top`,
 	topicAdded: `Tag Added`,

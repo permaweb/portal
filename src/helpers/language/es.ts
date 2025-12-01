@@ -460,6 +460,7 @@ export const es = {
 	themesUpdated: `Tema actualizado`,
 	thumbnailUpdated: `Miniatura actualizada`,
 	time: `Tiempo`,
+	tips: `Consejos`,
 	toolkit: `Kit de herramientas`,
 	top: `Superior`,
 	topicAdded: `Tema agregado`,
