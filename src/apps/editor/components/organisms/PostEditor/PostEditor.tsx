@@ -374,7 +374,6 @@ export default function PostEditor() {
 					addNotification(e.message ?? language?.errorUpdatingPost, 'warning');
 				}
 			} else {
-				console.log('going here');
 				try {
 					const assetDataFetch = await fetch(getTxEndpoint(ASSET_UPLOAD.src.data));
 					const dataSrc = await assetDataFetch.text();

@@ -143,7 +143,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				label: language?.domains,
 			},
 			{
-				path: currentId ? URLS.portalMonetization(currentId) : URLS.base,
+				path: currentId ? URLS.portalTips(currentId) : URLS.base,
 				icon: ICONS.money,
 				label: language?.tips,
 			},
