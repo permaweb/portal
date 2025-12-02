@@ -164,7 +164,6 @@ export default function ArticleEditor(props: {
 				// Clear the post if we're creating a new post (assetId is undefined)
 				// but have content from an existing post (currentPost.data.id exists)
 				// This handles the case where user navigates from editing an existing post to creating new
-				console.log('Clearing current post for new post creation');
 				if (currentPost.data.id) dispatch(currentPostClear());
 			}
 			previousAssetIdRef.current = assetId;

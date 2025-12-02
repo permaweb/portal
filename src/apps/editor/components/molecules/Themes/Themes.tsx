@@ -9,8 +9,9 @@ import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
-import { ICONS, THEME } from 'helpers/config';
-import { PortalPatchMapEnum, PortalSchemeType, PortalThemeType } from 'helpers/types';
+import { Toggle } from 'components/atoms/Toggle';
+import { ICONS } from 'helpers/config';
+import { PortalPatchMapEnum, PortalThemeType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -305,15 +306,12 @@ function Color(props: {
 					<S.SelectorWrapper>
 						<S.ShadowToggleRow>
 							<label>Shadow</label>
-							<S.ToggleWrapper>
-								<input
-									type="checkbox"
-									checked={shadowEnabled}
-									onChange={(e) => setShadowEnabled(e.target.checked)}
-									disabled={props.disabled}
-								/>
-								<span>{shadowEnabled ? 'ON' : 'OFF'}</span>
-							</S.ToggleWrapper>
+							<Toggle
+								options={['OFF', 'ON']}
+								activeOption={shadowEnabled ? 'ON' : 'OFF'}
+								handleToggle={(option) => setShadowEnabled(option === 'ON')}
+								disabled={props.disabled}
+							/>
 						</S.ShadowToggleRow>
 						<S.ShadowEditorGrid>
 							<S.ShadowEditorRow $disabled={!shadowEnabled}>
@@ -530,7 +528,7 @@ function resolveColorForDisplay(colorValue: string | undefined, scheme: 'light' 
 
 const ThemeSection = React.memo(function ThemeSection(props: any) {
 	const portalProvider = usePortalProvider();
-	const { theme, setTheme, name, setName, section, loading, originalTheme } = props;
+	const { theme, setTheme, section, loading, originalTheme } = props;
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
@@ -581,7 +579,6 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 		};
 
 		setTheme(updatedTheme);
-		// if (props.published) props.onThemeChange(updatedTheme, false);
 	}
 
 	function handleReset(section: string, type: string, key: string) {
@@ -926,30 +923,26 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 										<S.ThemeVariantsWrapper>
 											<S.ThemeLight colors={props.theme.basics?.colors}>
 												<S.ThemeValue>
-													<S.ToggleWrapper>
-														<input
-															type="checkbox"
-															checked={value.light}
-															onChange={(e) =>
-																handleThemeChange(section, 'preferences', 'light', key, e.target.checked)
-															}
-															disabled={unauthorized}
-														/>
-														<span>{value.light ? 'ON' : 'OFF'}</span>
-													</S.ToggleWrapper>
+													<Toggle
+														options={['OFF', 'ON']}
+														activeOption={value.light ? 'ON' : 'OFF'}
+														handleToggle={(option) =>
+															handleThemeChange(section, 'preferences', 'light', key, option === 'ON')
+														}
+														disabled={unauthorized}
+													/>
 												</S.ThemeValue>
 											</S.ThemeLight>
 											<S.ThemeDark colors={props.theme.basics?.colors}>
 												<S.ThemeValue>
-													<S.ToggleWrapper>
-														<input
-															type="checkbox"
-															checked={value.dark}
-															onChange={(e) => handleThemeChange(section, 'preferences', 'dark', key, e.target.checked)}
-															disabled={unauthorized}
-														/>
-														<span>{value.dark ? 'ON' : 'OFF'}</span>
-													</S.ToggleWrapper>
+													<Toggle
+														options={['OFF', 'ON']}
+														activeOption={value.dark ? 'ON' : 'OFF'}
+														handleToggle={(option) =>
+															handleThemeChange(section, 'preferences', 'dark', key, option === 'ON')
+														}
+														disabled={unauthorized}
+													/>
 												</S.ThemeValue>
 											</S.ThemeDark>
 										</S.ThemeVariantsWrapper>
@@ -1395,7 +1388,6 @@ function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpd
 	const language = languageProvider.object[languageProvider.current];
 
 	// const { theme, published, loading } = props;
-	const [showExpertMode, setShowExpertMode] = React.useState(false);
 	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
 	const [originalTheme] = React.useState<PortalThemeType>(props.theme); // Store original for comparison
 	const [pendingNameChange, setPendingNameChange] = React.useState<string | null>(null);
@@ -1422,20 +1414,8 @@ function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpd
 		return nameChanged || themeChanged;
 	}, [originalTheme, theme, pendingNameChange]);
 
-	// const order = ['basics', 'header', 'navigation', 'content', 'footer', 'card'];
-	// const sortedTheme = Object.fromEntries([
-	// 	...order.map((k) => [k, theme[k]]).filter(([_, v]) => v !== undefined),
-	// 	...Object.entries(theme || {}).filter(([k]) => !order.includes(k)),
-	// ]);
-
 	return (
 		<S.ThemeWrapper id={'ThemeWrapper'}>
-			{/* <Select
-				activeOption={{ id: theme?.name || 'Default', label: theme?.name || 'Default' }}
-				setActiveOption={() => {}}
-				options={[{ id: theme?.name || 'Default', label: theme?.name || 'Default' }]}
-				disabled={false}
-			/> */}
 			<FormField
 				key={'theme-name-field'}
 				value={localName}
@@ -1518,291 +1498,291 @@ function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpd
 	);
 }
 
-function Section(props: {
-	label: string;
-	theme: PortalThemeType;
-	onThemeChange: (theme: PortalThemeType, publish: boolean, prevName?: string) => void;
-	onThemePublish: (theme: PortalThemeType) => void;
-	onThemeCancel: (theme: PortalThemeType) => void;
-	handleThemeRemove: (theme: PortalThemeType) => void;
-	removeDisabled: boolean;
-	published: boolean;
-	loading: boolean;
-}) {
-	const portalProvider = usePortalProvider();
-	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
-	const [name, setName] = React.useState<string>(props.theme.name ?? '-');
-	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+// function Section(props: {
+// 	label: string;
+// 	theme: PortalThemeType;
+// 	onThemeChange: (theme: PortalThemeType, publish: boolean, prevName?: string) => void;
+// 	onThemePublish: (theme: PortalThemeType) => void;
+// 	onThemeCancel: (theme: PortalThemeType) => void;
+// 	handleThemeRemove: (theme: PortalThemeType) => void;
+// 	removeDisabled: boolean;
+// 	published: boolean;
+// 	loading: boolean;
+// }) {
+// 	const portalProvider = usePortalProvider();
+// 	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
+// 	const [name, setName] = React.useState<string>(props.theme.name ?? '-');
+// 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
-	React.useEffect(() => {
-		setTheme(props.theme);
-		setName(props.theme.name ?? '-');
-	}, [props.theme]);
+// 	React.useEffect(() => {
+// 		setTheme(props.theme);
+// 		setName(props.theme.name ?? '-');
+// 	}, [props.theme]);
 
-	function handleThemeChange(key: string, newColor: string) {
-		const updatedTheme = {
-			...theme,
-			basics: {
-				...theme.basics,
-				colors: {
-					...theme.basics.colors,
-					[key]: newColor,
-				},
-			},
-		};
-		setTheme(updatedTheme);
-		if (props.published) props.onThemeChange(updatedTheme, false);
-	}
+// 	function handleThemeChange(key: string, newColor: string) {
+// 		const updatedTheme = {
+// 			...theme,
+// 			basics: {
+// 				...theme.basics,
+// 				colors: {
+// 					...theme.basics.colors,
+// 					[key]: newColor,
+// 				},
+// 			},
+// 		};
+// 		setTheme(updatedTheme);
+// 		if (props.published) props.onThemeChange(updatedTheme, false);
+// 	}
 
-	const languageProvider = useLanguageProvider();
-	const language = languageProvider.object[languageProvider.current];
+// 	const languageProvider = useLanguageProvider();
+// 	const language = languageProvider.object[languageProvider.current];
 
-	// const { background, ...remainingTheme } = props.theme.basics.colors;
-	const remainingTheme = props.theme.basics.colors;
+// 	// const { background, ...remainingTheme } = props.theme.basics.colors;
+// 	const remainingTheme = props.theme.basics.colors;
 
-	const [scheme, setScheme] = React.useState<'light' | 'dark'>(props.theme.scheme);
-	const [showNameEdit, setShowNameEdit] = React.useState<boolean>(false);
-	const [showRemoveConfirmation, setShowRemoveConfirmation] = React.useState<boolean>(false);
+// 	const [scheme, setScheme] = React.useState<'light' | 'dark'>(props.theme.scheme);
+// 	const [showNameEdit, setShowNameEdit] = React.useState<boolean>(false);
+// 	const [showRemoveConfirmation, setShowRemoveConfirmation] = React.useState<boolean>(false);
 
-	const orderedRemainingTheme = Object.keys(THEME.DEFAULT.basics.colors)
-		// .filter((key) => key !== 'background')
-		.reduce((acc: Record<string, any>, key) => {
-			if (remainingTheme && remainingTheme.hasOwnProperty(key)) {
-				acc[key] = remainingTheme[key];
-			}
-			return acc;
-		}, {} as Record<string, any>);
+// 	const orderedRemainingTheme = Object.keys(THEME.DEFAULT.basics.colors)
+// 		// .filter((key) => key !== 'background')
+// 		.reduce((acc: Record<string, any>, key) => {
+// 			if (remainingTheme && remainingTheme.hasOwnProperty(key)) {
+// 				acc[key] = remainingTheme[key];
+// 			}
+// 			return acc;
+// 		}, {} as Record<string, any>);
 
-	function handleNameChange() {
-		const updatedTheme = {
-			...theme,
-			name: name,
-		};
+// 	function handleNameChange() {
+// 		const updatedTheme = {
+// 			...theme,
+// 			name: name,
+// 		};
 
-		if (props.published) props.onThemeChange(updatedTheme, false, props.theme.name);
+// 		if (props.published) props.onThemeChange(updatedTheme, false, props.theme.name);
 
-		setTheme(updatedTheme);
-		setShowNameEdit(false);
-	}
+// 		setTheme(updatedTheme);
+// 		setShowNameEdit(false);
+// 	}
 
-	function handleSchemeChange(option: string) {
-		const updatedScheme = option as PortalSchemeType;
+// 	function handleSchemeChange(option: string) {
+// 		const updatedScheme = option as PortalSchemeType;
 
-		const updatedTheme = {
-			...theme,
-			scheme: updatedScheme,
-		};
+// 		const updatedTheme = {
+// 			...theme,
+// 			scheme: updatedScheme,
+// 		};
 
-		if (props.published) props.onThemeChange(updatedTheme, false, props.theme.name);
+// 		if (props.published) props.onThemeChange(updatedTheme, false, props.theme.name);
 
-		setTheme(updatedTheme);
-		setScheme(updatedScheme);
-	}
+// 		setTheme(updatedTheme);
+// 		setScheme(updatedScheme);
+// 	}
 
-	return (
-		<>
-			<S.Section id={'Section'}>
-				<S.SectionHeader>
-					<p>{name}</p>
-					{/*
-					<S.SectionHeaderActions>
-						<IconButton
-							type={'alt1'}
-							active={false}
-							src={ICONS.write}
-							handlePress={() => setShowNameEdit(true)}
-							disabled={unauthorized}
-							dimensions={{ wrapper: 23.5, icon: 13.5 }}
-							tooltip={language?.editThemeName}
-							tooltipPosition={'bottom-right'}
-							noFocus
-						/>
-						<IconButton
-							type={'alt1'}
-							active={false}
-							src={ICONS.delete}
-							handlePress={() => setShowRemoveConfirmation(true)}
-							disabled={unauthorized || props.removeDisabled}
-							dimensions={{ wrapper: 23.5, icon: 13.5 }}
-							tooltip={language?.remove}
-							tooltipPosition={'bottom-right'}
-							noFocus
-						/>
-					</S.SectionHeaderActions>
-					*/}
-				</S.SectionHeader>
-				<S.SectionBody>
-					{/*
-					<S.FlexWrapper>
-						<S.SectionsWrapper>
-							Background
-							<Color
-								label={language?.background}
-								value={background}
-								onChange={(newColor) => handleThemeChange('background', newColor)}
-								loading={props.loading}
-								width={130.5}
-								disabled={unauthorized}
-							/>
-						</S.SectionsWrapper>
-						
-					</S.FlexWrapper>
-					*/}
-					<S.AttributesWrapper
-						className={'border-wrapper-alt2'}
-						style={{
-							color: `rgba(${theme.basics.colors.text},1)`,
-							background: `rgba(${theme.basics.colors.background},1)`,
-						}}
-					>
-						<S.GridWrapper id="GridWrapper">
-							<S.GridRows id="GridRows">
-								{Object.entries(orderedRemainingTheme).map(([key, value]: any) => (
-									<S.GridRow id="GridRow" key={key}>
-										<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-										<Color
-											key={key}
-											label={key}
-											value={value}
-											basics={theme.basics?.colors}
-											scheme={scheme}
-											onChange={(newColor) => handleThemeChange(key, newColor)}
-											loading={props.loading}
-											disabled={unauthorized}
-										/>
-									</S.GridRow>
-								))}
-							</S.GridRows>
-						</S.GridWrapper>
-					</S.AttributesWrapper>
+// 	return (
+// 		<>
+// 			<S.Section id={'Section'}>
+// 				<S.SectionHeader>
+// 					<p>{name}</p>
+// 					{/*
+// 					<S.SectionHeaderActions>
+// 						<IconButton
+// 							type={'alt1'}
+// 							active={false}
+// 							src={ICONS.write}
+// 							handlePress={() => setShowNameEdit(true)}
+// 							disabled={unauthorized}
+// 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
+// 							tooltip={language?.editThemeName}
+// 							tooltipPosition={'bottom-right'}
+// 							noFocus
+// 						/>
+// 						<IconButton
+// 							type={'alt1'}
+// 							active={false}
+// 							src={ICONS.delete}
+// 							handlePress={() => setShowRemoveConfirmation(true)}
+// 							disabled={unauthorized || props.removeDisabled}
+// 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
+// 							tooltip={language?.remove}
+// 							tooltipPosition={'bottom-right'}
+// 							noFocus
+// 						/>
+// 					</S.SectionHeaderActions>
+// 					*/}
+// 				</S.SectionHeader>
+// 				<S.SectionBody>
+// 					{/*
+// 					<S.FlexWrapper>
+// 						<S.SectionsWrapper>
+// 							Background
+// 							<Color
+// 								label={language?.background}
+// 								value={background}
+// 								onChange={(newColor) => handleThemeChange('background', newColor)}
+// 								loading={props.loading}
+// 								width={130.5}
+// 								disabled={unauthorized}
+// 							/>
+// 						</S.SectionsWrapper>
 
-					<S.AttributesWrapper
-						className={'border-wrapper-alt2'}
-						style={{
-							color: `rgba(${theme.basics.colors.text},1)`,
-							background: `rgba(${theme.basics.colors.background},1)`,
-						}}
-					>
-						Default Button
-						<S.ButtonPreview theme={theme.buttons.default}>Preview</S.ButtonPreview>
-						<S.GridWrapper id={'GridWrapper'}>
-							<S.GridRows id={'GridRows'}>
-								{Object.entries(theme.buttons.default.default.colors).map(([key, value]: any) => (
-									<S.GridRow id={'GridRow'} key={key}>
-										<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-										<Color
-											key={key}
-											label={key}
-											value={value}
-											basics={theme.basics?.colors}
-											scheme={scheme}
-											onChange={(newColor) => handleThemeChange(key, newColor)}
-											loading={props.loading}
-											disabled={unauthorized}
-										/>
-									</S.GridRow>
-								))}
-							</S.GridRows>
-						</S.GridWrapper>
-					</S.AttributesWrapper>
-					{/*
-					
-						<Toggle
-							label={language?.colorScheme}
-							options={[PortalSchemeType.Light, PortalSchemeType.Dark]}
-							activeOption={scheme}
-							handleToggle={(option: string) => handleSchemeChange(option)}
-							disabled={unauthorized}
-						/>
-						{!props.published && (
-							<S.SectionActions>
-								<Button
-									type={'alt3'}
-									label={language?.cancel}
-									handlePress={() => {
-										props.onThemeCancel(props.theme);
-									}}
-									disabled={unauthorized}
-								/>
-								<Button
-									type={'alt4'}
-									label={language?.publishTheme}
-									handlePress={() => props.onThemePublish(theme)}
-									disabled={unauthorized}
-								/>
-							</S.SectionActions>
-						)}
-					</S.AttributesWrapper>
-					*/}
-				</S.SectionBody>
-			</S.Section>
-			{showNameEdit && (
-				<Modal header={language?.editThemeName} handleClose={() => setShowNameEdit(false)}>
-					<S.ModalWrapper>
-						<FormField
-							value={name}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-							invalid={{ status: false, message: null }}
-							disabled={unauthorized}
-							hideErrorMessage
-							sm
-						/>
-						<S.ModalActionsWrapper>
-							<Button
-								type={'primary'}
-								label={language?.cancel}
-								handlePress={() => setShowNameEdit(false)}
-								disabled={unauthorized}
-							/>
-							<Button
-								type={'alt1'}
-								label={language?.save}
-								handlePress={() => handleNameChange()}
-								disabled={unauthorized}
-								loading={false}
-							/>
-						</S.ModalActionsWrapper>
-					</S.ModalWrapper>
-				</Modal>
-			)}
-			{showRemoveConfirmation && (
-				<Modal header={language?.confirmDeletion} handleClose={() => setShowNameEdit(false)}>
-					<S.ModalWrapper>
-						<S.ModalBodyWrapper>
-							<p>{language?.themeDeleteConfirmationInfo}</p>
-							<S.ModalBodyElements>
-								<S.ModalBodyElement>
-									<span>{name}</span>
-								</S.ModalBodyElement>
-							</S.ModalBodyElements>
-						</S.ModalBodyWrapper>
-						<S.ModalActionsWrapper>
-							<Button
-								type={'primary'}
-								label={language?.cancel}
-								handlePress={() => setShowRemoveConfirmation(false)}
-								disabled={false}
-							/>
-							<Button
-								type={'primary'}
-								label={language?.themeDeleteConfirmation}
-								handlePress={() => {
-									props.handleThemeRemove(theme);
-									setShowRemoveConfirmation(false);
-								}}
-								disabled={unauthorized}
-								loading={false}
-								icon={ICONS.delete}
-								iconLeftAlign
-								warning
-							/>
-						</S.ModalActionsWrapper>
-					</S.ModalWrapper>
-				</Modal>
-			)}
-		</>
-	);
-}
+// 					</S.FlexWrapper>
+// 					*/}
+// 					<S.AttributesWrapper
+// 						className={'border-wrapper-alt2'}
+// 						style={{
+// 							color: `rgba(${theme.basics.colors.text},1)`,
+// 							background: `rgba(${theme.basics.colors.background},1)`,
+// 						}}
+// 					>
+// 						<S.GridWrapper id="GridWrapper">
+// 							<S.GridRows id="GridRows">
+// 								{Object.entries(orderedRemainingTheme).map(([key, value]: any) => (
+// 									<S.GridRow id="GridRow" key={key}>
+// 										<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+// 										<Color
+// 											key={key}
+// 											label={key}
+// 											value={value}
+// 											basics={theme.basics?.colors}
+// 											scheme={scheme}
+// 											onChange={(newColor) => handleThemeChange(key, newColor)}
+// 											loading={props.loading}
+// 											disabled={unauthorized}
+// 										/>
+// 									</S.GridRow>
+// 								))}
+// 							</S.GridRows>
+// 						</S.GridWrapper>
+// 					</S.AttributesWrapper>
+
+// 					<S.AttributesWrapper
+// 						className={'border-wrapper-alt2'}
+// 						style={{
+// 							color: `rgba(${theme.basics.colors.text},1)`,
+// 							background: `rgba(${theme.basics.colors.background},1)`,
+// 						}}
+// 					>
+// 						Default Button
+// 						<S.ButtonPreview theme={theme.buttons.default}>Preview</S.ButtonPreview>
+// 						<S.GridWrapper id={'GridWrapper'}>
+// 							<S.GridRows id={'GridRows'}>
+// 								{Object.entries(theme.buttons.default.default.colors).map(([key, value]: any) => (
+// 									<S.GridRow id={'GridRow'} key={key}>
+// 										<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+// 										<Color
+// 											key={key}
+// 											label={key}
+// 											value={value}
+// 											basics={theme.basics?.colors}
+// 											scheme={scheme}
+// 											onChange={(newColor) => handleThemeChange(key, newColor)}
+// 											loading={props.loading}
+// 											disabled={unauthorized}
+// 										/>
+// 									</S.GridRow>
+// 								))}
+// 							</S.GridRows>
+// 						</S.GridWrapper>
+// 					</S.AttributesWrapper>
+// 					{/*
+
+// 						<Toggle
+// 							label={language?.colorScheme}
+// 							options={[PortalSchemeType.Light, PortalSchemeType.Dark]}
+// 							activeOption={scheme}
+// 							handleToggle={(option: string) => handleSchemeChange(option)}
+// 							disabled={unauthorized}
+// 						/>
+// 						{!props.published && (
+// 							<S.SectionActions>
+// 								<Button
+// 									type={'alt3'}
+// 									label={language?.cancel}
+// 									handlePress={() => {
+// 										props.onThemeCancel(props.theme);
+// 									}}
+// 									disabled={unauthorized}
+// 								/>
+// 								<Button
+// 									type={'alt4'}
+// 									label={language?.publishTheme}
+// 									handlePress={() => props.onThemePublish(theme)}
+// 									disabled={unauthorized}
+// 								/>
+// 							</S.SectionActions>
+// 						)}
+// 					</S.AttributesWrapper>
+// 					*/}
+// 				</S.SectionBody>
+// 			</S.Section>
+// 			{showNameEdit && (
+// 				<Modal header={language?.editThemeName} handleClose={() => setShowNameEdit(false)}>
+// 					<S.ModalWrapper>
+// 						<FormField
+// 							value={name}
+// 							onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+// 							invalid={{ status: false, message: null }}
+// 							disabled={unauthorized}
+// 							hideErrorMessage
+// 							sm
+// 						/>
+// 						<S.ModalActionsWrapper>
+// 							<Button
+// 								type={'primary'}
+// 								label={language?.cancel}
+// 								handlePress={() => setShowNameEdit(false)}
+// 								disabled={unauthorized}
+// 							/>
+// 							<Button
+// 								type={'alt1'}
+// 								label={language?.save}
+// 								handlePress={() => handleNameChange()}
+// 								disabled={unauthorized}
+// 								loading={false}
+// 							/>
+// 						</S.ModalActionsWrapper>
+// 					</S.ModalWrapper>
+// 				</Modal>
+// 			)}
+// 			{showRemoveConfirmation && (
+// 				<Modal header={language?.confirmDeletion} handleClose={() => setShowNameEdit(false)}>
+// 					<S.ModalWrapper>
+// 						<S.ModalBodyWrapper>
+// 							<p>{language?.themeDeleteConfirmationInfo}</p>
+// 							<S.ModalBodyElements>
+// 								<S.ModalBodyElement>
+// 									<span>{name}</span>
+// 								</S.ModalBodyElement>
+// 							</S.ModalBodyElements>
+// 						</S.ModalBodyWrapper>
+// 						<S.ModalActionsWrapper>
+// 							<Button
+// 								type={'primary'}
+// 								label={language?.cancel}
+// 								handlePress={() => setShowRemoveConfirmation(false)}
+// 								disabled={false}
+// 							/>
+// 							<Button
+// 								type={'primary'}
+// 								label={language?.themeDeleteConfirmation}
+// 								handlePress={() => {
+// 									props.handleThemeRemove(theme);
+// 									setShowRemoveConfirmation(false);
+// 								}}
+// 								disabled={unauthorized}
+// 								loading={false}
+// 								icon={ICONS.delete}
+// 								iconLeftAlign
+// 								warning
+// 							/>
+// 						</S.ModalActionsWrapper>
+// 					</S.ModalWrapper>
+// 				</Modal>
+// 			)}
+// 		</>
+// 	);
+// }
 
 export default function Themes() {
 	const arProvider = useArweaveProvider();
@@ -1825,58 +1805,58 @@ export default function Themes() {
 		}
 	}, [portalProvider.current]);
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	async function handleThemeUpdate(theme: PortalThemeType, publish: boolean, prevName?: string) {
-		if (!theme) return;
+	// // eslint-disable-next-line @typescript-eslint/no-unused-vars
+	// async function handleThemeUpdate(theme: PortalThemeType, publish: boolean, prevName?: string) {
+	// 	if (!theme) return;
 
-		const allOptionNames = new Set(options?.map((t) => t.name));
+	// 	const allOptionNames = new Set(options?.map((t) => t.name));
 
-		if (allOptionNames.has(theme.name)) {
-			addNotification(`A theme '${theme.name}' already exists.`, 'warning');
-			return;
-		}
+	// 	if (allOptionNames.has(theme.name)) {
+	// 		addNotification(`A theme '${theme.name}' already exists.`, 'warning');
+	// 		return;
+	// 	}
 
-		if (prevName) {
-			allOptionNames.delete(prevName);
-		}
+	// 	if (prevName) {
+	// 		allOptionNames.delete(prevName);
+	// 	}
 
-		const publishedNames = new Set(portalProvider.current?.themes.map((t) => t.name));
+	// 	const publishedNames = new Set(portalProvider.current?.themes.map((t) => t.name));
 
-		if (prevName && publishedNames.has(prevName)) {
-			publishedNames.delete(prevName);
-			publishedNames.add(theme.name);
-		} else if (publish) {
-			publishedNames.add(theme.name);
-		}
+	// 	if (prevName && publishedNames.has(prevName)) {
+	// 		publishedNames.delete(prevName);
+	// 		publishedNames.add(theme.name);
+	// 	} else if (publish) {
+	// 		publishedNames.add(theme.name);
+	// 	}
 
-		const mapped =
-			options?.map((existing) => {
-				const matchKey = prevName ?? theme.name;
-				return existing.name === matchKey ? theme : existing;
-			}) || [];
+	// 	const mapped =
+	// 		options?.map((existing) => {
+	// 			const matchKey = prevName ?? theme.name;
+	// 			return existing.name === matchKey ? theme : existing;
+	// 		}) || [];
 
-		const updated = mapped.filter((t) => publishedNames.has(t.name));
+	// 	const updated = mapped.filter((t) => publishedNames.has(t.name));
 
-		await submitUpdatedThemes(updated);
-	}
+	// 	await submitUpdatedThemes(updated);
+	// }
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	async function handleThemePublish(theme: PortalThemeType) {
-		if (!theme) return;
+	// // eslint-disable-next-line @typescript-eslint/no-unused-vars
+	// async function handleThemePublish(theme: PortalThemeType) {
+	// 	if (!theme) return;
 
-		const themeExists = portalProvider.current?.themes?.find(
-			(existingTheme: PortalThemeType) => existingTheme.name === theme.name
-		);
+	// 	const themeExists = portalProvider.current?.themes?.find(
+	// 		(existingTheme: PortalThemeType) => existingTheme.name === theme.name
+	// 	);
 
-		if (themeExists) {
-			addNotification(`A theme '${theme.name}' already exists.`, 'warning');
-			return;
-		}
+	// 	if (themeExists) {
+	// 		addNotification(`A theme '${theme.name}' already exists.`, 'warning');
+	// 		return;
+	// 	}
 
-		const updatedThemes = [...(portalProvider.current?.themes ?? []), theme];
+	// 	const updatedThemes = [...(portalProvider.current?.themes ?? []), theme];
 
-		await submitUpdatedThemes(updatedThemes);
-	}
+	// 	await submitUpdatedThemes(updatedThemes);
+	// }
 
 	async function submitUpdatedThemes(themes: PortalThemeType[]) {
 		if (!unauthorized && themes && arProvider.wallet && portalProvider.current?.id) {

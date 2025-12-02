@@ -8,6 +8,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
+import { Toggle } from 'components/atoms/Toggle';
 import { PortalPatchMapEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -129,7 +130,7 @@ export default function Monetization() {
 		}
 	}
 
-	// --- Tips history state ---
+	// --- Tips History State ---
 
 	const [tips, setTips] = React.useState<TipRow[]>([]);
 	const [loadingTips, setLoadingTips] = React.useState(false);
@@ -278,38 +279,40 @@ export default function Monetization() {
 	return (
 		<S.Wrapper>
 			<ViewHeader
-				header={language?.monetization ?? 'Monetization'}
+				header={language?.tips ?? 'Tips'}
 				actions={[
 					<>
 						{hasMonetization && (
 							<S.Summary>
-								<span>{language?.totalReceived ?? 'Total received:'}</span>
-								<strong>{totalReceivedAr} AR</strong>
+								<p>
+									{`${language?.totalReceived ?? 'Total Received'}: `} <b>{`${totalReceivedAr} AR`}</b>
+								</p>
 							</S.Summary>
 						)}
 					</>,
 				]}
 			/>
-			<S.Section>
+			<S.Section className={'border-wrapper-alt2'}>
 				<S.SectionHeader>
 					<span>Configuration</span>
 				</S.SectionHeader>
 
 				<S.ConfigForm>
 					<div className="row">
-						<span className="field-label">{language?.enableMonetization ?? 'Enable AR monetization'}</span>
-						<Button
-							type={monetization.enabled ? 'primary' : 'alt1'}
-							label={monetization.enabled ? language?.on ?? 'On' : language?.off ?? 'Off'}
-							handlePress={() =>
-								canEdit &&
-								setMonetization((prev) => ({
-									...prev,
-									enabled: !prev.enabled,
-								}))
-							}
-							disabled={!canEdit}
-						/>
+						<span className="field-label">{language?.enableMonetization ?? 'Enable AR Monetization'}</span>
+						<S.ConfigToggle>
+							<Toggle
+								options={['On', 'Off']}
+								activeOption={monetization.enabled ? 'On' : 'Off'}
+								handleToggle={(option: 'On' | 'Off') =>
+									setMonetization((prev) => ({
+										...prev,
+										enabled: option === 'On' ? true : false,
+									}))
+								}
+								disabled={false}
+							/>
+						</S.ConfigToggle>
 					</div>
 
 					<FormField
@@ -331,14 +334,20 @@ export default function Monetization() {
 						value={monetization.tokenAddress}
 						onChange={() => {}}
 						invalid={{ status: false, message: null }}
-						disabled={true} // fixed to AR for v1
+						disabled={true} // Fixed to AR for v1
 						hideErrorMessage
 					/>
 
 					<div className="actions">
 						<Button
 							type={'primary'}
-							label={savingMonetization ? language?.saving ?? 'Saving...' : language?.save ?? 'Save'}
+							label={
+								savingMonetization
+									? language?.saving
+										? `${language.saving}...`
+										: 'Saving...'
+									: language?.save ?? 'Save'
+							}
 							handlePress={handleSaveMonetization}
 							disabled={savingMonetization || !canEdit || !portalProvider.current?.id}
 						/>
@@ -346,12 +355,12 @@ export default function Monetization() {
 				</S.ConfigForm>
 			</S.Section>
 
-			{/* Tips history */}
-			<S.Section>
+			{/* Tips History */}
+			<S.Section className={'border-wrapper-alt2'}>
 				<S.SectionHeader>
-					<span>{language?.tipsHistory ?? 'Tips history'}</span>
+					<span>{language?.tipsHistory ?? 'Tips History'}</span>
 					<Button
-						type="alt1"
+						type={'alt4'}
 						label={language?.refresh ?? 'Refresh'}
 						handlePress={() => setReloadKey((k) => k + 1)}
 						disabled={loadingTips}

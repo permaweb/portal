@@ -24,31 +24,28 @@ export const Title = styled.h4`
 `;
 
 export const Summary = styled.div`
-	display: flex;
-	align-items: baseline;
-	gap: 6px;
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.small};
-	color: ${(props) => props.theme.colors.font.alt1};
+	padding: 5px 15px;
+	border-radius: ${STYLING.dimensions.radius.primary} !important;
+	background: ${(props) => props.theme.colors.container.alt11.background};
 
-	strong {
-		font-weight: ${(props) => props.theme.typography.weight.semibold};
-		color: ${(props) => props.theme.colors.status.positive};
+	p {
+		color: ${(props) => props.theme.colors.font.light2};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+
+	b {
+		color: ${(props) => props.theme.colors.font.light1};
+		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
 	}
 `;
 
 export const Section = styled.section`
-	background: ${(props) => props.theme.colors.container.alt1.background};
-	border-radius: ${STYLING.dimensions.radius.primary};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
-	padding: 16px 20px;
+	padding: 15px;
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
-
-	@media (max-width: ${STYLING.cutoffs.initial}) {
-		padding: 12px 14px;
-	}
 `;
 
 export const SectionHeader = styled.div`
@@ -58,10 +55,11 @@ export const SectionHeader = styled.div`
 	gap: 12px;
 
 	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.base};
-		font-weight: ${(props) => props.theme.typography.weight.semibold};
-		color: ${(props) => props.theme.colors.font.primary};
+		text-transform: uppercase;
 	}
 `;
 
@@ -127,9 +125,11 @@ export const ConfigForm = styled.div`
 	}
 
 	.field-label {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
-		color: ${(props) => props.theme.colors.font.primary};
+		text-transform: uppercase;
 	}
 
 	.actions {
@@ -139,11 +139,15 @@ export const ConfigForm = styled.div`
 	}
 `;
 
+export const ConfigToggle = styled.div``;
+
 export const Info = styled.div`
-	padding: 8px 10px;
-	border-radius: ${STYLING.dimensions.radius.alt1};
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.small};
+	padding: 5px 10px 7.5px 10px;
+
+	span {
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+	}
 
 	&.warning {
 		background: ${(props) => props.theme.colors.status.warningBackground};
