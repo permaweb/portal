@@ -18,7 +18,7 @@ export const Header = styled.div<{ $layout: any; theme: any }>`
 	border-top: ${(props) => (props.$layout.border.top ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
 	border-left: ${(props) => (props.$layout.border.sides ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
 	border-right: ${(props) => (props.$layout.border.sides ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
-	box-shadow: ${(props) => (props.$layout.shadow ? props.$layout.shadow : `unset`)};
+	box-shadow: var(--preference-header-shadow);
 	z-index: 3;
 	user-select: none;
 	box-sizing: border-box;

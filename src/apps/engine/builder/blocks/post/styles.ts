@@ -96,7 +96,17 @@ export const Wrapper = styled.div`
 	}
 
 	a {
-		text-decoration: underline;
+		color: var(--color-link-default, rgba(var(--color-text), 1));
+		text-decoration: var(--preference-link-text-decoration-default, underline);
+		font-weight: var(--preference-link-font-weight-default, normal);
+		font-style: var(--preference-link-font-style-default, normal);
+	}
+
+	a:hover {
+		color: var(--color-link-hover, rgba(var(--color-primary), 1));
+		text-decoration: var(--preference-link-text-decoration-hover, underline);
+		font-weight: var(--preference-link-font-weight-hover, normal);
+		font-style: var(--preference-link-font-style-hover, normal);
 	}
 
 	blockquote {

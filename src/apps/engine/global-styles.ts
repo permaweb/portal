@@ -66,13 +66,7 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   a {
-    font-weight: 500;
-    color: rgba(var(--color-text), 1);
-    text-decoration: inherit;
-  }
-
-  a:hover {
-    color: rgba(var(--color-primary), 1);
+    text-decoration: none;
   }
 
   h1 {
@@ -152,10 +146,6 @@ export const GlobalStyles = createGlobalStyle`
     :root {
       color: #213547;
       background-color: #ffffff;
-    }
-
-    a:hover {
-      color: #747bff;
     }
 
     button {
