@@ -19,7 +19,38 @@ export default function Navigation(props: any) {
 	const layout = props.layout;
 	const content = props.content;
 
-	const { portal } = usePortalProvider();
+	const portalProvider = usePortalProvider();
+	const { portal, layoutHeights, setLayoutHeights, navSticky, layoutEditMode } = portalProvider;
+	const [isDragging, setIsDragging] = React.useState(false);
+	const [startY, setStartY] = React.useState(0);
+	const [startHeight, setStartHeight] = React.useState(0);
+
+	const handleMouseDown = (e: React.MouseEvent) => {
+		e.preventDefault();
+		setIsDragging(true);
+		setStartY(e.clientY);
+		setStartHeight(layoutHeights.navigation);
+	};
+
+	React.useEffect(() => {
+		if (!isDragging) return;
+
+		const handleMouseMove = (e: MouseEvent) => {
+			const delta = e.clientY - startY;
+			const newHeight = Math.max(30, Math.min(100, startHeight + delta));
+			setLayoutHeights({ ...layoutHeights, navigation: newHeight });
+		};
+
+		const handleMouseUp = () => setIsDragging(false);
+
+		document.addEventListener('mousemove', handleMouseMove);
+		document.addEventListener('mouseup', handleMouseUp);
+
+		return () => {
+			document.removeEventListener('mousemove', handleMouseMove);
+			document.removeEventListener('mouseup', handleMouseUp);
+		};
+	}, [isDragging, startY, startHeight, layoutHeights, setLayoutHeights]);
 	const Layout = preview ? defaultLayout : portal?.Layout;
 	const Themes = preview ? defaultThemes : portal?.Themes;
 
@@ -151,7 +182,13 @@ export default function Navigation(props: any) {
 	if (!layout) return null;
 
 	return (
-		<S.Navigation $layout={layout} maxWidth={Layout?.basics?.maxWidth} id="Navigation">
+		<S.Navigation
+			$layout={layout}
+			maxWidth={Layout?.basics?.maxWidth}
+			id="Navigation"
+			$editHeight={layoutHeights.navigation}
+			$editSticky={navSticky}
+		>
 			{preview && <GlobalStyles />}
 			<S.NavigationEntries $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
 				{content &&
@@ -160,6 +197,13 @@ export default function Navigation(props: any) {
 					))}
 				<Search />
 			</S.NavigationEntries>
+			{layoutEditMode && (
+				<S.ResizeHandle $isDragging={isDragging} onMouseDown={handleMouseDown}>
+					<S.HandleBar>
+						<S.HandleLabel>Navigation ({layoutHeights.navigation}px)</S.HandleLabel>
+					</S.HandleBar>
+				</S.ResizeHandle>
+			)}
 		</S.Navigation>
 	);
 }
