@@ -398,36 +398,47 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 								</S.NavigationEntry>
 							</S.NavigationWrapper>
 							<S.DSpacer />
-							{profile?.id && (
-								<>
-									<S.NavigationWrapper>
-										<S.NavigationCategory>Portal</S.NavigationCategory>
-										<S.NavigationEntry
-											onClick={() => {
-												setShowLayoutPanel(true);
-												setLayoutEditMode(true);
-											}}
-										>
-											<ReactSVG src={ICONS.layout} />
-											Edit Layout
-										</S.NavigationEntry>
-										<S.NavigationEntry
-											onClick={() => {
-												setShowUserMenu(false);
-												portalProvider.setEditorMode('mini');
-											}}
-										>
-											<ReactSVG src={ICONS.portal} />
-											Zone Editor
-										</S.NavigationEntry>
-										<S.NavigationEntry onClick={() => window.open('https://portal.arweave.net/', '_blank')}>
-											<ReactSVG src={ICONS.portal} />
-											Portal Editor
-										</S.NavigationEntry>
-									</S.NavigationWrapper>
-									<S.DSpacer />
-								</>
-							)}
+							{(() => {
+								if (!profile?.id) return null;
+								const roles: string[] = profile?.roles || [];
+								const isAdmin = roles.includes('Admin');
+								const isAdminOrMod = isAdmin || roles.includes('Moderator');
+								if (!isAdminOrMod) return null;
+								return (
+									<>
+										<S.NavigationWrapper>
+											<S.NavigationCategory>Portal</S.NavigationCategory>
+											{isAdmin && (
+												<S.NavigationEntry
+													onClick={() => {
+														setShowLayoutPanel(true);
+														setLayoutEditMode(true);
+													}}
+												>
+													<ReactSVG src={ICONS.layout} />
+													Edit Layout
+												</S.NavigationEntry>
+											)}
+											{isAdmin && (
+												<S.NavigationEntry
+													onClick={() => {
+														setShowUserMenu(false);
+														portalProvider.setEditorMode('mini');
+													}}
+												>
+													<ReactSVG src={ICONS.portal} />
+													Zone Editor
+												</S.NavigationEntry>
+											)}
+											<S.NavigationEntry onClick={() => window.open('https://portal.arweave.net/', '_blank')}>
+												<ReactSVG src={ICONS.portal} />
+												Portal Editor
+											</S.NavigationEntry>
+										</S.NavigationWrapper>
+										<S.DSpacer />
+									</>
+								);
+							})()}
 							<S.DFooterWrapper>
 								<S.NavigationEntry onClick={handleDisconnect}>
 									<ReactSVG src={ICONS.signout} />
