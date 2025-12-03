@@ -25,21 +25,18 @@ export default function Users() {
 	const permawebProvider = usePermawebProvider();
 	const { addNotification } = useNotifications();
 	const language = languageProvider.object[languageProvider.current];
-
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [showAddUser, setShowAddUser] = React.useState<boolean>(false);
 	const [showTransferInvitesModal, setShowTransferInvitesModal] = React.useState<boolean>(false);
 
 	const currentWalletAddress = arProvider.walletAddress;
-
 	const pendingOwnershipInvites = React.useMemo(() => {
-		return (portalProvider.transfers ?? []).filter((request: any) => {
+		return (portalProvider.current?.transfers ?? []).filter((request: any) => {
 			const inviteeAddress = request.To ?? request.to;
 			const stateValue = (request.State ?? request.state)?.toLowerCase?.();
 			return inviteeAddress === currentWalletAddress && stateValue === 'pending';
 		});
-	}, [portalProvider.transfers, currentWalletAddress]);
-
+	}, [portalProvider.current?.transfers, currentWalletAddress]);
 	const [inviteProfiles, setInviteProfiles] = React.useState<Record<string, any>>({});
 
 	React.useEffect(() => {
@@ -54,6 +51,7 @@ export default function Users() {
 				if (!profiles[inviterAddress]) {
 					try {
 						const profile = await permawebProvider.fetchProfile(inviterAddress);
+						console.log('fetched profile for', inviterAddress, profile);
 						profiles[inviterAddress] = profile;
 					} catch (err) {
 						console.error('Failed to fetch profile for', inviterAddress, err);
