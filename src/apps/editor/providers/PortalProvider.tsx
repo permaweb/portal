@@ -139,8 +139,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								if (response?.users) users = parseField(PortalPatchMapEnum.Users, response);
 
 								let transfers: any = {};
-								if (response?.transfers) transfers = parseField(PortalPatchMapEnum.Transfers, response);
-
+								if (response?.transfers) {
+									transfers = parseField(PortalPatchMapEnum.Transfers, response);
+								}
 								return {
 									...portal,
 									name: overview.name ?? overview.store?.name ?? 'None',
@@ -159,6 +160,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 										logo: cached.logo ?? portal.logo ?? 'None',
 										icon: cached.icon ?? portal.icon ?? 'None',
 										users: cached.users ?? portal.roles ?? [],
+										transfers: cached.transfers ?? [],
 									};
 								}
 								return portal;
@@ -235,6 +237,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			const posts = parseField(PortalPatchMapEnum.Posts, response, opts?.patchKey);
 			const requests = parseField(PortalPatchMapEnum.Requests, response, opts?.patchKey);
 			const monetization = parseField(PortalPatchMapEnum.Monetization, response, opts?.patchKey);
+			const transfers = parseField(PortalPatchMapEnum.Transfers, response, opts?.patchKey);
 
 			/* Check for node updates and add the new node address as an authority */
 			if (
@@ -293,6 +296,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				permissions: users?.permissions ?? current?.permissions ?? null,
 				domains: navigation?.domains ?? current?.domains ?? [],
 				monetization: monetization ?? current?.monetization ?? null,
+				transfers: transfers?.transfers ?? current?.transfers ?? [],
 			};
 
 			if (permawebProvider.profile?.id && portalState.users) {

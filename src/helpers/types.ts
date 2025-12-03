@@ -32,6 +32,7 @@ export type PortalDetailType = {
 	themes?: PortalThemeType[];
 	layout?: any;
 	monetization?: any;
+	transfers?: any[];
 };
 
 export type PortalAssetType = {

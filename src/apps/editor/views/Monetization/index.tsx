@@ -50,7 +50,9 @@ export default function Monetization() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const ownerWallet = (portalProvider.current as any)?.ownerWallet || (portalProvider.current as any)?.owner || '';
-
+	const existingMonetization =
+		((portalProvider.current as any)?.monetization?.monetization as MonetizationConfig | undefined) ||
+		((portalProvider.current as any)?.Monetization as MonetizationConfig | undefined);
 	const [savingMonetization, setSavingMonetization] = React.useState(false);
 
 	const [monetization, setMonetization] = React.useState<MonetizationConfig>(() => {
@@ -66,7 +68,6 @@ export default function Monetization() {
 			tokenAddress: 'AR',
 		};
 	});
-
 	React.useEffect(() => {
 		const existing =
 			((portalProvider.current as any)?.monetization?.monetization as MonetizationConfig | undefined) ||
@@ -137,7 +138,9 @@ export default function Monetization() {
 	const [tipsError, setTipsError] = React.useState<string | null>(null);
 	const [reloadKey, setReloadKey] = React.useState(0);
 
-	const hasMonetization = !!monetization.enabled && !!monetization.walletAddress;
+	const hasMonetization = !!existingMonetization?.enabled && !!existingMonetization.walletAddress;
+
+	const monetizationWalletForTips = existingMonetization?.walletAddress || ownerWallet;
 
 	const totalReceivedAr = React.useMemo(() => {
 		if (!tips.length) return '0';
@@ -199,7 +202,7 @@ export default function Monetization() {
 						}
 					`,
 					variables: {
-						toAddr: [monetization.walletAddress],
+						toAddr: [monetizationWalletForTips],
 					},
 				};
 
@@ -256,7 +259,7 @@ export default function Monetization() {
 		return () => {
 			cancelled = true;
 		};
-	}, [hasMonetization, monetization.walletAddress, portalProvider.current?.id, reloadKey]);
+	}, [hasMonetization, monetizationWalletForTips, portalProvider.current?.id, reloadKey]);
 
 	function renderFrom(row: TipRow) {
 		if (row.fromName) return row.fromName;
