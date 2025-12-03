@@ -10,7 +10,7 @@ export const en = {
 	address: `Address`,
 	addSection: `Add Section`,
 	addTheme: `Add a theme`,
-	addTo: `Add To `,
+	addTo: `Add To`,
 	addTopic: `Add a tag`,
 	addUser: `Add a user`,
 	admin: `Admin`,

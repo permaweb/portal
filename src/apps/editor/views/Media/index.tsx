@@ -29,9 +29,14 @@ export default function Media() {
 					actions={[
 						<S.CreditsWrapper className={'border-wrapper-alt3'}>
 							<p>
-								{arProvider.turboBalanceObj.effectiveBalance
-									? `${getARAmountFromWinc(Number(arProvider.turboBalanceObj.effectiveBalance))} ${language?.credits}`
-									: `${language?.loading}...`}
+								{arProvider.turboBalanceObj.effectiveBalance ? (
+									<>
+										<b>{getARAmountFromWinc(Number(arProvider.turboBalanceObj.effectiveBalance))}</b>{' '}
+										{language?.credits}
+									</>
+								) : (
+									`${language?.loading}...`
+								)}
 							</p>
 						</S.CreditsWrapper>,
 						<Button

@@ -14,7 +14,6 @@ export const LAYOUT = {
 };
 
 import { ICONS, ICONS_SOCIAL } from './config/icons';
-import { PortalMonetization } from 'editor/components/organisms/PortalMonetization';
 export { ICONS, ICONS_SOCIAL };
 
 export const AO_NODE = {
@@ -126,7 +125,7 @@ function createURLs() {
 		postEditArticle: (portalId: string) => `${postEditBase(portalId)}article/`,
 		postEditImage: (portalId: string) => `${postEditBase(portalId)}image/`,
 		postEditVideo: (portalId: string) => `${postEditBase(portalId)}video/`,
-		portalMonetization: (portalId: string) => `${portalBase(portalId)}monetization/`,
+		portalTips: (portalId: string) => `${portalBase(portalId)}tips/`,
 		docs: docsBase,
 		docsIntro: `${docsBase}overview/introduction`,
 		docsEditor: `${docsBase}posts/editor`,

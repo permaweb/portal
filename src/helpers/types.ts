@@ -6,6 +6,7 @@ export type PortalHeaderType = {
 	logo?: string | null;
 	icon?: string | null;
 	roles?: PortalUserType[];
+	users?: PortalUserType[];
 };
 
 export type PortalDetailType = {

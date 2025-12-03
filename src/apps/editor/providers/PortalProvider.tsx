@@ -235,6 +235,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			const posts = parseField(PortalPatchMapEnum.Posts, response, opts?.patchKey);
 			const requests = parseField(PortalPatchMapEnum.Requests, response, opts?.patchKey);
 			const monetization = parseField(PortalPatchMapEnum.Monetization, response, opts?.patchKey);
+
 			/* Check for node updates and add the new node address as an authority */
 			if (
 				overview?.authorities &&
@@ -251,13 +252,18 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 			/* Check for updates in the portal patch map */
 			if (
+				overview &&
 				(!overview?.patchMap || !isEqual(overview?.patchMap, PORTAL_PATCH_MAP)) &&
 				permawebProvider.libs?.updateZonePatchMap &&
 				!patchMapRef.current
 			) {
+				console.log(overview?.patchMap);
 				patchMapRef.current = true;
-				const t = await permawebProvider.libs.updateZonePatchMap({ ...PORTAL_PATCH_MAP }, currentId);
-				console.log(t);
+				try {
+					permawebProvider.libs.updateZonePatchMap({ ...PORTAL_PATCH_MAP }, currentId);
+				} catch (e: any) {
+					console.error('Failed to update portal patch map:', e);
+				}
 			}
 
 			setUpdateAvailable(

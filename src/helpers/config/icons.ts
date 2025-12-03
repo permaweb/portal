@@ -115,7 +115,7 @@ export const ICONS = {
 	warning: getTxEndpoint('BASlMnOWcLCcLUSrO2wUybQL_06231dLONeVkdTWs3o'),
 	write: getTxEndpoint('SUWTk8Qtcub9EsP5PDF6-vzgKsP5Irg1bB9b8NImDDk'),
 	admin: getTxEndpoint('L6_7B3Qbpnye2pHGNS-8TS310s2uWzRgeQH6fqHS37o'),
-	money: getTxEndpoint('te6x-ItxUmfLR2u67_OkQzjo5bzwOZfdRPktCPAs-5A'),
+	money: getTxEndpoint('Ku_ak3oDGcZglAz201CeaIc9jfAcrWiXjHDJ8RVCnf8'),
 	ENGINE: {
 		arrow: getTxEndpoint('-6sVfmeNGSFDFe3uguyeCo5qY7aa__n8tpi_Dg238SM'),
 		search: getTxEndpoint('UnDIcovg6SbgqTLIZ-N-g12wCMT3EOceHkPcoYHd6_g'),

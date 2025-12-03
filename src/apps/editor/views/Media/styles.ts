@@ -10,10 +10,15 @@ export const CreditsWrapper = styled.div`
 	background: ${(props) => props.theme.colors.container.alt11.background};
 
 	p {
-		color: ${(props) => props.theme.colors.font.light1};
+		color: ${(props) => props.theme.colors.font.light2};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+
+	b {
+		color: ${(props) => props.theme.colors.font.light1};
+		font-weight: ${(props) => props.theme.typography.weight.xBold} !important;
 	}
 `;
 
