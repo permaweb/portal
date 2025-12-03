@@ -209,7 +209,6 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 					...currentLayout.footer,
 					layout: {
 						...currentLayout.footer?.layout,
-						height: `${layoutHeights.footer}px`,
 						fixed: footerFixed,
 					},
 				},
@@ -321,17 +320,6 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 						<label>Fixed</label>
 						<S.Toggle $active={footerFixed} onClick={() => setFooterFixed(!footerFixed)} />
 					</S.ToggleRow>
-					<S.SliderRow>
-						<label>Height</label>
-						<input
-							type="range"
-							value={layoutHeights.footer}
-							onChange={(e) => setLayoutHeights({ ...layoutHeights, footer: parseInt(e.target.value) })}
-							min={100}
-							max={500}
-						/>
-						<span>{layoutHeights.footer}px</span>
-					</S.SliderRow>
 				</S.NavigationWrapper>
 				<S.LayoutFooter>
 					<S.LayoutButton onClick={handleLayoutCancel} disabled={saving}>

@@ -45,8 +45,7 @@ export const LAYOUT_JOURNAL = {
 	footer: {
 		layout: {
 			width: 'page',
-			height: 'auto',
-			padding: '20px',
+			padding: '10px',
 			gradient: false,
 			border: {
 				top: true,
@@ -114,7 +113,6 @@ export const LAYOUT_BLOG = {
 	footer: {
 		layout: {
 			width: 'page',
-			height: '46px',
 			padding: '14px',
 			verticalAlign: 'center',
 			border: {

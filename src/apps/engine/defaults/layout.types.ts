@@ -74,7 +74,7 @@ export declare type PortalLayout = {
 
 export declare type Layout = {
 	width: string;
-	height: string;
+	height?: string;
 	padding: string;
 	gradient?: boolean;
 	shadow?: boolean;

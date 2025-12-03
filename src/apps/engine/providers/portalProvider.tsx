@@ -14,7 +14,6 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 export interface LayoutHeights {
 	header: number;
 	navigation: number;
-	footer: number;
 }
 
 export interface LogoSettings {
@@ -45,7 +44,6 @@ export interface PortalContextState {
 const DEFAULT_LAYOUT_HEIGHTS: LayoutHeights = {
 	header: 100,
 	navigation: 50,
-	footer: 230,
 };
 
 const DEFAULT_LOGO_SETTINGS: LogoSettings = {
@@ -246,7 +244,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			setLayoutHeights({
 				header: parseHeight(layout.header?.layout?.height) || DEFAULT_LAYOUT_HEIGHTS.header,
 				navigation: parseHeight(layout.navigation?.layout?.height) || DEFAULT_LAYOUT_HEIGHTS.navigation,
-				footer: parseHeight(layout.footer?.layout?.height) || DEFAULT_LAYOUT_HEIGHTS.footer,
 			});
 			const logoContent = layout.header?.content?.logo;
 			if (logoContent) {

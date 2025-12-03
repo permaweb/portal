@@ -61,7 +61,6 @@ export const defaultLayout: PortalLayout = {
 	footer: {
 		layout: {
 			width: 'page',
-			height: '230px',
 			padding: '14px',
 			verticalAlign: 'center',
 			border: {
