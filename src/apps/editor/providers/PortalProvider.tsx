@@ -142,7 +142,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								if (response?.transfers) {
 									transfers = parseField(PortalPatchMapEnum.Transfers, response);
 								}
-								console.log(transfers, portal.id);
 								return {
 									...portal,
 									name: overview.name ?? overview.store?.name ?? 'None',
@@ -168,7 +167,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 							}
 						})
 					);
-					console.log('Updated portals:', updated);
 					setPortals(updated);
 				})();
 			} else {

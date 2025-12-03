@@ -56,6 +56,7 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 
 		const load = async () => {
 			const newProfiles: Record<string, any> = { ...profileMap };
+			let changed = false;
 
 			for (const addr of allProfileAddresses) {
 				if (newProfiles[addr]) continue; // already fetched
@@ -63,13 +64,16 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 				try {
 					const profile = await permawebProvider.fetchProfile(addr);
 					newProfiles[addr] = profile;
-					console.log('Fetched profile for', addr, profile);
+					changed = true;
 				} catch (err) {
 					console.warn('Failed fetching profile for', addr);
 				}
 			}
 
-			setProfileMap(newProfiles);
+			// 🔑 only update state if something actually changed
+			if (changed) {
+				setProfileMap(newProfiles);
+			}
 		};
 
 		load();
@@ -149,7 +153,7 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 			<p>{language?.transferOwnershipDescription}</p>
 
 			<Select
-				label={language?.walletAddress}
+				label={''}
 				disabled={loading || adminWalletOptions.length === 0}
 				activeOption={activeWalletOption ?? adminWalletOptions[0] ?? { id: '', label: 'Select wallet' }}
 				setActiveOption={setActiveWalletOption}
