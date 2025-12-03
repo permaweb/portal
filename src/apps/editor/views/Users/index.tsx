@@ -51,7 +51,6 @@ export default function Users() {
 				if (!profiles[inviterAddress]) {
 					try {
 						const profile = await permawebProvider.fetchProfile(inviterAddress);
-						console.log('fetched profile for', inviterAddress, profile);
 						profiles[inviterAddress] = profile;
 					} catch (err) {
 						console.error('Failed to fetch profile for', inviterAddress, err);
