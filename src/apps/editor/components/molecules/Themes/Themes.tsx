@@ -403,7 +403,7 @@ function Color(props: {
 							</S.ShadowEditorRow>
 						</S.ShadowEditorGrid>
 						<S.ShadowPreview
-							shadow={shadowEnabled ? shadowConfigToString(shadowConfig) : 'none'}
+							shadow={shadowEnabled ? shadowConfigToString(shadowConfig) : 'unset'}
 							backgroundColor={props.basics?.background?.[props.scheme] || '128,128,128'}
 						/>
 						<S.SelectorActions>
@@ -423,7 +423,7 @@ function Color(props: {
 									type={'alt1'}
 									label={language?.save}
 									handlePress={() => {
-										const shadowStr = shadowEnabled ? shadowConfigToString(shadowConfig) : 'none';
+										const shadowStr = shadowEnabled ? shadowConfigToString(shadowConfig) : 'unset';
 										props.onChange(shadowStr);
 										setTextValue(shadowStr);
 										setShowTextInput(false);
