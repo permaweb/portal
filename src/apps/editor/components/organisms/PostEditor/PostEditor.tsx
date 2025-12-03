@@ -295,10 +295,10 @@ export default function PostEditor() {
 
 			if (assetId) {
 				try {
-					/* If user is authorized in the asset then send update directly, otherwise forward it through the portal */
+					/* Update the post through the portal */
 					let assetContentUpdateId = null;
 					if (reviewStatus === 'Auto') {
-						// directly save if it is not in review mode or from non contributor
+						/* Directly save if it is not in review mode or from non contributor */
 						assetContentUpdateId = await permawebProvider.libs.sendMessage({
 							processId: portalProvider.current.id,
 							wallet: arProvider.wallet,
@@ -388,7 +388,7 @@ export default function PostEditor() {
 							contentType: ASSET_UPLOAD.contentType,
 							assetType: ASSET_UPLOAD.ansType,
 							users: getAssetAuthUsers(),
-							spawnComments: true,
+							spawnComments: false,
 						},
 						(status: any) => console.log(status)
 					);
@@ -560,6 +560,9 @@ export default function PostEditor() {
 
 	function getAssetAuthUsers() {
 		const authUsers = [portalProvider.current.id];
+		return authUsers;
+
+		/* Below is deprecated, all post updates now go directly through the portal */
 
 		/* Give all admins and moderators access to the post */
 		for (const user of portalProvider.current?.users) {
