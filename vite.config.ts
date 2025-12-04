@@ -23,7 +23,21 @@ export default defineConfig(({ mode }) => {
 				emptyOutDir: true,
 				rollupOptions: {
 					input: path.resolve(root, 'index.html'),
-					plugins: [polyfillNode()],
+					plugins: [
+						polyfillNode(),
+						{
+							name: 'copy-service-worker',
+							writeBundle() {
+								const fs = require('fs');
+								const swPath = path.resolve(__dirname, 'public/service-worker.js');
+								const outPath = path.resolve(__dirname, `dist/${app}/service-worker.js`);
+								if (fs.existsSync(swPath)) {
+									fs.copyFileSync(swPath, outPath);
+									console.log('Service worker copied to dist');
+								}
+							},
+						},
+					],
 					output: {
 						manualChunks: (id: string) => {
 							if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
