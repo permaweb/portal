@@ -11,6 +11,17 @@ import { cachePortal, getCachedPortal, getPortalUsers } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
+export interface LayoutHeights {
+	header: number;
+	navigation: number;
+}
+
+export interface LogoSettings {
+	positionX: 'left' | 'center' | 'right';
+	positionY: 'top' | 'center' | 'bottom';
+	size: number;
+}
+
 export interface PortalContextState {
 	portalId: string | null;
 	portal: any;
@@ -18,7 +29,28 @@ export interface PortalContextState {
 	setPortalId: (portalId: string) => void;
 	editorMode: string;
 	setEditorMode: (mode: string) => void;
+	layoutEditMode: boolean;
+	setLayoutEditMode: (mode: boolean) => void;
+	layoutHeights: LayoutHeights;
+	setLayoutHeights: (heights: LayoutHeights) => void;
+	logoSettings: LogoSettings;
+	setLogoSettings: (settings: LogoSettings) => void;
+	footerFixed: boolean;
+	setFooterFixed: (fixed: boolean) => void;
+	navSticky: boolean;
+	setNavSticky: (sticky: boolean) => void;
 }
+
+const DEFAULT_LAYOUT_HEIGHTS: LayoutHeights = {
+	header: 100,
+	navigation: 50,
+};
+
+const DEFAULT_LOGO_SETTINGS: LogoSettings = {
+	positionX: 'left',
+	positionY: 'center',
+	size: 80,
+};
 
 const DEFAULT_CONTEXT = {
 	portalId: null,
@@ -27,6 +59,16 @@ const DEFAULT_CONTEXT = {
 	setPortalId(_portalId: string) {},
 	editorMode: 'hidden',
 	setEditorMode(_mode: string) {},
+	layoutEditMode: false,
+	setLayoutEditMode(_mode: boolean) {},
+	layoutHeights: DEFAULT_LAYOUT_HEIGHTS,
+	setLayoutHeights(_heights: LayoutHeights) {},
+	logoSettings: DEFAULT_LOGO_SETTINGS,
+	setLogoSettings(_settings: LogoSettings) {},
+	footerFixed: false,
+	setFooterFixed(_fixed: boolean) {},
+	navSticky: true,
+	setNavSticky(_sticky: boolean) {},
 };
 
 export const PortalContext = React.createContext<PortalContextState>(DEFAULT_CONTEXT);
@@ -54,6 +96,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [portal, setPortal] = React.useState(null);
 	const [permissions, setPermissions] = React.useState<PortalPermissionsType | null>(null);
 	const [editorMode, setEditorMode] = React.useState('hidden');
+	const [layoutEditMode, setLayoutEditMode] = React.useState(false);
+	const [layoutHeights, setLayoutHeights] = React.useState<LayoutHeights>(DEFAULT_LAYOUT_HEIGHTS);
+	const [logoSettings, setLogoSettings] = React.useState<LogoSettings>(DEFAULT_LOGO_SETTINGS);
+	const [footerFixed, setFooterFixed] = React.useState(false);
+	const [navSticky, setNavSticky] = React.useState(true);
 
 	React.useEffect(() => {
 		if (!portalId || !permawebProvider.libs) return;
@@ -186,6 +233,35 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [portalId, permawebProvider.libs, permawebProvider.profile?.id, arProvider.walletAddress]);
 
+	React.useEffect(() => {
+		if (portal?.Layout) {
+			const layout = portal.Layout;
+			const parseHeight = (h: string | number): number => {
+				if (typeof h === 'number') return h;
+				if (typeof h === 'string') return parseInt(h.replace('px', ''), 10) || 0;
+				return 0;
+			};
+			setLayoutHeights({
+				header: parseHeight(layout.header?.layout?.height) || DEFAULT_LAYOUT_HEIGHTS.header,
+				navigation: parseHeight(layout.navigation?.layout?.height) || DEFAULT_LAYOUT_HEIGHTS.navigation,
+			});
+			const logoContent = layout.header?.content?.logo;
+			if (logoContent) {
+				const parseSize = (s: string | number): number => {
+					if (typeof s === 'number') return s;
+					if (typeof s === 'string') return parseInt(s.replace('%', ''), 10) || 80;
+					return 80;
+				};
+				setLogoSettings({
+					positionX: logoContent.positionX || DEFAULT_LOGO_SETTINGS.positionX,
+					positionY: logoContent.positionY || DEFAULT_LOGO_SETTINGS.positionY,
+					size: parseSize(logoContent.size),
+				});
+			}
+			setFooterFixed(layout.footer?.layout?.fixed || false);
+		}
+	}, [portal?.Layout]);
+
 	function getUserPermissions(address: string, users: PortalUserType[], permissions: PortalPermissionsType) {
 		const user = users?.find((user: PortalUserType) => user.address === address);
 
@@ -251,6 +327,16 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					setPortalId,
 					editorMode,
 					setEditorMode,
+					layoutEditMode,
+					setLayoutEditMode,
+					layoutHeights,
+					setLayoutHeights,
+					logoSettings,
+					setLogoSettings,
+					footerFixed,
+					setFooterFixed,
+					navSticky,
+					setNavSticky,
 				}}
 			>
 				{props.children}

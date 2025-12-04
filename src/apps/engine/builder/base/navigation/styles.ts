@@ -1,14 +1,26 @@
 import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
-export const Navigation = styled.div<{ $layout: any; maxWidth: number }>`
-	position: relative;
-	position: sticky;
+export const Navigation = styled.div<{ $layout: any; maxWidth: number; $editHeight?: number; $editSticky?: boolean }>`
+	position: ${(props) => {
+		const isSticky = props.$editSticky !== undefined ? props.$editSticky : true;
+		return isSticky ? 'sticky' : 'relative';
+	}};
 	display: flex;
 	align-items: center;
 	top: 0px;
-	height: ${(props) => (props.$layout.height ? `${props.$layout.height}px` : `40px`)};
-	min-height: ${(props) => (props.$layout.height ? `${props.$layout.height}px` : `40px`)};
+	height: ${(props) =>
+		props.$editHeight !== undefined
+			? `${props.$editHeight}px`
+			: props.$layout.height
+			? `${props.$layout.height}px`
+			: `40px`};
+	min-height: ${(props) =>
+		props.$editHeight !== undefined
+			? `${props.$editHeight}px`
+			: props.$layout.height
+			? `${props.$layout.height}px`
+			: `40px`};
 	width: 100%;
 	max-width: ${(props) => (props.$layout.width === 'content' ? `${props.maxWidth}px` : `100%`)};
 	background: var(--color-navigation-background);
@@ -24,6 +36,7 @@ export const Navigation = styled.div<{ $layout: any; maxWidth: number }>`
 	border-right: ${(props) =>
 		props.$layout.border.sides ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`};
 	box-shadow: var(--preference-navigation-shadow);
+	clip-path: inset(0 -100% -100% -100%);
 	user-select: none;
 	box-sizing: border-box;
 
@@ -241,4 +254,60 @@ export const Tooltip = styled.div`
 	${NavItem}:hover & {
 		opacity: 1;
 	}
+`;
+
+export const ResizeHandle = styled.div<{ $isDragging?: boolean }>`
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: ns-resize;
+	z-index: 10;
+	transform: translateY(50%);
+
+	&:hover > div {
+		background: rgba(var(--color-primary), 1);
+		opacity: 1;
+	}
+
+	${(props) =>
+		props.$isDragging &&
+		`
+		> div {
+			background: rgba(var(--color-primary), 1);
+			opacity: 1;
+			height: 6px;
+		}
+	`}
+`;
+
+export const HandleBar = styled.div`
+	width: 100%;
+	height: 4px;
+	background: rgba(var(--color-primary), 0.6);
+	opacity: 0.8;
+	transition: all 0.15s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+`;
+
+export const HandleLabel = styled.span`
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: rgba(var(--color-primary), 1);
+	color: white;
+	padding: 4px 12px;
+	border-radius: 4px;
+	font-size: 11px;
+	font-weight: 600;
+	white-space: nowrap;
+	pointer-events: none;
 `;
