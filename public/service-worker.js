@@ -69,7 +69,6 @@ self.addEventListener('fetch', (event) => {
 		event.respondWith(
 			caches.match(request).then((response) => {
 				if (response) {
-					console.log('[Service Worker] Serving from cache:', request.url);
 					return response;
 				}
 
