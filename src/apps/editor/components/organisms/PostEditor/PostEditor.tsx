@@ -8,8 +8,7 @@ import { currentPostUpdate, setOriginalData } from 'editor/store/post';
 
 import { Button } from 'components/atoms/Button';
 import { Modal } from 'components/atoms/Modal';
-import { ASSET_UPLOAD, URLS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
+import { ASSET_UPLOAD, PORTAL_POST_DATA, URLS } from 'helpers/config';
 import {
 	PortalAssetRequestType,
 	PortalHeaderType,
@@ -17,7 +16,7 @@ import {
 	PortalUserType,
 	RequestUpdateType,
 } from 'helpers/types';
-import { filterDuplicates, hasUnsavedPostChanges, isMac, urlify } from 'helpers/utils';
+import { filterDuplicates, getByteSize, getByteSizeDisplay, hasUnsavedPostChanges, isMac, urlify } from 'helpers/utils';
 import { useNavigationConfirm } from 'hooks/useNavigationConfirm';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -375,23 +374,23 @@ export default function PostEditor() {
 				}
 			} else {
 				try {
-					const assetDataFetch = await fetch(getTxEndpoint(ASSET_UPLOAD.src.data));
-					const dataSrc = await assetDataFetch.text();
+					const args = {
+						name: currentPost.data.title,
+						description: currentPost.data.description,
+						topics: currentPost.data.topics,
+						creator: currentPost.data.creator ?? permawebProvider.profile.id,
+						data: PORTAL_POST_DATA(), // TODO
+						// data: 'Portal Post',
+						contentType: ASSET_UPLOAD.contentType,
+						assetType: ASSET_UPLOAD.ansType,
+						users: getAssetAuthUsers(),
+						spawnComments: false,
+					};
 
-					const assetId = await permawebProvider.libs.createAtomicAsset(
-						{
-							name: currentPost.data.title,
-							description: currentPost.data.description,
-							topics: currentPost.data.topics,
-							creator: currentPost.data.creator ?? permawebProvider.profile.id,
-							data: dataSrc,
-							contentType: ASSET_UPLOAD.contentType,
-							assetType: ASSET_UPLOAD.ansType,
-							users: getAssetAuthUsers(),
-							spawnComments: false,
-						},
-						(status: any) => console.log(status)
-					);
+					const bytes = getByteSize(JSON.stringify(args));
+					console.log(`Data Size: ${getByteSizeDisplay(bytes)}`);
+
+					const assetId = await permawebProvider.libs.createAtomicAsset(args, (status: any) => console.log(status));
 
 					console.log(`Asset ID: ${assetId}`);
 
