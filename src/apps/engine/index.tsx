@@ -169,24 +169,44 @@ function App() {
 		);
 	}
 
+	const navPosition = Layout?.navigation?.layout?.position || 'top';
+	const isSideNav = navPosition === 'left' || navPosition === 'right';
+
 	return portalProvider?.portal ? (
 		<>
 			<div id={DOM.loader} />
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />
 			<S.PageWrapper>
-				<S.Page $layout={Layout?.basics} wallpaper={Wallpaper} id="Page">
-					<Header
-						name={Name}
-						layout={Layout?.header?.layout}
-						content={Layout?.header?.content}
-						theme={theme}
-						setTheme={setTheme}
-					/>
-					<Navigation layout={Layout?.navigation?.layout} content={Categories} theme={theme} />
-					<Content layout={Layout} />
-					<Footer layout={Layout?.footer?.layout} content={Layout?.footer?.content} theme={theme} />
-				</S.Page>
+				{isSideNav ? (
+					<S.SideNavLayout $navPosition={navPosition}>
+						<Navigation layout={Layout?.navigation?.layout} content={Categories} theme={theme} />
+						<S.Page $layout={Layout?.basics} wallpaper={Wallpaper} id="Page">
+							<Header
+								name={Name}
+								layout={Layout?.header?.layout}
+								content={Layout?.header?.content}
+								theme={theme}
+								setTheme={setTheme}
+							/>
+							<Content layout={Layout} />
+							<Footer layout={Layout?.footer?.layout} content={Layout?.footer?.content} theme={theme} />
+						</S.Page>
+					</S.SideNavLayout>
+				) : (
+					<S.Page $layout={Layout?.basics} wallpaper={Wallpaper} id="Page">
+						<Header
+							name={Name}
+							layout={Layout?.header?.layout}
+							content={Layout?.header?.content}
+							theme={theme}
+							setTheme={setTheme}
+						/>
+						<Navigation layout={Layout?.navigation?.layout} content={Categories} theme={theme} />
+						<Content layout={Layout} />
+						<Footer layout={Layout?.footer?.layout} content={Layout?.footer?.content} theme={theme} />
+					</S.Page>
+				)}
 				<ZoneEditor />
 			</S.PageWrapper>
 		</>

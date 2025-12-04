@@ -104,7 +104,7 @@ export const THEME_DEFAULT = {
 			},
 			shadow: {
 				light: 'unset',
-				dark: '0 2px 2px',
+				dark: 'unset',
 			},
 		},
 	},

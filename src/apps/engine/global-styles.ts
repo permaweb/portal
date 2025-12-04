@@ -215,6 +215,13 @@ export const FooterWrapper = styled.div<{ $layout: any }>`
 	z-index: 0;
 `;
 
+export const SideNavLayout = styled.div<{ $navPosition: 'left' | 'right' }>`
+	display: flex;
+	flex-direction: ${(props) => (props.$navPosition === 'right' ? 'row-reverse' : 'row')};
+	width: 100%;
+	min-height: 100vh;
+`;
+
 export const SettingsButton = styled.div`
 	position: absolute;
 	right: -40px;

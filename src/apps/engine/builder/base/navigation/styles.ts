@@ -1,38 +1,71 @@
 import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
+const isSideNav = (layout: any) => layout?.position === 'left' || layout?.position === 'right';
+
 export const Navigation = styled.div<{ $layout: any; maxWidth: number }>`
-	position: relative;
 	position: sticky;
+	top: 0;
 	display: flex;
-	align-items: center;
-	top: 0px;
-	height: ${(props) => (props.$layout.height ? `${props.$layout.height}px` : `40px`)};
-	min-height: ${(props) => (props.$layout.height ? `${props.$layout.height}px` : `40px`)};
-	width: 100%;
-	max-width: ${(props) => (props.$layout.width === 'content' ? `${props.maxWidth}px` : `100%`)};
+	flex-direction: ${(props) => (isSideNav(props.$layout) ? 'column' : 'row')};
+	align-items: ${(props) => (isSideNav(props.$layout) ? 'stretch' : 'center')};
+	width: ${(props) => {
+		if (isSideNav(props.$layout)) {
+			return typeof props.$layout.width === 'number' ? `${props.$layout.width}px` : '300px';
+		}
+		return '100%';
+	}};
+	min-width: ${(props) => {
+		if (isSideNav(props.$layout)) {
+			return typeof props.$layout.width === 'number' ? `${props.$layout.width}px` : '300px';
+		}
+		return 'auto';
+	}};
+	height: ${(props) => {
+		if (isSideNav(props.$layout)) {
+			return '100vh';
+		}
+		return props.$layout.height ? `${props.$layout.height}px` : '40px';
+	}};
+	min-height: ${(props) =>
+		isSideNav(props.$layout) ? 'auto' : props.$layout.height ? `${props.$layout.height}px` : '40px'};
+	max-width: ${(props) => {
+		if (isSideNav(props.$layout)) return 'none';
+		return props.$layout.width === 'content' ? `${props.maxWidth}px` : '100%';
+	}};
 	background: var(--color-navigation-background);
-	margin-left: auto;
-	margin-right: auto;
-	padding: ${(props) => (props.$layout.width === `content` ? `0 10px` : 0)};
+	margin-left: ${(props) => (isSideNav(props.$layout) ? '0' : 'auto')};
+	margin-right: ${(props) => (isSideNav(props.$layout) ? '0' : 'auto')};
+	padding: ${(props) => {
+		if (isSideNav(props.$layout)) return '20px 0';
+		return props.$layout.width === 'content' ? '0 10px' : '0';
+	}};
 	z-index: 2;
-	border-bottom: ${(props) =>
-		props.$layout.border.bottom ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`};
-	border-top: ${(props) => (props.$layout.border.top ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`)};
-	border-left: ${(props) =>
-		props.$layout.border.sides ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`};
-	border-right: ${(props) =>
-		props.$layout.border.sides ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`};
+	overflow-y: ${(props) => (isSideNav(props.$layout) ? 'auto' : 'visible')};
+	border-bottom: ${(props) => {
+		if (isSideNav(props.$layout)) return 'none';
+		return props.$layout.border?.bottom ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
+	}};
+	border-top: ${(props) => (props.$layout.border?.top ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset')};
+	border-left: ${(props) => {
+		if (props.$layout?.position === 'right') return '1px solid rgba(var(--color-navigation-border),1)';
+		return props.$layout.border?.sides ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
+	}};
+	border-right: ${(props) => {
+		if (props.$layout?.position === 'left') return '1px solid rgba(var(--color-navigation-border),1)';
+		return props.$layout.border?.sides ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
+	}};
 	box-shadow: var(--preference-navigation-shadow);
 	user-select: none;
 	box-sizing: border-box;
 
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-		padding: 0 var(--spacing-xxs);
+		padding: ${(props) => (isSideNav(props.$layout) ? '20px 0' : '0 var(--spacing-xxs)')};
 	}
 
 	${(props) =>
-		props.$layout.width === `content` &&
+		!isSideNav(props.$layout) &&
+		props.$layout.width === 'content' &&
 		`
     &::before,
     &::after {
@@ -48,30 +81,31 @@ export const Navigation = styled.div<{ $layout: any; maxWidth: number }>`
       top: 100%;
       left: 0;
       border-top-color: var(--color-navigation-background);
-      border-left-color: transparent; 
-      border-width: 10px 0 0 10px; 
+      border-left-color: transparent;
+      border-width: 10px 0 0 10px;
     }
 
     &::after {
       top: 100%;
       right: 0;
       border-top-color: var(--color-navigation-background);
-      border-right-color: transparent; 
-      border-width: 10px 10px 0 0; 
+      border-right-color: transparent;
+      border-width: 10px 10px 0 0;
     }
   `};
 `;
 
 export const NavigationEntries = styled.div<{ $layout: any; maxWidth: number }>`
 	display: flex;
-	align-items: center;
-	height: 100%;
+	flex-direction: ${(props) => (isSideNav(props.$layout) ? 'column' : 'row')};
+	align-items: ${(props) => (isSideNav(props.$layout) ? 'stretch' : 'center')};
+	height: ${(props) => (isSideNav(props.$layout) ? 'auto' : '100%')};
 	width: 100%;
 	padding: ${(props) => (props.$layout.padding ? props.$layout.padding : 0)};
-	max-width: ${(props) => (props?.maxWidth ? `${props.maxWidth}px` : '1200px')};
-	margin-left: ${(props) => (props.$layout.width === 'page' ? `auto` : `10px`)};
-	margin-right: auto;
-	gap: 20px;
+	max-width: ${(props) => (isSideNav(props.$layout) ? '100%' : props?.maxWidth ? `${props.maxWidth}px` : '1200px')};
+	margin-left: ${(props) => (isSideNav(props.$layout) ? '0' : props.$layout.width === 'page' ? 'auto' : '10px')};
+	margin-right: ${(props) => (isSideNav(props.$layout) ? '0' : 'auto')};
+	gap: ${(props) => (isSideNav(props.$layout) ? '0' : '20px')};
 	box-sizing: border-box;
 
 	> div > a {
@@ -79,7 +113,8 @@ export const NavigationEntries = styled.div<{ $layout: any; maxWidth: number }>`
 	}
 
 	button {
-		margin-left: auto;
+		margin-left: ${(props) => (isSideNav(props.$layout) ? '0' : 'auto')};
+		margin-top: ${(props) => (isSideNav(props.$layout) ? 'auto' : '0')};
 	}
 
 	a.active {
@@ -95,14 +130,16 @@ export const NavigationEntries = styled.div<{ $layout: any; maxWidth: number }>`
 	}
 `;
 
-export const NavigationEntry = styled.div`
+export const NavigationEntry = styled.div<{ $layout?: any }>`
 	position: relative;
 	display: flex;
-	justify-content: center;
-	align-items: center;
+	flex-direction: ${(props) => (isSideNav(props.$layout) ? 'column' : 'row')};
+	justify-content: ${(props) => (isSideNav(props.$layout) ? 'flex-start' : 'center')};
+	align-items: ${(props) => (isSideNav(props.$layout) ? 'stretch' : 'center')};
 	height: fit-content;
-	min-height: 100%;
-	border-radius: 8px;
+	min-height: ${(props) => (isSideNav(props.$layout) ? 'auto' : '100%')};
+	width: ${(props) => (isSideNav(props.$layout) ? '100%' : 'auto')};
+	border-radius: ${(props) => (isSideNav(props.$layout) ? '0' : '8px')};
 	white-space: nowrap;
 
 	a {
@@ -111,6 +148,8 @@ export const NavigationEntry = styled.div`
 		display: flex;
 		align-items: center;
 		width: 100%;
+		padding: ${(props) => (isSideNav(props.$layout) ? '12px 20px' : '0')};
+		box-sizing: border-box;
 
 		font-size: var(--font-size-default);
 		font-weight: 600;
@@ -124,6 +163,7 @@ export const NavigationEntry = styled.div`
 
 	&:hover {
 		cursor: pointer;
+		background: ${(props) => (isSideNav(props.$layout) ? 'rgba(var(--color-navigation-text), 0.1)' : 'transparent')};
 		a {
 			color: rgba(var(--color-navigation-text-hover), 1);
 
@@ -173,26 +213,27 @@ export const Edit = styled.div`
 `;
 
 export const NavigationEntryMenu = styled.div<{ $layout: any }>`
-	position: absolute;
-	top: 40px;
-	left: 0;
-	width: fit-content;
+	position: ${(props) => (isSideNav(props.$layout) ? 'relative' : 'absolute')};
+	top: ${(props) => (isSideNav(props.$layout) ? 'auto' : '40px')};
+	left: ${(props) => (isSideNav(props.$layout) ? 'auto' : '0')};
+	width: ${(props) => (isSideNav(props.$layout) ? '100%' : 'fit-content')};
 	min-width: 150px;
-	background: var(--color-navigation-background);
-	// box-shadow: var(--shadow-navigation-entry);
-	transform: scaleY(0);
+	background: ${(props) =>
+		isSideNav(props.$layout) ? 'rgba(var(--color-navigation-text), 0.05)' : 'var(--color-navigation-background)'};
+	transform: ${(props) => (isSideNav(props.$layout) ? 'none' : 'scaleY(0)')};
 	transform-origin: top;
 	transition: transform 0.5s ease;
-	animation: 0.1s ease forwards expandOnLoad;
+	animation: ${(props) => (isSideNav(props.$layout) ? 'none' : '0.1s ease forwards expandOnLoad')};
 	border-top: ${(props) =>
-		props.$layout.border.bottom ? `1px solid rgba(var(--color-navigation-background),1)` : `unset`};
+		props.$layout?.border?.bottom ? `1px solid rgba(var(--color-navigation-background),1)` : `unset`};
 	border-bottom: ${(props) =>
-		props.$layout.border.bottom ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`};
+		props.$layout?.border?.bottom ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`};
 	border-left: ${(props) =>
-		props.$layout.border.bottom ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`};
+		props.$layout?.border?.bottom ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`};
 	border-right: ${(props) =>
-		props.$layout.border.bottom ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`};
+		props.$layout?.border?.bottom ? `1px solid rgba(var(--color-navigation-border),1)` : `unset`};
 	box-sizing: border-box;
+	padding-left: ${(props) => (isSideNav(props.$layout) ? '20px' : '0')};
 
 	@keyframes expandOnLoad {
 		to {

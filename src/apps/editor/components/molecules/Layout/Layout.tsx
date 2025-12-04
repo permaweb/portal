@@ -31,7 +31,7 @@ export default function Layout() {
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	// Layout options for feed content
-	const options = [{ name: 'journal' }, { name: 'blog' }];
+	const options = [{ name: 'journal' }, { name: 'blog' }, { name: 'documentation' }];
 
 	const [activeName, setActiveName] = React.useState<string>('');
 
@@ -54,7 +54,10 @@ export default function Layout() {
 
 	React.useEffect(() => {
 		if (portalProvider.current) {
+			const currentLayout = portalProvider.current?.layout as any;
 			const currentPages = portalProvider.current?.pages as any;
+			const navPosition = currentLayout?.navigation?.layout?.position;
+
 			const hasPostSpotlight = currentPages?.home?.content?.some((row: any) =>
 				row.content?.some((item: any) => item.type === 'postSpotlight')
 			);
@@ -62,9 +65,11 @@ export default function Layout() {
 				row.content?.some((item: any) => item.type === 'categorySpotlight')
 			);
 
-			if (hasPostSpotlight && hasCategorySpotlight) {
+			if (navPosition === 'left' || navPosition === 'right') {
+				setActiveName('documentation');
+			} else if (hasPostSpotlight && hasCategorySpotlight) {
 				setActiveName('blog');
-			} else if (JSON.stringify(portalProvider.current?.layout) === JSON.stringify(LAYOUT.JOURNAL)) {
+			} else if (JSON.stringify(currentLayout) === JSON.stringify(LAYOUT.JOURNAL)) {
 				setActiveName('journal');
 			} else {
 				setActiveName(currentPages?.feed?.content?.[0]?.content?.[0]?.layout || 'journal');
@@ -79,6 +84,9 @@ export default function Layout() {
 		} else if (optionName === 'journal') {
 			setLayout(LAYOUT.JOURNAL);
 			setPages(PAGES.JOURNAL);
+		} else if (optionName === 'documentation') {
+			setLayout(LAYOUT.DOCUMENTATION);
+			setPages(PAGES.BLOG);
 		} else {
 			const layoutValue = optionName.toLowerCase();
 			const updatedPages = {

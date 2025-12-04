@@ -101,6 +101,7 @@ export default function Navigation(props: any) {
 			<S.NavigationEntry
 				ref={containerRef}
 				id={`entry-${index}-${entry?.name ?? 'unnamed'}`}
+				$layout={layout}
 				onPointerEnter={handlePointerEnter}
 				onPointerLeave={handlePointerLeave}
 				onFocus={handleFocus}
@@ -156,7 +157,7 @@ export default function Navigation(props: any) {
 			<S.NavigationEntries $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
 				{content &&
 					Object.entries(content).map(([key, entry]: [string, any]) => (
-						<NavigationEntry key={key} index={key} entry={entry} />
+						<NavigationEntry key={key} index={key} entry={entry} layout={layout} />
 					))}
 				<Search />
 			</S.NavigationEntries>
