@@ -1,8 +1,15 @@
 import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
-export const Header = styled.div<{ $layout: any; theme: any; $editHeight?: number }>`
-	position: relative;
+export const Header = styled.div<{
+	$layout: any;
+	theme: any;
+	$editHeight?: number;
+	$sticky?: boolean;
+	$isSideNav?: boolean;
+}>`
+	position: ${(props) => (props.$sticky ? 'sticky' : 'relative')};
+	top: ${(props) => (props.$sticky ? '0' : 'auto')};
 	display: flex;
 	flex-shrink: 0;
 	flex-direction: column;
@@ -32,11 +39,25 @@ export const Header = styled.div<{ $layout: any; theme: any; $editHeight?: numbe
 	}
 `;
 
-export const HeaderContentWrapper = styled.div<{ $layout: any; maxWidth: number; $isSideNav?: boolean }>`
+export const HeaderContentWrapper = styled.div<{
+	$layout: any;
+	maxWidth: number;
+	$isSideNav?: boolean;
+	$navWidth?: number;
+}>`
 	position: relative;
 	width: 100%;
-	max-width: ${(props) => (props.$layout.width === 'page' ? `${props.maxWidth}px` : `100%`)};
-	margin-left: ${(props) => (props.$isSideNav ? '20px' : 'auto')};
+	max-width: ${(props) => {
+		if (props.$layout.width === 'page') {
+			if (props.$isSideNav) {
+				const navWidth = props.$navWidth || 300;
+				return `${props.maxWidth - navWidth}px`;
+			}
+			return `${props.maxWidth}px`;
+		}
+		return '100%';
+	}};
+	margin-left: ${(props) => (props.$isSideNav ? '0' : 'auto')};
 	margin-right: auto;
 	min-height: 100%;
 	max-height: 100%;
@@ -111,6 +132,14 @@ export const Actions = styled.div<{ $isLogo: boolean }>`
 	align-items: center;
 	top: 10px;
 	right: 0;
+	z-index: 2;
+`;
+
+export const HeaderSearch = styled.div`
+	position: absolute;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
 	z-index: 2;
 `;
 

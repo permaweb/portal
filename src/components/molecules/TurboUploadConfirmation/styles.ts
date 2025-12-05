@@ -108,7 +108,7 @@ export const RadioGroup = styled.div`
 
 export const RadioOption = styled.div<{ selected: boolean; disabled?: boolean }>`
 	display: flex;
-	align-items: flex-start;
+	align-items: center;
 	gap: 12px;
 	padding: 12px 15px;
 	border-radius: ${STYLING.dimensions.radius.primary};

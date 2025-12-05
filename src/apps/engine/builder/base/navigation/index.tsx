@@ -7,6 +7,7 @@ import { initThemes } from 'engine/helpers/themes';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
 import { getRedirect } from 'helpers/utils';
 
 import { GlobalStyles } from '../../../global-styles';
@@ -20,7 +21,7 @@ export default function Navigation(props: any) {
 	const content = props.content;
 
 	const portalProvider = usePortalProvider();
-	const { portal, layoutHeights, setLayoutHeights, navSticky, layoutEditMode } = portalProvider;
+	const { portal, layoutHeights, setLayoutHeights, navSticky, layoutEditMode, logoSettings } = portalProvider;
 	const [isDragging, setIsDragging] = React.useState(false);
 	const [startPos, setStartPos] = React.useState(0);
 	const [startSize, setStartSize] = React.useState(0);
@@ -61,6 +62,8 @@ export default function Navigation(props: any) {
 	}, [isDragging, startPos, startSize, layoutHeights, setLayoutHeights, isSideNav, layout?.position]);
 	const Layout = preview ? defaultLayout : portal?.Layout;
 	const Themes = preview ? defaultThemes : portal?.Themes;
+	const Logo = portal?.Logo === 'None' ? ICONS.logo : portal?.Logo;
+	const [logoError, setLogoError] = React.useState<{ [key: string]: boolean }>({});
 
 	React.useEffect(() => {
 		if (preview) {
@@ -68,6 +71,29 @@ export default function Navigation(props: any) {
 			document.getElementById('preview')?.setAttribute('data-theme', 'dark');
 		}
 	}, [preview, Themes, Layout]);
+
+	const renderLogo = (txId: string) => {
+		const url = txId.startsWith('http') ? txId : getTxEndpoint(txId);
+
+		if (logoError[txId]) {
+			return <img src={url} alt="Logo" />;
+		}
+
+		return (
+			<ReactSVG
+				src={url}
+				beforeInjection={(_svg) => {
+					if (logoError[txId]) {
+						setLogoError((prev) => ({ ...prev, [txId]: false }));
+					}
+				}}
+				fallback={() => {
+					setLogoError((prev) => ({ ...prev, [txId]: true }));
+					return <img src={url} alt="Logo" />;
+				}}
+			/>
+		);
+	};
 
 	const NavigationEntry = (childProps: any) => {
 		const entry = childProps.entry;
@@ -200,11 +226,16 @@ export default function Navigation(props: any) {
 		>
 			{preview && <GlobalStyles />}
 			<S.NavigationEntries $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
+				{isSideNav && Logo && (
+					<S.NavLogo $logoSize={logoSettings?.size} $positionX={logoSettings?.positionX}>
+						<NavLink to={getRedirect()}>{renderLogo(Logo)}</NavLink>
+					</S.NavLogo>
+				)}
 				{content &&
 					Object.entries(content).map(([key, entry]: [string, any]) => (
 						<NavigationEntry key={key} index={key} entry={entry} layout={layout} />
 					))}
-				<Search />
+				{!isSideNav && <Search />}
 			</S.NavigationEntries>
 			{layoutEditMode && (
 				<>

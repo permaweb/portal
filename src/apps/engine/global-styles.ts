@@ -163,6 +163,7 @@ export const GlobalStyles = createGlobalStyle`
 export const PageWrapper = styled.div`
 	display: flex;
 	min-height: 100%;
+	overflow-x: hidden;
 `;
 
 export const Page = styled.div<{ $layout: any; wallpaper: any }>`
@@ -215,10 +216,29 @@ export const FooterWrapper = styled.div<{ $layout: any }>`
 	z-index: 0;
 `;
 
-export const SideNavLayout = styled.div<{ $navPosition: 'left' | 'right' }>`
+export const SideNavLayout = styled.div<{ $navPosition: 'left' | 'right'; $maxWidth?: number }>`
 	display: flex;
 	flex-direction: ${(props) => (props.$navPosition === 'right' ? 'row-reverse' : 'row')};
 	width: 100%;
+	min-height: 100vh;
+`;
+
+export const SideNavWrapper = styled.div<{ $navPosition: 'left' | 'right'; $maxWidth?: number; $navWidth?: number }>`
+	display: flex;
+	justify-content: ${(props) => (props.$navPosition === 'right' ? 'flex-start' : 'flex-end')};
+	width: ${(props) => {
+		const navWidth = props.$navWidth || 300;
+		const maxWidth = props.$maxWidth || 1200;
+		return `calc((100vw - ${maxWidth}px) / 2 + ${navWidth}px)`;
+	}};
+	min-width: ${(props) => `${props.$navWidth || 300}px`};
+	background: var(--color-navigation-background);
+`;
+
+export const ContentWrapper = styled.div<{ $navPosition: 'left' | 'right' }>`
+	flex: 1;
+	display: flex;
+	flex-direction: column;
 	min-height: 100vh;
 `;
 

@@ -44,6 +44,8 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		setFooterFixed,
 		navSticky,
 		setNavSticky,
+		headerSticky,
+		setHeaderSticky,
 		setLayoutEditMode,
 	} = portalProvider;
 
@@ -51,6 +53,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	const [initialLogoSettings, setInitialLogoSettings] = React.useState(logoSettings);
 	const [initialFooterFixed, setInitialFooterFixed] = React.useState(footerFixed);
 	const [initialNavSticky, setInitialNavSticky] = React.useState(navSticky);
+	const [initialHeaderSticky, setInitialHeaderSticky] = React.useState(headerSticky);
 
 	React.useEffect(() => {
 		if (showUserMenu && !showLayoutPanel) {
@@ -58,6 +61,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 			setInitialLogoSettings({ ...logoSettings });
 			setInitialFooterFixed(footerFixed);
 			setInitialNavSticky(navSticky);
+			setInitialHeaderSticky(headerSticky);
 		}
 	}, [showUserMenu]);
 
@@ -166,6 +170,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		setLogoSettings(initialLogoSettings);
 		setFooterFixed(initialFooterFixed);
 		setNavSticky(initialNavSticky);
+		setHeaderSticky(initialHeaderSticky);
 		setShowLayoutPanel(false);
 		setShowUserMenu(false);
 		setLayoutEditMode(false);
@@ -259,59 +264,95 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 						/>
 						<span>{layoutHeights.header}px</span>
 					</S.SliderRow>
-					<S.SliderRow>
-						<label>Logo Size</label>
-						<input
-							type="range"
-							value={logoSettings.size}
-							onChange={(e) => setLogoSettings({ ...logoSettings, size: parseInt(e.target.value) })}
-							min={10}
-							max={100}
-						/>
-						<span>{logoSettings.size}%</span>
-					</S.SliderRow>
-					<S.EntryRow>
-						<label>Logo Position X</label>
-						<select
-							value={logoSettings.positionX}
-							onChange={(e) =>
-								setLogoSettings({ ...logoSettings, positionX: e.target.value as LogoSettings['positionX'] })
-							}
-						>
-							<option value="left">Left</option>
-							<option value="center">Center</option>
-							<option value="right">Right</option>
-						</select>
-					</S.EntryRow>
-					<S.EntryRow>
-						<label>Logo Position Y</label>
-						<select
-							value={logoSettings.positionY}
-							onChange={(e) =>
-								setLogoSettings({ ...logoSettings, positionY: e.target.value as LogoSettings['positionY'] })
-							}
-						>
-							<option value="top">Top</option>
-							<option value="center">Center</option>
-							<option value="bottom">Bottom</option>
-						</select>
-					</S.EntryRow>
+					{isSideNav && (
+						<S.ToggleRow>
+							<label>Sticky</label>
+							<S.Toggle $active={headerSticky} onClick={() => setHeaderSticky(!headerSticky)} />
+						</S.ToggleRow>
+					)}
+					{!isSideNav && (
+						<>
+							<S.SliderRow>
+								<label>Logo Size</label>
+								<input
+									type="range"
+									value={logoSettings.size}
+									onChange={(e) => setLogoSettings({ ...logoSettings, size: parseInt(e.target.value) })}
+									min={10}
+									max={100}
+								/>
+								<span>{logoSettings.size}%</span>
+							</S.SliderRow>
+							<S.EntryRow>
+								<label>Logo Position X</label>
+								<select
+									value={logoSettings.positionX}
+									onChange={(e) =>
+										setLogoSettings({ ...logoSettings, positionX: e.target.value as LogoSettings['positionX'] })
+									}
+								>
+									<option value="left">Left</option>
+									<option value="center">Center</option>
+									<option value="right">Right</option>
+								</select>
+							</S.EntryRow>
+							<S.EntryRow>
+								<label>Logo Position Y</label>
+								<select
+									value={logoSettings.positionY}
+									onChange={(e) =>
+										setLogoSettings({ ...logoSettings, positionY: e.target.value as LogoSettings['positionY'] })
+									}
+								>
+									<option value="top">Top</option>
+									<option value="center">Center</option>
+									<option value="bottom">Bottom</option>
+								</select>
+							</S.EntryRow>
+						</>
+					)}
 				</S.NavigationWrapper>
 				<S.DSpacer />
 				<S.NavigationWrapper>
 					<S.NavigationCategory>Navigation</S.NavigationCategory>
 					{isSideNav ? (
-						<S.SliderRow>
-							<label>Width</label>
-							<input
-								type="range"
-								value={layoutHeights.navigation}
-								onChange={(e) => setLayoutHeights({ ...layoutHeights, navigation: parseInt(e.target.value) })}
-								min={200}
-								max={400}
-							/>
-							<span>{layoutHeights.navigation}px</span>
-						</S.SliderRow>
+						<>
+							<S.SliderRow>
+								<label>Width</label>
+								<input
+									type="range"
+									value={layoutHeights.navigation}
+									onChange={(e) => setLayoutHeights({ ...layoutHeights, navigation: parseInt(e.target.value) })}
+									min={200}
+									max={400}
+								/>
+								<span>{layoutHeights.navigation}px</span>
+							</S.SliderRow>
+							<S.SliderRow>
+								<label>Logo Size</label>
+								<input
+									type="range"
+									value={logoSettings.size}
+									onChange={(e) => setLogoSettings({ ...logoSettings, size: parseInt(e.target.value) })}
+									min={10}
+									max={100}
+								/>
+								<span>{logoSettings.size}%</span>
+							</S.SliderRow>
+							<S.EntryRow>
+								<label>Logo Position X</label>
+								<select
+									value={logoSettings.positionX}
+									onChange={(e) =>
+										setLogoSettings({ ...logoSettings, positionX: e.target.value as LogoSettings['positionX'] })
+									}
+								>
+									<option value="left">Left</option>
+									<option value="center">Center</option>
+									<option value="right">Right</option>
+								</select>
+							</S.EntryRow>
+						</>
 					) : (
 						<>
 							<S.ToggleRow>

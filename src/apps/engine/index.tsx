@@ -180,18 +180,26 @@ function App() {
 			<S.PageWrapper>
 				{isSideNav ? (
 					<S.SideNavLayout $navPosition={navPosition}>
-						<Navigation layout={Layout?.navigation?.layout} content={Categories} theme={theme} />
-						<S.Page $layout={Layout?.basics} wallpaper={Wallpaper} id="Page">
-							<Header
-								name={Name}
-								layout={Layout?.header?.layout}
-								content={Layout?.header?.content}
-								theme={theme}
-								setTheme={setTheme}
-							/>
-							<Content layout={Layout} />
-							<Footer layout={Layout?.footer?.layout} content={Layout?.footer?.content} theme={theme} />
-						</S.Page>
+						<S.SideNavWrapper
+							$navPosition={navPosition}
+							$maxWidth={Layout?.basics?.maxWidth}
+							$navWidth={Layout?.navigation?.layout?.width}
+						>
+							<Navigation layout={Layout?.navigation?.layout} content={Categories} theme={theme} />
+						</S.SideNavWrapper>
+						<S.ContentWrapper $navPosition={navPosition}>
+							<S.Page $layout={Layout?.basics} wallpaper={Wallpaper} id="Page">
+								<Header
+									name={Name}
+									layout={Layout?.header?.layout}
+									content={Layout?.header?.content}
+									theme={theme}
+									setTheme={setTheme}
+								/>
+								<Content layout={Layout} />
+								<Footer layout={Layout?.footer?.layout} content={Layout?.footer?.content} theme={theme} />
+							</S.Page>
+						</S.ContentWrapper>
 					</S.SideNavLayout>
 				) : (
 					<S.Page $layout={Layout?.basics} wallpaper={Wallpaper} id="Page">

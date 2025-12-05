@@ -43,7 +43,7 @@ export const Navigation = styled.div<{ $layout: any; maxWidth: number; $editHeig
 	margin-left: ${(props) => (isSideNav(props.$layout) ? '0' : 'auto')};
 	margin-right: ${(props) => (isSideNav(props.$layout) ? '0' : 'auto')};
 	padding: ${(props) => {
-		if (isSideNav(props.$layout)) return '20px 0';
+		if (isSideNav(props.$layout)) return '0';
 		return props.$layout.width === 'content' ? '0 10px' : '0';
 	}};
 	z-index: 2;
@@ -54,20 +54,24 @@ export const Navigation = styled.div<{ $layout: any; maxWidth: number; $editHeig
 	}};
 	border-top: ${(props) => (props.$layout.border?.top ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset')};
 	border-left: ${(props) => {
-		if (props.$layout?.position === 'right') return '1px solid rgba(var(--color-navigation-border),1)';
+		if (isSideNav(props.$layout)) {
+			return props.$layout?.position === 'right' ? '1px solid rgba(var(--color-navigation-border),1)' : 'none';
+		}
 		return props.$layout.border?.sides ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
 	}};
 	border-right: ${(props) => {
-		if (props.$layout?.position === 'left') return '1px solid rgba(var(--color-navigation-border),1)';
+		if (isSideNav(props.$layout)) {
+			return 'none';
+		}
 		return props.$layout.border?.sides ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
 	}};
-	box-shadow: var(--preference-navigation-shadow);
-	clip-path: inset(0 -100% -100% -100%);
+	box-shadow: ${(props) => (isSideNav(props.$layout) ? 'none' : 'var(--preference-navigation-shadow)')};
+	clip-path: ${(props) => (isSideNav(props.$layout) ? 'none' : 'inset(0 -100% -100% -100%)')};
 	user-select: none;
 	box-sizing: border-box;
 
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-		padding: ${(props) => (isSideNav(props.$layout) ? '20px 0' : '0 var(--spacing-xxs)')};
+		padding: ${(props) => (isSideNav(props.$layout) ? '0' : '0 var(--spacing-xxs)')};
 	}
 
 	${(props) =>
@@ -363,4 +367,34 @@ export const HandleLabel = styled.span<{ $isSideNav?: boolean }>`
 	font-weight: 600;
 	white-space: nowrap;
 	pointer-events: none;
+`;
+
+export const NavLogo = styled.div<{ $logoSize?: number; $positionX?: string }>`
+	display: flex;
+	align-items: center;
+	justify-content: ${(props) => {
+		const posX = props.$positionX || 'center';
+		return posX === 'center' ? 'center' : posX === 'left' ? 'flex-start' : 'flex-end';
+	}};
+	padding: 15px 20px;
+
+	a {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		div {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+	}
+
+	img,
+	svg {
+		max-width: 100%;
+		height: ${(props) => (props.$logoSize ? `${props.$logoSize}px` : '50px')};
+		width: auto;
+		object-fit: contain;
+	}
 `;
