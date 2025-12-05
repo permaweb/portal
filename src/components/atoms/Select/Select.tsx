@@ -17,6 +17,7 @@ export default function Select(props: {
 	icon?: string;
 	hideActiveOption?: boolean;
 	dropdownTop?: number;
+	renderOption?: (option: SelectOptionType) => React.ReactNode;
 }) {
 	const [active, setActive] = React.useState<boolean>(false);
 
@@ -48,7 +49,7 @@ export default function Select(props: {
 										setActive(false);
 									}}
 								>
-									{option.label}
+									{props.renderOption ? props.renderOption(option) : option.label}
 								</S.Option>
 							);
 						})}

@@ -35,12 +35,9 @@ export default function Fonts() {
 	const { addNotification } = useNotifications();
 
 	React.useEffect(() => {
-		if (headerFont?.id) loadFont(headerFont.id);
-	}, [headerFont]);
-
-	React.useEffect(() => {
-		if (bodyFont?.id) loadFont(bodyFont.id);
-	}, [bodyFont]);
+		const allFonts = [...FONT_OPTIONS.headers, ...FONT_OPTIONS.body];
+		WebFont.load({ google: { families: allFonts } });
+	}, []);
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
@@ -80,12 +77,12 @@ export default function Fonts() {
 		return opts[0];
 	}
 
-	function loadFont(family: string) {
-		WebFont.load({ google: { families: [family] } });
-	}
-
 	function getFontOptions(key: 'headers' | 'body') {
 		return FONT_OPTIONS[key].map((option: string) => ({ id: option, label: stripFontWeights(option) }));
+	}
+
+	function renderFontOption(option: SelectOptionType) {
+		return <span style={{ fontFamily: option.label }}>{option.label}</span>;
 	}
 
 	function getPreview(family: string) {
@@ -113,6 +110,7 @@ export default function Fonts() {
 						setActiveOption={(option) => setHeaderFont(option)}
 						options={headerOptions}
 						disabled={unauthorized || loading}
+						renderOption={renderFontOption}
 					/>
 					{getPreview(headerFont.label)}
 				</S.Section>
@@ -123,6 +121,7 @@ export default function Fonts() {
 						setActiveOption={(option) => setBodyFont(option)}
 						options={bodyOptions}
 						disabled={unauthorized || loading}
+						renderOption={renderFontOption}
 					/>
 					{getPreview(bodyFont.label)}
 				</S.Section>
