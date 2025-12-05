@@ -379,12 +379,11 @@ export default function PostEditor() {
 						description: currentPost.data.description,
 						topics: currentPost.data.topics,
 						creator: currentPost.data.creator ?? permawebProvider.profile.id,
-						data: PORTAL_POST_DATA(), // TODO
-						// data: 'Portal Post',
+						data: PORTAL_POST_DATA(),
 						contentType: ASSET_UPLOAD.contentType,
 						assetType: ASSET_UPLOAD.ansType,
 						users: getAssetAuthUsers(),
-						spawnComments: false,
+						spawnComments: true,
 					};
 
 					const bytes = getByteSize(JSON.stringify(args));
