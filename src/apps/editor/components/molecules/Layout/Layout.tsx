@@ -30,8 +30,11 @@ export default function Layout() {
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
-	// Layout options for feed content
-	const options = [{ name: 'journal' }, { name: 'blog' }, { name: 'documentation' }];
+	const options = [
+		{ name: 'journal', icon: ICONS.layoutJournal },
+		{ name: 'blog', icon: ICONS.layoutBlog },
+		{ name: 'documentation', icon: ICONS.layoutDocumentation },
+	];
 
 	const [activeName, setActiveName] = React.useState<string>('');
 
@@ -162,11 +165,14 @@ export default function Layout() {
 						return (
 							<S.Option
 								key={option.name}
-								disabled={active || unauthorized}
+								disabled={unauthorized}
+								$active={active}
 								onClick={() => (active ? {} : handleLayoutOptionChange(option.name))}
 							>
-								<p>{option.name}</p>
-								<S.Indicator active={active}>{active && <ReactSVG src={ICONS.checkmark} />}</S.Indicator>
+								<S.OptionIcon $active={active}>
+									<img src={option.icon} alt={option.name} />
+								</S.OptionIcon>
+								<S.OptionLabel>{option.name}</S.OptionLabel>
 							</S.Option>
 						);
 					})}

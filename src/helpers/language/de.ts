@@ -1,8 +1,12 @@
 export const de = {
 	// === UNTRANSLATED START ===
 	// TODO: translate
+	compressImage: `Compress Image`,
+	compressImageFree: `Compress Image (Free)`,
+	compressingImage: `Compressing image`,
 	contentImported: `Content Imported`,
 	errorImportingPost: `Error Importing Post`,
+	free: `Free`,
 	import: `Import`,
 	importFromExistingPost: `Import From Existing Post`,
 	importFromExistingPostInfo: `Imported post data will not overwrite any existing content in this post. Select from the existing options below.`,
@@ -10,7 +14,11 @@ export const de = {
 	markdownFileOnly: `Please upload a markdown (.md) file`,
 	markdownImportError: `Error importing markdown file`,
 	markdownImportSuccess: `Markdown content imported successfully`,
+	or: `or`,
 	postId: `Post ID`,
+	uploadOptions: `Upload Options`,
+	uploadUncompressed: `Upload Original`,
+	useCredits: `Use Credits`,
 	// === UNTRANSLATED END ===
 	activate: `Aktivieren`,
 	add: `Hinzufügen`,

@@ -1,14 +1,14 @@
 import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
-export const Header = styled.div<{ $layout: any; theme: any }>`
+export const Header = styled.div<{ $layout: any; theme: any; $editHeight?: number }>`
 	position: relative;
 	display: flex;
 	flex-shrink: 0;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	height: ${(props) => props.$layout.height};
+	height: ${(props) => (props.$editHeight !== undefined ? `${props.$editHeight}px` : props.$layout.height)};
 	background: rgba(var(--color-header-background), var(--color-header-opacity));
 	width: 100%;
 	margin-left: auto;
@@ -32,11 +32,11 @@ export const Header = styled.div<{ $layout: any; theme: any }>`
 	}
 `;
 
-export const HeaderContentWrapper = styled.div<{ $layout: any; maxWidth: number }>`
+export const HeaderContentWrapper = styled.div<{ $layout: any; maxWidth: number; $isSideNav?: boolean }>`
 	position: relative;
 	width: 100%;
 	max-width: ${(props) => (props.$layout.width === 'page' ? `${props.maxWidth}px` : `100%`)};
-	margin-left: auto;
+	margin-left: ${(props) => (props.$isSideNav ? '20px' : 'auto')};
 	margin-right: auto;
 	min-height: 100%;
 	max-height: 100%;
@@ -55,21 +55,25 @@ export const HeaderContent = styled.div<{ $layout: any; maxWidth: number }>`
 	height: 100%;
 `;
 
-export const Logo = styled.div<{ $layout: any }>`
+export const Logo = styled.div<{ $layout: any; $editLogo?: { positionX: string; positionY: string; size: number } }>`
 	position: absolute;
 	top: 20px;
 	left: 0;
 	bottom: 20px;
 	display: flex;
 	width: 100%;
-	justify-content: ${(props) =>
-		props.$layout.positionX === 'center' ? 'center' : props.$layout.positionX === 'left' ? 'flex-start' : 'center'};
-	align-items: ${(props) =>
-		props.$layout.positionY === 'center' ? 'center' : props.$layout.positionY === 'top' ? 'flex-start' : 'center'};
+	justify-content: ${(props) => {
+		const posX = props.$editLogo?.positionX || props.$layout.positionX;
+		return posX === 'center' ? 'center' : posX === 'left' ? 'flex-start' : posX === 'right' ? 'flex-end' : 'center';
+	}};
+	align-items: ${(props) => {
+		const posY = props.$editLogo?.positionY || props.$layout.positionY;
+		return posY === 'center' ? 'center' : posY === 'top' ? 'flex-start' : posY === 'bottom' ? 'flex-end' : 'center';
+	}};
 	z-index: 1;
 
 	a {
-		height: ${(props) => props.$layout.size};
+		height: ${(props) => (props.$editLogo ? `${props.$editLogo.size}%` : props.$layout.size)};
 		width: auto;
 		flex-shrink: 0;
 
@@ -155,4 +159,59 @@ export const LinksList = styled.div`
 			height: 16px;
 		}
 	}
+`;
+
+export const ResizeHandle = styled.div<{ $isDragging?: boolean }>`
+	position: fixed;
+	left: 0;
+	right: 0;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: ns-resize;
+	z-index: 50;
+	transform: translateY(-50%);
+
+	&:hover > div {
+		background: rgba(var(--color-primary), 1);
+		opacity: 1;
+	}
+
+	${(props) =>
+		props.$isDragging &&
+		`
+		> div {
+			background: rgba(var(--color-primary), 1);
+			opacity: 1;
+			height: 6px;
+		}
+	`}
+`;
+
+export const HandleBar = styled.div`
+	width: 100%;
+	height: 4px;
+	background: rgba(var(--color-primary), 0.6);
+	opacity: 0.8;
+	transition: all 0.15s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+`;
+
+export const HandleLabel = styled.span`
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: rgba(var(--color-primary), 1);
+	color: white;
+	padding: 4px 12px;
+	border-radius: 4px;
+	font-size: 11px;
+	font-weight: 600;
+	white-space: nowrap;
+	pointer-events: none;
 `;

@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 export const ContentWrapper = styled.div`
 	display: flex;
-	justify-content: center;
+	justify-content: flex-start;
 	width: 100%;
 	height: calc(100% - 40px);
 	margin-bottom: 120px;

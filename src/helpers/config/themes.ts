@@ -12,12 +12,12 @@ export const THEME_DEFAULT = {
 				dark: '20,20,20',
 			},
 			primary: {
-				light: '151,151,151',
-				dark: '77,77,77',
+				light: '222,0,80',
+				dark: '222,0,80',
 			},
 			secondary: {
-				light: '161,161,161',
-				dark: '88,88,88',
+				light: '239,102,152',
+				dark: '239,102,152',
 			},
 			border: {
 				light: '50, 50, 50',

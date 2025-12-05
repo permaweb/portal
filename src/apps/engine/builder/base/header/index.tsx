@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { NavLink } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import SocialLinks from 'engine/components/socialLinks';
@@ -20,7 +21,41 @@ import * as S from './styles';
 
 export default function Header(props: any) {
 	const { name, layout, content, preview } = props;
-	const { portal } = usePortalProvider();
+	const portalProvider = usePortalProvider();
+	const { portal, layoutHeights, setLayoutHeights, logoSettings, layoutEditMode } = portalProvider;
+
+	const navPosition = portal?.Layout?.navigation?.layout?.position;
+	const isSideNav = navPosition === 'left' || navPosition === 'right';
+	const [isDragging, setIsDragging] = React.useState(false);
+	const [startY, setStartY] = React.useState(0);
+	const [startHeight, setStartHeight] = React.useState(0);
+
+	const handleMouseDown = (e: React.MouseEvent) => {
+		e.preventDefault();
+		setIsDragging(true);
+		setStartY(e.clientY);
+		setStartHeight(layoutHeights.header);
+	};
+
+	React.useEffect(() => {
+		if (!isDragging) return;
+
+		const handleMouseMove = (e: MouseEvent) => {
+			const delta = e.clientY - startY;
+			const newHeight = Math.max(50, Math.min(300, startHeight + delta));
+			setLayoutHeights({ ...layoutHeights, header: newHeight });
+		};
+
+		const handleMouseUp = () => setIsDragging(false);
+
+		document.addEventListener('mousemove', handleMouseMove);
+		document.addEventListener('mouseup', handleMouseUp);
+
+		return () => {
+			document.removeEventListener('mousemove', handleMouseMove);
+			document.removeEventListener('mouseup', handleMouseUp);
+		};
+	}, [isDragging, startY, startHeight, layoutHeights, setLayoutHeights]);
 	const Themes = preview ? defaultThemes : portal?.Themes;
 	const Layout = preview ? defaultLayout : portal?.Layout;
 	const Logo = portal?.Logo === 'None' ? ICONS.logo : portal?.Logo;
@@ -80,11 +115,11 @@ export default function Header(props: any) {
 	return (
 		<>
 			{preview && <GlobalStyles />}
-			<S.Header $layout={layout} theme={settings?.theme as any} id="Header">
-				<S.HeaderContentWrapper $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
+			<S.Header $layout={layout} theme={settings?.theme as any} id="Header" $editHeight={layoutHeights.header}>
+				<S.HeaderContentWrapper $layout={layout} maxWidth={Layout?.basics?.maxWidth} $isSideNav={isSideNav}>
 					<S.HeaderContent $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
 						{Logo ? (
-							<S.Logo $layout={content.logo}>
+							<S.Logo $layout={content.logo} $editLogo={logoSettings}>
 								{Logo ? (
 									preview ? (
 										<a href="">{renderLogo(Logo)}</a>
@@ -110,6 +145,23 @@ export default function Header(props: any) {
 					</S.HeaderContent>
 				</S.HeaderContentWrapper>
 			</S.Header>
+			{layoutEditMode &&
+				ReactDOM.createPortal(
+					<S.ResizeHandle
+						$isDragging={isDragging}
+						onMouseDown={handleMouseDown}
+						style={{
+							top: layoutHeights.header,
+							left: isSideNav && navPosition === 'left' ? layoutHeights.navigation : 0,
+							right: isSideNav && navPosition === 'right' ? layoutHeights.navigation : 0,
+						}}
+					>
+						<S.HandleBar>
+							<S.HandleLabel>Header ({layoutHeights.header}px)</S.HandleLabel>
+						</S.HandleBar>
+					</S.ResizeHandle>,
+					document.body
+				)}
 		</>
 	);
 }

@@ -5,7 +5,7 @@ import Avatar from 'engine/components/avatar';
 import { Panel } from 'engine/components/panel';
 import ProfileEditor from 'engine/components/profileEditor';
 import useNavigate from 'engine/helpers/preview';
-import { usePortalProvider } from 'engine/providers/portalProvider';
+import { LogoSettings, usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS, STORAGE } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
@@ -26,12 +26,40 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	const { profile } = permawebProvider;
 	const language = languageProvider.object?.[languageProvider.current] ?? null;
 	const [showUserMenu, setShowUserMenu] = React.useState<boolean>(false);
+	const [saving, setSaving] = React.useState<boolean>(false);
 	const [showProfileManage, setShowProfileManage] = React.useState<boolean>(false);
+	const [showLayoutPanel, setShowLayoutPanel] = React.useState<boolean>(false);
 	const [instance, setInstance] = React.useState(null);
 	const [label, setLabel] = React.useState<string>('Log in');
 	const [banner, setBanner] = React.useState<string>('');
 	const [avatar, setAvatar] = React.useState<string>('');
 	const wrapperRef = React.useRef();
+
+	const {
+		layoutHeights,
+		setLayoutHeights,
+		logoSettings,
+		setLogoSettings,
+		footerFixed,
+		setFooterFixed,
+		navSticky,
+		setNavSticky,
+		setLayoutEditMode,
+	} = portalProvider;
+
+	const [initialLayoutHeights, setInitialLayoutHeights] = React.useState(layoutHeights);
+	const [initialLogoSettings, setInitialLogoSettings] = React.useState(logoSettings);
+	const [initialFooterFixed, setInitialFooterFixed] = React.useState(footerFixed);
+	const [initialNavSticky, setInitialNavSticky] = React.useState(navSticky);
+
+	React.useEffect(() => {
+		if (showUserMenu && !showLayoutPanel) {
+			setInitialLayoutHeights({ ...layoutHeights });
+			setInitialLogoSettings({ ...logoSettings });
+			setInitialFooterFixed(footerFixed);
+			setInitialNavSticky(navSticky);
+		}
+	}, [showUserMenu]);
 
 	React.useEffect(() => {
 		if (!instance) {
@@ -120,101 +148,327 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 
 	function handleDisconnect() {
 		setShowUserMenu(false);
+		setShowLayoutPanel(false);
+		setLayoutEditMode(false);
 		arProvider.handleDisconnect();
+	}
+
+	function handleCloseMenu() {
+		setShowUserMenu(false);
+		setShowLayoutPanel(false);
+		setLayoutEditMode(false);
 	}
 
 	const shorten = (s: string) => s.slice(0, 7) + '....' + s.slice(-4);
 
-	function getUserMenu() {
+	function handleLayoutCancel() {
+		setLayoutHeights(initialLayoutHeights);
+		setLogoSettings(initialLogoSettings);
+		setFooterFixed(initialFooterFixed);
+		setNavSticky(initialNavSticky);
+		setShowLayoutPanel(false);
+		setShowUserMenu(false);
+		setLayoutEditMode(false);
+	}
+
+	async function handleLayoutSave() {
+		if (!arProvider.wallet || !portalProvider.portalId) {
+			return;
+		}
+
+		try {
+			setSaving(true);
+
+			const currentLayout = portalProvider.portal?.Layout || {};
+			const updatedLayout = {
+				...currentLayout,
+				header: {
+					...currentLayout.header,
+					layout: {
+						...currentLayout.header?.layout,
+						height: `${layoutHeights.header}px`,
+					},
+					content: {
+						...currentLayout.header?.content,
+						logo: {
+							...currentLayout.header?.content?.logo,
+							positionX: logoSettings.positionX,
+							positionY: logoSettings.positionY,
+							size: `${logoSettings.size}%`,
+						},
+					},
+				},
+				navigation: {
+					...currentLayout.navigation,
+					layout: {
+						...currentLayout.navigation?.layout,
+						height: layoutHeights.navigation,
+					},
+				},
+				footer: {
+					...currentLayout.footer,
+					layout: {
+						...currentLayout.footer?.layout,
+						fixed: footerFixed,
+					},
+				},
+			};
+
+			const updateData = { Layout: updatedLayout };
+
+			await permawebProvider.libs.updateZone(updateData, portalProvider.portalId, arProvider.wallet);
+
+			setShowLayoutPanel(false);
+			setShowUserMenu(false);
+			setLayoutEditMode(false);
+		} catch (e: any) {
+			console.error('Failed to save layout:', e);
+		} finally {
+			setSaving(false);
+		}
+	}
+
+	function getLayoutMenu() {
+		const navPosition = portalProvider.portal?.Layout?.navigation?.layout?.position;
+		const isSideNav = navPosition === 'left' || navPosition === 'right';
+
 		return (
-			<S.UserMenu id="UserMenu">
-				<S.HeaderWrapper>
-					<S.Header>
-						<S.Banner>
-							{banner !== '' && (
-								<img
-									className="missingBanner"
-									onLoad={(e) => e.currentTarget.classList.remove('missingBanner')}
-									src={banner}
-								/>
-							)}
-						</S.Banner>
-						<S.AvatarWrapper>
-							<Avatar profile={profile} size={52} />
-						</S.AvatarWrapper>
-						<S.DisplayName>{profile?.displayName ? profile.displayName : 'My Profile'}</S.DisplayName>
-						<S.DAddress>
-							{shorten(arProvider.walletAddress)}
-							<ReactSVG src={ICONS.copy} />
-						</S.DAddress>
-					</S.Header>
-				</S.HeaderWrapper>
+			<S.LayoutMenu>
+				<S.LayoutHeader>
+					<S.BackButton
+						onClick={() => {
+							setShowLayoutPanel(false);
+							setLayoutEditMode(false);
+						}}
+					>
+						<ReactSVG src={ICONS.ENGINE.arrow} />
+					</S.BackButton>
+					<span>Edit Layout</span>
+					<div style={{ width: 24 }} />
+				</S.LayoutHeader>
 				<S.NavigationWrapper>
-					<S.NavigationCategory>User</S.NavigationCategory>
-					{profile?.id && (
-						<S.NavigationEntry
-							onClick={() => {
-								setShowUserMenu(false);
-								navigate(getRedirect(`author/${profile.id}`));
-							}}
+					<S.NavigationCategory>Header</S.NavigationCategory>
+					<S.SliderRow>
+						<label>Height</label>
+						<input
+							type="range"
+							value={layoutHeights.header}
+							onChange={(e) => setLayoutHeights({ ...layoutHeights, header: parseInt(e.target.value) })}
+							min={50}
+							max={300}
+						/>
+						<span>{layoutHeights.header}px</span>
+					</S.SliderRow>
+					<S.SliderRow>
+						<label>Logo Size</label>
+						<input
+							type="range"
+							value={logoSettings.size}
+							onChange={(e) => setLogoSettings({ ...logoSettings, size: parseInt(e.target.value) })}
+							min={10}
+							max={100}
+						/>
+						<span>{logoSettings.size}%</span>
+					</S.SliderRow>
+					<S.EntryRow>
+						<label>Logo Position X</label>
+						<select
+							value={logoSettings.positionX}
+							onChange={(e) =>
+								setLogoSettings({ ...logoSettings, positionX: e.target.value as LogoSettings['positionX'] })
+							}
 						>
-							<ReactSVG src={ICONS.user} />
-							{language.myProfile}
-						</S.NavigationEntry>
-					)}
-					<S.NavigationEntry $disabled={!profile?.id}>
-						<ReactSVG src={ICONS.post} />
-						{language.myPosts}
-					</S.NavigationEntry>
-					<S.NavigationEntry $disabled={!profile?.id}>
-						<ReactSVG src={ICONS.comments} />
-						{language.myComments}
-					</S.NavigationEntry>
-					{auth?.authType !== 'NATIVE_WALLET' && (
-						<S.NavigationEntry onClick={() => window.wanderInstance.open()}>
-							<ReactSVG src={ICONS.wallet} />
-							{language.myWallet}
-						</S.NavigationEntry>
-					)}
-					<S.NavigationEntry onClick={() => setShowProfileManage(true)}>
-						<ReactSVG src={profile?.id ? ICONS.edit : ICONS.user} />
-						{profile?.id ? language.editProfile : language.createProfile}
-						{!profile?.id && (
-							<S.Hint>
-								<ReactSVG src={ICONS.info} />
-							</S.Hint>
-						)}
-					</S.NavigationEntry>
+							<option value="left">Left</option>
+							<option value="center">Center</option>
+							<option value="right">Right</option>
+						</select>
+					</S.EntryRow>
+					<S.EntryRow>
+						<label>Logo Position Y</label>
+						<select
+							value={logoSettings.positionY}
+							onChange={(e) =>
+								setLogoSettings({ ...logoSettings, positionY: e.target.value as LogoSettings['positionY'] })
+							}
+						>
+							<option value="top">Top</option>
+							<option value="center">Center</option>
+							<option value="bottom">Bottom</option>
+						</select>
+					</S.EntryRow>
 				</S.NavigationWrapper>
 				<S.DSpacer />
-				{profile?.id && (
-					<>
-						<S.NavigationWrapper>
-							<S.NavigationCategory>Portal</S.NavigationCategory>
-							<S.NavigationEntry
-								onClick={() => {
-									setShowUserMenu(false);
-									portalProvider.setEditorMode('mini');
-								}}
-							>
-								<ReactSVG src={ICONS.portal} />
-								Zone Editor
-							</S.NavigationEntry>
-							<S.NavigationEntry onClick={() => window.open('https://portal.arweave.net/', '_blank')}>
-								<ReactSVG src={ICONS.portal} />
-								Portal Editor
-							</S.NavigationEntry>
-						</S.NavigationWrapper>
-						<S.DSpacer />
-					</>
-				)}
-				<S.DFooterWrapper>
-					<S.NavigationEntry onClick={handleDisconnect}>
-						<ReactSVG src={ICONS.signout} />
-						{language.disconnect}
-					</S.NavigationEntry>
-				</S.DFooterWrapper>
-			</S.UserMenu>
+				<S.NavigationWrapper>
+					<S.NavigationCategory>Navigation</S.NavigationCategory>
+					{isSideNav ? (
+						<S.SliderRow>
+							<label>Width</label>
+							<input
+								type="range"
+								value={layoutHeights.navigation}
+								onChange={(e) => setLayoutHeights({ ...layoutHeights, navigation: parseInt(e.target.value) })}
+								min={200}
+								max={400}
+							/>
+							<span>{layoutHeights.navigation}px</span>
+						</S.SliderRow>
+					) : (
+						<>
+							<S.ToggleRow>
+								<label>Sticky</label>
+								<S.Toggle $active={navSticky} onClick={() => setNavSticky(!navSticky)} />
+							</S.ToggleRow>
+							<S.SliderRow>
+								<label>Height</label>
+								<input
+									type="range"
+									value={layoutHeights.navigation}
+									onChange={(e) => setLayoutHeights({ ...layoutHeights, navigation: parseInt(e.target.value) })}
+									min={30}
+									max={100}
+								/>
+								<span>{layoutHeights.navigation}px</span>
+							</S.SliderRow>
+						</>
+					)}
+				</S.NavigationWrapper>
+				<S.DSpacer />
+				<S.NavigationWrapper>
+					<S.NavigationCategory>Footer</S.NavigationCategory>
+					<S.ToggleRow>
+						<label>Fixed</label>
+						<S.Toggle $active={footerFixed} onClick={() => setFooterFixed(!footerFixed)} />
+					</S.ToggleRow>
+				</S.NavigationWrapper>
+				<S.LayoutFooter>
+					<S.LayoutButton onClick={handleLayoutCancel} disabled={saving}>
+						Cancel
+					</S.LayoutButton>
+					<S.LayoutButton $primary onClick={handleLayoutSave} disabled={saving}>
+						{saving ? 'Saving...' : 'Save'}
+					</S.LayoutButton>
+				</S.LayoutFooter>
+			</S.LayoutMenu>
+		);
+	}
+
+	function getUserMenu() {
+		return (
+			<S.CubeWrapper>
+				<S.CubeContainer $rotated={showLayoutPanel}>
+					<S.CubeFaceFront $rotated={showLayoutPanel}>
+						<S.UserMenu id="UserMenu">
+							<S.HeaderWrapper>
+								<S.Header>
+									<S.Banner>
+										{banner !== '' && (
+											<img
+												className="missingBanner"
+												onLoad={(e) => e.currentTarget.classList.remove('missingBanner')}
+												src={banner}
+											/>
+										)}
+									</S.Banner>
+									<S.AvatarWrapper>
+										<Avatar profile={profile} size={52} />
+									</S.AvatarWrapper>
+									<S.DisplayName>{profile?.displayName ? profile.displayName : 'My Profile'}</S.DisplayName>
+									<S.DAddress>
+										{shorten(arProvider.walletAddress)}
+										<ReactSVG src={ICONS.copy} />
+									</S.DAddress>
+								</S.Header>
+							</S.HeaderWrapper>
+							<S.NavigationWrapper>
+								<S.NavigationCategory>User</S.NavigationCategory>
+								{profile?.id && (
+									<S.NavigationEntry
+										onClick={() => {
+											setShowUserMenu(false);
+											navigate(getRedirect(`author/${profile.id}`));
+										}}
+									>
+										<ReactSVG src={ICONS.user} />
+										{language.myProfile}
+									</S.NavigationEntry>
+								)}
+								<S.NavigationEntry $disabled={!profile?.id}>
+									<ReactSVG src={ICONS.post} />
+									{language.myPosts}
+								</S.NavigationEntry>
+								<S.NavigationEntry $disabled={!profile?.id}>
+									<ReactSVG src={ICONS.comments} />
+									{language.myComments}
+								</S.NavigationEntry>
+								{auth?.authType !== 'NATIVE_WALLET' && (
+									<S.NavigationEntry onClick={() => window.wanderInstance.open()}>
+										<ReactSVG src={ICONS.wallet} />
+										{language.myWallet}
+									</S.NavigationEntry>
+								)}
+								<S.NavigationEntry onClick={() => setShowProfileManage(true)}>
+									<ReactSVG src={profile?.id ? ICONS.edit : ICONS.user} />
+									{profile?.id ? language.editProfile : language.createProfile}
+									{!profile?.id && (
+										<S.Hint>
+											<ReactSVG src={ICONS.info} />
+										</S.Hint>
+									)}
+								</S.NavigationEntry>
+							</S.NavigationWrapper>
+							<S.DSpacer />
+							{(() => {
+								if (!profile?.id) return null;
+								const roles: string[] = Array.isArray(profile?.roles) ? profile.roles : [];
+								const isAdmin = roles.includes('Admin');
+								const isAdminOrMod = isAdmin || roles.includes('Moderator');
+								if (!isAdminOrMod) return null;
+								return (
+									<>
+										<S.NavigationWrapper>
+											<S.NavigationCategory>Portal</S.NavigationCategory>
+											{isAdmin && (
+												<S.NavigationEntry
+													onClick={() => {
+														setShowLayoutPanel(true);
+														setLayoutEditMode(true);
+													}}
+												>
+													<ReactSVG src={ICONS.layout} />
+													Edit Layout
+												</S.NavigationEntry>
+											)}
+											{isAdmin && (
+												<S.NavigationEntry
+													onClick={() => {
+														setShowUserMenu(false);
+														portalProvider.setEditorMode('mini');
+													}}
+												>
+													<ReactSVG src={ICONS.portal} />
+													Zone Editor
+												</S.NavigationEntry>
+											)}
+											<S.NavigationEntry onClick={() => window.open('https://portal.arweave.net/', '_blank')}>
+												<ReactSVG src={ICONS.portal} />
+												Portal Editor
+											</S.NavigationEntry>
+										</S.NavigationWrapper>
+										<S.DSpacer />
+									</>
+								);
+							})()}
+							<S.DFooterWrapper>
+								<S.NavigationEntry onClick={handleDisconnect}>
+									<ReactSVG src={ICONS.signout} />
+									{language.disconnect}
+								</S.NavigationEntry>
+							</S.DFooterWrapper>
+						</S.UserMenu>
+					</S.CubeFaceFront>
+					<S.CubeFaceRight $rotated={showLayoutPanel}>{getLayoutMenu()}</S.CubeFaceRight>
+				</S.CubeContainer>
+			</S.CubeWrapper>
 		);
 	}
 
@@ -243,7 +497,13 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 			<S.Wrapper>
 				{getHeader()}
 				{showUserMenu && (
-					<Panel open={showUserMenu} header={''} handleClose={() => setShowUserMenu(false)} width={300}>
+					<Panel
+						open={showUserMenu}
+						header={''}
+						handleClose={handleCloseMenu}
+						width={300}
+						transparent={showLayoutPanel}
+					>
 						{getUserMenu()}
 					</Panel>
 				)}

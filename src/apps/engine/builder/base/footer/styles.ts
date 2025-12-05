@@ -1,21 +1,34 @@
 import styled from 'styled-components';
 
-export const FooterWrapper = styled.div<{ $layout: any; $theme: any }>`
-	display: ${(props) => (props.$layout?.fixed ? `fixed` : `flex`)};
+export const FooterWrapper = styled.div<{ $layout: any; $theme: any; $editFixed?: boolean }>`
+	position: relative;
 	width: 100%;
 	max-width: ${(props) => (props.$layout?.width === 'content' ? `1200px` : `100%`)};
-	// height: ${(props) => props.$layout?.height};
-	height: fit-content;
 	background: rgba(var(--color-footer-background), 1);
-	margin-left: auto;
-	margin-right: auto;
 	color: rgba(var(--color-text), 1);
 	padding: ${(props) => props.$layout?.padding};
 	border-top: ${(props) => (props.$layout?.border?.top ? `1px solid rgba(var(--color-border),1)` : `unset`)};
 	font-weight: 600;
 	box-sizing: border-box;
-	overflow: hidden;
 	z-index: 1;
+
+	${(props) => {
+		const isFixed = props.$editFixed !== undefined ? props.$editFixed : props.$layout?.fixed;
+		if (isFixed) {
+			return `
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				margin: 0;
+			`;
+		}
+		return `
+			display: flex;
+			margin-left: auto;
+			margin-right: auto;
+		`;
+	}}
 `;
 
 export const Footer = styled.div<{ $layout: any }>`
@@ -101,9 +114,9 @@ export const LinkWrapper = styled.div`
 	}
 `;
 
-export const Copyright = styled.div`
+export const Copyright = styled.div<{ $hasContentAbove?: boolean }>`
 	padding: 10px 40px 0 40px;
-	margin-top: 10px;
+	margin-top: ${(props) => (props.$hasContentAbove ? '10px' : '0')};
 	margin-bottom: 20px;
-	border-top: 1px solid rgba(var(--color-border), 3);
+	border-top: ${(props) => (props.$hasContentAbove ? '1px solid rgba(var(--color-border), 3)' : 'none')};
 `;

@@ -19,7 +19,46 @@ export default function Navigation(props: any) {
 	const layout = props.layout;
 	const content = props.content;
 
-	const { portal } = usePortalProvider();
+	const portalProvider = usePortalProvider();
+	const { portal, layoutHeights, setLayoutHeights, navSticky, layoutEditMode } = portalProvider;
+	const [isDragging, setIsDragging] = React.useState(false);
+	const [startPos, setStartPos] = React.useState(0);
+	const [startSize, setStartSize] = React.useState(0);
+
+	const isSideNav = layout?.position === 'left' || layout?.position === 'right';
+
+	const handleMouseDown = (e: React.MouseEvent) => {
+		e.preventDefault();
+		setIsDragging(true);
+		setStartPos(isSideNav ? e.clientX : e.clientY);
+		setStartSize(layoutHeights.navigation);
+	};
+
+	React.useEffect(() => {
+		if (!isDragging) return;
+
+		const handleMouseMove = (e: MouseEvent) => {
+			if (isSideNav) {
+				const delta = layout?.position === 'right' ? startPos - e.clientX : e.clientX - startPos;
+				const newWidth = Math.max(200, Math.min(400, startSize + delta));
+				setLayoutHeights({ ...layoutHeights, navigation: newWidth });
+			} else {
+				const delta = e.clientY - startPos;
+				const newHeight = Math.max(30, Math.min(100, startSize + delta));
+				setLayoutHeights({ ...layoutHeights, navigation: newHeight });
+			}
+		};
+
+		const handleMouseUp = () => setIsDragging(false);
+
+		document.addEventListener('mousemove', handleMouseMove);
+		document.addEventListener('mouseup', handleMouseUp);
+
+		return () => {
+			document.removeEventListener('mousemove', handleMouseMove);
+			document.removeEventListener('mouseup', handleMouseUp);
+		};
+	}, [isDragging, startPos, startSize, layoutHeights, setLayoutHeights, isSideNav, layout?.position]);
 	const Layout = preview ? defaultLayout : portal?.Layout;
 	const Themes = preview ? defaultThemes : portal?.Themes;
 
@@ -152,7 +191,13 @@ export default function Navigation(props: any) {
 	if (!layout) return null;
 
 	return (
-		<S.Navigation $layout={layout} maxWidth={Layout?.basics?.maxWidth} id="Navigation">
+		<S.Navigation
+			$layout={layout}
+			maxWidth={Layout?.basics?.maxWidth}
+			id="Navigation"
+			$editHeight={layoutHeights.navigation}
+			$editSticky={navSticky}
+		>
 			{preview && <GlobalStyles />}
 			<S.NavigationEntries $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
 				{content &&
@@ -161,6 +206,27 @@ export default function Navigation(props: any) {
 					))}
 				<Search />
 			</S.NavigationEntries>
+			{layoutEditMode && (
+				<>
+					<S.ResizeHandle
+						$isDragging={isDragging}
+						$isSideNav={isSideNav}
+						$position={layout?.position}
+						onMouseDown={handleMouseDown}
+					>
+						<S.HandleBar $isSideNav={isSideNav} />
+					</S.ResizeHandle>
+					<S.HandleLabel
+						style={
+							isSideNav
+								? { left: layoutHeights.navigation + 10, top: '50%', transform: 'translateY(-50%)' }
+								: { left: '50%', bottom: -10, transform: 'translateX(-50%)' }
+						}
+					>
+						{isSideNav ? 'Width' : 'Height'} ({layoutHeights.navigation}px)
+					</S.HandleLabel>
+				</>
+			)}
 		</S.Navigation>
 	);
 }

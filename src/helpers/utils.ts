@@ -475,3 +475,73 @@ export function isOnlyPortal(portals: PortalHeaderType[], profileId: string): bo
 	if (portals.length === 1 && portals[0].id === profileId) return true;
 	return false;
 }
+
+export function isCompressibleImage(file: File): boolean {
+	const compressibleTypes = ['image/jpeg', 'image/png', 'image/webp'];
+	return compressibleTypes.includes(file.type);
+}
+
+export async function compressImageToSize(file: File, targetSizeBytes: number): Promise<File> {
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		const url = URL.createObjectURL(file);
+
+		img.onload = () => {
+			URL.revokeObjectURL(url);
+
+			const canvas = document.createElement('canvas');
+			const ctx = canvas.getContext('2d');
+
+			const { width, height } = img;
+			const outputType = 'image/jpeg';
+
+			const tryCompress = (s: number, q: number): Promise<Blob | null> => {
+				canvas.width = width * s;
+				canvas.height = height * s;
+				ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+				return new Promise((res) => {
+					canvas.toBlob((blob) => res(blob), outputType, q);
+				});
+			};
+
+			const compress = async () => {
+				let scale = 1;
+				let quality = 0.9;
+				let blob: Blob | null = null;
+
+				while (scale >= 0.05) {
+					quality = 0.9;
+					while (quality >= 0.1) {
+						blob = await tryCompress(scale, quality);
+						if (blob && blob.size <= targetSizeBytes) {
+							const newFileName = file.name.replace(/\.[^/.]+$/, '') + '_compressed.jpg';
+							const compressedFile = new File([blob], newFileName, { type: outputType });
+							resolve(compressedFile);
+							return;
+						}
+						quality -= 0.1;
+					}
+					scale -= 0.1;
+				}
+
+				blob = await tryCompress(0.05, 0.1);
+				if (blob) {
+					const newFileName = file.name.replace(/\.[^/.]+$/, '') + '_compressed.jpg';
+					const compressedFile = new File([blob], newFileName, { type: outputType });
+					resolve(compressedFile);
+				} else {
+					reject(new Error('Failed to compress image'));
+				}
+			};
+
+			compress();
+		};
+
+		img.onerror = () => {
+			URL.revokeObjectURL(url);
+			reject(new Error('Failed to load image'));
+		};
+
+		img.src = url;
+	});
+}

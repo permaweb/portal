@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { ReactSVG } from 'react-svg';
 import { CloseHandler } from 'engine/components/wrappers/closeHandler';
 
@@ -39,8 +40,12 @@ export default function Panel(props: IProps) {
 	function getBody() {
 		return (
 			<>
-				<S.Container $noHeader={!props.header} width={props.width}>
-					<CloseHandler active={props.open} disabled={!props.open} callback={() => props.handleClose()}>
+				<S.Container $noHeader={!props.header} width={props.width} $transparent={props.transparent}>
+					<CloseHandler
+						active={props.open}
+						disabled={!props.open || props.transparent}
+						callback={() => props.handleClose()}
+					>
 						{props.header && (
 							<S.Header>
 								<S.LT>
@@ -60,7 +65,8 @@ export default function Panel(props: IProps) {
 		);
 	}
 
-	return <S.Wrapper>{getBody()}</S.Wrapper>;
+	const portalTarget = document.getElementById('overlay') || document.body;
+	return ReactDOM.createPortal(<S.Wrapper $transparent={props.transparent}>{getBody()}</S.Wrapper>, portalTarget);
 }
 
 let panelOpenCounter = 0;

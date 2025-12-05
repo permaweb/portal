@@ -3,20 +3,22 @@ import styled from 'styled-components';
 
 const isSideNav = (layout: any) => layout?.position === 'left' || layout?.position === 'right';
 
-export const Navigation = styled.div<{ $layout: any; maxWidth: number }>`
-	position: sticky;
+export const Navigation = styled.div<{ $layout: any; maxWidth: number; $editHeight?: number; $editSticky?: boolean }>`
+	position: ${(props) => (isSideNav(props.$layout) ? 'sticky' : props.$editSticky ? 'sticky' : 'relative')};
 	top: 0;
 	display: flex;
 	flex-direction: ${(props) => (isSideNav(props.$layout) ? 'column' : 'row')};
 	align-items: ${(props) => (isSideNav(props.$layout) ? 'stretch' : 'center')};
 	width: ${(props) => {
 		if (isSideNav(props.$layout)) {
+			if (props.$editHeight) return `${props.$editHeight}px`;
 			return typeof props.$layout.width === 'number' ? `${props.$layout.width}px` : '300px';
 		}
 		return '100%';
 	}};
 	min-width: ${(props) => {
 		if (isSideNav(props.$layout)) {
+			if (props.$editHeight) return `${props.$editHeight}px`;
 			return typeof props.$layout.width === 'number' ? `${props.$layout.width}px` : '300px';
 		}
 		return 'auto';
@@ -25,10 +27,14 @@ export const Navigation = styled.div<{ $layout: any; maxWidth: number }>`
 		if (isSideNav(props.$layout)) {
 			return '100vh';
 		}
+		if (props.$editHeight) return `${props.$editHeight}px`;
 		return props.$layout.height ? `${props.$layout.height}px` : '40px';
 	}};
-	min-height: ${(props) =>
-		isSideNav(props.$layout) ? 'auto' : props.$layout.height ? `${props.$layout.height}px` : '40px'};
+	min-height: ${(props) => {
+		if (isSideNav(props.$layout)) return 'auto';
+		if (props.$editHeight) return `${props.$editHeight}px`;
+		return props.$layout.height ? `${props.$layout.height}px` : '40px';
+	}};
 	max-width: ${(props) => {
 		if (isSideNav(props.$layout)) return 'none';
 		return props.$layout.width === 'content' ? `${props.maxWidth}px` : '100%';
@@ -56,6 +62,7 @@ export const Navigation = styled.div<{ $layout: any; maxWidth: number }>`
 		return props.$layout.border?.sides ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
 	}};
 	box-shadow: var(--preference-navigation-shadow);
+	clip-path: inset(0 -100% -100% -100%);
 	user-select: none;
 	box-sizing: border-box;
 
@@ -282,4 +289,78 @@ export const Tooltip = styled.div`
 	${NavItem}:hover & {
 		opacity: 1;
 	}
+`;
+
+export const ResizeHandle = styled.div<{ $isDragging?: boolean; $isSideNav?: boolean; $position?: string }>`
+	position: absolute;
+	${(props) => {
+		if (props.$isSideNav) {
+			return props.$position === 'right'
+				? `
+					top: 0;
+					bottom: 0;
+					left: 0;
+					width: 20px;
+					height: 100%;
+					transform: translateX(-50%);
+				`
+				: `
+					top: 0;
+					bottom: 0;
+					right: 0;
+					width: 20px;
+					height: 100%;
+					transform: translateX(50%);
+				`;
+		}
+		return `
+			left: 0;
+			right: 0;
+			bottom: 0;
+			height: 20px;
+			width: 100%;
+			transform: translateY(50%);
+		`;
+	}}
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: ${(props) => (props.$isSideNav ? 'ew-resize' : 'ns-resize')};
+	z-index: 10;
+	overflow: visible;
+
+	&:hover > div {
+		background: rgba(var(--color-primary), 1);
+		opacity: 1;
+	}
+
+	${(props) =>
+		props.$isDragging &&
+		`
+		> div {
+			background: rgba(var(--color-primary), 1);
+			opacity: 1;
+			${props.$isSideNav ? 'width: 6px;' : 'height: 6px;'}
+		}
+	`}
+`;
+
+export const HandleBar = styled.div<{ $isSideNav?: boolean }>`
+	width: ${(props) => (props.$isSideNav ? '4px' : '100%')};
+	height: ${(props) => (props.$isSideNav ? '100%' : '4px')};
+	background: rgba(var(--color-primary), 0.6);
+	opacity: 0.8;
+	transition: all 0.15s ease;
+`;
+
+export const HandleLabel = styled.span<{ $isSideNav?: boolean }>`
+	position: fixed;
+	background: rgba(var(--color-primary), 1);
+	color: white;
+	padding: 4px 12px;
+	border-radius: 4px;
+	font-size: 11px;
+	font-weight: 600;
+	white-space: nowrap;
+	pointer-events: none;
 `;
