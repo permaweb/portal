@@ -493,11 +493,16 @@ export async function compressImageToSize(file: File, targetSizeBytes: number): 
 			const ctx = canvas.getContext('2d');
 
 			const { width, height } = img;
-			const outputType = 'image/jpeg';
+			const supportsTransparency = file.type === 'image/png' || file.type === 'image/webp';
+			const outputType = supportsTransparency ? 'image/webp' : 'image/jpeg';
+			const fileExtension = supportsTransparency ? '.webp' : '.jpg';
 
 			const tryCompress = (s: number, q: number): Promise<Blob | null> => {
 				canvas.width = width * s;
 				canvas.height = height * s;
+				if (supportsTransparency) {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+				}
 				ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 				return new Promise((res) => {
 					canvas.toBlob((blob) => res(blob), outputType, q);
@@ -514,7 +519,7 @@ export async function compressImageToSize(file: File, targetSizeBytes: number): 
 					while (quality >= 0.1) {
 						blob = await tryCompress(scale, quality);
 						if (blob && blob.size <= targetSizeBytes) {
-							const newFileName = file.name.replace(/\.[^/.]+$/, '') + '_compressed.jpg';
+							const newFileName = file.name.replace(/\.[^/.]+$/, '') + '_compressed' + fileExtension;
 							const compressedFile = new File([blob], newFileName, { type: outputType });
 							resolve(compressedFile);
 							return;
@@ -526,7 +531,7 @@ export async function compressImageToSize(file: File, targetSizeBytes: number): 
 
 				blob = await tryCompress(0.05, 0.1);
 				if (blob) {
-					const newFileName = file.name.replace(/\.[^/.]+$/, '') + '_compressed.jpg';
+					const newFileName = file.name.replace(/\.[^/.]+$/, '') + '_compressed' + fileExtension;
 					const compressedFile = new File([blob], newFileName, { type: outputType });
 					resolve(compressedFile);
 				} else {
