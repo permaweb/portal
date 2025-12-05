@@ -16,13 +16,17 @@ import { getTxEndpoint } from 'helpers/endpoints';
 import { getRedirect } from 'helpers/utils';
 
 import { GlobalStyles } from '../../../global-styles';
+import Search from '../navigation/search';
 
 import * as S from './styles';
 
 export default function Header(props: any) {
 	const { name, layout, content, preview } = props;
 	const portalProvider = usePortalProvider();
-	const { portal, layoutHeights, setLayoutHeights, logoSettings, layoutEditMode } = portalProvider;
+	const { portal, layoutHeights, setLayoutHeights, logoSettings, layoutEditMode, headerSticky } = portalProvider;
+
+	const navPosition = portal?.Layout?.navigation?.layout?.position;
+	const isSideNav = navPosition === 'left' || navPosition === 'right';
 	const [isDragging, setIsDragging] = React.useState(false);
 	const [startY, setStartY] = React.useState(0);
 	const [startHeight, setStartHeight] = React.useState(0);
@@ -112,10 +116,26 @@ export default function Header(props: any) {
 	return (
 		<>
 			{preview && <GlobalStyles />}
-			<S.Header $layout={layout} theme={settings?.theme as any} id="Header" $editHeight={layoutHeights.header}>
-				<S.HeaderContentWrapper $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
+			<S.Header
+				$layout={layout}
+				theme={settings?.theme as any}
+				id="Header"
+				$editHeight={layoutHeights.header}
+				$sticky={headerSticky && isSideNav}
+				$isSideNav={isSideNav}
+			>
+				<S.HeaderContentWrapper
+					$layout={layout}
+					maxWidth={Layout?.basics?.maxWidth}
+					$isSideNav={isSideNav}
+					$navWidth={Layout?.navigation?.layout?.width}
+				>
 					<S.HeaderContent $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
-						{Logo ? (
+						{isSideNav ? (
+							<S.HeaderSearch>
+								<Search />
+							</S.HeaderSearch>
+						) : Logo ? (
 							<S.Logo $layout={content.logo} $editLogo={logoSettings}>
 								{Logo ? (
 									preview ? (
@@ -144,7 +164,15 @@ export default function Header(props: any) {
 			</S.Header>
 			{layoutEditMode &&
 				ReactDOM.createPortal(
-					<S.ResizeHandle $isDragging={isDragging} onMouseDown={handleMouseDown} style={{ top: layoutHeights.header }}>
+					<S.ResizeHandle
+						$isDragging={isDragging}
+						onMouseDown={handleMouseDown}
+						style={{
+							top: layoutHeights.header,
+							left: isSideNav && navPosition === 'left' ? layoutHeights.navigation : 0,
+							right: isSideNav && navPosition === 'right' ? layoutHeights.navigation : 0,
+						}}
+					>
 						<S.HandleBar>
 							<S.HandleLabel>Header ({layoutHeights.header}px)</S.HandleLabel>
 						</S.HandleBar>

@@ -39,6 +39,8 @@ export interface PortalContextState {
 	setFooterFixed: (fixed: boolean) => void;
 	navSticky: boolean;
 	setNavSticky: (sticky: boolean) => void;
+	headerSticky: boolean;
+	setHeaderSticky: (sticky: boolean) => void;
 }
 
 const DEFAULT_LAYOUT_HEIGHTS: LayoutHeights = {
@@ -69,6 +71,8 @@ const DEFAULT_CONTEXT = {
 	setFooterFixed(_fixed: boolean) {},
 	navSticky: true,
 	setNavSticky(_sticky: boolean) {},
+	headerSticky: false,
+	setHeaderSticky(_sticky: boolean) {},
 };
 
 export const PortalContext = React.createContext<PortalContextState>(DEFAULT_CONTEXT);
@@ -101,6 +105,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [logoSettings, setLogoSettings] = React.useState<LogoSettings>(DEFAULT_LOGO_SETTINGS);
 	const [footerFixed, setFooterFixed] = React.useState(false);
 	const [navSticky, setNavSticky] = React.useState(true);
+	const [headerSticky, setHeaderSticky] = React.useState(false);
 
 	React.useEffect(() => {
 		if (!portalId || !permawebProvider.libs) return;
@@ -241,9 +246,14 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				if (typeof h === 'string') return parseInt(h.replace('px', ''), 10) || 0;
 				return 0;
 			};
+			const navPosition = layout.navigation?.layout?.position;
+			const isSideNav = navPosition === 'left' || navPosition === 'right';
+			const navValue = isSideNav
+				? parseHeight(layout.navigation?.layout?.width) || 300
+				: parseHeight(layout.navigation?.layout?.height) || DEFAULT_LAYOUT_HEIGHTS.navigation;
 			setLayoutHeights({
 				header: parseHeight(layout.header?.layout?.height) || DEFAULT_LAYOUT_HEIGHTS.header,
-				navigation: parseHeight(layout.navigation?.layout?.height) || DEFAULT_LAYOUT_HEIGHTS.navigation,
+				navigation: navValue,
 			});
 			const logoContent = layout.header?.content?.logo;
 			if (logoContent) {
@@ -337,6 +347,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					setFooterFixed,
 					navSticky,
 					setNavSticky,
+					headerSticky,
+					setHeaderSticky,
 				}}
 			>
 				{props.children}

@@ -8,10 +8,10 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
-import { ICONS } from 'helpers/config';
+import { ICONS, UPLOAD } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalDetailType, PortalPatchMapEnum } from 'helpers/types';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, compressImageToSize, isCompressibleImage } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -47,6 +47,9 @@ export default function Media(props: {
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [showRemoveConfirmation, setShowRemoveConfirmation] = React.useState<boolean>(false);
 	const [contentType, setContentType] = React.useState<string | null>(null);
+	const [compressing, setCompressing] = React.useState<boolean>(false);
+
+	const canCompress = media instanceof File && isCompressibleImage(media);
 
 	React.useEffect(() => {
 		if (props.portal) {
@@ -74,9 +77,13 @@ export default function Media(props: {
 
 	React.useEffect(() => {
 		(async function () {
-			if (props.hideActions && media instanceof File && arProvider.wallet) {
+			if (media instanceof File && arProvider.wallet) {
 				const result = await calculateUploadCost(media);
-				if (result && !result.requiresConfirmation) await handleSubmit();
+				if (result && !result.requiresConfirmation) {
+					if (props.hideActions) {
+						await handleSubmit();
+					}
+				}
 			}
 		})();
 	}, [media, props.portal, props.hideActions, arProvider.wallet, calculateUploadCost]);
@@ -179,6 +186,19 @@ export default function Media(props: {
 		if (mediaInputRef.current) {
 			mediaInputRef.current.value = '';
 		}
+	}
+
+	async function handleCompress() {
+		if (!(media instanceof File)) return;
+		setCompressing(true);
+		try {
+			const compressedFile = await compressImageToSize(media, UPLOAD.dispatchUploadSize);
+			clearUploadState();
+			setMedia(compressedFile);
+		} catch (e: any) {
+			addNotification(e.message ?? 'Error compressing image', 'warning');
+		}
+		setCompressing(false);
 	}
 
 	function getMediaWrapper() {
@@ -317,6 +337,9 @@ export default function Media(props: {
 								uploadDisabled={unauthorized || loading}
 								handleUpload={handleSubmit}
 								handleCancel={() => handleClearUpload()}
+								handleCompress={handleCompress}
+								canCompress={canCompress}
+								compressing={compressing}
 								insufficientBalance={insufficientBalance}
 							/>
 						</Modal>

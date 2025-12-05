@@ -202,3 +202,52 @@ export const MActions = styled.div`
 	flex-wrap: wrap;
 	gap: 15px;
 `;
+
+export const LayoutOptions = styled.div`
+	display: flex;
+	gap: 15px;
+	width: 100%;
+`;
+
+export const LayoutOption = styled.div<{ $active: boolean }>`
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 12px;
+	background: ${(props) =>
+		props.$active ? props.theme.colors.button.primary.active.background : props.theme.colors.button.primary.background};
+	border: 2px solid
+		${(props) => (props.$active ? props.theme.colors.indicator.active : props.theme.colors.button.primary.border)};
+	border-radius: ${STYLING.dimensions.radius.primary};
+	cursor: pointer;
+	transition: all 100ms;
+
+	&:hover {
+		background: ${(props) => props.theme.colors.button.primary.active.background};
+		border: 2px solid ${(props) => props.theme.colors.button.primary.active.border};
+	}
+`;
+
+export const LayoutOptionIcon = styled.div<{ $active: boolean }>`
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 12px;
+
+	img {
+		width: 100%;
+		height: auto;
+		opacity: ${(props) => (props.$active ? 1 : 0.5)};
+	}
+`;
+
+export const LayoutOptionLabel = styled.p`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+	font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+	font-family: ${(props) => props.theme.typography.family.primary} !important;
+	text-transform: uppercase;
+	margin: 0;
+`;

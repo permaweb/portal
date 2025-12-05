@@ -14,6 +14,8 @@ export default function Footer(props: any) {
 	const { preview, layout, content } = props;
 	const portalProvider = usePortalProvider();
 	const { portal, footerFixed } = portalProvider;
+	const navPosition = portal?.Layout?.navigation?.layout?.position;
+	const isSideNav = navPosition === 'left' || navPosition === 'right';
 	const Themes = preview ? defaultThemes : portal?.Themes;
 	const Name = portal?.Name;
 
@@ -29,8 +31,19 @@ export default function Footer(props: any) {
 	return (
 		<>
 			{preview && <GlobalStyles />}
-			<S.FooterWrapper $layout={layout} $theme={settings?.theme} id="Footer" $editFixed={footerFixed}>
-				<S.Footer $layout={layout}>
+			<S.FooterWrapper
+				$layout={layout}
+				$theme={settings?.theme}
+				id="Footer"
+				$editFixed={footerFixed}
+				$isSideNav={isSideNav}
+			>
+				<S.Footer
+					$layout={layout}
+					$isSideNav={isSideNav}
+					$navWidth={portal?.Layout?.navigation?.layout?.width}
+					$maxWidth={portal?.Layout?.basics?.maxWidth}
+				>
 					<Builder layout={content} preview={preview} />
 					<SocialLinks isFooter />
 					<S.Copyright $hasContentAbove={!!content?.content?.length || !!portal?.Links?.length}>

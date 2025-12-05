@@ -6,39 +6,56 @@ export const Wrapper = styled.div``;
 
 export const OptionsWrapper = styled.div`
 	display: flex;
-	flex-direction: column;
 	gap: 15px;
 `;
 
-export const Option = styled.div<{ disabled: boolean }>`
-	width: 100%;
+export const Option = styled.div<{ disabled: boolean; $active: boolean }>`
+	flex: 1;
 	display: flex;
+	flex-direction: column;
 	align-items: center;
-	justify-content: space-between;
-	padding: 8.5px 15px;
-	background: ${(props) => props.theme.colors.button.primary.background};
-	border: 1px solid ${(props) => props.theme.colors.button.primary.border};
+	padding: 12px;
+	background: ${(props) =>
+		props.$active ? props.theme.colors.button.primary.active.background : props.theme.colors.button.primary.background};
+	border: 2px solid
+		${(props) => (props.$active ? props.theme.colors.indicator.active : props.theme.colors.button.primary.border)};
 	border-radius: ${STYLING.dimensions.radius.primary};
-	cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
+	cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 	transition: all 100ms;
-
-	p {
-		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
-		font-family: ${(props) => props.theme.typography.family.primary} !important;
-		text-transform: uppercase;
-	}
+	opacity: ${(props) => (props.disabled ? 0.5 : 1)};
 
 	&:hover {
 		background: ${(props) =>
 			props.disabled
 				? props.theme.colors.button.primary.background
 				: props.theme.colors.button.primary.active.background};
-		border: 1px solid
+		border: 2px solid
 			${(props) =>
 				props.disabled ? props.theme.colors.button.primary.border : props.theme.colors.button.primary.active.border};
 	}
+`;
+
+export const OptionIcon = styled.div<{ $active: boolean }>`
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 12px;
+
+	img {
+		width: 100%;
+		height: auto;
+		opacity: ${(props) => (props.$active ? 1 : 0.5)};
+	}
+`;
+
+export const OptionLabel = styled.p`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+	font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+	font-family: ${(props) => props.theme.typography.family.primary} !important;
+	text-transform: uppercase;
+	margin: 0;
 `;
 
 export const Indicator = styled.div<{ active: boolean }>`

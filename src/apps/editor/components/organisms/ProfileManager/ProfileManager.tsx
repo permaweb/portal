@@ -6,10 +6,13 @@ import { Types } from '@permaweb/libs';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
+import { Modal } from 'components/atoms/Modal';
 import { TextArea } from 'components/atoms/TextArea';
-import { ICONS } from 'helpers/config';
+import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
+import { ICONS, UPLOAD } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, compressImageToSize, isCompressibleImage } from 'helpers/utils';
+import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -44,7 +47,12 @@ export default function ProfileManager(props: {
 	const [thumbnailRemoved, setThumbnailRemoved] = React.useState<boolean>(false);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
+	const [pendingFile, setPendingFile] = React.useState<{ file: File; type: 'banner' | 'thumbnail' } | null>(null);
+	const [compressing, setCompressing] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
+	const { uploadCost, showUploadConfirmation, calculateUploadCost, clearUploadState } = useUploadCost();
+
+	const canCompress = pendingFile?.file && isCompressibleImage(pendingFile.file);
 
 	React.useEffect(() => {
 		setUsername(props.profile?.username ?? '');
@@ -119,33 +127,68 @@ export default function ProfileManager(props: {
 		return { status: false, message: null };
 	}
 
-	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'thumbnail') {
+	async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'thumbnail') {
 		if (e.target.files && e.target.files.length) {
 			const file = e.target.files[0];
 			if (file.type.startsWith('image/')) {
-				const reader = new FileReader();
-
-				reader.onload = (event: ProgressEvent<FileReader>) => {
-					if (event.target?.result) {
-						switch (type) {
-							case 'banner':
-								setBanner(event.target.result);
-								setBannerRemoved(false);
-								break;
-							case 'thumbnail':
-								setThumbnail(event.target.result);
-								setThumbnailRemoved(false);
-								break;
-							default:
-								break;
-						}
-					}
-				};
-
-				reader.readAsDataURL(file);
+				if (file.size >= UPLOAD.dispatchUploadSize && arProvider.wallet) {
+					setPendingFile({ file, type });
+					await calculateUploadCost(file);
+				} else {
+					applyFileToState(file, type);
+				}
 			}
 			e.target.value = '';
 		}
+	}
+
+	function applyFileToState(file: File, type: 'banner' | 'thumbnail') {
+		const reader = new FileReader();
+
+		reader.onload = (event: ProgressEvent<FileReader>) => {
+			if (event.target?.result) {
+				switch (type) {
+					case 'banner':
+						setBanner(event.target.result);
+						setBannerRemoved(false);
+						break;
+					case 'thumbnail':
+						setThumbnail(event.target.result);
+						setThumbnailRemoved(false);
+						break;
+					default:
+						break;
+				}
+			}
+		};
+
+		reader.readAsDataURL(file);
+	}
+
+	function handleUploadConfirm() {
+		if (pendingFile) {
+			applyFileToState(pendingFile.file, pendingFile.type);
+			handleClearPendingFile(null);
+		}
+	}
+
+	function handleClearPendingFile(message: string | null) {
+		if (message) addNotification(message, 'warning');
+		setPendingFile(null);
+		clearUploadState();
+	}
+
+	async function handleCompress() {
+		if (!pendingFile) return;
+		setCompressing(true);
+		try {
+			const compressedFile = await compressImageToSize(pendingFile.file, UPLOAD.dispatchUploadSize);
+			applyFileToState(compressedFile, pendingFile.type);
+			handleClearPendingFile(null);
+		} catch (e: any) {
+			addNotification(e.message ?? 'Error compressing image', 'warning');
+		}
+		setCompressing(false);
 	}
 
 	function getBannerWrapper() {
@@ -284,6 +327,23 @@ export default function ProfileManager(props: {
 									: `${language?.profileCreatingInfo}...`
 							}
 						/>
+					)}
+					{showUploadConfirmation && pendingFile && (
+						<Modal
+							header={`${language?.upload} ${pendingFile.file.name}`}
+							handleClose={() => handleClearPendingFile(language?.uploadCancelled)}
+							className={'modal-wrapper'}
+						>
+							<TurboUploadConfirmation
+								uploadCost={uploadCost}
+								uploadDisabled={loading}
+								handleUpload={handleUploadConfirm}
+								handleCancel={() => handleClearPendingFile(language?.uploadCancelled)}
+								handleCompress={handleCompress}
+								canCompress={canCompress}
+								compressing={compressing}
+							/>
+						</Modal>
 					)}
 				</>
 			);

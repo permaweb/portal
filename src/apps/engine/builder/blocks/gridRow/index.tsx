@@ -8,10 +8,17 @@ export default function GridRow(props: any) {
 	const { getContent, content, layout, preview } = props;
 	const { portal } = usePortalProvider();
 	const Layout = preview ? defaultLayout : portal?.Layout;
+	const navPosition = Layout?.navigation?.layout?.position;
+	const isSideNav = navPosition === 'left' || navPosition === 'right';
 
 	return (
 		<S.GridRow $layout={layout} id="GridRow">
-			<S.GridRowWrapper $layout={layout} padding={Layout?.basics?.padding} maxWidth={Layout?.basics?.maxWidth}>
+			<S.GridRowWrapper
+				$layout={layout}
+				padding={Layout?.basics?.padding}
+				maxWidth={Layout?.basics?.maxWidth}
+				$isSideNav={isSideNav}
+			>
 				{content.map((element: any, index: number) => {
 					return (
 						<React.Fragment key={index}>

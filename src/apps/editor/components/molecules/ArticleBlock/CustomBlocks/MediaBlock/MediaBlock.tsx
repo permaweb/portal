@@ -12,7 +12,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
-import { ICONS } from 'helpers/config';
+import { ICONS, UPLOAD } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import {
 	AlignmentButtonType,
@@ -22,6 +22,7 @@ import {
 	PortalUploadOptionType,
 	PortalUploadType,
 } from 'helpers/types';
+import { compressImageToSize, isCompressibleImage } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -135,6 +136,9 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const [mediaUploaded, setMediaUploaded] = React.useState<boolean>(false);
 	const [mediaLoading, setMediaLoading] = React.useState<boolean>(false);
 	const [uploadDisabled, setUploadDisabled] = React.useState<boolean>(false);
+	const [compressing, setCompressing] = React.useState<boolean>(false);
+
+	const canCompress = mediaData.file && isCompressibleImage(mediaData.file);
 
 	React.useEffect(() => {
 		if (
@@ -241,6 +245,19 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		}
 	}
 
+	async function handleCompress() {
+		if (!mediaData.file) return;
+		setCompressing(true);
+		try {
+			const compressedFile = await compressImageToSize(mediaData.file, UPLOAD.dispatchUploadSize);
+			clearUploadState();
+			setMediaData((prevContent) => ({ ...prevContent, file: compressedFile }));
+		} catch (e: any) {
+			addNotification(e.message ?? 'Error compressing image', 'warning');
+		}
+		setCompressing(false);
+	}
+
 	const validateUrl = (url: string) => {
 		if (url.startsWith('data')) {
 			return true;
@@ -330,6 +347,9 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					uploadDisabled={uploadDisabled}
 					handleUpload={handleUpload}
 					handleCancel={() => handleClear(language?.uploadCancelled)}
+					handleCompress={handleCompress}
+					canCompress={canCompress}
+					compressing={compressing}
 				/>
 			);
 		}

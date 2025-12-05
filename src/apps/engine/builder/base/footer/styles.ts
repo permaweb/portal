@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const FooterWrapper = styled.div<{ $layout: any; $theme: any; $editFixed?: boolean }>`
+export const FooterWrapper = styled.div<{ $layout: any; $theme: any; $editFixed?: boolean; $isSideNav?: boolean }>`
 	position: relative;
 	width: 100%;
 	max-width: ${(props) => (props.$layout?.width === 'content' ? `1200px` : `100%`)};
@@ -31,14 +31,24 @@ export const FooterWrapper = styled.div<{ $layout: any; $theme: any; $editFixed?
 	}}
 `;
 
-export const Footer = styled.div<{ $layout: any }>`
+export const Footer = styled.div<{ $layout: any; $isSideNav?: boolean; $navWidth?: number; $maxWidth?: number }>`
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	width: 100%;
-	max-width: ${(props) => (props.$layout?.width === 'page' ? `1200px` : `100%`)};
-	margin-left: auto;
+	max-width: ${(props) => {
+		if (props.$layout?.width === 'page') {
+			if (props.$isSideNav) {
+				const navWidth = props.$navWidth || 300;
+				const maxWidth = props.$maxWidth || 1200;
+				return `${maxWidth - navWidth}px`;
+			}
+			return `${props.$maxWidth || 1200}px`;
+		}
+		return '100%';
+	}};
+	margin-left: ${(props) => (props.$isSideNav ? '0' : 'auto')};
 	margin-right: auto;
 
 	div:first-child {
