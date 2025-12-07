@@ -75,7 +75,7 @@ export default function Users() {
 				op: 'Accept',
 			});
 			addNotification(language?.inviteAccepted ?? 'Ownership invite accepted', 'success');
-			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Transfers);
+			portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Transfers, PortalPatchMapEnum.Users]);
 			setShowTransferInvitesModal(false);
 		} catch (error: any) {
 			console.error(error);
@@ -94,7 +94,7 @@ export default function Users() {
 				op: 'Reject',
 			});
 			addNotification(language?.inviteRejected ?? 'Ownership invite rejected', 'success');
-			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Transfers);
+			portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Transfers, PortalPatchMapEnum.Users]);
 			setShowTransferInvitesModal(false);
 		} catch (error: any) {
 			console.error(error);
@@ -113,7 +113,7 @@ export default function Users() {
 						<S.TransferInvitesList className="scroll-wrapper">
 							{pendingOwnershipInvites.map((request: any, index: number) => {
 								const inviterAddress = request.From ?? request.from;
-								const inviterUsername = inviteProfiles[inviterAddress].username;
+								const inviterUsername = inviteProfiles[inviterAddress]?.username ?? inviterAddress;
 								return (
 									<S.TransferInviteRow key={`${inviterAddress}-${index}`}>
 										<S.TransferInviteMeta>
