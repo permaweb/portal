@@ -86,6 +86,7 @@ export const TransfersCountBubble = styled.span`
 
 /* Modal-based invites list */
 export const TransferInvitesWrapper = styled.div`
+	position: relative;
 	width: 100%;
 	display: flex;
 	flex-direction: column;
@@ -165,4 +166,20 @@ export const TransferInviteActions = styled.div`
 	display: inline-flex;
 	gap: 8px;
 	justify-self: end;
+`;
+
+export const LoadingOverlay = styled.div`
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.4);
+	z-index: 1;
+
+	span {
+		margin-top: 12px;
+		font-size: 14px;
+	}
 `;
