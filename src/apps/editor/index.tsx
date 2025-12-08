@@ -80,6 +80,11 @@ function AppContent() {
 	const hasHiddenLoaderRef = React.useRef(false);
 	const hasInitializedServiceWorkerRef = React.useRef(false);
 
+	// TODO: Remove
+	React.useEffect(() => {
+		localStorage.clear();
+	}, []);
+
 	React.useEffect(() => {
 		if (!hasInitializedPreloaderRef.current) {
 			preloadAllAssets();
