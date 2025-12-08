@@ -11,7 +11,7 @@ import { currentPageClear, currentPageUpdate, setOriginalData } from 'editor/sto
 
 import { Loader } from 'components/atoms/Loader';
 import { PageSectionEnum, PageSectionType } from 'helpers/types';
-import { capitalize, isMac, urlify } from 'helpers/utils';
+import { capitalize, debugLog, isMac, urlify } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -216,11 +216,11 @@ export default function PageEditor() {
 					arProvider.wallet
 				);
 
-				console.log(`Portal update: ${portalUpdateId}`);
+				debugLog('info', 'PageEditor', `Portal update: ${portalUpdateId}`);
 
 				addNotification(`${language?.pageSaved}!`, 'success');
 			} catch (e: any) {
-				console.error(e);
+				debugLog('error', 'PageEditor', e);
 				addNotification(e.message ?? 'Error saving page', 'warning');
 			}
 

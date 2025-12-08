@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { STORAGE, URLS } from 'helpers/config';
 import { getARBalanceEndpoint, getTurboBalanceEndpoint } from 'helpers/endpoints';
 import { WalletEnum } from 'helpers/types';
+import { debugLog } from 'helpers/utils';
 
 const WALLET_PERMISSIONS = ['ACCESS_ADDRESS', 'ACCESS_PUBLIC_KEY', 'SIGN_TRANSACTION', 'DISPATCH', 'SIGNATURE'];
 
@@ -198,7 +199,9 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				try {
 					await window.arweaveWallet.connect(WALLET_PERMISSIONS as any);
 					const address = await window.arweaveWallet.getActiveAddress();
-					console.log('[ArweaveProvider] Connected to wallet:', address);
+
+					debugLog('info', 'ArweaveProvider', 'Connected to wallet:', address);
+
 					setWalletAddress(address);
 					setWallet(window.arweaveWallet);
 					if (window?.wanderInstance?.authInfo?.authType) {
@@ -214,10 +217,10 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 						localStorage.setItem(STORAGE.walletType, defaultType);
 					}
 				} catch (e: any) {
-					console.error('[ArweaveProvider] Connection error:', e);
+					debugLog('error', 'ArweaveProvider', 'Connection Error:', e.message ?? 'Unknown error');
 				}
 			} else {
-				console.log('[ArweaveProvider] No wallet available');
+				debugLog('warn', 'ArweaveProvider', 'No Wallet Available');
 			}
 		}
 	}
@@ -317,7 +320,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 		for (let attempt = 1; attempt <= maxTries; attempt++) {
 			current = await getTurboBalance();
-			console.log(current);
 
 			if (current !== null && current !== initial) {
 				return current;

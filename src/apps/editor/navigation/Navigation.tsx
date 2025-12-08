@@ -11,7 +11,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { ICONS, STYLING, URLS } from 'helpers/config';
 import { PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
-import { formatAddress, isOnlyPortal, resolvePrimaryDomain } from 'helpers/utils';
+import { debugLog, formatAddress, isOnlyPortal, resolvePrimaryDomain } from 'helpers/utils';
 import { checkWindowCutoff } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -319,12 +319,12 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 					permawebProvider.profile.id
 				);
 
-				console.log(`Profile update: ${profileUpdateId}`);
+				debugLog('info', 'Navigation', 'Profile update:', profileUpdateId);
 
 				setPendingPortalId(portalId);
 				permawebProvider.refreshProfile();
 			} catch (e: any) {
-				console.error(e);
+				debugLog('error', 'Navigation', 'Error joining portal:', e.message ?? 'Unknown error');
 				setPendingPortalId(null);
 			}
 			setLoading(false);

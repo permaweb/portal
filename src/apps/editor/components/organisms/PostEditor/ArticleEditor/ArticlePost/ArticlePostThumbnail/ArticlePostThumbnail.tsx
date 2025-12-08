@@ -13,7 +13,7 @@ import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirm
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalPatchMapEnum } from 'helpers/types';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, debugLog } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -89,7 +89,7 @@ export default function ArticlePostThumbnail() {
 				arProvider.wallet
 			);
 
-			console.log(`Media update: ${mediaUpdateId}`);
+			debugLog('info', 'ArticlePostThumbnail', `Media update: ${mediaUpdateId}`);
 
 			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Media);
 		} catch (e: any) {

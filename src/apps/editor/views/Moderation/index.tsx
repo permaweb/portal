@@ -8,7 +8,7 @@ import { Checkbox } from 'components/atoms/Checkbox';
 import { Drawer } from 'components/atoms/Drawer';
 import { Loader } from 'components/atoms/Loader';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { cacheModeration, formatAddress, getCachedModeration } from 'helpers/utils';
+import { cacheModeration, debugLog, formatAddress, getCachedModeration } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -85,8 +85,13 @@ export default function Moderation() {
 								});
 							});
 						}
-					} catch (e) {
-						console.error(`Error fetching comments for post ${post.id}:`, e);
+					} catch (e: any) {
+						debugLog(
+							'error',
+							'Moderation',
+							`Error fetching comments for post ${post.id}:`,
+							e.message ?? 'Unknown error'
+						);
 					}
 				}
 			}
@@ -101,8 +106,8 @@ export default function Moderation() {
 					profiles: {},
 				});
 			}
-		} catch (error) {
-			console.error('Error fetching comments:', error);
+		} catch (error: any) {
+			debugLog('error', 'Moderation', 'Error fetching comments:', error.message ?? 'Unknown error');
 		} finally {
 			if (!backgroundRefresh) {
 				setLoadingComments(false);
@@ -249,8 +254,8 @@ export default function Moderation() {
 								}
 							}
 							return entry;
-						} catch (e) {
-							console.error('Error fetching comment content:', e);
+						} catch (e: any) {
+							debugLog('error', 'Moderation', 'Error fetching comment content:', e.message ?? 'Unknown error');
 							return entry;
 						}
 					})
@@ -260,8 +265,8 @@ export default function Moderation() {
 				setModeratedComments([]);
 			}
 			setLoadingComments(false);
-		} catch (e) {
-			console.error('Error fetching moderation entries:', e);
+		} catch (e: any) {
+			debugLog('error', 'Moderation', 'Error fetching moderation entries:', e.message ?? 'Unknown error');
 			setModeratedUsers([]);
 			setModeratedComments([]);
 			setLoadingUsers(false);
@@ -343,8 +348,8 @@ export default function Moderation() {
 					profiles,
 				});
 			}
-		} catch (error) {
-			console.error('Error activating comment:', error);
+		} catch (error: any) {
+			debugLog('error', 'Moderation', 'Error activating comment:', error.message ?? 'Unknown error');
 		} finally {
 			setUpdatingComment(null);
 		}
@@ -455,7 +460,7 @@ export default function Moderation() {
 															label={'Unblock'}
 															handlePress={async () => {
 																try {
-																	console.log('user: ', user);
+																	debugLog('info', 'Moderation', 'Unblocking user:', user);
 																	const targetId = user.targetId;
 																	await permawebProvider.libs.removeModerationEntry({
 																		moderationId: portalProvider.current.moderation,
@@ -463,8 +468,13 @@ export default function Moderation() {
 																		targetId: targetId,
 																	});
 																	fetchModerationEntries();
-																} catch (e) {
-																	console.error('Error unblocking user:', e);
+																} catch (e: any) {
+																	debugLog(
+																		'error',
+																		'Moderation',
+																		'Error unblocking user:',
+																		e.message ?? 'Unknown error'
+																	);
 																}
 															}}
 														/>
@@ -586,7 +596,7 @@ export default function Moderation() {
 																		try {
 																			const authorId = comment.comment?.creator;
 																			if (authorId && permawebProvider.profile?.id) {
-																				console.log('authorId: ', authorId);
+																				debugLog('info', 'Moderation', 'Blocking author:', authorId);
 																				await permawebProvider.libs.addModerationEntry({
 																					moderationId: portalProvider.current.moderation,
 																					targetType: 'profile',
@@ -597,8 +607,13 @@ export default function Moderation() {
 																				});
 																				fetchModerationEntries();
 																			}
-																		} catch (e) {
-																			console.error('Error blocking user:', e);
+																		} catch (e: any) {
+																			debugLog(
+																				'error',
+																				'Moderation',
+																				'Error blocking user:',
+																				e.message ?? 'Unknown error'
+																			);
 																		}
 																	}}
 																	disabled={!comment.comment?.creator}
@@ -615,8 +630,13 @@ export default function Moderation() {
 																				targetId: targetId,
 																			});
 																			fetchModerationEntries();
-																		} catch (e) {
-																			console.error('Error unblocking comment:', e);
+																		} catch (e: any) {
+																			debugLog(
+																				'error',
+																				'Moderation',
+																				'Error unblocking comment:',
+																				e.message ?? 'Unknown error'
+																			);
 																		}
 																	}}
 																/>

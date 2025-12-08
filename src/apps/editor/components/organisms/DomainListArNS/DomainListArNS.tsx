@@ -19,7 +19,7 @@ import { getArnsCost } from 'helpers/arnsCosts';
 import { ICONS, IS_TESTNET } from 'helpers/config';
 import { loadCachedDomains, saveCachedDomains } from 'helpers/domainCache';
 import { PortalPatchMapEnum, UserOwnedDomain } from 'helpers/types';
-import { withTimeout } from 'helpers/utils';
+import { debugLog, withTimeout } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useLatestANTVersion } from 'hooks/useLatestANTVersion';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -114,7 +114,7 @@ async function fetchOwnedAntIds(ownerAddress: string): Promise<string[]> {
 
 		return antIds;
 	} catch (error) {
-		console.error('Error fetching ANT ids from ARIO:', error);
+		debugLog('error', 'DomainListArNS', 'Error fetching ANT ids from ARIO:', error);
 		return [];
 	}
 }
@@ -403,7 +403,7 @@ export default function DomainListArNS() {
 				intersectOwnedIdsWithNetworkArns();
 			})
 			.catch((err) => {
-				console.error('Error initializing domain lists:', err);
+				debugLog('error', 'DomainListArNS', 'Error initializing domain lists:', err);
 				setLoadingArnsRecords(false);
 			});
 	}
@@ -637,7 +637,7 @@ export default function DomainListArNS() {
 	async function upgradeDomain(domain: { antId: string; name: string; userDomain: UserOwnedDomain }) {
 		setAntUpdating(true);
 		try {
-			console.log('Upgrading domain:', domain.userDomain);
+			debugLog('info', 'DomainListArNS', 'Upgrading domain:', domain.userDomain);
 			const signer = new ArconnectSigner(window.arweaveWallet);
 			const ant = ANT.init({ processId: domain.antId, signer });
 
@@ -645,18 +645,18 @@ export default function DomainListArNS() {
 				names: [domain.name],
 				skipVersionCheck: false,
 				onSigningProgress: (event, payload: any) => {
-					console.log(`${event}:`, payload);
+					debugLog('info', 'DomainListArNS', `${event}:`, payload);
 					if (event === 'checking-version') {
-						console.log(`Checking version: ${payload.antProcessId}`);
+						debugLog('info', 'DomainListArNS', `Checking version: ${payload.antProcessId}`);
 					}
 					if (event === 'fetching-affiliated-names') {
-						console.log(`Fetching affiliated names: ${payload.arioProcessId}`);
+						debugLog('info', 'DomainListArNS', `Fetching affiliated names: ${payload.arioProcessId}`);
 					}
 					if (event === 'reassigning-name') {
-						console.log(`Reassigning name: ${payload.name}`);
+						debugLog('info', 'DomainListArNS', `Reassigning name: ${payload.name}`);
 					}
 					if (event === 'validating-names') {
-						console.log(`Validating names: ${payload.names}`);
+						debugLog('info', 'DomainListArNS', `Validating names: ${payload.names}`);
 					}
 				},
 			});
@@ -670,9 +670,9 @@ export default function DomainListArNS() {
 
 			if (reassigned && !failed) {
 				const msg = result.reassignedNames[name];
-				console.log('Reassigned OK:', msg);
+				debugLog('info', 'DomainListArNS', 'Reassigned OK:', msg);
 				if (result.forkedProcessId) {
-					console.log('Forked ANT processId:', result.forkedProcessId);
+					debugLog('info', 'DomainListArNS', 'Forked ANT processId:', result.forkedProcessId);
 				}
 				// Mark this domain as having the latest version
 				antVersionCheckCacheRef.current.set(domain.antId, true);
@@ -689,12 +689,12 @@ export default function DomainListArNS() {
 
 			if (failed) {
 				const detail = result.failedReassignedNames[name];
-				console.warn('Reassignment failed:', detail);
+				debugLog('warn', 'DomainListArNS', 'Reassignment failed:', detail);
 				addNotification(`Upgrade failed for ${name}. Please try again later.`, 'warning');
 				setAntUpdating(false);
 				return;
 			}
-			console.log(result);
+			debugLog('info', 'DomainListArNS', result);
 			addNotification('No upgrade was needed.', 'success');
 		} catch (e: any) {
 			addNotification(e.message ?? 'Error updating domain', 'warning');
@@ -829,7 +829,7 @@ export default function DomainListArNS() {
 									await pollAndHydrateAfterChange({ name: domain.name, antId: domain.antId });
 									addNotification('Updated successfully.', 'success');
 								} catch (e: any) {
-									console.error('ANT update failed:', e);
+									debugLog('error', 'DomainListArNS', 'ANT update failed:', e);
 									addNotification(`${language.errorOccurred}: ${e?.message || e}`, 'warning');
 								} finally {
 									setUpdatingAnts((s) => {
@@ -1040,11 +1040,11 @@ export default function DomainListArNS() {
 
 			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
-			console.log(`Domain update: ${domainUpdateId}`);
+			debugLog('info', 'DomainListArNS', `Domain update: ${domainUpdateId}`);
 
 			addNotification(language.redirectSuccess, 'success');
 		} catch (error: any) {
-			console.error('Error redirecting domain:', error);
+			debugLog('error', 'DomainListArNS', 'Error redirecting domain:', error);
 			addNotification(`${language.redirectFailed} ${error.message}`, 'warning');
 		} finally {
 			setRedirectingDomains((prev) => {
@@ -1082,11 +1082,11 @@ export default function DomainListArNS() {
 
 			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
-			console.log(`Domain update: ${domainUpdateId}`);
+			debugLog('info', 'DomainListArNS', `Domain update: ${domainUpdateId}`);
 
 			addNotification(language.assignmentRemoved, 'success');
 		} catch (err: any) {
-			console.error('Error removing assignment:', err);
+			debugLog('error', 'DomainListArNS', 'Error removing assignment:', err);
 			addNotification(`${language.errorOccurred}: ${err.message}`, 'warning');
 		}
 	}

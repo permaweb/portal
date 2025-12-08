@@ -22,6 +22,7 @@ import {
 	PortalUploadOptionType,
 	PortalUploadType,
 } from 'helpers/types';
+import { debugLog } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -217,7 +218,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					arProvider.wallet
 				);
 
-				console.log(`Media update: ${mediaUpdateId}`);
+				debugLog('info', 'MediaBlock', `Media update: ${mediaUpdateId}`);
 
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Media);
 			}

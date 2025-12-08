@@ -8,7 +8,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { ICONS } from 'helpers/config';
 import { PortalDomainType, PortalPatchMapEnum } from 'helpers/types';
-import { getCurrentGateway } from 'helpers/utils';
+import { debugLog, getCurrentGateway } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -50,7 +50,7 @@ function Domain(props: { domain: PortalDomainType }) {
 
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
-				console.log(`Domain update: ${domainUpdateId}`);
+				debugLog('info', 'DomainListPortal', `Domain update: ${domainUpdateId}`);
 				addNotification(`${language.domainsUpdated}!`, 'success');
 			} catch (e: any) {
 				addNotification(e.message ?? 'Error updating domains', 'warning');
