@@ -469,7 +469,7 @@ export default function PostEditor() {
 								message: zoneIndexUpdateId,
 							});
 
-							debugLog('info', 'PostEditor', `Zone result: ${zoneResult}`);
+							debugLog('info', 'PostEditor', `Zone result: ${JSON.stringify(zoneResult, null, 2)}`);
 
 							if (zoneResult?.Messages?.length > 0) {
 								const assetIndexUpdateId = await permawebProvider.libs.sendMessage({

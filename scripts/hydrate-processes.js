@@ -1,9 +1,9 @@
 const processes = [
-	'yEjDfAy09teV3h3eRjtOBMWi0XxR1OHaoT-agm5_a28',
+	// 'yEjDfAy09teV3h3eRjtOBMWi0XxR1OHaoT-agm5_a28',
 	// '1RizbzhMUcXrNRB_5JPk6bDvY7LgknSEILBmbTnid1M'
 ];
 
-const url = 'https://app-1.forward.computer';
+const url = 'http://localhost:8734';
 
 (async function () {
 	for (const processId of processes) {
