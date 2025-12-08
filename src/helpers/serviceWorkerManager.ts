@@ -86,6 +86,9 @@ export class ServiceWorkerManager {
 				debugLog('info', 'ServiceWorkerManager', 'ArNS ID changed from', storedArnsId, 'to', currentArnsId);
 				debugLog('info', 'ServiceWorkerManager', 'Clearing cache and reloading...');
 
+				// Clear all local storage
+				localStorage.clear();
+
 				// Update the stored ID
 				localStorage.setItem(ARNS_ID_KEY, currentArnsId);
 
