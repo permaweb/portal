@@ -16,7 +16,15 @@ import {
 	PortalUserType,
 	RequestUpdateType,
 } from 'helpers/types';
-import { filterDuplicates, getByteSize, getByteSizeDisplay, hasUnsavedPostChanges, isMac, urlify } from 'helpers/utils';
+import {
+	debugLog,
+	filterDuplicates,
+	getByteSize,
+	getByteSizeDisplay,
+	hasUnsavedPostChanges,
+	isMac,
+	urlify,
+} from 'helpers/utils';
 import { useNavigationConfirm } from 'hooks/useNavigationConfirm';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -113,7 +121,7 @@ export default function PostEditor() {
 
 			if (isCurrentRequest) {
 				try {
-					console.log('Updating post status...', status);
+					debugLog('info', 'PostEditor', 'Updating post status...', status);
 					const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
 						processId: portalProvider.current.id,
 						wallet: arProvider.wallet,
@@ -180,7 +188,7 @@ export default function PostEditor() {
 						],
 					});
 
-					console.log(`Zone index update: ${zoneIndexUpdateId}`);
+					debugLog('info', 'PostEditor', `Zone index update: ${zoneIndexUpdateId}`);
 
 					const zoneIndexResult = await permawebProvider.deps.ao.result({
 						process: portalProvider.current.id,
@@ -231,7 +239,7 @@ export default function PostEditor() {
 									data: data,
 								});
 
-								console.log(`Asset content update: ${assetContentUpdateId}`);
+								debugLog('info', 'PostEditor', `Asset content update: ${assetContentUpdateId}`);
 							}
 						}
 
@@ -355,11 +363,11 @@ export default function PostEditor() {
 
 							portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
 
-							console.log(`Pages update: ${pagesUpdateId}`);
+							debugLog('info', 'PostEditor', `Pages update: ${pagesUpdateId}`);
 						}
 					}
 
-					console.log(`Asset content update: ${assetContentUpdateId}`);
+					debugLog('info', 'PostEditor', `Asset content update: ${assetContentUpdateId}`);
 					addNotification(`${language?.postUpdated}!`, 'success');
 					portalProvider.refreshCurrentPortal([
 						...(isStaticPage ? [PortalPatchMapEnum.Presentation] : []),
@@ -387,11 +395,13 @@ export default function PostEditor() {
 					};
 
 					const bytes = getByteSize(JSON.stringify(args));
-					console.log(`Data Size: ${getByteSizeDisplay(bytes)}`);
+					debugLog('info', 'PostEditor', `Data Size: ${getByteSizeDisplay(bytes)}`);
 
-					const assetId = await permawebProvider.libs.createAtomicAsset(args, (status: any) => console.log(status));
+					const assetId = await permawebProvider.libs.createAtomicAsset(args, (status: any) =>
+						debugLog('info', 'PostEditor', status)
+					);
 
-					console.log(`Asset ID: ${assetId}`);
+					debugLog('info', 'PostEditor', `Asset ID: ${assetId}`);
 
 					const assetContentUpdateId = await permawebProvider.libs.sendMessage({
 						processId: assetId,
@@ -401,7 +411,7 @@ export default function PostEditor() {
 						data: data,
 					});
 
-					console.log(`Asset content update: ${assetContentUpdateId}`);
+					debugLog('info', 'PostEditor', `Asset content update: ${assetContentUpdateId}`);
 
 					/* Add static pages assets directly to the portal process */
 					if (isStaticPage && portalProvider.permissions?.updatePortalMeta) {
@@ -422,7 +432,7 @@ export default function PostEditor() {
 
 						portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
 
-						console.log(`Pages update: ${pagesUpdateId}`);
+						debugLog('info', 'PostEditor', `Pages update: ${pagesUpdateId}`);
 
 						// Update the current post with the new assetId and set it as saved state
 						const updatedPostData = { ...currentPost.data, id: assetId };
@@ -451,13 +461,15 @@ export default function PostEditor() {
 							],
 						});
 
-						console.log(`Zone (profile) index update: ${zoneIndexUpdateId}`);
+						debugLog('info', 'PostEditor', `Zone (profile) index update: ${zoneIndexUpdateId}`);
 
 						if (portalProvider.permissions.postAutoIndex) {
 							const zoneResult = await permawebProvider.deps.ao.result({
 								process: permawebProvider.profile.id,
 								message: zoneIndexUpdateId,
 							});
+
+							debugLog('info', 'PostEditor', `Zone result: ${zoneResult}`);
 
 							if (zoneResult?.Messages?.length > 0) {
 								const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
@@ -473,7 +485,7 @@ export default function PostEditor() {
 									data: { Recipients: [portalProvider.current.id] },
 								});
 
-								console.log(`Asset index update: ${assetIndexUpdateId}`);
+								debugLog('info', 'PostEditor', `Asset index update: ${assetIndexUpdateId}`);
 
 								portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Posts, PortalPatchMapEnum.Requests]);
 							}
@@ -510,7 +522,7 @@ export default function PostEditor() {
 									tags: tags,
 								});
 
-								console.log(`External zone index update: ${zoneIndexUpdateId}`);
+								debugLog('info', 'PostEditor', `External zone index update: ${zoneIndexUpdateId}`);
 
 								if (hasExternalAdminAccess) {
 									const zoneResult = await permawebProvider.deps.ao.result({
@@ -531,7 +543,7 @@ export default function PostEditor() {
 											data: { Recipients: [externalPortal.id] },
 										});
 
-										console.log(`Asset index update: ${assetIndexUpdateId}`);
+										debugLog('info', 'PostEditor', `Asset index update: ${assetIndexUpdateId}`);
 										portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Posts, PortalPatchMapEnum.Requests]);
 									}
 								}

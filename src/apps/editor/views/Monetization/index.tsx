@@ -10,6 +10,7 @@ import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Toggle } from 'components/atoms/Toggle';
 import { PortalPatchMapEnum } from 'helpers/types';
+import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -111,7 +112,7 @@ export default function Monetization() {
 			};
 
 			const updateId = await permawebProvider.libs.updateZone(body, portalProvider.current.id, arProvider.wallet);
-			console.log('[PortalMonetization] Monetization update:', updateId);
+			debugLog('info', 'Monetization', 'Monetization update:', updateId);
 
 			// keep in-memory portal up to date
 			(portalProvider.current as any).monetization = { monetization: payload };
@@ -123,7 +124,7 @@ export default function Monetization() {
 
 			addNotification(language?.monetizationSaved ?? 'Monetization settings saved.', 'success');
 		} catch (e: any) {
-			console.error(e);
+			debugLog('error', 'Monetization', 'Error saving monetization settings:', e.message ?? 'Unknown error');
 			addNotification(e?.message ?? 'Error saving monetization settings.', 'warning');
 		} finally {
 			setSavingMonetization(false);
@@ -242,7 +243,7 @@ export default function Monetization() {
 				}
 			} catch (e: any) {
 				if (!cancelled) {
-					console.error('[PortalMonetization] Failed to fetch tips', e);
+					debugLog('error', 'Monetization', 'Failed to fetch tips:', e.message ?? 'Unknown error');
 					setTipsError(e.message ?? 'Failed to fetch tips');
 					setTips([]);
 				}

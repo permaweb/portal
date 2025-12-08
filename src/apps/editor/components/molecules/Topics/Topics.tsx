@@ -7,6 +7,7 @@ import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
 import { ICONS } from 'helpers/config';
 import { PortalPatchMapEnum, PortalTopicType } from 'helpers/types';
+import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -65,7 +66,7 @@ export default function Topics(props: {
 
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
-				console.log(`Topic update: ${topicUpdateId}`);
+				debugLog('info', 'Topics', 'Topic update:', topicUpdateId);
 
 				if (props.selectOnAdd) props.setTopics([...props.topics, newTopic]);
 
@@ -95,7 +96,7 @@ export default function Topics(props: {
 
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
-				console.log(`Topic update: ${topicUpdateId}`);
+				debugLog('info', 'Topics', 'Topic update:', topicUpdateId);
 
 				addNotification(`${language?.topicsUpdated}!`, 'success');
 				setShowDeleteConfirmation(false);

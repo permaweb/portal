@@ -9,7 +9,7 @@ import { Loader } from 'components/atoms/Loader';
 import { TextArea } from 'components/atoms/TextArea';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -88,14 +88,16 @@ export default function ProfileManager(props: {
 
 				if (props.profile && props.profile.id) {
 					const profileUpdateId = await permawebProvider.libs.updateProfile(data, props.profile.id, (status: any) =>
-						console.log(status)
+						debugLog('info', 'ProfileManager', status)
 					);
-					console.log(`Profile update: ${profileUpdateId}`);
+					debugLog('info', 'ProfileManager', `Profile update: ${profileUpdateId}`);
 					handleUpdate(`${language?.profileUpdated}!`);
 				} else {
-					const profileId = await permawebProvider.libs.createProfile(data, (status: any) => console.log(status));
+					const profileId = await permawebProvider.libs.createProfile(data, (status: any) =>
+						debugLog('info', 'ProfileManager', status)
+					);
 
-					console.log(`Profile ID: ${profileId}`);
+					debugLog('info', 'ProfileManager', `Profile ID: ${profileId}`);
 
 					handleUpdate(`${language?.profileCreated}!`);
 

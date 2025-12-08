@@ -7,7 +7,7 @@ import { FormField } from 'components/atoms/FormField';
 import { Select } from 'components/atoms/Select';
 import { ICONS } from 'helpers/config';
 import { PortalPatchMapEnum, SelectOptionType } from 'helpers/types';
-import { checkValidAddress, formatRoleLabel } from 'helpers/utils';
+import { checkValidAddress, debugLog, formatRoleLabel } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -99,7 +99,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 					arProvider.wallet
 				);
 
-				console.log(`Roles update: ${rolesUpdate}`);
+				debugLog('info', 'UserManager', 'Roles update:', rolesUpdate);
 
 				addNotification(`${props.user ? language?.userUpdated : language?.userAdded}!`, 'success');
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Users);
@@ -107,7 +107,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				setWalletAddress('');
 				setRole(null);
 			} catch (e: any) {
-				console.error(e);
+				debugLog('error', 'UserManager', 'Error adding user:', e.message ?? 'Unknown error');
 				addNotification(e.message ?? 'Error adding user', 'warning');
 			}
 			setLoading(false);

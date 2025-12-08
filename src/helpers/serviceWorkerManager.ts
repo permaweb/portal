@@ -1,3 +1,5 @@
+import { debugLog } from './utils';
+
 const ARNS_ID_KEY = 'portal-arns-id';
 
 export class ServiceWorkerManager {
@@ -15,7 +17,13 @@ export class ServiceWorkerManager {
 
 	async register(): Promise<void> {
 		if (!('serviceWorker' in navigator)) {
-			console.warn('[Service Worker] Not supported in this browser');
+			debugLog('warn', 'ServiceWorkerManager', 'Not supported in this browser');
+			return;
+		}
+
+		// Skip registration on localhost
+		if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+			debugLog('info', 'ServiceWorkerManager', 'Skipping registration on localhost');
 			return;
 		}
 
@@ -24,26 +32,32 @@ export class ServiceWorkerManager {
 				scope: '/',
 			});
 
-			console.log('[Service Worker] Registered successfully');
+			debugLog('info', 'ServiceWorkerManager', 'Registered successfully');
 
 			// Listen for messages from the service worker
 			navigator.serviceWorker.addEventListener('message', (event) => {
 				if (event.data && event.data.type === 'CACHE_CLEARED') {
-					console.log('[Service Worker] Cache cleared, reloading page...');
+					debugLog('info', 'ServiceWorkerManager', 'Cache cleared, reloading page...');
 					window.location.reload();
 				}
 			});
 
 			// Check for updates
 			this.registration.addEventListener('updatefound', () => {
-				console.log('[Service Worker] Update found');
+				debugLog('info', 'ServiceWorkerManager', 'Update found');
 			});
 		} catch (error) {
-			console.error('[Service Worker] Registration failed:', error);
+			debugLog('error', 'ServiceWorkerManager', 'Registration failed:', error);
 		}
 	}
 
 	async checkArNSUpdate(): Promise<void> {
+		// Skip on localhost
+		if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+			debugLog('info', 'ServiceWorkerManager', 'Skipping ArNS update check on localhost');
+			return;
+		}
+
 		try {
 			// Fetch the current ArNS ID from the response headers
 			const response = await fetch(`https://${window.location.host}`, {
@@ -54,7 +68,7 @@ export class ServiceWorkerManager {
 			const currentArnsId = response.headers.get('X-Arns-Resolved-Id');
 
 			if (!currentArnsId) {
-				console.warn('[ArNS] No X-Arns-Resolved-Id header found');
+				debugLog('warn', 'ServiceWorkerManager', 'No X-Arns-Resolved-Id header found');
 				return;
 			}
 
@@ -64,13 +78,13 @@ export class ServiceWorkerManager {
 			if (!storedArnsId) {
 				// First time - store the ID
 				localStorage.setItem(ARNS_ID_KEY, currentArnsId);
-				console.log('[ArNS] Stored initial ID:', currentArnsId);
+				debugLog('info', 'ServiceWorkerManager', 'Stored initial ArNS ID:', currentArnsId);
 				return;
 			}
 
 			if (storedArnsId !== currentArnsId) {
-				console.log('[ArNS] ID changed from', storedArnsId, 'to', currentArnsId);
-				console.log('[ArNS] Clearing cache and reloading...');
+				debugLog('info', 'ServiceWorkerManager', 'ArNS ID changed from', storedArnsId, 'to', currentArnsId);
+				debugLog('info', 'ServiceWorkerManager', 'Clearing cache and reloading...');
 
 				// Update the stored ID
 				localStorage.setItem(ARNS_ID_KEY, currentArnsId);
@@ -78,16 +92,16 @@ export class ServiceWorkerManager {
 				// Clear the service worker cache
 				await this.clearCache();
 			} else {
-				console.log('[ArNS] ID unchanged:', currentArnsId);
+				debugLog('info', 'ServiceWorkerManager', 'ArNS ID unchanged:', currentArnsId);
 			}
 		} catch (error) {
-			console.error('[ArNS] Error checking for updates:', error);
+			debugLog('error', 'ServiceWorkerManager', 'Error checking for updates:', error);
 		}
 	}
 
 	async clearCache(): Promise<void> {
 		if (!this.registration) {
-			console.warn('[Service Worker] Not registered, cannot clear cache');
+			debugLog('warn', 'ServiceWorkerManager', 'Not registered, cannot clear cache');
 			return;
 		}
 
@@ -96,7 +110,7 @@ export class ServiceWorkerManager {
 			this.registration.active.postMessage({
 				type: 'CLEAR_CACHE',
 			});
-			console.log('[Service Worker] Sent clear cache message');
+			debugLog('info', 'ServiceWorkerManager', 'Sent clear cache message');
 		}
 	}
 
@@ -107,10 +121,10 @@ export class ServiceWorkerManager {
 
 		try {
 			await this.registration.unregister();
-			console.log('[Service Worker] Unregistered successfully');
+			debugLog('info', 'ServiceWorkerManager', 'Unregistered successfully');
 			this.registration = null;
 		} catch (error) {
-			console.error('[Service Worker] Unregistration failed:', error);
+			debugLog('error', 'ServiceWorkerManager', 'Unregistration failed:', error);
 		}
 	}
 }

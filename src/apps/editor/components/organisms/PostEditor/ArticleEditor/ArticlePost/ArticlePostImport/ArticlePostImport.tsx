@@ -10,7 +10,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Panel } from 'components/atoms/Panel';
 import { ICONS } from 'helpers/config';
 import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, debugLog } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -266,7 +266,7 @@ export default function ArticlePostImport() {
 			addNotification(language.markdownImportSuccess, 'success');
 			setShowOptions(false);
 		} catch (e: any) {
-			console.error(e);
+			debugLog('error', 'ArticlePostImport', e);
 			addNotification(e.message ?? language.markdownImportError, 'warning');
 		} finally {
 			setLoading(false);
@@ -283,7 +283,7 @@ export default function ArticlePostImport() {
 				setLoading(true);
 				try {
 					const response = await permawebProvider.libs.getAtomicAsset(assetId);
-					console.log(response);
+					debugLog('info', 'ArticlePostImport', response);
 					if (response?.metadata?.content) {
 						const existingContent = currentPost.data.content || [];
 						const updatedContent = [...existingContent, ...response.metadata.content];
@@ -296,7 +296,7 @@ export default function ArticlePostImport() {
 					}
 					addNotification(language.contentImported, 'success');
 				} catch (e: any) {
-					console.error(e);
+					debugLog('error', 'ArticlePostImport', e);
 					addNotification(e.message ?? language.errorImportingPost, 'warning');
 				}
 				setShowOptions(false);

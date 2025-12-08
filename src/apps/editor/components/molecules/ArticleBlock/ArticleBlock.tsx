@@ -14,7 +14,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Modal } from 'components/atoms/Modal';
 import { ARTICLE_BLOCKS, ICONS } from 'helpers/config';
 import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
-import { validateUrl } from 'helpers/utils';
+import { debugLog, validateUrl } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
@@ -634,26 +634,26 @@ export default function ArticleBlock(props: {
 		if (validateUrl(newLinkUrl)) {
 			restoreSelection();
 			if (!editableRef.current) {
-				console.log('Editable element not found.');
+				debugLog('warn', 'ArticleBlock', 'Editable element not found');
 				return;
 			}
 
 			const selection = window.getSelection();
 			if (!selection || selection.rangeCount === 0) {
-				console.log('No selection available.');
+				debugLog('warn', 'ArticleBlock', 'No selection available');
 				handleLinkClear();
 				return;
 			}
 
 			const range = selection.getRangeAt(0);
 			if (range.collapsed) {
-				console.log('Selection is collapsed.');
+				debugLog('warn', 'ArticleBlock', 'Selection is collapsed');
 				handleLinkClear();
 				return;
 			}
 
 			if (!editableRef.current.contains(range.commonAncestorContainer)) {
-				console.log('Selection is outside the editable area.');
+				debugLog('warn', 'ArticleBlock', 'Selection is outside the editable area');
 				handleLinkClear();
 				return;
 			}

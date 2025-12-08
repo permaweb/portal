@@ -12,6 +12,7 @@ import { Modal } from 'components/atoms/Modal';
 import { Toggle } from 'components/atoms/Toggle';
 import { ICONS } from 'helpers/config';
 import { PortalPatchMapEnum, PortalThemeType } from 'helpers/types';
+import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -1870,7 +1871,7 @@ export default function Themes() {
 
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
 
-				console.log(`Theme update: ${themeUpdateId}`);
+				debugLog('info', 'Themes', `Theme update: ${themeUpdateId}`);
 
 				setOptions(permawebProvider.libs.mapFromProcessCase(themes));
 

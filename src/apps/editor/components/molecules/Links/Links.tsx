@@ -9,7 +9,7 @@ import { Modal } from 'components/atoms/Modal';
 import { ICONS, ICONS_SOCIAL } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalLinkType, PortalPatchMapEnum, ViewLayoutType } from 'helpers/types';
-import { checkValidAddress, validateUrl } from 'helpers/utils';
+import { checkValidAddress, debugLog, validateUrl } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -82,7 +82,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
-				console.log(`Link update: ${linkUpdateId}`);
+				debugLog('info', 'Links', 'Link update:', linkUpdateId);
 
 				addNotification(`${language?.linksUpdated}!`, 'success');
 				setShowDeleteConfirmation(false);
@@ -116,7 +116,7 @@ export default function Links(props: { type: ViewLayoutType; showActions?: boole
 
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
-				console.log(`Link update: ${linkUpdateId}`);
+				debugLog('info', 'Links', 'Link update:', linkUpdateId);
 
 				setLinkOptions(permawebProvider.libs.mapFromProcessCase(updatedLinkOptions));
 				addNotification(`${language?.linkAdded}!`, 'success');

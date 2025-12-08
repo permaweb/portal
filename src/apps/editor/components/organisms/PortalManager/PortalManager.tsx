@@ -9,7 +9,7 @@ import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { LAYOUT, PAGES, PORTAL_DATA, PORTAL_PATCH_MAP, PORTAL_ROLES, THEME, URLS } from 'helpers/config';
 import { PortalDetailType, PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
-import { checkValidAddress, getBootTag } from 'helpers/utils';
+import { checkValidAddress, debugLog, getBootTag } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -64,7 +64,7 @@ export default function PortalManager(props: {
 					try {
 						data.Banner = await permawebProvider.libs.resolveTransaction(logoId);
 					} catch (e: any) {
-						console.error(`Failed to resolve logo: ${e.message}`);
+						debugLog('error', 'PortalManager', `Failed to resolve logo: ${e.message}`);
 					}
 				} else {
 					data.Banner = 'None';
@@ -74,7 +74,7 @@ export default function PortalManager(props: {
 					try {
 						data.Thumbnail = await permawebProvider.libs.resolveTransaction(iconId);
 					} catch (e: any) {
-						console.error(`Failed to resolve icon: ${e.message}`);
+						debugLog('error', 'PortalManager', `Failed to resolve icon: ${e.message}`);
 					}
 				} else {
 					data.Thumbnail = 'None';
@@ -93,7 +93,7 @@ export default function PortalManager(props: {
 
 					const portalUpdateId = await permawebProvider.libs.updateZone(data, props.portal.id, arProvider.wallet);
 
-					console.log(`Portal update: ${portalUpdateId}`);
+					debugLog('info', 'PortalManager', `Portal update: ${portalUpdateId}`);
 
 					profileUpdateId = await permawebProvider.libs.updateZone(
 						{ Portals: portalsUpdateData },
@@ -130,7 +130,7 @@ export default function PortalManager(props: {
 						Or else treat this portal as the user profile */
 					let profileId = permawebProvider.profile?.id;
 					if (!profileId) {
-						console.log('No profile found for wallet, creating portal as profile');
+						debugLog('info', 'PortalManager', 'No profile found for wallet, creating portal as profile');
 
 						tags.push({ name: 'Zone-Type', value: 'User' });
 
@@ -146,10 +146,10 @@ export default function PortalManager(props: {
 							spawnModeration: false,
 							authUsers: [arProvider.walletAddress],
 						},
-						(status: any) => console.log(status)
+						(status: any) => debugLog('info', 'PortalManager', status)
 					);
 
-					console.log(`Portal ID: ${portalId}`);
+					debugLog('info', 'PortalManager', `Portal ID: ${portalId}`);
 
 					/* Use this portal as the profile if one doesn't exist yet */
 					if (!profileId) profileId = portalId;
@@ -173,7 +173,7 @@ export default function PortalManager(props: {
 						arProvider.wallet
 					);
 
-					console.log(`Roles update: ${rolesUpdate}`);
+					debugLog('info', 'PortalManager', `Roles update: ${rolesUpdate}`);
 
 					const currentPortals = Array.isArray(permawebProvider.profile?.portals)
 						? permawebProvider.profile.portals
@@ -197,7 +197,7 @@ export default function PortalManager(props: {
 						arProvider.wallet
 					);
 
-					console.log(`Portal update: ${portalUpdateId}`);
+					debugLog('info', 'PortalManager', `Portal update: ${portalUpdateId}`);
 
 					response = `${language?.portalCreated}!`;
 
@@ -205,7 +205,7 @@ export default function PortalManager(props: {
 					window.location.reload();
 				}
 
-				if (profileUpdateId) console.log(`Profile update: ${profileUpdateId}`);
+				if (profileUpdateId) debugLog('info', 'PortalManager', `Profile update: ${profileUpdateId}`);
 
 				permawebProvider.refreshProfile();
 

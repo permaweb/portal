@@ -11,7 +11,7 @@ import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirm
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalDetailType, PortalPatchMapEnum } from 'helpers/types';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, debugLog } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -66,7 +66,7 @@ export default function Media(props: {
 					const contentTypeHeader = response.headers.get('Content-Type');
 					setContentType(contentTypeHeader);
 				} catch (e: any) {
-					console.error(e);
+					debugLog('error', 'Media', 'Error fetching content type:', e.message ?? 'Unknown error');
 				}
 			}
 		})();
@@ -102,7 +102,7 @@ export default function Media(props: {
 							data[mediaKey] = await permawebProvider.libs.resolveTransaction(media);
 						} catch (e: any) {
 							data[mediaKey] = 'None';
-							console.error(`Failed to resolve ${props.type}: ${e.message}`);
+							debugLog('error', 'Media', `Failed to resolve ${props.type}:`, e.message ?? 'Unknown error');
 						}
 					} else {
 						data[mediaKey] = 'None';
@@ -110,7 +110,7 @@ export default function Media(props: {
 
 					const portalUpdateId = await permawebProvider.libs.updateZone(data, props.portal.id, arProvider.wallet);
 
-					console.log(`Portal update: ${portalUpdateId}`);
+					debugLog('info', 'Media', 'Portal update:', portalUpdateId);
 
 					response =
 						props.type === 'icon'
@@ -129,7 +129,7 @@ export default function Media(props: {
 						props.onMediaUpload(mediaId);
 						response = `${language?.mediaUploaded}!`;
 					} catch (e: any) {
-						console.error(`Failed to upload ${props.type}: ${e.message}`);
+						debugLog('error', 'Media', `Failed to upload ${props.type}:`, e.message ?? 'Unknown error');
 						throw e;
 					}
 				}
