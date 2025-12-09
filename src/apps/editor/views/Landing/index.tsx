@@ -14,7 +14,7 @@ import { LanguageSelect } from 'components/molecules/LanguageSelect';
 import { ICONS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalHeaderType } from 'helpers/types';
-import { checkValidAddress, formatAddress, isOnlyPortal } from 'helpers/utils';
+import { checkValidAddress, debugLog, formatAddress, isOnlyPortal } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -95,12 +95,12 @@ export default function Landing() {
 					permawebProvider.profile.id
 				);
 
-				console.log(`Profile update: ${profileUpdateId}`);
+				debugLog('info', 'Landing', 'Profile update:', profileUpdateId);
 
 				setPendingPortalId(portalId);
 				permawebProvider.refreshProfile();
 			} catch (e: any) {
-				console.error(e);
+				debugLog('error', 'Landing', 'Error joining portal:', e.message ?? 'Unknown error');
 				setPendingPortalId(null);
 			}
 			setLoading(false);

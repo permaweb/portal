@@ -7,6 +7,7 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { ICONS, LAYOUT, PAGES } from 'helpers/config';
 import { PortalPatchMapEnum } from 'helpers/types';
+import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -145,7 +146,7 @@ export default function Layout() {
 
 			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
 
-			console.log(`Layout/Pages update: ${layoutUpdateId}`);
+			debugLog('info', 'Layout', 'Layout/Pages update:', layoutUpdateId);
 			addNotification(`${language?.layoutUpdated || 'Layout Updated'}!`, 'success');
 		} catch (e: any) {
 			addNotification(e.message ?? 'Error updating layout', 'warning');

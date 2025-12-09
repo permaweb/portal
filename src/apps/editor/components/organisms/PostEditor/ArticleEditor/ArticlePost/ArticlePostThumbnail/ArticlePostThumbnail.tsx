@@ -92,7 +92,7 @@ export default function ArticlePostThumbnail() {
 				arProvider.wallet
 			);
 
-			console.log(`Media update: ${mediaUpdateId}`);
+			debugLog('info', 'ArticlePostThumbnail', `Media update: ${mediaUpdateId}`);
 
 			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Media);
 		} catch (e: any) {

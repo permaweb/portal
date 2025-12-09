@@ -1,6 +1,7 @@
 import { Dispatch } from 'redux';
 
 import { PortalPageReduxType, ReduxActionType } from 'helpers/types';
+import { debugLog } from 'helpers/utils';
 
 const UPDATE_CURRENT_PAGE = 'UPDATE_CURRENT_PAGE';
 const SET_ORIGINAL_DATA = 'SET_ORIGINAL_DATA';
@@ -53,21 +54,21 @@ function validateEditorState(state: any): boolean {
 
 	for (const field of requiredEditorFields) {
 		if (!(field in state.editor)) {
-			console.log(`Missing editor field: ${field}`);
+			debugLog('warn', 'store/page', `Missing editor field: ${field}`);
 			return false;
 		}
 	}
 
 	// Check for required nested markup fields
 	if (!state.editor.markup || typeof state.editor.markup !== 'object') {
-		console.log('Missing or invalid editor.markup');
+		debugLog('warn', 'store/page', 'Missing or invalid editor.markup');
 		return false;
 	}
 
 	const requiredMarkupFields = ['bold', 'italic', 'underline', 'strikethrough'];
 	for (const field of requiredMarkupFields) {
 		if (!(field in state.editor.markup)) {
-			console.log(`Missing markup field: ${field}`);
+			debugLog('warn', 'store/page', `Missing markup field: ${field}`);
 			return false;
 		}
 	}
@@ -99,7 +100,7 @@ export function currentPage(
 ) {
 	// Validate state structure and reset if fields are missing
 	if (!validateEditorState(state)) {
-		console.log('Editor state validation failed, resetting to initial state');
+		debugLog('warn', 'store/page', 'Editor state validation failed, resetting to initial state');
 		state = initStateCurrentPage;
 	}
 

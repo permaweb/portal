@@ -132,7 +132,7 @@ export default function MediaLibrary(props: {
 			try {
 				tx = await permawebProvider.libs.resolveTransaction(mediaData);
 			} catch (e) {
-				console.error('Upload failed', e);
+				debugLog('error', 'MediaLibrary', 'Upload failed', e);
 				throw new Error('Failed to upload media to Permaweb');
 			}
 
@@ -141,7 +141,7 @@ export default function MediaLibrary(props: {
 			let thumbnail: string | null = null;
 			if (mediaType === 'video') {
 				thumbnail = await generateThumbnail();
-				console.log(`Video thumbnail: ${thumbnail}`);
+				debugLog('info', 'MediaLibrary', `Video thumbnail: ${thumbnail}`);
 			}
 
 			const data: any = {
@@ -160,7 +160,7 @@ export default function MediaLibrary(props: {
 				arProvider.wallet
 			);
 
-			console.log(`Media update: ${mediaUpdateId}`);
+			debugLog('info', 'MediaLibrary', `Media update: ${mediaUpdateId}`);
 
 			addNotification(`${language?.mediaUploaded}!`, 'success');
 			handleClear(null);
@@ -248,7 +248,7 @@ export default function MediaLibrary(props: {
 
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Media);
 
-				console.log(`Media update: ${mediaUpdateId}`);
+				debugLog('info', 'MediaLibrary', `Media update: ${mediaUpdateId}`);
 
 				addNotification(`${language?.mediaUpdated}!`, 'success');
 			} catch (e: any) {

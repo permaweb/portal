@@ -8,7 +8,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Select } from 'components/atoms/Select';
 import { FONT_OPTIONS } from 'helpers/config';
 import { PortalPatchMapEnum, SelectOptionType } from 'helpers/types';
-import { stripFontWeights } from 'helpers/utils';
+import { debugLog, stripFontWeights } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -58,7 +58,7 @@ export default function Fonts() {
 
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
 
-				console.log(`Font update: ${fontUpdateId}`);
+				debugLog('info', 'Fonts', `Font update: ${fontUpdateId}`);
 
 				addNotification(`${language?.fontsUpdated}!`, 'success');
 			} catch (e: any) {

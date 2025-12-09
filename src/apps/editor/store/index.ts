@@ -3,6 +3,8 @@ import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import thunk from 'redux-thunk';
 
+import { debugLog } from 'helpers/utils';
+
 import { currentPage } from './page';
 import { currentPost, initStateCurrentPost } from './post';
 
@@ -20,7 +22,7 @@ const persistConfig = {
 
 			// Check if markup field exists
 			if (!editor?.markup) {
-				console.log('Missing editor.markup field, resetting currentPost state');
+				debugLog('warn', 'store/index', 'Missing editor.markup field, resetting currentPost state');
 				return Promise.resolve({
 					...state,
 					currentPost: initStateCurrentPost,
@@ -31,7 +33,7 @@ const persistConfig = {
 			const requiredMarkupFields = ['bold', 'italic', 'underline', 'strikethrough'];
 			for (const field of requiredMarkupFields) {
 				if (!(field in editor.markup)) {
-					console.log(`Missing markup.${field} field, resetting currentPost state`);
+					debugLog('warn', 'store/index', `Missing markup.${field} field, resetting currentPost state`);
 					return Promise.resolve({
 						...state,
 						currentPost: initStateCurrentPost,
@@ -52,7 +54,11 @@ const persistConfig = {
 				}
 
 				if (missingFields.length > 0) {
-					console.log(`Missing data fields: ${missingFields.join(', ')}, adding with default values`);
+					debugLog(
+						'warn',
+						'store/index',
+						`Missing data fields: ${missingFields.join(', ')}, adding with default values`
+					);
 					return Promise.resolve({
 						...state,
 						currentPost: {

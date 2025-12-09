@@ -19,7 +19,7 @@ import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { getArnsCost } from 'helpers/arnsCosts';
 import { ICONS, IS_TESTNET, URLS } from 'helpers/config';
 import { PortalPatchMapEnum } from 'helpers/types';
-import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
+import { debugLog, getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -131,7 +131,7 @@ export default function Domains() {
 
 				setDomainAvailable(!record);
 			} catch (err) {
-				console.error('Failed to fetch record:', err);
+				debugLog('error', 'DomainsRegister', 'Failed to fetch record:', err);
 			}
 			setLoadingAvailable(false);
 		}, 750);
@@ -151,7 +151,7 @@ export default function Domains() {
 					setTurboCreditBuyAmount(buyEstimate.credits);
 					setArioCostBuyAmount(buyEstimate.mario);
 				} catch (e: any) {
-					console.error(e);
+					debugLog('error', 'DomainsRegister', e);
 				}
 			}
 		})();
@@ -169,7 +169,7 @@ export default function Domains() {
 					setTurboCreditLeaseAmount(leaseEstimate.credits);
 					setArioCostLeaseAmount(leaseEstimate.mario);
 				} catch (e: any) {
-					console.error(e);
+					debugLog('error', 'DomainsRegister', e);
 				}
 			}
 		})();
@@ -208,12 +208,12 @@ export default function Domains() {
 
 	async function handleSubmit(methodOverride?: 'turbo' | 'ario') {
 		if (unauthorized) {
-			console.error('User is not authorized to register domains for this portal');
+			debugLog('error', 'DomainsRegister', 'User is not authorized to register domains for this portal');
 			return;
 		}
 
 		if (!purchaseType || !domain.trim() || !domainAvailable) {
-			console.error('Invalid purchase parameters');
+			debugLog('error', 'DomainsRegister', 'Invalid purchase parameters');
 			return;
 		}
 
@@ -222,7 +222,7 @@ export default function Domains() {
 		setPurchaseSuccess(null);
 
 		try {
-			console.log(`Purchasing domain: ${domain.trim()} with type: ${purchaseType}`);
+			debugLog('info', 'DomainsRegister', `Purchasing domain: ${domain.trim()} with type: ${purchaseType}`);
 
 			// Check if wallet is connected
 			if (!window.arweaveWallet) {
@@ -237,7 +237,7 @@ export default function Domains() {
 			try {
 				await window.arweaveWallet.connect(['SIGN_TRANSACTION', 'ACCESS_ADDRESS', 'ACCESS_PUBLIC_KEY']);
 			} catch (permError) {
-				console.warn('Permission request failed, proceeding with existing permissions');
+				debugLog('warn', 'DomainsRegister', 'Permission request failed, proceeding with existing permissions');
 			}
 
 			// Use simplified SDK initialization as per documentation
@@ -253,13 +253,13 @@ export default function Domains() {
 					arIO = ARIO.mainnet({ signer });
 				}
 			} catch (signerError) {
-				console.error('Error initializing ArconnectSigner:', signerError);
+				debugLog('error', 'DomainsRegister', 'Error initializing ArconnectSigner:', signerError);
 				throw new Error('Failed to initialize wallet signer. Please ensure ArConnect is properly connected.');
 			}
 
 			const name = domain.trim().toLowerCase();
 
-			console.log('Attempting to purchase domain:', {
+			debugLog('info', 'DomainsRegister', 'Attempting to purchase domain:', {
 				name,
 				type: purchaseType,
 				years: purchaseType === 'lease' ? leaseDuration : undefined,
@@ -268,7 +268,7 @@ export default function Domains() {
 			// Use the correct buyRecord API according to ar.io SDK documentation
 			let result;
 			try {
-				console.log('Calling buyRecord with parameters:', {
+				debugLog('info', 'DomainsRegister', 'Calling buyRecord with parameters:', {
 					name,
 					type: purchaseType,
 					years: purchaseType === 'lease' ? leaseDuration : undefined,
@@ -295,8 +295,8 @@ export default function Domains() {
 					});
 				}
 			} catch (buyRecordError) {
-				console.error('buyRecord failed:', buyRecordError);
-				console.error('Error stack:', buyRecordError.stack);
+				debugLog('error', 'DomainsRegister', 'buyRecord failed:', buyRecordError);
+				debugLog('error', 'DomainsRegister', 'Error stack:', buyRecordError.stack);
 
 				// Check if this is the ArrayBuffer error specifically
 				if (buyRecordError.message?.includes('ArrayBuffer')) {
@@ -306,7 +306,7 @@ export default function Domains() {
 				throw buyRecordError;
 			}
 
-			console.log('Purchase result:', result);
+			debugLog('info', 'DomainsRegister', 'Purchase result:', result);
 
 			// Refresh the ARIO balance after purchase
 			refetchArIOBalance();
@@ -352,12 +352,20 @@ export default function Domains() {
 						transactionId: portalProvider.current.id,
 						ttlSeconds: 60,
 					});
-					console.log(`Set '@' record for ${purchasedName} to portal ${portalProvider.current.id}`);
+					debugLog(
+						'info',
+						'DomainsRegister',
+						`Set '@' record for ${purchasedName} to portal ${portalProvider.current.id}`
+					);
 				} else {
-					console.warn('Unable to resolve ANT process id or missing portal id. Skipping auto-redirect.');
+					debugLog(
+						'warn',
+						'DomainsRegister',
+						'Unable to resolve ANT process id or missing portal id. Skipping auto-redirect.'
+					);
 				}
 			} catch (redirectErr) {
-				console.error('Auto-redirect after purchase failed:', redirectErr);
+				debugLog('error', 'DomainsRegister', 'Auto-redirect after purchase failed:', redirectErr);
 			}
 
 			const current = portalProvider.current?.domains ?? [];
@@ -386,7 +394,7 @@ export default function Domains() {
 
 			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Navigation);
 
-			console.log(`Domain update: ${domainUpdateId}`);
+			debugLog('info', 'DomainsRegister', `Domain update: ${domainUpdateId}`);
 
 			// Set success state
 			setPurchaseSuccess({
@@ -400,7 +408,7 @@ export default function Domains() {
 			setDomain('');
 			setPurchaseType(null);
 		} catch (error: any) {
-			console.error('Error purchasing domain:', error);
+			debugLog('error', 'DomainsRegister', 'Error purchasing domain:', error);
 
 			// Provide more helpful error messages for common issues
 			let errorMessage = error.message || 'Unknown error';
@@ -439,7 +447,7 @@ export default function Domains() {
 				mario: res.mario ?? 0,
 			};
 		} catch (error) {
-			console.error('Error getting price via helper:', error);
+			debugLog('error', 'DomainsRegister', 'Error getting price via helper:', error);
 			return { fiat: 'N/A', credits: 0, mario: 0 };
 		}
 	}

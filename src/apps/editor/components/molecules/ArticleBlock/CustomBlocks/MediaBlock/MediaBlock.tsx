@@ -221,7 +221,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					arProvider.wallet
 				);
 
-				console.log(`Media update: ${mediaUpdateId}`);
+				debugLog('info', 'MediaBlock', `Media update: ${mediaUpdateId}`);
 
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Media);
 			}

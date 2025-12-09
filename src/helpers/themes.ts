@@ -6,7 +6,7 @@ export const common = {
 	caution1: '#EECA00',
 	negative1: '#F16A82',
 	negative2: '#EE4463',
-	editor: {
+	editorLight: {
 		primary: '#ec3063',
 		alt1: '#13ab8f',
 		alt2: '#5E66DB',
@@ -15,9 +15,22 @@ export const common = {
 		alt5: '#8580d9',
 		alt6: '#FF5722',
 		alt7: '#FFC107',
-		alt8: '#00BCD4',
+		alt8: '#1681c7',
 		alt9: '#8BC34A',
 		alt10: '#3a3a3a',
+	},
+	editorDark: {
+		primary: '#D975E6',
+		alt1: '#62c1b1',
+		alt2: '#45c6ae',
+		alt3: '#5bdcbf',
+		alt4: '#67cac0',
+		alt5: '#8580d9',
+		alt6: '#FFC107',
+		alt7: '#FFC107',
+		alt8: '#7EBEEF',
+		alt9: '#4AC37E',
+		alt10: '#BCBCBC',
 	},
 	roles: {
 		primary: '#F38284',
@@ -30,6 +43,7 @@ export const common = {
 export const lightTheme = {
 	scheme: 'light',
 	...common,
+	editor: { ...common.editorLight },
 	neutral1: '#FFFFFF',
 	neutral2: '#F9F9F9',
 	neutral3: '#F0F0F0',
@@ -64,6 +78,7 @@ export const lightTheme = {
 export const lightThemeHighContrast = {
 	scheme: 'light',
 	...common,
+	editor: { ...common.editorLight },
 	neutral1: '#FEFEFE',
 	neutral2: '#F0F0F0',
 	neutral3: '#E0E0E0',
@@ -98,6 +113,7 @@ export const lightThemeHighContrast = {
 export const lightThemeAlt1 = {
 	scheme: 'light',
 	...common,
+	editor: { ...common.editorLight },
 	neutral1: '#FEFEFE',
 	neutral2: '#F9F9F9',
 	neutral3: '#F0F0F0',
@@ -132,6 +148,7 @@ export const lightThemeAlt1 = {
 export const lightThemeAlt2 = {
 	scheme: 'light',
 	...common,
+	editor: { ...common.editorLight },
 	positive1: '#5AB6A0',
 	positive2: '#4BAA94',
 	neutral1: '#FEFEFE',
@@ -168,6 +185,7 @@ export const lightThemeAlt2 = {
 export const darkTheme = {
 	scheme: 'dark',
 	...common,
+	editor: { ...common.editorDark },
 	positive1: '#38BD80',
 	positive2: '#2F9D6A',
 	neutral1: '#1B1B1B',
@@ -204,6 +222,7 @@ export const darkTheme = {
 export const darkThemeHighContrast = {
 	scheme: 'dark',
 	...common,
+	editor: { ...common.editorDark },
 	positive1: '#38BD80',
 	positive2: '#2F9D6A',
 	neutral1: '#101013',
@@ -240,6 +259,7 @@ export const darkThemeHighContrast = {
 export const darkThemeAlt1 = {
 	scheme: 'dark',
 	...common,
+	editor: { ...common.editorDark },
 	positive1: '#38BD80',
 	positive2: '#2F9D6A',
 	neutral1: '#16161c',
@@ -276,6 +296,7 @@ export const darkThemeAlt1 = {
 export const darkThemeAlt2 = {
 	scheme: 'dark',
 	...common,
+	editor: { ...common.editorDark },
 	positive1: '#38BD80',
 	positive2: '#2F9D6A',
 	neutral1: '#17191f',

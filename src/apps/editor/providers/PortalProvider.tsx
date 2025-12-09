@@ -17,6 +17,7 @@ import {
 import {
 	cachePortal,
 	cacheProfile,
+	debugLog,
 	getCachedPortal,
 	getCachedProfile,
 	getPortalAssets,
@@ -151,7 +152,12 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									transfers: transfers.transfers ?? [],
 								};
 							} catch (e) {
-								console.warn(`Failed to fetch portal metadata for ${portal.id}:`, e);
+								debugLog(
+									'warn',
+									'PortalProvider',
+									`Failed to fetch portal metadata for ${portal.id}:`,
+									e.message ?? 'Unknown error'
+								);
 								const cached = getCachedPortal(portal.id);
 								if (cached) {
 									return {
@@ -202,7 +208,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					await fetchPortal();
 				}
 			} catch (e: any) {
-				console.error(e);
+				debugLog('error', 'PortalProvider', 'Error getting portal:', e.message ?? 'Unknown error');
 				addNotification(e.message ?? 'An error occurred getting this portal', 'warning');
 			}
 		})();
@@ -211,7 +217,13 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		(async function () {
 			if (current && refreshFields && refreshFields.length > 0) {
-				await Promise.all(refreshFields.map((field) => fetchPortal({ patchKey: field })));
+				try {
+					await Promise.all(refreshFields.map((field) => fetchPortal({ patchKey: field })));
+				} catch (e: any) {
+					debugLog('error', 'PortalProvider', 'Error refreshing portal:', e.message ?? 'Unknown error');
+				} finally {
+					setRefreshFields(null);
+				}
 			}
 		})();
 	}, [refreshCurrentTrigger, refreshFields]);
@@ -260,12 +272,12 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				permawebProvider.libs?.updateZonePatchMap &&
 				!patchMapRef.current
 			) {
-				console.log(overview?.patchMap);
+				debugLog('info', 'PortalProvider', 'Portal patchMap:', overview?.patchMap);
 				patchMapRef.current = true;
 				try {
 					permawebProvider.libs.updateZonePatchMap({ ...PORTAL_PATCH_MAP }, currentId);
 				} catch (e: any) {
-					console.error('Failed to update portal patch map:', e);
+					debugLog('error', 'PortalProvider', 'Failed to update portal patch map:', e.message ?? 'Unknown error');
 				}
 			}
 
@@ -306,7 +318,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			cachePortal(currentId, portalState);
 			setCurrent(portalState);
 		} catch (e: any) {
-			console.error('Failed to fetch portal data', e);
+			debugLog('error', 'PortalProvider', 'Failed to fetch portal data:', e.message ?? 'Unknown error');
 		}
 		setUpdating(false);
 	};
@@ -363,7 +375,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						cacheProfile(user.address, profile);
 					}
 				} catch (e: any) {
-					console.error(e);
+					debugLog('error', 'PortalProvider', 'Error fetching profile:', e.message ?? 'Unknown error');
 				}
 			}
 
@@ -374,7 +386,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				}));
 			}
 		} catch (e: any) {
-			console.error(e);
+			debugLog('error', 'PortalProvider', 'Error fetching user profile:', e.message ?? 'Unknown error');
 		}
 	}
 

@@ -16,7 +16,9 @@ import { Loader } from 'components/atoms/Loader';
 import { Portal } from 'components/atoms/Portal';
 import { DOM, URLS } from 'helpers/config';
 import { preloadAllAssets } from 'helpers/preloader';
+import { serviceWorkerManager } from 'helpers/serviceWorkerManager';
 import { GlobalStyle } from 'helpers/styles';
+import { debugLog } from 'helpers/utils';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvider';
 import { NotificationProvider } from 'providers/NotificationProvider';
@@ -76,11 +78,22 @@ function AppContent() {
 	const hasCheckedProfileRef = React.useRef(false);
 	const hasInitializedPreloaderRef = React.useRef(false);
 	const hasHiddenLoaderRef = React.useRef(false);
+	const hasInitializedServiceWorkerRef = React.useRef(false);
 
 	React.useEffect(() => {
 		if (!hasInitializedPreloaderRef.current) {
 			preloadAllAssets();
 			hasInitializedPreloaderRef.current = true;
+		}
+	}, []);
+
+	React.useEffect(() => {
+		if (!hasInitializedServiceWorkerRef.current) {
+			hasInitializedServiceWorkerRef.current = true;
+			(async () => {
+				await serviceWorkerManager.register();
+				await serviceWorkerManager.checkArNSUpdate();
+			})();
 		}
 	}, []);
 
@@ -100,13 +113,13 @@ function AppContent() {
 			if (permawebProvider.profile?.id) {
 				const userVersion = permawebProvider.profile.version;
 				if (!userVersion || userVersion !== CurrentZoneVersion) {
-					console.log('User profile version does match current version, updating...');
+					debugLog('info', 'EditorApp', 'User profile version does not match current version, updating...');
 
 					await permawebProvider.libs.updateProfileVersion({
 						profileId: permawebProvider.profile.id,
 					});
 
-					console.log('Updated profile version.');
+					debugLog('info', 'EditorApp', 'Updated profile version.');
 
 					hasCheckedProfileRef.current = true;
 				}
