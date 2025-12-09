@@ -52,7 +52,10 @@ export const Navigation = styled.div<{ $layout: any; maxWidth: number; $editHeig
 		if (isSideNav(props.$layout)) return 'none';
 		return props.$layout.border?.bottom ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
 	}};
-	border-top: ${(props) => (props.$layout.border?.top ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset')};
+	border-top: ${(props) => {
+		if (isSideNav(props.$layout)) return 'none';
+		return props.$layout.border?.top ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
+	}};
 	border-left: ${(props) => {
 		if (isSideNav(props.$layout)) {
 			return props.$layout?.position === 'right' ? '1px solid rgba(var(--color-navigation-border),1)' : 'none';

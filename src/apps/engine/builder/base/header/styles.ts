@@ -22,7 +22,8 @@ export const Header = styled.div<{
 	margin-right: auto;
 	box-sizing: border-box;
 	border-bottom: ${(props) => (props.$layout.border.bottom ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
-	border-top: ${(props) => (props.$layout.border.top ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
+	border-top: ${(props) =>
+		props.$isSideNav ? 'none' : props.$layout.border.top ? `1px solid rgba(var(--color-header-border),1)` : `unset`};
 	border-left: ${(props) =>
 		props.$isSideNav ? 'none' : props.$layout.border.sides ? `1px solid rgba(var(--color-header-border),1)` : `unset`};
 	border-right: ${(props) =>
