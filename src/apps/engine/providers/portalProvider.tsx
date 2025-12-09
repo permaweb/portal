@@ -103,7 +103,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [layoutEditMode, setLayoutEditMode] = React.useState(false);
 	const [layoutHeights, setLayoutHeights] = React.useState<LayoutHeights>(DEFAULT_LAYOUT_HEIGHTS);
 	const [logoSettings, setLogoSettings] = React.useState<LogoSettings>(DEFAULT_LOGO_SETTINGS);
-	const [footerFixed, setFooterFixed] = React.useState(false);
+	const [footerFixed, setFooterFixed] = React.useState<boolean | undefined>(undefined);
 	const [navSticky, setNavSticky] = React.useState(true);
 	const [headerSticky, setHeaderSticky] = React.useState(false);
 
@@ -268,7 +268,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					size: parseSize(logoContent.size),
 				});
 			}
-			setFooterFixed(layout.footer?.layout?.fixed || false);
+			const fixedValue = layout.footer?.layout?.fixed;
+			setFooterFixed(fixedValue === true || fixedValue === 'true');
 		}
 	}, [portal?.Layout]);
 

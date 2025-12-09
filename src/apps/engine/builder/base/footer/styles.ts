@@ -13,7 +13,8 @@ export const FooterWrapper = styled.div<{ $layout: any; $theme: any; $editFixed?
 	z-index: 1;
 
 	${(props) => {
-		const isFixed = props.$editFixed !== undefined ? props.$editFixed : props.$layout?.fixed;
+		const layoutFixed = props.$layout?.fixed === true || props.$layout?.fixed === 'true';
+		const isFixed = props.$editFixed !== undefined ? props.$editFixed : layoutFixed;
 		if (isFixed) {
 			return `
 				position: fixed;

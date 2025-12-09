@@ -84,10 +84,8 @@ export default function Layout() {
 	function handleLayoutOptionChange(optionName: string) {
 		if (optionName === 'blog') {
 			setLayout(LAYOUT.BLOG);
-			setPages(PAGES.BLOG);
 		} else if (optionName === 'journal') {
 			setLayout(LAYOUT.JOURNAL);
-			setPages(PAGES.JOURNAL);
 		} else if (optionName === 'documentation') {
 			setLayout(LAYOUT.DOCUMENTATION);
 		} else {
