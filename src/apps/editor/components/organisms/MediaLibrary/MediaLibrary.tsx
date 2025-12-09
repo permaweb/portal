@@ -12,7 +12,7 @@ import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirm
 import { ICONS, UPLOAD } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { MediaConfigType, PortalPatchMapEnum, PortalUploadOptionType, PortalUploadType } from 'helpers/types';
-import { compressImageToSize, isCompressibleImage } from 'helpers/utils';
+import { compressImageToSize, debugLog, isCompressibleImage } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';

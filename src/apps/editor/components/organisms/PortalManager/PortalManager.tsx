@@ -304,6 +304,10 @@ export default function PortalManager(props: {
 								</S.PWrapper>
 							) : (
 								<>
+									<S.SectionLabel>{language?.logo || 'Logo'}</S.SectionLabel>
+									<S.LogoWrapper>
+										<Media portal={null} type={'logo'} onMediaUpload={handleLogoUpload} hideActions />
+									</S.LogoWrapper>
 									<S.SectionLabel>{language?.layout || 'Layout'}</S.SectionLabel>
 									<S.LayoutOptions>
 										{layoutOptions.map((option) => {
@@ -322,8 +326,6 @@ export default function PortalManager(props: {
 											);
 										})}
 									</S.LayoutOptions>
-									<S.SectionLabel>{language?.logo || 'Logo'}</S.SectionLabel>
-									<Media portal={null} type={'logo'} onMediaUpload={handleLogoUpload} hideActions />
 								</>
 							)}
 							<S.SAction>

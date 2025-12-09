@@ -11,7 +11,7 @@ import { TextArea } from 'components/atoms/TextArea';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
 import { ICONS, UPLOAD } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress, compressImageToSize, isCompressibleImage } from 'helpers/utils';
+import { checkValidAddress, compressImageToSize, debugLog, isCompressibleImage } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';

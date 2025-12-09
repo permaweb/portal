@@ -67,10 +67,10 @@ export default function Navigation(props: any) {
 
 	React.useEffect(() => {
 		if (preview) {
-			initThemes(Themes, Layout);
+			initThemes(Themes);
 			document.getElementById('preview')?.setAttribute('data-theme', 'dark');
 		}
-	}, [preview, Themes, Layout]);
+	}, [preview, Themes]);
 
 	const renderLogo = (txId: string) => {
 		const url = txId.startsWith('http') ? txId : getTxEndpoint(txId);

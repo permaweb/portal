@@ -213,11 +213,17 @@ export const SectionLabel = styled.p`
 	margin: 0 0 10px 0;
 `;
 
+export const LogoWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	justify-content: flex-start;
+	margin: 0 0 20px 0;
+`;
+
 export const LayoutOptions = styled.div`
 	display: flex;
 	gap: 15px;
 	width: 100%;
-	margin: 0 0 20px 0;
 `;
 
 export const LayoutOption = styled.div<{ $active: boolean }>`
