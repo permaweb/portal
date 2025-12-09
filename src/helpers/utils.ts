@@ -553,3 +553,24 @@ export async function compressImageToSize(file: File, targetSizeBytes: number, m
 		img.src = url;
 	});
 }
+
+const COLORS: Record<string, string> = {
+	info: 'color: #8F8F8F',
+	warn: 'color: #EECA00',
+	error: 'color: #EE4463',
+	success: 'color: #64B686',
+};
+
+const METHOD: Record<string, (...args: any[]) => void> = {
+	info: console.log,
+	warn: console.warn,
+	error: console.error,
+	success: console.log,
+};
+
+export function debugLog(level: string, context: string, ...args: any[]) {
+	const style = COLORS[level] || 'color: #8F8F8F';
+	const method = METHOD[level] || console.log;
+
+	method(`%c[Portal: ${capitalize(level)}]%c %c(${context})%c -`, style, '', 'font-weight: medium;', '', ...args);
+}

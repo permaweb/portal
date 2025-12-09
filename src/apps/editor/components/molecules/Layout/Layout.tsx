@@ -90,7 +90,6 @@ export default function Layout() {
 			setPages(PAGES.JOURNAL);
 		} else if (optionName === 'documentation') {
 			setLayout(LAYOUT.DOCUMENTATION);
-			setPages(PAGES.BLOG);
 		} else {
 			const layoutValue = optionName.toLowerCase();
 			const updatedPages = {

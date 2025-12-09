@@ -198,7 +198,7 @@ export default function PortalManager(props: {
 						if (selectedLayout === 'blog') {
 							return { layout: LAYOUT.BLOG, pages: PAGES.BLOG };
 						} else if (selectedLayout === 'documentation') {
-							return { layout: LAYOUT.DOCUMENTATION, pages: PAGES.BLOG };
+							return { layout: LAYOUT.DOCUMENTATION, pages: PAGES.DOCUMENTATION };
 						}
 						return { layout: LAYOUT.JOURNAL, pages: PAGES.JOURNAL };
 					};
