@@ -481,7 +481,7 @@ export function isCompressibleImage(file: File): boolean {
 	return compressibleTypes.includes(file.type);
 }
 
-export async function compressImageToSize(file: File, targetSizeBytes: number): Promise<File> {
+export async function compressImageToSize(file: File, targetSizeBytes: number, maxWidth?: number): Promise<File> {
 	return new Promise((resolve, reject) => {
 		const img = new Image();
 		const url = URL.createObjectURL(file);
@@ -492,7 +492,14 @@ export async function compressImageToSize(file: File, targetSizeBytes: number): 
 			const canvas = document.createElement('canvas');
 			const ctx = canvas.getContext('2d');
 
-			const { width, height } = img;
+			let { width, height } = img;
+
+			if (maxWidth && width > maxWidth) {
+				const ratio = maxWidth / width;
+				width = maxWidth;
+				height = Math.round(height * ratio);
+			}
+
 			const supportsTransparency = file.type === 'image/png' || file.type === 'image/webp';
 			const outputType = supportsTransparency ? 'image/webp' : 'image/jpeg';
 			const fileExtension = supportsTransparency ? '.webp' : '.jpg';
@@ -511,25 +518,21 @@ export async function compressImageToSize(file: File, targetSizeBytes: number): 
 
 			const compress = async () => {
 				let scale = 1;
-				let quality = 0.9;
+				const quality = 0.92;
 				let blob: Blob | null = null;
 
-				while (scale >= 0.05) {
-					quality = 0.9;
-					while (quality >= 0.1) {
-						blob = await tryCompress(scale, quality);
-						if (blob && blob.size <= targetSizeBytes) {
-							const newFileName = file.name.replace(/\.[^/.]+$/, '') + '_compressed' + fileExtension;
-							const compressedFile = new File([blob], newFileName, { type: outputType });
-							resolve(compressedFile);
-							return;
-						}
-						quality -= 0.1;
+				while (scale >= 0.1) {
+					blob = await tryCompress(scale, quality);
+					if (blob && blob.size <= targetSizeBytes) {
+						const newFileName = file.name.replace(/\.[^/.]+$/, '') + '_compressed' + fileExtension;
+						const compressedFile = new File([blob], newFileName, { type: outputType });
+						resolve(compressedFile);
+						return;
 					}
-					scale -= 0.1;
+					scale -= 0.05;
 				}
 
-				blob = await tryCompress(0.05, 0.1);
+				blob = await tryCompress(0.1, quality);
 				if (blob) {
 					const newFileName = file.name.replace(/\.[^/.]+$/, '') + '_compressed' + fileExtension;
 					const compressedFile = new File([blob], newFileName, { type: outputType });

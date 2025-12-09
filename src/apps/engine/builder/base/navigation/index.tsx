@@ -227,7 +227,7 @@ export default function Navigation(props: any) {
 			{preview && <GlobalStyles />}
 			<S.NavigationEntries $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
 				{isSideNav && Logo && (
-					<S.NavLogo $logoSize={logoSettings?.size} $positionX={logoSettings?.positionX}>
+					<S.NavLogo id="Logo" $logoSize={logoSettings?.size} $positionX={logoSettings?.positionX}>
 						<NavLink to={getRedirect()}>{renderLogo(Logo)}</NavLink>
 					</S.NavLogo>
 				)}
@@ -238,25 +238,17 @@ export default function Navigation(props: any) {
 				{!isSideNav && <Search />}
 			</S.NavigationEntries>
 			{layoutEditMode && (
-				<>
-					<S.ResizeHandle
-						$isDragging={isDragging}
-						$isSideNav={isSideNav}
-						$position={layout?.position}
-						onMouseDown={handleMouseDown}
-					>
-						<S.HandleBar $isSideNav={isSideNav} />
-					</S.ResizeHandle>
-					<S.HandleLabel
-						style={
-							isSideNav
-								? { left: layoutHeights.navigation + 10, top: '50%', transform: 'translateY(-50%)' }
-								: { left: '50%', bottom: -10, transform: 'translateX(-50%)' }
-						}
-					>
-						{isSideNav ? 'Width' : 'Height'} ({layoutHeights.navigation}px)
+				<S.ResizeHandle
+					$isDragging={isDragging}
+					$isSideNav={isSideNav}
+					$position={layout?.position}
+					onMouseDown={handleMouseDown}
+				>
+					<S.HandleBar $isSideNav={isSideNav} />
+					<S.HandleLabel $isSideNav={isSideNav}>
+						{isSideNav ? 'Width' : 'Height'} ({layoutHeights.navigation || layout?.width || 300}px)
 					</S.HandleLabel>
-				</>
+				</S.ResizeHandle>
 			)}
 		</S.Navigation>
 	);

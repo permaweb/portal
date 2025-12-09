@@ -6,8 +6,6 @@ import { useProfile } from 'engine/hooks/profiles';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 
-import SidebarArchive from '../archive';
-
 import * as S from './styles';
 
 export default function SidebarUser() {
@@ -78,7 +76,6 @@ export default function SidebarUser() {
 			<S.Content>
 				<S.Bio>{profile.description}</S.Bio>
 			</S.Content>
-			<SidebarArchive author={profile.id} />
 		</S.SidebarUserWrapper>
 	);
 }

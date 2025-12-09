@@ -43,7 +43,7 @@ export default function Header(props: any) {
 
 		const handleMouseMove = (e: MouseEvent) => {
 			const delta = e.clientY - startY;
-			const newHeight = Math.max(50, Math.min(300, startHeight + delta));
+			const newHeight = Math.max(48, Math.min(300, startHeight + delta));
 			setLayoutHeights({ ...layoutHeights, header: newHeight });
 		};
 
@@ -91,18 +91,20 @@ export default function Header(props: any) {
 		}
 
 		return (
-			<ReactSVG
-				src={url}
-				beforeInjection={(_svg) => {
-					if (logoError[txId]) {
-						setLogoError((prev) => ({ ...prev, [txId]: false }));
-					}
-				}}
-				fallback={() => {
-					setLogoError((prev) => ({ ...prev, [txId]: true }));
-					return <img src={url} alt="Logo" />;
-				}}
-			/>
+			<span style={{ color: 'rgba(var(--color-text), 1)' }}>
+				<ReactSVG
+					src={url}
+					beforeInjection={(_svg) => {
+						if (logoError[txId]) {
+							setLogoError((prev) => ({ ...prev, [txId]: false }));
+						}
+					}}
+					fallback={() => {
+						setLogoError((prev) => ({ ...prev, [txId]: true }));
+						return <img src={url} alt="Logo" />;
+					}}
+				/>
+			</span>
 		);
 	};
 
@@ -141,14 +143,16 @@ export default function Header(props: any) {
 									preview ? (
 										<a href="">{renderLogo(Logo)}</a>
 									) : (
-										<NavLink to={getRedirect()}>{renderLogo(Logo)}</NavLink>
+										<NavLink to={getRedirect()} style={{ color: 'inherit' }}>
+											{renderLogo(Logo)}
+										</NavLink>
 									)
 								) : (
 									<h1>{name}</h1>
 								)}
 							</S.Logo>
 						) : (
-							<NavLink to={getRedirect()}>
+							<NavLink to={getRedirect()} style={{ color: 'inherit' }}>
 								<h1>{name}</h1>
 							</NavLink>
 						)}
@@ -169,8 +173,18 @@ export default function Header(props: any) {
 						onMouseDown={handleMouseDown}
 						style={{
 							top: layoutHeights.header,
-							left: isSideNav && navPosition === 'left' ? layoutHeights.navigation : 0,
-							right: isSideNav && navPosition === 'right' ? layoutHeights.navigation : 0,
+							left:
+								isSideNav && navPosition === 'left'
+									? `calc((100vw - ${Layout?.basics?.maxWidth || 1200}px) / 2 + ${
+											Layout?.navigation?.layout?.width || 300
+									  }px)`
+									: 0,
+							right:
+								isSideNav && navPosition === 'right'
+									? `calc((100vw - ${Layout?.basics?.maxWidth || 1200}px) / 2 + ${
+											Layout?.navigation?.layout?.width || 300
+									  }px)`
+									: 0,
 						}}
 					>
 						<S.HandleBar>

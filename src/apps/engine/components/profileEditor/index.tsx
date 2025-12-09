@@ -4,12 +4,9 @@ import Button from 'engine/components/form/button';
 
 import { Types } from '@permaweb/libs';
 
-import { Modal } from 'components/atoms/Modal';
-import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
 import { ICONS, UPLOAD } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress, compressImageToSize, isCompressibleImage } from 'helpers/utils';
-import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -43,22 +40,20 @@ export default function ProfileEditor(props: {
 	const [thumbnailRemoved, setThumbnailRemoved] = React.useState<boolean>(false);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
-	const [pendingFile, setPendingFile] = React.useState<{ file: File; type: 'banner' | 'thumbnail' } | null>(null);
-	const [compressing, setCompressing] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
-	const { uploadCost, showUploadConfirmation, calculateUploadCost, clearUploadState } = useUploadCost();
 
-	const canCompress = pendingFile?.file && isCompressibleImage(pendingFile.file);
+	const bannerChangedRef = React.useRef(false);
+	const thumbnailChangedRef = React.useRef(false);
 
 	React.useEffect(() => {
 		setUsername(props.profile?.username ?? '');
 		setName(props.profile?.displayName ?? '');
 		setDescription(props.profile?.description ?? '');
 
-		if (!bannerRemoved) {
+		if (!bannerRemoved && !bannerChangedRef.current) {
 			setBanner(props.profile?.banner && checkValidAddress(props.profile.banner) ? props.profile.banner : null);
 		}
-		if (!thumbnailRemoved) {
+		if (!thumbnailRemoved && !thumbnailChangedRef.current) {
 			setThumbnail(
 				props.profile?.thumbnail && checkValidAddress(props.profile.thumbnail) ? props.profile.thumbnail : null
 			);
@@ -70,6 +65,8 @@ export default function ProfileEditor(props: {
 
 		setBannerRemoved(false);
 		setThumbnailRemoved(false);
+		bannerChangedRef.current = false;
+		thumbnailChangedRef.current = false;
 
 		if (props.handleUpdate) props.handleUpdate();
 		if (props.handleClose) props.handleClose(true);
@@ -125,14 +122,19 @@ export default function ProfileEditor(props: {
 
 	async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'thumbnail') {
 		if (e.target.files && e.target.files.length) {
-			const file = e.target.files[0];
+			let file = e.target.files[0];
 			if (file.type.startsWith('image/')) {
-				if (file.size >= UPLOAD.dispatchUploadSize && arProvider.wallet) {
-					setPendingFile({ file, type });
-					await calculateUploadCost(file);
-				} else {
-					applyFileToState(file, type);
+				const maxWidth = type === 'thumbnail' ? 100 : 1080;
+				if (isCompressibleImage(file)) {
+					try {
+						file = await compressImageToSize(file, UPLOAD.dispatchUploadSize, maxWidth);
+					} catch (err: any) {
+						addNotification(err.message ?? 'Error compressing image', 'warning');
+						e.target.value = '';
+						return;
+					}
 				}
+				applyFileToState(file, type);
 			}
 			e.target.value = '';
 		}
@@ -147,10 +149,12 @@ export default function ProfileEditor(props: {
 					case 'banner':
 						setBanner(event.target.result);
 						setBannerRemoved(false);
+						bannerChangedRef.current = true;
 						break;
 					case 'thumbnail':
 						setThumbnail(event.target.result);
 						setThumbnailRemoved(false);
+						thumbnailChangedRef.current = true;
 						break;
 					default:
 						break;
@@ -159,32 +163,6 @@ export default function ProfileEditor(props: {
 		};
 
 		reader.readAsDataURL(file);
-	}
-
-	function handleUploadConfirm() {
-		if (pendingFile) {
-			applyFileToState(pendingFile.file, pendingFile.type);
-			handleClearPendingFile(null);
-		}
-	}
-
-	function handleClearPendingFile(message: string | null) {
-		if (message) addNotification(message, 'warning');
-		setPendingFile(null);
-		clearUploadState();
-	}
-
-	async function handleCompress() {
-		if (!pendingFile) return;
-		setCompressing(true);
-		try {
-			const compressedFile = await compressImageToSize(pendingFile.file, UPLOAD.dispatchUploadSize);
-			applyFileToState(compressedFile, pendingFile.type);
-			handleClearPendingFile(null);
-		} catch (e: any) {
-			addNotification(e.message ?? 'Error compressing image', 'warning');
-		}
-		setCompressing(false);
 	}
 
 	function getBannerWrapper() {
@@ -317,23 +295,6 @@ export default function ProfileEditor(props: {
 									: `${language?.profileCreatingInfo}...`}
 							</span>
 						</S.LoadingMessage>
-					)}
-					{showUploadConfirmation && pendingFile && (
-						<Modal
-							header={`${language?.upload} ${pendingFile.file.name}`}
-							handleClose={() => handleClearPendingFile(language?.uploadCancelled)}
-							className={'modal-wrapper'}
-						>
-							<TurboUploadConfirmation
-								uploadCost={uploadCost}
-								uploadDisabled={loading}
-								handleUpload={handleUploadConfirm}
-								handleCancel={() => handleClearPendingFile(language?.uploadCancelled)}
-								handleCompress={handleCompress}
-								canCompress={canCompress}
-								compressing={compressing}
-							/>
-						</Modal>
 					)}
 				</>
 			);

@@ -105,3 +105,69 @@ export const ContentPlaceholderLine = styled.div<{ flex: number }>`
 	border-radius: 4px;
 	opacity: 0.25;
 `;
+
+export const PostSelector = styled.div`
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 10px;
+`;
+
+export const EmptyPostBlock = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	padding: 20px;
+	border: 1px dashed ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.primary};
+	background: ${(props) => props.theme.colors.container.primary.background};
+`;
+
+export const ModalContent = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	padding: 20px;
+`;
+
+export const ModalFilterInput = styled.input`
+	width: 100%;
+	padding: 10px 12px;
+	font-size: 14px;
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.primary};
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	color: ${(props) => props.theme.colors.font.primary};
+	box-sizing: border-box;
+
+	&::placeholder {
+		color: ${(props) => props.theme.colors.font.alt1};
+	}
+
+	&:focus {
+		outline: none;
+		border-color: ${(props) => props.theme.colors.button.primary.background};
+	}
+`;
+
+export const ModalSelect = styled.select`
+	width: 100%;
+	padding: 10px 12px;
+	font-size: 14px;
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.primary};
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	color: ${(props) => props.theme.colors.font.primary};
+	cursor: pointer;
+
+	&:focus {
+		outline: none;
+		border-color: ${(props) => props.theme.colors.button.primary.background};
+	}
+`;
+
+export const ModalActions = styled.div`
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 10px;
+`;

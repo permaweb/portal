@@ -24,8 +24,9 @@ import Comments from '../comments';
 import * as S from './styles';
 
 export default function Post(props: any) {
-	const { preview } = props;
-	const { postId } = useParams();
+	const { preview, txId } = props;
+	const { postId: routePostId } = useParams();
+	const postId = txId || routePostId;
 	const { portal } = usePortalProvider();
 	const { profile: user } = usePermawebProvider();
 	const Name = portal?.Name;

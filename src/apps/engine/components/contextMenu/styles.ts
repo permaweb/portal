@@ -60,6 +60,8 @@ export const MenuEntries = styled.div`
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 	z-index: 99;
 	padding: 4px;
+	min-width: 120px;
+	white-space: nowrap;
 	animation: ${slideDown} 0.2s ease-out forwards;
 	transform-origin: top center;
 

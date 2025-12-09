@@ -183,6 +183,12 @@ export const SubElementHeaderAction = styled.div`
 	}
 `;
 
+export const SubElementHeaderActions = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 5px;
+`;
+
 export const SubElementBody = styled.div`
 	width: 100%;
 `;

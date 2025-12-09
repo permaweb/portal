@@ -128,6 +128,10 @@ export const THEME_DEFAULT = {
 				light: 'background',
 				dark: 'background',
 			},
+			border: {
+				light: 'border',
+				dark: 'border',
+			},
 		},
 		preferences: {
 			opacity: {

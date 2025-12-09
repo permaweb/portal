@@ -303,19 +303,28 @@ export default function PortalManager(props: {
 									</S.IconWrapper>
 								</S.PWrapper>
 							) : (
-								<S.LayoutOptions>
-									{layoutOptions.map((option) => {
-										const active = option.name === selectedLayout;
-										return (
-											<S.LayoutOption key={option.name} $active={active} onClick={() => setSelectedLayout(option.name)}>
-												<S.LayoutOptionIcon $active={active}>
-													<img src={option.icon} alt={option.name} />
-												</S.LayoutOptionIcon>
-												<S.LayoutOptionLabel>{option.name}</S.LayoutOptionLabel>
-											</S.LayoutOption>
-										);
-									})}
-								</S.LayoutOptions>
+								<>
+									<S.SectionLabel>{language?.layout || 'Layout'}</S.SectionLabel>
+									<S.LayoutOptions>
+										{layoutOptions.map((option) => {
+											const active = option.name === selectedLayout;
+											return (
+												<S.LayoutOption
+													key={option.name}
+													$active={active}
+													onClick={() => setSelectedLayout(option.name)}
+												>
+													<S.LayoutOptionIcon $active={active}>
+														<img src={option.icon} alt={option.name} />
+													</S.LayoutOptionIcon>
+													<S.LayoutOptionLabel>{option.name}</S.LayoutOptionLabel>
+												</S.LayoutOption>
+											);
+										})}
+									</S.LayoutOptions>
+									<S.SectionLabel>{language?.logo || 'Logo'}</S.SectionLabel>
+									<Media portal={null} type={'logo'} onMediaUpload={handleLogoUpload} hideActions />
+								</>
 							)}
 							<S.SAction>
 								{props.handleClose && (

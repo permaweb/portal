@@ -2,6 +2,7 @@ import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
 export const CategorySpotlight = styled.div`
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	margin: 20px 0;
@@ -205,5 +206,153 @@ export const RightSource = styled.div`
 	}
 	span {
 		font-weight: 800;
+	}
+`;
+
+export const MenuWrapper = styled.div`
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 10;
+`;
+
+export const ModalOverlay = styled.div`
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.7);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+`;
+
+export const ModalContainer = styled.div`
+	background: var(--color-navigation-background);
+	border-radius: 8px;
+	width: 500px;
+	max-width: 90vw;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+`;
+
+export const ModalHeader = styled.div`
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 16px 20px;
+	border-bottom: 1px solid rgba(var(--color-text), 0.1);
+
+	span {
+		font-size: 16px;
+		font-weight: 600;
+	}
+`;
+
+export const ModalClose = styled.button`
+	background: none;
+	border: none;
+	font-size: 24px;
+	cursor: pointer;
+	color: rgba(var(--color-text), 0.6);
+	padding: 0;
+	line-height: 1;
+
+	&:hover {
+		color: rgba(var(--color-text), 1);
+	}
+`;
+
+export const ModalContent = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 20px;
+`;
+
+export const ModalLabel = styled.label`
+	font-size: 14px;
+	font-weight: 500;
+`;
+
+export const ModalFilterInput = styled.input`
+	width: 100%;
+	padding: 10px 12px;
+	font-size: 14px;
+	border: 1px solid rgba(var(--color-text), 0.2);
+	border-radius: 4px;
+	background: rgba(0, 0, 0, 0.3);
+	color: inherit;
+	box-sizing: border-box;
+
+	&::placeholder {
+		color: rgba(var(--color-text), 0.5);
+	}
+
+	&:focus {
+		outline: none;
+		border-color: rgba(var(--color-primary), 1);
+	}
+`;
+
+export const ModalSelect = styled.select`
+	width: 100%;
+	padding: 10px 12px;
+	font-size: 14px;
+	border: 1px solid rgba(var(--color-text), 0.2);
+	border-radius: 4px;
+	background: rgba(0, 0, 0, 0.3);
+	color: inherit;
+	cursor: pointer;
+
+	option {
+		background: var(--color-navigation-background);
+		color: inherit;
+	}
+
+	&:focus {
+		outline: none;
+		border-color: rgba(var(--color-primary), 1);
+	}
+`;
+
+export const ModalActions = styled.div`
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 10px;
+`;
+
+export const ModalButton = styled.button`
+	padding: 10px 20px;
+	font-size: 14px;
+	border: none;
+	border-radius: 0;
+	background: rgba(var(--color-text), 0.1);
+	color: inherit;
+	cursor: pointer;
+
+	&:hover {
+		background: rgba(var(--color-text), 0.2);
+	}
+`;
+
+export const ModalButtonPrimary = styled.button`
+	padding: 10px 20px;
+	font-size: 14px;
+	border: none;
+	border-radius: 0;
+	background: rgba(var(--color-primary), 1);
+	color: white;
+	cursor: pointer;
+
+	&:hover:not(:disabled) {
+		opacity: 0.9;
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 `;

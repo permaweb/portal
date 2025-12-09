@@ -20,18 +20,24 @@ export const Option = styled.div<{ disabled: boolean; $active: boolean }>`
 	border: 2px solid
 		${(props) => (props.$active ? props.theme.colors.indicator.active : props.theme.colors.button.primary.border)};
 	border-radius: ${STYLING.dimensions.radius.primary};
-	cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+	cursor: ${(props) => (props.$active ? 'default' : props.disabled ? 'not-allowed' : 'pointer')};
 	transition: all 100ms;
 	opacity: ${(props) => (props.disabled ? 0.5 : 1)};
 
 	&:hover {
 		background: ${(props) =>
-			props.disabled
+			props.$active
+				? props.theme.colors.button.primary.active.background
+				: props.disabled
 				? props.theme.colors.button.primary.background
 				: props.theme.colors.button.primary.active.background};
 		border: 2px solid
 			${(props) =>
-				props.disabled ? props.theme.colors.button.primary.border : props.theme.colors.button.primary.active.border};
+				props.$active
+					? props.theme.colors.indicator.active
+					: props.disabled
+					? props.theme.colors.button.primary.border
+					: props.theme.colors.button.primary.active.border};
 	}
 `;
 

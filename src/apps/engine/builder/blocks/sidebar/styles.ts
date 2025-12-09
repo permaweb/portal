@@ -1,13 +1,13 @@
 import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
-export const Sidebar = styled.div`
+export const Sidebar = styled.div<{ $fullWidth?: boolean }>`
 	display: flex;
 	flex-direction: column;
-	min-width: 300px;
-	max-width: 300px;
+	min-width: ${(props) => (props.$fullWidth ? '100%' : '300px')};
+	max-width: ${(props) => (props.$fullWidth ? '100%' : '300px')};
 	min-height: 100%;
-	margin-left: auto;
+	margin-left: ${(props) => (props.$fullWidth ? '0' : 'auto')};
 	box-sizing: border-box;
 
 	h2 {

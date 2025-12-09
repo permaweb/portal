@@ -259,7 +259,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 							type="range"
 							value={layoutHeights.header}
 							onChange={(e) => setLayoutHeights({ ...layoutHeights, header: parseInt(e.target.value) })}
-							min={50}
+							min={48}
 							max={300}
 						/>
 						<span>{layoutHeights.header}px</span>

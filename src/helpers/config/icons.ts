@@ -31,7 +31,7 @@ export const ICONS = {
 	domains: getTxEndpoint('HCp8UMAiBcJyBuMwH8PLrNM6lJqlRLGKe6iDRRBid6I'),
 	download: getTxEndpoint('x50OzGGU4giiL16t_AsMkzv5F5kZO1iVtnKCELqok70'),
 	drag: getTxEndpoint('BfwMIGxk7WTqI3rYOyzM0DQXAfo_n4I4yyBbTsqe_QE'),
-	edit: getTxEndpoint('oxEYDrxH1LBAUaFqp6JXSB646ME4lKCg1x2F5rjrqtA'),
+	edit: getTxEndpoint('GkcSnq3GEsGaWgZTMICMtOM7ppWtRjEzjrn1D2GQ-6A'),
 	emoji: getTxEndpoint('C2MUFWq2viimo5wNIcmF2C38vIl1Umof29W0fs4HpP8'),
 	featuredCategory: getTxEndpoint('GJONkGPrHJZVbmU5HsWzzidFMBR1fP5_MIu7G_1pz0o'),
 	featuredPost: getTxEndpoint('SPxgRLb2lUdRBeU3akHjT2VA2qZUl4uzPBYC1rdcoac'),

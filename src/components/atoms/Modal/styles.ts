@@ -11,7 +11,7 @@ export const Wrapper = styled.div<{ top: number; noHeader: boolean }>`
 	z-index: 15;
 	top: 0;
 	left: 0;
-	background: ${(props) => props.theme.colors.overlay.primary};
+	background: ${(props) => props.theme?.colors?.overlay?.primary || 'rgba(0, 0, 0, 0.75)'};
 	animation: ${open} ${transition2};
 `;
 
@@ -21,8 +21,11 @@ export const Container = styled.div<{
 }>`
 	width: ${(props) => (props.width ? `${props.width}px` : '650px')};
 	max-width: ${(props) => (props.noHeader ? '100%' : '90vw')};
-	background: ${(props) => (props.noHeader ? 'transparent' : props.theme.colors.container.primary.background)};
-	border: 1.25px solid ${(props) => props.theme.colors.border.alt4};
+	background: ${(props) =>
+		props.noHeader
+			? 'transparent'
+			: props.theme?.colors?.container?.primary?.background || 'rgba(var(--color-surface), 1)'};
+	border: 1.25px solid ${(props) => props.theme?.colors?.border?.alt4 || 'rgba(var(--color-border), 0.5)'};
 	border-radius: ${STYLING.dimensions.radius.alt1};
 	margin: 20px auto;
 `;
@@ -52,24 +55,24 @@ export const Indicator = styled.div<{ status: 'success' | 'warning' }>`
 	justify-content: center;
 	align-items: center;
 	background: ${(props) => {
-		if (props.status === 'success') return props.theme.colors.indicator.active;
-		if (props.status === 'warning') return props.theme.colors.warning.primary;
+		if (props.status === 'success') return props.theme?.colors?.indicator?.active || 'rgba(var(--color-primary), 1)';
+		if (props.status === 'warning') return props.theme?.colors?.warning?.primary || '#f59e0b';
 	}};
 
 	svg {
 		height: 13.5px;
 		width: 13.5px;
 		margin: 6.5px 0 0 0;
-		color: ${(props) => props.theme.colors.font.light1};
-		fill: ${(props) => props.theme.colors.font.light1};
+		color: ${(props) => props.theme?.colors?.font?.light1 || '#ffffff'};
+		fill: ${(props) => props.theme?.colors?.font?.light1 || '#ffffff'};
 	}
 `;
 
 export const Title = styled.p`
-	color: ${(props) => props.theme.colors.font.primary};
-	font-size: ${(props) => props.theme.typography.size.lg};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	line-height: calc(${(props) => props.theme.typography.size.lg} + 5px);
+	color: ${(props) => props.theme?.colors?.font?.primary || 'rgba(var(--color-text), 1)'};
+	font-size: ${(props) => props.theme?.typography?.size?.lg || '18px'};
+	font-weight: ${(props) => props.theme?.typography?.weight?.bold || '600'};
+	line-height: calc(${(props) => props.theme?.typography?.size?.lg || '18px'} + 5px);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;

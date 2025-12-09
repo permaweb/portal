@@ -9,17 +9,18 @@ export const Wrapper = styled.div`
 	gap: 25px;
 `;
 
+export const MainPagesWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+`;
+
 export const PagesWrapper = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-
-	> * {
-		&:not(:last-child) {
-			border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
-		}
-	}
 `;
 
 export const InfoPagesWrapper = styled.div`
@@ -49,13 +50,11 @@ export const PageWrapper = styled.div`
 	flex-wrap: wrap;
 	gap: 20px;
 	transition: all 100ms;
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	cursor: pointer;
 
 	&:hover {
 		background: ${(props) => props.theme.colors.button.primary.active.background};
-		p {
-			text-decoration: underline;
-			text-decoration-thickness: 1.25px;
-		}
 	}
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
@@ -64,20 +63,24 @@ export const PageWrapper = styled.div`
 	}
 `;
 
+export const Arrow = styled.div<{ $open: boolean }>`
+	display: flex;
+	align-items: center;
+	svg {
+		width: 17.5px;
+		height: 17.5px;
+		transform: rotate(${(props) => (props.$open ? '0deg' : '270deg')});
+		fill: ${(props) => props.theme.colors.font.primary};
+		color: ${(props) => props.theme.colors.font.primary};
+		transition: transform 100ms;
+	}
+`;
+
 export const PageHeader = styled.div`
 	max-width: 50%;
 	display: flex;
 	align-items: center;
-	flex-wrap: wrap;
-	gap: 20px;
-	display: flex;
-	align-items: center;
-	gap: 5px;
-
-	svg {
-		color: ${(props) => props.theme.colors.font.primary};
-		fill: ${(props) => props.theme.colors.font.primary};
-	}
+	gap: 10px;
 
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
@@ -87,13 +90,6 @@ export const PageHeader = styled.div`
 		white-space: nowrap;
 		overflow-x: hidden;
 		text-overflow: ellipsis;
-	}
-
-	svg {
-		height: 18.5px;
-		width: 16.5px;
-		padding: 4.5px 0 0 0;
-		margin: 4.5px 0 0 0;
 	}
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
@@ -153,23 +149,31 @@ export const HomeTemplateOption = styled.button<{ $active: boolean; disabled: bo
 	border: 2px solid
 		${(props) => (props.$active ? props.theme.colors.indicator.active : props.theme.colors.button.primary.border)};
 	border-radius: ${STYLING.dimensions.radius.primary};
-	cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+	cursor: ${(props) => (props.$active ? 'default' : props.disabled ? 'not-allowed' : 'pointer')};
+	pointer-events: ${(props) => (props.$active ? 'none' : 'auto')};
 	transition: all 100ms;
 	opacity: ${(props) => (props.disabled ? 0.5 : 1)};
 
 	&:hover {
 		background: ${(props) =>
-			props.disabled
+			props.$active
+				? props.theme.colors.button.primary.active.background
+				: props.disabled
 				? props.theme.colors.button.primary.background
 				: props.theme.colors.button.primary.active.background};
 		border: 2px solid
 			${(props) =>
-				props.disabled ? props.theme.colors.button.primary.border : props.theme.colors.button.primary.active.border};
+				props.$active
+					? props.theme.colors.indicator.active
+					: props.disabled
+					? props.theme.colors.button.primary.border
+					: props.theme.colors.button.primary.active.border};
 	}
 `;
 
 export const HomeTemplateOptionIcon = styled.div<{ $active: boolean }>`
 	width: 100%;
+	flex: 1;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -185,6 +189,23 @@ export const HomeTemplateOptionIcon = styled.div<{ $active: boolean }>`
 		width: 40px;
 		height: 40px;
 		opacity: ${(props) => (props.$active ? 1 : 0.5)};
+		fill: ${(props) => props.theme.colors.font.alt1};
+	}
+`;
+
+export const HomeTemplateIconPlaceholder = styled.div<{ $active: boolean }>`
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	border-radius: ${STYLING.dimensions.radius.primary};
+	opacity: ${(props) => (props.$active ? 1 : 0.5)};
+
+	svg {
+		width: 40px;
+		height: 40px;
 		fill: ${(props) => props.theme.colors.font.alt1};
 	}
 `;

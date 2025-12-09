@@ -203,10 +203,21 @@ export const MActions = styled.div`
 	gap: 15px;
 `;
 
+export const SectionLabel = styled.p`
+	width: 100%;
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	text-transform: uppercase;
+	margin: 0 0 10px 0;
+`;
+
 export const LayoutOptions = styled.div`
 	display: flex;
 	gap: 15px;
 	width: 100%;
+	margin: 0 0 20px 0;
 `;
 
 export const LayoutOption = styled.div<{ $active: boolean }>`
@@ -220,12 +231,17 @@ export const LayoutOption = styled.div<{ $active: boolean }>`
 	border: 2px solid
 		${(props) => (props.$active ? props.theme.colors.indicator.active : props.theme.colors.button.primary.border)};
 	border-radius: ${STYLING.dimensions.radius.primary};
-	cursor: pointer;
+	cursor: ${(props) => (props.$active ? 'default' : 'pointer')};
 	transition: all 100ms;
 
 	&:hover {
-		background: ${(props) => props.theme.colors.button.primary.active.background};
-		border: 2px solid ${(props) => props.theme.colors.button.primary.active.border};
+		background: ${(props) =>
+			props.$active
+				? props.theme.colors.button.primary.active.background
+				: props.theme.colors.button.primary.active.background};
+		border: 2px solid
+			${(props) =>
+				props.$active ? props.theme.colors.indicator.active : props.theme.colors.button.primary.active.border};
 	}
 `;
 

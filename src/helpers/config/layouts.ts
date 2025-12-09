@@ -144,7 +144,7 @@ export const LAYOUT_DOCUMENTATION = {
 	header: {
 		layout: {
 			width: 'page',
-			height: '50px',
+			height: '48px',
 			padding: '0',
 			border: {
 				top: false,
@@ -157,7 +157,7 @@ export const LAYOUT_DOCUMENTATION = {
 				display: true,
 				positionX: 'left',
 				positionY: 'bottom',
-				size: '80%',
+				size: '26%',
 			},
 		},
 	},

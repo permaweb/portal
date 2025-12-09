@@ -50,7 +50,8 @@ export const GlobalStyles = createGlobalStyle`
     display: flex;
     place-items: center;
     height: 100%;
-    width: 100%;    
+    width: 100%;
+    overflow-x: hidden;
     overflow-y: auto;
 		background: rgba(var(--color-background), 1);
   }
@@ -163,7 +164,6 @@ export const GlobalStyles = createGlobalStyle`
 export const PageWrapper = styled.div`
 	display: flex;
 	min-height: 100%;
-	overflow-x: hidden;
 `;
 
 export const Page = styled.div<{ $layout: any; wallpaper: any }>`
@@ -233,6 +233,9 @@ export const SideNavWrapper = styled.div<{ $navPosition: 'left' | 'right'; $maxW
 	}};
 	min-width: ${(props) => `${props.$navWidth || 300}px`};
 	background: var(--color-navigation-background);
+	box-sizing: border-box;
+	z-index: 10;
+	overflow: hidden;
 `;
 
 export const ContentWrapper = styled.div<{ $navPosition: 'left' | 'right' }>`
@@ -240,6 +243,7 @@ export const ContentWrapper = styled.div<{ $navPosition: 'left' | 'right' }>`
 	display: flex;
 	flex-direction: column;
 	min-height: 100vh;
+	overflow-x: hidden;
 `;
 
 export const SettingsButton = styled.div`

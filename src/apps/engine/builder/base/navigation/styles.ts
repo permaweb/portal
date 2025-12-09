@@ -129,7 +129,6 @@ export const NavigationEntries = styled.div<{ $layout: any; maxWidth: number }>`
 	}
 
 	a.active {
-		pointer-events: none;
 		color: rgba(var(--color-secondary), 1);
 
 		div {
@@ -331,7 +330,6 @@ export const ResizeHandle = styled.div<{ $isDragging?: boolean; $isSideNav?: boo
 	justify-content: center;
 	cursor: ${(props) => (props.$isSideNav ? 'ew-resize' : 'ns-resize')};
 	z-index: 10;
-	overflow: visible;
 
 	&:hover > div {
 		background: rgba(var(--color-primary), 1);
@@ -358,7 +356,11 @@ export const HandleBar = styled.div<{ $isSideNav?: boolean }>`
 `;
 
 export const HandleLabel = styled.span<{ $isSideNav?: boolean }>`
-	position: fixed;
+	position: absolute;
+	top: 50%;
+	right: ${(props) => (props.$isSideNav ? '20px' : 'auto')};
+	left: ${(props) => (props.$isSideNav ? 'auto' : '50%')};
+	transform: ${(props) => (props.$isSideNav ? 'translateY(-50%)' : 'translate(-50%, -50%)')};
 	background: rgba(var(--color-primary), 1);
 	color: white;
 	padding: 4px 12px;
@@ -378,7 +380,8 @@ export const NavLogo = styled.div<{ $logoSize?: number; $positionX?: string }>`
 	}};
 	padding: 15px 20px;
 
-	a {
+	a,
+	a.active {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -387,6 +390,10 @@ export const NavLogo = styled.div<{ $logoSize?: number; $positionX?: string }>`
 			display: flex;
 			align-items: center;
 			justify-content: center;
+
+			svg {
+				color: rgba(var(--color-text), 1) !important;
+			}
 		}
 	}
 

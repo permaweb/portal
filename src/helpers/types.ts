@@ -251,6 +251,8 @@ export type PageBlockType = {
 	layout: any;
 	content: any[];
 	width: number;
+	txId?: string;
+	categoryId?: string;
 };
 
 export type TagType = { name: string; value: string };

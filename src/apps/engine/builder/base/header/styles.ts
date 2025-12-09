@@ -23,10 +23,12 @@ export const Header = styled.div<{
 	box-sizing: border-box;
 	border-bottom: ${(props) => (props.$layout.border.bottom ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
 	border-top: ${(props) => (props.$layout.border.top ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
-	border-left: ${(props) => (props.$layout.border.sides ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
-	border-right: ${(props) => (props.$layout.border.sides ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
+	border-left: ${(props) =>
+		props.$isSideNav ? 'none' : props.$layout.border.sides ? `1px solid rgba(var(--color-header-border),1)` : `unset`};
+	border-right: ${(props) =>
+		props.$isSideNav ? 'none' : props.$layout.border.sides ? `1px solid rgba(var(--color-header-border),1)` : `unset`};
 	box-shadow: var(--preference-header-shadow);
-	z-index: 3;
+	z-index: ${(props) => (props.$isSideNav ? 1 : 3)};
 	user-select: none;
 	box-sizing: border-box;
 
@@ -82,7 +84,7 @@ export const Logo = styled.div<{ $layout: any; $editLogo?: { positionX: string; 
 	left: 0;
 	bottom: 20px;
 	display: flex;
-	width: 100%;
+	width: fit-content;
 	justify-content: ${(props) => {
 		const posX = props.$editLogo?.positionX || props.$layout.positionX;
 		return posX === 'center' ? 'center' : posX === 'left' ? 'flex-start' : posX === 'right' ? 'flex-end' : 'center';
@@ -92,27 +94,25 @@ export const Logo = styled.div<{ $layout: any; $editLogo?: { positionX: string; 
 		return posY === 'center' ? 'center' : posY === 'top' ? 'flex-start' : posY === 'bottom' ? 'flex-end' : 'center';
 	}};
 	z-index: 1;
-
 	a {
-		height: ${(props) => (props.$editLogo ? `${props.$editLogo.size}%` : props.$layout.size)};
-		width: auto;
-		flex-shrink: 0;
-
-		div {
-			height: 100%;
-			width: auto;
-		}
+		display: flex;
+		height: 100%;
 	}
+
 	svg,
 	img {
 		display: ${(props) => (props.$layout?.display ? 'inline-block' : 'none')};
 		height: 100%;
 		width: auto;
-		color: rgba(var(--color-text), 1);
+		color: rgba(var(--color-text), 1) !important;
 
 		&:hover {
 			cursor: pointer;
 		}
+	}
+
+	div {
+		color: rgba(var(--color-text), 1);
 	}
 
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
@@ -137,7 +137,7 @@ export const Actions = styled.div<{ $isLogo: boolean }>`
 
 export const HeaderSearch = styled.div`
 	position: absolute;
-	left: 0;
+	left: 20px;
 	top: 50%;
 	transform: translateY(-50%);
 	z-index: 2;

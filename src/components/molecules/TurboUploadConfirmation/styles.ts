@@ -7,10 +7,10 @@ export const Wrapper = styled.div``;
 export const InputDescription = styled.div`
 	margin: 5px 0 10px 0;
 	span {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
-		font-family: ${(props) => props.theme.typography.family.primary};
+		color: ${(props) => props.theme?.colors?.font?.alt1 || 'rgba(var(--color-text), 0.7)'};
+		font-size: ${(props) => props.theme?.typography?.size?.xSmall || '12px'};
+		font-weight: ${(props) => props.theme?.typography?.weight?.medium || '500'};
+		font-family: ${(props) => props.theme?.typography?.family?.primary || 'inherit'};
 	}
 `;
 
@@ -45,24 +45,24 @@ export const InputActionsInfo = styled.div<{ disabled?: boolean }>`
 export const InputActionsInfoDivider = styled.div`
 	height: 1px;
 	width: 100%;
-	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-top: 1px solid ${(props) => props.theme?.colors?.border?.primary || 'rgba(var(--color-border), 1)'};
 `;
 
 export const InputActionsInfoLine = styled.div`
 	span {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.medium};
-		font-family: ${(props) => props.theme.typography.family.primary};
+		color: ${(props) => props.theme?.colors?.font?.alt1 || 'rgba(var(--color-text), 0.7)'};
+		font-size: ${(props) => props.theme?.typography?.size?.xSmall || '12px'} !important;
+		font-weight: ${(props) => props.theme?.typography?.weight?.medium || '500'};
+		font-family: ${(props) => props.theme?.typography?.family?.primary || 'inherit'};
 		display: flex;
 		width: 170px;
 	}
 
 	p {
-		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.xBold};
-		font-family: ${(props) => props.theme.typography.family.primary};
+		color: ${(props) => props.theme?.colors?.font?.primary || 'rgba(var(--color-text), 1)'};
+		font-size: ${(props) => props.theme?.typography?.size?.xSmall || '12px'} !important;
+		font-weight: ${(props) => props.theme?.typography?.weight?.xBold || '700'};
+		font-family: ${(props) => props.theme?.typography?.family?.primary || 'inherit'};
 		display: flex;
 	}
 `;
@@ -74,10 +74,10 @@ export const InputActionsMessage = styled.div`
 	margin: 5px 0 0 0;
 
 	p {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		font-family: ${(props) => props.theme.typography.family.primary};
+		color: ${(props) => props.theme?.colors?.font?.alt1 || 'rgba(var(--color-text), 0.7)'};
+		font-size: ${(props) => props.theme?.typography?.size?.xSmall || '12px'} !important;
+		font-weight: ${(props) => props.theme?.typography?.weight?.bold || '600'};
+		font-family: ${(props) => props.theme?.typography?.family?.primary || 'inherit'};
 	}
 `;
 
@@ -92,10 +92,10 @@ export const InputActionsFlex = styled.div`
 export const UploadOptionsHeader = styled.div`
 	margin: 0 0 10px 0;
 	span {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		font-family: ${(props) => props.theme.typography.family.primary};
+		color: ${(props) => props.theme?.colors?.font?.alt1 || 'rgba(var(--color-text), 0.7)'};
+		font-size: ${(props) => props.theme?.typography?.size?.xSmall || '12px'};
+		font-weight: ${(props) => props.theme?.typography?.weight?.bold || '600'};
+		font-family: ${(props) => props.theme?.typography?.family?.primary || 'inherit'};
 		text-transform: uppercase;
 	}
 `;
@@ -112,7 +112,7 @@ export const RadioOption = styled.div<{ selected: boolean; disabled?: boolean }>
 	gap: 12px;
 	padding: 12px 15px;
 	border-radius: ${STYLING.dimensions.radius.primary};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border: 1px solid ${(props) => props.theme?.colors?.border?.primary || 'rgba(var(--color-border), 1)'};
 	background: transparent;
 	cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
 	transition: all 0.15s ease;
@@ -121,12 +121,15 @@ export const RadioOption = styled.div<{ selected: boolean; disabled?: boolean }>
 		props.selected &&
 		!props.disabled &&
 		`
-		border-color: ${props.theme.colors.border.alt2};
-		background: ${props.theme.colors.container.alt3.background};
+		border-color: ${props.theme?.colors?.border?.alt2 || 'rgba(var(--color-primary), 1)'};
+		background: ${props.theme?.colors?.container?.alt3?.background || 'rgba(var(--color-primary), 0.1)'};
 	`}
 
 	&:hover {
-		border-color: ${(props) => (props.disabled ? props.theme.colors.border.primary : props.theme.colors.border.alt2)};
+		border-color: ${(props) =>
+			props.disabled
+				? props.theme?.colors?.border?.primary || 'rgba(var(--color-border), 1)'
+				: props.theme?.colors?.border?.alt2 || 'rgba(var(--color-primary), 1)'};
 	}
 
 	button {
@@ -152,7 +155,11 @@ export const RadioButton = styled.div<{ selected: boolean; disabled?: boolean }>
 	height: 18px;
 	min-width: 18px;
 	border-radius: 50%;
-	border: 2px solid ${(props) => (props.selected ? props.theme.colors.border.alt2 : props.theme.colors.border.primary)};
+	border: 2px solid
+		${(props) =>
+			props.selected
+				? props.theme?.colors?.border?.alt2 || 'rgba(var(--color-primary), 1)'
+				: props.theme?.colors?.border?.primary || 'rgba(var(--color-border), 1)'};
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -164,7 +171,8 @@ export const RadioButtonInner = styled.div<{ selected: boolean }>`
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
-	background: ${(props) => (props.selected ? props.theme.colors.border.alt2 : 'transparent')};
+	background: ${(props) =>
+		props.selected ? props.theme?.colors?.border?.alt2 || 'rgba(var(--color-primary), 1)' : 'transparent'};
 	transition: all 0.15s ease;
 `;
 
@@ -175,17 +183,17 @@ export const RadioLabel = styled.div<{ disabled?: boolean }>`
 	opacity: ${(props) => (props.disabled ? 0.4 : 1)};
 
 	span {
-		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		font-family: ${(props) => props.theme.typography.family.primary};
+		color: ${(props) => props.theme?.colors?.font?.primary || 'rgba(var(--color-text), 1)'};
+		font-size: ${(props) => props.theme?.typography?.size?.small || '14px'};
+		font-weight: ${(props) => props.theme?.typography?.weight?.bold || '600'};
+		font-family: ${(props) => props.theme?.typography?.family?.primary || 'inherit'};
 	}
 
 	p {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
-		font-family: ${(props) => props.theme.typography.family.primary};
+		color: ${(props) => props.theme?.colors?.font?.alt1 || 'rgba(var(--color-text), 0.7)'};
+		font-size: ${(props) => props.theme?.typography?.size?.xSmall || '12px'};
+		font-weight: ${(props) => props.theme?.typography?.weight?.medium || '500'};
+		font-family: ${(props) => props.theme?.typography?.family?.primary || 'inherit'};
 		margin: 0;
 	}
 `;
