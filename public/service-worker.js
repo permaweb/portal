@@ -67,25 +67,51 @@ self.addEventListener('fetch', (event) => {
 
 	if (isBundleFile) {
 		event.respondWith(
-			caches.match(request).then((response) => {
-				if (response) {
-					return response;
-				}
-
-				return fetch(request).then((response) => {
-					// Don't cache if not a successful response
-					if (!response || response.status !== 200 || response.type !== 'basic') {
+			caches.match(request).then((cachedResponse) => {
+				// Try to fetch from network first
+				const fetchPromise = fetch(request)
+					.then((response) => {
+						// Only cache successful responses
+						if (response && response.status === 200 && response.type === 'basic') {
+							const responseToCache = response.clone();
+							caches.open(CACHE_NAME).then((cache) => {
+								console.log('[Service Worker] Caching new file:', request.url);
+								cache.put(request, responseToCache);
+							});
+						}
 						return response;
-					}
-
-					const responseToCache = response.clone();
-					caches.open(CACHE_NAME).then((cache) => {
-						console.log('[Service Worker] Caching new file:', request.url);
-						cache.put(request, responseToCache);
+					})
+					.catch((error) => {
+						console.warn('[Service Worker] Fetch failed for:', request.url, error);
+						// If fetch fails and we have a cached version, use it
+						if (cachedResponse) {
+							console.log('[Service Worker] Using cached fallback for:', request.url);
+							return cachedResponse;
+						}
+						// If no cached version, throw the error
+						throw error;
 					});
 
-					return response;
-				});
+				// If we have a cached response, validate it works, otherwise fetch
+				if (cachedResponse) {
+					console.log('[Service Worker] Found cached response for:', request.url);
+					// Return cached response immediately, but verify it in background
+					return cachedResponse
+						.clone()
+						.blob()
+						.then(() => {
+							console.log('[Service Worker] Serving valid cache for:', request.url);
+							return cachedResponse;
+						})
+						.catch(() => {
+							// Cached response is corrupted, fetch from network
+							console.warn('[Service Worker] Cached response corrupted, fetching from network:', request.url);
+							return fetchPromise;
+						});
+				}
+
+				// No cached response, fetch from network
+				return fetchPromise;
 			})
 		);
 	}
