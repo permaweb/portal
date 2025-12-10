@@ -79,7 +79,6 @@ export const TableViewport = styled.div`
 export const TransferTable = styled.table`
 	width: 100%;
 	border-collapse: collapse;
-	min-width: 720px;
 `;
 
 export const TableHead = styled.thead`
