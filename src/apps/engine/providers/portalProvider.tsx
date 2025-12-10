@@ -7,7 +7,7 @@ import WebFont from 'webfontloader';
 
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalPermissionsType, PortalUserType } from 'helpers/types';
-import { cachePortal, getCachedPortal, getPortalUsers } from 'helpers/utils';
+import { cachePortal, fixBooleanStrings, getCachedPortal, getPortalUsers } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -115,23 +115,35 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const cached = getCachedPortal(portalId);
 
 				// Fetch from multiple endpoints
-				const overview = permawebProvider.libs.mapFromProcessCase(
-					await permawebProvider.libs.readState({ processId: portalId, path: 'overview' })
+				const overview = fixBooleanStrings(
+					permawebProvider.libs.mapFromProcessCase(
+						await permawebProvider.libs.readState({ processId: portalId, path: 'overview' })
+					)
 				);
-				const presentation = permawebProvider.libs.mapFromProcessCase(
-					await permawebProvider.libs.readState({ processId: portalId, path: 'presentation' })
+				const presentation = fixBooleanStrings(
+					permawebProvider.libs.mapFromProcessCase(
+						await permawebProvider.libs.readState({ processId: portalId, path: 'presentation' })
+					)
 				);
-				const navigation = permawebProvider.libs.mapFromProcessCase(
-					await permawebProvider.libs.readState({ processId: portalId, path: 'navigation' })
+				const navigation = fixBooleanStrings(
+					permawebProvider.libs.mapFromProcessCase(
+						await permawebProvider.libs.readState({ processId: portalId, path: 'navigation' })
+					)
 				);
-				const posts = permawebProvider.libs.mapFromProcessCase(
-					await permawebProvider.libs.readState({ processId: portalId, path: 'posts' })
+				const posts = fixBooleanStrings(
+					permawebProvider.libs.mapFromProcessCase(
+						await permawebProvider.libs.readState({ processId: portalId, path: 'posts' })
+					)
 				);
-				const users = permawebProvider.libs.mapFromProcessCase(
-					await permawebProvider.libs.readState({ processId: portalId, path: 'users' })
+				const users = fixBooleanStrings(
+					permawebProvider.libs.mapFromProcessCase(
+						await permawebProvider.libs.readState({ processId: portalId, path: 'users' })
+					)
 				);
-				const monetization = permawebProvider.libs.mapFromProcessCase(
-					await permawebProvider.libs.readState({ processId: portalId, path: 'monetization' })
+				const monetization = fixBooleanStrings(
+					permawebProvider.libs.mapFromProcessCase(
+						await permawebProvider.libs.readState({ processId: portalId, path: 'monetization' })
+					)
 				);
 
 				const portalUsers = users?.roles ? getPortalUsers(users.roles) : null;

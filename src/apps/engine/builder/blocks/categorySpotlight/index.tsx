@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import Avatar from 'engine/components/avatar';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
+import Button from 'engine/components/form/button';
 import ModalPortal from 'engine/components/modalPortal';
 import Placeholder from 'engine/components/placeholder';
 import { usePosts } from 'engine/hooks/posts';
@@ -198,10 +199,8 @@ export default function CategorySpotlight(props: any) {
 									))}
 								</S.ModalSelect>
 								<S.ModalActions>
-									<S.ModalButton onClick={handleCloseModal}>Cancel</S.ModalButton>
-									<S.ModalButtonPrimary onClick={handleSetCategory} disabled={!selectedCategory}>
-										Set
-									</S.ModalButtonPrimary>
+									<Button label="Cancel" type="default" onClick={handleCloseModal} />
+									<Button label="Set" type="primary" onClick={handleSetCategory} disabled={!selectedCategory} />
 								</S.ModalActions>
 							</S.ModalContent>
 						</S.ModalContainer>

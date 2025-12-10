@@ -114,7 +114,22 @@ export const GlobalStyles = createGlobalStyle`
 
   button:focus,
   button:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
+    outline: none;
+  }
+
+  input,
+  textarea {
+    padding: 8px 10px;
+    outline: none;
+    border: 1px solid rgba(var(--color-border), 0.5);
+    background: rgba(var(--color-text), 0.05);
+    color: rgba(var(--color-text), 1);
+    font-family: inherit;
+    font-size: inherit;
+
+    &:focus {
+      border: 1px solid rgba(var(--color-primary), 1);
+    }
   }
 
   .loadingThumbnail {

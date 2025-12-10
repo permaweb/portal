@@ -99,7 +99,6 @@ export const UserMenu = styled.div`
 	flex-direction: column;
 	width: 300px;
 	height: 100%;
-	background: var(--color-card-background);
 `;
 
 export const LayoutMenu = styled.div`
@@ -107,7 +106,6 @@ export const LayoutMenu = styled.div`
 	flex-direction: column;
 	width: 300px;
 	height: 100%;
-	background: var(--color-card-background);
 `;
 
 export const HeaderWrapper = styled.div`
@@ -125,6 +123,7 @@ export const Banner = styled.div`
 	width: 100%;
 	height: 100px;
 	overflow: hidden;
+	border-radius: var(--border-radius) var(--border-radius) 0 0;
 
 	img {
 		width: 100%;
@@ -162,7 +161,7 @@ export const DisplayName = styled.div`
 	position: absolute;
 	bottom: 15px;
 	left: 70px;
-	color: white;
+	color: rgba(var(--color-text), 1);
 	font-size: var(--font-size-default);
 	font-weight: 900;
 `;
@@ -190,14 +189,14 @@ export const DAddress = styled.div`
 
 export const NavigationWrapper = styled.div`
 	width: 100%;
-	padding: 4px 0px;
+	padding: 4px 6px;
 	box-sizing: border-box;
 	color: rgba(var(--color-text), 1);
 `;
 
 export const NavigationCategory = styled.div`
 	font-weight: 700;
-	padding: 4px 12px;
+	padding: 4px 6px;
 	font-size: var(--font-size-small);
 	list-style: none;
 `;

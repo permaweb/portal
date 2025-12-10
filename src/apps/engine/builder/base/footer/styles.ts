@@ -126,8 +126,6 @@ export const LinkWrapper = styled.div`
 `;
 
 export const Copyright = styled.div<{ $hasContentAbove?: boolean }>`
-	padding: 10px 40px 0 40px;
 	margin-top: ${(props) => (props.$hasContentAbove ? '10px' : '0')};
-	margin-bottom: 20px;
 	border-top: ${(props) => (props.$hasContentAbove ? '1px solid rgba(var(--color-border), 3)' : 'none')};
 `;

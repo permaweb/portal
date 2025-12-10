@@ -12,16 +12,18 @@ export const Search = styled.div<{ $active: boolean }>`
 		padding: 3px;
 		margin-top: 0.5px;
 		margin-left: 0.5px;
-		color: black;
+		color: rgba(var(--color-text-contrast), 1);
 		stroke-width: 3;
+		z-index: 1;
 		&:hover {
 			cursor: pointer;
 		}
 	}
 	input {
 		border: 1px solid rgba(var(--color-text), 1);
-		background: white;
-		color: black;
+		color: rgba(var(--color-text), 1);
+		background: rgba(var(--color-background), 1);
+		filter: invert(1);
 		height: 22px;
 		width: 100%;
 		padding-left: ${(props) => (props.$active ? `24px` : 0)};

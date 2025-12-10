@@ -50,23 +50,23 @@ export const Navigation = styled.div<{ $layout: any; maxWidth: number; $editHeig
 	overflow-y: ${(props) => (isSideNav(props.$layout) ? 'auto' : 'visible')};
 	border-bottom: ${(props) => {
 		if (isSideNav(props.$layout)) return 'none';
-		return props.$layout.border?.bottom ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
+		return props.$layout.border?.bottom === true ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
 	}};
 	border-top: ${(props) => {
 		if (isSideNav(props.$layout)) return 'none';
-		return props.$layout.border?.top ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
+		return props.$layout.border?.top === true ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
 	}};
 	border-left: ${(props) => {
 		if (isSideNav(props.$layout)) {
 			return props.$layout?.position === 'right' ? '1px solid rgba(var(--color-navigation-border),1)' : 'none';
 		}
-		return props.$layout.border?.sides ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
+		return props.$layout.border?.sides === true ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
 	}};
 	border-right: ${(props) => {
 		if (isSideNav(props.$layout)) {
 			return 'none';
 		}
-		return props.$layout.border?.sides ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
+		return props.$layout.border?.sides === true ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
 	}};
 	box-shadow: ${(props) => (isSideNav(props.$layout) ? 'none' : 'var(--preference-navigation-shadow)')};
 	clip-path: ${(props) => (isSideNav(props.$layout) ? 'none' : 'inset(0 -100% -100% -100%)')};

@@ -58,6 +58,7 @@ export const MenuEntries = styled.div`
 	background: var(--color-navigation-background);
 	backdrop-filter: blur(5px);
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+	border-radius: var(--border-radius);
 	z-index: 99;
 	padding: 4px;
 	min-width: 120px;
@@ -75,6 +76,7 @@ export const MenuEntries = styled.div`
 export const MenuEntry = styled.div`
 	display: flex;
 	padding: 4px 10px 4px 6px;
+	border-radius: var(--border-radius);
 
 	div {
 		display: flex;
@@ -123,6 +125,7 @@ export const Submenu = styled.div`
 	background: var(--color-navigation-background);
 	backdrop-filter: blur(5px);
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+	border-radius: var(--border-radius);
 	padding: 4px;
 	min-width: 120px;
 	animation: ${slideDown} 0.2s ease-out forwards;

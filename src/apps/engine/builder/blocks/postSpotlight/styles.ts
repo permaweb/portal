@@ -162,11 +162,12 @@ export const ModalOverlay = styled.div`
 `;
 
 export const ModalContainer = styled.div`
-	background: var(--color-navigation-background);
+	background: var(--color-card-background);
+	border: 1px solid var(--color-card-border);
 	border-radius: 8px;
 	width: 500px;
 	max-width: 90vw;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+	box-shadow: var(--preference-card-shadow);
 `;
 
 export const ModalHeader = styled.div`
@@ -174,7 +175,8 @@ export const ModalHeader = styled.div`
 	justify-content: space-between;
 	align-items: center;
 	padding: 16px 20px;
-	border-bottom: 1px solid rgba(var(--color-text), 0.1);
+	border-bottom: 1px solid var(--color-card-border);
+	color: rgba(var(--color-text), 1);
 
 	span {
 		font-size: 16px;
@@ -228,25 +230,33 @@ export const ModalFilterInput = styled.input`
 	}
 `;
 
-export const ModalSelect = styled.select`
+export const ModalOptionsList = styled.div`
 	width: 100%;
-	padding: 10px 12px;
-	font-size: 14px;
+	max-height: 200px;
+	overflow-y: auto;
 	border: 1px solid rgba(var(--color-text), 0.2);
 	border-radius: 4px;
-	background: rgba(0, 0, 0, 0.3);
-	color: inherit;
+	background-color: rgba(0, 0, 0, 0.3);
+`;
+
+export const ModalOption = styled.div<{ $active: boolean }>`
+	padding: 10px 12px;
+	font-size: 14px;
 	cursor: pointer;
+	background-color: ${(props) => (props.$active ? 'rgba(var(--color-primary), 0.3)' : 'transparent')};
+	color: rgba(var(--color-text), 1);
 
-	option {
-		background: var(--color-navigation-background);
-		color: inherit;
+	&:hover {
+		background-color: ${(props) =>
+			props.$active ? 'rgba(var(--color-primary), 0.3)' : 'rgba(var(--color-text), 0.1)'};
 	}
+`;
 
-	&:focus {
-		outline: none;
-		border-color: rgba(var(--color-primary), 1);
-	}
+export const ModalOptionsEmpty = styled.div`
+	padding: 20px 12px;
+	font-size: 14px;
+	color: rgba(var(--color-text), 0.5);
+	text-align: center;
 `;
 
 export const ModalActions = styled.div`
@@ -254,37 +264,4 @@ export const ModalActions = styled.div`
 	justify-content: flex-end;
 	gap: 10px;
 	margin-top: 10px;
-`;
-
-export const ModalButton = styled.button`
-	padding: 10px 20px;
-	font-size: 14px;
-	border: none;
-	border-radius: 0;
-	background: rgba(var(--color-text), 0.1);
-	color: inherit;
-	cursor: pointer;
-
-	&:hover {
-		background: rgba(var(--color-text), 0.2);
-	}
-`;
-
-export const ModalButtonPrimary = styled.button`
-	padding: 10px 20px;
-	font-size: 14px;
-	border: none;
-	border-radius: 0;
-	background: rgba(var(--color-primary), 1);
-	color: white;
-	cursor: pointer;
-
-	&:hover:not(:disabled) {
-		opacity: 0.9;
-	}
-
-	&:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
 `;

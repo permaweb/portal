@@ -203,27 +203,32 @@ export const MActions = styled.div`
 	gap: 15px;
 `;
 
+export const SectionWrapper = styled.div`
+	width: 100%;
+	margin: 0 0 30px 0;
+`;
+
 export const SectionLabel = styled.p`
 	width: 100%;
 	color: ${(props) => props.theme.colors.font.alt1};
-	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
 	font-weight: ${(props) => props.theme.typography.weight.bold};
 	font-family: ${(props) => props.theme.typography.family.primary};
-	text-transform: uppercase;
-	margin: 0 0 10px 0;
+	margin: 0;
 `;
 
 export const LogoWrapper = styled.div`
 	width: 100%;
 	display: flex;
 	justify-content: flex-start;
-	margin: 0 0 20px 0;
+	margin: 7.5px 0 0 0;
 `;
 
 export const LayoutOptions = styled.div`
 	display: flex;
 	gap: 15px;
 	width: 100%;
+	margin: 7.5px 0 0 0;
 `;
 
 export const LayoutOption = styled.div<{ $active: boolean }>`

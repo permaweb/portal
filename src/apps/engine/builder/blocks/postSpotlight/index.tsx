@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import Avatar from 'engine/components/avatar';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
+import Button from 'engine/components/form/button';
 import ModalPortal from 'engine/components/modalPortal';
 import Placeholder from 'engine/components/placeholder';
 import { usePost, usePosts } from 'engine/hooks/posts';
@@ -86,7 +87,7 @@ export default function PostSpotlight(props: any) {
 	if (isAdmin) {
 		menuEntries.push({
 			icon: ICONS.featuredPost,
-			label: 'Set post',
+			label: 'Set Post',
 			onClick: () => setShowSetPostModal(true),
 		});
 	}
@@ -182,27 +183,24 @@ export default function PostSpotlight(props: any) {
 									value={filterText}
 									onChange={(e) => setFilterText(e.target.value)}
 								/>
-								<S.ModalSelect
-									value={selectedPost?.id || ''}
-									onChange={(e) => {
-										const option = postOptions.find((o) => o.id === e.target.value);
-										if (option) setSelectedPost(option);
-									}}
-								>
-									<option value="" disabled>
-										Select a post
-									</option>
-									{filteredOptions.map((option) => (
-										<option key={option.id} value={option.id}>
-											{option.label}
-										</option>
-									))}
-								</S.ModalSelect>
+								<S.ModalOptionsList>
+									{filteredOptions.length === 0 ? (
+										<S.ModalOptionsEmpty>No posts found</S.ModalOptionsEmpty>
+									) : (
+										filteredOptions.map((option) => (
+											<S.ModalOption
+												key={option.id}
+												$active={selectedPost?.id === option.id}
+												onClick={() => setSelectedPost(option)}
+											>
+												{option.label}
+											</S.ModalOption>
+										))
+									)}
+								</S.ModalOptionsList>
 								<S.ModalActions>
-									<S.ModalButton onClick={handleCloseModal}>Cancel</S.ModalButton>
-									<S.ModalButtonPrimary onClick={handleSetPost} disabled={!selectedPost}>
-										Set
-									</S.ModalButtonPrimary>
+									<Button label="Cancel" type="default" onClick={handleCloseModal} />
+									<Button label="Set" type="primary" onClick={handleSetPost} disabled={!selectedPost} />
 								</S.ModalActions>
 							</S.ModalContent>
 						</S.ModalContainer>

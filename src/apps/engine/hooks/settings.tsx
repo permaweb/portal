@@ -13,13 +13,7 @@ const updateSettings = async (newSettings: any) => {
 	return newSettings;
 };
 
-// tmp
-const switchTheme = (theme: string) => {
-	const colorHeaderBorder = theme === 'dark' ? '255,255,255' : '0,0,0';
-	const colorNavigationBorder = theme === 'dark' ? '255,255,255' : '0,0,0';
-	document.documentElement.style.setProperty('--color-header-border', colorHeaderBorder);
-	document.documentElement.style.setProperty('--color-navigation-border', colorNavigationBorder);
-};
+const switchTheme = (_theme: string) => {};
 // switchTheme(settingsQuery.data.theme)
 
 export const initSettings = async () => {

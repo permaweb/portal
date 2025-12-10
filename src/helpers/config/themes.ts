@@ -12,12 +12,12 @@ export const THEME_DEFAULT = {
 				dark: '20,20,20',
 			},
 			primary: {
-				light: '222,0,80',
-				dark: '222,0,80',
+				light: '94,102,219',
+				dark: '94,102,219',
 			},
 			secondary: {
-				light: '239,102,152',
-				dark: '239,102,152',
+				light: '56,189,128',
+				dark: '56,189,128',
 			},
 			border: {
 				light: '50, 50, 50',
@@ -69,8 +69,8 @@ export const THEME_DEFAULT = {
 				dark: 0.4,
 			},
 			shadow: {
-				light: '0px 4px 10px rgba(0, 0, 0, 0.4)',
-				dark: '0px 4px 10px rgba(0, 0, 0, 0.4)',
+				light: 'unset',
+				dark: 'unset',
 			},
 			gradient: {
 				light: true,
@@ -174,6 +174,10 @@ export const THEME_DEFAULT = {
 				light: 1,
 				dark: 1,
 			},
+			shadow: {
+				light: '2px 4px 3px -1px rgba(0, 0, 0, 0.18)',
+				dark: '2px 4px 3px -1px rgba(0, 0, 0, 0.18)',
+			},
 		},
 	},
 	buttons: {
@@ -267,6 +271,25 @@ export const THEME_DEFAULT = {
 						dark: 1,
 					},
 				},
+			},
+		},
+	},
+};
+
+export const THEME_DOCUMENTATION_PATCH = {
+	basics: {
+		colors: {
+			border: {
+				light: '226, 226, 226',
+				dark: '17, 17, 17',
+			},
+		},
+	},
+	navigation: {
+		colors: {
+			background: {
+				light: '238, 238, 238',
+				dark: '17, 17, 17',
 			},
 		},
 	},

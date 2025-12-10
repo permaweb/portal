@@ -90,6 +90,7 @@ export const PageHeader = styled.div`
 		white-space: nowrap;
 		overflow-x: hidden;
 		text-overflow: ellipsis;
+		min-width: 60px;
 	}
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
@@ -217,4 +218,43 @@ export const HomeTemplateOptionLabel = styled.p`
 	font-family: ${(props) => props.theme.typography.family.primary} !important;
 	text-transform: uppercase;
 	margin: 0;
+`;
+
+export const LayoutIndicators = styled.div`
+	display: flex;
+	gap: 5px;
+`;
+
+export const LayoutIndicator = styled.div<{ $active?: boolean }>`
+	position: relative;
+	width: 18px;
+	height: 18px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 10px;
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	background: ${(props) =>
+		props.$active ? props.theme.colors.indicator.active : props.theme.colors.container.primary.background};
+	color: ${(props) => (props.$active ? props.theme.colors.font.light1 : props.theme.colors.font.alt1)};
+	border: 1px solid
+		${(props) => (props.$active ? props.theme.colors.indicator.active : props.theme.colors.border.primary)};
+	border-radius: 4px;
+
+	&:hover::after {
+		content: attr(data-label);
+		position: absolute;
+		top: 100%;
+		left: 50%;
+		transform: translateX(-50%);
+		margin-top: 4px;
+		padding: 2px 6px;
+		background: ${(props) => props.theme.colors.container.primary.background};
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: 9px;
+		white-space: nowrap;
+		border-radius: 3px;
+		border: 1px solid ${(props) => props.theme.colors.border.primary};
+		z-index: 10;
+	}
 `;

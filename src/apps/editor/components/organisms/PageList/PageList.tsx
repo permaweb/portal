@@ -75,6 +75,7 @@ export default function PageList() {
 		if (current.type !== template.type) return false;
 		if (current.layout !== template.layout) return false;
 		if (current.width !== template.width) return false;
+		if (current.nonce !== template.nonce) return false;
 
 		if (Array.isArray(current.content) && Array.isArray(template.content)) {
 			if (current.content.length !== template.content.length) return false;
@@ -408,12 +409,23 @@ export default function PageList() {
 									<S.Arrow $open={!isCollapsed}>
 										<ReactSVG src={ICONS.arrow} />
 									</S.Arrow>
-									<p>
-										{displayUrlName(key)}
-										{isCollapsed &&
-											activeTemplate &&
-											`: ${activeTemplate.charAt(0).toUpperCase() + activeTemplate.slice(1)}`}
-									</p>
+									<p>{displayUrlName(key)}</p>
+									{isCollapsed && activeTemplate && (
+										<S.LayoutIndicators>
+											<S.LayoutIndicator $active={activeTemplate === 'journal'} data-label="Journal">
+												J
+											</S.LayoutIndicator>
+											<S.LayoutIndicator $active={activeTemplate === 'blog'} data-label="Blog">
+												B
+											</S.LayoutIndicator>
+											<S.LayoutIndicator $active={activeTemplate === 'documentation'} data-label="Documentation">
+												D
+											</S.LayoutIndicator>
+											<S.LayoutIndicator $active={activeTemplate === 'custom'} data-label="Custom">
+												C
+											</S.LayoutIndicator>
+										</S.LayoutIndicators>
+									)}
 								</S.PageHeader>
 								<S.PageDetail>
 									<S.PageActions>

@@ -30,6 +30,7 @@ export const Action = styled.div<{ open: boolean; noContentWrapper?: boolean }>`
 
 export const HeaderEnd = styled.div`
 	display: flex;
+	align-items: center;
 	gap: 15px;
 `;
 

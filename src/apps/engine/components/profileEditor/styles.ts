@@ -31,13 +31,16 @@ export const Form = styled.div`
 		margin-top: 10px;
 		font-size: 12px;
 		font-weight: 600;
+		color: rgba(var(--color-text), 1);
 	}
 
 	input {
 		font-size: 16px;
-		padding: 4px 6px;
+		padding: 8px 10px;
 		outline: none;
-		border: 1px solid transparent;
+		border: 1px solid rgba(var(--color-border), 0.5);
+		background: rgba(var(--color-text), 0.05);
+		color: rgba(var(--color-text), 1);
 
 		&:focus {
 			border: 1px solid rgba(var(--color-primary), 1);
@@ -48,10 +51,12 @@ export const Form = styled.div`
 		height: 240px !important;
 		width: 100%;
 		font-size: 16px;
-		padding: 4px 6px;
+		padding: 8px 10px;
 		box-sizing: border-box;
 		outline: none;
-		border: 1px solid transparent;
+		border: 1px solid rgba(var(--color-border), 0.5);
+		background: rgba(var(--color-text), 0.05);
+		color: rgba(var(--color-text), 1);
 
 		&:focus {
 			border: 1px solid rgba(var(--color-primary), 1);

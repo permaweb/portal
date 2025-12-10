@@ -61,6 +61,7 @@ export const PAGES_JOURNAL = {
 	},
 	post: {
 		type: 'grid',
+		nonce: 'journal',
 		content: [
 			{
 				type: 'row',
@@ -75,6 +76,7 @@ export const PAGES_JOURNAL = {
 	},
 	search: {
 		type: 'grid',
+		nonce: 'journal',
 		content: [
 			{
 				type: 'row',
@@ -83,92 +85,6 @@ export const PAGES_JOURNAL = {
 					{
 						type: 'feed',
 						layout: 'journal',
-						width: 3,
-					},
-				],
-			},
-		],
-	},
-};
-
-export const PAGES_DOCUMENTATION = {
-	home: {
-		type: 'grid',
-		content: [
-			{
-				type: 'row',
-				width: 'page',
-				content: [
-					{
-						type: 'post',
-					},
-				],
-			},
-		],
-	},
-	feed: {
-		type: 'grid',
-		content: [
-			{
-				type: 'row',
-				width: 'page',
-				content: [
-					{
-						type: 'feed',
-						width: 3,
-					},
-				],
-			},
-		],
-	},
-	user: {
-		type: 'grid',
-		content: [
-			{
-				type: 'row',
-				width: 'page',
-				content: [
-					{
-						type: 'sidebar',
-						width: 1,
-						content: ['user'],
-					},
-				],
-			},
-			{
-				type: 'row',
-				width: 'page',
-				content: [
-					{
-						type: 'feed',
-					},
-				],
-			},
-		],
-	},
-	post: {
-		type: 'grid',
-		content: [
-			{
-				type: 'row',
-				width: 'page',
-				content: [
-					{
-						type: 'post',
-					},
-				],
-			},
-		],
-	},
-	search: {
-		type: 'grid',
-		content: [
-			{
-				type: 'row',
-				width: 'page',
-				content: [
-					{
-						type: 'feed',
 						width: 3,
 					},
 				],
@@ -250,6 +166,7 @@ export const PAGES_BLOG = {
 	},
 	post: {
 		type: 'grid',
+		nonce: 'blog',
 		content: [
 			{
 				type: 'row',
@@ -264,6 +181,95 @@ export const PAGES_BLOG = {
 	},
 	search: {
 		type: 'grid',
+		nonce: 'blog',
+		content: [
+			{
+				type: 'row',
+				width: 'page',
+				content: [
+					{
+						type: 'feed',
+						width: 3,
+					},
+				],
+			},
+		],
+	},
+};
+
+export const PAGES_DOCUMENTATION = {
+	home: {
+		type: 'grid',
+		content: [
+			{
+				type: 'row',
+				width: 'page',
+				content: [
+					{
+						type: 'post',
+					},
+				],
+			},
+		],
+	},
+	feed: {
+		type: 'grid',
+		content: [
+			{
+				type: 'row',
+				width: 'page',
+				content: [
+					{
+						type: 'feed',
+						width: 3,
+					},
+				],
+			},
+		],
+	},
+	user: {
+		type: 'grid',
+		content: [
+			{
+				type: 'row',
+				width: 'page',
+				content: [
+					{
+						type: 'sidebar',
+						width: 1,
+						content: ['user'],
+					},
+				],
+			},
+			{
+				type: 'row',
+				width: 'page',
+				content: [
+					{
+						type: 'feed',
+					},
+				],
+			},
+		],
+	},
+	post: {
+		type: 'grid',
+		nonce: 'documentation',
+		content: [
+			{
+				type: 'row',
+				width: 'page',
+				content: [
+					{
+						type: 'post',
+					},
+				],
+			},
+		],
+	},
+	search: {
+		type: 'grid',
+		nonce: 'documentation',
 		content: [
 			{
 				type: 'row',

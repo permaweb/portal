@@ -12,6 +12,7 @@ export default function Drawer(props: {
 	content: React.ReactNode;
 	icon?: string;
 	actions?: React.ReactNode[];
+	headerContent?: React.ReactNode;
 	noContentWrapper?: boolean;
 	padContent?: boolean;
 	drawerKey?: string;
@@ -37,6 +38,7 @@ export default function Drawer(props: {
 						<p>{props.title}</p>
 					</S.Title>
 					<S.HeaderEnd>
+						{!open && props.headerContent}
 						{props.actions && (
 							<S.HeaderActions onClick={(e) => e.stopPropagation()}>
 								{props.actions.map((action: React.ReactNode, index: number) => (

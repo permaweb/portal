@@ -574,3 +574,17 @@ export function debugLog(level: string, context: string, ...args: any[]) {
 
 	method(`%c[Portal: ${capitalize(level)}]%c %c(${context})%c -`, style, '', 'font-weight: medium;', '', ...args);
 }
+
+export function fixBooleanStrings<T>(obj: T): T {
+	if (obj === null || obj === undefined) return obj;
+	if (obj === 'true') return true as T;
+	if (obj === 'false') return false as T;
+	if (typeof obj !== 'object') return obj;
+	if (Array.isArray(obj)) return obj.map(fixBooleanStrings) as T;
+
+	const result: any = {};
+	for (const key of Object.keys(obj)) {
+		result[key] = fixBooleanStrings((obj as any)[key]);
+	}
+	return result;
+}

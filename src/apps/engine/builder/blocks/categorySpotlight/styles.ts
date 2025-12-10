@@ -323,36 +323,3 @@ export const ModalActions = styled.div`
 	gap: 10px;
 	margin-top: 10px;
 `;
-
-export const ModalButton = styled.button`
-	padding: 10px 20px;
-	font-size: 14px;
-	border: none;
-	border-radius: 0;
-	background: rgba(var(--color-text), 0.1);
-	color: inherit;
-	cursor: pointer;
-
-	&:hover {
-		background: rgba(var(--color-text), 0.2);
-	}
-`;
-
-export const ModalButtonPrimary = styled.button`
-	padding: 10px 20px;
-	font-size: 14px;
-	border: none;
-	border-radius: 0;
-	background: rgba(var(--color-primary), 1);
-	color: white;
-	cursor: pointer;
-
-	&:hover:not(:disabled) {
-		opacity: 0.9;
-	}
-
-	&:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-`;

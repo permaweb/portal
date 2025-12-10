@@ -8,6 +8,7 @@ import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { ICONS, LAYOUT, PAGES, PORTAL_DATA, PORTAL_PATCH_MAP, PORTAL_ROLES, THEME, URLS } from 'helpers/config';
+import { THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
 import { PortalDetailType, PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
 import { checkValidAddress, debugLog, getBootTag } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -17,6 +18,25 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
+
+function deepMerge(target: any, patch: any): any {
+	if (!target) return patch;
+	const result = { ...target };
+	for (const key of Object.keys(patch)) {
+		if (
+			patch[key] &&
+			typeof patch[key] === 'object' &&
+			!Array.isArray(patch[key]) &&
+			target[key] &&
+			typeof target[key] === 'object'
+		) {
+			result[key] = deepMerge(target[key], patch[key]);
+		} else {
+			result[key] = patch[key];
+		}
+	}
+	return result;
+}
 
 export default function PortalManager(props: {
 	portal: PortalDetailType | null;
@@ -205,9 +225,12 @@ export default function PortalManager(props: {
 
 					const { layout: chosenLayout, pages: chosenPages } = getLayoutAndPages();
 
+					const chosenTheme =
+						selectedLayout === 'documentation' ? deepMerge(THEME.DEFAULT, THEME_DOCUMENTATION_PATCH) : THEME.DEFAULT;
+
 					const portalUpdateId = await permawebProvider.libs.updateZone(
 						{
-							Themes: [permawebProvider.libs.mapToProcessCase(THEME.DEFAULT)],
+							Themes: [permawebProvider.libs.mapToProcessCase(chosenTheme)],
 							Layout: permawebProvider.libs.mapToProcessCase(chosenLayout),
 							Pages: permawebProvider.libs.mapToProcessCase(chosenPages),
 						},
@@ -304,28 +327,32 @@ export default function PortalManager(props: {
 								</S.PWrapper>
 							) : (
 								<>
-									<S.SectionLabel>{language?.logo || 'Logo'}</S.SectionLabel>
-									<S.LogoWrapper>
-										<Media portal={null} type={'logo'} onMediaUpload={handleLogoUpload} hideActions />
-									</S.LogoWrapper>
-									<S.SectionLabel>{language?.layout || 'Layout'}</S.SectionLabel>
-									<S.LayoutOptions>
-										{layoutOptions.map((option) => {
-											const active = option.name === selectedLayout;
-											return (
-												<S.LayoutOption
-													key={option.name}
-													$active={active}
-													onClick={() => setSelectedLayout(option.name)}
-												>
-													<S.LayoutOptionIcon $active={active}>
-														<img src={option.icon} alt={option.name} />
-													</S.LayoutOptionIcon>
-													<S.LayoutOptionLabel>{option.name}</S.LayoutOptionLabel>
-												</S.LayoutOption>
-											);
-										})}
-									</S.LayoutOptions>
+									<S.SectionWrapper>
+										<S.SectionLabel>{language?.logo || 'Logo'}</S.SectionLabel>
+										<S.LogoWrapper>
+											<Media portal={null} type={'logo'} onMediaUpload={handleLogoUpload} hideActions />
+										</S.LogoWrapper>
+									</S.SectionWrapper>
+									<S.SectionWrapper>
+										<S.SectionLabel>{language?.layout || 'Layout'}</S.SectionLabel>
+										<S.LayoutOptions>
+											{layoutOptions.map((option) => {
+												const active = option.name === selectedLayout;
+												return (
+													<S.LayoutOption
+														key={option.name}
+														$active={active}
+														onClick={() => setSelectedLayout(option.name)}
+													>
+														<S.LayoutOptionIcon $active={active}>
+															<img src={option.icon} alt={option.name} />
+														</S.LayoutOptionIcon>
+														<S.LayoutOptionLabel>{option.name}</S.LayoutOptionLabel>
+													</S.LayoutOption>
+												);
+											})}
+										</S.LayoutOptions>
+									</S.SectionWrapper>
 								</>
 							)}
 							<S.SAction>

@@ -14,11 +14,42 @@ export default function DesignBasic() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
+	const currentLayout = portalProvider.current?.layout;
+	const navPosition = currentLayout?.navigation?.layout?.position;
+	const getActiveLayout = () => {
+		if (!currentLayout) return 'C';
+		if (navPosition === 'left' || navPosition === 'right') return 'D';
+		if (currentLayout?.navigation?.layout?.shadow) return 'B';
+		if (currentLayout?.header?.layout?.height === '100px') return 'J';
+		return 'C';
+	};
+	const activeLayout = getActiveLayout();
+
+	const layoutIndicators = (
+		<S.LayoutIndicators>
+			<S.LayoutIndicator $active={activeLayout === 'J'} data-label="Journal">
+				J
+			</S.LayoutIndicator>
+			<S.LayoutIndicator $active={activeLayout === 'B'} data-label="Blog">
+				B
+			</S.LayoutIndicator>
+			<S.LayoutIndicator $active={activeLayout === 'D'} data-label="Documentation">
+				D
+			</S.LayoutIndicator>
+		</S.LayoutIndicators>
+	);
+
 	return (
 		<S.BodyWrapper>
 			<S.SectionWrapper>
 				<S.Section>
-					<Drawer drawerKey="design-fonts" title={language?.fonts} content={<Fonts />} padContent />
+					<Drawer
+						drawerKey="design-layout"
+						title={language?.layout}
+						content={<Layout />}
+						headerContent={layoutIndicators}
+						padContent
+					/>
 				</S.Section>
 				<S.Section>
 					<Drawer
@@ -61,7 +92,7 @@ export default function DesignBasic() {
 			</S.SectionWrapper>
 			<S.SectionWrapper>
 				<S.Section>
-					<Drawer drawerKey="design-layout" title={language?.layout} content={<Layout />} padContent />
+					<Drawer drawerKey="design-fonts" title={language?.fonts} content={<Fonts />} padContent />
 				</S.Section>
 				<S.Section>
 					<Drawer drawerKey="design-themes" title={language?.themes} content={<Themes />} padContent />

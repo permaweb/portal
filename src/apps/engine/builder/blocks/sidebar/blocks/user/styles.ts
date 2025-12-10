@@ -9,10 +9,11 @@ export const Header = styled.div`
 `;
 
 export const Banner = styled.div`
-	height: 100px;
 	overflow: hidden;
 	img {
-		width: 300px;
+		width: 100%;
+		aspect-ratio: 3 / 1;
+		object-fit: cover;
 	}
 
 	&::after {
@@ -31,16 +32,26 @@ export const Avatar = styled.div`
 	position: absolute;
 	bottom: -12px;
 	left: 10px;
+	width: 14%;
+	min-width: 52px;
 
 	> div {
+		width: 100% !important;
+		height: unset !important;
+		aspect-ratio: 1 / 1;
 		box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.6), 0 4px 10px 0 rgba(0, 0, 0, 0.6);
+
+		img {
+			width: 100% !important;
+			height: 100% !important;
+		}
 	}
 `;
 
 export const Name = styled.div`
 	position: absolute;
 	bottom: 4px;
-	left: 70px;
+	left: max(calc(14% + 20px), 72px);
 	color: white;
 	font-size: var(--font-size-large);
 	font-weight: 900;
