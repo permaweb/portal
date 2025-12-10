@@ -31,7 +31,6 @@ export function useUploadCost() {
 
 				setUploadCost(uploadInWinc);
 				if (uploadInWinc > Number(arProvider.turboBalanceObj.effectiveBalance)) {
-					addNotification('Insufficient balance for upload', 'warning');
 					setInsufficientBalance(true);
 					return { requiresConfirmation: true, cost: uploadInWinc, hasInsufficientBalance: true };
 				}

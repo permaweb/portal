@@ -2,6 +2,7 @@ import React from 'react';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
+import { Button } from 'components/atoms/Button';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PageBlockType, PortalAssetType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -14,7 +15,7 @@ const FALLBACK_DATA = {
 	description: 'Description',
 };
 
-export default function PostBlock(_props: {
+export default function PostBlock(props: {
 	index: number;
 	block: PageBlockType;
 	onChangeBlock: (block: PageBlockType, index: number) => void;
@@ -24,16 +25,63 @@ export default function PostBlock(_props: {
 	const language = languageProvider.object[languageProvider.current];
 
 	const [post, setPost] = React.useState<PortalAssetType | null>(null);
+	const [filter, setFilter] = React.useState('');
+	const [selectedPostId, setSelectedPostId] = React.useState<string | null>(props.block.txId || null);
 
 	React.useEffect(() => {
-		if (portalProvider.current?.assets && portalProvider.current.assets.length > 0) {
-			setPost(portalProvider.current.assets[0]);
+		const assets = portalProvider.current?.assets;
+		if (props.block.txId && assets && assets.length > 0) {
+			const found = assets.find((a: PortalAssetType) => a.id === props.block.txId);
+			if (found) {
+				setPost(found);
+			}
+		} else if (!props.block.txId) {
+			setPost(null);
 		}
-	}, [portalProvider.current?.assets]);
+	}, [portalProvider.current?.assets, props.block.txId]);
+
+	const filteredPosts = React.useMemo(() => {
+		const assets = portalProvider.current?.assets || [];
+		if (!filter) return assets;
+		return assets.filter((a: PortalAssetType) => a.name?.toLowerCase().includes(filter.toLowerCase()));
+	}, [portalProvider.current?.assets, filter]);
+
+	const handleSave = () => {
+		if (selectedPostId) {
+			props.onChangeBlock({ ...props.block, txId: selectedPostId }, props.index);
+		}
+	};
 
 	const postTitle = post?.name || FALLBACK_DATA.title;
 	const postDescription = post?.metadata?.description || FALLBACK_DATA.description;
 	const postThumbnail = post?.metadata?.thumbnail;
+
+	if (!post) {
+		return (
+			<S.Wrapper>
+				<S.EmptyPostBlock>
+					<S.ModalFilterInput
+						type="text"
+						placeholder={language.filterPosts || 'Filter posts...'}
+						value={filter}
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilter(e.target.value)}
+					/>
+					<S.ModalSelect
+						value={selectedPostId || ''}
+						onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedPostId(e.target.value)}
+					>
+						<option value="">{language.selectPost || 'Select a post'}</option>
+						{filteredPosts.map((asset: PortalAssetType) => (
+							<option key={asset.id} value={asset.id}>
+								{asset.name}
+							</option>
+						))}
+					</S.ModalSelect>
+					<Button type={'alt1'} label={language.save || 'Save'} handlePress={handleSave} disabled={!selectedPostId} />
+				</S.EmptyPostBlock>
+			</S.Wrapper>
+		);
+	}
 
 	return (
 		<S.Wrapper>

@@ -110,8 +110,6 @@ export const Meta = styled.div`
 	margin-top: 10px;
 
 	img {
-		width: 18px;
-		height: 18px;
 		background: white;
 		border-radius: 50%;
 	}

@@ -27,6 +27,7 @@ export const LAYOUT_JOURNAL = {
 	},
 	navigation: {
 		layout: {
+			position: 'top',
 			width: 'page',
 			height: 50,
 			padding: '0 20px',
@@ -52,9 +53,6 @@ export const LAYOUT_JOURNAL = {
 				sides: false,
 				bottom: false,
 			},
-		},
-		content: {
-			links: [],
 		},
 	},
 	page: {
@@ -94,6 +92,7 @@ export const LAYOUT_BLOG = {
 	},
 	navigation: {
 		layout: {
+			position: 'top',
 			width: 'page',
 			height: 40,
 			padding: '0',
@@ -106,8 +105,76 @@ export const LAYOUT_BLOG = {
 			},
 			opacity: 1,
 		},
+	},
+	footer: {
+		layout: {
+			width: 'page',
+			height: '46px',
+			padding: '14px',
+			verticalAlign: 'center',
+			border: {
+				top: true,
+				sides: false,
+				bottom: false,
+			},
+			fixed: false,
+		},
 		content: {
 			links: [],
+		},
+	},
+	page: {
+		layout: {
+			structure: 'single-column',
+			padding: '30px 15px',
+		},
+	},
+	card: {
+		flow: 'column',
+	},
+};
+
+export const LAYOUT_DOCUMENTATION = {
+	basics: {
+		gradient: true,
+		borderRadius: 0,
+		maxWidth: 1400,
+		padding: '0',
+	},
+	header: {
+		layout: {
+			width: 'page',
+			height: '48px',
+			padding: '0',
+			border: {
+				top: false,
+				sides: false,
+				bottom: true,
+			},
+		},
+		content: {
+			logo: {
+				display: true,
+				positionX: 'left',
+				positionY: 'bottom',
+				size: '26%',
+			},
+		},
+	},
+	navigation: {
+		layout: {
+			position: 'left',
+			width: 300,
+			height: 'site',
+			padding: '0',
+			gradient: false,
+			shadow: true,
+			border: {
+				top: false,
+				sides: false,
+				bottom: true,
+			},
+			opacity: 1,
 		},
 	},
 	footer: {

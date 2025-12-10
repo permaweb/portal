@@ -1,22 +1,36 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const Button = styled.button<{ type: string }>`
-	width: fit-content;
-	padding: 6px 12px;
-	color: ${(props) => `var(--color-button-${props.type})`};
-	background: ${(props) => `var(--color-button-${props.type}-background)`};
-	border: ${(props) => `1px solid var(--color-button-${props.type}-border)`};
-	border-radius: var(--border-radius);
+const primaryStyles = css`
+	background: rgba(var(--color-primary), 1);
+	color: white;
 
-	&:hover {
-		color: ${(props) => `var(--color-button-${props.type}-hover)`};
-		background: ${(props) => `var(--color-button-${props.type}-hover-background)`};
-		border: ${(props) => `1px solid var(--color-button-${props.type}-hover-border)`};
+	&:hover:not(:disabled) {
+		opacity: 0.9;
 	}
+`;
+
+const defaultStyles = css`
+	background: rgba(var(--color-text), 0.1);
+	color: rgba(var(--color-text), 1);
+
+	&:hover:not(:disabled) {
+		background: rgba(var(--color-text), 0.2);
+	}
+`;
+
+export const Button = styled.button<{ $variant?: string }>`
+	width: fit-content;
+	padding: 10px 20px;
+	font-size: 14px;
+	font-weight: 600;
+	border: none;
+	border-radius: var(--border-radius);
+	cursor: pointer;
+
+	${(props) => (props.$variant === 'primary' ? primaryStyles : defaultStyles)}
 
 	&:disabled {
-		opacity: 0.6;
-		user-select: none;
-		pointer-events: none;
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 `;

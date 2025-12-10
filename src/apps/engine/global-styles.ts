@@ -50,7 +50,8 @@ export const GlobalStyles = createGlobalStyle`
     display: flex;
     place-items: center;
     height: 100%;
-    width: 100%;    
+    width: 100%;
+    overflow-x: hidden;
     overflow-y: auto;
 		background: rgba(var(--color-background), 1);
   }
@@ -113,7 +114,22 @@ export const GlobalStyles = createGlobalStyle`
 
   button:focus,
   button:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
+    outline: none;
+  }
+
+  input,
+  textarea {
+    padding: 8px 10px;
+    outline: none;
+    border: 1px solid rgba(var(--color-border), 0.5);
+    background: rgba(var(--color-text), 0.05);
+    color: rgba(var(--color-text), 1);
+    font-family: inherit;
+    font-size: inherit;
+
+    &:focus {
+      border: 1px solid rgba(var(--color-primary), 1);
+    }
   }
 
   .loadingThumbnail {
@@ -213,6 +229,36 @@ export const FooterWrapper = styled.div<{ $layout: any }>`
 	bottom: 0;
 	width: 100%;
 	z-index: 0;
+`;
+
+export const SideNavLayout = styled.div<{ $navPosition: 'left' | 'right'; $maxWidth?: number }>`
+	display: flex;
+	flex-direction: ${(props) => (props.$navPosition === 'right' ? 'row-reverse' : 'row')};
+	width: 100%;
+	min-height: 100vh;
+`;
+
+export const SideNavWrapper = styled.div<{ $navPosition: 'left' | 'right'; $maxWidth?: number; $navWidth?: number }>`
+	display: flex;
+	justify-content: ${(props) => (props.$navPosition === 'right' ? 'flex-start' : 'flex-end')};
+	width: ${(props) => {
+		const navWidth = props.$navWidth || 300;
+		const maxWidth = props.$maxWidth || 1200;
+		return `calc((100vw - ${maxWidth}px) / 2 + ${navWidth}px)`;
+	}};
+	min-width: ${(props) => `${props.$navWidth || 300}px`};
+	background: var(--color-navigation-background);
+	box-sizing: border-box;
+	z-index: 10;
+	overflow: hidden;
+`;
+
+export const ContentWrapper = styled.div<{ $navPosition: 'left' | 'right' }>`
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	overflow-x: hidden;
 `;
 
 export const SettingsButton = styled.div`

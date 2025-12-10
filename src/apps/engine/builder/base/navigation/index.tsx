@@ -7,6 +7,7 @@ import { initThemes } from 'engine/helpers/themes';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
 import { getRedirect } from 'helpers/utils';
 
 import { GlobalStyles } from '../../../global-styles';
@@ -20,25 +21,33 @@ export default function Navigation(props: any) {
 	const content = props.content;
 
 	const portalProvider = usePortalProvider();
-	const { portal, layoutHeights, setLayoutHeights, navSticky, layoutEditMode } = portalProvider;
+	const { portal, layoutHeights, setLayoutHeights, navSticky, layoutEditMode, logoSettings } = portalProvider;
 	const [isDragging, setIsDragging] = React.useState(false);
-	const [startY, setStartY] = React.useState(0);
-	const [startHeight, setStartHeight] = React.useState(0);
+	const [startPos, setStartPos] = React.useState(0);
+	const [startSize, setStartSize] = React.useState(0);
+
+	const isSideNav = layout?.position === 'left' || layout?.position === 'right';
 
 	const handleMouseDown = (e: React.MouseEvent) => {
 		e.preventDefault();
 		setIsDragging(true);
-		setStartY(e.clientY);
-		setStartHeight(layoutHeights.navigation);
+		setStartPos(isSideNav ? e.clientX : e.clientY);
+		setStartSize(layoutHeights.navigation);
 	};
 
 	React.useEffect(() => {
 		if (!isDragging) return;
 
 		const handleMouseMove = (e: MouseEvent) => {
-			const delta = e.clientY - startY;
-			const newHeight = Math.max(30, Math.min(100, startHeight + delta));
-			setLayoutHeights({ ...layoutHeights, navigation: newHeight });
+			if (isSideNav) {
+				const delta = layout?.position === 'right' ? startPos - e.clientX : e.clientX - startPos;
+				const newWidth = Math.max(200, Math.min(400, startSize + delta));
+				setLayoutHeights({ ...layoutHeights, navigation: newWidth });
+			} else {
+				const delta = e.clientY - startPos;
+				const newHeight = Math.max(30, Math.min(100, startSize + delta));
+				setLayoutHeights({ ...layoutHeights, navigation: newHeight });
+			}
 		};
 
 		const handleMouseUp = () => setIsDragging(false);
@@ -50,16 +59,41 @@ export default function Navigation(props: any) {
 			document.removeEventListener('mousemove', handleMouseMove);
 			document.removeEventListener('mouseup', handleMouseUp);
 		};
-	}, [isDragging, startY, startHeight, layoutHeights, setLayoutHeights]);
+	}, [isDragging, startPos, startSize, layoutHeights, setLayoutHeights, isSideNav, layout?.position]);
 	const Layout = preview ? defaultLayout : portal?.Layout;
 	const Themes = preview ? defaultThemes : portal?.Themes;
+	const Logo = portal?.Logo === 'None' ? ICONS.logo : portal?.Logo;
+	const [logoError, setLogoError] = React.useState<{ [key: string]: boolean }>({});
 
 	React.useEffect(() => {
 		if (preview) {
-			initThemes(Themes, Layout);
+			initThemes(Themes);
 			document.getElementById('preview')?.setAttribute('data-theme', 'dark');
 		}
-	}, [preview, Themes, Layout]);
+	}, [preview, Themes]);
+
+	const renderLogo = (txId: string) => {
+		const url = txId.startsWith('http') ? txId : getTxEndpoint(txId);
+
+		if (logoError[txId]) {
+			return <img src={url} alt="Logo" />;
+		}
+
+		return (
+			<ReactSVG
+				src={url}
+				beforeInjection={(_svg) => {
+					if (logoError[txId]) {
+						setLogoError((prev) => ({ ...prev, [txId]: false }));
+					}
+				}}
+				fallback={() => {
+					setLogoError((prev) => ({ ...prev, [txId]: true }));
+					return <img src={url} alt="Logo" />;
+				}}
+			/>
+		);
+	};
 
 	const NavigationEntry = (childProps: any) => {
 		const entry = childProps.entry;
@@ -132,6 +166,7 @@ export default function Navigation(props: any) {
 			<S.NavigationEntry
 				ref={containerRef}
 				id={`entry-${index}-${entry?.name ?? 'unnamed'}`}
+				$layout={layout}
 				onPointerEnter={handlePointerEnter}
 				onPointerLeave={handlePointerLeave}
 				onFocus={handleFocus}
@@ -191,17 +226,28 @@ export default function Navigation(props: any) {
 		>
 			{preview && <GlobalStyles />}
 			<S.NavigationEntries $layout={layout} maxWidth={Layout?.basics?.maxWidth}>
+				{isSideNav && Logo && (
+					<S.NavLogo id="Logo" $logoSize={logoSettings?.size} $positionX={logoSettings?.positionX}>
+						<NavLink to={getRedirect()}>{renderLogo(Logo)}</NavLink>
+					</S.NavLogo>
+				)}
 				{content &&
 					Object.entries(content).map(([key, entry]: [string, any]) => (
-						<NavigationEntry key={key} index={key} entry={entry} />
+						<NavigationEntry key={key} index={key} entry={entry} layout={layout} />
 					))}
-				<Search />
+				{!isSideNav && <Search />}
 			</S.NavigationEntries>
 			{layoutEditMode && (
-				<S.ResizeHandle $isDragging={isDragging} onMouseDown={handleMouseDown}>
-					<S.HandleBar>
-						<S.HandleLabel>Navigation ({layoutHeights.navigation}px)</S.HandleLabel>
-					</S.HandleBar>
+				<S.ResizeHandle
+					$isDragging={isDragging}
+					$isSideNav={isSideNav}
+					$position={layout?.position}
+					onMouseDown={handleMouseDown}
+				>
+					<S.HandleBar $isSideNav={isSideNav} />
+					<S.HandleLabel $isSideNav={isSideNav}>
+						{isSideNav ? 'Width' : 'Height'} ({layoutHeights.navigation || layout?.width || 300}px)
+					</S.HandleLabel>
 				</S.ResizeHandle>
 			)}
 		</S.Navigation>

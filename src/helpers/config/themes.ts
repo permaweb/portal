@@ -12,12 +12,12 @@ export const THEME_DEFAULT = {
 				dark: '20,20,20',
 			},
 			primary: {
-				light: '151,151,151',
-				dark: '77,77,77',
+				light: '94,102,219',
+				dark: '94,102,219',
 			},
 			secondary: {
-				light: '161,161,161',
-				dark: '88,88,88',
+				light: '56,189,128',
+				dark: '56,189,128',
 			},
 			border: {
 				light: '50, 50, 50',
@@ -69,8 +69,8 @@ export const THEME_DEFAULT = {
 				dark: 0.4,
 			},
 			shadow: {
-				light: '0px 4px 10px rgba(0, 0, 0, 0.4)',
-				dark: '0px 4px 10px rgba(0, 0, 0, 0.4)',
+				light: 'unset',
+				dark: 'unset',
 			},
 			gradient: {
 				light: true,
@@ -128,6 +128,10 @@ export const THEME_DEFAULT = {
 				light: 'background',
 				dark: 'background',
 			},
+			border: {
+				light: 'border',
+				dark: 'border',
+			},
 		},
 		preferences: {
 			opacity: {
@@ -169,6 +173,10 @@ export const THEME_DEFAULT = {
 			opacity: {
 				light: 1,
 				dark: 1,
+			},
+			shadow: {
+				light: '2px 4px 3px -1px rgba(0, 0, 0, 0.18)',
+				dark: '2px 4px 3px -1px rgba(0, 0, 0, 0.18)',
 			},
 		},
 	},
@@ -263,6 +271,25 @@ export const THEME_DEFAULT = {
 						dark: 1,
 					},
 				},
+			},
+		},
+	},
+};
+
+export const THEME_DOCUMENTATION_PATCH = {
+	basics: {
+		colors: {
+			border: {
+				light: '226, 226, 226',
+				dark: '17, 17, 17',
+			},
+		},
+	},
+	navigation: {
+		colors: {
+			background: {
+				light: '238, 238, 238',
+				dark: '17, 17, 17',
 			},
 		},
 	},

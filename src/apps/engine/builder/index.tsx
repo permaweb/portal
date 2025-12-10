@@ -37,6 +37,7 @@ export default function Builder(props: any) {
 					/>
 				);
 			case 'row':
+			case 'column':
 				return (
 					<GridRow
 						key={index}
@@ -61,7 +62,9 @@ export default function Builder(props: any) {
 					/>
 				);
 			case 'sidebar':
-				return <Sidebar key={index} content={element.content} gap={element.gap} preview={preview} />;
+				return (
+					<Sidebar key={index} content={element.content} gap={element.gap} width={element.width} preview={preview} />
+				);
 			case 'postSpotlight':
 				return <PostSpotlight key={index} txId={element.txId} preview={preview} />;
 			case 'categorySpotlight':

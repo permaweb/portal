@@ -7,7 +7,8 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
-import { LAYOUT, PAGES, PORTAL_DATA, PORTAL_PATCH_MAP, PORTAL_ROLES, THEME, URLS } from 'helpers/config';
+import { ICONS, LAYOUT, PAGES, PORTAL_DATA, PORTAL_PATCH_MAP, PORTAL_ROLES, THEME, URLS } from 'helpers/config';
+import { THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
 import { PortalDetailType, PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
 import { checkValidAddress, debugLog, getBootTag } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -17,6 +18,25 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
+
+function deepMerge(target: any, patch: any): any {
+	if (!target) return patch;
+	const result = { ...target };
+	for (const key of Object.keys(patch)) {
+		if (
+			patch[key] &&
+			typeof patch[key] === 'object' &&
+			!Array.isArray(patch[key]) &&
+			target[key] &&
+			typeof target[key] === 'object'
+		) {
+			result[key] = deepMerge(target[key], patch[key]);
+		} else {
+			result[key] = patch[key];
+		}
+	}
+	return result;
+}
 
 export default function PortalManager(props: {
 	portal: PortalDetailType | null;
@@ -34,8 +54,15 @@ export default function PortalManager(props: {
 	const [name, setName] = React.useState<string>('');
 	const [logoId, setLogoId] = React.useState<string | null>(null);
 	const [iconId, setIconId] = React.useState<string | null>(null);
+	const [selectedLayout, setSelectedLayout] = React.useState<string>('journal');
 
 	const [loading, setLoading] = React.useState<boolean>(false);
+
+	const layoutOptions = [
+		{ name: 'journal', icon: ICONS.layoutJournal },
+		{ name: 'blog', icon: ICONS.layoutBlog },
+		{ name: 'documentation', icon: ICONS.layoutDocumentation },
+	];
 	const { addNotification } = useNotifications();
 
 	React.useEffect(() => {
@@ -187,11 +214,25 @@ export default function PortalManager(props: {
 						arProvider.wallet
 					);
 
+					const getLayoutAndPages = () => {
+						if (selectedLayout === 'blog') {
+							return { layout: LAYOUT.BLOG, pages: PAGES.BLOG };
+						} else if (selectedLayout === 'documentation') {
+							return { layout: LAYOUT.DOCUMENTATION, pages: PAGES.DOCUMENTATION };
+						}
+						return { layout: LAYOUT.JOURNAL, pages: PAGES.JOURNAL };
+					};
+
+					const { layout: chosenLayout, pages: chosenPages } = getLayoutAndPages();
+
+					const chosenTheme =
+						selectedLayout === 'documentation' ? deepMerge(THEME.DEFAULT, THEME_DOCUMENTATION_PATCH) : THEME.DEFAULT;
+
 					const portalUpdateId = await permawebProvider.libs.updateZone(
 						{
-							Themes: [permawebProvider.libs.mapToProcessCase(THEME.DEFAULT)],
-							Layout: permawebProvider.libs.mapToProcessCase(LAYOUT.JOURNAL),
-							Pages: permawebProvider.libs.mapToProcessCase(PAGES.JOURNAL),
+							Themes: [permawebProvider.libs.mapToProcessCase(chosenTheme)],
+							Layout: permawebProvider.libs.mapToProcessCase(chosenLayout),
+							Pages: permawebProvider.libs.mapToProcessCase(chosenPages),
 						},
 						portalId,
 						arProvider.wallet
@@ -265,24 +306,55 @@ export default function PortalManager(props: {
 									/>
 								</S.TForm>
 							</S.Form>
-							<S.PWrapper>
-								<Media
-									portal={props.portal}
-									type={'logo'}
-									handleUpdate={handleMediaUpdate}
-									onMediaUpload={handleLogoUpload}
-									hideActions={!props.portal}
-								/>
-								<S.IconWrapper className={'border-wrapper-alt2'}>
+							{props.portal ? (
+								<S.PWrapper>
 									<Media
 										portal={props.portal}
-										type={'icon'}
+										type={'logo'}
 										handleUpdate={handleMediaUpdate}
-										onMediaUpload={handleIconUpload}
+										onMediaUpload={handleLogoUpload}
 										hideActions={!props.portal}
 									/>
-								</S.IconWrapper>
-							</S.PWrapper>
+									<S.IconWrapper className={'border-wrapper-alt2'}>
+										<Media
+											portal={props.portal}
+											type={'icon'}
+											handleUpdate={handleMediaUpdate}
+											onMediaUpload={handleIconUpload}
+											hideActions={!props.portal}
+										/>
+									</S.IconWrapper>
+								</S.PWrapper>
+							) : (
+								<>
+									<S.SectionWrapper>
+										<S.SectionLabel>{language?.logo || 'Logo'}</S.SectionLabel>
+										<S.LogoWrapper>
+											<Media portal={null} type={'logo'} onMediaUpload={handleLogoUpload} hideActions />
+										</S.LogoWrapper>
+									</S.SectionWrapper>
+									<S.SectionWrapper>
+										<S.SectionLabel>{language?.layout || 'Layout'}</S.SectionLabel>
+										<S.LayoutOptions>
+											{layoutOptions.map((option) => {
+												const active = option.name === selectedLayout;
+												return (
+													<S.LayoutOption
+														key={option.name}
+														$active={active}
+														onClick={() => setSelectedLayout(option.name)}
+													>
+														<S.LayoutOptionIcon $active={active}>
+															<img src={option.icon} alt={option.name} />
+														</S.LayoutOptionIcon>
+														<S.LayoutOptionLabel>{option.name}</S.LayoutOptionLabel>
+													</S.LayoutOption>
+												);
+											})}
+										</S.LayoutOptions>
+									</S.SectionWrapper>
+								</>
+							)}
 							<S.SAction>
 								{props.handleClose && (
 									<Button

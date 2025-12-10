@@ -1,8 +1,15 @@
 import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
-export const Header = styled.div<{ $layout: any; theme: any; $editHeight?: number }>`
-	position: relative;
+export const Header = styled.div<{
+	$layout: any;
+	theme: any;
+	$editHeight?: number;
+	$sticky?: boolean;
+	$isSideNav?: boolean;
+}>`
+	position: ${(props) => (props.$sticky ? 'sticky' : 'relative')};
+	top: ${(props) => (props.$sticky ? '0' : 'auto')};
 	display: flex;
 	flex-shrink: 0;
 	flex-direction: column;
@@ -14,12 +21,28 @@ export const Header = styled.div<{ $layout: any; theme: any; $editHeight?: numbe
 	margin-left: auto;
 	margin-right: auto;
 	box-sizing: border-box;
-	border-bottom: ${(props) => (props.$layout.border.bottom ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
-	border-top: ${(props) => (props.$layout.border.top ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
-	border-left: ${(props) => (props.$layout.border.sides ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
-	border-right: ${(props) => (props.$layout.border.sides ? `1px solid rgba(var(--color-header-border),1)` : `unset`)};
+	border-bottom: ${(props) =>
+		props.$layout.border.bottom === true ? `1px solid rgba(var(--color-header-border),1)` : `unset`};
+	border-top: ${(props) =>
+		props.$isSideNav
+			? 'none'
+			: props.$layout.border.top === true
+			? `1px solid rgba(var(--color-header-border),1)`
+			: `unset`};
+	border-left: ${(props) =>
+		props.$isSideNav
+			? 'none'
+			: props.$layout.border.sides === true
+			? `1px solid rgba(var(--color-header-border),1)`
+			: `unset`};
+	border-right: ${(props) =>
+		props.$isSideNav
+			? 'none'
+			: props.$layout.border.sides === true
+			? `1px solid rgba(var(--color-header-border),1)`
+			: `unset`};
 	box-shadow: var(--preference-header-shadow);
-	z-index: 3;
+	z-index: ${(props) => (props.$isSideNav ? 1 : 3)};
 	user-select: none;
 	box-sizing: border-box;
 
@@ -32,11 +55,25 @@ export const Header = styled.div<{ $layout: any; theme: any; $editHeight?: numbe
 	}
 `;
 
-export const HeaderContentWrapper = styled.div<{ $layout: any; maxWidth: number }>`
+export const HeaderContentWrapper = styled.div<{
+	$layout: any;
+	maxWidth: number;
+	$isSideNav?: boolean;
+	$navWidth?: number;
+}>`
 	position: relative;
 	width: 100%;
-	max-width: ${(props) => (props.$layout.width === 'page' ? `${props.maxWidth}px` : `100%`)};
-	margin-left: auto;
+	max-width: ${(props) => {
+		if (props.$layout.width === 'page') {
+			if (props.$isSideNav) {
+				const navWidth = props.$navWidth || 300;
+				return `${props.maxWidth - navWidth}px`;
+			}
+			return `${props.maxWidth}px`;
+		}
+		return '100%';
+	}};
+	margin-left: ${(props) => (props.$isSideNav ? '0' : 'auto')};
 	margin-right: auto;
 	min-height: 100%;
 	max-height: 100%;
@@ -61,7 +98,7 @@ export const Logo = styled.div<{ $layout: any; $editLogo?: { positionX: string; 
 	left: 0;
 	bottom: 20px;
 	display: flex;
-	width: 100%;
+	width: fit-content;
 	justify-content: ${(props) => {
 		const posX = props.$editLogo?.positionX || props.$layout.positionX;
 		return posX === 'center' ? 'center' : posX === 'left' ? 'flex-start' : posX === 'right' ? 'flex-end' : 'center';
@@ -71,9 +108,8 @@ export const Logo = styled.div<{ $layout: any; $editLogo?: { positionX: string; 
 		return posY === 'center' ? 'center' : posY === 'top' ? 'flex-start' : posY === 'bottom' ? 'flex-end' : 'center';
 	}};
 	z-index: 1;
-
 	a {
-		height: ${(props) => (props.$editLogo ? `${props.$editLogo.size}%` : props.$layout.size)};
+		height: ${(props) => (props.$editLogo?.size ? `${props.$editLogo.size}%` : props.$layout?.size)};
 		width: auto;
 		flex-shrink: 0;
 
@@ -82,16 +118,21 @@ export const Logo = styled.div<{ $layout: any; $editLogo?: { positionX: string; 
 			width: auto;
 		}
 	}
+
 	svg,
 	img {
 		display: ${(props) => (props.$layout?.display ? 'inline-block' : 'none')};
 		height: 100%;
 		width: auto;
-		color: rgba(var(--color-text), 1);
+		color: rgba(var(--color-text), 1) !important;
 
 		&:hover {
 			cursor: pointer;
 		}
+	}
+
+	div {
+		color: rgba(var(--color-text), 1);
 	}
 
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
@@ -112,6 +153,36 @@ export const Actions = styled.div<{ $isLogo: boolean }>`
 	top: 10px;
 	right: 0;
 	z-index: 2;
+`;
+
+export const HeaderSearch = styled.div`
+	position: absolute;
+	left: 20px;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 2;
+
+	> div {
+		width: 26px;
+
+		&:has(input:focus) {
+			width: 200px;
+		}
+	}
+
+	input {
+		height: 26px;
+		border-radius: 13px;
+
+		&:focus {
+			border-radius: 0;
+		}
+	}
+
+	svg {
+		margin-top: 2.5px;
+		margin-left: 2.5px;
+	}
 `;
 
 export const ThemeToggle = styled.div``;

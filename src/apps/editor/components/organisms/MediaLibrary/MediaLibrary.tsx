@@ -9,10 +9,10 @@ import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Tabs } from 'components/atoms/Tabs';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
-import { ICONS } from 'helpers/config';
+import { ICONS, UPLOAD } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { MediaConfigType, PortalPatchMapEnum, PortalUploadOptionType, PortalUploadType } from 'helpers/types';
-import { debugLog } from 'helpers/utils';
+import { compressImageToSize, debugLog, isCompressibleImage } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -73,8 +73,11 @@ export default function MediaLibrary(props: {
 	const [mediaData, setMediaData] = React.useState<File | null>(null);
 	const [mediaLoading, setMediaLoading] = React.useState<boolean>(false);
 	const [mediaMessage, setMediaMessage] = React.useState<string | null>(null);
+	const [compressing, setCompressing] = React.useState<boolean>(false);
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+
+	const canCompress = mediaData && isCompressibleImage(mediaData);
 
 	React.useEffect(() => {
 		if (portalProvider.current?.uploads) {
@@ -167,6 +170,19 @@ export default function MediaLibrary(props: {
 			handleClear(e.message ?? 'Error uploading media');
 		}
 		setMediaLoading(false);
+	}
+
+	async function handleCompress() {
+		if (!mediaData) return;
+		setCompressing(true);
+		try {
+			const compressedFile = await compressImageToSize(mediaData, UPLOAD.dispatchUploadSize);
+			clearUploadState();
+			setMediaData(compressedFile);
+		} catch (e: any) {
+			addNotification(e.message ?? 'Error compressing image', 'warning');
+		}
+		setCompressing(false);
 	}
 
 	async function generateThumbnail() {
@@ -447,6 +463,9 @@ export default function MediaLibrary(props: {
 						uploadDisabled={unauthorized || mediaLoading}
 						handleUpload={handleUpload}
 						handleCancel={() => handleClear(language?.uploadCancelled)}
+						handleCompress={handleCompress}
+						canCompress={canCompress}
+						compressing={compressing}
 					/>
 				</Modal>
 			)}

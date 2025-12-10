@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import SidebarArchive from './blocks/archive';
 import SidebarAuthors from './blocks/authors';
@@ -7,12 +7,13 @@ import SidebarUser from './blocks/user';
 import * as S from './styles';
 
 export default function Sidebar(props: any) {
-	const { content, preview } = props;
+	const { content, width, preview } = props;
 	const navigate = useNavigate();
+	const params = useParams();
 	// const { podcasts } = usePodcasts();
 
 	return (
-		<S.Sidebar id="Sidebar">
+		<S.Sidebar id="Sidebar" $fullWidth={width === 1}>
 			{Array.isArray(content) && content.includes('date') && <SidebarArchive />}
 
 			{Array.isArray(content) && content.includes('authors') && <SidebarAuthors />}
@@ -45,6 +46,8 @@ export default function Sidebar(props: any) {
 			)}
 
 			{Array.isArray(content) && content.includes('user') && <SidebarUser />}
+
+			{Array.isArray(content) && content.includes('archive') && <SidebarArchive author={params?.user} />}
 		</S.Sidebar>
 	);
 }

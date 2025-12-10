@@ -365,3 +365,121 @@ export const Tags = styled.div`
 	margin-top: 10px;
 	margin-bottom: 20px;
 `;
+
+export const ModalOverlay = styled.div`
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.7);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+`;
+
+export const ModalContainer = styled.div`
+	background: var(--color-card-background);
+	border: 1px solid var(--color-card-border);
+	border-radius: 8px;
+	width: 500px;
+	max-width: 90vw;
+	box-shadow: var(--preference-card-shadow);
+`;
+
+export const ModalHeader = styled.div`
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color-card-border);
+	color: rgba(var(--color-text), 1);
+
+	span {
+		font-size: 16px;
+		font-weight: 600;
+	}
+`;
+
+export const ModalClose = styled.button`
+	background: none;
+	border: none;
+	font-size: 24px;
+	cursor: pointer;
+	color: rgba(var(--color-text), 0.6);
+	padding: 0;
+	line-height: 1;
+
+	&:hover {
+		color: rgba(var(--color-text), 1);
+	}
+`;
+
+export const ModalContent = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 20px;
+`;
+
+export const ModalLabel = styled.label`
+	font-size: 14px;
+	font-weight: 500;
+`;
+
+export const ModalFilterInput = styled.input`
+	width: 100%;
+	padding: 10px 12px;
+	font-size: 14px;
+	border: 1px solid rgba(var(--color-text), 0.2);
+	border-radius: 4px;
+	background: rgba(var(--color-text), 0.05);
+	color: inherit;
+	box-sizing: border-box;
+
+	&::placeholder {
+		color: rgba(var(--color-text), 0.5);
+	}
+
+	&:focus {
+		outline: none;
+		border-color: rgba(var(--color-primary), 1);
+	}
+`;
+
+export const ModalOptionsList = styled.div`
+	width: 100%;
+	max-height: 200px;
+	overflow-y: auto;
+	border: 1px solid rgba(var(--color-text), 0.2);
+	border-radius: 4px;
+	background-color: rgba(0, 0, 0, 0.3);
+`;
+
+export const ModalOption = styled.div<{ $active: boolean }>`
+	padding: 10px 12px;
+	font-size: 14px;
+	cursor: pointer;
+	background-color: ${(props) => (props.$active ? 'rgba(var(--color-primary), 0.3)' : 'transparent')};
+	color: rgba(var(--color-text), 1);
+
+	&:hover {
+		background-color: ${(props) =>
+			props.$active ? 'rgba(var(--color-primary), 0.3)' : 'rgba(var(--color-text), 0.1)'};
+	}
+`;
+
+export const ModalOptionsEmpty = styled.div`
+	padding: 20px 12px;
+	font-size: 14px;
+	color: rgba(var(--color-text), 0.5);
+	text-align: center;
+`;
+
+export const ModalActions = styled.div`
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 10px;
+`;

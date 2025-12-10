@@ -29,14 +29,14 @@ export const GridRow = styled.div<{ $layout?: any }>`
   `};
 `;
 
-export const GridRowWrapper = styled.div<{ $layout?: any; padding?: string; maxWidth?: number }>`
+export const GridRowWrapper = styled.div<{ $layout?: any; padding?: string; maxWidth?: number; $isSideNav?: boolean }>`
 	display: flex;
 	width: 100%;
 	background: ${(props) => (props?.$layout?.width === 'content' ? `rgba(${props.$layout.background}, 1)` : 'unset')};
 	padding: ${(props) =>
 		props?.$layout?.padding ? props?.$layout?.padding : props?.padding ? props?.padding : 'unset'};
 	max-width: ${(props) => (props.maxWidth ? `${props.maxWidth}px` : '1200px')};
-	margin-left: auto;
+	margin-left: ${(props) => (props.$isSideNav ? '20px' : 'auto')};
 	margin-right: auto;
 	gap: 20px;
 	box-sizing: border-box;

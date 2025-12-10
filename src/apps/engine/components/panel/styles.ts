@@ -24,7 +24,6 @@ export const Container = styled.div<{
 	width: fit-content;
 	max-width: calc(100vw - 30px);
 	position: fixed;
-	overflow: hidden;
 	top: 10px;
 	right: 10px;
 	z-index: 100;
@@ -32,7 +31,8 @@ export const Container = styled.div<{
 	animation: ${openRight} 200ms;
 	background: var(--color-card-background);
 	border-radius: var(--border-radius);
-	border: 1px solid rgba(var(--color-border), 0.1);
+	border: 1px solid rgba(var(--color-border), 1);
+	box-shadow: var(--preference-card-shadow);
 	pointer-events: auto;
 `;
 

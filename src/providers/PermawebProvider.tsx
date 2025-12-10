@@ -6,6 +6,7 @@ import { connect, createSigner } from '@permaweb/aoconnect/browser';
 
 import { Loader } from 'components/atoms/Loader';
 import { AO_NODE, STORAGE } from 'helpers/config';
+import { cacheProfile as cacheProfileById } from 'helpers/utils';
 
 import { useArweaveProvider } from './ArweaveProvider';
 import { useLanguageProvider } from './LanguageProvider';
@@ -147,6 +148,9 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				if (newProfile) {
 					setProfile(newProfile);
 					cacheProfile(arProvider.walletAddress, newProfile);
+					if (newProfile.id) {
+						cacheProfileById(newProfile.id, newProfile);
+					}
 				}
 			} catch (error) {
 				console.error(error);
@@ -191,6 +195,9 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 				// if (!fetchedProfile?.id && cachedProfile) profileToUse = cachedProfile;
 				cacheProfile(address, profileToUse);
+				if (profileToUse?.id) {
+					cacheProfileById(profileToUse.id, profileToUse);
+				}
 
 				return profileToUse;
 			} catch (e: any) {

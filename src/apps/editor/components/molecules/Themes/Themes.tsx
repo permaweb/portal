@@ -848,6 +848,82 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 							</React.Fragment>
 						);
 					})}
+					{section === 'basics' && (
+						<S.ThemeRowWrapper>
+							<S.ThemeRow>
+								<S.ThemeKey>Border Radius</S.ThemeKey>
+								<S.ThemeVariantsWrapper>
+									<S.ThemeValue style={{ flex: 1 }}>
+										<S.RangeWrapper>
+											<input
+												type="range"
+												value={theme.basics?.preferences?.borderRadius ?? 0}
+												onChange={(e) => {
+													const updatedTheme = {
+														...theme,
+														basics: {
+															...theme.basics,
+															preferences: {
+																...theme.basics?.preferences,
+																borderRadius: parseInt(e.target.value),
+															},
+														},
+													};
+													setTheme(updatedTheme);
+												}}
+												disabled={unauthorized}
+												min="0"
+												max="18"
+												step="1"
+											/>
+											<span>{theme.basics?.preferences?.borderRadius ?? 0}px</span>
+										</S.RangeWrapper>
+									</S.ThemeValue>
+								</S.ThemeVariantsWrapper>
+								<S.ThemeResetButton
+									$hasChanges={
+										(originalTheme?.basics?.preferences?.borderRadius ?? 0) !==
+										(theme.basics?.preferences?.borderRadius ?? 0)
+									}
+								>
+									<IconButton
+										type={'alt1'}
+										active={false}
+										src={ICONS.reset}
+										handlePress={() => {
+											const savedValue = originalTheme?.basics?.preferences?.borderRadius ?? 0;
+											const updatedTheme = {
+												...theme,
+												basics: {
+													...theme.basics,
+													preferences: {
+														...theme.basics?.preferences,
+														borderRadius: savedValue,
+													},
+												},
+											};
+											setTheme(updatedTheme);
+										}}
+										disabled={
+											unauthorized ||
+											(originalTheme?.basics?.preferences?.borderRadius ?? 0) ===
+												(theme.basics?.preferences?.borderRadius ?? 0)
+										}
+										dimensions={{ wrapper: 20, icon: 11 }}
+										tooltip={'Reset'}
+										tooltipPosition={'left'}
+										noFocus
+										className={
+											(originalTheme?.basics?.preferences?.borderRadius ?? 0) !==
+											(theme.basics?.preferences?.borderRadius ?? 0)
+												? 'reset-active'
+												: ''
+										}
+									/>
+								</S.ThemeResetButton>
+							</S.ThemeRow>
+						</S.ThemeRowWrapper>
+					)}
 					{validPreferences.map(([key, value]: any) => {
 						const isBoolean = typeof value.light === 'boolean';
 						const isNumeric = typeof value.light === 'number';

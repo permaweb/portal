@@ -10,10 +10,10 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { TurboUploadConfirmation } from 'components/molecules/TurboUploadConfirmation';
-import { ICONS } from 'helpers/config';
+import { ICONS, UPLOAD } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalPatchMapEnum } from 'helpers/types';
-import { checkValidAddress, debugLog } from 'helpers/utils';
+import { checkValidAddress, compressImageToSize, debugLog, isCompressibleImage } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -40,7 +40,10 @@ export default function ArticlePostThumbnail() {
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [thumbnailData, setThumbnailData] = React.useState<File | null>(null);
+	const [compressing, setCompressing] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
+
+	const canCompress = thumbnailData && isCompressibleImage(thumbnailData);
 
 	React.useEffect(() => {
 		(async function () {
@@ -105,6 +108,19 @@ export default function ArticlePostThumbnail() {
 		if (inputRef.current) {
 			inputRef.current.value = '';
 		}
+	}
+
+	async function handleCompress() {
+		if (!thumbnailData) return;
+		setCompressing(true);
+		try {
+			const compressedFile = await compressImageToSize(thumbnailData, UPLOAD.dispatchUploadSize);
+			clearUploadState();
+			setThumbnailData(compressedFile);
+		} catch (e: any) {
+			addNotification(e.message ?? 'Error compressing image', 'warning');
+		}
+		setCompressing(false);
 	}
 
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -176,6 +192,9 @@ export default function ArticlePostThumbnail() {
 						uploadDisabled={loading}
 						handleUpload={handleUpload}
 						handleCancel={() => handleClear(language?.uploadCancelled)}
+						handleCompress={handleCompress}
+						canCompress={canCompress}
+						compressing={compressing}
 					/>
 				</Modal>
 			)}

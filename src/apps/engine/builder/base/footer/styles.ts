@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const FooterWrapper = styled.div<{ $layout: any; $theme: any; $editFixed?: boolean }>`
+export const FooterWrapper = styled.div<{ $layout: any; $theme: any; $editFixed?: boolean; $isSideNav?: boolean }>`
 	position: relative;
 	width: 100%;
 	max-width: ${(props) => (props.$layout?.width === 'content' ? `1200px` : `100%`)};
@@ -13,7 +13,8 @@ export const FooterWrapper = styled.div<{ $layout: any; $theme: any; $editFixed?
 	z-index: 1;
 
 	${(props) => {
-		const isFixed = props.$editFixed !== undefined ? props.$editFixed : props.$layout?.fixed;
+		const layoutFixed = props.$layout?.fixed === true || props.$layout?.fixed === 'true';
+		const isFixed = props.$editFixed !== undefined ? props.$editFixed : layoutFixed;
 		if (isFixed) {
 			return `
 				position: fixed;
@@ -31,14 +32,24 @@ export const FooterWrapper = styled.div<{ $layout: any; $theme: any; $editFixed?
 	}}
 `;
 
-export const Footer = styled.div<{ $layout: any }>`
+export const Footer = styled.div<{ $layout: any; $isSideNav?: boolean; $navWidth?: number; $maxWidth?: number }>`
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	width: 100%;
-	max-width: ${(props) => (props.$layout?.width === 'page' ? `1200px` : `100%`)};
-	margin-left: auto;
+	max-width: ${(props) => {
+		if (props.$layout?.width === 'page') {
+			if (props.$isSideNav) {
+				const navWidth = props.$navWidth || 300;
+				const maxWidth = props.$maxWidth || 1200;
+				return `${maxWidth - navWidth}px`;
+			}
+			return `${props.$maxWidth || 1200}px`;
+		}
+		return '100%';
+	}};
+	margin-left: ${(props) => (props.$isSideNav ? '0' : 'auto')};
 	margin-right: auto;
 
 	div:first-child {
@@ -115,8 +126,6 @@ export const LinkWrapper = styled.div`
 `;
 
 export const Copyright = styled.div<{ $hasContentAbove?: boolean }>`
-	padding: 10px 40px 0 40px;
 	margin-top: ${(props) => (props.$hasContentAbove ? '10px' : '0')};
-	margin-bottom: 20px;
 	border-top: ${(props) => (props.$hasContentAbove ? '1px solid rgba(var(--color-border), 3)' : 'none')};
 `;

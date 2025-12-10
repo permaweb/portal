@@ -18,6 +18,7 @@ import {
 	cachePortal,
 	cacheProfile,
 	debugLog,
+	fixBooleanStrings,
 	getCachedPortal,
 	getCachedProfile,
 	getPortalAssets,
@@ -99,7 +100,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		(key: PortalPatchMapEnum, response: any, patchKey?: string) => {
 			const value = patchKey === key ? response : response[key];
 			try {
-				return permawebProvider.libs.mapFromProcessCase(JSON.parse(value));
+				return fixBooleanStrings(permawebProvider.libs.mapFromProcessCase(JSON.parse(value)));
 			} catch {
 				return value || null;
 			}
@@ -129,8 +130,10 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					const updated = await Promise.all(
 						profilePortals.map(async (portal: PortalHeaderType) => {
 							try {
-								const response = permawebProvider.libs.mapFromProcessCase(
-									await permawebProvider.libs.readState({ processId: portal.id })
+								const response = fixBooleanStrings(
+									permawebProvider.libs.mapFromProcessCase(
+										await permawebProvider.libs.readState({ processId: portal.id })
+									)
 								);
 
 								let overview: any = {};
@@ -233,12 +236,14 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 		setUpdating(true);
 		try {
-			const response = permawebProvider.libs.mapFromProcessCase(
-				await permawebProvider.libs.readState({
-					processId: currentId,
-					path: opts?.patchKey,
-					hydrate: !!opts?.patchKey,
-				})
+			const response = fixBooleanStrings(
+				permawebProvider.libs.mapFromProcessCase(
+					await permawebProvider.libs.readState({
+						processId: currentId,
+						path: opts?.patchKey,
+						hydrate: !!opts?.patchKey,
+					})
+				)
 			);
 
 			const overview = parseField(PortalPatchMapEnum.Overview, response, opts?.patchKey);

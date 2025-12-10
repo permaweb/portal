@@ -5,7 +5,8 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
-import { ICONS, LAYOUT, PAGES } from 'helpers/config';
+import { ICONS, LAYOUT } from 'helpers/config';
+import { THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
 import { PortalPatchMapEnum } from 'helpers/types';
 import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -14,6 +15,25 @@ import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
+
+function deepMerge(target: any, patch: any): any {
+	if (!target) return patch;
+	const result = { ...target };
+	for (const key of Object.keys(patch)) {
+		if (
+			patch[key] &&
+			typeof patch[key] === 'object' &&
+			!Array.isArray(patch[key]) &&
+			target[key] &&
+			typeof target[key] === 'object'
+		) {
+			result[key] = deepMerge(target[key], patch[key]);
+		} else {
+			result[key] = patch[key];
+		}
+	}
+	return result;
+}
 
 export default function Layout() {
 	const arProvider = useArweaveProvider();
@@ -24,15 +44,20 @@ export default function Layout() {
 	const { addNotification } = useNotifications();
 
 	const [layout, setLayout] = React.useState(portalProvider.current?.layout || LAYOUT.JOURNAL);
-	const [pages, setPages] = React.useState<any>(portalProvider.current?.pages || PAGES.JOURNAL);
+	const [pages, setPages] = React.useState<any>(portalProvider.current?.pages);
+	const [themes, setThemes] = React.useState<any>(portalProvider.current?.themes);
 	const [originalLayout] = React.useState(portalProvider.current?.layout || LAYOUT.JOURNAL);
-	const [originalPages] = React.useState(portalProvider.current?.pages || PAGES.JOURNAL);
+	const [originalPages] = React.useState(portalProvider.current?.pages);
+	const [originalThemes] = React.useState(portalProvider.current?.themes);
 	const [loading, setLoading] = React.useState<boolean>(false);
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
-	// Layout options for feed content
-	const options = [{ name: 'journal' }, { name: 'blog' }];
+	const options = [
+		{ name: 'journal', icon: ICONS.layoutJournal },
+		{ name: 'blog', icon: ICONS.layoutBlog },
+		{ name: 'documentation', icon: ICONS.layoutDocumentation },
+	];
 
 	const [activeName, setActiveName] = React.useState<string>('');
 
@@ -40,8 +65,9 @@ export default function Layout() {
 	const hasChanges = React.useMemo(() => {
 		const layoutChanged = JSON.stringify(originalLayout) !== JSON.stringify(layout);
 		const pagesChanged = JSON.stringify(originalPages) !== JSON.stringify(pages);
-		return layoutChanged || pagesChanged;
-	}, [originalLayout, layout, originalPages, pages]);
+		const themesChanged = JSON.stringify(originalThemes) !== JSON.stringify(themes);
+		return layoutChanged || pagesChanged || themesChanged;
+	}, [originalLayout, layout, originalPages, pages, originalThemes, themes]);
 
 	// Update local state when portal data changes
 	React.useEffect(() => {
@@ -51,11 +77,17 @@ export default function Layout() {
 		if (portalProvider.current?.pages) {
 			setPages(portalProvider.current.pages);
 		}
+		if (portalProvider.current?.themes) {
+			setThemes(portalProvider.current.themes);
+		}
 	}, [portalProvider.current]);
 
 	React.useEffect(() => {
 		if (portalProvider.current) {
+			const currentLayout = portalProvider.current?.layout as any;
 			const currentPages = portalProvider.current?.pages as any;
+			const navPosition = currentLayout?.navigation?.layout?.position;
+
 			const hasPostSpotlight = currentPages?.home?.content?.some((row: any) =>
 				row.content?.some((item: any) => item.type === 'postSpotlight')
 			);
@@ -63,9 +95,11 @@ export default function Layout() {
 				row.content?.some((item: any) => item.type === 'categorySpotlight')
 			);
 
-			if (hasPostSpotlight && hasCategorySpotlight) {
+			if (navPosition === 'left' || navPosition === 'right') {
+				setActiveName('documentation');
+			} else if (hasPostSpotlight && hasCategorySpotlight) {
 				setActiveName('blog');
-			} else if (JSON.stringify(portalProvider.current?.layout) === JSON.stringify(LAYOUT.JOURNAL)) {
+			} else if (JSON.stringify(currentLayout) === JSON.stringify(LAYOUT.JOURNAL)) {
 				setActiveName('journal');
 			} else {
 				setActiveName(currentPages?.feed?.content?.[0]?.content?.[0]?.layout || 'journal');
@@ -76,10 +110,16 @@ export default function Layout() {
 	function handleLayoutOptionChange(optionName: string) {
 		if (optionName === 'blog') {
 			setLayout(LAYOUT.BLOG);
-			setPages(PAGES.BLOG);
 		} else if (optionName === 'journal') {
 			setLayout(LAYOUT.JOURNAL);
-			setPages(PAGES.JOURNAL);
+		} else if (optionName === 'documentation') {
+			setLayout(LAYOUT.DOCUMENTATION);
+			if (themes && Array.isArray(themes)) {
+				const updatedThemes = themes.map((theme: any) =>
+					theme.active ? deepMerge(theme, THEME_DOCUMENTATION_PATCH) : theme
+				);
+				setThemes(updatedThemes);
+			}
 		} else {
 			const layoutValue = optionName.toLowerCase();
 			const updatedPages = {
@@ -114,12 +154,14 @@ export default function Layout() {
 
 			const updateData: any = {};
 
-			// Only update Layout and Pages - exclude Themes and Fonts
 			if (JSON.stringify(originalLayout) !== JSON.stringify(layout)) {
 				updateData.Layout = permawebProvider.libs.mapToProcessCase(layout);
 			}
 			if (JSON.stringify(originalPages) !== JSON.stringify(pages)) {
 				updateData.Pages = permawebProvider.libs.mapToProcessCase(pages);
+			}
+			if (JSON.stringify(originalThemes) !== JSON.stringify(themes)) {
+				updateData.Themes = permawebProvider.libs.mapToProcessCase(themes);
 			}
 
 			if (Object.keys(updateData).length === 0) {
@@ -155,11 +197,14 @@ export default function Layout() {
 						return (
 							<S.Option
 								key={option.name}
-								disabled={active || unauthorized}
+								disabled={unauthorized}
+								$active={active}
 								onClick={() => (active ? {} : handleLayoutOptionChange(option.name))}
 							>
-								<p>{option.name}</p>
-								<S.Indicator active={active}>{active && <ReactSVG src={ICONS.checkmark} />}</S.Indicator>
+								<S.OptionIcon $active={active}>
+									<img src={option.icon} alt={option.name} />
+								</S.OptionIcon>
+								<S.OptionLabel>{option.name}</S.OptionLabel>
 							</S.Option>
 						);
 					})}

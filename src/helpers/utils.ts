@@ -476,6 +476,84 @@ export function isOnlyPortal(portals: PortalHeaderType[], profileId: string): bo
 	return false;
 }
 
+export function isCompressibleImage(file: File): boolean {
+	const compressibleTypes = ['image/jpeg', 'image/png', 'image/webp'];
+	return compressibleTypes.includes(file.type);
+}
+
+export async function compressImageToSize(file: File, targetSizeBytes: number, maxWidth?: number): Promise<File> {
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		const url = URL.createObjectURL(file);
+
+		img.onload = () => {
+			URL.revokeObjectURL(url);
+
+			const canvas = document.createElement('canvas');
+			const ctx = canvas.getContext('2d');
+
+			let { width, height } = img;
+
+			if (maxWidth && width > maxWidth) {
+				const ratio = maxWidth / width;
+				width = maxWidth;
+				height = Math.round(height * ratio);
+			}
+
+			const supportsTransparency = file.type === 'image/png' || file.type === 'image/webp';
+			const outputType = supportsTransparency ? 'image/webp' : 'image/jpeg';
+			const fileExtension = supportsTransparency ? '.webp' : '.jpg';
+
+			const tryCompress = (s: number, q: number): Promise<Blob | null> => {
+				canvas.width = width * s;
+				canvas.height = height * s;
+				if (supportsTransparency) {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+				}
+				ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+				return new Promise((res) => {
+					canvas.toBlob((blob) => res(blob), outputType, q);
+				});
+			};
+
+			const compress = async () => {
+				let scale = 1;
+				const quality = 0.92;
+				let blob: Blob | null = null;
+
+				while (scale >= 0.1) {
+					blob = await tryCompress(scale, quality);
+					if (blob && blob.size <= targetSizeBytes) {
+						const newFileName = file.name.replace(/\.[^/.]+$/, '') + '_compressed' + fileExtension;
+						const compressedFile = new File([blob], newFileName, { type: outputType });
+						resolve(compressedFile);
+						return;
+					}
+					scale -= 0.05;
+				}
+
+				blob = await tryCompress(0.1, quality);
+				if (blob) {
+					const newFileName = file.name.replace(/\.[^/.]+$/, '') + '_compressed' + fileExtension;
+					const compressedFile = new File([blob], newFileName, { type: outputType });
+					resolve(compressedFile);
+				} else {
+					reject(new Error('Failed to compress image'));
+				}
+			};
+
+			compress();
+		};
+
+		img.onerror = () => {
+			URL.revokeObjectURL(url);
+			reject(new Error('Failed to load image'));
+		};
+
+		img.src = url;
+	});
+}
+
 const COLORS: Record<string, string> = {
 	info: 'color: #8F8F8F',
 	warn: 'color: #EECA00',
@@ -495,4 +573,18 @@ export function debugLog(level: string, context: string, ...args: any[]) {
 	const method = METHOD[level] || console.log;
 
 	method(`%c[Portal: ${capitalize(level)}]%c %c(${context})%c -`, style, '', 'font-weight: medium;', '', ...args);
+}
+
+export function fixBooleanStrings<T>(obj: T): T {
+	if (obj === null || obj === undefined) return obj;
+	if (obj === 'true') return true as T;
+	if (obj === 'false') return false as T;
+	if (typeof obj !== 'object') return obj;
+	if (Array.isArray(obj)) return obj.map(fixBooleanStrings) as T;
+
+	const result: any = {};
+	for (const key of Object.keys(obj)) {
+		result[key] = fixBooleanStrings((obj as any)[key]);
+	}
+	return result;
 }

@@ -4,9 +4,9 @@ import Button from 'engine/components/form/button';
 
 import { Types } from '@permaweb/libs';
 
-import { ICONS } from 'helpers/config';
+import { ICONS, UPLOAD } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, compressImageToSize, isCompressibleImage } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -42,15 +42,18 @@ export default function ProfileEditor(props: {
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
 
+	const bannerChangedRef = React.useRef(false);
+	const thumbnailChangedRef = React.useRef(false);
+
 	React.useEffect(() => {
 		setUsername(props.profile?.username ?? '');
 		setName(props.profile?.displayName ?? '');
 		setDescription(props.profile?.description ?? '');
 
-		if (!bannerRemoved) {
+		if (!bannerRemoved && !bannerChangedRef.current) {
 			setBanner(props.profile?.banner && checkValidAddress(props.profile.banner) ? props.profile.banner : null);
 		}
-		if (!thumbnailRemoved) {
+		if (!thumbnailRemoved && !thumbnailChangedRef.current) {
 			setThumbnail(
 				props.profile?.thumbnail && checkValidAddress(props.profile.thumbnail) ? props.profile.thumbnail : null
 			);
@@ -62,6 +65,8 @@ export default function ProfileEditor(props: {
 
 		setBannerRemoved(false);
 		setThumbnailRemoved(false);
+		bannerChangedRef.current = false;
+		thumbnailChangedRef.current = false;
 
 		if (props.handleUpdate) props.handleUpdate();
 		if (props.handleClose) props.handleClose(true);
@@ -115,33 +120,49 @@ export default function ProfileEditor(props: {
 		return { status: false, message: null };
 	}
 
-	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'thumbnail') {
+	async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'thumbnail') {
 		if (e.target.files && e.target.files.length) {
-			const file = e.target.files[0];
+			let file = e.target.files[0];
 			if (file.type.startsWith('image/')) {
-				const reader = new FileReader();
-
-				reader.onload = (event: ProgressEvent<FileReader>) => {
-					if (event.target?.result) {
-						switch (type) {
-							case 'banner':
-								setBanner(event.target.result);
-								setBannerRemoved(false);
-								break;
-							case 'thumbnail':
-								setThumbnail(event.target.result);
-								setThumbnailRemoved(false);
-								break;
-							default:
-								break;
-						}
+				const maxWidth = type === 'thumbnail' ? 100 : 1080;
+				if (isCompressibleImage(file)) {
+					try {
+						file = await compressImageToSize(file, UPLOAD.dispatchUploadSize, maxWidth);
+					} catch (err: any) {
+						addNotification(err.message ?? 'Error compressing image', 'warning');
+						e.target.value = '';
+						return;
 					}
-				};
-
-				reader.readAsDataURL(file);
+				}
+				applyFileToState(file, type);
 			}
 			e.target.value = '';
 		}
+	}
+
+	function applyFileToState(file: File, type: 'banner' | 'thumbnail') {
+		const reader = new FileReader();
+
+		reader.onload = (event: ProgressEvent<FileReader>) => {
+			if (event.target?.result) {
+				switch (type) {
+					case 'banner':
+						setBanner(event.target.result);
+						setBannerRemoved(false);
+						bannerChangedRef.current = true;
+						break;
+					case 'thumbnail':
+						setThumbnail(event.target.result);
+						setThumbnailRemoved(false);
+						thumbnailChangedRef.current = true;
+						break;
+					default:
+						break;
+				}
+			}
+		};
+
+		reader.readAsDataURL(file);
 	}
 
 	function getBannerWrapper() {

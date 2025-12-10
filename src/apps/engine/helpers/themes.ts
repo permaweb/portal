@@ -153,6 +153,7 @@ export function initThemes(Themes: any[]) {
 			'--color-card-border-contrast': `rgba(${getContrastColor(
 				getColor(theme, scheme, theme.card.colors.border[scheme])
 			)},1)`,
+			'--preference-card-shadow': theme.card?.preferences?.shadow?.[scheme] || 'unset',
 
 			// Buttons
 			'--color-button-default': `rgba(${getColor(

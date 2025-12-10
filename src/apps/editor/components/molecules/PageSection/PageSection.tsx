@@ -538,16 +538,46 @@ export default function PageSection(props: {
 																			</S.EDragWrapper>
 																			<p>{getBlockLabel(block.type)}</p>
 																		</S.SubElementHeaderAction>
-																		<IconButton
-																			type={'alt1'}
-																			active={false}
-																			src={ICONS.delete}
-																			handlePress={() => deleteBlock(index)}
-																			dimensions={{ wrapper: 23.5, icon: 13.5 }}
-																			tooltip={language?.deleteBlock}
-																			tooltipPosition={'bottom-right'}
-																			noFocus
-																		/>
+																		<S.SubElementHeaderActions>
+																			{(block.type === 'post' || block.type === 'postSpotlight') && block.txId && (
+																				<IconButton
+																					type={'alt1'}
+																					active={false}
+																					src={ICONS.edit}
+																					handlePress={() => {
+																						handlePageBlockChange({ ...block, txId: undefined }, index);
+																					}}
+																					dimensions={{ wrapper: 23.5, icon: 13.5 }}
+																					tooltip={language?.editBlock}
+																					tooltipPosition={'bottom-right'}
+																					noFocus
+																				/>
+																			)}
+																			{block.type === 'categorySpotlight' && block.categoryId && (
+																				<IconButton
+																					type={'alt1'}
+																					active={false}
+																					src={ICONS.edit}
+																					handlePress={() => {
+																						handlePageBlockChange({ ...block, categoryId: undefined }, index);
+																					}}
+																					dimensions={{ wrapper: 23.5, icon: 13.5 }}
+																					tooltip={language?.editBlock}
+																					tooltipPosition={'bottom-right'}
+																					noFocus
+																				/>
+																			)}
+																			<IconButton
+																				type={'alt1'}
+																				active={false}
+																				src={ICONS.delete}
+																				handlePress={() => deleteBlock(index)}
+																				dimensions={{ wrapper: 23.5, icon: 13.5 }}
+																				tooltip={language?.deleteBlock}
+																				tooltipPosition={'bottom-right'}
+																				noFocus
+																			/>
+																		</S.SubElementHeaderActions>
 																	</S.SubElementHeader>
 																)}
 

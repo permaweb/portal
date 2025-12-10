@@ -6,8 +6,6 @@ import { useProfile } from 'engine/hooks/profiles';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
 
-import SidebarArchive from '../archive';
-
 import * as S from './styles';
 
 type UserTip = {
@@ -222,8 +220,6 @@ export default function SidebarUser() {
 					</S.TipsSection>
 				)}
 			</S.Content>
-
-			<SidebarArchive author={profile.id} />
 		</S.SidebarUserWrapper>
 	);
 }

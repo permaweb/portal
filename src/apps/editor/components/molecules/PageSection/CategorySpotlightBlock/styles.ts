@@ -176,3 +176,49 @@ export const ListPostTitle = styled.h4`
 	margin: 0;
 	line-height: 1.5;
 `;
+
+export const EmptyCategoryBlock = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	padding: 20px;
+	border: 1px dashed ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.primary};
+	background: ${(props) => props.theme.colors.container.primary.background};
+`;
+
+export const FilterInput = styled.input`
+	width: 100%;
+	padding: 10px 12px;
+	font-size: 14px;
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.primary};
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	color: ${(props) => props.theme.colors.font.primary};
+	box-sizing: border-box;
+
+	&::placeholder {
+		color: ${(props) => props.theme.colors.font.alt1};
+	}
+
+	&:focus {
+		outline: none;
+		border-color: ${(props) => props.theme.colors.button.primary.background};
+	}
+`;
+
+export const Select = styled.select`
+	width: 100%;
+	padding: 10px 12px;
+	font-size: 14px;
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.primary};
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	color: ${(props) => props.theme.colors.font.primary};
+	cursor: pointer;
+
+	&:focus {
+		outline: none;
+		border-color: ${(props) => props.theme.colors.button.primary.background};
+	}
+`;
