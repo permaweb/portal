@@ -46,10 +46,7 @@ export function useArTip() {
 					//
 					if (Name) tagPairs.push(['Portal-Name', String(Name.trim())]);
 					if (walletAddress) tagPairs.push(['From-Address', walletAddress.trim()]);
-					if (profile?.username) tagPairs.push(['From-Profile', profile.username.trim()]);
-					if (profile?.displayname || profile?.displayName) {
-						tagPairs.push(['From-Name', profile.displayname.trim() || profile.displayName.trim()]);
-					}
+					if (profile.id) tagPairs.push(['From-Profile', String(profile.id)]);
 					for (const [k, v] of tagPairs) tx.addTag(k, v);
 					const signedTx = await window.arweaveWallet.sign(tx);
 					const response = await arweave.transactions.post(signedTx);
@@ -57,7 +54,7 @@ export function useArTip() {
 						console.error('Error response from posting tx:', response);
 						throw new Error(`Failed posting tx: ${response.status} ${response.statusText}`);
 					}
-					return tx.id;
+					return signedTx.id;
 				}
 
 				throw new Error('No wallet available to sign transaction');

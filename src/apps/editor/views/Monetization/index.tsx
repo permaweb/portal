@@ -8,6 +8,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
+import { Pagination } from 'components/atoms/Pagination';
 import { Toggle } from 'components/atoms/Toggle';
 import { PortalPatchMapEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -54,7 +55,7 @@ export default function Monetization() {
 		((portalProvider.current as any)?.monetization?.monetization as MonetizationConfig | undefined) ||
 		((portalProvider.current as any)?.Monetization as MonetizationConfig | undefined);
 	const [savingMonetization, setSavingMonetization] = React.useState(false);
-
+	const [profileCache, setProfileCache] = React.useState<Record<string, any>>({});
 	const [monetization, setMonetization] = React.useState<MonetizationConfig>(() => {
 		const existing =
 			((portalProvider.current as any)?.monetization?.monetization as MonetizationConfig | undefined) ||
@@ -137,7 +138,23 @@ export default function Monetization() {
 	const [loadingTips, setLoadingTips] = React.useState(false);
 	const [tipsError, setTipsError] = React.useState<string | null>(null);
 	const [reloadKey, setReloadKey] = React.useState(0);
+	const [currentPage, setCurrentPage] = React.useState(1);
 
+	const pageSize = 5; // or whatever you want
+
+	const totalItems = tips.length;
+	const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+	const startIndex = totalItems === 0 ? 0 : (currentPage - 1) * pageSize;
+	const endIndex = totalItems === 0 ? 0 : Math.min(startIndex + pageSize, totalItems);
+
+	const currentRange = {
+		start: totalItems === 0 ? 0 : startIndex + 1,
+		end: endIndex,
+		total: totalItems,
+	};
+
+	const paginatedTips = React.useMemo(() => tips.slice(startIndex, endIndex), [tips, startIndex, endIndex]);
 	const hasMonetization = !!existingMonetization?.enabled && !!existingMonetization.walletAddress;
 
 	const monetizationWalletForTips = existingMonetization?.walletAddress || ownerWallet;
@@ -156,6 +173,10 @@ export default function Monetization() {
 	}, [tips]);
 
 	React.useEffect(() => {
+		setCurrentPage(1);
+	}, [tips]);
+
+	React.useEffect(() => {
 		if (!hasMonetization) {
 			setTips([]);
 			return;
@@ -170,37 +191,28 @@ export default function Monetization() {
 
 				const query = {
 					query: `
-						query($toAddr: [String!]!) {
-							transactions(
-								tags: [
-									{ name: "App-Name", values: ["Portal"] },
-									{ name: "Type", values: ["Tip"] },
-									{ name: "To-Address", values: $toAddr }
-								],
-								sort: HEIGHT_DESC,
-								first: 50
-							) {
-								edges {
-									node {
-										id
-										quantity {
-											winston
-										}
-										block {
-											timestamp
-										}
-										owner {
-											address
-										}
-										tags {
-											name
-											value
-										}
-									}
-								}
+				query($toAddr: [String!]!) {
+					transactions(
+						tags: [
+							{ name: "App-Name", values: ["Portal"] },
+							{ name: "Type", values: ["Tip"] },
+							{ name: "To-Address", values: $toAddr }
+						],
+						sort: HEIGHT_DESC,
+						first: 150
+					) {
+						edges {
+							node {
+								id
+								quantity { winston }
+								block { timestamp }
+								owner { address }
+								tags { name value }
 							}
 						}
-					`,
+					}
+				}
+			`,
 					variables: {
 						toAddr: [monetizationWalletForTips],
 					},
@@ -208,9 +220,7 @@ export default function Monetization() {
 
 				const res = await fetch('https://arweave.net/graphql', {
 					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
+					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(query),
 				});
 
@@ -228,20 +238,58 @@ export default function Monetization() {
 					const winston = node.quantity?.winston || '0';
 					const amountAr = arweave.ar.winstonToAr(winston);
 
+					const fromProfileId = getTag('From-Profile');
+
 					return {
 						id: node.id,
 						timestamp: node.block?.timestamp ?? null,
 						winston,
 						amountAr,
 						fromAddress: getTag('From-Address') || node.owner?.address || '',
-						fromName: getTag('From-Name'),
-						fromProfile: getTag('From-Profile'),
+						fromProfile: fromProfileId,
 						location: getTag('Location'),
 					};
 				});
 
+				const profileIds = Array.from(
+					new Set(parsed.map((t) => t.fromProfile).filter((id): id is string => Boolean(id)))
+				);
+				console.log('Profile IDs to fetch for tips:', profileIds);
+				const newCache = { ...profileCache };
+
+				for (const pid of profileIds) {
+					if (!newCache[pid]) {
+						try {
+							// adjust this if your provider uses a different method
+							const prof = await permawebProvider.fetchProfile(pid);
+							console.log('Fetched profile for tip', pid, prof);
+							newCache[pid] = prof;
+							console.log('Fetched profile for tip', pid, prof);
+						} catch (err) {
+							console.warn('Failed to fetch profile for tip', pid, err);
+						}
+					}
+				}
+
 				if (!cancelled) {
-					setTips(parsed);
+					setProfileCache(newCache);
+
+					// Optionally enrich the tips with profile display name
+					const enriched: TipRow[] = parsed.map((tip) => {
+						if (!tip.fromProfile) return tip;
+
+						const p = newCache[tip.fromProfile];
+
+						// tweak this line to match your profile shape
+						const niceName = p?.name || p?.handle || p?.Profile?.Name || p?.profile?.name || tip.fromName;
+
+						return {
+							...tip,
+							fromName: niceName,
+						};
+					});
+
+					setTips(enriched);
 				}
 			} catch (e: any) {
 				if (!cancelled) {
@@ -262,11 +310,25 @@ export default function Monetization() {
 	}, [hasMonetization, monetizationWalletForTips, portalProvider.current?.id, reloadKey]);
 
 	function renderFrom(row: TipRow) {
-		if (row.fromName) return row.fromName;
-		if (row.fromProfile) return row.fromProfile;
+		// If the tip came from a profile ID
+		if (row.fromProfile) {
+			const prof = profileCache[row.fromProfile];
+			if (prof) {
+				// adjust based on your profile shape
+				const displayName = prof.name || prof.handle || prof.Profile?.Name || prof.profile?.name;
+
+				if (displayName) return displayName;
+			}
+
+			// fallback: show the profile ID itself
+			return row.fromProfile;
+		}
+
+		// If there's no profile, fallback to address
 		if (row.fromAddress) {
 			return `${row.fromAddress.slice(0, 6)}...${row.fromAddress.slice(-4)}`;
 		}
+
 		return 'Unknown';
 	}
 
@@ -406,7 +468,7 @@ export default function Monetization() {
 								</tr>
 							</thead>
 							<tbody>
-								{tips.map((row) => (
+								{paginatedTips.map((row) => (
 									<tr key={row.id}>
 										<td>{renderDate(row.timestamp)}</td>
 										<td>{renderFrom(row)}</td>
@@ -423,6 +485,16 @@ export default function Monetization() {
 						</S.Table>
 					</S.TableWrapper>
 				)}
+				<Pagination
+					totalItems={totalItems}
+					totalPages={totalPages}
+					currentPage={currentPage}
+					currentRange={currentRange}
+					setCurrentPage={setCurrentPage}
+					showRange={true}
+					showControls={totalPages > 1}
+					iconButtons={true} // or false if you want the text buttons instead
+				/>
 			</S.Section>
 		</S.Wrapper>
 	);

@@ -91,7 +91,7 @@ export default function SidebarUser() {
 				const query = `
 					query($fromProfile: [String!]!) {
 					  transactions(
-					    first: 20
+					    first:100
 					    sort: HEIGHT_DESC
 					    tags: [
 					      { name: "App-Name", values: ["Portal"] }
@@ -114,20 +114,19 @@ export default function SidebarUser() {
 					  }
 					}
 				`;
-
 				const res = await fetch('https://arweave.net/graphql', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						query,
-						variables: { fromProfile: [username] },
+						variables: { fromProfile: [String(profile.id)] },
 					}),
 				});
 
 				if (!res.ok) throw new Error('Failed to load tip history');
 
 				const json = await res.json();
-
+				console.log('Tip history response:', json);
 				const edges: any[] = json?.data?.transactions?.edges ?? [];
 				const next: UserTip[] = edges.map((edge) => {
 					const node = edge.node;
@@ -217,9 +216,6 @@ export default function SidebarUser() {
 										)}
 										{tip.timestamp && <span className="tip-date">{new Date(tip.timestamp).toLocaleDateString()}</span>}
 									</div>
-									<a href={getTxEndpoint(tip.id)} target="_blank" rel="noreferrer">
-										View
-									</a>
 								</S.TipRow>
 							))}
 						</S.TipsList>

@@ -65,7 +65,7 @@ export const TipsSection = styled.div`
 `;
 
 export const TipsHeader = styled.div`
-	font-size: var(--font-size-medium);
+	font-size: var(--font-size-large);
 	font-weight: 700;
 	margin-bottom: 8px;
 	color: var(--color-text-primary);
@@ -83,7 +83,7 @@ export const TipRow = styled.div`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	font-size: var(--font-size-small);
+	font-size: var(--font-size-medium);
 	padding: 4px 0;
 
 	.tip-amount {
@@ -99,7 +99,7 @@ export const TipRow = styled.div`
 	.tip-date {
 		color: var(--color-text-tertiary);
 		margin-left: 6px;
-		font-size: var(--font-size-xsmall);
+		font-size: var(--font-size-medium);
 	}
 
 	a {
