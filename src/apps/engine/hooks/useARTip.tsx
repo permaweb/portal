@@ -15,46 +15,55 @@ const arweave = Arweave.init({
 
 export function useArTip() {
 	const portalProvider = usePortalProvider();
+	const { profile } = usePermawebProvider();
 	const { wallet, walletAddress, handleConnect } = useArweaveProvider();
 	const { Name } = portalProvider?.portal || {};
-	const { profile } = usePermawebProvider();
+
 	const sendTip = React.useCallback(
 		async (to: string, amount: string | undefined, location = 'page') => {
-			if (!walletAddress || !wallet) {
+			if (!walletAddress) {
 				await handleConnect(WalletEnum.wander);
 			}
 
-			const activeWallet = wallet || (window as any).arweaveWallet;
-			if (!activeWallet) throw new Error('No Arweave wallet available');
+			const cleanAmount = (amount || '').trim();
+			const quantity = cleanAmount !== '' ? arweave.ar.arToWinston(cleanAmount) : '0';
 
-			const quantity = amount && amount.trim() !== '' ? arweave.ar.arToWinston(amount) : '0';
+			try {
+				if (typeof window !== 'undefined' && (window as any).arweaveWallet) {
+					let tx = await arweave.createTransaction({
+						target: to,
+						quantity,
+					});
 
-			const tx = await arweave.createTransaction(
-				{
-					target: to,
-					quantity,
-				},
-				undefined
-			);
-			tx.addTag('App-Name', 'Portal');
-			tx.addTag('Portal-Name', Name);
-			tx.addTag('Token-Symbol', 'AR');
-			tx.addTag('Amount', quantity);
-			tx.addTag('From-Address', walletAddress);
-			tx.addTag('From-Profile', profile?.username);
-			tx.addTag('From-Name', profile?.displayname ?? profile.displayName);
-			tx.addTag('To-Address', to);
-			tx.addTag('Type', 'Tip');
-			tx.addTag('Location', location);
+					const tagPairs: Array<[string, string]> = [
+						['App-Name', 'Portal'],
+						['Token-Symbol', 'AR'],
+						['Amount', String(quantity)],
+						['To-Address', String(to)],
+						['Type', 'Tip'],
+						['Location', String(location)],
+					];
+					//
+					if (Name) tagPairs.push(['Portal-Name', String(Name.trim())]);
+					if (walletAddress) tagPairs.push(['From-Address', walletAddress.trim()]);
+					if (profile.id) tagPairs.push(['From-Profile', String(profile.id)]);
+					for (const [k, v] of tagPairs) tx.addTag(k, v);
+					const signedTx = await window.arweaveWallet.sign(tx);
+					const response = await arweave.transactions.post(signedTx);
+					if (response.status !== 200 && response.status !== 202) {
+						console.error('Error response from posting tx:', response);
+						throw new Error(`Failed posting tx: ${response.status} ${response.statusText}`);
+					}
+					return signedTx.id;
+				}
 
-			await activeWallet.sign(tx);
-
-			const res = await arweave.transactions.post(tx);
-			console.log('[ArTip] tx posted', tx.id, res);
-
-			return tx.id;
+				throw new Error('No wallet available to sign transaction');
+			} catch (err) {
+				console.error('Error sending AR tip:', err);
+				throw err;
+			}
 		},
-		[wallet, walletAddress, handleConnect]
+		[wallet, walletAddress, handleConnect, Name, profile?.username, profile?.displayname, profile?.displayName]
 	);
 
 	return { sendTip };

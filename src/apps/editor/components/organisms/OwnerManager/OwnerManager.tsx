@@ -97,6 +97,14 @@ export default function OwnerManager(props: { handleClose: () => void }) {
 		);
 	}, [portalProvider.current?.users, profileMap, arProvider.walletAddress]);
 
+	React.useEffect(() => {
+		if (adminWalletOptions.length > 0) {
+			setActiveWalletOption(adminWalletOptions[0]);
+		} else {
+			setActiveWalletOption(null);
+		}
+	}, [adminWalletOptions]);
+
 	// Keep walletAddress in sync with selected option
 	React.useEffect(() => {
 		if (activeWalletOption) {
