@@ -55,3 +55,66 @@ export const Bio = styled.div`
 	padding: 20px 10px;
 	background-color: var(--color-card-background);
 `;
+
+export const TipsSection = styled.div`
+	padding: 12px 10px;
+	background-color: var(--color-card-background);
+	border: 1px solid var(--color-border);
+	border-radius: 8px;
+	margin: 0 10px 15px 10px;
+`;
+
+export const TipsHeader = styled.div`
+	font-size: var(--font-size-large);
+	font-weight: 700;
+	margin-bottom: 8px;
+	color: var(--color-text-primary);
+`;
+
+export const TipsList = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	max-height: 200px;
+	overflow-y: auto;
+`;
+
+export const TipRow = styled.div`
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: var(--font-size-medium);
+	padding: 4px 0;
+
+	.tip-amount {
+		font-weight: 700;
+		color: var(--color-success);
+	}
+
+	.tip-target {
+		color: var(--color-text-secondary);
+		margin-left: 4px;
+	}
+
+	.tip-date {
+		color: var(--color-text-tertiary);
+		margin-left: 6px;
+		font-size: var(--font-size-medium);
+	}
+
+	a {
+		color: var(--color-accent);
+		text-decoration: none;
+		font-size: var(--font-size-small);
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+`;
+
+export const TipsPlaceholder = styled.div`
+	font-size: var(--font-size-small);
+	color: var(--color-text-tertiary);
+	padding: 10px;
+`;

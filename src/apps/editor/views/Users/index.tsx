@@ -6,6 +6,7 @@ import { UserManager } from 'editor/components/organisms/UserManager';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { ICONS } from 'helpers/config';
@@ -25,11 +26,13 @@ export default function Users() {
 	const permawebProvider = usePermawebProvider();
 	const { addNotification } = useNotifications();
 	const language = languageProvider.object[languageProvider.current];
+
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [showAddUser, setShowAddUser] = React.useState<boolean>(false);
 	const [showTransferInvitesModal, setShowTransferInvitesModal] = React.useState<boolean>(false);
 
 	const currentWalletAddress = arProvider.walletAddress;
+
 	const pendingOwnershipInvites = React.useMemo(() => {
 		return (portalProvider.current?.transfers ?? []).filter((request: any) => {
 			const inviteeAddress = request.To ?? request.to;
@@ -37,6 +40,7 @@ export default function Users() {
 			return inviteeAddress === currentWalletAddress && stateValue === 'pending';
 		});
 	}, [portalProvider.current?.transfers, currentWalletAddress]);
+
 	const [inviteProfiles, setInviteProfiles] = React.useState<Record<string, any>>({});
 
 	React.useEffect(() => {
@@ -64,7 +68,7 @@ export default function Users() {
 		if (pendingOwnershipInvites?.length > 0) {
 			loadProfiles();
 		}
-	}, [pendingOwnershipInvites]);
+	}, [pendingOwnershipInvites, permawebProvider]);
 
 	async function handleAcceptOwnershipInvite() {
 		if (!portalProvider.current?.id) return;
@@ -75,7 +79,7 @@ export default function Users() {
 				op: 'Accept',
 			});
 			addNotification(language?.inviteAccepted ?? 'Ownership invite accepted', 'success');
-			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Transfers);
+			portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Transfers, PortalPatchMapEnum.Users]);
 			setShowTransferInvitesModal(false);
 		} catch (error: any) {
 			console.error(error);
@@ -94,7 +98,7 @@ export default function Users() {
 				op: 'Reject',
 			});
 			addNotification(language?.inviteRejected ?? 'Ownership invite rejected', 'success');
-			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Transfers);
+			portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Transfers, PortalPatchMapEnum.Users]);
 			setShowTransferInvitesModal(false);
 		} catch (error: any) {
 			console.error(error);
@@ -106,14 +110,23 @@ export default function Users() {
 
 	function getTransferInvitesModal() {
 		const hasInvites = pendingOwnershipInvites.length > 0;
+
 		return (
-			<Modal header={'Transfer Invites'} handleClose={() => setShowTransferInvitesModal(false)}>
+			<Modal header={'Transfer Invites'} handleClose={loading ? undefined : () => setShowTransferInvitesModal(false)}>
 				<S.TransferInvitesWrapper>
+					{loading && (
+						<S.LoadingOverlay>
+							<Loader sm relative />
+							<span>{language?.processingTransfer ?? 'Processing transfer…'}</span>
+						</S.LoadingOverlay>
+					)}
+
 					{hasInvites && (
 						<S.TransferInvitesList className="scroll-wrapper">
 							{pendingOwnershipInvites.map((request: any, index: number) => {
 								const inviterAddress = request.From ?? request.from;
-								const inviterUsername = inviteProfiles[inviterAddress].username;
+								const inviterUsername = inviteProfiles[inviterAddress]?.username ?? inviterAddress;
+
 								return (
 									<S.TransferInviteRow key={`${inviterAddress}-${index}`}>
 										<S.TransferInviteMeta>
@@ -151,7 +164,7 @@ export default function Users() {
 				<ViewHeader
 					header={language?.users}
 					actions={[
-						<S.HeaderAction>
+						<S.HeaderAction key="transfers">
 							{pendingOwnershipInvites.length > 0 && (
 								<button onClick={() => setShowTransferInvitesModal((prev) => !prev)} disabled={loading}>
 									{language?.transfersLabel ?? 'Transfers'}
@@ -162,6 +175,7 @@ export default function Users() {
 							)}
 						</S.HeaderAction>,
 						<Button
+							key="add-user"
 							type={'alt1'}
 							label={language?.addUser}
 							handlePress={() => setShowAddUser(!showAddUser)}
@@ -191,6 +205,7 @@ export default function Users() {
 			>
 				<UserManager handleClose={() => setShowAddUser(false)} />
 			</Panel>
+
 			{showTransferInvitesModal && getTransferInvitesModal()}
 		</>
 	);

@@ -10,9 +10,26 @@ import SidebarArchive from '../archive';
 
 import * as S from './styles';
 
+type UserTip = {
+	id: string;
+	amountAr: string;
+	toAddress: string;
+	toName?: string;
+	timestamp?: string;
+};
+
+function shortenAddress(addr: string | undefined | null) {
+	if (!addr) return '';
+	if (addr.length <= 12) return addr;
+	return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+}
+
 export default function SidebarUser() {
 	const params = useParams();
 	const { profile } = useProfile(params?.user);
+
+	const [tips, setTips] = React.useState<UserTip[] | null>(null);
+	const [tipsLoading, setTipsLoading] = React.useState(false);
 
 	React.useEffect(() => {
 		if (!profile?.displayName && !profile?.displayname) return;
@@ -57,6 +74,109 @@ export default function SidebarUser() {
 		};
 	}, [profile]);
 
+	// --- Tip history (tips GIVEN by this user, via From-Profile tag) ---
+	React.useEffect(() => {
+		const username = profile?.username;
+		if (!username) {
+			setTips(null);
+			return;
+		}
+
+		let cancelled = false;
+
+		async function loadTips() {
+			try {
+				setTipsLoading(true);
+
+				const query = `
+					query($fromProfile: [String!]!) {
+					  transactions(
+					    first:100
+					    sort: HEIGHT_DESC
+					    tags: [
+					      { name: "App-Name", values: ["Portal"] }
+					      { name: "Type", values: ["Tip"] }
+					      { name: "From-Profile", values: $fromProfile }
+					    ]
+					  ) {
+					    edges {
+					      node {
+					        id
+					        block {
+					          timestamp
+					        }
+					        tags {
+					          name
+					          value
+					        }
+					      }
+					    }
+					  }
+					}
+				`;
+				const res = await fetch('https://arweave.net/graphql', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						query,
+						variables: { fromProfile: [String(profile.id)] },
+					}),
+				});
+
+				if (!res.ok) throw new Error('Failed to load tip history');
+
+				const json = await res.json();
+				console.log('Tip history response:', json);
+				const edges: any[] = json?.data?.transactions?.edges ?? [];
+				const next: UserTip[] = edges.map((edge) => {
+					const node = edge.node;
+					const tags: { name: string; value: string }[] = node.tags || [];
+
+					const getTag = (name: string) => tags.find((t) => t.name === name)?.value;
+
+					const amountWinston = getTag('Amount');
+					const toAddress = getTag('To-Address') || node.target || '';
+					const portalName = getTag('Portal-Name');
+					const ts = node.block?.timestamp ? new Date(node.block.timestamp * 1000).toISOString() : undefined;
+
+					let amountAr = '0';
+					if (amountWinston && !Number.isNaN(Number(amountWinston))) {
+						amountAr = (Number(amountWinston) / 1e12).toFixed(3);
+					}
+
+					return {
+						id: node.id,
+						amountAr,
+						toAddress,
+						toName: portalName || undefined,
+						timestamp: ts,
+					};
+				});
+
+				if (!cancelled) {
+					setTips(next);
+				}
+			} catch (e) {
+				console.error('[SidebarUser] Failed to load tip history', e);
+				if (!cancelled) {
+					setTips([]);
+				}
+			} finally {
+				if (!cancelled) {
+					setTipsLoading(false);
+				}
+			}
+		}
+
+		loadTips();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [profile?.username]);
+
+	const hasTips = !!tips && tips.length > 0;
+
 	return (
 		<S.SidebarUserWrapper>
 			<S.Header>
@@ -75,9 +195,34 @@ export default function SidebarUser() {
 				</S.Avatar>
 				<S.Name>{profile.displayName}</S.Name>
 			</S.Header>
+
 			<S.Content>
 				<S.Bio>{profile.description}</S.Bio>
+
+				{tipsLoading && !hasTips && <S.TipsPlaceholder>Loading tip activity…</S.TipsPlaceholder>}
+
+				{hasTips && (
+					<S.TipsSection>
+						<S.TipsHeader>Tip activity</S.TipsHeader>
+						<S.TipsList>
+							{tips!.map((tip) => (
+								<S.TipRow key={tip.id}>
+									<div>
+										<span className="tip-amount">{tip.amountAr} AR</span>
+										{tip.toName ? (
+											<span className="tip-target">to {tip.toName}</span>
+										) : (
+											<span className="tip-target">to {shortenAddress(tip.toAddress)}</span>
+										)}
+										{tip.timestamp && <span className="tip-date">{new Date(tip.timestamp).toLocaleDateString()}</span>}
+									</div>
+								</S.TipRow>
+							))}
+						</S.TipsList>
+					</S.TipsSection>
+				)}
 			</S.Content>
+
 			<SidebarArchive author={profile.id} />
 		</S.SidebarUserWrapper>
 	);
