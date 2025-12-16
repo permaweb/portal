@@ -181,8 +181,14 @@ export function SettingsProvider(props: SettingsProviderProps) {
 			'dark-alt-2': '#17191F',
 		};
 
-		const backgroundColor = themeBackgrounds[settings.theme] || themeBackgrounds['dark-primary'];
-		document.body.style.backgroundColor = backgroundColor;
+		const backgroundColor =
+			themeBackgrounds[settings.theme] ||
+			themeBackgrounds[
+				window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+					? 'dark-primary'
+					: 'light-primary'
+			];
+		document.body.style.background = backgroundColor;
 	}, [settings.theme]);
 
 	// Listen for system theme changes when syncWithSystem is enabled
