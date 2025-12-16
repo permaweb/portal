@@ -3,7 +3,6 @@ import path from 'path';
 import polyfillNode from 'rollup-plugin-polyfill-node';
 import { defineConfig, loadEnv } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
-import { VitePWA } from 'vite-plugin-pwa';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 
 export default defineConfig(({ mode }) => {
