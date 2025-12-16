@@ -177,16 +177,18 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 								<TurboCredits showBorderBottom setShowFundUpload={setShowFundUpload} />
 							</S.DCreditsWrapper>
 							<S.DBodyWrapper>
-								{auth?.authType !== 'NATIVE_WALLET' && window.wanderInstance && (
-									<li
-										onClick={() => window.wanderInstance.open(backupsNeeded > 0 ? 'backup' : undefined)}
-										style={{ position: 'relative' }}
-									>
-										<ReactSVG src={ICONS.wallet} />
-										{language?.wallet}
-										{backupsNeeded > 0 && <S.MenuBadge>{backupsNeeded}</S.MenuBadge>}
-									</li>
-								)}
+								{auth?.authType !== 'NATIVE_WALLET' &&
+									arProvider.walletType !== 'NATIVE_WALLET' &&
+									window.wanderInstance && (
+										<li
+											onClick={() => window.wanderInstance.open(backupsNeeded > 0 ? 'backup' : undefined)}
+											style={{ position: 'relative' }}
+										>
+											<ReactSVG src={ICONS.wallet} />
+											{language?.wallet}
+											{backupsNeeded > 0 && <S.MenuBadge>{backupsNeeded}</S.MenuBadge>}
+										</li>
+									)}
 								{permawebProvider.profile?.id !== portalProvider?.current?.id && (
 									<li onClick={() => setShowProfileManager(true)}>
 										<ReactSVG src={ICONS.write} />
