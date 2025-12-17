@@ -441,7 +441,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 									<ReactSVG src={ICONS.comments} />
 									{language.myComments}
 								</S.NavigationEntry>
-								{auth?.authType !== 'NATIVE_WALLET' && (
+								{auth?.authType !== 'NATIVE_WALLET' && arProvider.walletType !== 'NATIVE_WALLET' && (
 									<S.NavigationEntry onClick={() => window.wanderInstance.open()}>
 										<ReactSVG src={ICONS.wallet} />
 										{language.myWallet}
@@ -514,6 +514,11 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	}
 
 	function getHeader() {
+		const profileReady = permawebProvider.libs && !permawebProvider.profileLoading;
+		const missingProfileCount = profileReady && !profile?.id ? 1 : 0;
+		const notificationCount = (arProvider.backupsNeeded || 0) + missingProfileCount;
+		const showNotification = arProvider.walletAddress && notificationCount > 0;
+
 		return (
 			<S.UserButton>
 				<S.WanderConnectWrapper ref={wrapperRef} />
@@ -527,6 +532,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 							<ReactSVG src={ICONS.user} />
 						)}
 						<span>{label}</span>
+						{showNotification && <S.NotificationBubble>{notificationCount}</S.NotificationBubble>}
 					</S.LAction>
 				)}
 			</S.UserButton>

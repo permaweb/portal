@@ -125,7 +125,7 @@ export const MenuBadge = styled.span`
 	text-align: center;
 `;
 
-export const BackupNotification = styled.div`
+export const NotificationBubble = styled.div`
 	position: absolute;
 	top: -5px;
 	right: -7.5px;

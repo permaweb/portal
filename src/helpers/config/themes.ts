@@ -165,8 +165,8 @@ export const THEME_DEFAULT = {
 				dark: 'background',
 			},
 			border: {
-				light: 'border',
-				dark: 'border',
+				light: '238,238,238',
+				dark: '17,17,17',
 			},
 		},
 		preferences: {

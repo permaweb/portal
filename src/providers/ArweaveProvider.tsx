@@ -108,7 +108,10 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					const address = await window.arweaveWallet.getActiveAddress();
 					setWalletAddress(address);
 					setWallet(window.arweaveWallet);
-					if (window?.wanderInstance?.authInfo?.authType) {
+					if (window.arweaveWallet.walletName && window.arweaveWallet.walletName !== 'Wander Connect') {
+						setWalletType('NATIVE_WALLET' as WalletEnum);
+						localStorage.setItem(STORAGE.walletType, 'NATIVE_WALLET');
+					} else if (window?.wanderInstance?.authInfo?.authType) {
 						setWalletType(window.wanderInstance.authInfo.authType);
 						localStorage.setItem(STORAGE.walletType, window.wanderInstance.authInfo.authType);
 					} else {
@@ -204,7 +207,10 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 					setWalletAddress(address);
 					setWallet(window.arweaveWallet);
-					if (window?.wanderInstance?.authInfo?.authType) {
+					if (window.arweaveWallet.walletName && window.arweaveWallet.walletName !== 'Wander Connect') {
+						setWalletType('NATIVE_WALLET' as WalletEnum);
+						localStorage.setItem(STORAGE.walletType, 'NATIVE_WALLET');
+					} else if (window?.wanderInstance?.authInfo?.authType) {
 						setWalletType(window.wanderInstance.authInfo.authType);
 						localStorage.setItem(STORAGE.walletType, window.wanderInstance.authInfo.authType);
 					} else if (window?.wanderInstance?.authInfo) {

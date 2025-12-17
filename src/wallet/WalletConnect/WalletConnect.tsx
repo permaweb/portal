@@ -159,7 +159,10 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 							callback={handlePress}
 						/>
 						{backupsNeeded > 0 && arProvider.walletAddress && (
-							<S.BackupNotification>{backupsNeeded}</S.BackupNotification>
+							<S.NotificationBubble>{backupsNeeded}</S.NotificationBubble>
+						)}
+						{arProvider.walletAddress && !permawebProvider.profile?.id && (
+							<S.NotificationBubble>!</S.NotificationBubble>
 						)}
 						<div ref={wrapperRef} />
 					</S.PWrapper>

@@ -38,6 +38,7 @@ export const LAction = styled.button`
 	justify-content: center;
 	align-items: center;
 	height: 35px;
+	position: relative;
 
 	div {
 		height: 16px;
@@ -161,7 +162,7 @@ export const DisplayName = styled.div`
 	position: absolute;
 	bottom: 15px;
 	left: 70px;
-	color: rgba(var(--color-text), 1);
+	color: white;
 	font-size: var(--font-size-default);
 	font-weight: 900;
 `;
@@ -248,6 +249,7 @@ export const NavigationEntry = styled.div<{ $disabled?: boolean }>`
 export const DFooterWrapper = styled(NavigationWrapper)`
 	margin-top: auto;
 	border-bottom: none;
+	padding-bottom: 10px;
 `;
 
 export const PManageWrapper = styled.div`
@@ -260,11 +262,38 @@ export const WanderConnectWrapper = styled.div`
 
 export const Hint = styled.div`
 	display: flex;
+	align-items: center;
 	justify-content: center;
 	margin-left: auto;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: #e53935;
+	animation: hintPulse 2s infinite;
+
+	> div {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
 
 	svg {
-		color: red !important;
+		width: 10px;
+		height: 10px;
+		margin: 0 !important;
+		color: var(--color-card-background) !important;
+	}
+
+	@keyframes hintPulse {
+		0% {
+			box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.7);
+		}
+		70% {
+			box-shadow: 0 0 0 6px transparent;
+		}
+		100% {
+			box-shadow: 0 0 0 0 transparent;
+		}
 	}
 `;
 
@@ -476,5 +505,35 @@ export const LayoutButton = styled.button<{ $primary?: boolean }>`
 	&:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+`;
+
+export const NotificationBubble = styled.div`
+	position: absolute;
+	top: -4px;
+	right: -10px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: #e53935;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	font-size: 9px;
+	font-weight: bold;
+	filter: invert(1);
+	animation: pulse 2s infinite;
+
+	@keyframes pulse {
+		0% {
+			box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.7);
+		}
+		70% {
+			box-shadow: 0 0 0 6px transparent;
+		}
+		100% {
+			box-shadow: 0 0 0 0 transparent;
+		}
 	}
 `;
