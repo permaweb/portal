@@ -243,7 +243,11 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 	function setPortalRoles(roles: string[]) {
 		if (profile) {
-			setProfile({ ...profile, roles });
+			const currentRoles = profile.roles || [];
+			const rolesChanged = roles.length !== currentRoles.length || roles.some((r, i) => r !== currentRoles[i]);
+			if (rolesChanged) {
+				setProfile({ ...profile, roles });
+			}
 		}
 	}
 
