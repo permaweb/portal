@@ -151,10 +151,10 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	}
 
 	function handleDisconnect() {
+		arProvider.handleDisconnect(false);
 		setShowUserMenu(false);
 		setShowLayoutPanel(false);
 		setLayoutEditMode(false);
-		arProvider.handleDisconnect();
 	}
 
 	function handleCloseMenu() {

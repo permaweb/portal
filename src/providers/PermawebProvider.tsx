@@ -137,16 +137,10 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				if (cachedProfile?.id) {
 					try {
 						const fetchedProfile = await libs.getProfileById(cachedProfile.id);
+						const normalizedProfile = normalizeProfile(fetchedProfile);
 
-						if (fetchedProfile?.displayname) {
-							if (!fetchedProfile.displayName) {
-								fetchedProfile.displayName = fetchedProfile.displayname;
-							}
-							delete fetchedProfile.displayname;
-						}
-
-						setProfile(fetchedProfile);
-						cacheProfile(arProvider.walletAddress, fetchedProfile);
+						setProfile(normalizedProfile);
+						cacheProfile(arProvider.walletAddress, normalizedProfile);
 						setProfilePending(false);
 					} catch (e: any) {
 						console.error(e);
@@ -206,16 +200,8 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				// else fetchedProfile = await libs.getProfileByWalletAddress(address);
 
 				const fetchedProfile = await libs.getProfileByWalletAddress(address);
-				let profileToUse = { ...fetchedProfile };
+				const profileToUse = normalizeProfile({ ...fetchedProfile });
 
-				if (profileToUse.displayname) {
-					if (!profileToUse.displayName) {
-						profileToUse.displayName = profileToUse.displayname;
-					}
-					delete profileToUse.displayname;
-				}
-
-				// if (!fetchedProfile?.id && cachedProfile) profileToUse = cachedProfile;
 				cacheProfile(address, profileToUse);
 				if (profileToUse?.id) {
 					cacheProfileById(profileToUse.id, profileToUse);
@@ -228,9 +214,18 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		}
 	}
 
+	function normalizeProfile(profile: any) {
+		if (!profile) return profile;
+		const { displayname, ...rest } = profile;
+		return {
+			...rest,
+			displayName: rest.displayName || displayname || '',
+		};
+	}
+
 	function getCachedProfile(address: string) {
 		const cached = localStorage.getItem(STORAGE.profileByWallet(address));
-		return cached ? JSON.parse(cached) : null;
+		return cached ? normalizeProfile(JSON.parse(cached)) : null;
 	}
 
 	function cacheProfile(address: string, profileData: any) {
