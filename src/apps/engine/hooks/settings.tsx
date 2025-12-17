@@ -2,12 +2,10 @@ import React from 'react';
 
 import { dryrun } from '@permaweb/aoconnect';
 
-const getSystemTheme = () => (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-
 const getSettings = async () => {
 	return {
 		portal: 'ima',
-		theme: getSystemTheme(),
+		theme: 'dark',
 	};
 };
 
@@ -36,9 +34,9 @@ export const initSettings = async () => {
 initSettings();
 
 export const useSettings = (preview: boolean = false) => {
-	if (preview) return { settings: { theme: getSystemTheme() }, updateSetting: () => {} };
+	if (preview) return { settings: { theme: 'dark' }, updateSetting: () => {} };
 
-	const [settings, setSettings] = React.useState({ portal: 'ima', theme: getSystemTheme() });
+	const [settings, setSettings] = React.useState({ portal: 'ima', theme: 'dark' });
 	const [isLoading, setIsLoading] = React.useState(true);
 
 	React.useEffect(() => {

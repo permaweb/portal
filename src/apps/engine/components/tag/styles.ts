@@ -10,7 +10,7 @@ export const Tag = styled.div`
 	padding: 0 4px;
 	font-size: 13px;
 	font-weight: 600;
-	font-family: var(--font-header, Inter, system-ui, sans-serif);
+	font-family: var(--font-header);
 
 	&:hover {
 		cursor: pointer;

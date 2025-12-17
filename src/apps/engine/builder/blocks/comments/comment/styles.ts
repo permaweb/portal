@@ -5,12 +5,12 @@ export const Comment = styled.div<{ $level: number; $status?: string }>`
 	display: flex;
 	gap: 10px;
 	background: var(--color-card-background);
-	border: 1px solid var(--color-card-border);
 	padding: 10px;
 	border-radius: var(--border-radius);
 	margin-left: ${(props) => (props.$level > 0 ? `${props.$level * 40}px` : '0')};
 	margin-top: ${(props) => (props.$level > 0 ? '-18px' : '0')};
-	box-shadow: var(--preference-card-shadow);
+	box-shadow: ${(props) =>
+		props?.$status === 'active' || !props?.$status ? '0 4px 10px rgba(0, 0, 0, 0.4)' : '0 1px 4px rgba(0, 0, 0, 0.4)'};
 
 	${(props) =>
 		props?.$status !== 'active' &&
@@ -51,7 +51,6 @@ export const Meta = styled.div`
 `;
 
 export const UsernameWrapper = styled.div`
-	position: relative;
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -82,6 +81,33 @@ export const Username = styled.span<{ isPostAuthor: boolean }>`
 				margin-bottom: -1.5px;
 			}
 		}
+	}
+`;
+
+export const PortalMenuTrigger = styled.div<{ $active: boolean }>`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	cursor: pointer;
+	opacity: ${(props) => (props.$active ? 1 : 0.6)};
+	transition: opacity 0.2s;
+
+	&:hover {
+		opacity: 1;
+	}
+
+	div {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	svg {
+		width: 14px;
+		height: 14px;
+		fill: rgba(var(--color-primary), 1);
 	}
 `;
 

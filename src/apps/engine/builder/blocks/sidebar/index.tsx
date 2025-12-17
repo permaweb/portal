@@ -1,16 +1,19 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import SidebarArchive from './blocks/archive';
 import SidebarAuthors from './blocks/authors';
 import SidebarUser from './blocks/user';
+// import { usePodcasts } from '../../../mock/podcasts/hook';
 import * as S from './styles';
 
 export default function Sidebar(props: any) {
-	const { content, fullWidth } = props;
+	const { content, width, preview } = props;
+	const navigate = useNavigate();
 	const params = useParams();
+	// const { podcasts } = usePodcasts();
 
 	return (
-		<S.Sidebar id="Sidebar" $fullWidth={fullWidth}>
+		<S.Sidebar id="Sidebar" $fullWidth={width === 1}>
 			{Array.isArray(content) && content.includes('date') && <SidebarArchive />}
 
 			{Array.isArray(content) && content.includes('authors') && <SidebarAuthors />}

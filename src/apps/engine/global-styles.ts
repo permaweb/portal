@@ -7,8 +7,9 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   :root {
-    font-family: var(--font-body, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif);
-    font-weight: var(--font-body-weight, 400);
+    // font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family: var(--font-body);
+    font-weight: var(--font-body-weight);
     line-height: 1.5;    
 
     color-scheme: light dark;
@@ -70,24 +71,24 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   h1 {
-    font-family: var(--font-header, Inter, system-ui, sans-serif);
-    font-weight: var(--font-header-weight-bold, 700);
+    font-family: var(--font-header);
+    font-weight: var(--font-header-weight-bold);
     font-size: var(--font-size-xxxlarge);
     color: rgba(var(--color-primary), 1);
     line-height: 1.1;
   }
 
   h2 {
-    font-family: var(--font-header, Inter, system-ui, sans-serif);
-    font-weight: var(--font-header-weight-bold, 700);
+    font-family: var(--font-header);
+    font-weight: var(--font-header-weight-bold);
     margin: 0 0 4px 0;
     font-size: var(--font-size-xlarge);
     color: rgba(var(--color-primary), 1);
   }
 
   h3 {
-    font-family: var(--font-header, Inter, system-ui, sans-serif);
-    font-weight: var(--font-header-weight-bold, 700);
+    font-family: var(--font-header);
+    font-weight: var(--font-header-weight-bold);
     margin: 0;
     font-size: var(--font-size-large);
   }

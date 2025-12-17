@@ -245,6 +245,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					})
 				)
 			);
+
 			const overview = parseField(PortalPatchMapEnum.Overview, response, opts?.patchKey);
 			const users = parseField(PortalPatchMapEnum.Users, response, opts?.patchKey);
 			const navigation = parseField(PortalPatchMapEnum.Navigation, response, opts?.patchKey);
