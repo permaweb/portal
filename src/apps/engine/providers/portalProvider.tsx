@@ -235,7 +235,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					Users,
 					Monetization,
 				};
-				console.log('portalData: ', portalData);
 				setPortal(portalData);
 				if (portalId && portalData) cachePortal(portalId, portalData);
 			} catch (err) {

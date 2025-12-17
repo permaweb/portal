@@ -6,7 +6,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { ICONS, LAYOUT } from 'helpers/config';
-import { THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
+import { THEME_DEFAULT, THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
 import { PortalPatchMapEnum } from 'helpers/types';
 import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -33,6 +33,101 @@ function deepMerge(target: any, patch: any): any {
 		}
 	}
 	return result;
+}
+
+const LAYOUT_THEME_PATCHES: Record<string, any> = {
+	documentation: THEME_DOCUMENTATION_PATCH,
+};
+
+function getNestedValue(obj: any, path: string[]): any {
+	return path.reduce((acc, key) => acc?.[key], obj);
+}
+
+function setNestedValue(obj: any, path: string[], value: any): any {
+	if (path.length === 0) return value;
+	const [first, ...rest] = path;
+	return {
+		...obj,
+		[first]: rest.length === 0 ? value : setNestedValue(obj?.[first] || {}, rest, value),
+	};
+}
+
+function getPatchPaths(patch: any, prefix: string[] = []): string[][] {
+	const paths: string[][] = [];
+	for (const key of Object.keys(patch)) {
+		const currentPath = [...prefix, key];
+		if (patch[key] && typeof patch[key] === 'object' && !Array.isArray(patch[key])) {
+			paths.push(...getPatchPaths(patch[key], currentPath));
+		} else {
+			paths.push(currentPath);
+		}
+	}
+	return paths;
+}
+
+function applyLayoutPatch(theme: any, layoutName: string): any {
+	const patch = LAYOUT_THEME_PATCHES[layoutName];
+	if (!patch) return theme;
+
+	const paths = getPatchPaths(patch);
+	const original: any = {};
+	for (const path of paths) {
+		const currentValue = getNestedValue(theme, path);
+		if (currentValue !== undefined) {
+			original[path.join('.')] = currentValue;
+		}
+	}
+
+	const patched = deepMerge(theme, patch);
+	patched._layoutPatch = { layout: layoutName, original };
+	return patched;
+}
+
+function hasLegacyPatchColors(theme: any): string | null {
+	for (const [layoutName, patch] of Object.entries(LAYOUT_THEME_PATCHES)) {
+		const paths = getPatchPaths(patch);
+		for (const path of paths) {
+			const themeValue = getNestedValue(theme, path);
+			const patchValue = getNestedValue(patch, path);
+			if (themeValue === patchValue) {
+				return layoutName;
+			}
+		}
+	}
+	return null;
+}
+
+function resetLayoutPatch(theme: any): any {
+	if (theme._layoutPatch) {
+		const { original } = theme._layoutPatch;
+		let result = { ...theme };
+
+		for (const [pathStr, value] of Object.entries(original)) {
+			const path = pathStr.split('.');
+			result = setNestedValue(result, path, value);
+		}
+
+		delete result._layoutPatch;
+		return result;
+	}
+
+	const legacyLayout = hasLegacyPatchColors(theme);
+	if (legacyLayout) {
+		const patch = LAYOUT_THEME_PATCHES[legacyLayout];
+		const paths = getPatchPaths(patch);
+		let result = { ...theme };
+
+		for (const path of paths) {
+			const defaultValue = getNestedValue(THEME_DEFAULT, path);
+			if (defaultValue !== undefined) {
+				result = setNestedValue(result, path, defaultValue);
+			}
+		}
+
+		return result;
+	}
+
+	return theme;
 }
 
 export default function Layout() {
@@ -108,18 +203,24 @@ export default function Layout() {
 	}, [portalProvider.current]);
 
 	function handleLayoutOptionChange(optionName: string) {
+		if (themes && Array.isArray(themes)) {
+			const updatedThemes = themes.map((theme: any) => {
+				if (!theme.active) return theme;
+				let updated = resetLayoutPatch(theme);
+				if (LAYOUT_THEME_PATCHES[optionName]) {
+					updated = applyLayoutPatch(updated, optionName);
+				}
+				return updated;
+			});
+			setThemes(updatedThemes);
+		}
+
 		if (optionName === 'blog') {
 			setLayout(LAYOUT.BLOG);
 		} else if (optionName === 'journal') {
 			setLayout(LAYOUT.JOURNAL);
 		} else if (optionName === 'documentation') {
 			setLayout(LAYOUT.DOCUMENTATION);
-			if (themes && Array.isArray(themes)) {
-				const updatedThemes = themes.map((theme: any) =>
-					theme.active ? deepMerge(theme, THEME_DOCUMENTATION_PATCH) : theme
-				);
-				setThemes(updatedThemes);
-			}
 		} else {
 			const layoutValue = optionName.toLowerCase();
 			const updatedPages = {
