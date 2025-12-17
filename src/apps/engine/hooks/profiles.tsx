@@ -114,6 +114,12 @@ export const useProfile = (profileId: string) => {
 			.getProfileById(processId)
 			.then((fetchedProfile: any) => {
 				if (fetchedProfile) {
+					if (fetchedProfile.displayname) {
+						if (!fetchedProfile.displayName) {
+							fetchedProfile.displayName = fetchedProfile.displayname;
+						}
+						delete fetchedProfile.displayname;
+					}
 					cacheProfile(processId, fetchedProfile);
 					setProfile(fetchedProfile);
 				} else {
@@ -128,6 +134,12 @@ export const useProfile = (profileId: string) => {
 					.getProfileByWalletAddress(profileId)
 					.then((fetchedProfile: any) => {
 						if (fetchedProfile && fetchedProfile.id) {
+							if (fetchedProfile.displayname) {
+								if (!fetchedProfile.displayName) {
+									fetchedProfile.displayName = fetchedProfile.displayname;
+								}
+								delete fetchedProfile.displayname;
+							}
 							cacheProfile(profileId, fetchedProfile);
 							localStorage.setItem(`profile-by-wallet-${profileId}`, JSON.stringify(fetchedProfile));
 							setProfile(fetchedProfile);

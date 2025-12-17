@@ -31,7 +31,7 @@ export const Container = styled.div<{
 	animation: ${openRight} 200ms;
 	background: var(--color-card-background);
 	border-radius: var(--border-radius);
-	border: 1px solid rgba(var(--color-border), 1);
+	border: 1px solid var(--color-card-border);
 	box-shadow: var(--preference-card-shadow);
 	pointer-events: auto;
 `;

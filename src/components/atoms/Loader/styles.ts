@@ -146,6 +146,6 @@ export const MessageWrapper = styled.div`
 	border: none !important;
 
 	span {
-		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-size: ${(props) => props.theme?.typography?.size?.xSmall || '12px'} !important;
 	}
 `;
