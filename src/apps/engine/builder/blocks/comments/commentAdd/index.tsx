@@ -44,6 +44,7 @@ function CommentEditorContent(props: any) {
 		commentId,
 		initialContent,
 		onCancel,
+		isLoggedIn,
 	} = props;
 	const [editor] = useLexicalComposerContext();
 	const arProvider = useArweaveProvider();
@@ -59,6 +60,11 @@ function CommentEditorContent(props: any) {
 	const dropdownRef = React.useRef<HTMLDivElement>(null);
 	const [showProfileManage, setShowProfileManage] = React.useState(false);
 	const language = languageProvider.object?.[languageProvider.current] ?? null;
+
+	React.useEffect(() => {
+		editor.setEditable(isLoggedIn);
+	}, [editor, isLoggedIn]);
+
 	React.useEffect(() => {
 		if (initialContent && isEditMode) {
 			editor.update(() => {
@@ -324,6 +330,8 @@ export default function CommentAdd(props: any) {
 
 	const hasAuthorIcon = Boolean(portalId && !isEditMode && roles.some((r) => ['Admin', 'Moderator'].includes(r)));
 
+	const isLoggedIn = Boolean(walletAddress && profile?.id);
+
 	const initialConfig = {
 		namespace: 'CommentEditor',
 		theme: {
@@ -338,9 +346,8 @@ export default function CommentAdd(props: any) {
 		onError: (error: Error) => {
 			console.error('Lexical error:', error);
 		},
+		editable: isLoggedIn,
 	};
-
-	const isLoggedIn = Boolean(walletAddress && profile?.id);
 	const placeholder = isLoggedIn
 		? isEditMode
 			? 'Edit your comment...'
@@ -367,6 +374,7 @@ export default function CommentAdd(props: any) {
 							commentId={commentId}
 							initialContent={initialContent}
 							onCancel={onCancel}
+							isLoggedIn={isLoggedIn}
 						/>
 					}
 					placeholder={<div className="editor-placeholder">{placeholder}</div>}

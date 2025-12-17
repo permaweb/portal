@@ -204,7 +204,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					users: portalUsers,
 					monetization: monetization,
 				};
-
 				const Name = zone?.name;
 				const Categories = zone?.categories;
 				const Layout = zone?.layout;
