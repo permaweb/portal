@@ -83,7 +83,7 @@ function App() {
 		if (Themes) {
 			const systemScheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 			setTheme(systemScheme);
-			document.documentElement.setAttribute('theme', theme);
+			document.documentElement.setAttribute('theme', systemScheme);
 			initThemes(Themes);
 		}
 	}, [Themes]);

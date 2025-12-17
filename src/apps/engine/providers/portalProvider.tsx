@@ -204,7 +204,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					users: portalUsers,
 					monetization: monetization,
 				};
-
 				const Name = zone?.name;
 				const Categories = zone?.categories;
 				const Layout = zone?.layout;
@@ -235,7 +234,6 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					Users,
 					Monetization,
 				};
-				console.log('portalData: ', portalData);
 				setPortal(portalData);
 				if (portalId && portalData) cachePortal(portalId, portalData);
 			} catch (err) {

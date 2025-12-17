@@ -39,8 +39,9 @@ export const CommentAdd = styled.div<{ $active: boolean; $hasIcon?: boolean }>`
 export const Editor = styled.div`
 	position: relative;
 	background: var(--color-card-background);
+	border: 1px solid var(--color-card-border);
 	border-radius: var(--border-radius);
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+	box-shadow: var(--preference-card-shadow);
 	padding: 8px 80px 8px 10px;
 	min-height: 24px;
 	display: flex;

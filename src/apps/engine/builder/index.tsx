@@ -62,9 +62,9 @@ export default function Builder(props: any) {
 					/>
 				);
 			case 'sidebar':
-				return (
-					<Sidebar key={index} content={element.content} gap={element.gap} width={element.width} preview={preview} />
-				);
+				return <Sidebar key={index} content={element.content} gap={element.gap} preview={preview} />;
+			case 'topbar':
+				return <Sidebar key={index} content={element.content} gap={element.gap} preview={preview} fullWidth />;
 			case 'postSpotlight':
 				return <PostSpotlight key={index} txId={element.txId} preview={preview} />;
 			case 'categorySpotlight':

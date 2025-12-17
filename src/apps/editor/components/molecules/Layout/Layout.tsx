@@ -141,8 +141,7 @@ export default function Layout() {
 	const [layout, setLayout] = React.useState(portalProvider.current?.layout || LAYOUT.JOURNAL);
 	const [pages, setPages] = React.useState<any>(portalProvider.current?.pages);
 	const [themes, setThemes] = React.useState<any>(portalProvider.current?.themes);
-	const [originalLayout, setOriginalLayout] = React.useState(portalProvider.current?.layout);
-	const originalLayoutSet = React.useRef(false);
+	const [originalLayout] = React.useState(portalProvider.current?.layout || LAYOUT.JOURNAL);
 	const [originalPages] = React.useState(portalProvider.current?.pages);
 	const [originalThemes] = React.useState(portalProvider.current?.themes);
 	const [loading, setLoading] = React.useState<boolean>(false);
@@ -156,7 +155,6 @@ export default function Layout() {
 	];
 
 	const [activeName, setActiveName] = React.useState<string>('');
-	const hasUserSelected = React.useRef(false);
 
 	// Check if there are changes
 	const hasChanges = React.useMemo(() => {
@@ -166,13 +164,8 @@ export default function Layout() {
 		return layoutChanged || pagesChanged || themesChanged;
 	}, [originalLayout, layout, originalPages, pages, originalThemes, themes]);
 
-	// Update local state when portal data changes (only if user hasn't made a selection)
+	// Update local state when portal data changes
 	React.useEffect(() => {
-		if (portalProvider.current?.layout && !originalLayoutSet.current) {
-			setOriginalLayout(portalProvider.current.layout);
-			originalLayoutSet.current = true;
-		}
-		if (hasUserSelected.current) return;
 		if (portalProvider.current?.layout) {
 			setLayout(portalProvider.current.layout);
 		}
@@ -185,25 +178,31 @@ export default function Layout() {
 	}, [portalProvider.current]);
 
 	React.useEffect(() => {
-		if (portalProvider.current && !hasUserSelected.current) {
+		if (portalProvider.current) {
 			const currentLayout = portalProvider.current?.layout as any;
+			const currentPages = portalProvider.current?.pages as any;
 			const navPosition = currentLayout?.navigation?.layout?.position;
-			const headerHeight = currentLayout?.header?.layout?.height;
+
+			const hasPostSpotlight = currentPages?.home?.content?.some((row: any) =>
+				row.content?.some((item: any) => item.type === 'postSpotlight')
+			);
+			const hasCategorySpotlight = currentPages?.home?.content?.some((row: any) =>
+				row.content?.some((item: any) => item.type === 'categorySpotlight')
+			);
 
 			if (navPosition === 'left' || navPosition === 'right') {
 				setActiveName('documentation');
-			} else if (headerHeight === '120px') {
+			} else if (hasPostSpotlight && hasCategorySpotlight) {
 				setActiveName('blog');
-			} else if (headerHeight === '100px') {
+			} else if (JSON.stringify(currentLayout) === JSON.stringify(LAYOUT.JOURNAL)) {
 				setActiveName('journal');
 			} else {
-				setActiveName('journal');
+				setActiveName(currentPages?.feed?.content?.[0]?.content?.[0]?.layout || 'journal');
 			}
 		}
 	}, [portalProvider.current]);
 
 	function handleLayoutOptionChange(optionName: string) {
-		hasUserSelected.current = true;
 		if (themes && Array.isArray(themes)) {
 			const updatedThemes = themes.map((theme: any) => {
 				if (!theme.active) return theme;
