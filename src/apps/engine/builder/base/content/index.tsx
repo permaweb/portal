@@ -13,7 +13,7 @@ export default function Content(props: any) {
 	const isSideNav = navPosition === 'left' || navPosition === 'right';
 
 	return (
-		<S.ContentWrapper id="Content">
+		<S.ContentWrapper id="Content" $isSideNav={isSideNav}>
 			<S.Content
 				$layout={layout?.content}
 				maxWidth={layout?.basics?.maxWidth}
