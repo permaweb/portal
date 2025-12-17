@@ -73,6 +73,7 @@ export default defineConfig(({ mode }) => {
 				emptyOutDir: true,
 				cssCodeSplit: false,
 				assetsInlineLimit: 10_000_000,
+				modulePreload: false,
 				rollupOptions: {
 					input: path.resolve(root, 'index.tsx'),
 					plugins: [polyfillNode()],
@@ -82,7 +83,7 @@ export default defineConfig(({ mode }) => {
 						entryFileNames: `bundle.js`,
 						chunkFileNames: `bundle.js`,
 						assetFileNames: `[name][extname]`,
-						format: 'es',
+						format: 'iife',
 					},
 				},
 			},
