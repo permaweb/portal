@@ -189,15 +189,13 @@ export const ThemeToggle = styled.div``;
 
 export const Links = styled.div`
 	position: absolute;
-	top: 0;
+	bottom: 0;
 	right: 0;
 	display: flex;
 	width: fit-content;
-	height: 100%;
 	z-index: 1;
 
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-		left: 0;
 		right: var(--spacing-xxs);
 	}
 `;

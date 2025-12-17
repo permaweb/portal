@@ -161,8 +161,12 @@ export default function Header(props: any) {
 							<S.ThemeToggle>
 								<Toggle theme state={settings?.theme === 'dark'} setState={() => setTheme()} />
 							</S.ThemeToggle>
-							<SocialLinks />
 						</S.Actions>
+						<S.Links>
+							<S.LinksList>
+								<SocialLinks />
+							</S.LinksList>
+						</S.Links>
 					</S.HeaderContent>
 				</S.HeaderContentWrapper>
 			</S.Header>

@@ -111,13 +111,6 @@ export const Meta = styled.div`
 	font-size: var(--font-size-default);
 	font-weight: 800;
 	margin-top: 10px;
-
-	img {
-		width: 18px;
-		height: 18px;
-		background: white;
-		border-radius: 50%;
-	}
 `;
 
 export const SourceIcon = styled.img`
