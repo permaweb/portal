@@ -235,7 +235,7 @@ export const PAGES_DOCUMENTATION = {
 				width: 'page',
 				content: [
 					{
-						type: 'topbar',
+						type: 'sidebar',
 						width: 1,
 						content: ['user'],
 					},

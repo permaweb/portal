@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 
-export const ContentWrapper = styled.div<{ $isSideNav?: boolean }>`
+export const ContentWrapper = styled.div`
 	display: flex;
-	justify-content: ${(props) => (props.$isSideNav ? 'flex-start' : 'center')};
+	justify-content: flex-start;
 	width: 100%;
 	height: calc(100% - 40px);
 	margin-bottom: 120px;
@@ -21,7 +21,7 @@ export const Content = styled.div<{ $layout: any; maxWidth: number; $isSideNav?:
 			const navWidth = props.$navWidth || 300;
 			return `${props.maxWidth - navWidth}px`;
 		}
-		return undefined;
+		return props.maxWidth ? `${props.maxWidth}px` : undefined;
 	}};
 	padding: ${(props) => (props.$layout?.padding ? `${props.$layout?.padding}` : 0)};
 	margin-left: ${(props) => (props.$isSideNav ? '0' : 'auto')};

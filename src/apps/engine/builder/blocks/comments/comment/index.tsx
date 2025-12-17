@@ -29,6 +29,7 @@ export default function Comment(props: any) {
 	const [commentData, setCommentData] = React.useState(data);
 	const [isUpdating, setIsUpdating] = React.useState(false);
 	const [isEditSubmitting, setIsEditSubmitting] = React.useState(false);
+	const [showPortalMenu, setShowPortalMenu] = React.useState(false);
 	const prevReplyCountRef = React.useRef(data?.replies?.length || 0);
 	const { profile: user, libs } = usePermawebProvider();
 	const { portal, portalId } = usePortalProvider();
@@ -205,8 +206,26 @@ export default function Comment(props: any) {
 
 	function handleProfileClick() {
 		if (isLoadingProfile || !profile) return;
-		navigate(getRedirect(`author/${profile.username ? urlify(profile.username) : profile.id}`));
+
+		if (commentAuthorIsAdmin || commentAuthorIsModerator || commentAuthorIsContributor) {
+			navigate(getRedirect(`author/${profile.username ? urlify(profile.username) : profile.id}`));
+		} else if (profile.portals && profile.portals.length > 0) {
+			setShowPortalMenu(!showPortalMenu);
+		} else {
+			navigate(getRedirect(`author/${profile.username ? urlify(profile.username) : profile.id}`));
+		}
 	}
+
+	const portalMenuEntries: MenuItem[] = React.useMemo(() => {
+		if (!profile?.portals || profile.portals.length === 0) return [];
+		return profile.portals.map((portal: any) => ({
+			label: portal.Name || portal.id,
+			onClick: () => {
+				window.open(`https://portal.arweave.net/#/${portal.id}`, '_blank');
+				setShowPortalMenu(false);
+			},
+		}));
+	}, [profile]);
 
 	const menuEntries: MenuItem[] = [];
 
@@ -288,6 +307,13 @@ export default function Comment(props: any) {
 								{commentAuthorIsModerator && <ReactSVG src={ICONS.moderator} title={language.moderator} />}
 								{commentAuthorIsContributor && <ReactSVG src={ICONS.contributor} title={language.contributor} />}
 							</S.Username>
+							{portalMenuEntries.length > 0 && (
+								<ContextMenu entries={portalMenuEntries}>
+									<S.PortalMenuTrigger $active={showPortalMenu}>
+										<ReactSVG src={ICONS.portal} />
+									</S.PortalMenuTrigger>
+								</ContextMenu>
+							)}
 						</S.UsernameWrapper>
 						{isEditMode && (
 							<S.EditingIndicator>

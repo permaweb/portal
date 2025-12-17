@@ -38,14 +38,7 @@ export default function Avatar(props: AvatarProps) {
 
 	if (thumbnailSrc) {
 		return (
-			<S.Avatar
-				className={className}
-				$size={size}
-				$bgColor={bgColor}
-				$iconColor={iconColor}
-				$hoverable={hoverable}
-				$hasImage
-			>
+			<S.Avatar className={className} $size={size} $bgColor={bgColor} $iconColor={iconColor} $hoverable={hoverable}>
 				<img
 					className="loadingAvatar"
 					onLoad={(e) => {

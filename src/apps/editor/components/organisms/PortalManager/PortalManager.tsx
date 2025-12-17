@@ -7,17 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
-import {
-	FONT_OPTIONS,
-	ICONS,
-	LAYOUT,
-	PAGES,
-	PORTAL_DATA,
-	PORTAL_PATCH_MAP,
-	PORTAL_ROLES,
-	THEME,
-	URLS,
-} from 'helpers/config';
+import { ICONS, LAYOUT, PAGES, PORTAL_DATA, PORTAL_PATCH_MAP, PORTAL_ROLES, THEME, URLS } from 'helpers/config';
 import { THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
 import { PortalDetailType, PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
 import { checkValidAddress, debugLog, getBootTag } from 'helpers/utils';
@@ -238,17 +228,11 @@ export default function PortalManager(props: {
 					const chosenTheme =
 						selectedLayout === 'documentation' ? deepMerge(THEME.DEFAULT, THEME_DOCUMENTATION_PATCH) : THEME.DEFAULT;
 
-					const defaultFonts = {
-						headers: FONT_OPTIONS.headers[0],
-						body: FONT_OPTIONS.body[0],
-					};
-
 					const portalUpdateId = await permawebProvider.libs.updateZone(
 						{
 							Themes: [permawebProvider.libs.mapToProcessCase(chosenTheme)],
 							Layout: permawebProvider.libs.mapToProcessCase(chosenLayout),
 							Pages: permawebProvider.libs.mapToProcessCase(chosenPages),
-							Fonts: permawebProvider.libs.mapToProcessCase(defaultFonts),
 						},
 						portalId,
 						arProvider.wallet

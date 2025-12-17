@@ -20,7 +20,7 @@ export const Modal = styled.div`
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 
 	color: rgba(var(--color-text), 1);
-	font-family: var(--font-body, Inter, system-ui, sans-serif);
+	font-family: var(--font-body);
 `;
 
 export const CloseButton = styled.button`

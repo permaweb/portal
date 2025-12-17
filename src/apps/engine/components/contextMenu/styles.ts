@@ -16,7 +16,7 @@ const slideDown = keyframes`
 export const Menu = styled.div`
 	position: absolute;
 	right: 0;
-	top: 0;
+	top: var(--spacing-s);
 	width: fit-content;
 `;
 
@@ -55,9 +55,9 @@ export const MenuEntries = styled.div`
 	position: absolute;
 	top: 100%;
 	right: 0;
-	background: var(--color-card-background);
-	box-shadow: var(--preference-card-shadow);
-	border: 1px solid var(--color-card-border);
+	background: var(--color-navigation-background);
+	backdrop-filter: blur(5px);
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 	border-radius: var(--border-radius);
 	z-index: 99;
 	padding: 4px;
@@ -122,9 +122,9 @@ export const Submenu = styled.div`
 	position: absolute;
 	left: 100%;
 	top: 0;
-	background: var(--color-card-background);
-	box-shadow: var(--preference-card-shadow);
-	border: 1px solid var(--color-card-border);
+	background: var(--color-navigation-background);
+	backdrop-filter: blur(5px);
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 	border-radius: var(--border-radius);
 	padding: 4px;
 	min-width: 120px;
