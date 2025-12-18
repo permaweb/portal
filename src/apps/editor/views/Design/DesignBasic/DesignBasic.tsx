@@ -52,6 +52,19 @@ export default function DesignBasic() {
 					/>
 				</S.Section>
 				<S.Section>
+					<Drawer drawerKey="design-themes" title={language?.themes} content={<Themes />} padContent />
+				</S.Section>
+				<S.Section>
+					<Drawer drawerKey="design-fonts" title={language?.fonts} content={<Fonts />} padContent />
+				</S.Section>
+				{!portalProvider?.permissions?.updatePortalMeta && (
+					<S.InfoWrapper className={'warning'}>
+						<span>{language?.unauthorizedPortalUpdate}</span>
+					</S.InfoWrapper>
+				)}
+			</S.SectionWrapper>
+			<S.SectionWrapper>
+				<S.Section>
 					<Drawer
 						drawerKey="design-images"
 						title={language?.images}
@@ -89,19 +102,6 @@ export default function DesignBasic() {
 						padContent
 					/>
 				</S.Section>
-			</S.SectionWrapper>
-			<S.SectionWrapper>
-				<S.Section>
-					<Drawer drawerKey="design-fonts" title={language?.fonts} content={<Fonts />} padContent />
-				</S.Section>
-				<S.Section>
-					<Drawer drawerKey="design-themes" title={language?.themes} content={<Themes />} padContent />
-				</S.Section>
-				{!portalProvider?.permissions?.updatePortalMeta && (
-					<S.InfoWrapper className={'warning'}>
-						<span>{language?.unauthorizedPortalUpdate}</span>
-					</S.InfoWrapper>
-				)}
 			</S.SectionWrapper>
 		</S.BodyWrapper>
 	);

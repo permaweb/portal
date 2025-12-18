@@ -7,7 +7,7 @@ export const FooterWrapper = styled.div<{ $layout: any; $theme: any; $editFixed?
 	background: rgba(var(--color-footer-background), 1);
 	color: rgba(var(--color-text), 1);
 	padding: ${(props) => props.$layout?.padding};
-	border-top: ${(props) => (props.$layout?.border?.top ? `1px solid rgba(var(--color-border),1)` : `unset`)};
+	border-top: ${(props) => (props.$layout?.border?.top ? `1px solid rgba(var(--color-footer-border),1)` : `unset`)};
 	font-weight: 600;
 	box-sizing: border-box;
 	z-index: 1;
@@ -127,5 +127,5 @@ export const LinkWrapper = styled.div`
 
 export const Copyright = styled.div<{ $hasContentAbove?: boolean }>`
 	margin-top: ${(props) => (props.$hasContentAbove ? '10px' : '0')};
-	border-top: ${(props) => (props.$hasContentAbove ? '1px solid rgba(var(--color-border), 3)' : 'none')};
+	border-top: ${(props) => (props.$hasContentAbove ? '1px solid rgba(var(--color-footer-border), 1)' : 'none')};
 `;

@@ -67,16 +67,29 @@ export default function PostPreview_Default(props: any) {
 			{/* <ContextMenu entries={menuEntries} /> */}
 			<S.Categories>
 				{post ? (
-					post?.metadata?.categories?.map((category: any, index: number) => {
-						return (
-							<React.Fragment key={index}>
-								<NavLink to={getRedirect(`feed/category/${category.name}`)}>
-									<S.Category>{category.name}</S.Category>
-								</NavLink>
-								{index < post.metadata.categories.length - 1 && <>,&nbsp;</>}
-							</React.Fragment>
-						);
-					})
+					<>
+						{post?.metadata?.categories?.map((category: any, index: number) => {
+							return (
+								<React.Fragment key={index}>
+									<NavLink to={getRedirect(`feed/category/${category.name}`)}>
+										<S.Category>{category.name}</S.Category>
+									</NavLink>
+									{index < post.metadata.categories.length - 1 && <>,&nbsp;</>}
+								</React.Fragment>
+							);
+						})}
+						{post?.metadata?.topics?.length > 0 && post?.metadata?.categories?.length > 0 && <>&nbsp;·&nbsp;</>}
+						{post?.metadata?.topics?.map((tag: string, index: number) => {
+							return (
+								<React.Fragment key={index}>
+									<NavLink to={getRedirect(`feed/tag/${tag}`)}>
+										<S.Category>#{tag}</S.Category>
+									</NavLink>
+									{index < post.metadata.topics.length - 1 && <>&nbsp;</>}
+								</React.Fragment>
+							);
+						})}
+					</>
 				) : (
 					<S.Category>Loading...</S.Category>
 				)}

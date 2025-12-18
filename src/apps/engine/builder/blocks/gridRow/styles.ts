@@ -3,7 +3,8 @@ import styled from 'styled-components';
 
 export const GridRow = styled.div<{ $layout?: any }>`
 	position: relative;
-	width: 100%;
+	width: ${(props) => (props?.$layout?.width === 'page' ? '100vw' : '100%')};
+	margin-left: ${(props) => (props?.$layout?.width === 'page' ? 'calc(-50vw + 50%)' : '0')};
 	display: flex;
 	flex-wrap: wrap;
 	background: ${(props) => (props?.$layout?.width === 'page' ? `rgba(${props.$layout.background}, 1)` : 'unset')};
@@ -12,7 +13,7 @@ export const GridRow = styled.div<{ $layout?: any }>`
 	background-attachment: fixed;
 	background-size: cover;
 	z-index: 1;
-	margin: ${(props) => (props.$layout?.margin ? props.$layout?.margin : '0 0 20px 0')};
+	margin-bottom: ${(props) => (props.$layout?.margin ? props.$layout?.margin : '20px')};
 
 	${(props) =>
 		props.$layout?.gradient &&

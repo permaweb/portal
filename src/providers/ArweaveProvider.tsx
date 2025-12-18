@@ -162,17 +162,8 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}, [walletAddress]);
 
 	React.useEffect(() => {
-		const checkBackupStatus = () => {
-			if (window?.wanderInstance?.backupInfo?.backupsNeeded) {
-				setBackupsNeeded(window.wanderInstance.backupInfo.backupsNeeded);
-			}
-		};
-
-		checkBackupStatus();
-		const interval = setInterval(checkBackupStatus, 10000);
-
-		return () => clearInterval(interval);
-	}, []);
+		setBackupsNeeded(window?.wanderInstance?.backupInfo?.backupsNeeded ?? 0);
+	}, [auth]);
 
 	async function handleWallet() {
 		if (localStorage.getItem(STORAGE.walletType)) {
