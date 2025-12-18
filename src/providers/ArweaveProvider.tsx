@@ -67,11 +67,25 @@ export function useArweaveProvider(): ArweaveContextState {
 export function ArweaveProvider(props: { children: React.ReactNode }) {
 	const navigate = useNavigate();
 	const disconnectingRef = React.useRef(false);
+	const lastAuthKeyRef = React.useRef<string | null>(null);
+	const walletAddressRef = React.useRef<string | null>(null);
 
-	const [auth, setAuth] = React.useState(null);
+	const [auth, setAuthState] = React.useState(null);
+
+	const setAuth = (newAuth: any) => {
+		const authKey = newAuth ? `${newAuth.authStatus}-${newAuth.authType}` : null;
+		if (authKey !== lastAuthKeyRef.current) {
+			lastAuthKeyRef.current = authKey;
+			setAuthState(newAuth);
+		}
+	};
 	const [wallet, setWallet] = React.useState<any>(null);
 	const [walletType, setWalletType] = React.useState<WalletEnum | null>(null);
-	const [walletAddress, setWalletAddress] = React.useState<string | null>(null);
+	const [walletAddress, setWalletAddressState] = React.useState<string | null>(null);
+	const setWalletAddress = (addr: string | null) => {
+		walletAddressRef.current = addr;
+		setWalletAddressState(addr);
+	};
 	const [turboBalanceObj, setTurboBalanceObj] = React.useState<TurboBalance>({
 		winc: '0',
 		balance: '0',
@@ -196,7 +210,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 	async function handleArConnect() {
 		if (disconnectingRef.current) return;
-		if (!walletAddress) {
+		if (!walletAddressRef.current) {
 			if (window.arweaveWallet) {
 				try {
 					await window.arweaveWallet.connect(WALLET_PERMISSIONS as any);
