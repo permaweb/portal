@@ -479,7 +479,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 													Edit Layout
 												</S.NavigationEntry>
 											)}
-											{isAdmin && (
+											{isAdmin && localStorage.getItem('devMode') === 'true' && (
 												<S.NavigationEntry
 													onClick={() => {
 														setShowUserMenu(false);
