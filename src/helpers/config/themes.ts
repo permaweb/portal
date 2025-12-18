@@ -147,8 +147,8 @@ export const THEME_DEFAULT = {
 				dark: '38,38,38',
 			},
 			border: {
-				light: 'border',
-				dark: 'border',
+				light: 'unset',
+				dark: 'unset',
 			},
 		},
 		preferences: {
