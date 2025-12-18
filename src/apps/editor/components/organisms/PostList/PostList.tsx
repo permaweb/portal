@@ -10,7 +10,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
 import { Panel } from 'components/atoms/Panel';
 import { ICONS, URLS } from 'helpers/config';
-import { ArticleStatusType, PortalAssetRequestType, PortalAssetType, ViewLayoutType } from 'helpers/types';
+import { ArticleStatusType, PortalAssetType, ViewLayoutType } from 'helpers/types';
 import { formatDate } from 'helpers/utils';
 import { usePostsList } from 'hooks/usePostList';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -155,7 +155,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 				content = (
 					<S.PostsActionsRequests>
 						<S.PostsActionsRequestsBody>
-							{requests.map((request: PortalAssetRequestType) => {
+							{requests.map((request: any) => {
 								return (
 									<S.PostActionRequest key={request.id}>
 										<S.PostActionRequestLine>

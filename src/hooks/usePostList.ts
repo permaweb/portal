@@ -5,13 +5,6 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { ArticleStatusType, PortalAssetRequestType } from 'helpers/types';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
-type RequestRow = {
-	id: string;
-	name: string;
-	creatorId: string;
-	releaseDate: number;
-};
-
 export function usePostsList(props: { pageSize?: number }) {
 	const portalProvider = usePortalProvider();
 	const permawebProvider = usePermawebProvider();
@@ -65,7 +58,7 @@ export function usePostsList(props: { pageSize?: number }) {
 								releaseDate: asset.metadata?.releaseDate,
 							};
 
-							setRequests((prev) => {
+							setRequests((prev: any) => {
 								const base = prev ?? [];
 								return base.some((r) => r.id === formatted.id) ? base : [...base, formatted];
 							});
@@ -101,7 +94,7 @@ export function usePostsList(props: { pageSize?: number }) {
 				const dateB = new Date(Number(b.metadata?.releaseDate)).getTime();
 				return dateAscending ? dateA - dateB : dateB - dateA;
 			});
-	}, [portalProvider.current?.assets, currentStatusFilter, dateAscending]);
+	}, [portalProvider.current, currentStatusFilter, dateAscending]);
 
 	const totalPages = Math.ceil(assets.length / pageCount);
 
@@ -123,7 +116,7 @@ export function usePostsList(props: { pageSize?: number }) {
 		setShowFilterActions,
 		showRequests,
 		setShowRequests,
-		requests: requests as RequestRow[] | null,
+		requests: requests as any[] | null,
 		setRequests,
 		totalCount,
 		publishedCount,

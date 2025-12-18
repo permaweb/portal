@@ -9,11 +9,16 @@ interface NotificationItem {
 	message: string;
 	type: 'success' | 'warning';
 	timestamp: number;
+	persistent?: boolean;
+}
+
+interface NotificationOptions {
+	persistent?: boolean;
 }
 
 interface NotificationContextType {
 	notifications: NotificationItem[];
-	addNotification: (message: string, type: 'success' | 'warning') => void;
+	addNotification: (message: string, type: 'success' | 'warning', opts?: NotificationOptions) => void;
 	removeNotification: (id: string) => void;
 }
 
@@ -47,17 +52,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 		}
 	}, [portalContainer]);
 
-	const addNotification = React.useCallback((message: string, type: 'success' | 'warning') => {
-		const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-		const newNotification: NotificationItem = {
-			id,
-			message,
-			type,
-			timestamp: Date.now(),
-		};
+	const addNotification = React.useCallback(
+		(message: string, type: 'success' | 'warning', opts?: NotificationOptions) => {
+			const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+			const newNotification: NotificationItem = {
+				id,
+				message,
+				type,
+				timestamp: Date.now(),
+				persistent: opts?.persistent,
+			};
 
-		setNotifications((prev) => [...prev, newNotification]);
-	}, []);
+			setNotifications((prev) => [...prev, newNotification]);
+		},
+		[]
+	);
 
 	const removeNotification = React.useCallback((id: string) => {
 		setNotifications((prev) => prev.filter((notification) => notification.id !== id));
@@ -98,6 +107,7 @@ const NotificationStack: React.FC<{
 					<Notification
 						message={notification.message}
 						type={notification.type}
+						persistent={notification.persistent}
 						callback={() => removeNotification(notification.id)}
 					/>
 				</div>
