@@ -411,12 +411,12 @@ export default function Categories(props: {
 	function getCategoryAdd() {
 		return (
 			<S.CategoriesAction>
-				<S.Info>
-					{getEffectiveParentId() &&
-						`You are adding as a child to the category "${
-							findCategoryById(categoryOptions ?? [], getEffectiveParentId())?.name ?? ''
-						}".`}
-				</S.Info>
+				{getEffectiveParentId() && (
+					<S.Info inlineAdd={props.inlineAdd}>
+						You are adding as a child to the category '
+						{findCategoryById(categoryOptions ?? [], getEffectiveParentId())?.name ?? ''}'.
+					</S.Info>
+				)}
 				<S.CategoriesAddAction
 					onSubmit={addCategory}
 					onKeyDownCapture={(e) => {
@@ -474,16 +474,18 @@ export default function Categories(props: {
 								</S.CategoriesClose>
 							</>
 						) : (
-							<Button
-								type={'primary'}
-								label={language.addCategory}
-								handlePress={() => setShowCategoryAdd(true)}
-								disabled={!portalProvider.permissions?.updatePortalMeta}
-								icon={ICONS.add}
-								iconLeftAlign
-								height={40}
-								fullWidth
-							/>
+							<S.CategoryAddAction>
+								<Button
+									type={'primary'}
+									label={language.addCategory}
+									handlePress={() => setShowCategoryAdd(true)}
+									disabled={!portalProvider.permissions?.updatePortalMeta}
+									icon={ICONS.add}
+									iconLeftAlign
+									height={40}
+									fullWidth
+								/>
+							</S.CategoryAddAction>
 						)}
 					</S.CategoriesAdd>
 				)}

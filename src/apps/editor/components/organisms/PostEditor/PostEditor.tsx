@@ -7,6 +7,7 @@ import { EditorStoreRootState } from 'editor/store';
 import { currentPostUpdate, setOriginalData } from 'editor/store/post';
 
 import { Button } from 'components/atoms/Button';
+import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { ASSET_UPLOAD, PORTAL_POST_DATA, URLS } from 'helpers/config';
 import {
@@ -111,7 +112,7 @@ export default function PostEditor() {
 			}
 			if (!portalProvider.permissions?.updatePostStatus) {
 				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
-				addNotification(language?.unauthorized, 'warning');
+				addNotification(language?.unauthorized, 'warning', { persistent: true });
 				return;
 			}
 
@@ -139,12 +140,12 @@ export default function PostEditor() {
 
 					portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Requests);
 					if (zoneIndexResult?.Messages?.length > 0) {
-						addNotification(`${language?.postStatusUpdated}!`, 'success');
+						addNotification(`${language?.postStatusUpdated}!`, 'success', { persistent: true });
 					} else {
-						addNotification(language?.errorUpdatingPost, 'warning');
+						addNotification(language?.errorUpdatingPost, 'warning', { persistent: true });
 					}
 				} catch (e: any) {
-					addNotification(e.message ?? 'Error updating post status', 'warning');
+					addNotification(e.message ?? 'Error updating post status', 'warning', { persistent: true });
 				}
 			}
 
@@ -168,7 +169,7 @@ export default function PostEditor() {
 
 			if (!portalProvider.permissions?.updatePostRequestStatus) {
 				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
-				addNotification(language?.unauthorized, 'warning');
+				addNotification(language?.unauthorized, 'warning', { persistent: true });
 				return;
 			}
 
@@ -228,7 +229,7 @@ export default function PostEditor() {
 									try {
 										data.Thumbnail = await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail);
 									} catch (e: any) {
-										addNotification(e.message ?? language?.errorUploadingThumbnail, 'warning');
+										addNotification(e.message ?? language?.errorUploadingThumbnail, 'warning', { persistent: true });
 									}
 								}
 
@@ -243,14 +244,14 @@ export default function PostEditor() {
 							}
 						}
 
-						addNotification(`${language?.postStatusUpdated}!`, 'success');
+						addNotification(`${language?.postStatusUpdated}!`, 'success', { persistent: true });
 						portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Requests, PortalPatchMapEnum.Posts]);
 						if (updateType === 'Reject') navigate(URLS.portalBase(portalProvider.current.id));
 					} else {
-						addNotification(language?.errorUpdatingPost, 'warning');
+						addNotification(language?.errorUpdatingPost, 'warning', { persistent: true });
 					}
 				} catch (e: any) {
-					addNotification(e.message ?? 'Error updating post status', 'warning');
+					addNotification(e.message ?? 'Error updating post status', 'warning', { persistent: true });
 				}
 			}
 
@@ -296,7 +297,7 @@ export default function PostEditor() {
 				try {
 					data.Thumbnail = await permawebProvider.libs.resolveTransaction(currentPost.data.thumbnail);
 				} catch (e: any) {
-					addNotification(e.message ?? language?.errorUploadingThumbnail, 'warning');
+					addNotification(e.message ?? language?.errorUploadingThumbnail, 'warning', { persistent: true });
 				}
 			}
 
@@ -368,7 +369,7 @@ export default function PostEditor() {
 					}
 
 					debugLog('info', 'PostEditor', `Asset content update: ${assetContentUpdateId}`);
-					addNotification(`${language?.postUpdated}!`, 'success');
+					addNotification(`${language?.postUpdated}!`, 'success', { persistent: true });
 					portalProvider.refreshCurrentPortal([
 						...(isStaticPage ? [PortalPatchMapEnum.Presentation] : []),
 						PortalPatchMapEnum.Posts,
@@ -378,7 +379,7 @@ export default function PostEditor() {
 					// Update original data to reflect the saved state
 					dispatch(setOriginalData(currentPost.data));
 				} catch (e: any) {
-					addNotification(e.message ?? language?.errorUpdatingPost, 'warning');
+					addNotification(e.message ?? language?.errorUpdatingPost, 'warning', { persistent: true });
 				}
 			} else {
 				try {
@@ -469,7 +470,7 @@ export default function PostEditor() {
 								message: zoneIndexUpdateId,
 							});
 
-							debugLog('info', 'PostEditor', `Zone result: ${JSON.stringify(zoneResult, null, 2)}`);
+							// debugLog('info', 'PostEditor', `Zone result: ${JSON.stringify(zoneResult, null, 2)}`);
 
 							if (zoneResult?.Messages?.length > 0) {
 								const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
@@ -551,7 +552,7 @@ export default function PostEditor() {
 						}
 					}
 
-					addNotification(`${language?.postSaved}!`, 'success');
+					addNotification(`${language?.postSaved}!`, 'success', { persistent: true });
 
 					// Update the current post with the new assetId and set it as saved state
 					const updatedPostData = { ...currentPost.data, id: assetId };
@@ -560,7 +561,8 @@ export default function PostEditor() {
 
 					navigate(`${URLS.postEditArticle(portalProvider.current.id)}${assetId}`);
 				} catch (e: any) {
-					addNotification(e.message ?? 'Error creating post', 'warning');
+					debugLog('error', 'PostEditor', e);
+					addNotification(e.message ?? 'Error creating post', 'warning', { persistent: true });
 				}
 			}
 
@@ -689,6 +691,13 @@ export default function PostEditor() {
 
 	return (
 		<>
+			<ArticleEditor
+				handleSubmit={handleSubmit}
+				handleRequestUpdate={handleRequestUpdate}
+				handleStatusUpdate={handleStatusUpdate}
+				staticPage={isStaticPage}
+			/>
+			{currentPost.editor.loading.active && <Loader message={currentPost.editor.loading.message} />}
 			{unauthorized && (
 				<div className={'overlay'}>
 					<S.MessageWrapper className={'border-wrapper-alt2 warning'}>
@@ -701,12 +710,6 @@ export default function PostEditor() {
 					</S.MessageWrapper>
 				</div>
 			)}
-			<ArticleEditor
-				handleSubmit={handleSubmit}
-				handleRequestUpdate={handleRequestUpdate}
-				handleStatusUpdate={handleStatusUpdate}
-				staticPage={isStaticPage}
-			/>
 			{showReview && (
 				<Modal header={language?.reviewPostDetails} handleClose={() => setShowReview(false)}>
 					<S.ModalWrapper>

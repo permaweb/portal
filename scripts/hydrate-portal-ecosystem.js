@@ -25,10 +25,11 @@
  */
 
 import fs from 'fs';
-import { setGlobalDispatcher, Agent } from 'undici';
+import { Agent, setGlobalDispatcher } from 'undici';
+
 import Arweave from 'arweave';
-import { connect } from '@permaweb/aoconnect';
 import Permaweb from '@permaweb/libs';
+import { connect } from '@permaweb/aoconnect';
 
 // Configure fetch agent for better performance
 setGlobalDispatcher(
@@ -47,8 +48,8 @@ setGlobalDispatcher(
 // ============================================================================
 
 const PORTAL_SOURCE_NODE = 'https://hb.portalinto.com';
-const TARGET_NODES = ['https://app-1.forward.computer', 'https://app-2.forward.computer'];
-const MIN_BLOCK = 1808011;
+const TARGET_NODES = ['http://localhost:8734'];
+const MIN_BLOCK = 1818200;
 
 const OUTPUT_FILE = 'portal-ecosystem-hydrated.json';
 const ECOSYSTEM_DATA_FILE = 'portal-ecosystem-data.json';
@@ -166,7 +167,7 @@ async function getAggregatedGQLData(args, callback) {
  * Finds all portal processes via GraphQL
  */
 async function findPortalProcesses() {
-	console.log('🔍 Finding portal processes via GraphQL...\n');
+	console.log('Finding portal processes via GraphQL...\n');
 
 	const tags = [
 		{ name: 'Data-Protocol', values: ['ao'] },
@@ -197,14 +198,14 @@ async function fetchPortalData(portalId, sourceNode) {
 		const response = await fetch(url);
 
 		if (!response.ok) {
-			console.warn(`  ⚠️  Failed to fetch portal ${portalId}: HTTP ${response.status}`);
+			console.warn(`  Failed to fetch portal ${portalId}: HTTP ${response.status}`);
 			return null;
 		}
 
 		const data = await response.json();
 		return data;
 	} catch (error) {
-		console.error(`  ❌ Error fetching portal ${portalId}:`, error.message);
+		console.error(`  Error fetching portal ${portalId}:`, error.message);
 		return null;
 	}
 }
@@ -309,7 +310,7 @@ function extractAllIdsFromPortal(portalData, portalId) {
  * Aggregates all process IDs from multiple portals
  */
 async function aggregatePortalEcosystemIds(portalProcesses, sourceNode) {
-	console.log(`\n📦 Aggregating IDs from ${portalProcesses.length} portals...\n`);
+	console.log(`\nAggregating IDs from ${portalProcesses.length} portals...\n`);
 
 	const allPortalIds = [];
 	const allPostIds = new Set();
@@ -323,7 +324,7 @@ async function aggregatePortalEcosystemIds(portalProcesses, sourceNode) {
 	for (const process of portalProcesses) {
 		const portalId = process?.node?.id;
 		if (!portalId) {
-			console.warn('⚠️  Skipping process with no ID');
+			console.warn('Skipping process with no ID');
 			errorCount++;
 			continue;
 		}
@@ -333,7 +334,7 @@ async function aggregatePortalEcosystemIds(portalProcesses, sourceNode) {
 		const portalData = await fetchPortalData(portalId, sourceNode);
 
 		if (!portalData) {
-			console.warn(`⚠️  Failed to fetch data for portal ${portalId}`);
+			console.warn(`Failed to fetch data for portal ${portalId}`);
 			errorCount++;
 			continue;
 		}
@@ -365,7 +366,7 @@ async function aggregatePortalEcosystemIds(portalProcesses, sourceNode) {
 	};
 
 	console.log('\n' + '='.repeat(50));
-	console.log('📊 Aggregation Summary');
+	console.log('Aggregation Summary');
 	console.log('='.repeat(50));
 	console.log(`Portals processed: ${successCount}/${portalProcesses.length}`);
 	console.log(`Total unique posts: ${result.postIds.length}`);
@@ -418,7 +419,7 @@ async function hydrateProcess(pid, type, targetNodes) {
 	const typeLabel = `[${type}]`;
 
 	try {
-		console.log(`  Hydrating ${pid.substring(0, 8)}... ${typeLabel}`);
+		console.log(`  Hydrating ${pid}... ${typeLabel}`);
 
 		let nodeSuccess = false;
 
@@ -433,28 +434,28 @@ async function hydrateProcess(pid, type, targetNodes) {
 				console.log(`    Status: ${cronOnceRes.status}`);
 
 				if (cronOnceRes.ok) {
-					console.log(`    ✓ Hydration triggered successfully on ${node}`);
+					console.log(`    Hydration triggered successfully on ${node}`);
 					nodeSuccess = true;
 
 					// Add a small delay to let the process start
 					await new Promise((resolve) => setTimeout(resolve, 2000));
 				} else {
-					console.error(`    ✗ Failed: HTTP ${cronOnceRes.status}`);
+					console.error(`    Failed: HTTP ${cronOnceRes.status}`);
 				}
 			} catch (nodeErr) {
-				console.error(`    ✗ Error on ${node}:`, nodeErr.message);
+				console.error(`    Error on ${node}:`, nodeErr.message);
 			}
 		}
 
 		if (nodeSuccess) {
-			console.log(`  ✓ Success: ${pid.substring(0, 8)}... ${typeLabel}`);
+			console.log(`  Success: ${pid.substring(0, 8)}... ${typeLabel}`);
 			return true;
 		} else {
-			console.error(`  ✗ Failed on all nodes: ${pid.substring(0, 8)}... ${typeLabel}`);
+			console.error(`  Failed on all nodes: ${pid.substring(0, 8)}... ${typeLabel}`);
 			return false;
 		}
 	} catch (err) {
-		console.error(`  ✗ Error hydrating ${pid.substring(0, 8)}... ${typeLabel}:`, err.message);
+		console.error(`  Error hydrating ${pid.substring(0, 8)}... ${typeLabel}:`, err.message);
 		return false;
 	}
 }
@@ -463,7 +464,7 @@ async function hydrateProcess(pid, type, targetNodes) {
  * Hydrates all processes in the list
  */
 async function hydrateAllProcesses(hydrationList, targetNodes) {
-	console.log(`\n⚡ Starting hydration of ${hydrationList.length} processes...\n`);
+	console.log(`\nStarting hydration of ${hydrationList.length} processes...\n`);
 
 	const hydratedIds = loadHydratedIds();
 	const total = hydrationList.length;
@@ -475,7 +476,7 @@ async function hydrateAllProcesses(hydrationList, targetNodes) {
 		const { id, type } = item;
 
 		if (hydratedIds.has(id)) {
-			console.log(`  ⏭️  Skipping ${id.substring(0, 8)}... [${type}] (already hydrated)`);
+			console.log(`  Skipping ${id.substring(0, 8)}... [${type}] (already hydrated)`);
 			skippedCount++;
 			continue;
 		}
@@ -495,7 +496,7 @@ async function hydrateAllProcesses(hydrationList, targetNodes) {
 	}
 
 	console.log('\n' + '='.repeat(50));
-	console.log('✅ Hydration Complete');
+	console.log('Hydration Complete');
 	console.log('='.repeat(50));
 	console.log(`Total: ${total}`);
 	console.log(`Skipped: ${skippedCount} (already hydrated)`);
@@ -510,7 +511,7 @@ async function hydrateAllProcesses(hydrationList, targetNodes) {
 
 async function main() {
 	console.log('\n' + '='.repeat(50));
-	console.log('🌐 Portal Ecosystem Hydration');
+	console.log('Portal Ecosystem Hydration');
 	console.log('='.repeat(50));
 	console.log(`Source Node: ${PORTAL_SOURCE_NODE}`);
 	console.log(`Target Nodes: ${TARGET_NODES.join(', ')}`);
@@ -520,7 +521,7 @@ async function main() {
 	try {
 		// Step 1: Find all portal processes
 		const portalProcesses = await findPortalProcesses();
-		console.log(`\n✓ Found ${portalProcesses.length} portal processes\n`);
+		console.log(`\nFound ${portalProcesses.length} portal processes\n`);
 
 		if (portalProcesses.length === 0) {
 			console.log('No portals found. Exiting.');
@@ -532,14 +533,14 @@ async function main() {
 		saveEcosystemData(aggregatedIds);
 
 		// Step 3: Create hydration list
-		console.log('📋 Creating hydration list...\n');
+		console.log('Creating hydration list...\n');
 		const hydrationList = createHydrationList(aggregatedIds);
-		console.log(`✓ Total processes to hydrate: ${hydrationList.length}\n`);
+		console.log(`Total processes to hydrate: ${hydrationList.length}\n`);
 
 		// Step 4: Hydrate all processes
 		await hydrateAllProcesses(hydrationList, TARGET_NODES);
 
-		console.log('\n🎉 Portal ecosystem hydration complete!\n');
+		console.log('\nPortal ecosystem hydration complete!\n');
 		console.log(`Output files:`);
 		console.log(`  - ${OUTPUT_FILE} (hydrated process IDs)`);
 		console.log(`  - ${ECOSYSTEM_DATA_FILE} (ecosystem data)`);
@@ -548,7 +549,7 @@ async function main() {
 		}
 		console.log('');
 	} catch (error) {
-		console.error('\n❌ Fatal error:', error);
+		console.error('\nFatal error:', error);
 		saveError('main', error, 'fatal');
 		process.exit(1);
 	}

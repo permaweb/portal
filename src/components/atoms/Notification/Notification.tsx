@@ -12,6 +12,7 @@ export default function Notification(props: {
 	message: string;
 	callback: () => void | null;
 	type: 'success' | 'warning';
+	persistent?: boolean;
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -24,7 +25,7 @@ export default function Notification(props: {
 	}
 
 	React.useEffect(() => {
-		if (show) {
+		if (show && !props.persistent) {
 			const timer = setTimeout(
 				() => {
 					handleClose();
@@ -34,7 +35,7 @@ export default function Notification(props: {
 
 			return () => clearTimeout(timer);
 		}
-	}, [show, props.type]);
+	}, [show, props.type, props.persistent]);
 
 	return show ? (
 		<S.Wrapper warning={props.type === 'warning'} className={'info'}>

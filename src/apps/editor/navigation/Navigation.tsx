@@ -71,7 +71,10 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		window.addEventListener('scroll', handleScroll, { passive: true });
 		handleScroll();
 
-		return () => window.removeEventListener('scroll', handleScroll);
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+			header.style.borderBottom = 'none';
+		};
 	}, [location.pathname, theme.colors.border.primary]);
 
 	React.useEffect(() => {

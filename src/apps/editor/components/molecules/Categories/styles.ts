@@ -15,7 +15,6 @@ export const CategoriesAction = styled.div`
 
 export const CategoriesAdd = styled.div`
 	margin: 2.5px 0 0 0;
-	padding: 20px 0 0 0;
 	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
@@ -40,6 +39,10 @@ export const CategoriesAddAction = styled.form`
 
 export const CategoriesParentAction = styled.div`
 	position: relative;
+`;
+
+export const CategoryAddAction = styled.div`
+	margin: 17.5px 0 0 0;
 `;
 
 export const CategoriesParentSelectAction = styled.div`
@@ -232,6 +235,9 @@ export const CategoryDrag = styled.div<{ level: number; isDragging: boolean }>`
 		opacity: 1;
 		content: 'Parent';
 		white-space: nowrap;
+		position: absolute;
+		right: 10px;
+		top: -5px;
 	}
 `;
 
@@ -263,8 +269,10 @@ export const CategoryContent = styled.div`
 
 	.notification {
 		position: absolute;
-		top: -3.5px;
-		right: -3.5px;
+		background: ${(props) => props.theme.colors.indicator.alt1} !important;
+		animation: none !important;
+		top: -8.5px;
+		right: 35px;
 	}
 `;
 
@@ -363,9 +371,11 @@ export const FieldLabel = styled.label`
 	user-select: none;
 `;
 
-export const Info = styled.label`
-	font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+export const Info = styled.p<{ inlineAdd: boolean }>`
+	font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+	font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 	color: ${(props) => props.theme.colors.font.alt1};
+	margin: ${(props) => (props.inlineAdd ? '10.5px 0 0 0' : '12.5px 0 0 0')};
 `;
 
 export const Inline = styled.div`

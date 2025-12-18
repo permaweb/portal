@@ -194,12 +194,11 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	async function resolveProfile(address: string, opts?: { hydrate?: boolean }): Promise<Types.ProfileType | undefined> {
 		if (libs) {
 			try {
-				// let fetchedProfile: any;
-				// const cachedProfile = getCachedProfile(address);
-				// if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id, opts);
-				// else fetchedProfile = await libs.getProfileByWalletAddress(address);
+				let fetchedProfile: any;
+				const cachedProfile = getCachedProfile(address);
+				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id, opts);
+				else fetchedProfile = await libs.getProfileByWalletAddress(address);
 
-				const fetchedProfile = await libs.getProfileByWalletAddress(address);
 				const profileToUse = normalizeProfile({ ...fetchedProfile });
 
 				cacheProfile(address, profileToUse);
