@@ -76,7 +76,7 @@ export default function DesignBasic() {
 										<S.MediaInfo>{language?.recommended}: 500x280px (16:9)</S.MediaInfo>
 									</S.MediaTitleWrapper>
 									<S.MediaEntry>
-										<Media portal={portalProvider.current} type={'logo'} />
+										<Media portal={portalProvider.current} type={'logo'} hideActions />
 									</S.MediaEntry>
 								</div>
 								<div>
@@ -85,7 +85,7 @@ export default function DesignBasic() {
 										<S.MediaInfo>{language?.recommended}: 32x32px (1:1)</S.MediaInfo>
 									</S.MediaTitleWrapper>
 									<S.MediaEntry>
-										<Media portal={portalProvider.current} type={'icon'} />
+										<Media portal={portalProvider.current} type={'icon'} hideActions />
 									</S.MediaEntry>
 								</div>
 								<div>
@@ -94,7 +94,7 @@ export default function DesignBasic() {
 										<S.MediaInfo>{language?.recommended}: 1920x1080px (16:9)</S.MediaInfo>
 									</S.MediaTitleWrapper>
 									<S.MediaEntryWallpaper>
-										<Media portal={portalProvider.current} type={'wallpaper'} />
+										<Media portal={portalProvider.current} type={'wallpaper'} hideActions />
 									</S.MediaEntryWallpaper>
 								</div>
 							</>
