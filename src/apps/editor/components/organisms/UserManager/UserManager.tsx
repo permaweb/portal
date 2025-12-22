@@ -233,7 +233,6 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 
 		setLoading(true);
 		try {
-			// remove both wallet + process grants
 			await permawebProvider.libs.setZoneRoles(
 				[
 					{ granteeId: targetWallet, roles: [], type: 'wallet', sendInvite: false },
@@ -242,7 +241,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				portalProvider.current.id,
 				arProvider.wallet
 			);
-
+			console.log('User removed successfully', targetWallet, targetProcessId);
 			addNotification(language?.userRemoved ?? 'User removed', 'success');
 			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Users);
 			props.handleClose();
@@ -305,37 +304,16 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 					/>
 				</S.ActionsWrapper>
 
-				{props.user && (
+				{props.user && canRemoveUser && (
 					<S.ActionsWrapper>
 						<Button
-							type={'warning'} // keep if your Button supports it; otherwise swap to an existing type
+							type={'warning'}
 							label={language?.removeUser ?? 'Remove user'}
 							handlePress={() => setShowRemoveConfirm(true)}
-							disabled={!canRemoveUser}
 							loading={loading}
 							height={45}
 							fullWidth
 						/>
-
-						{!canRemoveUser && !loading && !unauthorized && !isOwner && !isTargetOwner && !isMe && (
-							<S.InfoWrapper className={'warning'}>
-								<span>
-									{language?.insufficientPriority ?? 'You cannot remove a user with equal or higher role priority.'}
-								</span>
-							</S.InfoWrapper>
-						)}
-
-						{isMe && (
-							<S.InfoWrapper className={'warning'}>
-								<span>{language?.cannotRemoveSelf ?? 'You cannot remove yourself.'}</span>
-							</S.InfoWrapper>
-						)}
-
-						{isTargetOwner && (
-							<S.InfoWrapper className={'warning'}>
-								<span>{language?.cannotRemoveOwner ?? 'You cannot remove the portal owner.'}</span>
-							</S.InfoWrapper>
-						)}
 					</S.ActionsWrapper>
 				)}
 			</S.Wrapper>
@@ -345,9 +323,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 					header={language?.confirmRemoval ?? 'Confirm removal'}
 					handleClose={loading ? undefined : () => setShowRemoveConfirm(false)}
 				>
-					<S.InfoWrapper className={'warning'}>
-						<p>{language?.removeUserWarning ?? 'This will remove the user from the portal.'}</p>
-					</S.InfoWrapper>
+					<p>{language?.removeUserWarning ?? 'This will remove the user from the portal.'}</p>
 
 					<S.ActionsWrapper>
 						<Button
@@ -356,7 +332,6 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 							handlePress={() => setShowRemoveConfirm(false)}
 							disabled={loading}
 							height={45}
-							fullWidth
 						/>
 						<Button
 							type={'primary'}
@@ -365,7 +340,6 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 							disabled={!canRemoveUser}
 							loading={loading}
 							height={45}
-							fullWidth
 						/>
 					</S.ActionsWrapper>
 				</Modal>

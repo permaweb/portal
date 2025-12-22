@@ -38,6 +38,7 @@ export const InfoWrapper = styled.div`
 export const ActionsWrapper = styled.div`
 	width: 100%;
 	display: flex;
+	flex-direction: row;
 	align-items: center;
 	justify-content: flex-end;
 	margin: 10px 0 0 0;
