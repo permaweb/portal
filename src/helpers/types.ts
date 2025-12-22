@@ -201,6 +201,7 @@ export enum ArticleBlockEnum {
 	Table = 'table',
 	MonetizationButton = 'monetizationButton',
 	Embed = 'embed',
+	Supporters = 'supporters',
 }
 
 export type ArticleBlockType = {
@@ -237,6 +238,7 @@ export enum PageBlockEnum {
 	CategorySpotlight = 'categorySpotlight',
 	Sidebar = 'sidebar',
 	MonetizationButton = 'monetizationButton',
+	Supporters = 'supporters',
 }
 
 export type PageSectionType = {
@@ -254,6 +256,65 @@ export type PageBlockType = {
 	width: number;
 	txId?: string;
 	categoryId?: string;
+	data?: any;
+};
+
+export type SupporterColumnConfig = {
+	avatar: boolean;
+	name: boolean;
+	amount: boolean;
+	time: boolean;
+	usdApprox: boolean;
+};
+
+export type SupportersModuleConfig = {
+	showTop: boolean;
+	showRecent: boolean;
+	showFullList: boolean;
+};
+
+export type SupportersTopConfig = {
+	count: number;
+	sort: 'amount_desc' | 'amount_asc' | 'time_desc';
+	columns: SupporterColumnConfig;
+};
+
+export type SupportersRecentConfig = {
+	count: number;
+	columns: SupporterColumnConfig;
+};
+
+export type SupportersFullListConfig = {
+	columns: SupporterColumnConfig;
+	pagination: number;
+};
+
+export type SupportersFormattingConfig = {
+	amountDecimals: number;
+	title?: string;
+	showUsdApprox: boolean;
+};
+
+export type SupportersBlockData = {
+	id: string;
+	scope: 'global' | 'post';
+	modules: SupportersModuleConfig;
+	top?: SupportersTopConfig;
+	recent?: SupportersRecentConfig;
+	fullList?: SupportersFullListConfig;
+	formatting: SupportersFormattingConfig;
+};
+
+export type SupporterTip = {
+	id: string;
+	timestamp: number | null;
+	amountAr: string;
+	winston: string;
+	fromAddress: string;
+	fromProfile?: string;
+	fromName?: string;
+	fromAvatar?: string;
+	location?: string;
 };
 
 export type TagType = { name: string; value: string };

@@ -26,6 +26,7 @@ import { HTMLBlock } from './CustomBlocks/HTMLBlock';
 import { MediaBlock } from './CustomBlocks/MediaBlock';
 import { PostMonetizationBlock } from './CustomBlocks/MonetizationBlock';
 import { SpacerBlock } from './CustomBlocks/SpacerBlock';
+import { PostSupportersBlock } from './CustomBlocks/SupportersBlock';
 import { TableBlock } from './CustomBlocks/TableBlock';
 import * as S from './styles';
 
@@ -844,6 +845,7 @@ export default function ArticleBlock(props: {
 			useCustom = true;
 			element = <PostMonetizationBlock index={props.index} block={props.block} onChangeBlock={props.onChangeBlock} />;
 			break;
+
 		case 'embed':
 			useCustom = true;
 			element = (
@@ -855,6 +857,9 @@ export default function ArticleBlock(props: {
 					}
 				/>
 			);
+		case 'supporters':
+			useCustom = true;
+			element = <PostSupportersBlock index={props.index} block={props.block} onChangeBlock={props.onChangeBlock} />;
 			break;
 		default:
 			element = 'p';

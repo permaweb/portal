@@ -165,6 +165,11 @@ export const PAGE_BLOCKS = {
 		label: 'Monetization Button',
 		icon: ICONS.tools,
 	},
+	[PageBlockEnum.Supporters]: {
+		type: PageBlockEnum.Supporters,
+		label: 'Supporters',
+		icon: ICONS.users,
+	},
 };
 
 export const ARTICLE_BLOCKS = {
@@ -285,6 +290,12 @@ export const ARTICLE_BLOCKS = {
 		type: ArticleBlockEnum.Embed,
 		label: 'Embed',
 		icon: ICONS.link,
+	},
+	[ArticleBlockEnum.Supporters]: {
+		type: ArticleBlockEnum.Supporters,
+		label: 'Supporters',
+		icon: ICONS.users,
+		shortcut: 'Ctrl / S',
 	},
 };
 
