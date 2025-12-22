@@ -464,6 +464,7 @@ export const es = {
 	smaller: `Más pequeño`,
 	socialLinks: `Enlaces del sitio`,
 	sortBy: `Ordenar por`,
+	sortBy: `Ordenar Por`,
 	sortNewestToOldest: `Más nuevo a más antiguo`,
 	sortOldestToNewest: `Más antiguo a más nuevo`,
 	status: `Estado`,
@@ -568,5 +569,4 @@ export const es = {
 	yourRecords: 'Tus registros',
 	yourUploadBalance: `Tu saldo de subida`,
 
-	yyyyPlaceholder: `YYYY`,
-};
+	yyyyPlaceholder: `YYYY`,};

@@ -464,6 +464,7 @@ export const de = {
 	smaller: `Kleiner`,
 	socialLinks: `Social-Links`,
 	sortBy: `Sortieren nach`,
+	sortBy: `Sortieren nach`,
 	sortNewestToOldest: `Neueste zuerst`,
 	sortOldestToNewest: `Älteste zuerst`,
 	status: `Status`,
@@ -566,5 +567,4 @@ export const de = {
 	youAreInvited: `Sie sind eingeladen`,
 	yourRecords: `Ihre Einträge`,
 	yourUploadBalance: `Ihr Upload-Guthaben`,
-	yyyyPlaceholder: `JJJJ`,
-};
+	yyyyPlaceholder: `JJJJ`,};
