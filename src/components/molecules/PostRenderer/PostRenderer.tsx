@@ -9,6 +9,7 @@ import { getRedirect, urlify } from 'helpers/utils';
 import * as S from './styles';
 import MonetizationButton from 'engine/builder/blocks/monetizationButton';
 import Embed from 'engine/builder/blocks/embed';
+import Supporters from 'engine/builder/blocks/supporters';
 
 type ContentEntryType =
 	| 'header-1'
@@ -31,7 +32,8 @@ type ContentEntryType =
 	| 'spacer-vertical'
 	| 'table'
 	| 'monetizationButton'
-	| 'embed';
+	| 'embed'
+	| 'supporters';
 
 type ContentEntry = {
 	id: string | number;
@@ -54,6 +56,8 @@ type PostType = {
 };
 
 type ProfileType = {
+	id?: string;
+	username?: string;
 	displayName?: string;
 	thumbnail?: string;
 };
@@ -66,6 +70,7 @@ type PostRendererProps = {
 	profile?: ProfileType | null;
 	content?: ContentEntry[] | null;
 	isPreview?: boolean;
+	postId?: string;
 };
 
 export default function PostRenderer(props: PostRendererProps) {
@@ -281,7 +286,23 @@ export default function PostRenderer(props: PostRendererProps) {
 							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						case 'monetizationButton':
 							return (
-								<MonetizationButton key={entry.id} element={entry} preview={props.isPreview ?? false} location="post" />
+								<MonetizationButton
+									key={entry.id}
+									element={entry}
+									preview={props.isPreview ?? false}
+									location="post"
+									postId={props.postId}
+								/>
+							);
+						case 'supporters':
+							return (
+								<Supporters
+									key={entry.id}
+									element={entry}
+									preview={props.isPreview ?? false}
+									location="post"
+									postId={props.postId}
+								/>
 							);
 						case 'embed':
 							return <Embed key={entry.id} element={entry} />;

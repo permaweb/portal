@@ -5,23 +5,16 @@ import { STYLING } from 'helpers/config';
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-	padding: 12px 14px;
-	background: ${(props) => props.theme.colors.container.primary.background};
+	gap: 12px;
+	padding: 0;
 `;
 
 export const Header = styled.div`
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	display: none;
 `;
 
 export const Title = styled.p`
-	margin: 0;
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.small};
-	font-weight: ${(props) => props.theme.typography.weight.medium};
-	color: ${(props) => props.theme.colors.font.primary};
+	display: none;
 `;
 
 export const Body = styled.div`
@@ -33,19 +26,15 @@ export const Body = styled.div`
 export const Section = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-	padding: 10px;
-	border-radius: ${STYLING.dimensions.radius.primary};
-	background: ${(props) => props.theme.colors.container.alt1.background};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	gap: 12px;
 `;
 
-export const SectionTitle = styled.h4`
-	margin: 0;
+export const SectionTitle = styled.div`
+	margin: 0 0 6px 0;
 	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-size: ${(props) => props.theme.typography.size.small};
 	font-weight: ${(props) => props.theme.typography.weight.bold};
-	color: ${(props) => props.theme.colors.font.primary};
+	color: ${(props) => props.theme.colors.font.alt1};
 `;
 
 export const Row = styled.div`
@@ -75,7 +64,29 @@ export const LabelRow = styled.label`
 export const CheckboxGroup = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 12px;
+`;
+
+export const CheckboxContainer = styled.div<{ disabled?: boolean }>`
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
+	opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+
+	&:hover {
+		span {
+			color: ${(props) => (props.disabled ? props.theme.colors.font.alt1 : props.theme.colors.font.primary)};
+		}
+	}
+
+	span {
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		color: ${(props) => props.theme.colors.font.alt1};
+		transition: all 0.2s ease;
+	}
 `;
 
 export const ColumnsWrapper = styled.div`
@@ -87,14 +98,14 @@ export const ColumnsWrapper = styled.div`
 export const ScopeRow = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 8px;
 `;
 
 export const ScopeOption = styled.div<{ $active: boolean }>`
 	display: flex;
 	align-items: flex-start;
 	gap: 10px;
-	padding: 10px;
+	padding: 8px 10px;
 	border-radius: ${STYLING.dimensions.radius.primary};
 	background: ${(props) => (props.$active ? props.theme.colors.container.alt2.background : 'transparent')};
 	border: 1px solid ${(props) => (props.$active ? props.theme.colors.border.alt5 : props.theme.colors.border.primary)};
