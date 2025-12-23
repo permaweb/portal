@@ -220,9 +220,7 @@ export default function SupportersBlock(props: {
 							</S.FieldColumn>
 
 							<S.FieldColumn>
-								<S.LabelRow>
-									<span>{language?.sortBy ?? 'Sort By'}</span>
-								</S.LabelRow>
+								<S.LabelRow>{language?.sortBy ?? 'Sort By'}</S.LabelRow>
 								<Select
 									activeOption={SORT_OPTIONS.find((o) => o.id === config.top.sort) ?? SORT_OPTIONS[0]}
 									setActiveOption={(opt) => updateTop({ sort: opt.id as any })}

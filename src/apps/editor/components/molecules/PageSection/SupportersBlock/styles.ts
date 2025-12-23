@@ -55,6 +55,8 @@ export const FieldColumn = styled.div`
 `;
 
 export const LabelRow = styled.label`
+	display: block;
+	margin: 0 0 6px 0;
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
 	font-weight: ${(props) => props.theme.typography.weight.bold};

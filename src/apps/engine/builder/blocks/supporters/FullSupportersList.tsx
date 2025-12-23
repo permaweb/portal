@@ -49,20 +49,20 @@ export default function FullSupportersList(props: FullSupportersListProps) {
 				))}
 			</S.SupportersList>
 			{totalPages > 1 && (
-				<div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '10px' }}>
-					<button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
+				<S.PaginationWrapper>
+					<S.PaginationButton onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
 						Previous
-					</button>
-					<span>
+					</S.PaginationButton>
+					<S.PaginationInfo>
 						Page {currentPage} of {totalPages}
-					</span>
-					<button
+					</S.PaginationInfo>
+					<S.PaginationButton
 						onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
 						disabled={currentPage === totalPages}
 					>
 						Next
-					</button>
-				</div>
+					</S.PaginationButton>
+				</S.PaginationWrapper>
 			)}
 		</S.ModuleWrapper>
 	);
