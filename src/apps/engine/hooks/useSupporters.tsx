@@ -81,6 +81,7 @@ export function useSupporters(walletAddress: string | null, scope: 'global' | 'p
 					const winston = node.quantity?.winston || '0';
 					const amountAr = arweave.ar.winstonToAr(winston);
 					const location = getTag('Location');
+					const locationPostId = getTag('Location-Post-Id');
 
 					return {
 						id: node.id,
@@ -90,14 +91,18 @@ export function useSupporters(walletAddress: string | null, scope: 'global' | 'p
 						fromAddress: getTag('From-Address') || node.owner?.address || '',
 						fromProfile: getTag('From-Profile'),
 						location,
+						locationPostId,
 					};
 				});
 
 				// Filter by scope if needed
 				let filteredTips = parsed;
 				if (scope === 'post' && postId) {
-					// For post scope, only include tips with Location='post' or no location specified
-					filteredTips = parsed.filter((tip) => !tip.location || tip.location === 'post');
+					// For post scope, only include tips tagged with this specific postId
+					filteredTips = parsed.filter((tip) => tip.locationPostId === postId);
+				} else if (scope === 'global') {
+					// For global scope, include all tips
+					filteredTips = parsed;
 				}
 
 				// Aggregate tips by supporter

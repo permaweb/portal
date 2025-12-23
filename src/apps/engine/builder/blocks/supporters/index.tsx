@@ -5,7 +5,6 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 import { SupportersBlockData } from 'helpers/types';
 
 import FullSupportersList from './FullSupportersList';
-import { generateMockSupporters } from './mockData';
 import RecentSupporters from './RecentSupporters';
 import * as S from './styles';
 import TopSupporters from './TopSupporters';
@@ -51,49 +50,15 @@ export default function Supporters(props: SupportersProps) {
 		};
 	}, [props.element?.data]);
 
-	// Use mock data in preview mode, otherwise fetch real data
-	const shouldUseMock = props.preview || !enabled || !walletAddress;
-	const mockSupporters = React.useMemo(() => generateMockSupporters(15), []);
+	// Fetch real data from GraphQL
+	const { supporters, loading, error } = useSupporters(
+		enabled && walletAddress ? walletAddress : null,
+		config.scope,
+		props.postId
+	);
 
-	const {
-		supporters: realSupporters,
-		loading,
-		error,
-	} = useSupporters(shouldUseMock ? null : walletAddress, config.scope, props.postId);
-
-	const supporters = shouldUseMock ? mockSupporters : realSupporters;
-
-	// If monetization is off or no wallet, render nothing (or empty state)
+	// If monetization is off or no wallet, render nothing
 	if (!enabled || !walletAddress) {
-		if (props.preview) {
-			// In preview, show mock data
-			return (
-				<S.Wrapper className="portal-supporters">
-					{config.modules.showTop && (
-						<TopSupporters
-							supporters={mockSupporters}
-							config={config.top}
-							amountDecimals={config.formatting.amountDecimals}
-							title={config.formatting.title}
-						/>
-					)}
-					{config.modules.showRecent && (
-						<RecentSupporters
-							supporters={mockSupporters}
-							config={config.recent}
-							amountDecimals={config.formatting.amountDecimals}
-						/>
-					)}
-					{config.modules.showFullList && config.fullList && (
-						<FullSupportersList
-							supporters={mockSupporters}
-							config={config.fullList}
-							amountDecimals={config.formatting.amountDecimals}
-						/>
-					)}
-				</S.Wrapper>
-			);
-		}
 		return null;
 	}
 
@@ -108,7 +73,7 @@ export default function Supporters(props: SupportersProps) {
 	if (error) {
 		return (
 			<S.Wrapper className="portal-supporters">
-				<S.ErrorMessage>Error loading supporters: {error}</S.ErrorMessage>
+				<S.ErrorMessage>Error loading supporters</S.ErrorMessage>
 			</S.Wrapper>
 		);
 	}

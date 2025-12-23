@@ -314,6 +314,7 @@ export type SupporterTip = {
 	fromName?: string;
 	fromAvatar?: string;
 	location?: string;
+	locationPostId?: string;
 };
 
 export type TagType = { name: string; value: string };
