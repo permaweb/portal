@@ -5,8 +5,6 @@ export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
-	padding: 20px;
-	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 
 export const ModuleWrapper = styled.div`
@@ -17,10 +15,9 @@ export const ModuleWrapper = styled.div`
 
 export const ModuleTitle = styled.h3`
 	margin: 0;
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.lg};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	color: ${(props) => props.theme.colors.font.primary};
+	font-size: 22px;
+	font-weight: 700;
+	color: rgba(var(--color-text), 1);
 `;
 
 export const SupportersList = styled.div`
@@ -34,14 +31,12 @@ export const SupporterItem = styled.div`
 	align-items: center;
 	gap: 12px;
 	padding: 12px;
-	border-radius: 8px;
-	background: ${(props) => props.theme.colors.container.alt1.background};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: var(--border-radius);
+	background: var(--color-card-background);
 	transition: all 0.2s ease;
 
 	&:hover {
-		background: ${(props) => props.theme.colors.container.alt2.background};
-		border-color: ${(props) => props.theme.colors.border.alt1};
+		opacity: 0.9;
 	}
 `;
 
@@ -50,7 +45,7 @@ export const AvatarWrapper = styled.div`
 	height: 40px;
 	min-width: 40px;
 	border-radius: 50%;
-	background: ${(props) => props.theme.colors.container.alt3.background};
+	background: rgba(var(--color-text), 0.1);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -69,10 +64,9 @@ export const AvatarPlaceholder = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.base};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: var(--font-size-default);
+	font-weight: 700;
+	color: rgba(var(--color-text), 0.6);
 `;
 
 export const SupporterInfo = styled.div`
@@ -84,19 +78,17 @@ export const SupporterInfo = styled.div`
 `;
 
 export const SupporterName = styled.div`
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.small};
-	font-weight: ${(props) => props.theme.typography.weight.medium};
-	color: ${(props) => props.theme.colors.font.primary};
+	font-size: var(--font-size-default);
+	font-weight: 600;
+	color: rgba(var(--color-text), 1);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 `;
 
 export const SupporterAddress = styled.div`
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.xxxSmall};
-	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: var(--font-size-small);
+	color: rgba(var(--color-text), 0.6);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -110,47 +102,74 @@ export const SupporterAmount = styled.div`
 `;
 
 export const AmountPrimary = styled.div`
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.small};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	color: ${(props) => props.theme.colors.font.primary};
+	font-size: var(--font-size-default);
+	font-weight: 700;
+	color: rgba(var(--color-text), 1);
 `;
 
 export const AmountSecondary = styled.div`
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.xxxSmall};
-	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: var(--font-size-small);
+	color: rgba(var(--color-text), 0.6);
 `;
 
 export const SupporterTime = styled.div`
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.xxxSmall};
-	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: var(--font-size-small);
+	color: rgba(var(--color-text), 0.6);
 	white-space: nowrap;
 `;
 
 export const LoadingMessage = styled.div`
 	padding: 20px;
 	text-align: center;
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.small};
-	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: var(--font-size-default);
+	color: rgba(var(--color-text), 0.6);
 `;
 
 export const ErrorMessage = styled.div`
 	padding: 16px;
-	border-radius: 8px;
-	background: ${(props) => props.theme.colors.container.alt2.background};
-	border: 1px solid ${(props) => props.theme.colors.warning.primary};
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.small};
-	color: ${(props) => props.theme.colors.font.primary};
+	border-radius: var(--border-radius);
+	background: rgba(231, 76, 60, 0.1);
+	border: 1px solid rgba(231, 76, 60, 0.3);
+	font-size: var(--font-size-default);
+	color: rgba(var(--color-text), 1);
 `;
 
 export const EmptyMessage = styled.div`
 	padding: 20px;
 	text-align: center;
-	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.small};
-	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: var(--font-size-default);
+	color: rgba(var(--color-text), 0.6);
+`;
+
+export const PaginationWrapper = styled.div`
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+	margin-top: 10px;
+`;
+
+export const PaginationButton = styled.button`
+	padding: 8px 16px;
+	background: var(--color-card-background);
+	border: none;
+	border-radius: var(--border-radius);
+	font-size: var(--font-size-default);
+	color: rgba(var(--color-text), 1);
+	cursor: pointer;
+	transition: opacity 0.2s;
+
+	&:hover:not(:disabled) {
+		opacity: 0.8;
+	}
+
+	&:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+`;
+
+export const PaginationInfo = styled.span`
+	font-size: var(--font-size-default);
+	color: rgba(var(--color-text), 0.8);
 `;
