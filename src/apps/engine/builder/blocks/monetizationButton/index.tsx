@@ -20,6 +20,7 @@ type MonetizationButtonProps = {
 	element: any;
 	preview: boolean;
 	location?: 'page' | 'post';
+	postId?: string;
 };
 
 export default function MonetizationButton(props: MonetizationButtonProps) {
@@ -60,7 +61,7 @@ export default function MonetizationButton(props: MonetizationButtonProps) {
 
 		try {
 			setSubmitting(true);
-			await sendTip(walletAddress, amount, location);
+			await sendTip(walletAddress, amount, location, props.postId);
 		} catch (e) {
 			console.error('[MonetizationButton] tip failed', e);
 		} finally {

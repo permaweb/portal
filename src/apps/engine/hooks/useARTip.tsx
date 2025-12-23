@@ -20,7 +20,7 @@ export function useArTip() {
 	const { Name } = portalProvider?.portal || {};
 
 	const sendTip = React.useCallback(
-		async (to: string, amount: string | undefined, location = 'page') => {
+		async (to: string, amount: string | undefined, location = 'page', postId?: string) => {
 			if (!walletAddress) {
 				await handleConnect(WalletEnum.wander);
 			}
@@ -47,6 +47,7 @@ export function useArTip() {
 					if (Name) tagPairs.push(['Portal-Name', String(Name.trim())]);
 					if (walletAddress) tagPairs.push(['From-Address', walletAddress.trim()]);
 					if (profile.id) tagPairs.push(['From-Profile', String(profile.id)]);
+					if (postId) tagPairs.push(['Location-Post-Id', postId.toString().trim()]);
 					for (const [k, v] of tagPairs) tx.addTag(k, v);
 					const signedTx = await window.arweaveWallet.sign(tx);
 					const response = await arweave.transactions.post(signedTx);

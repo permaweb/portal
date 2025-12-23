@@ -5,7 +5,6 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
 import { Select } from 'components/atoms/Select';
-import { Toggle } from 'components/atoms/Toggle';
 import {
 	SelectOptionType,
 	SupporterColumnConfig,
@@ -70,13 +69,14 @@ export default function PostSupportersBlock(props: {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const monetization: any = portalProvider.current?.monetization;
+	const monetization: any = portalProvider.current?.monetization?.monetization;
 
 	const config = React.useMemo(() => {
-		const raw = (props.block.data as SupportersBlockData) ?? {};
+		const raw = (props.block.data as SupportersBlockData | null) ?? ({} as SupportersBlockData);
 		return {
 			...DEFAULT_CONFIG,
 			...raw,
+			scope: 'post', // Posts are always post-specific
 			modules: { ...DEFAULT_CONFIG.modules, ...raw.modules },
 			top: { ...DEFAULT_CONFIG.top, ...raw.top, columns: { ...DEFAULT_CONFIG.top.columns, ...raw.top?.columns } },
 			recent: {
@@ -138,10 +138,7 @@ export default function PostSupportersBlock(props: {
 
 	if (!monetization?.enabled) {
 		return (
-			<S.Wrapper className={'border-wrapper-alt2'}>
-				<S.Header>
-					<S.Title>{language?.supporters ?? 'Supporters'}</S.Title>
-				</S.Header>
+			<S.Wrapper>
 				<S.InfoMessage className={'warning'}>
 					<span>
 						{language?.monetizationDisabledMessage ??
@@ -154,10 +151,7 @@ export default function PostSupportersBlock(props: {
 
 	if (!monetization?.walletAddress) {
 		return (
-			<S.Wrapper className={'border-wrapper-alt2'}>
-				<S.Header>
-					<S.Title>{language?.supporters ?? 'Supporters'}</S.Title>
-				</S.Header>
+			<S.Wrapper>
 				<S.InfoMessage className={'warning'}>
 					<span>
 						{language?.monetizationNoWalletMessage ??
@@ -169,59 +163,63 @@ export default function PostSupportersBlock(props: {
 	}
 
 	return (
-		<S.Wrapper className={'border-wrapper-alt2'}>
-			<S.Header>
-				<S.Title>{language?.supporters ?? 'Supporters'}</S.Title>
-			</S.Header>
-
+		<S.Wrapper>
 			<S.Body>
-				{/* Scope Selection */}
-				<S.Section>
-					<S.SectionTitle>{language?.scope ?? 'Scope'}</S.SectionTitle>
-					<S.ScopeRow>
-						<S.ScopeOption $active={config.scope === 'global'} onClick={() => updateConfig({ scope: 'global' })}>
-							<S.RadioDot $active={config.scope === 'global'} />
-							<div>
-								<S.ScopeLabel>{language?.globalScope ?? 'Global (All Portal)'}</S.ScopeLabel>
-								<S.ScopeDescription>
-									{language?.globalScopeDescription ?? 'Show supporters for the entire portal'}
-								</S.ScopeDescription>
-							</div>
-						</S.ScopeOption>
-						<S.ScopeOption $active={config.scope === 'post'} onClick={() => updateConfig({ scope: 'post' })}>
-							<S.RadioDot $active={config.scope === 'post'} />
-							<div>
-								<S.ScopeLabel>{language?.postScope ?? 'This Post Only'}</S.ScopeLabel>
-								<S.ScopeDescription>
-									{language?.postScopeDescription ?? 'Show supporters only for this post'}
-								</S.ScopeDescription>
-							</div>
-						</S.ScopeOption>
-					</S.ScopeRow>
-				</S.Section>
-
 				{/* Module Selection */}
 				<S.Section>
 					<S.SectionTitle>{language?.modules ?? 'Modules'}</S.SectionTitle>
 					<S.CheckboxGroup>
-						<Checkbox
-							checked={config.modules.showTop}
-							onChange={(value: boolean) => updateModules({ showTop: value })}
-							label={language?.topSupporters ?? 'Top Supporters'}
-						/>
-						<Checkbox
-							checked={config.modules.showRecent}
-							onChange={(value: boolean) => updateModules({ showRecent: value })}
-							label={language?.recentSupporters ?? 'Recent Supporters'}
-						/>
+						<S.CheckboxContainer onClick={() => updateModules({ showTop: !config.modules.showTop })}>
+							<Checkbox
+								checked={config.modules.showTop}
+								handleSelect={() => updateModules({ showTop: !config.modules.showTop })}
+								disabled={false}
+							/>
+							<span>{language?.topSupporters ?? 'Top Supporters'}</span>
+						</S.CheckboxContainer>
+						<S.CheckboxContainer onClick={() => updateModules({ showRecent: !config.modules.showRecent })}>
+							<Checkbox
+								checked={config.modules.showRecent}
+								handleSelect={() => updateModules({ showRecent: !config.modules.showRecent })}
+								disabled={false}
+							/>
+							<span>{language?.recentSupporters ?? 'Recent Supporters'}</span>
+						</S.CheckboxContainer>
 					</S.CheckboxGroup>
 				</S.Section>
+				<S.Section>
+					<S.SectionTitle>{language?.formatting ?? 'Formatting'}</S.SectionTitle>
+					<S.Row>
+						<S.FieldColumn>
+							<FormField
+								label={language?.title ?? 'Title'}
+								value={config.formatting.title || ''}
+								onChange={(e) => updateFormatting({ title: e.target.value })}
+								invalid={{ status: false, message: null }}
+								disabled={false}
+								hideErrorMessage
+								sm
+							/>
+						</S.FieldColumn>
 
+						<S.FieldColumn>
+							<FormField
+								label={language?.amountDecimals ?? 'Amount Decimals'}
+								value={String(config.formatting.amountDecimals)}
+								onChange={(e) => updateFormatting({ amountDecimals: parseInt(e.target.value) || 4 })}
+								type={'number'}
+								invalid={{ status: false, message: null }}
+								disabled={false}
+								hideErrorMessage
+								sm
+							/>
+						</S.FieldColumn>
+					</S.Row>
+				</S.Section>
 				{/* Top Supporters Configuration */}
 				{config.modules.showTop && (
 					<S.Section>
-						<S.SectionTitle>{language?.topSupportersConfig ?? 'Top Supporters Configuration'}</S.SectionTitle>
-
+						<S.SectionTitle>{language?.topSupporters ?? 'Top Supporters'}</S.SectionTitle>
 						<S.Row>
 							<S.FieldColumn>
 								<FormField
@@ -254,31 +252,46 @@ export default function PostSupportersBlock(props: {
 								<span>{language?.showColumns ?? 'Show Columns'}</span>
 							</S.LabelRow>
 							<S.CheckboxGroup>
-								<Checkbox
-									checked={config.top.columns.avatar}
-									onChange={(value: boolean) => updateTopColumns({ avatar: value })}
-									label={language?.avatar ?? 'Avatar'}
-								/>
-								<Checkbox
-									checked={config.top.columns.name}
-									onChange={(value: boolean) => updateTopColumns({ name: value })}
-									label={language?.displayName ?? 'Name'}
-								/>
-								<Checkbox
-									checked={config.top.columns.amount}
-									onChange={(value: boolean) => updateTopColumns({ amount: value })}
-									label={language?.amount ?? 'Amount'}
-								/>
-								<Checkbox
-									checked={config.top.columns.time}
-									onChange={(value: boolean) => updateTopColumns({ time: value })}
-									label={language?.time ?? 'Time'}
-								/>
-								<Checkbox
-									checked={config.top.columns.usdApprox}
-									onChange={(value: boolean) => updateTopColumns({ usdApprox: value })}
-									label={language?.usdApproximate ?? 'USD Approx'}
-								/>
+								<S.CheckboxContainer onClick={() => updateTopColumns({ avatar: !config.top.columns.avatar })}>
+									<Checkbox
+										checked={config.top.columns.avatar}
+										handleSelect={() => updateTopColumns({ avatar: !config.top.columns.avatar })}
+										disabled={false}
+									/>
+									<span>{language?.avatar ?? 'Avatar'}</span>
+								</S.CheckboxContainer>
+								<S.CheckboxContainer onClick={() => updateTopColumns({ name: !config.top.columns.name })}>
+									<Checkbox
+										checked={config.top.columns.name}
+										handleSelect={() => updateTopColumns({ name: !config.top.columns.name })}
+										disabled={false}
+									/>
+									<span>{language?.displayName ?? 'Name'}</span>
+								</S.CheckboxContainer>
+								<S.CheckboxContainer onClick={() => updateTopColumns({ amount: !config.top.columns.amount })}>
+									<Checkbox
+										checked={config.top.columns.amount}
+										handleSelect={() => updateTopColumns({ amount: !config.top.columns.amount })}
+										disabled={false}
+									/>
+									<span>{language?.amount ?? 'Amount'}</span>
+								</S.CheckboxContainer>
+								<S.CheckboxContainer onClick={() => updateTopColumns({ time: !config.top.columns.time })}>
+									<Checkbox
+										checked={config.top.columns.time}
+										handleSelect={() => updateTopColumns({ time: !config.top.columns.time })}
+										disabled={false}
+									/>
+									<span>{language?.time ?? 'Time'}</span>
+								</S.CheckboxContainer>
+								<S.CheckboxContainer onClick={() => updateTopColumns({ usdApprox: !config.top.columns.usdApprox })}>
+									<Checkbox
+										checked={config.top.columns.usdApprox}
+										handleSelect={() => updateTopColumns({ usdApprox: !config.top.columns.usdApprox })}
+										disabled={false}
+									/>
+									<span>{language?.usdApproximate ?? 'USD Approx'}</span>
+								</S.CheckboxContainer>
 							</S.CheckboxGroup>
 						</S.ColumnsWrapper>
 					</S.Section>
@@ -287,8 +300,7 @@ export default function PostSupportersBlock(props: {
 				{/* Recent Supporters Configuration */}
 				{config.modules.showRecent && (
 					<S.Section>
-						<S.SectionTitle>{language?.recentSupportersConfig ?? 'Recent Supporters Configuration'}</S.SectionTitle>
-
+						<S.SectionTitle>{language?.recentSupporters ?? 'Recent Supporters'}</S.SectionTitle>
 						<S.Row>
 							<S.FieldColumn>
 								<FormField
@@ -309,67 +321,54 @@ export default function PostSupportersBlock(props: {
 								<span>{language?.showColumns ?? 'Show Columns'}</span>
 							</S.LabelRow>
 							<S.CheckboxGroup>
-								<Checkbox
-									checked={config.recent.columns.avatar}
-									onChange={(value: boolean) => updateRecentColumns({ avatar: value })}
-									label={language?.avatar ?? 'Avatar'}
-								/>
-								<Checkbox
-									checked={config.recent.columns.name}
-									onChange={(value: boolean) => updateRecentColumns({ name: value })}
-									label={language?.displayName ?? 'Name'}
-								/>
-								<Checkbox
-									checked={config.recent.columns.amount}
-									onChange={(value: boolean) => updateRecentColumns({ amount: value })}
-									label={language?.amount ?? 'Amount'}
-								/>
-								<Checkbox
-									checked={config.recent.columns.time}
-									onChange={(value: boolean) => updateRecentColumns({ time: value })}
-									label={language?.time ?? 'Time'}
-								/>
-								<Checkbox
-									checked={config.recent.columns.usdApprox}
-									onChange={(value: boolean) => updateRecentColumns({ usdApprox: value })}
-									label={language?.usdApproximate ?? 'USD Approx'}
-								/>
+								<S.CheckboxContainer onClick={() => updateRecentColumns({ avatar: !config.recent.columns.avatar })}>
+									<Checkbox
+										checked={config.recent.columns.avatar}
+										handleSelect={() => updateRecentColumns({ avatar: !config.recent.columns.avatar })}
+										disabled={false}
+									/>
+									<span>{language?.avatar ?? 'Avatar'}</span>
+								</S.CheckboxContainer>
+								<S.CheckboxContainer onClick={() => updateRecentColumns({ name: !config.recent.columns.name })}>
+									<Checkbox
+										checked={config.recent.columns.name}
+										handleSelect={() => updateRecentColumns({ name: !config.recent.columns.name })}
+										disabled={false}
+									/>
+									<span>{language?.displayName ?? 'Name'}</span>
+								</S.CheckboxContainer>
+								<S.CheckboxContainer onClick={() => updateRecentColumns({ amount: !config.recent.columns.amount })}>
+									<Checkbox
+										checked={config.recent.columns.amount}
+										handleSelect={() => updateRecentColumns({ amount: !config.recent.columns.amount })}
+										disabled={false}
+									/>
+									<span>{language?.amount ?? 'Amount'}</span>
+								</S.CheckboxContainer>
+								<S.CheckboxContainer onClick={() => updateRecentColumns({ time: !config.recent.columns.time })}>
+									<Checkbox
+										checked={config.recent.columns.time}
+										handleSelect={() => updateRecentColumns({ time: !config.recent.columns.time })}
+										disabled={false}
+									/>
+									<span>{language?.time ?? 'Time'}</span>
+								</S.CheckboxContainer>
+								<S.CheckboxContainer
+									onClick={() => updateRecentColumns({ usdApprox: !config.recent.columns.usdApprox })}
+								>
+									<Checkbox
+										checked={config.recent.columns.usdApprox}
+										handleSelect={() => updateRecentColumns({ usdApprox: !config.recent.columns.usdApprox })}
+										disabled={false}
+									/>
+									<span>{language?.usdApproximate ?? 'USD Approx'}</span>
+								</S.CheckboxContainer>
 							</S.CheckboxGroup>
 						</S.ColumnsWrapper>
 					</S.Section>
 				)}
 
 				{/* Formatting Options */}
-				<S.Section>
-					<S.SectionTitle>{language?.formatting ?? 'Formatting'}</S.SectionTitle>
-
-					<S.Row>
-						<S.FieldColumn>
-							<FormField
-								label={language?.title ?? 'Title'}
-								value={config.formatting.title || ''}
-								onChange={(e) => updateFormatting({ title: e.target.value })}
-								invalid={{ status: false, message: null }}
-								disabled={false}
-								hideErrorMessage
-								sm
-							/>
-						</S.FieldColumn>
-
-						<S.FieldColumn>
-							<FormField
-								label={language?.amountDecimals ?? 'Amount Decimals'}
-								value={String(config.formatting.amountDecimals)}
-								onChange={(e) => updateFormatting({ amountDecimals: parseInt(e.target.value) || 4 })}
-								type={'number'}
-								invalid={{ status: false, message: null }}
-								disabled={false}
-								hideErrorMessage
-								sm
-							/>
-						</S.FieldColumn>
-					</S.Row>
-				</S.Section>
 			</S.Body>
 		</S.Wrapper>
 	);
