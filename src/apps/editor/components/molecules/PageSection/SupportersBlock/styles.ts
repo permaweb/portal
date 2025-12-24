@@ -66,13 +66,13 @@ export const LabelRow = styled.label`
 export const CheckboxGroup = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 8px;
 `;
 
 export const CheckboxContainer = styled.div<{ disabled?: boolean }>`
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 8px;
 	cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
 	opacity: ${(props) => (props.disabled ? 0.5 : 1)};
 
