@@ -5,7 +5,7 @@ import { STYLING } from 'helpers/config';
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 8px;
 	padding: 0;
 `;
 
@@ -20,17 +20,17 @@ export const Title = styled.p`
 export const Body = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
+	gap: 12px;
 `;
 
 export const Section = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 8px;
 `;
 
 export const SectionTitle = styled.div`
-	margin: 0 0 6px 0;
+	margin: 0 0 4px 0;
 	font-family: ${(props) => props.theme.typography.family.primary};
 	font-size: ${(props) => props.theme.typography.size.small};
 	font-weight: ${(props) => props.theme.typography.weight.bold};
@@ -40,7 +40,7 @@ export const SectionTitle = styled.div`
 export const Row = styled.div`
 	display: flex;
 	flex-direction: row;
-	gap: 12px;
+	gap: 10px;
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {
 		flex-direction: column;
@@ -51,7 +51,7 @@ export const FieldColumn = styled.div`
 	flex: 1;
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 0;
 `;
 
 export const LabelRow = styled.label`
@@ -66,13 +66,13 @@ export const LabelRow = styled.label`
 export const CheckboxGroup = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 8px;
 `;
 
 export const CheckboxContainer = styled.div<{ disabled?: boolean }>`
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 8px;
 	cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
 	opacity: ${(props) => (props.disabled ? 0.5 : 1)};
 
@@ -94,7 +94,7 @@ export const CheckboxContainer = styled.div<{ disabled?: boolean }>`
 export const ColumnsWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 6px;
 `;
 
 export const ScopeRow = styled.div`
