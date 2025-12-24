@@ -261,9 +261,8 @@ export type PageBlockType = {
 export type SupporterColumnConfig = {
 	avatar: boolean;
 	name: boolean;
-	amount: boolean;
+	value: boolean;
 	time: boolean;
-	usdApprox: boolean;
 };
 
 export type SupportersModuleConfig = {
@@ -291,7 +290,6 @@ export type SupportersFullListConfig = {
 export type SupportersFormattingConfig = {
 	amountDecimals: number;
 	title?: string;
-	showUsdApprox: boolean;
 };
 
 export type SupportersBlockData = {
