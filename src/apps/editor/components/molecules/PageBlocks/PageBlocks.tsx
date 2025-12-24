@@ -66,6 +66,7 @@ export default function PageBlocks(props: {
 					PAGE_BLOCKS[PageBlockEnum.CategorySpotlight],
 					PAGE_BLOCKS[PageBlockEnum.Sidebar],
 					PAGE_BLOCKS[PageBlockEnum.MonetizationButton],
+					PAGE_BLOCKS[PageBlockEnum.Supporters],
 				],
 			},
 		],
