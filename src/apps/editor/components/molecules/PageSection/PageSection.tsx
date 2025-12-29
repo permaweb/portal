@@ -25,6 +25,7 @@ import { PostBlock } from './PostBlock';
 import { PostSpotlightBlock } from './PostSpotlightBlock';
 import { SidebarBlock } from './SidebarBlock';
 import * as S from './styles';
+import { SupportersBlock } from './SupportersBlock';
 
 export const ResizeContext = React.createContext<{
 	resizingBlockId: string | null;
@@ -438,6 +439,8 @@ export default function PageSection(props: {
 				return <SidebarBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
 			case 'monetizationButton':
 				return <MonetizationBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
+			case 'supporters':
+				return <SupportersBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
 			default:
 				return null;
 		}

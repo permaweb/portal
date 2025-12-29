@@ -15,6 +15,7 @@ import Post from './blocks/post';
 import PostSpotlight from './blocks/postSpotlight';
 import Reel from './blocks/reel';
 import Sidebar from './blocks/sidebar';
+import Supporters from './blocks/supporters';
 
 export default function Builder(props: any) {
 	const { preview, layout } = props;
@@ -102,6 +103,10 @@ export default function Builder(props: any) {
 				return element.text;
 			case 'monetizationButton':
 				return <MonetizationButton key={index} element={element} preview={preview} />;
+			case 'supporters':
+				return (
+					<Supporters key={index} element={element} preview={preview} location={props.location} postId={props.postId} />
+				);
 			default:
 				return null;
 		}
