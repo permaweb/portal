@@ -308,9 +308,9 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 					<S.ActionsWrapper>
 						<Button
 							type={'warning'}
-							label={language?.removeUser ?? 'Remove user'}
+							label={language?.removeUser ?? 'Remove User'}
 							handlePress={() => setShowRemoveConfirm(true)}
-							loading={loading}
+							disabled={loading || showRemoveConfirm}
 							height={45}
 							fullWidth
 						/>
@@ -320,26 +320,27 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 
 			{showRemoveConfirm && (
 				<Modal
-					header={language?.confirmRemoval ?? 'Confirm removal'}
+					header={language?.confirmRemoval ?? 'Confirm Removal'}
 					handleClose={loading ? undefined : () => setShowRemoveConfirm(false)}
+					className={'modal-wrapper'}
 				>
-					<p>{language?.removeUserWarning ?? 'This will remove the user from the portal.'}</p>
+					<p className={'default-text'}>
+						{language?.removeUserWarning ?? 'This will remove the user from the portal.'}
+					</p>
 
 					<S.ActionsWrapper>
 						<Button
-							type={'alt1'}
+							type={'primary'}
 							label={language?.cancel ?? 'Cancel'}
 							handlePress={() => setShowRemoveConfirm(false)}
 							disabled={loading}
-							height={45}
 						/>
 						<Button
-							type={'primary'}
+							type={'warning'}
 							label={language?.remove ?? 'Remove'}
 							handlePress={handleRemoveUser}
 							disabled={!canRemoveUser}
 							loading={loading}
-							height={45}
 						/>
 					</S.ActionsWrapper>
 				</Modal>

@@ -141,8 +141,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 								let users: any = {};
 								if (response?.users) users = parseField(PortalPatchMapEnum.Users, response);
-								console.log(response);
-								console.log('users', users);
+
 								let transfers: any = {};
 								if (response?.transfers) {
 									transfers = parseField(PortalPatchMapEnum.Transfers, response);
