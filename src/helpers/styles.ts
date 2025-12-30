@@ -246,6 +246,13 @@ export const GlobalStyle = createGlobalStyle`
       white-space: nowrap;
     }
   }
+
+	.default-text {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
   
   .warning {
   	background: ${(props) => props.theme.colors.warning.primary}; 
