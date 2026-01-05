@@ -24,7 +24,7 @@ import { DividerBlock } from './CustomBlocks/DividerBlock';
 import { HTMLBlock } from './CustomBlocks/HTMLBlock';
 import { MediaBlock } from './CustomBlocks/MediaBlock';
 import { PostMonetizationBlock } from './CustomBlocks/MonetizationBlock';
-import { OdyseeEmbedBlock } from './CustomBlocks/OdyseeEmbedBlock';
+import { buildEmbedHtml, OdyseeEmbedBlock, parseOdyseeUrl } from './CustomBlocks/OdyseeEmbedBlock';
 import { SpacerBlock } from './CustomBlocks/SpacerBlock';
 import { TableBlock } from './CustomBlocks/TableBlock';
 import * as S from './styles';
@@ -296,6 +296,25 @@ export default function ArticleBlock(props: {
 				// Only set toggleBlockFocus to false if this block was the one that had it active
 				if (currentReducer.editor.toggleBlockFocus) {
 					handleCurrentReducerUpdate({ field: 'toggleBlockFocus', value: false });
+				}
+
+				// Auto-detect Odysee URLs in paragraph blocks and convert to embed
+				if (currentBlock.type === 'paragraph' && currentBlock.content) {
+					// Strip HTML tags to get raw text
+					const rawText = currentBlock.content.replace(/<[^>]*>/g, '').trim();
+					// Check if it's only a URL (no other content)
+					if (rawText && !rawText.includes(' ') && rawText.startsWith('http')) {
+						const embedUrl = parseOdyseeUrl(rawText);
+						if (embedUrl) {
+							const embedHtml = buildEmbedHtml(embedUrl);
+							props.onChangeBlock({
+								id: props.block.id,
+								type: ArticleBlockEnum.OdyseeEmbed,
+								content: embedHtml,
+								data: { url: rawText, embedUrl: embedUrl },
+							});
+						}
+					}
 				}
 			}
 		} else {
