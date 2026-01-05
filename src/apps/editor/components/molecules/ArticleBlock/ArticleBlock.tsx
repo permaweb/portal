@@ -24,7 +24,6 @@ import { DividerBlock } from './CustomBlocks/DividerBlock';
 import { buildEmbedHtml, EmbedBlock, isSupportedEmbedUrl, parseEmbedUrl } from './CustomBlocks/EmbedBlock';
 import { HTMLBlock } from './CustomBlocks/HTMLBlock';
 import { MediaBlock } from './CustomBlocks/MediaBlock';
-import { OdyseeEmbedBlock } from './CustomBlocks/OdyseeEmbedBlock';
 import { SpacerBlock } from './CustomBlocks/SpacerBlock';
 import { PostSupportersBlock } from './CustomBlocks/SupportersBlock';
 import { TableBlock } from './CustomBlocks/TableBlock';
@@ -300,27 +299,20 @@ export default function ArticleBlock(props: {
 					handleCurrentReducerUpdate({ field: 'toggleBlockFocus', value: false });
 				}
 
-				// Auto-detect supported embed URLs in paragraph blocks and convert to embed
+				// Auto-detect Odysee URLs in paragraph blocks and convert to embed
 				if (currentBlock.type === 'paragraph' && currentBlock.content) {
 					// Strip HTML tags to get raw text
 					const rawText = currentBlock.content.replace(/<[^>]*>/g, '').trim();
-					// Check if it's only a URL (no other content) and is from a supported provider
-					if (rawText && !rawText.includes(' ') && rawText.startsWith('http') && isSupportedEmbedUrl(rawText)) {
-						const parsed = parseEmbedUrl(rawText);
-						if (parsed) {
-							const embedHtml = buildEmbedHtml(parsed.embedUrl || '', false, rawText, undefined, parsed.embedHtml);
+					// Check if it's only a URL (no other content)
+					if (rawText && !rawText.includes(' ') && rawText.startsWith('http')) {
+						const embedUrl = parseOdyseeUrl(rawText);
+						if (embedUrl) {
+							const embedHtml = buildEmbedHtml(embedUrl);
 							props.onChangeBlock({
 								id: props.block.id,
-								type: ArticleBlockEnum.Embed,
+								type: ArticleBlockEnum.OdyseeEmbed,
 								content: embedHtml,
-								data: {
-									url: rawText,
-									embedUrl: parsed.embedUrl,
-									collapsed: false,
-									provider: parsed.provider,
-									providerName: parsed.providerName,
-									embedHtml: parsed.embedHtml,
-								},
+								data: { url: rawText, embedUrl: embedUrl },
 							});
 						}
 					}

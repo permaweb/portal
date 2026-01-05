@@ -8,7 +8,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-function parseOdyseeUrl(input: string): string | null {
+export function parseOdyseeUrl(input: string): string | null {
 	if (!input) return null;
 
 	const trimmed = input.trim();
@@ -43,7 +43,7 @@ function parseOdyseeUrl(input: string): string | null {
 	return null;
 }
 
-function buildEmbedHtml(embedUrl: string): string {
+export function buildEmbedHtml(embedUrl: string): string {
 	return `<div class="odysee-embed-wrapper" style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden;"><iframe src="${embedUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allowfullscreen></iframe></div>`;
 }
 

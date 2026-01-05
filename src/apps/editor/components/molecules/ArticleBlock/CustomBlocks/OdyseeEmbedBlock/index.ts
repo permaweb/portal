@@ -1,1 +1,1 @@
-export { default as OdyseeEmbedBlock } from './OdyseeEmbedBlock';
+export { buildEmbedHtml, default as OdyseeEmbedBlock, parseOdyseeUrl } from './OdyseeEmbedBlock';
