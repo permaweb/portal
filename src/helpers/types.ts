@@ -202,6 +202,7 @@ export enum ArticleBlockEnum {
 	MonetizationButton = 'monetizationButton',
 	Embed = 'embed',
 	Supporters = 'supporters',
+	OdyseeEmbed = 'odysee-embed',
 }
 
 export type ArticleBlockType = {

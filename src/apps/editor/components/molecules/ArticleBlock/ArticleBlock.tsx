@@ -24,6 +24,7 @@ import { DividerBlock } from './CustomBlocks/DividerBlock';
 import { buildEmbedHtml, EmbedBlock, isSupportedEmbedUrl, parseEmbedUrl } from './CustomBlocks/EmbedBlock';
 import { HTMLBlock } from './CustomBlocks/HTMLBlock';
 import { MediaBlock } from './CustomBlocks/MediaBlock';
+import { OdyseeEmbedBlock } from './CustomBlocks/OdyseeEmbedBlock';
 import { SpacerBlock } from './CustomBlocks/SpacerBlock';
 import { PostSupportersBlock } from './CustomBlocks/SupportersBlock';
 import { TableBlock } from './CustomBlocks/TableBlock';
@@ -860,6 +861,18 @@ export default function ArticleBlock(props: {
 		case 'supporters':
 			useCustom = true;
 			element = <PostSupportersBlock index={props.index} block={props.block} onChangeBlock={props.onChangeBlock} />;
+			break;
+		case 'odysee-embed':
+			useCustom = true;
+			element = (
+				<OdyseeEmbedBlock
+					content={props.block.content}
+					data={props.block.data}
+					onChange={(newContent: any, data: any) =>
+						props.onChangeBlock({ id: props.block.id, content: newContent, data: data })
+					}
+				/>
+			);
 			break;
 		default:
 			element = 'p';
