@@ -24,6 +24,7 @@ import { DividerBlock } from './CustomBlocks/DividerBlock';
 import { HTMLBlock } from './CustomBlocks/HTMLBlock';
 import { MediaBlock } from './CustomBlocks/MediaBlock';
 import { PostMonetizationBlock } from './CustomBlocks/MonetizationBlock';
+import { OdyseeEmbedBlock } from './CustomBlocks/OdyseeEmbedBlock';
 import { SpacerBlock } from './CustomBlocks/SpacerBlock';
 import { TableBlock } from './CustomBlocks/TableBlock';
 import * as S from './styles';
@@ -816,6 +817,18 @@ export default function ArticleBlock(props: {
 		case 'monetizationButton':
 			useCustom = true;
 			element = <PostMonetizationBlock index={props.index} block={props.block} onChangeBlock={props.onChangeBlock} />;
+			break;
+		case 'odysee-embed':
+			useCustom = true;
+			element = (
+				<OdyseeEmbedBlock
+					content={props.block.content}
+					data={props.block.data}
+					onChange={(newContent: any, data: any) =>
+						props.onChangeBlock({ id: props.block.id, content: newContent, data: data })
+					}
+				/>
+			);
 			break;
 		default:
 			element = 'p';

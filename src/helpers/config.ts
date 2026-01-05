@@ -281,6 +281,11 @@ export const ARTICLE_BLOCKS = {
 		label: 'Monetization Button',
 		icon: ICONS.tools,
 	},
+	[ArticleBlockEnum.OdyseeEmbed]: {
+		type: ArticleBlockEnum.OdyseeEmbed,
+		label: 'Odysee Embed',
+		icon: ICONS.odysee,
+	},
 };
 
 export const STRIPE_PUBLISHABLE_KEY =
