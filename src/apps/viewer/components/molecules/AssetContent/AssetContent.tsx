@@ -1,5 +1,6 @@
 import parse from 'html-react-parser';
 
+import OdyseeEmbed from 'engine/builder/blocks/odyseeEmbed';
 import { ArticleBlockType } from 'helpers/types';
 
 import * as S from './styles';
@@ -42,6 +43,8 @@ export default function AssetContent(props: { content: ArticleBlockType[] }) {
 			case 'header-6':
 				Element = 'h6';
 				break;
+			case 'odysee-embed':
+				return <OdyseeEmbed key={block.id} element={block} />;
 			default:
 				Element = null;
 				break;

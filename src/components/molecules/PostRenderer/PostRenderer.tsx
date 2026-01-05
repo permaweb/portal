@@ -8,6 +8,7 @@ import { getRedirect, urlify } from 'helpers/utils';
 
 import * as S from './styles';
 import MonetizationButton from 'engine/builder/blocks/monetizationButton';
+import OdyseeEmbed from 'engine/builder/blocks/odyseeEmbed';
 
 type ContentEntryType =
 	| 'header-1'
@@ -29,7 +30,8 @@ type ContentEntryType =
 	| 'spacer-horizontal'
 	| 'spacer-vertical'
 	| 'table'
-	| 'monetizationButton';
+	| 'monetizationButton'
+	| 'odysee-embed';
 
 type ContentEntry = {
 	id: string | number;
@@ -281,6 +283,8 @@ export default function PostRenderer(props: PostRendererProps) {
 							return (
 								<MonetizationButton key={entry.id} element={entry} preview={props.isPreview ?? false} location="post" />
 							);
+						case 'odysee-embed':
+							return <OdyseeEmbed key={entry.id} element={entry} />;
 						default:
 							return <b key={entry.id}>{JSON.stringify(entry)}</b>;
 					}
