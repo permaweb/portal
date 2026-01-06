@@ -52,53 +52,8 @@ export default function Embed(props: EmbedProps) {
 	const isTwitterEmbed =
 		effectiveEmbedUrl?.includes('platform.twitter.com') || url?.includes('twitter.com') || url?.includes('x.com');
 
-	// Show iframe embed using embedUrl from data
+	// Show iframe embed
 	if (effectiveEmbedUrl) {
-		// Twitter embeds need different styling - they're not 16:9
-		if (isTwitterEmbed) {
-			return (
-				<div className="embed-wrapper" style={{ position: 'relative', maxWidth: '550px' }}>
-					{url && (
-						<button
-							onClick={() => setIsCollapsed(true)}
-							style={{
-								position: 'absolute',
-								top: '8px',
-								right: '8px',
-								width: '24px',
-								height: '24px',
-								padding: 0,
-								cursor: 'pointer',
-								border: 'none',
-								borderRadius: '50%',
-								background: 'rgba(0, 0, 0, 0.6)',
-								color: '#fff',
-								fontSize: '14px',
-								fontWeight: 'bold',
-								lineHeight: '24px',
-								textAlign: 'center',
-								zIndex: 10,
-							}}
-							title="Show link only"
-						>
-							×
-						</button>
-					)}
-					<iframe
-						src={effectiveEmbedUrl}
-						style={{
-							width: '100%',
-							height: '400px',
-							border: 'none',
-						}}
-						allowFullScreen
-						title={title || 'Twitter embed'}
-					/>
-				</div>
-			);
-		}
-
-		// Standard 16:9 embed (Odysee, YouTube, etc.)
 		return (
 			<div className="embed-wrapper" style={{ position: 'relative' }}>
 				{url && (
@@ -127,34 +82,20 @@ export default function Embed(props: EmbedProps) {
 						×
 					</button>
 				)}
-				<div
+				<iframe
+					src={effectiveEmbedUrl}
 					style={{
-						position: 'relative',
-						width: '100%',
-						paddingBottom: '56.25%',
-						height: 0,
-						overflow: 'hidden',
+						aspectRatio: isTwitterEmbed ? '2 / 1' : '16 / 9',
+						border: 'none',
 					}}
-				>
-					<iframe
-						src={effectiveEmbedUrl}
-						style={{
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							width: '100%',
-							height: '100%',
-							border: 0,
-						}}
-						allowFullScreen
-						title={title || `${providerName || 'Embedded'} content`}
-					/>
-				</div>
+					allowFullScreen
+					title={title || `${providerName || 'Embedded'} content`}
+				/>
 			</div>
 		);
 	}
 
-	// Show embed HTML for Twitter-style embeds
+	// Show embed HTML
 	if (embedHtml) {
 		return <div className="embed-wrapper" dangerouslySetInnerHTML={{ __html: embedHtml }} />;
 	}
