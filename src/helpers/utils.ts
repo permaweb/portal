@@ -306,6 +306,7 @@ export function getPortalUsers(roles: any) {
 	const users: PortalUserType[] = [];
 	if (roles) {
 		for (const entry of Object.keys(roles)) {
+			if (roles[entry] === 'Removed') continue;
 			users.push({
 				address: entry,
 				type: roles[entry].type,

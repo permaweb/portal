@@ -98,7 +98,10 @@ export default function Landing() {
 				debugLog('info', 'Landing', 'Profile update:', profileUpdateId);
 
 				setPendingPortalId(portalId);
+
 				permawebProvider.refreshProfile();
+
+				await new Promise((r) => setTimeout(r, 1000));
 			} catch (e: any) {
 				debugLog('error', 'Landing', 'Error joining portal:', e.message ?? 'Unknown error');
 				setPendingPortalId(null);

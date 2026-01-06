@@ -179,10 +179,10 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 			let profile: any = null;
 
 			if (props.user) {
-				// editing: process id should already exist
+				// Editing: Process ID should already exist
 				profile = { id: targetProcessId || props.user.address };
 			} else {
-				// adding: resolve profile process id from wallet
+				// Adding: Resolve profile process id from wallet
 				profile = await permawebProvider.libs.getProfileByWalletAddress(walletAddress);
 			}
 
@@ -193,8 +193,14 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 
 			const rolesUpdate = await permawebProvider.libs.setZoneRoles(
 				[
-					{ granteeId: walletAddress, roles: [role.id], type: 'wallet', sendInvite: false },
-					{ granteeId: profile.id, roles: [role.id], type: 'process', sendInvite: !props.user },
+					{ granteeId: walletAddress, roles: [role.id], type: 'wallet', sendInvite: false, remoteZonePath: 'Portals' },
+					{
+						granteeId: profile.id,
+						roles: [role.id],
+						type: 'process',
+						sendInvite: !props.user,
+						remoteZonePath: 'Portals',
+					},
 				],
 				portalProvider.current.id,
 				arProvider.wallet
@@ -235,8 +241,8 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 		try {
 			await permawebProvider.libs.setZoneRoles(
 				[
-					{ granteeId: targetWallet, roles: [], type: 'wallet', sendInvite: false },
-					{ granteeId: targetProcessId, roles: [], type: 'process', sendInvite: false },
+					{ granteeId: targetWallet, roles: [], type: 'wallet', sendInvite: false, remoteZonePath: 'Portals' },
+					{ granteeId: targetProcessId, roles: [], type: 'process', sendInvite: false, remoteZonePath: 'Portals' },
 				],
 				portalProvider.current.id,
 				arProvider.wallet
