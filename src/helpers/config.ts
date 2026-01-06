@@ -297,10 +297,10 @@ export const ARTICLE_BLOCKS = {
 		icon: ICONS.users,
 		shortcut: 'Ctrl / S',
 	},
-	[ArticleBlockEnum.OdyseeEmbed]: {
-		type: ArticleBlockEnum.OdyseeEmbed,
-		label: 'Odysee Embed',
-		icon: ICONS.odysee,
+	[ArticleBlockEnum.Embed]: {
+		type: ArticleBlockEnum.Embed,
+		label: 'Embed',
+		icon: ICONS.link,
 	},
 };
 

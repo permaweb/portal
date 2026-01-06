@@ -8,48 +8,6 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
-declare global {
-	interface Window {
-		twttr?: {
-			widgets: {
-				load: (element?: HTMLElement) => void;
-			};
-		};
-	}
-}
-
-// Load Twitter widgets.js if not already loaded
-function loadTwitterWidgets(): Promise<void> {
-	return new Promise((resolve) => {
-		if (window.twttr) {
-			resolve();
-			return;
-		}
-
-		const script = document.createElement('script');
-		script.src = 'https://platform.twitter.com/widgets.js';
-		script.async = true;
-		script.onload = () => resolve();
-		script.onerror = () => resolve();
-		document.head.appendChild(script);
-	});
-}
-
-// Twitter embed preview component
-function TwitterEmbedPreview({ html }: { html: string }) {
-	const containerRef = React.useRef<HTMLDivElement>(null);
-
-	React.useEffect(() => {
-		loadTwitterWidgets().then(() => {
-			if (window.twttr && containerRef.current) {
-				window.twttr.widgets.load(containerRef.current);
-			}
-		});
-	}, [html]);
-
-	return <S.EmbedContainer ref={containerRef} dangerouslySetInnerHTML={{ __html: html }} />;
-}
-
 // Supported embed providers
 export const EMBED_PROVIDERS: Record<string, { name: string; icon?: string }> = {
 	'odysee.com': {

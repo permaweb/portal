@@ -9,7 +9,7 @@ import { getRedirect, urlify } from 'helpers/utils';
 import * as S from './styles';
 import Embed from 'engine/builder/blocks/embed';
 import Supporters from 'engine/builder/blocks/supporters';
-import OdyseeEmbed from 'engine/builder/blocks/odyseeEmbed';
+import Embed from 'engine/builder/blocks/embed';
 
 type ContentEntryType =
 	| 'header-1'
@@ -32,8 +32,8 @@ type ContentEntryType =
 	| 'spacer-vertical'
 	| 'table'
 	| 'monetizationButton'
-	| 'embed'
-	| 'supporters';
+	| 'supporters'
+	| 'embed';
 
 type ContentEntry = {
 	id: string | number;
