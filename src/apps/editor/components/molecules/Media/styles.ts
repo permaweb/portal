@@ -2,7 +2,9 @@ import styled from 'styled-components';
 
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.div``;
+export const Wrapper = styled.div`
+	width: 100%;
+`;
 
 export const Header = styled.div`
 	display: flex;
