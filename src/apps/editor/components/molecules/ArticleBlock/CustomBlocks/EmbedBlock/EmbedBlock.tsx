@@ -294,6 +294,14 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 		return ICONS.link;
 	};
 
+	// Check if this is a Twitter embed
+	const isTwitterEmbed =
+		provider === 'twitter.com' ||
+		provider === 'x.com' ||
+		embedUrl?.includes('platform.twitter.com') ||
+		inputValue?.includes('twitter.com') ||
+		inputValue?.includes('x.com');
+
 	if ((embedUrl || oembedHtml) && props.content) {
 		// Show collapsed link view
 		if (collapsed) {
@@ -322,9 +330,15 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 					{oembedHtml ? (
 						<S.EmbedContainer dangerouslySetInnerHTML={{ __html: oembedHtml }} />
 					) : embedUrl ? (
-						<S.IframeContainer>
-							<iframe src={embedUrl} allowFullScreen title={title || 'Embedded content'} />
-						</S.IframeContainer>
+						isTwitterEmbed ? (
+							<S.TwitterIframeContainer>
+								<iframe src={embedUrl} allowFullScreen title={title || 'Twitter embed'} />
+							</S.TwitterIframeContainer>
+						) : (
+							<S.IframeContainer>
+								<iframe src={embedUrl} allowFullScreen title={title || 'Embedded content'} />
+							</S.IframeContainer>
+						)
 					) : null}
 				</S.PreviewWrapper>
 				<S.ActionsWrapper>

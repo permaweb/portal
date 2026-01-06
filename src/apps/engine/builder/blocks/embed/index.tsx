@@ -48,8 +48,57 @@ export default function Embed(props: EmbedProps) {
 		);
 	}
 
+	// Check if this is a Twitter embed
+	const isTwitterEmbed =
+		effectiveEmbedUrl?.includes('platform.twitter.com') || url?.includes('twitter.com') || url?.includes('x.com');
+
 	// Show iframe embed using embedUrl from data
 	if (effectiveEmbedUrl) {
+		// Twitter embeds need different styling - they're not 16:9
+		if (isTwitterEmbed) {
+			return (
+				<div className="embed-wrapper" style={{ position: 'relative', maxWidth: '550px' }}>
+					{url && (
+						<button
+							onClick={() => setIsCollapsed(true)}
+							style={{
+								position: 'absolute',
+								top: '8px',
+								right: '8px',
+								width: '24px',
+								height: '24px',
+								padding: 0,
+								cursor: 'pointer',
+								border: 'none',
+								borderRadius: '50%',
+								background: 'rgba(0, 0, 0, 0.6)',
+								color: '#fff',
+								fontSize: '14px',
+								fontWeight: 'bold',
+								lineHeight: '24px',
+								textAlign: 'center',
+								zIndex: 10,
+							}}
+							title="Show link only"
+						>
+							×
+						</button>
+					)}
+					<iframe
+						src={effectiveEmbedUrl}
+						style={{
+							width: '100%',
+							height: '400px',
+							border: 'none',
+						}}
+						allowFullScreen
+						title={title || 'Twitter embed'}
+					/>
+				</div>
+			);
+		}
+
+		// Standard 16:9 embed (Odysee, YouTube, etc.)
 		return (
 			<div className="embed-wrapper" style={{ position: 'relative' }}>
 				{url && (
