@@ -154,18 +154,40 @@ export function parseEmbedUrl(
 	return null;
 }
 
-// For backward compatibility - not used for fetching anymore
+// Fetch OEmbed data from provider's endpoint
 export async function fetchOEmbed(url: string): Promise<OEmbedResponse | null> {
-	// Direct parsing approach - no network request
-	const parsed = parseEmbedUrl(url);
-	if (parsed) {
-		return {
-			type: 'rich',
-			version: '1.0',
-			provider_name: parsed.providerName,
-			html: parsed.embedHtml,
-		};
+	const providerInfo = getProviderFromUrl(url);
+	if (!providerInfo) return null;
+
+	// Use Odysee's OEmbed endpoint
+	if (providerInfo.domain === 'odysee.com') {
+		try {
+			const oembedUrl = `https://odysee.com/$/oembed?url=${encodeURIComponent(url)}`;
+			const response = await fetch(oembedUrl);
+			if (!response.ok) {
+				console.error('OEmbed fetch failed:', response.status);
+				return null;
+			}
+			const data = await response.json();
+			return data as OEmbedResponse;
+		} catch (error) {
+			console.error('OEmbed fetch error:', error);
+			return null;
+		}
 	}
+
+	// For Twitter/X, use local parsing (no public OEmbed endpoint)
+	if (providerInfo.domain === 'twitter.com' || providerInfo.domain === 'x.com') {
+		const twitterData = parseTwitterUrl(url);
+		if (twitterData) {
+			return {
+				type: 'rich',
+				version: '1.0',
+				provider_name: providerInfo.config.name,
+			};
+		}
+	}
+
 	return null;
 }
 
@@ -210,6 +232,7 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 	const [provider, setProvider] = React.useState<string | null>(props.data?.provider || null);
 	const [error, setError] = React.useState<string | null>(null);
 	const [oembedHtml, setOembedHtml] = React.useState<string | null>(props.data?.embedHtml || null);
+	const [loading, setLoading] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
 		if (props.data?.embedUrl && !embedUrl) {
@@ -232,12 +255,60 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 		}
 	}, [props.data]);
 
-	const handleEmbed = () => {
+	const handleEmbed = async () => {
 		setError(null);
+		setLoading(true);
 
+		const providerInfo = getProviderFromUrl(inputValue);
+		if (!providerInfo) {
+			setError(language?.unsupportedProvider || 'This URL is not from a supported provider or is invalid');
+			setLoading(false);
+			return;
+		}
+
+		// Try to fetch OEmbed data for Odysee
+		if (providerInfo.domain === 'odysee.com') {
+			const oembedData = await fetchOEmbed(inputValue);
+			if (oembedData) {
+				const embedHtmlFromOembed = oembedData.html || null;
+				const embedUrlFromHtml = embedHtmlFromOembed ? extractEmbedUrlFromHtml(embedHtmlFromOembed) : null;
+				const finalEmbedUrl = embedUrlFromHtml || parseOdyseeUrl(inputValue);
+
+				setEmbedUrl(finalEmbedUrl);
+				setProvider(providerInfo.domain);
+				setTitle(oembedData.title || null);
+				setOembedHtml(embedHtmlFromOembed);
+
+				const content = buildEmbedHtml(
+					finalEmbedUrl || '',
+					false,
+					inputValue,
+					oembedData.title,
+					embedHtmlFromOembed || undefined
+				);
+
+				props.onChange(content, {
+					url: inputValue,
+					embedUrl: finalEmbedUrl,
+					collapsed: false,
+					provider: providerInfo.domain,
+					providerName: providerInfo.config.name,
+					title: oembedData.title,
+					authorName: oembedData.author_name,
+					authorUrl: oembedData.author_url,
+					thumbnailUrl: oembedData.thumbnail_url,
+					embedHtml: embedHtmlFromOembed,
+				});
+				setLoading(false);
+				return;
+			}
+		}
+
+		// Fallback to local parsing for Twitter or if OEmbed fails
 		const parsed = parseEmbedUrl(inputValue);
 		if (!parsed) {
 			setError(language?.unsupportedProvider || 'This URL is not from a supported provider or is invalid');
+			setLoading(false);
 			return;
 		}
 
@@ -255,6 +326,7 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 			providerName: parsed.providerName,
 			embedHtml: parsed.embedHtml,
 		});
+		setLoading(false);
 	};
 
 	const handleClear = () => {
@@ -371,12 +443,17 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 						value={inputValue}
 						onChange={handleInputChange}
 						invalid={{ status: !!error, message: error }}
-						disabled={false}
+						disabled={loading}
 						placeholder={'https://...'}
 						sm
 					/>
 					<S.InputActionsFlex>
-						<Button type={'alt1'} label={language?.embed || 'Embed'} handlePress={handleEmbed} disabled={!inputValue} />
+						<Button
+							type={'alt1'}
+							label={loading ? language?.loading || 'Loading...' : language?.embed || 'Embed'}
+							handlePress={handleEmbed}
+							disabled={!inputValue || loading}
+						/>
 					</S.InputActionsFlex>
 				</S.InputActions>
 			</S.InputWrapper>
