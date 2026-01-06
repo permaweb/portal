@@ -112,11 +112,37 @@ export const defaultThemes: Portal = [
 					light: 'background',
 					dark: 'background',
 				},
+				border: {
+					light: 'border',
+					dark: 'border',
+				},
 			},
 			preferences: {
 				opacity: {
 					light: 1,
 					dark: 1,
+				},
+			},
+		},
+		post: {
+			colors: {
+				background: {
+					light: undefined,
+					dark: undefined,
+				},
+				border: {
+					light: 'border',
+					dark: 'border',
+				},
+			},
+			preferences: {
+				opacity: {
+					light: 1,
+					dark: 0.6,
+				},
+				shadow: {
+					light: 'none',
+					dark: 'none',
 				},
 			},
 		},

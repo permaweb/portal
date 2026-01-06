@@ -8,37 +8,24 @@ export const Post = styled.div<{ $layout: any }>`
 	width: 100%;
 	background: var(--color-post-background);
 	padding: 20px;
+	margin-top: 20px;
 	box-sizing: border-box;
 	border-radius: var(--border-radius);
+	border: 1px solid var(--color-post-border);
+	box-shadow: var(--preference-post-shadow);
 	gap: 20px;
-	// box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.4);
-	margin-top: 21px;
 `;
 
 export const Categories = styled.div`
-	position: absolute;
-	display: flex;
-	top: -21px;
-	right: 0px;
-	background-color: var(--color-post-background);
-	padding: 1px 8px 1px 4px;
-	border-radius: 0 0 0 var(--border-radius);
-	font-size: 12px;
+	display: none;
+	align-items: center;
+	order: 999;
+	margin: auto -20px -20px -20px;
+	padding: 6px 20px;
+	font-size: var(--font-size-small);
 	font-weight: 600;
 	user-select: none;
-	border-bottom: 1px solid rgba(var(--color-background), 1);
-
-	&::before {
-		content: '';
-		position: absolute;
-		left: -20px;
-		bottom: 0px;
-		border-left: 10px solid transparent;
-		border-top: 10px solid transparent;
-		border-right: 10px solid var(--color-post-background);
-		border-bottom: 10px solid var(--color-post-background);
-		box-shadow: inset 0 -10px 10px rgba(0, 0, 0, 0.3);
-	}
+	background-image: linear-gradient(to right, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
 `;
 
 export const Category = styled.div``;

@@ -4,15 +4,13 @@ import styled from 'styled-components';
 export const Post = styled.div<{ $layout: any }>`
 	position: relative;
 	display: flex;
-	// flex-direction: ${(props: any) => (props.$layout?.flow === 'column' ? `column` : `row`)};
 	width: 100%;
-	// background: var(--color-card-background);
 	padding-top: 40px;
 	box-sizing: border-box;
 	border-radius: var(--border-radius);
 	gap: 20px;
-	// box-shadow: ${(props: any) => (props.$layout?.shadow ? `0 4px 10px rgba(0, 0, 0, 0.4)` : `unset`)};
-	border-top: 2px solid var(--color-card-border);
+	box-shadow: var(--preference-post-shadow);
+	border-top: 2px solid var(--color-post-border);
 	margin-bottom: 21px;
 `;
 
@@ -21,8 +19,8 @@ export const Categories = styled.div`
 	display: flex;
 	top: 0px;
 	left: 0px;
-	color: var(--color-card-border-contrast);
-	background-color: var(--color-card-border);
+	color: var(--color-post-border-contrast);
+	background-color: var(--color-post-border);
 	padding: 5px 15px 4px;
 	border-radius: 0 0 0 var(--border-radius);
 	font-size: 12px;
@@ -31,7 +29,7 @@ export const Categories = styled.div`
 `;
 
 export const Category = styled.div`
-	color: var(--color-card-border-contrast);
+	color: var(--color-post-border-contrast);
 `;
 
 export const TitleWrapper = styled.div`

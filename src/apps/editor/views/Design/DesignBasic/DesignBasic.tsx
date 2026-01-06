@@ -52,6 +52,19 @@ export default function DesignBasic() {
 					/>
 				</S.Section>
 				<S.Section>
+					<Drawer drawerKey="design-themes" title={language?.themes} content={<Themes />} padContent />
+				</S.Section>
+				<S.Section>
+					<Drawer drawerKey="design-fonts" title={language?.fonts} content={<Fonts />} padContent />
+				</S.Section>
+				{!portalProvider?.permissions?.updatePortalMeta && (
+					<S.InfoWrapper className={'warning'}>
+						<span>{language?.unauthorizedPortalUpdate}</span>
+					</S.InfoWrapper>
+				)}
+			</S.SectionWrapper>
+			<S.SectionWrapper>
+				<S.Section>
 					<Drawer
 						drawerKey="design-images"
 						title={language?.images}
@@ -63,7 +76,7 @@ export default function DesignBasic() {
 										<S.MediaInfo>{language?.recommended}: 500x280px (16:9)</S.MediaInfo>
 									</S.MediaTitleWrapper>
 									<S.MediaEntry>
-										<Media portal={portalProvider.current} type={'logo'} />
+										<Media portal={portalProvider.current} type={'logo'} hideActions />
 									</S.MediaEntry>
 								</div>
 								<div>
@@ -72,7 +85,7 @@ export default function DesignBasic() {
 										<S.MediaInfo>{language?.recommended}: 32x32px (1:1)</S.MediaInfo>
 									</S.MediaTitleWrapper>
 									<S.MediaEntry>
-										<Media portal={portalProvider.current} type={'icon'} />
+										<Media portal={portalProvider.current} type={'icon'} hideActions />
 									</S.MediaEntry>
 								</div>
 								<div>
@@ -81,7 +94,7 @@ export default function DesignBasic() {
 										<S.MediaInfo>{language?.recommended}: 1920x1080px (16:9)</S.MediaInfo>
 									</S.MediaTitleWrapper>
 									<S.MediaEntryWallpaper>
-										<Media portal={portalProvider.current} type={'wallpaper'} />
+										<Media portal={portalProvider.current} type={'wallpaper'} hideActions />
 									</S.MediaEntryWallpaper>
 								</div>
 							</>
@@ -89,19 +102,6 @@ export default function DesignBasic() {
 						padContent
 					/>
 				</S.Section>
-			</S.SectionWrapper>
-			<S.SectionWrapper>
-				<S.Section>
-					<Drawer drawerKey="design-fonts" title={language?.fonts} content={<Fonts />} padContent />
-				</S.Section>
-				<S.Section>
-					<Drawer drawerKey="design-themes" title={language?.themes} content={<Themes />} padContent />
-				</S.Section>
-				{!portalProvider?.permissions?.updatePortalMeta && (
-					<S.InfoWrapper className={'warning'}>
-						<span>{language?.unauthorizedPortalUpdate}</span>
-					</S.InfoWrapper>
-				)}
 			</S.SectionWrapper>
 		</S.BodyWrapper>
 	);

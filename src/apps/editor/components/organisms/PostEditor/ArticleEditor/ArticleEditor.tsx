@@ -8,7 +8,6 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPostClear, currentPostUpdate, setOriginalData } from 'editor/store/post';
 
-import { Loader } from 'components/atoms/Loader';
 import { URLS } from 'helpers/config';
 import { ArticleBlockEnum, ArticleBlockType, RequestUpdateType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
@@ -419,54 +418,51 @@ export default function ArticleEditor(props: {
 	};
 
 	return (
-		<>
-			<S.Wrapper>
-				<S.ToolbarWrapper>
-					<ArticleToolbar
-						addBlock={(type: ArticleBlockEnum) => addBlock(type)}
-						viewMode={viewMode}
-						handleInitAddBlock={(e) => handleKeyAddBlock(e)}
-						handleSubmit={props.handleSubmit}
-						handleStatusUpdate={props.handleStatusUpdate}
-						handleRequestUpdate={props.handleRequestUpdate}
-						handleSwitchOriginal={switchBetweenOriginal}
-						staticPage={props.staticPage}
-					/>
-				</S.ToolbarWrapper>
-				<S.EditorWrapper panelOpen={currentPost.editor.panelOpen} onClick={handleEditorClick}>
-					{currentPost.data.content?.length ? (
-						<DragDropContext onDragEnd={onDragEnd}>
-							<Droppable droppableId={'blocks'}>
-								{(provided) => (
-									<S.Editor
-										{...provided.droppableProps}
-										ref={provided.innerRef}
-										blockEditMode={currentPost.editor.blockEditMode}
-									>
-										{currentPost.data.content.map((block: ArticleBlockType, index: number) => (
-											<ArticleBlock
-												index={index}
-												type={'post'}
-												key={block.id}
-												block={block}
-												onChangeBlock={handleBlockChange}
-												onDeleteBlock={deleteBlock}
-												onFocus={() => handleCurrentPostUpdate({ field: 'focusedBlock', value: block })}
-											/>
-										))}
-										{provided.placeholder}
-									</S.Editor>
-								)}
-							</Droppable>
-						</DragDropContext>
-					) : (
-						<S.BlocksEmpty className={'fade-in'}>
-							<span>{language?.blocksEmpty}</span>
-						</S.BlocksEmpty>
-					)}
-				</S.EditorWrapper>
-			</S.Wrapper>
-			{currentPost.editor.loading.active && <Loader message={currentPost.editor.loading.message} />}
-		</>
+		<S.Wrapper>
+			<S.ToolbarWrapper>
+				<ArticleToolbar
+					addBlock={(type: ArticleBlockEnum) => addBlock(type)}
+					viewMode={viewMode}
+					handleInitAddBlock={(e) => handleKeyAddBlock(e)}
+					handleSubmit={props.handleSubmit}
+					handleStatusUpdate={props.handleStatusUpdate}
+					handleRequestUpdate={props.handleRequestUpdate}
+					handleSwitchOriginal={switchBetweenOriginal}
+					staticPage={props.staticPage}
+				/>
+			</S.ToolbarWrapper>
+			<S.EditorWrapper panelOpen={currentPost.editor.panelOpen} onClick={handleEditorClick}>
+				{currentPost.data.content?.length ? (
+					<DragDropContext onDragEnd={onDragEnd}>
+						<Droppable droppableId={'blocks'}>
+							{(provided) => (
+								<S.Editor
+									{...provided.droppableProps}
+									ref={provided.innerRef}
+									blockEditMode={currentPost.editor.blockEditMode}
+								>
+									{currentPost.data.content.map((block: ArticleBlockType, index: number) => (
+										<ArticleBlock
+											index={index}
+											type={'post'}
+											key={block.id}
+											block={block}
+											onChangeBlock={handleBlockChange}
+											onDeleteBlock={deleteBlock}
+											onFocus={() => handleCurrentPostUpdate({ field: 'focusedBlock', value: block })}
+										/>
+									))}
+									{provided.placeholder}
+								</S.Editor>
+							)}
+						</Droppable>
+					</DragDropContext>
+				) : (
+					<S.BlocksEmpty className={'fade-in'}>
+						<span>{language?.blocksEmpty}</span>
+					</S.BlocksEmpty>
+				)}
+			</S.EditorWrapper>
+		</S.Wrapper>
 	);
 }

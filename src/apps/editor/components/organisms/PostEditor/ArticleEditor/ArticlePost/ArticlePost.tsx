@@ -69,7 +69,7 @@ export default function ArticlePost(props: {
 					<p>{language?.categories}</p>
 				</S.SectionHeaderInput>
 				<S.SectionBody>
-					<Categories categories={props.categories} setCategories={props.setCategories} selectOnAdd skipAuthCheck />
+					<Categories categories={props.categories} setCategories={props.setCategories} skipAuthCheck />
 				</S.SectionBody>
 			</S.Section>
 			<S.TopicsSection>
@@ -77,7 +77,7 @@ export default function ArticlePost(props: {
 					<p>{language?.topics}</p>
 				</S.SectionHeaderInput>
 				<S.SectionBody>
-					<Topics topics={props.topics} setTopics={props.setTopics} selectOnAdd skipAuthCheck />
+					<Topics topics={props.topics} setTopics={props.setTopics} skipAuthCheck />
 				</S.SectionBody>
 			</S.TopicsSection>
 			<S.ContributeSection>

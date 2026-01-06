@@ -20,7 +20,7 @@ export const Wrapper = styled.div`
 `;
 
 export const TitleWrapper = styled.div`
-	width: calc(35% - 10px);
+	width: calc(30% - 10px);
 	overflow: hidden;
 	position: relative;
 	input {

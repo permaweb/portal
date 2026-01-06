@@ -128,6 +128,11 @@ export function initThemes(Themes: any[]) {
 
 			// Footer
 			'--color-footer-background': getColor(theme, scheme, theme.footer.colors.background[scheme]),
+			'--color-footer-border': getColor(
+				theme,
+				scheme,
+				theme.footer?.colors?.border?.[scheme] || theme.basics.colors.border[scheme]
+			),
 
 			// Content
 			'--color-content-background': `rgba(${theme.content.colors.background[scheme]},${theme.content.preferences.opacity[scheme]})`,
@@ -142,6 +147,7 @@ export function initThemes(Themes: any[]) {
 						'--color-post-border-contrast': `rgba(${getContrastColor(
 							getColor(theme, scheme, theme.post.colors.border[scheme])
 						)},1)`,
+						'--preference-post-shadow': theme.post?.preferences?.shadow?.[scheme] || 'none',
 				  }
 				: {}),
 
