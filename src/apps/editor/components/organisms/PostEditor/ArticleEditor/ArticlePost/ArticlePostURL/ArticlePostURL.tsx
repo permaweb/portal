@@ -36,11 +36,18 @@ export default function ArticlePostURL() {
 		setUrlValue(currentPost.data?.url || '');
 	}, [currentPost.data?.url]);
 
+	// Generate URL once for new posts only
 	React.useEffect(() => {
-		const generatedUrl = urlify(currentPost.data.title);
-		setUrlValue(generatedUrl);
-		handleCurrentPostUpdate({ field: 'url', value: generatedUrl });
-	}, [currentPost.data?.title]);
+		// Only generate URL once for new posts when:
+		// 1. No assetId (new post)
+		// 2. No existing URL
+		// 3. Title exists
+		if (!assetId && !currentPost.data?.url && currentPost.data?.title) {
+			const generatedUrl = urlify(currentPost.data.title);
+			setUrlValue(generatedUrl);
+			handleCurrentPostUpdate({ field: 'url', value: generatedUrl });
+		}
+	}, [assetId, currentPost.data?.title, currentPost.data?.url]);
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
