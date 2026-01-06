@@ -1,3 +1,5 @@
+import React from 'react';
+
 type EmbedProps = {
 	element: {
 		id: string | number;
@@ -5,7 +7,7 @@ type EmbedProps = {
 		data?: {
 			url?: string;
 			embedUrl?: string;
-			collapsed?: boolean;
+			collapsed?: boolean | string;
 			title?: string;
 			authorName?: string;
 			authorUrl?: string;
@@ -17,11 +19,26 @@ type EmbedProps = {
 	};
 };
 
+// Extract iframe src from HTML content
+function extractIframeSrc(html: string): string | null {
+	if (!html) return null;
+	const match = html.match(/<iframe[^>]+src=["']([^"']+)["']/i);
+	return match ? match[1] : null;
+}
+
 export default function Embed(props: EmbedProps) {
 	const { embedUrl, collapsed, url, title, providerName, embedHtml } = props.element?.data || {};
+	const content = props.element?.content || '';
 
-	// If collapsed, show link only
-	if (collapsed && url) {
+	// Handle collapsed as boolean or string (database may serialize as string)
+	const initialCollapsed = collapsed === true || collapsed === 'true';
+	const [isCollapsed, setIsCollapsed] = React.useState(initialCollapsed);
+
+	// Get the effective embed URL (from data or extracted from content)
+	const effectiveEmbedUrl = embedUrl || extractIframeSrc(content);
+
+	// If collapsed, show link only (no way to expand again)
+	if (isCollapsed && url) {
 		return (
 			<div className="embed-wrapper embed-collapsed">
 				<a href={url} target="_blank" rel="noopener noreferrer">
@@ -31,32 +48,59 @@ export default function Embed(props: EmbedProps) {
 		);
 	}
 
-	// Show iframe embed for Odysee-style embeds
-	if (embedUrl) {
+	// Show iframe embed using embedUrl from data
+	if (effectiveEmbedUrl) {
 		return (
-			<div
-				className="embed-wrapper"
-				style={{
-					position: 'relative',
-					width: '100%',
-					paddingBottom: '56.25%',
-					height: 0,
-					overflow: 'hidden',
-				}}
-			>
-				<iframe
-					src={embedUrl}
+			<div className="embed-wrapper" style={{ position: 'relative' }}>
+				{url && (
+					<button
+						onClick={() => setIsCollapsed(true)}
+						style={{
+							position: 'absolute',
+							top: '8px',
+							right: '8px',
+							width: '24px',
+							height: '24px',
+							padding: 0,
+							cursor: 'pointer',
+							border: 'none',
+							borderRadius: '50%',
+							background: 'rgba(0, 0, 0, 0.6)',
+							color: '#fff',
+							fontSize: '14px',
+							fontWeight: 'bold',
+							lineHeight: '24px',
+							textAlign: 'center',
+							zIndex: 10,
+						}}
+						title="Show link only"
+					>
+						×
+					</button>
+				)}
+				<div
 					style={{
-						position: 'absolute',
-						top: 0,
-						left: 0,
+						position: 'relative',
 						width: '100%',
-						height: '100%',
-						border: 0,
+						paddingBottom: '56.25%',
+						height: 0,
+						overflow: 'hidden',
 					}}
-					allowFullScreen
-					title={title || `${providerName || 'Embedded'} content`}
-				/>
+				>
+					<iframe
+						src={effectiveEmbedUrl}
+						style={{
+							position: 'absolute',
+							top: 0,
+							left: 0,
+							width: '100%',
+							height: '100%',
+							border: 0,
+						}}
+						allowFullScreen
+						title={title || `${providerName || 'Embedded'} content`}
+					/>
+				</div>
 			</div>
 		);
 	}
@@ -66,9 +110,9 @@ export default function Embed(props: EmbedProps) {
 		return <div className="embed-wrapper" dangerouslySetInnerHTML={{ __html: embedHtml }} />;
 	}
 
-	// Fallback to HTML content if available
-	if (props.element?.content) {
-		return <div className="embed-wrapper" dangerouslySetInnerHTML={{ __html: props.element.content }} />;
+	// Final fallback: render content HTML directly
+	if (content) {
+		return <div className="embed-wrapper" dangerouslySetInnerHTML={{ __html: content }} />;
 	}
 
 	return null;
