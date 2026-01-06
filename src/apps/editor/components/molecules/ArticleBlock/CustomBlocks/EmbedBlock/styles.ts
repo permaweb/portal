@@ -80,10 +80,58 @@ export const IframeContainer = styled.div`
 	}
 `;
 
+export const EmbedContainer = styled.div`
+	width: 100%;
+	border-radius: ${STYLING.dimensions.radius.alt4};
+	overflow: hidden;
+
+	iframe {
+		max-width: 100%;
+		border: 0;
+	}
+
+	/* Twitter embed specific styles */
+	.twitter-tweet {
+		margin: 0 auto !important;
+	}
+`;
+
 export const ActionsWrapper = styled.div`
 	width: 100%;
 	display: flex;
 	gap: 15px;
 	align-items: center;
 	justify-content: flex-end;
+`;
+
+export const CollapsedWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	padding: 15px 20px;
+	border-radius: ${STYLING.dimensions.radius.alt4} !important;
+`;
+
+export const CollapsedLink = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	svg {
+		width: 20px;
+		flex-shrink: 0;
+		fill: ${(props) => props.theme.colors.font.primary};
+	}
+	a {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.small};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		text-decoration: none;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		&:hover {
+			text-decoration: underline;
+		}
+	}
 `;

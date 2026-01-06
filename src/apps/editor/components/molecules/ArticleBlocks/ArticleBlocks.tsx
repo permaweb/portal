@@ -84,7 +84,7 @@ export default function ArticleBlocks(props: {
 				blocks: [
 					ARTICLE_BLOCKS[ArticleBlockEnum.Image],
 					ARTICLE_BLOCKS[ArticleBlockEnum.Video],
-					ARTICLE_BLOCKS[ArticleBlockEnum.OdyseeEmbed],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Embed],
 				].filter(Boolean),
 			},
 			{

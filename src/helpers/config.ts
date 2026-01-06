@@ -281,10 +281,10 @@ export const ARTICLE_BLOCKS = {
 		label: 'Monetization Button',
 		icon: ICONS.tools,
 	},
-	[ArticleBlockEnum.OdyseeEmbed]: {
-		type: ArticleBlockEnum.OdyseeEmbed,
-		label: 'Odysee Embed',
-		icon: ICONS.odysee,
+	[ArticleBlockEnum.Embed]: {
+		type: ArticleBlockEnum.Embed,
+		label: 'Embed',
+		icon: ICONS.link,
 	},
 };
 
