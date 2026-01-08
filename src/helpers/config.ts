@@ -281,6 +281,11 @@ export const ARTICLE_BLOCKS = {
 		label: 'Monetization Button',
 		icon: ICONS.tools,
 	},
+	[ArticleBlockEnum.Embed]: {
+		type: ArticleBlockEnum.Embed,
+		label: 'Embed',
+		icon: ICONS.link,
+	},
 };
 
 export const STRIPE_PUBLISHABLE_KEY =

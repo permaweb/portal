@@ -81,7 +81,11 @@ export default function ArticleBlocks(props: {
 			},
 			{
 				label: language.media,
-				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image], ARTICLE_BLOCKS[ArticleBlockEnum.Video]].filter(Boolean),
+				blocks: [
+					ARTICLE_BLOCKS[ArticleBlockEnum.Image],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Video],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Embed],
+				].filter(Boolean),
 			},
 			{
 				label: language.design,
