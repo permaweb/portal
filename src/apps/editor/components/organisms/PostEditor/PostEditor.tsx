@@ -22,6 +22,7 @@ import {
 	filterDuplicates,
 	getByteSize,
 	getByteSizeDisplay,
+	getPortalAssets,
 	hasUnsavedPostChanges,
 	isMac,
 	urlify,
@@ -266,6 +267,21 @@ export default function PostEditor() {
 			if (!validateSubmit()) {
 				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
 				return;
+			}
+
+			// Validate URL uniqueness in external portals (only runs when cross-posting)
+			if (currentPost.data?.externalRecipients?.length > 0) {
+				handleCurrentPostUpdate({
+					field: 'loading',
+					value: { active: true, message: `${language?.validating || 'Validating'}...` },
+				});
+				const externalValidation = await validateExternalPortalUrls();
+				if (!externalValidation.valid) {
+					setShowReview(true);
+					setMissingFields(externalValidation.errors);
+					handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
+					return;
+				}
 			}
 
 			const excludeFromIndex = JSON.stringify([
@@ -619,6 +635,44 @@ export default function PostEditor() {
 	function handleSubmitUpdate() {
 		setMissingFields([]);
 		handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
+	}
+
+	async function validateExternalPortalUrls(): Promise<{ valid: boolean; errors: string[] }> {
+		const errors: string[] = [];
+
+		if (!currentPost.data?.externalRecipients?.length || !currentPost.data.url) {
+			return { valid: true, errors: [] };
+		}
+
+		for (const portalId of currentPost.data.externalRecipients) {
+			const portal = portalProvider.portals?.find((p: PortalHeaderType) => p.id === portalId);
+			const portalName = portal?.name || portalId;
+
+			try {
+				const response = await permawebProvider.libs.readState({
+					processId: portalId,
+					path: 'Posts',
+					hydrate: true,
+				});
+
+				const posts = permawebProvider.libs.mapFromProcessCase(response);
+				const assets = getPortalAssets(posts?.index);
+
+				if (assets?.length) {
+					const duplicateUrl = assets.some(
+						(asset: any) => asset.metadata?.url?.toLowerCase() === currentPost.data.url.toLowerCase()
+					);
+
+					if (duplicateUrl) {
+						errors.push(`Post URL already exists in "${portalName}"`);
+					}
+				}
+			} catch (e: any) {
+				debugLog('warn', 'PostEditor', `Failed to validate URL for portal ${portalId}:`, e.message);
+			}
+		}
+
+		return { valid: errors.length === 0, errors };
 	}
 
 	function validateSubmit() {
