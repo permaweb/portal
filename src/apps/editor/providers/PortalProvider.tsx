@@ -24,6 +24,7 @@ import {
 	getPortalAssets,
 	getPortalUsers,
 	isEqual,
+	isVersionGreater,
 } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -287,7 +288,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			}
 
 			setUpdateAvailable(
-				overview?.version !== CurrentZoneVersion && arProvider.wallet && arProvider.walletAddress === overview?.owner
+				isVersionGreater(CurrentZoneVersion, overview?.version) &&
+					arProvider.wallet &&
+					arProvider.walletAddress === overview?.owner
 			);
 
 			const portalState: PortalDetailType = {

@@ -18,7 +18,7 @@ import { DOM, URLS } from 'helpers/config';
 import { preloadAllAssets } from 'helpers/preloader';
 import { serviceWorkerManager } from 'helpers/serviceWorkerManager';
 import { GlobalStyle } from 'helpers/styles';
-import { debugLog } from 'helpers/utils';
+import { debugLog, isVersionGreater } from 'helpers/utils';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvider';
 import { NotificationProvider } from 'providers/NotificationProvider';
@@ -112,7 +112,7 @@ function AppContent() {
 			if (hasCheckedProfileRef.current) return;
 			if (permawebProvider.profile?.id) {
 				const userVersion = permawebProvider.profile.version;
-				if (!userVersion || userVersion !== CurrentZoneVersion) {
+				if (!userVersion || isVersionGreater(CurrentZoneVersion, userVersion)) {
 					debugLog('info', 'EditorApp', 'User profile version does not match current version, updating...');
 
 					await permawebProvider.libs.updateProfileVersion({
