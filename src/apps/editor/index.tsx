@@ -48,7 +48,7 @@ const Domains = getLazyImport('Domains');
 const DomainsRegister = getLazyImport('Domains/Register');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
-const Monetization = getLazyImport('Monetization');
+const Tips = getLazyImport('Tips');
 
 function getLazyImport(view: string) {
 	const key = `./views/${view}/index.tsx`;
@@ -231,7 +231,7 @@ function AppContent() {
 						{getRoute(`${URLS.base}:portalId/pages`, <Pages />)}
 						{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
 						{getRoute(`${URLS.base}:portalId/domains/register`, <DomainsRegister />)}
-						{getRoute(`${URLS.base}:portalId/tips`, <Monetization />)}
+						{getRoute(`${URLS.base}:portalId/tips`, <Tips />)}
 						{getRoute(URLS.docs, <Docs />)}
 						{getRoute(`${URLS.docs}:active/*`, <Docs />)}
 						{getRoute(URLS.notFound, <NotFound />)}

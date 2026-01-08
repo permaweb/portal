@@ -438,3 +438,20 @@ export interface UserOwnedDomain {
 }
 
 export type ArticleBlocksContextType = 'toolbar' | 'inline' | 'grid';
+
+export type MonetizationConfig = {
+	enabled: boolean;
+	walletAddress: string;
+	tokenAddress: string;
+};
+
+export type TipRow = {
+	id: string;
+	timestamp: number | null;
+	amountAr: string;
+	fromAddress: string;
+	fromName?: string;
+	fromProfile?: string;
+	location?: string;
+	winston: string;
+};

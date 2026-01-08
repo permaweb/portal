@@ -7,7 +7,6 @@ import { getTxEndpoint } from 'helpers/endpoints';
 import { getRedirect, urlify } from 'helpers/utils';
 
 import * as S from './styles';
-import MonetizationButton from 'engine/builder/blocks/monetizationButton';
 import Embed from 'engine/builder/blocks/embed';
 import Supporters from 'engine/builder/blocks/supporters';
 
@@ -286,7 +285,7 @@ export default function PostRenderer(props: PostRendererProps) {
 							return <div key={entry.id} dangerouslySetInnerHTML={{ __html: entry.content || '' }} />;
 						case 'monetizationButton':
 							return (
-								<MonetizationButton
+								<TipsButton
 									key={entry.id}
 									element={entry}
 									preview={props.isPreview ?? false}

@@ -162,7 +162,7 @@ export const PAGE_BLOCKS = {
 	},
 	[PageBlockEnum.MonetizationButton]: {
 		type: PageBlockEnum.MonetizationButton,
-		label: 'Monetization Button',
+		label: 'Tips Button',
 		icon: ICONS.tools,
 	},
 	[PageBlockEnum.Supporters]: {
@@ -283,7 +283,7 @@ export const ARTICLE_BLOCKS = {
 	},
 	[ArticleBlockEnum.MonetizationButton]: {
 		type: ArticleBlockEnum.MonetizationButton,
-		label: 'Monetization Button',
+		label: 'Tips Button',
 		icon: ICONS.tools,
 	},
 	[ArticleBlockEnum.Embed]: {

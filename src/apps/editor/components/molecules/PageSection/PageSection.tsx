@@ -20,12 +20,12 @@ import { PageBlocks } from '../PageBlocks';
 
 import { CategorySpotlightBlock } from './CategorySpotlightBlock';
 import { FeedBlock } from './FeedBlock';
-import { MonetizationBlock } from './MonetizationBlock';
 import { PostBlock } from './PostBlock';
 import { PostSpotlightBlock } from './PostSpotlightBlock';
 import { SidebarBlock } from './SidebarBlock';
 import * as S from './styles';
 import { SupportersBlock } from './SupportersBlock';
+import { TipsBlock } from './TipsBlock';
 
 export const ResizeContext = React.createContext<{
 	resizingBlockId: string | null;
@@ -438,7 +438,7 @@ export default function PageSection(props: {
 			case 'sidebar':
 				return <SidebarBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
 			case 'monetizationButton':
-				return <MonetizationBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
+				return <TipsBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
 			case 'supporters':
 				return <SupportersBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
 			default:
