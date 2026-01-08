@@ -2,10 +2,12 @@ import styled from 'styled-components';
 
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div``;
+
+export const BodyWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 24px;
+	gap: 25px;
 `;
 
 export const HeaderRow = styled.div`
@@ -142,6 +144,7 @@ export const ConfigForm = styled.div`
 export const ConfigToggle = styled.div``;
 
 export const Info = styled.div`
+	width: fit-content;
 	padding: 5px 10px 7.5px 10px;
 
 	span {

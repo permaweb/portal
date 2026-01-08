@@ -358,145 +358,147 @@ export default function Monetization() {
 					</>,
 				]}
 			/>
-			<S.Section className={'border-wrapper-alt2'}>
-				<S.SectionHeader>
-					<span>Configuration</span>
-				</S.SectionHeader>
+			<S.BodyWrapper>
+				<S.Section className={'border-wrapper-alt2'}>
+					<S.SectionHeader>
+						<span>Configuration</span>
+					</S.SectionHeader>
 
-				<S.ConfigForm>
-					<div className="row">
-						<span className="field-label">{language?.enableMonetization ?? 'Enable AR Monetization'}</span>
-						<S.ConfigToggle>
-							<Toggle
-								options={['On', 'Off']}
-								activeOption={monetization.enabled ? 'On' : 'Off'}
-								handleToggle={(option: 'On' | 'Off') =>
-									setMonetization((prev) => ({
-										...prev,
-										enabled: option === 'On' ? true : false,
-									}))
-								}
-								disabled={false}
-							/>
-						</S.ConfigToggle>
-					</div>
+					<S.ConfigForm>
+						<div className="row">
+							<span className="field-label">{language?.enableMonetization ?? 'Enable AR Monetization'}</span>
+							<S.ConfigToggle>
+								<Toggle
+									options={['On', 'Off']}
+									activeOption={monetization.enabled ? 'On' : 'Off'}
+									handleToggle={(option: 'On' | 'Off') =>
+										setMonetization((prev) => ({
+											...prev,
+											enabled: option === 'On' ? true : false,
+										}))
+									}
+									disabled={false}
+								/>
+							</S.ConfigToggle>
+						</div>
 
-					<FormField
-						label={language?.walletAddress ?? 'Wallet address'}
-						value={monetization.walletAddress}
-						onChange={(e: any) =>
-							setMonetization((prev) => ({
-								...prev,
-								walletAddress: e.target.value,
-							}))
-						}
-						invalid={{ status: false, message: null }}
-						disabled={fieldsDisabled}
-						hideErrorMessage
-					/>
-
-					<FormField
-						label={language?.tokenAddress ?? 'Token'}
-						value={monetization.tokenAddress}
-						onChange={() => {}}
-						invalid={{ status: false, message: null }}
-						disabled={true} // Fixed to AR for v1
-						hideErrorMessage
-					/>
-
-					<div className="actions">
-						<Button
-							type={'primary'}
-							label={
-								savingMonetization
-									? language?.saving
-										? `${language.saving}...`
-										: 'Saving...'
-									: language?.save ?? 'Save'
+						<FormField
+							label={language?.walletAddress ?? 'Wallet address'}
+							value={monetization.walletAddress}
+							onChange={(e: any) =>
+								setMonetization((prev) => ({
+									...prev,
+									walletAddress: e.target.value,
+								}))
 							}
-							handlePress={handleSaveMonetization}
-							disabled={savingMonetization || !canEdit || !portalProvider.current?.id}
+							invalid={{ status: false, message: null }}
+							disabled={fieldsDisabled}
+							hideErrorMessage
 						/>
-					</div>
-				</S.ConfigForm>
-			</S.Section>
 
-			{/* Tips History */}
-			<S.Section className={'border-wrapper-alt2'}>
-				<S.SectionHeader>
-					<span>{language?.tipsHistory ?? 'Tips History'}</span>
-					<Button
-						type={'alt4'}
-						label={language?.refresh ?? 'Refresh'}
-						handlePress={() => setReloadKey((k) => k + 1)}
-						disabled={loadingTips}
-					/>
-				</S.SectionHeader>
+						<FormField
+							label={language?.tokenAddress ?? 'Token'}
+							value={monetization.tokenAddress}
+							onChange={() => {}}
+							invalid={{ status: false, message: null }}
+							disabled={true} // Fixed to AR for v1
+							hideErrorMessage
+						/>
 
-				{!hasMonetization && (
-					<S.Info className="warning">
-						<span>
-							{language?.monetizationDisabledMessage ??
-								'Monetization is disabled or no payout wallet is set for this portal.'}
-						</span>
-					</S.Info>
-				)}
+						<div className="actions">
+							<Button
+								type={'primary'}
+								label={
+									savingMonetization
+										? language?.saving
+											? `${language.saving}...`
+											: 'Saving...'
+										: language?.save ?? 'Save'
+								}
+								handlePress={handleSaveMonetization}
+								disabled={savingMonetization || !canEdit || !portalProvider.current?.id}
+							/>
+						</div>
+					</S.ConfigForm>
+				</S.Section>
 
-				{hasMonetization && loadingTips && <Loader message={language?.loading ?? 'Loading tips...'} />}
+				{/* Tips History */}
+				<S.Section className={'border-wrapper-alt2'}>
+					<S.SectionHeader>
+						<span>{language?.tipsHistory ?? 'Tips History'}</span>
+						<Button
+							type={'alt4'}
+							label={language?.refresh ?? 'Refresh'}
+							handlePress={() => setReloadKey((k) => k + 1)}
+							disabled={loadingTips}
+						/>
+					</S.SectionHeader>
 
-				{hasMonetization && !loadingTips && tipsError && (
-					<S.Info className="warning">
-						<span>{tipsError}</span>
-					</S.Info>
-				)}
+					{!hasMonetization && (
+						<S.Info className="warning">
+							<span>
+								{language?.monetizationDisabledMessage ??
+									'Monetization is disabled or no payout wallet is set for this portal.'}
+							</span>
+						</S.Info>
+					)}
 
-				{hasMonetization && !loadingTips && !tipsError && tips.length === 0 && (
-					<S.Info className="info">
-						<span>{language?.noTipsYet ?? 'No tips received yet for this portal.'}</span>
-					</S.Info>
-				)}
+					{hasMonetization && loadingTips && <Loader message={language?.loading ?? 'Loading tips...'} />}
 
-				{hasMonetization && !loadingTips && !tipsError && tips.length > 0 && (
-					<S.TableWrapper className="scroll-wrapper">
-						<S.Table>
-							<thead>
-								<tr>
-									<th>{language?.date ?? 'Date'}</th>
-									<th>{language?.from ?? 'From'}</th>
-									<th>{language?.amount ?? 'Amount (AR)'}</th>
-									<th>{language?.location ?? 'Location'}</th>
-									<th>Tx</th>
-								</tr>
-							</thead>
-							<tbody>
-								{paginatedTips.map((row) => (
-									<tr key={row.id}>
-										<td>{renderDate(row.timestamp)}</td>
-										<td>{renderFrom(row)}</td>
-										<td>{row.amountAr}</td>
-										<td>{row.location || '–'}</td>
-										<td>
-											<a href={`https://arweave.net/${row.id}`} target="_blank" rel="noopener noreferrer">
-												{row.id.slice(0, 6)}...{row.id.slice(-4)}
-											</a>
-										</td>
+					{hasMonetization && !loadingTips && tipsError && (
+						<S.Info className="warning">
+							<span>{tipsError}</span>
+						</S.Info>
+					)}
+
+					{hasMonetization && !loadingTips && !tipsError && tips.length === 0 && (
+						<S.Info className="info">
+							<span>{language?.noTipsYet ?? 'No tips received yet for this portal.'}</span>
+						</S.Info>
+					)}
+
+					{hasMonetization && !loadingTips && !tipsError && tips.length > 0 && (
+						<S.TableWrapper className="scroll-wrapper">
+							<S.Table>
+								<thead>
+									<tr>
+										<th>{language?.date ?? 'Date'}</th>
+										<th>{language?.from ?? 'From'}</th>
+										<th>{language?.amount ?? 'Amount (AR)'}</th>
+										<th>{language?.location ?? 'Location'}</th>
+										<th>Tx</th>
 									</tr>
-								))}
-							</tbody>
-						</S.Table>
-					</S.TableWrapper>
-				)}
-				<Pagination
-					totalItems={totalItems}
-					totalPages={totalPages}
-					currentPage={currentPage}
-					currentRange={currentRange}
-					setCurrentPage={setCurrentPage}
-					showRange={true}
-					showControls={totalPages > 1}
-					iconButtons={true} // or false if you want the text buttons instead
-				/>
-			</S.Section>
+								</thead>
+								<tbody>
+									{paginatedTips.map((row) => (
+										<tr key={row.id}>
+											<td>{renderDate(row.timestamp)}</td>
+											<td>{renderFrom(row)}</td>
+											<td>{row.amountAr}</td>
+											<td>{row.location || '–'}</td>
+											<td>
+												<a href={`https://arweave.net/${row.id}`} target="_blank" rel="noopener noreferrer">
+													{row.id.slice(0, 6)}...{row.id.slice(-4)}
+												</a>
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</S.Table>
+						</S.TableWrapper>
+					)}
+					<Pagination
+						totalItems={totalItems}
+						totalPages={totalPages}
+						currentPage={currentPage}
+						currentRange={currentRange}
+						setCurrentPage={setCurrentPage}
+						showRange={true}
+						showControls={totalPages > 1}
+						iconButtons={true}
+					/>
+				</S.Section>
+			</S.BodyWrapper>
 		</S.Wrapper>
 	);
 }
