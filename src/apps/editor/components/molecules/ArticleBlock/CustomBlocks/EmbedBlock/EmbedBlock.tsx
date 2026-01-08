@@ -8,6 +8,48 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
+declare global {
+	interface Window {
+		twttr?: {
+			widgets: {
+				load: (element?: HTMLElement) => void;
+			};
+		};
+	}
+}
+
+// Load Twitter widgets.js if not already loaded
+function loadTwitterWidgets(): Promise<void> {
+	return new Promise((resolve) => {
+		if (window.twttr) {
+			resolve();
+			return;
+		}
+
+		const script = document.createElement('script');
+		script.src = 'https://platform.twitter.com/widgets.js';
+		script.async = true;
+		script.onload = () => resolve();
+		script.onerror = () => resolve();
+		document.head.appendChild(script);
+	});
+}
+
+// Twitter embed preview component
+function TwitterEmbedPreview({ html }: { html: string }) {
+	const containerRef = React.useRef<HTMLDivElement>(null);
+
+	React.useEffect(() => {
+		loadTwitterWidgets().then(() => {
+			if (window.twttr && containerRef.current) {
+				window.twttr.widgets.load(containerRef.current);
+			}
+		});
+	}, [html]);
+
+	return <S.EmbedContainer ref={containerRef} dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
 // Supported embed providers
 export const EMBED_PROVIDERS: Record<string, { name: string; icon?: string }> = {
 	'odysee.com': {
@@ -176,15 +218,20 @@ export async function fetchOEmbed(url: string): Promise<OEmbedResponse | null> {
 		}
 	}
 
-	// For Twitter/X, use local parsing (no public OEmbed endpoint)
+	// Use Twitter's public OEmbed endpoint
 	if (providerInfo.domain === 'twitter.com' || providerInfo.domain === 'x.com') {
-		const twitterData = parseTwitterUrl(url);
-		if (twitterData) {
-			return {
-				type: 'rich',
-				version: '1.0',
-				provider_name: providerInfo.config.name,
-			};
+		try {
+			const oembedUrl = `https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}&omit_script=true`;
+			const response = await fetch(oembedUrl);
+			if (!response.ok) {
+				console.error('Twitter OEmbed fetch failed:', response.status);
+				return null;
+			}
+			const data = await response.json();
+			return data as OEmbedResponse;
+		} catch (error) {
+			console.error('Twitter OEmbed fetch error:', error);
+			return null;
 		}
 	}
 
@@ -266,45 +313,42 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 			return;
 		}
 
-		// Try to fetch OEmbed data for Odysee
-		if (providerInfo.domain === 'odysee.com') {
-			const oembedData = await fetchOEmbed(inputValue);
-			if (oembedData) {
-				const embedHtmlFromOembed = oembedData.html || null;
-				const embedUrlFromHtml = embedHtmlFromOembed ? extractEmbedUrlFromHtml(embedHtmlFromOembed) : null;
-				const finalEmbedUrl = embedUrlFromHtml || parseOdyseeUrl(inputValue);
+		// Try to fetch OEmbed data for supported providers
+		const oembedData = await fetchOEmbed(inputValue);
+		if (oembedData && oembedData.html) {
+			const embedHtmlFromOembed = oembedData.html;
+			const embedUrlFromHtml = extractEmbedUrlFromHtml(embedHtmlFromOembed);
 
-				setEmbedUrl(finalEmbedUrl);
-				setProvider(providerInfo.domain);
-				setTitle(oembedData.title || null);
-				setOembedHtml(embedHtmlFromOembed);
-
-				const content = buildEmbedHtml(
-					finalEmbedUrl || '',
-					false,
-					inputValue,
-					oembedData.title,
-					embedHtmlFromOembed || undefined
-				);
-
-				props.onChange(content, {
-					url: inputValue,
-					embedUrl: finalEmbedUrl,
-					collapsed: false,
-					provider: providerInfo.domain,
-					providerName: providerInfo.config.name,
-					title: oembedData.title,
-					authorName: oembedData.author_name,
-					authorUrl: oembedData.author_url,
-					thumbnailUrl: oembedData.thumbnail_url,
-					embedHtml: embedHtmlFromOembed,
-				});
-				setLoading(false);
-				return;
+			// For Odysee, we can extract an iframe URL; for Twitter, we use the HTML directly
+			let finalEmbedUrl: string | null = embedUrlFromHtml;
+			if (providerInfo.domain === 'odysee.com' && !finalEmbedUrl) {
+				finalEmbedUrl = parseOdyseeUrl(inputValue);
 			}
+
+			setEmbedUrl(finalEmbedUrl);
+			setProvider(providerInfo.domain);
+			setTitle(oembedData.title || null);
+			setOembedHtml(embedHtmlFromOembed);
+
+			const content = buildEmbedHtml(finalEmbedUrl || '', false, inputValue, oembedData.title, embedHtmlFromOembed);
+
+			props.onChange(content, {
+				url: inputValue,
+				embedUrl: finalEmbedUrl,
+				collapsed: false,
+				provider: providerInfo.domain,
+				providerName: providerInfo.config.name,
+				title: oembedData.title,
+				authorName: oembedData.author_name,
+				authorUrl: oembedData.author_url,
+				thumbnailUrl: oembedData.thumbnail_url,
+				embedHtml: embedHtmlFromOembed,
+			});
+			setLoading(false);
+			return;
 		}
 
-		// Fallback to local parsing for Twitter or if OEmbed fails
+		// Fallback to local parsing if OEmbed fails
 		const parsed = parseEmbedUrl(inputValue);
 		if (!parsed) {
 			setError(language?.unsupportedProvider || 'This URL is not from a supported provider or is invalid');
@@ -400,7 +444,11 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 			<S.Wrapper>
 				<S.PreviewWrapper>
 					{oembedHtml ? (
-						<S.EmbedContainer dangerouslySetInnerHTML={{ __html: oembedHtml }} />
+						isTwitterEmbed && oembedHtml.includes('twitter-tweet') ? (
+							<TwitterEmbedPreview html={oembedHtml} />
+						) : (
+							<S.EmbedContainer dangerouslySetInnerHTML={{ __html: oembedHtml }} />
+						)
 					) : embedUrl ? (
 						isTwitterEmbed ? (
 							<S.TwitterIframeContainer>
