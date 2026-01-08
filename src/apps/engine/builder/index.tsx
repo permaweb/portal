@@ -10,12 +10,12 @@ import Image from './blocks/image';
 // import StaticPage from './static';
 import Link from './blocks/link';
 import MediaSpotlight from './blocks/mediaSpotlight';
-import MonetizationButton from './blocks/monetizationButton';
 import Post from './blocks/post';
 import PostSpotlight from './blocks/postSpotlight';
 import Reel from './blocks/reel';
 import Sidebar from './blocks/sidebar';
 import Supporters from './blocks/supporters';
+import TipsButton from './blocks/tipsButton';
 
 export default function Builder(props: any) {
 	const { preview, layout } = props;
@@ -102,7 +102,7 @@ export default function Builder(props: any) {
 			case 'label':
 				return element.text;
 			case 'monetizationButton':
-				return <MonetizationButton key={index} element={element} preview={preview} />;
+				return <TipsButton key={index} element={element} preview={preview} />;
 			case 'supporters':
 				return (
 					<Supporters key={index} element={element} preview={preview} location={props.location} postId={props.postId} />

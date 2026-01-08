@@ -4,6 +4,7 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 import Arweave from 'arweave';
 
 import { WalletEnum } from 'helpers/types';
+import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -46,21 +47,24 @@ export function useArTip() {
 					//
 					if (Name) tagPairs.push(['Portal-Name', String(Name.trim())]);
 					if (walletAddress) tagPairs.push(['From-Address', walletAddress.trim()]);
-					if (profile.id) tagPairs.push(['From-Profile', String(profile.id)]);
+					if (profile?.id) tagPairs.push(['From-Profile', String(profile.id)]);
 					if (postId) tagPairs.push(['Location-Post-Id', postId.toString().trim()]);
 					for (const [k, v] of tagPairs) tx.addTag(k, v);
+					debugLog('info', 'useARTip', 'Tag pairs:', tagPairs);
 					const signedTx = await window.arweaveWallet.sign(tx);
+					console.log('signedTx', signedTx);
 					const response = await arweave.transactions.post(signedTx);
 					if (response.status !== 200 && response.status !== 202) {
-						console.error('Error response from posting tx:', response);
+						debugLog('error', 'useARTip', 'Error response from posting tx:', response);
 						throw new Error(`Failed posting tx: ${response.status} ${response.statusText}`);
 					}
+					console.log('response', response, signedTx.id);
 					return signedTx.id;
 				}
 
 				throw new Error('No wallet available to sign transaction');
 			} catch (err) {
-				console.error('Error sending AR tip:', err);
+				debugLog('error', 'useARTip', 'Error sending AR tip:', err);
 				throw err;
 			}
 		},
