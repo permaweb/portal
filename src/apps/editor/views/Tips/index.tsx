@@ -10,6 +10,7 @@ import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
 import { Toggle } from 'components/atoms/Toggle';
+import { TxAddress } from 'components/atoms/TxAddress';
 import { MonetizationConfig, PortalPatchMapEnum, TipRow } from 'helpers/types';
 import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -134,7 +135,7 @@ export default function Tips() {
 	const [reloadKey, setReloadKey] = React.useState(0);
 	const [currentPage, setCurrentPage] = React.useState(1);
 
-	const pageSize = 5; // or whatever you want
+	const pageSize = 5;
 
 	const totalItems = tips.length;
 	const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
@@ -245,24 +246,24 @@ export default function Tips() {
 					};
 				});
 
-			const profileIds = Array.from(
-				new Set(parsed.map((t) => t.fromProfile).filter((id): id is string => Boolean(id)))
-			);
-			debugLog('info', 'Monetization', 'Profile IDs to fetch for tips:', profileIds);
-			const newCache = { ...profileCache };
+				const profileIds = Array.from(
+					new Set(parsed.map((t) => t.fromProfile).filter((id): id is string => Boolean(id)))
+				);
+				debugLog('info', 'Monetization', 'Profile IDs to fetch for tips:', profileIds);
+				const newCache = { ...profileCache };
 
-			for (const pid of profileIds) {
-				if (!newCache[pid]) {
-					try {
-						// adjust this if your provider uses a different method
-						const prof = await permawebProvider.fetchProfile(pid);
-						debugLog('info', 'Monetization', 'Fetched profile for tip', pid, prof);
-						newCache[pid] = prof;
-					} catch (err) {
-						debugLog('warn', 'Monetization', 'Failed to fetch profile for tip', pid, err);
+				for (const pid of profileIds) {
+					if (!newCache[pid]) {
+						try {
+							// Adjust this if your provider uses a different method
+							const prof = await permawebProvider.fetchProfile(pid);
+							debugLog('info', 'Monetization', 'Fetched profile for tip', pid, prof);
+							newCache[pid] = prof;
+						} catch (err) {
+							debugLog('warn', 'Monetization', 'Failed to fetch profile for tip', pid, err);
+						}
 					}
 				}
-			}
 
 				if (!cancelled) {
 					setProfileCache(newCache);
@@ -302,24 +303,20 @@ export default function Tips() {
 		};
 	}, [hasMonetization, monetizationWalletForTips, portalProvider.current?.id, reloadKey]);
 
-	function renderFrom(row: TipRow) {
-		// If the tip came from a profile ID
+	function getFrom(row: TipRow) {
 		if (row.fromProfile) {
 			const prof = profileCache[row.fromProfile];
 			if (prof) {
-				// adjust based on your profile shape
 				const displayName = prof.name || prof.handle || prof.Profile?.Name || prof.profile?.name;
 
 				if (displayName) return displayName;
 			}
 
-			// fallback: show the profile ID itself
 			return row.fromProfile;
 		}
 
-		// If there's no profile, fallback to address
 		if (row.fromAddress) {
-			return `${row.fromAddress.slice(0, 6)}...${row.fromAddress.slice(-4)}`;
+			return row.fromAddress;
 		}
 
 		return 'Unknown';
@@ -334,154 +331,195 @@ export default function Tips() {
 		}
 	}
 
-	return (
-		<S.Wrapper>
-			<ViewHeader
-				header={language.tips}
-				actions={[
-					<>
-						{hasMonetization && (
-							<S.Summary>
-								<p>
-									{`${language.totalReceived}: `} <b>{`${totalReceivedAr} AR`}</b>
-								</p>
-							</S.Summary>
-						)}
-					</>,
-				]}
-			/>
-			<S.BodyWrapper>
-				<S.Section className={'border-wrapper-alt2'}>
-					<S.SectionHeader>
-						<span>Configuration</span>
-					</S.SectionHeader>
+	async function handleToggle(option: 'On' | 'Off') {
+		const enabled = option === 'On';
 
-					<S.ConfigForm>
-						<div className="row">
-							<span className="field-label">{language.enableMonetization}</span>
+		// Save immediately
+		if (!portalProvider.current?.id || !portalProvider.permissions?.updatePortalMeta) {
+			return;
+		}
+		if (!arProvider.wallet || !permawebProvider.libs) {
+			addNotification(language.walletNotConnected, 'warning');
+			return;
+		}
+
+		setSavingMonetization(true);
+
+		setMonetization((prev) => ({
+			...prev,
+			enabled,
+		}));
+
+		const payload: MonetizationConfig = {
+			enabled,
+			walletAddress: monetization.walletAddress.trim(),
+			tokenAddress: monetization.tokenAddress || 'AR',
+		};
+
+		try {
+			const body: any = {
+				Monetization: permawebProvider.libs.mapToProcessCase
+					? permawebProvider.libs.mapToProcessCase(payload)
+					: payload,
+			};
+
+			const updateId = await permawebProvider.libs.updateZone(body, portalProvider.current.id, arProvider.wallet);
+			debugLog('info', 'Monetization', 'Monetization update:', updateId);
+
+			(portalProvider.current as any).monetization = { monetization: payload };
+			(portalProvider.current as any).Monetization = payload;
+
+			if (portalProvider.refreshCurrentPortal) {
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Monetization);
+			}
+
+			addNotification(language.monetizationSaved, 'success');
+		} catch (e: any) {
+			debugLog('error', 'Monetization', 'Error saving monetization settings:', e.message ?? 'Unknown error');
+			addNotification(e?.message ?? 'Error saving monetization settings.', 'warning');
+		} finally {
+			setSavingMonetization(false);
+		}
+	}
+
+	return (
+		<>
+			<S.Wrapper>
+				<ViewHeader
+					header={language.tips}
+					actions={[
+						<>
+							{hasMonetization && (
+								<S.Summary>
+									<p>
+										<b>{`${Number(totalReceivedAr).toFixed(4)} AR `}</b>
+										{language.received}
+									</p>
+								</S.Summary>
+							)}
 							<S.ConfigToggle>
 								<Toggle
 									options={['On', 'Off']}
 									activeOption={monetization.enabled ? 'On' : 'Off'}
-									handleToggle={(option: 'On' | 'Off') =>
-										setMonetization((prev) => ({
-											...prev,
-											enabled: option === 'On' ? true : false,
-										}))
-									}
+									handleToggle={handleToggle}
 									disabled={false}
 								/>
 							</S.ConfigToggle>
-						</div>
+						</>,
+					]}
+				/>
+				<S.BodyWrapper>
+					<S.Section>
+						<S.ConfigForm>
+							<S.Forms>
+								<FormField
+									label={language.walletAddress}
+									value={monetization.walletAddress}
+									onChange={(e: any) =>
+										setMonetization((prev) => ({
+											...prev,
+											walletAddress: e.target.value,
+										}))
+									}
+									invalid={{ status: false, message: null }}
+									disabled={fieldsDisabled}
+									hideErrorMessage
+								/>
 
-						<FormField
-							label={language.walletAddress}
-							value={monetization.walletAddress}
-							onChange={(e: any) =>
-								setMonetization((prev) => ({
-									...prev,
-									walletAddress: e.target.value,
-								}))
-							}
-							invalid={{ status: false, message: null }}
-							disabled={fieldsDisabled}
-							hideErrorMessage
-						/>
+								<FormField
+									label={language.tokenAddress}
+									value={monetization.tokenAddress}
+									onChange={() => {}}
+									invalid={{ status: false, message: null }}
+									disabled={true}
+									hideErrorMessage
+								/>
+							</S.Forms>
+						</S.ConfigForm>
+					</S.Section>
 
-						<FormField
-							label={language.tokenAddress}
-							value={monetization.tokenAddress}
-							onChange={() => {}}
-							invalid={{ status: false, message: null }}
-							disabled={true} // Fixed to AR for v1
-							hideErrorMessage
-						/>
-
-						<div className="actions">
+					{/* Tips History */}
+					<S.Section>
+						<S.SectionHeader>
+							<h6>{language.tipsHistory}</h6>
 							<Button
-								type={'alt1'}
-								label={savingMonetization ? `${language.saving}...` : language.save}
-								handlePress={handleSaveTips}
-								disabled={savingMonetization || !canEdit || !portalProvider.current?.id || !hasChanges}
+								type={'alt4'}
+								label={language.refresh}
+								handlePress={() => setReloadKey((k) => k + 1)}
+								disabled={loadingTips}
 							/>
-						</div>
-					</S.ConfigForm>
-				</S.Section>
+						</S.SectionHeader>
 
-				{/* Tips History */}
-				<S.Section className={'border-wrapper-alt2'}>
-					<S.SectionHeader>
-						<span>{language.tipsHistory}</span>
-						<Button
-							type={'alt4'}
-							label={language.refresh}
-							handlePress={() => setReloadKey((k) => k + 1)}
-							disabled={loadingTips}
-						/>
-					</S.SectionHeader>
+						{hasMonetization && loadingTips && (
+							<S.LoadingWrapper className={'border-wrapper-alt2'}>
+								<p>{`${language.loading}...`}</p>
+							</S.LoadingWrapper>
+						)}
 
-					{!hasMonetization && (
-						<S.Info className="warning">
-							<span>{language.monetizationDisabledMessage}</span>
-						</S.Info>
-					)}
+						{!hasMonetization && (
+							<S.WrapperEmpty className={'border-wrapper-alt2'}>
+								<p>{language.monetizationDisabledHistoryInfo}</p>
+							</S.WrapperEmpty>
+						)}
 
-					{hasMonetization && loadingTips && <Loader message={`${language.loading}...`} />}
+						{hasMonetization && !loadingTips && tipsError && (
+							<S.WrapperEmpty className={'border-wrapper-alt2'}>
+								<p>{tipsError}</p>
+							</S.WrapperEmpty>
+						)}
 
-					{hasMonetization && !loadingTips && tipsError && (
-						<S.Info className="warning">
-							<span>{tipsError}</span>
-						</S.Info>
-					)}
+						{hasMonetization && !loadingTips && !tipsError && tips.length === 0 && (
+							<S.WrapperEmpty className={'border-wrapper-alt2'}>
+								<span>{language.noTipsYet}</span>
+							</S.WrapperEmpty>
+						)}
 
-					{hasMonetization && !loadingTips && !tipsError && tips.length === 0 && (
-						<S.Info className="info">
-							<span>{language.noTipsYet}</span>
-						</S.Info>
-					)}
-
-					{hasMonetization && !loadingTips && !tipsError && tips.length > 0 && (
-						<S.TableWrapper className="scroll-wrapper">
-							<S.Table>
-								<thead>
-									<tr>
-										<th>{language.date}</th>
-										<th>{language.from}</th>
-										<th>{language.amount}</th>
-										<th>{language.location}</th>
-										<th>Tx</th>
-									</tr>
-								</thead>
-								<tbody>
-									{paginatedTips.map((row) => (
-										<tr key={row.id}>
-											<td>{renderDate(row.timestamp)}</td>
-											<td>{renderFrom(row)}</td>
-											<td>{row.amountAr}</td>
-											<td>{row.location || '–'}</td>
-											<td>
-												<a href={`https://arweave.net/${row.id}`} target="_blank" rel="noopener noreferrer">
-													{row.id.slice(0, 6)}...{row.id.slice(-4)}
-												</a>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</S.Table>
-						</S.TableWrapper>
-					)}
-					<Pagination
-						totalItems={totalItems}
-						totalPages={totalPages}
-						currentPage={currentPage}
-						currentRange={currentRange}
-						setCurrentPage={setCurrentPage}
-						showRange={true}
-						showControls={totalPages > 1}
-						iconButtons={true}
-					/>
-				</S.Section>
-			</S.BodyWrapper>
-		</S.Wrapper>
+						{hasMonetization && !loadingTips && !tipsError && tips.length > 0 && (
+							<>
+								<S.TableWrapper className={'scroll-wrapper'}>
+									<S.Table>
+										<thead>
+											<tr>
+												<th>{language.amount}</th>
+												<th>{language.from}</th>
+												<th>Transaction</th>
+												<th>Location</th>
+												<th>{language.date}</th>
+											</tr>
+										</thead>
+										<tbody>
+											{paginatedTips.map((row) => (
+												<tr key={row.id}>
+													<td>{Number(row.amountAr).toFixed(4)}</td>
+													<td>
+														<TxAddress address={getFrom(row)} wrap={false} />
+													</td>
+													<td>
+														<TxAddress address={row.id} wrap={false} />
+													</td>
+													<td>{row.location.toUpperCase()}</td>
+													<td>{renderDate(row.timestamp)}</td>
+												</tr>
+											))}
+										</tbody>
+									</S.Table>
+								</S.TableWrapper>
+								<Pagination
+									totalItems={totalItems}
+									totalPages={totalPages}
+									currentPage={currentPage}
+									currentRange={currentRange}
+									setCurrentPage={setCurrentPage}
+									showRange={true}
+									showControls={true}
+									iconButtons={true}
+								/>
+							</>
+						)}
+					</S.Section>
+				</S.BodyWrapper>
+			</S.Wrapper>
+			{savingMonetization && <Loader message={`${language.loading}...`} />}
+		</>
 	);
 }
