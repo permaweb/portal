@@ -268,6 +268,7 @@ export default function Post(props: any) {
 							profile={profile}
 							content={content}
 							isPreview={false}
+							postId={postId}
 						/>
 					</div>
 				</S.Post>

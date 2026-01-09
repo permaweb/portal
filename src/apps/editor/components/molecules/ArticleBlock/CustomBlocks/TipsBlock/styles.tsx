@@ -85,3 +85,12 @@ export const InfoMessage = styled.div`
 		line-height: 1.4;
 	}
 `;
+
+export const PreviewWrapper = styled.div`
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 12px;
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	border-radius: ${STYLING.dimensions.radius.primary};
+`;

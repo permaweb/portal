@@ -10,7 +10,8 @@ import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
 import { Toggle } from 'components/atoms/Toggle';
-import { PortalPatchMapEnum } from 'helpers/types';
+import { TxAddress } from 'components/atoms/TxAddress';
+import { MonetizationConfig, PortalPatchMapEnum, TipRow } from 'helpers/types';
 import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -19,30 +20,13 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
-type MonetizationConfig = {
-	enabled: boolean;
-	walletAddress: string;
-	tokenAddress: string;
-};
-
-type TipRow = {
-	id: string;
-	timestamp: number | null;
-	amountAr: string;
-	fromAddress: string;
-	fromName?: string;
-	fromProfile?: string;
-	location?: string;
-	winston: string;
-};
-
 const arweave = Arweave.init({
 	host: 'arweave.net',
 	port: 443,
 	protocol: 'https',
 });
 
-export default function Monetization() {
+export default function Tips() {
 	const portalProvider = usePortalProvider();
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -89,12 +73,22 @@ export default function Monetization() {
 	const canEdit = !!portalProvider.permissions?.updatePortalMeta;
 	const fieldsDisabled = !monetization.enabled || !canEdit;
 
-	async function handleSaveMonetization() {
+	// Check if there are unsaved changes
+	const hasChanges = React.useMemo(() => {
+		if (!existingMonetization) return true;
+		return (
+			monetization.enabled !== existingMonetization.enabled ||
+			monetization.walletAddress.trim() !== existingMonetization.walletAddress.trim() ||
+			monetization.tokenAddress !== existingMonetization.tokenAddress
+		);
+	}, [monetization, existingMonetization]);
+
+	async function handleSaveTips() {
 		if (!portalProvider.current?.id || !portalProvider.permissions?.updatePortalMeta) {
 			return;
 		}
 		if (!arProvider.wallet || !permawebProvider.libs) {
-			addNotification(language?.walletNotConnected ?? 'Connect a wallet to update monetization.', 'warning');
+			addNotification(language.walletNotConnected, 'warning');
 			return;
 		}
 
@@ -124,7 +118,7 @@ export default function Monetization() {
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Monetization);
 			}
 
-			addNotification(language?.monetizationSaved ?? 'Monetization settings saved.', 'success');
+			addNotification(language.monetizationSaved, 'success');
 		} catch (e: any) {
 			debugLog('error', 'Monetization', 'Error saving monetization settings:', e.message ?? 'Unknown error');
 			addNotification(e?.message ?? 'Error saving monetization settings.', 'warning');
@@ -141,7 +135,7 @@ export default function Monetization() {
 	const [reloadKey, setReloadKey] = React.useState(0);
 	const [currentPage, setCurrentPage] = React.useState(1);
 
-	const pageSize = 5; // or whatever you want
+	const pageSize = 5;
 
 	const totalItems = tips.length;
 	const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
@@ -255,19 +249,18 @@ export default function Monetization() {
 				const profileIds = Array.from(
 					new Set(parsed.map((t) => t.fromProfile).filter((id): id is string => Boolean(id)))
 				);
-				console.log('Profile IDs to fetch for tips:', profileIds);
+				debugLog('info', 'Monetization', 'Profile IDs to fetch for tips:', profileIds);
 				const newCache = { ...profileCache };
 
 				for (const pid of profileIds) {
 					if (!newCache[pid]) {
 						try {
-							// adjust this if your provider uses a different method
+							// Adjust this if your provider uses a different method
 							const prof = await permawebProvider.fetchProfile(pid);
-							console.log('Fetched profile for tip', pid, prof);
+							debugLog('info', 'Monetization', 'Fetched profile for tip', pid, prof);
 							newCache[pid] = prof;
-							console.log('Fetched profile for tip', pid, prof);
 						} catch (err) {
-							console.warn('Failed to fetch profile for tip', pid, err);
+							debugLog('warn', 'Monetization', 'Failed to fetch profile for tip', pid, err);
 						}
 					}
 				}
@@ -310,24 +303,20 @@ export default function Monetization() {
 		};
 	}, [hasMonetization, monetizationWalletForTips, portalProvider.current?.id, reloadKey]);
 
-	function renderFrom(row: TipRow) {
-		// If the tip came from a profile ID
+	function getFrom(row: TipRow) {
 		if (row.fromProfile) {
 			const prof = profileCache[row.fromProfile];
 			if (prof) {
-				// adjust based on your profile shape
 				const displayName = prof.name || prof.handle || prof.Profile?.Name || prof.profile?.name;
 
 				if (displayName) return displayName;
 			}
 
-			// fallback: show the profile ID itself
 			return row.fromProfile;
 		}
 
-		// If there's no profile, fallback to address
 		if (row.fromAddress) {
-			return `${row.fromAddress.slice(0, 6)}...${row.fromAddress.slice(-4)}`;
+			return row.fromAddress;
 		}
 
 		return 'Unknown';
@@ -342,161 +331,195 @@ export default function Monetization() {
 		}
 	}
 
+	async function handleToggle(option: 'On' | 'Off') {
+		const enabled = option === 'On';
+
+		// Save immediately
+		if (!portalProvider.current?.id || !portalProvider.permissions?.updatePortalMeta) {
+			return;
+		}
+		if (!arProvider.wallet || !permawebProvider.libs) {
+			addNotification(language.walletNotConnected, 'warning');
+			return;
+		}
+
+		setSavingMonetization(true);
+
+		setMonetization((prev) => ({
+			...prev,
+			enabled,
+		}));
+
+		const payload: MonetizationConfig = {
+			enabled,
+			walletAddress: monetization.walletAddress.trim(),
+			tokenAddress: monetization.tokenAddress || 'AR',
+		};
+
+		try {
+			const body: any = {
+				Monetization: permawebProvider.libs.mapToProcessCase
+					? permawebProvider.libs.mapToProcessCase(payload)
+					: payload,
+			};
+
+			const updateId = await permawebProvider.libs.updateZone(body, portalProvider.current.id, arProvider.wallet);
+			debugLog('info', 'Monetization', 'Monetization update:', updateId);
+
+			(portalProvider.current as any).monetization = { monetization: payload };
+			(portalProvider.current as any).Monetization = payload;
+
+			if (portalProvider.refreshCurrentPortal) {
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Monetization);
+			}
+
+			addNotification(language.monetizationSaved, 'success');
+		} catch (e: any) {
+			debugLog('error', 'Monetization', 'Error saving monetization settings:', e.message ?? 'Unknown error');
+			addNotification(e?.message ?? 'Error saving monetization settings.', 'warning');
+		} finally {
+			setSavingMonetization(false);
+		}
+	}
+
 	return (
-		<S.Wrapper>
-			<ViewHeader
-				header={language?.tips ?? 'Tips'}
-				actions={[
-					<>
-						{hasMonetization && (
-							<S.Summary>
-								<p>
-									{`${language?.totalReceived ?? 'Total Received'}: `} <b>{`${totalReceivedAr} AR`}</b>
-								</p>
-							</S.Summary>
-						)}
-					</>,
-				]}
-			/>
-			<S.Section className={'border-wrapper-alt2'}>
-				<S.SectionHeader>
-					<span>Configuration</span>
-				</S.SectionHeader>
-
-				<S.ConfigForm>
-					<div className="row">
-						<span className="field-label">{language?.enableMonetization ?? 'Enable AR Monetization'}</span>
-						<S.ConfigToggle>
-							<Toggle
-								options={['On', 'Off']}
-								activeOption={monetization.enabled ? 'On' : 'Off'}
-								handleToggle={(option: 'On' | 'Off') =>
-									setMonetization((prev) => ({
-										...prev,
-										enabled: option === 'On' ? true : false,
-									}))
-								}
-								disabled={false}
-							/>
-						</S.ConfigToggle>
-					</div>
-
-					<FormField
-						label={language?.walletAddress ?? 'Wallet address'}
-						value={monetization.walletAddress}
-						onChange={(e: any) =>
-							setMonetization((prev) => ({
-								...prev,
-								walletAddress: e.target.value,
-							}))
-						}
-						invalid={{ status: false, message: null }}
-						disabled={fieldsDisabled}
-						hideErrorMessage
-					/>
-
-					<FormField
-						label={language?.tokenAddress ?? 'Token'}
-						value={monetization.tokenAddress}
-						onChange={() => {}}
-						invalid={{ status: false, message: null }}
-						disabled={true} // Fixed to AR for v1
-						hideErrorMessage
-					/>
-
-					<div className="actions">
-						<Button
-							type={'primary'}
-							label={
-								savingMonetization
-									? language?.saving
-										? `${language.saving}...`
-										: 'Saving...'
-									: language?.save ?? 'Save'
-							}
-							handlePress={handleSaveMonetization}
-							disabled={savingMonetization || !canEdit || !portalProvider.current?.id}
-						/>
-					</div>
-				</S.ConfigForm>
-			</S.Section>
-
-			{/* Tips History */}
-			<S.Section className={'border-wrapper-alt2'}>
-				<S.SectionHeader>
-					<span>{language?.tipsHistory ?? 'Tips History'}</span>
-					<Button
-						type={'alt4'}
-						label={language?.refresh ?? 'Refresh'}
-						handlePress={() => setReloadKey((k) => k + 1)}
-						disabled={loadingTips}
-					/>
-				</S.SectionHeader>
-
-				{!hasMonetization && (
-					<S.Info className="warning">
-						<span>
-							{language?.monetizationDisabledMessage ??
-								'Monetization is disabled or no payout wallet is set for this portal.'}
-						</span>
-					</S.Info>
-				)}
-
-				{hasMonetization && loadingTips && <Loader message={language?.loading ?? 'Loading tips...'} />}
-
-				{hasMonetization && !loadingTips && tipsError && (
-					<S.Info className="warning">
-						<span>{tipsError}</span>
-					</S.Info>
-				)}
-
-				{hasMonetization && !loadingTips && !tipsError && tips.length === 0 && (
-					<S.Info className="info">
-						<span>{language?.noTipsYet ?? 'No tips received yet for this portal.'}</span>
-					</S.Info>
-				)}
-
-				{hasMonetization && !loadingTips && !tipsError && tips.length > 0 && (
-					<S.TableWrapper className="scroll-wrapper">
-						<S.Table>
-							<thead>
-								<tr>
-									<th>{language?.date ?? 'Date'}</th>
-									<th>{language?.from ?? 'From'}</th>
-									<th>{language?.amount ?? 'Amount (AR)'}</th>
-									<th>{language?.location ?? 'Location'}</th>
-									<th>Tx</th>
-								</tr>
-							</thead>
-							<tbody>
-								{paginatedTips.map((row) => (
-									<tr key={row.id}>
-										<td>{renderDate(row.timestamp)}</td>
-										<td>{renderFrom(row)}</td>
-										<td>{row.amountAr}</td>
-										<td>{row.location || '–'}</td>
-										<td>
-											<a href={`https://arweave.net/${row.id}`} target="_blank" rel="noopener noreferrer">
-												{row.id.slice(0, 6)}...{row.id.slice(-4)}
-											</a>
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</S.Table>
-					</S.TableWrapper>
-				)}
-				<Pagination
-					totalItems={totalItems}
-					totalPages={totalPages}
-					currentPage={currentPage}
-					currentRange={currentRange}
-					setCurrentPage={setCurrentPage}
-					showRange={true}
-					showControls={totalPages > 1}
-					iconButtons={true} // or false if you want the text buttons instead
+		<>
+			<S.Wrapper>
+				<ViewHeader
+					header={language.tips}
+					actions={[
+						<>
+							{hasMonetization && (
+								<S.Summary>
+									<p>
+										<b>{`${Number(totalReceivedAr).toFixed(4)} AR `}</b>
+										{language.received}
+									</p>
+								</S.Summary>
+							)}
+							<S.ConfigToggle>
+								<Toggle
+									options={['On', 'Off']}
+									activeOption={monetization.enabled ? 'On' : 'Off'}
+									handleToggle={handleToggle}
+									disabled={false}
+								/>
+							</S.ConfigToggle>
+						</>,
+					]}
 				/>
-			</S.Section>
-		</S.Wrapper>
+				<S.BodyWrapper>
+					<S.Section>
+						<S.ConfigForm>
+							<S.Forms>
+								<FormField
+									label={language.walletAddress}
+									value={monetization.walletAddress}
+									onChange={(e: any) =>
+										setMonetization((prev) => ({
+											...prev,
+											walletAddress: e.target.value,
+										}))
+									}
+									invalid={{ status: false, message: null }}
+									disabled={fieldsDisabled}
+									hideErrorMessage
+								/>
+
+								<FormField
+									label={language.tokenAddress}
+									value={monetization.tokenAddress}
+									onChange={() => {}}
+									invalid={{ status: false, message: null }}
+									disabled={true}
+									hideErrorMessage
+								/>
+							</S.Forms>
+						</S.ConfigForm>
+					</S.Section>
+
+					{/* Tips History */}
+					<S.Section>
+						<S.SectionHeader>
+							<h6>{language.tipsHistory}</h6>
+							<Button
+								type={'alt4'}
+								label={language.refresh}
+								handlePress={() => setReloadKey((k) => k + 1)}
+								disabled={loadingTips}
+							/>
+						</S.SectionHeader>
+
+						{hasMonetization && loadingTips && (
+							<S.LoadingWrapper className={'border-wrapper-alt2'}>
+								<p>{`${language.loading}...`}</p>
+							</S.LoadingWrapper>
+						)}
+
+						{!hasMonetization && (
+							<S.WrapperEmpty className={'border-wrapper-alt2'}>
+								<p>{language.monetizationDisabledHistoryInfo}</p>
+							</S.WrapperEmpty>
+						)}
+
+						{hasMonetization && !loadingTips && tipsError && (
+							<S.WrapperEmpty className={'border-wrapper-alt2'}>
+								<p>{tipsError}</p>
+							</S.WrapperEmpty>
+						)}
+
+						{hasMonetization && !loadingTips && !tipsError && tips.length === 0 && (
+							<S.WrapperEmpty className={'border-wrapper-alt2'}>
+								<span>{language.noTipsYet}</span>
+							</S.WrapperEmpty>
+						)}
+
+						{hasMonetization && !loadingTips && !tipsError && tips.length > 0 && (
+							<>
+								<S.TableWrapper className={'scroll-wrapper'}>
+									<S.Table>
+										<thead>
+											<tr>
+												<th>{language.amount}</th>
+												<th>{language.from}</th>
+												<th>Transaction</th>
+												<th>Location</th>
+												<th>{language.date}</th>
+											</tr>
+										</thead>
+										<tbody>
+											{paginatedTips.map((row) => (
+												<tr key={row.id}>
+													<td>{Number(row.amountAr).toFixed(4)}</td>
+													<td>
+														<TxAddress address={getFrom(row)} wrap={false} />
+													</td>
+													<td>
+														<TxAddress address={row.id} wrap={false} />
+													</td>
+													<td>{row.location.toUpperCase()}</td>
+													<td>{renderDate(row.timestamp)}</td>
+												</tr>
+											))}
+										</tbody>
+									</S.Table>
+								</S.TableWrapper>
+								<Pagination
+									totalItems={totalItems}
+									totalPages={totalPages}
+									currentPage={currentPage}
+									currentRange={currentRange}
+									setCurrentPage={setCurrentPage}
+									showRange={true}
+									showControls={true}
+									iconButtons={true}
+								/>
+							</>
+						)}
+					</S.Section>
+				</S.BodyWrapper>
+			</S.Wrapper>
+			{savingMonetization && <Loader message={`${language.loading}...`} />}
+		</>
 	);
 }
