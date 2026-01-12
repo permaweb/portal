@@ -216,7 +216,7 @@ export default function SupportersBlock(props: {
 								/>
 							</S.FieldColumn>
 
-							<S.FieldColumn>
+							<S.SelectFieldColumn>
 								<S.LabelRow>{language?.sortBy ?? 'Sort By'}</S.LabelRow>
 								<Select
 									activeOption={SORT_OPTIONS.find((o) => o.id === config.top.sort) ?? SORT_OPTIONS[0]}
@@ -224,7 +224,7 @@ export default function SupportersBlock(props: {
 									options={SORT_OPTIONS}
 									disabled={false}
 								/>
-							</S.FieldColumn>
+							</S.SelectFieldColumn>
 						</S.Row>
 
 						<S.ColumnsWrapper>
