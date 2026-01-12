@@ -54,6 +54,10 @@ export const FieldColumn = styled.div`
 	gap: 0;
 `;
 
+export const SelectFieldColumn = styled(FieldColumn)`
+	margin-top: 6px;
+`;
+
 export const LabelRow = styled.label`
 	display: block;
 	margin: 0 0 12px 0;
@@ -65,8 +69,9 @@ export const LabelRow = styled.label`
 
 export const CheckboxGroup = styled.div`
 	display: flex;
-	flex-direction: column;
-	gap: 8px;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 8px 16px;
 `;
 
 export const CheckboxContainer = styled.div<{ disabled?: boolean }>`
