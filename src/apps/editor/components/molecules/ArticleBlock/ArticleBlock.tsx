@@ -23,9 +23,10 @@ import { ArticleBlocks } from '../ArticleBlocks';
 import { DividerBlock } from './CustomBlocks/DividerBlock';
 import { HTMLBlock } from './CustomBlocks/HTMLBlock';
 import { MediaBlock } from './CustomBlocks/MediaBlock';
-import { PostMonetizationBlock } from './CustomBlocks/MonetizationBlock';
 import { SpacerBlock } from './CustomBlocks/SpacerBlock';
+import { PostSupportersBlock } from './CustomBlocks/SupportersBlock';
 import { TableBlock } from './CustomBlocks/TableBlock';
+import { PostTipsBlock } from './CustomBlocks/TipsBlock';
 import * as S from './styles';
 
 export default function ArticleBlock(props: {
@@ -815,7 +816,11 @@ export default function ArticleBlock(props: {
 			break;
 		case 'monetizationButton':
 			useCustom = true;
-			element = <PostMonetizationBlock index={props.index} block={props.block} onChangeBlock={props.onChangeBlock} />;
+			element = <PostTipsBlock index={props.index} block={props.block} onChangeBlock={props.onChangeBlock} />;
+			break;
+		case 'supporters':
+			useCustom = true;
+			element = <PostSupportersBlock index={props.index} block={props.block} onChangeBlock={props.onChangeBlock} />;
 			break;
 		default:
 			element = 'p';
