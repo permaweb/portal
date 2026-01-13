@@ -53,6 +53,39 @@ export type EmbedData = {
 	embedHtml?: string;
 };
 
+// Twitter Embed Preview component that handles Twitter widget rendering
+function TwitterEmbedPreview({ html }: { html: string }) {
+	const containerRef = React.useRef<HTMLDivElement>(null);
+
+	React.useEffect(() => {
+		if (!containerRef.current) return;
+
+		// Load Twitter widget script if not already loaded
+		const scriptId = 'twitter-widgets-js';
+		if (!document.getElementById(scriptId)) {
+			const script = document.createElement('script');
+			script.id = scriptId;
+			script.src = 'https://platform.twitter.com/widgets.js';
+			script.async = true;
+			document.body.appendChild(script);
+			script.onload = () => {
+				// @ts-ignore - Twitter widgets global
+				if (window.twttr?.widgets) {
+					window.twttr.widgets.load(containerRef.current);
+				}
+			};
+		} else {
+			// Script already loaded, just re-render widgets
+			// @ts-ignore - Twitter widgets global
+			if (window.twttr?.widgets) {
+				window.twttr.widgets.load(containerRef.current);
+			}
+		}
+	}, [html]);
+
+	return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
 // Get provider config from URL
 export function getProviderFromUrl(url: string): { domain: string; config: (typeof EMBED_PROVIDERS)[string] } | null {
 	if (!url) return null;
@@ -403,7 +436,9 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 				<S.PreviewWrapper>
 					{oembedHtml ? (
 						isTwitterEmbed && oembedHtml.includes('twitter-tweet') ? (
-							<TwitterEmbedPreview html={oembedHtml} />
+							<S.TwitterEmbedContainer>
+								<TwitterEmbedPreview html={oembedHtml} />
+							</S.TwitterEmbedContainer>
 						) : (
 							<S.EmbedContainer dangerouslySetInnerHTML={{ __html: oembedHtml }} />
 						)

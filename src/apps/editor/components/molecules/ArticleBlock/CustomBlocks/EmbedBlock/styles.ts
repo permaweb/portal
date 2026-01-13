@@ -96,6 +96,28 @@ export const EmbedContainer = styled.div`
 	}
 `;
 
+export const TwitterIframeContainer = styled.div`
+	max-width: 550px;
+	margin: 0 auto;
+	border-radius: ${STYLING.dimensions.radius.alt4};
+	overflow: hidden;
+
+	iframe {
+		width: 100%;
+		min-height: 400px;
+		border: 0;
+	}
+`;
+
+export const TwitterEmbedContainer = styled.div`
+	max-width: 550px;
+	margin: 0 auto;
+
+	.twitter-tweet {
+		margin: 0 auto !important;
+	}
+`;
+
 export const ActionsWrapper = styled.div`
 	width: 100%;
 	display: flex;

@@ -96,28 +96,6 @@ export const CheckboxContainer = styled.div<{ disabled?: boolean }>`
 	}
 `;
 
-export const CheckboxContainer = styled.div<{ disabled?: boolean }>`
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
-	opacity: ${(props) => (props.disabled ? 0.5 : 1)};
-
-	&:hover {
-		span {
-			color: ${(props) => (props.disabled ? props.theme.colors.font.alt1 : props.theme.colors.font.primary)};
-		}
-	}
-
-	span {
-		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
-		color: ${(props) => props.theme.colors.font.alt1};
-		transition: all 0.2s ease;
-	}
-`;
-
 export const ColumnsWrapper = styled.div`
 	display: flex;
 	flex-direction: column;

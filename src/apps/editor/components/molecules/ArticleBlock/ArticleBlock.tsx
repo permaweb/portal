@@ -845,18 +845,6 @@ export default function ArticleBlock(props: {
 			useCustom = true;
 			element = <PostTipsBlock index={props.index} block={props.block} onChangeBlock={props.onChangeBlock} />;
 			break;
-
-		case 'embed':
-			useCustom = true;
-			element = (
-				<EmbedBlock
-					content={props.block.content}
-					data={props.block.data}
-					onChange={(newContent: any, data: any) =>
-						props.onChangeBlock({ id: props.block.id, content: newContent, data: data })
-					}
-				/>
-			);
 		case 'supporters':
 			useCustom = true;
 			element = <PostSupportersBlock index={props.index} block={props.block} onChangeBlock={props.onChangeBlock} />;

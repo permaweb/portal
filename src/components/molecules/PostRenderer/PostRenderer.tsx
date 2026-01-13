@@ -9,7 +9,6 @@ import { getRedirect, urlify } from 'helpers/utils';
 import * as S from './styles';
 import Embed from 'engine/builder/blocks/embed';
 import Supporters from 'engine/builder/blocks/supporters';
-import Embed from 'engine/builder/blocks/embed';
 
 type ContentEntryType =
 	| 'header-1'
