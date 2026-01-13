@@ -52,9 +52,25 @@ function TwitterEmbed({ html }: { html: string }) {
 	return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
+// Helper to normalize boolean values that might be stored as strings
+function normalizeBoolean(value: any): boolean {
+	if (typeof value === 'boolean') return value;
+	if (typeof value === 'string') return value === 'true';
+	return false;
+}
+
 export default function Embed(props: EmbedProps) {
-	const { embedUrl, collapsed, url, title, providerName, embedHtml, provider } = props.element?.data || {};
+	const {
+		embedUrl,
+		collapsed: collapsedRaw,
+		url,
+		title,
+		providerName,
+		embedHtml,
+		provider,
+	} = props.element?.data || {};
 	const content = props.element?.content;
+	const collapsed = normalizeBoolean(collapsedRaw);
 
 	// If collapsed, show link only
 	if (collapsed && url) {

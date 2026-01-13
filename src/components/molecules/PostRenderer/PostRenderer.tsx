@@ -304,16 +304,6 @@ export default function PostRenderer(props: PostRendererProps) {
 									postId={props.postId}
 								/>
 							);
-						case 'supporters':
-							return (
-								<Supporters
-									key={entry.id}
-									element={entry}
-									preview={props.isPreview ?? false}
-									location="post"
-									postId={props.postId}
-								/>
-							);
 						case 'embed':
 							return <Embed key={entry.id} element={entry} />;
 						default:

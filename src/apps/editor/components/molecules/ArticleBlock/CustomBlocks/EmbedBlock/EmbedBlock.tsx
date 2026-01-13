@@ -53,6 +53,13 @@ export type EmbedData = {
 	embedHtml?: string;
 };
 
+// Helper to normalize boolean values that might be stored as strings
+function normalizeBoolean(value: any): boolean {
+	if (typeof value === 'boolean') return value;
+	if (typeof value === 'string') return value === 'true';
+	return false;
+}
+
 // Twitter Embed Preview component that handles Twitter widget rendering
 function TwitterEmbedPreview({ html }: { html: string }) {
 	const containerRef = React.useRef<HTMLDivElement>(null);
@@ -265,7 +272,7 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 
 	const [inputValue, setInputValue] = React.useState<string>(props.data?.url || '');
 	const [embedUrl, setEmbedUrl] = React.useState<string | null>(props.data?.embedUrl || null);
-	const [collapsed, setCollapsed] = React.useState<boolean>(props.data?.collapsed || false);
+	const [collapsed, setCollapsed] = React.useState<boolean>(normalizeBoolean(props.data?.collapsed));
 	const [title, setTitle] = React.useState<string | null>(props.data?.title || null);
 	const [provider, setProvider] = React.useState<string | null>(props.data?.provider || null);
 	const [error, setError] = React.useState<string | null>(null);
@@ -280,7 +287,7 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 			setInputValue(props.data.url);
 		}
 		if (props.data?.collapsed !== undefined) {
-			setCollapsed(props.data.collapsed);
+			setCollapsed(normalizeBoolean(props.data.collapsed));
 		}
 		if (props.data?.title) {
 			setTitle(props.data.title);
