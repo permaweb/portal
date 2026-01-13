@@ -7,6 +7,7 @@ import { getTxEndpoint } from 'helpers/endpoints';
 import { getRedirect, urlify } from 'helpers/utils';
 
 import * as S from './styles';
+import Embed from 'engine/builder/blocks/embed';
 import TipsButton from 'engine/builder/blocks/tipsButton';
 import Supporters from 'engine/builder/blocks/supporters';
 
@@ -31,7 +32,8 @@ type ContentEntryType =
 	| 'spacer-vertical'
 	| 'table'
 	| 'monetizationButton'
-	| 'supporters';
+	| 'supporters'
+	| 'embed';
 
 type ContentEntry = {
 	id: string | number;
@@ -302,6 +304,8 @@ export default function PostRenderer(props: PostRendererProps) {
 									postId={props.postId}
 								/>
 							);
+						case 'embed':
+							return <Embed key={entry.id} element={entry} />;
 						default:
 							return <b key={entry.id}>{JSON.stringify(entry)}</b>;
 					}

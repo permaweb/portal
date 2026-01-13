@@ -21,6 +21,7 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 import { ArticleBlocks } from '../ArticleBlocks';
 
 import { DividerBlock } from './CustomBlocks/DividerBlock';
+import { buildEmbedHtml, EmbedBlock, isSupportedEmbedUrl, parseEmbedUrl } from './CustomBlocks/EmbedBlock';
 import { HTMLBlock } from './CustomBlocks/HTMLBlock';
 import { MediaBlock } from './CustomBlocks/MediaBlock';
 import { SpacerBlock } from './CustomBlocks/SpacerBlock';
@@ -296,6 +297,32 @@ export default function ArticleBlock(props: {
 				// Only set toggleBlockFocus to false if this block was the one that had it active
 				if (currentReducer.editor.toggleBlockFocus) {
 					handleCurrentReducerUpdate({ field: 'toggleBlockFocus', value: false });
+				}
+
+				// Auto-detect supported embed URLs in paragraph blocks and convert to embed
+				if (currentBlock.type === 'paragraph' && currentBlock.content) {
+					// Strip HTML tags to get raw text
+					const rawText = currentBlock.content.replace(/<[^>]*>/g, '').trim();
+					// Check if it's only a URL (no other content) and is from a supported provider
+					if (rawText && !rawText.includes(' ') && rawText.startsWith('http') && isSupportedEmbedUrl(rawText)) {
+						const parsed = parseEmbedUrl(rawText);
+						if (parsed) {
+							const embedHtml = buildEmbedHtml(parsed.embedUrl || '', false, rawText, undefined, parsed.embedHtml);
+							props.onChangeBlock({
+								id: props.block.id,
+								type: ArticleBlockEnum.Embed,
+								content: embedHtml,
+								data: {
+									url: rawText,
+									embedUrl: parsed.embedUrl,
+									collapsed: false,
+									provider: parsed.provider,
+									providerName: parsed.providerName,
+									embedHtml: parsed.embedHtml,
+								},
+							});
+						}
+					}
 				}
 			}
 		} else {
@@ -821,6 +848,18 @@ export default function ArticleBlock(props: {
 		case 'supporters':
 			useCustom = true;
 			element = <PostSupportersBlock index={props.index} block={props.block} onChangeBlock={props.onChangeBlock} />;
+			break;
+		case 'embed':
+			useCustom = true;
+			element = (
+				<EmbedBlock
+					content={props.block.content}
+					data={props.block.data}
+					onChange={(newContent: any, data: any) =>
+						props.onChangeBlock({ id: props.block.id, content: newContent, data: data })
+					}
+				/>
+			);
 			break;
 		default:
 			element = 'p';

@@ -292,6 +292,11 @@ export const ARTICLE_BLOCKS = {
 		icon: ICONS.users,
 		shortcut: 'Ctrl / S',
 	},
+	[ArticleBlockEnum.Embed]: {
+		type: ArticleBlockEnum.Embed,
+		label: 'Embed',
+		icon: ICONS.link,
+	},
 };
 
 export const STRIPE_PUBLISHABLE_KEY =

@@ -201,6 +201,7 @@ export enum ArticleBlockEnum {
 	Table = 'table',
 	MonetizationButton = 'monetizationButton',
 	Supporters = 'supporters',
+	Embed = 'embed',
 }
 
 export type ArticleBlockType = {
