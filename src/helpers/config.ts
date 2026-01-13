@@ -286,11 +286,6 @@ export const ARTICLE_BLOCKS = {
 		label: 'Tips Button',
 		icon: ICONS.tools,
 	},
-	[ArticleBlockEnum.Embed]: {
-		type: ArticleBlockEnum.Embed,
-		label: 'Embed',
-		icon: ICONS.link,
-	},
 	[ArticleBlockEnum.Supporters]: {
 		type: ArticleBlockEnum.Supporters,
 		label: 'Supporters',

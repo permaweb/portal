@@ -8,6 +8,7 @@ import { getRedirect, urlify } from 'helpers/utils';
 
 import * as S from './styles';
 import Embed from 'engine/builder/blocks/embed';
+import TipsButton from 'engine/builder/blocks/tipsButton';
 import Supporters from 'engine/builder/blocks/supporters';
 
 type ContentEntryType =
@@ -286,6 +287,16 @@ export default function PostRenderer(props: PostRendererProps) {
 						case 'monetizationButton':
 							return (
 								<TipsButton
+									key={entry.id}
+									element={entry}
+									preview={props.isPreview ?? false}
+									location="post"
+									postId={props.postId}
+								/>
+							);
+						case 'supporters':
+							return (
+								<Supporters
 									key={entry.id}
 									element={entry}
 									preview={props.isPreview ?? false}
