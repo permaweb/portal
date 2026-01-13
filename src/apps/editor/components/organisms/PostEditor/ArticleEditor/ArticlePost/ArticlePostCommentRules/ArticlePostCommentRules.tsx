@@ -55,8 +55,9 @@ export default function ArticlePostCommentRules() {
 		if (!commentsId || !permawebProvider.libs || hasLoaded || !hasPermission) return;
 
 		setLoading(true);
+		if (!permawebProvider.libs?.getRules) return;
 		permawebProvider.libs
-			.getRules({ commentsId })
+			?.getRules({ commentsId })
 			.then((rules: CommentRulesType) => {
 				if (rules) {
 					handleCurrentPostUpdate({ field: 'commentRules', value: rules });
