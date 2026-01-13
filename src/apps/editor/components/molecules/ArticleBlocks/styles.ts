@@ -124,5 +124,6 @@ export const BADropdownActionShortcut = styled.div`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: 10px !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;

@@ -20,7 +20,7 @@ export const Wrapper = styled.div`
 `;
 
 export const TitleWrapper = styled.div`
-	width: calc(30% - 10px);
+	width: calc(35% - 10px);
 	overflow: hidden;
 	position: relative;
 	input {
@@ -47,7 +47,13 @@ export const UpdateWrapper = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 7.5px;
-	padding: 5.5px 7.5px !important;
+
+	span {
+		color: ${(props) => props.theme.colors.contrast.color};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		white-space: nowrap;
+	}
 
 	.indicator {
 		height: 10px;
@@ -393,4 +399,82 @@ export const PreviewHeader = styled.div`
 	display: flex;
 	justify-content: flex-end;
 	background: inherit;
+`;
+
+export const OptionsWrapper = styled.div`
+	position: relative;
+`;
+
+export const OptionsDropdown = styled.div`
+	max-height: 75vh;
+	width: 300px;
+	max-width: 80vw;
+	position: absolute;
+	z-index: 2;
+	top: 43.5px;
+	right: 0;
+	padding: 11.5px 10px;
+
+	button {
+		height: 40px;
+		width: 100%;
+		display: flex;
+		gap: 12.5px;
+		align-items: center;
+		cursor: pointer;
+		background: transparent;
+		border-radius: ${STYLING.dimensions.radius.alt4};
+		transition: all 100ms;
+		padding: 0 10px;
+
+		p {
+			color: ${(props) => props.theme.colors.font.primary} !important;
+			font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
+			font-family: ${(props) => props.theme.typography.family.primary} !important;
+			display: block;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			max-width: 85%;
+			overflow: hidden;
+		}
+
+		span {
+			font-family: ${(props) => props.theme.typography.family.primary} !important;
+			display: block;
+			text-transform: uppercase;
+			padding: 2.5px 6.5px;
+			border: 1px solid transparent;
+			background: ${(props) => props.theme.colors.container.alt2.background} !important;
+			border: 1px solid ${(props) => props.theme.colors.border.primary} !important;
+			border-radius: ${STYLING.dimensions.radius.alt3} !important;
+			color: ${(props) => props.theme.colors.font.primary} !important;
+			font-size: 10px !important;
+			font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+
+			margin: 0 0 0 auto;
+		}
+
+		.info {
+			padding: 2.5px 7.5px !important;
+		}
+
+		svg {
+			height: 15.5px;
+			width: 15.5px;
+			margin: 2.5px 0 0 0;
+			color: ${(props) => props.theme.colors.font.alt1};
+			fill: ${(props) => props.theme.colors.font.alt1};
+		}
+
+		img {
+			height: 22.5px;
+			width: 22.5px;
+			margin: 0 12.5px 0 0;
+		}
+
+		&:hover {
+			background: ${(props) => props.theme.colors.container.primary.active};
+		}
+	}
 `;

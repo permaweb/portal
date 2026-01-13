@@ -326,6 +326,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			cachePortal(currentId, portalState);
 			setCurrent(portalState);
 		} catch (e: any) {
+			console.error(e);
 			debugLog('error', 'PortalProvider', 'Failed to fetch portal data:', e.message ?? 'Unknown error');
 		}
 		setUpdating(false);

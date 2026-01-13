@@ -591,6 +591,8 @@ export function fixBooleanStrings<T>(obj: T): T {
 }
 
 export function isVersionGreater(v1, v2) {
+	if (!v1 || !v2) return false;
+
 	const a = v1.split('.').map(Number);
 	const b = v2.split('.').map(Number);
 
