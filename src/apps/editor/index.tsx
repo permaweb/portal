@@ -18,7 +18,7 @@ import { DOM, URLS } from 'helpers/config';
 import { preloadAllAssets } from 'helpers/preloader';
 import { serviceWorkerManager } from 'helpers/serviceWorkerManager';
 import { GlobalStyle } from 'helpers/styles';
-import { debugLog } from 'helpers/utils';
+import { debugLog, isVersionGreater } from 'helpers/utils';
 import { ArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvider';
 import { NotificationProvider } from 'providers/NotificationProvider';
@@ -48,7 +48,7 @@ const Domains = getLazyImport('Domains');
 const DomainsRegister = getLazyImport('Domains/Register');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
-const Monetization = getLazyImport('Monetization');
+const Tips = getLazyImport('Tips');
 
 function getLazyImport(view: string) {
 	const key = `./views/${view}/index.tsx`;
@@ -112,7 +112,7 @@ function AppContent() {
 			if (hasCheckedProfileRef.current) return;
 			if (permawebProvider.profile?.id) {
 				const userVersion = permawebProvider.profile.version;
-				if (!userVersion || userVersion !== CurrentZoneVersion) {
+				if (!userVersion || isVersionGreater(CurrentZoneVersion, userVersion)) {
 					debugLog('info', 'EditorApp', 'User profile version does not match current version, updating...');
 
 					await permawebProvider.libs.updateProfileVersion({
@@ -231,7 +231,7 @@ function AppContent() {
 						{getRoute(`${URLS.base}:portalId/pages`, <Pages />)}
 						{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
 						{getRoute(`${URLS.base}:portalId/domains/register`, <DomainsRegister />)}
-						{getRoute(`${URLS.base}:portalId/tips`, <Monetization />)}
+						{getRoute(`${URLS.base}:portalId/tips`, <Tips />)}
 						{getRoute(URLS.docs, <Docs />)}
 						{getRoute(`${URLS.docs}:active/*`, <Docs />)}
 						{getRoute(URLS.notFound, <NotFound />)}

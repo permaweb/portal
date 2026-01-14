@@ -4,7 +4,7 @@ import Avatar from 'engine/components/avatar';
 import { useProfile } from 'engine/hooks/profiles';
 
 import { getTxEndpoint } from 'helpers/endpoints';
-import { checkValidAddress } from 'helpers/utils';
+import { checkValidAddress, debugLog } from 'helpers/utils';
 
 import * as S from './styles';
 
@@ -124,7 +124,7 @@ export default function SidebarUser() {
 				if (!res.ok) throw new Error('Failed to load tip history');
 
 				const json = await res.json();
-				console.log('Tip history response:', json);
+				debugLog('info', 'SidebarUser', 'Tip history response:', json);
 				const edges: any[] = json?.data?.transactions?.edges ?? [];
 				const next: UserTip[] = edges.map((edge) => {
 					const node = edge.node;
@@ -155,7 +155,7 @@ export default function SidebarUser() {
 					setTips(next);
 				}
 			} catch (e) {
-				console.error('[SidebarUser] Failed to load tip history', e);
+				debugLog('error', 'SidebarUser', 'Failed to load tip history', e);
 				if (!cancelled) {
 					setTips([]);
 				}

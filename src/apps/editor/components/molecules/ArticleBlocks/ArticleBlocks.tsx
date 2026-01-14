@@ -81,7 +81,11 @@ export default function ArticleBlocks(props: {
 			},
 			{
 				label: language.media,
-				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.Image], ARTICLE_BLOCKS[ArticleBlockEnum.Video]].filter(Boolean),
+				blocks: [
+					ARTICLE_BLOCKS[ArticleBlockEnum.Image],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Video],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Embed],
+				].filter(Boolean),
 			},
 			{
 				label: language.design,
@@ -94,9 +98,11 @@ export default function ArticleBlocks(props: {
 			},
 			{
 				label: language.custom,
-				blocks: [ARTICLE_BLOCKS[ArticleBlockEnum.HTML], ARTICLE_BLOCKS[ArticleBlockEnum.MonetizationButton]].filter(
-					Boolean
-				),
+				blocks: [
+					ARTICLE_BLOCKS[ArticleBlockEnum.HTML],
+					ARTICLE_BLOCKS[ArticleBlockEnum.MonetizationButton],
+					ARTICLE_BLOCKS[ArticleBlockEnum.Supporters],
+				].filter(Boolean),
 			},
 		],
 		[language.text, language.headers, language.media, language.design]
