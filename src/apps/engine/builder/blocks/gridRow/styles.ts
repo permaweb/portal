@@ -45,6 +45,7 @@ export const GridRowWrapper = styled.div<{ $layout?: any; padding?: string; maxW
 
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
 		flex-direction: column;
+		padding: 0;
 	}
 `;
 

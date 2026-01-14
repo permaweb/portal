@@ -11,8 +11,18 @@ export const Marker = styled.div<{ $state: boolean }>`
 
 export const Icon = styled.div<{ $state: boolean }>`
 	position: absolute;
+	display: flex;
+	justify-content: center;
 	width: 14px;
+	height: 14px;
 	top: 6px;
+
+	div {
+		width: 14px;
+		height: 14px;
+		display: flex;
+		justify-content: center;
+	}
 
 	svg {
 		transition: fill 0.4s, stroke 0.4s;

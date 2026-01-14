@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 
-export const Search = styled.div<{ $active: boolean }>`
+export const Search = styled.div<{ $active: boolean; $expanded?: boolean }>`
 	position: relative;
-	margin-left: auto;
-	width: ${(props) => (props.$active ? '200px' : '22px')};
+	width: ${(props) => (props.$expanded ? 'auto' : props.$active ? '200px' : '22px')};
+	margin: ${(props) => (props.$expanded ? '0 var(--spacing-xxxs)' : '0 0 0 auto')};
 	transition: width 0.2s;
 
 	svg {
@@ -26,8 +26,8 @@ export const Search = styled.div<{ $active: boolean }>`
 		filter: invert(1);
 		height: 22px;
 		width: 100%;
-		padding-left: ${(props) => (props.$active ? `24px` : 0)};
-		border-radius: ${(props) => (props.$active ? 0 : '16px')};
+		padding-left: ${(props) => (props.$active || props.$expanded ? `24px` : 0)};
+		border-radius: ${(props) => (props.$expanded ? 'var(--border-radius)' : props.$active ? 0 : '16px')};
 		transition: padding 0.2s, border-radius 0.2s;
 		box-sizing: border-box;
 

@@ -69,12 +69,12 @@ export const Navigation = styled.div<{ $layout: any; maxWidth: number; $editHeig
 		return props.$layout.border?.sides === true ? '1px solid rgba(var(--color-navigation-border),1)' : 'unset';
 	}};
 	box-shadow: ${(props) => (isSideNav(props.$layout) ? 'none' : 'var(--preference-navigation-shadow)')};
-	clip-path: ${(props) => (isSideNav(props.$layout) ? 'none' : 'inset(0 -100% -100% -100%)')};
+	clip-path: ${(props) => (isSideNav(props.$layout) ? 'none' : 'inset(0 -100% -500% -100%)')};
 	user-select: none;
 	box-sizing: border-box;
 
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-		padding: ${(props) => (isSideNav(props.$layout) ? '0' : '0 var(--spacing-xxs)')};
+		display: none;
 	}
 
 	${(props) =>
@@ -131,6 +131,13 @@ export const NavigationEntries = styled.div<{ $layout: any; maxWidth: number }>`
 		margin-top: ${(props) => (isSideNav(props.$layout) ? 'auto' : '0')};
 	}
 
+	a {
+		height: 100%;
+		svg {
+			color: rgba(var(--color-text), 1) !important;
+		}
+	}
+
 	a.active {
 		color: rgba(var(--color-secondary), 1);
 
@@ -149,7 +156,7 @@ export const NavigationEntry = styled.div<{ $layout?: any }>`
 	flex-direction: ${(props) => (isSideNav(props.$layout) ? 'column' : 'row')};
 	justify-content: ${(props) => (isSideNav(props.$layout) ? 'flex-start' : 'center')};
 	align-items: ${(props) => (isSideNav(props.$layout) ? 'stretch' : 'center')};
-	height: fit-content;
+	height: 100%;
 	min-height: ${(props) => (isSideNav(props.$layout) ? 'auto' : '100%')};
 	width: ${(props) => (isSideNav(props.$layout) ? '100%' : 'auto')};
 	border-radius: ${(props) => (isSideNav(props.$layout) ? '0' : '8px')};
@@ -227,10 +234,35 @@ export const Edit = styled.div`
 
 export const NavigationEntryMenu = styled.div<{ $layout: any }>`
 	position: ${(props) => (isSideNav(props.$layout) ? 'relative' : 'absolute')};
-	top: ${(props) => (isSideNav(props.$layout) ? 'auto' : '40px')};
+	top: ${(props) => (isSideNav(props.$layout) ? 'auto' : '100%')};
 	left: ${(props) => (isSideNav(props.$layout) ? 'auto' : '0')};
 	width: ${(props) => (isSideNav(props.$layout) ? '100%' : 'fit-content')};
 	min-width: 150px;
+
+	&::before {
+		content: ${(props) => (isSideNav(props.$layout) ? 'none' : '""')};
+		position: absolute;
+		top: 0;
+		left: -20px;
+		right: -20px;
+		bottom: -20px;
+	}
+
+	> div {
+		justify-content: flex-start;
+		width: 100%;
+
+		> div {
+			width: 100%;
+
+			a {
+				padding: var(--spacing-xxs) var(--spacing-xs);
+				width: 100%;
+				box-sizing: border-box;
+			}
+		}
+	}
+	border-radius: 0 0 var(--border-radius) var(--border-radius);
 	background: ${(props) =>
 		isSideNav(props.$layout) ? 'rgba(var(--color-navigation-text), 0.05)' : 'var(--color-navigation-background)'};
 	transform: ${(props) => (isSideNav(props.$layout) ? 'none' : 'scaleY(0)')};
@@ -276,6 +308,7 @@ export const NavItem = styled.div`
 	position: relative;
 	display: inline-flex;
 	align-items: center;
+	height: 100%;
 `;
 
 export const Tooltip = styled.div`
@@ -406,5 +439,122 @@ export const NavLogo = styled.div<{ $logoSize?: number; $positionX?: string }>`
 		height: ${(props) => (props.$logoSize ? `${props.$logoSize}px` : '50px')};
 		width: auto;
 		object-fit: contain;
+	}
+`;
+
+export const MobileOverlay = styled.div<{ $open: boolean }>`
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 99;
+	opacity: ${(props) => (props.$open ? 1 : 0)};
+	pointer-events: ${(props) => (props.$open ? 'auto' : 'none')};
+	backdrop-filter: blur(5px);
+	transition: opacity 0.3s ease;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		display: block;
+	}
+`;
+
+export const MobileDrawer = styled.div<{ $open: boolean }>`
+	display: none;
+	position: fixed;
+	top: var(--spacing-xxs);
+	right: var(--spacing-xxs);
+	bottom: var(--spacing-xxs);
+	width: 300px;
+	max-width: calc(100vw - var(--spacing-l));
+	background: var(--color-card-background);
+	border-radius: var(--border-radius);
+	border: 1px solid var(--color-card-border);
+	box-shadow: var(--preference-card-shadow);
+	z-index: 100;
+	transform: translateX(${(props) => (props.$open ? '0' : 'calc(100% + 20px)')});
+	transition: transform 0.2s ease;
+	font-size: 13px;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		display: flex;
+		flex-direction: column;
+	}
+`;
+
+export const MobileDrawerHeader = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: var(--spacing-xs) var(--spacing-xs) 0 var(--spacing-xs);
+`;
+
+export const MobileSpacer = styled.div`
+	border-bottom: 1px solid rgba(var(--color-text), 0.1);
+	margin: 10px 6px;
+`;
+
+export const MobileDrawerClose = styled.button`
+	background: none;
+	border: none;
+	padding: 0 0 0 var(--spacing-xxs);
+	cursor: pointer;
+	color: rgba(var(--color-navigation-text), 1);
+	font-size: var(--font-size-xlarge);
+	line-height: 1;
+`;
+
+export const MobileDrawerEntries = styled.div`
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow-y: auto;
+	padding: var(--spacing-xxxs);
+`;
+
+export const MobileNavEntry = styled.div`
+	a {
+		display: flex;
+		align-items: center;
+		height: 34px;
+		padding: 0 10px;
+		color: rgba(var(--color-text), 1);
+		font-weight: 600;
+		border-radius: var(--border-radius);
+
+		&:hover {
+			background: rgba(var(--color-text), 0.05);
+			color: rgba(var(--color-primary), 1);
+		}
+
+		&.active {
+			color: rgba(var(--color-secondary), 1);
+		}
+	}
+`;
+
+export const MobileSubEntries = styled.div`
+	padding-left: 20px;
+`;
+
+export const MobileThemeToggle = styled.div``;
+
+export const MobileLinks = styled.div`
+	display: flex;
+	justify-content: center;
+	gap: var(--spacing-xxs);
+	padding: var(--spacing-xxs);
+	margin-top: auto;
+
+	svg {
+		height: 20px;
+		fill: rgba(var(--color-text), 1);
+		width: unset;
+
+		&:hover {
+			transform: scale(1.2);
+			transition: transform 0.2s;
+		}
 	}
 `;
