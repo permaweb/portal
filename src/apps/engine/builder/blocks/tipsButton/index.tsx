@@ -4,7 +4,9 @@ import Button from 'engine/components/form/button';
 import TipModal from 'engine/components/tipModal';
 import { useArTip } from 'engine/hooks/useARTip';
 import { usePortalProvider } from 'engine/providers/portalProvider';
+
 import { debugLog } from 'helpers/utils';
+import { useNotifications } from 'providers/NotificationProvider';
 
 type MonetizationSettings = {
 	enabled: boolean;
@@ -27,6 +29,7 @@ type TipsButtonProps = {
 export default function TipsButton(props: TipsButtonProps) {
 	const { portal } = usePortalProvider();
 	const { sendTip } = useArTip();
+	const { addNotification } = useNotifications();
 
 	// Portal-level monetization config
 	const monetization = portal?.Monetization as MonetizationSettings | undefined;
@@ -62,8 +65,12 @@ export default function TipsButton(props: TipsButtonProps) {
 
 		try {
 			setSubmitting(true);
-			await sendTip(walletAddress, amount, location, props.postId);
-		} catch (e) {
+			const txId = await sendTip(walletAddress, amount, location, props.postId);
+			addNotification(`Successfully sent ${amount} AR tip!`, 'success');
+			debugLog('info', 'TipsButton', 'Tip sent successfully', txId);
+		} catch (e: any) {
+			const errorMessage = e?.message || 'Failed to send tip';
+			addNotification(errorMessage, 'warning');
 			debugLog('error', 'TipsButton', 'tip failed', e);
 		} finally {
 			setSubmitting(false);
