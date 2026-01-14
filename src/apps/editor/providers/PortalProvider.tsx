@@ -362,6 +362,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	async function fetchPortalUserProfile(user: PortalUserType) {
 		try {
+			// If profile is already loaded in state, skip fetching
+			if (usersByPortalId?.[user.address]) {
+				return;
+			}
+
 			let profile: any = null;
 			if (user.address === permawebProvider.profile?.id) {
 				profile = { ...permawebProvider.profile };

@@ -21,23 +21,23 @@ export default function Post(props: { post: PortalAssetType }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [fetched, setFetched] = React.useState<boolean>(false);
-
 	const unauthorized =
 		!portalProvider?.permissions?.postAutoIndex &&
 		!portalProvider?.permissions?.updatePostRequestStatus &&
 		props.post?.creator !== permawebProvider.profile.id;
 
 	React.useEffect(() => {
-		(async function () {
-			if (!fetched && props.post.creator && props.post.creator !== portalProvider.current?.id) {
-				portalProvider.fetchPortalUserProfile({
-					address: props.post.creator,
-				});
-			}
-			setFetched(true);
-		})();
-	}, [props.post?.creator, portalProvider.current?.id, fetched]);
+		// Only fetch if creator exists, is not the portal itself, and profile not already loaded
+		if (
+			props.post.creator &&
+			props.post.creator !== portalProvider.current?.id &&
+			!portalProvider.usersByPortalId?.[props.post.creator]
+		) {
+			portalProvider.fetchPortalUserProfile({
+				address: props.post.creator,
+			});
+		}
+	}, [props.post?.creator, portalProvider.current?.id, portalProvider.usersByPortalId]);
 
 	const creatorName =
 		props.post?.creator === portalProvider.current?.id
