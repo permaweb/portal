@@ -28,7 +28,6 @@ export default function User(props: {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [fetched, setFetched] = React.useState<boolean>(false);
 	const [showManageUser, setShowManageUser] = React.useState<boolean>(false);
 	const [showManageOwner, setShowManageOwner] = React.useState<boolean>(false);
 	const [showShareCredits, setShowShareCredits] = React.useState<boolean>(false);
@@ -44,11 +43,11 @@ export default function User(props: {
 	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser && !invitePending;
 
 	React.useEffect(() => {
-		(async function () {
-			if (!fetched) portalProvider.fetchPortalUserProfile(props.user);
-			setFetched(true);
-		})();
-	}, [props.user, fetched]);
+		// Only fetch if the profile is not already in the provider
+		if (!portalProvider.usersByPortalId?.[props.user.address]) {
+			portalProvider.fetchPortalUserProfile(props.user);
+		}
+	}, [props.user.address, portalProvider.usersByPortalId]);
 
 	const signer = new ArconnectSigner(arweaveProvider.wallet);
 	const turbo = TurboFactory.authenticated({ signer });
