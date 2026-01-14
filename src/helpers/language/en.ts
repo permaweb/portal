@@ -70,7 +70,7 @@ export const en = {
 	checkoutFinalBalance: `Final Balance:`,
 	checkoutRegistrationPeriod: `Registration Period:`,
 	checkoutTotalDue: `Total Due:`,
-	checkPost: `Check Post`,
+	checkPost: `Go To Post`,
 	chooseAppearance: `Choose Appearance`,
 	choosePayment: `Choose Payment`,
 	clear: `Clear`,

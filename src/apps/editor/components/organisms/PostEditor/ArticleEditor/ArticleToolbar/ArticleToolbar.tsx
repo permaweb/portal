@@ -357,7 +357,7 @@ export default function ArticleToolbar(props: {
 				return (
 					<>
 						<Button
-							type={'alt1'}
+							type={'primary'}
 							label={language?.save}
 							handlePress={() =>
 								currentRequest?.status === 'Pending' && !isAssetIdPresentInAssets

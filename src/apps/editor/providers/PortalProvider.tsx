@@ -222,7 +222,12 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		(async function () {
 			if (current && refreshFields && refreshFields.length > 0) {
 				try {
-					await Promise.all(refreshFields.map((field) => fetchPortal({ patchKey: field })));
+					await Promise.all(
+						refreshFields.map((field) => {
+							debugLog('info', 'PortalProvider', `Refreshing field ${field}`);
+							return fetchPortal({ patchKey: field });
+						})
+					);
 				} catch (e: any) {
 					debugLog('error', 'PortalProvider', 'Error refreshing portal:', e.message ?? 'Unknown error');
 				} finally {

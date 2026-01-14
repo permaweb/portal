@@ -1,9 +1,9 @@
 import fs from 'fs';
-import { setGlobalDispatcher, Agent } from 'undici';
+import { Agent, setGlobalDispatcher } from 'undici';
 
 import Arweave from 'arweave';
-import { connect } from '@permaweb/aoconnect';
 import Permaweb from '@permaweb/libs';
+import { connect } from '@permaweb/aoconnect';
 
 setGlobalDispatcher(
 	new Agent({

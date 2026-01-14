@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+import { open, transition2 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
@@ -69,10 +70,10 @@ export const Arrow = styled.div<{ $open: boolean }>`
 	svg {
 		width: 17.5px;
 		height: 17.5px;
+		margin: 0 5.5px -3.5px 0;
 		transform: rotate(${(props) => (props.$open ? '0deg' : '270deg')});
 		fill: ${(props) => props.theme.colors.font.primary};
 		color: ${(props) => props.theme.colors.font.primary};
-		transition: transform 100ms;
 	}
 `;
 
@@ -130,6 +131,7 @@ export const WrapperEmpty = styled.div`
 export const LoadingWrapper = styled(WrapperEmpty)``;
 
 export const HomeTemplateWrapper = styled.div`
+	animation: ${open} ${transition2};
 	padding: 15px;
 	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
@@ -147,7 +149,7 @@ export const HomeTemplateOption = styled.button<{ $active: boolean; disabled: bo
 	padding: 12px;
 	background: ${(props) =>
 		props.$active ? props.theme.colors.button.primary.active.background : props.theme.colors.button.primary.background};
-	border: 2px solid
+	border: 1px solid
 		${(props) => (props.$active ? props.theme.colors.indicator.active : props.theme.colors.button.primary.border)};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	cursor: ${(props) => (props.$active ? 'default' : props.disabled ? 'not-allowed' : 'pointer')};
@@ -162,7 +164,7 @@ export const HomeTemplateOption = styled.button<{ $active: boolean; disabled: bo
 				: props.disabled
 				? props.theme.colors.button.primary.background
 				: props.theme.colors.button.primary.active.background};
-		border: 2px solid
+		border: 1px solid
 			${(props) =>
 				props.$active
 					? props.theme.colors.indicator.active
@@ -200,13 +202,14 @@ export const HomeTemplateIconPlaceholder = styled.div<{ $active: boolean }>`
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	background: ${(props) => props.theme.colors.container.alt1.background};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	opacity: ${(props) => (props.$active ? 1 : 0.5)};
 
 	svg {
-		width: 40px;
-		height: 40px;
+		width: 25px;
+		height: 25px;
+		margin: 40px 0;
+		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
 	}
 `;

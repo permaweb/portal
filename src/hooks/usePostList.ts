@@ -110,6 +110,7 @@ export function usePostsList(props: { pageSize?: number }) {
 		const total = assets.length;
 		return { start, end, total };
 	}, [currentPage, assets.length]);
+
 	return {
 		loading,
 		showFilterActions,

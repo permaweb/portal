@@ -573,7 +573,18 @@ export function debugLog(level: string, context: string, ...args: any[]) {
 	const style = COLORS[level] || 'color: #8F8F8F';
 	const method = METHOD[level] || console.log;
 
-	method(`%c[Portal: ${capitalize(level)}]%c %c(${context})%c -`, style, '', 'font-weight: medium;', '', ...args);
+	const formattedArgs = args.map((arg) =>
+		typeof arg === 'object' && arg !== null ? JSON.stringify(arg, null, 2) : arg
+	);
+
+	method(
+		`%c[Portal: ${capitalize(level)}]%c %c(${context})%c -`,
+		style,
+		'',
+		'font-weight: medium;',
+		'',
+		...formattedArgs
+	);
 }
 
 export function fixBooleanStrings<T>(obj: T): T {
