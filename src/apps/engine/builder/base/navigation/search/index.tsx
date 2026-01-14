@@ -7,14 +7,15 @@ import { getRedirect } from 'helpers/utils';
 
 import * as S from './styles';
 
-export default function Search(props: any) {
-	const [useSearch, setUseSearch] = React.useState(false);
+export default function Search(props: { expanded?: boolean }) {
+	const [useSearch, setUseSearch] = React.useState(props.expanded || false);
 	const [term, setTerm] = React.useState('');
 	const searchRef = React.useRef(null);
 	const inputRef = React.useRef<HTMLInputElement>(null);
 	const navigate = useNavigate();
 
 	React.useEffect(() => {
+		if (props.expanded) return;
 		const handleClickOutside = (event: MouseEvent) => {
 			if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
 				setUseSearch(false);
@@ -25,14 +26,14 @@ export default function Search(props: any) {
 		return () => {
 			document.removeEventListener('click', handleClickOutside);
 		};
-	}, []);
+	}, [props.expanded]);
 
 	React.useEffect(() => {
-		if (useSearch) inputRef.current?.focus();
-	}, [useSearch]);
+		if (useSearch && !props.expanded) inputRef.current?.focus();
+	}, [useSearch, props.expanded]);
 
 	return (
-		<S.Search ref={searchRef} $active={useSearch} onClick={() => setUseSearch(true)}>
+		<S.Search ref={searchRef} $active={useSearch} $expanded={props.expanded} onClick={() => setUseSearch(true)}>
 			<ReactSVG src={ICONS.ENGINE.search} />
 			<input
 				ref={inputRef}

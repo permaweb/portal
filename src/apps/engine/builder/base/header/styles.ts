@@ -51,7 +51,7 @@ export const Header = styled.div<{
 	}
 
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-		// padding: 0 var(--spacing-xxs);
+		max-height: 50px;
 	}
 `;
 
@@ -90,6 +90,12 @@ export const HeaderContent = styled.div<{ $layout: any; maxWidth: number }>`
 	position: relative;
 	width: 100%;
 	height: 100%;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
 `;
 
 export const Logo = styled.div<{ $layout: any; $editLogo?: { positionX: string; positionY: string; size: number } }>`
@@ -136,12 +142,10 @@ export const Logo = styled.div<{ $layout: any; $editLogo?: { positionX: string; 
 	}
 
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-		top: var(--spacing-m);
-		bottom: 0;
+		position: static;
 
 		a {
-			height: 46%;
-			margin-bottom: auto;
+			height: 26px;
 		}
 	}
 `;
@@ -153,6 +157,10 @@ export const Actions = styled.div<{ $isLogo: boolean }>`
 	top: 10px;
 	right: 0;
 	z-index: 2;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		position: static;
+	}
 `;
 
 export const HeaderSearch = styled.div`
@@ -185,7 +193,11 @@ export const HeaderSearch = styled.div`
 	}
 `;
 
-export const ThemeToggle = styled.div``;
+export const ThemeToggle = styled.div`
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		display: none;
+	}
+`;
 
 export const Links = styled.div`
 	position: absolute;
@@ -196,7 +208,7 @@ export const Links = styled.div`
 	z-index: 1;
 
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-		right: var(--spacing-xxs);
+		display: none;
 	}
 `;
 
@@ -283,4 +295,41 @@ export const HandleLabel = styled.span`
 	font-weight: 600;
 	white-space: nowrap;
 	pointer-events: none;
+`;
+
+export const HamburgerButton = styled.button`
+	display: none;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	background: none;
+	border: none;
+	padding: var(--spacing-xxs) 0;
+	margin-left: var(--spacing-xs);
+	cursor: pointer;
+
+	span {
+		display: block;
+		width: 22px;
+		height: 2px;
+		background: rgba(var(--color-text), 1);
+		margin: 3px 0;
+		transition: all 0.3s ease;
+	}
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		display: flex;
+	}
+
+	&[data-open='true'] {
+		span:nth-child(1) {
+			transform: rotate(45deg) translate(4px, 4px);
+		}
+		span:nth-child(2) {
+			opacity: 0;
+		}
+		span:nth-child(3) {
+			transform: rotate(-45deg) translate(4px, -4px);
+		}
+	}
 `;

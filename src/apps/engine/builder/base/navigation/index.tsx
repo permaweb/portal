@@ -1,9 +1,13 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { NavLink } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
+import SocialLinks from 'engine/components/socialLinks';
+import Toggle from 'engine/components/toggle';
 import { defaultLayout } from 'engine/defaults/layout.defaults';
 import { defaultThemes } from 'engine/defaults/theme.defaults';
 import { initThemes } from 'engine/helpers/themes';
+import { useSettings } from 'engine/hooks/settings';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS } from 'helpers/config';
@@ -21,10 +25,26 @@ export default function Navigation(props: any) {
 	const content = props.content;
 
 	const portalProvider = usePortalProvider();
-	const { portal, layoutHeights, setLayoutHeights, navSticky, layoutEditMode, logoSettings } = portalProvider;
+	const {
+		portal,
+		layoutHeights,
+		setLayoutHeights,
+		navSticky,
+		layoutEditMode,
+		logoSettings,
+		mobileMenuOpen,
+		setMobileMenuOpen,
+	} = portalProvider;
+	const { settings, updateSetting } = useSettings();
 	const [isDragging, setIsDragging] = React.useState(false);
 	const [startPos, setStartPos] = React.useState(0);
 	const [startSize, setStartSize] = React.useState(0);
+
+	function setTheme() {
+		const newTheme = settings?.theme === 'dark' || !settings?.theme ? 'light' : 'dark';
+		updateSetting('theme', newTheme);
+		document.documentElement.setAttribute('theme', newTheme);
+	}
 
 	const isSideNav = layout?.position === 'left' || layout?.position === 'right';
 
@@ -214,6 +234,31 @@ export default function Navigation(props: any) {
 		);
 	};
 
+	const MobileNavigationEntry = (mobileProps: { entry: any; onClose: () => void }) => {
+		const entry = mobileProps.entry;
+
+		if (entry?.metadata?.hidden) return null;
+
+		const hasChildren = !!entry?.children?.length;
+
+		return (
+			<>
+				<S.MobileNavEntry>
+					<NavLink to={getRedirect(`feed/category/${entry.name}`)} onClick={mobileProps.onClose}>
+						{entry.name}
+					</NavLink>
+				</S.MobileNavEntry>
+				{hasChildren && (
+					<S.MobileSubEntries>
+						{entry.children.map((child: any, i: number) => (
+							<MobileNavigationEntry key={`mobile-${entry.name}-${i}`} entry={child} onClose={mobileProps.onClose} />
+						))}
+					</S.MobileSubEntries>
+				)}
+			</>
+		);
+	};
+
 	if (!layout) return null;
 
 	return (
@@ -250,6 +295,37 @@ export default function Navigation(props: any) {
 					</S.HandleLabel>
 				</S.ResizeHandle>
 			)}
+			{!isSideNav &&
+				ReactDOM.createPortal(
+					<>
+						<S.MobileOverlay $open={mobileMenuOpen} onClick={() => setMobileMenuOpen(false)} />
+						<S.MobileDrawer $open={mobileMenuOpen}>
+							<S.MobileDrawerHeader>
+								<S.MobileThemeToggle>
+									<Toggle theme state={settings?.theme === 'dark'} setState={() => setTheme()} />
+								</S.MobileThemeToggle>
+								<S.MobileDrawerClose onClick={() => setMobileMenuOpen(false)}>✕</S.MobileDrawerClose>
+							</S.MobileDrawerHeader>
+							<S.MobileSpacer />
+							<Search expanded />
+							<S.MobileSpacer />
+							<S.MobileDrawerEntries>
+								{content &&
+									Object.entries(content).map(([key, entry]: [string, any]) => (
+										<MobileNavigationEntry
+											key={`mobile-${key}`}
+											entry={entry}
+											onClose={() => setMobileMenuOpen(false)}
+										/>
+									))}
+							</S.MobileDrawerEntries>
+							<S.MobileLinks>
+								<SocialLinks />
+							</S.MobileLinks>
+						</S.MobileDrawer>
+					</>,
+					document.body
+				)}
 		</S.Navigation>
 	);
 }

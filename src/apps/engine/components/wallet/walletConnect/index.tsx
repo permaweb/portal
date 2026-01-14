@@ -399,6 +399,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 				<S.CubeContainer $rotated={showLayoutPanel}>
 					<S.CubeFaceFront $rotated={showLayoutPanel}>
 						<S.UserMenu id="UserMenu">
+							<S.MobileMenuClose onClick={() => setShowUserMenu(false)}>✕</S.MobileMenuClose>
 							<S.HeaderWrapper>
 								<S.Header>
 									<S.Banner>
@@ -531,6 +532,9 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 						) : (
 							<ReactSVG src={ICONS.user} />
 						)}
+						<S.MobileAvatar>
+							<Avatar profile={profile} size={26} />
+						</S.MobileAvatar>
 						<span>{label}</span>
 						{showNotification && <S.NotificationBubble>{notificationCount}</S.NotificationBubble>}
 					</S.LAction>

@@ -20,12 +20,12 @@ export const THEME_DEFAULT = {
 				dark: '56,189,128',
 			},
 			border: {
-				light: '50, 50, 50',
-				dark: '160, 160, 160',
+				light: '50,50,50',
+				dark: '160,160,160',
 			},
 		},
 		preferences: {
-			borderRadius: 0,
+			borderRadius: 10,
 		},
 	},
 	links: {
@@ -129,8 +129,8 @@ export const THEME_DEFAULT = {
 				dark: 'background',
 			},
 			border: {
-				light: 'border',
-				dark: 'border',
+				light: 'unset',
+				dark: 'unset',
 			},
 		},
 		preferences: {
@@ -147,8 +147,8 @@ export const THEME_DEFAULT = {
 				dark: '38,38,38',
 			},
 			border: {
-				light: 'unset',
-				dark: 'unset',
+				light: 'border',
+				dark: 'border',
 			},
 		},
 		preferences: {
@@ -161,8 +161,8 @@ export const THEME_DEFAULT = {
 	card: {
 		colors: {
 			background: {
-				light: 'background',
-				dark: 'background',
+				light: '238,238,238',
+				dark: '36,36,36',
 			},
 			border: {
 				light: '238,238,238',

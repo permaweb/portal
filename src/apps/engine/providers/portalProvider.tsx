@@ -41,6 +41,8 @@ export interface PortalContextState {
 	setNavSticky: (sticky: boolean) => void;
 	headerSticky: boolean;
 	setHeaderSticky: (sticky: boolean) => void;
+	mobileMenuOpen: boolean;
+	setMobileMenuOpen: (open: boolean) => void;
 }
 
 const DEFAULT_LAYOUT_HEIGHTS: LayoutHeights = {
@@ -73,6 +75,8 @@ const DEFAULT_CONTEXT = {
 	setNavSticky(_sticky: boolean) {},
 	headerSticky: false,
 	setHeaderSticky(_sticky: boolean) {},
+	mobileMenuOpen: false,
+	setMobileMenuOpen(_open: boolean) {},
 };
 
 export const PortalContext = React.createContext<PortalContextState>(DEFAULT_CONTEXT);
@@ -106,6 +110,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const [footerFixed, setFooterFixed] = React.useState<boolean | undefined>(undefined);
 	const [navSticky, setNavSticky] = React.useState(true);
 	const [headerSticky, setHeaderSticky] = React.useState(false);
+	const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
 	React.useEffect(() => {
 		if (!portalId || !permawebProvider.libs) return;
@@ -362,6 +367,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					setNavSticky,
 					headerSticky,
 					setHeaderSticky,
+					mobileMenuOpen,
+					setMobileMenuOpen,
 				}}
 			>
 				{props.children}

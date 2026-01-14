@@ -1,4 +1,5 @@
 import { fadeIn1, open, openRight } from 'engine/constants/animations';
+import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
 export const Wrapper = styled.div<{ $transparent?: boolean }>`
@@ -34,6 +35,12 @@ export const Container = styled.div<{
 	border: 1px solid var(--color-card-border);
 	box-shadow: var(--preference-card-shadow);
 	pointer-events: auto;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		top: var(--spacing-xxs);
+		right: var(--spacing-xxs);
+		max-width: calc(100vw - var(--spacing-l));
+	}
 `;
 
 export const Header = styled.div`
