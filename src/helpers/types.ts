@@ -69,6 +69,12 @@ export type PortalAssetRequestType = {
 	dateCreated?: string;
 };
 
+export type CommentRulesType = {
+	profileAgeRequired?: number;
+	mutedWords?: string[];
+	requireProfileThumbnail?: boolean;
+};
+
 export type PortalAssetPostReduxType = {
 	id: null;
 	title: '';
@@ -85,6 +91,7 @@ export type PortalAssetPostReduxType = {
 	releaseDate: number | null;
 	authUsers: string[];
 	url: string | null;
+	commentRules: CommentRulesType | null;
 };
 
 export type PortalPageReduxType = {
