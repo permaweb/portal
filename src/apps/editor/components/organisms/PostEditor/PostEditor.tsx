@@ -331,7 +331,7 @@ export default function PostEditor() {
 						});
 					}
 
-					await handleExternalRecipients();
+					// await handleExternalRecipients();
 
 					if (isStaticPage) {
 						const currentPages = portalProvider.current?.pages || {};
@@ -537,7 +537,7 @@ export default function PostEditor() {
 							action: 'Run-Action',
 							tags: tags,
 							data: { Input: {} },
-							deepResult: { target: externalPortal.id },
+							// deepResult: { target: externalPortal.id },
 						});
 
 						if (hasExternalAdminAccess) {

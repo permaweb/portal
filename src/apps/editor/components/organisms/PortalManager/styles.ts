@@ -239,7 +239,7 @@ export const LayoutOption = styled.div<{ $active: boolean }>`
 	padding: 12px;
 	background: ${(props) =>
 		props.$active ? props.theme.colors.button.primary.active.background : props.theme.colors.button.primary.background};
-	border: 2px solid
+	border: 1px solid
 		${(props) => (props.$active ? props.theme.colors.indicator.active : props.theme.colors.button.primary.border)};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	cursor: ${(props) => (props.$active ? 'default' : 'pointer')};
@@ -250,7 +250,7 @@ export const LayoutOption = styled.div<{ $active: boolean }>`
 			props.$active
 				? props.theme.colors.button.primary.active.background
 				: props.theme.colors.button.primary.active.background};
-		border: 2px solid
+		border: 1px solid
 			${(props) =>
 				props.$active ? props.theme.colors.indicator.active : props.theme.colors.button.primary.active.border};
 	}
