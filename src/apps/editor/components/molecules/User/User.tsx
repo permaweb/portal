@@ -103,9 +103,7 @@ export default function User(props: {
 						setShowManageOwner(true);
 						return;
 					}
-					if (portalProvider.usersByPortalId?.[props.user.address].owner !== arweaveProvider.walletAddress) {
-						setShowManageUser(true);
-					}
+					setShowManageUser(true);
 				}}
 				disabled={unauthorized}
 				hideAction={props.hideAction}

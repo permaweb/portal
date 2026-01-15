@@ -205,7 +205,7 @@ export default function PostEditor() {
 									{ name: 'Date-Added', value: new Date().getTime().toString() },
 								],
 								data: { Input: { Recipients: indexRecipients } },
-								deepResult: { target: assetId },
+								returnResult: true,
 							});
 
 							if (assetIndexResult?.Messages?.length > 0) {
@@ -235,7 +235,7 @@ export default function PostEditor() {
 										{ name: 'Forward-Action', value: 'Update-Asset' },
 									],
 									data: { Input: data },
-									deepResult: { target: assetId },
+									returnResult: true,
 								});
 
 								debugLog('info', 'PostEditor', `Asset content update: ${assetContentUpdateId}`);
@@ -315,7 +315,7 @@ export default function PostEditor() {
 								{ name: 'Exclude-Index', value: excludeFromIndex },
 							],
 							data: { Input: data },
-							deepResult: { target: assetId },
+							returnResult: true,
 						});
 					} else {
 						assetContentUpdateId = await permawebProvider.libs.sendMessage({
@@ -331,7 +331,7 @@ export default function PostEditor() {
 						});
 					}
 
-					// await handleExternalRecipients();
+					// await handleExternalRecipients(assetId);
 
 					if (isStaticPage) {
 						const currentPages = portalProvider.current?.pages || {};
@@ -462,7 +462,7 @@ export default function PostEditor() {
 								{ name: 'Index-Id', value: assetId },
 							],
 							data: { Input: {} },
-							deepResult: { target: portalProvider.current.id },
+							returnResult: true,
 						});
 
 						if (portalProvider.permissions.postAutoIndex) {
@@ -488,7 +488,7 @@ export default function PostEditor() {
 						}
 					}
 
-					await handleExternalRecipients();
+					await handleExternalRecipients(assetId);
 
 					addNotification(`${language?.postSaved}!`, 'success', { persistent: true });
 
@@ -508,7 +508,7 @@ export default function PostEditor() {
 		}
 	}
 
-	async function handleExternalRecipients() {
+	async function handleExternalRecipients(assetId: string) {
 		/* If there are external recipients, also send an index request to them */
 		/* If the user is an admin in another portal then index it directly */
 		if (currentPost.data?.externalRecipients?.length > 0) {
@@ -526,6 +526,7 @@ export default function PostEditor() {
 						{ name: 'Forward-Action', value: externalIndexAction },
 						{ name: 'Index-Id', value: assetId },
 					];
+
 					if (!hasExternalAdminAccess) {
 						tags.push({ name: 'Status', value: 'Review' });
 					}
@@ -537,7 +538,7 @@ export default function PostEditor() {
 							action: 'Run-Action',
 							tags: tags,
 							data: { Input: {} },
-							// deepResult: { target: externalPortal.id },
+							returnResult: true,
 						});
 
 						if (hasExternalAdminAccess) {

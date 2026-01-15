@@ -22,13 +22,12 @@ setGlobalDispatcher(
 // ============================================================================
 
 const SCHEDULER = 'https://schedule.forward.computer';
-const PORTAL_SOURCE_NODE = 'https://hb.portalinto.com';
-const TARGET_NODES = ['http://localhost:8734'];
-const MIN_BLOCK = 1836780;
+const PORTAL_SOURCE_NODE = 'http://localhost:8734';
+const TARGET_NODES = ['https://hb.portalinto.com'];
+const MIN_BLOCK = 1818200;
 
-const PORTAL_IDS = [
-	'Uko7_w8kUt91gpXpXpXtbjfHgOn_KPC5APoqN8lFvT8', // Permaweb Journal
-];
+// Include additional Portal IDs
+const PORTAL_IDS = ['nhdiOytr5s2MzGBlAAMIsKtcwvXDkiv54H0_O5FUacU', 'GYOxC2in9PTT8ehdJ0Wzmpu_EskE4OhjcSq44TBqpxg'];
 
 const WRITE_TO_FILES = false; // Toggle to control file writing
 
@@ -291,6 +290,8 @@ async function getAggregatedGQLData(args, callback) {
  * Finds all portal processes via GraphQL
  */
 async function findPortalProcesses() {
+	return []; // TODO
+
 	debugLog('info', 'findPortalProcesses', 'Finding portal processes via GraphQL...');
 
 	const tags = [
@@ -625,6 +626,9 @@ async function hydrateProcess(pid, type, targetNodes) {
 						let lastSlot = currentSlot;
 
 						while (currentSlot < targetSlot) {
+							let retriesFailed = false;
+							const previousSlot = currentSlot;
+
 							currentSlot = await withRetries(
 								async () => {
 									const slotRes = await fetch(`${node}/${pid}~process@1.0/compute/at-slot`, {
@@ -640,9 +644,9 @@ async function hydrateProcess(pid, type, targetNodes) {
 									return slot;
 								},
 								{
-									maxRetries: 100,
-									delayMs: 2000,
-									backoff: false,
+									maxRetries: 3,
+									delayMs: 3000,
+									backoff: true,
 									validate: (slot) => {
 										// Validate that slot is progressing
 										if (slot === lastSlot) {
@@ -654,13 +658,26 @@ async function hydrateProcess(pid, type, targetNodes) {
 								}
 							).catch((error) => {
 								debugLog('error', 'hydrateProcess', `Failed to get slot for ${pid} on ${node}:`, error.message);
+								retriesFailed = true;
 								return currentSlot; // Return current slot if failed
 							});
+
+							// Check if slot progressed
+							if (currentSlot === previousSlot) {
+								debugLog('error', 'hydrateProcess', `Slot did not progress for ${pid} on ${node}`);
+								break;
+							}
 
 							// Update last slot
 							lastSlot = currentSlot;
 
 							if (currentSlot >= targetSlot) {
+								break;
+							}
+
+							// Exit if retries exhausted
+							if (retriesFailed) {
+								debugLog('error', 'hydrateProcess', `Max retries exhausted for ${pid} on ${node}`);
 								break;
 							}
 						}
@@ -791,11 +808,19 @@ async function main() {
 		const portalProcesses = await findPortalProcesses();
 		debugLog('success', 'main', `Found ${portalProcesses.length} portal processes via GraphQL`);
 
-		// Add any hardcoded portal IDs
+		// Add any hardcoded portal IDs if not already present
 		if (PORTAL_IDS.length > 0) {
-			debugLog('info', 'main', `Adding ${PORTAL_IDS.length} hardcoded portal IDs`);
-			const hardcodedProcesses = PORTAL_IDS.map((id) => ({ node: { id } }));
-			portalProcesses.push(...hardcodedProcesses);
+			const existingIds = new Set(portalProcesses.map((p) => p.node?.id));
+			const newHardcodedIds = PORTAL_IDS.filter((id) => !existingIds.has(id));
+
+			if (newHardcodedIds.length > 0) {
+				debugLog('info', 'main', `Adding ${newHardcodedIds.length} hardcoded portal IDs not already present`);
+				const hardcodedProcesses = newHardcodedIds.map((id) => ({ node: { id } }));
+				portalProcesses.push(...hardcodedProcesses);
+			} else {
+				debugLog('info', 'main', 'All hardcoded portal IDs already present in fetched results');
+			}
+
 			debugLog('info', 'main', `Total portals to process: ${portalProcesses.length}`);
 		}
 

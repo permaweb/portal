@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 
+import { STYLING } from 'helpers/config';
+
 export const Wrapper = styled.div`
 	width: 100%;
 	display: flex;
@@ -56,7 +58,6 @@ export const TransferHeader = styled.div`
 	align-items: center;
 	justify-content: space-between;
 	margin-top: 10px;
-	padding: 6px 0;
 `;
 
 export const TransferTitle = styled.h4`
@@ -64,15 +65,14 @@ export const TransferTitle = styled.h4`
 	padding: 0;
 	font-size: ${(p) => p.theme.typography.size.xSmall};
 	font-family: ${(p) => p.theme.typography.family.primary};
-	font-weight: ${(p) => p.theme.typography.weight.xBold};
+	font-weight: ${(p) => p.theme.typography.weight.bold};
 	color: ${(p) => p.theme.colors.font.primary};
 `;
 
 export const TableViewport = styled.div`
 	width: 100%;
-	margin-top: 8px;
 	border: 1px solid ${(p) => p.theme.colors.border.primary};
-	border-radius: 10px;
+	border-radius: ${STYLING.dimensions.radius.alt2};
 	background: ${(p) => p.theme.colors.container.alt1.background};
 `;
 
@@ -100,6 +100,7 @@ export const TableHeaderCell = styled.th`
 export const TableBody = styled.tbody``;
 
 export const TableRow = styled.tr`
+	background: ${(p) => p.theme.colors.container.primary.background};
 	border-top: 1px solid ${(p) => p.theme.colors.border.primary};
 
 	&:hover {
@@ -112,6 +113,7 @@ export const TableCell = styled.td`
 	font-size: ${(p) => p.theme.typography.size.xSmall};
 	font-family: ${(p) => p.theme.typography.family.primary};
 	font-weight: ${(p) => p.theme.typography.weight.medium};
+	background: ${(p) => p.theme.colors.container.primary.background};
 	color: ${(p) => p.theme.colors.font.primary};
 	vertical-align: middle;
 	word-break: break-all;
