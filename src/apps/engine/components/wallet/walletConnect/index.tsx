@@ -66,59 +66,58 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		}
 	}, [showUserMenu]);
 
-	React.useEffect(() => {
-		if (!instance) {
-			try {
-				const wanderInstance = new WanderConnect({
-					clientId: 'FREE_TRIAL',
-					theme: 'Dark',
-					button: {
-						parent: wrapperRef.current,
-						label: false,
-						customStyles: `
-							#wanderConnectButtonHost {
-								// display:none;
-							}`,
-					},
-					iframe: {
-						routeLayout: {
-							default: {
-								// type: 'dropdown',
-								type: 'modal',
-							},
-							auth: {
-								type: 'modal',
-							},
-							'auth-request': {
-								type: 'modal',
-							},
+	if (!window.wanderInstance && wrapperRef.current) {
+		try {
+			const wanderInstance = new WanderConnect({
+				clientId: 'FREE_TRIAL',
+				theme: 'Dark',
+				button: {
+					parent: wrapperRef.current,
+					label: false,
+					customStyles: `
+						#wanderConnectButtonHost {
+							// display:none;
+						}`,
+				},
+				iframe: {
+					routeLayout: {
+						default: {
+							// type: 'dropdown',
+							type: 'modal',
 						},
-						cssVars: {
-							light: {
-								shadowBlurred: 'none',
-							},
-							dark: {
-								shadowBlurred: 'none',
-								boxShadow: 'none',
-							},
+						auth: {
+							type: 'modal',
 						},
-						customStyles: ``,
+						'auth-request': {
+							type: 'modal',
+						},
 					},
-				});
+					cssVars: {
+						light: {
+							shadowBlurred: 'none',
+						},
+						dark: {
+							shadowBlurred: 'none',
+							boxShadow: 'none',
+						},
+					},
+					customStyles: ``,
+				},
+			});
 
-				setInstance(wanderInstance);
-				window.wanderInstance = wanderInstance;
-			} catch (e) {
-				console.error(e);
-			}
+			window.wanderInstance = wanderInstance;
+		} catch (e) {
+			console.error(e);
 		}
+	}
 
+	React.useEffect(() => {
 		return () => {
 			try {
-				window.wanderInstance.destroy();
+				window.wanderInstance?.destroy();
+				window.wanderInstance = null;
 			} catch {}
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 	React.useEffect(() => {
 		if (auth) {
@@ -454,6 +453,17 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 										{language.myWallet}
 									</S.NavigationEntry>
 								)}
+								{auth?.authType !== 'NATIVE_WALLET' &&
+									arProvider.walletType !== 'NATIVE_WALLET' &&
+									arProvider.backupsNeeded > 0 && (
+										<S.NavigationEntry onClick={() => window.wanderInstance.open('backup')}>
+											<ReactSVG src={ICONS.backup} />
+											{language.backupWallet || 'Backup Wallet'}
+											<S.Hint>
+												<ReactSVG src={ICONS.info} />
+											</S.Hint>
+										</S.NavigationEntry>
+									)}
 								<S.NavigationEntry onClick={() => setShowProfileManage(true)}>
 									<ReactSVG src={profile?.id ? ICONS.edit : ICONS.user} />
 									{profile?.id ? language.editProfile : language.createProfile}
