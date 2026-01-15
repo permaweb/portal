@@ -33,6 +33,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	const [label, setLabel] = React.useState<string>('Log in');
 	const [banner, setBanner] = React.useState<string>('');
 	const [avatar, setAvatar] = React.useState<string>('');
+	const [isLoading, setIsLoading] = React.useState<boolean>(false);
 	const wrapperRef = React.useRef();
 
 	const {
@@ -122,20 +123,25 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	React.useEffect(() => {
 		if (auth) {
 			const status = auth.authStatus;
-			if (status === 'loading') setLabel('Signing in');
-			else if (
+			if (status === 'loading') {
+				setIsLoading(true);
+				setLabel('');
+			} else if (
 				(status === 'authenticated' || auth.authType === 'NATIVE_WALLET' || localStorage.getItem(STORAGE.walletType)) &&
 				profile
 			) {
+				setIsLoading(false);
 				setLabel(profile.displayName || 'My Profile');
 				setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : '');
 				setBanner(profile?.banner && checkValidAddress(profile.banner) ? getTxEndpoint(profile.banner) : '');
 			}
 		} else if (localStorage.getItem(STORAGE.walletType) && profile) {
+			setIsLoading(false);
 			setLabel(profile.displayName || 'My Profile');
 			setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : '');
 			setBanner(profile?.banner && checkValidAddress(profile.banner) ? getTxEndpoint(profile.banner) : '');
 		} else {
+			setIsLoading(false);
 			setLabel('Log in');
 			setAvatar('');
 			setBanner('');
@@ -523,7 +529,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		return (
 			<S.UserButton>
 				<S.WanderConnectWrapper ref={wrapperRef} />
-				{label && (
+				{(label || isLoading) && (
 					<S.LAction onClick={handlePress}>
 						{avatar ? (
 							<div>
@@ -535,7 +541,14 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 						<S.MobileAvatar>
 							<Avatar profile={profile} size={26} />
 						</S.MobileAvatar>
-						<span>{label}</span>
+						<S.LabelWrapper $loading={isLoading}>
+							<S.LoadingDots $visible={isLoading}>
+								<span />
+								<span />
+								<span />
+							</S.LoadingDots>
+							<span>{label || 'Log in'}</span>
+						</S.LabelWrapper>
 						{showNotification && <S.NotificationBubble>{notificationCount}</S.NotificationBubble>}
 					</S.LAction>
 				)}

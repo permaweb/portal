@@ -199,11 +199,6 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 			case 'NATIVE_WALLET':
 				handleArConnect();
 				break;
-			default:
-				if (window.arweaveWallet || walletType === WalletEnum.wander) {
-					handleArConnect();
-					break;
-				}
 		}
 		return walletObj;
 	}
@@ -393,7 +388,19 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 								}
 							});
 						} else if (data.data.authStatus === 'authenticated') {
-							handleArConnect();
+							(async () => {
+								try {
+									if (window.arweaveWallet?.walletName === 'Wander Connect') {
+										const address = await window.arweaveWallet.getActiveAddress();
+										setWalletAddress(address);
+										setWallet(window.arweaveWallet);
+										setWalletType(data.data.authType as WalletEnum);
+										localStorage.setItem(STORAGE.walletType, data.data.authType);
+									}
+								} catch (e) {
+									console.error('Error getting embedded wallet address:', e);
+								}
+							})();
 						}
 					} else {
 						setAuth(data.data);
