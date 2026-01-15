@@ -65,7 +65,7 @@ export default function PageToolbar(props: { handleSubmit: () => void; addSectio
 			</S.TitleWrapper>
 			<S.EndActions>
 				{hasChanges && !currentPage.editor.loading.active && (
-					<S.UpdateWrapper className={'info'}>
+					<S.UpdateWrapper>
 						<span>{language.unsavedChanges}</span>
 						<div className={'indicator'} />
 					</S.UpdateWrapper>

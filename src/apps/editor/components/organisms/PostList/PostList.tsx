@@ -184,7 +184,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 								label={language.close}
 								handlePress={() => setShowRequests(false)}
 								disabled={false}
-								height={40}
+								height={45}
 								fullWidth
 							/>
 						</S.ActionWrapper>
@@ -222,6 +222,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 					header={language?.requests}
 					width={550}
 					handleClose={() => setShowRequests((prev) => !prev)}
+					closeHandlerDisabled
 				>
 					<div className={'modal-wrapper'}>{content}</div>
 				</Panel>

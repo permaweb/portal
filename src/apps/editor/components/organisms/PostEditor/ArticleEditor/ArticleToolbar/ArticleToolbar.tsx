@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { ReactSVG } from 'react-svg';
 import { debounce } from 'lodash';
 
 import { ArticleBlocks } from 'editor/components/molecules/ArticleBlocks';
@@ -27,6 +28,7 @@ import { hasUnsavedPostChanges, isMac } from 'helpers/utils';
 import { checkWindowCutoff, hideDocumentBody, showDocumentBody } from 'helpers/window';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
+import { CloseHandler } from 'wrappers/CloseHandler';
 
 import { ArticlePost } from '../ArticlePost';
 
@@ -61,6 +63,8 @@ export default function ArticleToolbar(props: {
 	const [currentTab, setCurrentTab] = React.useState<string>(TABS[0]!.id);
 	const [desktop, setDesktop] = React.useState(checkWindowCutoff(parseInt(STYLING.cutoffs.desktop)));
 	const [previewOpen, setPreviewOpen] = React.useState(false);
+	const [showDropdown, setShowDropdown] = React.useState(false);
+
 	const titleRef = React.useRef<any>(null);
 	const prevDesktopRef = React.useRef<boolean>(desktop);
 
@@ -192,6 +196,122 @@ export default function ArticleToolbar(props: {
 		}
 	}
 
+	// <Button
+	// 	type={'primary'}
+	// 	label={language?.toolkit}
+	// 	handlePress={() => {
+	// 		handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
+	// 		setCurrentTab(TABS[0]!.id);
+	// 	}}
+	// 	active={currentPost.editor.panelOpen}
+	// 	disabled={currentPost.editor.loading.active}
+	// 	icon={currentPost.editor.panelOpen ? ICONS.close : ICONS.tools}
+	// 	iconLeftAlign
+	// 	tooltip={'CTRL + K'}
+	// 	noFocus
+	// />
+
+	// <Button
+	// 	type={'primary'}
+	// 	label={language?.layout}
+	// 	handlePress={() =>
+	// 		handleCurrentPostUpdate({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode })
+	// 	}
+	// 	active={currentPost.editor.blockEditMode}
+	// 	disabled={currentPost.editor.loading.active}
+	// 	icon={currentPost.editor.blockEditMode ? ICONS.close : ICONS.layout}
+	// 	iconLeftAlign
+	// 	tooltip={'CTRL + L'}
+	// 	noFocus
+	// />
+	// <Button
+	// 	type={'primary'}
+	// 	label={language?.preview ?? 'Preview'}
+	// 	handlePress={() => setPreviewOpen(true)}
+	// 	active={false}
+	// 	disabled={currentPost.editor.loading.active}
+	// 	noFocus
+	// 	icon={ICONS.show}
+	// 	iconLeftAlign
+	// />
+
+	{
+		/* <Button
+		type={'primary'}
+		label={language?.changes}
+		handlePress={() => props.handleSwitchOriginal(props.viewMode === 'original' ? 'new' : 'original')}
+		icon={props.viewMode === 'original' ? ICONS.close : ICONS.help}
+		iconLeftAlign
+		noFocus
+	/> */
+	}
+
+	function handleOptionDropdownAction(action: () => void) {
+		action();
+		setShowDropdown(false);
+	}
+
+	function getOptionsDropdown() {
+		const actions = [
+			<button
+				onClick={() =>
+					handleOptionDropdownAction(() => {
+						handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
+						setCurrentTab(TABS[0]!.id);
+					})
+				}
+			>
+				<ReactSVG src={currentPost.editor.panelOpen ? ICONS.close : ICONS.tools} />
+				<p>{currentPost.editor.panelOpen ? language?.closeToolkit : language?.openToolkit}</p>
+				<span>CTRL + K</span>
+			</button>,
+			<button
+				onClick={() =>
+					handleOptionDropdownAction(() => {
+						handleCurrentPostUpdate({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode });
+					})
+				}
+			>
+				<ReactSVG src={currentPost.editor.blockEditMode ? ICONS.close : ICONS.layout} />
+				<p>{currentPost.editor.blockEditMode ? language?.closeLayout : language?.openLayout}</p>
+				<span>CTRL + L</span>
+			</button>,
+			<button
+				onClick={() =>
+					handleOptionDropdownAction(() => {
+						setPreviewOpen(true);
+					})
+				}
+			>
+				<ReactSVG src={ICONS.show} />
+				<p>{language?.preview}</p>
+			</button>,
+		];
+
+		if (isCurrentRequest && !requestUnauthorized) {
+			actions.push(
+				<button
+					onClick={() =>
+						handleOptionDropdownAction(() => {
+							props.handleSwitchOriginal(props.viewMode === 'original' ? 'new' : 'original');
+						})
+					}
+				>
+					<ReactSVG src={props.viewMode === 'original' ? ICONS.close : ICONS.write} />
+					<p>{props.viewMode === 'original' ? language?.hideChanges : language?.showChanges}</p>
+				</button>
+			);
+		}
+
+		return (
+			<>
+				{actions.map((action, index) => {
+					return <React.Fragment key={index}>{action}</React.Fragment>;
+				})}
+			</>
+		);
+	}
+
 	const isAssetIdPresentInAssets = React.useMemo(() => {
 		return portalProvider.current?.assets?.some((asset: any) => asset.id === assetId);
 	}, [assetId, portalProvider.current?.assets]);
@@ -216,14 +336,6 @@ export default function ArticleToolbar(props: {
 				return (
 					<>
 						<Button
-							type={'primary'}
-							label={language?.changes}
-							handlePress={() => props.handleSwitchOriginal(props.viewMode === 'original' ? 'new' : 'original')}
-							icon={props.viewMode === 'original' ? ICONS.close : ICONS.help}
-							iconLeftAlign
-							noFocus
-						/>
-						<Button
 							type={'warning'}
 							label={language?.reject}
 							handlePress={() => props.handleRequestUpdate('Reject')}
@@ -245,7 +357,7 @@ export default function ArticleToolbar(props: {
 				return (
 					<>
 						<Button
-							type={'alt1'}
+							type={'primary'}
 							label={language?.save}
 							handlePress={() =>
 								currentRequest?.status === 'Pending' && !isAssetIdPresentInAssets
@@ -269,15 +381,6 @@ export default function ArticleToolbar(props: {
 								noFocus
 							/>
 						)}
-						<Button
-							type={'alt1'}
-							label={language?.preview ?? 'Preview'}
-							handlePress={() => setPreviewOpen(true)}
-							active={false}
-							disabled={currentPost.editor.loading.active}
-							noFocus
-							icon={ICONS.show}
-						/>
 					</>
 				);
 			}
@@ -441,55 +544,36 @@ export default function ArticleToolbar(props: {
 				</S.TitleWrapper>
 				<S.EndActions>
 					{hasChanges && !isEmpty && !currentPost.editor.loading.active && (
-						<S.UpdateWrapper className={'info'}>
+						<S.UpdateWrapper>
 							<span>{language.unsavedChanges}</span>
 							<div className={'indicator'} />
 						</S.UpdateWrapper>
 					)}
 					{currentRequest?.status && (
-						<S.UpdateWrapper className={'info'}>
+						<S.UpdateWrapper>
 							<span>{currentRequest?.status}</span>
 							<div className={'indicator'} />
 						</S.UpdateWrapper>
 					)}
 					<ArticleToolbarMarkup />
-					<Button
-						type={'primary'}
-						label={language?.toolkit}
-						handlePress={() => {
-							handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
-							setCurrentTab(TABS[0]!.id);
-						}}
-						active={currentPost.editor.panelOpen}
-						disabled={currentPost.editor.loading.active}
-						icon={currentPost.editor.panelOpen ? ICONS.close : ICONS.tools}
-						iconLeftAlign
-						tooltip={'CTRL + K'}
-						noFocus
-					/>
-					<Button
-						type={'primary'}
-						label={language?.layout}
-						handlePress={() =>
-							handleCurrentPostUpdate({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode })
-						}
-						active={currentPost.editor.blockEditMode}
-						disabled={currentPost.editor.loading.active}
-						icon={currentPost.editor.blockEditMode ? ICONS.close : ICONS.layout}
-						iconLeftAlign
-						tooltip={'CTRL + L'}
-						noFocus
-					/>
-					<Button
-						type={'primary'}
-						label={language?.preview ?? 'Preview'}
-						handlePress={() => setPreviewOpen(true)}
-						active={false}
-						disabled={currentPost.editor.loading.active}
-						noFocus
-						icon={ICONS.show}
-						iconLeftAlign
-					/>
+					<S.OptionsWrapper>
+						<CloseHandler active={showDropdown} disabled={!showDropdown} callback={() => setShowDropdown(false)}>
+							<Button
+								type={'primary'}
+								label={language?.options}
+								handlePress={() => setShowDropdown((prev) => !prev)}
+								active={showDropdown}
+								disabled={false}
+								icon={ICONS.arrow}
+								noFocus
+							/>
+							{showDropdown && (
+								<S.OptionsDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper-hidden'}>
+									{getOptionsDropdown()}
+								</S.OptionsDropdown>
+							)}
+						</CloseHandler>
+					</S.OptionsWrapper>
 					<S.SubmitWrapper>{getSubmit()}</S.SubmitWrapper>
 				</S.EndActions>
 			</S.Wrapper>

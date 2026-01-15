@@ -28,7 +28,7 @@ export default function PageList() {
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [collapsedPages, setCollapsedPages] = React.useState<{ [key: string]: boolean }>({
-		home: false,
+		home: true,
 		feed: true,
 		post: true,
 		user: true,
@@ -410,7 +410,7 @@ export default function PageList() {
 										<ReactSVG src={ICONS.arrow} />
 									</S.Arrow>
 									<p>{displayUrlName(key)}</p>
-									{isCollapsed && activeTemplate && (
+									{/* {isCollapsed && activeTemplate && (
 										<S.LayoutIndicators>
 											<S.LayoutIndicator $active={activeTemplate === 'journal'} data-label="Journal">
 												J
@@ -425,7 +425,7 @@ export default function PageList() {
 												C
 											</S.LayoutIndicator>
 										</S.LayoutIndicators>
-									)}
+									)} */}
 								</S.PageHeader>
 								<S.PageDetail>
 									<S.PageActions>
@@ -633,7 +633,7 @@ export default function PageList() {
 
 	return (
 		<>
-			{loading && <Loader message={'Updating template...'} />}
+			{loading && <Loader message={'Updating Template...'} />}
 			{pages}
 		</>
 	);

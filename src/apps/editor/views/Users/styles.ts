@@ -21,13 +21,14 @@ export const InfoWrapper = styled.div`
 `;
 
 export const HeaderAction = styled.div`
+	position: relative;
+	margin: 0 5px 0 0;
+
 	a,
 	button {
 		position: relative;
 		display: flex;
 		gap: 7.5px;
-		margin-top: 8px;
-		margin-right: 18px;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
@@ -41,7 +42,7 @@ export const HeaderAction = styled.div`
 	.notification {
 		position: absolute;
 		top: -5px;
-		right: -23.5px;
+		right: -2.5px;
 	}
 `;
 
@@ -115,15 +116,13 @@ export const TransferInviteRow = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	align-items: center;
-	padding: 10px 12px;
 	background: ${(p) => p.theme.colors.container.alt2};
 `;
 
 export const TransferInviteMeta = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: 10px;
 
 	strong {
 		font-size: ${(p) => p.theme.typography.size.xSmall};
@@ -131,7 +130,8 @@ export const TransferInviteMeta = styled.div`
 	}
 
 	span {
-		font-size: ${(p) => p.theme.typography.size.xxxSmall};
+		font-size: ${(p) => p.theme.typography.size.xSmall};
+		font-weight: ${(p) => p.theme.typography.weight.bold};
 		color: ${(p) => p.theme.colors.font.alt1};
 	}
 `;
@@ -163,9 +163,11 @@ export const TransferInviteState = styled.span<{ $state?: string }>`
 `;
 
 export const TransferInviteActions = styled.div`
-	display: inline-flex;
-	gap: 8px;
-	justify-self: end;
+	width: 100%;
+	display: flex;
+	gap: 15px;
+	margin: 15px 0 0 0;
+	justify-content: flex-end;
 `;
 
 export const LoadingOverlay = styled.div`

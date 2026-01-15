@@ -157,7 +157,7 @@ export const IconPrimary = styled.div<{
 		height: 15.5px;
 		width: 15.5px;
 		padding: 1.5px 0 0 0;
-		margin: ${(props) => (props.leftAlign ? '3.25px 7.5px 0 0' : '2.25px 0 0 7.5px')};
+		margin: ${(props) => (props.leftAlign ? '3.25px 7.5px 0 0' : '2.25px 0 0 10.5px')};
 		color: ${(props) =>
 			props.warning
 				? props.theme.colors.font.light1
