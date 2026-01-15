@@ -565,6 +565,7 @@ export const NotificationBubble = styled.div`
 		top: -4px;
 		right: auto;
 		left: 16px;
+		filter: none;
 	}
 
 	@keyframes pulse {
@@ -588,6 +589,10 @@ export const LabelWrapper = styled.div<{ $loading?: boolean }>`
 	overflow: hidden;
 	transition: max-width 0.6s ease;
 
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		display: none;
+	}
+
 	> * {
 		grid-area: 1 / 1;
 	}
@@ -598,10 +603,6 @@ export const LabelWrapper = styled.div<{ $loading?: boolean }>`
 		white-space: nowrap;
 		opacity: ${(props) => (props.$loading ? 0 : 1)};
 		transition: opacity 0.2s ease;
-
-		@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-			display: none;
-		}
 	}
 `;
 

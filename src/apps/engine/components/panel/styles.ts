@@ -40,8 +40,8 @@ export const Container = styled.div<{
 		top: var(--spacing-xxs);
 		right: var(--spacing-xxs);
 		min-width: unset;
-		width: calc(100vw - var(--spacing-xxs) * 2);
-		max-width: calc(100vw - var(--spacing-xxs) * 2);
+		width: 300px;
+		max-width: calc(100vw - var(--spacing-l));
 		max-height: calc(100vh - var(--spacing-xxs) * 2);
 		overflow-x: hidden;
 		overflow-y: auto;
