@@ -2,10 +2,12 @@ import styled from 'styled-components';
 
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div``;
+
+export const BodyWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 24px;
+	gap: 25px;
 `;
 
 export const HeaderRow = styled.div`
@@ -42,17 +44,21 @@ export const Summary = styled.div`
 `;
 
 export const Section = styled.section`
-	padding: 15px;
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
 `;
 
 export const SectionHeader = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
+	gap: 15px;
+
+	h6 {
+		font-size: ${(props) => props.theme.typography.size.xxLg} !important;
+		color: ${(props) => props.theme.colors.font.alt1};
+		margin: 0 0 15px 0;
+	}
 
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
@@ -114,8 +120,7 @@ export const Badge = styled.span<{ active?: boolean }>`
 export const ConfigForm = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
-	margin-top: 8px;
+	gap: 15px;
 
 	.row {
 		display: flex;
@@ -139,9 +144,21 @@ export const ConfigForm = styled.div`
 	}
 `;
 
+export const Forms = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 25px;
+	justify-content: space-between;
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		flex-direction: column;
+	}
+`;
+
 export const ConfigToggle = styled.div``;
 
 export const Info = styled.div`
+	width: fit-content;
 	padding: 5px 10px 7.5px 10px;
 
 	span {
@@ -175,7 +192,7 @@ export const Table = styled.table`
 	font-size: ${(props) => props.theme.typography.size.small};
 
 	thead {
-		background: ${(props) => props.theme.colors.container.alt2.background};
+		background: ${(props) => props.theme.colors.container.alt1.background};
 		position: sticky;
 		top: 0;
 		z-index: 1;
@@ -183,20 +200,45 @@ export const Table = styled.table`
 
 	th,
 	td {
-		padding: 8px 10px;
+		padding: 12.5px 15px;
 		text-align: left;
 		border-bottom: 1px solid ${(props) => props.theme.colors.border.alt1};
+
+		&:nth-child(2),
+		&:nth-child(3),
+		&:nth-child(4),
+		&:nth-child(5) {
+			text-align: right;
+		}
+	}
+
+	td {
+		padding: 12.5px 15px;
 	}
 
 	th {
-		font-weight: ${(props) => props.theme.typography.weight.semibold};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
 		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		text-transform: uppercase;
 		white-space: nowrap;
 	}
 
 	td {
 		color: ${(props) => props.theme.colors.font.primary};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
 		vertical-align: middle;
+
+		&:nth-child(2),
+		&:nth-child(3),
+		&:nth-child(4),
+		&:nth-child(5) {
+			> * {
+				text-align: right;
+				justify-content: flex-end;
+			}
+		}
 	}
 
 	tbody tr:last-child td {
@@ -216,3 +258,17 @@ export const Table = styled.table`
 		}
 	}
 `;
+
+export const WrapperEmpty = styled.div`
+	padding: 15px;
+
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
+`;
+
+export const LoadingWrapper = styled(WrapperEmpty)``;

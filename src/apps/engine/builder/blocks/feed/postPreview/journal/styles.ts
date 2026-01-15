@@ -7,11 +7,20 @@ export const Post = styled.div<{ $layout: any }>`
 	width: 100%;
 	padding-top: 40px;
 	box-sizing: border-box;
-	border-radius: var(--border-radius);
 	gap: 20px;
 	box-shadow: var(--preference-post-shadow);
-	border-top: 2px solid var(--color-post-border);
 	margin-bottom: 21px;
+
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 1px;
+		background-color: rgba(var(--color-background), 1);
+		filter: invert(1);
+	}
 `;
 
 export const Categories = styled.div`
@@ -20,16 +29,19 @@ export const Categories = styled.div`
 	top: 0px;
 	left: 0px;
 	color: var(--color-post-border-contrast);
-	background-color: var(--color-post-border);
+	// background-color: var(--color-post-border);
+	background-color: rgba(var(--color-background), 1);
 	padding: 5px 15px 4px;
 	border-radius: 0 0 0 var(--border-radius);
 	font-size: 12px;
 	font-weight: 600;
 	user-select: none;
+	filter: invert(1);
 `;
 
 export const Category = styled.div`
 	color: var(--color-post-border-contrast);
+	filter: invert(1);
 `;
 
 export const TitleWrapper = styled.div`

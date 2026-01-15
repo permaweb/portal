@@ -240,8 +240,11 @@ function Color(props: {
 										setBorderEnabled(enabled);
 										if (!enabled) {
 											props.onChange('unset');
-										} else if (value) {
-											props.onChange(hexToRgb(value));
+										} else {
+											const defaultColor = props.basics?.border?.[props.scheme] || '128,128,128';
+											const colorToUse = value || parseRgbStringToHex(defaultColor);
+											setValue(colorToUse);
+											props.onChange(hexToRgb(colorToUse));
 										}
 									}}
 									disabled={props.disabled}
@@ -352,7 +355,10 @@ function Color(props: {
 									handlePress={() => {
 										if (props.isBorder && !borderEnabled) {
 											props.onChange('unset');
-										} else if (value) {
+										} else if (
+											!['primary', 'secondary', 'background', 'text', 'border'].includes(props.value) &&
+											value
+										) {
 											props.onChange(hexToRgb(value));
 										}
 										setShowSelector(false);

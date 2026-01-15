@@ -117,6 +117,7 @@ export const ICONS = {
 	user_old: getTxEndpoint('aOk91wDJnZ1xQbQum0MHoaOldAiumdFjdjM4LVM83NQ'),
 	users: getTxEndpoint('LfFkPVJBgBWgJwCtoceyS_EAyYa-r__AjAB5_JAx3aw'),
 	video: getTxEndpoint('T2astk8vaCBLLP8PD2rXgLKbwhNYkdHXllXvGbk-Wps'),
+	odysee: getTxEndpoint('vtQEUOXJSodjxh72lbgLGuR0FQY5st3YXcX_5VgU9f4'),
 	wallet: getTxEndpoint('P0asvZPbh73r_c6615YAHrENmYwGTCRghrPGovcPXUU'),
 	warning: getTxEndpoint('BASlMnOWcLCcLUSrO2wUybQL_06231dLONeVkdTWs3o'),
 	write: getTxEndpoint('SUWTk8Qtcub9EsP5PDF6-vzgKsP5Irg1bB9b8NImDDk'),

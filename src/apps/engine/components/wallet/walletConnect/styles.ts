@@ -1,3 +1,4 @@
+import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
 export const Wrapper = styled.div`
@@ -26,6 +27,13 @@ export const UserButton = styled.div`
 		&:hover {
 			outline: unset;
 		}
+
+		@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+			background: none;
+			filter: none;
+			margin: 0 !important;
+			padding: 0;
+		}
 	}
 
 	&:hover {
@@ -40,10 +48,15 @@ export const LAction = styled.button`
 	height: 35px;
 	position: relative;
 
-	div {
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		height: auto;
+	}
+
+	> div:first-child {
 		height: 16px;
 		width: 16px;
 		margin-right: 4px;
+
 		img {
 			height: 100%;
 			width: 100%;
@@ -51,16 +64,19 @@ export const LAction = styled.button`
 			border-radius: 50%;
 			filter: invert(1);
 		}
-	}
 
-	svg {
-		margin-right: 4px;
-		height: 16px;
-		width: 16px;
-		fill: rgba(var(--color-text), 1);
-		color: rgba(var(--color-text), 1);
-		border-radius: 50%;
-		outline: 2px solid rgba(var(--color-text), 1);
+		svg {
+			height: 16px;
+			width: 16px;
+			fill: rgba(var(--color-text), 1);
+			color: rgba(var(--color-text), 1);
+			border-radius: 50%;
+			outline: 2px solid rgba(var(--color-text), 1);
+		}
+
+		@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+			display: none;
+		}
 	}
 
 	span {
@@ -68,6 +84,18 @@ export const LAction = styled.button`
 		font-weight: 800;
 		display: block;
 		margin: 0 2px;
+
+		@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+			display: none;
+		}
+	}
+`;
+
+export const MobileAvatar = styled.div`
+	display: none;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		display: block;
 	}
 `;
 
@@ -100,6 +128,25 @@ export const UserMenu = styled.div`
 	flex-direction: column;
 	width: 300px;
 	height: 100%;
+`;
+
+export const MobileMenuClose = styled.button`
+	display: none;
+	position: absolute;
+	top: var(--spacing-xs);
+	right: var(--spacing-xs);
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	color: rgba(var(--color-text), 1);
+	font-size: var(--font-size-xlarge);
+	line-height: 1;
+	z-index: 10;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		display: block;
+	}
 `;
 
 export const LayoutMenu = styled.div`

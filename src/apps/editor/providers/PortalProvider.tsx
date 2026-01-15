@@ -24,6 +24,7 @@ import {
 	getPortalAssets,
 	getPortalUsers,
 	isEqual,
+	isVersionGreater,
 } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -287,7 +288,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			}
 
 			setUpdateAvailable(
-				overview?.version !== CurrentZoneVersion && arProvider.wallet && arProvider.walletAddress === overview?.owner
+				isVersionGreater(CurrentZoneVersion, overview?.version) &&
+					arProvider.wallet &&
+					arProvider.walletAddress === overview?.owner
 			);
 
 			const portalState: PortalDetailType = {
@@ -359,6 +362,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	async function fetchPortalUserProfile(user: PortalUserType) {
 		try {
+			// If profile is already loaded in state, skip fetching
+			if (usersByPortalId?.[user.address]) {
+				return;
+			}
+
 			let profile: any = null;
 			if (user.address === permawebProvider.profile?.id) {
 				profile = { ...permawebProvider.profile };

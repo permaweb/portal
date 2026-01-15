@@ -9,7 +9,8 @@ export const Feed = styled.div<{ width: number }>`
 	flex: ${(props) => (props.width ? props.width : undefined)};
 
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-		margin: var(--spacing-xxs);
+		padding: var(--spacing-xxs);
+		box-sizing: border-box;
 	}
 `;
 

@@ -1,9 +1,12 @@
-// src/portal/blocks/monetizationButton.tsx
+// src/portal/blocks/tipsButton.tsx
 import React from 'react';
 import Button from 'engine/components/form/button';
 import TipModal from 'engine/components/tipModal';
 import { useArTip } from 'engine/hooks/useARTip';
 import { usePortalProvider } from 'engine/providers/portalProvider';
+
+import { debugLog } from 'helpers/utils';
+import { useNotifications } from 'providers/NotificationProvider';
 
 type MonetizationSettings = {
 	enabled: boolean;
@@ -11,20 +14,22 @@ type MonetizationSettings = {
 	tokenAddress: string;
 };
 
-type MonetizationButtonBlockData = {
+type TipsButtonBlockData = {
 	label?: string;
 	variant?: 'primary' | 'alt1' | 'alt2';
 };
 
-type MonetizationButtonProps = {
+type TipsButtonProps = {
 	element: any;
 	preview: boolean;
 	location?: 'page' | 'post';
+	postId?: string;
 };
 
-export default function MonetizationButton(props: MonetizationButtonProps) {
+export default function TipsButton(props: TipsButtonProps) {
 	const { portal } = usePortalProvider();
 	const { sendTip } = useArTip();
+	const { addNotification } = useNotifications();
 
 	// Portal-level monetization config
 	const monetization = portal?.Monetization as MonetizationSettings | undefined;
@@ -32,8 +37,8 @@ export default function MonetizationButton(props: MonetizationButtonProps) {
 	const walletAddress = monetization?.walletAddress || null;
 
 	// Block-level config (label + variant)
-	const data: MonetizationButtonBlockData = React.useMemo(() => {
-		const raw = (props.element?.data ?? {}) as MonetizationButtonBlockData;
+	const data: TipsButtonBlockData = React.useMemo(() => {
+		const raw = (props.element?.data ?? {}) as TipsButtonBlockData;
 		return {
 			label: raw.label ?? '',
 			variant: raw.variant ?? 'primary',
@@ -47,8 +52,8 @@ export default function MonetizationButton(props: MonetizationButtonProps) {
 	const [modalOpen, setModalOpen] = React.useState(false);
 	const [submitting, setSubmitting] = React.useState(false);
 
-	// If monetization is off or no wallet, render nothing
-	if (!enabled || !walletAddress) return null;
+	// If monetization is off or no wallet, render nothing (except in preview mode)
+	if ((!enabled || !walletAddress) && !props.preview) return null;
 
 	const handleClick = () => {
 		if (props.preview || submitting) return;
@@ -60,9 +65,13 @@ export default function MonetizationButton(props: MonetizationButtonProps) {
 
 		try {
 			setSubmitting(true);
-			await sendTip(walletAddress, amount, location);
-		} catch (e) {
-			console.error('[MonetizationButton] tip failed', e);
+			const txId = await sendTip(walletAddress, amount, location, props.postId);
+			addNotification(`Successfully sent ${amount} AR tip!`, 'success');
+			debugLog('info', 'TipsButton', 'Tip sent successfully', txId);
+		} catch (e: any) {
+			const errorMessage = e?.message || 'Failed to send tip';
+			addNotification(errorMessage, 'warning');
+			debugLog('error', 'TipsButton', 'tip failed', e);
 		} finally {
 			setSubmitting(false);
 			setModalOpen(false);

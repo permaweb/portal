@@ -23,7 +23,16 @@ import * as S from './styles';
 export default function Header(props: any) {
 	const { name, layout, content, preview } = props;
 	const portalProvider = usePortalProvider();
-	const { portal, layoutHeights, setLayoutHeights, logoSettings, layoutEditMode, headerSticky } = portalProvider;
+	const {
+		portal,
+		layoutHeights,
+		setLayoutHeights,
+		logoSettings,
+		layoutEditMode,
+		headerSticky,
+		mobileMenuOpen,
+		setMobileMenuOpen,
+	} = portalProvider;
 
 	const navPosition = portal?.Layout?.navigation?.layout?.position;
 	const isSideNav = navPosition === 'left' || navPosition === 'right';
@@ -158,6 +167,11 @@ export default function Header(props: any) {
 						)}
 						<S.Actions $isLogo={Boolean(Logo)}>
 							<WalletConnect />
+							<S.HamburgerButton data-open={mobileMenuOpen} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+								<span />
+								<span />
+								<span />
+							</S.HamburgerButton>
 							<S.ThemeToggle>
 								<Toggle theme state={settings?.theme === 'dark'} setState={() => setTheme()} />
 							</S.ThemeToggle>
