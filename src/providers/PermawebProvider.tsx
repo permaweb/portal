@@ -196,8 +196,15 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 			try {
 				let fetchedProfile: any;
 				const cachedProfile = getCachedProfile(address);
-				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id, opts);
-				else fetchedProfile = await libs.getProfileByWalletAddress(address);
+				if (cachedProfile?.id) {
+					fetchedProfile = await libs.getProfileById(cachedProfile.id, opts);
+					if (fetchedProfile && fetchedProfile.owner !== address) {
+						localStorage.removeItem(STORAGE.profileByWallet(address));
+						fetchedProfile = await libs.getProfileByWalletAddress(address);
+					}
+				} else {
+					fetchedProfile = await libs.getProfileByWalletAddress(address);
+				}
 
 				const profileToUse = normalizeProfile({ ...fetchedProfile });
 

@@ -557,8 +557,8 @@ export const LayoutButton = styled.button<{ $primary?: boolean }>`
 
 export const NotificationBubble = styled.div`
 	position: absolute;
-	top: -4px;
-	right: -10px;
+	top: -6px;
+	right: -6px;
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
@@ -571,6 +571,12 @@ export const NotificationBubble = styled.div`
 	font-weight: bold;
 	filter: invert(1);
 	animation: pulse 2s infinite;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		top: -4px;
+		right: auto;
+		left: 16px;
+	}
 
 	@keyframes pulse {
 		0% {
