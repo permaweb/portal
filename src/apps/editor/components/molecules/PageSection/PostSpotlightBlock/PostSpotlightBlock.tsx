@@ -3,8 +3,10 @@ import React from 'react';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { FormField } from 'components/atoms/FormField';
+import { Select } from 'components/atoms/Select';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { PageBlockType, PortalAssetType } from 'helpers/types';
+import { PageBlockType, PortalAssetType, SelectOptionType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -26,7 +28,7 @@ export default function PostSpotlightBlock(props: {
 
 	const [post, setPost] = React.useState<PortalAssetType | null>(null);
 	const [filter, setFilter] = React.useState('');
-	const [selectedPostId, setSelectedPostId] = React.useState<string | null>(props.block.txId || null);
+	const [selectedPost, setSelectedPost] = React.useState<SelectOptionType>({ id: '', label: '' });
 
 	React.useEffect(() => {
 		const assets = portalProvider.current?.assets;
@@ -34,21 +36,28 @@ export default function PostSpotlightBlock(props: {
 			const found = assets.find((a: PortalAssetType) => a.id === props.block.txId);
 			if (found) {
 				setPost(found);
+				setSelectedPost({ id: found.id, label: found.name });
 			}
 		} else if (!props.block.txId) {
 			setPost(null);
+			setSelectedPost({ id: '', label: language.selectPost || 'Select a post' });
 		}
 	}, [portalProvider.current?.assets, props.block.txId]);
 
-	const filteredPosts = React.useMemo(() => {
+	const postOptions = React.useMemo(() => {
 		const assets = portalProvider.current?.assets || [];
-		if (!filter) return assets;
-		return assets.filter((a: PortalAssetType) => a.name?.toLowerCase().includes(filter.toLowerCase()));
-	}, [portalProvider.current?.assets, filter]);
+		const filtered = filter
+			? assets.filter((a: PortalAssetType) => a.name?.toLowerCase().includes(filter.toLowerCase()))
+			: assets;
+		return [
+			{ id: '', label: language.selectPost || 'Select a post' },
+			...filtered.map((a: PortalAssetType) => ({ id: a.id, label: a.name })),
+		];
+	}, [portalProvider.current?.assets, filter, language.selectPost]);
 
 	const handleSave = () => {
-		if (selectedPostId) {
-			props.onChangeBlock({ ...props.block, txId: selectedPostId }, props.index);
+		if (selectedPost && selectedPost.id) {
+			props.onChangeBlock({ ...props.block, txId: selectedPost.id }, props.index);
 		}
 	};
 
@@ -60,24 +69,28 @@ export default function PostSpotlightBlock(props: {
 		return (
 			<S.Wrapper>
 				<S.EmptyPostBlock>
-					<S.FilterInput
-						type="text"
-						placeholder={language.filterPosts || 'Filter posts...'}
+					<FormField
 						value={filter}
 						onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilter(e.target.value)}
+						invalid={{ status: false, message: null }}
+						disabled={false}
+						placeholder={language.filterPosts || 'Filter posts...'}
+						hideErrorMessage
 					/>
-					<S.Select
-						value={selectedPostId || ''}
-						onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedPostId(e.target.value)}
-					>
-						<option value="">{language.selectPost || 'Select a post'}</option>
-						{filteredPosts.map((asset: PortalAssetType) => (
-							<option key={asset.id} value={asset.id}>
-								{asset.name}
-							</option>
-						))}
-					</S.Select>
-					<Button type={'alt1'} label={language.save || 'Save'} handlePress={handleSave} disabled={!selectedPostId} />
+					<Select
+						activeOption={selectedPost}
+						setActiveOption={setSelectedPost}
+						options={postOptions}
+						disabled={false}
+					/>
+					<S.EmptyPostAction>
+						<Button
+							type={'alt1'}
+							label={language.save || 'Save'}
+							handlePress={handleSave}
+							disabled={!selectedPost || !selectedPost.id}
+						/>
+					</S.EmptyPostAction>
 				</S.EmptyPostBlock>
 			</S.Wrapper>
 		);

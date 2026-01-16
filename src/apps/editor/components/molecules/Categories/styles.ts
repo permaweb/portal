@@ -133,6 +133,12 @@ export const CategoriesList = styled.ul``;
 export const CategoryOption = styled.li<{ level: number }>`
 	position: relative;
 	margin: ${(props) => `0 10px 12.5px ${(props.level * 20).toString()}px`} !important;
+
+	button {
+		pointer-events: auto;
+		position: relative;
+		z-index: 1;
+	}
 `;
 
 export const WrapperEmpty = styled.div`
@@ -283,6 +289,7 @@ export const CategoryRow = styled.div`
 
 	button:last-child {
 		opacity: 0;
+		pointer-events: none;
 		transition: opacity 100ms;
 
 		span {
@@ -292,6 +299,7 @@ export const CategoryRow = styled.div`
 
 	&:hover button:last-child {
 		opacity: 1;
+		pointer-events: auto;
 	}
 `;
 

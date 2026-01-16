@@ -13,7 +13,7 @@ export function useCategoriesWithReorder(props: {
 	skipAuthCheck?: boolean;
 	selectOnAdd?: boolean;
 	unauthorized?: boolean;
-	portalId: string;
+	portalId: string | null;
 	portalCategories: PortalCategoryType[] | null;
 	refreshCurrentPortal: (patchKey: PortalPatchMapEnum.Navigation) => void;
 }) {
@@ -54,6 +54,13 @@ export function useCategoriesWithReorder(props: {
 		}
 		setCategoryElementRects(rects);
 	}, [props.allowReorder]);
+
+	// Sync categoryOptions with portalCategories
+	React.useEffect(() => {
+		if (props.portalCategories) {
+			setCategoryOptions(props.portalCategories);
+		}
+	}, [props.portalCategories]);
 
 	// Mouse tracking during drag
 	React.useEffect(() => {

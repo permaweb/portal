@@ -398,7 +398,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		<>
 			<S.Wrapper>
 				{!props.content ? (
-					<S.InputWrapper className={'border-wrapper-alt2'}>
+					<S.InputWrapper className={'border-wrapper-primary'}>
 						{getInputWrapper()}
 						{mediaLoading && (
 							<S.InputOverlay className={'border-wrapper-primary'}>

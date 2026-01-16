@@ -46,7 +46,7 @@ export const UpdateWrapper = styled.div`
 	gap: 7.5px;
 
 	span {
-		color: ${(props) => props.theme.colors.contrast.color};
+		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		white-space: nowrap;

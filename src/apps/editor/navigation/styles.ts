@@ -300,11 +300,11 @@ export const Portal = styled.button<{ active: boolean }>`
 	}
 
 	svg {
-		height: 17.5px;
-		width: 17.5px;
+		height: 18.5px;
+		width: 18.5px;
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
-		margin: 5px 0px 0 12.5px;
+		margin: 2.5px 0px 0 14.5px;
 	}
 	&:hover {
 		background: ${(props) => props.theme.colors.container.primary.active};
