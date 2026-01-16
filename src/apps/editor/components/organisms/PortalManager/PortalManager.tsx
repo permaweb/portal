@@ -250,6 +250,11 @@ export default function PortalManager(props: {
 
 				if (profileUpdateId) debugLog('info', 'PortalManager', `Profile update: ${profileUpdateId}`);
 
+				await permawebProvider.deps.ao.result({
+					process: permawebProvider.profile.id,
+					message: profileUpdateId,
+				});
+
 				permawebProvider.refreshProfile();
 
 				if (props.handleUpdate) props.handleUpdate();

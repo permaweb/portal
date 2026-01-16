@@ -78,14 +78,14 @@ function TwitterEmbedPreview({ html }: { html: string }) {
 			script.onload = () => {
 				// @ts-ignore - Twitter widgets global
 				if (window.twttr?.widgets) {
-					window.twttr.widgets.load(containerRef.current);
+					(window as any).twttr.widgets.load(containerRef.current);
 				}
 			};
 		} else {
 			// Script already loaded, just re-render widgets
 			// @ts-ignore - Twitter widgets global
 			if (window.twttr?.widgets) {
-				window.twttr.widgets.load(containerRef.current);
+				(window as any).twttr.widgets.load(containerRef.current);
 			}
 		}
 	}, [html]);
@@ -477,7 +477,7 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 
 	return (
 		<S.Wrapper>
-			<S.InputWrapper className={'border-wrapper-alt2'}>
+			<S.InputWrapper className={'border-wrapper-primary'}>
 				<S.InputHeader>
 					<ReactSVG src={ICONS.link} />
 					<p>{language?.embed || 'Embed'}</p>
@@ -494,6 +494,7 @@ export default function EmbedBlock(props: { content: any; data: EmbedData; onCha
 						disabled={loading}
 						placeholder={'https://...'}
 						sm
+						hideErrorMessage
 					/>
 					<S.InputActionsFlex>
 						<Button

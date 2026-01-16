@@ -3,8 +3,10 @@ import React from 'react';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { FormField } from 'components/atoms/FormField';
+import { Select } from 'components/atoms/Select';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { PageBlockType, PortalAssetType, PortalCategoryType } from 'helpers/types';
+import { PageBlockType, PortalAssetType, PortalCategoryType, SelectOptionType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -25,13 +27,14 @@ export default function CategorySpotlightBlock(props: {
 	const [category, setCategory] = React.useState<PortalCategoryType | null>(null);
 	const [posts, setPosts] = React.useState<PortalAssetType[]>([]);
 	const [filter, setFilter] = React.useState('');
-	const [selectedCategoryId, setSelectedCategoryId] = React.useState<string | null>(props.block.categoryId || null);
+	const [selectedCategory, setSelectedCategory] = React.useState<SelectOptionType>({ id: '', label: '' });
 
 	React.useEffect(() => {
 		if (props.block.categoryId && portalProvider.current?.categories && portalProvider.current.categories.length > 0) {
 			const found = portalProvider.current.categories.find((c: PortalCategoryType) => c.id === props.block.categoryId);
 			if (found) {
 				setCategory(found);
+				setSelectedCategory({ id: found.id, label: found.name });
 
 				if (portalProvider.current?.assets) {
 					const categoryPosts = portalProvider.current.assets
@@ -43,18 +46,29 @@ export default function CategorySpotlightBlock(props: {
 		} else if (!props.block.categoryId) {
 			setCategory(null);
 			setPosts([]);
+			setSelectedCategory({ id: '', label: language.selectCategory || 'Select a category' });
 		}
-	}, [portalProvider.current?.categories, portalProvider.current?.assets, props.block.categoryId]);
+	}, [
+		portalProvider.current?.categories,
+		portalProvider.current?.assets,
+		props.block.categoryId,
+		language.selectCategory,
+	]);
 
-	const filteredCategories = React.useMemo(() => {
+	const categoryOptions = React.useMemo(() => {
 		const categories = portalProvider.current?.categories || [];
-		if (!filter) return categories;
-		return categories.filter((c: PortalCategoryType) => c.name?.toLowerCase().includes(filter.toLowerCase()));
-	}, [portalProvider.current?.categories, filter]);
+		const filtered = filter
+			? categories.filter((c: PortalCategoryType) => c.name?.toLowerCase().includes(filter.toLowerCase()))
+			: categories;
+		return [
+			{ id: '', label: language.selectCategory || 'Select a category' },
+			...filtered.map((c: PortalCategoryType) => ({ id: c.id, label: c.name })),
+		];
+	}, [portalProvider.current?.categories, filter, language.selectCategory]);
 
 	const handleSave = () => {
-		if (selectedCategoryId) {
-			props.onChangeBlock({ ...props.block, categoryId: selectedCategoryId }, props.index);
+		if (selectedCategory && selectedCategory.id) {
+			props.onChangeBlock({ ...props.block, categoryId: selectedCategory.id }, props.index);
 		}
 	};
 
@@ -68,29 +82,28 @@ export default function CategorySpotlightBlock(props: {
 		return (
 			<S.Wrapper>
 				<S.EmptyCategoryBlock>
-					<S.FilterInput
-						type="text"
-						placeholder={language.filterCategories || 'Filter categories...'}
+					<FormField
 						value={filter}
 						onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilter(e.target.value)}
+						invalid={{ status: false, message: null }}
+						disabled={false}
+						placeholder={language.filterCategories || 'Filter categories...'}
+						hideErrorMessage
 					/>
-					<S.Select
-						value={selectedCategoryId || ''}
-						onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedCategoryId(e.target.value)}
-					>
-						<option value="">{language.selectCategory || 'Select a category'}</option>
-						{filteredCategories.map((cat: PortalCategoryType) => (
-							<option key={cat.id} value={cat.id}>
-								{cat.name}
-							</option>
-						))}
-					</S.Select>
-					<Button
-						type={'alt1'}
-						label={language.save || 'Save'}
-						handlePress={handleSave}
-						disabled={!selectedCategoryId}
+					<Select
+						activeOption={selectedCategory}
+						setActiveOption={setSelectedCategory}
+						options={categoryOptions}
+						disabled={false}
 					/>
+					<S.EmptyCategoryAction>
+						<Button
+							type={'alt1'}
+							label={language.save || 'Save'}
+							handlePress={handleSave}
+							disabled={!selectedCategory || !selectedCategory.id}
+						/>
+					</S.EmptyCategoryAction>
 				</S.EmptyCategoryBlock>
 			</S.Wrapper>
 		);
@@ -137,7 +150,6 @@ export default function CategorySpotlightBlock(props: {
 								<S.PostTitle>
 									<span>{featuredPost.name || 'Title'}</span>
 								</S.PostTitle>
-								{/* <S.PostCreator>BY {featuredPost.creator || ''}</S.PostCreator> */}
 							</S.PostOverlay>
 						</S.FeaturedPost>
 					)}

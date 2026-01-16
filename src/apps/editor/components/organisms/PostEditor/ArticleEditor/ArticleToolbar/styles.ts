@@ -49,7 +49,7 @@ export const UpdateWrapper = styled.div`
 	gap: 7.5px;
 
 	span {
-		color: ${(props) => props.theme.colors.contrast.color};
+		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		white-space: nowrap;
@@ -75,6 +75,14 @@ export const EndActions = styled.div`
 		flex-wrap: wrap;
 		justify-content: center;
 	}
+`;
+
+export const Indicators = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 15px;
+	margin: 0 5px 0 0;
 `;
 
 export const SubmitWrapper = styled.div`

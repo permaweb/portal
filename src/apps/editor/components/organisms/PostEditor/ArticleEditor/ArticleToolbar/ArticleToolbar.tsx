@@ -176,6 +176,20 @@ export default function ArticleToolbar(props: {
 		};
 	}, [titleRef]);
 
+	const handleSetCategories = React.useCallback(
+		(updatedCategories: PortalCategoryType[]) => {
+			dispatch(currentPostUpdate({ field: 'categories', value: updatedCategories }));
+		},
+		[dispatch]
+	);
+
+	const handleSetTopics = React.useCallback(
+		(updatedTopics: string[]) => {
+			dispatch(currentPostUpdate({ field: 'topics', value: updatedTopics }));
+		},
+		[dispatch]
+	);
+
 	function getCurrentTab() {
 		switch (currentTab) {
 			case 'blocks':
@@ -184,11 +198,9 @@ export default function ArticleToolbar(props: {
 				return (
 					<ArticlePost
 						categories={currentPost.data.categories}
-						setCategories={(updatedCategories: PortalCategoryType[]) =>
-							handleCurrentPostUpdate({ field: 'categories', value: updatedCategories })
-						}
+						setCategories={handleSetCategories}
 						topics={currentPost.data.topics}
-						setTopics={(updatedTopics: string[]) => handleCurrentPostUpdate({ field: 'topics', value: updatedTopics })}
+						setTopics={handleSetTopics}
 					/>
 				);
 			default:
@@ -327,7 +339,11 @@ export default function ArticleToolbar(props: {
 	const currentRequest =
 		isCurrentRequest &&
 		portalProvider.current?.requests?.find((request: PortalAssetRequestType) => request.id === assetId);
-	const primaryDisabled = submitUnauthorized || currentPost.editor.loading.active || currentPost.editor.submitDisabled;
+	const primaryDisabled =
+		submitUnauthorized ||
+		currentPost.editor.loading.active ||
+		currentPost.editor.submitDisabled ||
+		portalProvider.updating;
 	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
 
 	function getSubmit() {
@@ -543,18 +559,20 @@ export default function ArticleToolbar(props: {
 					/>
 				</S.TitleWrapper>
 				<S.EndActions>
-					{hasChanges && !isEmpty && !currentPost.editor.loading.active && (
-						<S.UpdateWrapper>
-							<span>{language.unsavedChanges}</span>
-							<div className={'indicator'} />
-						</S.UpdateWrapper>
-					)}
-					{currentRequest?.status && (
-						<S.UpdateWrapper>
-							<span>{currentRequest?.status}</span>
-							<div className={'indicator'} />
-						</S.UpdateWrapper>
-					)}
+					<S.Indicators>
+						{hasChanges && !isEmpty && !currentPost.editor.loading.active && (
+							<S.UpdateWrapper>
+								<span>{language.unsavedChanges}</span>
+								<div className={'indicator'} />
+							</S.UpdateWrapper>
+						)}
+						{currentRequest?.status && (
+							<S.UpdateWrapper>
+								<span>{currentRequest?.status}</span>
+								<div className={'indicator'} />
+							</S.UpdateWrapper>
+						)}
+					</S.Indicators>
 					<ArticleToolbarMarkup />
 					<S.OptionsWrapper>
 						<CloseHandler active={showDropdown} disabled={!showDropdown} callback={() => setShowDropdown(false)}>

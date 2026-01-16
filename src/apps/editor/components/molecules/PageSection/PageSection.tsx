@@ -551,7 +551,7 @@ export default function PageSection(props: {
 																						handlePageBlockChange({ ...block, txId: undefined }, index);
 																					}}
 																					dimensions={{ wrapper: 23.5, icon: 13.5 }}
-																					tooltip={language?.editBlock}
+																					tooltip={language?.edit}
 																					tooltipPosition={'bottom-right'}
 																					noFocus
 																				/>
@@ -565,7 +565,7 @@ export default function PageSection(props: {
 																						handlePageBlockChange({ ...block, categoryId: undefined }, index);
 																					}}
 																					dimensions={{ wrapper: 23.5, icon: 13.5 }}
-																					tooltip={language?.editBlock}
+																					tooltip={language?.edit}
 																					tooltipPosition={'bottom-right'}
 																					noFocus
 																				/>

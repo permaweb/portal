@@ -36,6 +36,8 @@ function getElementWrapper(blockEditMode: boolean, type: ArticleBlockEnum, theme
 		case 'spacer-horizontal':
 		case 'spacer-vertical':
 		case 'html':
+		case 'embed':
+		case 'table':
 			return '';
 		case 'code':
 			return `

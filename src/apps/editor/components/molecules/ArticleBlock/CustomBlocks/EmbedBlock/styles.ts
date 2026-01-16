@@ -11,31 +11,35 @@ export const Wrapper = styled.div`
 export const InputWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
-	padding: 20px;
-	border-radius: ${STYLING.dimensions.radius.alt4} !important;
+	padding: 12.5px 15px 15px 15px;
 `;
 
 export const InputHeader = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	svg {
-		width: 22.5px;
-		fill: ${(props) => props.theme.colors.font.primary};
-	}
+
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		font-family: ${(props) => props.theme.typography.family.primary};
 	}
+
+	svg {
+		height: 15px;
+		width: 15px;
+		margin: 8.5px 0 0 0;
+		color: ${(props) => props.theme.colors.font.primary};
+		fill: ${(props) => props.theme.colors.font.primary};
+	}
 `;
 
 export const InputDescription = styled.div`
+	margin: 5px 0 20px 0;
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 	}
@@ -45,6 +49,8 @@ export const InputActions = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
+	margin: -10px 0 0 0;
+
 	input[type='file'] {
 		display: none;
 	}
@@ -124,6 +130,7 @@ export const ActionsWrapper = styled.div`
 	gap: 15px;
 	align-items: center;
 	justify-content: flex-end;
+	margin: 10px 0 0 0;
 `;
 
 export const CollapsedWrapper = styled.div`
@@ -138,13 +145,18 @@ export const CollapsedLink = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 10px;
+
 	svg {
-		width: 20px;
+		height: 17.5px;
+		width: 17.5px;
 		flex-shrink: 0;
-		fill: ${(props) => props.theme.colors.font.primary};
+		color: ${(props) => props.theme.colors.font.alt1};
+		fill: ${(props) => props.theme.colors.font.alt1};
+		margin: 8.5px 5px 0 0;
 	}
+
 	a {
-		color: ${(props) => props.theme.colors.font.primary};
+		color: ${(props) => props.theme.colors.link.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
