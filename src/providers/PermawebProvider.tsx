@@ -105,10 +105,16 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				prevWalletRef.current = arProvider.walletAddress;
 			}
 
+			const cachedProfile = getCachedProfile(arProvider.walletAddress);
+			if (cachedProfile?.id) {
+				setProfile(normalizeProfile(cachedProfile));
+			}
+
 			try {
 				const freshProfile = await resolveProfile(arProvider.walletAddress);
 				if (freshProfile) {
 					setProfile(freshProfile);
+					cacheProfile(arProvider.walletAddress, freshProfile);
 					if (profilePending) setProfilePending(false);
 				}
 			} catch (e: any) {

@@ -391,10 +391,7 @@ export default function PageList() {
 
 					return (
 						<S.PagesWrapper key={index} className={'border-wrapper-alt2'}>
-							<S.PageWrapper
-								className={'fade-in'}
-								onClick={() => setCollapsedPages((prev) => ({ ...prev, [key]: !prev[key] }))}
-							>
+							<S.PageWrapper onClick={() => setCollapsedPages((prev) => ({ ...prev, [key]: !prev[key] }))}>
 								<S.PageHeader>
 									<S.Arrow $open={!isCollapsed}>
 										<ReactSVG src={ICONS.arrow} />

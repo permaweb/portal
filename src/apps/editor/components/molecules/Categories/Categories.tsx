@@ -69,6 +69,7 @@ export default function Categories(props: {
 		isDragging,
 		dragOverId,
 		showChildDropZone,
+		showUnNestIndicator,
 		handleDragEnd,
 		handleDragStart,
 		handleDragUpdate,
@@ -256,9 +257,25 @@ export default function Categories(props: {
 																<S.CategoryDrag
 																	level={item.level}
 																	isDragging={snapshot.isDragging}
-																	className={dragOverId === item.category.id ? 'can-be-parent' : ''}
+																	className={(() => {
+																		if (dragOverId === item.category.id && showChildDropZone) {
+																			return 'can-be-parent';
+																		}
+																		if (dragOverId === item.category.id && showUnNestIndicator) {
+																			return `will-unnest`;
+																		}
+																		return '';
+																	})()}
+																	hasCount={selectedIds.size > 1}
 																>
-																	<S.CategoryDragHandle {...provided.dragHandleProps}>
+																	<S.CategoryDragHandle
+																		{...provided.dragHandleProps}
+																		style={{
+																			...(provided.dragHandleProps as any)?.style,
+																			pointerEvents: categoryLoading ? 'none' : 'auto',
+																			opacity: categoryLoading ? 0.5 : 1,
+																		}}
+																	>
 																		<ReactSVG src={ICONS.drag} />
 																	</S.CategoryDragHandle>
 																	<S.CategoryContent>

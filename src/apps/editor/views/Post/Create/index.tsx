@@ -28,7 +28,7 @@ export default function Create() {
 	}, [portalProvider.current?.id]);
 
 	return (
-		<S.Wrapper className={'fade-in'}>
+		<S.Wrapper>
 			<S.HeaderWrapper>
 				<h4>{language?.postCreateHeader}</h4>
 			</S.HeaderWrapper>

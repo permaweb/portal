@@ -508,12 +508,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 			{loading && <Loader message={`${language?.loading}...`} />}
 			{portalUpdating && <Loader message={`${language.updatingPortal}...`} />}
 			{panel}
-			<S.Header
-				id={'navigation-header'}
-				navigationOpen={props.open}
-				navWidth={props.open ? navWidth : 0}
-				className={'fade-in'}
-			>
+			<S.Header id={'navigation-header'} navigationOpen={props.open} navWidth={props.open ? navWidth : 0}>
 				<S.Content>
 					<S.C1Wrapper>
 						{!props.open && navigationToggle}

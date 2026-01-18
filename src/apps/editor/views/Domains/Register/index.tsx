@@ -370,13 +370,13 @@ export default function Domains() {
 
 			const current = portalProvider.current?.domains ?? [];
 
-			let next: PortalDomainType[];
+			let next: any[];
 
 			/* Remove the current primary flag from other domains if this domain is set to use primary */
 			if (usePrimary) {
 				const hadName = current.some((d) => d.name === name);
 
-				next = current.map<PortalDomainType>(
+				next = current.map<any>(
 					(d) => (d.name === name ? { name, primary: true } : { name: d.name }) // keep name, drop primary
 				);
 
@@ -509,7 +509,7 @@ export default function Domains() {
 	return (
 		<>
 			{isSubmitting && <Loader message={language.registeringProgress} />}
-			<S.Wrapper className={'fade-in'}>
+			<S.Wrapper>
 				<ViewHeader
 					header={language?.domainRegistration}
 					actions={[

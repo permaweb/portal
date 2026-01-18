@@ -28,7 +28,7 @@ export default function Portal() {
 	const unauthorized = !portalProvider.permissions?.postAutoIndex && !portalProvider.permissions?.postRequestIndex;
 
 	return (
-		<S.Wrapper className={'fade-in'}>
+		<S.Wrapper>
 			<ViewHeader
 				header={language?.portalHeader}
 				actions={[
