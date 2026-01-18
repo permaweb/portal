@@ -285,7 +285,7 @@ export const Portal = styled.button<{ active: boolean }>`
 	cursor: pointer;
 	background: ${(props) => (props.active ? props.theme.colors.container.primary.active : 'transparent')};
 	border-radius: ${STYLING.dimensions.radius.alt4};
-	padding: 7.5px 16.5px;
+	padding: 7.5px 50.5px 7.5px 16.5px;
 	position: relative;
 
 	span {
@@ -304,7 +304,10 @@ export const Portal = styled.button<{ active: boolean }>`
 		width: 18.5px;
 		color: ${(props) => props.theme.colors.font.alt1};
 		fill: ${(props) => props.theme.colors.font.alt1};
-		margin: 2.5px 0px 0 14.5px;
+		position: absolute;
+		top: 50%;
+		right: 15px;
+		transform: translate(0%, -50%);
 	}
 	&:hover {
 		background: ${(props) => props.theme.colors.container.primary.active};

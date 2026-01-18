@@ -20,7 +20,7 @@ export default function Pages() {
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	return (
-		<S.Wrapper className={'fade-in'}>
+		<S.Wrapper>
 			<ViewHeader
 				header={language?.pages}
 				actions={[

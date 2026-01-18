@@ -4,6 +4,7 @@ import { ReactSVG } from 'react-svg';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
+
 import { Loader } from '../Loader';
 
 import * as S from './styles';
@@ -39,7 +40,6 @@ export default function Avatar(props: {
 			dimensions={props.dimensions}
 			hasCallback={props.callback !== null && props.callback !== undefined}
 			hasOwner={props.owner !== null}
-			className={'fade-in'}
 			hasImage={hasImage}
 		>
 			{thumbnail}

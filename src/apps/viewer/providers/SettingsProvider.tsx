@@ -218,51 +218,53 @@ export function SettingsProvider(props: SettingsProviderProps) {
 	}
 
 	const updateSettings = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-		setSettings((prevSettings) => {
-			let newSettings = { ...prevSettings, [key]: value };
+		React.startTransition(() => {
+			setSettings((prevSettings) => {
+				let newSettings = { ...prevSettings, [key]: value };
 
-			// When changing theme and syncWithSystem is enabled, update the preferred theme
-			if (key === 'theme' && prevSettings.syncWithSystem && portalProvider.current?.themes) {
-				const themeValue = value as string;
-				const selectedTheme = portalProvider.current.themes.find((t) => t.name === themeValue);
-				const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				// When changing theme and syncWithSystem is enabled, update the preferred theme
+				if (key === 'theme' && prevSettings.syncWithSystem && portalProvider.current?.themes) {
+					const themeValue = value as string;
+					const selectedTheme = portalProvider.current.themes.find((t) => t.name === themeValue);
+					const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-				if (selectedTheme) {
-					if (selectedTheme.scheme === 'light') {
-						newSettings.preferredLightTheme = themeValue;
-						// Only apply the theme if system is currently in light mode
-						if (!systemIsDark) {
-							newSettings.theme = themeValue;
+					if (selectedTheme) {
+						if (selectedTheme.scheme === 'light') {
+							newSettings.preferredLightTheme = themeValue;
+							// Only apply the theme if system is currently in light mode
+							if (!systemIsDark) {
+								newSettings.theme = themeValue;
+							} else {
+								// Keep the current dark theme
+								newSettings.theme = prevSettings.theme;
+							}
 						} else {
-							// Keep the current dark theme
-							newSettings.theme = prevSettings.theme;
-						}
-					} else {
-						newSettings.preferredDarkTheme = themeValue;
-						// Only apply the theme if system is currently in dark mode
-						if (systemIsDark) {
-							newSettings.theme = themeValue;
-						} else {
-							// Keep the current light theme
-							newSettings.theme = prevSettings.theme;
+							newSettings.preferredDarkTheme = themeValue;
+							// Only apply the theme if system is currently in dark mode
+							if (systemIsDark) {
+								newSettings.theme = themeValue;
+							} else {
+								// Keep the current light theme
+								newSettings.theme = prevSettings.theme;
+							}
 						}
 					}
 				}
-			}
 
-			// When disabling syncWithSystem, keep the current theme
-			if (key === 'syncWithSystem' && value === false) {
-				// Current theme stays as is
-			}
+				// When disabling syncWithSystem, keep the current theme
+				if (key === 'syncWithSystem' && value === false) {
+					// Current theme stays as is
+				}
 
-			// When enabling syncWithSystem, switch to the appropriate preferred theme
-			if (key === 'syncWithSystem' && value === true) {
-				const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-				newSettings.theme = isDark ? prevSettings.preferredDarkTheme : prevSettings.preferredLightTheme;
-			}
+				// When enabling syncWithSystem, switch to the appropriate preferred theme
+				if (key === 'syncWithSystem' && value === true) {
+					const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+					newSettings.theme = isDark ? prevSettings.preferredDarkTheme : prevSettings.preferredLightTheme;
+				}
 
-			localStorage.setItem('settings', JSON.stringify(newSettings));
-			return newSettings;
+				localStorage.setItem('settings', JSON.stringify(newSettings));
+				return newSettings;
+			});
 		});
 	};
 
@@ -297,29 +299,29 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		return null;
 	}
 
-	function getTheme() {
+	const currentTheme = React.useMemo(() => {
 		if (!portalProvider.current?.themes) return theme(preferredFallbackTheme);
 
-		let currentTheme = portalProvider.current.themes.find((theme: PortalThemeType) => theme.name === settings.theme);
+		let selectedTheme = portalProvider.current.themes.find((theme: PortalThemeType) => theme.name === settings.theme);
 
 		const preferredScheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
-		if (!currentTheme) {
+		if (!selectedTheme) {
 			const filteredThemes = portalProvider.current.themes.filter(
 				(theme: PortalThemeType) => theme.scheme === preferredScheme
 			);
-			currentTheme = filteredThemes[0];
-			if (currentTheme) updateSettings('theme', currentTheme.name);
+			selectedTheme = filteredThemes[0];
+			if (selectedTheme) updateSettings('theme', selectedTheme.name);
 		}
 
-		return theme(currentTheme ? createThemeFromCustom(currentTheme) : preferredFallbackTheme);
-	}
+		return theme(selectedTheme ? createThemeFromCustom(selectedTheme) : preferredFallbackTheme);
+	}, [settings.theme, portalProvider.current?.themes]);
+
+	const availableThemes = React.useMemo(() => getAvailableThemes(), [portalProvider.current?.themes]);
 
 	return (
-		<SettingsContext.Provider
-			value={{ settings: settings, updateSettings: updateSettings, availableThemes: getAvailableThemes() }}
-		>
-			<ThemeProvider theme={getTheme()}>{props.children}</ThemeProvider>
+		<SettingsContext.Provider value={{ settings: settings, updateSettings: updateSettings, availableThemes }}>
+			<ThemeProvider theme={currentTheme}>{props.children}</ThemeProvider>
 		</SettingsContext.Provider>
 	);
 }

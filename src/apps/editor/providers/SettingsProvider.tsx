@@ -210,49 +210,51 @@ export function SettingsProvider(props: SettingsProviderProps) {
 	}, [settings.syncWithSystem, settings.preferredLightTheme, settings.preferredDarkTheme]);
 
 	const updateSettings = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-		setSettings((prevSettings) => {
-			let newSettings = { ...prevSettings, [key]: value };
+		React.startTransition(() => {
+			setSettings((prevSettings) => {
+				let newSettings = { ...prevSettings, [key]: value };
 
-			// When changing theme and syncWithSystem is enabled, update the preferred theme
-			if (key === 'theme' && prevSettings.syncWithSystem) {
-				const themeValue = value as ThemeType;
-				const isLightTheme = themeValue.startsWith('light-');
-				const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				// When changing theme and syncWithSystem is enabled, update the preferred theme
+				if (key === 'theme' && prevSettings.syncWithSystem) {
+					const themeValue = value as ThemeType;
+					const isLightTheme = themeValue.startsWith('light-');
+					const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-				if (isLightTheme) {
-					newSettings.preferredLightTheme = themeValue;
-					// Only apply the theme if system is currently in light mode
-					if (!systemIsDark) {
-						newSettings.theme = themeValue;
+					if (isLightTheme) {
+						newSettings.preferredLightTheme = themeValue;
+						// Only apply the theme if system is currently in light mode
+						if (!systemIsDark) {
+							newSettings.theme = themeValue;
+						} else {
+							// Keep the current dark theme
+							newSettings.theme = prevSettings.theme;
+						}
 					} else {
-						// Keep the current dark theme
-						newSettings.theme = prevSettings.theme;
-					}
-				} else {
-					newSettings.preferredDarkTheme = themeValue;
-					// Only apply the theme if system is currently in dark mode
-					if (systemIsDark) {
-						newSettings.theme = themeValue;
-					} else {
-						// Keep the current light theme
-						newSettings.theme = prevSettings.theme;
+						newSettings.preferredDarkTheme = themeValue;
+						// Only apply the theme if system is currently in dark mode
+						if (systemIsDark) {
+							newSettings.theme = themeValue;
+						} else {
+							// Keep the current light theme
+							newSettings.theme = prevSettings.theme;
+						}
 					}
 				}
-			}
 
-			// When disabling syncWithSystem, keep the current theme
-			if (key === 'syncWithSystem' && value === false) {
-				// Current theme stays as is
-			}
+				// When disabling syncWithSystem, keep the current theme
+				if (key === 'syncWithSystem' && value === false) {
+					// Current theme stays as is
+				}
 
-			// When enabling syncWithSystem, switch to the appropriate preferred theme
-			if (key === 'syncWithSystem' && value === true) {
-				const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-				newSettings.theme = isDark ? prevSettings.preferredDarkTheme : prevSettings.preferredLightTheme;
-			}
+				// When enabling syncWithSystem, switch to the appropriate preferred theme
+				if (key === 'syncWithSystem' && value === true) {
+					const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+					newSettings.theme = isDark ? prevSettings.preferredDarkTheme : prevSettings.preferredLightTheme;
+				}
 
-			localStorage.setItem('settings', JSON.stringify(newSettings));
-			return newSettings;
+				localStorage.setItem('settings', JSON.stringify(newSettings));
+				return newSettings;
+			});
 		});
 	};
 
@@ -330,7 +332,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		},
 	};
 
-	function getTheme() {
+	const currentTheme = React.useMemo(() => {
 		switch (settings.theme) {
 			case 'light-primary':
 				return theme(lightTheme);
@@ -351,7 +353,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 			default:
 				return theme(lightTheme);
 		}
-	}
+	}, [settings.theme]);
 
 	return (
 		<SettingsContext.Provider
@@ -362,7 +364,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 				availableThemes: AVAILABLE_THEMES,
 			}}
 		>
-			<ThemeProvider theme={getTheme()}>{props.children}</ThemeProvider>
+			<ThemeProvider theme={currentTheme}>{props.children}</ThemeProvider>
 		</SettingsContext.Provider>
 	);
 }

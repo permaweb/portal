@@ -15,10 +15,12 @@ import {
 	PortalUserType,
 } from 'helpers/types';
 import {
+	cachePermissions,
 	cachePortal,
 	cacheProfile,
 	debugLog,
 	fixBooleanStrings,
+	getCachedPermissions,
 	getCachedPortal,
 	getCachedProfile,
 	getPortalAssets,
@@ -209,6 +211,13 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				if (!current && currentId && permawebProvider.libs) {
 					const cachedPortal = getCachedPortal(currentId);
 					if (cachedPortal) setCurrent(cachedPortal);
+
+					// Load cached permissions if available
+					if (permawebProvider.profile?.id) {
+						const cachedPerms = getCachedPermissions(currentId, permawebProvider.profile.id);
+						if (cachedPerms) setPermissions(cachedPerms);
+					}
+
 					await fetchPortal();
 				}
 			} catch (e: any) {
@@ -396,7 +405,13 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			};
 
 			if (permawebProvider.profile?.id && portalState.users) {
-				setPermissions(getUserPermissions(permawebProvider.profile.id, portalState.users, portalState.permissions));
+				const userPermissions = getUserPermissions(
+					permawebProvider.profile.id,
+					portalState.users,
+					portalState.permissions
+				);
+				setPermissions(userPermissions);
+				cachePermissions(currentId, permawebProvider.profile.id, userPermissions);
 			}
 
 			cachePortal(currentId, portalState);

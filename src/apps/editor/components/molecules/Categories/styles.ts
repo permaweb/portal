@@ -208,7 +208,7 @@ export const CategoryDragWrapper = styled.div<{ level: number; isDragging: boole
 	}
 `;
 
-export const CategoryDrag = styled.div<{ level: number; isDragging: boolean }>`
+export const CategoryDrag = styled.div<{ level: number; isDragging: boolean; hasCount?: boolean }>`
 	width: fit-content;
 	position: relative;
 	display: flex;
@@ -244,6 +244,16 @@ export const CategoryDrag = styled.div<{ level: number; isDragging: boolean }>`
 		position: absolute;
 		right: 10px;
 		top: -5px;
+	}
+
+	&.will-unnest::after {
+		background: ${(props) => props.theme.colors.indicator.alt1};
+		opacity: 1;
+		content: 'Un-Nest';
+		white-space: nowrap;
+		position: absolute;
+		top: -7.5px;
+		right: ${(props) => (props.hasCount ? '-15.5px' : '2.5px')};
 	}
 `;
 

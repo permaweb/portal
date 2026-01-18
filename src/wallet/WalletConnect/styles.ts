@@ -287,6 +287,11 @@ export const SystemSyncWrapper = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 10px;
+	margin: 5px 0 0 0;
+
+	button {
+		border-radius: ${STYLING.dimensions.radius.primary};
+	}
 
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};

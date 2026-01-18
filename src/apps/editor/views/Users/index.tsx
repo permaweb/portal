@@ -157,7 +157,7 @@ export default function Users() {
 
 	return (
 		<>
-			<S.Wrapper className={'fade-in'}>
+			<S.Wrapper>
 				<ViewHeader
 					header={language?.users}
 					actions={[

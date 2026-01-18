@@ -295,6 +295,15 @@ export const cachePortal = (id: string, portalData: any) => {
 	localStorage.setItem(STORAGE.portal(id), JSON.stringify(portalData));
 };
 
+export const getCachedPermissions = (portalId: string, userId: string) => {
+	const cached = localStorage.getItem(STORAGE.permissions(portalId, userId));
+	return cached ? JSON.parse(cached) : null;
+};
+
+export const cachePermissions = (portalId: string, userId: string, permissions: any) => {
+	localStorage.setItem(STORAGE.permissions(portalId, userId), JSON.stringify(permissions));
+};
+
 export function getPortalAssets(index: PortalAssetType[]) {
 	return index?.filter(
 		(asset: any) =>

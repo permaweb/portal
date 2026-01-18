@@ -10,7 +10,7 @@ export default function Design() {
 	const language = languageProvider.object[languageProvider.current];
 
 	return (
-		<S.Wrapper className={'fade-in'}>
+		<S.Wrapper>
 			<ViewHeader header={language?.design} />
 			<DesignBasic />
 		</S.Wrapper>
