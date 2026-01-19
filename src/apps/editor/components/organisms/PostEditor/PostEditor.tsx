@@ -370,29 +370,6 @@ export default function PostEditor() {
 
 					debugLog('info', 'PostEditor', `Asset content update: ${assetContentUpdateId}`);
 
-					// Update comment rules if they exist and have changed
-					const asset = portalProvider.current?.assets?.find((a: any) => a.id === assetId);
-					const commentsId = asset?.metadata?.comments;
-
-					if (commentsId && currentPost.data.commentRules) {
-						try {
-							const rulesChanged =
-								JSON.stringify(currentPost.data.commentRules) !==
-								JSON.stringify(currentPost.originalData?.commentRules);
-
-							if (rulesChanged) {
-								await permawebProvider.libs.updateRules({
-									commentsId,
-									rules: currentPost.data.commentRules,
-								});
-								debugLog('info', 'PostEditor', 'Comment rules updated');
-							}
-						} catch (e: any) {
-							console.error('Error updating comment rules:', e);
-							addNotification(language?.errorUpdatingCommentRules, 'warning', { persistent: true });
-						}
-					}
-
 					addNotification(`${language?.postUpdated}!`, 'success', { persistent: true });
 					portalProvider.refreshCurrentPortal([
 						...(isStaticPage ? [PortalPatchMapEnum.Presentation] : []),
@@ -573,29 +550,6 @@ export default function PostEditor() {
 									}
 								}
 							}
-						}
-					}
-
-					// Set initial comment rules if configured
-					if (currentPost.data.commentRules) {
-						try {
-							// Wait a moment for the comments process to be spawned
-							await new Promise((resolve) => setTimeout(resolve, 2000));
-
-							// Fetch the asset to get the comments process ID
-							const asset = await permawebProvider.libs.getAssetById(assetId);
-							const commentsId = asset?.metadata?.comments;
-
-							if (commentsId) {
-								await permawebProvider.libs.updateRules({
-									commentsId,
-									rules: currentPost.data.commentRules,
-								});
-								debugLog('info', 'PostEditor', 'Initial comment rules set');
-							}
-						} catch (e: any) {
-							console.error('Error setting initial comment rules:', e);
-							// Don't show error to user for initial rules setting
 						}
 					}
 

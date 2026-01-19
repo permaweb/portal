@@ -42,6 +42,7 @@ export const es = {
 	tipsButton: `Tips Button`,
 	tipsHistory: `History`,
 	tokenAddress: `Token`,
+	updateRules: `Update Rules`,
 	uploadOptions: `Upload Options`,
 	uploadUncompressed: `Upload Original`,
 	useCredits: `Use Credits`,

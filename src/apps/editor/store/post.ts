@@ -25,6 +25,7 @@ export const initStateCurrentPost: { data: PortalAssetPostReduxType; originalDat
 		authUsers: [],
 		url: null,
 		commentRules: null,
+		commentsId: null,
 	},
 	originalData: null,
 	editor: {

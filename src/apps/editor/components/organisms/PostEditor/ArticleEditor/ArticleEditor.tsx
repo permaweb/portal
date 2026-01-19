@@ -110,6 +110,7 @@ export default function ArticleEditor(props: {
 								lastUpdate: source.updatedAt || null,
 								releaseDate: meta.releaseDate || null,
 								authUsers: source.authUsers || [],
+								commentsId: meta.comments || source.metadata?.comments || null,
 							});
 							setOriginalDataState({
 								id: assetId || null,
@@ -126,6 +127,7 @@ export default function ArticleEditor(props: {
 								lastUpdate: source.updatedAt || null,
 								releaseDate: assetData.metadata.releaseDate || null,
 								authUsers: source.authUsers || [],
+								commentsId: assetData.metadata.comments || source.metadata?.comments || null,
 							});
 						}
 
@@ -144,6 +146,7 @@ export default function ArticleEditor(props: {
 							lastUpdate: source.updatedAt || null,
 							releaseDate: meta.releaseDate || null,
 							authUsers: source.authUsers || [],
+							commentsId: meta.comments || source.metadata?.comments || null,
 						};
 
 						// Update current data

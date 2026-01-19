@@ -533,6 +533,7 @@ export const en = {
 	unsavedChanges: `Unsaved Changes`,
 	untitledPost: `Untitled Post`,
 	updateAvailable: `Update Available`,
+	updateRules: `Update Rules`,
 	updating: `Updating`,
 	updatingFonts: `Updating Fonts`,
 	updatingLayout: `Updating Layout`,

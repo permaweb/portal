@@ -96,7 +96,9 @@ export default function ArticlePost(props: {
 					<p>{language?.commentRules}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
-					<ArticlePostCommentRules />
+					<S.SectionStart>
+						<ArticlePostCommentRules />
+					</S.SectionStart>
 				</S.SectionBody>
 			</S.Section>
 		</S.Wrapper>
