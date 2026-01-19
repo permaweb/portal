@@ -448,7 +448,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 									{language.myComments}
 								</S.NavigationEntry>
 								{auth?.authType !== 'NATIVE_WALLET' && arProvider.walletType !== 'NATIVE_WALLET' && (
-									<S.NavigationEntry onClick={() => window.wanderInstance.open()}>
+									<S.NavigationEntry onClick={() => window.wanderInstance.open('home')}>
 										<ReactSVG src={ICONS.wallet} />
 										{language.myWallet}
 									</S.NavigationEntry>
@@ -533,7 +533,9 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	function getHeader() {
 		const profileReady = permawebProvider.libs && !permawebProvider.profileLoading;
 		const missingProfileCount = profileReady && !profile?.id ? 1 : 0;
-		const notificationCount = (arProvider.backupsNeeded || 0) + missingProfileCount;
+		const isEmbeddedWallet = auth?.authType !== 'NATIVE_WALLET' && arProvider.walletType !== 'NATIVE_WALLET';
+		const backupCount = isEmbeddedWallet ? arProvider.backupsNeeded || 0 : 0;
+		const notificationCount = backupCount + missingProfileCount;
 		const showNotification = arProvider.walletAddress && notificationCount > 0;
 
 		return (
