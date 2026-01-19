@@ -96,6 +96,10 @@ export default defineConfig(({ mode }) => {
 		plugins: [
 			nodePolyfills({
 				protocolImports: true,
+				globals: {
+					process: true,
+					Buffer: true,
+				},
 			}),
 			react(),
 			...(app === 'viewer' ? [viteSingleFile()] : []),
