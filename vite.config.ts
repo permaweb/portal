@@ -25,14 +25,6 @@ export default defineConfig(({ mode }) => {
 					plugins: [
 						polyfillNode(),
 						{
-							name: 'inject-process-browser',
-							renderChunk(code) {
-								const injection =
-									'if(typeof process==="undefined"){var process={browser:true,env:{}};}else if(typeof process.browser==="undefined"){process.browser=true;}\n';
-								return injection + code;
-							},
-						},
-						{
 							name: 'copy-service-worker',
 							writeBundle() {
 								const fs = require('fs');
@@ -101,10 +93,6 @@ export default defineConfig(({ mode }) => {
 		plugins: [
 			nodePolyfills({
 				protocolImports: true,
-				globals: {
-					process: true,
-					Buffer: true,
-				},
 			}),
 			react(),
 			...(app === 'viewer' ? [viteSingleFile()] : []),

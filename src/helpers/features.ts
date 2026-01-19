@@ -38,5 +38,5 @@ export const loadAOConnect = async () => {
 	if (!FEATURES.AO_CONNECT) {
 		throw new Error('AO Connect is disabled');
 	}
-	return import('@permaweb/aoconnect/browser');
+	return import('@permaweb/aoconnect');
 };
