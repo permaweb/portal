@@ -26,8 +26,11 @@ export default defineConfig(({ mode }) => {
 						polyfillNode(),
 						{
 							name: 'inject-process-browser',
-							banner:
-								'if(typeof process === "undefined"){var process = {browser: true, env: {}};}else if(typeof process.browser === "undefined"){process.browser = true;}',
+							renderChunk(code) {
+								const injection =
+									'if(typeof process==="undefined"){var process={browser:true,env:{}};}else if(typeof process.browser==="undefined"){process.browser=true;}\n';
+								return injection + code;
+							},
 						},
 						{
 							name: 'copy-service-worker',
