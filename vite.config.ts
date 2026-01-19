@@ -25,6 +25,11 @@ export default defineConfig(({ mode }) => {
 					plugins: [
 						polyfillNode(),
 						{
+							name: 'inject-process-browser',
+							banner:
+								'if(typeof process === "undefined"){var process = {browser: true, env: {}};}else if(typeof process.browser === "undefined"){process.browser = true;}',
+						},
+						{
 							name: 'copy-service-worker',
 							writeBundle() {
 								const fs = require('fs');
