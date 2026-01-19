@@ -50,9 +50,6 @@ export default defineConfig(({ mode }) => {
 							if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
 								return 'vendor';
 							}
-							if (id.includes('@permaweb/aoconnect')) {
-								return 'ao-connect';
-							}
 							if (id.includes('@permaweb/libs') || id.includes('arweave')) {
 								return 'permaweb-libs';
 							}
