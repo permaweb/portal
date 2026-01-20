@@ -35,6 +35,13 @@ export default function Categories(props: {
 	const language = languageProvider.object[languageProvider.current];
 	const theme = useTheme();
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta && !props.skipAuthCheck;
+
+	// Memoize portal categories to prevent infinite re-renders
+	const portalCategoriesStable = React.useMemo(
+		() => portalProvider.current?.categories || null,
+		[portalProvider.current?.id, portalProvider.current?.categories?.length]
+	);
+
 	const [openMetadata, setOpenMetadata] = React.useState<{
 		open: boolean;
 		categoryId: string | null;
@@ -46,7 +53,6 @@ export default function Categories(props: {
 	const {
 		addCategory,
 		categoryOptions,
-		setCategoryOptions,
 		showCategoryAdd,
 		setShowCategoryAdd,
 		newCategoryName,
@@ -63,6 +69,7 @@ export default function Categories(props: {
 		isDragging,
 		dragOverId,
 		showChildDropZone,
+		showUnNestIndicator,
 		handleDragEnd,
 		handleDragStart,
 		handleDragUpdate,
@@ -76,7 +83,7 @@ export default function Categories(props: {
 		allowReorder: props.allowReorder,
 		unauthorized,
 		portalId: portalProvider.current?.id || null,
-		portalCategories: portalProvider.current?.categories || [],
+		portalCategories: portalCategoriesStable,
 		refreshCurrentPortal: portalProvider.refreshCurrentPortal,
 	});
 
@@ -90,76 +97,73 @@ export default function Categories(props: {
 		});
 	}
 
-	React.useEffect(() => {
-		if (portalProvider.current?.id) {
-			if (portalProvider.current.categories) setCategoryOptions(portalProvider.current.categories);
-		}
-	}, [portalProvider.current]);
-
-	const CategoryItem = ({
-		category,
-		index,
-		level,
-		isDragEnabled,
-	}: {
-		category: PortalCategoryType;
-		index: number;
-		level: number;
-		isDragEnabled: boolean;
-	}) => {
-		const active = props.categories?.find((c: PortalCategoryType) => category.id === c.id) !== undefined;
-		if (isDragEnabled) {
+	const CategoryItem = React.memo(
+		({
+			category,
+			index,
+			level,
+			isDragEnabled,
+		}: {
+			category: PortalCategoryType;
+			index: number;
+			level: number;
+			isDragEnabled: boolean;
+		}) => {
+			const active = props.categories?.find((c: PortalCategoryType) => category.id === c.id) !== undefined;
+			if (isDragEnabled) {
+				return (
+					<Draggable key={category.id} draggableId={category.id} index={index}>
+						{(provided, snapshot) => (
+							<S.CategoryDragWrapper
+								ref={provided.innerRef}
+								{...provided.draggableProps}
+								level={level}
+								isDragging={snapshot.isDragging}
+								parentDragging={false}
+							>
+								<S.CategoryDrag level={level} isDragging={snapshot.isDragging}>
+									<S.CategoryDragHandle {...provided.dragHandleProps}>
+										<ReactSVG src={ICONS.drag} />
+									</S.CategoryDragHandle>
+									<S.CategoryContent>
+										<Button
+											type={'alt3'}
+											label={category.name}
+											handlePress={() => handleSelectCategory(category.id)}
+											active={active}
+											disabled={unauthorized || categoryLoading || isDragging}
+											icon={active ? ICONS.close : ICONS.add}
+										/>
+									</S.CategoryContent>
+								</S.CategoryDrag>
+								{category.children && category.children.length > 0 && (
+									<CategoryOptions categories={category.children} level={level + 1} />
+								)}
+							</S.CategoryDragWrapper>
+						)}
+					</Draggable>
+				);
+			}
 			return (
-				<Draggable key={category.id} draggableId={category.id} index={index}>
-					{(provided, snapshot) => (
-						<S.CategoryDragWrapper
-							ref={provided.innerRef}
-							{...provided.draggableProps}
-							level={level}
-							isDragging={snapshot.isDragging}
-							parentDragging={false}
-						>
-							<S.CategoryDrag level={level} isDragging={snapshot.isDragging}>
-								<S.CategoryDragHandle {...provided.dragHandleProps}>
-									<ReactSVG src={ICONS.drag} />
-								</S.CategoryDragHandle>
-								<S.CategoryContent>
-									<Button
-										type={'alt3'}
-										label={category.name}
-										handlePress={() => handleSelectCategory(category.id)}
-										active={active}
-										disabled={unauthorized || categoryLoading || isDragging}
-										icon={active ? ICONS.close : ICONS.add}
-									/>
-								</S.CategoryContent>
-							</S.CategoryDrag>
-							{category.children && category.children.length > 0 && (
-								<CategoryOptions categories={category.children} level={level + 1} />
-							)}
-						</S.CategoryDragWrapper>
+				<React.Fragment key={category.id}>
+					<S.CategoryOption level={level}>
+						<Button
+							type={'alt3'}
+							label={category.name}
+							handlePress={() => handleSelectCategory(category.id)}
+							active={active}
+							disabled={unauthorized || categoryLoading}
+							icon={active ? ICONS.close : ICONS.add}
+							noFocus
+						/>
+					</S.CategoryOption>
+					{category.children && category.children.length > 0 && (
+						<CategoryOptions categories={category.children} level={level + 1} />
 					)}
-				</Draggable>
+				</React.Fragment>
 			);
 		}
-		return (
-			<React.Fragment key={category.id}>
-				<S.CategoryOption level={level}>
-					<Button
-						type={'alt3'}
-						label={category.name}
-						handlePress={() => handleSelectCategory(category.id)}
-						active={active}
-						disabled={unauthorized || categoryLoading}
-						icon={active ? ICONS.close : ICONS.add}
-					/>
-				</S.CategoryOption>
-				{category.children && category.children.length > 0 && (
-					<CategoryOptions categories={category.children} level={level + 1} />
-				)}
-			</React.Fragment>
-		);
-	};
+	);
 
 	const CategoryOptions = ({ categories, level = 0 }: { categories: PortalCategoryType[]; level?: number }) => {
 		const isDragEnabled = props.allowReorder && portalProvider.permissions?.updatePortalMeta;
@@ -253,9 +257,25 @@ export default function Categories(props: {
 																<S.CategoryDrag
 																	level={item.level}
 																	isDragging={snapshot.isDragging}
-																	className={dragOverId === item.category.id ? 'can-be-parent' : ''}
+																	className={(() => {
+																		if (dragOverId === item.category.id && showChildDropZone) {
+																			return 'can-be-parent';
+																		}
+																		if (dragOverId === item.category.id && showUnNestIndicator) {
+																			return `will-unnest`;
+																		}
+																		return '';
+																	})()}
+																	hasCount={selectedIds.size > 1}
 																>
-																	<S.CategoryDragHandle {...provided.dragHandleProps}>
+																	<S.CategoryDragHandle
+																		{...provided.dragHandleProps}
+																		style={{
+																			...(provided.dragHandleProps as any)?.style,
+																			pointerEvents: categoryLoading ? 'none' : 'auto',
+																			opacity: categoryLoading ? 0.5 : 1,
+																		}}
+																	>
 																		<ReactSVG src={ICONS.drag} />
 																	</S.CategoryDragHandle>
 																	<S.CategoryContent>

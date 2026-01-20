@@ -123,7 +123,7 @@ export default function PostEditor() {
 			if (isCurrentRequest) {
 				try {
 					debugLog('info', 'PostEditor', 'Updating post status...', status);
-					const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
+					const zoneIndexUpdate = await permawebProvider.libs.sendMessage({
 						processId: portalProvider.current.id,
 						wallet: arProvider.wallet,
 						action: 'Update-Status-Index-Request',
@@ -135,7 +135,7 @@ export default function PostEditor() {
 
 					const zoneIndexResult = await permawebProvider.deps.ao.result({
 						process: portalProvider.current.id,
-						message: zoneIndexUpdateId,
+						message: zoneIndexUpdate,
 					});
 
 					portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Requests);
@@ -179,7 +179,7 @@ export default function PostEditor() {
 
 			if (isCurrentRequest) {
 				try {
-					const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
+					const zoneIndexResult = await permawebProvider.libs.sendMessage({
 						processId: portalProvider.current.id,
 						wallet: arProvider.wallet,
 						action: 'Update-Index-Request',
@@ -187,32 +187,25 @@ export default function PostEditor() {
 							{ name: 'Index-Id', value: assetId },
 							{ name: 'Update-Type', value: updateType },
 						],
+						returnResult: true,
 					});
 
-					debugLog('info', 'PostEditor', `Zone index update: ${zoneIndexUpdateId}`);
-
-					const zoneIndexResult = await permawebProvider.deps.ao.result({
-						process: portalProvider.current.id,
-						message: zoneIndexUpdateId,
-					});
+					debugLog('info', 'PostEditor', `Zone index update`, zoneIndexResult?.Output?.data);
 
 					if (zoneIndexResult?.Messages?.length > 0) {
 						if (updateType === 'Approve') {
-							const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
-								processId: assetId,
+							const assetIndexResult = await permawebProvider.libs.sendMessage({
+								processId: portalProvider.current.id,
 								wallet: arProvider.wallet,
-								action: 'Send-Index',
+								action: 'Run-Action',
 								tags: [
+									{ name: 'Forward-To', value: assetId },
+									{ name: 'Forward-Action', value: 'Send-Index' },
 									{ name: 'Asset-Type', value: ASSET_UPLOAD.ansType },
-									{ name: 'Content-Type', value: ASSET_UPLOAD.contentType },
 									{ name: 'Date-Added', value: new Date().getTime().toString() },
 								],
-								data: { Recipients: indexRecipients },
-							});
-
-							const assetIndexResult = await permawebProvider.deps.ao.result({
-								process: assetId,
-								message: assetIndexUpdateId,
+								data: { Input: { Recipients: indexRecipients } },
+								returnResult: true,
 							});
 
 							if (assetIndexResult?.Messages?.length > 0) {
@@ -234,10 +227,15 @@ export default function PostEditor() {
 								}
 
 								const assetContentUpdateId = await permawebProvider.libs.sendMessage({
-									processId: assetId,
+									processId: portalProvider.current.id,
 									wallet: arProvider.wallet,
-									action: 'Update-Asset',
-									data: data,
+									action: 'Run-Action',
+									tags: [
+										{ name: 'Forward-To', value: assetId },
+										{ name: 'Forward-Action', value: 'Update-Asset' },
+									],
+									data: { Input: data },
+									returnResult: true,
 								});
 
 								debugLog('info', 'PostEditor', `Asset content update: ${assetContentUpdateId}`);
@@ -317,6 +315,7 @@ export default function PostEditor() {
 								{ name: 'Exclude-Index', value: excludeFromIndex },
 							],
 							data: { Input: data },
+							returnResult: true,
 						});
 					} else {
 						assetContentUpdateId = await permawebProvider.libs.sendMessage({
@@ -331,6 +330,8 @@ export default function PostEditor() {
 							data: { Input: data },
 						});
 					}
+
+					// await handleExternalRecipients(assetId);
 
 					if (isStaticPage) {
 						const currentPages = portalProvider.current?.pages || {};
@@ -452,7 +453,7 @@ export default function PostEditor() {
 					else if (portalProvider.permissions.postRequestIndex) internalIndexAction = 'Add-Index-Request';
 
 					if (internalIndexAction) {
-						const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
+						const zoneResult = await permawebProvider.libs.sendMessage({
 							processId: permawebProvider.profile.id,
 							wallet: arProvider.wallet,
 							action: 'Run-Action',
@@ -461,18 +462,11 @@ export default function PostEditor() {
 								{ name: 'Forward-Action', value: internalIndexAction },
 								{ name: 'Index-Id', value: assetId },
 							],
+							data: { Input: {} },
+							returnResult: true,
 						});
 
-						debugLog('info', 'PostEditor', `Zone (profile) index update: ${zoneIndexUpdateId}`);
-
 						if (portalProvider.permissions.postAutoIndex) {
-							const zoneResult = await permawebProvider.deps.ao.result({
-								process: permawebProvider.profile.id,
-								message: zoneIndexUpdateId,
-							});
-
-							// debugLog('info', 'PostEditor', `Zone result: ${JSON.stringify(zoneResult, null, 2)}`);
-
 							if (zoneResult?.Messages?.length > 0) {
 								const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
 									processId: assetId,
@@ -480,7 +474,6 @@ export default function PostEditor() {
 									action: 'Send-Index',
 									tags: [
 										{ name: 'Asset-Type', value: ASSET_UPLOAD.ansType },
-										{ name: 'Content-Type', value: ASSET_UPLOAD.contentType },
 										{ name: 'Date-Added', value: new Date().getTime().toString() },
 										{ name: 'Exclude', value: excludeFromIndex },
 									],
@@ -496,62 +489,7 @@ export default function PostEditor() {
 						}
 					}
 
-					/* If there are external recipients, also send an index request to them */
-					/* If the user is an admin in another portal then index it directly */
-					if (currentPost.data?.externalRecipients?.length > 0) {
-						for (const portalId of currentPost.data.externalRecipients) {
-							const externalPortal = portalProvider.portals.find((portal: PortalHeaderType) => portal.id === portalId);
-							if (externalPortal) {
-								const hasExternalAdminAccess = externalPortal?.users?.some(
-									(u: PortalUserType) => u.address === permawebProvider.profile.id && u.roles?.includes('Admin')
-								);
-								let externalIndexAction = 'Add-Index-Request';
-								if (hasExternalAdminAccess) externalIndexAction = 'Add-Index-Id';
-
-								let tags = [
-									{ name: 'Forward-To', value: externalPortal.id },
-									{ name: 'Forward-Action', value: externalIndexAction },
-									{ name: 'Index-Id', value: assetId },
-								];
-								if (!hasExternalAdminAccess) {
-									tags.push({ name: 'Status', value: 'Review' });
-								}
-
-								const zoneIndexUpdateId = await permawebProvider.libs.sendMessage({
-									processId: permawebProvider.profile.id,
-									wallet: arProvider.wallet,
-									action: 'Run-Action',
-									tags: tags,
-								});
-
-								debugLog('info', 'PostEditor', `External zone index update: ${zoneIndexUpdateId}`);
-
-								if (hasExternalAdminAccess) {
-									const zoneResult = await permawebProvider.deps.ao.result({
-										process: permawebProvider.profile.id,
-										message: zoneIndexUpdateId,
-									});
-
-									if (zoneResult?.Messages?.length > 0) {
-										const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
-											processId: assetId,
-											wallet: arProvider.wallet,
-											action: 'Send-Index',
-											tags: [
-												{ name: 'Asset-Type', value: ASSET_UPLOAD.ansType },
-												{ name: 'Content-Type', value: ASSET_UPLOAD.contentType },
-												{ name: 'Date-Added', value: new Date().getTime().toString() },
-											],
-											data: { Recipients: [externalPortal.id] },
-										});
-
-										debugLog('info', 'PostEditor', `Asset index update: ${assetIndexUpdateId}`);
-										portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Posts, PortalPatchMapEnum.Requests]);
-									}
-								}
-							}
-						}
-					}
+					await handleExternalRecipients(assetId);
 
 					addNotification(`${language?.postSaved}!`, 'success', { persistent: true });
 
@@ -571,11 +509,83 @@ export default function PostEditor() {
 		}
 	}
 
+	async function handleExternalRecipients(assetId: string) {
+		/* If there are external recipients, also send an index request to them */
+		/* If the user is an admin in another portal then index it directly */
+		if (currentPost.data?.externalRecipients?.length > 0) {
+			for (const portalId of currentPost.data.externalRecipients) {
+				const externalPortal = portalProvider.portals.find((portal: PortalHeaderType) => portal.id === portalId);
+				if (externalPortal) {
+					const hasExternalAdminAccess = externalPortal?.users?.some(
+						(u: PortalUserType) => u.address === permawebProvider.profile.id && u.roles?.includes('Admin')
+					);
+					let externalIndexAction = 'Add-Index-Request';
+					if (hasExternalAdminAccess) externalIndexAction = 'Add-Index-Id';
+
+					let tags = [
+						{ name: 'Forward-To', value: externalPortal.id },
+						{ name: 'Forward-Action', value: externalIndexAction },
+						{ name: 'Index-Id', value: assetId },
+					];
+
+					if (!hasExternalAdminAccess) {
+						tags.push({ name: 'Status', value: 'Review' });
+					}
+
+					try {
+						const zoneResult = await permawebProvider.libs.sendMessage({
+							processId: permawebProvider.profile.id,
+							wallet: arProvider.wallet,
+							action: 'Run-Action',
+							tags: tags,
+							data: { Input: {} },
+							returnResult: true,
+						});
+
+						if (hasExternalAdminAccess) {
+							if (zoneResult?.Messages?.length > 0) {
+								const assetIndexUpdateId = await permawebProvider.libs.sendMessage({
+									processId: assetId,
+									wallet: arProvider.wallet,
+									action: 'Send-Index',
+									tags: [
+										{ name: 'Asset-Type', value: ASSET_UPLOAD.ansType },
+										{ name: 'Date-Added', value: new Date().getTime().toString() },
+									],
+									data: { Recipients: [externalPortal.id] },
+								});
+
+								debugLog('info', 'PostEditor', `Asset index update: ${assetIndexUpdateId}`);
+								portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Posts, PortalPatchMapEnum.Requests]);
+							}
+						}
+					} catch (e: any) {
+						console.error(e);
+						throw new Error(e);
+					}
+				}
+			}
+		}
+	}
+
 	function getAssetAuthUsers() {
 		const authUsers = [portalProvider.current.id];
+
+		/* Add external portals as auth users if they exist */
+		if (currentPost.data?.externalRecipients?.length > 0) {
+			for (const portalId of currentPost.data.externalRecipients) {
+				const externalPortal = portalProvider.portals.find((portal: PortalHeaderType) => portal.id === portalId);
+
+				if (externalPortal) {
+					/* Give the external portal update access */
+					authUsers.push(externalPortal.id);
+				}
+			}
+		}
+
 		return authUsers;
 
-		/* Below is deprecated, all post updates now go directly through the portal */
+		/* Below is deprecated, all post updates now go directly through portal processes */
 
 		/* Give all admins and moderators access to the post */
 		for (const user of portalProvider.current?.users) {

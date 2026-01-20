@@ -75,16 +75,16 @@ export default function Panel(props: {
 							{props.handleClose && (
 								<S.Close>
 									<IconButton
-										type={'primary'}
+										type={'alt1'}
 										warning
 										src={ICONS.close}
 										handlePress={() => props.handleClose()}
 										active={false}
 										dimensions={{
-											wrapper: 32.5,
+											wrapper: 30,
 											icon: 18.5,
 										}}
-										tooltip={language?.close ?? 'Close'}
+										tooltip={language?.close}
 									/>
 								</S.Close>
 							)}

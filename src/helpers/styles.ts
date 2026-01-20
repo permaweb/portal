@@ -194,8 +194,10 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   .notification {
-    width: 16px;
 		height: 16px;
+		min-width: 16px;
+		width: fit-content;
+		padding: 0.5px 0.5px;
 		border-radius: 50%;
 		background: ${(props) => props.theme.colors.warning.primary};
 		display: flex;

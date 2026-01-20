@@ -181,10 +181,15 @@ export const EmptyCategoryBlock = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
-	padding: 20px;
-	border: 1px dashed ${(props) => props.theme.colors.border.primary};
+	padding: 0 15px 15px 15px;
+	border: 1px dotted ${(props) => props.theme.colors.border.primary};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	background: ${(props) => props.theme.colors.container.primary.background};
+`;
+
+export const EmptyCategoryAction = styled.div`
+	width: fit-content;
+	margin: 7.5px 0 0 auto;
 `;
 
 export const FilterInput = styled.input`

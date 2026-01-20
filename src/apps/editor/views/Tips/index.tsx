@@ -54,6 +54,13 @@ export default function Tips() {
 			tokenAddress: 'AR',
 		};
 	});
+
+	const [tips, setTips] = React.useState<TipRow[]>([]);
+	const [loadingTips, setLoadingTips] = React.useState(false);
+	const [tipsError, setTipsError] = React.useState<string | null>(null);
+	const [reloadKey, setReloadKey] = React.useState(0);
+	const [currentPage, setCurrentPage] = React.useState(1);
+
 	React.useEffect(() => {
 		const existing =
 			((portalProvider.current as any)?.monetization?.monetization as MonetizationConfig | undefined) ||
@@ -72,68 +79,6 @@ export default function Tips() {
 
 	const canEdit = !!portalProvider.permissions?.updatePortalMeta;
 	const fieldsDisabled = !monetization.enabled || !canEdit;
-
-	// Check if there are unsaved changes
-	const hasChanges = React.useMemo(() => {
-		if (!existingMonetization) return true;
-		return (
-			monetization.enabled !== existingMonetization.enabled ||
-			monetization.walletAddress.trim() !== existingMonetization.walletAddress.trim() ||
-			monetization.tokenAddress !== existingMonetization.tokenAddress
-		);
-	}, [monetization, existingMonetization]);
-
-	async function handleSaveTips() {
-		if (!portalProvider.current?.id || !portalProvider.permissions?.updatePortalMeta) {
-			return;
-		}
-		if (!arProvider.wallet || !permawebProvider.libs) {
-			addNotification(language.walletNotConnected, 'warning');
-			return;
-		}
-
-		const payload: MonetizationConfig = {
-			enabled: monetization.enabled,
-			walletAddress: monetization.walletAddress.trim(),
-			tokenAddress: monetization.tokenAddress || 'AR',
-		};
-
-		setSavingMonetization(true);
-
-		try {
-			const body: any = {
-				Monetization: permawebProvider.libs.mapToProcessCase
-					? permawebProvider.libs.mapToProcessCase(payload)
-					: payload,
-			};
-
-			const updateId = await permawebProvider.libs.updateZone(body, portalProvider.current.id, arProvider.wallet);
-			debugLog('info', 'Monetization', 'Monetization update:', updateId);
-
-			// keep in-memory portal up to date
-			(portalProvider.current as any).monetization = { monetization: payload };
-			(portalProvider.current as any).Monetization = payload;
-
-			if (portalProvider.refreshCurrentPortal) {
-				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Monetization);
-			}
-
-			addNotification(language.monetizationSaved, 'success');
-		} catch (e: any) {
-			debugLog('error', 'Monetization', 'Error saving monetization settings:', e.message ?? 'Unknown error');
-			addNotification(e?.message ?? 'Error saving monetization settings.', 'warning');
-		} finally {
-			setSavingMonetization(false);
-		}
-	}
-
-	// --- Tips History State ---
-
-	const [tips, setTips] = React.useState<TipRow[]>([]);
-	const [loadingTips, setLoadingTips] = React.useState(false);
-	const [tipsError, setTipsError] = React.useState<string | null>(null);
-	const [reloadKey, setReloadKey] = React.useState(0);
-	const [currentPage, setCurrentPage] = React.useState(1);
 
 	const pageSize = 5;
 
@@ -402,7 +347,7 @@ export default function Tips() {
 									options={['On', 'Off']}
 									activeOption={monetization.enabled ? 'On' : 'Off'}
 									handleToggle={handleToggle}
-									disabled={false}
+									disabled={!canEdit}
 								/>
 							</S.ConfigToggle>
 						</>,
@@ -446,7 +391,7 @@ export default function Tips() {
 								type={'alt4'}
 								label={language.refresh}
 								handlePress={() => setReloadKey((k) => k + 1)}
-								disabled={loadingTips}
+								disabled={!hasMonetization || loadingTips}
 							/>
 						</S.SectionHeader>
 
@@ -470,7 +415,7 @@ export default function Tips() {
 
 						{hasMonetization && !loadingTips && !tipsError && tips.length === 0 && (
 							<S.WrapperEmpty className={'border-wrapper-alt2'}>
-								<span>{language.noTipsYet}</span>
+								<p>{language.noTipsYet}</p>
 							</S.WrapperEmpty>
 						)}
 

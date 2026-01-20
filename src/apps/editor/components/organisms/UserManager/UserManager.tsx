@@ -336,7 +336,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 
 					<S.ActionsWrapper>
 						<Button
-							type={'primary'}
+							type={'alt1'}
 							label={language?.cancel ?? 'Cancel'}
 							handlePress={() => setShowRemoveConfirm(false)}
 							disabled={loading}

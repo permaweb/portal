@@ -74,13 +74,13 @@ export default function Users() {
 		if (!portalProvider.current?.id) return;
 		try {
 			setLoading(true);
+			setShowTransferInvitesModal(false);
 			await permawebProvider.libs.transferZoneOwnership({
 				zoneId: portalProvider.current.id,
 				op: 'Accept',
 			});
 			addNotification(language?.inviteAccepted ?? 'Ownership invite accepted', 'success');
 			portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Transfers, PortalPatchMapEnum.Users]);
-			setShowTransferInvitesModal(false);
 		} catch (error: any) {
 			console.error(error);
 			addNotification(error?.message ?? 'Error accepting invite', 'warning');
@@ -93,13 +93,13 @@ export default function Users() {
 		if (!portalProvider.current?.id) return;
 		try {
 			setLoading(true);
+			setShowTransferInvitesModal(false);
 			await permawebProvider.libs.transferZoneOwnership({
 				zoneId: portalProvider.current.id,
 				op: 'Reject',
 			});
 			addNotification(language?.inviteRejected ?? 'Ownership invite rejected', 'success');
 			portalProvider.refreshCurrentPortal([PortalPatchMapEnum.Transfers, PortalPatchMapEnum.Users]);
-			setShowTransferInvitesModal(false);
 		} catch (error: any) {
 			console.error(error);
 			addNotification(error?.message ?? 'Error rejecting invite', 'warning');
@@ -112,17 +112,14 @@ export default function Users() {
 		const hasInvites = pendingOwnershipInvites.length > 0;
 
 		return (
-			<Modal header={'Transfer Invites'} handleClose={loading ? undefined : () => setShowTransferInvitesModal(false)}>
+			<Modal
+				header={'Transfer Invites'}
+				handleClose={loading ? undefined : () => setShowTransferInvitesModal(false)}
+				className={'modal-wrapper'}
+			>
 				<S.TransferInvitesWrapper>
-					{loading && (
-						<S.LoadingOverlay>
-							<Loader sm relative />
-							<span>{language?.processingTransfer ?? 'Processing transfer…'}</span>
-						</S.LoadingOverlay>
-					)}
-
 					{hasInvites && (
-						<S.TransferInvitesList className="scroll-wrapper">
+						<S.TransferInvitesList className={'scroll-wrapper'}>
 							{pendingOwnershipInvites.map((request: any, index: number) => {
 								const inviterAddress = request.From ?? request.from;
 								const inviterUsername = inviteProfiles[inviterAddress]?.username ?? inviterAddress;
@@ -130,20 +127,20 @@ export default function Users() {
 								return (
 									<S.TransferInviteRow key={`${inviterAddress}-${index}`}>
 										<S.TransferInviteMeta>
-											<strong>{inviterUsername} is inviting you to take ownership of the current portal.</strong>
+											<span>{inviterUsername} is inviting you to take ownership of the current portal.</span>
 										</S.TransferInviteMeta>
 										<S.TransferInviteActions>
 											<Button
-												type="primary"
-												label={language?.accept ?? 'Accept'}
-												handlePress={handleAcceptOwnershipInvite}
+												type={'primary'}
+												label={language?.reject ?? 'Reject'}
+												handlePress={handleRejectOwnershipInvite}
 												disabled={loading}
 												height={32}
 											/>
 											<Button
-												type="alt1"
-												label={language?.reject ?? 'Reject'}
-												handlePress={handleRejectOwnershipInvite}
+												type={'alt1'}
+												label={language?.accept ?? 'Accept'}
+												handlePress={handleAcceptOwnershipInvite}
 												disabled={loading}
 												height={32}
 											/>
@@ -160,22 +157,30 @@ export default function Users() {
 
 	return (
 		<>
-			<S.Wrapper className={'fade-in'}>
+			<S.Wrapper>
 				<ViewHeader
 					header={language?.users}
 					actions={[
-						<S.HeaderAction key="transfers">
+						<S.HeaderAction key={'transfers'}>
 							{pendingOwnershipInvites.length > 0 && (
-								<button onClick={() => setShowTransferInvitesModal((prev) => !prev)} disabled={loading}>
-									{language?.transfersLabel ?? 'Transfers'}
+								<>
+									<Button
+										type={'primary'}
+										label={language?.transfersLabel ?? 'Transfers'}
+										handlePress={(e: any) => {
+											e.preventDefault();
+											e.stopPropagation();
+											setShowTransferInvitesModal((prev) => !prev);
+										}}
+									/>
 									<div className={'notification'}>
 										<span>{pendingOwnershipInvites.length}</span>
 									</div>
-								</button>
+								</>
 							)}
 						</S.HeaderAction>,
 						<Button
-							key="add-user"
+							key={'add-user'}
 							type={'alt1'}
 							label={language?.addUser}
 							handlePress={() => setShowAddUser(!showAddUser)}
@@ -205,8 +210,8 @@ export default function Users() {
 			>
 				<UserManager handleClose={() => setShowAddUser(false)} />
 			</Panel>
-
 			{showTransferInvitesModal && getTransferInvitesModal()}
+			{loading && <Loader message={`${language.loading}...`} />}
 		</>
 	);
 }

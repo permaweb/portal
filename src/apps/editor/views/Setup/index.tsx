@@ -10,7 +10,7 @@ export default function Setup() {
 	const language = languageProvider.object[languageProvider.current];
 
 	return (
-		<S.Wrapper className={'fade-in'}>
+		<S.Wrapper>
 			<ViewHeader header={language?.setup} />
 			<S.BodyWrapper>
 				<PortalSetup type={'detail'} />

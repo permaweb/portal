@@ -356,7 +356,7 @@ export default function Moderation() {
 	}
 
 	return (
-		<S.Wrapper className={'fade-in'}>
+		<S.Wrapper>
 			<ViewHeader header={language?.moderation} />
 			<S.BodyWrapper>
 				<>

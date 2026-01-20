@@ -44,6 +44,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	const language = languageProvider.object[languageProvider.current];
 
 	const authoritiesRef = React.useRef(false);
+	const prevWalletRef = React.useRef<string | null>(null);
 
 	const [deps, setDeps] = React.useState<any>(null);
 	const [libs, setLibs] = React.useState<any>(null);
@@ -89,6 +90,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				setProfile(null);
 				setProfileLoading(false);
 				setProfilePending(false);
+				prevWalletRef.current = null;
 				return;
 			}
 
@@ -96,23 +98,23 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				return;
 			}
 
-			const cachedProfile = getCachedProfile(arProvider.walletAddress);
-
-			if (cachedProfile) {
-				if (cachedProfile.status === 'pending') {
-					setProfilePending(true);
-				} else {
-					setProfilePending(false);
-				}
-				setProfile(cachedProfile);
-			} else {
+			const walletChanged = prevWalletRef.current !== arProvider.walletAddress;
+			if (walletChanged) {
+				setProfile(null);
 				setProfileLoading(true);
+				prevWalletRef.current = arProvider.walletAddress;
+			}
+
+			const cachedProfile = getCachedProfile(arProvider.walletAddress);
+			if (cachedProfile?.id) {
+				setProfile(normalizeProfile(cachedProfile));
 			}
 
 			try {
 				const freshProfile = await resolveProfile(arProvider.walletAddress);
 				if (freshProfile) {
 					setProfile(freshProfile);
+					cacheProfile(arProvider.walletAddress, freshProfile);
 					if (profilePending) setProfilePending(false);
 				}
 			} catch (e: any) {
@@ -153,7 +155,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	const refreshProfile = React.useCallback(async () => {
 		if (arProvider.wallet && arProvider.walletAddress) {
 			try {
-				const newProfile = await resolveProfile(arProvider.walletAddress, { hydrate: true });
+				const newProfile = await resolveProfile(arProvider.walletAddress);
 				if (newProfile) {
 					setProfile(newProfile);
 					cacheProfile(arProvider.walletAddress, newProfile);
@@ -191,14 +193,10 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [profile?.id, AO_NODE.authority, libs?.updateZoneAuthorities]);
 
-	async function resolveProfile(address: string, opts?: { hydrate?: boolean }): Promise<Types.ProfileType | undefined> {
+	async function resolveProfile(address: string): Promise<Types.ProfileType | undefined> {
 		if (libs) {
 			try {
-				let fetchedProfile: any;
-				const cachedProfile = getCachedProfile(address);
-				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id, opts);
-				else fetchedProfile = await libs.getProfileByWalletAddress(address);
-
+				const fetchedProfile = await libs.getProfileByWalletAddress(address);
 				const profileToUse = normalizeProfile({ ...fetchedProfile });
 
 				cacheProfile(address, profileToUse);
@@ -241,9 +239,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	}
 
 	function setPortalRoles(roles: string[]) {
-		if (profile) {
-			setProfile({ ...profile, roles });
-		}
+		setProfile((currentProfile: Types.ProfileType | null) => (currentProfile ? { ...currentProfile, roles } : null));
 	}
 
 	return (

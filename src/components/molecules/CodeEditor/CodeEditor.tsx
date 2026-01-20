@@ -90,7 +90,7 @@ export default function CodeEditor(props: {
 	};
 
 	const handleBeforeMount: BeforeMount = (monaco) => {
-		monacoRef.current = monaco;
+		(monacoRef as any).current = monaco;
 
 		monaco.editor.defineTheme(themes.light, {
 			base: 'vs',
@@ -211,6 +211,15 @@ export default function CodeEditor(props: {
 							fontWeight: '600',
 							scrollBeyondLastLine: false,
 							colorDecorators: false,
+							suggest: {
+								showWords: true,
+								showSnippets: true,
+							},
+							quickSuggestions: {
+								other: true,
+								comments: false,
+								strings: props.language === 'html',
+							},
 							scrollbar: {
 								verticalSliderSize: 8,
 								horizontalSliderSize: 8,

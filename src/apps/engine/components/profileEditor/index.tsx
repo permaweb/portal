@@ -289,11 +289,9 @@ export default function ProfileEditor(props: {
 					</S.Wrapper>
 					{loading && (
 						<S.LoadingMessage>
-							<span>
-								{props.profile && props.profile.id
-									? `${language?.profileUpdatingInfo}...`
-									: `${language?.profileCreatingInfo}...`}
-							</span>
+							<span />
+							<span />
+							<span />
 						</S.LoadingMessage>
 					)}
 				</>

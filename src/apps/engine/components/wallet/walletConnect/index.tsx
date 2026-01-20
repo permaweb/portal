@@ -33,6 +33,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	const [label, setLabel] = React.useState<string>('Log in');
 	const [banner, setBanner] = React.useState<string>('');
 	const [avatar, setAvatar] = React.useState<string>('');
+	const [isLoading, setIsLoading] = React.useState<boolean>(false);
 	const wrapperRef = React.useRef();
 
 	const {
@@ -65,77 +66,81 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		}
 	}, [showUserMenu]);
 
-	React.useEffect(() => {
-		if (!instance) {
-			try {
-				const wanderInstance = new WanderConnect({
-					clientId: 'FREE_TRIAL',
-					theme: 'Dark',
-					button: {
-						parent: wrapperRef.current,
-						label: false,
-						customStyles: `
-							#wanderConnectButtonHost {
-								// display:none;
-							}`,
-					},
-					iframe: {
-						routeLayout: {
-							default: {
-								// type: 'dropdown',
-								type: 'modal',
-							},
-							auth: {
-								type: 'modal',
-							},
-							'auth-request': {
-								type: 'modal',
-							},
+	if (!window.wanderInstance && wrapperRef.current) {
+		try {
+			const wanderInstance = new WanderConnect({
+				clientId: 'FREE_TRIAL',
+				theme: 'Dark',
+				button: {
+					parent: wrapperRef.current,
+					label: false,
+					customStyles: `
+						#wanderConnectButtonHost {
+							// display:none;
+						}`,
+				},
+				iframe: {
+					routeLayout: {
+						default: {
+							// type: 'dropdown',
+							type: 'modal',
 						},
-						cssVars: {
-							light: {
-								shadowBlurred: 'none',
-							},
-							dark: {
-								shadowBlurred: 'none',
-								boxShadow: 'none',
-							},
+						auth: {
+							type: 'modal',
 						},
-						customStyles: ``,
+						'auth-request': {
+							type: 'modal',
+						},
 					},
-				});
+					cssVars: {
+						light: {
+							shadowBlurred: 'none',
+						},
+						dark: {
+							shadowBlurred: 'none',
+							boxShadow: 'none',
+						},
+					},
+					customStyles: ``,
+				},
+			});
 
-				setInstance(wanderInstance);
-				window.wanderInstance = wanderInstance;
-			} catch (e) {
-				console.error(e);
-			}
+			window.wanderInstance = wanderInstance;
+		} catch (e) {
+			console.error(e);
 		}
+	}
 
+	React.useEffect(() => {
 		return () => {
 			try {
-				window.wanderInstance.destroy();
+				window.wanderInstance?.destroy();
+				window.wanderInstance = null;
 			} catch {}
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 	React.useEffect(() => {
 		if (auth) {
 			const status = auth.authStatus;
-			if (status === 'loading') setLabel('Signing in');
-			else if (
+			if (status === 'loading') {
+				setIsLoading(true);
+				setLabel('');
+			} else if (
 				(status === 'authenticated' || auth.authType === 'NATIVE_WALLET' || localStorage.getItem(STORAGE.walletType)) &&
 				profile
 			) {
+				setIsLoading(false);
 				setLabel(profile.displayName || 'My Profile');
 				setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : '');
 				setBanner(profile?.banner && checkValidAddress(profile.banner) ? getTxEndpoint(profile.banner) : '');
 			}
 		} else if (localStorage.getItem(STORAGE.walletType) && profile) {
+			setIsLoading(false);
 			setLabel(profile.displayName || 'My Profile');
 			setAvatar(profile?.thumbnail && checkValidAddress(profile.thumbnail) ? getTxEndpoint(profile.thumbnail) : '');
 			setBanner(profile?.banner && checkValidAddress(profile.banner) ? getTxEndpoint(profile.banner) : '');
 		} else {
+			setIsLoading(false);
 			setLabel('Log in');
 			setAvatar('');
 			setBanner('');
@@ -443,11 +448,22 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 									{language.myComments}
 								</S.NavigationEntry>
 								{auth?.authType !== 'NATIVE_WALLET' && arProvider.walletType !== 'NATIVE_WALLET' && (
-									<S.NavigationEntry onClick={() => window.wanderInstance.open()}>
+									<S.NavigationEntry onClick={() => window.wanderInstance.open('home')}>
 										<ReactSVG src={ICONS.wallet} />
 										{language.myWallet}
 									</S.NavigationEntry>
 								)}
+								{auth?.authType !== 'NATIVE_WALLET' &&
+									arProvider.walletType !== 'NATIVE_WALLET' &&
+									arProvider.backupsNeeded > 0 && (
+										<S.NavigationEntry onClick={() => window.wanderInstance.open('backup')}>
+											<ReactSVG src={ICONS.backup} />
+											{language.backupWallet || 'Backup Wallet'}
+											<S.Hint>
+												<ReactSVG src={ICONS.info} />
+											</S.Hint>
+										</S.NavigationEntry>
+									)}
 								<S.NavigationEntry onClick={() => setShowProfileManage(true)}>
 									<ReactSVG src={profile?.id ? ICONS.edit : ICONS.user} />
 									{profile?.id ? language.editProfile : language.createProfile}
@@ -517,13 +533,15 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	function getHeader() {
 		const profileReady = permawebProvider.libs && !permawebProvider.profileLoading;
 		const missingProfileCount = profileReady && !profile?.id ? 1 : 0;
-		const notificationCount = (arProvider.backupsNeeded || 0) + missingProfileCount;
+		const isEmbeddedWallet = auth?.authType !== 'NATIVE_WALLET' && arProvider.walletType !== 'NATIVE_WALLET';
+		const backupCount = isEmbeddedWallet ? arProvider.backupsNeeded || 0 : 0;
+		const notificationCount = backupCount + missingProfileCount;
 		const showNotification = arProvider.walletAddress && notificationCount > 0;
 
 		return (
 			<S.UserButton>
 				<S.WanderConnectWrapper ref={wrapperRef} />
-				{label && (
+				{(label || isLoading) && (
 					<S.LAction onClick={handlePress}>
 						{avatar ? (
 							<div>
@@ -535,7 +553,14 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 						<S.MobileAvatar>
 							<Avatar profile={profile} size={26} />
 						</S.MobileAvatar>
-						<span>{label}</span>
+						<S.LabelWrapper $loading={isLoading}>
+							<S.LoadingDots $visible={isLoading}>
+								<span />
+								<span />
+								<span />
+							</S.LoadingDots>
+							<span>{label || 'Log in'}</span>
+						</S.LabelWrapper>
 						{showNotification && <S.NotificationBubble>{notificationCount}</S.NotificationBubble>}
 					</S.LAction>
 				)}

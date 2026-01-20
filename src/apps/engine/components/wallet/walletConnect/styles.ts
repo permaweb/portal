@@ -42,7 +42,7 @@ export const UserButton = styled.div`
 `;
 
 export const LAction = styled.button`
-	display: flex;
+	display: inline-flex;
 	justify-content: center;
 	align-items: center;
 	height: 35px;
@@ -73,17 +73,6 @@ export const LAction = styled.button`
 			border-radius: 50%;
 			outline: 2px solid rgba(var(--color-text), 1);
 		}
-
-		@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
-			display: none;
-		}
-	}
-
-	span {
-		color: rgba(var(--color-text), 1);
-		font-weight: 800;
-		display: block;
-		margin: 0 2px;
 
 		@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
 			display: none;
@@ -557,8 +546,8 @@ export const LayoutButton = styled.button<{ $primary?: boolean }>`
 
 export const NotificationBubble = styled.div`
 	position: absolute;
-	top: -4px;
-	right: -10px;
+	top: -6px;
+	right: -6px;
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
@@ -572,6 +561,13 @@ export const NotificationBubble = styled.div`
 	filter: invert(1);
 	animation: pulse 2s infinite;
 
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		top: -4px;
+		right: auto;
+		left: 16px;
+		filter: none;
+	}
+
 	@keyframes pulse {
 		0% {
 			box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.7);
@@ -581,6 +577,76 @@ export const NotificationBubble = styled.div`
 		}
 		100% {
 			box-shadow: 0 0 0 0 transparent;
+		}
+	}
+`;
+
+export const LabelWrapper = styled.div<{ $loading?: boolean }>`
+	display: grid;
+	align-items: center;
+	margin-left: 2px;
+	max-width: ${(props) => (props.$loading ? '50px' : '200px')};
+	overflow: hidden;
+	transition: max-width 0.6s ease;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		display: none;
+	}
+
+	> * {
+		grid-area: 1 / 1;
+	}
+
+	> span {
+		color: rgba(var(--color-text), 1);
+		font-weight: 800;
+		white-space: nowrap;
+		opacity: ${(props) => (props.$loading ? 0 : 1)};
+		transition: opacity 0.2s ease;
+	}
+`;
+
+export const LoadingDots = styled.div<{ $visible?: boolean }>`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1px;
+	padding-top: 4px;
+	padding-left: 8px;
+	padding-right: 8px;
+	opacity: ${(props) => (props.$visible ? 1 : 0)};
+	transition: opacity 0.2s ease;
+	filter: invert(1);
+
+	span {
+		width: 5px;
+		height: 5px;
+		border-radius: 50%;
+		background: rgba(var(--color-text), 1);
+		animation: loadingWave 1s infinite ease-in-out;
+
+		&:nth-child(1) {
+			animation-delay: 0s;
+		}
+		&:nth-child(2) {
+			animation-delay: 0.15s;
+		}
+		&:nth-child(3) {
+			animation-delay: 0.3s;
+		}
+	}
+
+	@keyframes loadingWave {
+		0%,
+		100% {
+			transform: translateY(0) scale(0.6);
+			opacity: 0.4;
+			background: rgba(var(--color-background), 1);
+		}
+		50% {
+			transform: translateY(-4px) scale(1);
+			opacity: 1;
+			background: rgba(var(--color-primary), 1);
 		}
 	}
 `;

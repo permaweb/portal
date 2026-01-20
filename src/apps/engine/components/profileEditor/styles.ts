@@ -1,3 +1,4 @@
+import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
 export const Wrapper = styled.div``;
@@ -17,8 +18,12 @@ export const Body = styled.div`
 	display: flex;
 	justify-content: center;
 	flex-wrap: wrap;
-	gap: 10px;
-	padding: 20px;
+	gap: var(--spacing-xs);
+	padding: var(--spacing-m);
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		padding: var(--spacing-xs);
+	}
 `;
 
 export const Form = styled.div`
@@ -39,6 +44,7 @@ export const Form = styled.div`
 		padding: 8px 10px;
 		outline: none;
 		border: 1px solid rgba(var(--color-border), 0.5);
+		border-radius: var(--border-radius);
 		background: rgba(var(--color-text), 0.05);
 		color: rgba(var(--color-text), 1);
 
@@ -55,11 +61,16 @@ export const Form = styled.div`
 		box-sizing: border-box;
 		outline: none;
 		border: 1px solid rgba(var(--color-border), 0.5);
+		border-radius: var(--border-radius);
 		background: rgba(var(--color-text), 0.05);
 		color: rgba(var(--color-text), 1);
 
 		&:focus {
 			border: 1px solid rgba(var(--color-primary), 1);
+		}
+
+		@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+			height: 100px !important;
 		}
 	}
 `;
@@ -68,6 +79,10 @@ export const TForm = styled.div`
 	display: flex;
 	flex-direction: column;
 	margin: 20px 0 30px 0;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		margin: var(--spacing-xs) 0;
+	}
 `;
 
 export const PWrapper = styled.div`
@@ -77,6 +92,11 @@ export const PWrapper = styled.div`
 	flex: 1;
 	input {
 		display: none;
+	}
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		min-width: unset;
+		width: 100%;
 	}
 `;
 
@@ -123,6 +143,15 @@ export const BannerInput = styled.button<{ $hasBanner: boolean }>`
 		width: 100%;
 		object-fit: cover;
 	}
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		height: 120px;
+
+		img {
+			height: 120px;
+		}
+	}
+
 	&:hover {
 		outline: 1px dashed rgba(var(--color-primary), 1);
 		outline-offset: -1px;
@@ -159,7 +188,7 @@ export const BannerInput = styled.button<{ $hasBanner: boolean }>`
         }
         &:hover {
 					cursor: pointer;
-					border: none;
+					border: 1px solid rgba(var(--color-border), 0.5);
         }
     `
 			: ''}
@@ -194,6 +223,18 @@ export const AvatarInput = styled.button<{ $hasAvatar: boolean }>`
 		border-radius: 50%;
 		object-fit: cover;
 	}
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		height: 70px;
+		width: 70px;
+		bottom: -35px;
+		left: 10px;
+
+		svg {
+			margin: 0;
+		}
+	}
+
 	&:hover {
 		outline: 1px dashed rgba(var(--color-primary), 1);
 		outline-offset: -1px;
@@ -228,7 +269,7 @@ export const AvatarInput = styled.button<{ $hasAvatar: boolean }>`
         }
         &:hover {
             cursor: pointer;
-            border: none;
+            border: 1px solid rgba(var(--color-border), 0.5);
         }
     `
 			: ''}
@@ -238,8 +279,14 @@ export const ImageActions = styled.div`
 	display: flex;
 	justify-content: flex-end;
 	flex-wrap: wrap;
-	gap: 10px;
-	margin-top: 10px;
+	gap: var(--spacing-xs);
+	margin-top: var(--spacing-xs);
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		button {
+			padding: var(--spacing-xxs) var(--spacing-xs);
+		}
+	}
 `;
 
 export const PInfoMessage = styled.div`
@@ -309,11 +356,38 @@ export const LoadingMessage = styled.div`
 	border-radius: 8px;
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 	z-index: 1000;
+	display: flex;
+	align-items: center;
+	gap: 4px;
 
 	span {
-		display: block;
-		font-size: 16px;
-		font-weight: 500;
-		color: rgba(var(--color-font), 1);
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: rgba(var(--color-primary), 1);
+		animation: loadingDot 1.4s infinite ease-in-out both;
+
+		&:nth-child(1) {
+			animation-delay: -0.32s;
+		}
+		&:nth-child(2) {
+			animation-delay: -0.16s;
+		}
+		&:nth-child(3) {
+			animation-delay: 0s;
+		}
+	}
+
+	@keyframes loadingDot {
+		0%,
+		80%,
+		100% {
+			transform: scale(0.6);
+			opacity: 0.4;
+		}
+		40% {
+			transform: scale(1);
+			opacity: 1;
+		}
 	}
 `;

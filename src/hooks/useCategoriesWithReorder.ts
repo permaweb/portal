@@ -13,7 +13,7 @@ export function useCategoriesWithReorder(props: {
 	skipAuthCheck?: boolean;
 	selectOnAdd?: boolean;
 	unauthorized?: boolean;
-	portalId: string;
+	portalId: string | null;
 	portalCategories: PortalCategoryType[] | null;
 	refreshCurrentPortal: (patchKey: PortalPatchMapEnum.Navigation) => void;
 }) {
@@ -25,6 +25,8 @@ export function useCategoriesWithReorder(props: {
 
 	const categoryElementRefs = React.useRef<Map<string, HTMLElement>>(new Map());
 	const draggedElementRef = React.useRef<HTMLElement | null>(null);
+	const draggedIdRef = React.useRef<string | null>(null);
+	const originalDraggedRect = React.useRef<DOMRect | null>(null);
 
 	const [categoryOptions, setCategoryOptions] = React.useState<PortalCategoryType[] | null>(null);
 	const [showCategoryAdd, setShowCategoryAdd] = React.useState<boolean>(false);
@@ -35,6 +37,7 @@ export function useCategoriesWithReorder(props: {
 	const [isDragging, setIsDragging] = React.useState<boolean>(false);
 	const [dragOverId, setDragOverId] = React.useState<string | null>(null);
 	const [showChildDropZone, setShowChildDropZone] = React.useState<boolean>(false);
+	const [showUnNestIndicator, setShowUnNestIndicator] = React.useState<boolean>(false);
 	const [mouseX, setMouseX] = React.useState<number>(0);
 	const [categoryElementRects, setCategoryElementRects] = React.useState<Map<string, DOMRect>>(new Map());
 
@@ -55,6 +58,13 @@ export function useCategoriesWithReorder(props: {
 		setCategoryElementRects(rects);
 	}, [props.allowReorder]);
 
+	// Sync categoryOptions with portalCategories
+	React.useEffect(() => {
+		if (props.portalCategories) {
+			setCategoryOptions(props.portalCategories);
+		}
+	}, [props.portalCategories]);
+
 	// Mouse tracking during drag
 	React.useEffect(() => {
 		const handleMouseMove = (event: MouseEvent) => {
@@ -70,6 +80,84 @@ export function useCategoriesWithReorder(props: {
 			};
 		}
 	}, [isDragging]);
+
+	// Store the current destination index from drag updates
+	const currentDestinationRef = React.useRef<number | null>(null);
+
+	// Update drag indicators based on mouse position
+	React.useEffect(() => {
+		if (!isDragging || !draggedIdRef.current || !originalDraggedRect.current || mouseX === 0) {
+			return;
+		}
+
+		const draggedId = draggedIdRef.current;
+
+		const flattened = flattenCategories(categoryOptions);
+		const dragged = flattened.find((item) => item.category.id === draggedId);
+		if (!dragged) return;
+
+		const NEST_THRESHOLD = 40;
+		// For un-nesting: trigger when dragged left by (indentation - buffer)
+		// This makes it trigger when roughly aligned with parent level
+		const INDENTATION_PER_LEVEL = 20;
+		const UNNEST_BUFFER = 40; // Large buffer to account for grab position offset and make it easier to trigger
+
+		// Use the original rect position, not the current animated position
+		const originalLeft = originalDraggedRect.current.left;
+
+		// Calculate the left position where the parent level would be
+		// Each level is indented by INDENTATION_PER_LEVEL pixels
+		// So the parent level (one level up) would be INDENTATION_PER_LEVEL pixels to the left
+		const parentLevelLeft = originalLeft - INDENTATION_PER_LEVEL;
+
+		// Check if dragging left to un-nest
+		// Should trigger when mouse is roughly at or left of where the parent level starts
+		// We add UNNEST_BUFFER to make it easier to trigger
+		if (dragged.level > 0 && mouseX <= parentLevelLeft + UNNEST_BUFFER) {
+			setDragOverId(dragged.category.id);
+			setShowChildDropZone(false);
+			setShowUnNestIndicator(true);
+			return;
+		}
+
+		// Check if dragging right to nest
+		// Use the current destination position if available, otherwise use source
+		if (mouseX > originalLeft + NEST_THRESHOLD) {
+			const sourceIndex = flattened.findIndex((item) => item.category.id === draggedId);
+			const currentDestination = currentDestinationRef.current;
+
+			// Determine which category should be the parent based on current drag position
+			let potentialParentIndex = -1;
+			if (currentDestination !== null && currentDestination > 0) {
+				// Use the category before the current destination
+				potentialParentIndex = currentDestination > sourceIndex ? currentDestination : currentDestination - 1;
+			} else if (sourceIndex > 0) {
+				// Fall back to source position
+				potentialParentIndex = sourceIndex - 1;
+			}
+
+			if (potentialParentIndex >= 0 && potentialParentIndex < flattened.length) {
+				const potentialParent = flattened[potentialParentIndex];
+				const canBeChild =
+					potentialParent &&
+					!potentialParent.path.startsWith(dragged.path + '.') &&
+					!dragged.path.startsWith(potentialParent.path + '.') &&
+					potentialParent.category.id !== dragged.category.id;
+
+				if (canBeChild) {
+					setDragOverId(potentialParent.category.id);
+					setShowChildDropZone(true);
+					setShowUnNestIndicator(false);
+					return;
+				}
+			}
+		}
+
+		// Clear indicators if not nesting/un-nesting
+		setDragOverId(null);
+		setShowChildDropZone(false);
+		setShowUnNestIndicator(false);
+	}, [isDragging, mouseX, categoryElementRects, categoryOptions]);
 
 	const addCategory = async () => {
 		if (!props.unauthorized && newCategoryName && props.portalId && arProvider.wallet) {
@@ -333,59 +421,120 @@ export function useCategoriesWithReorder(props: {
 	};
 
 	const handleDragEnd = async (result: any) => {
-		// Store dragOverId before clearing it for logic use
-		const activeDragOverId = dragOverId;
+		// Store dragOverId and mouseX before clearing for logic use
+		// @ts-ignore
+		const _activeDragOverId = dragOverId;
+		const currentMouseX = mouseX;
+		const originalRect = originalDraggedRect.current;
 
 		// Clean up all drag states immediately
 		setIsDragging(false);
 		setSelectedIds(new Set());
 		setDragOverId(null);
 		setShowChildDropZone(false);
+		setShowUnNestIndicator(false);
 		setMouseX(0);
 		draggedElementRef.current = null;
+		draggedIdRef.current = null;
+		originalDraggedRect.current = null;
+		currentDestinationRef.current = null;
 
-		if (!result.destination || props.unauthorized) return;
+		if (props.unauthorized) return;
+
 		const { source, destination } = result;
-		if (source.index === destination.index) return;
-
 		const flattened = flattenCategories(categoryOptions);
 		const dragged = flattened[source.index];
 
-		// Check if we're trying to make a category a child of itself or its descendants
-		const draggedTarget = destination.index < flattened.length ? flattened[destination.index] : null;
-		const isDraggedIntoDescendant =
-			draggedTarget && (draggedTarget.path === dragged.path || draggedTarget.path.startsWith(dragged.path + '.'));
+		// Check if user is trying to nest/unnest based on horizontal movement
+		const NEST_THRESHOLD = 40;
+		const INDENTATION_PER_LEVEL = 20;
+		const UNNEST_BUFFER = 40; // Large buffer to account for grab position offset and make it easier to trigger
 
-		if (isDraggedIntoDescendant) {
-			addNotification('Cannot make a category a child of itself or its descendants', 'warning');
-			return;
-		}
-
-		// Determine if this should be a child relationship based on:
-		// 1. Position relative to potential parent
-		// 2. Mouse position being to the right of the parent (tracked via dragOverId)
 		let shouldMakeChild = false;
+		let shouldUnNest = false;
 		let newParent = null;
 
-		if (activeDragOverId) {
-			// Find the parent based on activeDragOverId (which was set during drag update)
-			const potentialParent = flattened.find((item) => item.category.id === activeDragOverId);
+		// Determine nesting intent from mouse position using the stored original position
+		if (originalRect && currentMouseX > 0) {
+			const originalLeft = originalRect.left;
+			const parentLevelLeft = originalLeft - INDENTATION_PER_LEVEL;
 
-			// Check if we can make this a child relationship
-			const canBeChild =
-				potentialParent &&
-				!potentialParent.path.startsWith(dragged.path + '.') && // Not dragging into own descendant
-				potentialParent.category.id !== dragged.category.id; // Not same category
+			// User dragged to the right - try to make it a child
+			if (currentMouseX > originalLeft + NEST_THRESHOLD) {
+				// Find the category immediately before this one (or at destination) to use as parent
+				let potentialParentIndex = source.index - 1;
 
-			if (canBeChild) {
-				shouldMakeChild = true;
-				newParent = potentialParent;
+				// If we moved to a new position, use the category before the destination
+				if (destination.index !== source.index && destination.index > 0) {
+					potentialParentIndex = destination.index > source.index ? destination.index : destination.index - 1;
+				}
+
+				if (potentialParentIndex >= 0 && potentialParentIndex < flattened.length) {
+					const potentialParent = flattened[potentialParentIndex];
+					const canBeChild =
+						potentialParent &&
+						!potentialParent.path.startsWith(dragged.path + '.') && // Not dragging into own descendant
+						!dragged.path.startsWith(potentialParent.path + '.') && // Not already a descendant
+						potentialParent.category.id !== dragged.category.id; // Not same category
+
+					if (canBeChild) {
+						shouldMakeChild = true;
+						newParent = potentialParent;
+					}
+				}
+			}
+			// User dragged to the left - try to un-nest
+			// Check if mouse is at or left of where the parent level starts
+			else if (dragged.level > 0 && currentMouseX <= parentLevelLeft + UNNEST_BUFFER) {
+				shouldUnNest = true;
+			}
+		}
+
+		// If no valid destination and not un-nesting, return early
+		if (!destination && !shouldUnNest) return;
+
+		// Early return only if no movement AND no nesting change
+		if (destination && source.index === destination.index && !shouldMakeChild && !shouldUnNest) return;
+
+		// Check if we're trying to make a category a child of itself or its descendants (only for regular moves)
+		if (!shouldMakeChild && !shouldUnNest && destination) {
+			const draggedTarget = destination.index < flattened.length ? flattened[destination.index] : null;
+			const isDraggedIntoDescendant =
+				draggedTarget && (draggedTarget.path === dragged.path || draggedTarget.path.startsWith(dragged.path + '.'));
+
+			if (isDraggedIntoDescendant) {
+				addNotification('Cannot make a category a child of itself or its descendants', 'warning');
+				return;
 			}
 		}
 
 		let reordered: PortalCategoryType[];
 
-		if (shouldMakeChild && newParent) {
+		if (shouldUnNest) {
+			// Un-nest the dragged item (move it up one level)
+			const subtree = flattened.filter(
+				(item) => item.path === dragged.path || item.path.startsWith(dragged.path + '.')
+			);
+			const remaining = flattened.filter(
+				(item) => !(item.path === dragged.path || item.path.startsWith(dragged.path + '.'))
+			);
+
+			// Decrease the level by 1 for the dragged item and its children
+			const updatedSubtree = subtree.map((item) => ({
+				...item,
+				level: Math.max(0, item.level - 1),
+			}));
+
+			// When un-nesting, keep the item in the same position (or use source position if no destination)
+			let insertIdx = destination ? destination.index : source.index;
+			if (destination && destination.index > source.index) {
+				insertIdx = destination.index + 1;
+			}
+
+			const newFlattened = [...remaining.slice(0, insertIdx), ...updatedSubtree, ...remaining.slice(insertIdx)];
+
+			reordered = reconstructHierarchy(newFlattened);
+		} else if (shouldMakeChild && newParent) {
 			// Make the dragged item a child of the new parent
 			const subtree = flattened.filter(
 				(item) => item.path === dragged.path || item.path.startsWith(dragged.path + '.')
@@ -416,8 +565,8 @@ export function useCategoriesWithReorder(props: {
 			const newFlattened = [...remaining.slice(0, insertIdx), ...updatedSubtree, ...remaining.slice(insertIdx)];
 
 			reordered = reconstructHierarchy(newFlattened);
-		} else {
-			// Regular reordering logic
+		} else if (destination && source.index !== destination.index) {
+			// Regular reordering logic - only if position actually changed
 			const subtree = flattened.filter(
 				(item) => item.path === dragged.path || item.path.startsWith(dragged.path + '.')
 			);
@@ -432,6 +581,9 @@ export function useCategoriesWithReorder(props: {
 
 			const newFlattened = [...remaining.slice(0, insertIdx), ...subtree, ...remaining.slice(insertIdx)];
 			reordered = reconstructHierarchy(newFlattened);
+		} else {
+			// No changes were made
+			return;
 		}
 
 		setCategoryOptions(reordered);
@@ -465,12 +617,22 @@ export function useCategoriesWithReorder(props: {
 			.filter((item) => item.path === dragged.path || item.path.startsWith(dragged.path + '.'))
 			.map((item) => item.category.id);
 
+		// Capture the dragged element ref, ID, and original position
+		const draggedEl = categoryElementRefs.current.get(draggedId);
+		if (draggedEl) {
+			draggedElementRef.current = draggedEl;
+			originalDraggedRect.current = draggedEl.getBoundingClientRect();
+		}
+		draggedIdRef.current = draggedId;
+
 		// Reset all drag-related state
 		setDragOverId(null);
 		setShowChildDropZone(false);
+		setShowUnNestIndicator(false);
 		setSelectedIds(new Set(subtreeIds));
 		setIsDragging(true);
 		setMouseX(0);
+		currentDestinationRef.current = null;
 
 		// Update element rects immediately when drag starts
 		setTimeout(() => {
@@ -480,66 +642,20 @@ export function useCategoriesWithReorder(props: {
 
 	function handleDragUpdate(update: any) {
 		if (!update.destination) {
-			setDragOverId(null);
-			setShowChildDropZone(false);
+			currentDestinationRef.current = null;
+			// Don't clear indicators here - let the useEffect handle it based on mouseX
 			return;
 		}
 
-		const { destination } = update;
-		const flattened = flattenCategories(categoryOptions);
-		const dragged = flattened.find((item) => item.category.id === update.draggableId);
-
-		if (!dragged) {
-			setDragOverId(null);
-			setShowChildDropZone(false);
-			return;
-		}
-
-		// Find the category element we're hovering over based on destination index
 		// @ts-ignore
-		let hoveredCategory = null;
+		const { destination, source } = update;
 
-		// Use destination index to find the category we're dropping near
-		if (destination.index < flattened.length) {
-			hoveredCategory = flattened[destination.index];
-		} else if (destination.index > 0 && destination.index >= flattened.length) {
-			// If dropping at the end, use the last category
-			hoveredCategory = flattened[flattened.length - 1];
-		}
+		// Store the current destination index for the useEffect to use
+		currentDestinationRef.current = destination.index;
 
-		let bestParentCandidate = null;
-
-		// Only show parent relationship if:
-		// 1. Mouse is significantly to the right (indicating intent to nest)
-		// 2. The target category can be a valid parent
-		if (mouseX > 850) {
-			let potentialParent = null;
-
-			// Find the category that should become the parent
-			// This should be the category immediately before the current drop position
-			// or the category we're hovering over if we're dropping at the end
-			if (destination.index > 0) {
-				potentialParent = flattened[destination.index - 1];
-			}
-
-			if (potentialParent && potentialParent.category.id !== dragged.category.id) {
-				const canBeChild =
-					!potentialParent.path.startsWith(dragged.path + '.') && // Not dragging into own descendant
-					!(dragged.path.startsWith(potentialParent.path + '.') && dragged.level === potentialParent.level + 1); // Not already a direct child
-
-				if (canBeChild) {
-					bestParentCandidate = potentialParent;
-				}
-			}
-		}
-
-		if (bestParentCandidate) {
-			setDragOverId(bestParentCandidate.category.id);
-			setShowChildDropZone(true);
-		} else {
-			setDragOverId(null);
-			setShowChildDropZone(false);
-		}
+		// Don't override drag indicators here - the useEffect based on mouseX is more accurate
+		// This function only updates when destination changes (vertical movement)
+		// The useEffect updates on every mouseX change (horizontal movement)
 	}
 
 	return {
@@ -560,6 +676,7 @@ export function useCategoriesWithReorder(props: {
 		isDragging,
 		dragOverId,
 		showChildDropZone,
+		showUnNestIndicator,
 		handleDragEnd,
 		handleDragStart,
 		handleDragUpdate,

@@ -44,7 +44,13 @@ export const UpdateWrapper = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 7.5px;
-	padding: 5.5px 7.5px !important;
+
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		white-space: nowrap;
+	}
 
 	.indicator {
 		height: 10px;

@@ -39,7 +39,12 @@ export const Container = styled.div<{
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
 		top: var(--spacing-xxs);
 		right: var(--spacing-xxs);
+		min-width: unset;
+		width: 300px;
 		max-width: calc(100vw - var(--spacing-l));
+		max-height: calc(100vh - var(--spacing-xxs) * 2);
+		overflow-x: hidden;
+		overflow-y: auto;
 	}
 `;
 
@@ -50,6 +55,10 @@ export const Header = styled.div`
 	justify-content: space-between;
 	align-items: center;
 	padding: 0 20px;
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
+		padding: 0 var(--spacing-xs);
+	}
 `;
 
 export const LT = styled.div`
@@ -63,6 +72,7 @@ export const Title = styled.h2`
 	overflow: hidden;
 	text-overflow: ellipsis;
 	margin: 2.5px 0 0 0;
+	color: rgba(var(--color-text), 1);
 `;
 
 export const Close = styled.div`

@@ -295,6 +295,15 @@ export const cachePortal = (id: string, portalData: any) => {
 	localStorage.setItem(STORAGE.portal(id), JSON.stringify(portalData));
 };
 
+export const getCachedPermissions = (portalId: string, userId: string) => {
+	const cached = localStorage.getItem(STORAGE.permissions(portalId, userId));
+	return cached ? JSON.parse(cached) : null;
+};
+
+export const cachePermissions = (portalId: string, userId: string, permissions: any) => {
+	localStorage.setItem(STORAGE.permissions(portalId, userId), JSON.stringify(permissions));
+};
+
 export function getPortalAssets(index: PortalAssetType[]) {
 	return index?.filter(
 		(asset: any) =>
@@ -573,7 +582,18 @@ export function debugLog(level: string, context: string, ...args: any[]) {
 	const style = COLORS[level] || 'color: #8F8F8F';
 	const method = METHOD[level] || console.log;
 
-	method(`%c[Portal: ${capitalize(level)}]%c %c(${context})%c -`, style, '', 'font-weight: medium;', '', ...args);
+	const formattedArgs = args.map((arg) =>
+		typeof arg === 'object' && arg !== null ? JSON.stringify(arg, null, 2) : arg
+	);
+
+	method(
+		`%c[Portal: ${capitalize(level)}]%c %c(${context})%c -`,
+		style,
+		'',
+		'font-weight: medium;',
+		'',
+		...formattedArgs
+	);
 }
 
 export function fixBooleanStrings<T>(obj: T): T {
@@ -591,6 +611,8 @@ export function fixBooleanStrings<T>(obj: T): T {
 }
 
 export function isVersionGreater(v1, v2) {
+	if (!v1 || !v2) return false;
+
 	const a = v1.split('.').map(Number);
 	const b = v2.split('.').map(Number);
 

@@ -28,7 +28,7 @@ export default function PageList() {
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [collapsedPages, setCollapsedPages] = React.useState<{ [key: string]: boolean }>({
-		home: false,
+		home: true,
 		feed: true,
 		post: true,
 		user: true,
@@ -389,43 +389,14 @@ export default function PageList() {
 						portalProvider.current?.id
 					)}/#/${urlify(key)}`;
 
-					const getActiveTemplate = () => {
-						if (isHome) return activeHomeTemplate;
-						if (isFeed) return activeFeedTemplate;
-						if (isPost) return activePostTemplate;
-						if (isUser) return activeUserTemplate;
-						if (isSearch) return activeSearchTemplate;
-						return null;
-					};
-					const activeTemplate = getActiveTemplate();
-
 					return (
 						<S.PagesWrapper key={index} className={'border-wrapper-alt2'}>
-							<S.PageWrapper
-								className={'fade-in'}
-								onClick={() => setCollapsedPages((prev) => ({ ...prev, [key]: !prev[key] }))}
-							>
+							<S.PageWrapper onClick={() => setCollapsedPages((prev) => ({ ...prev, [key]: !prev[key] }))}>
 								<S.PageHeader>
 									<S.Arrow $open={!isCollapsed}>
 										<ReactSVG src={ICONS.arrow} />
 									</S.Arrow>
 									<p>{displayUrlName(key)}</p>
-									{isCollapsed && activeTemplate && (
-										<S.LayoutIndicators>
-											<S.LayoutIndicator $active={activeTemplate === 'journal'} data-label="Journal">
-												J
-											</S.LayoutIndicator>
-											<S.LayoutIndicator $active={activeTemplate === 'blog'} data-label="Blog">
-												B
-											</S.LayoutIndicator>
-											<S.LayoutIndicator $active={activeTemplate === 'documentation'} data-label="Documentation">
-												D
-											</S.LayoutIndicator>
-											<S.LayoutIndicator $active={activeTemplate === 'custom'} data-label="Custom">
-												C
-											</S.LayoutIndicator>
-										</S.LayoutIndicators>
-									)}
 								</S.PageHeader>
 								<S.PageDetail>
 									<S.PageActions>
@@ -633,7 +604,7 @@ export default function PageList() {
 
 	return (
 		<>
-			{loading && <Loader message={'Updating template...'} />}
+			{loading && <Loader message={'Updating Template...'} />}
 			{pages}
 		</>
 	);

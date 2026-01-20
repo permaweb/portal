@@ -10,7 +10,7 @@ export default function DocsDetail() {
 		<S.Wrapper>
 			<S.BodyWrapper>
 				<DocsNavigationHeader />
-				<S.ContentWrapper className={'fade-in'}>
+				<S.ContentWrapper>
 					<DocTemplate />
 					<DocsNavigationFooter />
 				</S.ContentWrapper>

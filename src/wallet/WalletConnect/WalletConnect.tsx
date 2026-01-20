@@ -9,7 +9,7 @@ import { useSettingsProvider as useEditorSettingsProvider } from 'editor/provide
 import { useSettingsProvider as useViewerSettingsProvider } from 'viewer/providers/SettingsProvider';
 
 import { Avatar } from 'components/atoms/Avatar';
-import { Checkbox } from 'components/atoms/Checkbox';
+import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
 import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { ICONS } from 'helpers/config';
@@ -250,14 +250,6 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 					handleClose={() => setShowThemeSelector(false)}
 				>
 					<S.MWrapper className={'modal-wrapper'}>
-						<S.SystemSyncWrapper>
-							<Checkbox
-								checked={settings.syncWithSystem}
-								handleSelect={() => updateSettings('syncWithSystem', !settings.syncWithSystem)}
-								disabled={false}
-							/>
-							<span>{language?.syncWithSystem || 'Sync With System'}</span>
-						</S.SystemSyncWrapper>
 						{Object.entries(availableThemes).map(([key, theme]: any) => {
 							const isLightScheme = key === 'light';
 							const preferredTheme = isLightScheme ? settings.preferredLightTheme : settings.preferredDarkTheme;
@@ -296,6 +288,17 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 								</S.MSection>
 							);
 						})}
+						<S.SystemSyncWrapper>
+							<Button
+								type={'alt1'}
+								label={language?.syncWithSystem || 'Sync With System'}
+								handlePress={() => updateSettings('syncWithSystem', !settings.syncWithSystem)}
+								active={settings.syncWithSystem}
+								icon={settings.syncWithSystem ? ICONS.checkmark : null}
+								height={45}
+								fullWidth
+							/>
+						</S.SystemSyncWrapper>
 					</S.MWrapper>
 				</Panel>
 			)}

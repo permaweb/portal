@@ -133,6 +133,12 @@ export const CategoriesList = styled.ul``;
 export const CategoryOption = styled.li<{ level: number }>`
 	position: relative;
 	margin: ${(props) => `0 10px 12.5px ${(props.level * 20).toString()}px`} !important;
+
+	button {
+		pointer-events: auto;
+		position: relative;
+		z-index: 1;
+	}
 `;
 
 export const WrapperEmpty = styled.div`
@@ -202,7 +208,7 @@ export const CategoryDragWrapper = styled.div<{ level: number; isDragging: boole
 	}
 `;
 
-export const CategoryDrag = styled.div<{ level: number; isDragging: boolean }>`
+export const CategoryDrag = styled.div<{ level: number; isDragging: boolean; hasCount?: boolean }>`
 	width: fit-content;
 	position: relative;
 	display: flex;
@@ -238,6 +244,16 @@ export const CategoryDrag = styled.div<{ level: number; isDragging: boolean }>`
 		position: absolute;
 		right: 10px;
 		top: -5px;
+	}
+
+	&.will-unnest::after {
+		background: ${(props) => props.theme.colors.indicator.alt1};
+		opacity: 1;
+		content: 'Un-Nest';
+		white-space: nowrap;
+		position: absolute;
+		top: -7.5px;
+		right: ${(props) => (props.hasCount ? '-15.5px' : '2.5px')};
 	}
 `;
 
@@ -283,6 +299,7 @@ export const CategoryRow = styled.div`
 
 	button:last-child {
 		opacity: 0;
+		pointer-events: none;
 		transition: opacity 100ms;
 
 		span {
@@ -292,6 +309,7 @@ export const CategoryRow = styled.div`
 
 	&:hover button:last-child {
 		opacity: 1;
+		pointer-events: auto;
 	}
 `;
 

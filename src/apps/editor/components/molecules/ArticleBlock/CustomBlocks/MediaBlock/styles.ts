@@ -69,6 +69,7 @@ export const InputHeader = styled.div`
 
 export const InputDescription = styled.div`
 	margin: 5px 0 10px 0;
+
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
@@ -133,7 +134,7 @@ export const InputActionsFlex = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 15px 20px;
+	gap: 15px;
 `;
 
 export const ContentWrapper = styled.div`

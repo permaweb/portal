@@ -9,6 +9,7 @@ export const ICONS = {
 	arrow: getTxEndpoint('ghFL1fzQ2C1eEAnqSVvfAMP5Jikx7NKSPP5neoNPALw'),
 	arrows: getTxEndpoint('9WYuWYKP1eE6kcmrW6IPCCnwqFvKX4DtWD0hVn2RRPo'),
 	article: getTxEndpoint('upm3OCUmKcVpgCP6QCsMDspuUovC4WamRXql4iaFo9A'),
+	backup: getTxEndpoint('rhJ0W_AEpEqhlZ8bWVP2VpZ13EU7IwjA2mQ3grrR5KM'),
 	banner: getTxEndpoint('lN9aWd46bCyk2RJrOCBR9iBfiH3nn9_n5d0zQDn4yXc'),
 	bold: getTxEndpoint('5a1ASx_K7p1pIIrhdtf9UNc8GeszEXAulMQ-jwosMlE'),
 	checkmark: getTxEndpoint('mVnNwxm-F6CV043zVtORE-EaMWfd2j8w6HHX70IcVbI'),

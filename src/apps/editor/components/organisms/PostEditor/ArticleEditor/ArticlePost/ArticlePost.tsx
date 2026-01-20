@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { Categories } from 'editor/components/molecules/Categories';
 import { Topics } from 'editor/components/molecules/Topics';
 
@@ -15,7 +17,7 @@ import { ArticlePostThumbnail } from './ArticlePostThumbnail';
 import { ArticlePostURL } from './ArticlePostURL';
 import * as S from './styles';
 
-export default function ArticlePost(props: {
+function ArticlePost(props: {
 	categories: PortalCategoryType[];
 	setCategories: (categories: PortalCategoryType[]) => void;
 	topics: string[];
@@ -104,3 +106,5 @@ export default function ArticlePost(props: {
 		</S.Wrapper>
 	);
 }
+
+export default React.memo(ArticlePost);

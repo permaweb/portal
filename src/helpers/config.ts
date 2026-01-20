@@ -43,6 +43,7 @@ export const STORAGE = {
 	portal: (id: string) => `portal-${id}`,
 	profile: (id: string) => `profile-${id}`,
 	moderation: (id: string) => `moderation-${id}`,
+	permissions: (portalId: string, userId: string) => `permissions-${portalId}-${userId}`,
 };
 
 export const STYLING = {
@@ -281,17 +282,17 @@ export const ARTICLE_BLOCKS = {
 		label: 'Table',
 		icon: ICONS.menu,
 	},
-	[ArticleBlockEnum.MonetizationButton]: {
-		type: ArticleBlockEnum.MonetizationButton,
-		label: 'Tips Button',
-		icon: ICONS.tools,
-	},
-	[ArticleBlockEnum.Supporters]: {
-		type: ArticleBlockEnum.Supporters,
-		label: 'Supporters',
-		icon: ICONS.users,
-		shortcut: 'Ctrl / S',
-	},
+	// [ArticleBlockEnum.MonetizationButton]: {
+	// 	type: ArticleBlockEnum.MonetizationButton,
+	// 	label: 'Tips Button',
+	// 	icon: ICONS.tools,
+	// },
+	// [ArticleBlockEnum.Supporters]: {
+	// 	type: ArticleBlockEnum.Supporters,
+	// 	label: 'Supporters',
+	// 	icon: ICONS.users,
+	// 	shortcut: 'Ctrl / S',
+	// },
 	[ArticleBlockEnum.Embed]: {
 		type: ArticleBlockEnum.Embed,
 		label: 'Embed',

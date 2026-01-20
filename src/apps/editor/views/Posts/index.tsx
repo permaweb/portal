@@ -29,7 +29,7 @@ export default function Posts() {
 
 	return (
 		<>
-			<S.Wrapper className={'fade-in'}>
+			<S.Wrapper>
 				<ViewHeader
 					header={language?.posts}
 					actions={[

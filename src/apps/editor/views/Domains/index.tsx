@@ -22,7 +22,7 @@ export default function Domains() {
 	const [showAdditionalRecords, setShowAdditionalRecords] = React.useState(false);
 
 	return (
-		<S.Wrapper className={'fade-in'}>
+		<S.Wrapper>
 			<ViewHeader
 				header={language?.domains}
 				actions={[

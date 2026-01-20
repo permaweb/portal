@@ -15,10 +15,12 @@ import {
 	PortalUserType,
 } from 'helpers/types';
 import {
+	cachePermissions,
 	cachePortal,
 	cacheProfile,
 	debugLog,
 	fixBooleanStrings,
+	getCachedPermissions,
 	getCachedPortal,
 	getCachedProfile,
 	getPortalAssets,
@@ -209,6 +211,13 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				if (!current && currentId && permawebProvider.libs) {
 					const cachedPortal = getCachedPortal(currentId);
 					if (cachedPortal) setCurrent(cachedPortal);
+
+					// Load cached permissions if available
+					if (permawebProvider.profile?.id) {
+						const cachedPerms = getCachedPermissions(currentId, permawebProvider.profile.id);
+						if (cachedPerms) setPermissions(cachedPerms);
+					}
+
 					await fetchPortal();
 				}
 			} catch (e: any) {
@@ -222,7 +231,10 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		(async function () {
 			if (current && refreshFields && refreshFields.length > 0) {
 				try {
-					await Promise.all(refreshFields.map((field) => fetchPortal({ patchKey: field })));
+					refreshFields.forEach((field) => {
+						debugLog('info', 'PortalProvider', `Refreshing field ${field}`);
+					});
+					await fetchPortal({ patchKeys: refreshFields });
 				} catch (e: any) {
 					debugLog('error', 'PortalProvider', 'Error refreshing portal:', e.message ?? 'Unknown error');
 				} finally {
@@ -232,30 +244,103 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [refreshCurrentTrigger, refreshFields]);
 
-	const fetchPortal = async (opts?: { patchKey?: string }) => {
+	const fetchPortal = async (opts?: { patchKey?: string; patchKeys?: string[] }) => {
 		if (!currentId) return;
 
 		setUpdating(true);
 		try {
-			const response = fixBooleanStrings(
-				permawebProvider.libs.mapFromProcessCase(
-					await permawebProvider.libs.readState({
-						processId: currentId,
-						path: opts?.patchKey,
-						hydrate: !!opts?.patchKey,
-					})
-				)
-			);
+			let overview, users, navigation, presentation, media, posts, requests, monetization, transfers;
 
-			const overview = parseField(PortalPatchMapEnum.Overview, response, opts?.patchKey);
-			const users = parseField(PortalPatchMapEnum.Users, response, opts?.patchKey);
-			const navigation = parseField(PortalPatchMapEnum.Navigation, response, opts?.patchKey);
-			const presentation = parseField(PortalPatchMapEnum.Presentation, response, opts?.patchKey);
-			const media = parseField(PortalPatchMapEnum.Media, response, opts?.patchKey);
-			const posts = parseField(PortalPatchMapEnum.Posts, response, opts?.patchKey);
-			const requests = parseField(PortalPatchMapEnum.Requests, response, opts?.patchKey);
-			const monetization = parseField(PortalPatchMapEnum.Monetization, response, opts?.patchKey);
-			const transfers = parseField(PortalPatchMapEnum.Transfers, response, opts?.patchKey);
+			if (opts?.patchKeys && opts.patchKeys.length > 0) {
+				const responses = await Promise.all(
+					opts.patchKeys.map((key) =>
+						permawebProvider.libs
+							.readState({
+								processId: currentId,
+								path: key,
+								hydrate: true,
+							})
+							.then((res) => ({ key, data: fixBooleanStrings(permawebProvider.libs.mapFromProcessCase(res)) }))
+					)
+				);
+
+				const responseMap = responses.reduce((acc, { key, data }) => {
+					acc[key] = data;
+					return acc;
+				}, {} as Record<string, any>);
+
+				overview = responseMap[PortalPatchMapEnum.Overview]
+					? parseField(
+							PortalPatchMapEnum.Overview,
+							responseMap[PortalPatchMapEnum.Overview],
+							PortalPatchMapEnum.Overview
+					  )
+					: null;
+				users = responseMap[PortalPatchMapEnum.Users]
+					? parseField(PortalPatchMapEnum.Users, responseMap[PortalPatchMapEnum.Users], PortalPatchMapEnum.Users)
+					: null;
+				navigation = responseMap[PortalPatchMapEnum.Navigation]
+					? parseField(
+							PortalPatchMapEnum.Navigation,
+							responseMap[PortalPatchMapEnum.Navigation],
+							PortalPatchMapEnum.Navigation
+					  )
+					: null;
+				presentation = responseMap[PortalPatchMapEnum.Presentation]
+					? parseField(
+							PortalPatchMapEnum.Presentation,
+							responseMap[PortalPatchMapEnum.Presentation],
+							PortalPatchMapEnum.Presentation
+					  )
+					: null;
+				media = responseMap[PortalPatchMapEnum.Media]
+					? parseField(PortalPatchMapEnum.Media, responseMap[PortalPatchMapEnum.Media], PortalPatchMapEnum.Media)
+					: null;
+				posts = responseMap[PortalPatchMapEnum.Posts]
+					? parseField(PortalPatchMapEnum.Posts, responseMap[PortalPatchMapEnum.Posts], PortalPatchMapEnum.Posts)
+					: null;
+				requests = responseMap[PortalPatchMapEnum.Requests]
+					? parseField(
+							PortalPatchMapEnum.Requests,
+							responseMap[PortalPatchMapEnum.Requests],
+							PortalPatchMapEnum.Requests
+					  )
+					: null;
+				monetization = responseMap[PortalPatchMapEnum.Monetization]
+					? parseField(
+							PortalPatchMapEnum.Monetization,
+							responseMap[PortalPatchMapEnum.Monetization],
+							PortalPatchMapEnum.Monetization
+					  )
+					: null;
+				transfers = responseMap[PortalPatchMapEnum.Transfers]
+					? parseField(
+							PortalPatchMapEnum.Transfers,
+							responseMap[PortalPatchMapEnum.Transfers],
+							PortalPatchMapEnum.Transfers
+					  )
+					: null;
+			} else {
+				const response = fixBooleanStrings(
+					permawebProvider.libs.mapFromProcessCase(
+						await permawebProvider.libs.readState({
+							processId: currentId,
+							path: opts?.patchKey,
+							hydrate: !!opts?.patchKey,
+						})
+					)
+				);
+
+				overview = parseField(PortalPatchMapEnum.Overview, response, opts?.patchKey);
+				users = parseField(PortalPatchMapEnum.Users, response, opts?.patchKey);
+				navigation = parseField(PortalPatchMapEnum.Navigation, response, opts?.patchKey);
+				presentation = parseField(PortalPatchMapEnum.Presentation, response, opts?.patchKey);
+				media = parseField(PortalPatchMapEnum.Media, response, opts?.patchKey);
+				posts = parseField(PortalPatchMapEnum.Posts, response, opts?.patchKey);
+				requests = parseField(PortalPatchMapEnum.Requests, response, opts?.patchKey);
+				monetization = parseField(PortalPatchMapEnum.Monetization, response, opts?.patchKey);
+				transfers = parseField(PortalPatchMapEnum.Transfers, response, opts?.patchKey);
+			}
 
 			/* Check for node updates and add the new node address as an authority */
 			if (
@@ -320,12 +405,19 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			};
 
 			if (permawebProvider.profile?.id && portalState.users) {
-				setPermissions(getUserPermissions(permawebProvider.profile.id, portalState.users, portalState.permissions));
+				const userPermissions = getUserPermissions(
+					permawebProvider.profile.id,
+					portalState.users,
+					portalState.permissions
+				);
+				setPermissions(userPermissions);
+				cachePermissions(currentId, permawebProvider.profile.id, userPermissions);
 			}
 
 			cachePortal(currentId, portalState);
 			setCurrent(portalState);
 		} catch (e: any) {
+			console.error(e);
 			debugLog('error', 'PortalProvider', 'Failed to fetch portal data:', e.message ?? 'Unknown error');
 		}
 		setUpdating(false);

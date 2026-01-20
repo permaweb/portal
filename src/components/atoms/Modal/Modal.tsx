@@ -68,14 +68,14 @@ export default function Modal(props: {
 							{props.handleClose && (
 								<S.Close>
 									<IconButton
-										type={'primary'}
+										type={'alt1'}
 										warning
 										src={ICONS.close}
 										handlePress={() => props.handleClose()}
 										active={false}
 										dimensions={{
-											wrapper: 35,
-											icon: 20,
+											wrapper: 30,
+											icon: 18.5,
 										}}
 										tooltip={language?.close}
 									/>
