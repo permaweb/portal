@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { CurrentZoneVersion } from '@permaweb/libs';
 
 import { PortalManager } from 'editor/components/organisms/PortalManager';
+import { WordPressImport } from 'editor/components/organisms/WordPressImport';
 
 import { Panel } from 'components/atoms/Panel';
 import { AO_NODE, PORTAL_PATCH_MAP } from 'helpers/config';
@@ -28,6 +29,7 @@ import {
 	isEqual,
 	isVersionGreater,
 } from 'helpers/utils';
+import { ConvertedPost, PortalImportData } from 'helpers/wordpress';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -41,6 +43,9 @@ interface PortalContextState {
 	transfers: any;
 	showPortalManager: boolean;
 	setShowPortalManager: (toggle: boolean, useNew?: boolean) => void;
+	showWordPressImport: boolean;
+	setShowWordPressImport: (toggle: boolean) => void;
+	wordPressImportData: { data: PortalImportData; posts: ConvertedPost[]; pages: ConvertedPost[] } | null;
 	refreshCurrentPortal: (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => void;
 	fetchPortalUserProfile: (user: PortalUserType) => void;
 	usersByPortalId: any;
@@ -56,6 +61,9 @@ const DEFAULT_CONTEXT = {
 	transfers: null,
 	showPortalManager: false,
 	setShowPortalManager(_toggle: boolean) {},
+	showWordPressImport: false,
+	setShowWordPressImport(_toggle: boolean) {},
+	wordPressImportData: null,
 	refreshCurrentPortal() {},
 	fetchPortalUserProfile(_user: PortalUserType) {},
 	usersByPortalId: {},
@@ -98,6 +106,12 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	const [showPortalManager, setShowPortalManager] = React.useState<boolean>(false);
 	const [createNewPortal, setCreateNewPortal] = React.useState<boolean>(false);
+	const [showWordPressImport, setShowWordPressImport] = React.useState<boolean>(false);
+	const [wordPressImportData, setWordPressImportData] = React.useState<{
+		data: PortalImportData;
+		posts: ConvertedPost[];
+		pages: ConvertedPost[];
+	} | null>(null);
 
 	const parseField = React.useCallback(
 		(key: PortalPatchMapEnum, response: any, patchKey?: string) => {
@@ -500,6 +514,15 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		setCreateNewPortal(useNew ?? false);
 	}
 
+	function handleShowWordPressImport(toggle: boolean) {
+		setShowWordPressImport(toggle);
+	}
+
+	function handleWordPressImportComplete(data: PortalImportData, posts: ConvertedPost[], pages: ConvertedPost[]) {
+		setWordPressImportData({ data, posts, pages });
+		setShowWordPressImport(false);
+	}
+
 	const refreshCurrentPortal = (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => {
 		if (field) {
 			const fieldsArray = Array.isArray(field) ? field : [field];
@@ -517,6 +540,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				permissions,
 				showPortalManager,
 				setShowPortalManager: handleShowPortalManager,
+				showWordPressImport,
+				setShowWordPressImport: handleShowWordPressImport,
+				wordPressImportData,
 				refreshCurrentPortal: (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => refreshCurrentPortal(field),
 				fetchPortalUserProfile: (userRole: PortalUserType) => fetchPortalUserProfile(userRole),
 				usersByPortalId: usersByPortalId,
@@ -543,6 +569,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					handleUpdate={null}
 				/>
 			</Panel>
+			<WordPressImport
+				open={showWordPressImport}
+				handleClose={() => setShowWordPressImport(false)}
+				onImportComplete={handleWordPressImportComplete}
+			/>
 		</PortalContext.Provider>
 	);
 }
