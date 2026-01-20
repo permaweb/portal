@@ -370,6 +370,7 @@ export default function PostEditor() {
 					}
 
 					debugLog('info', 'PostEditor', `Asset content update: ${assetContentUpdateId}`);
+
 					addNotification(`${language?.postUpdated}!`, 'success', { persistent: true });
 					portalProvider.refreshCurrentPortal([
 						...(isStaticPage ? [PortalPatchMapEnum.Presentation] : []),

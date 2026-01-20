@@ -373,3 +373,16 @@ export const CloseButton = styled.button`
 		opacity: 0.85;
 	}
 `;
+
+export const RuleError = styled.div`
+	background: rgba(231, 76, 60, 0.15);
+	border: 1px solid rgba(231, 76, 60, 0.3);
+	color: #e74c3c;
+	padding: 8px 12px;
+	border-radius: var(--border-radius);
+	font-size: var(--font-size-small);
+	margin-bottom: 8px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+`;

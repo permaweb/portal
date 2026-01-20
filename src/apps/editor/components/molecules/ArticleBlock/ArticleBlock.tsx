@@ -860,7 +860,7 @@ export default function ArticleBlock(props: {
 		return (
 			<S.ElementToolbar tabIndex={-1}>
 				<S.EToolbarHeader>
-					<span>{ARTICLE_BLOCKS[props.block.type].label}</span>
+					<span>{ARTICLE_BLOCKS[props.block.type]?.label}</span>
 				</S.EToolbarHeader>
 				<S.EToolbarActions>
 					{currentReducer?.editor.focusedBlock?.id === props.block.id &&
