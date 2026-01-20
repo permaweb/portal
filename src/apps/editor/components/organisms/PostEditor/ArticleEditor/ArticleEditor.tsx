@@ -134,6 +134,7 @@ export default function ArticleEditor(props: {
 						const postData = {
 							id: assetId || null,
 							title: meta.name || source.name || '',
+							url: meta.url || null,
 							creator: meta.creator || source.creator || null,
 							status: meta.status || 'draft',
 							categories: meta.categories || [],
