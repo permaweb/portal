@@ -8,7 +8,7 @@ export const Post = styled.div<{ $layout: any }>`
 	width: 100%;
 	background: var(--color-post-background);
 	padding: 20px;
-	margin-top: 20px;
+	margin-bottom: 20px;
 	box-sizing: border-box;
 	border-radius: var(--border-radius);
 	border: 1px solid var(--color-post-border);

@@ -483,3 +483,20 @@ export const ModalActions = styled.div`
 	gap: 10px;
 	margin-top: 10px;
 `;
+
+export const TransactionLink = styled.div`
+	width: 100%;
+	max-width: 950px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: var(--spacing-l);
+
+	a {
+		font-size: var(--font-size-default);
+		color: rgba(var(--color-text), 0.6);
+
+		&:hover {
+			color: rgba(var(--color-primary), 1);
+		}
+	}
+`;

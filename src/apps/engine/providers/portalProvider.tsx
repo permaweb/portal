@@ -118,6 +118,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		(async () => {
 			try {
 				const cached = getCachedPortal(portalId);
+				if (cached && !portal) setPortal(cached);
 
 				// Fetch from multiple endpoints
 				const overview = fixBooleanStrings(

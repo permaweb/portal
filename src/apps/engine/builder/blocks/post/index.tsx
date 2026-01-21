@@ -272,6 +272,13 @@ export default function Post(props: any) {
 						/>
 					</div>
 				</S.Post>
+				{/* postId && (
+					<S.TransactionLink>
+						<a href={`https://arweave.net/${postId}`} target="_blank" rel="noopener noreferrer">
+							View on Arweave
+						</a>
+					</S.TransactionLink>
+				) */}
 				<Comments commentsId={post?.metadata?.comments} postAuthorId={post?.creator} />
 			</S.Wrapper>
 			{showSetPostModal && (

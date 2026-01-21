@@ -81,7 +81,7 @@ export const Data = styled.div`
 			box-sizing: border-box;
 			text-decoration: none;
 			padding: 6px 14px;
-			background: rgba(var(--color-secondary), 1);
+			background: rgba(var(--color-primary), 1);
 			color: white;
 			-webkit-box-decoration-break: clone;
 			font-weight: 800;
@@ -122,6 +122,28 @@ export const Meta = styled.div`
 	font-weight: 600;
 	margin-left: 12%;
 	color: rgba(var(--color-text), 1);
+
+	a {
+		width: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 0;
+		color: rgba(var(--color-text), 1) !important;
+		opacity: 1;
+
+		span {
+			opacity: 1 !important;
+		}
+
+		&:hover {
+			color: rgba(var(--color-primary), 1) !important;
+
+			> div {
+				--avatar-opacity: 0.8;
+			}
+		}
+	}
 
 	img {
 		width: 18px;

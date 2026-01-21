@@ -168,7 +168,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		setLayoutEditMode(false);
 	}
 
-	const shorten = (s: string) => s.slice(0, 7) + '....' + s.slice(-4);
+	const shorten = (s: string) => (s ? s.slice(0, 7) + '....' + s.slice(-4) : '');
 
 	function handleLayoutCancel() {
 		setLayoutHeights(initialLayoutHeights);

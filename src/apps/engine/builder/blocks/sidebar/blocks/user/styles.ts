@@ -6,13 +6,18 @@ export const SidebarUserWrapper = styled.div`
 
 export const Header = styled.div`
 	position: relative;
+	width: 100%;
 `;
 
 export const Banner = styled.div`
+	position: relative;
 	overflow: hidden;
+	width: 100%;
+	height: 100px;
+
 	img {
 		width: 100%;
-		aspect-ratio: 3 / 1;
+		height: 100%;
 		object-fit: cover;
 	}
 
@@ -32,30 +37,19 @@ export const Avatar = styled.div`
 	position: absolute;
 	bottom: -12px;
 	left: 10px;
-	width: 14%;
-	min-width: 52px;
 
 	> div {
-		width: 100% !important;
-		height: unset !important;
-		aspect-ratio: 1 / 1;
 		box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.6), 0 4px 10px 0 rgba(0, 0, 0, 0.6);
-
-		img {
-			width: 100% !important;
-			height: 100% !important;
-		}
 	}
 `;
 
 export const Name = styled.div`
 	position: absolute;
-	bottom: 4px;
-	left: max(calc(14% + 20px), 72px);
+	bottom: 15px;
+	left: 70px;
 	color: white;
-	font-size: var(--font-size-large);
+	font-size: var(--font-size-default);
 	font-weight: 900;
-	padding: 2px;
 `;
 
 export const Content = styled.div`
@@ -64,7 +58,6 @@ export const Content = styled.div`
 
 export const Bio = styled.div`
 	padding: 20px 10px;
-	background-color: var(--color-card-background);
 `;
 
 export const TipsSection = styled.div`
