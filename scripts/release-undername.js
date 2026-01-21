@@ -14,7 +14,7 @@ const { ANT, ARIO, ArweaveSigner } = require('@ar.io/sdk');
 			process.exit(1);
 		}
 
-		const jsonString = atob(process.env.DEPLOY_KEY);
+		const jsonString = Buffer.from(process.env.DEPLOY_KEY, 'base64').toString();
 		const jwk = JSON.parse(jsonString);
 		const signer = new ArweaveSigner(jwk);
 
@@ -31,7 +31,10 @@ const { ANT, ARIO, ArweaveSigner } = require('@ar.io/sdk');
 		try {
 			await ant.removeUndernameRecord({ undername: UNDERNAME });
 		} catch (e) {
-			throw new Error('ANT remove undername method not found on this SDK version');
+			if (e.message?.includes('not a function') || e.message?.includes('undefined')) {
+				throw new Error('ANT removeUndernameRecord method not found on this SDK version');
+			}
+			throw e;
 		}
 
 		console.log(`✅ Released undername "${UNDERNAME}" from ${ARNS_NAME}`);
