@@ -324,7 +324,7 @@ export default function Domains() {
 								return record.processId;
 							}
 						} catch {
-							// ignore and retry
+							// Ignore and retry
 						}
 
 						// Fallback to a broad scan if direct lookup fails to materialize
@@ -337,7 +337,7 @@ export default function Domains() {
 							}
 						} catch {}
 
-						// wait before next attempt (3s x 10 = 30s total)
+						// Wait before next attempt (3s x 10 = 30s total)
 						await new Promise((r) => setTimeout(r, 3000));
 					}
 					return null;

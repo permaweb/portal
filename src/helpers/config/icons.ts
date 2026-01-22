@@ -120,7 +120,7 @@ export const ICONS = {
 	video: getTxEndpoint('T2astk8vaCBLLP8PD2rXgLKbwhNYkdHXllXvGbk-Wps'),
 	odysee: getTxEndpoint('vtQEUOXJSodjxh72lbgLGuR0FQY5st3YXcX_5VgU9f4'),
 	wallet: getTxEndpoint('P0asvZPbh73r_c6615YAHrENmYwGTCRghrPGovcPXUU'),
-	warning: getTxEndpoint('BASlMnOWcLCcLUSrO2wUybQL_06231dLONeVkdTWs3o'),
+	warning: getTxEndpoint('kcPKQ0reeLYNQkEXt-7BIM3AqQv18uCvs5_-Jrv3kDs'),
 	write: getTxEndpoint('SUWTk8Qtcub9EsP5PDF6-vzgKsP5Irg1bB9b8NImDDk'),
 	admin: getTxEndpoint('L6_7B3Qbpnye2pHGNS-8TS310s2uWzRgeQH6fqHS37o'),
 	money: getTxEndpoint('Ku_ak3oDGcZglAz201CeaIc9jfAcrWiXjHDJ8RVCnf8'),

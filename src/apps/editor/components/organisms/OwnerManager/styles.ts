@@ -110,7 +110,7 @@ export const TableRow = styled.tr`
 
 export const TableCell = styled.td`
 	padding: 10px 12px;
-	font-size: ${(p) => p.theme.typography.size.xSmall};
+	font-size: ${(p) => p.theme.typography.size.xxSmall};
 	font-family: ${(p) => p.theme.typography.family.primary};
 	font-weight: ${(p) => p.theme.typography.weight.medium};
 	background: ${(p) => p.theme.colors.container.primary.background};

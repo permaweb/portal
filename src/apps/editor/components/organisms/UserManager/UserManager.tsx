@@ -32,7 +32,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [showRemoveConfirm, setShowRemoveConfirm] = React.useState(false);
 
-	// must match backend
+	// Must match backend
 	const ROLE_PRIORITY: Record<string, number> = React.useMemo(
 		() => ({
 			ExternalContributor: 1,
@@ -70,7 +70,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 		return (me?.roles as string[]) ?? [];
 	}
 
-	// resolve the target's "profile process id" + wallet owner address from the same place the UI uses
+	// Resolve the target's "profile process id" + wallet owner address from the same place the UI uses
 	const targetProfile = React.useMemo(() => {
 		if (!props.user) return null;
 		// In your User component, usersByPortalId is keyed by props.user.address
@@ -119,7 +119,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 		if (loading || unauthorized) return false;
 		if (isTargetOwner) return false;
 		if (isMe) return false;
-		// backend rule: must strictly outrank target unless you are Owner
+		// Backend rule: must strictly outrank target unless you are Owner
 		return isOwner || actorPriority > targetPriority;
 	}, [props.user, loading, unauthorized, isTargetOwner, isMe, isOwner, actorPriority, targetPriority]);
 
@@ -133,13 +133,13 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 			.map((r) => ({ id: r as string, label: formatRoleLabel(r as string) }))
 			.sort((a, b) => roleOrder.indexOf(a.id) - roleOrder.indexOf(b.id));
 
-		// hide Admin for non-owners
+		// Hide Admin for non-owners
 		return isOwner ? sorted : sorted.filter((r) => r.id !== 'Admin');
 	}, [portalProvider.current?.roleOptions, roleDescriptions, isOwner]);
 
 	// Initialize form state for edit vs add
 	React.useEffect(() => {
-		// edit existing user
+		// Edit existing user
 		if (props.user) {
 			const existingWallet = props.user.owner || targetProfile?.owner;
 			if (existingWallet && checkValidAddress(existingWallet)) setWalletAddress(existingWallet);
@@ -153,7 +153,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				setRole(opt);
 			}
 
-			// only owner can modify Admin users
+			// Only owner can modify Admin users
 			setUnauthorized(false);
 			if (activeRole === 'Admin' && portalProvider?.current?.owner !== arProvider.walletAddress) {
 				setUnauthorized(true);
@@ -161,7 +161,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 			return;
 		}
 
-		// add new user defaults
+		// Add new user defaults
 		setUnauthorized(false);
 		setWalletAddress('');
 		const defaultRole = roleOptions.find((r) => r.id === 'Contributor') || roleOptions[0] || null;
@@ -282,7 +282,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				/>
 
 				{role && (
-					<S.InfoWrapper className={'border-wrapper-alt3'}>
+					<S.InfoWrapper>
 						<span>{`${formatRoleLabel(role.label)} ${language?.permissions ?? 'permissions'}`}</span>
 						{(roleDescriptions as any)[role.id]?.map((description: string) => (
 							<p key={description}>{`· ${description}`}</p>
@@ -291,7 +291,7 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				)}
 
 				{!props.user && (
-					<S.InfoWrapper className={'border-wrapper-alt3'}>
+					<S.InfoWrapper>
 						<p>{language?.userInviteInfo}</p>
 					</S.InfoWrapper>
 				)}

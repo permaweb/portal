@@ -117,7 +117,7 @@ export default function PageEditor() {
 				}
 			} else {
 				// Clear the page if we're creating a new page (pageId is undefined)
-				// but have content from an existing page (currentPage.data.id exists)
+				// But have content from an existing page (currentPage.data.id exists)
 				// This handles the case where user navigates from editing an existing page to creating new
 				if (currentPage.data.id) dispatch(currentPageClear());
 			}
