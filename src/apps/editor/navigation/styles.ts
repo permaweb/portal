@@ -456,6 +456,7 @@ export const PDropdownAction = styled.div`
 
 		.info {
 			padding: 2.5px 7.5px !important;
+			border: 1px solid ${(props) => props.theme.colors.border.primary};
 		}
 
 		svg {
@@ -530,6 +531,18 @@ export const PDropdownFooter = styled.div`
 		}
 		&:hover {
 			background: ${(props) => props.theme.colors.container.primary.active};
+		}
+	}
+`;
+
+export const PDropdownWarning = styled(PDropdownFooter)`
+	button {
+		padding: 0 8.5px;
+		color: ${(props) => props.theme.colors.warning.primary} !important;
+
+		svg {
+			color: ${(props) => props.theme.colors.warning.primary} !important;
+			fill: ${(props) => props.theme.colors.warning.primary} !important;
 		}
 	}
 `;
@@ -632,4 +645,28 @@ export const LoadingWrapper = styled.div`
 		text-overflow: ellipsis;
 		overflow: hidden;
 	}
+`;
+
+export const LeaveModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 0 20px 20px 20px !important;
+`;
+
+export const LeaveModalBodyWrapper = styled.div`
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+`;
+
+export const LeaveModalActionsWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 15px;
 `;

@@ -219,7 +219,7 @@ export default function Tips() {
 
 						const p = newCache[tip.fromProfile];
 
-						// tweak this line to match your profile shape
+						// Tweak this line to match your profile shape
 						const niceName = p?.name || p?.handle || p?.Profile?.Name || p?.profile?.name || tip.fromName;
 
 						return {

@@ -13,7 +13,6 @@ export const InfoWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 7.5px;
-	padding: 10px 12.5px;
 	margin: 10px 0 0 0;
 
 	p {

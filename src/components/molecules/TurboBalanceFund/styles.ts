@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 
+import { STYLING } from 'helpers/config';
+
 export const MWrapper = styled.div`
 	position: relative;
 `;
@@ -43,6 +45,8 @@ export const DElements = styled.div`
 	gap: 10px;
 
 	button {
+		border-radius: ${STYLING.dimensions.radius.primary};
+
 		span {
 			font-size: ${(props) => props.theme.typography.size.xSmall} !important;
 		}
@@ -58,6 +62,7 @@ export const CWrapper = styled(DWrapper)`
 
 export const COWrapper = styled.div`
 	padding: 10px;
+	border-radius: ${STYLING.dimensions.radius.primary};
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-weight: ${(props) => props.theme.typography.weight.xBold};
