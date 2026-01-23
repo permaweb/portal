@@ -1,13 +1,15 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { CurrentZoneVersion } from '@permaweb/libs';
 
 import { PortalManager } from 'editor/components/organisms/PortalManager';
 import { WordPressImport } from 'editor/components/organisms/WordPressImport';
+import { currentPostClear, currentPostUpdate, setOriginalData } from 'editor/store/post';
 
 import { Panel } from 'components/atoms/Panel';
-import { AO_NODE, PORTAL_PATCH_MAP } from 'helpers/config';
+import { AO_NODE, ASSET_UPLOAD, PORTAL_PATCH_MAP, PORTAL_POST_DATA, URLS } from 'helpers/config';
 import {
 	PortalDetailType,
 	PortalHeaderType,
@@ -28,6 +30,7 @@ import {
 	getPortalUsers,
 	isEqual,
 	isVersionGreater,
+	urlify,
 } from 'helpers/utils';
 import { ConvertedPost, PortalImportData } from 'helpers/wordpress';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -79,6 +82,8 @@ export function usePortalProvider(): PortalContextState {
 
 export function PortalProvider(props: { children: React.ReactNode }) {
 	const location = useLocation();
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
 
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -518,9 +523,363 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		setShowWordPressImport(toggle);
 	}
 
-	function handleWordPressImportComplete(data: PortalImportData, posts: ConvertedPost[], pages: ConvertedPost[]) {
+	async function handleWordPressImportComplete(
+		data: PortalImportData,
+		posts: ConvertedPost[],
+		pages: ConvertedPost[],
+		selectedCategories: Set<string>,
+		createCategories: boolean,
+		createTopics: boolean,
+		createPortal?: boolean
+	) {
+		if (!arProvider.wallet) {
+			addNotification('Please connect your wallet to import content', 'warning');
+			return;
+		}
+
+		// If creating a portal, we need a profile (or create portal as profile)
+		let profileId = permawebProvider.profile?.id;
+		if (createPortal && !profileId && !arProvider.walletAddress) {
+			addNotification('Please connect your wallet to create a portal', 'warning');
+			return;
+		}
+
+		// If not creating portal, we need an existing portal
+		if (!createPortal && !current?.id) {
+			addNotification('Please select or create a portal first', 'warning');
+			return;
+		}
+
+		let targetPortalId = current?.id;
+
 		setWordPressImportData({ data, posts, pages });
 		setShowWordPressImport(false);
+
+		// Start the import process
+		try {
+			addNotification(createPortal ? 'Creating portal from WordPress...' : 'Starting WordPress import...', 'info');
+
+			// If creating a portal, create it first
+			if (createPortal) {
+				const { PORTAL_DATA, PORTAL_PATCH_MAP } = await import('helpers/config');
+				const { PORTAL_ROLES } = await import('helpers/config');
+
+				const getBootTag = (key: string, value: string) => ({
+					name: `Zone-${key}`,
+					value,
+				});
+
+				const getPatchMapTag = (key: string, values: string[]) => {
+					const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+					return {
+						name: `Zone-Patch-Map-${capitalizedKey}`,
+						value: JSON.stringify(values),
+					};
+				};
+
+				const tags = [
+					getBootTag('Name', data.name || 'Imported Portal'),
+					{ name: 'Content-Type', value: 'text/html' },
+					{ name: 'Zone-Type', value: 'Portal' },
+				];
+
+				for (const key of Object.keys(PORTAL_PATCH_MAP)) {
+					tags.push(getPatchMapTag(key, PORTAL_PATCH_MAP[key]));
+				}
+
+				// Use site logo/icon if available (would need to fetch from media)
+				// For now, leave as None
+
+				if (!profileId) {
+					tags.push({ name: 'Zone-Type', value: 'User' });
+					tags.push(getBootTag('Username', data.name || 'Imported Portal'));
+					tags.push(getBootTag('DisplayName', data.name || 'Imported Portal'));
+					tags.push(getBootTag('Description', data.description || ''));
+				}
+
+				targetPortalId = await permawebProvider.libs.createZone(
+					{
+						tags: tags,
+						data: PORTAL_DATA(),
+						spawnModeration: false,
+						authUsers: [arProvider.walletAddress],
+					},
+					(status: any) => debugLog('info', 'WordPressImport', status)
+				);
+
+				debugLog('info', 'WordPressImport', `Created portal: ${targetPortalId}`);
+
+				if (!profileId) profileId = targetPortalId;
+
+				// Set roles
+				await permawebProvider.libs.setZoneRoles(
+					[
+						{
+							granteeId: arProvider.walletAddress,
+							roles: [PORTAL_ROLES.ADMIN],
+							type: 'wallet',
+							sendInvite: false,
+							remoteZonePath: 'Portals',
+						},
+						{
+							granteeId: profileId,
+							roles: [PORTAL_ROLES.ADMIN],
+							type: 'process',
+							sendInvite: false,
+							remoteZonePath: 'Portals',
+						},
+					],
+					targetPortalId,
+					arProvider.wallet
+				);
+
+				// Add to profile
+				const currentPortals = Array.isArray(permawebProvider.profile?.portals) ? permawebProvider.profile.portals : [];
+				const updatedPortals = [...currentPortals, { Id: targetPortalId, Name: data.name || 'Imported Portal' }];
+				await permawebProvider.libs.updateZone(
+					{ Portals: permawebProvider.libs.mapToProcessCase(updatedPortals) },
+					profileId,
+					arProvider.wallet
+				);
+
+				permawebProvider.refreshProfile();
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+			}
+
+			// Refresh current portal if we just created it or need to fetch it
+			let portalToUpdate = current;
+			if (createPortal || !portalToUpdate?.id || portalToUpdate.id !== targetPortalId) {
+				await fetchPortal(targetPortalId, { patchKeys: [] });
+				// Get the updated portal from state
+				portalToUpdate = current;
+			}
+
+			if (!portalToUpdate?.id) {
+				throw new Error('Failed to get portal for update');
+			}
+
+			// 1. Update portal with categories, topics, and theme
+			const updates: any = {};
+
+			// Update categories if we have any and createCategories is true
+			if (createCategories && data.categories && data.categories.length > 0) {
+				const existingCategories = portalToUpdate.categories || [];
+
+				// Flatten existing tree to get all ids (we only had roots before)
+				const existingIds = new Set<string>();
+				const flattenExisting = (cats: any[]) => {
+					cats.forEach((cat: any) => {
+						if (cat?.id) existingIds.add(cat.id);
+						if (cat?.children?.length) flattenExisting(cat.children);
+					});
+				};
+				flattenExisting(existingCategories);
+
+				// Collect selected ∪ ancestors of selected (so hierarchy is valid)
+				const selectedOrAncestors = new Set<string>();
+				const collectSelectedAndAncestors = (cats: any[]): boolean => {
+					let anyIncluded = false;
+					for (const cat of cats) {
+						const childIncluded = cat.children?.length ? collectSelectedAndAncestors(cat.children) : false;
+						const include = selectedCategories.has(cat.id) || childIncluded;
+						if (include) {
+							selectedOrAncestors.add(cat.id);
+							anyIncluded = true;
+						}
+					}
+					return anyIncluded;
+				};
+				collectSelectedAndAncestors(data.categories);
+
+				// Build new tree (only selected + ancestors) from data.categories, preserving hierarchy
+				const buildNewSubtree = (cats: any[]): any[] => {
+					const out: any[] = [];
+					for (const cat of cats) {
+						if (!selectedOrAncestors.has(cat.id)) continue;
+						if (existingIds.has(cat.id)) continue;
+						const children = cat.children?.length ? buildNewSubtree(cat.children) : [];
+						out.push({
+							id: cat.id,
+							name: cat.name,
+							parent: cat.parent || undefined,
+							metadata: cat.metadata || {},
+							children,
+						});
+					}
+					return out;
+				};
+				const newTreeRoots = buildNewSubtree(data.categories);
+
+				// Zone expects full tree: existing (unchanged) + new roots
+				const mergedRoots = [...existingCategories, ...newTreeRoots];
+				updates.Categories = permawebProvider.libs.mapToProcessCase(mergedRoots);
+			}
+
+			// Update topics if we have any and createTopics is true
+			if (createTopics && data.topics && data.topics.length > 0) {
+				const existingTopics = portalToUpdate.topics || [];
+				const existingTopicValues = new Set(existingTopics.map((t: any) => t.value));
+				const newTopics = data.topics
+					.filter((topic) => !existingTopicValues.has(topic.value))
+					.map((topic) => ({ Value: topic.value }));
+				const allTopics = [...existingTopics.map((t: any) => ({ Value: t.value })), ...newTopics];
+				updates.Topics = permawebProvider.libs.mapToProcessCase(allTopics);
+			}
+
+			// Update theme if we have one
+			if (data.theme) {
+				const existingThemes = portalToUpdate.themes || [];
+				const newTheme = permawebProvider.libs.mapToProcessCase(data.theme);
+				updates.Themes = [...existingThemes, newTheme];
+			}
+
+			// Update portal metadata if we have site info (always set for new portals)
+			if (data.name && (createPortal || !portalToUpdate.name)) {
+				updates.Name = data.name;
+			}
+			if (data.description && (createPortal || !portalToUpdate.description)) {
+				updates.Description = data.description;
+			}
+
+			// Apply portal updates FIRST (categories and topics must exist before creating posts)
+			if (Object.keys(updates).length > 0) {
+				await permawebProvider.libs.updateZone(updates, portalToUpdate.id, arProvider.wallet);
+				refreshCurrentPortal([
+					PortalPatchMapEnum.Navigation,
+					PortalPatchMapEnum.Overview,
+					PortalPatchMapEnum.Presentation,
+				]);
+				addNotification('Portal updated with categories, topics, and theme', 'success');
+
+				// Wait a moment for the portal state to update
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+			}
+
+			// 2. Open first post in editor instead of creating
+			if (posts.length > 0) {
+				const firstPost = posts[0];
+
+				// Clear current post state
+				dispatch(currentPostClear());
+
+				// Set post data in Redux store (only assign categories we created)
+				const postCategories = createCategories
+					? firstPost.categories.filter((cat) => selectedCategories.has(cat.id))
+					: [];
+				const postTopics = createTopics ? firstPost.topics : [];
+				const postData = {
+					id: null,
+					title: firstPost.title,
+					description: firstPost.description,
+					content: firstPost.content,
+					creator: permawebProvider.profile.id,
+					status: 'draft' as const,
+					categories: postCategories,
+					topics: postTopics,
+					externalRecipients: [],
+					thumbnail: firstPost.thumbnail,
+					dateCreated: firstPost.dateCreated,
+					lastUpdate: null,
+					releaseDate: firstPost.dateCreated,
+					authUsers: [],
+					url: null,
+				};
+
+				// Update Redux state
+				Object.keys(postData).forEach((key) => {
+					dispatch(currentPostUpdate({ field: key, value: postData[key as keyof typeof postData] }));
+				});
+
+				// Set original data
+				dispatch(setOriginalData(postData));
+
+				// Navigate to post editor
+				const portalId = portalToUpdate.id;
+				navigate(`${URLS.base}${portalId}/post/create/article`);
+
+				addNotification(
+					`Opening "${firstPost.title}" in editor. ${
+						posts.length > 1
+							? `${posts.length - 1} more post${posts.length > 2 ? 's' : ''} will be available after.`
+							: ''
+					}`,
+					'success'
+				);
+			}
+
+			// 3. Create pages and add to portal
+			if (pages.length > 0 && permissions?.updatePortalMeta) {
+				const currentPages = current.pages || {};
+				const updatedPages = { ...currentPages };
+
+				for (const page of pages) {
+					try {
+						const args = {
+							name: page.title,
+							description: page.description,
+							topics: [],
+							creator: permawebProvider.profile.id,
+							data: PORTAL_POST_DATA(),
+							contentType: ASSET_UPLOAD.contentType,
+							assetType: ASSET_UPLOAD.ansType,
+							users: [],
+							spawnComments: false,
+						};
+
+						const assetId = await permawebProvider.libs.createAtomicAsset(args, (status: any) =>
+							debugLog('info', 'WordPressImport', `Creating page "${page.title}": ${status}`)
+						);
+
+						// Update asset with content
+						const contentData = {
+							content: page.content,
+							thumbnail: page.thumbnail,
+							status: page.status,
+						};
+
+						await permawebProvider.libs.sendMessage({
+							processId: assetId,
+							wallet: arProvider.wallet,
+							action: 'Update-Asset',
+							tags: [],
+							data: contentData,
+						});
+
+						// Add to portal pages
+						const pageSlug = urlify(page.title);
+						updatedPages[pageSlug] = {
+							type: 'static',
+							id: assetId,
+							name: page.title,
+						};
+
+						addNotification(`Created page: ${page.title}`, 'success');
+					} catch (error: any) {
+						debugLog('error', 'WordPressImport', `Failed to create page "${page.title}": ${error.message}`);
+						addNotification(`Failed to create page "${page.title}": ${error.message}`, 'warning');
+					}
+				}
+
+				// Update portal with pages
+				if (Object.keys(updatedPages).length > Object.keys(currentPages).length) {
+					await permawebProvider.libs.updateZone(
+						{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
+						current.id,
+						arProvider.wallet
+					);
+					refreshCurrentPortal(PortalPatchMapEnum.Presentation);
+				}
+			}
+
+			// Clear import data
+			setWordPressImportData(null);
+
+			// Refresh portal to show new content
+			refreshCurrentPortal();
+		} catch (error: any) {
+			debugLog('error', 'WordPressImport', `Import failed: ${error.message}`);
+			addNotification(`Import failed: ${error.message}`, 'warning', { persistent: true });
+		}
 	}
 
 	const refreshCurrentPortal = (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => {
@@ -572,7 +931,18 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			<WordPressImport
 				open={showWordPressImport}
 				handleClose={() => setShowWordPressImport(false)}
-				onImportComplete={handleWordPressImportComplete}
+				createPortal={!current?.id}
+				onImportComplete={(data, posts, pages, selectedCategories, createCategories, createTopics) =>
+					handleWordPressImportComplete(
+						data,
+						posts,
+						pages,
+						selectedCategories,
+						createCategories,
+						createTopics,
+						!current?.id
+					)
+				}
 			/>
 		</PortalContext.Provider>
 	);

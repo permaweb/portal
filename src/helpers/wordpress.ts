@@ -178,10 +178,26 @@ export class WordPressClient {
 	private baseUrl: string;
 	private apiBase: string;
 	private corsProxy: string | null;
+	private isWordPressCom: boolean;
+	private wpComSiteSlug: string | null;
 
 	constructor(siteUrl: string, corsProxy: string | null = null) {
 		this.baseUrl = normalizeUrl(siteUrl);
-		this.apiBase = `${this.baseUrl}/wp-json/wp/v2`;
+
+		// Detect WordPress.com sites
+		this.isWordPressCom = this.baseUrl.includes('.wordpress.com');
+		if (this.isWordPressCom) {
+			// Extract site slug from URL (e.g., "terrytao" from "terrytao.wordpress.com")
+			const match = this.baseUrl.match(/https?:\/\/([^.]+)\.wordpress\.com/);
+			this.wpComSiteSlug = match ? match[1] : null;
+			this.apiBase = this.wpComSiteSlug
+				? `https://public-api.wordpress.com/rest/v1.1/sites/${this.wpComSiteSlug}.wordpress.com`
+				: `${this.baseUrl}/wp-json/wp/v2`;
+		} else {
+			this.apiBase = `${this.baseUrl}/wp-json/wp/v2`;
+			this.wpComSiteSlug = null;
+		}
+
 		this.corsProxy = corsProxy;
 	}
 
@@ -198,11 +214,33 @@ export class WordPressClient {
 
 	async checkApiAvailability(): Promise<boolean> {
 		try {
+			if (this.isWordPressCom && this.wpComSiteSlug) {
+				// For WordPress.com, test the public API
+				const response = await this.fetchWithProxy(`${this.apiBase}/posts?number=1`);
+				return response.ok;
+			}
+
 			const response = await this.fetchWithProxy(`${this.baseUrl}/wp-json/`);
 			if (response.ok) {
 				const data = await response.json();
 				return Array.isArray(data.namespaces) && data.namespaces.some((ns: string) => ns.startsWith('wp/v'));
 			}
+
+			// Check for WordPress.com Link header even on 404
+			const linkHeader = response.headers.get('link');
+			if (linkHeader?.includes('public-api.wordpress.com')) {
+				// It's a WordPress.com site, update our detection
+				this.isWordPressCom = true;
+				const match = this.baseUrl.match(/https?:\/\/([^.]+)\.wordpress\.com/);
+				if (match) {
+					this.wpComSiteSlug = match[1];
+					this.apiBase = `https://public-api.wordpress.com/rest/v1.1/sites/${this.wpComSiteSlug}.wordpress.com`;
+					// Test the WordPress.com API
+					const wpComResponse = await this.fetchWithProxy(`${this.apiBase}/posts?number=1`);
+					return wpComResponse.ok;
+				}
+			}
+
 			return false;
 		} catch {
 			return false;
@@ -211,6 +249,25 @@ export class WordPressClient {
 
 	async getSiteInfo(): Promise<WordPressSiteInfo | null> {
 		try {
+			if (this.isWordPressCom && this.wpComSiteSlug) {
+				// WordPress.com doesn't have a site info endpoint, construct from posts response
+				const response = await this.fetchWithProxy(`${this.apiBase}/posts?number=1`);
+				if (response.ok) {
+					const data = await response.json();
+					// WordPress.com API returns site info in the response
+					return {
+						name: data.site?.name || this.wpComSiteSlug,
+						description: data.site?.description || '',
+						url: this.baseUrl,
+						home: this.baseUrl,
+						gmt_offset: 0,
+						timezone_string: '',
+						namespaces: ['wp.com/v1.1'],
+					};
+				}
+				return null;
+			}
+
 			const response = await this.fetchWithProxy(`${this.baseUrl}/wp-json/`);
 			if (response.ok) {
 				return await response.json();
@@ -226,6 +283,50 @@ export class WordPressClient {
 		page: number = 1
 	): Promise<{ posts: WordPressPost[]; total: number; totalPages: number }> {
 		try {
+			if (this.isWordPressCom && this.wpComSiteSlug) {
+				// WordPress.com API uses different parameters
+				const response = await this.fetchWithProxy(`${this.apiBase}/posts?number=${perPage}&page=${page}`);
+				if (response.ok) {
+					const data = await response.json();
+					// WordPress.com returns {found: X, posts: [...]}
+					const wpComPosts = data.posts || [];
+					// Convert WordPress.com post format to standard format
+					const posts: WordPressPost[] = wpComPosts.map((wp: any) => {
+						// WordPress.com returns category/tag objects, not just IDs
+						const categoryIds = Array.isArray(wp.categories)
+							? wp.categories.map((cat: any) => (typeof cat === 'object' ? cat.ID : cat))
+							: [];
+						const tagIds = Array.isArray(wp.tags)
+							? wp.tags.map((tag: any) => (typeof tag === 'object' ? tag.ID : tag))
+							: [];
+
+						return {
+							id: wp.ID,
+							date: wp.date,
+							date_gmt: wp.date_gmt || wp.date,
+							modified: wp.modified,
+							modified_gmt: wp.modified_gmt || wp.modified,
+							slug: wp.slug,
+							status: wp.status === 'publish' ? 'publish' : wp.status || 'draft',
+							type: 'post',
+							link: wp.URL,
+							title: { rendered: typeof wp.title === 'string' ? wp.title : wp.title || '' },
+							content: { rendered: typeof wp.content === 'string' ? wp.content : wp.content || '', protected: false },
+							excerpt: { rendered: typeof wp.excerpt === 'string' ? wp.excerpt : wp.excerpt || '', protected: false },
+							author: typeof wp.author === 'object' ? wp.author?.ID || 0 : wp.author || 0,
+							featured_media: wp.featured_image ? 1 : 0, // WordPress.com doesn't return media ID directly
+							categories: categoryIds,
+							tags: tagIds,
+						};
+					});
+
+					const total = data.found || 0;
+					const totalPages = Math.ceil(total / perPage);
+					return { posts, total, totalPages };
+				}
+				return { posts: [], total: 0, totalPages: 0 };
+			}
+
 			const response = await this.fetchWithProxy(`${this.apiBase}/posts?per_page=${perPage}&page=${page}&_embed`);
 			if (response.ok) {
 				const posts = await response.json();
@@ -250,11 +351,15 @@ export class WordPressClient {
 		allPosts.push(...firstPage.posts);
 		onProgress?.(allPosts.length, firstPage.total);
 
-		while (page < firstPage.totalPages) {
+		// Continue fetching if there are more pages
+		while (page < firstPage.totalPages && firstPage.totalPages > 1) {
 			page++;
 			const nextPage = await this.getPosts(perPage, page);
 			allPosts.push(...nextPage.posts);
 			onProgress?.(allPosts.length, firstPage.total);
+
+			// Safety check: if we got no posts, we've reached the end
+			if (nextPage.posts.length === 0) break;
 		}
 
 		return allPosts;
@@ -265,6 +370,41 @@ export class WordPressClient {
 		page: number = 1
 	): Promise<{ pages: WordPressPage[]; total: number; totalPages: number }> {
 		try {
+			if (this.isWordPressCom && this.wpComSiteSlug) {
+				// WordPress.com API for pages
+				const response = await this.fetchWithProxy(`${this.apiBase}/pages?number=${perPage}&page=${page}`);
+				if (response.ok) {
+					const data = await response.json();
+					const wpComPages = data.pages || [];
+					// Convert WordPress.com page format to standard format
+					const pages: WordPressPage[] = wpComPages.map((wp: any) => ({
+						id: wp.ID,
+						date: wp.date,
+						date_gmt: wp.date_gmt || wp.date,
+						modified: wp.modified,
+						modified_gmt: wp.modified_gmt || wp.modified,
+						slug: wp.slug,
+						status: wp.status === 'publish' ? 'publish' : wp.status || 'draft',
+						type: 'page',
+						link: wp.URL,
+						title: { rendered: typeof wp.title === 'string' ? wp.title : wp.title || '' },
+						content: { rendered: typeof wp.content === 'string' ? wp.content : wp.content || '', protected: false },
+						excerpt: { rendered: typeof wp.excerpt === 'string' ? wp.excerpt : wp.excerpt || '', protected: false },
+						author: typeof wp.author === 'object' ? wp.author?.ID || 0 : wp.author || 0,
+						featured_media: wp.featured_image ? 1 : 0,
+						categories: [],
+						tags: [],
+						parent: wp.parent || 0,
+						menu_order: wp.menu_order || 0,
+					}));
+
+					const total = data.found || 0;
+					const totalPages = Math.ceil(total / perPage);
+					return { pages, total, totalPages };
+				}
+				return { pages: [], total: 0, totalPages: 0 };
+			}
+
 			const response = await this.fetchWithProxy(`${this.apiBase}/pages?per_page=${perPage}&page=${page}&_embed`);
 			if (response.ok) {
 				const pages = await response.json();
@@ -289,11 +429,15 @@ export class WordPressClient {
 		allPages.push(...firstPage.pages);
 		onProgress?.(allPages.length, firstPage.total);
 
-		while (page < firstPage.totalPages) {
+		// Continue fetching if there are more pages
+		while (page < firstPage.totalPages && firstPage.totalPages > 1) {
 			page++;
 			const nextPage = await this.getPages(perPage, page);
 			allPages.push(...nextPage.pages);
 			onProgress?.(allPages.length, firstPage.total);
+
+			// Safety check: if we got no pages, we've reached the end
+			if (nextPage.pages.length === 0) break;
 		}
 
 		return allPages;
@@ -301,6 +445,27 @@ export class WordPressClient {
 
 	async getCategories(): Promise<WordPressCategory[]> {
 		try {
+			if (this.isWordPressCom && this.wpComSiteSlug) {
+				// WordPress.com API for categories
+				const response = await this.fetchWithProxy(`${this.apiBase}/categories?number=100`);
+				if (response.ok) {
+					const data = await response.json();
+					const wpComCategories = data.categories || [];
+					// Convert WordPress.com category format to standard format
+					return wpComCategories.map((cat: any) => ({
+						id: cat.ID,
+						count: cat.post_count || 0,
+						description: cat.description || '',
+						link: cat.URL || '',
+						name: cat.name,
+						slug: cat.slug,
+						taxonomy: 'category',
+						parent: cat.parent || 0,
+					}));
+				}
+				return [];
+			}
+
 			const response = await this.fetchWithProxy(`${this.apiBase}/categories?per_page=100`);
 			if (response.ok) {
 				return await response.json();
@@ -313,6 +478,26 @@ export class WordPressClient {
 
 	async getTags(): Promise<WordPressTag[]> {
 		try {
+			if (this.isWordPressCom && this.wpComSiteSlug) {
+				// WordPress.com API for tags
+				const response = await this.fetchWithProxy(`${this.apiBase}/tags?number=100`);
+				if (response.ok) {
+					const data = await response.json();
+					const wpComTags = data.tags || [];
+					// Convert WordPress.com tag format to standard format
+					return wpComTags.map((tag: any) => ({
+						id: tag.ID,
+						count: tag.post_count || 0,
+						description: tag.description || '',
+						link: tag.URL || '',
+						name: tag.name,
+						slug: tag.slug,
+						taxonomy: 'post_tag',
+					}));
+				}
+				return [];
+			}
+
 			const response = await this.fetchWithProxy(`${this.apiBase}/tags?per_page=100`);
 			if (response.ok) {
 				return await response.json();
@@ -433,6 +618,45 @@ export class WordPressClient {
 				}
 			}
 
+			// Extract common CSS color patterns from inline styles and style tags
+			const colorPatterns = [
+				{
+					pattern: /(?:--|color|background|bg)[-:]?\s*(?:primary|brand|main)[-:]?\s*:\s*([#\w()\s,]+);/gi,
+					key: 'primary',
+				},
+				{
+					pattern: /(?:--|color|background|bg)[-:]?\s*(?:secondary|accent)[-:]?\s*:\s*([#\w()\s,]+);/gi,
+					key: 'secondary',
+				},
+				{
+					pattern: /(?:--|background|bg)[-:]?\s*(?:body|page|site|base)[-:]?\s*:\s*([#\w()\s,]+);/gi,
+					key: 'background',
+				},
+				{
+					pattern: /(?:--|color|text|foreground)[-:]?\s*(?:text|body|content|base)[-:]?\s*:\s*([#\w()\s,]+);/gi,
+					key: 'text',
+				},
+				{
+					pattern: /(?:--|color|border)[-:]?\s*(?:border|divider|separator)[-:]?\s*:\s*([#\w()\s,]+);/gi,
+					key: 'border',
+				},
+				{ pattern: /(?:--|color)[-:]?\s*(?:link|anchor|a)[-:]?\s*:\s*([#\w()\s,]+);/gi, key: 'link' },
+			];
+
+			colorPatterns.forEach(({ pattern, key }) => {
+				const matches = cssText.matchAll(pattern);
+				for (const match of matches) {
+					if (match[1] && !extractedTheme.colors[key as keyof ExtractedThemeColors]) {
+						const color = match[1].trim();
+						// Basic validation: should look like a color
+						if (/^#[\da-f]{3,6}$/i.test(color) || /^rgba?\(/i.test(color) || /^hsla?\(/i.test(color)) {
+							extractedTheme.colors[key as keyof ExtractedThemeColors] = color;
+							break;
+						}
+					}
+				}
+			});
+
 			// Fallback: Extract from computed styles of key elements
 			// Try to get background color from body
 			const bodyBg = doc.body?.style?.backgroundColor || doc.body?.getAttribute('data-bg');
@@ -458,6 +682,26 @@ export class WordPressClient {
 					extractedTheme.colors.primary = themeColor;
 				}
 			}
+
+			// Extract from common WordPress theme classes
+			const wpThemeClasses = [
+				{ selector: '.wp-block-site-title a, .site-title a', key: 'primary' },
+				{ selector: 'a, .wp-block-post-title a', key: 'link' },
+				{ selector: 'body, .site', key: 'background' },
+			];
+
+			// Note: We can't get computed styles from DOMParser, but we can check inline styles
+			wpThemeClasses.forEach(({ selector, key }) => {
+				const elements = doc.querySelectorAll(selector);
+				for (const el of Array.from(elements)) {
+					const htmlEl = el as HTMLElement;
+					const color = htmlEl.style?.color || htmlEl.style?.backgroundColor;
+					if (color && !extractedTheme.colors[key as keyof ExtractedThemeColors]) {
+						extractedTheme.colors[key as keyof ExtractedThemeColors] = color;
+						break;
+					}
+				}
+			});
 
 			return extractedTheme;
 		} catch {
@@ -573,7 +817,25 @@ export class WordPressClient {
 		return extractedTheme;
 	}
 
-	async extractAll(onProgress?: (progress: WordPressExtractionProgress) => void): Promise<WordPressExtractionResult> {
+	async extractAll(
+		onProgress?: (progress: WordPressExtractionProgress) => void,
+		options?: {
+			fetchPosts?: boolean;
+			fetchPages?: boolean;
+			fetchCategories?: boolean;
+			fetchTags?: boolean;
+			fetchTheme?: boolean;
+			postsLimit?: number;
+		}
+	): Promise<WordPressExtractionResult> {
+		const opts = {
+			fetchPosts: true,
+			fetchPages: true,
+			fetchCategories: true,
+			fetchTags: true,
+			fetchTheme: true,
+			...options,
+		};
 		const result: WordPressExtractionResult = {
 			siteInfo: null,
 			posts: [],
@@ -590,7 +852,15 @@ export class WordPressClient {
 			onProgress?.({ stage: 'connecting', current: 0, total: 1, message: 'Connecting to WordPress site...' });
 			const isAvailable = await this.checkApiAvailability();
 			if (!isAvailable) {
-				result.errors.push('WordPress REST API is not available on this site');
+				if (this.isWordPressCom) {
+					result.errors.push(
+						'WordPress.com public API is not available for this site. The site may be private or restricted.'
+					);
+				} else {
+					result.errors.push(
+						'WordPress REST API is not available on this site. The site may not be WordPress or the API may be disabled.'
+					);
+				}
 				onProgress?.({ stage: 'error', current: 0, total: 0, message: 'API not available' });
 				return result;
 			}
@@ -600,24 +870,44 @@ export class WordPressClient {
 			result.siteInfo = await this.getSiteInfo();
 
 			// Get categories
-			onProgress?.({ stage: 'categories', current: 0, total: 1, message: 'Fetching categories...' });
-			result.categories = await this.getCategories();
+			if (opts.fetchCategories) {
+				onProgress?.({ stage: 'categories', current: 0, total: 1, message: 'Fetching categories...' });
+				result.categories = await this.getCategories();
+			}
 
 			// Get tags
-			onProgress?.({ stage: 'tags', current: 0, total: 1, message: 'Fetching tags...' });
-			result.tags = await this.getTags();
+			if (opts.fetchTags) {
+				onProgress?.({ stage: 'tags', current: 0, total: 1, message: 'Fetching tags...' });
+				result.tags = await this.getTags();
+			}
 
 			// Get posts
-			onProgress?.({ stage: 'posts', current: 0, total: 0, message: 'Fetching posts...' });
-			result.posts = await this.getAllPosts((current, total) => {
-				onProgress?.({ stage: 'posts', current, total, message: `Fetching posts (${current}/${total})...` });
-			});
+			if (opts.fetchPosts) {
+				onProgress?.({ stage: 'posts', current: 0, total: 0, message: 'Fetching posts...' });
+				if (opts.postsLimit) {
+					// Fetch limited number of posts
+					const limitedPosts = await this.getPosts(opts.postsLimit, 1);
+					result.posts = limitedPosts.posts;
+					onProgress?.({
+						stage: 'posts',
+						current: limitedPosts.posts.length,
+						total: limitedPosts.total,
+						message: `Fetched ${limitedPosts.posts.length} posts...`,
+					});
+				} else {
+					result.posts = await this.getAllPosts((current, total) => {
+						onProgress?.({ stage: 'posts', current, total, message: `Fetching posts (${current}/${total})...` });
+					});
+				}
+			}
 
 			// Get pages
-			onProgress?.({ stage: 'pages', current: 0, total: 0, message: 'Fetching pages...' });
-			result.pages = await this.getAllPages((current, total) => {
-				onProgress?.({ stage: 'pages', current, total, message: `Fetching pages (${current}/${total})...` });
-			});
+			if (opts.fetchPages) {
+				onProgress?.({ stage: 'pages', current: 0, total: 0, message: 'Fetching pages...' });
+				result.pages = await this.getAllPages((current, total) => {
+					onProgress?.({ stage: 'pages', current, total, message: `Fetching pages (${current}/${total})...` });
+				});
+			}
 
 			// Collect featured media IDs
 			const mediaIds = new Set<number>();
@@ -642,10 +932,12 @@ export class WordPressClient {
 			}
 
 			// Extract theme/colors
-			onProgress?.({ stage: 'theme', current: 0, total: 1, message: 'Extracting theme colors...' });
-			result.theme = await this.extractTheme();
-			if (result.theme) {
-				onProgress?.({ stage: 'theme', current: 1, total: 1, message: 'Theme colors extracted!' });
+			if (opts.fetchTheme) {
+				onProgress?.({ stage: 'theme', current: 0, total: 1, message: 'Extracting theme colors...' });
+				result.theme = await this.extractTheme();
+				if (result.theme) {
+					onProgress?.({ stage: 'theme', current: 1, total: 1, message: 'Theme colors extracted!' });
+				}
 			}
 
 			onProgress?.({ stage: 'complete', current: 1, total: 1, message: 'Extraction complete!' });
@@ -658,8 +950,33 @@ export class WordPressClient {
 	}
 }
 
+/** Resolve potentially relative image/video URL against base (e.g. WordPress site URL). */
+function resolveMediaUrl(href: string, baseUrl?: string): string {
+	if (!href || !baseUrl) return href;
+	href = href.trim();
+	if (/^https?:\/\//i.test(href) || href.startsWith('data:')) return href;
+	try {
+		return new URL(href, baseUrl.endsWith('/') ? baseUrl : baseUrl + '/').href;
+	} catch {
+		return href;
+	}
+}
+
+function escapeHtml(s: string): string {
+	return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/** Build portal-media-wrapper HTML matching MediaBlock output (column, center). Used for image/video blocks. */
+function buildMediaBlockHtml(type: 'image' | 'video', url: string, caption: string): string {
+	const style = 'display: flex; flex-direction: column; justify-content: center; max-width: 100%;';
+	const safeUrl = url.replace(/"/g, '&quot;');
+	const tag = type === 'video' ? `<video controls src="${safeUrl}"></video>` : `<img src="${safeUrl}" alt="">`;
+	const cap = caption ? `<p>${escapeHtml(caption)}</p>` : '';
+	return `<div class="portal-media-wrapper portal-media-column" style="${style}">\n  ${tag}\n  ${cap}\n</div>`;
+}
+
 // HTML to ArticleBlocks converter
-export function htmlToArticleBlocks(html: string): ArticleBlockType[] {
+export function htmlToArticleBlocks(html: string, baseUrl?: string): ArticleBlockType[] {
 	const blocks: ArticleBlockType[] = [];
 
 	// Create a temporary DOM element to parse HTML
@@ -705,11 +1022,14 @@ export function htmlToArticleBlocks(html: string): ArticleBlockType[] {
 				// Check if paragraph contains only an image
 				if (element.children.length === 1 && element.children[0].tagName.toLowerCase() === 'img') {
 					const img = element.children[0] as HTMLImageElement;
+					const rawSrc = img.getAttribute('src') || img.src || '';
+					const url = resolveMediaUrl(rawSrc, baseUrl);
+					const caption = '';
 					return {
 						id,
 						type: ArticleBlockEnum.Image,
-						content: img.src,
-						data: { alt: img.alt || '', caption: '' },
+						content: buildMediaBlockHtml('image', url, caption),
+						data: { url, caption, alt: img.alt || '', alignment: 'portal-media-column', mediaAlign: 'center' },
 					};
 				}
 				return { id, type: ArticleBlockEnum.Paragraph, content: pContent };
@@ -740,26 +1060,37 @@ export function htmlToArticleBlocks(html: string): ArticleBlockType[] {
 					olItems.push(`<li>${li.innerHTML}</li>`);
 				});
 				return { id, type: ArticleBlockEnum.OrderedList, content: olItems.join('') };
-			case 'img':
+			case 'img': {
 				const imgElement = element as HTMLImageElement;
+				const rawSrc = imgElement.getAttribute('src') || imgElement.src || '';
+				const url = resolveMediaUrl(rawSrc, baseUrl);
+				const caption = '';
 				return {
 					id,
 					type: ArticleBlockEnum.Image,
-					content: imgElement.src,
-					data: { alt: imgElement.alt || '', caption: '' },
+					content: buildMediaBlockHtml('image', url, caption),
+					data: { url, caption, alt: imgElement.alt || '', alignment: 'portal-media-column', mediaAlign: 'center' },
 				};
-			case 'figure':
+			}
+			case 'figure': {
 				// WordPress often wraps images in figure elements
 				const figImg = element.querySelector('img');
 				const figCaption = element.querySelector('figcaption');
 				if (figImg) {
+					const imgEl = figImg as HTMLImageElement;
+					const rawSrc = imgEl.getAttribute('src') || imgEl.src || '';
+					const url = resolveMediaUrl(rawSrc, baseUrl);
+					const caption = figCaption?.textContent?.trim() || '';
 					return {
 						id,
 						type: ArticleBlockEnum.Image,
-						content: (figImg as HTMLImageElement).src,
+						content: buildMediaBlockHtml('image', url, caption),
 						data: {
-							alt: (figImg as HTMLImageElement).alt || '',
-							caption: figCaption?.textContent || '',
+							url,
+							caption,
+							alt: imgEl.alt || '',
+							alignment: 'portal-media-column',
+							mediaAlign: 'center',
 						},
 					};
 				}
@@ -767,10 +1098,14 @@ export function htmlToArticleBlocks(html: string): ArticleBlockType[] {
 				const figVideo = element.querySelector('video');
 				if (figVideo) {
 					const source = figVideo.querySelector('source');
+					const rawSrc = (source?.getAttribute('src') || (figVideo as HTMLVideoElement).src || '').trim();
+					const url = resolveMediaUrl(rawSrc, baseUrl);
+					const caption = element.querySelector('figcaption')?.textContent?.trim() || '';
 					return {
 						id,
 						type: ArticleBlockEnum.Video,
-						content: source?.src || (figVideo as HTMLVideoElement).src || '',
+						content: buildMediaBlockHtml('video', url, caption),
+						data: { url, caption, alignment: 'portal-media-column', mediaAlign: 'center' },
 					};
 				}
 				// Check for iframe (embedded content)
@@ -783,14 +1118,20 @@ export function htmlToArticleBlocks(html: string): ArticleBlockType[] {
 					};
 				}
 				return null;
-			case 'video':
+			}
+			case 'video': {
 				const videoElement = element as HTMLVideoElement;
 				const videoSource = videoElement.querySelector('source');
+				const rawSrc = (videoSource?.getAttribute('src') || videoElement.src || '').trim();
+				const url = resolveMediaUrl(rawSrc, baseUrl);
+				const caption = '';
 				return {
 					id,
 					type: ArticleBlockEnum.Video,
-					content: videoSource?.src || videoElement.src || '',
+					content: buildMediaBlockHtml('video', url, caption),
+					data: { url, caption, alignment: 'portal-media-column', mediaAlign: 'center' },
 				};
+			}
 			case 'iframe':
 				return { id, type: ArticleBlockEnum.Embed, content: element.outerHTML };
 			case 'hr':
@@ -804,14 +1145,21 @@ export function htmlToArticleBlocks(html: string): ArticleBlockType[] {
 				if (wpBlockClass.includes('wp-block-image')) {
 					const divImg = element.querySelector('img');
 					if (divImg) {
+						const imgEl = divImg as HTMLImageElement;
 						const divCaption = element.querySelector('figcaption');
+						const rawSrc = imgEl.getAttribute('src') || imgEl.src || '';
+						const url = resolveMediaUrl(rawSrc, baseUrl);
+						const caption = divCaption?.textContent?.trim() || '';
 						return {
 							id,
 							type: ArticleBlockEnum.Image,
-							content: (divImg as HTMLImageElement).src,
+							content: buildMediaBlockHtml('image', url, caption),
 							data: {
-								alt: (divImg as HTMLImageElement).alt || '',
-								caption: divCaption?.textContent || '',
+								url,
+								caption,
+								alt: imgEl.alt || '',
+								alignment: 'portal-media-column',
+								mediaAlign: 'center',
 							},
 						};
 					}
@@ -820,10 +1168,14 @@ export function htmlToArticleBlocks(html: string): ArticleBlockType[] {
 					const divVideo = element.querySelector('video');
 					if (divVideo) {
 						const source = divVideo.querySelector('source');
+						const rawSrc = (source?.getAttribute('src') || (divVideo as HTMLVideoElement).src || '').trim();
+						const url = resolveMediaUrl(rawSrc, baseUrl);
+						const vCap = element.querySelector('figcaption')?.textContent?.trim() || '';
 						return {
 							id,
 							type: ArticleBlockEnum.Video,
-							content: source?.src || (divVideo as HTMLVideoElement).src || '',
+							content: buildMediaBlockHtml('video', url, vCap),
+							data: { url, caption: vCap, alignment: 'portal-media-column', mediaAlign: 'center' },
 						};
 					}
 				}
@@ -949,10 +1301,11 @@ export function convertPost(
 	wpPost: WordPressPost,
 	wpCategories: WordPressCategory[],
 	wpTags: WordPressTag[],
-	wpMedia: WordPressMedia[]
+	wpMedia: WordPressMedia[],
+	baseUrl?: string
 ): ConvertedPost {
-	// Convert HTML content to article blocks
-	const content = htmlToArticleBlocks(wpPost.content.rendered);
+	// Convert HTML content to article blocks (baseUrl resolves relative image/video URLs)
+	const content = htmlToArticleBlocks(wpPost.content.rendered, baseUrl);
 
 	// Strip HTML from excerpt for description
 	const tempDiv = document.createElement('div');
@@ -1154,12 +1507,14 @@ export function convertWordPressToPortal(extraction: WordPressExtractionResult):
 	const categories = convertCategories(extraction.categories);
 	const topics = convertTags(extraction.tags);
 
+	const baseUrl = extraction.siteInfo?.home || extraction.siteInfo?.url;
+
 	const posts = extraction.posts.map((post) =>
-		convertPost(post, extraction.categories, extraction.tags, extraction.media)
+		convertPost(post, extraction.categories, extraction.tags, extraction.media, baseUrl)
 	);
 
 	const pages = extraction.pages.map((page) =>
-		convertPost(page, extraction.categories, extraction.tags, extraction.media)
+		convertPost(page, extraction.categories, extraction.tags, extraction.media, baseUrl)
 	);
 
 	// Convert theme if available
@@ -1177,4 +1532,233 @@ export function convertWordPressToPortal(extraction: WordPressExtractionResult):
 		theme,
 		extractedTheme: extraction.theme,
 	};
+}
+
+// Parse WordPress WXR (WordPress eXtended RSS) export file
+export async function parseWXRFile(file: File): Promise<WordPressExtractionResult> {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+
+		reader.onload = (e) => {
+			try {
+				const xmlText = e.target?.result as string;
+				const parser = new DOMParser();
+				const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+				// Check for parsing errors
+				const parseError = xmlDoc.querySelector('parsererror');
+				if (parseError) {
+					reject(new Error('Invalid XML file'));
+					return;
+				}
+
+				const result: WordPressExtractionResult = {
+					siteInfo: null,
+					posts: [],
+					pages: [],
+					categories: [],
+					tags: [],
+					media: [],
+					theme: null,
+					errors: [],
+				};
+
+				// Extract site info from <channel>
+				const channel = xmlDoc.querySelector('channel');
+				if (channel) {
+					const title = channel.querySelector('title')?.textContent || '';
+					const description = channel.querySelector('description')?.textContent || '';
+					const link = channel.querySelector('link')?.textContent || '';
+
+					result.siteInfo = {
+						name: title,
+						description: description,
+						url: link,
+						home: link,
+						gmt_offset: 0,
+						timezone_string: '',
+						namespaces: ['wp/v2'],
+					};
+				}
+
+				// Extract categories and tags - WXR can have them in <wp:category> or <category> elements
+				const categoryMap = new Map<string, WordPressCategory>();
+				const tagMap = new Map<string, WordPressTag>();
+
+				// Try wp:category elements first (more common in WXR)
+				const wpCategories = xmlDoc.querySelectorAll('wp\\:category, category[domain="category"]');
+				wpCategories.forEach((catEl, index) => {
+					const termId =
+						catEl.getAttribute('term_id') || catEl.querySelector('wp\\:term_id')?.textContent || `${index}`;
+					const nicename =
+						catEl.getAttribute('nicename') || catEl.querySelector('wp\\:category_nicename')?.textContent || '';
+					const parent = catEl.getAttribute('parent') || catEl.querySelector('wp\\:category_parent')?.textContent || '';
+					const name = catEl.querySelector('wp\\:cat_name')?.textContent || catEl.textContent || '';
+					const description = catEl.querySelector('wp\\:category_description')?.textContent || '';
+
+					if (termId && name) {
+						categoryMap.set(termId, {
+							id: parseInt(termId) || index,
+							count: 0,
+							description: description,
+							link: '',
+							name: name,
+							slug: nicename || name.toLowerCase().replace(/\s+/g, '-'),
+							taxonomy: 'category',
+							parent: parent ? parseInt(parent) : 0,
+						});
+					}
+				});
+
+				// Extract tags - wp:tag or category[domain="post_tag"]
+				const wpTags = xmlDoc.querySelectorAll('wp\\:tag, category[domain="post_tag"]');
+				wpTags.forEach((tagEl, index) => {
+					const termId =
+						tagEl.getAttribute('term_id') || tagEl.querySelector('wp\\:term_id')?.textContent || `${index}`;
+					const nicename = tagEl.getAttribute('nicename') || tagEl.querySelector('wp\\:tag_slug')?.textContent || '';
+					const name = tagEl.querySelector('wp\\:tag_name')?.textContent || tagEl.textContent || '';
+
+					if (termId && name) {
+						tagMap.set(termId, {
+							id: parseInt(termId) || index,
+							count: 0,
+							description: '',
+							link: '',
+							name: name,
+							slug: nicename || name.toLowerCase().replace(/\s+/g, '-'),
+							taxonomy: 'post_tag',
+						});
+					}
+				});
+
+				result.categories = Array.from(categoryMap.values());
+				result.tags = Array.from(tagMap.values());
+
+				// Extract items (posts/pages)
+				const items = xmlDoc.querySelectorAll('item');
+				let postIndex = 0;
+				items.forEach((item) => {
+					const title = item.querySelector('title')?.textContent || '';
+					const link = item.querySelector('link')?.textContent || '';
+					const pubDate = item.querySelector('pubDate')?.textContent || '';
+					const guid = item.querySelector('guid')?.textContent || '';
+					const description = item.querySelector('description')?.textContent || '';
+					const content = item.querySelector('content\\:encoded')?.textContent || description;
+					const excerpt = item.querySelector('excerpt\\:encoded')?.textContent || '';
+					const postType = item.querySelector('wp\\:post_type')?.textContent || 'post';
+					const status = (item.querySelector('wp\\:status')?.textContent || 'publish') as WordPressPost['status'];
+					const postId = parseInt(item.querySelector('wp\\:post_id')?.textContent || `${postIndex}`) || postIndex;
+					const postDate = item.querySelector('wp\\:post_date')?.textContent || pubDate;
+					const postDateGmt = item.querySelector('wp\\:post_date_gmt')?.textContent || postDate;
+					const modified = item.querySelector('wp\\:post_date')?.textContent || postDate;
+					const modifiedGmt = item.querySelector('wp\\:post_modified_gmt')?.textContent || modified;
+
+					// Extract categories and tags for this post
+					const postCategories: number[] = [];
+					const postTags: number[] = [];
+					const categoryRefs = item.querySelectorAll('category');
+					categoryRefs.forEach((catRef) => {
+						const domain = catRef.getAttribute('domain');
+						const termId = catRef.getAttribute('term_id');
+						if (termId) {
+							const id = parseInt(termId);
+							if (!isNaN(id)) {
+								if (domain === 'category') {
+									postCategories.push(id);
+								} else if (domain === 'post_tag') {
+									postTags.push(id);
+								}
+							}
+						} else {
+							// Fallback: try to match by name/slug
+							const name = catRef.textContent || '';
+							const slug = catRef.getAttribute('nicename') || '';
+							if (domain === 'category') {
+								const found = Array.from(categoryMap.values()).find((c) => c.name === name || c.slug === slug);
+								if (found) postCategories.push(found.id);
+							} else if (domain === 'post_tag') {
+								const found = Array.from(tagMap.values()).find((t) => t.name === name || t.slug === slug);
+								if (found) postTags.push(found.id);
+							}
+						}
+					});
+
+					// Extract featured image
+					const metaFeaturedImage = Array.from(item.querySelectorAll('wp\\:postmeta')).find(
+						(meta) => meta.querySelector('wp\\:meta_key')?.textContent === '_thumbnail_id'
+					);
+					const featuredMedia = metaFeaturedImage
+						? parseInt(metaFeaturedImage.querySelector('wp\\:meta_value')?.textContent || '0')
+						: 0;
+
+					const postData: WordPressPost = {
+						id: postId,
+						date: postDate,
+						date_gmt: postDateGmt,
+						modified: modified,
+						modified_gmt: modifiedGmt,
+						slug: item.querySelector('wp\\:post_name')?.textContent || guid.split('/').pop() || '',
+						status,
+						type: postType,
+						link,
+						title: { rendered: title },
+						content: { rendered: content, protected: false },
+						excerpt: { rendered: excerpt, protected: false },
+						author: 0, // WXR doesn't always include author IDs
+						featured_media: featuredMedia,
+						categories: postCategories,
+						tags: postTags,
+					};
+
+					if (postType === 'page') {
+						const parent = parseInt(item.querySelector('wp\\:post_parent')?.textContent || '0') || 0;
+						const menuOrder = parseInt(item.querySelector('wp\\:menu_order')?.textContent || '0') || 0;
+						result.pages.push({
+							...postData,
+							parent,
+							menu_order: menuOrder,
+						});
+					} else {
+						result.posts.push(postData);
+					}
+
+					postIndex++;
+				});
+
+				// Extract attachments/media (wp:attachment_url in postmeta)
+				const attachments = xmlDoc.querySelectorAll('item');
+				attachments.forEach((item) => {
+					const postType = item.querySelector('wp\\:post_type')?.textContent || '';
+					if (postType === 'attachment') {
+						const attachmentUrl = item.querySelector('wp\\:attachment_url')?.textContent || '';
+						const postId = parseInt(item.querySelector('wp\\:post_id')?.textContent || '0') || 0;
+						if (attachmentUrl) {
+							result.media.push({
+								id: postId,
+								date: item.querySelector('wp\\:post_date')?.textContent || '',
+								slug: item.querySelector('wp\\:post_name')?.textContent || '',
+								type: 'attachment',
+								link: item.querySelector('link')?.textContent || '',
+								title: { rendered: item.querySelector('title')?.textContent || '' },
+								alt_text: '',
+								media_type: attachmentUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? 'image' : 'file',
+								mime_type: '',
+								source_url: attachmentUrl,
+							});
+						}
+					}
+				});
+
+				resolve(result);
+			} catch (error: any) {
+				reject(new Error(`Failed to parse WXR file: ${error.message || 'Unknown error'}`));
+			}
+		};
+
+		reader.onerror = () => {
+			reject(new Error('Failed to read file'));
+		};
+
+		reader.readAsText(file);
+	});
 }

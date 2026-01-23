@@ -5,13 +5,13 @@ import { STYLING } from 'helpers/config';
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 16px;
 `;
 
 export const Section = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 8px;
 `;
 
 export const SectionHeader = styled.div`
@@ -29,10 +29,10 @@ export const SectionLabel = styled.span`
 
 export const SectionInfo = styled.p`
 	color: ${(props) => props.theme.colors.font.alt1};
-	font-size: ${(props) => props.theme.typography.size.xxSmall};
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	margin: 0;
-	line-height: 1.5;
+	line-height: 1.4;
 `;
 
 export const ProgressWrapper = styled.div`
@@ -366,4 +366,30 @@ export const NoThemeMessage = styled.div`
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
 		font-family: ${(props) => props.theme.typography.family.primary};
 	}
+`;
+
+export const CheckboxGroup = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 0;
+`;
+
+export const CheckboxLabel = styled.span`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-size: ${(props) => props.theme.typography.size.xxSmall};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1;
+	user-select: none;
+`;
+
+export const CountInputWrapper = styled.div`
+	width: 60px;
+	display: flex;
+	align-items: center;
+	margin-left: auto;
 `;

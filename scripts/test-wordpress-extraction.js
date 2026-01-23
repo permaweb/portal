@@ -116,12 +116,19 @@ async function testRestAPI(baseUrl) {
 		errors: [],
 	};
 
+	// Check if this is a WordPress.com site
+	const isWordPressCom = baseUrl.includes('.wordpress.com');
+
 	try {
 		// Test root API endpoint
 		const rootUrl = `${baseUrl}/wp-json/`;
 		logInfo(`Testing REST API root: ${rootUrl}`);
 
 		const rootResponse = await makeRequest(rootUrl);
+
+		// Check for WordPress.com Link header (even on 404)
+		const linkHeader = rootResponse.headers.link;
+		const wpComApiMatch = linkHeader?.match(/<https:\/\/public-api\.wordpress\.com\/wp-json\/\?rest_route=([^>]+)>/);
 
 		if (rootResponse.statusCode === 200) {
 			try {
@@ -133,6 +140,13 @@ async function testRestAPI(baseUrl) {
 			} catch (e) {
 				logWarning('API root returned non-JSON response');
 			}
+		} else if (isWordPressCom || wpComApiMatch) {
+			// WordPress.com site - use WordPress.com public API
+			logInfo('WordPress.com site detected, trying WordPress.com public API...');
+			results.available = true;
+			results.version = 'wp.com/v1.1';
+			results.isWordPressCom = true;
+			logSuccess('WordPress.com public API available');
 		} else {
 			logError(`API root returned status ${rootResponse.statusCode}`);
 			return results;
@@ -148,32 +162,62 @@ async function testRestAPI(baseUrl) {
 	}
 
 	// Test various endpoints
-	const endpoints = [
-		{ name: 'Site Info', path: '/wp-json/', key: 'siteInfo' },
-		{ name: 'Posts', path: '/wp-json/wp/v2/posts?per_page=1', key: 'posts' },
-		{ name: 'Pages', path: '/wp-json/wp/v2/pages?per_page=1', key: 'pages' },
-		{ name: 'Categories', path: '/wp-json/wp/v2/categories?per_page=10', key: 'categories' },
-		{ name: 'Tags', path: '/wp-json/wp/v2/tags?per_page=10', key: 'tags' },
-		{ name: 'Media', path: '/wp-json/wp/v2/media?per_page=1', key: 'media' },
-		{ name: 'Users', path: '/wp-json/wp/v2/users?per_page=1', key: 'users' },
-		{ name: 'Themes', path: '/wp-json/wp/v2/themes', key: 'themes' },
-	];
+	// WordPress.com uses different API structure
+	const siteSlug = isWordPressCom
+		? baseUrl.replace('https://', '').replace('http://', '').replace('.wordpress.com', '')
+		: null;
+	const wpComBase = isWordPressCom
+		? `https://public-api.wordpress.com/rest/v1.1/sites/${siteSlug}.wordpress.com`
+		: null;
+
+	const endpoints = isWordPressCom
+		? [
+				{ name: 'Posts', path: `${wpComBase}/posts?number=1`, key: 'posts', isWordPressCom: true },
+				{ name: 'Pages', path: `${wpComBase}/pages?number=1`, key: 'pages', isWordPressCom: true },
+				{ name: 'Categories', path: `${wpComBase}/categories?number=10`, key: 'categories', isWordPressCom: true },
+				{ name: 'Tags', path: `${wpComBase}/tags?number=10`, key: 'tags', isWordPressCom: true },
+		  ]
+		: [
+				{ name: 'Site Info', path: '/wp-json/', key: 'siteInfo' },
+				{ name: 'Posts', path: '/wp-json/wp/v2/posts?per_page=1', key: 'posts' },
+				{ name: 'Pages', path: '/wp-json/wp/v2/pages?per_page=1', key: 'pages' },
+				{ name: 'Categories', path: '/wp-json/wp/v2/categories?per_page=10', key: 'categories' },
+				{ name: 'Tags', path: '/wp-json/wp/v2/tags?per_page=10', key: 'tags' },
+				{ name: 'Media', path: '/wp-json/wp/v2/media?per_page=1', key: 'media' },
+				{ name: 'Users', path: '/wp-json/wp/v2/users?per_page=1', key: 'users' },
+				{ name: 'Themes', path: '/wp-json/wp/v2/themes', key: 'themes' },
+		  ];
 
 	for (const endpoint of endpoints) {
 		try {
-			const url = `${baseUrl}${endpoint.path}`;
+			const url = endpoint.isWordPressCom ? endpoint.path : `${baseUrl}${endpoint.path}`;
 			const response = await makeRequest(url);
 
 			if (response.statusCode === 200) {
 				try {
 					const data = JSON.parse(response.body);
+					// WordPress.com API returns different structure
+					const wpData =
+						endpoint.isWordPressCom && data.found !== undefined
+							? data.posts || data.pages || data.categories || data.tags
+							: Array.isArray(data)
+							? data
+							: [data];
+					const total =
+						endpoint.isWordPressCom && data.found !== undefined
+							? data.found
+							: response.headers['x-wp-total']
+							? parseInt(response.headers['x-wp-total'])
+							: null;
+
 					results.endpoints[endpoint.key] = {
 						available: true,
 						url: endpoint.path,
-						data: Array.isArray(data) ? data : [data],
-						count: Array.isArray(data) ? data.length : 1,
-						total: response.headers['x-wp-total'] ? parseInt(response.headers['x-wp-total']) : null,
+						data: Array.isArray(wpData) ? wpData : [wpData],
+						count: Array.isArray(wpData) ? wpData.length : 1,
+						total: total,
 						totalPages: response.headers['x-wp-totalpages'] ? parseInt(response.headers['x-wp-totalpages']) : null,
+						isWordPressCom: endpoint.isWordPressCom || false,
 					};
 
 					const totalInfo = results.endpoints[endpoint.key].total
