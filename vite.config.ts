@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
 
 	const config: any = {
 		editor: {
-			port: 3001,
+			port: 3000,
 			build: {
 				sourcemap: false,
 				outDir: path.resolve(__dirname, `dist/${app}`),
