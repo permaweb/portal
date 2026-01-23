@@ -119,6 +119,8 @@ function AppContent() {
 						profileId: permawebProvider.profile.id,
 					});
 
+					permawebProvider.refreshProfile();
+
 					debugLog('info', 'EditorApp', 'Updated profile version.');
 
 					hasCheckedProfileRef.current = true;

@@ -94,7 +94,7 @@ export const ICONS = {
 	settings: getTxEndpoint('e3jdELVw-3jNIOCbWTYCh1fuH4zIa7tDqmOqE6HyizY'),
 	setup: getTxEndpoint('dyFHmCSxONAiUPJsr6HeAdED_MSsRAL9nQDvdmGryT0'),
 	shortcuts: getTxEndpoint('RHIjV5uz9SGb9FVDdc-MAQlXFRtfpnTwQWLexcClMW0'),
-	show: getTxEndpoint('uqYcReQQa_ndg9qPJN5d9hqgSrAfcWPeNAAs5gBwRN4'),
+	show: getTxEndpoint('tdD3PITzqZjzw628DutkNZyQPlMJ-sO0O72LlkQMIS0'),
 	sidebar: getTxEndpoint('XM1V21oiMIm4az0_9v-Ie3cjDWFbxhmlgGEid288Wu0'),
 	signout: getTxEndpoint('WSd2O4e-s6rnY-3c6NUrLCMEysx4iM51bcyOVxGsbEA'),
 	site: getTxEndpoint('gAG4DPY73lacgyiBnXXCgaolI40yxh3CRcrS86TASoA'),

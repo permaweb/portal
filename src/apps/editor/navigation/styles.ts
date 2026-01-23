@@ -669,4 +669,5 @@ export const LeaveModalActionsWrapper = styled.div`
 	justify-content: flex-end;
 	flex-wrap: wrap;
 	gap: 15px;
+	margin: 10px 0 0 0;
 `;
