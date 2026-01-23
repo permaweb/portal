@@ -283,7 +283,7 @@ export default function Comment(props: any) {
 	}
 
 	if (!commentData) return null;
-	const hasModPermission = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles.includes(r));
+	const hasModPermission = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles?.includes(r));
 	if (commentData.status !== 'active' && !hasModPermission) return null;
 
 	return (
