@@ -325,6 +325,11 @@ export const Post = styled.div`
 		padding-right: var(--spacing-xxs);
 		box-sizing: border-box;
 	}
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-large']}) {
+		padding-left: var(--spacing-xs);
+		padding-right: var(--spacing-xs);
+	}
 `;
 
 export const Description = styled.p`

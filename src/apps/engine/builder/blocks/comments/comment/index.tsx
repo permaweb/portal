@@ -219,7 +219,8 @@ export default function Comment(props: any) {
 	const portalMenuEntries: MenuItem[] = React.useMemo(() => {
 		if (!profile?.portals || profile.portals.length === 0) return [];
 		return profile.portals.map((portal: any) => ({
-			label: portal.Name || portal.id,
+			icon: ICONS.portal,
+			label: portal.name || portal.id,
 			onClick: () => {
 				window.open(`https://portal.arweave.net/#/${portal.id}`, '_blank');
 				setShowPortalMenu(false);
@@ -310,7 +311,7 @@ export default function Comment(props: any) {
 							{portalMenuEntries.length > 0 && (
 								<ContextMenu entries={portalMenuEntries}>
 									<S.PortalMenuTrigger $active={showPortalMenu}>
-										<ReactSVG src={ICONS.portal} />
+										<ReactSVG src={ICONS.ENGINE.menu} />
 									</S.PortalMenuTrigger>
 								</ContextMenu>
 							)}
