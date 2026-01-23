@@ -421,7 +421,7 @@ export const OptionsDropdown = styled.div`
 	z-index: 2;
 	top: 43.5px;
 	right: 0;
-	padding: 11.5px 10px;
+	padding: 10px;
 
 	button {
 		height: 40px;

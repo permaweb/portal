@@ -12,7 +12,8 @@ export const PostWrapper = styled.div`
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 20px;
-	transition: all 150ms;
+	transition: all 100ms;
+	background: ${(props) => props.theme.colors.container.primary.background};
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		flex-direction: column;
@@ -21,10 +22,6 @@ export const PostWrapper = styled.div`
 
 	&:hover {
 		background: ${(props) => props.theme.colors.container.alt2.background};
-		p {
-			text-decoration: underline;
-			text-decoration-thickness: 1.25px;
-		}
 	}
 `;
 
@@ -90,6 +87,111 @@ export const PostActions = styled.div`
 	margin: 0 -4.5px 0 0;
 `;
 
+export const PostMenuWrapper = styled.div`
+	position: relative;
+`;
+
+export const PostMenuAction = styled.div`
+	button {
+		padding: 3.5px 0 0 0 !important;
+	}
+`;
+
+export const PostMenuDropdown = styled.div`
+	max-height: 75vh;
+	width: 265px;
+	max-width: 80vw;
+	position: absolute;
+	z-index: 2;
+	top: 30.5px;
+	right: 0;
+	padding: 10px;
+
+	button {
+		height: 35px;
+		width: 100%;
+		display: flex;
+		gap: 12.5px;
+		align-items: center;
+		cursor: pointer;
+		background: transparent;
+		border-radius: ${STYLING.dimensions.radius.alt4};
+		transition: all 100ms;
+		padding: 0 10px;
+
+		p {
+			color: ${(props) => props.theme.colors.font.primary};
+			font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
+			font-family: ${(props) => props.theme.typography.family.primary} !important;
+			display: block;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			max-width: 85%;
+			overflow: hidden;
+			text-decoration: none !important;
+		}
+
+		span {
+			font-family: ${(props) => props.theme.typography.family.primary} !important;
+			display: block;
+			text-transform: uppercase;
+			padding: 2.5px 6.5px;
+			border: 1px solid transparent;
+			background: ${(props) => props.theme.colors.container.alt2.background} !important;
+			border: 1px solid ${(props) => props.theme.colors.border.primary} !important;
+			border-radius: ${STYLING.dimensions.radius.alt3} !important;
+			color: ${(props) => props.theme.colors.font.primary} !important;
+			font-size: 10px !important;
+			font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+
+			margin: 0 0 0 auto;
+		}
+
+		.info {
+			padding: 2.5px 7.5px !important;
+		}
+
+		svg {
+			height: 14.5px;
+			width: 14.5px;
+			margin: 2.5px 0 0 0;
+			color: ${(props) => props.theme.colors.font.alt1};
+			fill: ${(props) => props.theme.colors.font.alt1};
+		}
+
+		img {
+			height: 22.5px;
+			width: 22.5px;
+			margin: 0 12.5px 0 0;
+		}
+
+		&:hover {
+			background: ${(props) => props.theme.colors.container.primary.active};
+		}
+	}
+`;
+
+export const PostMenuDivider = styled.div`
+	height: 1px;
+	width: calc(100% - 20px);
+	margin: 5px auto;
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+`;
+
+export const PostMenuWarning = styled.button`
+	padding: 0 8.5px;
+
+	p {
+		color: ${(props) => props.theme.colors.warning.primary} !important;
+	}
+
+	svg {
+		color: ${(props) => props.theme.colors.warning.primary} !important;
+		fill: ${(props) => props.theme.colors.warning.primary} !important;
+	}
+`;
+
 export const PostStatus = styled.div<{ status: ArticleStatusType }>`
 	display: flex;
 	align-items: center;
@@ -110,4 +212,29 @@ export const PostStatus = styled.div<{ status: ArticleStatusType }>`
 		border-radius: 50%;
 		background: ${(props) => getPostStatusBackground(props.status, props.theme)};
 	}
+`;
+
+export const RemoveModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 0 20px 20px 20px !important;
+`;
+
+export const RemoveModalBodyWrapper = styled.div`
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+`;
+
+export const RemoveModalActionsWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 15px;
+	margin: 10px 0 0 0;
 `;
