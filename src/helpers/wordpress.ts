@@ -520,6 +520,61 @@ export class WordPressClient {
 		}
 	}
 
+	async getPostBySlug(slug: string): Promise<WordPressPost | null> {
+		try {
+			if (this.isWordPressCom && this.wpComSiteSlug) {
+				// WordPress.com API - search by slug
+				const response = await this.fetchWithProxy(`${this.apiBase}/posts?slug=${encodeURIComponent(slug)}&number=1`);
+				if (response.ok) {
+					const data = await response.json();
+					const posts = data.posts || [];
+					if (posts.length > 0) {
+						const wp = posts[0];
+						// Convert WordPress.com format to standard format
+						const categoryIds = Array.isArray(wp.categories)
+							? wp.categories.map((cat: any) => (typeof cat === 'object' ? cat.ID : cat))
+							: [];
+						const tagIds = Array.isArray(wp.tags)
+							? wp.tags.map((tag: any) => (typeof tag === 'object' ? tag.ID : tag))
+							: [];
+
+						return {
+							id: wp.ID,
+							date: wp.date,
+							date_gmt: wp.date_gmt || wp.date,
+							modified: wp.modified,
+							modified_gmt: wp.modified_gmt || wp.modified,
+							slug: wp.slug,
+							status: wp.status === 'publish' ? 'publish' : wp.status || 'draft',
+							type: 'post',
+							link: wp.URL,
+							title: { rendered: typeof wp.title === 'string' ? wp.title : wp.title || '' },
+							content: { rendered: typeof wp.content === 'string' ? wp.content : wp.content || '', protected: false },
+							excerpt: { rendered: typeof wp.excerpt === 'string' ? wp.excerpt : wp.excerpt || '', protected: false },
+							author: typeof wp.author === 'object' ? wp.author?.ID || 0 : wp.author || 0,
+							featured_media: wp.featured_image ? 1 : 0,
+							categories: categoryIds,
+							tags: tagIds,
+						};
+					}
+				}
+				return null;
+			}
+
+			// Standard WordPress REST API - fetch by slug
+			const response = await this.fetchWithProxy(`${this.apiBase}/posts?slug=${encodeURIComponent(slug)}&_embed`);
+			if (response.ok) {
+				const posts = await response.json();
+				if (Array.isArray(posts) && posts.length > 0) {
+					return posts[0];
+				}
+			}
+			return null;
+		} catch {
+			return null;
+		}
+	}
+
 	async getGlobalStyles(): Promise<WordPressThemeSettings | null> {
 		try {
 			// Try the global-styles endpoint (WP 5.9+ with block themes)
@@ -1761,4 +1816,70 @@ export async function parseWXRFile(file: File): Promise<WordPressExtractionResul
 
 		reader.readAsText(file);
 	});
+}
+
+/**
+ * Extract a single WordPress post/article from a URL
+ * @param articleUrl - The full URL of the WordPress article/post
+ * @returns A ConvertedPost object ready for use in the editor
+ */
+export async function extractWordPressArticle(articleUrl: string): Promise<ConvertedPost> {
+	try {
+		// Parse the URL to extract site URL and post slug
+		const url = new URL(articleUrl);
+		const pathParts = url.pathname.split('/').filter((p) => p);
+
+		// Extract site URL (protocol + host)
+		const siteUrl = `${url.protocol}//${url.host}`;
+
+		// Extract post slug (usually the last non-empty path segment)
+		// WordPress URLs typically look like: site.com/2024/01/post-slug/ or site.com/post-slug/
+		let postSlug = pathParts[pathParts.length - 1];
+
+		// Remove trailing slash if present
+		if (postSlug && postSlug.endsWith('/')) {
+			postSlug = postSlug.slice(0, -1);
+		}
+
+		if (!postSlug) {
+			throw new Error('Could not extract post slug from URL');
+		}
+
+		// Create WordPress client
+		const client = new WordPressClient(siteUrl);
+
+		// Check API availability
+		const isAvailable = await client.checkApiAvailability();
+		if (!isAvailable) {
+			throw new Error('WordPress REST API is not available on this site');
+		}
+
+		// Fetch the post by slug
+		const wpPost = await client.getPostBySlug(postSlug);
+
+		if (!wpPost) {
+			throw new Error(`Post not found: ${postSlug}`);
+		}
+
+		// Fetch categories, tags, and media needed for conversion
+		const [wpCategories, wpTags, wpMediaItem] = await Promise.all([
+			client.getCategories(),
+			client.getTags(),
+			wpPost.featured_media ? client.getMedia(wpPost.featured_media) : Promise.resolve(null),
+		]);
+
+		// Convert media item to array format expected by convertPost
+		const wpMedia: WordPressMedia[] = wpMediaItem ? [wpMediaItem] : [];
+
+		// Get site info for base URL
+		const siteInfo = await client.getSiteInfo();
+		const baseUrl = siteInfo?.home || siteInfo?.url || siteUrl;
+
+		// Convert the post
+		const convertedPost = convertPost(wpPost, wpCategories, wpTags, wpMedia, baseUrl);
+
+		return convertedPost;
+	} catch (error: any) {
+		throw new Error(`Failed to extract WordPress article: ${error.message || 'Unknown error'}`);
+	}
 }
