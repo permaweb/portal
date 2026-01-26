@@ -95,7 +95,7 @@ export default function Post(props: { post: PortalAssetType }) {
 	return props.post ? (
 		<>
 			<Link to={externalPostLink} target={'_blank'}>
-				<S.PostWrapper className={'fade-in'}>
+				<S.PostWrapper>
 					<S.PostHeader>
 						<p>{props.post.name}</p>
 						<S.PostHeaderDetail>

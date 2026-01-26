@@ -133,7 +133,7 @@ function AppContent() {
 		const baseRoutes = [URLS.base, URLS.docs, `URLS.docs/*`, `${URLS.docs}:active/*`, URLS.notFound, '*'];
 
 		if (baseRoutes.includes(path)) {
-			return <Route path={path} element={element} />;
+			return <Route path={path} element={<Suspense fallback={<Loader />}>{element}</Suspense>} />;
 		}
 
 		const view = (() => {
@@ -151,8 +151,12 @@ function AppContent() {
 
 			if (!portalProvider.permissions) {
 				return (
-					<Portal node={DOM.loader}>
-						<Loader />
+					<Portal node={DOM.overlay}>
+						<S.CenteredWrapper className={'overlay'}>
+							<S.MessageWrapper>
+								<p>{`${language?.loggingIn}...`}</p>
+							</S.MessageWrapper>
+						</S.CenteredWrapper>
 					</Portal>
 				);
 			}
@@ -170,7 +174,13 @@ function AppContent() {
 										? language?.permissionExternalContributor
 										: language?.permissionBaseDenied}
 								</p>
-								<Button type={'primary'} label={language?.returnHome} handlePress={() => navigate(URLS.base)} />
+								<Button
+									type={'primary'}
+									label={language?.returnHome}
+									handlePress={() => navigate(URLS.base)}
+									height={37.5}
+									width={135}
+								/>
 							</S.MessageWrapper>
 						</S.CenteredWrapper>
 					</Portal>
@@ -191,7 +201,7 @@ function AppContent() {
 						}}
 					/>
 					<S.View className={'max-view-wrapper'} navigationOpen={navWidth > 0} navWidth={navWidth}>
-						{element}
+						<Suspense fallback={<Loader relative />}>{element}</Suspense>
 					</S.View>
 					<S.Footer navigationOpen={navWidth > 0} navWidth={navWidth}>
 						<p>
@@ -211,36 +221,34 @@ function AppContent() {
 			<div id={DOM.loader} />
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />
-			<Suspense fallback={<Loader />}>
-				<S.App>
-					<Routes>
-						{getRoute(URLS.base, <Landing />)}
-						{getRoute(`${URLS.base}:portalId`, <PortalView />)}
-						{getRoute(`${URLS.base}:portalId/posts`, <Posts />)}
-						{getRoute(`${URLS.base}:portalId/moderation`, <Moderation />)}
-						{getRoute(`${URLS.base}:portalId/post/create`, <PostCreate />)}
-						{getRoute(`${URLS.base}:portalId/post/create/article`, <PostEdit />)}
-						{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <PostEdit />)}
-						{getRoute(`${URLS.base}:portalId/page/create/main`, <PageCreateMain />)}
-						{getRoute(`${URLS.base}:portalId/page/edit/main/:pageId`, <PageEditMain />)}
-						{getRoute(`${URLS.base}:portalId/page/create/info`, <PageCreateInfo />)}
-						{getRoute(`${URLS.base}:portalId/page/edit/info/:assetId`, <PageEditInfo />)}
-						{getRoute(`${URLS.base}:portalId/setup`, <Setup />)}
-						{getRoute(`${URLS.base}:portalId/design`, <Design />)}
-						{getRoute(`${URLS.base}:portalId/design/:active`, <Design />)}
-						{getRoute(`${URLS.base}:portalId/media`, <Media />)}
-						{getRoute(`${URLS.base}:portalId/users`, <Users />)}
-						{getRoute(`${URLS.base}:portalId/pages`, <Pages />)}
-						{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
-						{getRoute(`${URLS.base}:portalId/domains/register`, <DomainsRegister />)}
-						{getRoute(`${URLS.base}:portalId/tips`, <Tips />)}
-						{getRoute(URLS.docs, <Docs />)}
-						{getRoute(`${URLS.docs}:active/*`, <Docs />)}
-						{getRoute(URLS.notFound, <NotFound />)}
-						{getRoute(`*`, <NotFound />)}
-					</Routes>
-				</S.App>
-			</Suspense>
+			<S.App>
+				<Routes>
+					{getRoute(URLS.base, <Landing />)}
+					{getRoute(`${URLS.base}:portalId`, <PortalView />)}
+					{getRoute(`${URLS.base}:portalId/posts`, <Posts />)}
+					{getRoute(`${URLS.base}:portalId/moderation`, <Moderation />)}
+					{getRoute(`${URLS.base}:portalId/post/create`, <PostCreate />)}
+					{getRoute(`${URLS.base}:portalId/post/create/article`, <PostEdit />)}
+					{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <PostEdit />)}
+					{getRoute(`${URLS.base}:portalId/page/create/main`, <PageCreateMain />)}
+					{getRoute(`${URLS.base}:portalId/page/edit/main/:pageId`, <PageEditMain />)}
+					{getRoute(`${URLS.base}:portalId/page/create/info`, <PageCreateInfo />)}
+					{getRoute(`${URLS.base}:portalId/page/edit/info/:assetId`, <PageEditInfo />)}
+					{getRoute(`${URLS.base}:portalId/setup`, <Setup />)}
+					{getRoute(`${URLS.base}:portalId/design`, <Design />)}
+					{getRoute(`${URLS.base}:portalId/design/:active`, <Design />)}
+					{getRoute(`${URLS.base}:portalId/media`, <Media />)}
+					{getRoute(`${URLS.base}:portalId/users`, <Users />)}
+					{getRoute(`${URLS.base}:portalId/pages`, <Pages />)}
+					{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
+					{getRoute(`${URLS.base}:portalId/domains/register`, <DomainsRegister />)}
+					{getRoute(`${URLS.base}:portalId/tips`, <Tips />)}
+					{getRoute(URLS.docs, <Docs />)}
+					{getRoute(`${URLS.docs}:active/*`, <Docs />)}
+					{getRoute(URLS.notFound, <NotFound />)}
+					{getRoute(`*`, <NotFound />)}
+				</Routes>
+			</S.App>
 		</>
 	);
 }
@@ -259,16 +267,16 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 			<HashRouter>
 				<SettingsProvider>
 					<LanguageProvider>
-						<ArweaveProvider>
-							<PermawebProvider>
-								<NotificationProvider>
+						<NotificationProvider>
+							<ArweaveProvider>
+								<PermawebProvider>
 									<PortalProvider>
 										<GlobalStyle />
 										<App />
 									</PortalProvider>
-								</NotificationProvider>
-							</PermawebProvider>
-						</ArweaveProvider>
+								</PermawebProvider>
+							</ArweaveProvider>
+						</NotificationProvider>
 					</LanguageProvider>
 				</SettingsProvider>
 			</HashRouter>

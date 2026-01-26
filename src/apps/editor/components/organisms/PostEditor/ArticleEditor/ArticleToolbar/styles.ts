@@ -124,8 +124,7 @@ export const PanelCloseWrapperStart = styled.div`
 `;
 
 export const PanelCloseWrapperEnd = styled.div`
-	margin: 10px 0;
-	padding: 0 10px;
+	margin: 20px 0 10px 0;
 `;
 
 export const TabWrapper = styled.div<{ label: string; icon?: string }>``;

@@ -201,6 +201,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					setCurrentId(currentPortal.id);
 					setCurrent(null);
 				}
+			} else {
+				setPermissions({ base: false });
 			}
 		}
 	}, [location.pathname, portals, currentId]);

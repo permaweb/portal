@@ -30,6 +30,11 @@ export const RuleLabel = styled.label`
 	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 
+export const MutedWordsLabel = styled(RuleLabel)`
+	margin-bottom: 8px;
+	display: block;
+`;
+
 export const RuleDescription = styled.p`
 	color: ${(props) => props.theme.colors.font.alt2};
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
@@ -181,4 +186,13 @@ export const ActionWrapper = styled.div`
 	margin: 0;
 	padding: 15px 0 17.5px 0;
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+`;
+
+export const WrapperEmpty = styled.div`
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
 `;

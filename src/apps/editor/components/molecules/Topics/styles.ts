@@ -21,14 +21,10 @@ export const TopicsAction = styled.form<{ addToggled: boolean }>`
 	}
 `;
 
-export const TopicsAdd = styled.div`
-	margin: 15px 0 0 0;
-	position: relative;
-	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
-`;
+export const TopicsAdd = styled.div``;
 
 export const TopicsToggle = styled.div`
-	margin: 17.5px 0 0 0;
+	margin: 15px 0 0 0;
 `;
 
 export const TopicsBody = styled.div`
