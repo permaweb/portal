@@ -55,14 +55,14 @@ export const InputActionsInfoLine = styled.div`
 		font-weight: ${(props) => props.theme?.typography?.weight?.medium || '500'};
 		font-family: ${(props) => props.theme?.typography?.family?.primary || 'inherit'};
 		display: flex;
-		width: 170px;
+		width: 185px;
 	}
 
 	p {
 		color: ${(props) => props.theme?.colors?.font?.primary || 'rgba(var(--color-text), 1)'};
 		font-size: ${(props) => props.theme?.typography?.size?.xSmall || '12px'} !important;
-		font-weight: ${(props) => props.theme?.typography?.weight?.xBold || '700'};
-		font-family: ${(props) => props.theme?.typography?.family?.primary || 'inherit'};
+		font-weight: ${(props) => props.theme?.typography?.weight?.xBold || '700'} !important;
+		font-family: ${(props) => props.theme?.typography?.family?.primary || 'inherit'} !important;
 		display: flex;
 	}
 `;
@@ -85,8 +85,9 @@ export const InputActionsFlex = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 15px 20px;
-	margin: 10px 0 0 0;
+	justify-content: flex-end;
+	gap: 15px;
+	margin: 25px 0 0 0;
 `;
 
 export const UploadOptionsHeader = styled.div`
@@ -113,7 +114,7 @@ export const RadioOption = styled.div<{ selected: boolean; disabled?: boolean }>
 	padding: 12px 15px;
 	border-radius: ${STYLING.dimensions.radius.primary};
 	border: 1px solid ${(props) => props.theme?.colors?.border?.primary || 'rgba(var(--color-border), 1)'};
-	background: transparent;
+	background: ${(props) => props.theme.colors.container.alt1.background};
 	cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
 	transition: all 0.15s ease;
 
@@ -144,10 +145,18 @@ export const RadioOptionContent = styled.div`
 	width: 100%;
 `;
 
+export const AddFundsAction = styled.div`
+	button {
+		min-width: 0 !important;
+		max-width: 500px !important;
+		margin: 10px auto;
+	}
+`;
+
 export const RadioOptionHeader = styled.div`
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: 15px;
 `;
 
 export const RadioButton = styled.div<{ selected: boolean; disabled?: boolean }>`
@@ -192,7 +201,7 @@ export const RadioLabel = styled.div<{ disabled?: boolean }>`
 	p {
 		color: ${(props) => props.theme?.colors?.font?.alt1 || 'rgba(var(--color-text), 0.7)'};
 		font-size: ${(props) => props.theme?.typography?.size?.xSmall || '12px'};
-		font-weight: ${(props) => props.theme?.typography?.weight?.medium || '500'};
+		font-weight: ${(props) => props.theme?.typography?.weight?.xBold || '700'};
 		font-family: ${(props) => props.theme?.typography?.family?.primary || 'inherit'};
 		margin: 0;
 	}

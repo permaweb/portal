@@ -92,7 +92,6 @@ export default function User(props: {
 		<>
 			<S.UserWrapper
 				key={props.user.address}
-				className={'fade-in'}
 				onClick={() => {
 					if (props.hideAction || unauthorized) return;
 					if (

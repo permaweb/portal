@@ -53,6 +53,7 @@ Error handling uses `debugLog` for development logging and `addNotification` for
 - Always use theme values, never hardcode colors/fonts/spacing
 - Helper functions in styles.ts for complex conditional styling
 - Responsive patterns
+- No inline CSS styles: use styled-components instead of style prop
 
 **Patterns**
 

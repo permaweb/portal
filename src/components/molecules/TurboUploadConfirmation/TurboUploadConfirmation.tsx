@@ -114,19 +114,21 @@ export default function TurboUploadConfirmation(props: {
 								</S.InputActionsInfoLine>
 							</S.InputActionsInfo>
 							{insufficientBalance && (
-								<Button
-									type={'alt1'}
-									label={language?.addFunds}
-									handlePress={(e) => {
-										e.stopPropagation();
-										setShowFundUpload(true);
-									}}
-									disabled={showFundUpload}
-									icon={ICONS.add}
-									iconLeftAlign
-									height={40}
-									fullWidth
-								/>
+								<S.AddFundsAction>
+									<Button
+										type={'alt1'}
+										label={language?.addFunds}
+										handlePress={(e) => {
+											e.stopPropagation();
+											setShowFundUpload(true);
+										}}
+										disabled={showFundUpload}
+										icon={ICONS.add}
+										iconLeftAlign
+										height={40}
+										fullWidth
+									/>
+								</S.AddFundsAction>
 							)}
 						</S.RadioOptionContent>
 					</S.RadioOption>

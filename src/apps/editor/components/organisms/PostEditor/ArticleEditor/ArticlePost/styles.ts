@@ -3,21 +3,22 @@ import styled from 'styled-components';
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 25px;
+	gap: 19.5px;
 `;
 
-export const Section = styled.div``;
+export const Section = styled.div`
+	width: calc(100% - 10px);
+	margin: 0 auto;
+	padding: 0 0 20px 0;
+	border-bottom: 1px dotted ${(props) => props.theme.colors.border.primary};
+`;
 
 export const SectionStart = styled.div`
 	padding: 7.5px 0 0 0;
-	margin: 7.5px 0 0 0;
-	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+	margin: 2.5px 0 0 0;
 `;
 
-export const SectionEnd = styled.div`
-	padding: 0 0 7.5px 0;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
-`;
+export const SectionEnd = styled.div``;
 
 export const SectionHeader = styled.div`
 	width: 100%;
@@ -25,7 +26,6 @@ export const SectionHeader = styled.div`
 	align-items: center;
 	justify-content: space-between;
 	gap: 15px;
-	padding: 0 5px 0 10px;
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
@@ -50,11 +50,10 @@ export const SectionBody = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	padding: 0 5px 0 10px;
 `;
 
 export const TopicsSection = styled(Section)``;
 
 export const ContributeSection = styled(Section)`
-	padding: 0 0 10px 0;
+	padding: 0 0 20px 0;
 `;

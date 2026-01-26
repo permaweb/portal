@@ -117,7 +117,7 @@ export const PanelContent = styled.div<{ open: boolean }>`
 
 export const PanelLink = styled.div<{ showText?: boolean; useFill?: boolean }>`
 	a {
-		height: 40.5px;
+		height: 38.5px;
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;
@@ -131,11 +131,10 @@ export const PanelLink = styled.div<{ showText?: boolean; useFill?: boolean }>`
 		border-radius: ${STYLING.dimensions.radius.primary};
 		white-space: nowrap;
 		transition: all 100ms;
-		padding: 0 8.5px;
+		padding: 0 8.5px 2.5px 8.5px;
 		svg {
 			height: 17.5px;
 			width: 17.5px;
-			margin: ${(props) => (props.showText ? '6.5px 12.5px 0 0' : '4.5px 0 0 0')};
 			color: ${(props) => props.theme.colors.font.primary};
 			${(props) => props.useFill && `fill: ${props.theme.colors.font.primary};`}
 		}
@@ -152,13 +151,19 @@ export const PanelLink = styled.div<{ showText?: boolean; useFill?: boolean }>`
 	}
 `;
 
+export const PanelIconWrapper = styled.div<{ showText?: boolean }>`
+	height: 17.5px;
+	width: 17.5px;
+	margin: ${(props) => (props.showText ? '3.5px 13.5px 0 0' : '3.5px 0 0 0')};
+`;
+
 export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 	height: 70px;
 	width: 100%;
 	padding: 15px;
 
 	a {
-		height: 40.5px;
+		height: 38.5px;
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;
@@ -176,7 +181,6 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 		svg {
 			height: 17.5px;
 			width: 17.5px;
-			margin: ${(props) => (props.showText ? '4.5px 10.5px 0 0' : '4.5px 0 0 0')};
 			color: ${(props) => props.theme.colors.font.primary};
 			fill: ${(props) => props.theme.colors.font.primary};
 		}
@@ -192,6 +196,12 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 			${(props) => !props.showText && `${HelpCenterTooltip} { display: block; }`}
 		}
 	}
+`;
+
+export const PanelIconFooterWrapper = styled.div<{ showText?: boolean }>`
+	height: 17.5px;
+	width: 17.5px;
+	margin: ${(props) => (props.showText ? '0 10.5px 0 0' : '0 0 0 0')};
 `;
 
 export const Header = styled.header<{ navigationOpen: boolean; navWidth?: number }>`

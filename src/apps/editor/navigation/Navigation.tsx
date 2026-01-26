@@ -292,11 +292,13 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		const content = (
 			<>
 				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
-				<S.PanelContent open={props.open} className={'fade-in scroll-wrapper-hidden'}>
+				<S.PanelContent open={props.open} className={'scroll-wrapper-hidden'}>
 					{paths.map((element, index) => (
 						<S.PanelLink key={index} showText={showText} useFill={element.useFill}>
 							<Link to={element.path} onClick={(e) => handleNavigate(e, element.path)}>
-								<ReactSVG src={element.icon} />
+								<S.PanelIconWrapper showText={showText}>
+									<ReactSVG src={element.icon} />
+								</S.PanelIconWrapper>
 								{showText && element.label}
 								{!showText && (
 									<S.LinkTooltip className={'info'}>
@@ -307,9 +309,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						</S.PanelLink>
 					))}
 				</S.PanelContent>
-				<S.PanelFooter open={props.open} showText={showText} className={'fade-in'}>
+				<S.PanelFooter open={props.open} showText={showText}>
 					<Link to={URLS.docsIntro} onClick={(e) => handleNavigate(e, URLS.docsIntro)}>
-						<ReactSVG src={ICONS.help} />
+						<S.PanelIconFooterWrapper showText={showText}>
+							<ReactSVG src={ICONS.help} />
+						</S.PanelIconFooterWrapper>
 						{showText && language?.helpCenter}
 						{!showText && (
 							<S.HelpCenterTooltip className={'info'}>
@@ -323,7 +327,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 		if (desktop) {
 			return (
-				<S.Panel open={props.open} className={'fade-in'} width={props.open ? navWidth : 0}>
+				<S.Panel open={props.open} width={props.open ? navWidth : 0}>
 					{props.open && (
 						<>
 							{content}
@@ -335,7 +339,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		} else {
 			return (
 				<>
-					<S.Panel open={props.open} className={'fade-in'} width={navWidth}>
+					<S.Panel open={props.open} width={navWidth}>
 						<CloseHandler active={props.open} disabled={!props.open} callback={() => props.toggle()}>
 							{content}
 						</CloseHandler>
@@ -390,7 +394,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	const portal = React.useMemo(() => {
 		if (portalProvider.current?.id) {
 			return (
-				<S.PortalWrapper className={'fade-in'}>
+				<S.PortalWrapper>
 					<CloseHandler
 						active={showPortalDropdown}
 						disabled={!showPortalDropdown}

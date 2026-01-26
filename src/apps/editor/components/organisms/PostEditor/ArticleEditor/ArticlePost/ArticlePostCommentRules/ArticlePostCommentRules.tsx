@@ -157,14 +157,18 @@ export default function ArticlePostCommentRules() {
 
 	// Only show if post has comments process
 	if (!commentsId || !hasPermission) {
-		return null;
+		return (
+			<S.WrapperEmpty>
+				<p>{language?.noCommentRules}</p>
+			</S.WrapperEmpty>
+		);
 	}
 
 	if (loading) {
 		return (
-			<S.Wrapper>
-				<span>{language?.fetching}...</span>
-			</S.Wrapper>
+			<S.WrapperEmpty>
+				<p>{language?.fetching}...</p>
+			</S.WrapperEmpty>
 		);
 	}
 
@@ -210,7 +214,7 @@ export default function ArticlePostCommentRules() {
 			</S.Section>
 
 			<S.Section>
-				<S.RuleLabel style={{ marginBottom: '8px', display: 'block' }}>{language?.mutedWords}</S.RuleLabel>
+				<S.MutedWordsLabel>{language?.mutedWords}</S.MutedWordsLabel>
 				<S.TagsWrapper>
 					<S.InputWrapper>
 						<S.Input

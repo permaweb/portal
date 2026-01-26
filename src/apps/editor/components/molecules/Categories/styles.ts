@@ -13,10 +13,7 @@ export const CategoriesAction = styled.div`
 	position: relative;
 `;
 
-export const CategoriesAdd = styled.div`
-	margin: 2.5px 0 0 0;
-	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
-`;
+export const CategoriesAdd = styled.div``;
 
 export const CategoriesClose = styled.div`
 	margin: 17.5px 0 0 0;
@@ -27,12 +24,13 @@ export const CategoriesAddAction = styled.form`
 
 	button {
 		position: absolute;
-		top: 16.5px;
+		top: 8.5px;
 		right: 10px;
 		z-index: 1;
 	}
 
 	input {
+		margin: 0;
 		padding: 10px 85px 10px 10px;
 	}
 `;
@@ -42,7 +40,7 @@ export const CategoriesParentAction = styled.div`
 `;
 
 export const CategoryAddAction = styled.div`
-	margin: 17.5px 0 0 0;
+	margin: 5px 0 0 0;
 `;
 
 export const CategoriesParentSelectAction = styled.div`
@@ -295,7 +293,6 @@ export const CategoryContent = styled.div`
 export const CategoryRow = styled.div`
 	display: flex;
 	align-items: center;
-	gap: 5px;
 
 	button:last-child {
 		opacity: 0;

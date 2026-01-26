@@ -873,7 +873,6 @@ export default function DomainListArNS() {
 		return (
 			<div key={`${sectionId}-${domain.antId}`}>
 				<S.DomainWrapper
-					className={'fade-in'}
 					onClick={() =>
 						setExpandedDetails((prev) => {
 							const next = new Set(prev);
@@ -1127,7 +1126,7 @@ export default function DomainListArNS() {
 	return (
 		<>
 			{antUpdating && <Loader message={`${language.updating}...`} />}
-			<S.Wrapper className={'fade-in'}>
+			<S.Wrapper>
 				{/* Domain Groupings */}
 				{(() => {
 					return createSectionsForRender({
