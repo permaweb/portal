@@ -81,27 +81,40 @@ export function generateColorFromId(id?: string): string {
 }
 
 export function initThemes(Themes: any[]) {
+	// Early return if Themes is not a valid array or is empty
+	if (!Array.isArray(Themes) || Themes.length === 0) {
+		return;
+	}
+
 	const activeTheme = Themes.find((e: any) => e.active);
 
+	// Early return if no active theme found
+	if (!activeTheme) {
+		return;
+	}
+
 	function getColor(theme: any, scheme: string, value: string) {
+		if (!theme?.basics?.colors) {
+			return value;
+		}
 		switch (value) {
 			case 'primary':
-				return theme.basics.colors.primary[scheme];
+				return theme.basics.colors.primary?.[scheme] || value;
 			case 'secondary':
-				return theme.basics.colors.secondary[scheme];
+				return theme.basics.colors.secondary?.[scheme] || value;
 			case 'background':
-				return theme.basics.colors.background[scheme];
+				return theme.basics.colors.background?.[scheme] || value;
 			case 'text':
-				return theme.basics.colors.text[scheme];
+				return theme.basics.colors.text?.[scheme] || value;
 			case 'border':
-				return theme.basics.colors.border[scheme];
+				return theme.basics.colors.border?.[scheme] || value;
 			default:
 				return value;
 		}
 	}
 
 	function setScheme(theme: any, scheme: string) {
-		if (!theme.basics) return null;
+		if (!theme || !theme.basics) return null;
 		updateThemeStyles(scheme, {
 			// Basics
 			'--color-text': theme.basics.colors.text[scheme],
