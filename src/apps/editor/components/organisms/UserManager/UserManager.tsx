@@ -297,6 +297,14 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				)}
 
 				<S.ActionsWrapper>
+					{props.user && canRemoveUser && (
+						<Button
+							type={'warning'}
+							label={language?.removeUser ?? 'Remove User'}
+							handlePress={() => setShowRemoveConfirm(true)}
+							disabled={loading || showRemoveConfirm}
+						/>
+					)}
 					<Button
 						type={'alt1'}
 						label={props.user ? language?.save : language?.add}
@@ -305,23 +313,8 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 						loading={loading}
 						icon={props.user ? null : ICONS.add}
 						iconLeftAlign
-						height={45}
-						fullWidth
 					/>
 				</S.ActionsWrapper>
-
-				{props.user && canRemoveUser && (
-					<S.ActionsWrapper>
-						<Button
-							type={'warning'}
-							label={language?.removeUser ?? 'Remove User'}
-							handlePress={() => setShowRemoveConfirm(true)}
-							disabled={loading || showRemoveConfirm}
-							height={45}
-							fullWidth
-						/>
-					</S.ActionsWrapper>
-				)}
 			</S.Wrapper>
 
 			{showRemoveConfirm && (
@@ -333,10 +326,9 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 					<p className={'default-text'}>
 						{language?.removeUserWarning ?? 'This will remove the user from the portal.'}
 					</p>
-
 					<S.ActionsWrapper>
 						<Button
-							type={'alt1'}
+							type={'primary'}
 							label={language?.cancel ?? 'Cancel'}
 							handlePress={() => setShowRemoveConfirm(false)}
 							disabled={loading}

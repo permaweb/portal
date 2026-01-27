@@ -59,14 +59,14 @@ function ArticlePost(props: {
 					</S.SectionEnd>
 				</S.SectionBody>
 			</S.Section>
-			<S.Section>
+			<S.DescriptionSection>
 				<S.SectionHeader>
 					<p>{language?.description}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
 					<ArticlePostDescription />
 				</S.SectionBody>
-			</S.Section>
+			</S.DescriptionSection>
 			<S.Section>
 				<S.SectionHeaderInput>
 					<p>{language?.categories}</p>

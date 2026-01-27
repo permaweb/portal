@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { ReactSVG } from 'react-svg';
 
 import { Post } from 'editor/components/molecules/Post';
 import { User } from 'editor/components/molecules/User';
@@ -157,15 +158,16 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 						<S.PostsActionsRequestsBody>
 							{requests.map((request: any) => {
 								return (
-									<S.PostActionRequest key={request.id}>
+									<S.PostActionRequest
+										key={request.id}
+										onClick={() => handleReviewRedirect(request.id)}
+										className={'border-wrapper-alt2'}
+									>
 										<S.PostActionRequestLine>
 											<p>{request.name}</p>
-											<Button
-												type={'alt4'}
-												label={language.checkPost}
-												handlePress={() => handleReviewRedirect(request.id)}
-												icon={ICONS.newTab}
-											/>
+											<span>
+												{language.checkPost} <ReactSVG src={ICONS.newTab} />{' '}
+											</span>
 										</S.PostActionRequestLine>
 										<S.PostActionRequestLine>
 											<div className={'user-line'}>

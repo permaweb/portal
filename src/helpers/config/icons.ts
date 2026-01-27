@@ -89,6 +89,7 @@ export const ICONS = {
 	reset: getTxEndpoint('DSgpHN64OAwP1Uyt-FLcQ06U0ANdkUZrqD2v9njxJYc'),
 	rotate: getTxEndpoint('o6b5WZGWf7ChLoZPnj8IVZipD19RtM-Yxg1AC4vs12E'),
 	rows: getTxEndpoint('xXDS2irAA7MlbTRl0xkXov8hllsFHjGuf-vIGfg0NLk'),
+	save: getTxEndpoint('S7EHh2ekWVFOJ_4V4upi-aqIpJvSXZpn_rIM0oTRz20'),
 	search: getTxEndpoint('yRgUeadiTV769j2tbEg2HnpXUohA_3M2oFZsHwNRqOU'),
 	send: getTxEndpoint('xw3wfZmsj6K3YOA7IJDbWoW2ysIT1D5OHV141etlk8M'),
 	settings: getTxEndpoint('e3jdELVw-3jNIOCbWTYCh1fuH4zIa7tDqmOqE6HyizY'),

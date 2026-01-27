@@ -52,6 +52,10 @@ export const SectionBody = styled.div`
 	gap: 10px;
 `;
 
+export const DescriptionSection = styled(Section)`
+	padding: 0 0 25px 0;
+`;
+
 export const TopicsSection = styled(Section)``;
 
 export const ContributeSection = styled(Section)`

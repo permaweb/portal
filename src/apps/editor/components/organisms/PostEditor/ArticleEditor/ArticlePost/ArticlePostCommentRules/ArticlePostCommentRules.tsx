@@ -8,6 +8,7 @@ import { currentPostUpdate } from 'editor/store/post';
 
 import { Button } from 'components/atoms/Button';
 import { Checkbox } from 'components/atoms/Checkbox';
+import { FormField } from 'components/atoms/FormField';
 import { ICONS } from 'helpers/config';
 import { CommentRulesType, PortalUserType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -195,54 +196,74 @@ export default function ArticlePostCommentRules() {
 			</S.Section>
 
 			<S.Section>
-				<S.RuleItem>
-					<S.RuleLabel>{language?.profileAgeRequired}</S.RuleLabel>
-					<S.InputGroup>
-						<S.NumberInput
-							type="number"
-							min="0"
-							value={profileAgeDays}
-							onChange={(e) => handleProfileAgeChange(e.target.value)}
-							disabled={disabled || updating}
-						/>
-						<span>{language?.profileAgeRequiredDays}</span>
-					</S.InputGroup>
-				</S.RuleItem>
+				<FormField
+					label={language?.profileAgeRequired}
+					value={profileAgeDays}
+					onChange={(e) => handleProfileAgeChange(e.target.value)}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter') {
+							e.preventDefault();
+							e.nativeEvent.stopImmediatePropagation();
+						}
+					}}
+					disabled={disabled || updating}
+					invalid={{ status: false, message: null }}
+					hideErrorMessage
+					endText={language?.profileAgeRequiredDays}
+					sm
+					noMargin
+				/>
 				<S.RuleDescription>
 					{language?.profileAgeRequiredDescription || 'Minimum days since profile creation to allow commenting'}
 				</S.RuleDescription>
 			</S.Section>
 
 			<S.Section>
-				<S.MutedWordsLabel>{language?.mutedWords}</S.MutedWordsLabel>
 				<S.TagsWrapper>
 					<S.InputWrapper>
-						<S.Input
-							type="text"
+						<FormField
+							label={language?.mutedWords}
 							placeholder={language?.mutedWordsPlaceholder}
 							value={newWord}
 							onChange={(e) => setNewWord(e.target.value)}
 							onKeyDown={(e) => {
-								if (e.key === 'Enter' && newWord.trim()) {
+								if (e.key === 'Enter') {
 									e.preventDefault();
-									handleAddWord();
+									e.nativeEvent.stopImmediatePropagation();
+									if (newWord.trim()) {
+										handleAddWord();
+									}
 								}
 							}}
 							disabled={disabled || updating}
+							invalid={{ status: false, message: null }}
+							hideErrorMessage
+							sm
+							noMargin
 						/>
-						<S.AddButton onClick={handleAddWord} disabled={disabled || updating || !newWord.trim()} type="button">
-							{language?.add || 'Add'}
+						<S.AddButton>
+							<Button
+								type={'alt4'}
+								label={language?.add || 'Add'}
+								handlePress={handleAddWord}
+								disabled={disabled || updating || !newWord.trim()}
+								icon={ICONS.add}
+								iconLeftAlign
+							/>
 						</S.AddButton>
 					</S.InputWrapper>
 					{mutedWords.length > 0 && (
 						<S.TagsContainer>
 							{mutedWords.map((word, index) => (
-								<S.Tag key={index}>
-									<span>{word}</span>
-									<S.RemoveButton onClick={() => handleRemoveMutedWord(word)} disabled={disabled || updating}>
-										×
-									</S.RemoveButton>
-								</S.Tag>
+								<Button
+									key={index}
+									type={'alt3'}
+									label={word}
+									handlePress={() => handleRemoveMutedWord(word)}
+									disabled={disabled || updating}
+									active={false}
+									icon={ICONS.remove}
+								/>
 							))}
 						</S.TagsContainer>
 					)}
@@ -250,12 +271,12 @@ export default function ArticlePostCommentRules() {
 			</S.Section>
 			<S.ActionWrapper>
 				<Button
-					type={'primary'}
+					type={'alt1'}
 					label={language?.updateRules || 'Update Rules'}
 					handlePress={handleUpdateRules}
 					disabled={disabled || updating}
 					loading={updating}
-					icon={ICONS.add}
+					icon={ICONS.save}
 					iconLeftAlign
 					height={40}
 					fullWidth
