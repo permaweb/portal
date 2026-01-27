@@ -51,7 +51,7 @@ export const Input = styled.input<{
 	color: ${(props) =>
 		props.disabled ? props.theme.colors.button.primary.disabled.color : props.theme.colors.font.primary};
 	font-family: ${(props) => props.theme.typography.family.primary};
-	font-size: ${(props) => props.theme.typography.size.base};
+	font-size: ${(props) => props.theme.typography.size.small};
 	font-weight: ${(props) => props.theme.typography.weight.bold};
 	letter-spacing: 0.15px;
 	margin: 7.5px 0 0 0;
@@ -75,19 +75,21 @@ export const Input = styled.input<{
 		box-shadow: none;
 		border: 1px solid ${(props) => props.theme.colors.form.disabled.border};
 	}
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		font-size: ${(props) => props.theme.typography.size.base};
+	}
 `;
 
 export const EndTextContainer = styled.div<{
 	sm: boolean | undefined;
 	disabled: boolean;
 }>`
-	height: ${(props) => (props.sm ? STYLING.dimensions.form.small : `calc(${STYLING.dimensions.form.max} - 7.5px)`)};
-	height: 100%;
+	height: fit-content;
 	max-width: 100px;
 	position: absolute;
-	top: ${(props) => (props.sm ? '42.5%' : '37.5%')};
-	right: 47.5px;
-	transform: translate(0, -50%);
+	top: 36.15px;
+	right: 10px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -98,9 +100,10 @@ export const EndTextContainer = styled.div<{
 `;
 
 export const EndText = styled.span<{ sm: boolean | undefined }>`
-	color: ${(props) => props.theme.colors.font.primary.alt4};
-	font-size: ${(props) => (props.sm ? props.theme.typography.size.small : '19px')};
-	font-weight: ${(props) => props.theme.typography.weight.regular};
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: ${(props) =>
+		props.sm ? props.theme.typography.size.xxSmall : props.theme.typography.size.small ?? '15px'};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
 	width: 100%;
 `;
 
