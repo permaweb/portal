@@ -27,7 +27,7 @@ import Comments from '../comments';
 import * as S from './styles';
 
 export default function Post(props: any) {
-	const { preview, txId, onSetPost } = props;
+	const { txId, onSetPost } = props;
 	const { postId: routePostId } = useParams();
 	const postId = txId || routePostId;
 	const { portal } = usePortalProvider();

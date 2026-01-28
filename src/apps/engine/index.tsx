@@ -226,16 +226,16 @@ function App() {
 ReactDOM.createRoot(document.getElementById('portal') as HTMLElement).render(
 	<HashRouter>
 		<LanguageProvider>
-			<ArweaveProvider>
-				<PermawebProvider>
-					<NotificationProvider>
+			<NotificationProvider>
+				<ArweaveProvider>
+					<PermawebProvider>
 						<PortalProvider>
 							<GlobalStyles />
 							<App />
 						</PortalProvider>
-					</NotificationProvider>
-				</PermawebProvider>
-			</ArweaveProvider>
+					</PermawebProvider>
+				</ArweaveProvider>
+			</NotificationProvider>
 		</LanguageProvider>
 	</HashRouter>
 );
