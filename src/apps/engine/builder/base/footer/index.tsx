@@ -55,6 +55,7 @@ export default function Footer(props: any) {
 					$maxWidth={portal?.Layout?.basics?.maxWidth}
 				>
 					<Builder layout={content} preview={preview} />
+					<SocialLinks isFooter />
 					{staticPages.length > 0 && (
 						<S.Links>
 							{staticPages.map((page: any) => (
@@ -64,7 +65,6 @@ export default function Footer(props: any) {
 							))}
 						</S.Links>
 					)}
-					<SocialLinks isFooter />
 					<S.Copyright
 						$hasContentAbove={!!content?.content?.length || !!portal?.Links?.length || staticPages.length > 0}
 					>

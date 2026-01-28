@@ -46,6 +46,11 @@ export default function Post(props: any) {
 		: [];
 	const canEditPost = user?.owner && roles && ['Admin', 'Moderator'].some((r) => roles?.includes(r));
 
+	const isStaticPage = React.useMemo(() => {
+		if (!portal?.Pages || !postId) return false;
+		return Object.values(portal.Pages).some((page: any) => page?.type === 'static' && page?.id === postId);
+	}, [portal?.Pages, postId]);
+
 	const [showSetPostModal, setShowSetPostModal] = React.useState(false);
 	const [selectedPost, setSelectedPost] = React.useState<SelectOptionType | null>(null);
 	const [filterText, setFilterText] = React.useState('');
@@ -269,6 +274,7 @@ export default function Post(props: any) {
 							content={content}
 							isPreview={false}
 							postId={postId}
+							isStaticPage={isStaticPage}
 						/>
 					</div>
 				</S.Post>
@@ -279,7 +285,7 @@ export default function Post(props: any) {
 						</a>
 					</S.TransactionLink>
 				) */}
-				<Comments commentsId={post?.metadata?.comments} postAuthorId={post?.creator} />
+				{!isStaticPage && <Comments commentsId={post?.metadata?.comments} postAuthorId={post?.creator} />}
 			</S.Wrapper>
 			{showSetPostModal && (
 				<ModalPortal>

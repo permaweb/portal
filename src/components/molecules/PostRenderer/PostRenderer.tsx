@@ -71,6 +71,7 @@ type PostRendererProps = {
 	content?: ContentEntry[] | null;
 	isPreview?: boolean;
 	postId?: string;
+	isStaticPage?: boolean;
 };
 
 export default function PostRenderer(props: PostRendererProps) {
@@ -96,7 +97,7 @@ export default function PostRenderer(props: PostRendererProps) {
 			<S.TitleWrapper>
 				<h1>{isLoadingPost ? <Placeholder width="180" /> : post?.name}</h1>
 
-				{post?.metadata?.status === 'draft' && (
+				{post?.metadata?.status === 'draft' && !props.isStaticPage && (
 					<S.DraftIndicator>
 						<S.DraftDot />
 						Draft
@@ -106,26 +107,28 @@ export default function PostRenderer(props: PostRendererProps) {
 
 			{post?.metadata?.description && <S.Description>{post.metadata.description}</S.Description>}
 
-			<S.Meta>
-				<S.Author onClick={handleAuthorClick}>
-					<Avatar profile={profile} isLoading={isLoadingProfile} size={20} hoverable={true} />
-					{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}
-				</S.Author>
-				&nbsp;
-				<span>
-					•{' '}
-					{isLoadingPost ? (
-						<>
-							<Placeholder width="40" /> <Placeholder width="30" />
-						</>
-					) : dateMs ? (
-						<>
-							{new Date(dateMs).toLocaleDateString()}{' '}
-							{new Date(dateMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-						</>
-					) : null}
-				</span>
-			</S.Meta>
+			{!props.isStaticPage && (
+				<S.Meta>
+					<S.Author onClick={handleAuthorClick}>
+						<Avatar profile={profile} isLoading={isLoadingProfile} size={20} hoverable={true} />
+						{isLoadingProfile ? <Placeholder width="100" /> : profile?.displayName}
+					</S.Author>
+					&nbsp;
+					<span>
+						•{' '}
+						{isLoadingPost ? (
+							<>
+								<Placeholder width="40" /> <Placeholder width="30" />
+							</>
+						) : dateMs ? (
+							<>
+								{new Date(dateMs).toLocaleDateString()}{' '}
+								{new Date(dateMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+							</>
+						) : null}
+					</span>
+				</S.Meta>
+			)}
 
 			{!isLoadingPost && post?.metadata?.thumbnail && (
 				<S.Thumbnail
@@ -136,11 +139,13 @@ export default function PostRenderer(props: PostRendererProps) {
 				/>
 			)}
 
-			<S.Tags>
-				{post?.metadata?.topics?.map((topic: any, index: number) => (
-					<Tag key={index} tag={topic} />
-				))}
-			</S.Tags>
+			{!props.isStaticPage && (
+				<S.Tags>
+					{post?.metadata?.topics?.map((topic: any, index: number) => (
+						<Tag key={index} tag={topic} />
+					))}
+				</S.Tags>
+			)}
 
 			{isLoadingContent && <p>Loading content...</p>}
 
