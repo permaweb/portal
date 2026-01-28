@@ -15,13 +15,16 @@ import {
 	WordPressExtractionProgress,
 	WordPressExtractionResult,
 } from 'helpers/wordpress';
+import { calculateImageCostEstimate, ImageUploadState, uploadImagesToArweave } from 'helpers/wordpressImageUpload';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
+import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
 type ImportStage = 'input' | 'extracting' | 'preview' | 'importing' | 'complete';
-type ContentTab = 'posts' | 'pages' | 'categories' | 'theme';
+type ContentTab = 'posts' | 'pages' | 'categories' | 'tags' | 'theme' | 'images';
 
 // Helper to determine if a color is light (for border visibility on swatches)
 function isLightColor(color: string): boolean {
@@ -63,12 +66,16 @@ export default function WordPressImport(props: {
 		selectedPages: ConvertedPost[],
 		selectedCategories: Set<string>,
 		createCategories: boolean,
-		createTopics: boolean
+		createTopics: boolean,
+		selectedTopics?: Set<string>,
+		uploadedImageUrls?: Map<string, string>
 	) => void;
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const { addNotification } = useNotifications();
+	const arProvider = useArweaveProvider();
+	const permawebProvider = usePermawebProvider();
 
 	const [importMethod, setImportMethod] = React.useState<'url' | 'file'>('url');
 	const [url, setUrl] = React.useState<string>('');
@@ -80,10 +87,19 @@ export default function WordPressImport(props: {
 	const [selectedPosts, setSelectedPosts] = React.useState<Set<number>>(new Set());
 	const [selectedPages, setSelectedPages] = React.useState<Set<number>>(new Set());
 	const [selectedCategories, setSelectedCategories] = React.useState<Set<string>>(new Set());
+	const [selectedTopics, setSelectedTopics] = React.useState<Set<string>>(new Set());
 	const [createCategories, setCreateCategories] = React.useState<boolean>(true);
 	const [createTopics, setCreateTopics] = React.useState<boolean>(true);
+	const [portalName, setPortalName] = React.useState<string>('');
 	const [activeTab, setActiveTab] = React.useState<ContentTab>('posts');
 	const [errors, setErrors] = React.useState<string[]>([]);
+
+	// Image upload state
+	const [selectedImages, setSelectedImages] = React.useState<Set<string>>(new Set());
+	const [imageUploadStates, setImageUploadStates] = React.useState<Map<string, ImageUploadState>>(new Map());
+	const [isUploadingImages, setIsUploadingImages] = React.useState<boolean>(false);
+	const [uploadedImageUrls, setUploadedImageUrls] = React.useState<Map<string, string>>(new Map());
+	const [failedImageUrls, setFailedImageUrls] = React.useState<Set<string>>(new Set());
 
 	// Fetch options (only used for URL import)
 	const [fetchPosts, setFetchPosts] = React.useState<boolean>(true);
@@ -105,8 +121,15 @@ export default function WordPressImport(props: {
 		if (importData) {
 			setSelectedPosts(new Set(importData.posts.map((p) => p.wpId)));
 			setSelectedPages(new Set(importData.pages.map((p) => p.wpId)));
-			// Categories: default to none selected; user chooses explicitly (including children)
+			// Categories and tags: default to none selected; user chooses explicitly
 			setSelectedCategories(new Set());
+			setSelectedTopics(new Set());
+			setPortalName(importData.name || '');
+			setFailedImageUrls(new Set());
+			// Select all images by default
+			if (importData.images && importData.images.length > 0) {
+				setSelectedImages(new Set(importData.images.map((img) => img.originalUrl)));
+			}
 		}
 	}, [importData]);
 
@@ -121,8 +144,10 @@ export default function WordPressImport(props: {
 		setSelectedPosts(new Set());
 		setSelectedPages(new Set());
 		setSelectedCategories(new Set());
+		setSelectedTopics(new Set());
 		setCreateCategories(true);
 		setCreateTopics(true);
+		setPortalName('');
 		setActiveTab('posts');
 		setErrors([]);
 		setFetchPosts(true);
@@ -131,6 +156,12 @@ export default function WordPressImport(props: {
 		setFetchTags(true);
 		setFetchTheme(true);
 		setPostsCount(10);
+		// Reset image state
+		setSelectedImages(new Set());
+		setImageUploadStates(new Map());
+		setIsUploadingImages(false);
+		setUploadedImageUrls(new Map());
+		setFailedImageUrls(new Set());
 		if (fileInputRef.current) {
 			fileInputRef.current.value = '';
 		}
@@ -301,6 +332,104 @@ export default function WordPressImport(props: {
 		}
 	}, [importData, selectedCategories]);
 
+	const handleToggleTopic = React.useCallback((topicValue: string) => {
+		setSelectedTopics((prev) => {
+			const next = new Set(prev);
+			if (next.has(topicValue)) {
+				next.delete(topicValue);
+			} else {
+				next.add(topicValue);
+			}
+			return next;
+		});
+	}, []);
+
+	const handleSelectAllTags = React.useCallback(() => {
+		if (!importData) return;
+		const allSelected = importData.topics.every((t) => selectedTopics.has(t.value));
+		if (allSelected) {
+			setSelectedTopics(new Set());
+		} else {
+			setSelectedTopics(new Set(importData.topics.map((t) => t.value)));
+		}
+	}, [importData, selectedTopics]);
+
+	// Image selection handlers
+	const handleToggleImage = React.useCallback((url: string) => {
+		setSelectedImages((prev) => {
+			const next = new Set(prev);
+			if (next.has(url)) {
+				next.delete(url);
+			} else {
+				next.add(url);
+			}
+			return next;
+		});
+	}, []);
+
+	const handleSelectAllImages = React.useCallback(() => {
+		if (!importData) return;
+		const allSelected = importData.images.every((img) => selectedImages.has(img.originalUrl));
+		if (allSelected) {
+			setSelectedImages(new Set());
+		} else {
+			setSelectedImages(new Set(importData.images.map((img) => img.originalUrl)));
+		}
+	}, [importData, selectedImages]);
+
+	const handleUploadImages = React.useCallback(async () => {
+		if (!importData || selectedImages.size === 0) return;
+		if (!arProvider.wallet) {
+			addNotification('Please connect your wallet to upload images', 'warning');
+			return;
+		}
+
+		setIsUploadingImages(true);
+
+		// Initialize all selected images as pending
+		const initialStates = new Map<string, ImageUploadState>();
+		selectedImages.forEach((url) => {
+			initialStates.set(url, { status: 'pending' });
+		});
+		setImageUploadStates(initialStates);
+
+		try {
+			const urlMap = await uploadImagesToArweave(
+				importData.images,
+				selectedImages,
+				permawebProvider.libs,
+				arProvider.wallet,
+				(url, state) => {
+					setImageUploadStates((prev) => {
+						const next = new Map(prev);
+						next.set(url, state);
+						return next;
+					});
+				}
+			);
+
+			setUploadedImageUrls(urlMap);
+
+			const successCount = urlMap.size;
+			const failCount = selectedImages.size - successCount;
+
+			if (successCount > 0) {
+				addNotification(
+					`Uploaded ${successCount} image${successCount !== 1 ? 's' : ''} to Arweave${
+						failCount > 0 ? ` (${failCount} failed)` : ''
+					}`,
+					failCount > 0 ? 'warning' : 'success'
+				);
+			} else if (failCount > 0) {
+				addNotification(`Failed to upload ${failCount} image${failCount !== 1 ? 's' : ''}`, 'warning');
+			}
+		} catch (error: any) {
+			addNotification(`Image upload failed: ${error.message || 'Unknown error'}`, 'warning');
+		} finally {
+			setIsUploadingImages(false);
+		}
+	}, [importData, selectedImages, arProvider.wallet, permawebProvider.libs, addNotification]);
+
 	const handleImport = React.useCallback(() => {
 		if (!importData) return;
 
@@ -322,21 +451,36 @@ export default function WordPressImport(props: {
 		}
 
 		if (props.onImportComplete) {
+			const dataToImport = {
+				...importData,
+				categories: categoriesToImport,
+				name: props.createPortal ? portalName || importData.name : importData.name,
+			};
 			props.onImportComplete(
-				{
-					...importData,
-					categories: categoriesToImport,
-				},
+				dataToImport,
 				postsToImport,
 				[],
 				selectedCategories,
 				createCategories,
-				createTopics
+				createTopics,
+				selectedTopics,
+				uploadedImageUrls.size > 0 ? uploadedImageUrls : undefined
 			);
 		}
 
 		props.handleClose();
-	}, [importData, selectedPosts, selectedCategories, createCategories, createTopics, props, addNotification]);
+	}, [
+		importData,
+		selectedPosts,
+		selectedCategories,
+		selectedTopics,
+		createCategories,
+		createTopics,
+		portalName,
+		props,
+		addNotification,
+		uploadedImageUrls,
+	]);
 
 	const getProgressPercentage = React.useCallback(() => {
 		if (!progress) return 0;
@@ -344,8 +488,11 @@ export default function WordPressImport(props: {
 		return Math.round((progress.current / progress.total) * 100);
 	}, [progress]);
 
-	function formatDate(timestamp: number): string {
-		return new Date(timestamp).toLocaleDateString();
+	function formatDate(timestamp: number | string | undefined): string {
+		if (!timestamp) return 'No date';
+		const date = new Date(timestamp);
+		if (isNaN(date.getTime())) return 'No date';
+		return date.toLocaleDateString();
 	}
 
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -373,42 +520,40 @@ export default function WordPressImport(props: {
 						or upload a WordPress export file (.xml).
 					</S.SectionInfo>
 					<S.CheckboxGroup>
-						<Checkbox
-							checked={importMethod === 'url'}
-							handleSelect={() => {
-								setImportMethod('url');
-								setWxrFile(null);
-								if (fileInputRef.current) fileInputRef.current.value = '';
-							}}
-							disabled={false}
-						/>
-						<S.CheckboxLabel
+						<S.CheckboxContainer
 							onClick={() => {
 								setImportMethod('url');
 								setWxrFile(null);
 								if (fileInputRef.current) fileInputRef.current.value = '';
 							}}
 						>
-							Import from URL
-						</S.CheckboxLabel>
-					</S.CheckboxGroup>
-					<S.CheckboxGroup>
-						<Checkbox
-							checked={importMethod === 'file'}
-							handleSelect={() => {
-								setImportMethod('file');
-								setUrl('');
-							}}
-							disabled={false}
-						/>
-						<S.CheckboxLabel
+							<Checkbox
+								checked={importMethod === 'url'}
+								handleSelect={() => {
+									setImportMethod('url');
+									setWxrFile(null);
+									if (fileInputRef.current) fileInputRef.current.value = '';
+								}}
+								disabled={false}
+							/>
+							<span>Import from URL</span>
+						</S.CheckboxContainer>
+						<S.CheckboxContainer
 							onClick={() => {
 								setImportMethod('file');
 								setUrl('');
 							}}
 						>
-							Upload WordPress Export File (.xml)
-						</S.CheckboxLabel>
+							<Checkbox
+								checked={importMethod === 'file'}
+								handleSelect={() => {
+									setImportMethod('file');
+									setUrl('');
+								}}
+								disabled={false}
+							/>
+							<span>Upload WordPress Export File (.xml)</span>
+						</S.CheckboxContainer>
 					</S.CheckboxGroup>
 				</S.Section>
 
@@ -437,16 +582,40 @@ export default function WordPressImport(props: {
 						<S.Section>
 							<S.SectionLabel>What to Import</S.SectionLabel>
 							<S.SectionInfo>Select what content you want to fetch from the WordPress site.</S.SectionInfo>
-							<S.CheckboxGroup>
-								<Checkbox checked={fetchPosts} handleSelect={() => setFetchPosts(!fetchPosts)} disabled={false} />
-								<S.CheckboxLabel onClick={() => setFetchPosts(!fetchPosts)}>
-									Posts
-									{fetchPosts && (
-										<S.CountInputWrapper onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+							<S.WhatToImportList>
+								<S.WhatToImportCheckboxes>
+									<S.CheckboxContainer onClick={() => setFetchPosts(!fetchPosts)}>
+										<Checkbox checked={fetchPosts} handleSelect={() => setFetchPosts(!fetchPosts)} disabled={false} />
+										<span>Posts</span>
+									</S.CheckboxContainer>
+									<S.CheckboxContainer onClick={() => setFetchPages(!fetchPages)}>
+										<Checkbox checked={fetchPages} handleSelect={() => setFetchPages(!fetchPages)} disabled={false} />
+										<span>Pages</span>
+									</S.CheckboxContainer>
+									<S.CheckboxContainer onClick={() => setFetchCategories(!fetchCategories)}>
+										<Checkbox
+											checked={fetchCategories}
+											handleSelect={() => setFetchCategories(!fetchCategories)}
+											disabled={false}
+										/>
+										<span>Categories</span>
+									</S.CheckboxContainer>
+									<S.CheckboxContainer onClick={() => setFetchTags(!fetchTags)}>
+										<Checkbox checked={fetchTags} handleSelect={() => setFetchTags(!fetchTags)} disabled={false} />
+										<span>Tags</span>
+									</S.CheckboxContainer>
+									<S.CheckboxContainer onClick={() => setFetchTheme(!fetchTheme)}>
+										<Checkbox checked={fetchTheme} handleSelect={() => setFetchTheme(!fetchTheme)} disabled={false} />
+										<span>Theme</span>
+									</S.CheckboxContainer>
+								</S.WhatToImportCheckboxes>
+								{fetchPosts && (
+									<S.PostsLimitRow onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+										<S.PostsLimitLabel>Number of posts</S.PostsLimitLabel>
+										<S.PostsLimitInputWrap>
 											<FormField
 												value={postsCount.toString()}
 												onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-													e.stopPropagation();
 													const val = parseInt(e.target.value) || 0;
 													if (val >= 0 && val <= 1000) {
 														setPostsCount(val);
@@ -457,30 +626,10 @@ export default function WordPressImport(props: {
 												invalid={{ status: false, message: null }}
 												noMargin
 											/>
-										</S.CountInputWrapper>
-									)}
-								</S.CheckboxLabel>
-							</S.CheckboxGroup>
-							<S.CheckboxGroup>
-								<Checkbox checked={fetchPages} handleSelect={() => setFetchPages(!fetchPages)} disabled={false} />
-								<S.CheckboxLabel onClick={() => setFetchPages(!fetchPages)}>Pages</S.CheckboxLabel>
-							</S.CheckboxGroup>
-							<S.CheckboxGroup>
-								<Checkbox
-									checked={fetchCategories}
-									handleSelect={() => setFetchCategories(!fetchCategories)}
-									disabled={false}
-								/>
-								<S.CheckboxLabel onClick={() => setFetchCategories(!fetchCategories)}>Categories</S.CheckboxLabel>
-							</S.CheckboxGroup>
-							<S.CheckboxGroup>
-								<Checkbox checked={fetchTags} handleSelect={() => setFetchTags(!fetchTags)} disabled={false} />
-								<S.CheckboxLabel onClick={() => setFetchTags(!fetchTags)}>Tags</S.CheckboxLabel>
-							</S.CheckboxGroup>
-							<S.CheckboxGroup>
-								<Checkbox checked={fetchTheme} handleSelect={() => setFetchTheme(!fetchTheme)} disabled={false} />
-								<S.CheckboxLabel onClick={() => setFetchTheme(!fetchTheme)}>Theme</S.CheckboxLabel>
-							</S.CheckboxGroup>
+										</S.PostsLimitInputWrap>
+									</S.PostsLimitRow>
+								)}
+							</S.WhatToImportList>
 						</S.Section>
 					</>
 				) : (
@@ -512,9 +661,9 @@ export default function WordPressImport(props: {
 							fullWidth
 						/>
 						{wxrFile && (
-							<S.SectionInfo style={{ marginTop: '8px', color: 'var(--color-primary)' }}>
+							<S.FileSelectedMessage>
 								✓ File selected: {wxrFile.name} ({(wxrFile.size / 1024).toFixed(1)} KB)
-							</S.SectionInfo>
+							</S.FileSelectedMessage>
 						)}
 					</S.Section>
 				)}
@@ -574,7 +723,20 @@ export default function WordPressImport(props: {
 			<S.Wrapper>
 				<S.PreviewWrapper>
 					<S.PreviewHeader>
-						<S.PreviewTitle>{importData.name}</S.PreviewTitle>
+						{props.createPortal ? (
+							<>
+								<S.SectionLabel>{language?.portalName || 'Portal name'}</S.SectionLabel>
+								<FormField
+									value={portalName}
+									onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPortalName(e.target.value)}
+									placeholder={importData.name || 'Enter portal name'}
+									disabled={false}
+									invalid={{ status: false, message: null }}
+								/>
+							</>
+						) : (
+							<S.PreviewTitle>{importData.name}</S.PreviewTitle>
+						)}
 						{importData.description && <S.PreviewDescription>{importData.description}</S.PreviewDescription>}
 					</S.PreviewHeader>
 
@@ -617,6 +779,9 @@ export default function WordPressImport(props: {
 						<S.Tab $active={activeTab === 'categories'} onClick={() => setActiveTab('categories')}>
 							Categories ({importData.categories.length})
 						</S.Tab>
+						<S.Tab $active={activeTab === 'tags'} onClick={() => setActiveTab('tags')}>
+							Tags ({selectedTopics.size}/{importData.topics.length})
+						</S.Tab>
 						<S.Tab $active={activeTab === 'theme'} onClick={() => setActiveTab('theme')}>
 							🎨 Theme{' '}
 							{importMethod === 'file'
@@ -627,6 +792,11 @@ export default function WordPressImport(props: {
 								? '(Found)'
 								: ''}
 						</S.Tab>
+						{importData.images && importData.images.length > 0 && (
+							<S.Tab $active={activeTab === 'images'} onClick={() => setActiveTab('images')}>
+								Images ({selectedImages.size}/{importData.images.length})
+							</S.Tab>
+						)}
 					</S.Tabs>
 
 					{activeTab === 'posts' && (
@@ -634,9 +804,7 @@ export default function WordPressImport(props: {
 							{importData.posts.length > 0 && (
 								<S.SelectAllWrapper>
 									<Checkbox checked={allPostsSelected} handleSelect={handleSelectAllPosts} disabled={false} />
-									<S.PostItemTitle onClick={handleSelectAllPosts} style={{ cursor: 'pointer' }}>
-										Select All Posts
-									</S.PostItemTitle>
+									<S.SelectAllTitle onClick={handleSelectAllPosts}>Select All Posts</S.SelectAllTitle>
 								</S.SelectAllWrapper>
 							)}
 							<S.PostList>
@@ -668,9 +836,7 @@ export default function WordPressImport(props: {
 							{importData.pages.length > 0 && (
 								<S.SelectAllWrapper>
 									<Checkbox checked={allPagesSelected} handleSelect={handleSelectAllPages} disabled={false} />
-									<S.PostItemTitle onClick={handleSelectAllPages} style={{ cursor: 'pointer' }}>
-										Select All Pages
-									</S.PostItemTitle>
+									<S.SelectAllTitle onClick={handleSelectAllPages}>Select All Pages</S.SelectAllTitle>
 								</S.SelectAllWrapper>
 							)}
 							<S.PostList>
@@ -701,22 +867,14 @@ export default function WordPressImport(props: {
 						<>
 							<S.Section>
 								<S.CheckboxGroup>
-									<Checkbox
-										checked={createCategories}
-										handleSelect={() => setCreateCategories(!createCategories)}
-										disabled={false}
-									/>
-									<S.CheckboxLabel onClick={() => setCreateCategories(!createCategories)}>
-										Create Categories
-									</S.CheckboxLabel>
-								</S.CheckboxGroup>
-								<S.CheckboxGroup>
-									<Checkbox
-										checked={createTopics}
-										handleSelect={() => setCreateTopics(!createTopics)}
-										disabled={false}
-									/>
-									<S.CheckboxLabel onClick={() => setCreateTopics(!createTopics)}>Create Topics (Tags)</S.CheckboxLabel>
+									<S.CheckboxContainer onClick={() => setCreateCategories(!createCategories)}>
+										<Checkbox
+											checked={createCategories}
+											handleSelect={() => setCreateCategories(!createCategories)}
+											disabled={false}
+										/>
+										<span>Create Categories</span>
+									</S.CheckboxContainer>
 								</S.CheckboxGroup>
 							</S.Section>
 							{importData.categories.length > 0 && (
@@ -726,53 +884,116 @@ export default function WordPressImport(props: {
 											Select which categories to create. Parent and child categories can be selected individually.
 										</S.SectionInfo>
 									</S.Section>
-									<S.SelectAllWrapper>
-										<Checkbox
-											checked={importData.categories.every((cat) => {
-												const checkCategory = (c: any): boolean => {
-													if (!selectedCategories.has(c.id)) return false;
-													if (c.children && c.children.length > 0) {
-														return c.children.every((child: any) => checkCategory(child));
-													}
-													return true;
-												};
-												return checkCategory(cat);
+									<S.CategoryListScrollArea>
+										<S.SelectAllWrapper>
+											<Checkbox
+												checked={importData.categories.every((cat) => {
+													const checkCategory = (c: any): boolean => {
+														if (!selectedCategories.has(c.id)) return false;
+														if (c.children && c.children.length > 0) {
+															return c.children.every((child: any) => checkCategory(child));
+														}
+														return true;
+													};
+													return checkCategory(cat);
+												})}
+												handleSelect={handleSelectAllCategories}
+												disabled={false}
+											/>
+											<S.SelectAllTitle onClick={handleSelectAllCategories}>Select All Categories</S.SelectAllTitle>
+										</S.SelectAllWrapper>
+										<S.PostList className="categories-list">
+											{importData.categories.map((category) => {
+												const renderCategory = (cat: any, depth = 0) => (
+													<React.Fragment key={cat.id}>
+														<S.NestedPostItem
+															$selected={selectedCategories.has(cat.id)}
+															onClick={() => handleToggleCategory(cat.id)}
+															$depth={depth}
+														>
+															<Checkbox
+																checked={selectedCategories.has(cat.id)}
+																handleSelect={() => handleToggleCategory(cat.id)}
+																disabled={false}
+															/>
+															<S.PostItemContent>
+																<S.PostItemTitle>{cat.name}</S.PostItemTitle>
+																{cat.metadata?.description && (
+																	<S.PostItemMeta>{cat.metadata.description}</S.PostItemMeta>
+																)}
+															</S.PostItemContent>
+														</S.NestedPostItem>
+														{cat.children && cat.children.length > 0 && (
+															<>{cat.children.map((child: any) => renderCategory(child, depth + 1))}</>
+														)}
+													</React.Fragment>
+												);
+												return renderCategory(category);
 											})}
-											handleSelect={handleSelectAllCategories}
+										</S.PostList>
+									</S.CategoryListScrollArea>
+								</>
+							)}
+						</>
+					)}
+
+					{activeTab === 'tags' && (
+						<>
+							<S.Section>
+								<S.CheckboxGroup>
+									<S.CheckboxContainer onClick={() => setCreateTopics(!createTopics)}>
+										<Checkbox
+											checked={createTopics}
+											handleSelect={() => setCreateTopics(!createTopics)}
 											disabled={false}
 										/>
-										<S.PostItemTitle onClick={handleSelectAllCategories} style={{ cursor: 'pointer' }}>
-											Select All Categories
-										</S.PostItemTitle>
-									</S.SelectAllWrapper>
-									<S.PostList>
-										{importData.categories.map((category) => {
-											const renderCategory = (cat: any, depth = 0) => (
-												<React.Fragment key={cat.id}>
-													<S.PostItem
-														$selected={selectedCategories.has(cat.id)}
-														onClick={() => handleToggleCategory(cat.id)}
-														style={{ paddingLeft: `${depth * 20 + 10}px` }}
-													>
-														<Checkbox
-															checked={selectedCategories.has(cat.id)}
-															handleSelect={() => handleToggleCategory(cat.id)}
-															disabled={false}
-														/>
-														<S.PostItemContent>
-															<S.PostItemTitle>{cat.name}</S.PostItemTitle>
-															{cat.metadata?.description && <S.PostItemMeta>{cat.metadata.description}</S.PostItemMeta>}
-														</S.PostItemContent>
-													</S.PostItem>
-													{cat.children && cat.children.length > 0 && (
-														<>{cat.children.map((child: any) => renderCategory(child, depth + 1))}</>
-													)}
-												</React.Fragment>
-											);
-											return renderCategory(category);
-										})}
-									</S.PostList>
+										<span>Create Topics (Tags)</span>
+									</S.CheckboxContainer>
+								</S.CheckboxGroup>
+							</S.Section>
+							{importData.topics.length > 0 && (
+								<>
+									<S.Section>
+										<S.SectionInfo>
+											Select which tags to create on the portal. Only selected tags will be added as topics.
+										</S.SectionInfo>
+									</S.Section>
+									<S.CategoryListScrollArea>
+										<S.SelectAllWrapper>
+											<Checkbox
+												checked={
+													importData.topics.length > 0 && importData.topics.every((t) => selectedTopics.has(t.value))
+												}
+												handleSelect={handleSelectAllTags}
+												disabled={false}
+											/>
+											<S.SelectAllTitle onClick={handleSelectAllTags}>Select All Tags</S.SelectAllTitle>
+										</S.SelectAllWrapper>
+										<S.PostList className="categories-list">
+											{importData.topics.map((topic) => (
+												<S.PostItem
+													key={topic.value}
+													$selected={selectedTopics.has(topic.value)}
+													onClick={() => handleToggleTopic(topic.value)}
+												>
+													<Checkbox
+														checked={selectedTopics.has(topic.value)}
+														handleSelect={() => handleToggleTopic(topic.value)}
+														disabled={false}
+													/>
+													<S.PostItemContent>
+														<S.PostItemTitle>{topic.value}</S.PostItemTitle>
+													</S.PostItemContent>
+												</S.PostItem>
+											))}
+										</S.PostList>
+									</S.CategoryListScrollArea>
 								</>
+							)}
+							{importData.topics.length === 0 && (
+								<S.Section>
+									<S.SectionInfo>No tags were found in the imported content.</S.SectionInfo>
+								</S.Section>
 							)}
 						</>
 					)}
@@ -874,6 +1095,157 @@ export default function WordPressImport(props: {
 							)}
 						</S.ThemePreview>
 					)}
+
+					{activeTab === 'images' && importData.images && importData.images.length > 0 && (
+						<>
+							<S.Section>
+								<S.SectionInfo>
+									Select images to upload to Arweave. Uploaded images will be stored permanently and their URLs will be
+									replaced in your imported content. Images smaller than 100KB are free to upload.
+								</S.SectionInfo>
+							</S.Section>
+
+							{/* Image cost summary */}
+							{(() => {
+								const stats = calculateImageCostEstimate(importData.images, selectedImages);
+								return (
+									<S.ImageSummary>
+										<S.ImageSummaryStat>
+											<S.ImageSummaryLabel>Total Images</S.ImageSummaryLabel>
+											<S.ImageSummaryValue>{stats.totalImages}</S.ImageSummaryValue>
+										</S.ImageSummaryStat>
+										<S.ImageSummaryStat>
+											<S.ImageSummaryLabel>Selected</S.ImageSummaryLabel>
+											<S.ImageSummaryValue>{stats.selectedImages}</S.ImageSummaryValue>
+										</S.ImageSummaryStat>
+										<S.ImageSummaryStat>
+											<S.ImageSummaryLabel>Uploaded</S.ImageSummaryLabel>
+											<S.ImageSummaryValue>{uploadedImageUrls.size}</S.ImageSummaryValue>
+										</S.ImageSummaryStat>
+									</S.ImageSummary>
+								);
+							})()}
+
+							{/* Actions */}
+							<S.ImageActions>
+								<Checkbox
+									checked={
+										importData.images.length > 0 &&
+										importData.images.every((img) => selectedImages.has(img.originalUrl))
+									}
+									handleSelect={handleSelectAllImages}
+									disabled={isUploadingImages}
+								/>
+								<S.SelectAllTitle onClick={handleSelectAllImages}>Select All Images</S.SelectAllTitle>
+								<Button
+									type={'alt1'}
+									label={
+										isUploadingImages
+											? 'Uploading...'
+											: `Upload ${selectedImages.size} Image${selectedImages.size !== 1 ? 's' : ''}`
+									}
+									handlePress={handleUploadImages}
+									disabled={selectedImages.size === 0 || isUploadingImages || !arProvider.wallet}
+									icon={ICONS.upload}
+									iconLeftAlign
+								/>
+							</S.ImageActions>
+
+							{/* Image grid */}
+							<S.ImageGrid>
+								{importData.images.map((image) => {
+									const uploadState = imageUploadStates.get(image.originalUrl);
+									const isUploaded = uploadedImageUrls.has(image.originalUrl);
+									const loadFailed = failedImageUrls.has(image.originalUrl);
+
+									return (
+										<S.ImageCard
+											key={image.originalUrl}
+											$selected={selectedImages.has(image.originalUrl)}
+											onClick={() => !isUploadingImages && handleToggleImage(image.originalUrl)}
+										>
+											<S.ImageThumbnail>
+												{loadFailed ? (
+													<S.ImageThumbnailPlaceholder>Image</S.ImageThumbnailPlaceholder>
+												) : (
+													<img
+														src={image.originalUrl}
+														alt=""
+														loading="lazy"
+														onError={() => {
+															setFailedImageUrls((prev) => new Set(prev).add(image.originalUrl));
+														}}
+													/>
+												)}
+											</S.ImageThumbnail>
+											<S.ImageCheckbox>
+												<Checkbox
+													checked={selectedImages.has(image.originalUrl)}
+													handleSelect={() => handleToggleImage(image.originalUrl)}
+													disabled={isUploadingImages}
+												/>
+											</S.ImageCheckbox>
+											<S.ImageBadge $type={image.sourceType}>
+												{image.sourceType === 'featured' ? 'Featured' : 'Content'}
+											</S.ImageBadge>
+											{image.postIds.length > 1 && <S.ImagePostCount>{image.postIds.length} posts</S.ImagePostCount>}
+
+											{/* Upload status overlay */}
+											{(uploadState || isUploaded) && (
+												<S.ImageUploadStatus $status={isUploaded ? 'complete' : uploadState?.status || 'pending'}>
+													{isUploaded ? (
+														<>
+															<S.ImageUploadStatusIcon>✓</S.ImageUploadStatusIcon>
+															<S.ImageUploadStatusText>Uploaded</S.ImageUploadStatusText>
+														</>
+													) : uploadState?.status === 'error' ? (
+														<>
+															<S.ImageUploadStatusIcon>✗</S.ImageUploadStatusIcon>
+															<S.ImageUploadStatusText>Failed</S.ImageUploadStatusText>
+														</>
+													) : uploadState?.status === 'complete' ? (
+														<>
+															<S.ImageUploadStatusIcon>✓</S.ImageUploadStatusIcon>
+															<S.ImageUploadStatusText>Complete</S.ImageUploadStatusText>
+														</>
+													) : (
+														<>
+															<S.ImageUploadStatusText>{uploadState?.status || 'pending'}</S.ImageUploadStatusText>
+															{uploadState?.progress !== undefined && (
+																<S.ImageUploadProgress>
+																	<S.ImageUploadProgressFill $progress={uploadState.progress} />
+																</S.ImageUploadProgress>
+															)}
+														</>
+													)}
+												</S.ImageUploadStatus>
+											)}
+										</S.ImageCard>
+									);
+								})}
+							</S.ImageGrid>
+
+							{/* Warning about wallet */}
+							{!arProvider.wallet && (
+								<S.UploadWarning>
+									<span>
+										Connect your wallet to upload images to Arweave. Images not uploaded will keep their original
+										WordPress URLs.
+									</span>
+								</S.UploadWarning>
+							)}
+
+							{/* Warning about failed uploads */}
+							{Array.from(imageUploadStates.values()).some((s) => s.status === 'error') && (
+								<S.UploadWarning>
+									<span>
+										Some images failed to upload. They will keep their original WordPress URLs. You can try uploading
+										them again or proceed with the import.
+									</span>
+								</S.UploadWarning>
+							)}
+						</>
+					)}
 				</S.PreviewWrapper>
 
 				{errors.length > 0 && (
@@ -890,8 +1262,8 @@ export default function WordPressImport(props: {
 						type={'alt1'}
 						label={
 							props.createPortal
-								? `Create Portal & Open ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''} in editor`
-								: `Open ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''} in editor`
+								? `Create Portal & Import ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`
+								: `Import ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`
 						}
 						handlePress={handleImport}
 						disabled={selectedPosts.size === 0}

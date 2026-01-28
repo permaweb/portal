@@ -22,7 +22,7 @@ import {
 	PortalUploadOptionType,
 	PortalUploadType,
 } from 'helpers/types';
-import { compressImageToSize, debugLog, isCompressibleImage } from 'helpers/utils';
+import { checkValidAddress, compressImageToSize, debugLog, isCompressibleImage } from 'helpers/utils';
 import { useUploadCost } from 'hooks/useUploadCost';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -75,6 +75,17 @@ function getJustifyContent(alignment?: 'left' | 'center' | 'right' | null): 'fle
 	}
 }
 
+function isExternalMediaUrl(url: string | null | undefined): boolean {
+	if (!url || !/^https?:\/\//i.test(url)) return false;
+	try {
+		const path = new URL(url).pathname;
+		const lastSegment = path.split('/').filter(Boolean).pop()?.split('?')[0] ?? '';
+		return !checkValidAddress(lastSegment);
+	} catch {
+		return true;
+	}
+}
+
 export default function MediaBlock(props: { type: 'image' | 'video'; content: any; data: any; onChange: any }) {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -82,7 +93,8 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const { addNotification } = useNotifications();
-	const { uploadCost, showUploadConfirmation, calculateUploadCost, clearUploadState } = useUploadCost();
+	const { uploadCost, showUploadConfirmation, calculateUploadCost, clearUploadState, insufficientBalance } =
+		useUploadCost();
 
 	const mediaConfig: Record<PortalUploadOptionType, MediaConfigType> = {
 		image: {
@@ -138,7 +150,12 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const [uploadDisabled, setUploadDisabled] = React.useState<boolean>(false);
 	const [compressing, setCompressing] = React.useState<boolean>(false);
 
+	const [externalUploadFile, setExternalUploadFile] = React.useState<File | null>(null);
+	const [externalUploadLoading, setExternalUploadLoading] = React.useState<boolean>(false);
+	const [externalCompressing, setExternalCompressing] = React.useState<boolean>(false);
+
 	const canCompress = mediaData.file && isCompressibleImage(mediaData.file);
+	const canCompressExternal = externalUploadFile && isCompressibleImage(externalUploadFile);
 
 	React.useEffect(() => {
 		if (
@@ -184,6 +201,12 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 			props.onChange(buildContent(mediaData), mediaData);
 		}
 	}, [mediaData?.url, mediaData?.caption, mediaData?.alignment, mediaData?.width, mediaData?.mediaAlign]);
+
+	React.useEffect(() => {
+		if (externalUploadFile && portalProvider.current?.id && arProvider.wallet) {
+			calculateUploadCost(externalUploadFile);
+		}
+	}, [externalUploadFile, portalProvider.current?.id, arProvider.wallet, calculateUploadCost]);
 
 	function buildContent(data: any) {
 		const flexDirection = getFlexDirection(data.alignment);
@@ -285,6 +308,79 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 	const handleLibraryCallback = (upload: PortalUploadType) => {
 		setMediaData((prevContent) => ({ ...prevContent, url: getTxEndpoint(upload.tx) }));
 		setShowMediaLibrary(false);
+	};
+
+	const handleUploadFromUrlClick = async () => {
+		const url = mediaData?.url;
+		if (!url || !/^https?:\/\//i.test(url) || props.type !== 'image') return;
+		setExternalUploadLoading(true);
+		try {
+			const res = await fetch(url, { mode: 'cors' });
+			if (!res.ok) throw new Error('Failed to fetch image');
+			const blob = await res.blob();
+			const mime = blob.type || 'image/png';
+			const ext = mime === 'image/gif' ? 'gif' : mime === 'image/webp' ? 'webp' : 'png';
+			const file = new File([blob], `imported.${ext}`, { type: mime });
+			setExternalUploadFile(file);
+		} catch (e: any) {
+			debugLog('error', 'MediaBlock', 'Fetch image for upload', e);
+			addNotification(e?.message ?? language?.errorUpdatingPortal ?? 'Failed to fetch image', 'warning');
+		} finally {
+			setExternalUploadLoading(false);
+		}
+	};
+
+	const handleExternalUploadConfirm = async () => {
+		if (!externalUploadFile) return;
+		setExternalUploadLoading(true);
+		try {
+			const tx = await permawebProvider.libs.resolveTransaction(externalUploadFile);
+			const arweaveUrl = getTxEndpoint(tx);
+			const nextData = { ...mediaData, url: arweaveUrl };
+			setMediaData(nextData);
+			isInternalUpdateRef.current = true;
+			props.onChange(buildContent(nextData), nextData);
+			if (portalProvider.permissions?.updatePortalMeta && portalProvider.current?.uploads) {
+				const data: any = {
+					tx,
+					type: props.type,
+					dateUploaded: Date.now().toString(),
+				};
+				const updatedMedia = [...portalProvider.current.uploads, data];
+				await permawebProvider.libs.updateZone(
+					{ Uploads: portalProvider.libs.mapToProcessCase(updatedMedia) },
+					portalProvider.current.id,
+					arProvider.wallet
+				);
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Media);
+			}
+			addNotification(`${language?.mediaUploaded ?? 'Media uploaded'}!`, 'success');
+			setExternalUploadFile(null);
+			clearUploadState();
+		} catch (e: any) {
+			addNotification(e?.message ?? language?.errorUpdatingPortal ?? 'Upload failed', 'warning');
+		} finally {
+			setExternalUploadLoading(false);
+		}
+	};
+
+	const handleExternalUploadCancel = () => {
+		setExternalUploadFile(null);
+		clearUploadState();
+	};
+
+	const handleExternalCompress = async () => {
+		if (!externalUploadFile) return;
+		setExternalCompressing(true);
+		try {
+			const compressed = await compressImageToSize(externalUploadFile, UPLOAD.dispatchUploadSize);
+			clearUploadState();
+			setExternalUploadFile(compressed);
+		} catch (e: any) {
+			addNotification(e?.message ?? 'Error compressing image', 'warning');
+		} finally {
+			setExternalCompressing(false);
+		}
 	};
 
 	const alignmentButtons: AlignmentButtonType[] = [
@@ -463,6 +559,27 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 									)}
 									<S.ResizeHandle side="right" onMouseDown={(e) => handleResizeStart(e, 'right')} />
 								</S.MediaResizeWrapper>
+								{props.type === 'image' && mediaData?.url && isExternalMediaUrl(mediaData.url) && (
+									<S.ExternalUploadBar>
+										<span>
+											{language?.externalImageUploadInfo ??
+												'This image is hosted elsewhere. Upload to Arweave to store it permanently.'}
+										</span>
+										<Button
+											type={'alt1'}
+											label={
+												externalUploadLoading
+													? `${language?.loading ?? 'Loading'}...`
+													: language?.uploadToArweave ?? 'Upload to Arweave'
+											}
+											handlePress={handleUploadFromUrlClick}
+											disabled={externalUploadLoading}
+											icon={ICONS.upload}
+											iconLeftAlign
+											height={36}
+										/>
+									</S.ExternalUploadBar>
+								)}
 							</S.Content>
 						</S.ContentWrapper>
 						{showCaptionEdit && (
@@ -559,6 +676,24 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 					handleClose={() => setShowMediaLibrary(false)}
 				/>
 			</Panel>
+			{externalUploadFile && (
+				<Modal header={language?.uploadToArweave ?? 'Upload to Arweave'} handleClose={handleExternalUploadCancel}>
+					{externalUploadLoading ? (
+						<Loader message={`${language?.uploadingMedia ?? 'Uploading'}...`} />
+					) : (
+						<TurboUploadConfirmation
+							uploadCost={uploadCost ?? 0}
+							uploadDisabled={!!insufficientBalance}
+							handleUpload={handleExternalUploadConfirm}
+							handleCancel={handleExternalUploadCancel}
+							handleCompress={handleExternalCompress}
+							canCompress={!!canCompressExternal}
+							compressing={externalCompressing}
+							insufficientBalance={!!insufficientBalance}
+						/>
+					)}
+				</Modal>
+			)}
 		</>
 	);
 }

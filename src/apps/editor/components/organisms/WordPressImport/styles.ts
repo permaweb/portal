@@ -48,7 +48,7 @@ export const ProgressWrapper = styled.div`
 export const ProgressBar = styled.div`
 	height: 8px;
 	background: ${(props) => props.theme.colors.container.alt1.background};
-	border-radius: 4px;
+	border-radius: ${STYLING.dimensions.radius.alt4};
 	overflow: hidden;
 `;
 
@@ -73,7 +73,7 @@ export const PreviewWrapper = styled.div`
 	background: ${(props) => props.theme.colors.container.primary.background};
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-radius: ${STYLING.dimensions.radius.primary};
-	max-height: 400px;
+	max-height: min(720px, 78vh);
 	overflow-y: auto;
 `;
 
@@ -155,8 +155,24 @@ export const PostList = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
-	max-height: 200px;
+	max-height: 340px;
+	min-height: 0;
 	overflow-y: auto;
+`;
+
+export const CategoryListScrollArea = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	max-height: 520px;
+	min-height: 400px;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+
+	.categories-list {
+		max-height: none;
+		flex-shrink: 0;
+	}
 `;
 
 export const PostItem = styled.div<{ $selected: boolean }>`
@@ -240,6 +256,7 @@ export const ThemePreview = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
+	min-height: 420px;
 `;
 
 export const ColorPalette = styled.div`
@@ -370,26 +387,298 @@ export const NoThemeMessage = styled.div`
 
 export const CheckboxGroup = styled.div`
 	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 4px 0;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 8px 16px;
 `;
 
-export const CheckboxLabel = styled.span`
-	color: ${(props) => props.theme.colors.font.primary};
+export const CheckboxContainer = styled.div<{ disabled?: boolean }>`
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
+	opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+
+	&:hover {
+		span {
+			color: ${(props) => (props.disabled ? props.theme.colors.font.alt1 : props.theme.colors.font.primary)};
+		}
+	}
+
+	span {
+		font-family: ${(props) => props.theme.typography.family.primary};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		color: ${(props) => props.theme.colors.font.alt1};
+		transition: all 0.2s ease;
+	}
+`;
+
+export const WhatToImportList = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+`;
+
+export const WhatToImportCheckboxes = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 20px;
+`;
+
+export const PostsLimitRow = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+`;
+
+export const PostsLimitLabel = styled.span`
+	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
 	font-family: ${(props) => props.theme.typography.family.primary};
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	flex: 1;
-	user-select: none;
 `;
 
-export const CountInputWrapper = styled.div`
-	width: 60px;
+export const PostsLimitInputWrap = styled.div`
+	width: 72px;
+	flex-shrink: 0;
+
+	input {
+		text-align: center;
+	}
+`;
+
+export const FileSelectedMessage = styled.p`
+	color: ${(props) => props.theme.colors.indicator.active};
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	margin: 8px 0 0 0;
+	line-height: 1.4;
+`;
+
+export const SelectAllTitle = styled.span`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	cursor: pointer;
+	flex: 1;
+
+	&:hover {
+		color: ${(props) => props.theme.colors.font.alt5};
+	}
+`;
+
+export const NestedPostItem = styled(PostItem)<{ $depth: number }>`
+	padding-left: ${(props) => props.$depth * 20 + 10}px;
+`;
+
+// Image grid styles – fixed-size small boxes
+const THUMB_SIZE = 92;
+
+export const ImageGrid = styled.div`
+	display: grid;
+	grid-template-columns: repeat(auto-fill, ${THUMB_SIZE}px);
+	gap: 10px;
+	min-height: 200px;
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 4px;
+	justify-content: start;
+	flex-shrink: 0;
+`;
+
+export const ImageCard = styled.div<{ $selected: boolean }>`
+	position: relative;
+	width: ${THUMB_SIZE}px;
+	height: ${THUMB_SIZE}px;
+	border-radius: ${STYLING.dimensions.radius.alt1};
+	overflow: hidden;
+	border: 2px solid
+		${(props) => (props.$selected ? props.theme.colors.button.primary.background : props.theme.colors.border.primary)};
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	cursor: pointer;
+	transition: all 0.2s ease;
+	flex-shrink: 0;
+
+	&:hover {
+		border-color: ${(props) => props.theme.colors.button.primary.background};
+	}
+`;
+
+export const ImageThumbnail = styled.div`
+	width: 100%;
+	height: 100%;
 	display: flex;
 	align-items: center;
-	margin-left: auto;
+	justify-content: center;
+	background-color: ${(props) => props.theme.colors.container.alt1.background};
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+`;
+
+export const ImageThumbnailPlaceholder = styled.div`
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: ${(props) => props.theme.colors.container.alt1.background};
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
+	font-family: ${(props) => props.theme.typography.family.primary};
+`;
+
+export const ImageOverlay = styled.div`
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding: 6px;
+	pointer-events: none;
+`;
+
+export const ImageCheckbox = styled.div`
+	position: absolute;
+	top: 6px;
+	left: 6px;
+	pointer-events: auto;
+	z-index: 2;
+`;
+
+export const ImageBadge = styled.span<{ $type: 'featured' | 'content' }>`
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	padding: 2px 6px;
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	background: ${(props) =>
+		props.$type === 'featured' ? props.theme.colors.button.primary.background : props.theme.colors.overlay.primary};
+	color: ${(props) => props.theme.colors.font.light1};
+	border-radius: ${STYLING.dimensions.radius.alt4};
+	text-transform: uppercase;
+`;
+
+export const ImagePostCount = styled.span`
+	position: absolute;
+	bottom: 6px;
+	right: 6px;
+	padding: 2px 6px;
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	background: ${(props) => props.theme.colors.overlay.primary};
+	color: ${(props) => props.theme.colors.font.light1};
+	border-radius: ${STYLING.dimensions.radius.alt4};
+`;
+
+export const ImageUploadStatus = styled.div<{ $status: string }>`
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background: ${(props) => {
+		switch (props.$status) {
+			case 'complete':
+				return props.theme.colors.indicator.active;
+			case 'error':
+				return props.theme.colors.warning.primary;
+			default:
+				return props.theme.colors.overlay.primary;
+		}
+	}};
+	color: ${(props) => props.theme.colors.font.light1};
+	z-index: 3;
+`;
+
+export const ImageUploadProgress = styled.div`
+	width: 60%;
+	height: 4px;
+	background: ${(props) => props.theme.colors.overlay.alt1};
+	border-radius: ${STYLING.dimensions.radius.alt4};
+	margin-top: 6px;
+	overflow: hidden;
+`;
+
+export const ImageUploadProgressFill = styled.div<{ $progress: number }>`
+	height: 100%;
+	width: ${(props) => props.$progress}%;
+	background: ${(props) => props.theme.colors.font.light1};
+	transition: width 0.2s ease;
+`;
+
+export const ImageUploadStatusText = styled.span`
+	font-size: ${(props) => props.theme.typography.size.xxxxSmall};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	text-transform: capitalize;
+`;
+
+export const ImageUploadStatusIcon = styled.span`
+	font-size: 24px;
+	margin-bottom: 4px;
+`;
+
+export const ImageSummary = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	padding: 12px;
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	border-radius: ${STYLING.dimensions.radius.alt1};
+	margin-bottom: 12px;
+`;
+
+export const ImageSummaryStat = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+`;
+
+export const ImageSummaryLabel = styled.span`
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
+	font-family: ${(props) => props.theme.typography.family.primary};
+`;
+
+export const ImageSummaryValue = styled.span`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-family: ${(props) => props.theme.typography.family.primary};
+`;
+
+export const ImageActions = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 12px;
+`;
+
+export const UploadWarning = styled.div`
+	padding: 10px 12px;
+	background: ${(props) => props.theme.colors.warning.primary};
+	border-radius: ${STYLING.dimensions.radius.alt1};
+	margin-top: 12px;
+
+	span {
+		color: ${(props) => props.theme.colors.font.light1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-family: ${(props) => props.theme.typography.family.primary};
+	}
 `;

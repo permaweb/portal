@@ -208,28 +208,16 @@ export default function Landing() {
 						</S.WalletConnect>
 					)}
 					{action && arProvider.walletAddress && (
-						<>
-							<Button
-								type={'primary'}
-								label={label}
-								handlePress={action}
-								disabled={disabled}
-								icon={icon}
-								iconLeftAlign
-								height={70}
-								fullWidth
-							/>
-							<Button
-								type={'alt1'}
-								label={language?.createPortalFromWordPress || 'Create Portal from WordPress'}
-								handlePress={() => portalProvider.setShowWordPressImport(true)}
-								disabled={disabled}
-								icon={ICONS.import}
-								iconLeftAlign
-								height={70}
-								fullWidth
-							/>
-						</>
+						<Button
+							type={'primary'}
+							label={label}
+							handlePress={action}
+							disabled={disabled}
+							icon={icon}
+							iconLeftAlign
+							height={70}
+							fullWidth
+						/>
 					)}
 				</S.PortalActionWrapper>
 			</S.PortalsWrapper>

@@ -147,6 +147,15 @@ export type WordPressExtractionResult = {
 	errors: string[];
 };
 
+// Extracted image from WordPress content
+export type ExtractedImage = {
+	originalUrl: string;
+	sourceType: 'featured' | 'content';
+	postIds: number[];
+	alt?: string;
+	caption?: string;
+};
+
 export type WordPressExtractionProgress = {
 	stage:
 		| 'connecting'
@@ -163,6 +172,27 @@ export type WordPressExtractionProgress = {
 	total: number;
 	message: string;
 };
+
+// Default theme colors used when extraction finds nothing
+export function getDefaultExtractedTheme(): ExtractedTheme {
+	return {
+		colors: {
+			primary: '#5E66DB', // Portal default primary
+			secondary: '#38BD80', // Portal default secondary
+			background: '#FAFAFA',
+			text: '#1A1A1A',
+			accent: '#5E66DB',
+			border: '#E0E0E0',
+			link: '#5E66DB',
+		},
+		fonts: {
+			heading: null,
+			body: null,
+		},
+		borderRadius: 10,
+		colorPalette: [],
+	};
+}
 
 // Normalize URL helper
 function normalizeUrl(url: string): string {
@@ -292,13 +322,29 @@ export class WordPressClient {
 					const wpComPosts = data.posts || [];
 					// Convert WordPress.com post format to standard format
 					const posts: WordPressPost[] = wpComPosts.map((wp: any) => {
-						// WordPress.com returns category/tag objects, not just IDs
-						const categoryIds = Array.isArray(wp.categories)
-							? wp.categories.map((cat: any) => (typeof cat === 'object' ? cat.ID : cat))
-							: [];
-						const tagIds = Array.isArray(wp.tags)
-							? wp.tags.map((tag: any) => (typeof tag === 'object' ? tag.ID : tag))
-							: [];
+						// WordPress.com returns category/tag as objects keyed by slug, not arrays
+						let categoryIds: number[] = [];
+						if (wp.categories) {
+							if (Array.isArray(wp.categories)) {
+								categoryIds = wp.categories.map((cat: any) => (typeof cat === 'object' ? cat.ID : cat));
+							} else if (typeof wp.categories === 'object') {
+								// Object keyed by slug: { "category-slug": { ID: 123, name: "..." }, ... }
+								categoryIds = Object.values(wp.categories)
+									.map((cat: any) => cat.ID)
+									.filter(Boolean);
+							}
+						}
+						let tagIds: number[] = [];
+						if (wp.tags) {
+							if (Array.isArray(wp.tags)) {
+								tagIds = wp.tags.map((tag: any) => (typeof tag === 'object' ? tag.ID : tag));
+							} else if (typeof wp.tags === 'object') {
+								// Object keyed by slug: { "tag-slug": { ID: 123, name: "..." }, ... }
+								tagIds = Object.values(wp.tags)
+									.map((tag: any) => tag.ID)
+									.filter(Boolean);
+							}
+						}
 
 						return {
 							id: wp.ID,
@@ -476,31 +522,98 @@ export class WordPressClient {
 		}
 	}
 
+	/** Normalize tag so name is never blank (API may return name in different shapes). */
+	private normalizeTag(tag: any, index: number): WordPressTag {
+		const name =
+			(typeof tag?.name === 'string' && tag.name.trim()) ||
+			(tag?.name?.rendered && String(tag.name.rendered).trim()) ||
+			(typeof tag?.slug === 'string' && tag.slug.trim()) ||
+			`Tag ${tag?.id ?? index + 1}`;
+		const slug = typeof tag?.slug === 'string' ? tag.slug : tag?.nicename || name.toLowerCase().replace(/\s+/g, '-');
+		return {
+			id: Number(tag?.id ?? tag?.ID ?? index + 1) || index + 1,
+			count: Number(tag?.count ?? tag?.post_count ?? 0) || 0,
+			description: typeof tag?.description === 'string' ? tag.description : '',
+			link: typeof tag?.link === 'string' ? tag.link : tag?.URL || '',
+			name,
+			slug,
+			taxonomy: 'post_tag',
+		};
+	}
+
 	async getTags(): Promise<WordPressTag[]> {
 		try {
 			if (this.isWordPressCom && this.wpComSiteSlug) {
-				// WordPress.com API for tags
-				const response = await this.fetchWithProxy(`${this.apiBase}/tags?number=100`);
+				// WordPress.com tags endpoint often returns many orphaned/empty tags.
+				// Better approach: fetch tags from recent posts which have full tag data embedded.
+				const tagMap = new Map<number, WordPressTag>();
+
+				// First, try to get tags from recent posts (more reliable)
+				try {
+					const postsResponse = await this.fetchWithProxy(`${this.apiBase}/posts?number=50`);
+					if (postsResponse.ok) {
+						const postsData = await postsResponse.json();
+						const posts = postsData.posts || [];
+						posts.forEach((post: any) => {
+							if (post.tags && typeof post.tags === 'object') {
+								// Tags are object keyed by slug: { "tag-slug": { ID, name, slug, ... } }
+								Object.values(post.tags).forEach((tag: any) => {
+									const name = (tag?.name || '').trim();
+									const slug = (tag?.slug || '').trim();
+									if ((name || slug) && tag?.ID && !tagMap.has(tag.ID)) {
+										tagMap.set(tag.ID, {
+											id: tag.ID,
+											count: tag.post_count || 0,
+											description: tag.description || '',
+											link: tag.URL || '',
+											name: name || slug,
+											slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
+											taxonomy: 'post_tag',
+										});
+									}
+								});
+							}
+						});
+					}
+				} catch {
+					// Ignore error from posts fetch, fall through to tags endpoint
+				}
+
+				// Also fetch from tags endpoint with order_by=count to get popular tags
+				const response = await this.fetchWithProxy(`${this.apiBase}/tags?number=100&order_by=count`);
 				if (response.ok) {
 					const data = await response.json();
-					const wpComTags = data.tags || [];
-					// Convert WordPress.com tag format to standard format
-					return wpComTags.map((tag: any) => ({
-						id: tag.ID,
-						count: tag.post_count || 0,
-						description: tag.description || '',
-						link: tag.URL || '',
-						name: tag.name,
-						slug: tag.slug,
-						taxonomy: 'post_tag',
-					}));
+					let wpComTags: any[] = [];
+					if (Array.isArray(data.tags)) {
+						wpComTags = data.tags;
+					} else if (data.tags && typeof data.tags === 'object') {
+						wpComTags = Object.values(data.tags);
+					}
+					// Filter and add valid tags not already in map
+					wpComTags.forEach((tag: any, i: number) => {
+						const name = (tag?.name || '').trim();
+						const slug = (tag?.slug || '').trim();
+						const id = tag?.ID || tag?.id || i + 1000;
+						if ((name || slug) && !tagMap.has(id)) {
+							tagMap.set(id, this.normalizeTag(tag, i));
+						}
+					});
 				}
-				return [];
+
+				return Array.from(tagMap.values());
 			}
 
 			const response = await this.fetchWithProxy(`${this.apiBase}/tags?per_page=100`);
 			if (response.ok) {
-				return await response.json();
+				const raw = await response.json();
+				const arr = Array.isArray(raw) ? raw : [];
+				// Filter out invalid tags for self-hosted WordPress too
+				const validTags = arr.filter((tag: any) => {
+					const name = (tag?.name || '').trim();
+					const slug = (tag?.slug || '').trim();
+					return name.length > 0 || slug.length > 0;
+				});
+				return validTags.map((tag: any, i: number) => this.normalizeTag(tag, i));
 			}
 			return [];
 		} catch {
@@ -531,12 +644,27 @@ export class WordPressClient {
 					if (posts.length > 0) {
 						const wp = posts[0];
 						// Convert WordPress.com format to standard format
-						const categoryIds = Array.isArray(wp.categories)
-							? wp.categories.map((cat: any) => (typeof cat === 'object' ? cat.ID : cat))
-							: [];
-						const tagIds = Array.isArray(wp.tags)
-							? wp.tags.map((tag: any) => (typeof tag === 'object' ? tag.ID : tag))
-							: [];
+						// WordPress.com returns category/tag as objects keyed by slug, not arrays
+						let categoryIds: number[] = [];
+						if (wp.categories) {
+							if (Array.isArray(wp.categories)) {
+								categoryIds = wp.categories.map((cat: any) => (typeof cat === 'object' ? cat.ID : cat));
+							} else if (typeof wp.categories === 'object') {
+								categoryIds = Object.values(wp.categories)
+									.map((cat: any) => cat.ID)
+									.filter(Boolean);
+							}
+						}
+						let tagIds: number[] = [];
+						if (wp.tags) {
+							if (Array.isArray(wp.tags)) {
+								tagIds = wp.tags.map((tag: any) => (typeof tag === 'object' ? tag.ID : tag));
+							} else if (typeof wp.tags === 'object') {
+								tagIds = Object.values(wp.tags)
+									.map((tag: any) => tag.ID)
+									.filter(Boolean);
+							}
+						}
 
 						return {
 							id: wp.ID,
@@ -620,12 +748,24 @@ export class WordPressClient {
 				colorPalette: [],
 			};
 
-			// Extract CSS custom properties from inline styles and stylesheets
+			// Extract CSS from inline <style> and linked stylesheets (for title/heading color detection)
 			const styleElements = doc.querySelectorAll('style');
 			let cssText = '';
 			styleElements.forEach((style) => {
 				cssText += style.textContent || '';
 			});
+			// Fetch up to 5 linked stylesheets to detect title/heading colors from theme CSS
+			const sheetLinks = Array.from(doc.querySelectorAll('link[rel="stylesheet"][href]')).slice(0, 5);
+			for (const link of sheetLinks) {
+				try {
+					const href = link.getAttribute('href') || '';
+					const absolute = href.startsWith('http') ? href : new URL(href, this.baseUrl).href;
+					const res = await this.fetchWithProxy(absolute);
+					if (res.ok) cssText += '\n' + (await res.text());
+				} catch {
+					/* ignore failed stylesheet fetch */
+				}
+			}
 
 			// Also check for WordPress preset colors in class attributes
 			const wpColorVars = [
@@ -712,6 +852,65 @@ export class WordPressClient {
 				}
 			});
 
+			// CSS selector-based detection: title, heading, and post title colors
+			// Match rule blocks where selector mentions title/heading and declaration has color
+			const selectorColorPatterns = [
+				{
+					// .site-title, .wp-block-site-title, .entry-title, .post-title, .page-title, h1, h2, etc.
+					pattern:
+						/(?:\.site-title|\.wp-block-site-title|\.entry-title|\.post-title|\.wp-block-post-title|\.page-title|\.archive-title|\.headline|\.hero-title|h1\s*[,{]|h2\s*[,{]|\.heading\s*)[^{]*\{\s*[^}]*?color\s*:\s*([#\w().\s,%-]+);/gi,
+					key: 'primary',
+				},
+				{
+					// heading / title in variable names
+					pattern: /(?:--|color)[-:]?\s*(?:title|heading|headline)[-:]?\s*:\s*([#\w()\s,]+);/gi,
+					key: 'primary',
+				},
+			];
+			const isValidColor = (s: string) => /^#[\da-f]{3,6}$/i.test(s) || /^rgba?\(/i.test(s) || /^hsla?\(/i.test(s);
+			selectorColorPatterns.forEach(({ pattern, key }) => {
+				if (extractedTheme.colors[key as keyof ExtractedThemeColors]) return;
+				const matches = cssText.matchAll(pattern);
+				for (const m of matches) {
+					const color = (m[1] || '').trim();
+					if (color && isValidColor(color)) {
+						extractedTheme.colors[key as keyof ExtractedThemeColors] = color;
+						break;
+					}
+				}
+			});
+
+			// Extract theme from heading/paragraph tags (h1, h2, h3, p, etc.) via inline styles
+			const headingSelectors =
+				'h1, h2, h3, h4, h5, h6, .entry-title, .post-title, .wp-block-post-title, .page-title, .site-title';
+			const bodySelectors = 'p, .entry-content p, .post-content p, .wp-block-post-content p';
+
+			for (const el of Array.from(doc.querySelectorAll(headingSelectors))) {
+				const htmlEl = el as HTMLElement;
+				const color = (htmlEl.style?.color || '').trim();
+				const font = (htmlEl.style?.fontFamily || '').replace(/['"]/g, '').trim();
+				if (color && isValidColor(color) && !extractedTheme.colors.primary) {
+					extractedTheme.colors.primary = color;
+				}
+				if (font && !extractedTheme.fonts.heading) {
+					extractedTheme.fonts.heading = font;
+				}
+				if (extractedTheme.colors.primary && extractedTheme.fonts.heading) break;
+			}
+
+			for (const el of Array.from(doc.querySelectorAll(bodySelectors))) {
+				const htmlEl = el as HTMLElement;
+				const color = (htmlEl.style?.color || '').trim();
+				const font = (htmlEl.style?.fontFamily || '').replace(/['"]/g, '').trim();
+				if (color && isValidColor(color) && !extractedTheme.colors.text) {
+					extractedTheme.colors.text = color;
+				}
+				if (font && !extractedTheme.fonts.body) {
+					extractedTheme.fonts.body = font;
+				}
+				if (extractedTheme.colors.text && extractedTheme.fonts.body) break;
+			}
+
 			// Fallback: Extract from computed styles of key elements
 			// Try to get background color from body
 			const bodyBg = doc.body?.style?.backgroundColor || doc.body?.getAttribute('data-bg');
@@ -758,13 +957,72 @@ export class WordPressClient {
 				}
 			});
 
+			// Last resort: scrape any color/background from raw CSS (works with classic themes and minified/compiled CSS)
+			const fillFromRawCss = () => {
+				const rawColorRe = /(?:^|[;\s{])(?:color|background(?:-color)?)\s*:\s*([^;}]+?)(?=\s*[;}]|$)/gi;
+				const collected: string[] = [];
+				let rawMatch;
+				while ((rawMatch = rawColorRe.exec(cssText)) !== null) {
+					const val = rawMatch[1].trim();
+					// Extract first token that looks like a color (handles "2px solid #333" -> #333, "rgba(0,0,0,.5)" as-is)
+					const colorLike = val.match(/#[\da-f]{3,8}\b|rgba?\s*\([^)]+\)|hsla?\s*\([^)]+\)/i)?.[0];
+					if (colorLike && isValidColor(colorLike) && !collected.includes(colorLike)) {
+						collected.push(colorLike);
+					}
+				}
+				// Heuristic: assume order often is background, text, then accents. Fill missing slots.
+				const slots: (keyof ExtractedThemeColors)[] = [
+					'background',
+					'text',
+					'primary',
+					'link',
+					'secondary',
+					'border',
+					'accent',
+				];
+				let i = 0;
+				for (const slot of slots) {
+					if (!extractedTheme.colors[slot] && collected[i]) {
+						extractedTheme.colors[slot] = collected[i];
+						i++;
+					}
+				}
+			};
+			const hasAnyColor = Object.values(extractedTheme.colors).some((c) => c !== null);
+			if (!hasAnyColor && cssText.length > 0) {
+				fillFromRawCss();
+			}
+
+			// Also scan inline style attributes anywhere in the document for color/background
+			const styleEls = doc.querySelectorAll<HTMLElement>('[style*="color"], [style*="background"]');
+			for (const el of Array.from(styleEls)) {
+				const s = el.getAttribute('style') || '';
+				const colorMatch = s.match(/color\s*:\s*([^;]+)/i);
+				const bgMatch = s.match(/background(?:-color)?\s*:\s*([^;]+)/i);
+				const tryColor = (val: string) => {
+					const c = val.trim();
+					if (!isValidColor(c)) return;
+					if (!extractedTheme.colors.primary) extractedTheme.colors.primary = c;
+					else if (!extractedTheme.colors.text) extractedTheme.colors.text = c;
+					else if (!extractedTheme.colors.background) extractedTheme.colors.background = c;
+				};
+				if (colorMatch) tryColor(colorMatch[1].trim());
+				if (bgMatch) {
+					const bg = bgMatch[1].trim();
+					const colorLike = bg.match(/#[\da-f]{3,8}\b|rgba?\s*\([^)]+\)|hsla?\s*\([^)]+\)/i)?.[0];
+					if (colorLike && isValidColor(colorLike) && !extractedTheme.colors.background) {
+						extractedTheme.colors.background = colorLike;
+					}
+				}
+			}
+
 			return extractedTheme;
 		} catch {
 			return null;
 		}
 	}
 
-	async extractTheme(): Promise<ExtractedTheme | null> {
+	async extractTheme(): Promise<ExtractedTheme> {
 		// First try the Global Styles API (block themes)
 		const globalStyles = await this.getGlobalStyles();
 
@@ -866,7 +1124,8 @@ export class WordPressClient {
 		const hasPalette = extractedTheme.colorPalette.length > 0;
 
 		if (!hasColors && !hasFonts && !hasPalette) {
-			return null;
+			// Return default theme instead of null
+			return getDefaultExtractedTheme();
 		}
 
 		return extractedTheme;
@@ -990,9 +1249,10 @@ export class WordPressClient {
 			if (opts.fetchTheme) {
 				onProgress?.({ stage: 'theme', current: 0, total: 1, message: 'Extracting theme colors...' });
 				result.theme = await this.extractTheme();
-				if (result.theme) {
-					onProgress?.({ stage: 'theme', current: 1, total: 1, message: 'Theme colors extracted!' });
-				}
+				onProgress?.({ stage: 'theme', current: 1, total: 1, message: 'Theme colors extracted!' });
+			} else {
+				// Provide default theme when theme extraction is skipped
+				result.theme = getDefaultExtractedTheme();
 			}
 
 			onProgress?.({ stage: 'complete', current: 1, total: 1, message: 'Extraction complete!' });
@@ -1331,11 +1591,13 @@ export function convertCategories(wpCategories: WordPressCategory[]): PortalCate
 	return rootCategories;
 }
 
-// Convert WordPress tags to Portal topics
+// Convert WordPress tags to Portal topics (ensure value is never blank)
 export function convertTags(wpTags: WordPressTag[]): PortalTopicType[] {
-	return wpTags.map((tag) => ({
-		value: tag.name,
-	}));
+	return wpTags
+		.map((tag) => ({
+			value: (tag.name || tag.slug || `tag-${tag.id}`).trim(),
+		}))
+		.filter((t) => t.value.length > 0);
 }
 
 // Convert a WordPress post to a Portal asset-compatible structure
@@ -1399,8 +1661,12 @@ export function convertPost(
 		}
 	}
 
-	// Parse date
-	const dateCreated = new Date(wpPost.date_gmt + 'Z').getTime();
+	// Parse date - handle both ISO format and WordPress format (YYYY-MM-DD HH:MM:SS)
+	const dateStr = wpPost.date_gmt || wpPost.date || '';
+	// Replace space with T for ISO compatibility, ensure UTC timezone
+	const normalizedDate = dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T');
+	const parsedDate = new Date(normalizedDate + (normalizedDate.includes('Z') ? '' : 'Z'));
+	const dateCreated = isNaN(parsedDate.getTime()) ? Date.now() : parsedDate.getTime();
 
 	// Map status
 	const status = wpPost.status === 'publish' ? 'published' : 'draft';
@@ -1423,7 +1689,7 @@ export function convertPost(
 	};
 }
 
-// Portal theme type for import
+// Portal theme type for import - must match engine's expected structure
 export type PortalThemeImport = {
 	name: string;
 	active: boolean;
@@ -1437,6 +1703,113 @@ export type PortalThemeImport = {
 		};
 		preferences: {
 			borderRadius: number;
+			wallpaper?: string;
+		};
+	};
+	header: {
+		colors: {
+			background: { light: string; dark: string };
+			border: { light: string; dark: string };
+			shadow: { light: string; dark: string };
+		};
+		preferences: {
+			opacity: { light: number; dark: number };
+			shadow: { light: string; dark: string };
+			gradient: { light: boolean; dark: boolean };
+		};
+	};
+	navigation: {
+		colors: {
+			background: { light: string; dark: string };
+			text: { light: string; dark: string };
+			border: { light: string; dark: string };
+			hover: { light: string; dark: string };
+		};
+		preferences: {
+			opacity: { light: number; dark: number };
+			shadow: { light: string; dark: string };
+		};
+	};
+	content: {
+		colors: {
+			background: { light: string; dark: string };
+		};
+		preferences: {
+			opacity: { light: number; dark: number };
+		};
+	};
+	footer: {
+		colors: {
+			background: { light: string; dark: string };
+			border: { light: string; dark: string };
+		};
+		preferences: {
+			opacity: { light: number; dark: number };
+		};
+	};
+	post: {
+		colors: {
+			background: { light: string; dark: string };
+			border: { light: string; dark: string };
+		};
+		preferences: {
+			opacity: { light: number; dark: number };
+			shadow: { light: string; dark: string };
+		};
+	};
+	card: {
+		colors: {
+			background: { light: string; dark: string };
+			border: { light: string; dark: string };
+		};
+		preferences: {
+			opacity: { light: number; dark: number };
+		};
+	};
+	buttons: {
+		default: {
+			default: {
+				colors: {
+					color: { light: string; dark: string };
+					background: { light: string; dark: string };
+					border: { light: string; dark: string };
+				};
+				preferences: {
+					opacity: { light: number; dark: number };
+				};
+			};
+			hover: {
+				colors: {
+					color: { light: string; dark: string };
+					background: { light: string; dark: string };
+					border: { light: string; dark: string };
+				};
+				preferences: {
+					opacity: { light: number; dark: number };
+				};
+			};
+		};
+		primary: {
+			default: {
+				colors: {
+					color: { light: string; dark: string };
+					background: { light: string; dark: string };
+					border: { light: string; dark: string };
+				};
+				preferences: {
+					opacity: number;
+				};
+			};
+			hover: {
+				colors: {
+					color: { light: string; dark: string };
+					background: { light: string; dark: string };
+					border: { light: string; dark: string };
+				};
+				preferences: {
+					opacity: number;
+				};
+			};
 		};
 	};
 };
@@ -1510,35 +1883,127 @@ export function convertThemeToPortal(extractedTheme: ExtractedTheme): PortalThem
 	const darkText = isLightMode ? '255,255,255' : textRgb;
 	const lightBackground = isLightMode ? backgroundRgb : '250,250,250';
 	const lightText = isLightMode ? textRgb : '0,0,0';
+	const darkBorder = isLightColor(borderRgb) ? '100,100,100' : borderRgb;
 
 	return {
 		name: 'Imported Theme',
 		active: true,
 		basics: {
 			colors: {
-				text: {
-					light: lightText,
-					dark: darkText,
-				},
-				background: {
-					light: lightBackground,
-					dark: darkBackground,
-				},
-				primary: {
-					light: primaryRgb,
-					dark: primaryRgb,
-				},
-				secondary: {
-					light: secondaryRgb,
-					dark: secondaryRgb,
-				},
-				border: {
-					light: borderRgb,
-					dark: isLightColor(borderRgb) ? '100,100,100' : borderRgb,
-				},
+				text: { light: lightText, dark: darkText },
+				background: { light: lightBackground, dark: darkBackground },
+				primary: { light: primaryRgb, dark: primaryRgb },
+				secondary: { light: secondaryRgb, dark: secondaryRgb },
+				border: { light: borderRgb, dark: darkBorder },
 			},
 			preferences: {
 				borderRadius: extractedTheme.borderRadius || 10,
+			},
+		},
+		header: {
+			colors: {
+				background: { light: 'background', dark: 'background' },
+				border: { light: 'border', dark: 'border' },
+				shadow: { light: 'rgba(0, 0, 0, 0.4)', dark: 'rgba(0, 0, 0, 0.4)' },
+			},
+			preferences: {
+				opacity: { light: 1, dark: 0.4 },
+				shadow: { light: '0 4px 10px', dark: '0 4px 10px' },
+				gradient: { light: true, dark: true },
+			},
+		},
+		navigation: {
+			colors: {
+				background: { light: '238,238,238', dark: '32,32,32' },
+				text: { light: 'text', dark: 'text' },
+				border: { light: 'border', dark: 'border' },
+				hover: { light: '50,50,50', dark: '208,208,208' },
+			},
+			preferences: {
+				opacity: { light: 1, dark: 1 },
+				shadow: { light: 'unset', dark: '0 2px 2px' },
+			},
+		},
+		content: {
+			colors: {
+				background: { light: '255,255,255', dark: '0,0,0' },
+			},
+			preferences: {
+				opacity: { light: 1, dark: 1 },
+			},
+		},
+		footer: {
+			colors: {
+				background: { light: 'background', dark: 'background' },
+				border: { light: 'border', dark: 'border' },
+			},
+			preferences: {
+				opacity: { light: 1, dark: 1 },
+			},
+		},
+		post: {
+			colors: {
+				background: { light: 'background', dark: 'background' },
+				border: { light: 'border', dark: 'border' },
+			},
+			preferences: {
+				opacity: { light: 1, dark: 0.6 },
+				shadow: { light: 'none', dark: 'none' },
+			},
+		},
+		card: {
+			colors: {
+				background: { light: 'background', dark: 'background' },
+				border: { light: 'border', dark: 'border' },
+			},
+			preferences: {
+				opacity: { light: 1, dark: 0.6 },
+			},
+		},
+		buttons: {
+			default: {
+				default: {
+					colors: {
+						color: { light: '255,255,255', dark: '255,255,255' },
+						background: { light: '0,0,0', dark: '33,33,33' },
+						border: { light: '0,0,0', dark: '33,33,33' },
+					},
+					preferences: {
+						opacity: { light: 1, dark: 1 },
+					},
+				},
+				hover: {
+					colors: {
+						color: { light: '255,255,255', dark: '255,255,255' },
+						background: { light: '50,50,50', dark: '50,50,50' },
+						border: { light: '0,0,0', dark: '50,50,50' },
+					},
+					preferences: {
+						opacity: { light: 1, dark: 1 },
+					},
+				},
+			},
+			primary: {
+				default: {
+					colors: {
+						color: { light: '255,255,255', dark: '255,255,255' },
+						background: { light: 'primary', dark: 'primary' },
+						border: { light: 'primary', dark: 'primary' },
+					},
+					preferences: {
+						opacity: 1,
+					},
+				},
+				hover: {
+					colors: {
+						color: { light: '255,255,255', dark: '255,255,255' },
+						background: { light: 'primary', dark: 'primary' },
+						border: { light: 'primary', dark: 'primary' },
+					},
+					preferences: {
+						opacity: 1,
+					},
+				},
 			},
 		},
 	};
@@ -1554,8 +2019,9 @@ export type PortalImportData = {
 	topics: PortalTopicType[];
 	posts: ConvertedPost[];
 	pages: ConvertedPost[];
-	theme: PortalThemeImport | null;
-	extractedTheme: ExtractedTheme | null;
+	theme: PortalThemeImport; // Always present - uses default if extraction fails
+	extractedTheme: ExtractedTheme; // Always present - uses default if extraction fails
+	images: ExtractedImage[]; // All images found in posts/pages
 };
 
 export function convertWordPressToPortal(extraction: WordPressExtractionResult): PortalImportData {
@@ -1572,8 +2038,12 @@ export function convertWordPressToPortal(extraction: WordPressExtractionResult):
 		convertPost(page, extraction.categories, extraction.tags, extraction.media, baseUrl)
 	);
 
-	// Convert theme if available
-	const theme = extraction.theme ? convertThemeToPortal(extraction.theme) : null;
+	// Convert theme - use default if not available
+	const extractedTheme = extraction.theme || getDefaultExtractedTheme();
+	const theme = convertThemeToPortal(extractedTheme);
+
+	// Extract all images from posts and pages
+	const images = extractImagesFromPosts(posts, pages, extraction.media);
 
 	return {
 		name: extraction.siteInfo?.name || 'Imported Portal',
@@ -1585,8 +2055,116 @@ export function convertWordPressToPortal(extraction: WordPressExtractionResult):
 		posts,
 		pages,
 		theme,
-		extractedTheme: extraction.theme,
+		extractedTheme: extractedTheme,
+		images,
 	};
+}
+
+/**
+ * Extract all unique images from posts and pages
+ * Collects featured images and content images, deduplicates by URL
+ */
+export function extractImagesFromPosts(
+	posts: ConvertedPost[],
+	pages: ConvertedPost[],
+	media: WordPressMedia[]
+): ExtractedImage[] {
+	const imageMap = new Map<string, ExtractedImage>();
+
+	// Helper to add image to map, tracking which posts use it
+	const addImage = (
+		url: string,
+		sourceType: 'featured' | 'content',
+		postId: number,
+		alt?: string,
+		caption?: string
+	) => {
+		if (!url || url.startsWith('data:')) return;
+
+		// Skip Arweave URLs (already uploaded)
+		if (url.includes('arweave.net')) return;
+
+		const normalizedUrl = url.trim();
+		const existing = imageMap.get(normalizedUrl);
+
+		if (existing) {
+			if (!existing.postIds.includes(postId)) {
+				existing.postIds.push(postId);
+			}
+			// Prefer featured image metadata over content
+			if (sourceType === 'featured') {
+				existing.sourceType = 'featured';
+				if (alt && !existing.alt) existing.alt = alt;
+				if (caption && !existing.caption) existing.caption = caption;
+			}
+		} else {
+			imageMap.set(normalizedUrl, {
+				originalUrl: normalizedUrl,
+				sourceType,
+				postIds: [postId],
+				alt,
+				caption,
+			});
+		}
+	};
+
+	// Process featured images from media array
+	media.forEach((m) => {
+		if (m.media_type === 'image' && m.source_url) {
+			// Find which posts use this media as featured image
+			const postsUsingMedia = [...posts, ...pages].filter((p) => {
+				// Match by checking if thumbnail URL matches
+				return p.thumbnail === m.source_url;
+			});
+			postsUsingMedia.forEach((p) => {
+				addImage(m.source_url, 'featured', p.wpId, m.alt_text, m.title?.rendered);
+			});
+		}
+	});
+
+	// Process all posts and pages
+	const allContent = [...posts, ...pages];
+
+	allContent.forEach((post) => {
+		// Featured image (thumbnail)
+		if (post.thumbnail) {
+			addImage(post.thumbnail, 'featured', post.wpId);
+		}
+
+		// Extract images from content blocks
+		post.content.forEach((block) => {
+			// Check block data for image URLs
+			if (block.data?.url && block.type === ArticleBlockEnum.Image) {
+				addImage(block.data.url, 'content', post.wpId, block.data.alt, block.data.caption);
+			}
+
+			// Also parse content HTML for img tags
+			if (block.content && typeof block.content === 'string') {
+				const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*(?:alt=["']([^"']*)["'])?[^>]*>/gi;
+				let match;
+				while ((match = imgRegex.exec(block.content)) !== null) {
+					const imgUrl = match[1];
+					const imgAlt = match[2];
+					if (imgUrl && !imgUrl.startsWith('data:')) {
+						addImage(imgUrl, 'content', post.wpId, imgAlt);
+					}
+				}
+
+				// Also check for figure/figcaption patterns
+				const figureRegex =
+					/<figure[^>]*>[\s\S]*?<img[^>]+src=["']([^"']+)["'][^>]*>[\s\S]*?(?:<figcaption[^>]*>([^<]*)<\/figcaption>)?[\s\S]*?<\/figure>/gi;
+				while ((match = figureRegex.exec(block.content)) !== null) {
+					const imgUrl = match[1];
+					const caption = match[2];
+					if (imgUrl && !imgUrl.startsWith('data:')) {
+						addImage(imgUrl, 'content', post.wpId, undefined, caption);
+					}
+				}
+			}
+		});
+	});
+
+	return Array.from(imageMap.values());
 }
 
 // Parse WordPress WXR (WordPress eXtended RSS) export file
@@ -1614,7 +2192,7 @@ export async function parseWXRFile(file: File): Promise<WordPressExtractionResul
 					categories: [],
 					tags: [],
 					media: [],
-					theme: null,
+					theme: getDefaultExtractedTheme(), // Use default theme for WXR imports since we can't extract from file
 					errors: [],
 				};
 
@@ -1665,22 +2243,57 @@ export async function parseWXRFile(file: File): Promise<WordPressExtractionResul
 					}
 				});
 
-				// Extract tags - wp:tag or category[domain="post_tag"]
-				const wpTags = xmlDoc.querySelectorAll('wp\\:tag, category[domain="post_tag"]');
-				wpTags.forEach((tagEl, index) => {
+				// Extract tags - wp:tag or category[domain="post_tag"] (tag name from wp:tag_name, or element text for category)
+				const wpTagEls = xmlDoc.querySelectorAll('wp\\:tag, category[domain="post_tag"]');
+				let tagIndex = 0;
+				wpTagEls.forEach((tagEl) => {
 					const termId =
-						tagEl.getAttribute('term_id') || tagEl.querySelector('wp\\:term_id')?.textContent || `${index}`;
-					const nicename = tagEl.getAttribute('nicename') || tagEl.querySelector('wp\\:tag_slug')?.textContent || '';
-					const name = tagEl.querySelector('wp\\:tag_name')?.textContent || tagEl.textContent || '';
+						tagEl.getAttribute('term_id') || tagEl.querySelector('wp\\:term_id')?.textContent?.trim() || '';
+					const nicename = (
+						tagEl.getAttribute('nicename') ||
+						tagEl.querySelector('wp\\:tag_slug')?.textContent ||
+						''
+					).trim();
+					// wp:tag has child wp:tag_name; category has textContent as the tag name
+					const nameRaw =
+						tagEl.querySelector('wp\\:tag_name')?.textContent || (tagEl as Element).textContent || nicename || '';
+					const name = nameRaw.replace(/\s+/g, ' ').trim();
+					const slug = nicename || name.toLowerCase().replace(/\s+/g, '-') || `tag-${tagIndex}`;
+					const displayName = name || slug || `Tag ${tagIndex + 1}`;
 
-					if (termId && name) {
-						tagMap.set(termId, {
-							id: parseInt(termId) || index,
+					// Use slug as key to avoid duplicates, since term_id may not always be present
+					const mapKey = termId || slug || `tag-${tagIndex}`;
+					if (!tagMap.has(mapKey) && displayName) {
+						tagMap.set(mapKey, {
+							id: parseInt(String(termId).replace(/\D/g, ''), 10) || tagIndex + 1,
 							count: 0,
 							description: '',
 							link: '',
-							name: name,
-							slug: nicename || name.toLowerCase().replace(/\s+/g, '-'),
+							name: displayName,
+							slug,
+							taxonomy: 'post_tag',
+						});
+						tagIndex++;
+					}
+				});
+
+				// Also collect tags from all items (posts) that might not be in the top-level wp:tag elements
+				const allItemTags = xmlDoc.querySelectorAll('item category[domain="post_tag"]');
+				allItemTags.forEach((tagEl) => {
+					const nicename = (tagEl.getAttribute('nicename') || '').trim();
+					const name = (tagEl.textContent || '').replace(/\s+/g, ' ').trim();
+					const slug = nicename || name.toLowerCase().replace(/\s+/g, '-');
+					const displayName = name || slug;
+
+					if (displayName && !Array.from(tagMap.values()).some((t) => t.slug === slug || t.name === displayName)) {
+						tagIndex++;
+						tagMap.set(slug || `item-tag-${tagIndex}`, {
+							id: tagIndex,
+							count: 0,
+							description: '',
+							link: '',
+							name: displayName,
+							slug: slug || `tag-${tagIndex}`,
 							taxonomy: 'post_tag',
 						});
 					}
@@ -1715,25 +2328,35 @@ export async function parseWXRFile(file: File): Promise<WordPressExtractionResul
 					categoryRefs.forEach((catRef) => {
 						const domain = catRef.getAttribute('domain');
 						const termId = catRef.getAttribute('term_id');
-						if (termId) {
-							const id = parseInt(termId);
-							if (!isNaN(id)) {
-								if (domain === 'category') {
-									postCategories.push(id);
-								} else if (domain === 'post_tag') {
-									postTags.push(id);
-								}
-							}
-						} else {
-							// Fallback: try to match by name/slug
-							const name = catRef.textContent || '';
-							const slug = catRef.getAttribute('nicename') || '';
-							if (domain === 'category') {
-								const found = Array.from(categoryMap.values()).find((c) => c.name === name || c.slug === slug);
+						const name = (catRef.textContent || '').replace(/\s+/g, ' ').trim();
+						const slug = (catRef.getAttribute('nicename') || '').trim();
+
+						if (domain === 'category') {
+							if (termId) {
+								const id = parseInt(termId);
+								if (!isNaN(id)) postCategories.push(id);
+							} else {
+								// Fallback: try to match by name/slug
+								const found = Array.from(categoryMap.values()).find(
+									(c) => c.name === name || c.slug === slug || c.slug === name.toLowerCase().replace(/\s+/g, '-')
+								);
 								if (found) postCategories.push(found.id);
-							} else if (domain === 'post_tag') {
-								const found = Array.from(tagMap.values()).find((t) => t.name === name || t.slug === slug);
-								if (found) postTags.push(found.id);
+							}
+						} else if (domain === 'post_tag') {
+							// For tags, always try to match by name/slug first (more reliable than term_id)
+							const found = Array.from(tagMap.values()).find(
+								(t) =>
+									t.name === name ||
+									t.slug === slug ||
+									t.slug === name.toLowerCase().replace(/\s+/g, '-') ||
+									(slug && t.slug === slug)
+							);
+							if (found) {
+								postTags.push(found.id);
+							} else if (termId) {
+								// Fallback to term_id
+								const id = parseInt(termId);
+								if (!isNaN(id)) postTags.push(id);
 							}
 						}
 					});

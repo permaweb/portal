@@ -37,10 +37,13 @@ export default function Topics(props: {
 	const [topicLoading, setTopicLoading] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
 
+	// Normalize topic to display string: backend may return .value or .Value (PascalCase)
+	const getTopicValue = (topic: PortalTopicType | { value?: string; Value?: string }) =>
+		typeof topic === 'string' ? topic : topic?.value ?? (topic as { Value?: string })?.Value ?? '';
+
 	React.useEffect(() => {
-		if (portalProvider.current?.id) {
-			if (portalProvider.current.topics)
-				setTopicOptions(portalProvider.current.topics.map((topic: PortalTopicType) => topic.value));
+		if (portalProvider.current?.id && portalProvider.current.topics) {
+			setTopicOptions(portalProvider.current.topics.map((t) => getTopicValue(t)));
 		}
 	}, [portalProvider.current]);
 
@@ -84,7 +87,7 @@ export default function Topics(props: {
 		if (!unauthorized && arProvider.wallet && portalProvider.current?.topics && props.topics?.length) {
 			setTopicLoading(true);
 			try {
-				const currentTopicOptions = portalProvider.current.topics.map((topic: PortalTopicType) => topic.value);
+				const currentTopicOptions = portalProvider.current.topics.map((topic: PortalTopicType) => getTopicValue(topic));
 				const updatedTopicOptions = currentTopicOptions.filter((topic: string) => !props.topics.includes(topic));
 				const topicUpdateId = await permawebProvider.libs.updateZone(
 					{ Topics: updatedTopicOptions.map((topic: string) => ({ Value: topic })) },

@@ -178,7 +178,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					? [...posts.index]
 							.filter((post) => {
 								const releaseDate = post.metadata?.releaseDate || post.dateCreated;
+								// If no date is set, include the post (don't filter it out)
+								if (!releaseDate) return true;
 								const postDate = new Date(Number(releaseDate));
+								// If date is invalid, include the post
+								if (isNaN(postDate.getTime())) return true;
 								const now = new Date();
 								// Only include posts that have been released (not in the future)
 								return postDate <= now;
@@ -186,8 +190,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 							.sort((a, b) => {
 								const aDate = a.metadata?.releaseDate || a.dateCreated;
 								const bDate = b.metadata?.releaseDate || b.dateCreated;
+								// Handle missing/invalid dates - put them at the end
+								const aNum = aDate ? Number(aDate) : 0;
+								const bNum = bDate ? Number(bDate) : 0;
 								// Sort descending (newest first)
-								return Number(bDate) - Number(aDate);
+								return bNum - aNum;
 							})
 					: [];
 				const zone = {
