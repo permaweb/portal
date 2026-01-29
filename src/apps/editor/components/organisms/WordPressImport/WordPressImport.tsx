@@ -69,7 +69,7 @@ export default function WordPressImport(props: {
 		createTopics: boolean,
 		selectedTopics?: Set<string>,
 		uploadedImageUrls?: Map<string, string>
-	) => void;
+	) => Promise<void>;
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -430,7 +430,7 @@ export default function WordPressImport(props: {
 		}
 	}, [importData, selectedImages, arProvider.wallet, permawebProvider.libs, addNotification]);
 
-	const handleImport = React.useCallback(() => {
+	const handleImport = React.useCallback(async () => {
 		if (!importData) return;
 
 		const postsToImport = importData.posts.filter((p) => selectedPosts.has(p.wpId));
@@ -456,19 +456,31 @@ export default function WordPressImport(props: {
 				categories: categoriesToImport,
 				name: props.createPortal ? portalName || importData.name : importData.name,
 			};
-			props.onImportComplete(
-				dataToImport,
-				postsToImport,
-				[],
-				selectedCategories,
-				createCategories,
-				createTopics,
-				selectedTopics,
-				uploadedImageUrls.size > 0 ? uploadedImageUrls : undefined
-			);
-		}
 
-		props.handleClose();
+			// Set stage to importing and wait for completion
+			setStage('importing');
+
+			try {
+				await props.onImportComplete(
+					dataToImport,
+					postsToImport,
+					[],
+					selectedCategories,
+					createCategories,
+					createTopics,
+					selectedTopics,
+					uploadedImageUrls.size > 0 ? uploadedImageUrls : undefined
+				);
+				// Import completed successfully, close the modal
+				props.handleClose();
+			} catch (error: any) {
+				// Import failed, show error and go back to preview
+				setErrors([error.message || 'Import failed']);
+				setStage('preview');
+			}
+		} else {
+			props.handleClose();
+		}
 	}, [
 		importData,
 		selectedPosts,
@@ -1284,7 +1296,18 @@ export default function WordPressImport(props: {
 			case 'preview':
 				return renderPreviewStage();
 			case 'importing':
-				return <Loader message={`${language?.importing || 'Importing'}...`} />;
+				return (
+					<S.Wrapper>
+						<S.ProgressWrapper>
+							<Loader
+								message={
+									props.createPortal ? 'Creating portal and importing content...' : 'Importing content to portal...'
+								}
+							/>
+							<S.ProgressMessage>This may take a few minutes. Please don't close this window.</S.ProgressMessage>
+						</S.ProgressWrapper>
+					</S.Wrapper>
+				);
 			default:
 				return null;
 		}
