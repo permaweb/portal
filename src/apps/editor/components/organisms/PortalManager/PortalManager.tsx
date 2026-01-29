@@ -293,6 +293,12 @@ export default function PortalManager(props: {
 		setIconId(mediaId);
 	}
 
+	function handleWordPressImportClick() {
+		props.handleClose();
+		// Pass true for createPortal when we're in "create new portal" mode (props.portal is null)
+		portalProvider.setShowWordPressImport(true, !props.portal);
+	}
+
 	function getConnectedView() {
 		if (!arProvider.walletAddress) return <WalletBlock />;
 		else {
@@ -380,6 +386,30 @@ export default function PortalManager(props: {
 									loading={false}
 								/>
 							</S.SAction>
+							{!props.portal && (
+								<>
+									<S.HorizontalDivider />
+									<S.SectionWrapper>
+										<S.SectionLabel>{language?.importFromWordPress || 'Import from WordPress'}</S.SectionLabel>
+										<S.SectionInfo>
+											<span>
+												{language?.importFromWordPressInfo ||
+													'Create a portal by importing content, categories, tags, and theme from a WordPress site.'}
+											</span>
+										</S.SectionInfo>
+										<Button
+											type={'alt1'}
+											label={language?.importFromWordPress || 'Import from WordPress'}
+											handlePress={handleWordPressImportClick}
+											disabled={loading}
+											icon={ICONS.import}
+											iconLeftAlign
+											height={42.5}
+											fullWidth
+										/>
+									</S.SectionWrapper>
+								</>
+							)}
 						</S.Body>
 					</S.Wrapper>
 					{loading && (
