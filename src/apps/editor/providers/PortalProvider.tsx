@@ -567,7 +567,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		let targetPortalId = current?.id;
 
 		setWordPressImportData({ data, posts, pages });
-		setShowWordPressImport(false);
+		// Note: Modal closing is now handled by WordPressImport component after import completes
 
 		// Start the import process
 		try {
