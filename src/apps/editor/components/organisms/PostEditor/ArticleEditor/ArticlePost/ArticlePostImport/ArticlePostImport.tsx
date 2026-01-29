@@ -11,6 +11,7 @@ import { Panel } from 'components/atoms/Panel';
 import { ICONS } from 'helpers/config';
 import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
 import { checkValidAddress, debugLog } from 'helpers/utils';
+import { extractWordPressArticle } from 'helpers/wordpress';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -28,6 +29,7 @@ export default function ArticlePostImport() {
 
 	const [showOptions, setShowOptions] = React.useState<boolean>(false);
 	const [assetId, setAssetId] = React.useState<string>('');
+	const [wordPressUrl, setWordPressUrl] = React.useState<string>('');
 	const [loading, setLoading] = React.useState<boolean>(false);
 
 	const parseInlineMarkup = (text: string): string => {
@@ -244,6 +246,50 @@ export default function ArticlePostImport() {
 		fileInputRef.current?.click();
 	};
 
+	const handleWordPressImport = async () => {
+		if (!wordPressUrl.trim()) {
+			addNotification('Please enter a WordPress article URL', 'warning');
+			return;
+		}
+
+		setLoading(true);
+		try {
+			const convertedPost = await extractWordPressArticle(wordPressUrl.trim());
+
+			// Update post content
+			dispatch(currentPostUpdate({ field: 'content', value: convertedPost.content }));
+
+			// Update title
+			if (convertedPost.title) {
+				dispatch(currentPostUpdate({ field: 'title', value: convertedPost.title }));
+			}
+
+			// Update description
+			if (convertedPost.description) {
+				dispatch(currentPostUpdate({ field: 'description', value: convertedPost.description }));
+			}
+
+			// Update thumbnail
+			if (convertedPost.thumbnail) {
+				dispatch(currentPostUpdate({ field: 'thumbnail', value: convertedPost.thumbnail }));
+			}
+
+			// Update date created if available
+			if (convertedPost.dateCreated) {
+				dispatch(currentPostUpdate({ field: 'dateCreated', value: convertedPost.dateCreated }));
+			}
+
+			addNotification('WordPress article imported successfully', 'success');
+			setShowOptions(false);
+			setWordPressUrl('');
+		} catch (e: any) {
+			debugLog('error', 'ArticlePostImport', e);
+			addNotification(e.message ?? 'Failed to import WordPress article', 'warning');
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (!file) return;
@@ -345,6 +391,36 @@ export default function ArticlePostImport() {
 							tooltip={'Import from an existing portal post.'}
 							noMargin
 						/>
+					</S.PanelSection>
+					<S.PanelSectionDivider>
+						<div className={'divider'} />
+						<span>Or</span>
+						<div className={'divider'} />
+					</S.PanelSectionDivider>
+					<S.PanelSection>
+						<FormField
+							value={wordPressUrl}
+							onChange={(e: any) => setWordPressUrl(e.target.value)}
+							label={'WordPress Article URL'}
+							invalid={{ status: false, message: null }}
+							disabled={false}
+							hideErrorMessage
+							tooltip={
+								'Import from a WordPress article URL. Supports both self-hosted WordPress sites and WordPress.com sites.'
+							}
+							noMargin
+							placeholder={'https://example.com/2024/01/my-article/'}
+						/>
+						<div style={{ marginTop: '10px' }}>
+							<Button
+								type={'alt1'}
+								label={'Import WordPress Article'}
+								handlePress={handleWordPressImport}
+								disabled={!wordPressUrl.trim() || loading}
+								height={42.5}
+								fullWidth
+							/>
+						</div>
 					</S.PanelSection>
 					<S.PanelSectionDivider>
 						<div className={'divider'} />

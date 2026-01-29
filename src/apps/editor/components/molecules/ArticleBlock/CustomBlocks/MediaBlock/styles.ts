@@ -392,3 +392,26 @@ export const CaptionToolsInline = styled.div<{ editMode: boolean }>`
 		padding: 3.5px 0 0 1.15px !important;
 	}
 `;
+
+export const ExternalUploadBar = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin-top: 12px;
+	padding: 10px 12px;
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.primary};
+
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		line-height: 1.4;
+		flex: 1;
+		min-width: 0;
+	}
+`;
