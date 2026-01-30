@@ -17,17 +17,11 @@ export const MainPagesWrapper = styled.div`
 	gap: 15px;
 `;
 
-export const PagesWrapper = styled.div`
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-`;
-
 export const InfoPagesWrapper = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
+	gap: 15px;
 `;
 
 export const InfoPagesHeader = styled.div`
@@ -35,84 +29,11 @@ export const InfoPagesHeader = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin: 0 0 15px 0;
 
 	h6 {
 		font-size: ${(props) => props.theme.typography.size.xxLg} !important;
 		color: ${(props) => props.theme.colors.font.alt1};
 	}
-`;
-
-export const PageWrapper = styled.div`
-	display: flex;
-	padding: 15px;
-	justify-content: space-between;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 20px;
-	transition: all 100ms;
-	background: ${(props) => props.theme.colors.container.alt1.background};
-	cursor: pointer;
-
-	&:hover {
-		background: ${(props) => props.theme.colors.button.primary.active.background};
-	}
-
-	@media (max-width: ${STYLING.cutoffs.secondary}) {
-		flex-direction: column;
-		align-items: flex-start;
-	}
-`;
-
-export const Arrow = styled.div<{ $open: boolean }>`
-	display: flex;
-	align-items: center;
-	svg {
-		width: 17.5px;
-		height: 17.5px;
-		margin: 0 5.5px -3.5px 0;
-		transform: rotate(${(props) => (props.$open ? '0deg' : '270deg')});
-		fill: ${(props) => props.theme.colors.font.primary};
-		color: ${(props) => props.theme.colors.font.primary};
-	}
-`;
-
-export const PageHeader = styled.div`
-	max-width: 50%;
-	display: flex;
-	align-items: center;
-	gap: 10px;
-
-	p {
-		color: ${(props) => props.theme.colors.font.primary};
-		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		white-space: nowrap;
-		overflow-x: hidden;
-		text-overflow: ellipsis;
-		min-width: 60px;
-	}
-
-	@media (max-width: ${STYLING.cutoffs.secondary}) {
-		max-width: 100%;
-	}
-`;
-
-export const PageDetail = styled.div`
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 12.5px;
-
-	@media (max-width: ${STYLING.cutoffs.secondary}) {
-		align-items: flex-start;
-	}
-`;
-
-export const PageActions = styled.div`
-	display: flex;
-	gap: 12.5px;
 `;
 
 export const WrapperEmpty = styled.div`
@@ -129,6 +50,10 @@ export const WrapperEmpty = styled.div`
 `;
 
 export const LoadingWrapper = styled(WrapperEmpty)``;
+
+export const TemplateEmptyWrapper = styled(WrapperEmpty)`
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+`;
 
 export const HomeTemplateWrapper = styled.div`
 	animation: ${open} ${transition2};
@@ -221,43 +146,4 @@ export const HomeTemplateOptionLabel = styled.p`
 	font-family: ${(props) => props.theme.typography.family.primary} !important;
 	text-transform: uppercase;
 	margin: 0;
-`;
-
-export const LayoutIndicators = styled.div`
-	display: flex;
-	gap: 5px;
-`;
-
-export const LayoutIndicator = styled.div<{ $active?: boolean }>`
-	position: relative;
-	width: 18px;
-	height: 18px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 10px;
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	background: ${(props) =>
-		props.$active ? props.theme.colors.indicator.active : props.theme.colors.container.primary.background};
-	color: ${(props) => (props.$active ? props.theme.colors.font.light1 : props.theme.colors.font.alt1)};
-	border: 1px solid
-		${(props) => (props.$active ? props.theme.colors.indicator.active : props.theme.colors.border.primary)};
-	border-radius: 4px;
-
-	&:hover::after {
-		content: attr(data-label);
-		position: absolute;
-		top: 100%;
-		left: 50%;
-		transform: translateX(-50%);
-		margin-top: 4px;
-		padding: 2px 6px;
-		background: ${(props) => props.theme.colors.container.primary.background};
-		color: ${(props) => props.theme.colors.font.primary};
-		font-size: 9px;
-		white-space: nowrap;
-		border-radius: 3px;
-		border: 1px solid ${(props) => props.theme.colors.border.primary};
-		z-index: 10;
-	}
 `;

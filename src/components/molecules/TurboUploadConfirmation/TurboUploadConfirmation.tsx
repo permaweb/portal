@@ -126,7 +126,7 @@ export default function TurboUploadConfirmation(props: {
 										icon={ICONS.add}
 										iconLeftAlign
 										height={40}
-										fullWidth
+										width={350}
 									/>
 								</S.AddFundsAction>
 							)}

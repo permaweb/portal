@@ -17,7 +17,7 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
 
-export default function Post(props: { post: PortalAssetType }) {
+export default function PostRow(props: { post: PortalAssetType }) {
 	const navigate = useNavigate();
 
 	const portalProvider = usePortalProvider();

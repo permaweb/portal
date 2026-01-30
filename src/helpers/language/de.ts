@@ -359,6 +359,7 @@ export const de = {
 	noPostsFound: `Keine Beiträge gefunden`,
 	noProfileFound: `Kein zugeordnetes Profil gefunden`,
 	noRequestsFound: `Keine Anfragen gefunden`,
+	noTemplatesFound: `Keine Vorlagen gefunden`,
 	noThemesFound: `Keine Themes gefunden`,
 	noTopicsFound: `Keine Tags gefunden`,
 	noUploadsFound: `Keine Uploads gefunden`,
