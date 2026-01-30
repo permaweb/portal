@@ -178,8 +178,8 @@ function AppContent() {
 									type={'primary'}
 									label={language?.returnHome}
 									handlePress={() => navigate(URLS.base)}
-									height={37.5}
-									width={135}
+									height={36.5}
+									width={145}
 								/>
 							</S.MessageWrapper>
 						</S.CenteredWrapper>

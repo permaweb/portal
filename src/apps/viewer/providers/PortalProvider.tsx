@@ -7,6 +7,7 @@ import { PortalDetailType, PortalUserType } from 'helpers/types';
 import {
 	cachePortal,
 	cacheProfile,
+	filterRemoved,
 	getCachedPortal,
 	getCachedProfile,
 	getPortalAssets,
@@ -102,6 +103,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const users: PortalUserType[] = [];
 				if (portalData?.roles) {
 					for (const entry of Object.keys(portalData.roles)) {
+						if (portalData.roles[entry] === 'Removed') continue;
 						users.push({
 							address: entry,
 							type: portalData.roles[entry].type,
@@ -110,7 +112,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					}
 				}
 
-				const portal: PortalDetailType = {
+				const portal: PortalDetailType = filterRemoved({
 					id: currentId,
 					name: portalData.store?.name ?? 'None',
 					logo: portalData.store?.logo ?? 'None',
@@ -124,7 +126,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					fonts: portalData?.store?.fonts ?? {},
 					themes: portalData?.store?.themes ?? [],
 					layout: portalData?.store?.layout ?? null,
-				};
+				});
 
 				return portal;
 			} catch (e: any) {

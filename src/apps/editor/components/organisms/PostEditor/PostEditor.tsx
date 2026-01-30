@@ -474,26 +474,26 @@ export default function PostEditor() {
 					if (isStaticPage) {
 						const currentPages = portalProvider.current?.pages || {};
 
-						// Find the current page by looking for the asset ID in the page values
-						const currentPageEntry: any = Object.entries(currentPages).find(([_, page]: any) => page.id === assetId);
-						const currentPageKey = currentPageEntry?.[0];
-						const currentPageName = currentPageEntry?.[1]?.name;
+						// Find all entries with the current asset ID
+						const matchingEntries: any = Object.entries(currentPages).filter(([_, page]: any) => page.id === assetId);
+						const currentPageName = matchingEntries[0]?.[1]?.name;
 
 						// Only update pages if the title has changed
-						if (urlify(currentPageName) !== urlify(currentPost.data.title)) {
-							const updatedPages = {
-								...currentPages,
-								[urlify(currentPost.data.title)]: {
-									type: 'static',
-									id: assetId,
-									name: currentPost.data.title,
-								},
-							};
+						if (currentPageName !== currentPost.data.title) {
+							// Start with all existing pages
+							const updatedPages = { ...currentPages };
 
-							// Remove the old page entry using the correct key
-							if (currentPageKey) {
-								delete updatedPages[currentPageKey];
-							}
+							// Mark all old entries with the same asset ID as 'Removed'
+							matchingEntries.forEach(([key]) => {
+								updatedPages[key] = 'Removed';
+							});
+
+							// Add the new entry with updated title
+							updatedPages[urlify(currentPost.data.title)] = {
+								type: 'static',
+								id: assetId,
+								name: currentPost.data.title,
+							};
 
 							const pagesUpdateId = await permawebProvider.libs.updateZone(
 								{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },

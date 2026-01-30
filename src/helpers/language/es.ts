@@ -359,6 +359,7 @@ export const es = {
 	noPostsFound: `No se encontraron publicaciones`,
 	noProfileFound: `No se encontró perfil asociado`,
 	noRequestsFound: `No se encontraron solicitudes`,
+	noTemplatesFound: `No se encontraron plantillas`,
 	noThemesFound: `No se encontraron temas`,
 	noTopicsFound: `No se encontraron etiquetas`,
 	noUploadsFound: `No se encontraron subidas`,

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
-import { Post } from 'editor/components/molecules/Post';
+import { PostRow } from 'editor/components/molecules/PostRow';
 import { User } from 'editor/components/molecules/User';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -34,7 +34,7 @@ export const Posts = (props: { paginatedPosts?: PortalAssetType[]; type?: ViewLa
 	return (
 		<S.PostsWrapper type={props.type} className={'border-wrapper-alt2'}>
 			{props.paginatedPosts.map((post: PortalAssetType) => (
-				<Post key={post.id} post={post} />
+				<PostRow key={post.id} post={post} />
 			))}
 		</S.PostsWrapper>
 	);

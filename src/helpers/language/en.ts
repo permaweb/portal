@@ -338,6 +338,7 @@ export const en = {
 	noPostsFound: `No Posts Found`,
 	noProfileFound: `No Associated Profile Found`,
 	noRequestsFound: `No Requests Found`,
+	noTemplatesFound: `No Templates Found`,
 	noThemesFound: `No Themes Found`,
 	noTipsYet: `No tips received yet for this portal.`,
 	noTopicsFound: `No Tags Found`,
