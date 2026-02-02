@@ -18,17 +18,10 @@ export const TabsHeader = styled.div<{ useFixed: boolean }>`
 export const Tabs = styled.div`
 	display: flex;
 	align-items: center;
+	gap: 40px;
 	padding: 0 0 10px 0;
-	overflow-x: auto;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.alt4};
-	> * {
-		&:not(:last-child) {
-			margin: 0 30px 0 0;
-		}
-		&:last-child {
-			margin: 0;
-		}
-	}
+	overflow-x: visible;
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
 export const Content = styled.div``;
@@ -46,19 +39,23 @@ export const Tab = styled.div<{ active: boolean }>`
 		font-family: ${(props) => props.theme.typography.family.primary};
 		&:hover {
 			cursor: pointer;
-			color: ${(props) => props.theme.colors.tabs.active.color};
+			color: ${(props) => (props.active ? props.theme.colors.tabs.active.color : props.theme.colors.font.alt1)};
 		}
 		&:before {
 			content: '';
 			position: absolute;
-			bottom: -10px;
-			height: 3.5px;
+			bottom: -11px;
+			height: 4.5px;
 			width: 100%;
-			background: ${(props) => props.theme.colors.tabs.active.background};
-			border-radius: ${STYLING.dimensions.radius.primary};
+			background: ${(props) =>
+				props.active ? props.theme.colors.tabs.active.background : props.theme.colors.border.alt4};
+			border-radius: 1.5px;
 			opacity: ${(props) => (props.active ? 1 : 0)};
 			pointer-events: none;
 			transition: all 200ms;
+		}
+		&:hover:before {
+			opacity: 1;
 		}
 	}
 `;
@@ -67,5 +64,5 @@ export const View = styled.div`
 	height: 100%;
 	width: 100%;
 	position: relative;
-	margin: 25px 0 0 0;
+	margin: 20px 0 0 0;
 `;

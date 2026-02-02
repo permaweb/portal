@@ -5,12 +5,37 @@ import { STYLING } from 'helpers/config';
 export const BodyWrapper = styled.div`
 	width: 100%;
 	display: flex;
-	justify-content: space-between;
+	flex-direction: column;
 	gap: 25px;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		flex-direction: column;
 		gap: 20px;
+	}
+`;
+
+export const ViewWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+`;
+
+export const FlexWrapper = styled.div`
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 25px;
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		flex-direction: column;
+	}
+`;
+
+export const FlexSection = styled.div<{ flex: number }>`
+	flex: ${(props) => props.flex};
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		flex: 1;
 	}
 `;
 
@@ -57,16 +82,28 @@ export const InfoWrapper = styled.div`
 	}
 `;
 
-export const MediaEntry = styled.div`
+export const MediaEntryLogo = styled.div`
 	width: 100%;
-	margin-top: 12.5px;
-	margin-bottom: 20px;
+	margin: 12.5px 0 20px 0;
+`;
+
+export const MediaEntryIcon = styled.div`
+	width: 100%;
+	margin: 12.5px 0 20px 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	justify-content: flex-end;
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		justify-content: flex-start;
+		align-items: flex-start;
+	}
 `;
 
 export const MediaEntryWallpaper = styled.div`
 	width: 100%;
-	margin-top: 12.5px;
-	margin-bottom: 20px;
+	margin: 12.5px 0 20px 0;
 `;
 
 export const MediaTitleWrapper = styled.div`
@@ -76,8 +113,16 @@ export const MediaTitleWrapper = styled.div`
 	margin: 0 0 5px 0;
 `;
 
+export const IconTitleWrapper = styled(MediaTitleWrapper)`
+	justify-content: flex-end;
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		justify-content: flex-start;
+	}
+`;
+
 export const MediaTitle = styled.p`
-	color: ${(props) => props.theme.colors.font.primary};
+	color: ${(props) => props.theme.colors.font.alt1};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
 	font-weight: ${(props) => props.theme.typography.weight.bold};
@@ -88,45 +133,6 @@ export const MediaInfo = styled.span`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xxxxSmall};
 	font-weight: ${(props) => props.theme.typography.weight.bold};
-`;
-
-export const LayoutIndicators = styled.div`
-	display: flex;
-	align-items: center;
-	gap: 5px;
-	margin-bottom: 2.5px;
-`;
-
-export const LayoutIndicator = styled.div<{ $active?: boolean }>`
-	position: relative;
-	width: 18px;
-	height: 18px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 10px;
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	background: ${(props) =>
-		props.$active ? props.theme.colors.indicator.active : props.theme.colors.container.primary.background};
-	color: ${(props) => (props.$active ? props.theme.colors.font.light1 : props.theme.colors.font.alt1)};
-	border: 1px solid
-		${(props) => (props.$active ? props.theme.colors.indicator.active : props.theme.colors.border.primary)};
-	border-radius: 4px;
-
-	&:hover::after {
-		content: attr(data-label);
-		position: absolute;
-		top: 100%;
-		left: 50%;
-		transform: translateX(-50%);
-		margin-top: 4px;
-		padding: 2px 6px;
-		background: ${(props) => props.theme.colors.container.primary.background};
-		color: ${(props) => props.theme.colors.font.primary};
-		font-size: 9px;
-		white-space: nowrap;
-		border-radius: 3px;
-		border: 1px solid ${(props) => props.theme.colors.border.primary};
-		z-index: 10;
-	}
+	display: block;
+	margin: 5px 0 0 0;
 `;

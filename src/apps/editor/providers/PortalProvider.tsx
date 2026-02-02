@@ -204,6 +204,14 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				}
 			} else {
 				setPermissions({ base: false });
+				setCurrentId(null);
+				setCurrent(null);
+				setUsersByPortalId({});
+				setRefreshFields(null);
+				setUpdating(false);
+				setUpdateAvailable(false);
+				setShowPortalManager(false);
+				setCreateNewPortal(false);
 			}
 		}
 	}, [location.pathname, portals, currentId]);

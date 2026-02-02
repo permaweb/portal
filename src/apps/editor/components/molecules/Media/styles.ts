@@ -2,9 +2,7 @@ import styled from 'styled-components';
 
 import { STYLING } from 'helpers/config';
 
-export const Wrapper = styled.div`
-	width: 100%;
-`;
+export const Wrapper = styled.div``;
 
 export const Header = styled.div`
 	display: flex;
@@ -79,22 +77,23 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 	${(props) =>
 		props.isIcon
 			? `
-		height: 80px;
-		width: 80px;
+		height: 200px;
+		width: 200px;
 	`
 			: props.mediaType === 'logo'
 			? props.hasMedia
 				? `
-		max-height: 180px;
+		max-height: 200px;
 		width: 100%;
 		height: auto;
 	`
 				: `
-		height: 180px;
+		height: 200px;
 		width: 100%;
 		aspect-ratio: 16 / 9;
 	`
 			: `
+		max-height: 500px;
 		width: 100%;
 		aspect-ratio: 16 / 9;
 		height: auto;

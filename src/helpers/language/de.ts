@@ -483,6 +483,7 @@ export const de = {
 	roleDescriptionExternalContributor: ['Beiträge von anderen Portalen erstellen'],
 	roleDescriptionModerator: ['Beiträge genehmigen', 'Kommentare moderieren'],
 	save: `Speichern`,
+	saveChanges: `Änderungen speichern`,
 	saving: `Speichere...`,
 	scope: `Umfang`,
 	seeLess: `Weniger`,

@@ -5,7 +5,7 @@ import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div``;
 
-export const Action = styled.div<{ open: boolean; noContentWrapper?: boolean }>`
+export const Action = styled.div<{ open: boolean; noContentWrapper?: boolean; sm?: boolean }>`
 	width: 100%;
 	transition: all 100ms;
 	background: ${(props) => props.theme.colors.button.primary.background};
@@ -21,7 +21,7 @@ export const Action = styled.div<{ open: boolean; noContentWrapper?: boolean }>`
 
 	box-shadow: ${(props) =>
 		props.noContentWrapper && !props.open ? `${props.theme.colors.shadow.primary} 0px 1px 2px 0.5px` : 'none'};
-	padding: 15px 0;
+	padding: ${(props) => (props.sm ? '10px 0' : '15px 0')};
 	&:hover {
 		background: ${(props) => props.theme.colors.button.primary.active.background};
 		cursor: pointer;
@@ -40,7 +40,7 @@ export const HeaderActions = styled.div`
 	gap: 12.5px;
 `;
 
-export const Label = styled.div`
+export const Label = styled.div<{ sm?: boolean }>`
 	height: 100%;
 	width: 100%;
 	display: flex;
@@ -50,22 +50,24 @@ export const Label = styled.div`
 	align-items: center;
 	padding: 2.5px 15px 0 15px;
 	p {
-		font-size: ${(props) => props.theme.typography.size.base};
+		font-size: ${(props) => (props.sm ? props.theme.typography.size.xSmall : props.theme.typography.size.base)};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		color: ${(props) => props.theme.colors.font.primary};
 		padding: 0 0 2.5px 0;
 	}
 	svg {
-		width: 17.5px !important;
+		width: ${(props) => (props.sm ? '15px' : '17.5px')} !important;
 		fill: ${(props) => props.theme.colors.font.primary};
 		color: ${(props) => props.theme.colors.font.primary};
 	}
 `;
 
-export const Arrow = styled.div<{ open: boolean }>`
+export const Arrow = styled.div<{ open: boolean; sm?: boolean }>`
 	margin: 2.5px 0 0 0;
 	svg {
+		width: ${(props) => (props.sm ? '15.5px' : '17.5px')} !important;
+		height: ${(props) => (props.sm ? '15.5px' : '17.5px')} !important;
 		transform: rotate(${(props) => (props.open ? '0deg' : '270deg')});
 		fill: ${(props) => props.theme.colors.font.primary};
 		color: ${(props) => props.theme.colors.font.primary};

@@ -13,7 +13,7 @@ export const View = styled.main<{ navigationOpen: boolean; navWidth?: number }>`
 	min-height: calc(100vh - ${STYLING.dimensions.nav.height} - 35px);
 	position: relative;
 	top: ${STYLING.dimensions.nav.height};
-	padding: 0 20px 20px
+	padding: 0 25px 20px
 		calc(${(props) => (props.navWidth !== undefined ? `${props.navWidth}px` : STYLING.dimensions.nav.width)} + 30px);
 	margin: 0 auto;
 	transition: padding-left ${transition2};
