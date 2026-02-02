@@ -472,6 +472,7 @@ export const en = {
 	roleDescriptionExternalContributor: ['Add Post Requests from another Portal'],
 	roleDescriptionModerator: ['Approve Contributor Posts', 'Remove Post Comments'],
 	save: `Save`,
+	saveChanges: `Save Changes`,
 	saving: `Saving`,
 	scope: `Scope`,
 	seeLess: `See less`,

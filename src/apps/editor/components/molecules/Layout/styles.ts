@@ -17,7 +17,7 @@ export const Option = styled.div<{ disabled: boolean; $active: boolean }>`
 	padding: 12px;
 	background: ${(props) =>
 		props.$active ? props.theme.colors.button.primary.active.background : props.theme.colors.button.primary.background};
-	border: 2px solid
+	border: 1px solid
 		${(props) => (props.$active ? props.theme.colors.indicator.active : props.theme.colors.button.primary.border)};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	cursor: ${(props) => (props.$active ? 'default' : props.disabled ? 'not-allowed' : 'pointer')};
@@ -31,7 +31,7 @@ export const Option = styled.div<{ disabled: boolean; $active: boolean }>`
 				: props.disabled
 				? props.theme.colors.button.primary.background
 				: props.theme.colors.button.primary.active.background};
-		border: 2px solid
+		border: 1px solid
 			${(props) =>
 				props.$active
 					? props.theme.colors.indicator.active
@@ -93,5 +93,5 @@ export const EndActions = styled.div`
 	align-items: center;
 	justify-content: flex-end;
 	gap: 15px;
-	margin: 17.5px 0 0 0;
+	margin: 20px 0 0 0;
 `;

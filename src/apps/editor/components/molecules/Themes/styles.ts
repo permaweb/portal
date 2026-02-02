@@ -276,14 +276,16 @@ export const SelectorColorSwatch = styled.button<{ background: string; $isSelect
 	height: 35px;
 	width: 35px;
 	background: ${(props) => props.background};
-	border: 2px solid ${(props) => (props.$isSelected ? '#5E66DB' : props.theme.colors.border.primary)};
+	border: 1px solid
+		${(props) => (props.$isSelected ? props.theme.colors.button.alt1.background : props.theme.colors.border.primary)};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	cursor: pointer;
 	transition: all 100ms;
 
 	&:hover {
 		transform: scale(1.1);
-		border-color: ${(props) => (props.$isSelected ? '#5E66DB' : props.theme.colors.border.alt1)};
+		border-color: ${(props) =>
+			props.$isSelected ? props.theme.colors.button.alt1.background : props.theme.colors.border.alt1};
 	}
 
 	&:disabled {
@@ -412,14 +414,46 @@ export const ModalActionsWrapper = styled.div`
 export const ThemeWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 5px;
-	margin: -7.5px 0 0 0;
+	gap: 25px;
+`;
+
+export const ThemeHeaderWrapper = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 15px;
+
+	button {
+		margin: 7.5px 0 0 0;
+		svg {
+			margin: 2.25px 9.5px 0 0 !important;
+		}
+	}
+`;
+
+export const ThemeHeaderInput = styled.div`
+	width: 500px;
+	max-width: 100%;
+`;
+
+export const ThemeHeaderAction = styled.div`
+	width: 200px;
+	max-width: 100%;
+	margin: 0 0 0 auto;
 `;
 
 export const Theme = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
+`;
+
+export const ThemeSectionsColumn = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	flex: 1;
 `;
 
 export const ThemeRowWrapper = styled.div``;
@@ -442,11 +476,11 @@ export const ThemeResetButton = styled.div<{ $hasChanges: boolean }>`
 	}
 
 	.reset-active {
-		background: #5e66db !important;
-		border-color: #5e66db !important;
+		background: ${(props) => props.theme.colors.button.alt1.background} !important;
+		border-color: ${(props) => props.theme.colors.button.alt1.border} !important;
 
 		&:hover {
-			background: #4a52b0 !important;
+			background: ${(props) => props.theme.colors.button.alt1.active.background} !important;
 		}
 	}
 `;
@@ -616,14 +650,15 @@ export const ThemeSectionColumn = styled.div`
 	flex-direction: column;
 	gap: 15px;
 	padding: 10.5px 15px 15px 15px;
-	background: ${(props) => props.theme.colors.container.alt1.background};
+	background: ${(props) => props.theme.colors.container.primary.background};
 
+	border-top: 1px solid ${(props) => props.theme.colors.button.primary.border};
 	border-right: 1px solid ${(props) => props.theme.colors.button.primary.border};
 	border-bottom: 1px solid ${(props) => props.theme.colors.button.primary.border};
 	border-left: 1px solid ${(props) => props.theme.colors.button.primary.border};
 
-	border-bottom-right-radius: ${STYLING.dimensions.radius.primary};
-	border-bottom-left-radius: ${STYLING.dimensions.radius.primary};
+	border-bottom-right-radius: ${STYLING.dimensions.radius.alt1};
+	border-bottom-left-radius: ${STYLING.dimensions.radius.alt1};
 
 	> * {
 		&:not(:last-child) {
@@ -790,7 +825,7 @@ export const ShadowEditorRow = styled.div<{ $disabled?: boolean }>`
 			width: 18px;
 			height: 18px;
 			background: ${(props) => props.theme.colors.button.primary.background};
-			border: 2px solid ${(props) => props.theme.colors.button.primary.border};
+			border: 1px solid ${(props) => props.theme.colors.button.primary.border};
 			border-radius: 50%;
 			cursor: pointer;
 		}
@@ -799,7 +834,7 @@ export const ShadowEditorRow = styled.div<{ $disabled?: boolean }>`
 			width: 18px;
 			height: 18px;
 			background: ${(props) => props.theme.colors.button.primary.background};
-			border: 2px solid ${(props) => props.theme.colors.button.primary.border};
+			border: 1px solid ${(props) => props.theme.colors.button.primary.border};
 			border-radius: 50%;
 			cursor: pointer;
 		}
@@ -895,7 +930,7 @@ export const RangeWrapper = styled.div`
 			width: 16px;
 			height: 16px;
 			background: ${(props) => props.theme.colors.button.primary.background};
-			border: 2px solid ${(props) => props.theme.colors.button.primary.border};
+			border: 1px solid ${(props) => props.theme.colors.button.primary.border};
 			border-radius: 50%;
 			cursor: pointer;
 			transition: all 0.2s ease;
@@ -909,7 +944,7 @@ export const RangeWrapper = styled.div`
 			width: 16px;
 			height: 16px;
 			background: ${(props) => props.theme.colors.button.primary.background};
-			border: 2px solid ${(props) => props.theme.colors.button.primary.border};
+			border: 1px solid ${(props) => props.theme.colors.button.primary.border};
 			border-radius: 50%;
 			cursor: pointer;
 			transition: all 0.2s ease;

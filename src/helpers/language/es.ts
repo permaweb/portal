@@ -483,6 +483,7 @@ export const es = {
 	roleDescriptionExternalContributor: ['Agregar solicitudes de publicación desde otro portal'],
 	roleDescriptionModerator: ['Aprobar publicaciones de contribuidores', 'Eliminar comentarios de publicaciones'],
 	save: `Guardar`,
+	saveChanges: `Guardar cambios`,
 	saving: `Guardando`,
 	scope: `Alcance`,
 	seeLess: `Ver menos`,
