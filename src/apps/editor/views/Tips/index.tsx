@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Arweave from 'arweave';
 
@@ -11,6 +12,7 @@ import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
 import { Toggle } from 'components/atoms/Toggle';
 import { TxAddress } from 'components/atoms/TxAddress';
+import { URLS } from 'helpers/config';
 import { MonetizationConfig, PortalPatchMapEnum, TipRow } from 'helpers/types';
 import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -27,6 +29,8 @@ const arweave = Arweave.init({
 });
 
 export default function Tips() {
+	const navigate = useNavigate();
+
 	const portalProvider = usePortalProvider();
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -414,9 +418,26 @@ export default function Tips() {
 						)}
 
 						{hasMonetization && !loadingTips && !tipsError && tips.length === 0 && (
-							<S.WrapperEmpty className={'border-wrapper-alt2'}>
-								<p>{language.noTipsYet}</p>
-							</S.WrapperEmpty>
+							<S.SetupBanner>
+								<h6>{language.tipsSetupBannerTitle}</h6>
+								<p>{language.tipsSetupBannerDescription}</p>
+								<S.SetupBannerActions>
+									{portalProvider.current?.id && (
+										<>
+											<Button
+												type={'alt1'}
+												label={language.tipsSetupBannerMainPage}
+												handlePress={() => navigate(URLS.pageEditMain(portalProvider.current.id))}
+											/>
+											<Button
+												type={'alt2'}
+												label={language.tipsSetupBannerInfoPages}
+												handlePress={() => navigate(URLS.pageEditInfo(portalProvider.current.id))}
+											/>
+										</>
+									)}
+								</S.SetupBannerActions>
+							</S.SetupBanner>
 						)}
 
 						{hasMonetization && !loadingTips && !tipsError && tips.length > 0 && (
