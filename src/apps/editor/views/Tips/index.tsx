@@ -427,7 +427,7 @@ export default function Tips() {
 											<Button
 												type={'alt1'}
 												label={language.tipsSetupBannerMainPage}
-												handlePress={() => navigate(URLS.pageEditMain(portalProvider.current.id))}
+												handlePress={() => navigate(`${URLS.pageEditMain(portalProvider.current.id)}/home`)}
 											/>
 											<Button
 												type={'alt2'}

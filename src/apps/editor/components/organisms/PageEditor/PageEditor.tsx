@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 
 import { PageSection, ResizeContext } from 'editor/components/molecules/PageSection';
@@ -9,8 +9,10 @@ import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPageClear, currentPageUpdate, setOriginalData } from 'editor/store/page';
 
+import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
-import { PageSectionEnum, PageSectionType } from 'helpers/types';
+import { URLS } from 'helpers/config';
+import { MonetizationConfig, PageSectionEnum, PageSectionType } from 'helpers/types';
 import { capitalize, debugLog, isMac, urlify } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -22,6 +24,7 @@ import * as S from './styles';
 
 export default function PageEditor() {
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 	const { pageId } = useParams<{ pageId?: string }>();
 
 	const currentPage = useSelector((state: EditorStoreRootState) => state.currentPage);
@@ -37,6 +40,13 @@ export default function PageEditor() {
 
 	const [resizingBlockId, setResizingBlockId] = React.useState<string | null>(null);
 	const [hasBodyOverflow, setHasBodyOverflow] = React.useState(false);
+
+	// Check if tips are enabled
+	const existingMonetization =
+		((portalProvider.current as any)?.monetization?.monetization as MonetizationConfig | undefined) ||
+		((portalProvider.current as any)?.Monetization as MonetizationConfig | undefined);
+	const hasMonetization = !!existingMonetization?.enabled && !!existingMonetization.walletAddress;
+	const isHomePage = pageId === 'home';
 
 	React.useEffect(() => {
 		const checkOverflow = () => {
@@ -238,6 +248,23 @@ export default function PageEditor() {
 				</S.ToolbarWrapper>
 				<ResizeContext.Provider value={{ resizingBlockId, setResizingBlockId }}>
 					<S.EditorWrapper>
+						{isHomePage && hasMonetization && (
+							<S.TipsBanner>
+								<h6>{language.tipsSetupBannerTitle}</h6>
+								<p>{language.tipsSetupBannerDescription}</p>
+								<S.TipsBannerActions>
+									{portalProvider.current?.id && (
+										<>
+											<Button
+												type={'alt1'}
+												label={language.tipsSetupBannerInfoPages}
+												handlePress={() => navigate(URLS.pageEditInfo(portalProvider.current.id))}
+											/>
+										</>
+									)}
+								</S.TipsBannerActions>
+							</S.TipsBanner>
+						)}
 						<DragDropContext onDragEnd={onDragEnd}>
 							<Droppable droppableId={'blocks'}>
 								{(provided) => (
