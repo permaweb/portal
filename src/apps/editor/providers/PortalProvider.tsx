@@ -19,6 +19,7 @@ import {
 	cachePortal,
 	cacheProfile,
 	debugLog,
+	filterRemoved,
 	fixBooleanStrings,
 	getCachedPermissions,
 	getCachedPortal,
@@ -203,6 +204,14 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				}
 			} else {
 				setPermissions({ base: false });
+				setCurrentId(null);
+				setCurrent(null);
+				setUsersByPortalId({});
+				setRefreshFields(null);
+				setUpdating(false);
+				setUpdateAvailable(false);
+				setShowPortalManager(false);
+				setCreateNewPortal(false);
 			}
 		}
 	}, [location.pathname, portals, currentId]);
@@ -380,7 +389,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					arProvider.walletAddress === overview?.owner
 			);
 
-			const portalState: PortalDetailType = {
+			const portalState: PortalDetailType = filterRemoved({
 				id: currentId,
 				name: overview?.name ?? current?.name ?? null,
 				logo: overview?.banner ?? overview?.logo ?? current?.logo ?? null,
@@ -404,7 +413,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				domains: navigation?.domains ?? current?.domains ?? [],
 				monetization: monetization ?? current?.monetization ?? null,
 				transfers: transfers?.transfers ?? current?.transfers ?? [],
-			};
+			});
 
 			if (permawebProvider.profile?.id && portalState.users) {
 				const userPermissions = getUserPermissions(

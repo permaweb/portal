@@ -10,7 +10,7 @@ import { EditorStoreRootState } from 'editor/store';
 import { currentPageClear, currentPageUpdate, setOriginalData } from 'editor/store/page';
 
 import { Loader } from 'components/atoms/Loader';
-import { MonetizationConfig, PageBlockEnum, PageSectionEnum, PageSectionType } from 'helpers/types';
+import { MonetizationConfig, PageBlockEnum, PageSectionEnum, PageSectionType, PortalPatchMapEnum } from 'helpers/types';
 import { capitalize, debugLog, isMac, urlify } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -299,8 +299,8 @@ export default function PageEditor() {
 					arProvider.wallet
 				);
 
+				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
 				debugLog('info', 'PageEditor', `Portal update: ${portalUpdateId}`);
-
 				addNotification(`${language?.pageSaved}!`, 'success');
 			} catch (e: any) {
 				debugLog('error', 'PageEditor', e);

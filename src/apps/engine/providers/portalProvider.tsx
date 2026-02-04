@@ -7,7 +7,7 @@ import WebFont from 'webfontloader';
 
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalPermissionsType, PortalUserType } from 'helpers/types';
-import { cachePortal, fixBooleanStrings, getCachedPortal, getPortalUsers } from 'helpers/utils';
+import { cachePortal, filterRemoved, fixBooleanStrings, getCachedPortal, getPortalUsers } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -191,7 +191,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								return Number(bDate) - Number(aDate);
 							})
 					: [];
-				const zone = {
+				const zone = filterRemoved({
 					...defaultPortal,
 					...cached,
 					name: overview?.name,
@@ -209,7 +209,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					posts: sortedPosts,
 					users: portalUsers,
 					monetization: monetization,
-				};
+				});
 
 				const Name = zone?.name;
 				const Categories = zone?.categories;

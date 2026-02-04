@@ -287,12 +287,6 @@ export const ARTICLE_BLOCKS = {
 		label: 'Tips Button',
 		icon: ICONS.tools,
 	},
-	// [ArticleBlockEnum.Supporters]: {
-	// 	type: ArticleBlockEnum.Supporters,
-	// 	label: 'Supporters',
-	// 	icon: ICONS.users,
-	// 	shortcut: 'Ctrl / S',
-	// },
 	[ArticleBlockEnum.Embed]: {
 		type: ArticleBlockEnum.Embed,
 		label: 'Embed',

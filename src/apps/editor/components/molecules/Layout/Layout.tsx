@@ -311,7 +311,6 @@ export default function Layout() {
 						);
 					})}
 				</S.OptionsWrapper>
-
 				<S.EndActions>
 					<Button
 						type={'alt1'}

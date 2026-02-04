@@ -207,7 +207,7 @@ export const PanelIconFooterWrapper = styled.div<{ showText?: boolean }>`
 export const Header = styled.header<{ navigationOpen: boolean; navWidth?: number }>`
 	height: ${STYLING.dimensions.nav.height};
 	width: 100%;
-	padding: 0 20px 0
+	padding: 0 25px 0
 		calc(
 			${(props) => (props.navWidth !== undefined ? `${props.navWidth}px` : STYLING.dimensions.nav.width)} +
 				${(props) => (props.navigationOpen ? '10px' : '25px')}

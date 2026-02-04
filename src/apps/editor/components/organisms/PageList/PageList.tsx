@@ -2,13 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 
+import PageRow from 'editor/components/molecules/PageRow/PageRow';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { ICONS, PAGES, URLS } from 'helpers/config';
 import { PortalPatchMapEnum } from 'helpers/types';
-import { displayUrlName, resolvePrimaryDomain, urlify } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -35,40 +35,48 @@ export default function PageList() {
 		search: true,
 	});
 
-	const homeTemplateOptions = [
-		{ name: 'journal', icon: ICONS.pageHomeJournal, pages: PAGES.JOURNAL },
-		{ name: 'blog', icon: ICONS.pageHomeBlog, pages: PAGES.BLOG },
-		{ name: 'documentation', icon: ICONS.pageHomeDocumentation, pages: PAGES.DOCUMENTATION },
-		{ name: 'custom', icon: null, pages: null },
-	];
-
-	const feedTemplateOptions = [
-		{ name: 'journal', icon: null, pages: PAGES.JOURNAL },
-		{ name: 'blog', icon: null, pages: PAGES.BLOG },
-		{ name: 'documentation', icon: null, pages: PAGES.DOCUMENTATION },
-		{ name: 'custom', icon: null, pages: null },
-	];
-
-	const postTemplateOptions = [
-		{ name: 'journal', icon: null, pages: PAGES.JOURNAL },
-		{ name: 'blog', icon: null, pages: PAGES.BLOG },
-		{ name: 'documentation', icon: null, pages: PAGES.DOCUMENTATION },
-		{ name: 'custom', icon: null, pages: null },
-	];
-
-	const userTemplateOptions = [
-		{ name: 'journal', icon: null, pages: PAGES.JOURNAL },
-		{ name: 'blog', icon: null, pages: PAGES.BLOG },
-		{ name: 'documentation', icon: null, pages: PAGES.DOCUMENTATION },
-		{ name: 'custom', icon: null, pages: null },
-	];
-
-	const searchTemplateOptions = [
-		{ name: 'journal', icon: null, pages: PAGES.JOURNAL },
-		{ name: 'blog', icon: null, pages: PAGES.BLOG },
-		{ name: 'documentation', icon: null, pages: PAGES.DOCUMENTATION },
-		{ name: 'custom', icon: null, pages: null },
-	];
+	const templateConfig = {
+		home: {
+			options: [
+				{ name: 'journal', icon: ICONS.pageHomeJournal, pages: PAGES.JOURNAL },
+				{ name: 'blog', icon: ICONS.pageHomeBlog, pages: PAGES.BLOG },
+				{ name: 'documentation', icon: ICONS.pageHomeDocumentation, pages: PAGES.DOCUMENTATION },
+				{ name: 'custom', icon: null, pages: null },
+			],
+		},
+		feed: {
+			options: [
+				{ name: 'journal', icon: null, pages: PAGES.JOURNAL },
+				{ name: 'blog', icon: null, pages: PAGES.BLOG },
+				{ name: 'documentation', icon: null, pages: PAGES.DOCUMENTATION },
+				{ name: 'custom', icon: null, pages: null },
+			],
+		},
+		post: {
+			options: [
+				{ name: 'journal', icon: null, pages: PAGES.JOURNAL },
+				{ name: 'blog', icon: null, pages: PAGES.BLOG },
+				{ name: 'documentation', icon: null, pages: PAGES.DOCUMENTATION },
+				{ name: 'custom', icon: null, pages: null },
+			],
+		},
+		user: {
+			options: [
+				{ name: 'journal', icon: null, pages: PAGES.JOURNAL },
+				{ name: 'blog', icon: null, pages: PAGES.BLOG },
+				{ name: 'documentation', icon: null, pages: PAGES.DOCUMENTATION },
+				{ name: 'custom', icon: null, pages: null },
+			],
+		},
+		search: {
+			options: [
+				{ name: 'journal', icon: null, pages: PAGES.JOURNAL },
+				{ name: 'blog', icon: null, pages: PAGES.BLOG },
+				{ name: 'documentation', icon: null, pages: PAGES.DOCUMENTATION },
+				{ name: 'custom', icon: null, pages: null },
+			],
+		},
+	};
 
 	const comparePageStructure = (current: any, template: any): boolean => {
 		if (!current || !template) return false;
@@ -155,47 +163,48 @@ export default function PageList() {
 		return 'custom';
 	};
 
-	const [activeHomeTemplate, setActiveHomeTemplate] = React.useState<string>(getActiveHomeTemplate());
-	const [activeFeedTemplate, setActiveFeedTemplate] = React.useState<string>(getActiveFeedTemplate());
-	const [activePostTemplate, setActivePostTemplate] = React.useState<string>(getActivePostTemplate());
-	const [activeUserTemplate, setActiveUserTemplate] = React.useState<string>(getActiveUserTemplate());
-	const [activeSearchTemplate, setActiveSearchTemplate] = React.useState<string>(getActiveSearchTemplate());
+	const [activeTemplates, setActiveTemplates] = React.useState<{ [key: string]: string }>({
+		home: getActiveHomeTemplate(),
+		feed: getActiveFeedTemplate(),
+		post: getActivePostTemplate(),
+		user: getActiveUserTemplate(),
+		search: getActiveSearchTemplate(),
+	});
 
 	React.useEffect(() => {
-		setActiveHomeTemplate(getActiveHomeTemplate());
-	}, [(portalProvider.current?.pages as any)?.home]);
+		setActiveTemplates({
+			home: getActiveHomeTemplate(),
+			feed: getActiveFeedTemplate(),
+			post: getActivePostTemplate(),
+			user: getActiveUserTemplate(),
+			search: getActiveSearchTemplate(),
+		});
+	}, [
+		(portalProvider.current?.pages as any)?.home,
+		(portalProvider.current?.pages as any)?.feed,
+		(portalProvider.current?.pages as any)?.post,
+		(portalProvider.current?.pages as any)?.user,
+		(portalProvider.current?.pages as any)?.search,
+	]);
 
-	React.useEffect(() => {
-		setActiveFeedTemplate(getActiveFeedTemplate());
-	}, [(portalProvider.current?.pages as any)?.feed]);
-
-	React.useEffect(() => {
-		setActivePostTemplate(getActivePostTemplate());
-	}, [(portalProvider.current?.pages as any)?.post]);
-
-	React.useEffect(() => {
-		setActiveUserTemplate(getActiveUserTemplate());
-	}, [(portalProvider.current?.pages as any)?.user]);
-
-	React.useEffect(() => {
-		setActiveSearchTemplate(getActiveSearchTemplate());
-	}, [(portalProvider.current?.pages as any)?.search]);
-
-	async function handleHomeTemplateChange(templateName: string) {
-		if (templateName === activeHomeTemplate) return;
+	async function handleTemplateChange(pageKey: string, templateName: string) {
+		if (templateName === activeTemplates[pageKey]) return;
 		if (!arProvider.wallet || !portalProvider.current?.id) return;
 
-		const template = homeTemplateOptions.find((t) => t.name === templateName);
+		const config = templateConfig[pageKey];
+		if (!config) return;
+
+		const template = config.options.find((t) => t.name === templateName);
 		if (!template) return;
 
 		const isCustom = templateName === 'custom';
-		const newHome = isCustom ? { type: 'grid', content: [] } : template.pages.home;
+		const newPageContent = isCustom ? { type: 'grid', content: [] } : template.pages[pageKey];
 
 		setLoading(true);
 		try {
 			const updatedPages = {
 				...portalProvider.current.pages,
-				home: newHome,
+				[pageKey]: newPageContent,
 			};
 
 			await permawebProvider.libs.updateZone(
@@ -205,138 +214,18 @@ export default function PageList() {
 			);
 
 			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
-			setActiveHomeTemplate(templateName);
-			addNotification(`${language?.homeTemplateUpdated || 'Home template updated'}!`, 'success');
-		} catch (e: any) {
-			addNotification(e.message ?? 'Error updating home template', 'warning');
-		}
-		setLoading(false);
-	}
+			setActiveTemplates((prev) => ({ ...prev, [pageKey]: templateName }));
 
-	async function handleFeedTemplateChange(templateName: string) {
-		if (templateName === activeFeedTemplate) return;
-		if (!arProvider.wallet || !portalProvider.current?.id) return;
-
-		const template = feedTemplateOptions.find((t) => t.name === templateName);
-		if (!template) return;
-
-		const isCustom = templateName === 'custom';
-		const newFeed = isCustom ? { type: 'grid', content: [] } : template.pages.feed;
-
-		setLoading(true);
-		try {
-			const updatedPages = {
-				...portalProvider.current.pages,
-				feed: newFeed,
+			const messages = {
+				home: language?.homeTemplateUpdated || 'Home template updated',
+				feed: language?.feedTemplateUpdated || 'Feed template updated',
+				post: 'Post template updated',
+				user: 'User template updated',
+				search: 'Search template updated',
 			};
-
-			await permawebProvider.libs.updateZone(
-				{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
-				portalProvider.current.id,
-				arProvider.wallet
-			);
-
-			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
-			setActiveFeedTemplate(templateName);
-			addNotification(`${language?.feedTemplateUpdated || 'Feed template updated'}!`, 'success');
+			addNotification(`${messages[pageKey]}!`, 'success');
 		} catch (e: any) {
-			addNotification(e.message ?? 'Error updating feed template', 'warning');
-		}
-		setLoading(false);
-	}
-
-	async function handlePostTemplateChange(templateName: string) {
-		if (templateName === activePostTemplate) return;
-		if (!arProvider.wallet || !portalProvider.current?.id) return;
-
-		const template = postTemplateOptions.find((t) => t.name === templateName);
-		if (!template) return;
-
-		const isCustom = templateName === 'custom';
-		const newPost = isCustom ? { type: 'grid', content: [] } : template.pages.post;
-
-		setLoading(true);
-		try {
-			const updatedPages = {
-				...portalProvider.current.pages,
-				post: newPost,
-			};
-
-			await permawebProvider.libs.updateZone(
-				{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
-				portalProvider.current.id,
-				arProvider.wallet
-			);
-
-			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
-			setActivePostTemplate(templateName);
-			addNotification('Post template updated!', 'success');
-		} catch (e: any) {
-			addNotification(e.message ?? 'Error updating post template', 'warning');
-		}
-		setLoading(false);
-	}
-
-	async function handleUserTemplateChange(templateName: string) {
-		if (templateName === activeUserTemplate) return;
-		if (!arProvider.wallet || !portalProvider.current?.id) return;
-
-		const template = userTemplateOptions.find((t) => t.name === templateName);
-		if (!template) return;
-
-		const isCustom = templateName === 'custom';
-		const newUser = isCustom ? { type: 'grid', content: [] } : template.pages.user;
-
-		setLoading(true);
-		try {
-			const updatedPages = {
-				...portalProvider.current.pages,
-				user: newUser,
-			};
-
-			await permawebProvider.libs.updateZone(
-				{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
-				portalProvider.current.id,
-				arProvider.wallet
-			);
-
-			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
-			setActiveUserTemplate(templateName);
-			addNotification('User template updated!', 'success');
-		} catch (e: any) {
-			addNotification(e.message ?? 'Error updating user template', 'warning');
-		}
-		setLoading(false);
-	}
-
-	async function handleSearchTemplateChange(templateName: string) {
-		if (templateName === activeSearchTemplate) return;
-		if (!arProvider.wallet || !portalProvider.current?.id) return;
-
-		const template = searchTemplateOptions.find((t) => t.name === templateName);
-		if (!template) return;
-
-		const isCustom = templateName === 'custom';
-		const newSearch = isCustom ? { type: 'grid', content: [] } : template.pages.search;
-
-		setLoading(true);
-		try {
-			const updatedPages = {
-				...portalProvider.current.pages,
-				search: newSearch,
-			};
-
-			await permawebProvider.libs.updateZone(
-				{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
-				portalProvider.current.id,
-				arProvider.wallet
-			);
-
-			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
-			setActiveSearchTemplate(templateName);
-			addNotification('Search template updated!', 'success');
-		} catch (e: any) {
-			addNotification(e.message ?? 'Error updating search template', 'warning');
+			addNotification(e.message ?? `Error updating ${pageKey} template`, 'warning');
 		}
 		setLoading(false);
 	}
@@ -364,7 +253,41 @@ export default function PageList() {
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
-	function renderPageList(pages: any) {
+	const renderTemplateOptions = (pageKey: string, activeTemplate: string) => {
+		const config = templateConfig[pageKey];
+		if (!config) return null;
+
+		return (
+			<S.HomeTemplateWrapper>
+				<S.HomeTemplateOptions>
+					{config.options.map((option) => {
+						const active = option.name === activeTemplate;
+						return (
+							<S.HomeTemplateOption
+								key={option.name}
+								$active={active}
+								disabled={unauthorized || loading}
+								onClick={() => !unauthorized && !loading && !active && handleTemplateChange(pageKey, option.name)}
+							>
+								<S.HomeTemplateOptionIcon $active={active}>
+									{option.icon ? (
+										<img src={option.icon} alt={option.name} />
+									) : (
+										<S.HomeTemplateIconPlaceholder $active={active}>
+											<ReactSVG src={ICONS.add} />
+										</S.HomeTemplateIconPlaceholder>
+									)}
+								</S.HomeTemplateOptionIcon>
+								<S.HomeTemplateOptionLabel>{option.name}</S.HomeTemplateOptionLabel>
+							</S.HomeTemplateOption>
+						);
+					})}
+				</S.HomeTemplateOptions>
+			</S.HomeTemplateWrapper>
+		);
+	};
+
+	function renderPageList(pages: any, opts?: { static?: boolean }) {
 		if (Object.entries(pages).length === 0) {
 			return (
 				<S.WrapperEmpty className={'border-wrapper-alt2'}>
@@ -376,180 +299,26 @@ export default function PageList() {
 		return (
 			<>
 				{Object.entries(pages).map(([key], index) => {
-					const redirectBase = pages[key].type === 'static' ? URLS.pageEditInfo : URLS.pageEditMain;
-					const redirectId = pages[key].type === 'static' ? pages[key].id : key;
-					const isHome = key === 'home';
-					const isFeed = key === 'feed';
-					const isPost = key === 'post';
-					const isUser = key === 'user';
-					const isSearch = key === 'search';
-					const isCollapsed = collapsedPages[key] ?? false;
-					const previewUrl = `${resolvePrimaryDomain(
-						portalProvider.current?.domains,
-						portalProvider.current?.id
-					)}/#/${urlify(key)}`;
+					const isCollapsed = collapsedPages[key] ?? true;
+					const hasTemplates = templateConfig[key] && !opts?.static;
+					const isTemplatePage = !!templateConfig[key];
 
 					return (
-						<S.PagesWrapper key={index} className={'border-wrapper-alt2'}>
-							<S.PageWrapper onClick={() => setCollapsedPages((prev) => ({ ...prev, [key]: !prev[key] }))}>
-								<S.PageHeader>
-									<S.Arrow $open={!isCollapsed}>
-										<ReactSVG src={ICONS.arrow} />
-									</S.Arrow>
-									<p>{displayUrlName(key)}</p>
-								</S.PageHeader>
-								<S.PageDetail>
-									<S.PageActions>
-										<Button
-											type={'alt3'}
-											label={'Preview'}
-											handlePress={(e: any) => {
-												e.stopPropagation();
-												window.open(previewUrl, '_blank');
-											}}
-										/>
-										<Button
-											type={'alt3'}
-											label={language?.edit}
-											handlePress={(e: any) => {
-												e.stopPropagation();
-												navigate(`${redirectBase(portalProvider.current.id)}/${redirectId}`);
-											}}
-										/>
-									</S.PageActions>
-								</S.PageDetail>
-							</S.PageWrapper>
-							{isHome && !isCollapsed && (
-								<S.HomeTemplateWrapper>
-									<S.HomeTemplateOptions>
-										{homeTemplateOptions.map((option) => {
-											const active = option.name === activeHomeTemplate;
-											return (
-												<S.HomeTemplateOption
-													key={option.name}
-													$active={active}
-													disabled={unauthorized || loading}
-													onClick={() => !unauthorized && !loading && !active && handleHomeTemplateChange(option.name)}
-												>
-													<S.HomeTemplateOptionIcon $active={active}>
-														{option.icon ? (
-															<img src={option.icon} alt={option.name} />
-														) : (
-															<S.HomeTemplateIconPlaceholder $active={active}>
-																<ReactSVG src={ICONS.add} />
-															</S.HomeTemplateIconPlaceholder>
-														)}
-													</S.HomeTemplateOptionIcon>
-													<S.HomeTemplateOptionLabel>{option.name}</S.HomeTemplateOptionLabel>
-												</S.HomeTemplateOption>
-											);
-										})}
-									</S.HomeTemplateOptions>
-								</S.HomeTemplateWrapper>
+						<PageRow
+							key={index}
+							pageKey={key}
+							isStatic={opts?.static}
+							isCollapsed={isCollapsed}
+							onToggleCollapse={() => setCollapsedPages((prev) => ({ ...prev, [key]: !prev[key] }))}
+							isTemplatePage={isTemplatePage}
+						>
+							{hasTemplates && !isCollapsed && renderTemplateOptions(key, activeTemplates[key])}
+							{!hasTemplates && !isCollapsed && !opts?.static && (
+								<S.TemplateEmptyWrapper>
+									<p>{language?.noTemplatesFound}</p>
+								</S.TemplateEmptyWrapper>
 							)}
-							{isFeed && !isCollapsed && (
-								<S.HomeTemplateWrapper>
-									<S.HomeTemplateOptions>
-										{feedTemplateOptions.map((option) => {
-											const active = option.name === activeFeedTemplate;
-											return (
-												<S.HomeTemplateOption
-													key={option.name}
-													$active={active}
-													disabled={unauthorized || loading}
-													onClick={() => !unauthorized && !loading && !active && handleFeedTemplateChange(option.name)}
-												>
-													<S.HomeTemplateOptionIcon $active={active}>
-														{option.icon ? (
-															<img src={option.icon} alt={option.name} />
-														) : (
-															<S.HomeTemplateIconPlaceholder $active={active}>
-																<ReactSVG src={ICONS.add} />
-															</S.HomeTemplateIconPlaceholder>
-														)}
-													</S.HomeTemplateOptionIcon>
-													<S.HomeTemplateOptionLabel>{option.name}</S.HomeTemplateOptionLabel>
-												</S.HomeTemplateOption>
-											);
-										})}
-									</S.HomeTemplateOptions>
-								</S.HomeTemplateWrapper>
-							)}
-							{isPost && !isCollapsed && (
-								<S.HomeTemplateWrapper>
-									<S.HomeTemplateOptions>
-										{postTemplateOptions.map((option) => {
-											const active = option.name === activePostTemplate;
-											return (
-												<S.HomeTemplateOption
-													key={option.name}
-													$active={active}
-													disabled={unauthorized || loading}
-													onClick={() => !unauthorized && !loading && !active && handlePostTemplateChange(option.name)}
-												>
-													<S.HomeTemplateOptionIcon $active={active}>
-														<S.HomeTemplateIconPlaceholder $active={active}>
-															<ReactSVG src={ICONS.add} />
-														</S.HomeTemplateIconPlaceholder>
-													</S.HomeTemplateOptionIcon>
-													<S.HomeTemplateOptionLabel>{option.name}</S.HomeTemplateOptionLabel>
-												</S.HomeTemplateOption>
-											);
-										})}
-									</S.HomeTemplateOptions>
-								</S.HomeTemplateWrapper>
-							)}
-							{isUser && !isCollapsed && (
-								<S.HomeTemplateWrapper>
-									<S.HomeTemplateOptions>
-										{userTemplateOptions.map((option) => {
-											const active = option.name === activeUserTemplate;
-											return (
-												<S.HomeTemplateOption
-													key={option.name}
-													$active={active}
-													disabled={unauthorized || loading}
-													onClick={() => !unauthorized && !loading && !active && handleUserTemplateChange(option.name)}
-												>
-													<S.HomeTemplateOptionIcon $active={active}>
-														<S.HomeTemplateIconPlaceholder $active={active}>
-															<ReactSVG src={ICONS.add} />
-														</S.HomeTemplateIconPlaceholder>
-													</S.HomeTemplateOptionIcon>
-													<S.HomeTemplateOptionLabel>{option.name}</S.HomeTemplateOptionLabel>
-												</S.HomeTemplateOption>
-											);
-										})}
-									</S.HomeTemplateOptions>
-								</S.HomeTemplateWrapper>
-							)}
-							{isSearch && !isCollapsed && (
-								<S.HomeTemplateWrapper>
-									<S.HomeTemplateOptions>
-										{searchTemplateOptions.map((option) => {
-											const active = option.name === activeSearchTemplate;
-											return (
-												<S.HomeTemplateOption
-													key={option.name}
-													$active={active}
-													disabled={unauthorized || loading}
-													onClick={() =>
-														!unauthorized && !loading && !active && handleSearchTemplateChange(option.name)
-													}
-												>
-													<S.HomeTemplateOptionIcon $active={active}>
-														<S.HomeTemplateIconPlaceholder $active={active}>
-															<ReactSVG src={ICONS.add} />
-														</S.HomeTemplateIconPlaceholder>
-													</S.HomeTemplateOptionIcon>
-													<S.HomeTemplateOptionLabel>{option.name}</S.HomeTemplateOptionLabel>
-												</S.HomeTemplateOption>
-											);
-										})}
-									</S.HomeTemplateOptions>
-								</S.HomeTemplateWrapper>
-							)}
-						</S.PagesWrapper>
+						</PageRow>
 					);
 				})}
 			</>
@@ -586,7 +355,7 @@ export default function PageList() {
 							iconLeftAlign
 						/>
 					</S.InfoPagesHeader>
-					{renderPageList(staticPages)}
+					{renderPageList(staticPages, { static: true })}
 				</S.InfoPagesWrapper>
 			</S.Wrapper>
 		) : null;
@@ -595,11 +364,7 @@ export default function PageList() {
 		portalProvider.current?.pages,
 		languageProvider.current,
 		collapsedPages,
-		activeHomeTemplate,
-		activeFeedTemplate,
-		activePostTemplate,
-		activeUserTemplate,
-		activeSearchTemplate,
+		activeTemplates,
 	]);
 
 	return (

@@ -311,6 +311,33 @@ export function getPortalAssets(index: PortalAssetType[]) {
 	);
 }
 
+export function filterRemoved(obj: any): any {
+	if (obj === null || obj === undefined || obj === 'Removed') {
+		return null;
+	}
+
+	if (Array.isArray(obj)) {
+		return obj
+			.filter((item) => item !== 'Removed')
+			.map((item) => filterRemoved(item))
+			.filter((item) => item !== null);
+	}
+
+	if (typeof obj === 'object') {
+		const filtered: any = {};
+		for (const key of Object.keys(obj)) {
+			if (obj[key] === 'Removed') continue;
+			const value = filterRemoved(obj[key]);
+			if (value !== null) {
+				filtered[key] = value;
+			}
+		}
+		return filtered;
+	}
+
+	return obj;
+}
+
 export function getPortalUsers(roles: any) {
 	const users: PortalUserType[] = [];
 	if (roles) {
