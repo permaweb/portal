@@ -68,38 +68,3 @@ export const BlocksEmpty = styled.div`
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 `;
-
-export const TipsBanner = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 15px;
-	padding: 20px;
-	margin-bottom: 25px;
-	background: ${(props) => props.theme.colors.container.alt3.background};
-	border: 1px solid ${(props) => props.theme.colors.border.alt1};
-	border-radius: ${STYLING.dimensions.radius.primary};
-
-	h6 {
-		margin: 0;
-		font-size: ${(props) => props.theme.typography.size.base};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		font-family: ${(props) => props.theme.typography.family.primary};
-		color: ${(props) => props.theme.colors.font.primary};
-	}
-
-	p {
-		margin: 0;
-		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
-		font-family: ${(props) => props.theme.typography.family.primary};
-		color: ${(props) => props.theme.colors.font.alt1};
-		line-height: 1.5;
-	}
-`;
-
-export const TipsBannerActions = styled.div`
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	flex-wrap: wrap;
-`;

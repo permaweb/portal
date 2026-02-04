@@ -82,12 +82,14 @@ export function useSupporters(walletAddress: string | null, scope: 'global' | 'p
 					const amountAr = arweave.ar.winstonToAr(winston);
 					const location = getTag('Location');
 					const locationPostId = getTag('Location-Post-Id');
+					const usdValue = getTag('USD-Value') || null;
 
 					return {
 						id: node.id,
 						timestamp: node.block?.timestamp ?? null,
 						winston,
 						amountAr,
+						usdValue,
 						fromAddress: getTag('From-Address') || node.owner?.address || '',
 						fromProfile: getTag('From-Profile'),
 						location,
@@ -120,6 +122,14 @@ export function useSupporters(walletAddress: string | null, scope: 'global' | 'p
 
 						existing.winston = totalWinston.toString();
 						existing.amountAr = arweave.ar.winstonToAr(existing.winston);
+
+						// Aggregate USD value if present
+						if (tip.usdValue) {
+							const existingUsd = Number(existing.usdValue || 0);
+							const tipUsd = Number(tip.usdValue);
+							const totalUsd = existingUsd + (Number.isFinite(tipUsd) ? tipUsd : 0);
+							existing.usdValue = totalUsd > 0 ? totalUsd.toFixed(2) : existing.usdValue;
+						}
 
 						// Keep most recent timestamp
 						if (tip.timestamp && (!existing.timestamp || tip.timestamp > existing.timestamp)) {

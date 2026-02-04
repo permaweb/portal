@@ -316,6 +316,7 @@ export type SupporterTip = {
 	timestamp: number | null;
 	amountAr: string;
 	winston: string;
+	usdValue?: string | null;
 	fromAddress: string;
 	fromProfile?: string;
 	fromName?: string;
@@ -462,4 +463,5 @@ export type TipRow = {
 	fromProfile?: string;
 	location?: string;
 	winston: string;
+	usdValue?: string | null;
 };

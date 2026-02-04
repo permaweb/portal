@@ -282,11 +282,11 @@ export const ARTICLE_BLOCKS = {
 		label: 'Table',
 		icon: ICONS.menu,
 	},
-	// [ArticleBlockEnum.MonetizationButton]: {
-	// 	type: ArticleBlockEnum.MonetizationButton,
-	// 	label: 'Tips Button',
-	// 	icon: ICONS.tools,
-	// },
+	[ArticleBlockEnum.MonetizationButton]: {
+		type: ArticleBlockEnum.MonetizationButton,
+		label: 'Tips Button',
+		icon: ICONS.tools,
+	},
 	// [ArticleBlockEnum.Supporters]: {
 	// 	type: ArticleBlockEnum.Supporters,
 	// 	label: 'Supporters',

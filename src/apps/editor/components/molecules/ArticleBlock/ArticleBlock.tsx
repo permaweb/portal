@@ -19,6 +19,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import { ArticleBlocks } from '../ArticleBlocks';
+import { TipsBlock } from '../PageSection/TipsBlock';
 
 import { DividerBlock } from './CustomBlocks/DividerBlock';
 import { buildEmbedHtml, EmbedBlock, isSupportedEmbedUrl, parseEmbedUrl } from './CustomBlocks/EmbedBlock';
@@ -848,6 +849,27 @@ export default function ArticleBlock(props: {
 					onChange={(newContent: any, data: any) =>
 						props.onChangeBlock({ id: props.block.id, content: newContent, data: data })
 					}
+				/>
+			);
+			break;
+		case 'monetizationButton':
+			useCustom = true;
+			element = (
+				<TipsBlock
+					index={props.index}
+					block={{
+						type: 'monetizationButton' as any,
+						layout: props.block.layout || null,
+						content: [],
+						width: props.block.width || 1,
+						data: props.block.data,
+					}}
+					onChangeBlock={(block: any) => {
+						props.onChangeBlock({
+							id: props.block.id,
+							data: block.data,
+						});
+					}}
 				/>
 			);
 			break;

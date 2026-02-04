@@ -25,12 +25,6 @@ export default function Pages() {
 				header={language?.pages}
 				actions={[
 					<Button
-						type={'alt2'}
-						label={language?.tips}
-						handlePress={() => navigate(URLS.portalTips(portalProvider.current.id))}
-						disabled={unauthorized || !portalProvider.current}
-					/>,
-					<Button
 						type={'alt1'}
 						label={language?.createPage}
 						handlePress={() => navigate(URLS.pageCreateMain(portalProvider.current.id))}

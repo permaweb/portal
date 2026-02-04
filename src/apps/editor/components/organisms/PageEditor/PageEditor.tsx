@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 
 import { PageSection, ResizeContext } from 'editor/components/molecules/PageSection';
@@ -9,10 +9,8 @@ import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPageClear, currentPageUpdate, setOriginalData } from 'editor/store/page';
 
-import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
-import { URLS } from 'helpers/config';
-import { MonetizationConfig, PageSectionEnum, PageSectionType } from 'helpers/types';
+import { MonetizationConfig, PageBlockEnum, PageSectionEnum, PageSectionType } from 'helpers/types';
 import { capitalize, debugLog, isMac, urlify } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -24,7 +22,6 @@ import * as S from './styles';
 
 export default function PageEditor() {
 	const dispatch = useDispatch();
-	const navigate = useNavigate();
 	const { pageId } = useParams<{ pageId?: string }>();
 
 	const currentPage = useSelector((state: EditorStoreRootState) => state.currentPage);
@@ -148,6 +145,62 @@ export default function PageEditor() {
 		}
 	}, [currentPage.data.content]);
 
+	// Helper: check if any section has a Tips (monetization) button block
+	const hasTipsBlockInContent = React.useCallback((sections: any[]): boolean => {
+		if (!Array.isArray(sections)) return false;
+		for (const section of sections) {
+			if (!Array.isArray(section?.content)) continue;
+			for (const block of section.content) {
+				if (block.type === PageBlockEnum.MonetizationButton) return true;
+				if (block.type === 'section' && block.content?.content) {
+					if (hasTipsBlockInContent([block.content])) return true;
+				}
+			}
+		}
+		return false;
+	}, []);
+
+	// Auto-add Tips button at bottom when tips are enabled and page has none (home only)
+	React.useEffect(() => {
+		if (!isHomePage || !hasMonetization || !currentPage.data.content?.length) return;
+		if (currentPage.editor.loading.active) return;
+		if (hasTipsBlockInContent(currentPage.data.content)) return;
+
+		const makeId = () =>
+			typeof crypto?.randomUUID === 'function'
+				? crypto.randomUUID()
+				: `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+		const tipsBlock = {
+			id: makeId(),
+			type: PageBlockEnum.MonetizationButton,
+			content: null,
+			width: 1,
+		};
+
+		const newSection: PageSectionType = {
+			type: PageSectionEnum.Row,
+			layout: null,
+			content: [tipsBlock],
+			width: 1,
+		};
+
+		const updatedSections = [...currentPage.data.content, newSection];
+		handleCurrentPageUpdate({ field: 'content', value: updatedSections });
+		addNotification(
+			language?.tipsButtonAddedDefault ?? 'Tips button added at the bottom. You can move or hide it.',
+			'success'
+		);
+	}, [
+		isHomePage,
+		hasMonetization,
+		currentPage.data.content,
+		currentPage.editor.loading.active,
+		hasTipsBlockInContent,
+		addNotification,
+		language?.tipsButtonAddedDefault,
+	]);
+
 	// Keyboard shortcut: Cmd/Ctrl + Shift + S to save
 	React.useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
@@ -248,23 +301,6 @@ export default function PageEditor() {
 				</S.ToolbarWrapper>
 				<ResizeContext.Provider value={{ resizingBlockId, setResizingBlockId }}>
 					<S.EditorWrapper>
-						{isHomePage && hasMonetization && (
-							<S.TipsBanner>
-								<h6>{language.tipsSetupBannerTitle}</h6>
-								<p>{language.tipsSetupBannerDescription}</p>
-								<S.TipsBannerActions>
-									{portalProvider.current?.id && (
-										<>
-											<Button
-												type={'alt1'}
-												label={language.tipsSetupBannerInfoPages}
-												handlePress={() => navigate(URLS.pageEditInfo(portalProvider.current.id))}
-											/>
-										</>
-									)}
-								</S.TipsBannerActions>
-							</S.TipsBanner>
-						)}
 						<DragDropContext onDragEnd={onDragEnd}>
 							<Droppable droppableId={'blocks'}>
 								{(provided) => (

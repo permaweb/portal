@@ -183,6 +183,7 @@ export default function Tips() {
 					const amountAr = arweave.ar.winstonToAr(winston);
 
 					const fromProfileId = getTag('From-Profile');
+					const usdValue = getTag('USD-Value') || null;
 
 					return {
 						id: node.id,
@@ -192,6 +193,7 @@ export default function Tips() {
 						fromAddress: getTag('From-Address') || node.owner?.address || '',
 						fromProfile: fromProfileId,
 						location: getTag('Location'),
+						usdValue,
 					};
 				});
 
@@ -456,14 +458,28 @@ export default function Tips() {
 										<tbody>
 											{paginatedTips.map((row) => (
 												<tr key={row.id}>
-													<td>{Number(row.amountAr).toFixed(4)}</td>
+													<td>
+														{Number(row.amountAr).toFixed(4)} AR
+														{row.usdValue && (
+															<span
+																style={{
+																	display: 'block',
+																	fontSize: '0.85em',
+																	color: 'var(--color-text-secondary)',
+																	marginTop: '2px',
+																}}
+															>
+																${row.usdValue} USD
+															</span>
+														)}
+													</td>
 													<td>
 														<TxAddress address={getFrom(row)} wrap={false} />
 													</td>
 													<td>
 														<TxAddress address={row.id} wrap={false} />
 													</td>
-													<td>{row.location.toUpperCase()}</td>
+													<td>{row.location?.toUpperCase() || '–'}</td>
 													<td>{renderDate(row.timestamp)}</td>
 												</tr>
 											))}

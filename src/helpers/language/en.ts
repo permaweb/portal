@@ -520,6 +520,7 @@ export const en = {
 	time: `Time`,
 	tips: `Tips`,
 	tipsButton: `Tips Button`,
+	tipsButtonAddedDefault: `Tips button added at the bottom. You can move or hide it.`,
 	tipsHistory: `History`,
 	tipsSetupBannerDescription: `Tips are enabled, but visitors can't tip yet. Add a "Tips button" block to your pages so visitors can support your portal.`,
 	tipsSetupBannerInfoPages: `Edit Info Pages`,
