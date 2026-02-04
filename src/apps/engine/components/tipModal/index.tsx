@@ -46,7 +46,7 @@ export default function TipModal({
 					{PRESET_AMOUNTS.map((amt) => (
 						<S.PresetButton
 							key={amt}
-							active={selected === amt}
+							$active={selected === amt}
 							onClick={() => {
 								setSelected(amt);
 								setCustomAmount('');
@@ -72,7 +72,7 @@ export default function TipModal({
 				</S.InputWrapper>
 
 				<S.Actions>
-					<Button type="alt1" label="Cancel" onClick={onClose} />
+					<Button type="default" label="Cancel" onClick={onClose} />
 					<Button type="primary" label="Tip now" onClick={handleConfirm} disabled={!finalAmount} />
 				</S.Actions>
 			</S.Modal>

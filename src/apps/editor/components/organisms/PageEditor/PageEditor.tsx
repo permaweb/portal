@@ -10,7 +10,7 @@ import { EditorStoreRootState } from 'editor/store';
 import { currentPageClear, currentPageUpdate, setOriginalData } from 'editor/store/page';
 
 import { Loader } from 'components/atoms/Loader';
-import { PageSectionEnum, PageSectionType, PortalPatchMapEnum } from 'helpers/types';
+import { MonetizationConfig, PageBlockEnum, PageSectionEnum, PageSectionType, PortalPatchMapEnum } from 'helpers/types';
 import { capitalize, debugLog, isMac, urlify } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -37,6 +37,13 @@ export default function PageEditor() {
 
 	const [resizingBlockId, setResizingBlockId] = React.useState<string | null>(null);
 	const [hasBodyOverflow, setHasBodyOverflow] = React.useState(false);
+
+	// Check if tips are enabled
+	const existingMonetization =
+		((portalProvider.current as any)?.monetization?.monetization as MonetizationConfig | undefined) ||
+		((portalProvider.current as any)?.Monetization as MonetizationConfig | undefined);
+	const hasMonetization = !!existingMonetization?.enabled && !!existingMonetization.walletAddress;
+	const isHomePage = pageId === 'home';
 
 	React.useEffect(() => {
 		const checkOverflow = () => {
@@ -137,6 +144,82 @@ export default function PageEditor() {
 			handleCurrentPageUpdate({ field: 'content', value: [newSection] });
 		}
 	}, [currentPage.data.content]);
+
+	// Helper: check if any section has a Tips (monetization) button block
+	const hasTipsBlockInContent = React.useCallback((sections: any[]): boolean => {
+		if (!Array.isArray(sections)) return false;
+		for (const section of sections) {
+			if (!Array.isArray(section?.content)) continue;
+			for (const block of section.content) {
+				if (block.type === PageBlockEnum.MonetizationButton) return true;
+				if (block.type === 'section' && block.content?.content) {
+					if (hasTipsBlockInContent([block.content])) return true;
+				}
+			}
+		}
+		return false;
+	}, []);
+
+	// Auto-add Tips button at bottom when tips are enabled and page has none (home only)
+	React.useEffect(() => {
+		if (!isHomePage || !hasMonetization || !currentPage.data.content?.length) return;
+		if (currentPage.editor.loading.active) return;
+		if (hasTipsBlockInContent(currentPage.data.content)) return;
+
+		const makeId = () =>
+			typeof crypto?.randomUUID === 'function'
+				? crypto.randomUUID()
+				: `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+		const tipsBlock = {
+			id: makeId(),
+			type: PageBlockEnum.MonetizationButton,
+			content: null,
+			width: 1,
+		};
+
+		const newSection: PageSectionType = {
+			type: PageSectionEnum.Row,
+			layout: null,
+			content: [tipsBlock],
+			width: 1,
+		};
+
+		const updatedSections = [...currentPage.data.content, newSection];
+		handleCurrentPageUpdate({ field: 'content', value: updatedSections });
+		addNotification(
+			language?.tipsButtonAddedDefault ?? 'Tips button added at the bottom. You can move or hide it.',
+			'success'
+		);
+	}, [
+		isHomePage,
+		hasMonetization,
+		currentPage.data.content,
+		currentPage.editor.loading.active,
+		hasTipsBlockInContent,
+		addNotification,
+		language?.tipsButtonAddedDefault,
+	]);
+
+	// Mark tip button as "seen" when user visits home page with a tips button
+	React.useEffect(() => {
+		if (!isHomePage || !portalProvider.current?.id) return;
+		if (currentPage.editor.loading.active) return;
+		if (!currentPage.data.content?.length) return;
+		if (!hasTipsBlockInContent(currentPage.data.content)) return;
+
+		// Mark as seen in localStorage
+		const key = `portal_tip_button_seen_${portalProvider.current.id}`;
+		if (localStorage.getItem(key) !== 'true') {
+			localStorage.setItem(key, 'true');
+		}
+	}, [
+		isHomePage,
+		portalProvider.current?.id,
+		currentPage.data.content,
+		currentPage.editor.loading.active,
+		hasTipsBlockInContent,
+	]);
 
 	// Keyboard shortcut: Cmd/Ctrl + Shift + S to save
 	React.useEffect(() => {

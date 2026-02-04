@@ -62,7 +62,11 @@ export default function SupporterItem(props: SupporterItemProps) {
 
 			{columns.value && (
 				<S.SupporterAmount>
-					<S.AmountPrimary>{parseFloat(supporter.amountAr).toFixed(amountDecimals)} AR</S.AmountPrimary>
+					{supporter.usdValue ? (
+						<S.AmountPrimary>${supporter.usdValue} USD</S.AmountPrimary>
+					) : (
+						<S.AmountPrimary>{parseFloat(supporter.amountAr).toFixed(amountDecimals)} AR</S.AmountPrimary>
+					)}
 				</S.SupporterAmount>
 			)}
 

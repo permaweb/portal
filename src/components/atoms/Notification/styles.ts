@@ -12,9 +12,9 @@ export const Wrapper = styled.div<{ warning: boolean | undefined }>`
 	align-items: center;
 	padding: 11.5px 17.5px !important;
 	gap: 45px;
-	border: 1px solid ${(props) => props.theme.colors.border.alt4} !important;
+	border: 1px solid ${(props) => props.theme?.colors?.border?.alt4 ?? 'var(--color-card-border, rgba(0,0,0,0.1))'} !important;
 	border-radius: ${STYLING.dimensions.radius.alt3};
-	background: ${(props) => props.theme.colors.container.primary.background};
+	background: ${(props) => props.theme?.colors?.container?.primary?.background ?? 'var(--color-card-background, #fff)'};
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
@@ -40,15 +40,18 @@ export const Icon = styled.div<{ warning: boolean | undefined }>`
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: ${(props) => (props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.indicator.active)};
+	background: ${(props) =>
+		props.warning
+			? props.theme?.colors?.warning?.alt1 ?? 'rgba(231, 76, 60, 0.8)'
+			: props.theme?.colors?.indicator?.active ?? 'rgba(var(--color-primary, 46, 204, 113), 1)'};
 	border-radius: 50%;
 
 	svg {
 		height: 11.5px;
 		width: 11.5px;
 		margin: 6.5px 0 0 0;
-		color: ${(props) => props.theme.colors.font.light1};
-		fill: ${(props) => props.theme.colors.font.light1};
+		color: ${(props) => props.theme?.colors?.font?.light1 ?? '#fff'};
+		fill: ${(props) => props.theme?.colors?.font?.light1 ?? '#fff'};
 	}
 `;
 
@@ -57,21 +60,21 @@ export const Message = styled.span`
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	color: ${(props) => props.theme.colors.font.light1};
-	font-weight: ${(props) => props.theme.typography.weight.bold} !important;
-	font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+	color: ${(props) => props.theme?.colors?.font?.light1 ?? 'rgba(var(--color-text, 0,0,0), 1)'};
+	font-weight: ${(props) => props.theme?.typography?.weight?.bold ?? '600'} !important;
+	font-size: ${(props) => props.theme?.typography?.size?.xSmall ?? '13px'} !important;
 `;
 
 export const Close = styled.div`
 	margin: 0 0 0 auto;
 	button {
 		span {
-			color: ${(props) => props.theme.colors.font.light1} !important;
-			font-size: ${(props) => props.theme.typography.size.xSmall};
+			color: ${(props) => props.theme?.colors?.font?.light1 ?? 'rgba(var(--color-text, 0,0,0), 1)'} !important;
+			font-size: ${(props) => props.theme?.typography?.size?.xSmall ?? '13px'};
 		}
 		&:hover {
 			span {
-				color: ${(props) => props.theme.colors.font.light1} !important;
+				color: ${(props) => props.theme?.colors?.font?.light1 ?? 'rgba(var(--color-text, 0,0,0), 1)'} !important;
 				opacity: 0.75;
 			}
 		}

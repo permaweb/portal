@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Arweave from 'arweave';
 
@@ -11,7 +12,8 @@ import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
 import { Toggle } from 'components/atoms/Toggle';
 import { TxAddress } from 'components/atoms/TxAddress';
-import { MonetizationConfig, PortalPatchMapEnum, TipRow } from 'helpers/types';
+import { URLS } from 'helpers/config';
+import { MonetizationConfig, PageBlockEnum, PageSectionEnum, PortalPatchMapEnum, TipRow } from 'helpers/types';
 import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -27,6 +29,8 @@ const arweave = Arweave.init({
 });
 
 export default function Tips() {
+	const navigate = useNavigate();
+
 	const portalProvider = usePortalProvider();
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -79,6 +83,43 @@ export default function Tips() {
 
 	const canEdit = !!portalProvider.permissions?.updatePortalMeta;
 	const fieldsDisabled = !monetization.enabled || !canEdit;
+
+	// Helper: check if any section has a Tips (monetization) button block
+	const hasTipsBlockInContent = React.useCallback((sections: any[]): boolean => {
+		if (!Array.isArray(sections)) return false;
+		for (const section of sections) {
+			if (!Array.isArray(section?.content)) continue;
+			for (const block of section.content) {
+				if (block.type === PageBlockEnum.MonetizationButton) return true;
+				if (block.type === 'section' && block.content?.content) {
+					if (hasTipsBlockInContent([block.content])) return true;
+				}
+			}
+		}
+		return false;
+	}, []);
+
+	// Check if home page already has a tips button
+	const homePageContent = portalProvider.current?.pages?.['home']?.content;
+	const homePageHasTipsButton = React.useMemo(
+		() => hasTipsBlockInContent(homePageContent || []),
+		[homePageContent, hasTipsBlockInContent]
+	);
+
+	// Track if user has seen the tip button on home page (localStorage)
+	const tipButtonSeenKey = `portal_tip_button_seen_${portalProvider.current?.id}`;
+	const [hasTipButtonBeenSeen, setHasTipButtonBeenSeen] = React.useState(() => {
+		if (typeof window === 'undefined') return false;
+		return localStorage.getItem(tipButtonSeenKey) === 'true';
+	});
+
+	// Update seen state when portal changes
+	React.useEffect(() => {
+		if (portalProvider.current?.id) {
+			const key = `portal_tip_button_seen_${portalProvider.current.id}`;
+			setHasTipButtonBeenSeen(localStorage.getItem(key) === 'true');
+		}
+	}, [portalProvider.current?.id]);
 
 	const pageSize = 5;
 
@@ -179,6 +220,7 @@ export default function Tips() {
 					const amountAr = arweave.ar.winstonToAr(winston);
 
 					const fromProfileId = getTag('From-Profile');
+					const usdValue = getTag('USD-Value') || null;
 
 					return {
 						id: node.id,
@@ -188,6 +230,7 @@ export default function Tips() {
 						fromAddress: getTag('From-Address') || node.owner?.address || '',
 						fromProfile: fromProfileId,
 						location: getTag('Location'),
+						usdValue,
 					};
 				});
 
@@ -302,11 +345,52 @@ export default function Tips() {
 		};
 
 		try {
+			// Prepare the update body
 			const body: any = {
 				Monetization: permawebProvider.libs.mapToProcessCase
 					? permawebProvider.libs.mapToProcessCase(payload)
 					: payload,
 			};
+
+			// If enabling tips and home page doesn't have a tips button, auto-add one
+			if (enabled && !homePageHasTipsButton) {
+				const makeId = () =>
+					typeof crypto?.randomUUID === 'function'
+						? crypto.randomUUID()
+						: `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+				const tipsBlock = {
+					id: makeId(),
+					type: PageBlockEnum.MonetizationButton,
+					content: null,
+					width: 1,
+				};
+
+				const newSection = {
+					type: PageSectionEnum.Row,
+					layout: null,
+					content: [tipsBlock],
+					width: 1,
+				};
+
+				// Get existing home page content or create empty array
+				const existingHomeContent = portalProvider.current?.pages?.['home']?.content || [];
+				const updatedHomeContent = [...existingHomeContent, newSection];
+
+				// Update pages with the new home content
+				const updatedPages = {
+					...portalProvider.current?.pages,
+					home: {
+						...portalProvider.current?.pages?.['home'],
+						content: updatedHomeContent,
+						type: 'grid',
+					},
+				};
+
+				body.Pages = permawebProvider.libs.mapToProcessCase
+					? permawebProvider.libs.mapToProcessCase(updatedPages)
+					: updatedPages;
+			}
 
 			const updateId = await permawebProvider.libs.updateZone(body, portalProvider.current.id, arProvider.wallet);
 			debugLog('info', 'Monetization', 'Monetization update:', updateId);
@@ -314,11 +398,47 @@ export default function Tips() {
 			(portalProvider.current as any).monetization = { monetization: payload };
 			(portalProvider.current as any).Monetization = payload;
 
+			// Update pages in portal state if we added the tips button
+			if (enabled && !homePageHasTipsButton && body.Pages) {
+				const existingHomeContent = portalProvider.current?.pages?.['home']?.content || [];
+				const makeId = () =>
+					typeof crypto?.randomUUID === 'function'
+						? crypto.randomUUID()
+						: `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+				const tipsBlock = {
+					id: makeId(),
+					type: PageBlockEnum.MonetizationButton,
+					content: null,
+					width: 1,
+				};
+
+				const newSection = {
+					type: PageSectionEnum.Row,
+					layout: null,
+					content: [tipsBlock],
+					width: 1,
+				};
+
+				(portalProvider.current as any).pages = {
+					...portalProvider.current?.pages,
+					home: {
+						...portalProvider.current?.pages?.['home'],
+						content: [...existingHomeContent, newSection],
+						type: 'grid',
+					},
+				};
+			}
+
 			if (portalProvider.refreshCurrentPortal) {
 				portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Monetization);
 			}
 
-			addNotification(language.monetizationSaved, 'success');
+			const message =
+				enabled && !homePageHasTipsButton
+					? language?.tipsEnabledWithButton ?? 'Tips enabled! A tip button has been added to your home page.'
+					: language.monetizationSaved;
+			addNotification(message, 'success');
 		} catch (e: any) {
 			debugLog('error', 'Monetization', 'Error saving monetization settings:', e.message ?? 'Unknown error');
 			addNotification(e?.message ?? 'Error saving monetization settings.', 'warning');
@@ -414,9 +534,58 @@ export default function Tips() {
 						)}
 
 						{hasMonetization && !loadingTips && !tipsError && tips.length === 0 && (
-							<S.WrapperEmpty className={'border-wrapper-alt2'}>
-								<p>{language.noTipsYet}</p>
-							</S.WrapperEmpty>
+							<>
+								{/* Show banner only if: button doesn't exist, OR button exists but user hasn't seen it yet */}
+								{(!homePageHasTipsButton || (homePageHasTipsButton && !hasTipButtonBeenSeen)) && (
+									<S.SetupBanner>
+										{homePageHasTipsButton ? (
+											<>
+												<h6>{language?.tipsButtonAddedTitle ?? 'Tip button added!'}</h6>
+												<p>
+													{language?.tipsButtonAddedDescription ??
+														'A tip button has been added to your home page. Visit the page editor to customize its position or style.'}
+												</p>
+												<S.SetupBannerActions>
+													{portalProvider.current?.id && (
+														<Button
+															type={'alt1'}
+															label={language?.tipsGoToHomePage ?? 'Go to Home Page'}
+															handlePress={() => navigate(`${URLS.pageEditMain(portalProvider.current.id)}/home`)}
+														/>
+													)}
+												</S.SetupBannerActions>
+											</>
+										) : (
+											<>
+												<h6>{language.tipsSetupBannerTitle}</h6>
+												<p>{language.tipsSetupBannerDescription}</p>
+												<S.SetupBannerActions>
+													{portalProvider.current?.id && (
+														<>
+															<Button
+																type={'alt1'}
+																label={language.tipsSetupBannerMainPage}
+																handlePress={() => navigate(`${URLS.pageEditMain(portalProvider.current.id)}/home`)}
+															/>
+															<Button
+																type={'alt2'}
+																label={language.tipsSetupBannerInfoPages}
+																handlePress={() => navigate(URLS.pageEditInfo(portalProvider.current.id))}
+															/>
+														</>
+													)}
+												</S.SetupBannerActions>
+											</>
+										)}
+									</S.SetupBanner>
+								)}
+								{/* Show empty state message when banner is not shown (user has seen button) */}
+								{homePageHasTipsButton && hasTipButtonBeenSeen && (
+									<S.WrapperEmpty className={'border-wrapper-alt2'}>
+										<p>{language?.noTipsYet ?? 'No tips received yet for this portal.'}</p>
+									</S.WrapperEmpty>
+								)}
+							</>
 						)}
 
 						{hasMonetization && !loadingTips && !tipsError && tips.length > 0 && (
@@ -435,14 +604,28 @@ export default function Tips() {
 										<tbody>
 											{paginatedTips.map((row) => (
 												<tr key={row.id}>
-													<td>{Number(row.amountAr).toFixed(4)}</td>
+													<td>
+														{Number(row.amountAr).toFixed(4)} AR
+														{row.usdValue && (
+															<span
+																style={{
+																	display: 'block',
+																	fontSize: '0.85em',
+																	color: 'var(--color-text-secondary)',
+																	marginTop: '2px',
+																}}
+															>
+																${row.usdValue} USD
+															</span>
+														)}
+													</td>
 													<td>
 														<TxAddress address={getFrom(row)} wrap={false} />
 													</td>
 													<td>
 														<TxAddress address={row.id} wrap={false} />
 													</td>
-													<td>{row.location.toUpperCase()}</td>
+													<td>{row.location?.toUpperCase() || '–'}</td>
 													<td>{renderDate(row.timestamp)}</td>
 												</tr>
 											))}

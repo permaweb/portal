@@ -282,6 +282,11 @@ export const ARTICLE_BLOCKS = {
 		label: 'Table',
 		icon: ICONS.menu,
 	},
+	[ArticleBlockEnum.MonetizationButton]: {
+		type: ArticleBlockEnum.MonetizationButton,
+		label: 'Tips Button',
+		icon: ICONS.tools,
+	},
 	[ArticleBlockEnum.Embed]: {
 		type: ArticleBlockEnum.Embed,
 		label: 'Embed',
