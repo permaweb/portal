@@ -110,12 +110,22 @@ export function useArTip() {
 
 	const sendTip = React.useCallback(
 		async (to: string, amount: string | undefined, location = 'page', postId?: string) => {
+			// Validate inputs
+			const targetAddress = to?.trim();
+			if (!targetAddress || targetAddress.length !== 43) {
+				throw new Error('Invalid recipient wallet address');
+			}
+
+			const cleanAmount = (amount || '').trim();
+			if (!cleanAmount || isNaN(Number(cleanAmount)) || Number(cleanAmount) <= 0) {
+				throw new Error('Invalid tip amount');
+			}
+
 			if (!walletAddress) {
 				await handleConnect(WalletEnum.wander);
 			}
 
-			const cleanAmount = (amount || '').trim();
-			const quantity = cleanAmount !== '' ? arweave.ar.arToWinston(cleanAmount) : '0';
+			const quantity = arweave.ar.arToWinston(cleanAmount);
 
 			try {
 				if (typeof window !== 'undefined' && (window as any).arweaveWallet) {
@@ -131,7 +141,7 @@ export function useArTip() {
 
 					// Create a test transaction to check fees
 					const testParams = {
-						target: to,
+						target: targetAddress,
 						quantity,
 					};
 
@@ -158,7 +168,7 @@ export function useArTip() {
 						}
 
 						tx = await arweave.createTransaction({
-							target: to,
+							target: targetAddress,
 							quantity: adjustedQuantity.toString(),
 						});
 					}
@@ -175,21 +185,36 @@ export function useArTip() {
 						debugLog('warn', 'useARTip', 'Failed to fetch USD value for tip, proceeding without it:', e);
 					}
 
+					// Build tags - ensure all values are non-empty strings
 					const tagPairs: Array<[string, string]> = [
 						['App-Name', 'Portal'],
 						['Token-Symbol', 'AR'],
-						['Amount', String(quantity)],
-						['To-Address', String(to)],
+						['Amount', String(quantity || '0')],
+						['To-Address', targetAddress],
 						['Type', 'Tip'],
-						['Location', String(location)],
+						['Location', String(location || 'page')],
 					];
-					//
-					if (Name) tagPairs.push(['Portal-Name', String(Name.trim())]);
-					if (walletAddress) tagPairs.push(['From-Address', walletAddress.trim()]);
-					if (profile?.id) tagPairs.push(['From-Profile', String(profile.id)]);
-					if (postId) tagPairs.push(['Location-Post-Id', postId.toString().trim()]);
-					if (usdValue) tagPairs.push(['USD-Value', usdValue]);
-					for (const [k, v] of tagPairs) tx.addTag(k, v);
+
+					// Only add optional tags if they have valid non-empty values
+					const portalName = Name?.trim();
+					if (portalName) tagPairs.push(['Portal-Name', portalName]);
+
+					const fromAddr = walletAddress?.trim();
+					if (fromAddr) tagPairs.push(['From-Address', fromAddr]);
+
+					const profileId = profile?.id;
+					if (profileId) tagPairs.push(['From-Profile', String(profileId)]);
+
+					const postIdStr = postId?.toString().trim();
+					if (postIdStr) tagPairs.push(['Location-Post-Id', postIdStr]);
+
+					// USD value is already a string with 2 decimal places if set
+					if (usdValue && usdValue.trim()) tagPairs.push(['USD-Value', usdValue.trim()]);
+
+					// Add tags to transaction
+					for (const [k, v] of tagPairs) {
+						if (k && v) tx.addTag(k, v);
+					}
 					debugLog('info', 'useARTip', 'Tag pairs:', tagPairs);
 					const signedTx = await window.arweaveWallet.sign(tx);
 					const response = await arweave.transactions.post(signedTx);
