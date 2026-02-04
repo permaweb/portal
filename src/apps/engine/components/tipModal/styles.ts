@@ -15,10 +15,9 @@ export const Modal = styled.div`
 	max-width: 90%;
 	padding: 22px 24px 28px;
 	border-radius: var(--border-radius);
-	background: rgba(var(--color-background), 1); /* use background, not container */
-	border: 1px solid rgba(var(--color-border), 1);
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-
+	background: var(--color-card-background);
+	border: 1px solid var(--color-card-border);
+	box-shadow: var(--preference-card-shadow);
 	color: rgba(var(--color-text), 1);
 	font-family: var(--font-body);
 `;
@@ -30,8 +29,8 @@ export const CloseButton = styled.button`
 	width: 22px;
 	height: 22px;
 	border-radius: 50%;
-	border: 1px solid rgba(var(--color-border), 1);
-	background: rgba(var(--color-background), 1);
+	border: 1px solid var(--color-card-border);
+	background: var(--color-card-background);
 	color: rgba(var(--color-text), 1);
 	cursor: pointer;
 	display: flex;
@@ -43,7 +42,7 @@ export const CloseButton = styled.button`
 	transition: background 120ms;
 
 	&:hover {
-		background: rgba(var(--color-secondary), 0.1);
+		background: rgba(var(--color-text), 0.1);
 	}
 `;
 
@@ -75,21 +74,18 @@ export const PresetRow = styled.div`
 	margin-bottom: 12px;
 `;
 
-export const PresetButton = styled.button<{ active?: boolean }>`
+export const PresetButton = styled.button<{ $active?: boolean }>`
 	padding: 6px 12px;
 	font-size: 13px;
 	border-radius: var(--border-radius);
-	border: 1px solid ${(p) => (p.active ? 'rgba(var(--color-primary), 1)' : 'rgba(var(--color-border), 1)')};
-
-	background: ${(p) => (p.active ? 'rgba(var(--color-primary), 1)' : 'rgba(var(--color-background), 1)')};
-
-	color: ${(p) => (p.active ? 'rgba(var(--color-primary-contrast), 1)' : 'rgba(var(--color-text), 1)')};
-
+	border: 1px solid ${(p) => (p.$active ? 'rgba(var(--color-primary), 1)' : 'var(--color-card-border)')};
+	background: ${(p) => (p.$active ? 'rgba(var(--color-primary), 1)' : 'var(--color-card-background)')};
+	color: ${(p) => (p.$active ? 'rgba(var(--color-primary-contrast), 1)' : 'rgba(var(--color-text), 1)')};
 	cursor: pointer;
 	transition: all 120ms;
 
 	&:hover {
-		background: ${(p) => (p.active ? 'rgba(var(--color-primary), 1)' : 'rgba(var(--color-secondary), 0.08)')};
+		background: ${(p) => (p.$active ? 'rgba(var(--color-primary), 1)' : 'rgba(var(--color-text), 0.1)')};
 	}
 `;
 
@@ -100,13 +96,13 @@ export const InputWrapper = styled.div`
 		width: 80%;
 		padding: 10px 12px;
 		border-radius: var(--border-radius);
-		border: 1px solid rgba(var(--color-border), 1);
-		background: rgba(var(--color-background), 1);
+		border: 1px solid var(--color-card-border);
+		background: var(--color-card-background);
 		color: rgba(var(--color-text), 1);
 		font-size: 14px;
 
 		&::placeholder {
-			color: rgba(var(--color-text-secondary), 1);
+			color: rgba(var(--color-text), 0.6);
 		}
 
 		&:focus {

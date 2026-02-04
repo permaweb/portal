@@ -201,6 +201,26 @@ export default function PageEditor() {
 		language?.tipsButtonAddedDefault,
 	]);
 
+	// Mark tip button as "seen" when user visits home page with a tips button
+	React.useEffect(() => {
+		if (!isHomePage || !portalProvider.current?.id) return;
+		if (currentPage.editor.loading.active) return;
+		if (!currentPage.data.content?.length) return;
+		if (!hasTipsBlockInContent(currentPage.data.content)) return;
+
+		// Mark as seen in localStorage
+		const key = `portal_tip_button_seen_${portalProvider.current.id}`;
+		if (localStorage.getItem(key) !== 'true') {
+			localStorage.setItem(key, 'true');
+		}
+	}, [
+		isHomePage,
+		portalProvider.current?.id,
+		currentPage.data.content,
+		currentPage.editor.loading.active,
+		hasTipsBlockInContent,
+	]);
+
 	// Keyboard shortcut: Cmd/Ctrl + Shift + S to save
 	React.useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
