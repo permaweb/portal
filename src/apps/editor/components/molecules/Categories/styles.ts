@@ -292,6 +292,7 @@ export const CategoryContent = styled.div`
 
 export const CategoryRow = styled.div`
 	display: flex;
+	gap: 7.5px;
 	align-items: center;
 
 	button:last-child {
