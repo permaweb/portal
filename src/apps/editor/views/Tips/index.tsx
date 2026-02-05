@@ -1,8 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import Arweave from 'arweave';
-
 import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -13,6 +11,7 @@ import { Pagination } from 'components/atoms/Pagination';
 import { Toggle } from 'components/atoms/Toggle';
 import { TxAddress } from 'components/atoms/TxAddress';
 import { URLS } from 'helpers/config';
+import { formatAmountDisplay, fromBaseUnits, normalizeTipToken, parseTipTags } from 'helpers/tokens';
 import { MonetizationConfig, PageBlockEnum, PageSectionEnum, PortalPatchMapEnum, TipRow } from 'helpers/types';
 import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -22,11 +21,33 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
-const arweave = Arweave.init({
-	host: 'arweave.net',
-	port: 443,
-	protocol: 'https',
-});
+const DEFAULT_TOKEN_DECIMALS = 12;
+
+const normalizeMonetizationConfig = (config: MonetizationConfig, ownerWallet: string): MonetizationConfig => {
+	const tokenAddress = config.tokenAddress?.trim() || '';
+	const tokenType =
+		config.tokenType === 'AO' || config.tokenType === 'AR'
+			? config.tokenType
+			: tokenAddress && tokenAddress !== 'AR'
+			? 'AO'
+			: 'AR';
+
+	const tokenSymbol = config.tokenSymbol?.trim() || (tokenType === 'AR' ? 'AR' : 'AO');
+	const tokenDecimals = Number.isFinite(config.tokenDecimals)
+		? Math.max(0, Math.floor(Number(config.tokenDecimals)))
+		: tokenType === 'AR'
+		? DEFAULT_TOKEN_DECIMALS
+		: 0;
+
+	return {
+		enabled: !!config.enabled,
+		walletAddress: config.walletAddress || ownerWallet,
+		tokenAddress: tokenAddress || (tokenType === 'AR' ? 'AR' : ''),
+		tokenSymbol,
+		tokenDecimals,
+		tokenType,
+	};
+};
 
 export default function Tips() {
 	const navigate = useNavigate();
@@ -50,12 +71,15 @@ export default function Tips() {
 			((portalProvider.current as any)?.monetization?.monetization as MonetizationConfig | undefined) ||
 			((portalProvider.current as any)?.Monetization as MonetizationConfig | undefined);
 
-		if (existing) return existing;
+		if (existing) return normalizeMonetizationConfig(existing, ownerWallet);
 
 		return {
 			enabled: false,
 			walletAddress: ownerWallet,
 			tokenAddress: 'AR',
+			tokenSymbol: 'AR',
+			tokenDecimals: DEFAULT_TOKEN_DECIMALS,
+			tokenType: 'AR',
 		};
 	});
 
@@ -71,7 +95,7 @@ export default function Tips() {
 			((portalProvider.current as any)?.Monetization as MonetizationConfig | undefined);
 
 		if (existing) {
-			setMonetization(existing);
+			setMonetization(normalizeMonetizationConfig(existing, ownerWallet));
 		} else {
 			setMonetization((prev) => ({
 				...prev,
@@ -139,19 +163,21 @@ export default function Tips() {
 	const hasMonetization = !!existingMonetization?.enabled && !!existingMonetization.walletAddress;
 
 	const monetizationWalletForTips = existingMonetization?.walletAddress || ownerWallet;
+	const activeToken = normalizeTipToken(existingMonetization || monetization);
+	const tokenSymbol = activeToken.symbol || 'AR';
 
-	const totalReceivedAr = React.useMemo(() => {
+	const totalReceived = React.useMemo(() => {
 		if (!tips.length) return '0';
 		try {
 			let total = BigInt(0);
 			for (const t of tips) {
-				total += BigInt(t.winston || '0');
+				total += BigInt(t.amountRaw || '0');
 			}
-			return arweave.ar.winstonToAr(total.toString());
+			return formatAmountDisplay(fromBaseUnits(total.toString(), tips[0]?.tokenDecimals ?? activeToken.decimals));
 		} catch {
 			return '0';
 		}
-	}, [tips]);
+	}, [tips, activeToken.decimals]);
 
 	React.useEffect(() => {
 		setCurrentPage(1);
@@ -170,14 +196,23 @@ export default function Tips() {
 				setLoadingTips(true);
 				setTipsError(null);
 
+				const tagFilters = [
+					`{ name: "App-Name", values: ["Portal"] }`,
+					`{ name: "Type", values: ["Tip"] }`,
+					`{ name: "To-Address", values: $toAddr }`,
+					`{ name: "Token-Symbol", values: ["${tokenSymbol}"] }`,
+				];
+
+				if (activeToken.type === 'AO' && activeToken.processId) {
+					tagFilters.push(`{ name: "Token-Process", values: ["${activeToken.processId}"] }`);
+				}
+
 				const query = {
 					query: `
 				query($toAddr: [String!]!) {
 					transactions(
 						tags: [
-							{ name: "App-Name", values: ["Portal"] },
-							{ name: "Type", values: ["Tip"] },
-							{ name: "To-Address", values: $toAddr }
+							${tagFilters.join(',\n')}
 						],
 						sort: HEIGHT_DESC,
 						first: 150
@@ -214,11 +249,9 @@ export default function Tips() {
 					const node = edge.node;
 					const tags: { name: string; value: string }[] = node.tags || [];
 
-					const getTag = (name: string) => tags.find((t) => t.name === name)?.value || undefined;
-
 					const winston = node.quantity?.winston || '0';
-					const amountAr = arweave.ar.winstonToAr(winston);
-
+					const parsedTip = parseTipTags(tags, winston);
+					const getTag = (name: string) => tags.find((t) => t.name === name)?.value || undefined;
 					const fromProfileId = getTag('From-Profile');
 					const usdValue = getTag('USD-Value') || null;
 
@@ -226,7 +259,13 @@ export default function Tips() {
 						id: node.id,
 						timestamp: node.block?.timestamp ?? null,
 						winston,
-						amountAr,
+						amountAr: parsedTip.amount,
+						amount: parsedTip.amount,
+						amountRaw: parsedTip.amountRaw,
+						tokenSymbol: parsedTip.tokenSymbol,
+						tokenDecimals: parsedTip.tokenDecimals,
+						tokenProcess: parsedTip.tokenProcess,
+						tokenType: parsedTip.tokenType,
 						fromAddress: getTag('From-Address') || node.owner?.address || '',
 						fromProfile: fromProfileId,
 						location: getTag('Location'),
@@ -289,7 +328,15 @@ export default function Tips() {
 		return () => {
 			cancelled = true;
 		};
-	}, [hasMonetization, monetizationWalletForTips, portalProvider.current?.id, reloadKey]);
+	}, [
+		hasMonetization,
+		monetizationWalletForTips,
+		portalProvider.current?.id,
+		reloadKey,
+		activeToken.symbol,
+		activeToken.processId,
+		activeToken.type,
+	]);
 
 	function getFrom(row: TipRow) {
 		if (row.fromProfile) {
@@ -338,10 +385,14 @@ export default function Tips() {
 			enabled,
 		}));
 
+		const normalized = normalizeMonetizationConfig({ ...monetization, enabled }, ownerWallet);
 		const payload: MonetizationConfig = {
-			enabled,
-			walletAddress: monetization.walletAddress.trim(),
-			tokenAddress: monetization.tokenAddress || 'AR',
+			enabled: normalized.enabled,
+			walletAddress: normalized.walletAddress.trim(),
+			tokenAddress: normalized.tokenAddress || 'AR',
+			tokenSymbol: normalized.tokenSymbol,
+			tokenDecimals: normalized.tokenDecimals,
+			tokenType: normalized.tokenType,
 		};
 
 		try {
@@ -457,7 +508,7 @@ export default function Tips() {
 							{hasMonetization && (
 								<S.Summary>
 									<p>
-										<b>{`${Number(totalReceivedAr).toFixed(4)} AR `}</b>
+										<b>{`${totalReceived} ${tokenSymbol} `}</b>
 										{language.received}
 									</p>
 								</S.Summary>
@@ -494,12 +545,70 @@ export default function Tips() {
 								<FormField
 									label={language.tokenAddress}
 									value={monetization.tokenAddress}
-									onChange={() => {}}
+									onChange={(e: any) =>
+										setMonetization((prev) => ({
+											...prev,
+											tokenAddress: e.target.value,
+										}))
+									}
 									invalid={{ status: false, message: null }}
-									disabled={true}
+									disabled={fieldsDisabled || monetization.tokenType !== 'AO'}
 									hideErrorMessage
 								/>
 							</S.Forms>
+							<S.ConfigForm>
+								<div className="row">
+									<span className="field-label">{language.tokenType ?? 'Token Type'}</span>
+									<Toggle
+										options={['AR', 'AO']}
+										activeOption={monetization.tokenType === 'AO' ? 'AO' : 'AR'}
+										handleToggle={(option) =>
+											setMonetization((prev) => ({
+												...prev,
+												tokenType: option === 'AO' ? 'AO' : 'AR',
+												tokenSymbol: option === 'AO' ? prev.tokenSymbol || 'AO' : 'AR',
+												tokenDecimals: option === 'AO' ? prev.tokenDecimals ?? 0 : DEFAULT_TOKEN_DECIMALS,
+												tokenAddress: option === 'AO' ? prev.tokenAddress : 'AR',
+											}))
+										}
+										disabled={fieldsDisabled}
+									/>
+								</div>
+							</S.ConfigForm>
+							{monetization.tokenType === 'AO' && (
+								<S.Forms>
+									<FormField
+										label={language.tokenSymbol ?? 'Token Symbol'}
+										value={monetization.tokenSymbol || ''}
+										onChange={(e: any) =>
+											setMonetization((prev) => ({
+												...prev,
+												tokenSymbol: e.target.value,
+											}))
+										}
+										invalid={{ status: false, message: null }}
+										disabled={fieldsDisabled}
+										hideErrorMessage
+									/>
+									<FormField
+										label={language.tokenDecimals ?? 'Token Decimals'}
+										value={monetization.tokenDecimals ?? 0}
+										onChange={(e: any) =>
+											setMonetization((prev) => {
+												const nextValue = Number(e.target.value);
+												return {
+													...prev,
+													tokenDecimals: Number.isFinite(nextValue) ? Math.max(0, Math.floor(nextValue)) : 0,
+												};
+											})
+										}
+										invalid={{ status: false, message: null }}
+										disabled={fieldsDisabled}
+										hideErrorMessage
+										type="number"
+									/>
+								</S.Forms>
+							)}
 						</S.ConfigForm>
 					</S.Section>
 
@@ -605,7 +714,9 @@ export default function Tips() {
 											{paginatedTips.map((row) => (
 												<tr key={row.id}>
 													<td>
-														{Number(row.amountAr).toFixed(4)} AR
+														{`${formatAmountDisplay(row.amount || row.amountAr || '0')} ${
+															row.tokenSymbol || tokenSymbol
+														}`}
 														{row.usdValue && (
 															<span
 																style={{

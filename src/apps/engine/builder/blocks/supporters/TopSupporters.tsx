@@ -16,13 +16,14 @@ export default function TopSupporters(props: TopSupportersProps) {
 	const { supporters, config, amountDecimals, title } = props;
 
 	// Sort supporters
+	const getAmount = (supporter: SupporterTip) => parseFloat(supporter.amount ?? supporter.amountAr ?? '0');
 	let sortedSupporters = [...supporters];
 	switch (config.sort) {
 		case 'amount_desc':
-			sortedSupporters.sort((a, b) => parseFloat(b.amountAr) - parseFloat(a.amountAr));
+			sortedSupporters.sort((a, b) => getAmount(b) - getAmount(a));
 			break;
 		case 'amount_asc':
-			sortedSupporters.sort((a, b) => parseFloat(a.amountAr) - parseFloat(b.amountAr));
+			sortedSupporters.sort((a, b) => getAmount(a) - getAmount(b));
 			break;
 		case 'time_desc':
 			sortedSupporters.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));

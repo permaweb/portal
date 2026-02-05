@@ -10,10 +10,12 @@ export default function TipModal({
 	isOpen,
 	onClose,
 	onConfirm,
+	tokenSymbol = 'AR',
 }: {
 	isOpen: boolean;
 	onClose: () => void;
 	onConfirm: (amount: string) => void;
+	tokenSymbol?: string;
 }) {
 	const [selected, setSelected] = React.useState<string | null>(null);
 	const [customAmount, setCustomAmount] = React.useState('');
@@ -52,7 +54,7 @@ export default function TipModal({
 								setCustomAmount('');
 							}}
 						>
-							{amt} AR
+							{amt} {tokenSymbol}
 						</S.PresetButton>
 					))}
 				</S.PresetRow>
@@ -63,7 +65,7 @@ export default function TipModal({
 					<input
 						type="text"
 						value={customAmount}
-						placeholder="Custom amount in AR"
+						placeholder={`Custom amount in ${tokenSymbol}`}
 						onChange={(e) => {
 							setCustomAmount(e.target.value);
 							setSelected(null);
