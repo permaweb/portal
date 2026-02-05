@@ -1,19 +1,15 @@
 import React from 'react';
 import Button from 'engine/components/form/button';
 import TipModal from 'engine/components/tipModal';
-import { useArTip } from 'engine/hooks/useARTip';
+import { useTokenTip } from 'engine/hooks/useTokenTip';
 import { useEngineNotifications } from 'engine/providers/notificationProvider';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
+import { normalizeTipToken } from 'helpers/tokens';
+import { MonetizationConfig } from 'helpers/types';
 import { debugLog } from 'helpers/utils';
 
 import * as S from './styles';
-
-type MonetizationSettings = {
-	enabled: boolean;
-	walletAddress: string;
-	tokenAddress: string;
-};
 
 type TipsButtonBlockData = {
 	label?: string;
@@ -29,13 +25,14 @@ type TipsButtonProps = {
 
 export default function TipsButton(props: TipsButtonProps) {
 	const { portal } = usePortalProvider();
-	const { sendTip } = useArTip();
 	const { addNotification } = useEngineNotifications();
 
 	// Portal-level monetization config
-	const monetization = portal?.Monetization as MonetizationSettings | undefined;
+	const monetization = portal?.Monetization as MonetizationConfig | undefined;
 	const enabled = !!monetization?.enabled;
 	const walletAddress = monetization?.walletAddress || null;
+	const token = normalizeTipToken(monetization);
+	const { sendTip } = useTokenTip(token);
 
 	// Block-level config (label + variant)
 	const data: TipsButtonBlockData = React.useMemo(() => {
@@ -67,7 +64,7 @@ export default function TipsButton(props: TipsButtonProps) {
 		try {
 			setSubmitting(true);
 			const txId = await sendTip(walletAddress, amount, location, props.postId);
-			addNotification(`Successfully sent ${amount} AR tip!`, 'success');
+			addNotification(`Successfully sent ${amount} ${token.symbol} tip!`, 'success');
 			debugLog('info', 'TipsButton', 'Tip sent successfully', txId);
 		} catch (e: any) {
 			const errorMessage = e?.message || 'Failed to send tip';
@@ -87,7 +84,7 @@ export default function TipsButton(props: TipsButtonProps) {
 	return (
 		<S.Wrapper className="portal-monetization-button">
 			<Button type={variant} label={label} onClick={handleClick} disabled={props.preview || submitting} />
-			<TipModal isOpen={modalOpen} onClose={handleCloseModal} onConfirm={handleConfirmTip} />
+			<TipModal isOpen={modalOpen} onClose={handleCloseModal} onConfirm={handleConfirmTip} tokenSymbol={token.symbol} />
 		</S.Wrapper>
 	);
 }

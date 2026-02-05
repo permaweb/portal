@@ -315,6 +315,8 @@ export type SupporterTip = {
 	id: string;
 	timestamp: number | null;
 	amountAr: string;
+	amount?: string;
+	amountRaw?: string;
 	winston: string;
 	usdValue?: string | null;
 	fromAddress: string;
@@ -323,6 +325,10 @@ export type SupporterTip = {
 	fromAvatar?: string;
 	location?: string;
 	locationPostId?: string;
+	tokenSymbol?: string;
+	tokenDecimals?: number;
+	tokenProcess?: string;
+	tokenType?: 'AR' | 'AO';
 };
 
 export type TagType = { name: string; value: string };
@@ -452,16 +458,25 @@ export type MonetizationConfig = {
 	enabled: boolean;
 	walletAddress: string;
 	tokenAddress: string;
+	tokenSymbol?: string;
+	tokenDecimals?: number;
+	tokenType?: 'AR' | 'AO';
 };
 
 export type TipRow = {
 	id: string;
 	timestamp: number | null;
 	amountAr: string;
+	amount?: string;
+	amountRaw?: string;
 	fromAddress: string;
 	fromName?: string;
 	fromProfile?: string;
 	location?: string;
 	winston: string;
 	usdValue?: string | null;
+	tokenSymbol?: string;
+	tokenDecimals?: number;
+	tokenProcess?: string;
+	tokenType?: 'AR' | 'AO';
 };

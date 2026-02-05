@@ -40,6 +40,10 @@ export default function SupporterItem(props: SupporterItemProps) {
 				.toUpperCase()
 				.slice(0, 2)
 		: supporter.fromAddress.slice(0, 2).toUpperCase();
+	const tokenSymbol = supporter.tokenSymbol || 'AR';
+	const rawAmount = supporter.amount ?? supporter.amountAr ?? '0';
+	const amountValue = Number(rawAmount);
+	const formattedAmount = Number.isFinite(amountValue) ? amountValue.toFixed(amountDecimals) : rawAmount;
 
 	return (
 		<S.SupporterItem>
@@ -65,7 +69,9 @@ export default function SupporterItem(props: SupporterItemProps) {
 					{supporter.usdValue ? (
 						<S.AmountPrimary>${supporter.usdValue} USD</S.AmountPrimary>
 					) : (
-						<S.AmountPrimary>{parseFloat(supporter.amountAr).toFixed(amountDecimals)} AR</S.AmountPrimary>
+						<S.AmountPrimary>
+							{formattedAmount} {tokenSymbol}
+						</S.AmountPrimary>
 					)}
 				</S.SupporterAmount>
 			)}

@@ -2,7 +2,8 @@ import React from 'react';
 import { useSupporters } from 'engine/hooks/useSupporters';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
-import { SupportersBlockData } from 'helpers/types';
+import { normalizeTipToken } from 'helpers/tokens';
+import { MonetizationConfig, SupportersBlockData } from 'helpers/types';
 
 import FullSupportersList from './FullSupportersList';
 import RecentSupporters from './RecentSupporters';
@@ -16,18 +17,14 @@ type SupportersProps = {
 	postId?: string;
 };
 
-type MonetizationSettings = {
-	enabled: boolean;
-	walletAddress?: string;
-};
-
 export default function Supporters(props: SupportersProps) {
 	const { portal } = usePortalProvider();
 
 	// Portal-level monetization config
-	const monetization = portal?.Monetization as MonetizationSettings | undefined;
+	const monetization = portal?.Monetization as MonetizationConfig | undefined;
 	const enabled = !!monetization?.enabled;
 	const walletAddress = monetization?.walletAddress || null;
+	const activeToken = normalizeTipToken(monetization as any);
 
 	// Block configuration
 	const config: SupportersBlockData = React.useMemo(() => {
@@ -54,7 +51,11 @@ export default function Supporters(props: SupportersProps) {
 	const { supporters, loading, error } = useSupporters(
 		enabled && walletAddress ? walletAddress : null,
 		config.scope,
-		props.postId
+		props.postId,
+		{
+			symbol: activeToken.symbol,
+			process: activeToken.type === 'AO' ? activeToken.processId : undefined,
+		}
 	);
 
 	// If monetization is off or no wallet, render nothing

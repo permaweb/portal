@@ -189,6 +189,9 @@ export function useArTip() {
 					const tagPairs: Array<[string, string]> = [
 						['App-Name', 'Portal'],
 						['Token-Symbol', 'AR'],
+						['Token-Decimals', '12'],
+						['Token-Amount', cleanAmount],
+						['Token-Type', 'AR'],
 						['Amount', String(quantity || '0')],
 						['To-Address', targetAddress],
 						['Type', 'Tip'],

@@ -4,13 +4,15 @@ import Avatar from 'engine/components/avatar';
 import { useProfile } from 'engine/hooks/profiles';
 
 import { getTxEndpoint } from 'helpers/endpoints';
+import { formatAmountDisplay, parseTipTags } from 'helpers/tokens';
 import { checkValidAddress, debugLog } from 'helpers/utils';
 
 import * as S from './styles';
 
 type UserTip = {
 	id: string;
-	amountAr: string;
+	amount: string;
+	tokenSymbol: string;
 	toAddress: string;
 	toName?: string;
 	timestamp?: string;
@@ -132,19 +134,16 @@ export default function SidebarUser() {
 
 					const getTag = (name: string) => tags.find((t) => t.name === name)?.value;
 
-					const amountWinston = getTag('Amount');
 					const toAddress = getTag('To-Address') || node.target || '';
 					const portalName = getTag('Portal-Name');
 					const ts = node.block?.timestamp ? new Date(node.block.timestamp * 1000).toISOString() : undefined;
 
-					let amountAr = '0';
-					if (amountWinston && !Number.isNaN(Number(amountWinston))) {
-						amountAr = (Number(amountWinston) / 1e12).toFixed(3);
-					}
+					const parsedTip = parseTipTags(tags);
 
 					return {
 						id: node.id,
-						amountAr,
+						amount: parsedTip.amount,
+						tokenSymbol: parsedTip.tokenSymbol,
 						toAddress,
 						toName: portalName || undefined,
 						timestamp: ts,
@@ -206,7 +205,9 @@ export default function SidebarUser() {
 							{tips!.map((tip) => (
 								<S.TipRow key={tip.id}>
 									<div>
-										<span className="tip-amount">{tip.amountAr} AR</span>
+										<span className="tip-amount">
+											{formatAmountDisplay(tip.amount)} {tip.tokenSymbol}
+										</span>
 										{tip.toName ? (
 											<span className="tip-target">to {tip.toName}</span>
 										) : (
