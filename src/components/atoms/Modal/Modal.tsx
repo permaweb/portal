@@ -16,13 +16,14 @@ export default function Modal(props: {
 	status?: 'success' | 'warning';
 	className?: string;
 	width?: number;
+	closeDisabled?: boolean;
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
 	const escFunction = React.useCallback(
 		(e: any) => {
-			if (e.key === 'Escape' && props.handleClose) {
+			if (e.key === 'Escape' && props.handleClose && !props.closeDisabled) {
 				props.handleClose();
 			}
 		},
@@ -73,6 +74,7 @@ export default function Modal(props: {
 										src={ICONS.close}
 										handlePress={() => props.handleClose()}
 										active={false}
+										disabled={props.closeDisabled}
 										dimensions={{
 											wrapper: 30,
 											icon: 18.5,

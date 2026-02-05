@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
+import { ReactSVG } from 'react-svg';
 
-import { Post } from 'editor/components/molecules/Post';
+import { PostRow } from 'editor/components/molecules/PostRow';
 import { User } from 'editor/components/molecules/User';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -33,7 +34,7 @@ export const Posts = (props: { paginatedPosts?: PortalAssetType[]; type?: ViewLa
 	return (
 		<S.PostsWrapper type={props.type} className={'border-wrapper-alt2'}>
 			{props.paginatedPosts.map((post: PortalAssetType) => (
-				<Post key={post.id} post={post} />
+				<PostRow key={post.id} post={post} />
 			))}
 		</S.PostsWrapper>
 	);
@@ -157,15 +158,16 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 						<S.PostsActionsRequestsBody>
 							{requests.map((request: any) => {
 								return (
-									<S.PostActionRequest key={request.id}>
+									<S.PostActionRequest
+										key={request.id}
+										onClick={() => handleReviewRedirect(request.id)}
+										className={'border-wrapper-alt2'}
+									>
 										<S.PostActionRequestLine>
 											<p>{request.name}</p>
-											<Button
-												type={'alt4'}
-												label={language.checkPost}
-												handlePress={() => handleReviewRedirect(request.id)}
-												icon={ICONS.newTab}
-											/>
+											<span>
+												{language.checkPost} <ReactSVG src={ICONS.newTab} />{' '}
+											</span>
 										</S.PostActionRequestLine>
 										<S.PostActionRequestLine>
 											<div className={'user-line'}>

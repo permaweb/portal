@@ -110,6 +110,7 @@ export default function ArticleEditor(props: {
 								lastUpdate: source.updatedAt || null,
 								releaseDate: meta.releaseDate || null,
 								authUsers: source.authUsers || [],
+								commentsId: meta.comments || source.metadata?.comments || null,
 							});
 							setOriginalDataState({
 								id: assetId || null,
@@ -126,12 +127,14 @@ export default function ArticleEditor(props: {
 								lastUpdate: source.updatedAt || null,
 								releaseDate: assetData.metadata.releaseDate || null,
 								authUsers: source.authUsers || [],
+								commentsId: assetData.metadata.comments || source.metadata?.comments || null,
 							});
 						}
 
 						const postData = {
 							id: assetId || null,
 							title: meta.name || source.name || '',
+							url: meta.url || null,
 							creator: meta.creator || source.creator || null,
 							status: meta.status || 'draft',
 							categories: meta.categories || [],
@@ -144,6 +147,7 @@ export default function ArticleEditor(props: {
 							lastUpdate: source.updatedAt || null,
 							releaseDate: meta.releaseDate || null,
 							authUsers: source.authUsers || [],
+							commentsId: meta.comments || source.metadata?.comments || null,
 						};
 
 						// Update current data
@@ -161,7 +165,7 @@ export default function ArticleEditor(props: {
 				}
 			} else {
 				// Clear the post if we're creating a new post (assetId is undefined)
-				// but have content from an existing post (currentPost.data.id exists)
+				// But have content from an existing post (currentPost.data.id exists)
 				// This handles the case where user navigates from editing an existing post to creating new
 				if (currentPost.data.id) dispatch(currentPostClear());
 			}

@@ -1,10 +1,10 @@
 # Portal
 
-Portal is a decentralized publishing platform that lets you build your own website with true ownership, built on [Arweave](https://docs.arweave.org/developers/) and [AO](https://ao.arweave.net/). This project consists of three main applications: an editor for content management, a viewer for displaying portals, and an engine for dynamic portal rendering.
+Portal is a decentralized publishing platform that lets you build your own website with true ownership, built on [Arweave](https://docs.arweave.org/developers/) and [AO](https://ao.arweave.net/). This project consists of two main applications: an editor for content management, and an engine for dynamic portal rendering.
 
 ## Architecture
 
-The project is organized into three main applications:
+The project is organized into two main applications:
 
 #### Editor (`/src/apps/editor/`)
 
@@ -13,13 +13,6 @@ The project is organized into three main applications:
 - User management and permissions
 - Design customization tools
 - Media library management
-
-#### Viewer (`/src/apps/viewer/`)
-
-- Public-facing portal display
-- Post viewing and navigation
-- Category browsing
-- Responsive design for end users
 
 #### Engine (`/src/apps/engine/`)
 
@@ -44,20 +37,8 @@ Start the development servers:
 # Start editor application (port 3000)
 npm run start:editor
 
-# Start viewer application (port 4000)
-npm run start:viewer
-
 # Start engine application (port 5000)
 npm run start:engine
-
-# Start editor in testnet mode (uses tario tokens)
-npm run start:editor:testnet
-
-# Start viewer in testnet mode
-npm run start:viewer:testnet
-
-# Start engine in testnet mode
-npm run start:engine:testnet
 ```
 
 ## Building
@@ -68,15 +49,8 @@ Build the applications for production:
 # Build editor application
 npm run build:editor
 
-# Build viewer application
-npm run build:viewer
-
 # Build engine application
 npm run build:engine
-
-# Build for testnet
-npm run build:editor:testnet
-npm run build:viewer:testnet
 ```
 
 ## Deployment
@@ -100,7 +74,6 @@ Development Guide to follow while working on the Project - https://github.com/pe
 src/
 ├── apps/
 │   ├── editor/           # Editor application
-│   ├── viewer/           # Viewer application
 │   └── engine/           # Engine application
 ├── components/           # Shared UI components
 │   ├── atoms/           # Basic UI elements
@@ -112,19 +85,6 @@ src/
 ├── wallet/              # Wallet integration
 └── wrappers/            # Component wrappers
 ```
-
-## Scripts
-
-- `npm run format` - Format code with ESLint and Prettier
-- `npm run start:editor` - Start editor in development mode
-- `npm run start:viewer` - Start viewer in development mode
-- `npm run start:engine` - Start engine in development mode
-- `npm run build:editor` - Build editor for production
-- `npm run build:viewer` - Build viewer for production
-- `npm run build:engine` - Build engine for production
-- `npm run deploy:editor:main` - Deploy editor to main environment
-- `npm run deploy:editor:staging` - Deploy editor to staging environment
-- `npm run deploy:engine` - Deploy engine to production
 
 ## Environment Variables
 

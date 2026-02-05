@@ -11,7 +11,7 @@ import { useProfile } from 'engine/hooks/profiles';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { SelectOptionType } from 'helpers/types';
-import { checkValidAddress, getRedirect } from 'helpers/utils';
+import { checkValidAddress, getRedirect, urlify } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -145,9 +145,14 @@ export default function PostSpotlight(props: any) {
 							</span>
 						</h2>
 						<S.Meta>
-							<Avatar profile={profile} isLoading={isLoadingProfile} size={18} />
-							By
-							<span>{isLoadingProfile ? <Placeholder width="60" /> : profile?.displayName}</span>
+							<NavLink
+								to={getRedirect(`author/${profile?.username ? urlify(profile.username) : profile?.id}`)}
+								onClick={(e) => e.stopPropagation()}
+							>
+								<Avatar profile={profile} isLoading={isLoadingProfile} size={18} />
+								By
+								<span>{isLoadingProfile ? <Placeholder width="60" /> : profile?.displayName}</span>
+							</NavLink>
 							<span>
 								·{' '}
 								{isLoading ? (

@@ -22,6 +22,11 @@ export const Comments = styled.div`
 		padding-left: var(--spacing-xxs);
 		padding-right: var(--spacing-xxs);
 	}
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-large']}) {
+		padding-left: var(--spacing-xs);
+		padding-right: var(--spacing-xs);
+	}
 `;
 
 export const CommentList = styled.div`

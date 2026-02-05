@@ -1,12 +1,13 @@
-// src/portal/blocks/tipsButton.tsx
 import React from 'react';
 import Button from 'engine/components/form/button';
 import TipModal from 'engine/components/tipModal';
 import { useArTip } from 'engine/hooks/useARTip';
+import { useEngineNotifications } from 'engine/providers/notificationProvider';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { debugLog } from 'helpers/utils';
-import { useNotifications } from 'providers/NotificationProvider';
+
+import * as S from './styles';
 
 type MonetizationSettings = {
 	enabled: boolean;
@@ -16,7 +17,7 @@ type MonetizationSettings = {
 
 type TipsButtonBlockData = {
 	label?: string;
-	variant?: 'primary' | 'alt1' | 'alt2';
+	variant?: 'primary' | 'default';
 };
 
 type TipsButtonProps = {
@@ -29,7 +30,7 @@ type TipsButtonProps = {
 export default function TipsButton(props: TipsButtonProps) {
 	const { portal } = usePortalProvider();
 	const { sendTip } = useArTip();
-	const { addNotification } = useNotifications();
+	const { addNotification } = useEngineNotifications();
 
 	// Portal-level monetization config
 	const monetization = portal?.Monetization as MonetizationSettings | undefined;
@@ -84,12 +85,9 @@ export default function TipsButton(props: TipsButtonProps) {
 	};
 
 	return (
-		<>
-			<div className="portal-monetization-button">
-				<Button type={variant} label={label} onClick={handleClick} disabled={props.preview || submitting} />
-			</div>
-
+		<S.Wrapper className="portal-monetization-button">
+			<Button type={variant} label={label} onClick={handleClick} disabled={props.preview || submitting} />
 			<TipModal isOpen={modalOpen} onClose={handleCloseModal} onConfirm={handleConfirmTip} />
-		</>
+		</S.Wrapper>
 	);
 }

@@ -19,6 +19,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import { ArticleBlocks } from '../ArticleBlocks';
+import { TipsBlock } from '../PageSection/TipsBlock';
 
 import { DividerBlock } from './CustomBlocks/DividerBlock';
 import { buildEmbedHtml, EmbedBlock, isSupportedEmbedUrl, parseEmbedUrl } from './CustomBlocks/EmbedBlock';
@@ -851,6 +852,27 @@ export default function ArticleBlock(props: {
 				/>
 			);
 			break;
+		case 'monetizationButton':
+			useCustom = true;
+			element = (
+				<TipsBlock
+					index={props.index}
+					block={{
+						type: 'monetizationButton' as any,
+						layout: props.block.layout || null,
+						content: [],
+						width: props.block.width || 1,
+						data: props.block.data,
+					}}
+					onChangeBlock={(block: any) => {
+						props.onChangeBlock({
+							id: props.block.id,
+							data: block.data,
+						});
+					}}
+				/>
+			);
+			break;
 		default:
 			element = 'p';
 			break;
@@ -860,7 +882,7 @@ export default function ArticleBlock(props: {
 		return (
 			<S.ElementToolbar tabIndex={-1}>
 				<S.EToolbarHeader>
-					<span>{ARTICLE_BLOCKS[props.block.type].label}</span>
+					<span>{ARTICLE_BLOCKS[props.block.type]?.label}</span>
 				</S.EToolbarHeader>
 				<S.EToolbarActions>
 					{currentReducer?.editor.focusedBlock?.id === props.block.id &&

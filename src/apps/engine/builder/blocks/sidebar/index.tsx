@@ -13,7 +13,7 @@ export default function Sidebar(props: any) {
 	// const { podcasts } = usePodcasts();
 
 	return (
-		<S.Sidebar id="Sidebar" $fullWidth={width === 1}>
+		<S.Sidebar id="Sidebar" $width={width}>
 			{Array.isArray(content) && content.includes('date') && <SidebarArchive />}
 
 			{Array.isArray(content) && content.includes('authors') && <SidebarAuthors />}

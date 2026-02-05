@@ -148,6 +148,11 @@ export const NavigationEntries = styled.div<{ $layout: any; maxWidth: number }>`
 			color: rgba(var(--color-secondary), 1) !important;
 		}
 	}
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-large']}) {
+		padding-left: var(--spacing-xs);
+		padding-right: var(--spacing-xs);
+	}
 `;
 
 export const NavigationEntry = styled.div<{ $layout?: any }>`

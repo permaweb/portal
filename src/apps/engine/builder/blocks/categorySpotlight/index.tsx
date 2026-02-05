@@ -12,7 +12,7 @@ import { usePortalProvider } from 'engine/providers/portalProvider';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { SelectOptionType } from 'helpers/types';
-import { getRedirect } from 'helpers/utils';
+import { getRedirect, urlify } from 'helpers/utils';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -97,8 +97,13 @@ export default function CategorySpotlight(props: any) {
 					<S.LeftMeta>
 						<S.LeftTitle>{isLoadingPosts ? <Placeholder /> : post.name}</S.LeftTitle>
 						<S.LeftSource>
-							<Avatar profile={profile} isLoading={isLoadingProfile} size={18} />
-							By <span>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</span>
+							<NavLink
+								to={getRedirect(`author/${profile?.username ? urlify(profile.username) : profile?.id}`)}
+								onClick={(e) => e.stopPropagation()}
+							>
+								<Avatar profile={profile} isLoading={isLoadingProfile} size={18} />
+								By <span>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</span>
+							</NavLink>
 						</S.LeftSource>
 					</S.LeftMeta>
 				</S.LeftEntry>
@@ -131,8 +136,13 @@ export default function CategorySpotlight(props: any) {
 							</span>
 						</S.RightTitle>
 						<S.RightSource>
-							<Avatar profile={profile} isLoading={isLoadingProfile} size={18} />
-							By <span>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</span>
+							<NavLink
+								to={getRedirect(`author/${profile?.username ? urlify(profile.username) : profile?.id}`)}
+								onClick={(e) => e.stopPropagation()}
+							>
+								<Avatar profile={profile} isLoading={isLoadingProfile} size={18} />
+								By <span>{isLoadingProfile ? <Placeholder /> : profile?.displayName}</span>
+							</NavLink>
 						</S.RightSource>
 					</S.RightThumbnail>
 				</S.RightEntry>

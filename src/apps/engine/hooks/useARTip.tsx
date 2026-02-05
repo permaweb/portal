@@ -22,11 +22,84 @@ const fetchARBalance = async (address: string) => {
 	for (const gateway of gateways) {
 		try {
 			const res = await fetch(getBalanceEndpoint(address, gateway));
-			const balance = await res.json();
-			return balance / 1e12;
+			if (!res.ok) continue;
+			const balanceText = (await res.text()).trim();
+			// Arweave gateways return raw winston as text for /wallet/:address/balance
+			const balanceAr = arweave.ar.winstonToAr(balanceText);
+			const numeric = Number(balanceAr);
+			if (Number.isFinite(numeric)) return numeric;
 		} catch {}
 	}
 	return -1;
+};
+
+const PRICE_CACHE_KEY = 'portal_ar_usd_price_v1';
+const PRICE_CACHE_TTL_MS = 60 * 1000;
+
+const readCachedPrice = (): number | null => {
+	if (typeof window === 'undefined' || !window.localStorage) return null;
+	try {
+		const raw = window.localStorage.getItem(PRICE_CACHE_KEY);
+		if (!raw) return null;
+		const parsed = JSON.parse(raw);
+		if (!parsed || typeof parsed.price !== 'number' || typeof parsed.ts !== 'number') return null;
+		if (Date.now() - parsed.ts > PRICE_CACHE_TTL_MS) return null;
+		return parsed.price;
+	} catch {
+		return null;
+	}
+};
+
+const writeCachedPrice = (price: number) => {
+	if (typeof window === 'undefined' || !window.localStorage) return;
+	try {
+		window.localStorage.setItem(PRICE_CACHE_KEY, JSON.stringify({ price, ts: Date.now() }));
+	} catch {}
+};
+
+const fetchJsonWithTimeout = async (url: string, timeoutMs = 4000) => {
+	const controller = new AbortController();
+	const timeout = setTimeout(() => controller.abort(), timeoutMs);
+	try {
+		const res = await fetch(url, { signal: controller.signal });
+		if (!res.ok) return null;
+		return await res.json();
+	} finally {
+		clearTimeout(timeout);
+	}
+};
+
+const fetchARPriceUSD = async (): Promise<number | null> => {
+	const cached = readCachedPrice();
+	if (cached && Number.isFinite(cached)) return cached;
+
+	// Try Redstone API first (no API key required, supports AR)
+	try {
+		const data = await fetchJsonWithTimeout('https://api.redstone.finance/prices?symbols=AR&provider=redstone');
+		const price = data?.AR?.value;
+		if (typeof price === 'number' && Number.isFinite(price)) {
+			writeCachedPrice(price);
+			return price;
+		}
+	} catch (e) {
+		debugLog('warn', 'useARTip', 'Failed to fetch AR price from Redstone:', e);
+	}
+
+	// Fallback: Try CoinGecko API
+	try {
+		const data = await fetchJsonWithTimeout(
+			'https://api.coingecko.com/api/v3/simple/price?ids=arweave&vs_currencies=usd&include_last_updated_at=true'
+		);
+		const price = data?.arweave?.usd;
+		if (typeof price === 'number' && Number.isFinite(price)) {
+			writeCachedPrice(price);
+			return price;
+		}
+	} catch (e) {
+		debugLog('warn', 'useARTip', 'Failed to fetch AR price from CoinGecko:', e);
+	}
+
+	return null;
 };
 
 export function useArTip() {
@@ -37,12 +110,22 @@ export function useArTip() {
 
 	const sendTip = React.useCallback(
 		async (to: string, amount: string | undefined, location = 'page', postId?: string) => {
+			// Validate inputs
+			const targetAddress = to?.trim();
+			if (!targetAddress || targetAddress.length !== 43) {
+				throw new Error('Invalid recipient wallet address');
+			}
+
+			const cleanAmount = (amount || '').trim();
+			if (!cleanAmount || isNaN(Number(cleanAmount)) || Number(cleanAmount) <= 0) {
+				throw new Error('Invalid tip amount');
+			}
+
 			if (!walletAddress) {
 				await handleConnect(WalletEnum.wander);
 			}
 
-			const cleanAmount = (amount || '').trim();
-			const quantity = cleanAmount !== '' ? arweave.ar.arToWinston(cleanAmount) : '0';
+			const quantity = arweave.ar.arToWinston(cleanAmount);
 
 			try {
 				if (typeof window !== 'undefined' && (window as any).arweaveWallet) {
@@ -58,7 +141,7 @@ export function useArTip() {
 
 					// Create a test transaction to check fees
 					const testParams = {
-						target: to,
+						target: targetAddress,
 						quantity,
 					};
 
@@ -85,25 +168,53 @@ export function useArTip() {
 						}
 
 						tx = await arweave.createTransaction({
-							target: to,
+							target: targetAddress,
 							quantity: adjustedQuantity.toString(),
 						});
 					}
 
+					// Fetch AR price in USD (non-blocking - transaction proceeds even if price fetch fails)
+					let usdValue: string | null = null;
+					try {
+						const arPriceUSD = await fetchARPriceUSD();
+						const amountAR = cleanAmount !== '' ? Number(cleanAmount) : 0;
+						if (arPriceUSD && Number.isFinite(amountAR) && amountAR > 0) {
+							usdValue = (amountAR * arPriceUSD).toFixed(2);
+						}
+					} catch (e) {
+						debugLog('warn', 'useARTip', 'Failed to fetch USD value for tip, proceeding without it:', e);
+					}
+
+					// Build tags - ensure all values are non-empty strings
 					const tagPairs: Array<[string, string]> = [
 						['App-Name', 'Portal'],
 						['Token-Symbol', 'AR'],
-						['Amount', String(quantity)],
-						['To-Address', String(to)],
+						['Amount', String(quantity || '0')],
+						['To-Address', targetAddress],
 						['Type', 'Tip'],
-						['Location', String(location)],
+						['Location', String(location || 'page')],
 					];
-					//
-					if (Name) tagPairs.push(['Portal-Name', String(Name.trim())]);
-					if (walletAddress) tagPairs.push(['From-Address', walletAddress.trim()]);
-					if (profile?.id) tagPairs.push(['From-Profile', String(profile.id)]);
-					if (postId) tagPairs.push(['Location-Post-Id', postId.toString().trim()]);
-					for (const [k, v] of tagPairs) tx.addTag(k, v);
+
+					// Only add optional tags if they have valid non-empty values
+					const portalName = Name?.trim();
+					if (portalName) tagPairs.push(['Portal-Name', portalName]);
+
+					const fromAddr = walletAddress?.trim();
+					if (fromAddr) tagPairs.push(['From-Address', fromAddr]);
+
+					const profileId = profile?.id;
+					if (profileId) tagPairs.push(['From-Profile', String(profileId)]);
+
+					const postIdStr = postId?.toString().trim();
+					if (postIdStr) tagPairs.push(['Location-Post-Id', postIdStr]);
+
+					// USD value is already a string with 2 decimal places if set
+					if (usdValue && usdValue.trim()) tagPairs.push(['USD-Value', usdValue.trim()]);
+
+					// Add tags to transaction
+					for (const [k, v] of tagPairs) {
+						if (k && v) tx.addTag(k, v);
+					}
 					debugLog('info', 'useARTip', 'Tag pairs:', tagPairs);
 					const signedTx = await window.arweaveWallet.sign(tx);
 					const response = await arweave.transactions.post(signedTx);

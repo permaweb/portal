@@ -32,19 +32,29 @@ export default function ArticlePostURL() {
 	const [showForm, setShowForm] = React.useState<boolean>(false);
 	const [urlValue, setUrlValue] = React.useState<string>(currentPost.data?.url || '');
 
+	const handleCurrentPostUpdate = React.useCallback(
+		(updatedField: { field: string; value: any }) => {
+			dispatch(currentPostUpdate(updatedField));
+		},
+		[dispatch]
+	);
+
 	React.useEffect(() => {
 		setUrlValue(currentPost.data?.url || '');
 	}, [currentPost.data?.url]);
 
+	// Generate URL on every title change for new posts only
 	React.useEffect(() => {
-		const generatedUrl = urlify(currentPost.data.title);
-		setUrlValue(generatedUrl);
-		handleCurrentPostUpdate({ field: 'url', value: generatedUrl });
-	}, [currentPost.data?.title]);
-
-	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
-		dispatch(currentPostUpdate(updatedField));
-	};
+		// Only generate URL for new posts when:
+		// 1. No assetId (new post - post doesn't exist yet)
+		// 2. Title exists
+		// Regenerate on every title change for new posts (every character typed)
+		if (!assetId && currentPost.data?.title) {
+			const generatedUrl = urlify(currentPost.data.title);
+			setUrlValue(generatedUrl);
+			handleCurrentPostUpdate({ field: 'url', value: generatedUrl });
+		}
+	}, [assetId, currentPost.data?.title, handleCurrentPostUpdate]);
 
 	const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;

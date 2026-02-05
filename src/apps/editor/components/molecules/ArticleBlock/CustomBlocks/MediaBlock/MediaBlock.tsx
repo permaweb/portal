@@ -185,9 +185,10 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 				const result = await calculateUploadCost(mediaData.file);
 
 				if (result) {
-					if (result.hasInsufficientBalance) {
-						setUploadDisabled(true);
-					} else if (!result.requiresConfirmation) {
+					// if (result.hasInsufficientBalance) {
+					// 	setUploadDisabled(true);
+					// }
+					if (!result.requiresConfirmation) {
 						await handleUpload();
 					}
 				}

@@ -300,7 +300,7 @@ export default function Landing() {
 						</S.HeaderActionsWrapper>
 					</S.HeaderContent>
 				</S.HeaderWrapper>
-				<S.ContentWrapper className={'fade-in border-wrapper-alt3'}>
+				<S.ContentWrapper className={'border-wrapper-alt3'}>
 					<S.ContentHeaderWrapper>
 						<h4>{`[${language?.app}]`}</h4>
 					</S.ContentHeaderWrapper>

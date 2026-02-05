@@ -22,6 +22,7 @@ import {
 	filterDuplicates,
 	getByteSize,
 	getByteSizeDisplay,
+	getPortalAssets,
 	hasUnsavedPostChanges,
 	isMac,
 	urlify,
@@ -50,6 +51,7 @@ export default function PostEditor() {
 
 	const { addNotification } = useNotifications();
 	const [showReview, setShowReview] = React.useState<boolean>(false);
+	const [submittedReviewStatus, setSubmittedReviewStatus] = React.useState<'pending' | null>(null);
 	const [missingFields, setMissingFields] = React.useState<string[]>([]);
 
 	const isStaticPage = location.pathname.includes('page');
@@ -266,6 +268,21 @@ export default function PostEditor() {
 				return;
 			}
 
+			// Validate URL uniqueness in external portals (only runs when cross-posting)
+			if (currentPost.data?.externalRecipients?.length > 0) {
+				handleCurrentPostUpdate({
+					field: 'loading',
+					value: { active: true, message: `${language?.validating || 'Validating'}...` },
+				});
+				const externalValidation = await validateExternalPortalUrls();
+				if (!externalValidation.valid) {
+					setShowReview(true);
+					setMissingFields(externalValidation.errors);
+					handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
+					return;
+				}
+			}
+
 			const excludeFromIndex = JSON.stringify([
 				'Balances',
 				'Ticker',
@@ -299,90 +316,7 @@ export default function PostEditor() {
 				}
 			}
 
-			if (assetId) {
-				try {
-					/* Update the post through the portal */
-					let assetContentUpdateId = null;
-					if (reviewStatus === 'Auto') {
-						/* Directly save if it is not in review mode or from non contributor */
-						assetContentUpdateId = await permawebProvider.libs.sendMessage({
-							processId: portalProvider.current.id,
-							wallet: arProvider.wallet,
-							action: 'Run-Action',
-							tags: [
-								{ name: 'Forward-To', value: assetId },
-								{ name: 'Forward-Action', value: 'Update-Asset' },
-								{ name: 'Exclude-Index', value: excludeFromIndex },
-							],
-							data: { Input: data },
-							returnResult: true,
-						});
-					} else {
-						assetContentUpdateId = await permawebProvider.libs.sendMessage({
-							processId: portalProvider.current.id,
-							wallet: arProvider.wallet,
-							action: 'Update-Asset-Through-Zone',
-							tags: [
-								{ name: 'Forward-To', value: assetId },
-								{ name: 'Forward-Action', value: 'Update-Asset' },
-								{ name: 'Exclude-Index', value: excludeFromIndex },
-							],
-							data: { Input: data },
-						});
-					}
-
-					// await handleExternalRecipients(assetId);
-
-					if (isStaticPage) {
-						const currentPages = portalProvider.current?.pages || {};
-
-						// Find the current page by looking for the asset ID in the page values
-						const currentPageEntry: any = Object.entries(currentPages).find(([_, page]: any) => page.id === assetId);
-						const currentPageKey = currentPageEntry?.[0];
-						const currentPageName = currentPageEntry?.[1]?.name;
-
-						// Only update pages if the title has changed
-						if (urlify(currentPageName) !== urlify(currentPost.data.title)) {
-							const updatedPages = {
-								...currentPages,
-								[urlify(currentPost.data.title)]: {
-									type: 'static',
-									id: assetId,
-									name: currentPost.data.title,
-								},
-							};
-
-							// Remove the old page entry using the correct key
-							if (currentPageKey) {
-								delete updatedPages[currentPageKey];
-							}
-
-							const pagesUpdateId = await permawebProvider.libs.updateZone(
-								{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
-								portalProvider.current.id,
-								arProvider.wallet
-							);
-
-							portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
-
-							debugLog('info', 'PostEditor', `Pages update: ${pagesUpdateId}`);
-						}
-					}
-
-					debugLog('info', 'PostEditor', `Asset content update: ${assetContentUpdateId}`);
-					addNotification(`${language?.postUpdated}!`, 'success', { persistent: true });
-					portalProvider.refreshCurrentPortal([
-						...(isStaticPage ? [PortalPatchMapEnum.Presentation] : []),
-						PortalPatchMapEnum.Posts,
-						PortalPatchMapEnum.Requests,
-					]);
-
-					// Update original data to reflect the saved state
-					dispatch(setOriginalData(currentPost.data));
-				} catch (e: any) {
-					addNotification(e.message ?? language?.errorUpdatingPost, 'warning', { persistent: true });
-				}
-			} else {
+			if (!assetId) {
 				try {
 					const args = {
 						name: currentPost.data.title,
@@ -485,6 +419,7 @@ export default function PostEditor() {
 							}
 						} else {
 							portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Requests);
+							setSubmittedReviewStatus('pending');
 						}
 					}
 
@@ -501,6 +436,90 @@ export default function PostEditor() {
 				} catch (e: any) {
 					debugLog('error', 'PostEditor', e);
 					addNotification(e.message ?? 'Error creating post', 'warning', { persistent: true });
+				}
+			} else {
+				try {
+					/* Update the post through the portal */
+					let assetContentUpdateId = null;
+					if (reviewStatus === 'Auto') {
+						/* Directly save if it is not in review mode or from non contributor */
+						assetContentUpdateId = await permawebProvider.libs.sendMessage({
+							processId: portalProvider.current.id,
+							wallet: arProvider.wallet,
+							action: 'Run-Action',
+							tags: [
+								{ name: 'Forward-To', value: assetId },
+								{ name: 'Forward-Action', value: 'Update-Asset' },
+								{ name: 'Exclude-Index', value: excludeFromIndex },
+							],
+							data: { Input: data },
+							returnResult: true,
+						});
+					} else {
+						assetContentUpdateId = await permawebProvider.libs.sendMessage({
+							processId: portalProvider.current.id,
+							wallet: arProvider.wallet,
+							action: 'Update-Asset-Through-Zone',
+							tags: [
+								{ name: 'Forward-To', value: assetId },
+								{ name: 'Forward-Action', value: 'Update-Asset' },
+								{ name: 'Exclude-Index', value: excludeFromIndex },
+							],
+							data: { Input: data },
+						});
+					}
+
+					// await handleExternalRecipients(assetId);
+
+					if (isStaticPage) {
+						const currentPages = portalProvider.current?.pages || {};
+
+						// Find all entries with the current asset ID
+						const matchingEntries: any = Object.entries(currentPages).filter(([_, page]: any) => page.id === assetId);
+						const currentPageName = matchingEntries[0]?.[1]?.name;
+
+						// Only update pages if the title has changed
+						if (currentPageName !== currentPost.data.title) {
+							// Start with all existing pages
+							const updatedPages = { ...currentPages };
+
+							// Mark all old entries with the same asset ID as 'Removed'
+							matchingEntries.forEach(([key]) => {
+								updatedPages[key] = 'Removed';
+							});
+
+							// Add the new entry with updated title
+							updatedPages[urlify(currentPost.data.title)] = {
+								type: 'static',
+								id: assetId,
+								name: currentPost.data.title,
+							};
+
+							const pagesUpdateId = await permawebProvider.libs.updateZone(
+								{ Pages: permawebProvider.libs.mapToProcessCase(updatedPages) },
+								portalProvider.current.id,
+								arProvider.wallet
+							);
+
+							portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
+
+							debugLog('info', 'PostEditor', `Pages update: ${pagesUpdateId}`);
+						}
+					}
+
+					debugLog('info', 'PostEditor', `Asset content update: ${assetContentUpdateId}`);
+
+					addNotification(`${language?.postUpdated}!`, 'success', { persistent: true });
+					portalProvider.refreshCurrentPortal([
+						...(isStaticPage ? [PortalPatchMapEnum.Presentation] : []),
+						PortalPatchMapEnum.Posts,
+						PortalPatchMapEnum.Requests,
+					]);
+
+					// Update original data to reflect the saved state
+					dispatch(setOriginalData(currentPost.data));
+				} catch (e: any) {
+					addNotification(e.message ?? language?.errorUpdatingPost, 'warning', { persistent: true });
 				}
 			}
 
@@ -631,6 +650,44 @@ export default function PostEditor() {
 		handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
 	}
 
+	async function validateExternalPortalUrls(): Promise<{ valid: boolean; errors: string[] }> {
+		const errors: string[] = [];
+
+		if (!currentPost.data?.externalRecipients?.length || !currentPost.data.url) {
+			return { valid: true, errors: [] };
+		}
+
+		for (const portalId of currentPost.data.externalRecipients) {
+			const portal = portalProvider.portals?.find((p: PortalHeaderType) => p.id === portalId);
+			const portalName = portal?.name || portalId;
+
+			try {
+				const response = await permawebProvider.libs.readState({
+					processId: portalId,
+					path: 'Posts',
+					hydrate: true,
+				});
+
+				const posts = permawebProvider.libs.mapFromProcessCase(response);
+				const assets = getPortalAssets(posts?.index);
+
+				if (assets?.length) {
+					const duplicateUrl = assets.some(
+						(asset: any) => asset.metadata?.url?.toLowerCase() === currentPost.data.url.toLowerCase()
+					);
+
+					if (duplicateUrl) {
+						errors.push(`Post URL already exists in "${portalName}"`);
+					}
+				}
+			} catch (e: any) {
+				debugLog('warn', 'PostEditor', `Failed to validate URL for portal ${portalId}:`, e.message);
+			}
+		}
+
+		return { valid: errors.length === 0, errors };
+	}
+
 	function validateSubmit() {
 		let valid: boolean = true;
 		let message: string | null = null;
@@ -699,6 +756,45 @@ export default function PostEditor() {
 		return valid;
 	}
 
+	function getSubmittedReviewStatus() {
+		let renderModal = true;
+
+		let header = '';
+		let description = '';
+
+		switch (submittedReviewStatus) {
+			case 'pending':
+				header = language.postSavedHeader;
+				description = language.postSavedDescription;
+				break;
+			default:
+				renderModal = false;
+				break;
+		}
+
+		if (renderModal) {
+			return (
+				<Modal header={header} handleClose={() => setSubmittedReviewStatus(null)}>
+					<S.ModalWrapper>
+						<S.ModalBodyWrapper>
+							<p>{description}</p>
+						</S.ModalBodyWrapper>
+						<S.ModalActionsWrapper>
+							<Button
+								type={'alt1'}
+								label={language?.close}
+								handlePress={() => setSubmittedReviewStatus(null)}
+								disabled={false}
+							/>
+						</S.ModalActionsWrapper>
+					</S.ModalWrapper>
+				</Modal>
+			);
+		}
+
+		return null;
+	}
+
 	return (
 		<>
 			<ArticleEditor
@@ -748,6 +844,7 @@ export default function PostEditor() {
 					</S.ModalWrapper>
 				</Modal>
 			)}
+			{submittedReviewStatus && getSubmittedReviewStatus()}
 		</>
 	);
 }

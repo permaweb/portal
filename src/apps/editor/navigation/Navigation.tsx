@@ -9,10 +9,12 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
+import { Modal } from 'components/atoms/Modal';
 import { ICONS, STYLING, URLS } from 'helpers/config';
 import { PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
-import { debugLog, formatAddress, isOnlyPortal, resolvePrimaryDomain } from 'helpers/utils';
+import { debugLog, formatAddress, isNotOwner, isOnlyPortal, resolvePrimaryDomain } from 'helpers/utils';
 import { checkWindowCutoff } from 'helpers/window';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -25,6 +27,8 @@ import * as S from './styles';
 export default function Navigation(props: { open: boolean; toggle: () => void }) {
 	const navigate = useNavigate();
 	const location = useLocation();
+
+	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
@@ -39,6 +43,8 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	const [portalUpdating, setPortalUpdating] = React.useState<boolean>(false);
 	const [pendingPortalId, setPendingPortalId] = React.useState<string | null>(null);
 	const [isResizing, setIsResizing] = React.useState<boolean>(false);
+	const [showLeaveConfirmation, setShowLeaveConfirmation] = React.useState<boolean>(false);
+	const [leaveLoading, setLeaveLoading] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
 		const header = document.getElementById('navigation-header');
@@ -216,6 +222,53 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		if (!desktop) props.toggle();
 	};
 
+	const handleLeavePortal = async () => {
+		if (!portalProvider.current?.id || !permawebProvider.profile?.id || !arProvider.wallet) return;
+
+		setLeaveLoading(true);
+		try {
+			const updatedPortals = permawebProvider.profile.portals?.filter(
+				(portal: PortalHeaderType) => portal.id !== portalProvider.current?.id
+			);
+
+			const profileUpdateId = await permawebProvider.libs.updateZone(
+				{ Portals: permawebProvider.libs.mapToProcessCase(updatedPortals) },
+				permawebProvider.profile.id,
+				arProvider.wallet
+			);
+
+			debugLog('info', 'Navigation', 'Profile update:', profileUpdateId);
+
+			const leaveIdProfile = await permawebProvider.libs.sendMessage({
+				processId: permawebProvider.profile.id,
+				wallet: arProvider.wallet,
+				action: 'Run-Action',
+				tags: [
+					{ name: 'Forward-To', value: portalProvider.current.id },
+					{ name: 'Forward-Action', value: 'Zone-Leave' },
+				],
+				returnResult: true,
+			});
+			debugLog('info', 'Navigation', 'Leave zone (profile):', leaveIdProfile);
+
+			const leaveIdWallet = await permawebProvider.libs.leaveZone(portalProvider.current.id, arProvider.wallet);
+			debugLog('info', 'Navigation', 'Leave zone (wallet):', leaveIdWallet);
+
+			permawebProvider.refreshProfile();
+			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Users);
+
+			addNotification(`${language?.portalUpdated}!`, 'success');
+			setShowLeaveConfirmation(false);
+
+			// Navigate back to base and reload
+			navigate(URLS.base);
+			window.location.reload();
+		} catch (e: any) {
+			addNotification(e.message ?? 'Error leaving portal', 'warning');
+		}
+		setLeaveLoading(false);
+	};
+
 	const navigationToggle = React.useMemo(() => {
 		return (
 			<S.ToggleWrapper open={props.open}>
@@ -239,11 +292,13 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		const content = (
 			<>
 				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
-				<S.PanelContent open={props.open} className={'fade-in scroll-wrapper-hidden'}>
+				<S.PanelContent open={props.open} className={'scroll-wrapper-hidden'}>
 					{paths.map((element, index) => (
 						<S.PanelLink key={index} showText={showText} useFill={element.useFill}>
 							<Link to={element.path} onClick={(e) => handleNavigate(e, element.path)}>
-								<ReactSVG src={element.icon} />
+								<S.PanelIconWrapper showText={showText}>
+									<ReactSVG src={element.icon} />
+								</S.PanelIconWrapper>
 								{showText && element.label}
 								{!showText && (
 									<S.LinkTooltip className={'info'}>
@@ -254,9 +309,11 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 						</S.PanelLink>
 					))}
 				</S.PanelContent>
-				<S.PanelFooter open={props.open} showText={showText} className={'fade-in'}>
+				<S.PanelFooter open={props.open} showText={showText}>
 					<Link to={URLS.docsIntro} onClick={(e) => handleNavigate(e, URLS.docsIntro)}>
-						<ReactSVG src={ICONS.help} />
+						<S.PanelIconFooterWrapper showText={showText}>
+							<ReactSVG src={ICONS.help} />
+						</S.PanelIconFooterWrapper>
 						{showText && language?.helpCenter}
 						{!showText && (
 							<S.HelpCenterTooltip className={'info'}>
@@ -270,7 +327,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 		if (desktop) {
 			return (
-				<S.Panel open={props.open} className={'fade-in'} width={props.open ? navWidth : 0}>
+				<S.Panel open={props.open} width={props.open ? navWidth : 0}>
 					{props.open && (
 						<>
 							{content}
@@ -282,7 +339,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		} else {
 			return (
 				<>
-					<S.Panel open={props.open} className={'fade-in'} width={navWidth}>
+					<S.Panel open={props.open} width={navWidth}>
 						<CloseHandler active={props.open} disabled={!props.open} callback={() => props.toggle()}>
 							{content}
 						</CloseHandler>
@@ -337,7 +394,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 	const portal = React.useMemo(() => {
 		if (portalProvider.current?.id) {
 			return (
-				<S.PortalWrapper className={'fade-in'}>
+				<S.PortalWrapper>
 					<CloseHandler
 						active={showPortalDropdown}
 						disabled={!showPortalDropdown}
@@ -486,6 +543,14 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										</button>
 									)}
 								</S.PDropdownFooter>
+								{isNotOwner(portalProvider.current, arProvider.walletAddress) && (
+									<S.PDropdownWarning>
+										<button onClick={() => setShowLeaveConfirmation(true)}>
+											<ReactSVG src={ICONS.warning} />
+											{language?.leavePortal}
+										</button>
+									</S.PDropdownWarning>
+								)}
 							</S.PortalDropdown>
 						)}
 					</CloseHandler>
@@ -528,6 +593,35 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 					</S.ActionsWrapper>
 				</S.Content>
 			</S.Header>
+			{showLeaveConfirmation && (
+				<Modal
+					header={language?.confirm}
+					handleClose={() => setShowLeaveConfirmation(false)}
+					closeDisabled={leaveLoading}
+				>
+					<S.LeaveModalWrapper>
+						<S.LeaveModalBodyWrapper>
+							<p>{language?.leavePortalConfirmationInfo}</p>
+						</S.LeaveModalBodyWrapper>
+						<S.LeaveModalActionsWrapper>
+							<Button
+								type={'primary'}
+								label={language?.cancel}
+								handlePress={() => setShowLeaveConfirmation(false)}
+								disabled={leaveLoading}
+							/>
+							<Button
+								type={'primary'}
+								label={language?.leavePortalConfirmation}
+								handlePress={() => handleLeavePortal()}
+								disabled={leaveLoading}
+								loading={leaveLoading}
+								warning
+							/>
+						</S.LeaveModalActionsWrapper>
+					</S.LeaveModalWrapper>
+				</Modal>
+			)}
 		</>
 	);
 }

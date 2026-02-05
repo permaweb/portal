@@ -10,6 +10,7 @@ import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import Avatar from 'engine/components/avatar';
 import ModalPortal from 'engine/components/modalPortal';
 import ProfileEditor from 'engine/components/profileEditor';
+import { useCommentRules } from 'engine/hooks/comments';
 import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 import {
@@ -58,6 +59,8 @@ function CommentEditorContent(props: any) {
 	const [showAuthorDropdown, setShowAuthorDropdown] = React.useState(false);
 	const dropdownRef = React.useRef<HTMLDivElement>(null);
 	const [showProfileManage, setShowProfileManage] = React.useState(false);
+	const { rules } = useCommentRules(commentsId);
+	const [ruleError, setRuleError] = React.useState<string | null>(null);
 	const language = languageProvider.object?.[languageProvider.current] ?? null;
 	React.useEffect(() => {
 		if (initialContent && isEditMode) {
@@ -117,6 +120,13 @@ function CommentEditorContent(props: any) {
 			setShowProfileManage(true);
 			return;
 		}
+
+		const error = validateRules(editorText);
+		if (error) {
+			setRuleError(error);
+			return;
+		}
+
 		if (!canSend || isSubmitting) return;
 
 		let plainText = '';
@@ -206,6 +216,36 @@ function CommentEditorContent(props: any) {
 		);
 	};
 
+	const validateRules = (text: string): string | null => {
+		if (!rules) return null;
+
+		// 1. Profile Age Check
+		const dateCreated = profile?.dateCreated || profile?.createdAt;
+		if (rules.profileAgeRequired > 0 && dateCreated) {
+			const profileAge = Date.now() - dateCreated;
+			if (profileAge < rules.profileAgeRequired) {
+				const daysRequired = Math.ceil(rules.profileAgeRequired / (24 * 60 * 60 * 1000));
+				return `Your profile must be at least ${daysRequired} days old to comment.`;
+			}
+		}
+
+		// 2. Profile Thumbnail Check
+		if (rules.requireProfileThumbnail && !profile?.thumbnail) {
+			return 'You must have a profile picture to comment.';
+		}
+
+		// 3. Muted Words Check
+		if (rules.mutedWords?.length > 0) {
+			const lowerText = text.toLowerCase();
+			const foundWord = rules.mutedWords.find((word: string) => lowerText.includes(word.toLowerCase()));
+			if (foundWord) {
+				return `Your comment contains a blocked word: "${foundWord}"`;
+			}
+		}
+
+		return null;
+	};
+
 	const handleEditorChange = () => {
 		editor.getEditorState().read(() => {
 			const root = $getRoot();
@@ -213,7 +253,11 @@ function CommentEditorContent(props: any) {
 			setEditorText(text);
 			const trimmedText = text.trim();
 			const isDuplicate = checkForDuplicate(trimmedText);
-			setCanSend(trimmedText.length > 0 && text.length <= MAX_EDITOR_LENGTH && !isDuplicate);
+
+			const error = validateRules(text);
+			setRuleError(error);
+
+			setCanSend(trimmedText.length > 0 && text.length <= MAX_EDITOR_LENGTH && !isDuplicate && !error);
 		});
 	};
 
@@ -227,6 +271,7 @@ function CommentEditorContent(props: any) {
 	const roles = Array.isArray(profile?.roles) ? profile.roles : profile?.roles ? [profile.roles] : [];
 	return (
 		<>
+			{ruleError && <S.RuleError>{ruleError}</S.RuleError>}
 			<S.Editor onClick={handleEditorClick}>
 				{portalId && !isEditMode && roles && (roles.includes('Admin') || roles.includes('Moderator')) && (
 					<S.AuthorSelector ref={dropdownRef}>

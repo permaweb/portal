@@ -18,6 +18,7 @@ import Header from './builder/base/header';
 import Navigation from './builder/base/navigation';
 import Loader from './components/loader';
 import ZoneEditor from './components/zoneEditor';
+import { EngineNotificationProvider } from './providers/notificationProvider';
 import { GlobalStyles } from './global-styles';
 import * as S from './global-styles';
 
@@ -226,16 +227,18 @@ function App() {
 ReactDOM.createRoot(document.getElementById('portal') as HTMLElement).render(
 	<HashRouter>
 		<LanguageProvider>
-			<ArweaveProvider>
-				<PermawebProvider>
-					<NotificationProvider>
+			<NotificationProvider>
+				<ArweaveProvider>
+					<PermawebProvider>
 						<PortalProvider>
-							<GlobalStyles />
-							<App />
+							<EngineNotificationProvider>
+								<GlobalStyles />
+								<App />
+							</EngineNotificationProvider>
 						</PortalProvider>
-					</NotificationProvider>
-				</PermawebProvider>
-			</ArweaveProvider>
+					</PermawebProvider>
+				</ArweaveProvider>
+			</NotificationProvider>
 		</LanguageProvider>
 	</HashRouter>
 );

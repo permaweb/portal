@@ -48,6 +48,13 @@ export default function Navigation(props: any) {
 
 	const isSideNav = layout?.position === 'left' || layout?.position === 'right';
 
+	const staticPages = React.useMemo(() => {
+		if (!portal?.Pages) return [];
+		return Object.entries(portal.Pages)
+			.filter(([_, page]: [string, any]) => page?.type === 'static')
+			.map(([key, page]: [string, any]) => ({ key, ...page }));
+	}, [portal?.Pages]);
+
 	const handleMouseDown = (e: React.MouseEvent) => {
 		e.preventDefault();
 		setIsDragging(true);
@@ -280,6 +287,13 @@ export default function Navigation(props: any) {
 					Object.entries(content).map(([key, entry]: [string, any]) => (
 						<NavigationEntry key={key} index={key} entry={entry} layout={layout} />
 					))}
+				{staticPages.map((page: any) => (
+					<S.NavigationEntry key={`static-${page.key}`} $layout={layout}>
+						<S.NavItem>
+							<NavLink to={getRedirect(`post/${page.id}`)}>{page.name}</NavLink>
+						</S.NavItem>
+					</S.NavigationEntry>
+				))}
 				{!isSideNav && <Search />}
 			</S.NavigationEntries>
 			{layoutEditMode && (
@@ -318,6 +332,13 @@ export default function Navigation(props: any) {
 											onClose={() => setMobileMenuOpen(false)}
 										/>
 									))}
+								{staticPages.map((page: any) => (
+									<S.MobileNavEntry key={`mobile-static-${page.key}`}>
+										<NavLink to={getRedirect(`post/${page.id}`)} onClick={() => setMobileMenuOpen(false)}>
+											{page.name}
+										</NavLink>
+									</S.MobileNavEntry>
+								))}
 							</S.MobileDrawerEntries>
 							<S.MobileLinks>
 								<SocialLinks />

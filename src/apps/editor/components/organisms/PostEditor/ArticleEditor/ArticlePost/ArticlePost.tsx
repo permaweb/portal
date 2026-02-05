@@ -6,6 +6,7 @@ import { Topics } from 'editor/components/molecules/Topics';
 import { PortalCategoryType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
+import { ArticlePostCommentRules } from './ArticlePostCommentRules';
 import { ArticlePostContribute } from './ArticlePostContribute';
 import { ArticlePostCreator } from './ArticlePostCreator';
 import { ArticlePostDescription } from './ArticlePostDescription';
@@ -58,14 +59,14 @@ function ArticlePost(props: {
 					</S.SectionEnd>
 				</S.SectionBody>
 			</S.Section>
-			<S.Section>
+			<S.DescriptionSection>
 				<S.SectionHeader>
 					<p>{language?.description}</p>
 				</S.SectionHeader>
 				<S.SectionBody>
 					<ArticlePostDescription />
 				</S.SectionBody>
-			</S.Section>
+			</S.DescriptionSection>
 			<S.Section>
 				<S.SectionHeaderInput>
 					<p>{language?.categories}</p>
@@ -92,6 +93,16 @@ function ArticlePost(props: {
 					</S.SectionStart>
 				</S.SectionBody>
 			</S.ContributeSection>
+			<S.Section>
+				<S.SectionHeader>
+					<p>{language?.commentRules}</p>
+				</S.SectionHeader>
+				<S.SectionBody>
+					<S.SectionStart>
+						<ArticlePostCommentRules />
+					</S.SectionStart>
+				</S.SectionBody>
+			</S.Section>
 		</S.Wrapper>
 	);
 }

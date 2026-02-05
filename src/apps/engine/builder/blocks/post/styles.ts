@@ -325,6 +325,11 @@ export const Post = styled.div`
 		padding-right: var(--spacing-xxs);
 		box-sizing: border-box;
 	}
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-large']}) {
+		padding-left: var(--spacing-xs);
+		padding-right: var(--spacing-xs);
+	}
 `;
 
 export const Description = styled.p`
@@ -482,4 +487,21 @@ export const ModalActions = styled.div`
 	justify-content: flex-end;
 	gap: 10px;
 	margin-top: 10px;
+`;
+
+export const TransactionLink = styled.div`
+	width: 100%;
+	max-width: 950px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: var(--spacing-l);
+
+	a {
+		font-size: var(--font-size-default);
+		color: rgba(var(--color-text), 0.6);
+
+		&:hover {
+			color: rgba(var(--color-primary), 1);
+		}
+	}
 `;

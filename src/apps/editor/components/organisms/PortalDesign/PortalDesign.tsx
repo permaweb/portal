@@ -70,7 +70,7 @@ export default function PortalDesign() {
 				open={showPanel}
 				header={header}
 				handleClose={() => setShowPanel(false)}
-				width={panelType === 'images' ? 700 : 500}
+				width={550}
 				closeHandlerDisabled={true}
 			>
 				<S.PanelBodyWrapper>

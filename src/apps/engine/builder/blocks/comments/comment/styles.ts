@@ -90,6 +90,7 @@ export const PortalMenuTrigger = styled.div<{ $active: boolean }>`
 	justify-content: center;
 	width: 20px;
 	height: 20px;
+	align-self: flex-start;
 	cursor: pointer;
 	opacity: ${(props) => (props.$active ? 1 : 0.6)};
 	transition: opacity 0.2s;
