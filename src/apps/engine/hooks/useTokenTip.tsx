@@ -21,14 +21,16 @@ const arweave = Arweave.init({
 
 type UseTokenTipOptions = {
 	createReceipt?: boolean;
+	sendFromProfile?: boolean;
 };
 
 export function useTokenTip(tokenOverride?: TipToken, options?: UseTokenTipOptions) {
 	const portalProvider = usePortalProvider();
-	const { profile, deps } = usePermawebProvider();
+	const { profile, deps, libs } = usePermawebProvider();
 	const { walletAddress, handleConnect } = useArweaveProvider();
 	const { sendTip: sendArTip } = useArTip();
 	const { Name } = portalProvider?.portal || {};
+	const isLegacyProfile = (profile as any)?.isLegacyProfile;
 
 	const sendTip = React.useCallback(
 		async (to: string, amount: string | undefined, location: 'page' | 'post' = 'page', postId?: string) => {
@@ -56,26 +58,74 @@ export function useTokenTip(tokenOverride?: TipToken, options?: UseTokenTipOptio
 				await handleConnect(WalletEnum.wander);
 			}
 
-			if (!deps?.ao?.message) {
-				throw new Error('AO connection not available');
-			}
-
 			const quantity = toBaseUnits(cleanAmount, token.decimals);
-			const signer =
-				deps?.signer ||
-				(typeof window !== 'undefined' && (window as any).arweaveWallet
-					? createSigner((window as any).arweaveWallet)
-					: undefined);
 
-			const messageId = await deps.ao.message({
-				process: token.processId,
-				tags: [
-					{ name: 'Action', value: 'Transfer' },
-					{ name: 'Recipient', value: targetAddress },
-					{ name: 'Quantity', value: quantity },
-				],
-				signer,
-			});
+			let messageId: string;
+
+			if (options?.sendFromProfile && profile?.id && libs?.sendMessage) {
+				if (isLegacyProfile) {
+					messageId = await libs.sendMessage({
+						processId: profile.id,
+						action: 'Transfer',
+						tags: [
+							{ name: 'Action', value: 'Transfer' },
+							{ name: 'Target', value: token.processId },
+							{ name: 'Recipient', value: targetAddress },
+							{ name: 'Quantity', value: quantity },
+						],
+					});
+				} else {
+					messageId = await libs.sendMessage({
+						processId: profile.id,
+						action: 'Run-Action',
+						tags: [
+							{ name: 'ForwardTo', value: token.processId },
+							{ name: 'ForwardAction', value: 'Transfer' },
+							{ name: 'Forward-To', value: token.processId },
+							{ name: 'Forward-Action', value: 'Transfer' },
+							{ name: 'Recipient', value: targetAddress },
+							{ name: 'Quantity', value: quantity },
+						],
+						data: {
+							Target: token.processId,
+							Action: 'Transfer',
+							Input: {
+								Recipient: targetAddress,
+								Quantity: quantity,
+							},
+						},
+					});
+				}
+			} else if (libs?.sendMessage) {
+				messageId = await libs.sendMessage({
+					processId: token.processId,
+					action: 'Transfer',
+					tags: [
+						{ name: 'Recipient', value: targetAddress },
+						{ name: 'Quantity', value: quantity },
+					],
+				});
+			} else {
+				if (!deps?.ao?.message) {
+					throw new Error('AO connection not available');
+				}
+
+				const signer =
+					deps?.signer ||
+					(typeof window !== 'undefined' && (window as any).arweaveWallet
+						? createSigner((window as any).arweaveWallet)
+						: undefined);
+
+				messageId = await deps.ao.message({
+					process: token.processId,
+					tags: [
+						{ name: 'Action', value: 'Transfer' },
+						{ name: 'Recipient', value: targetAddress },
+						{ name: 'Quantity', value: quantity },
+					],
+					signer,
+				});
+			}
 
 			const shouldCreateReceipt = options?.createReceipt !== false;
 			if (shouldCreateReceipt && typeof window !== 'undefined' && (window as any).arweaveWallet) {
@@ -135,13 +185,16 @@ export function useTokenTip(tokenOverride?: TipToken, options?: UseTokenTipOptio
 		[
 			tokenOverride,
 			options?.createReceipt,
+			options?.sendFromProfile,
 			sendArTip,
 			walletAddress,
 			handleConnect,
 			deps?.ao,
 			deps?.signer,
+			libs?.sendMessage,
 			Name,
 			profile?.id,
+			isLegacyProfile,
 		]
 	);
 
