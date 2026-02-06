@@ -278,3 +278,42 @@ export const LayoutOptionLabel = styled.p`
 	text-transform: uppercase;
 	margin: 0;
 `;
+
+export const SectionInfo = styled.div`
+	margin: 7.5px 0 15px 0;
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		line-height: 1.5;
+	}
+`;
+
+export const SectionDivider = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	margin: 20px 0;
+
+	span {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+	}
+
+	.divider {
+		height: 1px;
+		width: 50%;
+		border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+	}
+`;
+
+export const HorizontalDivider = styled.div`
+	width: 100%;
+	height: 1px;
+	margin: 20px 0;
+	background: ${(props) => props.theme.colors.border.primary};
+`;
