@@ -519,8 +519,8 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										{language?.editPortal}
 									</button>
 									<button
-										onClick={() => {
-											portalProvider.setShowPortalManager(true, true);
+										onClick={(e: any) => {
+											handleNavigate(e, URLS.create);
 											setShowPortalDropdown(false);
 										}}
 									>

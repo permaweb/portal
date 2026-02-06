@@ -5,13 +5,38 @@ import { STYLING } from 'helpers/config';
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
+	gap: 18px;
+`;
+
+export const InlinePanel = styled.div`
+	width: 100%;
+	max-width: 700px;
+	margin: 0 auto;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
 	gap: 16px;
+`;
+
+export const InlineTitle = styled.p`
+	margin: 0;
+	color: ${(props) => props.theme.colors.font.primary};
+	font-size: ${(props) => props.theme.typography.size.small};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 
 export const Section = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
+`;
+
+export const InputSection = styled(Section)`
+	padding: 16px;
+	background: ${(props) => props.theme.colors.container.primary.background};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.alt2};
 `;
 
 export const SectionHeader = styled.div`
@@ -32,7 +57,8 @@ export const SectionInfo = styled.p`
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	margin: 0;
-	line-height: 1.4;
+	line-height: 1.55;
+	max-width: 720px;
 `;
 
 export const ProgressWrapper = styled.div`
@@ -149,6 +175,8 @@ export const Actions = styled.div`
 	align-items: center;
 	justify-content: flex-end;
 	gap: 10px;
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+	padding-top: 14px;
 `;
 
 export const PostList = styled.div`
@@ -424,7 +452,7 @@ export const WhatToImportCheckboxes = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 8px 20px;
+	gap: 10px 18px;
 `;
 
 export const PostsLimitRow = styled.div`
@@ -468,6 +496,82 @@ export const SelectAllTitle = styled.span`
 	&:hover {
 		color: ${(props) => props.theme.colors.font.alt5};
 	}
+`;
+
+export const CategoryButtonList = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+`;
+
+export const CategoryNode = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+`;
+
+export const CategoryChildren = styled.div`
+	position: relative;
+	margin-left: 10px;
+	margin-top: 2px;
+	padding-left: 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+	&::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: -6px;
+		bottom: 10px;
+		border-left: 1px dashed ${(props) => props.theme.colors.border.primary};
+	}
+
+	> ${CategoryNode} {
+		position: relative;
+	}
+
+	> ${CategoryNode}::before {
+		content: '';
+		position: absolute;
+		left: -14px;
+		top: 14px;
+		width: 10px;
+		border-top: 1px dashed ${(props) => props.theme.colors.border.primary};
+	}
+`;
+
+export const CategoryButtonRow = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+`;
+
+export const CategoryDescription = styled.span`
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	line-height: 1.4;
+`;
+
+export const CategoryLevelTag = styled.span`
+	padding: 3px 8px;
+	border-radius: ${STYLING.dimensions.radius.alt4};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	text-transform: uppercase;
+`;
+
+export const TopicButtonList = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
 `;
 
 export const NestedPostItem = styled(PostItem)<{ $depth: number }>`

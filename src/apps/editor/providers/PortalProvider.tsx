@@ -51,6 +51,19 @@ interface PortalContextState {
 	setShowWordPressImport: (toggle: boolean, createPortal?: boolean) => void;
 	wordPressImportCreatePortal: boolean;
 	wordPressImportData: { data: PortalImportData; posts: ConvertedPost[]; pages: ConvertedPost[] } | null;
+	importWordPress: (
+		data: PortalImportData,
+		posts: ConvertedPost[],
+		pages: ConvertedPost[],
+		selectedCategories: Set<string>,
+		createCategories: boolean,
+		createTopics: boolean,
+		selectedTopics?: Set<string>,
+		createPortal?: boolean,
+		uploadedImageUrls?: Map<string, string>,
+		redirectPath?: string,
+		redirectToCreate?: boolean
+	) => Promise<void>;
 	refreshCurrentPortal: (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => void;
 	fetchPortalUserProfile: (user: PortalUserType) => void;
 	usersByPortalId: any;
@@ -70,6 +83,7 @@ const DEFAULT_CONTEXT = {
 	setShowWordPressImport(_toggle: boolean, _createPortal?: boolean) {},
 	wordPressImportCreatePortal: false,
 	wordPressImportData: null,
+	importWordPress: async () => {},
 	refreshCurrentPortal() {},
 	fetchPortalUserProfile(_user: PortalUserType) {},
 	usersByPortalId: {},
@@ -555,7 +569,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		createTopics: boolean,
 		selectedTopics?: Set<string>,
 		createPortal?: boolean,
-		uploadedImageUrls?: Map<string, string>
+		uploadedImageUrls?: Map<string, string>,
+		redirectPath?: string,
+		redirectToCreate?: boolean
 	) {
 		if (!arProvider.wallet) {
 			addNotification('Please connect your wallet to import content', 'warning');
@@ -951,7 +967,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 			if (posts.length > 0) {
 				refreshCurrentPortal([PortalPatchMapEnum.Posts, PortalPatchMapEnum.Requests]);
-				navigate(`${URLS.base}${portalToUpdate.id}`);
+				if (redirectToCreate) {
+					navigate(URLS.portalCreate(portalToUpdate.id));
+				} else {
+					navigate(redirectPath ?? `${URLS.base}${portalToUpdate.id}`);
+				}
 				addNotification(
 					createPortal
 						? `Portal created and ${posts.length} post${posts.length !== 1 ? 's' : ''} imported.`
@@ -1073,6 +1093,33 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		setRefreshCurrentTrigger((prev) => !prev);
 	};
 
+	const importWordPress = async (
+		data: PortalImportData,
+		posts: ConvertedPost[],
+		pages: ConvertedPost[],
+		selectedCategories: Set<string>,
+		createCategories: boolean,
+		createTopics: boolean,
+		selectedTopics?: Set<string>,
+		createPortal?: boolean,
+		uploadedImageUrls?: Map<string, string>,
+		redirectPath?: string,
+		redirectToCreate?: boolean
+	) =>
+		handleWordPressImportComplete(
+			data,
+			posts,
+			pages,
+			selectedCategories,
+			createCategories,
+			createTopics,
+			selectedTopics,
+			createPortal,
+			uploadedImageUrls,
+			redirectPath,
+			redirectToCreate
+		);
+
 	return (
 		<PortalContext.Provider
 			value={{
@@ -1086,6 +1133,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				setShowWordPressImport: handleShowWordPressImport,
 				wordPressImportCreatePortal,
 				wordPressImportData,
+				importWordPress,
 				refreshCurrentPortal: (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => refreshCurrentPortal(field),
 				fetchPortalUserProfile: (userRole: PortalUserType) => fetchPortalUserProfile(userRole),
 				usersByPortalId: usersByPortalId,

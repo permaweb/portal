@@ -60,6 +60,14 @@ export default function WordPressImport(props: {
 	open: boolean;
 	handleClose: () => void;
 	createPortal?: boolean; // If true, create a new portal instead of importing to existing
+	inline?: boolean;
+	title?: string;
+	closeOnComplete?: boolean;
+	portalName?: string;
+	onPortalNameChange?: (name: string) => void;
+	submitLabel?: string | ((count: number) => string);
+	importingMessage?: string;
+	showImportingStage?: boolean;
 	onImportComplete?: (
 		data: PortalImportData,
 		selectedPosts: ConvertedPost[],
@@ -90,7 +98,7 @@ export default function WordPressImport(props: {
 	const [selectedTopics, setSelectedTopics] = React.useState<Set<string>>(new Set());
 	const [createCategories, setCreateCategories] = React.useState<boolean>(true);
 	const [createTopics, setCreateTopics] = React.useState<boolean>(true);
-	const [portalName, setPortalName] = React.useState<string>('');
+	const [portalName, setPortalName] = React.useState<string>(props.portalName ?? '');
 	const [activeTab, setActiveTab] = React.useState<ContentTab>('posts');
 	const [errors, setErrors] = React.useState<string[]>([]);
 
@@ -124,14 +132,24 @@ export default function WordPressImport(props: {
 			// Categories and tags: default to none selected; user chooses explicitly
 			setSelectedCategories(new Set());
 			setSelectedTopics(new Set());
-			setPortalName(importData.name || '');
+			if (props.portalName === undefined) {
+				setPortalName(importData.name || '');
+			} else if (props.onPortalNameChange) {
+				props.onPortalNameChange(importData.name || '');
+			}
 			setFailedImageUrls(new Set());
 			// Select all images by default
 			if (importData.images && importData.images.length > 0) {
 				setSelectedImages(new Set(importData.images.map((img) => img.originalUrl)));
 			}
 		}
-	}, [importData]);
+	}, [importData, props.portalName, props.onPortalNameChange]);
+
+	React.useEffect(() => {
+		if (props.portalName !== undefined) {
+			setPortalName(props.portalName);
+		}
+	}, [props.portalName]);
 
 	const handleReset = React.useCallback(() => {
 		setUrl('');
@@ -148,6 +166,7 @@ export default function WordPressImport(props: {
 		setCreateCategories(true);
 		setCreateTopics(true);
 		setPortalName('');
+		if (props.onPortalNameChange) props.onPortalNameChange('');
 		setActiveTab('posts');
 		setErrors([]);
 		setFetchPosts(true);
@@ -165,7 +184,7 @@ export default function WordPressImport(props: {
 		if (fileInputRef.current) {
 			fileInputRef.current.value = '';
 		}
-	}, []);
+	}, [props.onPortalNameChange]);
 
 	const handleExtract = React.useCallback(async () => {
 		setStage('extracting');
@@ -457,8 +476,9 @@ export default function WordPressImport(props: {
 				name: props.createPortal ? portalName || importData.name : importData.name,
 			};
 
-			// Set stage to importing and wait for completion
-			setStage('importing');
+			// Set stage to importing and wait for completion (if enabled)
+			const showImportingStage = props.showImportingStage !== false;
+			if (showImportingStage) setStage('importing');
 
 			try {
 				await props.onImportComplete(
@@ -471,8 +491,12 @@ export default function WordPressImport(props: {
 					selectedTopics,
 					uploadedImageUrls.size > 0 ? uploadedImageUrls : undefined
 				);
-				// Import completed successfully, close the modal
-				props.handleClose();
+				// Import completed successfully
+				if (props.closeOnComplete !== false) {
+					props.handleClose();
+				} else {
+					setStage('preview');
+				}
 			} catch (error: any) {
 				// Import failed, show error and go back to preview
 				setErrors([error.message || 'Import failed']);
@@ -525,7 +549,7 @@ export default function WordPressImport(props: {
 	function renderInputStage() {
 		return (
 			<S.Wrapper>
-				<S.Section>
+				<S.InputSection>
 					<S.SectionLabel>Import Method</S.SectionLabel>
 					<S.SectionInfo>
 						Choose how you want to import your WordPress content. You can either import from a live WordPress site URL
@@ -567,11 +591,11 @@ export default function WordPressImport(props: {
 							<span>Upload WordPress Export File (.xml)</span>
 						</S.CheckboxContainer>
 					</S.CheckboxGroup>
-				</S.Section>
+				</S.InputSection>
 
 				{importMethod === 'url' ? (
 					<>
-						<S.Section>
+						<S.InputSection>
 							<S.SectionLabel>{language?.wordpressUrl || 'WordPress Site URL'}</S.SectionLabel>
 							<S.SectionInfo>
 								Enter the URL of the WordPress site you want to import content from. Supports both self-hosted WordPress
@@ -589,9 +613,9 @@ export default function WordPressImport(props: {
 								disabled={false}
 								invalid={{ status: false, message: null }}
 							/>
-						</S.Section>
+						</S.InputSection>
 
-						<S.Section>
+						<S.InputSection>
 							<S.SectionLabel>What to Import</S.SectionLabel>
 							<S.SectionInfo>Select what content you want to fetch from the WordPress site.</S.SectionInfo>
 							<S.WhatToImportList>
@@ -642,10 +666,10 @@ export default function WordPressImport(props: {
 									</S.PostsLimitRow>
 								)}
 							</S.WhatToImportList>
-						</S.Section>
+						</S.InputSection>
 					</>
 				) : (
-					<S.Section>
+					<S.InputSection>
 						<S.SectionLabel>WordPress Export File</S.SectionLabel>
 						<S.SectionInfo>
 							Upload a WordPress export file (.xml). This file contains all your posts, pages, categories, tags, and
@@ -677,7 +701,7 @@ export default function WordPressImport(props: {
 								✓ File selected: {wxrFile.name} ({(wxrFile.size / 1024).toFixed(1)} KB)
 							</S.FileSelectedMessage>
 						)}
-					</S.Section>
+					</S.InputSection>
 				)}
 
 				{errors.length > 0 && (
@@ -740,7 +764,10 @@ export default function WordPressImport(props: {
 								<S.SectionLabel>{language?.portalName || 'Portal name'}</S.SectionLabel>
 								<FormField
 									value={portalName}
-									onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPortalName(e.target.value)}
+									onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+										setPortalName(e.target.value);
+										if (props.onPortalNameChange) props.onPortalNameChange(e.target.value);
+									}}
 									placeholder={importData.name || 'Enter portal name'}
 									disabled={false}
 									invalid={{ status: false, message: null }}
@@ -914,35 +941,34 @@ export default function WordPressImport(props: {
 											/>
 											<S.SelectAllTitle onClick={handleSelectAllCategories}>Select All Categories</S.SelectAllTitle>
 										</S.SelectAllWrapper>
-										<S.PostList className="categories-list">
+										<S.CategoryButtonList>
 											{importData.categories.map((category) => {
 												const renderCategory = (cat: any, depth = 0) => (
-													<React.Fragment key={cat.id}>
-														<S.NestedPostItem
-															$selected={selectedCategories.has(cat.id)}
-															onClick={() => handleToggleCategory(cat.id)}
-															$depth={depth}
-														>
-															<Checkbox
-																checked={selectedCategories.has(cat.id)}
-																handleSelect={() => handleToggleCategory(cat.id)}
+													<S.CategoryNode key={cat.id}>
+														<S.CategoryButtonRow>
+															<Button
+																type={'alt3'}
+																label={cat.name}
+																handlePress={() => handleToggleCategory(cat.id)}
+																active={selectedCategories.has(cat.id)}
 																disabled={false}
+																icon={selectedCategories.has(cat.id) ? ICONS.close : ICONS.add}
 															/>
-															<S.PostItemContent>
-																<S.PostItemTitle>{cat.name}</S.PostItemTitle>
-																{cat.metadata?.description && (
-																	<S.PostItemMeta>{cat.metadata.description}</S.PostItemMeta>
-																)}
-															</S.PostItemContent>
-														</S.NestedPostItem>
-														{cat.children && cat.children.length > 0 && (
-															<>{cat.children.map((child: any) => renderCategory(child, depth + 1))}</>
+															{depth > 0 && <S.CategoryLevelTag>{`Level ${depth + 1}`}</S.CategoryLevelTag>}
+														</S.CategoryButtonRow>
+														{cat.metadata?.description && (
+															<S.CategoryDescription>{cat.metadata.description}</S.CategoryDescription>
 														)}
-													</React.Fragment>
+														{cat.children && cat.children.length > 0 && (
+															<S.CategoryChildren>
+																{cat.children.map((child: any) => renderCategory(child, depth + 1))}
+															</S.CategoryChildren>
+														)}
+													</S.CategoryNode>
 												);
 												return renderCategory(category);
 											})}
-										</S.PostList>
+										</S.CategoryButtonList>
 									</S.CategoryListScrollArea>
 								</>
 							)}
@@ -981,24 +1007,19 @@ export default function WordPressImport(props: {
 											/>
 											<S.SelectAllTitle onClick={handleSelectAllTags}>Select All Tags</S.SelectAllTitle>
 										</S.SelectAllWrapper>
-										<S.PostList className="categories-list">
+										<S.TopicButtonList>
 											{importData.topics.map((topic) => (
-												<S.PostItem
+												<Button
 													key={topic.value}
-													$selected={selectedTopics.has(topic.value)}
-													onClick={() => handleToggleTopic(topic.value)}
-												>
-													<Checkbox
-														checked={selectedTopics.has(topic.value)}
-														handleSelect={() => handleToggleTopic(topic.value)}
-														disabled={false}
-													/>
-													<S.PostItemContent>
-														<S.PostItemTitle>{topic.value}</S.PostItemTitle>
-													</S.PostItemContent>
-												</S.PostItem>
+													type={'alt3'}
+													label={topic.value}
+													handlePress={() => handleToggleTopic(topic.value)}
+													active={selectedTopics.has(topic.value)}
+													disabled={false}
+													icon={selectedTopics.has(topic.value) ? ICONS.close : ICONS.add}
+												/>
 											))}
-										</S.PostList>
+										</S.TopicButtonList>
 									</S.CategoryListScrollArea>
 								</>
 							)}
@@ -1273,9 +1294,12 @@ export default function WordPressImport(props: {
 					<Button
 						type={'alt1'}
 						label={
-							props.createPortal
-								? `Create Portal & Import ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`
-								: `Import ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`
+							typeof props.submitLabel === 'function'
+								? props.submitLabel(selectedPosts.size)
+								: props.submitLabel ??
+								  (props.createPortal
+										? `Create Portal & Import ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`
+										: `Import ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`)
 						}
 						handlePress={handleImport}
 						disabled={selectedPosts.size === 0}
@@ -1301,7 +1325,8 @@ export default function WordPressImport(props: {
 						<S.ProgressWrapper>
 							<Loader
 								message={
-									props.createPortal ? 'Creating portal and importing content...' : 'Importing content to portal...'
+									props.importingMessage ??
+									(props.createPortal ? 'Creating portal and importing content...' : 'Importing content to portal...')
 								}
 							/>
 							<S.ProgressMessage>This may take a few minutes. Please don't close this window.</S.ProgressMessage>
@@ -1311,6 +1336,16 @@ export default function WordPressImport(props: {
 			default:
 				return null;
 		}
+	}
+
+	if (props.inline) {
+		if (!props.open) return null;
+		return (
+			<S.InlinePanel>
+				{props.title && <S.InlineTitle>{props.title}</S.InlineTitle>}
+				{getContent()}
+			</S.InlinePanel>
+		);
 	}
 
 	return (
