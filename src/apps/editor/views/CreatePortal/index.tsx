@@ -8,7 +8,7 @@ import { Media } from 'editor/components/molecules/Media';
 import { Themes } from 'editor/components/molecules/Themes';
 import { PortalSetup } from 'editor/components/organisms/PortalSetup';
 import { PostList } from 'editor/components/organisms/PostList';
-import { WordPressImport } from 'editor/components/organisms/WordPressImport';
+import { WordPressImport, type WordPressImportDraft } from 'editor/components/organisms/WordPressImport';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
@@ -21,7 +21,7 @@ import { THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
 import type { PortalHeaderType, SelectOptionType } from 'helpers/types';
 import { PortalPatchMapEnum } from 'helpers/types';
 import { checkValidAddress, debugLog, getBootTag } from 'helpers/utils';
-import type { ConvertedPost, PortalImportData } from 'helpers/wordpress';
+import type { PortalImportData } from 'helpers/wordpress';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -91,17 +91,6 @@ function ImagesView() {
 	);
 }
 
-type ImportDraft = {
-	data: PortalImportData;
-	posts: ConvertedPost[];
-	pages: ConvertedPost[];
-	selectedCategories: Set<string>;
-	createCategories: boolean;
-	createTopics: boolean;
-	selectedTopics?: Set<string>;
-	uploadedImageUrls?: Map<string, string>;
-};
-
 export default function CreatePortal() {
 	const { portalId } = useParams();
 	const navigate = useNavigate();
@@ -117,9 +106,10 @@ export default function CreatePortal() {
 	const [nameSaving, setNameSaving] = React.useState<boolean>(false);
 	const [creating, setCreating] = React.useState<boolean>(false);
 	const [logoId, setLogoId] = React.useState<string | null>(null);
-	const iconId: string | null = null;
+	const [iconId, setIconId] = React.useState<string | null>(null);
+	const [wallpaperId, setWallpaperId] = React.useState<string | null>(null);
 	const [selectedLayout, setSelectedLayout] = React.useState<string>('journal');
-	const [importDraft, setImportDraft] = React.useState<ImportDraft | null>(null);
+	const [importDraft, setImportDraft] = React.useState<WordPressImportDraft | null>(null);
 
 	const importOptions: SelectOptionType[] = [
 		{ id: 'none', label: language?.none || 'None' },
@@ -132,6 +122,14 @@ export default function CreatePortal() {
 	const creatingNew = !portalId;
 	const canUpdateMeta = portalProvider.permissions?.updatePortalMeta;
 	const hasImportDraft = Boolean(importDraft);
+
+	const handleImportDraftChange = React.useCallback((draft: WordPressImportDraft | null) => {
+		setImportDraft(draft);
+	}, []);
+
+	const handleWordPressPortalNameChange = React.useCallback((value: string) => {
+		setName(value);
+	}, []);
 
 	React.useEffect(() => {
 		if (portalProvider.current?.name) {
@@ -185,6 +183,16 @@ export default function CreatePortal() {
 				data.Thumbnail = 'None';
 			}
 
+			if (wallpaperId && checkValidAddress(wallpaperId)) {
+				try {
+					data.Wallpaper = await permawebProvider.libs.resolveTransaction(wallpaperId);
+				} catch (e: any) {
+					debugLog('error', 'CreatePortal', `Failed to resolve wallpaper: ${e.message}`);
+				}
+			} else {
+				data.Wallpaper = 'None';
+			}
+
 			const getPatchMapTag = (key: string, values: string[]) => {
 				const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
 				return {
@@ -205,6 +213,7 @@ export default function CreatePortal() {
 
 			if (data.Banner) tags.push(getBootTag('Banner', data.Banner));
 			if (data.Thumbnail) tags.push(getBootTag('Thumbnail', data.Thumbnail));
+			if (data.Wallpaper) tags.push(getBootTag('Wallpaper', data.Wallpaper));
 
 			let profileId = permawebProvider.profile?.id;
 			if (!profileId) {
@@ -298,7 +307,7 @@ export default function CreatePortal() {
 			permawebProvider.refreshProfile();
 
 			addNotification(`${language?.portalCreated || 'Portal created'}!`, 'success');
-			navigate(URLS.portalCreate(portalId));
+			navigate(URLS.portalBase(portalId));
 			window.location.reload();
 		} catch (e: any) {
 			addNotification(e.message ?? language?.errorUpdatingPortal, 'warning');
@@ -337,7 +346,12 @@ export default function CreatePortal() {
 				true,
 				importDraft.uploadedImageUrls,
 				undefined,
-				true
+				false,
+				{
+					logoId,
+					iconId,
+					wallpaperId,
+				}
 			);
 		} catch (e: any) {
 			addNotification(e.message ?? language?.errorUpdatingPortal, 'warning');
@@ -405,31 +419,10 @@ export default function CreatePortal() {
 										closeOnComplete={false}
 										showImportingStage={false}
 										portalName={name}
-										onPortalNameChange={(value) => setName(value)}
-										submitLabel={(count) => `Apply Import (${count} post${count !== 1 ? 's' : ''})`}
+										hidePreviewSubmit
+										onPortalNameChange={handleWordPressPortalNameChange}
+										onDraftChange={handleImportDraftChange}
 										importingMessage={'Preparing import data...'}
-										onImportComplete={async (
-											data,
-											posts,
-											pages,
-											selectedCategories,
-											createCategories,
-											createTopics,
-											selectedTopics,
-											uploadedImageUrls
-										) => {
-											setImportDraft({
-												data,
-												posts,
-												pages,
-												selectedCategories,
-												createCategories,
-												createTopics,
-												selectedTopics,
-												uploadedImageUrls,
-											});
-											setName(data.name || '');
-										}}
 									/>
 								</S.PanelInner>
 							</S.SectionBody>
@@ -454,9 +447,22 @@ export default function CreatePortal() {
 											required
 											hideErrorMessage
 										/>
+										<S.MediaRow>
+											<S.MediaBlock>
+												<S.MediaTitle>{language?.logo || 'Logo'}</S.MediaTitle>
+												<Media portal={null} type={'logo'} onMediaUpload={setLogoId} hideActions />
+												<S.MediaInfo>{`${language?.recommended || 'Recommended'}: 500x280px (16:9)`}</S.MediaInfo>
+											</S.MediaBlock>
+											<S.IconMediaBlock>
+												<S.MediaTitle>{`${language?.icon || 'Icon'} (Favicon)`}</S.MediaTitle>
+												<Media portal={null} type={'icon'} onMediaUpload={setIconId} hideActions />
+												<S.MediaInfo>{`${language?.recommended || 'Recommended'}: 32x32px (1:1)`}</S.MediaInfo>
+											</S.IconMediaBlock>
+										</S.MediaRow>
 										<S.MediaBlock>
-											<S.MediaTitle>{language?.logo || 'Logo'}</S.MediaTitle>
-											<Media portal={null} type={'logo'} onMediaUpload={setLogoId} hideActions />
+											<S.MediaTitle>{language?.wallpaper || 'Wallpaper'}</S.MediaTitle>
+											<Media portal={null} type={'wallpaper'} onMediaUpload={setWallpaperId} hideActions />
+											<S.MediaInfo>{`${language?.recommended || 'Recommended'}: 1920x1080px (16:9)`}</S.MediaInfo>
 										</S.MediaBlock>
 										<div>
 											<S.MediaTitle>{language?.layout || 'Layout'}</S.MediaTitle>

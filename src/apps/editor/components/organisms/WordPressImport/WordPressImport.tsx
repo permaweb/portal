@@ -26,6 +26,17 @@ import * as S from './styles';
 type ImportStage = 'input' | 'extracting' | 'preview' | 'importing' | 'complete';
 type ContentTab = 'posts' | 'pages' | 'categories' | 'tags' | 'theme' | 'images';
 
+export type WordPressImportDraft = {
+	data: PortalImportData;
+	posts: ConvertedPost[];
+	pages: ConvertedPost[];
+	selectedCategories: Set<string>;
+	createCategories: boolean;
+	createTopics: boolean;
+	selectedTopics?: Set<string>;
+	uploadedImageUrls?: Map<string, string>;
+};
+
 // Helper to determine if a color is light (for border visibility on swatches)
 function isLightColor(color: string): boolean {
 	// Handle hex colors
@@ -68,6 +79,7 @@ export default function WordPressImport(props: {
 	submitLabel?: string | ((count: number) => string);
 	importingMessage?: string;
 	showImportingStage?: boolean;
+	hidePreviewSubmit?: boolean;
 	onImportComplete?: (
 		data: PortalImportData,
 		selectedPosts: ConvertedPost[],
@@ -78,6 +90,7 @@ export default function WordPressImport(props: {
 		selectedTopics?: Set<string>,
 		uploadedImageUrls?: Map<string, string>
 	) => Promise<void>;
+	onDraftChange?: (draft: WordPressImportDraft | null) => void;
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -151,6 +164,67 @@ export default function WordPressImport(props: {
 		}
 	}, [props.portalName]);
 
+	const getSelectedCategoriesForImport = React.useCallback(
+		(data: PortalImportData) =>
+			data.categories.filter((cat) => {
+				const checkCategory = (c: any): boolean => {
+					if (selectedCategories.has(c.id)) return true;
+					if (c.children && c.children.length > 0) {
+						return c.children.some((child: any) => checkCategory(child));
+					}
+					return false;
+				};
+				return checkCategory(cat);
+			}),
+		[selectedCategories]
+	);
+
+	React.useEffect(() => {
+		if (!props.onDraftChange) return;
+		if (stage !== 'preview' || !importData) {
+			props.onDraftChange(null);
+			return;
+		}
+
+		const postsToImport = importData.posts.filter((p) => selectedPosts.has(p.wpId));
+		if (postsToImport.length === 0) {
+			props.onDraftChange(null);
+			return;
+		}
+
+		const pagesToImport = importData.pages.filter((p) => selectedPages.has(p.wpId));
+		const categoriesToImport = getSelectedCategoriesForImport(importData);
+
+		props.onDraftChange({
+			data: {
+				...importData,
+				categories: categoriesToImport,
+				name: props.createPortal ? portalName || importData.name : importData.name,
+			},
+			posts: postsToImport,
+			pages: pagesToImport,
+			selectedCategories: new Set(selectedCategories),
+			createCategories,
+			createTopics,
+			selectedTopics: new Set(selectedTopics),
+			uploadedImageUrls: uploadedImageUrls.size > 0 ? new Map(uploadedImageUrls) : undefined,
+		});
+	}, [
+		createCategories,
+		createTopics,
+		getSelectedCategoriesForImport,
+		importData,
+		portalName,
+		props.createPortal,
+		props.onDraftChange,
+		selectedCategories,
+		selectedPages,
+		selectedPosts,
+		selectedTopics,
+		stage,
+		uploadedImageUrls,
+	]);
+
 	const handleReset = React.useCallback(() => {
 		setUrl('');
 		setWxrFile(null);
@@ -181,10 +255,11 @@ export default function WordPressImport(props: {
 		setIsUploadingImages(false);
 		setUploadedImageUrls(new Map());
 		setFailedImageUrls(new Set());
+		if (props.onDraftChange) props.onDraftChange(null);
 		if (fileInputRef.current) {
 			fileInputRef.current.value = '';
 		}
-	}, [props.onPortalNameChange]);
+	}, [props.onDraftChange, props.onPortalNameChange]);
 
 	const handleExtract = React.useCallback(async () => {
 		setStage('extracting');
@@ -453,16 +528,8 @@ export default function WordPressImport(props: {
 		if (!importData) return;
 
 		const postsToImport = importData.posts.filter((p) => selectedPosts.has(p.wpId));
-		const categoriesToImport = importData.categories.filter((cat) => {
-			const checkCategory = (c: any): boolean => {
-				if (selectedCategories.has(c.id)) return true;
-				if (c.children && c.children.length > 0) {
-					return c.children.some((child: any) => checkCategory(child));
-				}
-				return false;
-			};
-			return checkCategory(cat);
-		});
+		const pagesToImport = importData.pages.filter((p) => selectedPages.has(p.wpId));
+		const categoriesToImport = getSelectedCategoriesForImport(importData);
 
 		if (postsToImport.length === 0) {
 			addNotification('Please select at least one post to import', 'warning');
@@ -484,7 +551,7 @@ export default function WordPressImport(props: {
 				await props.onImportComplete(
 					dataToImport,
 					postsToImport,
-					[],
+					pagesToImport,
 					selectedCategories,
 					createCategories,
 					createTopics,
@@ -509,11 +576,17 @@ export default function WordPressImport(props: {
 		importData,
 		selectedPosts,
 		selectedCategories,
+		selectedPages,
 		selectedTopics,
 		createCategories,
 		createTopics,
+		getSelectedCategoriesForImport,
 		portalName,
-		props,
+		props.closeOnComplete,
+		props.createPortal,
+		props.handleClose,
+		props.onImportComplete,
+		props.showImportingStage,
 		addNotification,
 		uploadedImageUrls,
 	]);
@@ -1289,23 +1362,34 @@ export default function WordPressImport(props: {
 					</S.ErrorWrapper>
 				)}
 
+				{props.hidePreviewSubmit && (
+					<S.SyncNotice>Selected content will be imported automatically when you create the portal.</S.SyncNotice>
+				)}
+
 				<S.Actions>
-					<Button type={'primary'} label={language?.back || 'Back'} handlePress={handleReset} disabled={false} />
 					<Button
-						type={'alt1'}
-						label={
-							typeof props.submitLabel === 'function'
-								? props.submitLabel(selectedPosts.size)
-								: props.submitLabel ??
-								  (props.createPortal
-										? `Create Portal & Import ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`
-										: `Import ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`)
-						}
-						handlePress={handleImport}
-						disabled={selectedPosts.size === 0}
-						icon={ICONS.import}
-						iconLeftAlign
+						type={'primary'}
+						label={props.hidePreviewSubmit ? 'Reset Import' : language?.back || 'Back'}
+						handlePress={handleReset}
+						disabled={false}
 					/>
+					{!props.hidePreviewSubmit && (
+						<Button
+							type={'alt1'}
+							label={
+								typeof props.submitLabel === 'function'
+									? props.submitLabel(selectedPosts.size)
+									: props.submitLabel ??
+									  (props.createPortal
+											? `Create Portal & Import ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`
+											: `Import ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`)
+							}
+							handlePress={handleImport}
+							disabled={selectedPosts.size === 0}
+							icon={ICONS.import}
+							iconLeftAlign
+						/>
+					)}
 				</S.Actions>
 			</S.Wrapper>
 		);

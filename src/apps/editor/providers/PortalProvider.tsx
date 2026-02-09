@@ -62,7 +62,12 @@ interface PortalContextState {
 		createPortal?: boolean,
 		uploadedImageUrls?: Map<string, string>,
 		redirectPath?: string,
-		redirectToCreate?: boolean
+		redirectToCreate?: boolean,
+		mediaOverrides?: {
+			logoId?: string | null;
+			iconId?: string | null;
+			wallpaperId?: string | null;
+		}
 	) => Promise<void>;
 	refreshCurrentPortal: (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => void;
 	fetchPortalUserProfile: (user: PortalUserType) => void;
@@ -571,7 +576,12 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		createPortal?: boolean,
 		uploadedImageUrls?: Map<string, string>,
 		redirectPath?: string,
-		redirectToCreate?: boolean
+		redirectToCreate?: boolean,
+		mediaOverrides?: {
+			logoId?: string | null;
+			iconId?: string | null;
+			wallpaperId?: string | null;
+		}
 	) {
 		if (!arProvider.wallet) {
 			addNotification('Please connect your wallet to import content', 'warning');
@@ -628,8 +638,23 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					tags.push(getPatchMapTag(key, PORTAL_PATCH_MAP[key]));
 				}
 
-				// Use site logo/icon if available (would need to fetch from media)
-				// For now, leave as None
+				const resolveMediaOverride = async (id?: string | null) => {
+					if (!id || !checkValidAddress(id)) return null;
+					try {
+						return await permawebProvider.libs.resolveTransaction(id);
+					} catch (e: any) {
+						debugLog('error', 'WordPressImport', `Failed to resolve media override: ${e.message}`);
+						return null;
+					}
+				};
+
+				const banner = await resolveMediaOverride(mediaOverrides?.logoId);
+				const icon = await resolveMediaOverride(mediaOverrides?.iconId);
+				const wallpaper = await resolveMediaOverride(mediaOverrides?.wallpaperId);
+
+				if (banner) tags.push(getBootTag('Banner', banner));
+				if (icon) tags.push(getBootTag('Thumbnail', icon));
+				if (wallpaper) tags.push(getBootTag('Wallpaper', wallpaper));
 
 				if (!profileId) {
 					tags.push({ name: 'Zone-Type', value: 'User' });
@@ -1104,7 +1129,12 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		createPortal?: boolean,
 		uploadedImageUrls?: Map<string, string>,
 		redirectPath?: string,
-		redirectToCreate?: boolean
+		redirectToCreate?: boolean,
+		mediaOverrides?: {
+			logoId?: string | null;
+			iconId?: string | null;
+			wallpaperId?: string | null;
+		}
 	) =>
 		handleWordPressImportComplete(
 			data,
@@ -1117,7 +1147,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			createPortal,
 			uploadedImageUrls,
 			redirectPath,
-			redirectToCreate
+			redirectToCreate,
+			mediaOverrides
 		);
 
 	return (

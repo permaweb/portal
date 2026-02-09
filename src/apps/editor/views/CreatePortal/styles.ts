@@ -115,12 +115,32 @@ export const Placeholder = styled.div`
 `;
 
 export const MediaBlock = styled.div`
-	width: 100%;
-	min-width: 0;
-	max-width: 560px;
+	flex: 1;
+	min-width: 280px;
 	display: flex;
 	flex-direction: column;
 	gap: 7.5px;
+`;
+
+export const IconMediaBlock = styled.div`
+	width: 220px;
+	min-width: 220px;
+	display: flex;
+	flex-direction: column;
+	gap: 7.5px;
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		width: 100%;
+		min-width: 0;
+	}
+`;
+
+export const MediaRow = styled.div`
+	width: 100%;
+	display: flex;
+	gap: 15px;
+	align-items: flex-start;
+	flex-wrap: wrap;
 `;
 
 export const MediaTitle = styled.p`

@@ -170,6 +170,17 @@ export const ErrorMessage = styled.span`
 	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 
+export const SyncNotice = styled.div`
+	padding: 12px;
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.alt1};
+	background: ${(props) => props.theme.colors.container.alt1.background};
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	line-height: 1.45;
+`;
+
 export const Actions = styled.div`
 	display: flex;
 	align-items: center;
