@@ -63,7 +63,7 @@ export const Data = styled.div`
 		display: block;
 		margin-left: -20%;
 		margin-right: 0%;
-		color: white;
+		color: rgba(var(--color-primary-contrast), 1);
 		font-size: 30px;
 		line-height: 52px;
 		padding: 12px 30px;
@@ -82,7 +82,7 @@ export const Data = styled.div`
 			text-decoration: none;
 			padding: 6px 14px;
 			background: rgba(var(--color-primary), 1);
-			color: white;
+			color: rgba(var(--color-primary-contrast), 1);
 			-webkit-box-decoration-break: clone;
 			font-weight: 800;
 		}
