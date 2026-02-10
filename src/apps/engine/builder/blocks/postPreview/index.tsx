@@ -1,0 +1,261 @@
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import Avatar from 'engine/components/avatar';
+import Placeholder from 'engine/components/placeholder';
+import useNavigate from 'engine/helpers/preview';
+import { useComments } from 'engine/hooks/comments';
+import { useProfile } from 'engine/hooks/profiles';
+import { usePortalProvider } from 'engine/providers/portalProvider';
+
+import { POST_PREVIEWS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
+import { checkValidAddress, getRedirect, urlify } from 'helpers/utils';
+import { usePermawebProvider } from 'providers/PermawebProvider';
+
+import * as S from './styles';
+
+type PostPreviewTemplate = {
+	id: string;
+	name: string;
+	type: string;
+	layout: {
+		direction?: string;
+		gap?: string;
+	};
+	content: PostPreviewElement[];
+};
+
+type PostPreviewElement = {
+	id?: string;
+	type: string;
+	layout?: any;
+	content?: any;
+};
+
+interface PostPreviewDynamicProps {
+	template?: PostPreviewTemplate;
+	templateId?: string;
+	post: any;
+}
+
+export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
+	const navigate = useNavigate();
+	const { portal } = usePortalProvider();
+	usePermawebProvider();
+	const Layout = portal?.Layout;
+
+	const { templateId, post } = props;
+	const template = props.template || POST_PREVIEWS[templateId as keyof typeof POST_PREVIEWS] || POST_PREVIEWS.blog;
+
+	const { profile, isLoading: isLoadingProfile } = useProfile(post?.creator || null);
+	const { comments } = useComments(post?.id || null, true);
+
+	const isPortalCreator = post?.creator === portal?.id;
+	const displayName = isPortalCreator ? portal?.name : profile?.displayName;
+	const displayThumbnail = isPortalCreator ? portal?.logo : profile?.thumbnail;
+
+	const renderElement = (element: PostPreviewElement, index: number): React.ReactNode => {
+		switch (element.type) {
+			case 'categories':
+				return (
+					<S.Categories key={index} $layout={element.layout}>
+						{post ? (
+							<>
+								{post?.metadata?.categories?.map((category: any, catIndex: number) => (
+									<React.Fragment key={catIndex}>
+										<NavLink to={getRedirect(`feed/category/${category.name}`)}>
+											<S.Category $layout={element.layout}>{category.name}</S.Category>
+										</NavLink>
+										{catIndex < post.metadata.categories.length - 1 && <>,&nbsp;</>}
+									</React.Fragment>
+								))}
+								{post?.metadata?.topics?.length > 0 && post?.metadata?.categories?.length > 0 && <>&nbsp;·&nbsp;</>}
+								{post?.metadata?.topics?.map((tag: string, tagIndex: number) => (
+									<React.Fragment key={tagIndex}>
+										<NavLink to={getRedirect(`feed/tag/${tag}`)}>
+											<S.Category $layout={element.layout}>#{tag}</S.Category>
+										</NavLink>
+										{tagIndex < post.metadata.topics.length - 1 && <>&nbsp;</>}
+									</React.Fragment>
+								))}
+							</>
+						) : (
+							<Placeholder />
+						)}
+					</S.Categories>
+				);
+
+			case 'thumbnail':
+				if (!post?.metadata?.thumbnail) return null;
+				return (
+					<S.ThumbnailWrapper key={index} $layout={element.layout}>
+						<img
+							className="loadingThumbnail"
+							onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
+							onClick={() => navigate(getRedirect(`post/${post?.metadata?.url ?? post?.id}`))}
+							src={getTxEndpoint(post.metadata.thumbnail)}
+						/>
+					</S.ThumbnailWrapper>
+				);
+
+			case 'title':
+				return (
+					<S.TitleWrapper key={index}>
+						<h2
+							className={!post ? 'loadingPlaceholder' : ''}
+							onClick={() => navigate(getRedirect(`post/${post?.metadata?.url ?? post?.id}`))}
+						>
+							<span>{post ? post?.name : <Placeholder width="180" />}</span>
+						</h2>
+						{post?.metadata?.status === 'draft' && (
+							<S.DraftIndicator>
+								<S.DraftDot />
+								Draft
+							</S.DraftIndicator>
+						)}
+					</S.TitleWrapper>
+				);
+
+			case 'description':
+				return <S.Description key={index}>{post?.metadata?.description}</S.Description>;
+
+			case 'author':
+				return (
+					<S.Author
+						key={index}
+						onClick={() =>
+							!isPortalCreator &&
+							navigate(getRedirect(`author/${profile?.username ? urlify(profile.username) : profile?.id}`))
+						}
+						style={{ cursor: isPortalCreator ? 'default' : 'pointer' }}
+					>
+						<Avatar
+							src={
+								displayThumbnail && checkValidAddress(displayThumbnail) ? getTxEndpoint(displayThumbnail) : undefined
+							}
+							profile={isPortalCreator ? { id: portal?.id } : profile}
+							isLoading={isLoadingProfile}
+							size={20}
+							hoverable={true}
+						/>
+						{isLoadingProfile ? <Placeholder width="100" /> : displayName}
+					</S.Author>
+				);
+
+			case 'date':
+				return (
+					<S.Date key={index}>
+						{isLoadingProfile ? (
+							<Placeholder width="120" />
+						) : (
+							`${new Date(Number(post?.metadata?.releaseDate)).toLocaleDateString()} ${new Date(
+								Number(post?.metadata?.releaseDate)
+							).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+						)}
+					</S.Date>
+				);
+
+			case 'tags':
+				if (!post?.metadata?.topics?.length) return null;
+				return (
+					<S.Tags key={index}>
+						{post?.metadata?.topics?.map((tag: string, tagIndex: number) => (
+							<React.Fragment key={tagIndex}>
+								<NavLink to={getRedirect(`feed/tag/${tag}`)}>
+									<S.Tag>#{tag}</S.Tag>
+								</NavLink>
+							</React.Fragment>
+						))}
+					</S.Tags>
+				);
+
+			case 'meta':
+				const metaItems = (element.content as string[]) || ['author', 'date'];
+				return (
+					<S.Meta key={index}>
+						{metaItems.includes('author') && (
+							<S.Author
+								onClick={() =>
+									!isPortalCreator &&
+									navigate(getRedirect(`author/${profile?.username ? urlify(profile.username) : profile?.id}`))
+								}
+								style={{ cursor: isPortalCreator ? 'default' : 'pointer' }}
+							>
+								<Avatar
+									src={
+										displayThumbnail && checkValidAddress(displayThumbnail)
+											? getTxEndpoint(displayThumbnail)
+											: undefined
+									}
+									profile={isPortalCreator ? { id: portal?.id } : profile}
+									isLoading={isLoadingProfile}
+									size={20}
+									hoverable={true}
+								/>
+								{isLoadingProfile ? <Placeholder width="100" /> : displayName}
+							</S.Author>
+						)}
+						{metaItems.includes('date') && (
+							<S.Date>
+								{isLoadingProfile ? (
+									<Placeholder width="120" />
+								) : (
+									`${new Date(Number(post?.metadata?.releaseDate)).toLocaleDateString()} ${new Date(
+										Number(post?.metadata?.releaseDate)
+									).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+								)}
+							</S.Date>
+						)}
+					</S.Meta>
+				);
+
+			case 'body':
+				return (
+					<S.Body key={index} $layout={element.layout}>
+						{element.content?.map((child: PostPreviewElement | string, childIndex: number) =>
+							typeof child === 'string' ? null : renderElement(child as PostPreviewElement, childIndex)
+						)}
+					</S.Body>
+				);
+
+			case 'comments':
+				if (!comments?.length) return null;
+				return (
+					<S.Comments key={index}>
+						<h3>Comments</h3>
+						{comments.map((comment: any, commentIndex: number) => (
+							<Comment key={commentIndex} data={comment} />
+						))}
+					</S.Comments>
+				);
+
+			default:
+				return null;
+		}
+	};
+
+	return (
+		<S.Container $layout={template.layout} $portalLayout={Layout}>
+			{template.content.map((element: PostPreviewElement, index: number) => renderElement(element, index))}
+		</S.Container>
+	);
+}
+
+function Comment({ data }: { data: any }) {
+	const { profile, isLoading: isLoadingProfile } = useProfile(data.creator || null);
+
+	return (
+		<S.Comment>
+			<S.CommentHeader>
+				<Avatar profile={profile} isLoading={isLoadingProfile} size={18} />
+				<S.Username>{profile?.displayName || '[[displayName]]'}</S.Username>
+				<S.CommentDate>
+					{`${new Date(data?.dateCreated || 'now').toLocaleDateString()} ${new Date(
+						data.dateCreated
+					).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+				</S.CommentDate>
+			</S.CommentHeader>
+			<S.CommentText>{data?.content || '[[content]]'}</S.CommentText>
+		</S.Comment>
+	);
+}

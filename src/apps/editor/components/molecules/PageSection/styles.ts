@@ -189,6 +189,39 @@ export const SubElementHeaderActions = styled.div`
 	gap: 5px;
 `;
 
+export const FeedLayoutWrapper = styled.div`
+	position: relative;
+`;
+
+export const FeedLayoutDropdown = styled.div`
+	position: absolute;
+	top: 100%;
+	right: 0;
+	margin-top: 5px;
+	min-width: 120px;
+	background: ${(props) => props.theme.colors.container.primary.background};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.alt2};
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+	z-index: 100;
+	overflow: hidden;
+`;
+
+export const FeedLayoutOption = styled.div<{ $active: boolean }>`
+	padding: 8px 12px;
+	font-size: ${(props) => props.theme.typography.size.xxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
+	color: ${(props) => (props.$active ? props.theme.colors.font.primary : props.theme.colors.font.alt1)};
+	background: ${(props) => (props.$active ? props.theme.colors.container.primary.active : 'transparent')};
+	cursor: pointer;
+	transition: all 100ms;
+
+	&:hover {
+		background: ${(props) => props.theme.colors.container.primary.active};
+		color: ${(props) => props.theme.colors.font.primary};
+	}
+`;
+
 export const SubElementBody = styled.div`
 	width: 100%;
 `;

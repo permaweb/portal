@@ -49,6 +49,7 @@ const DomainsRegister = getLazyImport('Domains/Register');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
 const Tips = getLazyImport('Tips');
+const PostPreviewEdit = getLazyImport('PostPreviews/Edit');
 
 function getLazyImport(view: string) {
 	const key = `./views/${view}/index.tsx`;
@@ -243,6 +244,8 @@ function AppContent() {
 					{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
 					{getRoute(`${URLS.base}:portalId/domains/register`, <DomainsRegister />)}
 					{getRoute(`${URLS.base}:portalId/tips`, <Tips />)}
+					{getRoute(`${URLS.base}:portalId/post-preview/edit/:previewId`, <PostPreviewEdit />)}
+					{getRoute(`${URLS.base}:portalId/post-preview/create`, <PostPreviewEdit />)}
 					{getRoute(URLS.docs, <Docs />)}
 					{getRoute(`${URLS.docs}:active/*`, <Docs />)}
 					{getRoute(URLS.notFound, <NotFound />)}
