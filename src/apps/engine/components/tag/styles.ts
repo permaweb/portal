@@ -15,5 +15,6 @@ export const Tag = styled.div`
 	&:hover {
 		cursor: pointer;
 		background: rgba(var(--color-secondary), 1);
+		color: rgba(var(--color-secondary-contrast), 1);
 	}
 `;
