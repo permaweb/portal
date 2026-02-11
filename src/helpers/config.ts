@@ -24,6 +24,58 @@ export const AO_NODE = {
 	scheduler: 'n_XZJhUnmldNFo4dhajoPZWhBXuJk-OcQr5JQ49c4Zo',
 };
 
+export const TIP_TOKEN_OPTIONS = [
+	{
+		label: 'AR',
+		tokenType: 'AR' as const,
+		tokenAddress: 'AR',
+		tokenSymbol: 'AR',
+		tokenDecimals: 12,
+	},
+	{
+		label: 'AO',
+		tokenType: 'AO' as const,
+		tokenAddress: '0syT13r0s0tgPmIed95bJnuSqaD29HQNN8D3ElLSrsc',
+		tokenSymbol: 'AO',
+		tokenDecimals: 12,
+	},
+	{
+		label: 'WANDER',
+		tokenType: 'AO' as const,
+		tokenAddress: '7GoQfmSOct_aUOWKM4xbKGg6DzAmOgdKwg8Kf-CbHm4',
+		tokenSymbol: 'WANDER',
+		tokenDecimals: 12,
+	},
+	{
+		label: 'PI',
+		tokenType: 'AO' as const,
+		tokenAddress: '4hXj_E-5fAKmo4E8KjgQvuDJKAFk9P2grhycVmISDLs',
+		tokenSymbol: 'PI',
+		tokenDecimals: 12,
+	},
+	{
+		label: 'USDA',
+		tokenType: 'AO' as const,
+		tokenAddress: 'FBt9A5GA_KXMMSxA2DJ0xZbAq8sLLU2ak-YJe9zDvg8',
+		tokenSymbol: 'USDA',
+		tokenDecimals: 12,
+	},
+	{
+		label: 'wAR',
+		tokenType: 'AO' as const,
+		tokenAddress: 'xU9zFkq3X2ZQ6olwNVvr1vUWIjc3kXTWr7xKQD6dh10',
+		tokenSymbol: 'wAR',
+		tokenDecimals: 12,
+	},
+	{
+		label: 'ARIO',
+		tokenType: 'AO' as const,
+		tokenAddress: 'qNvAoz0TgcH7DMg8BCVn8jF32QH5L6T29VjHxhHqqGE',
+		tokenSymbol: 'ARIO',
+		tokenDecimals: 12,
+	},
+];
+
 export const IS_TESTNET = import.meta.env.VITE_ARIO_TESTNET === 'true';
 
 export const ASSET_UPLOAD = {

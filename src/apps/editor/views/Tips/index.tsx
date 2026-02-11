@@ -5,12 +5,12 @@ import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
-import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
+import { Select } from 'components/atoms/Select';
 import { Toggle } from 'components/atoms/Toggle';
 import { TxAddress } from 'components/atoms/TxAddress';
-import { URLS } from 'helpers/config';
+import { TIP_TOKEN_OPTIONS, URLS } from 'helpers/config';
 import {
 	formatAmountDisplay,
 	fromBaseUnits,
@@ -19,7 +19,14 @@ import {
 	parseTipTags,
 	tokensToMonetizationConfig,
 } from 'helpers/tokens';
-import { MonetizationConfig, PageBlockEnum, PageSectionEnum, PortalPatchMapEnum, TipRow } from 'helpers/types';
+import {
+	MonetizationConfig,
+	PageBlockEnum,
+	PageSectionEnum,
+	PortalPatchMapEnum,
+	SelectOptionType,
+	TipRow,
+} from 'helpers/types';
 import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -375,6 +382,24 @@ export default function Tips() {
 		if (list.length > 0) return list.slice(0, MAX_TIP_TOKENS);
 		return [{ ...DEFAULT_MONETIZATION_TOKEN }];
 	}, [monetization.tipTokens]);
+	const getTokenOptionId = (token: {
+		tokenType?: 'AR' | 'AO';
+		tokenAddress?: string;
+		tokenSymbol?: string;
+		tokenDecimals?: number;
+	}) =>
+		`${token.tokenType || 'AO'}:${token.tokenAddress || ''}:${token.tokenSymbol || ''}:${Number(
+			token.tokenDecimals ?? DEFAULT_TOKEN_DECIMALS
+		)}`;
+	const presetOptions = React.useMemo<SelectOptionType[]>(
+		() => [
+			...TIP_TOKEN_OPTIONS.map((token) => ({
+				id: getTokenOptionId(token),
+				label: `${token.label} (${token.tokenAddress})`,
+			})),
+		],
+		[]
+	);
 
 	function updateTipToken(index: number, updates: Partial<(typeof tipTokens)[number]>) {
 		setMonetization((prev) => {
@@ -394,10 +419,7 @@ export default function Tips() {
 				tipTokens: [
 					...list,
 					{
-						tokenType: 'AO',
-						tokenAddress: '',
-						tokenSymbol: 'AO',
-						tokenDecimals: 0,
+						...DEFAULT_MONETIZATION_TOKEN,
 					},
 				],
 			};
@@ -414,10 +436,17 @@ export default function Tips() {
 	}
 
 	function buildPayload(nextMonetization: MonetizationConfig, enabledOverride?: boolean): MonetizationConfig {
+		const withFixedDecimals = {
+			...nextMonetization,
+			tipTokens: (nextMonetization.tipTokens || []).map((token) => ({
+				...token,
+				tokenDecimals: DEFAULT_TOKEN_DECIMALS,
+			})),
+		};
 		const normalized = normalizeMonetizationConfig(
 			{
-				...nextMonetization,
-				enabled: enabledOverride ?? nextMonetization.enabled,
+				...withFixedDecimals,
+				enabled: enabledOverride ?? withFixedDecimals.enabled,
 			},
 			ownerWallet
 		);
@@ -442,8 +471,8 @@ export default function Tips() {
 			if (!token.symbol?.trim()) {
 				return `Each token must include a symbol.`;
 			}
-			if (!Number.isFinite(token.decimals) || token.decimals < 0) {
-				return `Token decimals must be a non-negative number.`;
+			if (!Number.isFinite(token.decimals) || token.decimals !== DEFAULT_TOKEN_DECIMALS) {
+				return `Token decimals must be ${DEFAULT_TOKEN_DECIMALS}.`;
 			}
 			if (token.type === 'AO' && !token.processId) {
 				return `Each AO token needs a valid 43-character process ID.`;
@@ -614,83 +643,47 @@ export default function Tips() {
 				<S.BodyWrapper>
 					<S.Section>
 						<S.ConfigForm>
-							<S.Forms>
-								<FormField
-									label={language.walletAddress}
-									value={monetization.walletAddress}
-									onChange={(e: any) =>
-										setMonetization((prev) => ({
-											...prev,
-											walletAddress: e.target.value,
-										}))
-									}
-									invalid={{ status: false, message: null }}
-									disabled={fieldsDisabled}
-									hideErrorMessage
-								/>
-							</S.Forms>
-
 							{tipTokens.map((token, index) => {
-								const tokenType = token.tokenType === 'AO' ? 'AO' : 'AR';
+								const matchedPreset = TIP_TOKEN_OPTIONS.find(
+									(preset) =>
+										preset.tokenType === (token.tokenType === 'AO' ? 'AO' : 'AR') &&
+										preset.tokenAddress === (token.tokenAddress || '') &&
+										preset.tokenSymbol === (token.tokenSymbol || '') &&
+										Number(preset.tokenDecimals) === Number(token.tokenDecimals ?? 0)
+								);
+								const selectedPresetId = matchedPreset ? getTokenOptionId(matchedPreset) : presetOptions[0].id;
+								const selectedPresetOption =
+									presetOptions.find((option) => option.id === selectedPresetId) || presetOptions[0];
+
 								return (
 									<S.ConfigForm key={`tip-token-${index}`}>
 										<div className="row">
 											<span className="field-label">{`Tip Token ${index + 1}`}</span>
-											<div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-												<Toggle
-													options={['AR', 'AO']}
-													activeOption={tokenType}
-													handleToggle={(option) =>
-														updateTipToken(index, {
-															tokenType: option === 'AO' ? 'AO' : 'AR',
-															tokenSymbol: option === 'AO' ? token.tokenSymbol || 'AO' : 'AR',
-															tokenDecimals: option === 'AO' ? token.tokenDecimals ?? 0 : DEFAULT_TOKEN_DECIMALS,
-															tokenAddress: option === 'AO' ? token.tokenAddress || '' : 'AR',
-														})
-													}
+											{tipTokens.length > 1 && (
+												<Button
+													type={'alt4'}
+													label={language?.remove ?? 'Remove'}
+													handlePress={() => removeTipToken(index)}
 													disabled={fieldsDisabled}
 												/>
-												{tipTokens.length > 1 && (
-													<Button
-														type={'alt4'}
-														label={language?.remove ?? 'Remove'}
-														handlePress={() => removeTipToken(index)}
-														disabled={fieldsDisabled}
-													/>
-												)}
-											</div>
+											)}
 										</div>
-
 										<S.Forms>
-											<FormField
-												label={language.tokenAddress}
-												value={token.tokenAddress || (tokenType === 'AR' ? 'AR' : '')}
-												onChange={(e: any) => updateTipToken(index, { tokenAddress: e.target.value })}
-												invalid={{ status: false, message: null }}
-												disabled={fieldsDisabled || tokenType !== 'AO'}
-												hideErrorMessage
-											/>
-											<FormField
-												label={language.tokenSymbol ?? 'Token Symbol'}
-												value={token.tokenSymbol || ''}
-												onChange={(e: any) => updateTipToken(index, { tokenSymbol: e.target.value })}
-												invalid={{ status: false, message: null }}
-												disabled={fieldsDisabled}
-												hideErrorMessage
-											/>
-											<FormField
-												label={language.tokenDecimals ?? 'Token Decimals'}
-												value={token.tokenDecimals ?? 0}
-												onChange={(e: any) => {
-													const nextValue = Number(e.target.value);
+											<Select
+												label={'Token'}
+												activeOption={selectedPresetOption}
+												setActiveOption={(option) => {
+													const preset = TIP_TOKEN_OPTIONS.find((entry) => getTokenOptionId(entry) === option.id);
+													if (!preset) return;
 													updateTipToken(index, {
-														tokenDecimals: Number.isFinite(nextValue) ? Math.max(0, Math.floor(nextValue)) : 0,
+														tokenType: preset.tokenType,
+														tokenAddress: preset.tokenAddress,
+														tokenSymbol: preset.tokenSymbol,
+														tokenDecimals: DEFAULT_TOKEN_DECIMALS,
 													});
 												}}
-												invalid={{ status: false, message: null }}
+												options={presetOptions}
 												disabled={fieldsDisabled}
-												hideErrorMessage
-												type="number"
 											/>
 										</S.Forms>
 									</S.ConfigForm>
