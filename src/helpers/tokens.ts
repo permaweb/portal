@@ -1,4 +1,4 @@
-import { MonetizationConfig, TagType } from './types';
+import { MonetizationConfig, TagType, TipTokenConfig } from './types';
 
 export type TipTokenType = 'AR' | 'AO';
 
@@ -28,34 +28,75 @@ export const DEFAULT_AR_TOKEN: TipToken = {
 
 const isProbablyProcessId = (value?: string | null) => typeof value === 'string' && value.trim().length === 43;
 
-export function normalizeTipToken(monetization?: MonetizationConfig | null): TipToken {
-	if (!monetization) return { ...DEFAULT_AR_TOKEN };
+const toTokenConfig = (token: TipToken): TipTokenConfig => ({
+	tokenType: token.type,
+	tokenAddress: token.type === 'AR' ? 'AR' : token.processId || '',
+	tokenSymbol: token.symbol,
+	tokenDecimals: token.decimals,
+});
 
-	const rawType = monetization.tokenType;
-	const tokenAddress = monetization.tokenAddress?.trim() || '';
+const normalizeSingleTokenConfig = (config?: TipTokenConfig | null): TipToken => {
+	if (!config) return { ...DEFAULT_AR_TOKEN };
+
+	const tokenAddress = config.tokenAddress?.trim() || '';
+	const rawType = config.tokenType;
 	const tokenType: TipTokenType =
 		rawType === 'AO' || rawType === 'AR' ? rawType : tokenAddress === 'AR' || !tokenAddress ? 'AR' : 'AO';
 
 	if (tokenType === 'AR') {
-		const decimals = Number.isFinite(monetization.tokenDecimals)
-			? Math.max(0, Math.floor(Number(monetization.tokenDecimals)))
+		const decimals = Number.isFinite(config.tokenDecimals)
+			? Math.max(0, Math.floor(Number(config.tokenDecimals)))
 			: DEFAULT_AR_DECIMALS;
 		return {
 			type: 'AR',
-			symbol: monetization.tokenSymbol?.trim() || 'AR',
+			symbol: config.tokenSymbol?.trim() || 'AR',
 			decimals,
 		};
 	}
 
-	const aoDecimals = Number.isFinite(monetization.tokenDecimals)
-		? Math.max(0, Math.floor(Number(monetization.tokenDecimals)))
-		: 0;
+	const aoDecimals = Number.isFinite(config.tokenDecimals) ? Math.max(0, Math.floor(Number(config.tokenDecimals))) : 0;
 	return {
 		type: 'AO',
-		symbol: monetization.tokenSymbol?.trim() || 'AO',
+		symbol: config.tokenSymbol?.trim() || 'AO',
 		decimals: aoDecimals,
 		processId: isProbablyProcessId(tokenAddress) ? tokenAddress : undefined,
 	};
+};
+
+export function normalizeTipTokens(monetization?: MonetizationConfig | null): TipToken[] {
+	if (!monetization) return [{ ...DEFAULT_AR_TOKEN }];
+
+	const rawList = Array.isArray(monetization.tipTokens) ? monetization.tipTokens : [];
+	const sourceList =
+		rawList.length > 0
+			? rawList
+			: [
+					{
+						tokenType: monetization.tokenType,
+						tokenAddress: monetization.tokenAddress,
+						tokenSymbol: monetization.tokenSymbol,
+						tokenDecimals: monetization.tokenDecimals,
+					},
+			  ];
+
+	const normalized = sourceList.map((entry) => normalizeSingleTokenConfig(entry));
+	const unique = normalized.filter((token, index, arr) => {
+		const key = `${token.type}:${token.symbol}:${token.decimals}:${token.processId || ''}`;
+		return (
+			index === arr.findIndex((item) => `${item.type}:${item.symbol}:${item.decimals}:${item.processId || ''}` === key)
+		);
+	});
+
+	const bounded = unique.slice(0, 3);
+	return bounded.length > 0 ? bounded : [{ ...DEFAULT_AR_TOKEN }];
+}
+
+export function normalizeTipToken(monetization?: MonetizationConfig | null): TipToken {
+	return normalizeTipTokens(monetization)[0];
+}
+
+export function tokensToMonetizationConfig(tokens: TipToken[]): TipTokenConfig[] {
+	return tokens.slice(0, 3).map(toTokenConfig);
 }
 
 export function toBaseUnits(amount: string, decimals: number): string {

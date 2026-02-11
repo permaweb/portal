@@ -11,7 +11,14 @@ import { Pagination } from 'components/atoms/Pagination';
 import { Toggle } from 'components/atoms/Toggle';
 import { TxAddress } from 'components/atoms/TxAddress';
 import { URLS } from 'helpers/config';
-import { formatAmountDisplay, fromBaseUnits, normalizeTipToken, parseTipTags } from 'helpers/tokens';
+import {
+	formatAmountDisplay,
+	fromBaseUnits,
+	normalizeTipToken,
+	normalizeTipTokens,
+	parseTipTags,
+	tokensToMonetizationConfig,
+} from 'helpers/tokens';
 import { MonetizationConfig, PageBlockEnum, PageSectionEnum, PortalPatchMapEnum, TipRow } from 'helpers/types';
 import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -22,30 +29,26 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import * as S from './styles';
 
 const DEFAULT_TOKEN_DECIMALS = 12;
+const MAX_TIP_TOKENS = 3;
+const DEFAULT_MONETIZATION_TOKEN = {
+	tokenType: 'AR' as const,
+	tokenAddress: 'AR',
+	tokenSymbol: 'AR',
+	tokenDecimals: DEFAULT_TOKEN_DECIMALS,
+};
 
 const normalizeMonetizationConfig = (config: MonetizationConfig, ownerWallet: string): MonetizationConfig => {
-	const tokenAddress = config.tokenAddress?.trim() || '';
-	const tokenType =
-		config.tokenType === 'AO' || config.tokenType === 'AR'
-			? config.tokenType
-			: tokenAddress && tokenAddress !== 'AR'
-			? 'AO'
-			: 'AR';
-
-	const tokenSymbol = config.tokenSymbol?.trim() || (tokenType === 'AR' ? 'AR' : 'AO');
-	const tokenDecimals = Number.isFinite(config.tokenDecimals)
-		? Math.max(0, Math.floor(Number(config.tokenDecimals)))
-		: tokenType === 'AR'
-		? DEFAULT_TOKEN_DECIMALS
-		: 0;
+	const normalizedTokens = normalizeTipTokens(config);
+	const primaryToken = normalizedTokens[0];
 
 	return {
 		enabled: !!config.enabled,
 		walletAddress: config.walletAddress || ownerWallet,
-		tokenAddress: tokenAddress || (tokenType === 'AR' ? 'AR' : ''),
-		tokenSymbol,
-		tokenDecimals,
-		tokenType,
+		tokenAddress: primaryToken.type === 'AR' ? 'AR' : primaryToken.processId || '',
+		tokenSymbol: primaryToken.symbol,
+		tokenDecimals: primaryToken.decimals,
+		tokenType: primaryToken.type,
+		tipTokens: tokensToMonetizationConfig(normalizedTokens),
 	};
 };
 
@@ -80,6 +83,7 @@ export default function Tips() {
 			tokenSymbol: 'AR',
 			tokenDecimals: DEFAULT_TOKEN_DECIMALS,
 			tokenType: 'AR',
+			tipTokens: [{ ...DEFAULT_MONETIZATION_TOKEN }],
 		};
 	});
 
@@ -366,10 +370,72 @@ export default function Tips() {
 		}
 	}
 
-	async function handleToggle(option: 'On' | 'Off') {
-		const enabled = option === 'On';
+	const tipTokens = React.useMemo(() => {
+		const list = monetization.tipTokens || [];
+		if (list.length > 0) return list.slice(0, MAX_TIP_TOKENS);
+		return [{ ...DEFAULT_MONETIZATION_TOKEN }];
+	}, [monetization.tipTokens]);
 
-		// Save immediately
+	function updateTipToken(index: number, updates: Partial<(typeof tipTokens)[number]>) {
+		setMonetization((prev) => {
+			const list = [...(prev.tipTokens || [{ ...DEFAULT_MONETIZATION_TOKEN }])].slice(0, MAX_TIP_TOKENS);
+			if (!list[index]) return prev;
+			list[index] = { ...list[index], ...updates };
+			return { ...prev, tipTokens: list };
+		});
+	}
+
+	function addTipToken() {
+		setMonetization((prev) => {
+			const list = [...(prev.tipTokens || [{ ...DEFAULT_MONETIZATION_TOKEN }])].slice(0, MAX_TIP_TOKENS);
+			if (list.length >= MAX_TIP_TOKENS) return prev;
+			return {
+				...prev,
+				tipTokens: [
+					...list,
+					{
+						tokenType: 'AO',
+						tokenAddress: '',
+						tokenSymbol: 'AO',
+						tokenDecimals: 0,
+					},
+				],
+			};
+		});
+	}
+
+	function removeTipToken(index: number) {
+		setMonetization((prev) => {
+			const list = [...(prev.tipTokens || [{ ...DEFAULT_MONETIZATION_TOKEN }])];
+			if (list.length <= 1) return prev;
+			list.splice(index, 1);
+			return { ...prev, tipTokens: list };
+		});
+	}
+
+	function buildPayload(nextMonetization: MonetizationConfig, enabledOverride?: boolean): MonetizationConfig {
+		const normalized = normalizeMonetizationConfig(
+			{
+				...nextMonetization,
+				enabled: enabledOverride ?? nextMonetization.enabled,
+			},
+			ownerWallet
+		);
+		const normalizedTokens = normalizeTipTokens(normalized);
+		const primary = normalizedTokens[0];
+
+		return {
+			enabled: normalized.enabled,
+			walletAddress: normalized.walletAddress.trim(),
+			tokenAddress: primary.type === 'AR' ? 'AR' : primary.processId || '',
+			tokenSymbol: primary.symbol,
+			tokenDecimals: primary.decimals,
+			tokenType: primary.type,
+			tipTokens: tokensToMonetizationConfig(normalizedTokens),
+		};
+	}
+
+	async function saveMonetization(nextMonetization: MonetizationConfig, enabledOverride?: boolean) {
 		if (!portalProvider.current?.id || !portalProvider.permissions?.updatePortalMeta) {
 			return;
 		}
@@ -378,22 +444,9 @@ export default function Tips() {
 			return;
 		}
 
+		const payload = buildPayload(nextMonetization, enabledOverride);
+		const enabled = payload.enabled;
 		setSavingMonetization(true);
-
-		setMonetization((prev) => ({
-			...prev,
-			enabled,
-		}));
-
-		const normalized = normalizeMonetizationConfig({ ...monetization, enabled }, ownerWallet);
-		const payload: MonetizationConfig = {
-			enabled: normalized.enabled,
-			walletAddress: normalized.walletAddress.trim(),
-			tokenAddress: normalized.tokenAddress || 'AR',
-			tokenSymbol: normalized.tokenSymbol,
-			tokenDecimals: normalized.tokenDecimals,
-			tokenType: normalized.tokenType,
-		};
 
 		try {
 			// Prepare the update body
@@ -490,12 +543,23 @@ export default function Tips() {
 					? language?.tipsEnabledWithButton ?? 'Tips enabled! A tip button has been added to your home page.'
 					: language.monetizationSaved;
 			addNotification(message, 'success');
+			setMonetization(payload);
 		} catch (e: any) {
 			debugLog('error', 'Monetization', 'Error saving monetization settings:', e.message ?? 'Unknown error');
 			addNotification(e?.message ?? 'Error saving monetization settings.', 'warning');
 		} finally {
 			setSavingMonetization(false);
 		}
+	}
+
+	async function handleToggle(option: 'On' | 'Off') {
+		const enabled = option === 'On';
+		const nextMonetization = {
+			...monetization,
+			enabled,
+		};
+		setMonetization(nextMonetization);
+		await saveMonetization(nextMonetization, enabled);
 	}
 
 	return (
@@ -541,74 +605,89 @@ export default function Tips() {
 									disabled={fieldsDisabled}
 									hideErrorMessage
 								/>
-
-								<FormField
-									label={language.tokenAddress}
-									value={monetization.tokenAddress}
-									onChange={(e: any) =>
-										setMonetization((prev) => ({
-											...prev,
-											tokenAddress: e.target.value,
-										}))
-									}
-									invalid={{ status: false, message: null }}
-									disabled={fieldsDisabled || monetization.tokenType !== 'AO'}
-									hideErrorMessage
-								/>
 							</S.Forms>
-							<S.ConfigForm>
-								<div className="row">
-									<span className="field-label">{language.tokenType ?? 'Token Type'}</span>
-									<Toggle
-										options={['AR', 'AO']}
-										activeOption={monetization.tokenType === 'AO' ? 'AO' : 'AR'}
-										handleToggle={(option) =>
-											setMonetization((prev) => ({
-												...prev,
-												tokenType: option === 'AO' ? 'AO' : 'AR',
-												tokenSymbol: option === 'AO' ? prev.tokenSymbol || 'AO' : 'AR',
-												tokenDecimals: option === 'AO' ? prev.tokenDecimals ?? 0 : DEFAULT_TOKEN_DECIMALS,
-												tokenAddress: option === 'AO' ? prev.tokenAddress : 'AR',
-											}))
-										}
-										disabled={fieldsDisabled}
-									/>
-								</div>
-							</S.ConfigForm>
-							{monetization.tokenType === 'AO' && (
-								<S.Forms>
-									<FormField
-										label={language.tokenSymbol ?? 'Token Symbol'}
-										value={monetization.tokenSymbol || ''}
-										onChange={(e: any) =>
-											setMonetization((prev) => ({
-												...prev,
-												tokenSymbol: e.target.value,
-											}))
-										}
-										invalid={{ status: false, message: null }}
-										disabled={fieldsDisabled}
-										hideErrorMessage
-									/>
-									<FormField
-										label={language.tokenDecimals ?? 'Token Decimals'}
-										value={monetization.tokenDecimals ?? 0}
-										onChange={(e: any) =>
-											setMonetization((prev) => {
-												const nextValue = Number(e.target.value);
-												return {
-													...prev,
-													tokenDecimals: Number.isFinite(nextValue) ? Math.max(0, Math.floor(nextValue)) : 0,
-												};
-											})
-										}
-										invalid={{ status: false, message: null }}
-										disabled={fieldsDisabled}
-										hideErrorMessage
-										type="number"
-									/>
-								</S.Forms>
-							)}
+
+							{tipTokens.map((token, index) => {
+								const tokenType = token.tokenType === 'AO' ? 'AO' : 'AR';
+								return (
+									<S.ConfigForm key={`tip-token-${index}`}>
+										<div className="row">
+											<span className="field-label">{`Tip Token ${index + 1}`}</span>
+											<div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+												<Toggle
+													options={['AR', 'AO']}
+													activeOption={tokenType}
+													handleToggle={(option) =>
+														updateTipToken(index, {
+															tokenType: option === 'AO' ? 'AO' : 'AR',
+															tokenSymbol: option === 'AO' ? token.tokenSymbol || 'AO' : 'AR',
+															tokenDecimals: option === 'AO' ? token.tokenDecimals ?? 0 : DEFAULT_TOKEN_DECIMALS,
+															tokenAddress: option === 'AO' ? token.tokenAddress || '' : 'AR',
+														})
+													}
+													disabled={fieldsDisabled}
+												/>
+												{tipTokens.length > 1 && (
+													<Button
+														type={'alt4'}
+														label={language?.remove ?? 'Remove'}
+														handlePress={() => removeTipToken(index)}
+														disabled={fieldsDisabled}
+													/>
+												)}
+											</div>
+										</div>
+
+										<S.Forms>
+											<FormField
+												label={language.tokenAddress}
+												value={token.tokenAddress || (tokenType === 'AR' ? 'AR' : '')}
+												onChange={(e: any) => updateTipToken(index, { tokenAddress: e.target.value })}
+												invalid={{ status: false, message: null }}
+												disabled={fieldsDisabled || tokenType !== 'AO'}
+												hideErrorMessage
+											/>
+											<FormField
+												label={language.tokenSymbol ?? 'Token Symbol'}
+												value={token.tokenSymbol || ''}
+												onChange={(e: any) => updateTipToken(index, { tokenSymbol: e.target.value })}
+												invalid={{ status: false, message: null }}
+												disabled={fieldsDisabled}
+												hideErrorMessage
+											/>
+											<FormField
+												label={language.tokenDecimals ?? 'Token Decimals'}
+												value={token.tokenDecimals ?? 0}
+												onChange={(e: any) => {
+													const nextValue = Number(e.target.value);
+													updateTipToken(index, {
+														tokenDecimals: Number.isFinite(nextValue) ? Math.max(0, Math.floor(nextValue)) : 0,
+													});
+												}}
+												invalid={{ status: false, message: null }}
+												disabled={fieldsDisabled}
+												hideErrorMessage
+												type="number"
+											/>
+										</S.Forms>
+									</S.ConfigForm>
+								);
+							})}
+
+							<div className="row">
+								<Button
+									type={'alt2'}
+									label={tipTokens.length >= MAX_TIP_TOKENS ? 'Max 3 tokens' : 'Add Token'}
+									handlePress={addTipToken}
+									disabled={fieldsDisabled || tipTokens.length >= MAX_TIP_TOKENS}
+								/>
+								<Button
+									type={'primary'}
+									label={language.save}
+									handlePress={() => saveMonetization(monetization)}
+									disabled={!canEdit}
+								/>
+							</div>
 						</S.ConfigForm>
 					</S.Section>
 

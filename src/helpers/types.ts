@@ -461,6 +461,14 @@ export type MonetizationConfig = {
 	tokenSymbol?: string;
 	tokenDecimals?: number;
 	tokenType?: 'AR' | 'AO';
+	tipTokens?: TipTokenConfig[];
+};
+
+export type TipTokenConfig = {
+	tokenAddress: string;
+	tokenSymbol?: string;
+	tokenDecimals?: number;
+	tokenType?: 'AR' | 'AO';
 };
 
 export type TipRow = {

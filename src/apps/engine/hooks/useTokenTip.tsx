@@ -33,8 +33,14 @@ export function useTokenTip(tokenOverride?: TipToken, options?: UseTokenTipOptio
 	const isLegacyProfile = (profile as any)?.isLegacyProfile;
 
 	const sendTip = React.useCallback(
-		async (to: string, amount: string | undefined, location: 'page' | 'post' = 'page', postId?: string) => {
-			const token = tokenOverride ?? DEFAULT_AR_TOKEN;
+		async (
+			to: string,
+			amount: string | undefined,
+			location: 'page' | 'post' = 'page',
+			postId?: string,
+			tokenInput?: TipToken
+		) => {
+			const token = tokenInput ?? tokenOverride ?? DEFAULT_AR_TOKEN;
 
 			if (token.type === 'AR') {
 				return sendArTip(to, amount, location, postId);
