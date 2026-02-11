@@ -435,12 +435,35 @@ export default function Tips() {
 		};
 	}
 
+	function validateTipTokenConfig(nextMonetization: MonetizationConfig) {
+		const tokens = normalizeTipTokens(nextMonetization);
+
+		for (const token of tokens) {
+			if (!token.symbol?.trim()) {
+				return `Each token must include a symbol.`;
+			}
+			if (!Number.isFinite(token.decimals) || token.decimals < 0) {
+				return `Token decimals must be a non-negative number.`;
+			}
+			if (token.type === 'AO' && !token.processId) {
+				return `Each AO token needs a valid 43-character process ID.`;
+			}
+		}
+
+		return null;
+	}
+
 	async function saveMonetization(nextMonetization: MonetizationConfig, enabledOverride?: boolean) {
 		if (!portalProvider.current?.id || !portalProvider.permissions?.updatePortalMeta) {
 			return;
 		}
 		if (!arProvider.wallet || !permawebProvider.libs) {
 			addNotification(language.walletNotConnected, 'warning');
+			return;
+		}
+		const tokenValidationError = validateTipTokenConfig(nextMonetization);
+		if (tokenValidationError) {
+			addNotification(tokenValidationError, 'warning');
 			return;
 		}
 

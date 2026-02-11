@@ -31,7 +31,9 @@ export default function TipsButton(props: TipsButtonProps) {
 	const monetization = portal?.Monetization as MonetizationConfig | undefined;
 	const enabled = !!monetization?.enabled;
 	const walletAddress = monetization?.walletAddress || null;
-	const tipTokens = normalizeTipTokens(monetization);
+	const configuredTipTokens = normalizeTipTokens(monetization);
+	const tipTokens = configuredTipTokens.filter((token) => token.type === 'AR' || !!token.processId);
+	const hasInvalidAOConfig = configuredTipTokens.some((token) => token.type === 'AO' && !token.processId);
 	const { sendTip } = useTokenTip();
 
 	// Block-level config (label + variant)
@@ -49,8 +51,8 @@ export default function TipsButton(props: TipsButtonProps) {
 
 	const [modalOpen, setModalOpen] = React.useState(false);
 	const [submitting, setSubmitting] = React.useState(false);
-	const [selectedTokenId, setSelectedTokenId] = React.useState(
-		() => `${tipTokens[0].type}:${tipTokens[0].symbol}:${tipTokens[0].processId || 'AR'}`
+	const [selectedTokenId, setSelectedTokenId] = React.useState(() =>
+		tipTokens[0] ? `${tipTokens[0].type}:${tipTokens[0].symbol}:${tipTokens[0].processId || 'AR'}` : ''
 	);
 
 	React.useEffect(() => {
@@ -67,6 +69,19 @@ export default function TipsButton(props: TipsButtonProps) {
 
 	const handleClick = () => {
 		if (props.preview || submitting) return;
+		if (tipTokens.length === 0) {
+			addNotification(
+				'Tips token config is invalid. Please ask the portal editor to fix token process IDs.',
+				'warning'
+			);
+			return;
+		}
+		if (hasInvalidAOConfig) {
+			addNotification(
+				'Some AO tip tokens are invalid and were hidden. Please verify token process IDs in the editor.',
+				'warning'
+			);
+		}
 		setModalOpen(true);
 	};
 
@@ -75,8 +90,20 @@ export default function TipsButton(props: TipsButtonProps) {
 		const selectedToken =
 			tipTokens.find((token) => `${token.type}:${token.symbol}:${token.processId || 'AR'}` === selectedTokenId) ||
 			tipTokens[0];
+		if (!selectedToken) {
+			addNotification('No valid tip token is configured for this portal.', 'warning');
+			return;
+		}
 
 		try {
+			debugLog('info', 'TipsButton', 'Submitting tip', {
+				amount,
+				tokenSymbol: selectedToken.symbol,
+				tokenType: selectedToken.type,
+				tokenProcess: selectedToken.processId || null,
+				location,
+				postId: props.postId || null,
+			});
 			setSubmitting(true);
 			const txId = await sendTip(walletAddress, amount, location, props.postId, selectedToken);
 			addNotification(`Successfully sent ${amount} ${selectedToken.symbol} tip!`, 'success');

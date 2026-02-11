@@ -24,10 +24,33 @@ type UseTokenTipOptions = {
 	sendFromProfile?: boolean;
 };
 
+const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> => {
+	let timeoutId: ReturnType<typeof setTimeout> | null = null;
+	const start = Date.now();
+	try {
+		debugLog('info', 'useTokenTip', 'Starting timed operation', { timeoutMs, errorMessage });
+		const timeoutPromise = new Promise<never>((_, reject) => {
+			timeoutId = setTimeout(() => {
+				debugLog('error', 'useTokenTip', 'Timed operation expired', { timeoutMs, errorMessage });
+				reject(new Error(errorMessage));
+			}, timeoutMs);
+		});
+		const result = await Promise.race([promise, timeoutPromise]);
+		debugLog('success', 'useTokenTip', 'Timed operation completed', { elapsedMs: Date.now() - start });
+		return result;
+	} finally {
+		if (timeoutId) clearTimeout(timeoutId);
+	}
+};
+
+const isTransferTimeoutError = (error: any) => {
+	return error instanceof Error && error.message.includes('Transfer request timed out');
+};
+
 export function useTokenTip(tokenOverride?: TipToken, options?: UseTokenTipOptions) {
 	const portalProvider = usePortalProvider();
 	const { profile, deps, libs } = usePermawebProvider();
-	const { walletAddress, handleConnect } = useArweaveProvider();
+	const { wallet, walletAddress, handleConnect } = useArweaveProvider();
 	const { sendTip: sendArTip } = useArTip();
 	const { Name } = portalProvider?.portal || {};
 	const isLegacyProfile = (profile as any)?.isLegacyProfile;
@@ -61,57 +84,23 @@ export function useTokenTip(tokenOverride?: TipToken, options?: UseTokenTipOptio
 			}
 
 			if (!walletAddress) {
+				debugLog('info', 'useTokenTip', 'Wallet not connected, requesting connect');
 				await handleConnect(WalletEnum.wander);
+				debugLog('success', 'useTokenTip', 'Wallet connect completed');
 			}
 
 			const quantity = toBaseUnits(cleanAmount, token.decimals);
+			debugLog('info', 'useTokenTip', 'Prepared AO tip transfer', {
+				tokenType: token.type,
+				tokenSymbol: token.symbol,
+				tokenProcess: token.processId,
+				quantity,
+				location,
+				postId: postId || null,
+			});
 
 			let messageId: string;
-
-			if (options?.sendFromProfile && profile?.id && libs?.sendMessage) {
-				if (isLegacyProfile) {
-					messageId = await libs.sendMessage({
-						processId: profile.id,
-						action: 'Transfer',
-						tags: [
-							{ name: 'Action', value: 'Transfer' },
-							{ name: 'Target', value: token.processId },
-							{ name: 'Recipient', value: targetAddress },
-							{ name: 'Quantity', value: quantity },
-						],
-					});
-				} else {
-					messageId = await libs.sendMessage({
-						processId: profile.id,
-						action: 'Run-Action',
-						tags: [
-							{ name: 'ForwardTo', value: token.processId },
-							{ name: 'ForwardAction', value: 'Transfer' },
-							{ name: 'Forward-To', value: token.processId },
-							{ name: 'Forward-Action', value: 'Transfer' },
-							{ name: 'Recipient', value: targetAddress },
-							{ name: 'Quantity', value: quantity },
-						],
-						data: {
-							Target: token.processId,
-							Action: 'Transfer',
-							Input: {
-								Recipient: targetAddress,
-								Quantity: quantity,
-							},
-						},
-					});
-				}
-			} else if (libs?.sendMessage) {
-				messageId = await libs.sendMessage({
-					processId: token.processId,
-					action: 'Transfer',
-					tags: [
-						{ name: 'Recipient', value: targetAddress },
-						{ name: 'Quantity', value: quantity },
-					],
-				});
-			} else {
+			const sendViaAoFallback = async () => {
 				if (!deps?.ao?.message) {
 					throw new Error('AO connection not available');
 				}
@@ -122,20 +111,103 @@ export function useTokenTip(tokenOverride?: TipToken, options?: UseTokenTipOptio
 						? createSigner((window as any).arweaveWallet)
 						: undefined);
 
-				messageId = await deps.ao.message({
-					process: token.processId,
-					tags: [
-						{ name: 'Action', value: 'Transfer' },
-						{ name: 'Recipient', value: targetAddress },
-						{ name: 'Quantity', value: quantity },
-					],
-					signer,
-				});
+				return withTimeout(
+					deps.ao.message({
+						process: token.processId,
+						tags: [
+							{ name: 'Action', value: 'Transfer' },
+							{ name: 'Recipient', value: targetAddress },
+							{ name: 'Quantity', value: quantity },
+						],
+						signer,
+					}),
+					25000,
+					'Transfer request timed out while waiting for wallet/network confirmation'
+				);
+			};
+
+			if (options?.sendFromProfile && profile?.id && libs?.sendMessage) {
+				debugLog('info', 'useTokenTip', 'Sending AO transfer from profile');
+				try {
+					if (isLegacyProfile) {
+						messageId = await withTimeout(
+							libs.sendMessage({
+								processId: profile.id,
+								wallet,
+								action: 'Transfer',
+								tags: [
+									{ name: 'Action', value: 'Transfer' },
+									{ name: 'Target', value: token.processId },
+									{ name: 'Recipient', value: targetAddress },
+									{ name: 'Quantity', value: quantity },
+								],
+							}),
+							25000,
+							'Transfer request timed out while waiting for wallet/network confirmation'
+						);
+					} else {
+						messageId = await withTimeout(
+							libs.sendMessage({
+								processId: profile.id,
+								wallet,
+								action: 'Run-Action',
+								tags: [
+									{ name: 'ForwardTo', value: token.processId },
+									{ name: 'ForwardAction', value: 'Transfer' },
+									{ name: 'Forward-To', value: token.processId },
+									{ name: 'Forward-Action', value: 'Transfer' },
+									{ name: 'Recipient', value: targetAddress },
+									{ name: 'Quantity', value: quantity },
+								],
+								data: {
+									Target: token.processId,
+									Action: 'Transfer',
+									Input: {
+										Recipient: targetAddress,
+										Quantity: quantity,
+									},
+								},
+							}),
+							25000,
+							'Transfer request timed out while waiting for wallet/network confirmation'
+						);
+					}
+				} catch (sendErr) {
+					if (!isTransferTimeoutError(sendErr)) throw sendErr;
+					debugLog('warn', 'useTokenTip', 'Profile send timed out, retrying with ao.message fallback');
+					messageId = await sendViaAoFallback();
+				}
+			} else if (libs?.sendMessage) {
+				debugLog('info', 'useTokenTip', 'Sending AO transfer via libs.sendMessage');
+				try {
+					messageId = await withTimeout(
+						libs.sendMessage({
+							processId: token.processId,
+							wallet,
+							action: 'Transfer',
+							tags: [
+								{ name: 'Recipient', value: targetAddress },
+								{ name: 'Quantity', value: quantity },
+							],
+						}),
+						25000,
+						'Transfer request timed out while waiting for wallet/network confirmation'
+					);
+				} catch (sendErr) {
+					if (!isTransferTimeoutError(sendErr)) throw sendErr;
+					debugLog('warn', 'useTokenTip', 'libs.sendMessage timed out, retrying with ao.message fallback');
+					messageId = await sendViaAoFallback();
+				}
+			} else {
+				debugLog('info', 'useTokenTip', 'Sending AO transfer via deps.ao.message fallback');
+				messageId = await sendViaAoFallback();
 			}
+			debugLog('success', 'useTokenTip', 'AO transfer message created', { messageId });
 
 			const shouldCreateReceipt = options?.createReceipt !== false;
 			if (shouldCreateReceipt && typeof window !== 'undefined' && (window as any).arweaveWallet) {
 				try {
+					debugLog('info', 'useTokenTip', 'Creating tip receipt transaction');
 					const receiptData = JSON.stringify({
 						type: 'tip',
 						token: token.symbol,
@@ -176,8 +248,21 @@ export function useTokenTip(tokenOverride?: TipToken, options?: UseTokenTipOptio
 						if (k && v) tx.addTag(k, v);
 					}
 
-					const signedTx = await (window as any).arweaveWallet.sign(tx);
-					const response = await arweave.transactions.post(signedTx);
+					const signedTx = await withTimeout(
+						(window as any).arweaveWallet.sign(tx),
+						20000,
+						'Tip transfer succeeded but receipt signing timed out'
+					);
+					debugLog('success', 'useTokenTip', 'Receipt signed', { receiptTxId: signedTx?.id });
+					const response = await withTimeout(
+						arweave.transactions.post(signedTx),
+						15000,
+						'Tip transfer succeeded but receipt upload timed out'
+					);
+					debugLog('success', 'useTokenTip', 'Receipt posted', {
+						status: response?.status,
+						statusText: response?.statusText,
+					});
 					if (response.status !== 200 && response.status !== 202) {
 						throw new Error(`Failed posting receipt: ${response.status} ${response.statusText}`);
 					}
@@ -193,6 +278,7 @@ export function useTokenTip(tokenOverride?: TipToken, options?: UseTokenTipOptio
 			options?.createReceipt,
 			options?.sendFromProfile,
 			sendArTip,
+			wallet,
 			walletAddress,
 			handleConnect,
 			deps?.ao,
