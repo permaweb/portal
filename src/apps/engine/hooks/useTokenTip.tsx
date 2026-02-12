@@ -3,6 +3,7 @@ import React from 'react';
 import Arweave from 'arweave';
 import { createSigner } from '@permaweb/aoconnect/browser';
 
+import { TIP_TOKEN_OPTIONS } from 'helpers/config';
 import { DEFAULT_AR_TOKEN, TipToken, toBaseUnits } from 'helpers/tokens';
 import { WalletEnum } from 'helpers/types';
 import { debugLog } from 'helpers/utils';
@@ -22,6 +23,126 @@ const arweave = Arweave.init({
 type UseTokenTipOptions = {
 	createReceipt?: boolean;
 	sendFromProfile?: boolean;
+};
+
+const AR_TOKEN_PROCESS = TIP_TOKEN_OPTIONS.find((token) => token.tokenSymbol === 'wAR')?.tokenAddress;
+const USDA_TOKEN_PROCESS = TIP_TOKEN_OPTIONS.find((token) => token.tokenSymbol === 'USDA')?.tokenAddress;
+const TOKEN_COINGECKO_IDS_BY_PROCESS: Record<string, string> = {
+	'0syT13r0s0tgPmIed95bJnuSqaD29HQNN8D3ElLSrsc': 'ao-computer',
+	qNvAoz0TgcH7DMg8BCVn8jF32QH5L6T29VjHxhHqqGE: 'ar-io-network',
+};
+const PRICE_CACHE_PREFIX = 'portal_token_usd_price_v1';
+const PRICE_CACHE_TTL_MS = 60 * 1000;
+
+const readCachedPrice = (key: string): number | null => {
+	if (typeof window === 'undefined' || !window.localStorage) return null;
+	try {
+		const raw = window.localStorage.getItem(`${PRICE_CACHE_PREFIX}:${key}`);
+		if (!raw) return null;
+		const parsed = JSON.parse(raw);
+		if (!parsed || typeof parsed.price !== 'number' || typeof parsed.ts !== 'number') return null;
+		if (Date.now() - parsed.ts > PRICE_CACHE_TTL_MS) return null;
+		return parsed.price;
+	} catch {
+		return null;
+	}
+};
+
+const writeCachedPrice = (key: string, price: number) => {
+	if (typeof window === 'undefined' || !window.localStorage) return;
+	try {
+		window.localStorage.setItem(`${PRICE_CACHE_PREFIX}:${key}`, JSON.stringify({ price, ts: Date.now() }));
+	} catch {}
+};
+
+const fetchJsonWithTimeout = async (url: string, timeoutMs = 4000) => {
+	const controller = new AbortController();
+	const timeout = setTimeout(() => controller.abort(), timeoutMs);
+	try {
+		const res = await fetch(url, { signal: controller.signal });
+		if (!res.ok) return null;
+		return await res.json();
+	} finally {
+		clearTimeout(timeout);
+	}
+};
+
+const fetchArPriceUSD = async (): Promise<number | null> => {
+	const cacheKey = 'AR';
+	const cached = readCachedPrice(cacheKey);
+	if (cached && Number.isFinite(cached)) return cached;
+
+	try {
+		const data = await fetchJsonWithTimeout('https://api.redstone.finance/prices?symbols=AR&provider=redstone');
+		const price = data?.AR?.value;
+		if (typeof price === 'number' && Number.isFinite(price)) {
+			writeCachedPrice(cacheKey, price);
+			return price;
+		}
+	} catch {}
+
+	try {
+		const data = await fetchJsonWithTimeout(
+			'https://api.coingecko.com/api/v3/simple/price?ids=arweave&vs_currencies=usd'
+		);
+		const price = data?.arweave?.usd;
+		if (typeof price === 'number' && Number.isFinite(price)) {
+			writeCachedPrice(cacheKey, price);
+			return price;
+		}
+	} catch {}
+
+	return null;
+};
+
+const fetchTokenPriceUSD = async (token: TipToken): Promise<number | null> => {
+	const key = `${token.processId || token.symbol}`;
+	const cached = readCachedPrice(key);
+	if (cached && Number.isFinite(cached)) return cached;
+
+	if (token.processId && USDA_TOKEN_PROCESS && token.processId === USDA_TOKEN_PROCESS) {
+		writeCachedPrice(key, 1);
+		return 1;
+	}
+
+	if ((token.processId && AR_TOKEN_PROCESS && token.processId === AR_TOKEN_PROCESS) || token.symbol === 'wAR') {
+		const arPrice = await fetchArPriceUSD();
+		if (arPrice && Number.isFinite(arPrice)) {
+			writeCachedPrice(key, arPrice);
+			return arPrice;
+		}
+		return null;
+	}
+
+	try {
+		const symbol = (token.symbol || '').toUpperCase();
+		if (symbol) {
+			const data = await fetchJsonWithTimeout(
+				`https://api.redstone.finance/prices?symbols=${encodeURIComponent(symbol)}&provider=redstone`
+			);
+			const price = data?.[symbol]?.value;
+			if (typeof price === 'number' && Number.isFinite(price)) {
+				writeCachedPrice(key, price);
+				return price;
+			}
+		}
+	} catch {}
+
+	const coingeckoId = token.processId ? TOKEN_COINGECKO_IDS_BY_PROCESS[token.processId] : undefined;
+	if (coingeckoId) {
+		try {
+			const data = await fetchJsonWithTimeout(
+				`https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(coingeckoId)}&vs_currencies=usd`
+			);
+			const price = data?.[coingeckoId]?.usd;
+			if (typeof price === 'number' && Number.isFinite(price)) {
+				writeCachedPrice(key, price);
+				return price;
+			}
+		} catch {}
+	}
+
+	return null;
 };
 
 const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> => {
@@ -208,6 +329,18 @@ export function useTokenTip(tokenOverride?: TipToken, options?: UseTokenTipOptio
 			if (shouldCreateReceipt && typeof window !== 'undefined' && (window as any).arweaveWallet) {
 				try {
 					debugLog('info', 'useTokenTip', 'Creating tip receipt transaction');
+
+					let usdValue: string | null = null;
+					try {
+						const tokenPriceUSD = await fetchTokenPriceUSD(token);
+						const amountNumber = cleanAmount !== '' ? Number(cleanAmount) : 0;
+						if (tokenPriceUSD && Number.isFinite(amountNumber) && amountNumber > 0) {
+							usdValue = (amountNumber * tokenPriceUSD).toFixed(2);
+						}
+					} catch (priceError) {
+						debugLog('warn', 'useTokenTip', 'Failed to fetch AO token USD value, proceeding without it:', priceError);
+					}
+
 					const receiptData = JSON.stringify({
 						type: 'tip',
 						token: token.symbol,
@@ -231,6 +364,7 @@ export function useTokenTip(tokenOverride?: TipToken, options?: UseTokenTipOptio
 						['To-Address', targetAddress],
 						['Location', String(location || 'page')],
 					];
+					if (usdValue && usdValue.trim()) tagPairs.push(['USD-Value', usdValue.trim()]);
 
 					const portalName = Name?.trim();
 					if (portalName) tagPairs.push(['Portal-Name', portalName]);
