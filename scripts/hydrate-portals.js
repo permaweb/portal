@@ -5,7 +5,10 @@ import Arweave from 'arweave';
 import Permaweb from '@permaweb/libs';
 import { connect } from '@permaweb/aoconnect';
 
-// Configure fetch agent for better performance
+import { debugLog } from './utils.js';
+
+const config = JSON.parse(fs.readFileSync(new URL('./config.json', import.meta.url), 'utf-8'));
+
 setGlobalDispatcher(
 	new Agent({
 		maxHeaderSize: 256 * 1024,
@@ -17,86 +20,29 @@ setGlobalDispatcher(
 	})
 );
 
-// ============================================================================
-// Configuration
-// ============================================================================
+const SCHEDULER = config.scheduler;
+const PORTAL_SOURCE_NODE = config.portalSourceNode;
+const TARGET_NODES = config.targetNodes;
+const MIN_BLOCK = config.minBlock;
+const PORTAL_IDS = config.portalIds;
 
-const SCHEDULER = 'https://schedule.forward.computer';
-const PORTAL_SOURCE_NODE = 'http://localhost:8734';
-const TARGET_NODES = ['https://hb.portalinto.com'];
-const MIN_BLOCK = 1818200;
-
-// Include additional Portal IDs
-const PORTAL_IDS = ['nhdiOytr5s2MzGBlAAMIsKtcwvXDkiv54H0_O5FUacU', 'GYOxC2in9PTT8ehdJ0Wzmpu_EskE4OhjcSq44TBqpxg'];
-
-const WRITE_TO_FILES = false; // Toggle to control file writing
+const WRITE_TO_FILES = config.writeToFiles;
 
 // Concurrency Configuration
 const CONCURRENCY = {
-	FETCH_PORTALS: 1, // Number of portals to fetch data from simultaneously
-	HYDRATE_PROCESSES: 2, // Number of processes to hydrate simultaneously
+	FETCH_PORTALS: config.concurrency.fetchPortals,
+	HYDRATE_PROCESSES: config.concurrency.hydrateProcesses,
 };
 
-const OUTPUT_FILE = 'portal-ecosystem-hydrated.json';
-const ECOSYSTEM_DATA_FILE = 'portal-ecosystem-data.json';
-const ERROR_FILE = 'portal-ecosystem-errors.json';
-
-// ============================================================================
-// Arweave/AO Initialization
-// ============================================================================
+const DATA_DIR = config.dataDir;
+const OUTPUT_FILE = `${DATA_DIR}/hydration-successes.json`;
+const ECOSYSTEM_DATA_FILE = `${DATA_DIR}/hydration-data.json`;
+const ERROR_FILE = `${DATA_DIR}/hydration-errors.json`;
 
 const arweave = Arweave.init({});
 const ao = connect({ MODE: 'legacy' });
 const permaweb = Permaweb.init({ arweave, ao });
 
-// ============================================================================
-// Helper Functions - Logging
-// ============================================================================
-
-const COLORS = {
-	info: '\x1b[90m', // Gray
-	warn: '\x1b[33m', // Yellow
-	error: '\x1b[31m', // Red
-	success: '\x1b[32m', // Green
-	reset: '\x1b[0m', // Reset
-};
-
-const METHOD = {
-	info: console.log,
-	warn: console.log,
-	error: console.log,
-	success: console.log,
-};
-
-function capitalize(str) {
-	return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function debugLog(level, context, ...args) {
-	const color = COLORS[level] || COLORS.info;
-	const method = METHOD[level] || console.log;
-
-	const formattedArgs = args.map((arg) =>
-		typeof arg === 'object' && arg !== null ? JSON.stringify(arg, null, 2) : arg
-	);
-
-	method(`${color}[${capitalize(level)}]${COLORS.reset} -`, ...formattedArgs);
-}
-
-// ============================================================================
-// Helper Functions - Retry Logic
-// ============================================================================
-
-/**
- * Executes a function with retries and validation
- * @param {Function} fn - The async function to execute
- * @param {Object} options - Retry options
- * @param {number} options.maxRetries - Maximum number of retries (default: 3)
- * @param {number} options.delayMs - Initial delay between retries in ms (default: 1000)
- * @param {boolean} options.backoff - Whether to use exponential backoff (default: true)
- * @param {Function} options.validate - Optional validation function for the result
- * @returns {Promise<*>} The result of the function
- */
 async function withRetries(fn, options = {}) {
 	const { maxRetries = 3, delayMs = 1000, backoff = true, validate } = options;
 
@@ -147,54 +93,51 @@ async function withRetries(fn, options = {}) {
 	return lastResult;
 }
 
-// ============================================================================
-// Helper Functions - File Operations
-// ============================================================================
-
-/**
- * Loads hydrated process IDs from file
- */
-function loadHydratedIds() {
-	if (fs.existsSync(OUTPUT_FILE)) {
-		return new Set(JSON.parse(fs.readFileSync(OUTPUT_FILE, 'utf8')));
-	}
-	return new Set();
+function loadHydratedProcesses() {
+	return [];
 }
 
-/**
- * Saves hydrated process IDs to file
- */
-function saveHydratedIds(ids) {
+function saveHydratedProcesses(processes) {
 	if (!WRITE_TO_FILES) return;
-	fs.writeFileSync(OUTPUT_FILE, JSON.stringify(Array.from(ids), null, 2));
+	if (!fs.existsSync(DATA_DIR)) {
+		fs.mkdirSync(DATA_DIR, { recursive: true });
+	}
+	fs.writeFileSync(OUTPUT_FILE, JSON.stringify(processes, null, 2));
 }
 
-/**
- * Saves ecosystem data for reference
- */
 function saveEcosystemData(data) {
 	if (!WRITE_TO_FILES) {
 		debugLog('info', 'saveEcosystemData', 'File writing disabled - ecosystem data not saved');
 		return;
 	}
+	if (!fs.existsSync(DATA_DIR)) {
+		fs.mkdirSync(DATA_DIR, { recursive: true });
+	}
 	fs.writeFileSync(ECOSYSTEM_DATA_FILE, JSON.stringify(data, null, 2));
 	debugLog('success', 'saveEcosystemData', `Saved ecosystem data to ${ECOSYSTEM_DATA_FILE}`);
 }
 
-/**
- * Logs an error to the error file
- */
-function saveError(pid, error, type = 'unknown') {
+function saveError(id, type, nodes, error) {
 	if (!WRITE_TO_FILES) return;
+
+	if (!fs.existsSync(DATA_DIR)) {
+		fs.mkdirSync(DATA_DIR, { recursive: true });
+	}
 
 	let errors = [];
 	if (fs.existsSync(ERROR_FILE)) {
-		errors = JSON.parse(fs.readFileSync(ERROR_FILE, 'utf8'));
+		try {
+			errors = JSON.parse(fs.readFileSync(ERROR_FILE, 'utf8'));
+		} catch (e) {
+			// If file is corrupted, start fresh
+			errors = [];
+		}
 	}
 
 	errors.push({
-		pid,
+		id,
 		type,
+		nodes,
 		timestamp: new Date().toISOString(),
 		error: error?.code || error?.message || String(error),
 	});
@@ -202,29 +145,6 @@ function saveError(pid, error, type = 'unknown') {
 	fs.writeFileSync(ERROR_FILE, JSON.stringify(errors, null, 2));
 }
 
-/**
- * Gets tag value from tag list
- */
-function getTagValue(list, name) {
-	for (let i = 0; i < list.length; i++) {
-		if (list[i] && list[i].name === name) {
-			return list[i].value;
-		}
-	}
-	return null;
-}
-
-// ============================================================================
-// Helper Functions - Concurrency
-// ============================================================================
-
-/**
- * Executes tasks in parallel with concurrency limit
- * @param {Array} items - Array of items to process
- * @param {Function} fn - Async function to execute for each item
- * @param {number} concurrency - Max number of concurrent executions
- * @returns {Promise<Array>} Array of results
- */
 async function parallelLimit(items, fn, concurrency) {
 	const results = [];
 	const executing = [];
@@ -246,13 +166,6 @@ async function parallelLimit(items, fn, concurrency) {
 	return Promise.all(results);
 }
 
-// ============================================================================
-// Helper Functions - GraphQL
-// ============================================================================
-
-/**
- * Fetches all pages of GQL data
- */
 async function getAggregatedGQLData(args, callback) {
 	let index = 1;
 	let fetchResult = await permaweb.getGQLData(args);
@@ -286,9 +199,6 @@ async function getAggregatedGQLData(args, callback) {
 	return null;
 }
 
-/**
- * Finds all portal processes via GraphQL
- */
 async function findPortalProcesses() {
 	return []; // TODO
 
@@ -308,13 +218,6 @@ async function findPortalProcesses() {
 	return portals || [];
 }
 
-// ============================================================================
-// Helper Functions - Portal Data Extraction
-// ============================================================================
-
-/**
- * Fetches portal data from source node
- */
 async function fetchPortalData(portalId, sourceNode) {
 	try {
 		const url = `${sourceNode}/${portalId}~process@1.0/compute?require-codec=application/json&accept-bundle=true`;
@@ -336,16 +239,21 @@ async function fetchPortalData(portalId, sourceNode) {
 	}
 }
 
-/**
- * Extracts post IDs from Store.Index (based on PORTAL_PATCH_MAP.Posts)
- */
+function isValidArweaveAddress(address) {
+	return typeof address === 'string' && /^[a-zA-Z0-9_-]{43}$/.test(address);
+}
+
 function extractPostIds(portalData) {
 	const postIds = [];
 
 	try {
 		const index = portalData?.posts?.Index;
 		for (const post of index) {
-			postIds.push(post.Id);
+			if (isValidArweaveAddress(post.Id)) {
+				postIds.push(post.Id);
+			} else {
+				debugLog('warn', 'extractPostIds', `Skipping invalid post ID: ${post.Id}`);
+			}
 		}
 	} catch (error) {
 		debugLog('error', 'extractPostIds', 'Error extracting post IDs:', error.message);
@@ -354,9 +262,6 @@ function extractPostIds(portalData) {
 	return postIds;
 }
 
-/**
- * Extracts user IDs from Roles (based on PORTAL_PATCH_MAP.Users)
- */
 function extractUserIds(portalData) {
 	const userIds = [];
 
@@ -365,8 +270,10 @@ function extractUserIds(portalData) {
 		if (roles && typeof roles === 'object') {
 			Object.entries(roles).forEach(([key, value]) => {
 				// Only include addresses with Type: 'process'
-				if (key && /^[a-zA-Z0-9_-]{43}$/.test(key) && value?.Type === 'process') {
+				if (isValidArweaveAddress(key) && value?.Type === 'process') {
 					userIds.push(key);
+				} else if (key && !isValidArweaveAddress(key) && value?.Type === 'process') {
+					debugLog('warn', 'extractUserIds', `Skipping invalid user ID: ${key}`);
 				}
 			});
 		}
@@ -377,9 +284,6 @@ function extractUserIds(portalData) {
 	return userIds;
 }
 
-/**
- * Extracts comment process IDs from post metadata
- */
 function extractCommentIds(portalData) {
 	const commentIds = [];
 
@@ -388,8 +292,10 @@ function extractCommentIds(portalData) {
 		if (index && typeof index === 'object') {
 			Object.values(index).forEach((post) => {
 				const commentsId = post?.Comments;
-				if (commentsId && /^[a-zA-Z0-9_-]{43}$/.test(commentsId)) {
+				if (isValidArweaveAddress(commentsId)) {
 					commentIds.push(commentsId);
+				} else if (commentsId) {
+					debugLog('warn', 'extractCommentIds', `Skipping invalid comment ID: ${commentsId}`);
 				}
 			});
 		}
@@ -400,14 +306,13 @@ function extractCommentIds(portalData) {
 	return commentIds;
 }
 
-/**
- * Extracts moderation process ID from Store.Moderation (based on PORTAL_PATCH_MAP.Overview)
- */
 function extractModerationId(portalData) {
 	try {
 		const moderationId = portalData?.['bootloader-moderation'];
-		if (moderationId && /^[a-zA-Z0-9_-]{43}$/.test(moderationId)) {
+		if (isValidArweaveAddress(moderationId)) {
 			return moderationId;
+		} else if (moderationId) {
+			debugLog('warn', 'extractModerationId', `Skipping invalid moderation ID: ${moderationId}`);
 		}
 	} catch (error) {
 		debugLog('error', 'extractModerationId', 'Error extracting moderation ID:', error.message);
@@ -416,9 +321,6 @@ function extractModerationId(portalData) {
 	return null;
 }
 
-/**
- * Extracts all process IDs from a single portal
- */
 function extractAllIdsFromPortal(portalData, portalId) {
 	return {
 		portalId: portalId,
@@ -429,9 +331,6 @@ function extractAllIdsFromPortal(portalData, portalId) {
 	};
 }
 
-/**
- * Aggregates all process IDs from multiple portals (with concurrency)
- */
 async function aggregatePortalEcosystemIds(portalProcesses, sourceNode) {
 	debugLog(
 		'info',
@@ -488,7 +387,11 @@ async function aggregatePortalEcosystemIds(portalProcesses, sourceNode) {
 			continue;
 		}
 
-		allPortalIds.push(result.portalId);
+		if (isValidArweaveAddress(result.portalId)) {
+			allPortalIds.push(result.portalId);
+		} else {
+			debugLog('warn', 'aggregatePortalEcosystemIds', `Skipping invalid portal ID: ${result.portalId}`);
+		}
 		result.extracted.postIds.forEach((id) => allPostIds.add(id));
 		result.extracted.userIds.forEach((id) => allUserIds.add(id));
 		result.extracted.commentIds.forEach((id) => allCommentIds.add(id));
@@ -526,9 +429,6 @@ async function aggregatePortalEcosystemIds(portalProcesses, sourceNode) {
 	return aggregatedResult;
 }
 
-/**
- * Creates a combined list of all process IDs to hydrate
- */
 function createHydrationList(aggregatedIds) {
 	const hydrationList = [];
 
@@ -555,29 +455,23 @@ function createHydrationList(aggregatedIds) {
 	return hydrationList;
 }
 
-// ============================================================================
-// Helper Functions - Hydration
-// ============================================================================
-
-/**
- * Hydrates a single process on target nodes
- */
 async function hydrateProcess(pid, type, targetNodes) {
 	const typeLabel = `[${type}]`;
 
 	try {
 		debugLog('info', 'hydrateProcess', `Starting hydration for ${pid} ${typeLabel}`);
 
-		let nodeSuccess = false;
-
 		const targetSlotRes = await fetch(`${SCHEDULER}/${pid}~process@1.0/slot/current`);
 		const targetSlot = await targetSlotRes.text();
 
 		debugLog('info', 'hydrateProcess', `Target slot: ${targetSlot}`);
 
-		let currentSlot = 0;
+		const nodeResults = [];
 
 		for (const node of targetNodes) {
+			let currentSlot = 0;
+			let nodeSuccess = false;
+
 			try {
 				debugLog('info', 'hydrateProcess', `Checking ${node}`);
 
@@ -589,19 +483,20 @@ async function hydrateProcess(pid, type, targetNodes) {
 
 					if (currentSlotRes.ok) {
 						currentSlot = Number(await currentSlotRes.text());
-						debugLog('info', 'hydrateProcess', `Current slot: ${currentSlot}, Target slot: ${targetSlot}`);
+						debugLog('info', 'hydrateProcess', `Current slot on ${node}: ${currentSlot}, Target slot: ${targetSlot}`);
 
 						if (currentSlot >= targetSlot) {
 							debugLog(
 								'success',
 								'hydrateProcess',
-								`Already hydrated ${pid} ${typeLabel} (${currentSlot}/${targetSlot})`
+								`Already hydrated ${pid} ${typeLabel} on ${node} (${currentSlot}/${targetSlot})`
 							);
-							return true;
+							nodeResults.push({ node, success: true });
+							continue;
 						}
 					}
 				} catch (checkErr) {
-					debugLog('warn', 'hydrateProcess', `Could not check current slot: ${checkErr.message}`);
+					debugLog('warn', 'hydrateProcess', `Could not check current slot on ${node}: ${checkErr.message}`);
 				}
 
 				debugLog('info', 'hydrateProcess', `Hydrating on ${node}`);
@@ -610,9 +505,9 @@ async function hydrateProcess(pid, type, targetNodes) {
 				const cronOnceUrl = `${node}/~cron@1.0/once?cron-path=${pid}~process@1.0/now`;
 				const cronOnceRes = await fetch(cronOnceUrl, { method: 'GET' });
 
-				debugLog('info', 'hydrateProcess', `Initial cron status: ${cronOnceRes.status}`);
+				debugLog('info', 'hydrateProcess', `Initial cron status on ${node}: ${cronOnceRes.status}`);
 				const cronId = await cronOnceRes.text();
-				debugLog('info', 'hydrateProcess', `Cron ID: ${cronId}`);
+				debugLog('info', 'hydrateProcess', `Cron ID on ${node}: ${cronId}`);
 
 				if (cronOnceRes.ok) {
 					debugLog('success', 'hydrateProcess', `Hydration triggered on ${node}`);
@@ -621,7 +516,7 @@ async function hydrateProcess(pid, type, targetNodes) {
 					await new Promise((resolve) => setTimeout(resolve, 2000));
 
 					if (targetSlot) {
-						debugLog('info', 'hydrateProcess', `Waiting for slot progress: ${currentSlot} -> ${targetSlot}`);
+						debugLog('info', 'hydrateProcess', `Waiting for slot progress on ${node}: ${currentSlot} -> ${targetSlot}`);
 
 						let lastSlot = currentSlot;
 
@@ -640,7 +535,7 @@ async function hydrateProcess(pid, type, targetNodes) {
 									}
 
 									const slot = Number(await slotRes.text());
-									debugLog('info', 'hydrateProcess', `Process ${pid} at slot ${slot} / ${targetSlot}`);
+									debugLog('info', 'hydrateProcess', `Process ${pid} on ${node} at slot ${slot} / ${targetSlot}`);
 									return slot;
 								},
 								{
@@ -684,34 +579,58 @@ async function hydrateProcess(pid, type, targetNodes) {
 
 						if (currentSlot >= targetSlot) {
 							nodeSuccess = true;
+							debugLog(
+								'success',
+								'hydrateProcess',
+								`Hydrated ${pid} ${typeLabel} on ${node} (${currentSlot}/${targetSlot})`
+							);
 						} else {
 							debugLog('error', 'hydrateProcess', `Process ${pid} failed on ${node}`);
 						}
 					}
 				} else {
-					debugLog('error', 'hydrateProcess', `Failed to trigger cron: HTTP ${cronOnceRes.status}`);
+					debugLog('error', 'hydrateProcess', `Failed to trigger cron on ${node}: HTTP ${cronOnceRes.status}`);
 				}
 			} catch (nodeErr) {
 				debugLog('error', 'hydrateProcess', `Error on ${node}:`, nodeErr.message);
 			}
+
+			nodeResults.push({ node, success: nodeSuccess });
 		}
 
-		if (nodeSuccess) {
-			debugLog('success', 'hydrateProcess', `Hydrated ${pid} ${typeLabel} (${currentSlot}/${targetSlot})`);
-			return true;
+		const successfulNodes = nodeResults.filter((r) => r.success);
+		const failedNodes = nodeResults.filter((r) => !r.success);
+		const anySuccess = successfulNodes.length > 0;
+
+		if (anySuccess) {
+			debugLog(
+				'success',
+				'hydrateProcess',
+				`Hydrated ${pid} ${typeLabel} on ${successfulNodes.length}/${targetNodes.length} nodes`
+			);
+			return {
+				success: true,
+				successfulNodes: successfulNodes.map((r) => r.node),
+				failedNodes: failedNodes.map((r) => r.node),
+			};
 		} else {
 			debugLog('error', 'hydrateProcess', `Failed on all nodes: ${pid} ${typeLabel}`);
-			return false;
+			return {
+				success: false,
+				successfulNodes: [],
+				failedNodes: failedNodes.map((r) => r.node),
+			};
 		}
 	} catch (err) {
 		debugLog('error', 'hydrateProcess', `Exception hydrating ${pid} ${typeLabel}:`, err.message);
-		return false;
+		return {
+			success: false,
+			successfulNodes: [],
+			failedNodes: targetNodes,
+		};
 	}
 }
 
-/**
- * Hydrates all processes in the list (with concurrency)
- */
 async function hydrateAllProcesses(hydrationList, targetNodes) {
 	debugLog(
 		'info',
@@ -719,15 +638,15 @@ async function hydrateAllProcesses(hydrationList, targetNodes) {
 		`Starting hydration of ${hydrationList.length} processes (concurrency: ${CONCURRENCY.HYDRATE_PROCESSES})`
 	);
 
-	const hydratedIds = loadHydratedIds();
+	const hydratedProcesses = loadHydratedProcesses();
+	const hydratedIdSet = new Set(hydratedProcesses.map((p) => p.id));
 	const total = hydrationList.length;
 	let successCount = 0;
 	let errorCount = 0;
 	let skippedCount = 0;
 
-	// Filter out already hydrated processes
 	const toHydrate = hydrationList.filter((item) => {
-		if (hydratedIds.has(item.id)) {
+		if (hydratedIdSet.has(item.id)) {
 			debugLog(
 				'info',
 				'hydrateAllProcesses',
@@ -739,26 +658,38 @@ async function hydrateAllProcesses(hydrationList, targetNodes) {
 		return true;
 	});
 
-	// Hydrate processes in parallel with concurrency limit
 	const results = await parallelLimit(
 		toHydrate,
 		async (item) => {
 			const { id, type } = item;
-			const success = await hydrateProcess(id, type, targetNodes);
-			return { id, type, success };
+			const hydrationResult = await hydrateProcess(id, type, targetNodes);
+			return { id, type, ...hydrationResult };
 		},
 		CONCURRENCY.HYDRATE_PROCESSES
 	);
 
-	// Process results and save progress
 	for (const result of results) {
 		if (result.success) {
-			hydratedIds.add(result.id);
+			hydratedProcesses.push({
+				id: result.id,
+				type: result.type,
+				nodes: result.successfulNodes,
+			});
 			successCount++;
-			saveHydratedIds(hydratedIds); // Save after each success
+			saveHydratedProcesses(hydratedProcesses);
+
+			// Also log partial failures to error file
+			if (result.failedNodes.length > 0) {
+				saveError(
+					result.id,
+					result.type,
+					result.failedNodes,
+					`Partial failure - succeeded on ${result.successfulNodes.length}/${targetNodes.length} nodes`
+				);
+			}
 		} else {
 			errorCount++;
-			saveError(result.id, 'Failed to hydrate', result.type);
+			saveError(result.id, result.type, result.failedNodes, 'Failed to hydrate on all nodes');
 		}
 	}
 
@@ -769,18 +700,21 @@ async function hydrateAllProcesses(hydrationList, targetNodes) {
 	debugLog('info', 'hydrateAllProcesses', `Errors: ${errorCount}/${total - skippedCount}`);
 }
 
-// ============================================================================
-// Main Function
-// ============================================================================
-
 async function main() {
 	debugLog('info', 'main', 'Portal Ecosystem Hydration');
 	debugLog('info', 'main', `Source Node: ${PORTAL_SOURCE_NODE}`);
 	debugLog('info', 'main', `Target Nodes: ${TARGET_NODES.join(', ')}`);
 	debugLog('info', 'main', `Min Block: ${MIN_BLOCK}`);
 
+	// Clear existing data files at start of run
+	if (WRITE_TO_FILES && fs.existsSync(DATA_DIR)) {
+		if (fs.existsSync(OUTPUT_FILE)) fs.unlinkSync(OUTPUT_FILE);
+		if (fs.existsSync(ERROR_FILE)) fs.unlinkSync(ERROR_FILE);
+		debugLog('info', 'main', 'Cleared existing data files');
+	}
+
 	try {
-		// Step 0: Verify target nodes are running
+		// Verify target nodes are running
 		debugLog('info', 'main', 'Verifying target nodes are running...');
 		for (const node of TARGET_NODES) {
 			try {
@@ -804,7 +738,7 @@ async function main() {
 		}
 		debugLog('success', 'main', 'All target nodes verified');
 
-		// Step 1: Find all portal processes via GraphQL
+		// Find all portal processes via GraphQL
 		const portalProcesses = await findPortalProcesses();
 		debugLog('success', 'main', `Found ${portalProcesses.length} portal processes via GraphQL`);
 
@@ -829,7 +763,7 @@ async function main() {
 			return;
 		}
 
-		// Step 2: Fetch portal data and aggregate all process IDs
+		// Fetch portal data and aggregate all process IDs
 		const aggregatedIds = await aggregatePortalEcosystemIds(portalProcesses, PORTAL_SOURCE_NODE);
 		saveEcosystemData(aggregatedIds);
 
@@ -838,26 +772,25 @@ async function main() {
 		const hydrationList = createHydrationList(aggregatedIds);
 		debugLog('info', 'main', `Total processes to hydrate: ${hydrationList.length}`);
 
-		// Step 4: Hydrate all processes
+		// Hydrate all processes
 		await hydrateAllProcesses(hydrationList, TARGET_NODES);
 
 		debugLog('success', 'main', 'Portal ecosystem hydration complete!');
 		if (WRITE_TO_FILES) {
 			debugLog('info', 'main', 'Output files:');
-			debugLog('info', 'main', `  - ${OUTPUT_FILE} (hydrated process IDs)`);
-			debugLog('info', 'main', `  - ${ECOSYSTEM_DATA_FILE} (ecosystem data)`);
+			debugLog('info', 'main', `${OUTPUT_FILE} (hydrated process IDs)`);
+			debugLog('info', 'main', `${ECOSYSTEM_DATA_FILE} (ecosystem data)`);
 			if (fs.existsSync(ERROR_FILE)) {
-				debugLog('info', 'main', `  - ${ERROR_FILE} (errors)`);
+				debugLog('info', 'main', `${ERROR_FILE} (errors)`);
 			}
 		}
 	} catch (error) {
 		debugLog('error', 'main', 'Fatal error:', error);
-		saveError('main', error, 'fatal');
+		saveError('main', 'fatal', TARGET_NODES, error);
 		process.exit(1);
 	}
 }
 
-// Run the script
 main()
 	.then(() => process.exit(0))
 	.catch((error) => {

@@ -1,0 +1,17 @@
+{
+	"scheduler": "https://schedule.forward.computer",
+	"portalSourceNode": "https://hb.portalinto.com",
+	"targetNodes": ["http://localhost:8734", "https://push.forward.computer"],
+	"minBlock": 1818200,
+	"portalIds": ["nhdiOytr5s2MzGBlAAMIsKtcwvXDkiv54H0_O5FUacU", "GYOxC2in9PTT8ehdJ0Wzmpu_EskE4OhjcSq44TBqpxg"],
+	"writeToFiles": true,
+	"concurrency": {
+		"fetchPortals": 1,
+		"hydrateProcesses": 1
+	},
+	"checkProcessSlots": {
+		"maxRetries": 10,
+		"latencyThreshold": 50
+	},
+	"dataDir": "scripts/data"
+}

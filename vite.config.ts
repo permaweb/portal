@@ -1,3 +1,4 @@
+import fs from 'fs';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import polyfillNode from 'rollup-plugin-polyfill-node';
@@ -27,7 +28,6 @@ export default defineConfig(({ mode }) => {
 						{
 							name: 'copy-service-worker',
 							writeBundle() {
-								const fs = require('fs');
 								const swPath = path.resolve(__dirname, 'public/service-worker.js');
 								const outPath = path.resolve(__dirname, `dist/${app}/service-worker.js`);
 								if (fs.existsSync(swPath)) {
