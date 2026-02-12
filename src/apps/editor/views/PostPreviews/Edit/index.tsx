@@ -265,7 +265,7 @@ function SortableBlock({
 
 	const style = {
 		transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-		opacity: isDragging ? 0.5 : 1,
+		opacity: isDragging ? 0 : 1,
 	};
 
 	return (
@@ -872,6 +872,10 @@ export default function PostPreviewEdit() {
 	};
 
 	const activeBlock = getActiveBlock();
+	const activeRowIndex =
+		activeId && template && !String(activeId).startsWith('available-')
+			? template.rows.findIndex((r) => r.columns.some((c) => c.blocks.some((b) => b.id === String(activeId))))
+			: -1;
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 	const primaryDisabled = unauthorized || !hasChanges || loading.active;
 
@@ -937,84 +941,93 @@ export default function PostPreviewEdit() {
 
 											<DropZoneBetweenRows
 												id="dropzone-0"
-												isActive={!!activeId}
+												isActive={!!activeId && activeRowIndex !== 0}
 												isOver={overId === 'dropzone-0'}
 												activeBlock={activeBlock}
 											/>
 
-											{template.rows.map((row, rowIndex) => (
-												<React.Fragment key={row.id}>
-													<S.Row $isDraggingOver={overId === row.id} $isDragging={!!activeId}>
-														<ColumnDropZone
-															id={`edge-left-${row.id}`}
-															isActive={!!activeId}
-															isOver={overId === `edge-left-${row.id}`}
+											{template.rows.map((row, rowIndex) => {
+												const rowHasActive =
+													!!activeId &&
+													!String(activeId).startsWith('available-') &&
+													row.columns.some((c: any) => c.blocks.some((b: any) => b.id === String(activeId)));
+												return (
+													<React.Fragment key={row.id}>
+														<S.Row $isDraggingOver={overId === row.id} $isDragging={!!activeId}>
+															<ColumnDropZone
+																id={`edge-left-${row.id}`}
+																isActive={!!activeId && !rowHasActive}
+																isOver={overId === `edge-left-${row.id}`}
+															/>
+															{(
+																row.columns ||
+																(row as any).blocks?.map((b: any, i: number) => ({ id: `col-${i}`, blocks: [b] })) ||
+																[]
+															).map((col: any, colIndex: number) => (
+																<React.Fragment key={col.id}>
+																	{colIndex > 0 && (
+																		<ColumnDropZone
+																			id={`edge-between-${row.id}-${colIndex}`}
+																			isActive={!!activeId && !rowHasActive}
+																			isOver={overId === `edge-between-${row.id}-${colIndex}`}
+																		/>
+																	)}
+																	<S.Column>
+																		<BlockDropZone
+																			id={`stack:${row.id}:${col.id}:0`}
+																			isActive={!!activeId && String(activeId) !== col.blocks[0]?.id}
+																			isOver={overId === `stack:${row.id}:${col.id}:0`}
+																		/>
+																		{col.blocks.map((block: any, blockIndex: number) => {
+																			const isSelf = String(activeId) === block.id;
+																			return (
+																				<React.Fragment key={block.id}>
+																					<S.BlockRow>
+																						<ColumnDropZone
+																							id={`block-left:${row.id}:${col.id}:${block.id}`}
+																							isActive={!!activeId && !isSelf}
+																							isOver={overId === `block-left:${row.id}:${col.id}:${block.id}`}
+																						/>
+																						<SortableBlock
+																							block={block}
+																							onDelete={() => deleteBlock(row.id, col.id, block.id)}
+																							isSelected={selectedBlockId === block.id}
+																							onSelect={() =>
+																								setSelectedBlockId(selectedBlockId === block.id ? null : block.id)
+																							}
+																						/>
+																						<ColumnDropZone
+																							id={`block-right:${row.id}:${col.id}:${block.id}`}
+																							isActive={!!activeId && !isSelf}
+																							isOver={overId === `block-right:${row.id}:${col.id}:${block.id}`}
+																						/>
+																					</S.BlockRow>
+																					<BlockDropZone
+																						id={`stack:${row.id}:${col.id}:${blockIndex + 1}`}
+																						isActive={!!activeId && !isSelf}
+																						isOver={overId === `stack:${row.id}:${col.id}:${blockIndex + 1}`}
+																					/>
+																				</React.Fragment>
+																			);
+																		})}
+																	</S.Column>
+																</React.Fragment>
+															))}
+															<ColumnDropZone
+																id={`edge-right-${row.id}`}
+																isActive={!!activeId && !rowHasActive}
+																isOver={overId === `edge-right-${row.id}`}
+															/>
+														</S.Row>
+														<DropZoneBetweenRows
+															id={`dropzone-${rowIndex + 1}`}
+															isActive={!!activeId && activeRowIndex !== rowIndex && activeRowIndex !== rowIndex + 1}
+															isOver={overId === `dropzone-${rowIndex + 1}`}
+															activeBlock={activeBlock}
 														/>
-														{(
-															row.columns ||
-															(row as any).blocks?.map((b: any, i: number) => ({ id: `col-${i}`, blocks: [b] })) ||
-															[]
-														).map((col: any, colIndex: number) => (
-															<React.Fragment key={col.id}>
-																{colIndex > 0 && (
-																	<ColumnDropZone
-																		id={`edge-between-${row.id}-${colIndex}`}
-																		isActive={!!activeId}
-																		isOver={overId === `edge-between-${row.id}-${colIndex}`}
-																	/>
-																)}
-																<S.Column>
-																	<BlockDropZone
-																		id={`stack:${row.id}:${col.id}:0`}
-																		isActive={!!activeId}
-																		isOver={overId === `stack:${row.id}:${col.id}:0`}
-																	/>
-																	{col.blocks.map((block: any, blockIndex: number) => (
-																		<React.Fragment key={block.id}>
-																			<S.BlockRow>
-																				<ColumnDropZone
-																					id={`block-left:${row.id}:${col.id}:${block.id}`}
-																					isActive={!!activeId}
-																					isOver={overId === `block-left:${row.id}:${col.id}:${block.id}`}
-																				/>
-																				<SortableBlock
-																					block={block}
-																					onDelete={() => deleteBlock(row.id, col.id, block.id)}
-																					isSelected={selectedBlockId === block.id}
-																					onSelect={() =>
-																						setSelectedBlockId(selectedBlockId === block.id ? null : block.id)
-																					}
-																				/>
-																				<ColumnDropZone
-																					id={`block-right:${row.id}:${col.id}:${block.id}`}
-																					isActive={!!activeId}
-																					isOver={overId === `block-right:${row.id}:${col.id}:${block.id}`}
-																				/>
-																			</S.BlockRow>
-																			<BlockDropZone
-																				id={`stack:${row.id}:${col.id}:${blockIndex + 1}`}
-																				isActive={!!activeId}
-																				isOver={overId === `stack:${row.id}:${col.id}:${blockIndex + 1}`}
-																			/>
-																		</React.Fragment>
-																	))}
-																</S.Column>
-															</React.Fragment>
-														))}
-														<ColumnDropZone
-															id={`edge-right-${row.id}`}
-															isActive={!!activeId}
-															isOver={overId === `edge-right-${row.id}`}
-														/>
-													</S.Row>
-													<DropZoneBetweenRows
-														id={`dropzone-${rowIndex + 1}`}
-														isActive={!!activeId}
-														isOver={overId === `dropzone-${rowIndex + 1}`}
-														activeBlock={activeBlock}
-													/>
-												</React.Fragment>
-											))}
+													</React.Fragment>
+												);
+											})}
 										</S.PreviewArea>
 										<PreviewRenderer template={template} themeVars={themeVars} />
 									</S.PreviewContainer>
@@ -1144,9 +1157,11 @@ export default function PostPreviewEdit() {
 													<span>{POST_PREVIEW_BLOCKS[activeBlock.type]?.label || activeBlock.type}</span>
 												</S.BlockHeaderLeft>
 											</S.BlockHeader>
-											<S.BlockContent $type={activeBlock.type}>
-												<ReactSVG src={POST_PREVIEW_BLOCKS[activeBlock.type]?.icon || ICONS.article} />
-											</S.BlockContent>
+											{activeBlock.type === 'thumbnail' && (
+												<S.BlockContent $type={activeBlock.type}>
+													<ReactSVG src={POST_PREVIEW_BLOCKS[activeBlock.type]?.icon || ICONS.article} />
+												</S.BlockContent>
+											)}
 										</S.DragOverlayBlock>
 									)}
 								</DragOverlay>
