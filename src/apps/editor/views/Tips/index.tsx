@@ -5,6 +5,7 @@ import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
 import { Select } from 'components/atoms/Select';
@@ -643,6 +644,22 @@ export default function Tips() {
 				<S.BodyWrapper>
 					<S.Section>
 						<S.ConfigForm>
+							<S.Forms>
+								<FormField
+									label={'Receipient Address'}
+									value={monetization.walletAddress}
+									onChange={(e: any) =>
+										setMonetization((prev) => ({
+											...prev,
+											walletAddress: e.target.value,
+										}))
+									}
+									invalid={{ status: false, message: null }}
+									disabled={fieldsDisabled}
+									hideErrorMessage
+								/>
+							</S.Forms>
+
 							{tipTokens.map((token, index) => {
 								const matchedPreset = TIP_TOKEN_OPTIONS.find(
 									(preset) =>
