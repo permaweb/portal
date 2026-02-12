@@ -56,20 +56,22 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 
 	const renderElement = (element: PostPreviewElement, index: number): React.ReactNode => {
 		switch (element.type) {
-			case 'categories':
+			case 'categories': {
+				const maxCount = element.layout?.maxCount || 1;
+				const visibleCategories = post?.metadata?.categories?.slice(0, maxCount) || [];
 				return (
 					<S.Categories key={index} $layout={element.layout}>
 						{post ? (
 							<>
-								{post?.metadata?.categories?.map((category: any, catIndex: number) => (
+								{visibleCategories.map((category: any, catIndex: number) => (
 									<React.Fragment key={catIndex}>
 										<NavLink to={getRedirect(`feed/category/${category.name}`)}>
 											<S.Category $layout={element.layout}>{category.name}</S.Category>
 										</NavLink>
-										{catIndex < post.metadata.categories.length - 1 && <>,&nbsp;</>}
+										{catIndex < visibleCategories.length - 1 && <>,&nbsp;</>}
 									</React.Fragment>
 								))}
-								{post?.metadata?.topics?.length > 0 && post?.metadata?.categories?.length > 0 && <>&nbsp;·&nbsp;</>}
+								{post?.metadata?.topics?.length > 0 && visibleCategories.length > 0 && <>&nbsp;·&nbsp;</>}
 								{post?.metadata?.topics?.map((tag: string, tagIndex: number) => (
 									<React.Fragment key={tagIndex}>
 										<NavLink to={getRedirect(`feed/tag/${tag}`)}>
@@ -84,6 +86,7 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 						)}
 					</S.Categories>
 				);
+			}
 
 			case 'thumbnail':
 				if (!post?.metadata?.thumbnail) return null;
@@ -119,7 +122,8 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 			case 'description':
 				return <S.Description key={index}>{post?.metadata?.description}</S.Description>;
 
-			case 'author':
+			case 'author': {
+				const showAvatar = element.layout?.showAvatar !== 'false';
 				return (
 					<S.Author
 						key={index}
@@ -127,24 +131,37 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 							!isPortalCreator &&
 							navigate(getRedirect(`author/${profile?.username ? urlify(profile.username) : profile?.id}`))
 						}
-						style={{ cursor: isPortalCreator ? 'default' : 'pointer' }}
+						style={{
+							cursor: isPortalCreator ? 'default' : 'pointer',
+							width: element.layout?.width === 'flex' ? undefined : 'fit-content',
+							flex: element.layout?.width === 'flex' ? element.layout?.flex || 1 : undefined,
+						}}
 					>
-						<Avatar
-							src={
-								displayThumbnail && checkValidAddress(displayThumbnail) ? getTxEndpoint(displayThumbnail) : undefined
-							}
-							profile={isPortalCreator ? { id: portal?.id } : profile}
-							isLoading={isLoadingProfile}
-							size={20}
-							hoverable={true}
-						/>
+						{showAvatar && (
+							<Avatar
+								src={
+									displayThumbnail && checkValidAddress(displayThumbnail) ? getTxEndpoint(displayThumbnail) : undefined
+								}
+								profile={isPortalCreator ? { id: portal?.id } : profile}
+								isLoading={isLoadingProfile}
+								size={20}
+								hoverable={true}
+							/>
+						)}
 						{isLoadingProfile ? <Placeholder width="100" /> : displayName}
 					</S.Author>
 				);
+			}
 
 			case 'date':
 				return (
-					<S.Date key={index}>
+					<S.Date
+						key={index}
+						style={{
+							width: element.layout?.width === 'flex' ? undefined : 'fit-content',
+							flex: element.layout?.width === 'flex' ? element.layout?.flex || 1 : undefined,
+						}}
+					>
 						{isLoadingProfile ? (
 							<Placeholder width="120" />
 						) : (

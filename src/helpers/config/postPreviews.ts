@@ -7,8 +7,8 @@ export const POST_PREVIEW_BLOG = {
 		gap: '20px',
 	},
 	content: [
-		{ id: 'thumbnail', type: 'thumbnail' },
 		{ id: 'title', type: 'title' },
+		{ id: 'thumbnail', type: 'thumbnail' },
 		{ id: 'author', type: 'author' },
 		{ id: 'date', type: 'date' },
 		{ id: 'description', type: 'description' },

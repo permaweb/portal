@@ -24,6 +24,8 @@ import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { ICONS, POST_PREVIEWS } from 'helpers/config';
+import { getTxEndpoint } from 'helpers/endpoints';
+import { getThemeVars } from 'helpers/themes';
 import { PortalPatchMapEnum } from 'helpers/types';
 import { isMac } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -38,7 +40,7 @@ const SAMPLE_POST = {
 	name: 'Sample Post Title',
 	creator: null,
 	metadata: {
-		thumbnail: null,
+		thumbnail: 'WnMy_B8jZcGuvhHUsOCNOI1cNZHj3kFSJ7bfhxiHzpQ',
 		description: 'This is a sample description for the post preview. It shows how the description element will appear.',
 		releaseDate: Date.now(),
 		categories: [{ name: 'Technology' }, { name: 'Design' }],
@@ -48,8 +50,8 @@ const SAMPLE_POST = {
 };
 
 const POST_PREVIEW_BLOCKS: Record<string, { label: string; icon: string }> = {
-	thumbnail: { label: 'Thumbnail', icon: ICONS.image },
 	title: { label: 'Title', icon: ICONS.header1 },
+	thumbnail: { label: 'Thumbnail', icon: ICONS.image },
 	description: { label: 'Description', icon: ICONS.paragraph },
 	author: { label: 'Author', icon: ICONS.user },
 	date: { label: 'Date', icon: ICONS.time },
@@ -58,7 +60,132 @@ const POST_PREVIEW_BLOCKS: Record<string, { label: string; icon: string }> = {
 	comments: { label: 'Comments', icon: ICONS.comments },
 };
 
-type LayoutBlock = { id: string; type: string };
+type SettingField = {
+	key: string;
+	label: string;
+	type: 'select' | 'number' | 'text' | 'range';
+	options?: { label: string; value: string }[];
+	placeholder?: string;
+	showIf?: { key: string; value: string };
+	min?: number;
+	max?: number;
+	step?: number;
+};
+
+const BLOCK_SETTINGS: Record<string, SettingField[]> = {
+	thumbnail: [
+		{ key: 'flex', label: 'Flex', type: 'number', placeholder: '1' },
+		{
+			key: 'aspectRatio',
+			label: 'Aspect Ratio',
+			type: 'select',
+			options: [
+				{ label: 'Default (16/9)', value: '' },
+				{ label: '16/6', value: '16/6' },
+				{ label: '16/9', value: '16/9' },
+				{ label: '4/3', value: '4/3' },
+				{ label: '1/1', value: '1/1' },
+			],
+		},
+		{
+			key: 'objectFit',
+			label: 'Object Fit',
+			type: 'select',
+			options: [
+				{ label: 'Cover', value: 'cover' },
+				{ label: 'Contain', value: 'contain' },
+				{ label: 'Fill', value: 'fill' },
+			],
+		},
+	],
+	categories: [
+		{ key: 'maxCount', label: 'Max Categories', type: 'number', placeholder: '1' },
+		{
+			key: 'position',
+			label: 'Position',
+			type: 'select',
+			options: [
+				{ label: 'Inline', value: '' },
+				{ label: 'Absolute', value: 'absolute' },
+			],
+		},
+		{
+			key: 'filter',
+			label: 'Filter',
+			type: 'select',
+			options: [
+				{ label: 'None', value: '' },
+				{ label: 'Invert', value: 'invert' },
+			],
+		},
+	],
+	title: [{ key: 'flex', label: 'Flex', type: 'number', placeholder: '1' }],
+	description: [{ key: 'flex', label: 'Flex', type: 'number', placeholder: '1' }],
+	author: [
+		{
+			key: 'showAvatar',
+			label: 'Show Avatar',
+			type: 'select',
+			options: [
+				{ label: 'Yes', value: '' },
+				{ label: 'No', value: 'false' },
+			],
+		},
+		{
+			key: 'width',
+			label: 'Width',
+			type: 'select',
+			options: [
+				{ label: 'Fit Content', value: '' },
+				{ label: 'Flex', value: 'flex' },
+			],
+		},
+		{ key: 'flex', label: 'Flex Value', type: 'number', placeholder: '1', showIf: { key: 'width', value: 'flex' } },
+	],
+	date: [
+		{
+			key: 'width',
+			label: 'Width',
+			type: 'select',
+			options: [
+				{ label: 'Fit Content', value: '' },
+				{ label: 'Flex', value: 'flex' },
+			],
+		},
+		{ key: 'flex', label: 'Flex Value', type: 'number', placeholder: '1', showIf: { key: 'width', value: 'flex' } },
+	],
+	tags: [],
+	comments: [],
+};
+
+const POST_SETTINGS: SettingField[] = [
+	{ key: 'gap', label: 'Gap', type: 'range', min: 0, max: 60, step: 1 },
+	{ key: 'padding', label: 'Padding', type: 'range', min: 0, max: 60, step: 1 },
+	{
+		key: 'topLine',
+		label: 'Top Line',
+		type: 'select',
+		options: [
+			{ label: 'No', value: '' },
+			{ label: 'Yes', value: 'true' },
+		],
+	},
+];
+
+type BlockLayout = {
+	flex?: number;
+	aspectRatio?: string;
+	objectFit?: string;
+	position?: string;
+	filter?: string;
+	direction?: string;
+	gap?: string;
+	maxCount?: number;
+	showAvatar?: string;
+	width?: string;
+};
+
+type LayoutBlock = { id: string; type: string; layout?: BlockLayout };
 type LayoutColumn = { id: string; blocks: LayoutBlock[] };
 type LayoutRow = { id: string; columns: LayoutColumn[] };
 
@@ -66,7 +193,7 @@ type PostPreviewTemplate = {
 	id: string;
 	name: string;
 	type: string;
-	layout: { direction?: string; gap?: string };
+	layout: { direction?: string; gap?: string; padding?: string; topLine?: boolean };
 	rows: LayoutRow[];
 };
 
@@ -91,13 +218,25 @@ function migrateToRows(content: any[]): LayoutRow[] {
 		columns: [
 			{
 				id: `col-${idx}-0`,
-				blocks: [{ id: item.id || `${item.type}-${idx}`, type: item.type }],
+				blocks: [
+					{ id: item.id || `${item.type}-${idx}`, type: item.type, ...(item.layout ? { layout: item.layout } : {}) },
+				],
 			},
 		],
 	}));
 }
 
-function SortableBlock({ block, onDelete }: { block: LayoutBlock; onDelete: () => void }) {
+function SortableBlock({
+	block,
+	onDelete,
+	isSelected,
+	onSelect,
+}: {
+	block: LayoutBlock;
+	onDelete: () => void;
+	isSelected: boolean;
+	onSelect: () => void;
+}) {
 	const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: block.id });
 
 	const style = {
@@ -107,9 +246,9 @@ function SortableBlock({ block, onDelete }: { block: LayoutBlock; onDelete: () =
 
 	return (
 		<S.BlockWrapper ref={setNodeRef} style={style} $isDragging={isDragging}>
-			<S.Block>
-				<S.BlockHeader {...attributes} {...listeners}>
-					<S.BlockHeaderLeft>
+			<S.Block $isSelected={isSelected} $compact={block.type !== 'thumbnail'} onClick={onSelect}>
+				<S.BlockHeader>
+					<S.BlockHeaderLeft {...attributes} {...listeners}>
 						<ReactSVG src={ICONS.drag} />
 						<span>{POST_PREVIEW_BLOCKS[block.type]?.label || block.type}</span>
 					</S.BlockHeaderLeft>
@@ -117,17 +256,16 @@ function SortableBlock({ block, onDelete }: { block: LayoutBlock; onDelete: () =
 						type={'alt1'}
 						active={false}
 						src={ICONS.delete}
-						handlePress={(e) => {
-							e.stopPropagation();
-							onDelete();
-						}}
+						handlePress={() => onDelete()}
 						dimensions={{ wrapper: 22, icon: 12 }}
 						noFocus
 					/>
 				</S.BlockHeader>
-				<S.BlockContent $type={block.type}>
-					<ReactSVG src={POST_PREVIEW_BLOCKS[block.type]?.icon || ICONS.article} />
-				</S.BlockContent>
+				{block.type === 'thumbnail' && (
+					<S.BlockContent $type={block.type}>
+						<ReactSVG src={POST_PREVIEW_BLOCKS[block.type]?.icon || ICONS.article} />
+					</S.BlockContent>
+				)}
 			</S.Block>
 		</S.BlockWrapper>
 	);
@@ -182,24 +320,47 @@ function DropZoneBetweenRows({
 	);
 }
 
-function PreviewRenderer({ template }: { template: PostPreviewTemplate }) {
-	const renderPreviewElement = (type: string, key: number) => {
-		switch (type) {
+function PreviewRenderer({
+	template,
+	themeVars,
+}: {
+	template: PostPreviewTemplate;
+	themeVars: Record<string, string>;
+}) {
+	const renderPreviewElement = (block: LayoutBlock, key: number) => {
+		const layout = block.layout || {};
+		switch (block.type) {
 			case 'thumbnail':
 				return (
-					<S.PreviewThumbnail key={key}>
-						<ReactSVG src={ICONS.image} />
-						<span>Thumbnail Image</span>
+					<S.PreviewThumbnail key={key} style={{ flex: layout.flex }}>
+						<img
+							src={getTxEndpoint(SAMPLE_POST.metadata.thumbnail)}
+							style={{ aspectRatio: layout.aspectRatio || '16/9', objectFit: (layout.objectFit as any) || 'cover' }}
+						/>
 					</S.PreviewThumbnail>
 				);
 			case 'title':
-				return <S.PreviewTitle key={key}>{SAMPLE_POST.name}</S.PreviewTitle>;
+				return (
+					<S.PreviewTitle key={key} style={{ flex: layout.flex }}>
+						{SAMPLE_POST.name}
+					</S.PreviewTitle>
+				);
 			case 'description':
-				return <S.PreviewDescription key={key}>{SAMPLE_POST.metadata.description}</S.PreviewDescription>;
+				return (
+					<S.PreviewDescription key={key} style={{ flex: layout.flex }}>
+						{SAMPLE_POST.metadata.description}
+					</S.PreviewDescription>
+				);
 			case 'author':
 				return (
-					<S.PreviewAuthor key={key}>
-						<div className="avatar" />
+					<S.PreviewAuthor
+						key={key}
+						style={{
+							width: layout.width === 'flex' ? undefined : 'fit-content',
+							flex: layout.width === 'flex' ? layout.flex || 1 : undefined,
+						}}
+					>
+						{layout.showAvatar !== 'false' && <div className="avatar" />}
 						<span>Author Name</span>
 					</S.PreviewAuthor>
 				);
@@ -210,7 +371,7 @@ function PreviewRenderer({ template }: { template: PostPreviewTemplate }) {
 			case 'categories':
 				return (
 					<S.PreviewCategories key={key}>
-						{SAMPLE_POST.metadata.categories.map((cat, i) => (
+						{SAMPLE_POST.metadata.categories.slice(0, layout.maxCount || 1).map((cat, i) => (
 							<span key={i}>{cat.name}</span>
 						))}
 					</S.PreviewCategories>
@@ -235,22 +396,45 @@ function PreviewRenderer({ template }: { template: PostPreviewTemplate }) {
 	};
 
 	return (
-		<S.LivePreview>
-			{template.rows.map((row) => (
-				<S.PreviewRow key={row.id} $blockCount={row.columns.length}>
-					{row.columns.map((col) => (
-						<S.PreviewColumn key={col.id}>
-							{col.blocks.map((block, blockIndex) => renderPreviewElement(block.type, blockIndex))}
-						</S.PreviewColumn>
-					))}
-				</S.PreviewRow>
-			))}
-			{template.rows.length === 0 && (
-				<S.EmptyState>
-					<span>No elements added yet</span>
-				</S.EmptyState>
-			)}
-		</S.LivePreview>
+		<S.LivePreviewWrapper>
+			<S.LivePreviewHeader>Preview</S.LivePreviewHeader>
+			<S.LivePreview
+				style={{
+					...themeVars,
+					flexDirection: (template.layout.direction || 'column') as React.CSSProperties['flexDirection'],
+					gap: template.layout.gap ? `${template.layout.gap}px` : '20px',
+					...(template.layout.padding ? { padding: `${template.layout.padding}px` } : {}),
+				}}
+				$topLine={template.layout.topLine}
+			>
+				{template.rows.map((row) => (
+					<S.PreviewRow key={row.id} $blockCount={row.columns.length}>
+						{row.columns.map((col) => {
+							const colLayout = col.blocks[0]?.layout;
+							const blockType = col.blocks[0]?.type;
+							const hasWidthOption = BLOCK_SETTINGS[blockType]?.some((f) => f.key === 'width');
+							const usesFlex = colLayout?.width === 'flex';
+							return (
+								<S.PreviewColumn
+									key={col.id}
+									style={{
+										flex: usesFlex ? colLayout?.flex || 1 : hasWidthOption ? undefined : colLayout?.flex || 1,
+										width: !usesFlex && hasWidthOption ? 'fit-content' : undefined,
+									}}
+								>
+									{col.blocks.map((block, blockIndex) => renderPreviewElement(block, blockIndex))}
+								</S.PreviewColumn>
+							);
+						})}
+					</S.PreviewRow>
+				))}
+				{template.rows.length === 0 && (
+					<S.EmptyState>
+						<span>No elements added yet</span>
+					</S.EmptyState>
+				)}
+			</S.LivePreview>
+		</S.LivePreviewWrapper>
 	);
 }
 
@@ -275,11 +459,46 @@ export default function PostPreviewEdit() {
 	});
 	const [template, setTemplate] = React.useState<PostPreviewTemplate | null>(null);
 	const [originalTemplate, setOriginalTemplate] = React.useState<PostPreviewTemplate | null>(null);
-	const [blockEditMode, setBlockEditMode] = React.useState(true);
 	const [hasBodyOverflow, setHasBodyOverflow] = React.useState(false);
 
 	const [activeId, setActiveId] = React.useState<UniqueIdentifier | null>(null);
 	const [overId, setOverId] = React.useState<UniqueIdentifier | null>(null);
+	const [selectedBlockId, setSelectedBlockId] = React.useState<string | null>(null);
+
+	const selectedBlock = React.useMemo(() => {
+		if (!selectedBlockId || !template) return null;
+		for (const row of template.rows) {
+			for (const col of row.columns) {
+				const block = col.blocks.find((b) => b.id === selectedBlockId);
+				if (block) return block;
+			}
+		}
+		return null;
+	}, [selectedBlockId, template]);
+
+	const updateBlockLayout = (blockId: string, key: string, value: any) => {
+		if (!template) return;
+		const newRows = template.rows.map((row) => ({
+			...row,
+			columns: row.columns.map((col) => ({
+				...col,
+				blocks: col.blocks.map((block) => {
+					if (block.id !== blockId) return block;
+					const newLayout = { ...(block.layout || {}), [key]: value };
+					if (value === '' || value === undefined) delete newLayout[key];
+					return { ...block, layout: Object.keys(newLayout).length > 0 ? newLayout : undefined };
+				}),
+			})),
+		}));
+		setTemplate({ ...template, rows: newRows });
+	};
+
+	const updateTemplateLayout = (key: string, value: any) => {
+		if (!template) return;
+		const newLayout = { ...template.layout, [key]: value };
+		if (value === '' || value === undefined) delete newLayout[key];
+		setTemplate({ ...template, layout: newLayout });
+	};
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -330,10 +549,6 @@ export default function PostPreviewEdit() {
 				e.preventDefault();
 				if (hasChanges && !loading.active) handleSave();
 			}
-			if (e.ctrlKey && e.key.toLowerCase() === 'l') {
-				e.preventDefault();
-				setBlockEditMode((prev) => !prev);
-			}
 		};
 		window.addEventListener('keydown', handleKeyDown);
 		return () => window.removeEventListener('keydown', handleKeyDown);
@@ -345,7 +560,13 @@ export default function PostPreviewEdit() {
 		try {
 			const existingPreviews = portalProvider.current?.postPreviews || {};
 			const contentForSave = template.rows.flatMap((row) =>
-				row.columns.flatMap((col) => col.blocks.map((block) => ({ id: block.id, type: block.type })))
+				row.columns.flatMap((col) =>
+					col.blocks.map((block) => {
+						const entry: any = { id: block.id, type: block.type };
+						if (block.layout) entry.layout = block.layout;
+						return entry;
+					})
+				)
 			);
 			const templateToSave = { ...template, content: contentForSave };
 			const updatedPreviews = { ...existingPreviews, [template.id]: templateToSave };
@@ -628,6 +849,10 @@ export default function PostPreviewEdit() {
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 	const primaryDisabled = unauthorized || !hasChanges || loading.active;
 
+	const scheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+	const activeTheme = portalProvider.current?.themes?.find((t: any) => t.active);
+	const themeVars = activeTheme ? getThemeVars(activeTheme, scheme) : {};
+
 	if (!template) return <Loader message={`${language?.loading}...`} />;
 
 	return (
@@ -650,17 +875,6 @@ export default function PostPreviewEdit() {
 									<div className={'indicator'} />
 								</S.UpdateWrapper>
 							)}
-							<Button
-								type={'primary'}
-								label={language?.layout || 'Layout'}
-								handlePress={() => setBlockEditMode(!blockEditMode)}
-								active={blockEditMode}
-								disabled={loading.active}
-								icon={blockEditMode ? ICONS.close : ICONS.layout}
-								iconLeftAlign
-								tooltip={'CTRL + L'}
-								noFocus
-							/>
 							<S.SubmitWrapper>
 								<Button
 									type={'alt1'}
@@ -677,108 +891,225 @@ export default function PostPreviewEdit() {
 				</S.ToolbarWrapper>
 
 				<S.EditorWrapper>
-					<S.Editor blockEditMode={blockEditMode}>
-						{!blockEditMode ? (
-							<S.PreviewModeContainer>
-								<PreviewRenderer template={template} />
-							</S.PreviewModeContainer>
-						) : (
-							<S.ElementWrapper blockEditMode={blockEditMode}>
-								<DndContext
-									sensors={sensors}
-									collisionDetection={pointerWithin}
-									onDragStart={handleDragStart}
-									onDragOver={handleDragOver}
-									onDragEnd={handleDragEnd}
-								>
-									<S.Element blockEditMode={blockEditMode} direction={'row'}>
-										<S.PreviewContainer>
-											<S.PreviewArea>
-												{template.rows.length === 0 && !activeId && (
-													<S.EmptyState>
-														<span>{language?.dragBlocksHere || 'Drag blocks here'}</span>
-													</S.EmptyState>
-												)}
+					<S.Editor blockEditMode={true}>
+						<S.ElementWrapper blockEditMode={true}>
+							<DndContext
+								sensors={sensors}
+								collisionDetection={pointerWithin}
+								onDragStart={handleDragStart}
+								onDragOver={handleDragOver}
+								onDragEnd={handleDragEnd}
+							>
+								<S.Element blockEditMode={true} direction={'row'}>
+									<S.PreviewContainer>
+										<S.PreviewArea>
+											{template.rows.length === 0 && !activeId && (
+												<S.EmptyState>
+													<span>{language?.dragBlocksHere || 'Drag blocks here'}</span>
+												</S.EmptyState>
+											)}
 
-												<DropZoneBetweenRows
-													id="dropzone-0"
-													isActive={!!activeId}
-													isOver={overId === 'dropzone-0'}
-													activeBlock={activeBlock}
-												/>
+											<DropZoneBetweenRows
+												id="dropzone-0"
+												isActive={!!activeId}
+												isOver={overId === 'dropzone-0'}
+												activeBlock={activeBlock}
+											/>
 
-												{template.rows.map((row, rowIndex) => (
-													<React.Fragment key={row.id}>
-														<S.Row $isDraggingOver={overId === row.id}>
-															<ColumnDropZone
-																id={`edge-left-${row.id}`}
-																isActive={!!activeId}
-																isOver={overId === `edge-left-${row.id}`}
-															/>
-															{(
-																row.columns ||
-																(row as any).blocks?.map((b: any, i: number) => ({ id: `col-${i}`, blocks: [b] })) ||
-																[]
-															).map((col: any, colIndex: number) => (
-																<React.Fragment key={col.id}>
-																	{colIndex > 0 && (
-																		<ColumnDropZone
-																			id={`edge-between-${row.id}-${colIndex}`}
-																			isActive={!!activeId}
-																			isOver={overId === `edge-between-${row.id}-${colIndex}`}
-																		/>
-																	)}
-																	<S.Column>
-																		<BlockDropZone
-																			id={`stack:${row.id}:${col.id}:0`}
-																			isActive={!!activeId}
-																			isOver={overId === `stack:${row.id}:${col.id}:0`}
-																		/>
-																		{col.blocks.map((block: any, blockIndex: number) => (
-																			<React.Fragment key={block.id}>
-																				<S.BlockRow>
-																					<ColumnDropZone
-																						id={`block-left:${row.id}:${col.id}:${block.id}`}
-																						isActive={!!activeId}
-																						isOver={overId === `block-left:${row.id}:${col.id}:${block.id}`}
-																					/>
-																					<SortableBlock
-																						block={block}
-																						onDelete={() => deleteBlock(row.id, col.id, block.id)}
-																					/>
-																					<ColumnDropZone
-																						id={`block-right:${row.id}:${col.id}:${block.id}`}
-																						isActive={!!activeId}
-																						isOver={overId === `block-right:${row.id}:${col.id}:${block.id}`}
-																					/>
-																				</S.BlockRow>
-																				<BlockDropZone
-																					id={`stack:${row.id}:${col.id}:${blockIndex + 1}`}
-																					isActive={!!activeId}
-																					isOver={overId === `stack:${row.id}:${col.id}:${blockIndex + 1}`}
-																				/>
-																			</React.Fragment>
-																		))}
-																	</S.Column>
-																</React.Fragment>
-															))}
-															<ColumnDropZone
-																id={`edge-right-${row.id}`}
-																isActive={!!activeId}
-																isOver={overId === `edge-right-${row.id}`}
-															/>
-														</S.Row>
-														<DropZoneBetweenRows
-															id={`dropzone-${rowIndex + 1}`}
+											{template.rows.map((row, rowIndex) => (
+												<React.Fragment key={row.id}>
+													<S.Row $isDraggingOver={overId === row.id} $isDragging={!!activeId}>
+														<ColumnDropZone
+															id={`edge-left-${row.id}`}
 															isActive={!!activeId}
-															isOver={overId === `dropzone-${rowIndex + 1}`}
-															activeBlock={activeBlock}
+															isOver={overId === `edge-left-${row.id}`}
 														/>
-													</React.Fragment>
-												))}
-											</S.PreviewArea>
-										</S.PreviewContainer>
+														{(
+															row.columns ||
+															(row as any).blocks?.map((b: any, i: number) => ({ id: `col-${i}`, blocks: [b] })) ||
+															[]
+														).map((col: any, colIndex: number) => (
+															<React.Fragment key={col.id}>
+																{colIndex > 0 && (
+																	<ColumnDropZone
+																		id={`edge-between-${row.id}-${colIndex}`}
+																		isActive={!!activeId}
+																		isOver={overId === `edge-between-${row.id}-${colIndex}`}
+																	/>
+																)}
+																<S.Column>
+																	<BlockDropZone
+																		id={`stack:${row.id}:${col.id}:0`}
+																		isActive={!!activeId}
+																		isOver={overId === `stack:${row.id}:${col.id}:0`}
+																	/>
+																	{col.blocks.map((block: any, blockIndex: number) => (
+																		<React.Fragment key={block.id}>
+																			<S.BlockRow>
+																				<ColumnDropZone
+																					id={`block-left:${row.id}:${col.id}:${block.id}`}
+																					isActive={!!activeId}
+																					isOver={overId === `block-left:${row.id}:${col.id}:${block.id}`}
+																				/>
+																				<SortableBlock
+																					block={block}
+																					onDelete={() => deleteBlock(row.id, col.id, block.id)}
+																					isSelected={selectedBlockId === block.id}
+																					onSelect={() =>
+																						setSelectedBlockId(selectedBlockId === block.id ? null : block.id)
+																					}
+																				/>
+																				<ColumnDropZone
+																					id={`block-right:${row.id}:${col.id}:${block.id}`}
+																					isActive={!!activeId}
+																					isOver={overId === `block-right:${row.id}:${col.id}:${block.id}`}
+																				/>
+																			</S.BlockRow>
+																			<BlockDropZone
+																				id={`stack:${row.id}:${col.id}:${blockIndex + 1}`}
+																				isActive={!!activeId}
+																				isOver={overId === `stack:${row.id}:${col.id}:${blockIndex + 1}`}
+																			/>
+																		</React.Fragment>
+																	))}
+																</S.Column>
+															</React.Fragment>
+														))}
+														<ColumnDropZone
+															id={`edge-right-${row.id}`}
+															isActive={!!activeId}
+															isOver={overId === `edge-right-${row.id}`}
+														/>
+													</S.Row>
+													<DropZoneBetweenRows
+														id={`dropzone-${rowIndex + 1}`}
+														isActive={!!activeId}
+														isOver={overId === `dropzone-${rowIndex + 1}`}
+														activeBlock={activeBlock}
+													/>
+												</React.Fragment>
+											))}
+										</S.PreviewArea>
+										<PreviewRenderer template={template} themeVars={themeVars} />
+									</S.PreviewContainer>
 
+									<S.SidebarContainer>
+										<S.SettingsContainer>
+											<S.SettingsPanel>
+												<S.SettingsPanelHeader>
+													<p>{selectedBlock ? POST_PREVIEW_BLOCKS[selectedBlock.type]?.label : 'Post Preview'}</p>
+												</S.SettingsPanelHeader>
+												<S.SettingsContent>
+													{selectedBlock ? (
+														BLOCK_SETTINGS[selectedBlock.type]?.length > 0 ? (
+															BLOCK_SETTINGS[selectedBlock.type]
+																.filter(
+																	(field) =>
+																		!field.showIf ||
+																		(selectedBlock.layout as any)?.[field.showIf.key] === field.showIf.value
+																)
+																.map((field) => (
+																	<S.SettingField key={field.key}>
+																		<S.SettingLabel>{field.label}</S.SettingLabel>
+																		{field.type === 'select' ? (
+																			<S.SettingSelect
+																				value={(selectedBlock.layout as any)?.[field.key] || ''}
+																				onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+																					updateBlockLayout(selectedBlock.id, field.key, e.target.value)
+																				}
+																			>
+																				{field.options?.map((opt) => (
+																					<option key={opt.value} value={opt.value}>
+																						{opt.label}
+																					</option>
+																				))}
+																			</S.SettingSelect>
+																		) : field.type === 'number' ? (
+																			<S.SettingInput
+																				type="number"
+																				value={(selectedBlock.layout as any)?.[field.key] ?? ''}
+																				placeholder={field.placeholder}
+																				onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+																					updateBlockLayout(
+																						selectedBlock.id,
+																						field.key,
+																						e.target.value ? Number(e.target.value) : undefined
+																					)
+																				}
+																			/>
+																		) : (
+																			<S.SettingInput
+																				type="text"
+																				value={(selectedBlock.layout as any)?.[field.key] || ''}
+																				placeholder={field.placeholder}
+																				onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+																					updateBlockLayout(selectedBlock.id, field.key, e.target.value)
+																				}
+																			/>
+																		)}
+																	</S.SettingField>
+																))
+														) : (
+															<S.SettingsEmpty>
+																<span>{language?.noSettings || 'No settings for this element'}</span>
+															</S.SettingsEmpty>
+														)
+													) : (
+														POST_SETTINGS.map((field) => (
+															<S.SettingField key={field.key}>
+																<S.SettingLabel>{field.label}</S.SettingLabel>
+																{field.type === 'select' ? (
+																	<S.SettingSelect
+																		value={
+																			field.key === 'topLine'
+																				? template.layout.topLine
+																					? 'true'
+																					: ''
+																				: (template.layout as any)?.[field.key] || ''
+																		}
+																		onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+																			updateTemplateLayout(
+																				field.key,
+																				field.key === 'topLine' ? e.target.value === 'true' : e.target.value
+																			)
+																		}
+																	>
+																		{field.options?.map((opt) => (
+																			<option key={opt.value} value={opt.value}>
+																				{opt.label}
+																			</option>
+																		))}
+																	</S.SettingSelect>
+																) : field.type === 'range' ? (
+																	<S.SliderField>
+																		<S.SettingInput
+																			type="range"
+																			min={field.min}
+																			max={field.max}
+																			step={field.step}
+																			value={parseInt((template.layout as any)?.[field.key]) || 20}
+																			onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+																				updateTemplateLayout(field.key, e.target.value)
+																			}
+																		/>
+																		<span>{parseInt((template.layout as any)?.[field.key]) || 20}px</span>
+																	</S.SliderField>
+																) : (
+																	<S.SettingInput
+																		type="text"
+																		value={(template.layout as any)?.[field.key] || ''}
+																		placeholder={field.placeholder}
+																		onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+																			updateTemplateLayout(field.key, e.target.value)
+																		}
+																	/>
+																)}
+															</S.SettingField>
+														))
+													)}
+												</S.SettingsContent>
+											</S.SettingsPanel>
+										</S.SettingsContainer>
 										<S.BlocksContainer>
 											<S.BlocksPanel>
 												<S.BlocksPanelHeader>
@@ -797,26 +1128,26 @@ export default function PostPreviewEdit() {
 												</S.BlocksList>
 											</S.BlocksPanel>
 										</S.BlocksContainer>
-									</S.Element>
+									</S.SidebarContainer>
+								</S.Element>
 
-									<DragOverlay>
-										{activeBlock && (
-											<S.DragOverlayBlock>
-												<S.BlockHeader>
-													<S.BlockHeaderLeft>
-														<ReactSVG src={ICONS.drag} />
-														<span>{POST_PREVIEW_BLOCKS[activeBlock.type]?.label || activeBlock.type}</span>
-													</S.BlockHeaderLeft>
-												</S.BlockHeader>
-												<S.BlockContent $type={activeBlock.type}>
-													<ReactSVG src={POST_PREVIEW_BLOCKS[activeBlock.type]?.icon || ICONS.article} />
-												</S.BlockContent>
-											</S.DragOverlayBlock>
-										)}
-									</DragOverlay>
-								</DndContext>
-							</S.ElementWrapper>
-						)}
+								<DragOverlay>
+									{activeBlock && (
+										<S.DragOverlayBlock>
+											<S.BlockHeader>
+												<S.BlockHeaderLeft>
+													<ReactSVG src={ICONS.drag} />
+													<span>{POST_PREVIEW_BLOCKS[activeBlock.type]?.label || activeBlock.type}</span>
+												</S.BlockHeaderLeft>
+											</S.BlockHeader>
+											<S.BlockContent $type={activeBlock.type}>
+												<ReactSVG src={POST_PREVIEW_BLOCKS[activeBlock.type]?.icon || ICONS.article} />
+											</S.BlockContent>
+										</S.DragOverlayBlock>
+									)}
+								</DragOverlay>
+							</DndContext>
+						</S.ElementWrapper>
 					</S.Editor>
 				</S.EditorWrapper>
 			</S.Wrapper>

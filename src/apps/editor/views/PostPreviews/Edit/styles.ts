@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { STYLING } from 'helpers/config';
 
@@ -161,7 +161,10 @@ export const EmptyState = styled.div`
 `;
 
 export const DropZone = styled.div<{ $isActive?: boolean; $isDraggingOver?: boolean }>`
-	min-height: ${(props) => (props.$isActive ? '70px' : '4px')};
+	height: ${(props) => (props.$isActive ? 'auto' : '0')};
+	min-height: ${(props) => (props.$isActive ? '40px' : '0')};
+	opacity: ${(props) => (props.$isActive ? 1 : 0)};
+	overflow: hidden;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -222,11 +225,11 @@ export const RowContainer = styled.div`
 	align-items: stretch;
 `;
 
-export const Row = styled.div<{ $isDraggingOver?: boolean }>`
+export const Row = styled.div<{ $isDraggingOver?: boolean; $isDragging?: boolean }>`
 	display: flex;
-	gap: 10px;
+	gap: ${(props) => (props.$isDragging ? '10px' : '0')};
 	padding: 10px;
-	min-height: 100px;
+	min-height: ${(props) => (props.$isDragging ? '100px' : 'auto')};
 	border-radius: ${STYLING.dimensions.radius.alt2};
 	background: ${(props) =>
 		props.$isDraggingOver
@@ -257,7 +260,10 @@ export const BlockRow = styled.div`
 `;
 
 export const BlockDropZone = styled.div<{ $isActive?: boolean; $isDraggingOver?: boolean }>`
-	min-height: ${(props) => (props.$isActive ? '40px' : '4px')};
+	height: ${(props) => (props.$isActive ? 'auto' : '0')};
+	min-height: ${(props) => (props.$isActive ? '20px' : '0')};
+	opacity: ${(props) => (props.$isActive ? 1 : 0)};
+	overflow: hidden;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -273,24 +279,20 @@ export const BlockDropZone = styled.div<{ $isActive?: boolean; $isDraggingOver?:
 `;
 
 export const ColumnDropZone = styled.div<{ $isActive?: boolean; $isDraggingOver?: boolean }>`
-	width: ${(props) => (props.$isActive ? '50px' : '8px')};
-	min-height: 80px;
+	width: ${(props) => (props.$isActive ? '50px' : '0')};
+	align-self: stretch;
+	opacity: ${(props) => (props.$isActive ? 1 : 0)};
+	overflow: hidden;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	border-radius: ${STYLING.dimensions.radius.alt2};
 	background: ${(props) =>
-		props.$isDraggingOver
-			? props.theme.colors.button.alt1.background + '20'
-			: props.$isActive
-			? 'rgba(100, 100, 100, 0.1)'
-			: 'rgba(100, 100, 100, 0.05)'};
+		props.$isDraggingOver ? props.theme.colors.button.alt1.background + '20' : 'rgba(100, 100, 100, 0.1)'};
 	border: ${(props) =>
 		props.$isDraggingOver
 			? `2px solid ${props.theme.colors.button.alt1.background}`
-			: props.$isActive
-			? `2px dashed ${props.theme.colors.border.primary}`
-			: `1px dashed ${props.theme.colors.border.primary}40`};
+			: `2px dashed ${props.theme.colors.border.primary}`};
 	transition: all 150ms ease;
 `;
 
@@ -327,13 +329,16 @@ export const BlockWrapper = styled.div<{ $isDragging?: boolean }>`
 	opacity: ${(props) => (props.$isDragging ? 0.8 : 1)};
 `;
 
-export const Block = styled.div`
+export const Block = styled.div<{ $isSelected?: boolean; $compact?: boolean }>`
 	display: flex;
 	flex-direction: column;
-	background: ${(props) => props.theme.colors.container.alt1.background};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	background: ${(props) =>
+		props.$compact ? props.theme.colors.container.alt3.background : props.theme.colors.container.alt1.background};
+	border: 2px solid
+		${(props) => (props.$isSelected ? props.theme.colors.button.alt1.background : props.theme.colors.border.primary)};
 	border-radius: ${STYLING.dimensions.radius.alt2};
 	overflow: hidden;
+	cursor: pointer;
 `;
 
 export const BlockHeader = styled.div`
@@ -430,17 +435,182 @@ export const BlockPreviewBody = styled.div<{ $type?: string }>`
 	min-height: ${(props) => (props.$type === 'thumbnail' ? 'auto' : '40px')};
 `;
 
+export const SidebarContainer = styled.div`
+	display: flex;
+	gap: 10px;
+	margin-left: auto;
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		width: 100%;
+		margin-left: 0;
+	}
+`;
+
+export const SettingsContainer = styled.div`
+	flex: 0 0 240px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		flex: none;
+		width: 100%;
+	}
+`;
+
+export const SettingsPanel = styled.div`
+	width: 100%;
+	border-radius: ${STYLING.dimensions.radius.primary};
+	background: ${(props) => props.theme.colors.container.primary.background};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	overflow: hidden;
+`;
+
+export const SettingsPanelHeader = styled.div`
+	width: 100%;
+	padding: 12px 15px;
+	background: ${(props) => props.theme.colors.container.alt3.background};
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+		text-transform: uppercase;
+		margin: 0;
+	}
+`;
+
+export const SettingsContent = styled.div`
+	display: flex;
+	flex-direction: column;
+	padding: 8px;
+	min-height: 50px;
+`;
+
+export const SettingsEmpty = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+
+	span {
+		color: ${(props) => props.theme.colors.font.alt2};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		text-align: center;
+	}
+`;
+
+export const SettingField = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 8px;
+`;
+
+export const SettingLabel = styled.label`
+	font-size: ${(props) => props.theme.typography.size.xxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	color: ${(props) => props.theme.colors.font.alt1};
+	text-transform: uppercase;
+`;
+
+export const SettingSelect = styled.select`
+	width: 100%;
+	padding: 6px 8px;
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	background: ${(props) => props.theme.colors.container.alt2.background};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.alt3};
+	color: ${(props) => props.theme.colors.font.primary};
+	outline: none;
+
+	&:focus {
+		border-color: ${(props) => props.theme.colors.button.alt1.background};
+	}
+`;
+
+export const SettingInput = styled.input`
+	width: 100%;
+	padding: 6px 8px;
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	background: ${(props) => props.theme.colors.container.alt2.background};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
+	border-radius: ${STYLING.dimensions.radius.alt3};
+	color: ${(props) => props.theme.colors.font.primary};
+	outline: none;
+	box-sizing: border-box;
+
+	&:focus {
+		border-color: ${(props) => props.theme.colors.button.alt1.background};
+	}
+
+	&::placeholder {
+		color: ${(props) => props.theme.colors.font.alt2};
+	}
+`;
+
+export const SliderField = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 8px;
+
+	input[type='range'] {
+		flex: 1;
+		padding: 0;
+		border: none;
+		background: transparent;
+		-webkit-appearance: none;
+		appearance: none;
+		height: 4px;
+		border-radius: 2px;
+		background: ${(props) => props.theme.colors.border.primary};
+		outline: none;
+
+		&::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			appearance: none;
+			width: 14px;
+			height: 14px;
+			border-radius: 50%;
+			background: ${(props) => props.theme.colors.button.alt1.background};
+			cursor: pointer;
+		}
+
+		&::-moz-range-thumb {
+			width: 14px;
+			height: 14px;
+			border-radius: 50%;
+			border: none;
+			background: ${(props) => props.theme.colors.button.alt1.background};
+			cursor: pointer;
+		}
+
+		&::-moz-range-track {
+			height: 4px;
+			border-radius: 2px;
+			background: ${(props) => props.theme.colors.border.primary};
+		}
+	}
+
+	span {
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		color: ${(props) => props.theme.colors.font.alt1};
+		min-width: 35px;
+		text-align: right;
+	}
+`;
+
 export const BlocksContainer = styled.div`
 	flex: 0 0 240px;
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	margin-left: auto;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		flex: none;
 		width: 100%;
-		margin-left: 0;
 	}
 `;
 
@@ -540,20 +710,65 @@ export const DragOverlayBlock = styled.div`
 	overflow: hidden;
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 	cursor: grabbing;
+	opacity: 0.7;
 `;
 
 export const PreviewModeContainer = styled.div`
 	max-width: 700px;
 `;
 
-export const LivePreview = styled.div`
+export const LivePreviewWrapper = styled.div`
+	margin-top: 40px;
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
-	padding: 20px;
-	background: ${(props) => props.theme.colors.container.primary.background};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
-	border-radius: ${STYLING.dimensions.radius.primary};
+	gap: 10px;
+`;
+
+export const LivePreviewHeader = styled.p`
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-size: ${(props) => props.theme.typography.size.xxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	text-transform: uppercase;
+	margin: 0;
+`;
+
+export const LivePreview = styled.div<{ $topLine?: boolean }>`
+	position: relative;
+	font-size: 13px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: var(--spacing-post, 20px);
+	background: var(--color-post-background);
+	border: 1px solid var(--color-post-border);
+	border-radius: var(--border-radius);
+	box-shadow: var(--preference-post-shadow);
+	color: rgba(var(--color-text), 1);
+
+	h2 {
+		font-size: calc(1em * 1.5);
+		margin: 0 0 4px 0;
+	}
+
+	p,
+	span {
+		font-size: calc(1em * 1);
+	}
+
+	${(props) =>
+		props.$topLine &&
+		css`
+			&::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 1px;
+				background-color: rgba(var(--color-background), 1);
+				filter: invert(1);
+			}
+		`}
 `;
 
 export const PreviewRow = styled.div<{ $blockCount: number }>`
@@ -563,98 +778,85 @@ export const PreviewRow = styled.div<{ $blockCount: number }>`
 `;
 
 export const PreviewColumn = styled.div`
-	flex: 1;
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 `;
 
 export const PreviewThumbnail = styled.div`
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: 10px;
-	aspect-ratio: 16 / 9;
-	background: ${(props) => props.theme.colors.container.alt3.background};
-	border-radius: ${STYLING.dimensions.radius.alt2};
-
-	svg {
-		width: 32px;
-		height: 32px;
-		fill: ${(props) => props.theme.colors.font.alt2};
-	}
-
-	span {
-		font-size: ${(props) => props.theme.typography.size.xSmall};
-		color: ${(props) => props.theme.colors.font.alt2};
+	img {
+		width: 100%;
+		border-radius: var(--border-radius);
+		background: rgba(var(--color-text), 0.05);
 	}
 `;
 
 export const PreviewTitle = styled.h2`
-	margin: 0;
-	font-size: ${(props) => props.theme.typography.size.lg};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
-	color: ${(props) => props.theme.colors.font.primary};
+	line-height: 28px;
+	color: var(--color-card-title, rgba(var(--color-text), 1));
 `;
 
 export const PreviewDescription = styled.p`
 	margin: 0;
-	font-size: ${(props) => props.theme.typography.size.small};
-	color: ${(props) => props.theme.colors.font.alt1};
+	opacity: 0.8;
 	line-height: 1.5;
 `;
 
 export const PreviewAuthor = styled.div`
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 6px;
 
 	.avatar {
-		width: 24px;
-		height: 24px;
+		width: 20px;
+		height: 20px;
 		border-radius: 50%;
-		background: ${(props) => props.theme.colors.container.alt3.background};
+		background: rgba(var(--color-text), 0.15);
 	}
 
 	span {
-		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		color: ${(props) => props.theme.colors.font.primary};
+		font-weight: 800;
 	}
 `;
 
 export const PreviewDate = styled.div`
-	font-size: ${(props) => props.theme.typography.size.xSmall};
-	color: ${(props) => props.theme.colors.font.alt2};
+	display: flex;
+	align-items: center;
+	min-height: 20px;
+	font-size: 12px;
+	opacity: 0.6;
 `;
 
 export const PreviewCategories = styled.div`
 	display: flex;
-	gap: 8px;
+	align-items: center;
+	font-size: 12px;
+	font-weight: 600;
 
 	span {
-		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		color: ${(props) => props.theme.colors.font.alt1};
 		text-transform: uppercase;
 	}
 `;
 
 export const PreviewTags = styled.div`
 	display: flex;
+	align-items: center;
 	flex-wrap: wrap;
-	gap: 8px;
+	gap: 6px;
 
 	span {
-		font-size: ${(props) => props.theme.typography.size.xSmall};
-		color: ${(props) => props.theme.colors.button.alt1.background};
+		background: rgba(var(--color-primary), 1);
+		color: rgba(var(--color-primary-contrast), 1);
+		border-radius: var(--border-radius);
+		padding: 0 4px;
+		font-size: 13px;
+		font-weight: 600;
 	}
 `;
 
 export const PreviewComments = styled.div`
 	span {
-		font-size: ${(props) => props.theme.typography.size.xSmall};
-		color: ${(props) => props.theme.colors.font.alt2};
+		font-size: 12px;
+		opacity: 0.6;
 	}
 `;
