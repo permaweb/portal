@@ -4,6 +4,8 @@ import styled, { css } from 'styled-components';
 type ContainerLayout = {
 	direction?: string;
 	gap?: string;
+	paddingTop?: string;
+	topLine?: boolean;
 };
 
 type ElementLayout = {
@@ -13,6 +15,8 @@ type ElementLayout = {
 	display?: string;
 	position?: string;
 	filter?: string;
+	direction?: string;
+	gap?: string;
 };
 
 export const Container = styled.div<{ $layout: ContainerLayout; $portalLayout?: any }>`
@@ -27,10 +31,26 @@ export const Container = styled.div<{ $layout: ContainerLayout; $portalLayout?: 
 	margin-bottom: 20px;
 	box-sizing: border-box;
 	padding: var(--spacing-post, 20px);
+	${(props) => props.$layout?.paddingTop && `padding-top: ${props.$layout.paddingTop};`}
 	background: var(--color-post-background);
 	border: 1px solid var(--color-post-border);
 	border-radius: var(--border-radius);
 	box-shadow: var(--preference-post-shadow);
+
+	${(props) =>
+		props.$layout?.topLine &&
+		css`
+			&::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 1px;
+				background-color: rgba(var(--color-background), 1);
+				filter: invert(1);
+			}
+		`}
 `;
 
 export const Categories = styled.div<{ $layout?: ElementLayout }>`
@@ -89,7 +109,10 @@ export const ThumbnailWrapper = styled.div<{ $layout?: ElementLayout }>`
 `;
 
 export const Body = styled.div<{ $layout?: ElementLayout }>`
+	display: flex;
+	flex-direction: ${(props) => props.$layout?.direction || 'column'};
 	flex: ${(props) => props.$layout?.flex || 2};
+	gap: ${(props) => props.$layout?.gap || '20px'};
 `;
 
 export const TitleWrapper = styled.div`
