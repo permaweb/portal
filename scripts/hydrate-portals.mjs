@@ -1,11 +1,10 @@
+import { connect } from '@permaweb/aoconnect';
+import Permaweb from '@permaweb/libs';
+import Arweave from 'arweave';
 import fs from 'fs';
 import { Agent, setGlobalDispatcher } from 'undici';
 
-import Arweave from 'arweave';
-import Permaweb from '@permaweb/libs';
-import { connect } from '@permaweb/aoconnect';
-
-import { debugLog } from './utils.js';
+import { debugLog } from './utils.mjs';
 
 const config = JSON.parse(fs.readFileSync(new URL('./config.json', import.meta.url), 'utf-8'));
 

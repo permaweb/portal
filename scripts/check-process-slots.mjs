@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { debugLog } from './utils.js';
+import { debugLog } from './utils.mjs';
 
 const config = JSON.parse(fs.readFileSync(new URL('./config.json', import.meta.url), 'utf-8'));
 
