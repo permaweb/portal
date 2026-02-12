@@ -365,6 +365,17 @@ export const BlockHeaderLeft = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 6px;
+	flex: 1;
+
+	> div {
+		display: flex;
+		align-items: center;
+		pointer-events: none;
+	}
+
+	span {
+		pointer-events: none;
+	}
 `;
 
 export const DragHandle = styled.div`
@@ -439,10 +450,14 @@ export const SidebarContainer = styled.div`
 	display: flex;
 	gap: 10px;
 	margin-left: auto;
+	position: sticky;
+	top: calc(${STYLING.dimensions.nav.height} + ${STYLING.dimensions.nav.height});
+	align-self: flex-start;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		width: 100%;
 		margin-left: 0;
+		position: static;
 	}
 `;
 
@@ -668,6 +683,17 @@ export const AvailableBlock = styled.div<{ $isDragging?: boolean }>`
 		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 
+	> div {
+		display: flex;
+		align-items: center;
+		pointer-events: none;
+
+		> div {
+			display: flex;
+			align-items: center;
+		}
+	}
+
 	svg {
 		height: 16px;
 		width: 16px;
@@ -827,11 +853,24 @@ export const PreviewDate = styled.div`
 	opacity: 0.6;
 `;
 
-export const PreviewCategories = styled.div`
+export const PreviewCategories = styled.div<{ $showBackground?: boolean }>`
 	display: flex;
 	align-items: center;
+	gap: 4px;
 	font-size: 12px;
 	font-weight: 600;
+
+	${(props) =>
+		props.$showBackground &&
+		css`
+			position: absolute;
+			top: 0;
+			left: 0;
+			background-color: rgba(var(--color-background), 1);
+			filter: invert(1);
+			padding: 5px 15px 4px;
+			border-radius: 0 0 0 var(--border-radius);
+		`}
 
 	span {
 		text-transform: uppercase;

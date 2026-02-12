@@ -101,12 +101,12 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 	categories: [
 		{ key: 'maxCount', label: 'Max Categories', type: 'number', placeholder: '1' },
 		{
-			key: 'position',
-			label: 'Position',
+			key: 'showBackground',
+			label: 'Show Background',
 			type: 'select',
 			options: [
-				{ label: 'Inline', value: '' },
-				{ label: 'Absolute', value: 'absolute' },
+				{ label: 'Yes', value: '' },
+				{ label: 'No', value: 'false' },
 			],
 		},
 		{
@@ -116,6 +116,15 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 			options: [
 				{ label: 'None', value: '' },
 				{ label: 'Invert', value: 'invert' },
+			],
+		},
+		{
+			key: 'topLine',
+			label: 'Top Line',
+			type: 'select',
+			options: [
+				{ label: 'No', value: '' },
+				{ label: 'Yes', value: 'true' },
 			],
 		},
 	],
@@ -155,21 +164,32 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 		{ key: 'flex', label: 'Flex Value', type: 'number', placeholder: '1', showIf: { key: 'width', value: 'flex' } },
 	],
 	tags: [],
-	comments: [],
+	comments: [
+		{
+			key: 'hideWhenEmpty',
+			label: 'Hide When Empty',
+			type: 'select',
+			options: [
+				{ label: 'Yes', value: '' },
+				{ label: 'No', value: 'false' },
+			],
+		},
+		{ key: 'maxCount', label: 'Max Comments', type: 'number', placeholder: '10' },
+		{
+			key: 'sortOrder',
+			label: 'Sort Order',
+			type: 'select',
+			options: [
+				{ label: 'Newest First', value: '' },
+				{ label: 'Oldest First', value: 'asc' },
+			],
+		},
+	],
 };
 
 const POST_SETTINGS: SettingField[] = [
 	{ key: 'gap', label: 'Gap', type: 'range', min: 0, max: 60, step: 1 },
 	{ key: 'padding', label: 'Padding', type: 'range', min: 0, max: 60, step: 1 },
-	{
-		key: 'topLine',
-		label: 'Top Line',
-		type: 'select',
-		options: [
-			{ label: 'No', value: '' },
-			{ label: 'Yes', value: 'true' },
-		],
-	},
 ];
 
 type BlockLayout = {
@@ -182,6 +202,10 @@ type BlockLayout = {
 	gap?: string;
 	maxCount?: number;
 	showAvatar?: string;
+	topLine?: string;
+	showBackground?: string;
+	hideWhenEmpty?: string;
+	sortOrder?: string;
 	width?: string;
 };
 
@@ -193,7 +217,7 @@ type PostPreviewTemplate = {
 	id: string;
 	name: string;
 	type: string;
-	layout: { direction?: string; gap?: string; padding?: string; topLine?: boolean };
+	layout: { direction?: string; gap?: string; padding?: string };
 	rows: LayoutRow[];
 };
 
@@ -370,7 +394,7 @@ function PreviewRenderer({
 				);
 			case 'categories':
 				return (
-					<S.PreviewCategories key={key}>
+					<S.PreviewCategories key={key} $showBackground={layout.showBackground !== 'false'}>
 						{SAMPLE_POST.metadata.categories.slice(0, layout.maxCount || 1).map((cat, i) => (
 							<span key={i}>{cat.name}</span>
 						))}
@@ -405,7 +429,9 @@ function PreviewRenderer({
 					gap: template.layout.gap ? `${template.layout.gap}px` : '20px',
 					...(template.layout.padding ? { padding: `${template.layout.padding}px` } : {}),
 				}}
-				$topLine={template.layout.topLine}
+				$topLine={template.rows.some((r) =>
+					r.columns.some((c) => c.blocks.some((b) => b.type === 'categories' && b.layout?.topLine === 'true'))
+				)}
 			>
 				{template.rows.map((row) => (
 					<S.PreviewRow key={row.id} $blockCount={row.columns.length}>
@@ -1058,29 +1084,7 @@ export default function PostPreviewEdit() {
 														POST_SETTINGS.map((field) => (
 															<S.SettingField key={field.key}>
 																<S.SettingLabel>{field.label}</S.SettingLabel>
-																{field.type === 'select' ? (
-																	<S.SettingSelect
-																		value={
-																			field.key === 'topLine'
-																				? template.layout.topLine
-																					? 'true'
-																					: ''
-																				: (template.layout as any)?.[field.key] || ''
-																		}
-																		onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-																			updateTemplateLayout(
-																				field.key,
-																				field.key === 'topLine' ? e.target.value === 'true' : e.target.value
-																			)
-																		}
-																	>
-																		{field.options?.map((opt) => (
-																			<option key={opt.value} value={opt.value}>
-																				{opt.label}
-																			</option>
-																		))}
-																	</S.SettingSelect>
-																) : field.type === 'range' ? (
+																{field.type === 'range' ? (
 																	<S.SliderField>
 																		<S.SettingInput
 																			type="range"

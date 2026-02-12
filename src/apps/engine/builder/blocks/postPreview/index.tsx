@@ -235,16 +235,20 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 					</S.Body>
 				);
 
-			case 'comments':
-				if (!comments?.length) return null;
+			case 'comments': {
+				if (element.layout?.hideWhenEmpty !== 'false' && !comments?.length) return null;
+				const maxComments = element.layout?.maxCount || comments?.length || 0;
+				const sortedComments = element.layout?.sortOrder === 'asc' ? [...(comments || [])].reverse() : comments || [];
+				const visibleComments = sortedComments.slice(0, maxComments);
 				return (
 					<S.Comments key={index}>
 						<h3>Comments</h3>
-						{comments.map((comment: any, commentIndex: number) => (
+						{visibleComments.map((comment: any, commentIndex: number) => (
 							<Comment key={commentIndex} data={comment} />
 						))}
 					</S.Comments>
 				);
+			}
 
 			default:
 				return null;

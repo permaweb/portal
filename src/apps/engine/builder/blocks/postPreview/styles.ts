@@ -17,6 +17,7 @@ type ElementLayout = {
 	filter?: string;
 	direction?: string;
 	gap?: string;
+	showBackground?: string;
 };
 
 export const Container = styled.div<{ $layout: ContainerLayout; $portalLayout?: any }>`
