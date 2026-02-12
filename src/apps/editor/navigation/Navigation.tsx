@@ -519,13 +519,22 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										{language?.editPortal}
 									</button>
 									<button
-										onClick={() => {
-											portalProvider.setShowPortalManager(true, true);
+										onClick={(e: any) => {
+											handleNavigate(e, URLS.create);
 											setShowPortalDropdown(false);
 										}}
 									>
 										<ReactSVG src={ICONS.add} />
 										{language?.createPortal}
+									</button>
+									<button
+										onClick={() => {
+											portalProvider.setShowWordPressImport(true);
+											setShowPortalDropdown(false);
+										}}
+									>
+										<ReactSVG src={ICONS.import} />
+										{language?.importFromWordPress || 'Import from WordPress'}
 									</button>
 									{!isOnlyPortal(portalProvider.portals, permawebProvider.profile?.id) && (
 										<button onClick={(e: any) => handleNavigate(e, URLS.base)}>

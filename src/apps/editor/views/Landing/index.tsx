@@ -165,7 +165,7 @@ export default function Landing() {
 			disabled = false;
 			label = language?.createPortal;
 			icon = ICONS.add;
-			action = () => portalProvider.setShowPortalManager(true, true);
+			action = () => navigate(URLS.create);
 
 			if (portalProvider.portals && portalProvider.portals.length > 0) {
 				content = (
