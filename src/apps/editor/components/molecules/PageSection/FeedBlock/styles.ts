@@ -102,14 +102,3 @@ export const PostImage = styled.div<{ hasImage: boolean }>`
 		padding: 30px;
 	}
 `;
-
-export const ActionsWrapper = styled.div`
-	width: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 15px;
-	padding: 15px 0 0 0;
-	margin: 15px 0 0 0;
-	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
-`;

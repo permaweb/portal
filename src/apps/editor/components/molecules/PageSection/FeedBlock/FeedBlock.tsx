@@ -2,11 +2,8 @@ import React from 'react';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
-import { Button } from 'components/atoms/Button';
-import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PageBlockType, PortalAssetType } from 'helpers/types';
-import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
 
@@ -16,14 +13,8 @@ const FALLBACK_DATA = {
 	description: 'Description',
 };
 
-export default function FeedBlock(props: {
-	index: number;
-	block: PageBlockType;
-	onChangeBlock: (block: PageBlockType, index: number) => void;
-}) {
+export default function FeedBlock(props: { index: number; block: PageBlockType }) {
 	const portalProvider = usePortalProvider();
-	const languageProvider = useLanguageProvider();
-	const language = languageProvider.object[languageProvider.current];
 
 	const [posts, setPosts] = React.useState<PortalAssetType[]>([]);
 
@@ -35,42 +26,9 @@ export default function FeedBlock(props: {
 
 	const displayPosts = posts.length > 0 ? posts.slice(0, 2) : [null, null];
 
-	// Ensure we always display both categories from the two posts
 	const categoryNames = displayPosts.map((post) => post?.metadata?.categories?.[0]?.name || FALLBACK_DATA.category);
 
-	const options = [
-		{ name: language.journal, value: 'journal' },
-		{ name: language.blog, value: 'blog' },
-		{ name: language.minimal, value: 'minimal' },
-	];
-
-	const [currentOptionIndex, setCurrentOptionIndex] = React.useState(0);
-
-	React.useEffect(() => {
-		if (props.block?.layout) {
-			const index = options.findIndex((opt) => opt.value === props.block.layout);
-			if (index !== -1 && index !== currentOptionIndex) {
-				setCurrentOptionIndex(index);
-			}
-		}
-	}, [props.block?.layout]);
-
-	const handleRotate = () => {
-		const nextIndex = (currentOptionIndex + 1) % options.length;
-		setCurrentOptionIndex(nextIndex);
-
-		props.onChangeBlock(
-			{
-				...props.block,
-				layout: options[nextIndex].value,
-			},
-			props.index
-		);
-	};
-
-	const currentOption = options[currentOptionIndex];
-	const currentLayout = props.block?.layout ?? options[0].value;
-	const nextOption = options[(currentOptionIndex + 1) % options.length];
+	const currentLayout = props.block?.layout ?? 'blog';
 
 	return (
 		<S.Wrapper>
@@ -106,15 +64,6 @@ export default function FeedBlock(props: {
 					);
 				})}
 			</S.ContentWrapper>
-			<S.ActionsWrapper>
-				<Button
-					type={'alt3'}
-					label={`Layout: ${currentOption.name}`}
-					handlePress={handleRotate}
-					icon={ICONS.rotate}
-					tooltip={`${language.switchTo} ${nextOption.name}`}
-				/>
-			</S.ActionsWrapper>
 		</S.Wrapper>
 	);
 }

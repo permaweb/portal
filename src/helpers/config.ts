@@ -1,5 +1,6 @@
 import { LAYOUT_BLOG, LAYOUT_DOCUMENTATION, LAYOUT_JOURNAL } from './config/layouts';
 import { PAGES_BLOG, PAGES_DOCUMENTATION, PAGES_JOURNAL } from './config/pages';
+import { POST_PREVIEWS } from './config/postPreviews';
 import { THEME_DEFAULT } from './config/themes';
 import { ArticleBlockEnum, PageBlockEnum, PortalPatchMapEnum } from './types';
 
@@ -14,6 +15,7 @@ export const LAYOUT = {
 	BLOG: LAYOUT_BLOG,
 	DOCUMENTATION: LAYOUT_DOCUMENTATION,
 };
+export { POST_PREVIEWS };
 
 import { ICONS, ICONS_SOCIAL } from './config/icons';
 export { ICONS, ICONS_SOCIAL };
@@ -126,6 +128,10 @@ function createURLs() {
 		postEditImage: (portalId: string) => `${postEditBase(portalId)}image/`,
 		postEditVideo: (portalId: string) => `${postEditBase(portalId)}video/`,
 		portalTips: (portalId: string) => `${portalBase(portalId)}tips/`,
+		portalPostPreviews: (portalId: string) => `${portalBase(portalId)}post-previews/`,
+		portalPostPreviewEdit: (portalId: string, previewId: string) =>
+			`${portalBase(portalId)}post-preview/edit/${previewId}`,
+		portalPostPreviewCreate: (portalId: string) => `${portalBase(portalId)}post-preview/create`,
 		docs: docsBase,
 		docsIntro: `${docsBase}overview/introduction`,
 		docsEditor: `${docsBase}posts/editor`,
