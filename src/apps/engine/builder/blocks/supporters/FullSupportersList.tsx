@@ -17,7 +17,8 @@ export default function FullSupportersList(props: FullSupportersListProps) {
 	const [currentPage, setCurrentPage] = React.useState(1);
 
 	// Sort by amount descending
-	const sortedSupporters = [...supporters].sort((a, b) => parseFloat(b.amountAr) - parseFloat(a.amountAr));
+	const getAmount = (supporter: SupporterTip) => parseFloat(supporter.amount ?? supporter.amountAr ?? '0');
+	const sortedSupporters = [...supporters].sort((a, b) => getAmount(b) - getAmount(a));
 
 	// Pagination
 	const itemsPerPage = config.pagination || 10;

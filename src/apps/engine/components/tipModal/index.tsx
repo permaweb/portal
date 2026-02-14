@@ -6,17 +6,30 @@ import * as S from './styles';
 
 const PRESET_AMOUNTS = ['5', '10', '15', '20', '25']; // all strings
 
+type TipOption = {
+	id: string;
+	symbol: string;
+};
+
 export default function TipModal({
 	isOpen,
 	onClose,
 	onConfirm,
+	tokens,
+	selectedTokenId,
+	onSelectToken,
 }: {
 	isOpen: boolean;
 	onClose: () => void;
 	onConfirm: (amount: string) => void;
+	tokens: TipOption[];
+	selectedTokenId: string;
+	onSelectToken: (tokenId: string) => void;
 }) {
 	const [selected, setSelected] = React.useState<string | null>(null);
 	const [customAmount, setCustomAmount] = React.useState('');
+	const activeToken = tokens.find((token) => token.id === selectedTokenId) || tokens[0];
+	const tokenSymbol = activeToken?.symbol || 'AR';
 
 	if (!isOpen) return null;
 
@@ -40,6 +53,23 @@ export default function TipModal({
 					<p>Your contribution helps keep this portal active.</p>
 				</S.Header>
 
+				{tokens.length > 1 && (
+					<>
+						<S.SectionLabel>Select token</S.SectionLabel>
+						<S.PresetRow>
+							{tokens.map((token) => (
+								<S.PresetButton
+									key={token.id}
+									$active={selectedTokenId === token.id}
+									onClick={() => onSelectToken(token.id)}
+								>
+									{token.symbol}
+								</S.PresetButton>
+							))}
+						</S.PresetRow>
+					</>
+				)}
+
 				<S.SectionLabel>Choose a tip amount</S.SectionLabel>
 
 				<S.PresetRow>
@@ -52,7 +82,7 @@ export default function TipModal({
 								setCustomAmount('');
 							}}
 						>
-							{amt} AR
+							{amt} {tokenSymbol}
 						</S.PresetButton>
 					))}
 				</S.PresetRow>
@@ -63,7 +93,7 @@ export default function TipModal({
 					<input
 						type="text"
 						value={customAmount}
-						placeholder="Custom amount in AR"
+						placeholder={`Custom amount in ${tokenSymbol}`}
 						onChange={(e) => {
 							setCustomAmount(e.target.value);
 							setSelected(null);
