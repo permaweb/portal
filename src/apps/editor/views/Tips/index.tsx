@@ -705,22 +705,6 @@ export default function Tips() {
 				<S.BodyWrapper>
 					<S.Section>
 						<S.ConfigForm>
-							<S.Forms>
-								<FormField
-									label={'Receipient Address'}
-									value={monetization.walletAddress}
-									onChange={(e: any) =>
-										setMonetization((prev) => ({
-											...prev,
-											walletAddress: e.target.value,
-										}))
-									}
-									invalid={{ status: false, message: null }}
-									disabled={fieldsDisabled}
-									hideErrorMessage
-								/>
-							</S.Forms>
-
 							{tipTokens.map((token, index) => {
 								const matchedPreset = TIP_TOKEN_OPTIONS.find(
 									(preset) =>
