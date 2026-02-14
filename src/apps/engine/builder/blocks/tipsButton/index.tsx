@@ -52,15 +52,24 @@ export default function TipsButton(props: TipsButtonProps) {
 	const [modalOpen, setModalOpen] = React.useState(false);
 	const [submitting, setSubmitting] = React.useState(false);
 	const [selectedTokenId, setSelectedTokenId] = React.useState(() =>
-		tipTokens[0] ? `${tipTokens[0].type}:${tipTokens[0].symbol}:${tipTokens[0].processId || 'AR'}` : ''
+		tipTokens[0]
+			? `${tipTokens[0].type}:${tipTokens[0].symbol}:${tipTokens[0].processId || 'AR'}:${
+					tipTokens[0].recipientAddress || ''
+			  }`
+			: ''
 	);
 
 	React.useEffect(() => {
 		const currentExists = tipTokens.some(
-			(token) => `${token.type}:${token.symbol}:${token.processId || 'AR'}` === selectedTokenId
+			(token) =>
+				`${token.type}:${token.symbol}:${token.processId || 'AR'}:${token.recipientAddress || ''}` === selectedTokenId
 		);
 		if (!currentExists && tipTokens[0]) {
-			setSelectedTokenId(`${tipTokens[0].type}:${tipTokens[0].symbol}:${tipTokens[0].processId || 'AR'}`);
+			setSelectedTokenId(
+				`${tipTokens[0].type}:${tipTokens[0].symbol}:${tipTokens[0].processId || 'AR'}:${
+					tipTokens[0].recipientAddress || ''
+				}`
+			);
 		}
 	}, [tipTokens, selectedTokenId]);
 
@@ -88,12 +97,15 @@ export default function TipsButton(props: TipsButtonProps) {
 	const handleConfirmTip = async (amount: string) => {
 		if (!walletAddress || !sendTip) return;
 		const selectedToken =
-			tipTokens.find((token) => `${token.type}:${token.symbol}:${token.processId || 'AR'}` === selectedTokenId) ||
-			tipTokens[0];
+			tipTokens.find(
+				(token) =>
+					`${token.type}:${token.symbol}:${token.processId || 'AR'}:${token.recipientAddress || ''}` === selectedTokenId
+			) || tipTokens[0];
 		if (!selectedToken) {
 			addNotification('No valid tip token is configured for this portal.', 'warning');
 			return;
 		}
+		const recipientAddress = selectedToken.recipientAddress?.trim() || walletAddress;
 
 		try {
 			debugLog('info', 'TipsButton', 'Submitting tip', {
@@ -105,7 +117,7 @@ export default function TipsButton(props: TipsButtonProps) {
 				postId: props.postId || null,
 			});
 			setSubmitting(true);
-			const txId = await sendTip(walletAddress, amount, location, props.postId, selectedToken);
+			const txId = await sendTip(recipientAddress, amount, location, props.postId, selectedToken);
 			addNotification(`Successfully sent ${amount} ${selectedToken.symbol} tip!`, 'success');
 			debugLog('info', 'TipsButton', 'Tip sent successfully', txId);
 		} catch (e: any) {
@@ -131,7 +143,7 @@ export default function TipsButton(props: TipsButtonProps) {
 				onClose={handleCloseModal}
 				onConfirm={handleConfirmTip}
 				tokens={tipTokens.map((token) => ({
-					id: `${token.type}:${token.symbol}:${token.processId || 'AR'}`,
+					id: `${token.type}:${token.symbol}:${token.processId || 'AR'}:${token.recipientAddress || ''}`,
 					symbol: token.symbol,
 				}))}
 				selectedTokenId={selectedTokenId}

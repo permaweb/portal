@@ -5,6 +5,7 @@ import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
@@ -15,7 +16,6 @@ import { TIP_TOKEN_OPTIONS, URLS } from 'helpers/config';
 import {
 	formatAmountDisplay,
 	fromBaseUnits,
-	normalizeTipToken,
 	normalizeTipTokens,
 	parseTipTags,
 	tokensToMonetizationConfig,
@@ -28,7 +28,7 @@ import {
 	SelectOptionType,
 	TipRow,
 } from 'helpers/types';
-import { debugLog } from 'helpers/utils';
+import { checkValidAddress, debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -175,21 +175,33 @@ export default function Tips() {
 	const hasMonetization = !!existingMonetization?.enabled && !!existingMonetization.walletAddress;
 
 	const monetizationWalletForTips = existingMonetization?.walletAddress || ownerWallet;
-	const activeToken = normalizeTipToken(existingMonetization || monetization);
-	const tokenSymbol = activeToken.symbol || 'AR';
-
-	const totalReceived = React.useMemo(() => {
-		if (!tips.length) return '0';
-		try {
-			let total = BigInt(0);
-			for (const t of tips) {
-				total += BigInt(t.amountRaw || '0');
-			}
-			return formatAmountDisplay(fromBaseUnits(total.toString(), tips[0]?.tokenDecimals ?? activeToken.decimals));
-		} catch {
-			return '0';
+	const tipRecipientAddressesForHistory = React.useMemo(() => {
+		const existingTokens = normalizeTipTokens(existingMonetization);
+		const recipients = new Set<string>();
+		const primaryRecipient = monetizationWalletForTips?.trim();
+		if (primaryRecipient) recipients.add(primaryRecipient);
+		for (const token of existingTokens) {
+			const tokenRecipient = token.recipientAddress?.trim();
+			if (tokenRecipient) recipients.add(tokenRecipient);
 		}
-	}, [tips, activeToken.decimals]);
+		return Array.from(recipients);
+	}, [existingMonetization, monetizationWalletForTips]);
+	const totalUsdReceived = React.useMemo(() => {
+		const sum = tips.reduce((acc, tip) => {
+			if (!tip.usdValue) return acc;
+			const cleaned = String(tip.usdValue).replace(/[^0-9.-]/g, '');
+			const parsed = Number.parseFloat(cleaned);
+			if (!Number.isFinite(parsed)) return acc;
+			return acc + parsed;
+		}, 0);
+
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: 'USD',
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		}).format(sum);
+	}, [tips]);
 
 	React.useEffect(() => {
 		setCurrentPage(1);
@@ -212,12 +224,7 @@ export default function Tips() {
 					`{ name: "App-Name", values: ["Portal"] }`,
 					`{ name: "Type", values: ["Tip"] }`,
 					`{ name: "To-Address", values: $toAddr }`,
-					`{ name: "Token-Symbol", values: ["${tokenSymbol}"] }`,
 				];
-
-				if (activeToken.type === 'AO' && activeToken.processId) {
-					tagFilters.push(`{ name: "Token-Process", values: ["${activeToken.processId}"] }`);
-				}
 
 				const query = {
 					query: `
@@ -242,7 +249,7 @@ export default function Tips() {
 				}
 			`,
 					variables: {
-						toAddr: [monetizationWalletForTips],
+						toAddr: tipRecipientAddressesForHistory,
 					},
 				};
 
@@ -278,6 +285,7 @@ export default function Tips() {
 						tokenDecimals: parsedTip.tokenDecimals,
 						tokenProcess: parsedTip.tokenProcess,
 						tokenType: parsedTip.tokenType,
+						toAddress: getTag('To-Address'),
 						fromAddress: getTag('From-Address') || node.owner?.address || '',
 						fromProfile: fromProfileId,
 						location: getTag('Location'),
@@ -340,15 +348,7 @@ export default function Tips() {
 		return () => {
 			cancelled = true;
 		};
-	}, [
-		hasMonetization,
-		monetizationWalletForTips,
-		portalProvider.current?.id,
-		reloadKey,
-		activeToken.symbol,
-		activeToken.processId,
-		activeToken.type,
-	]);
+	}, [hasMonetization, tipRecipientAddressesForHistory, portalProvider.current?.id, reloadKey]);
 
 	function getFrom(row: TipRow) {
 		if (row.fromProfile) {
@@ -396,11 +396,36 @@ export default function Tips() {
 		() => [
 			...TIP_TOKEN_OPTIONS.map((token) => ({
 				id: getTokenOptionId(token),
-				label: `${token.label} (${token.tokenAddress})`,
+				label: token.label,
 			})),
 		],
 		[]
 	);
+	const getTokenGroupKey = (token: {
+		tokenType?: 'AR' | 'AO';
+		tokenAddress?: string;
+		tokenSymbol?: string;
+		tokenDecimals?: number;
+		recipientAddress?: string;
+	}) => {
+		const recipient = (token.recipientAddress?.trim() || monetization.walletAddress?.trim() || '').toLowerCase();
+		return token.tokenType === 'AO' ? `AO:${token.tokenAddress || ''}:${recipient}` : `AR:AR:${recipient}`;
+	};
+	const tokenTotalsByKey = React.useMemo(() => {
+		const map = new Map<string, { total: bigint; symbol: string; decimals: number }>();
+		for (const tip of tips) {
+			const recipient = (tip.toAddress || '').trim().toLowerCase();
+			const key = tip.tokenType === 'AO' ? `AO:${tip.tokenProcess || ''}:${recipient}` : `AR:AR:${recipient}`;
+			const prev = map.get(key);
+			const nextTotal = (prev?.total ?? BigInt(0)) + BigInt(tip.amountRaw || '0');
+			map.set(key, {
+				total: nextTotal,
+				symbol: tip.tokenSymbol || prev?.symbol || 'AR',
+				decimals: tip.tokenDecimals ?? prev?.decimals ?? DEFAULT_TOKEN_DECIMALS,
+			});
+		}
+		return map;
+	}, [tips]);
 
 	function updateTipToken(index: number, updates: Partial<(typeof tipTokens)[number]>) {
 		setMonetization((prev) => {
@@ -451,7 +476,14 @@ export default function Tips() {
 			},
 			ownerWallet
 		);
-		const normalizedTokens = normalizeTipTokens(normalized);
+		const normalizedTokens = normalizeTipTokens(normalized).map((token) => {
+			const tokenRecipient = token.recipientAddress?.trim();
+			const mainRecipient = normalized.walletAddress?.trim();
+			if (tokenRecipient && mainRecipient && tokenRecipient.toLowerCase() === mainRecipient.toLowerCase()) {
+				return { ...token, recipientAddress: undefined };
+			}
+			return token;
+		});
 		const primary = normalizedTokens[0];
 
 		return {
@@ -464,9 +496,29 @@ export default function Tips() {
 			tipTokens: tokensToMonetizationConfig(normalizedTokens),
 		};
 	}
+	const hasPendingChanges = React.useMemo(() => {
+		const currentPayload = buildPayload(monetization);
+		const baseline = existingMonetization
+			? normalizeMonetizationConfig(existingMonetization, ownerWallet)
+			: {
+					enabled: false,
+					walletAddress: ownerWallet,
+					tokenAddress: 'AR',
+					tokenSymbol: 'AR',
+					tokenDecimals: DEFAULT_TOKEN_DECIMALS,
+					tokenType: 'AR' as const,
+					tipTokens: [{ ...DEFAULT_MONETIZATION_TOKEN }],
+			  };
+		const baselinePayload = buildPayload(baseline);
+		return JSON.stringify(currentPayload) !== JSON.stringify(baselinePayload);
+	}, [monetization, existingMonetization, ownerWallet]);
 
 	function validateTipTokenConfig(nextMonetization: MonetizationConfig) {
 		const tokens = normalizeTipTokens(nextMonetization);
+		const primaryRecipient = nextMonetization.walletAddress?.trim();
+		if (!checkValidAddress(primaryRecipient || null)) {
+			return `Main recipient address must be a valid wallet address.`;
+		}
 
 		for (const token of tokens) {
 			if (!token.symbol?.trim()) {
@@ -477,6 +529,9 @@ export default function Tips() {
 			}
 			if (token.type === 'AO' && !token.processId) {
 				return `Each AO token needs a valid 43-character process ID.`;
+			}
+			if (token.recipientAddress?.trim() && !checkValidAddress(token.recipientAddress.trim())) {
+				return `Token recipient address must be a valid wallet address.`;
 			}
 		}
 
@@ -625,8 +680,8 @@ export default function Tips() {
 							{hasMonetization && (
 								<S.Summary>
 									<p>
-										<b>{`${totalReceived} ${tokenSymbol} `}</b>
-										{language.received}
+										<b>{totalUsdReceived}</b>
+										{' Total USD Received'}
 									</p>
 								</S.Summary>
 							)}
@@ -636,6 +691,12 @@ export default function Tips() {
 									activeOption={monetization.enabled ? 'On' : 'Off'}
 									handleToggle={handleToggle}
 									disabled={!canEdit}
+								/>
+								<Button
+									type={'alt1'}
+									label={tipTokens.length >= MAX_TIP_TOKENS ? 'Max 3 tokens' : 'Add Token'}
+									handlePress={addTipToken}
+									disabled={fieldsDisabled || tipTokens.length >= MAX_TIP_TOKENS}
 								/>
 							</S.ConfigToggle>
 						</>,
@@ -671,11 +732,53 @@ export default function Tips() {
 								const selectedPresetId = matchedPreset ? getTokenOptionId(matchedPreset) : presetOptions[0].id;
 								const selectedPresetOption =
 									presetOptions.find((option) => option.id === selectedPresetId) || presetOptions[0];
+								const groupKey = getTokenGroupKey(token);
+								const totals = tokenTotalsByKey.get(groupKey);
+								const receivedAmount = totals
+									? formatAmountDisplay(fromBaseUnits(totals.total.toString(), totals.decimals))
+									: '0';
+								const receivedSymbol = totals?.symbol || token.tokenSymbol || 'AR';
+								const mainRecipient = monetization.walletAddress?.trim() || '';
+								const customRecipientEnabled = token.recipientAddress !== undefined;
+								const tokenRecipient = customRecipientEnabled ? token.recipientAddress?.trim() || '' : mainRecipient;
+								const checkboxLabel = `Change ${(token.tokenType || 'AR').toUpperCase()} recipient address`;
 
 								return (
-									<S.ConfigForm key={`tip-token-${index}`}>
-										<div className="row">
+									<S.TokenGroup key={`tip-token-${index}`}>
+										<div className="token-group-header">
 											<span className="field-label">{`Tip Token ${index + 1}`}</span>
+											<span className="token-received">{`${receivedAmount} ${receivedSymbol} received`}</span>
+										</div>
+										<div className="token-group-body">
+											<div className="token-recipient-field">
+												<FormField
+													label={'Receipient Address'}
+													value={tokenRecipient}
+													onChange={(e: any) => updateTipToken(index, { recipientAddress: e.target.value })}
+													invalid={{ status: false, message: null }}
+													disabled={fieldsDisabled || !customRecipientEnabled}
+													hideErrorMessage
+													noMargin
+												/>
+											</div>
+											<div className="token-select-field">
+												<Select
+													label={'Token'}
+													activeOption={selectedPresetOption}
+													setActiveOption={(option) => {
+														const preset = TIP_TOKEN_OPTIONS.find((entry) => getTokenOptionId(entry) === option.id);
+														if (!preset) return;
+														updateTipToken(index, {
+															tokenType: preset.tokenType,
+															tokenAddress: preset.tokenAddress,
+															tokenSymbol: preset.tokenSymbol,
+															tokenDecimals: DEFAULT_TOKEN_DECIMALS,
+														});
+													}}
+													options={presetOptions}
+													disabled={fieldsDisabled}
+												/>
+											</div>
 											{tipTokens.length > 1 && (
 												<Button
 													type={'alt4'}
@@ -685,40 +788,32 @@ export default function Tips() {
 												/>
 											)}
 										</div>
-										<S.Forms>
-											<Select
-												label={'Token'}
-												activeOption={selectedPresetOption}
-												setActiveOption={(option) => {
-													const preset = TIP_TOKEN_OPTIONS.find((entry) => getTokenOptionId(entry) === option.id);
-													if (!preset) return;
-													updateTipToken(index, {
-														tokenType: preset.tokenType,
-														tokenAddress: preset.tokenAddress,
-														tokenSymbol: preset.tokenSymbol,
-														tokenDecimals: DEFAULT_TOKEN_DECIMALS,
-													});
-												}}
-												options={presetOptions}
-												disabled={fieldsDisabled}
-											/>
-										</S.Forms>
-									</S.ConfigForm>
+										<div className="token-recipient-toggle">
+											<div className="token-checkbox-line">
+												<Checkbox
+													checked={customRecipientEnabled}
+													handleSelect={() => {
+														if (customRecipientEnabled) {
+															updateTipToken(index, { recipientAddress: undefined });
+															return;
+														}
+														updateTipToken(index, { recipientAddress: mainRecipient });
+													}}
+													disabled={fieldsDisabled}
+												/>
+												<span>{checkboxLabel}</span>
+											</div>
+										</div>
+									</S.TokenGroup>
 								);
 							})}
 
 							<div className="row">
 								<Button
-									type={'alt2'}
-									label={tipTokens.length >= MAX_TIP_TOKENS ? 'Max 3 tokens' : 'Add Token'}
-									handlePress={addTipToken}
-									disabled={fieldsDisabled || tipTokens.length >= MAX_TIP_TOKENS}
-								/>
-								<Button
-									type={'primary'}
+									type={'alt1'}
 									label={language.save}
 									handlePress={() => saveMonetization(monetization)}
-									disabled={!canEdit}
+									disabled={!canEdit || !hasPendingChanges || savingMonetization}
 								/>
 							</div>
 						</S.ConfigForm>
@@ -826,9 +921,7 @@ export default function Tips() {
 											{paginatedTips.map((row) => (
 												<tr key={row.id}>
 													<td>
-														{`${formatAmountDisplay(row.amount || row.amountAr || '0')} ${
-															row.tokenSymbol || tokenSymbol
-														}`}
+														{`${formatAmountDisplay(row.amount || row.amountAr || '0')} ${row.tokenSymbol || 'AR'}`}
 														{row.usdValue && (
 															<span
 																style={{

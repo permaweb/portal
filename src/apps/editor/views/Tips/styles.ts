@@ -155,7 +155,90 @@ export const Forms = styled.div`
 	}
 `;
 
-export const ConfigToggle = styled.div``;
+export const ConfigToggle = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 10px;
+`;
+
+export const TokenGroup = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 12px;
+	border: 1px solid ${(props) => props.theme.colors.border.alt1};
+	border-radius: ${STYLING.dimensions.radius.alt1};
+	background: ${(props) => props.theme.colors.container.alt1.background};
+
+	.token-group-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+
+	.token-group-body {
+		display: flex;
+		align-items: flex-end;
+		gap: 10px;
+	}
+
+	.token-recipient-field {
+		flex: 1 1 52%;
+	}
+
+	.token-select-field {
+		flex: 1 1 38%;
+	}
+
+	.token-received {
+		color: ${(props) => props.theme.colors.font.alt2};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.token-recipient-toggle {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding-top: 6px;
+		border-top: 1px dashed ${(props) => props.theme.colors.border.alt1};
+	}
+
+	.token-checkbox-line {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+
+		span {
+			color: ${(props) => props.theme.colors.font.alt1};
+			font-size: ${(props) => props.theme.typography.size.xxSmall};
+			font-weight: ${(props) => props.theme.typography.weight.bold};
+			font-family: ${(props) => props.theme.typography.family.primary};
+			text-transform: uppercase;
+		}
+	}
+
+	@media (max-width: ${STYLING.cutoffs.initial}) {
+		.token-group-body {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.token-recipient-field,
+		.token-select-field {
+			flex: 1 1 auto;
+		}
+
+		.token-group-header {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+	}
+`;
 
 export const Info = styled.div`
 	width: fit-content;

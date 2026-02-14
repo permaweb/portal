@@ -469,6 +469,7 @@ export type TipTokenConfig = {
 	tokenSymbol?: string;
 	tokenDecimals?: number;
 	tokenType?: 'AR' | 'AO';
+	recipientAddress?: string;
 };
 
 export type TipRow = {
@@ -487,4 +488,5 @@ export type TipRow = {
 	tokenDecimals?: number;
 	tokenProcess?: string;
 	tokenType?: 'AR' | 'AO';
+	toAddress?: string;
 };

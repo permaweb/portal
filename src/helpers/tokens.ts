@@ -7,6 +7,7 @@ export type TipToken = {
 	symbol: string;
 	decimals: number;
 	processId?: string;
+	recipientAddress?: string;
 };
 
 export type ParsedTipAmount = {
@@ -33,6 +34,7 @@ const toTokenConfig = (token: TipToken): TipTokenConfig => ({
 	tokenAddress: token.type === 'AR' ? 'AR' : token.processId || '',
 	tokenSymbol: token.symbol,
 	tokenDecimals: token.decimals,
+	recipientAddress: token.recipientAddress?.trim() || undefined,
 });
 
 const normalizeSingleTokenConfig = (config?: TipTokenConfig | null): TipToken => {
@@ -51,6 +53,7 @@ const normalizeSingleTokenConfig = (config?: TipTokenConfig | null): TipToken =>
 			type: 'AR',
 			symbol: config.tokenSymbol?.trim() || 'AR',
 			decimals,
+			recipientAddress: config.recipientAddress?.trim() || undefined,
 		};
 	}
 
@@ -60,6 +63,7 @@ const normalizeSingleTokenConfig = (config?: TipTokenConfig | null): TipToken =>
 		symbol: config.tokenSymbol?.trim() || 'AO',
 		decimals: aoDecimals,
 		processId: isProbablyProcessId(tokenAddress) ? tokenAddress : undefined,
+		recipientAddress: config.recipientAddress?.trim() || undefined,
 	};
 };
 
@@ -81,9 +85,15 @@ export function normalizeTipTokens(monetization?: MonetizationConfig | null): Ti
 
 	const normalized = sourceList.map((entry) => normalizeSingleTokenConfig(entry));
 	const unique = normalized.filter((token, index, arr) => {
-		const key = `${token.type}:${token.symbol}:${token.decimals}:${token.processId || ''}`;
+		const key = `${token.type}:${token.symbol}:${token.decimals}:${token.processId || ''}:${
+			token.recipientAddress || ''
+		}`;
 		return (
-			index === arr.findIndex((item) => `${item.type}:${item.symbol}:${item.decimals}:${item.processId || ''}` === key)
+			index ===
+			arr.findIndex(
+				(item) =>
+					`${item.type}:${item.symbol}:${item.decimals}:${item.processId || ''}:${item.recipientAddress || ''}` === key
+			)
 		);
 	});
 
