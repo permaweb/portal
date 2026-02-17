@@ -126,7 +126,9 @@ export const POST_PREVIEW_MINIMAL = {
 	type: 'post-preview',
 	layout: {
 		direction: 'column',
-		gap: '10px',
+		gap: '40',
+		padding: '0',
+		paddingTop: '40px',
 		topLine: true,
 	},
 	rows: [
