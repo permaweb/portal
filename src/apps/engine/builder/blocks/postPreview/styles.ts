@@ -54,7 +54,26 @@ export const Container = styled.div<{ $layout: ContainerLayout; $portalLayout?: 
 		`}
 `;
 
-export const Categories = styled.div<{ $layout?: ElementLayout }>`
+export const Row = styled.div<{ $layout?: ContainerLayout }>`
+	display: flex;
+	gap: ${(props) => props.$layout?.gap || '20px'};
+	width: 100%;
+	align-items: stretch;
+
+	@media (max-width: ${BREAKPOINTS.desktop}) {
+		flex-direction: column;
+	}
+`;
+
+export const Column = styled.div`
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+`;
+
+export const Categories = styled.div<{ $layout?: ElementLayout; $isFirst?: boolean }>`
 	display: ${(props) => props.$layout?.display || 'flex'};
 	align-items: center;
 	font-size: 12px;
@@ -62,24 +81,22 @@ export const Categories = styled.div<{ $layout?: ElementLayout }>`
 	user-select: none;
 
 	${(props) =>
-		props.$layout?.position === 'absolute' &&
+		(props.$layout?.showBackground !== 'false' || props.$layout?.position === 'absolute') &&
 		css`
-			position: absolute;
-			top: 0px;
-			left: 0px;
 			background-color: rgba(var(--color-background), 1);
 			padding: 5px 15px 4px;
-			border-radius: 0 0 0 var(--border-radius);
+			border-radius: var(--border-radius);
 			filter: invert(1);
 		`}
 
 	${(props) =>
-		!props.$layout?.position &&
+		(props.$layout?.showBackground !== 'false' || props.$layout?.position === 'absolute') &&
+		props.$isFirst &&
 		css`
-			order: 999;
-			margin: auto -20px -20px -20px;
-			padding: 6px 20px;
-			background-image: linear-gradient(to right, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			border-radius: 0 0 0 var(--border-radius);
 		`}
 `;
 

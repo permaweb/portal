@@ -17,7 +17,7 @@ export const ToolbarWrapper = styled.div<{ navWidth: number; hasBodyOverflow: bo
 	position: fixed;
 	top: ${STYLING.dimensions.nav.height};
 	left: ${(props) => `${props.navWidth}px`};
-	z-index: 1;
+	z-index: 10;
 	background: ${(props) => props.theme.colors.view.background};
 	border: 1px solid ${(props) => props.theme.colors.view.background};
 	padding: 10px 20px 15px 30px;
@@ -125,7 +125,7 @@ export const Element = styled.div<{ blockEditMode: boolean; direction: string }>
 export const PreviewContainer = styled.div`
 	flex: 1;
 	min-width: 0;
-	max-width: 700px;
+	max-width: 960px;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
 		flex: none;
@@ -259,6 +259,12 @@ export const BlockRow = styled.div`
 	align-items: stretch;
 `;
 
+export const InlineGroupWrapper = styled.div`
+	width: 100%;
+	display: block;
+	align-self: stretch;
+`;
+
 export const BlockDropZone = styled.div<{ $isActive?: boolean; $isDraggingOver?: boolean }>`
 	height: ${(props) => (props.$isActive ? 'auto' : '0')};
 	min-height: ${(props) => (props.$isActive ? '20px' : '0')};
@@ -280,6 +286,7 @@ export const BlockDropZone = styled.div<{ $isActive?: boolean; $isDraggingOver?:
 
 export const ColumnDropZone = styled.div<{ $isActive?: boolean; $isDraggingOver?: boolean }>`
 	width: ${(props) => (props.$isActive ? '50px' : '0')};
+	flex-shrink: 0;
 	align-self: stretch;
 	opacity: ${(props) => (props.$isActive ? 1 : 0)};
 	overflow: hidden;
@@ -323,10 +330,12 @@ export const EdgeDropZone = styled.div<{
 	overflow: hidden;
 `;
 
-export const BlockWrapper = styled.div<{ $isDragging?: boolean }>`
-	width: 100%;
+export const BlockWrapper = styled.div<{ $isDragging?: boolean; $inline?: boolean }>`
+	flex: 1;
+	min-width: 0;
 	user-select: none;
 	opacity: ${(props) => (props.$isDragging ? 0.8 : 1)};
+	z-index: 1;
 `;
 
 export const Block = styled.div<{ $isSelected?: boolean; $compact?: boolean }>`
@@ -339,6 +348,64 @@ export const Block = styled.div<{ $isSelected?: boolean; $compact?: boolean }>`
 	border-radius: ${STYLING.dimensions.radius.alt2};
 	overflow: hidden;
 	cursor: pointer;
+`;
+
+export const InlineGroup = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	padding: 6px;
+	width: 100%;
+	flex: 0 0 100%;
+	align-self: stretch;
+	min-width: 100%;
+	box-sizing: border-box;
+	border-radius: ${STYLING.dimensions.radius.alt2};
+	background: ${(props) => props.theme.colors.container.alt2.background};
+	border: 1px dashed ${(props) => props.theme.colors.border.primary};
+	margin-bottom: 6px;
+
+	${BlockRow} {
+		flex: 1 1 0;
+		min-width: 0;
+		position: relative;
+	}
+
+	${Block} {
+		width: 100%;
+	}
+`;
+
+export const InlineDropZone = styled.div<{ $isActive?: boolean; $isDraggingOver?: boolean; $side: 'left' | 'right' }>`
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	${(props) => (props.$side === 'left' ? 'left: 0;' : 'right: 0;')}
+	width: 50%;
+	height: 100%;
+	min-height: 100%;
+	visibility: ${(props) => (props.$isActive ? 'visible' : 'hidden')};
+	opacity: ${(props) => (props.$isActive ? 1 : 0)};
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: ${STYLING.dimensions.radius.alt2};
+	z-index: 3;
+	pointer-events: ${(props) => (props.$isActive ? 'auto' : 'none')};
+	background: ${(props) =>
+		props.$isDraggingOver
+			? props.theme.colors.button.alt1.background + '20'
+			: props.$isActive
+			? 'rgba(255, 255, 255, 0.08)'
+			: 'transparent'};
+	border: ${(props) =>
+		props.$isDraggingOver
+			? `2px solid ${props.theme.colors.button.alt1.background}`
+			: props.$isActive
+			? `1px dashed ${props.theme.colors.border.primary}`
+			: 'none'};
+	transition: all 150ms ease;
 `;
 
 export const BlockHeader = styled.div`
@@ -809,6 +876,13 @@ export const PreviewColumn = styled.div`
 	gap: 10px;
 `;
 
+export const PreviewBody = styled.div`
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+`;
+
 export const PreviewThumbnail = styled.div`
 	img {
 		width: 100%;
@@ -853,7 +927,7 @@ export const PreviewDate = styled.div`
 	opacity: 0.6;
 `;
 
-export const PreviewCategories = styled.div<{ $showBackground?: boolean }>`
+export const PreviewCategories = styled.div<{ $showBackground?: boolean; $isFirstRow?: boolean }>`
 	display: flex;
 	align-items: center;
 	gap: 4px;
@@ -863,12 +937,19 @@ export const PreviewCategories = styled.div<{ $showBackground?: boolean }>`
 	${(props) =>
 		props.$showBackground &&
 		css`
-			position: absolute;
-			top: 0;
-			left: 0;
 			background-color: rgba(var(--color-background), 1);
 			filter: invert(1);
 			padding: 5px 15px 4px;
+			border-radius: var(--border-radius);
+		`}
+
+	${(props) =>
+		props.$showBackground &&
+		props.$isFirstRow &&
+		css`
+			position: absolute;
+			top: 0;
+			left: 0;
 			border-radius: 0 0 0 var(--border-radius);
 		`}
 

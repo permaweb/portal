@@ -22,7 +22,8 @@ type PostPreviewTemplate = {
 		direction?: string;
 		gap?: string;
 	};
-	content: PostPreviewElement[];
+	content?: PostPreviewElement[];
+	rows?: PostPreviewRow[];
 };
 
 type PostPreviewElement = {
@@ -30,6 +31,16 @@ type PostPreviewElement = {
 	type: string;
 	layout?: any;
 	content?: any;
+};
+
+type PostPreviewColumn = {
+	id?: string;
+	blocks: PostPreviewElement[];
+};
+
+type PostPreviewRow = {
+	id?: string;
+	columns: PostPreviewColumn[];
 };
 
 interface PostPreviewDynamicProps {
@@ -54,13 +65,54 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 	const displayName = isPortalCreator ? portal?.name : profile?.displayName;
 	const displayThumbnail = isPortalCreator ? portal?.logo : profile?.thumbnail;
 
+	const normalizeElement = (element: PostPreviewElement | string): PostPreviewElement => {
+		if (typeof element === 'string') {
+			return { type: element, id: element };
+		}
+
+		if (element.type === 'body' || element.type === 'meta') {
+			const children = (element.content || []).map((child: PostPreviewElement | string) => normalizeElement(child));
+			return { ...element, content: children };
+		}
+
+		return element;
+	};
+
+	const getRows = (target: PostPreviewTemplate): PostPreviewRow[] => {
+		if (Array.isArray(target.rows) && target.rows.length > 0) {
+			return target.rows.map((row) => ({
+				...row,
+				columns: (row.columns || []).map((col) => ({
+					...col,
+					blocks: (col.blocks || []).map((block) => normalizeElement(block)),
+				})),
+			}));
+		}
+
+		if (Array.isArray(target.content) && target.content.length > 0) {
+			return [
+				{
+					id: 'row-legacy',
+					columns: [
+						{
+							id: 'col-legacy',
+							blocks: target.content.map((block) => normalizeElement(block)),
+						},
+					],
+				},
+			];
+		}
+
+		return [];
+	};
+
 	const renderElement = (element: PostPreviewElement, index: number): React.ReactNode => {
 		switch (element.type) {
 			case 'categories': {
 				const maxCount = element.layout?.maxCount || 1;
 				const visibleCategories = post?.metadata?.categories?.slice(0, maxCount) || [];
 				return (
-					<S.Categories key={index} $layout={element.layout}>
+					<S.Categories key={index} $layout={element.layout} $isFirst={index === 0}>
 						{post ? (
 							<>
 								{visibleCategories.map((category: any, catIndex: number) => (
@@ -120,6 +172,15 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 				);
 
 			case 'description':
+				if (!post?.metadata?.description) return null;
+				if (element.layout?.maxChars) {
+					const max = Number(element.layout.maxChars);
+					if (!Number.isNaN(max) && max > 0) {
+						const text = post.metadata.description;
+						const trimmed = text.length > max ? `${text.slice(0, Math.max(0, max - 3))}...` : text;
+						return <S.Description key={index}>{trimmed}</S.Description>;
+					}
+				}
 				return <S.Description key={index}>{post?.metadata?.description}</S.Description>;
 
 			case 'author': {
@@ -230,7 +291,7 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 				return (
 					<S.Body key={index} $layout={element.layout}>
 						{element.content?.map((child: PostPreviewElement | string, childIndex: number) =>
-							typeof child === 'string' ? null : renderElement(child as PostPreviewElement, childIndex)
+							renderElement(normalizeElement(child as PostPreviewElement | string), childIndex)
 						)}
 					</S.Body>
 				);
@@ -255,9 +316,19 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 		}
 	};
 
+	const rows = getRows(template);
+
 	return (
 		<S.Container $layout={template.layout} $portalLayout={Layout}>
-			{template.content.map((element: PostPreviewElement, index: number) => renderElement(element, index))}
+			{rows.map((row, rowIndex) => (
+				<S.Row key={row.id || rowIndex} $layout={template.layout}>
+					{row.columns.map((col, colIndex) => (
+						<S.Column key={col.id || colIndex}>
+							{col.blocks.map((element, index) => renderElement(element, index))}
+						</S.Column>
+					))}
+				</S.Row>
+			))}
 		</S.Container>
 	);
 }

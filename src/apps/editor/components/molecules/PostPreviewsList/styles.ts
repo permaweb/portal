@@ -51,47 +51,91 @@ export const TemplatePreview = styled.div`
 	margin-bottom: 12px;
 	min-height: 80px;
 `;
+export const PreviewLayout = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+`;
 
-export const PreviewPlaceholder = styled.div`
+export const PreviewTopLine = styled.div`
+	height: 2px;
+	width: 100%;
+	background: ${(props) => props.theme.colors.border.primary};
+	border-radius: 999px;
+	opacity: 0.6;
+`;
+
+export const PreviewRow = styled.div`
 	display: flex;
 	gap: 10px;
 `;
 
-export const PlaceholderThumbnail = styled.div<{ $show?: boolean }>`
-	width: 60px;
-	height: 45px;
-	background: ${(props) => props.theme.colors.border.primary};
-	border-radius: 4px;
-	flex-shrink: 0;
-	display: ${(props) => (props.$show ? 'block' : 'none')};
-`;
-
-export const PlaceholderContent = styled.div`
+export const PreviewColumn = styled.div`
 	flex: 1;
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
+	min-width: 0;
 `;
 
-export const PlaceholderTitle = styled.div`
-	width: 70%;
-	height: 12px;
+export const PreviewGroup = styled.div<{ $direction?: string }>`
+	display: flex;
+	flex-direction: ${(props) => (props.$direction === 'row' ? 'row' : 'column')};
+	gap: 6px;
+	align-items: ${(props) => (props.$direction === 'row' ? 'center' : 'stretch')};
+`;
+
+export const PreviewBlock = styled.div<{ $variant?: string }>`
+	border-radius: 3px;
 	background: ${(props) => props.theme.colors.border.primary};
-	border-radius: 2px;
-`;
+	opacity: 0.9;
+	width: 100%;
 
-export const PlaceholderMeta = styled.div`
-	width: 40%;
-	height: 8px;
-	background: ${(props) => props.theme.colors.border.alt1};
-	border-radius: 2px;
-`;
+	${(props) =>
+		props.$variant === 'title' &&
+		`
+		height: 12px;
+		width: 70%;
+	`}
 
-export const PlaceholderDescription = styled.div`
-	width: 90%;
-	height: 8px;
-	background: ${(props) => props.theme.colors.border.alt1};
-	border-radius: 2px;
+	${(props) =>
+		props.$variant === 'description' &&
+		`
+		height: 8px;
+		width: 90%;
+	`}
+
+	${(props) =>
+		props.$variant === 'meta' &&
+		`
+		height: 8px;
+		width: 45%;
+	`}
+
+	${(props) =>
+		props.$variant === 'thumbnail' &&
+		`
+		height: auto;
+		width: 100%;
+		aspect-ratio: 16 / 9;
+	`}
+
+	${(props) =>
+		props.$variant === 'categories' &&
+		`
+		position: relative;
+		height: 10px;
+		width: 55%;
+		border-radius: 999px;
+		background: ${props.theme.colors.border.alt1};
+	`}
+
+	${(props) =>
+		(props.$variant === 'line' || !props.$variant) &&
+		`
+		height: 8px;
+		width: 60%;
+	`}
 `;
 
 export const TemplateInfo = styled.div`

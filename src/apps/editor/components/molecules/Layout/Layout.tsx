@@ -169,12 +169,18 @@ export default function Layout() {
 	// Update local state when portal data changes (only if user hasn't made a selection)
 	React.useEffect(() => {
 		if (portalProvider.current?.layout && !originalLayoutSet.current) {
-			setOriginalLayout(portalProvider.current.layout);
+			setOriginalLayout({
+				...portalProvider.current.layout,
+				postPreviews: portalProvider.current.layout?.postPreviews ?? {},
+			});
 			originalLayoutSet.current = true;
 		}
 		if (hasUserSelected.current) return;
 		if (portalProvider.current?.layout) {
-			setLayout(portalProvider.current.layout);
+			setLayout({
+				...portalProvider.current.layout,
+				postPreviews: portalProvider.current.layout?.postPreviews ?? {},
+			});
 		}
 		if (portalProvider.current?.pages) {
 			setPages(portalProvider.current.pages);
@@ -204,6 +210,19 @@ export default function Layout() {
 
 	function handleLayoutOptionChange(optionName: string) {
 		hasUserSelected.current = true;
+		const existingPostPreviews = portalProvider.current?.layout?.postPreviews ?? layout?.postPreviews ?? {};
+		const layoutValue = optionName.toLowerCase();
+		const updateFeedLayouts = (node: any): any => {
+			if (!node) return node;
+			if (Array.isArray(node)) return node.map((item) => updateFeedLayouts(item));
+			if (node.type === 'feed') {
+				return { ...node, layout: layoutValue };
+			}
+			if (node.content && Array.isArray(node.content)) {
+				return { ...node, content: node.content.map((item: any) => updateFeedLayouts(item)) };
+			}
+			return node;
+		};
 		if (themes && Array.isArray(themes)) {
 			const updatedThemes = themes.map((theme: any) => {
 				if (!theme.active) return theme;
@@ -217,13 +236,15 @@ export default function Layout() {
 		}
 
 		if (optionName === 'blog') {
-			setLayout(LAYOUT.BLOG);
+			setLayout({ ...LAYOUT.BLOG, postPreviews: existingPostPreviews });
+			if (pages) setPages(updateFeedLayouts(pages));
 		} else if (optionName === 'journal') {
-			setLayout(LAYOUT.JOURNAL);
+			setLayout({ ...LAYOUT.JOURNAL, postPreviews: existingPostPreviews });
+			if (pages) setPages(updateFeedLayouts(pages));
 		} else if (optionName === 'documentation') {
-			setLayout(LAYOUT.DOCUMENTATION);
+			setLayout({ ...LAYOUT.DOCUMENTATION, postPreviews: existingPostPreviews });
+			if (pages) setPages(updateFeedLayouts(pages));
 		} else {
-			const layoutValue = optionName.toLowerCase();
 			const updatedPages = {
 				...pages,
 				Feed: {
@@ -255,9 +276,13 @@ export default function Layout() {
 			setLoading(true);
 
 			const updateData: any = {};
+			const layoutWithPreviews = {
+				...(layout || {}),
+				postPreviews: layout?.postPreviews ?? portalProvider.current?.layout?.postPreviews ?? {},
+			};
 
-			if (JSON.stringify(originalLayout) !== JSON.stringify(layout)) {
-				updateData.Layout = permawebProvider.libs.mapToProcessCase(layout);
+			if (JSON.stringify(originalLayout) !== JSON.stringify(layoutWithPreviews)) {
+				updateData.Layout = permawebProvider.libs.mapToProcessCase(layoutWithPreviews);
 			}
 			if (JSON.stringify(originalPages) !== JSON.stringify(pages)) {
 				updateData.Pages = permawebProvider.libs.mapToProcessCase(pages);
