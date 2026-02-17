@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const Comment = styled.div<{ $level: number; $status?: string }>`
+export const Comment = styled.div<{ $level: number; $status?: string; $isPaid?: boolean }>`
 	position: relative;
 	display: flex;
 	gap: 10px;
@@ -12,21 +12,21 @@ export const Comment = styled.div<{ $level: number; $status?: string }>`
 	box-shadow: ${(props) =>
 		props?.$status === 'active' || !props?.$status ? '0 4px 10px rgba(0, 0, 0, 0.4)' : '0 1px 4px rgba(0, 0, 0, 0.4)'};
 
-	${(props) =>
-		props?.$status !== 'active' &&
-		props?.$status &&
-		`
-		&::before {
-			content: '';
-			position: absolute;
-			left: 0;
-			top: 0;
-			bottom: 0;
-			width: 4px;
-			background: #e74c3c;
-			border-radius: var(--border-radius) 0 0 var(--border-radius);
-		}
-	`}
+	&::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 4px;
+		border-radius: var(--border-radius) 0 0 var(--border-radius);
+		${(props) =>
+			props?.$status !== 'active' && props?.$status
+				? `background: #e74c3c;`
+				: props?.$isPaid
+				? `background: #f39c12;`
+				: `background: transparent;`}
+	}
 `;
 
 export const Content = styled.div`
@@ -262,6 +262,30 @@ export const PinnedIndicator = styled.div`
 		width: 14px;
 		height: 14px;
 		fill: #2ecc71;
+	}
+`;
+
+export const PaidIndicator = styled.div`
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	background: rgba(243, 156, 18, 0.2);
+	color: #f39c12;
+	padding: 2px 8px;
+	border-radius: var(--border-radius);
+	font-size: 11px;
+	font-weight: 600;
+
+	div {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	svg {
+		width: 14px;
+		height: 14px;
+		fill: #f39c12;
 	}
 `;
 

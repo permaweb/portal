@@ -73,6 +73,12 @@ export type CommentRulesType = {
 	profileAgeRequired?: number;
 	mutedWords?: string[];
 	requireProfileThumbnail?: boolean;
+	enableTipping?: boolean;
+	requireTipToComment?: boolean;
+	tipAssetId?: string;
+	minTipAmount?: string;
+	showPaidTab?: boolean;
+	highlightPaidComments?: boolean;
 };
 
 export type PortalAssetPostReduxType = {

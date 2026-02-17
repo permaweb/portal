@@ -386,3 +386,41 @@ export const RuleError = styled.div`
 	align-items: center;
 	gap: 8px;
 `;
+
+export const TipAttachment = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 10px;
+	background: rgba(243, 156, 18, 0.1);
+	border: 1px solid rgba(243, 156, 18, 0.25);
+	border-radius: var(--border-radius);
+	margin-top: 6px;
+`;
+
+export const TipInput = styled.input`
+	flex: 1;
+	background: rgba(var(--color-text), 0.08);
+	border: 1px solid rgba(243, 156, 18, 0.3);
+	border-radius: var(--border-radius);
+	color: rgba(var(--color-text), 1);
+	font-size: var(--font-size-normal);
+	padding: 6px 10px;
+	outline: none;
+	min-width: 0;
+
+	&::placeholder {
+		color: rgba(var(--color-text), 0.4);
+	}
+
+	&:focus {
+		border-color: #f39c12;
+	}
+`;
+
+export const TipRequired = styled.span`
+	color: #f39c12;
+	font-size: 11px;
+	font-weight: 600;
+	white-space: nowrap;
+`;

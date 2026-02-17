@@ -91,6 +91,13 @@ export const Tag = styled.div`
 	}
 `;
 
+export const SectionDivider = styled.hr`
+	width: 100%;
+	border: none;
+	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
+	margin: 0;
+`;
+
 export const HeaderWrapper = styled.div`
 	width: 100%;
 	display: flex;
