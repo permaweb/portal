@@ -59,7 +59,7 @@ export const ContentWrapper = styled.div`
 	width: 100%;
 	max-width: 1600px;
 	margin: 0 auto;
-	padding: 0 20px 24px 20px;
+	padding: 40px 20px 24px 20px;
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
@@ -87,7 +87,7 @@ export const Column = styled.div`
 export const Section = styled.div``;
 
 export const SectionHeader = styled.div`
-	padding: 12px 15px;
+	padding: 12px 0;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -103,13 +103,11 @@ export const SectionTitle = styled.p`
 `;
 
 export const SectionBody = styled.div`
-	padding: 20px;
+	padding: 20px 0;
 `;
 
 export const PanelInner = styled.div`
 	width: 100%;
-	max-width: 700px;
-	margin: 0 auto;
 	display: flex;
 	flex-direction: column;
 	gap: 18px;
