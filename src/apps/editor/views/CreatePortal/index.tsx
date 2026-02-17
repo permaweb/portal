@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { Fonts } from 'editor/components/molecules/Fonts';
@@ -16,6 +16,7 @@ import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Select } from 'components/atoms/Select';
 import { Tabs } from 'components/atoms/Tabs';
+import { LanguageSelect } from 'components/molecules/LanguageSelect';
 import { ICONS, LAYOUT, PAGES, PORTAL_DATA, PORTAL_PATCH_MAP, PORTAL_ROLES, THEME, URLS } from 'helpers/config';
 import { THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
 import type { PortalHeaderType, SelectOptionType } from 'helpers/types';
@@ -27,6 +28,7 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
+import { WalletConnect } from 'wallet/WalletConnect';
 
 import * as S from './styles';
 
@@ -402,103 +404,128 @@ export default function CreatePortal() {
 	if (creatingNew) {
 		return (
 			<S.Wrapper>
-				<ViewHeader header={language?.createPortal || 'Create Portal'} />
-				<S.Body>
-					<S.Column>
-						<S.Section className={'border-wrapper-alt2'}>
-							<S.SectionHeader>
-								<S.SectionTitle>{language?.importFromWordPress || 'Import from WordPress'}</S.SectionTitle>
-							</S.SectionHeader>
-							<S.SectionBody>
-								<S.PanelInner>
-									<WordPressImport
-										open
-										inline
-										handleClose={() => setImportDraft(null)}
-										createPortal
-										closeOnComplete={false}
-										showImportingStage={false}
-										portalName={name}
-										hidePreviewSubmit
-										onPortalNameChange={handleWordPressPortalNameChange}
-										onDraftChange={handleImportDraftChange}
-										importingMessage={'Preparing import data...'}
-									/>
-								</S.PanelInner>
-							</S.SectionBody>
-						</S.Section>
-					</S.Column>
-					<S.Column>
-						<S.Section className={'border-wrapper-alt2'}>
-							<S.SectionHeader>
-								<S.SectionTitle>{'Portal Details'}</S.SectionTitle>
-							</S.SectionHeader>
-							<S.SectionBody>
-								{!arProvider.walletAddress ? (
-									<WalletBlock />
-								) : (
+				<S.HeaderWrapper>
+					<S.HeaderContent>
+						<S.HeaderActionsWrapper>
+							<S.HeaderAction>
+								<Link to={URLS.docs}>{language?.helpCenter}</Link>
+							</S.HeaderAction>
+						</S.HeaderActionsWrapper>
+						<S.HeaderActionsWrapper>
+							<LanguageSelect />
+							<WalletConnect app={'editor'} />
+						</S.HeaderActionsWrapper>
+					</S.HeaderContent>
+				</S.HeaderWrapper>
+				<S.ContentWrapper>
+					<ViewHeader
+						header={language?.createPortal || 'Create Portal'}
+						actions={[
+							<Button
+								key={'return-home'}
+								type={'alt1'}
+								label={language?.returnHome || 'Return Home'}
+								handlePress={() => navigate(URLS.base)}
+							/>,
+						]}
+					/>
+					<S.Body>
+						<S.Column>
+							<S.Section>
+								<S.SectionHeader>
+									<S.SectionTitle>{language?.importFromWordPress || 'Import from WordPress'}</S.SectionTitle>
+								</S.SectionHeader>
+								<S.SectionBody>
 									<S.PanelInner>
-										<FormField
-											label={language?.name || 'Name'}
-											value={name}
-											onChange={(e: any) => setName(e.target.value)}
-											disabled={creating}
-											invalid={defaultValidation}
-											required
-											hideErrorMessage
+										<WordPressImport
+											open
+											inline
+											handleClose={() => setImportDraft(null)}
+											createPortal
+											closeOnComplete={false}
+											showImportingStage={false}
+											portalName={name}
+											hidePreviewSubmit
+											onPortalNameChange={handleWordPressPortalNameChange}
+											onDraftChange={handleImportDraftChange}
+											importingMessage={'Preparing import data...'}
 										/>
-										<S.MediaRow>
-											<S.MediaBlock>
-												<S.MediaTitle>{language?.logo || 'Logo'}</S.MediaTitle>
-												<Media portal={null} type={'logo'} onMediaUpload={setLogoId} hideActions />
-												<S.MediaInfo>{`${language?.recommended || 'Recommended'}: 500x280px (16:9)`}</S.MediaInfo>
-											</S.MediaBlock>
-											<S.IconMediaBlock>
-												<S.MediaTitle>{`${language?.icon || 'Icon'} (Favicon)`}</S.MediaTitle>
-												<Media portal={null} type={'icon'} onMediaUpload={setIconId} hideActions />
-												<S.MediaInfo>{`${language?.recommended || 'Recommended'}: 32x32px (1:1)`}</S.MediaInfo>
-											</S.IconMediaBlock>
-										</S.MediaRow>
-										<S.MediaBlock>
-											<S.MediaTitle>{language?.wallpaper || 'Wallpaper'}</S.MediaTitle>
-											<Media portal={null} type={'wallpaper'} onMediaUpload={setWallpaperId} hideActions />
-											<S.MediaInfo>{`${language?.recommended || 'Recommended'}: 1920x1080px (16:9)`}</S.MediaInfo>
-										</S.MediaBlock>
-										<div>
-											<S.MediaTitle>{language?.layout || 'Layout'}</S.MediaTitle>
-											<S.LayoutOptions>
-												{layoutOptions.map((option) => {
-													const active = option.name === selectedLayout;
-													return (
-														<S.LayoutOption
-															key={option.name}
-															$active={active}
-															onClick={() => setSelectedLayout(option.name)}
-														>
-															<S.LayoutOptionIcon $active={active}>
-																<img src={option.icon} alt={option.name} />
-															</S.LayoutOptionIcon>
-															<S.LayoutOptionLabel>{option.name}</S.LayoutOptionLabel>
-														</S.LayoutOption>
-													);
-												})}
-											</S.LayoutOptions>
-										</div>
-										<S.Actions>
-											<Button
-												type={'primary'}
-												label={hasImportDraft ? `Create Portal & Import` : language?.createPortal || 'Create Portal'}
-												handlePress={hasImportDraft ? handleCreateFromDraft : handleCreatePortal}
-												disabled={(!name && !importDraft?.data?.name) || creating}
-												loading={creating}
-											/>
-										</S.Actions>
 									</S.PanelInner>
-								)}
-							</S.SectionBody>
-						</S.Section>
-					</S.Column>
-				</S.Body>
+								</S.SectionBody>
+							</S.Section>
+						</S.Column>
+						<S.Column>
+							<S.Section>
+								<S.SectionHeader>
+									<S.SectionTitle>{'Portal Details'}</S.SectionTitle>
+								</S.SectionHeader>
+								<S.SectionBody>
+									{!arProvider.walletAddress ? (
+										<WalletBlock />
+									) : (
+										<S.PanelInner>
+											<FormField
+												label={language?.name || 'Name'}
+												value={name}
+												onChange={(e: any) => setName(e.target.value)}
+												disabled={creating}
+												invalid={defaultValidation}
+												required
+												hideErrorMessage
+											/>
+											<S.MediaRow>
+												<S.MediaBlock>
+													<S.MediaTitle>{language?.logo || 'Logo'}</S.MediaTitle>
+													<Media portal={null} type={'logo'} onMediaUpload={setLogoId} hideActions />
+													<S.MediaInfo>{`${language?.recommended || 'Recommended'}: 500x280px (16:9)`}</S.MediaInfo>
+												</S.MediaBlock>
+												<S.IconMediaBlock>
+													<S.MediaTitle>{`${language?.icon || 'Icon'} (Favicon)`}</S.MediaTitle>
+													<Media portal={null} type={'icon'} onMediaUpload={setIconId} hideActions />
+													<S.MediaInfo>{`${language?.recommended || 'Recommended'}: 32x32px (1:1)`}</S.MediaInfo>
+												</S.IconMediaBlock>
+											</S.MediaRow>
+											<S.MediaBlock>
+												<S.MediaTitle>{language?.wallpaper || 'Wallpaper'}</S.MediaTitle>
+												<Media portal={null} type={'wallpaper'} onMediaUpload={setWallpaperId} hideActions />
+												<S.MediaInfo>{`${language?.recommended || 'Recommended'}: 1920x1080px (16:9)`}</S.MediaInfo>
+											</S.MediaBlock>
+											<div>
+												<S.MediaTitle>{language?.layout || 'Layout'}</S.MediaTitle>
+												<S.LayoutOptions>
+													{layoutOptions.map((option) => {
+														const active = option.name === selectedLayout;
+														return (
+															<S.LayoutOption
+																key={option.name}
+																$active={active}
+																onClick={() => setSelectedLayout(option.name)}
+															>
+																<S.LayoutOptionIcon $active={active}>
+																	<img src={option.icon} alt={option.name} />
+																</S.LayoutOptionIcon>
+																<S.LayoutOptionLabel>{option.name}</S.LayoutOptionLabel>
+															</S.LayoutOption>
+														);
+													})}
+												</S.LayoutOptions>
+											</div>
+											<S.Actions>
+												<Button
+													type={'primary'}
+													label={hasImportDraft ? `Create & Import` : language?.create || 'Create'}
+													handlePress={hasImportDraft ? handleCreateFromDraft : handleCreatePortal}
+													disabled={(!name && !importDraft?.data?.name) || creating}
+													loading={creating}
+												/>
+											</S.Actions>
+										</S.PanelInner>
+									)}
+								</S.SectionBody>
+							</S.Section>
+						</S.Column>
+					</S.Body>
+				</S.ContentWrapper>
 			</S.Wrapper>
 		);
 	}
@@ -506,50 +533,89 @@ export default function CreatePortal() {
 	if (!portalReady) {
 		return (
 			<S.Wrapper>
-				<ViewHeader header={language?.createPortal || 'Create Portal'} />
-				<Loader message={`${language?.loadingPortal || 'Loading portal'}...`} />
+				<S.HeaderWrapper>
+					<S.HeaderContent>
+						<S.HeaderActionsWrapper>
+							<S.HeaderAction>
+								<Link to={URLS.docs}>{language?.helpCenter}</Link>
+							</S.HeaderAction>
+						</S.HeaderActionsWrapper>
+						<S.HeaderActionsWrapper>
+							<LanguageSelect />
+							<WalletConnect app={'editor'} />
+						</S.HeaderActionsWrapper>
+					</S.HeaderContent>
+				</S.HeaderWrapper>
+				<S.ContentWrapper>
+					<ViewHeader
+						header={language?.createPortal || 'Create Portal'}
+						actions={[
+							<Button
+								key={'return-home'}
+								type={'alt1'}
+								label={language?.returnHome || 'Return Home'}
+								handlePress={() => navigate(URLS.base)}
+							/>,
+						]}
+					/>
+					<Loader message={`${language?.loadingPortal || 'Loading portal'}...`} />
+				</S.ContentWrapper>
 			</S.Wrapper>
 		);
 	}
 
 	return (
 		<S.Wrapper>
-			<ViewHeader header={language?.createPortal || 'Create Portal'} />
-			<S.Body>
-				<S.Column>
-					<S.Section className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<S.SectionTitle>{language?.importFromWordPress || 'Import from WordPress'}</S.SectionTitle>
-						</S.SectionHeader>
-						<S.SectionBody>
-							<S.ImportRow>
-								<Select
-									label={'Import Option'}
-									activeOption={importOption}
-									setActiveOption={(option: SelectOptionType) => setImportOption(option)}
-									options={importOptions}
-									disabled={!portalProvider.current?.id}
-								/>
-							</S.ImportRow>
-							{importOption.id === 'wordpress' && portalProvider.current?.id ? (
-								<WordPressImport
-									open
-									inline
-									closeOnComplete={false}
-									title={language?.importFromWordPress || 'Import from WordPress'}
-									handleClose={() => setImportOption(importOptions[0])}
-									createPortal={false}
-									onImportComplete={(
-										data,
-										posts,
-										pages,
-										selectedCategories,
-										createCategories,
-										createTopics,
-										selectedTopics,
-										uploadedImageUrls
-									) =>
-										portalProvider.importWordPress(
+			<S.HeaderWrapper>
+				<S.HeaderContent>
+					<S.HeaderActionsWrapper>
+						<S.HeaderAction>
+							<Link to={URLS.docs}>{language?.helpCenter}</Link>
+						</S.HeaderAction>
+					</S.HeaderActionsWrapper>
+					<S.HeaderActionsWrapper>
+						<LanguageSelect />
+						<WalletConnect app={'editor'} />
+					</S.HeaderActionsWrapper>
+				</S.HeaderContent>
+			</S.HeaderWrapper>
+			<S.ContentWrapper>
+				<ViewHeader
+					header={language?.createPortal || 'Create Portal'}
+					actions={[
+						<Button
+							key={'return-home'}
+							type={'alt1'}
+							label={language?.returnHome || 'Return Home'}
+							handlePress={() => navigate(URLS.base)}
+						/>,
+					]}
+				/>
+				<S.Body>
+					<S.Column>
+						<S.Section>
+							<S.SectionHeader>
+								<S.SectionTitle>{language?.importFromWordPress || 'Import from WordPress'}</S.SectionTitle>
+							</S.SectionHeader>
+							<S.SectionBody>
+								<S.ImportRow>
+									<Select
+										label={'Import Option'}
+										activeOption={importOption}
+										setActiveOption={(option: SelectOptionType) => setImportOption(option)}
+										options={importOptions}
+										disabled={!portalProvider.current?.id}
+									/>
+								</S.ImportRow>
+								{importOption.id === 'wordpress' && portalProvider.current?.id ? (
+									<WordPressImport
+										open
+										inline
+										closeOnComplete={false}
+										title={language?.importFromWordPress || 'Import from WordPress'}
+										handleClose={() => setImportOption(importOptions[0])}
+										createPortal={false}
+										onImportComplete={(
 											data,
 											posts,
 											pages,
@@ -557,100 +623,111 @@ export default function CreatePortal() {
 											createCategories,
 											createTopics,
 											selectedTopics,
-											false,
-											uploadedImageUrls,
-											URLS.portalCreate(portalProvider.current?.id)
-										)
-									}
-								/>
-							) : (
-								<S.DisabledNote>
-									<p>{'Select WordPress to enable import.'}</p>
-								</S.DisabledNote>
-							)}
-						</S.SectionBody>
-					</S.Section>
+											uploadedImageUrls
+										) =>
+											portalProvider.importWordPress(
+												data,
+												posts,
+												pages,
+												selectedCategories,
+												createCategories,
+												createTopics,
+												selectedTopics,
+												false,
+												uploadedImageUrls,
+												URLS.portalCreate(portalProvider.current?.id)
+											)
+										}
+									/>
+								) : (
+									<S.DisabledNote>
+										<p>{'Select WordPress to enable import.'}</p>
+									</S.DisabledNote>
+								)}
+							</S.SectionBody>
+						</S.Section>
 
-					<S.Section className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<S.SectionTitle>{language?.name || 'Name'}</S.SectionTitle>
-						</S.SectionHeader>
-						<S.SectionBody>
-							<S.FormRow>
-								<FormField
-									label={language?.name || 'Name'}
-									value={name}
-									onChange={(e: any) => setName(e.target.value)}
-									disabled={nameSaving || !canUpdateMeta}
-									invalid={defaultValidation}
-									required
-									hideErrorMessage
-								/>
-								<Button
-									type={'alt1'}
-									label={language?.save || 'Save'}
-									handlePress={handleNameSave}
-									disabled={!name || nameSaving || !canUpdateMeta}
-									loading={nameSaving}
-								/>
-							</S.FormRow>
-						</S.SectionBody>
-					</S.Section>
+						<S.Section>
+							<S.SectionHeader>
+								<S.SectionTitle>{language?.name || 'Name'}</S.SectionTitle>
+							</S.SectionHeader>
+							<S.SectionBody>
+								<S.FormRow>
+									<FormField
+										label={language?.name || 'Name'}
+										value={name}
+										onChange={(e: any) => setName(e.target.value)}
+										disabled={nameSaving || !canUpdateMeta}
+										invalid={defaultValidation}
+										required
+										hideErrorMessage
+									/>
+									<Button
+										type={'alt1'}
+										label={language?.save || 'Save'}
+										handlePress={handleNameSave}
+										disabled={!name || nameSaving || !canUpdateMeta}
+										loading={nameSaving}
+									/>
+								</S.FormRow>
+							</S.SectionBody>
+						</S.Section>
 
-					<S.Section className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<S.SectionTitle>{language?.setup || 'Portal Setup'}</S.SectionTitle>
-						</S.SectionHeader>
-						<S.SectionBody>
-							<PortalSetup type={'detail'} />
-						</S.SectionBody>
-					</S.Section>
+						<S.Section>
+							<S.SectionHeader>
+								<S.SectionTitle>{language?.setup || 'Portal Setup'}</S.SectionTitle>
+							</S.SectionHeader>
+							<S.SectionBody>
+								<PortalSetup type={'detail'} />
+							</S.SectionBody>
+						</S.Section>
 
-					<S.Section className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<S.SectionTitle>{language?.posts || 'Posts'}</S.SectionTitle>
-						</S.SectionHeader>
-						<S.SectionBody>
-							{importOption.id !== 'wordpress' ? (
-								<S.DisabledNote>
-									<p>{'Enable WordPress import to populate posts.'}</p>
-								</S.DisabledNote>
-							) : (
-								<PostList type={'detail'} pageCount={5} />
-							)}
-						</S.SectionBody>
-					</S.Section>
-				</S.Column>
-				<S.Column>
-					<S.Section className={'border-wrapper-alt2'}>
-						<S.SectionHeader>
-							<S.SectionTitle>{language?.design || 'Design'}</S.SectionTitle>
-						</S.SectionHeader>
-						<S.SectionBody>
-							<Tabs type={'alt1'} onTabPropClick={() => null}>
-								<div label={language?.themes || 'Themes'}>
-									<S.ViewWrapper>
-										<Themes />
-									</S.ViewWrapper>
-								</div>
-								<div label={language?.layout || 'Layout'}>
-									<S.ViewWrapper>
-										<Layout />
-									</S.ViewWrapper>
-								</div>
-								<div label={language?.fonts || 'Fonts'}>
-									<S.ViewWrapper>
-										<Fonts />
-									</S.ViewWrapper>
-								</div>
-								<div label={language?.images || 'Images'}>
-									<ImagesView />
-								</div>
-							</Tabs>
-						</S.SectionBody>
-					</S.Section>
-				</S.Column>
-			</S.Body>
+						<S.Section>
+							<S.SectionHeader>
+								<S.SectionTitle>{language?.posts || 'Posts'}</S.SectionTitle>
+							</S.SectionHeader>
+							<S.SectionBody>
+								{importOption.id !== 'wordpress' ? (
+									<S.DisabledNote>
+										<p>{'Enable WordPress import to populate posts.'}</p>
+									</S.DisabledNote>
+								) : (
+									<PostList type={'detail'} pageCount={5} />
+								)}
+							</S.SectionBody>
+						</S.Section>
+					</S.Column>
+					<S.Column>
+						<S.Section>
+							<S.SectionHeader>
+								<S.SectionTitle>{language?.design || 'Design'}</S.SectionTitle>
+							</S.SectionHeader>
+							<S.SectionBody>
+								<Tabs type={'alt1'} onTabPropClick={() => null}>
+									<div label={language?.themes || 'Themes'}>
+										<S.ViewWrapper>
+											<Themes />
+										</S.ViewWrapper>
+									</div>
+									<div label={language?.layout || 'Layout'}>
+										<S.ViewWrapper>
+											<Layout />
+										</S.ViewWrapper>
+									</div>
+									<div label={language?.fonts || 'Fonts'}>
+										<S.ViewWrapper>
+											<Fonts />
+										</S.ViewWrapper>
+									</div>
+									<div label={language?.images || 'Images'}>
+										<ImagesView />
+									</div>
+								</Tabs>
+							</S.SectionBody>
+						</S.Section>
+					</S.Column>
+				</S.Body>
+			</S.ContentWrapper>
 		</S.Wrapper>
 	);
 }

@@ -479,8 +479,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		} catch (e: any) {
 			console.error(e);
 			debugLog('error', 'PortalProvider', 'Failed to fetch portal data:', e.message ?? 'Unknown error');
+		} finally {
+			setUpdating(false);
 		}
-		setUpdating(false);
 	};
 
 	function getUserPermissions(address: string, users: PortalUserType[], permissions: PortalPermissionsType) {

@@ -6,10 +6,63 @@ export const Wrapper = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
+`;
+
+export const HeaderWrapper = styled.div`
+	height: ${STYLING.dimensions.nav.height};
+	width: 100%;
+	padding: 0 20px;
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	background: ${(props) => props.theme.colors.view.background};
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+
+	@media (max-width: ${STYLING.cutoffs.desktop}) {
+		padding: 0 20px 0 10px;
+	}
+`;
+
+export const HeaderContent = styled.div`
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 25px;
+	justify-content: space-between;
+`;
+
+export const HeaderActionsWrapper = styled.div`
+	display: flex;
+	align-items: center;
 	gap: 20px;
+`;
+
+export const HeaderAction = styled.div`
+	a,
+	button {
+		position: relative;
+		display: flex;
+		gap: 7.5px;
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-family: ${(props) => props.theme.typography.family.primary};
+
+		&:hover {
+			color: ${(props) => props.theme.colors.font.alt1};
+		}
+	}
+`;
+
+export const ContentWrapper = styled.div`
+	width: 100%;
 	max-width: 1600px;
 	margin: 0 auto;
 	padding: 0 20px 24px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
 `;
 
 export const Body = styled.div`
@@ -38,7 +91,6 @@ export const SectionHeader = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	background: ${(props) => props.theme.colors.container.alt1.background};
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
