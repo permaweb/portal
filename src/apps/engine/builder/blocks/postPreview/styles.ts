@@ -203,6 +203,8 @@ export const Author = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 6px;
+	font-weight: 700;
+	line-height: 1;
 
 	&:hover {
 		cursor: pointer;
