@@ -5,7 +5,7 @@ import { STYLING } from 'helpers/config';
 export const Wrapper = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 18px;
+	gap: 20px;
 `;
 
 export const InlinePanel = styled.div`
@@ -97,16 +97,12 @@ export const PreviewWrapper = styled.div`
 	background: ${(props) => props.theme.colors.container.primary.background};
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-radius: ${STYLING.dimensions.radius.primary};
-	max-height: min(720px, 78vh);
-	overflow-y: auto;
 `;
 
 export const PreviewHeader = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
-	padding-bottom: 10px;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
 export const PreviewTitle = styled.h3`
@@ -136,6 +132,7 @@ export const PreviewStat = styled.div`
 	gap: 3px;
 	padding: 10px;
 	background: ${(props) => props.theme.colors.container.alt1.background};
+	border: 1px solid ${(props) => props.theme.colors.border.primary};
 	border-radius: ${STYLING.dimensions.radius.alt1};
 `;
 
@@ -148,8 +145,8 @@ export const PreviewStatLabel = styled.span`
 
 export const PreviewStatValue = styled.span`
 	color: ${(props) => props.theme.colors.font.primary};
-	font-size: ${(props) => props.theme.typography.size.base};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-size: ${(props) => props.theme.typography.size.xSmall};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 
@@ -184,8 +181,7 @@ export const Actions = styled.div`
 	align-items: center;
 	justify-content: flex-end;
 	gap: 10px;
-	border-top: 1px solid ${(props) => props.theme.colors.border.primary};
-	padding-top: 14px;
+	padding-top: 10px;
 `;
 
 export const PostList = styled.div`
@@ -193,7 +189,6 @@ export const PostList = styled.div`
 	flex-direction: column;
 	gap: 8px;
 	max-height: 340px;
-	min-height: 0;
 	overflow-y: auto;
 `;
 
@@ -202,7 +197,6 @@ export const CategoryListScrollArea = styled.div`
 	flex-direction: column;
 	gap: 8px;
 	max-height: 520px;
-	min-height: 400px;
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
 
@@ -264,19 +258,19 @@ export const SelectAllWrapper = styled.div`
 export const Tabs = styled.div`
 	display: flex;
 	gap: 5px;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 	padding-bottom: 10px;
 `;
 
 export const Tab = styled.button<{ $active: boolean }>`
 	padding: 8px 16px;
 	background: ${(props) =>
-		props.$active ? props.theme.colors.button.primary.background : props.theme.colors.container.alt1.background};
+		props.$active ? props.theme.colors.button.primary.active.background : props.theme.colors.container.alt1.background};
 	color: ${(props) => (props.$active ? props.theme.colors.button.primary.color : props.theme.colors.font.primary)};
 	border: 1px solid
-		${(props) => (props.$active ? props.theme.colors.button.primary.border : props.theme.colors.border.primary)};
-	border-radius: ${STYLING.dimensions.radius.alt1};
+		${(props) => (props.$active ? props.theme.colors.button.primary.active.border : props.theme.colors.border.primary)};
+	border-radius: ${STYLING.dimensions.radius.primary};
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	cursor: pointer;
 	transition: all 0.2s ease;
@@ -293,7 +287,6 @@ export const ThemePreview = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
-	min-height: 420px;
 `;
 
 export const ColorPalette = styled.div`
@@ -467,8 +460,9 @@ export const WhatToImportCheckboxes = styled.div`
 export const PostsLimitRow = styled.div`
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 20px;
 	flex-shrink: 0;
+	margin: 10px 0 0 0;
 `;
 
 export const PostsLimitLabel = styled.span`
@@ -478,7 +472,7 @@ export const PostsLimitLabel = styled.span`
 `;
 
 export const PostsLimitInputWrap = styled.div`
-	width: 72px;
+	width: 150px;
 	flex-shrink: 0;
 
 	input {
@@ -510,7 +504,7 @@ export const SelectAllTitle = styled.span`
 export const CategoryButtonList = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 25px;
 `;
 
 export const CategoryNode = styled.div`
@@ -594,11 +588,10 @@ export const ImageGrid = styled.div`
 	display: grid;
 	grid-template-columns: repeat(auto-fill, ${THUMB_SIZE}px);
 	gap: 10px;
-	min-height: 200px;
-	max-height: 360px;
+	max-height: 500px;
 	overflow-y: auto;
 	padding: 4px;
-	justify-content: start;
+	justify-content: space-between;
 	flex-shrink: 0;
 `;
 
@@ -750,8 +743,8 @@ export const ImageUploadStatusIcon = styled.span`
 export const ImageSummary = styled.div`
 	display: flex;
 	flex-wrap: wrap;
-	gap: 12px;
-	padding: 12px;
+	gap: 25px;
+	padding: 12.5px 15px;
 	background: ${(props) => props.theme.colors.container.alt1.background};
 	border-radius: ${STYLING.dimensions.radius.alt1};
 	margin-bottom: 12px;

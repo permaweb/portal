@@ -66,7 +66,7 @@ export const STYLING = {
 			max: '47.5px',
 		},
 		nav: {
-			height: '70px',
+			height: '72.5px',
 			linksHeight: '50px',
 			width: '260px',
 			widthMin: 67.5,

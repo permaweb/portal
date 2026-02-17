@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { ViewHeader } from 'editor/components/atoms/ViewHeader';
 import { Fonts } from 'editor/components/molecules/Fonts';
@@ -9,6 +9,7 @@ import { Themes } from 'editor/components/molecules/Themes';
 import { PortalSetup } from 'editor/components/organisms/PortalSetup';
 import { PostList } from 'editor/components/organisms/PostList';
 import { WordPressImport, type WordPressImportDraft } from 'editor/components/organisms/WordPressImport';
+import { Header } from 'editor/navigation';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
@@ -16,7 +17,6 @@ import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Select } from 'components/atoms/Select';
 import { Tabs } from 'components/atoms/Tabs';
-import { LanguageSelect } from 'components/molecules/LanguageSelect';
 import { ICONS, LAYOUT, PAGES, PORTAL_DATA, PORTAL_PATCH_MAP, PORTAL_ROLES, THEME, URLS } from 'helpers/config';
 import { THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
 import type { PortalHeaderType, SelectOptionType } from 'helpers/types';
@@ -28,7 +28,6 @@ import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
-import { WalletConnect } from 'wallet/WalletConnect';
 
 import * as S from './styles';
 
@@ -404,19 +403,7 @@ export default function CreatePortal() {
 	if (creatingNew) {
 		return (
 			<S.Wrapper>
-				<S.HeaderWrapper>
-					<S.HeaderContent>
-						<S.HeaderActionsWrapper>
-							<S.HeaderAction>
-								<Link to={URLS.docs}>{language?.helpCenter}</Link>
-							</S.HeaderAction>
-						</S.HeaderActionsWrapper>
-						<S.HeaderActionsWrapper>
-							<LanguageSelect />
-							<WalletConnect app={'editor'} />
-						</S.HeaderActionsWrapper>
-					</S.HeaderContent>
-				</S.HeaderWrapper>
+				<Header />
 				<S.ContentWrapper>
 					<ViewHeader
 						header={language?.createPortal || 'Create Portal'}
@@ -479,7 +466,7 @@ export default function CreatePortal() {
 													<Media portal={null} type={'logo'} onMediaUpload={setLogoId} hideActions />
 													<S.MediaInfo>{`${language?.recommended || 'Recommended'}: 500x280px (16:9)`}</S.MediaInfo>
 												</S.MediaBlock>
-												<S.IconMediaBlock>
+												<S.IconMediaBlock align={'flex-end'}>
 													<S.MediaTitle>{`${language?.icon || 'Icon'} (Favicon)`}</S.MediaTitle>
 													<Media portal={null} type={'icon'} onMediaUpload={setIconId} hideActions />
 													<S.MediaInfo>{`${language?.recommended || 'Recommended'}: 32x32px (1:1)`}</S.MediaInfo>
@@ -533,19 +520,7 @@ export default function CreatePortal() {
 	if (!portalReady) {
 		return (
 			<S.Wrapper>
-				<S.HeaderWrapper>
-					<S.HeaderContent>
-						<S.HeaderActionsWrapper>
-							<S.HeaderAction>
-								<Link to={URLS.docs}>{language?.helpCenter}</Link>
-							</S.HeaderAction>
-						</S.HeaderActionsWrapper>
-						<S.HeaderActionsWrapper>
-							<LanguageSelect />
-							<WalletConnect app={'editor'} />
-						</S.HeaderActionsWrapper>
-					</S.HeaderContent>
-				</S.HeaderWrapper>
+				<Header />
 				<S.ContentWrapper>
 					<ViewHeader
 						header={language?.createPortal || 'Create Portal'}
@@ -566,19 +541,7 @@ export default function CreatePortal() {
 
 	return (
 		<S.Wrapper>
-			<S.HeaderWrapper>
-				<S.HeaderContent>
-					<S.HeaderActionsWrapper>
-						<S.HeaderAction>
-							<Link to={URLS.docs}>{language?.helpCenter}</Link>
-						</S.HeaderAction>
-					</S.HeaderActionsWrapper>
-					<S.HeaderActionsWrapper>
-						<LanguageSelect />
-						<WalletConnect app={'editor'} />
-					</S.HeaderActionsWrapper>
-				</S.HeaderContent>
-			</S.HeaderWrapper>
+			<Header />
 			<S.ContentWrapper>
 				<ViewHeader
 					header={language?.createPortal || 'Create Portal'}
@@ -704,24 +667,24 @@ export default function CreatePortal() {
 							</S.SectionHeader>
 							<S.SectionBody>
 								<Tabs type={'alt1'} onTabPropClick={() => null}>
-									<div label={language?.themes || 'Themes'}>
+									<S.TabWrapper label={language?.themes || 'Themes'}>
 										<S.ViewWrapper>
 											<Themes />
 										</S.ViewWrapper>
-									</div>
-									<div label={language?.layout || 'Layout'}>
+									</S.TabWrapper>
+									<S.TabWrapper label={language?.layout || 'Layout'}>
 										<S.ViewWrapper>
 											<Layout />
 										</S.ViewWrapper>
-									</div>
-									<div label={language?.fonts || 'Fonts'}>
+									</S.TabWrapper>
+									<S.TabWrapper label={language?.fonts || 'Fonts'}>
 										<S.ViewWrapper>
 											<Fonts />
 										</S.ViewWrapper>
-									</div>
-									<div label={language?.images || 'Images'}>
+									</S.TabWrapper>
+									<S.TabWrapper label={language?.images || 'Images'}>
 										<ImagesView />
-									</div>
+									</S.TabWrapper>
 								</Tabs>
 							</S.SectionBody>
 						</S.Section>

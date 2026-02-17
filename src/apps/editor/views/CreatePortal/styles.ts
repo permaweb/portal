@@ -8,68 +8,21 @@ export const Wrapper = styled.div`
 	flex-direction: column;
 `;
 
-export const HeaderWrapper = styled.div`
-	height: ${STYLING.dimensions.nav.height};
-	width: 100%;
-	padding: 0 20px;
-	position: sticky;
-	top: 0;
-	z-index: 2;
-	background: ${(props) => props.theme.colors.view.background};
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
-
-	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		padding: 0 20px 0 10px;
-	}
-`;
-
-export const HeaderContent = styled.div`
-	height: 100%;
-	width: 100%;
-	display: flex;
-	align-items: center;
-	gap: 25px;
-	justify-content: space-between;
-`;
-
-export const HeaderActionsWrapper = styled.div`
-	display: flex;
-	align-items: center;
-	gap: 20px;
-`;
-
-export const HeaderAction = styled.div`
-	a,
-	button {
-		position: relative;
-		display: flex;
-		gap: 7.5px;
-		color: ${(props) => props.theme.colors.font.primary};
-		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
-		font-family: ${(props) => props.theme.typography.family.primary};
-
-		&:hover {
-			color: ${(props) => props.theme.colors.font.alt1};
-		}
-	}
-`;
-
 export const ContentWrapper = styled.div`
 	width: 100%;
-	max-width: 1600px;
+	max-width: ${STYLING.cutoffs.maxEditor};
 	margin: 0 auto;
-	padding: 40px 20px 24px 20px;
+	padding: 0 20px;
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 5px 20px;
 `;
 
 export const Body = styled.div`
 	width: 100%;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-	gap: 20px;
+	gap: 30px;
 	align-items: start;
 
 	@media (max-width: ${STYLING.cutoffs.desktop}) {
@@ -87,11 +40,9 @@ export const Column = styled.div`
 export const Section = styled.div``;
 
 export const SectionHeader = styled.div`
-	padding: 12px 0;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 `;
 
 export const SectionTitle = styled.p`
@@ -103,7 +54,7 @@ export const SectionTitle = styled.p`
 `;
 
 export const SectionBody = styled.div`
-	padding: 20px 0;
+	padding: 15px 0;
 `;
 
 export const PanelInner = styled.div`
@@ -172,12 +123,13 @@ export const MediaBlock = styled.div`
 	gap: 7.5px;
 `;
 
-export const IconMediaBlock = styled.div`
+export const IconMediaBlock = styled.div<{ align?: string }>`
 	width: 220px;
 	min-width: 220px;
 	display: flex;
 	flex-direction: column;
 	gap: 7.5px;
+	align-items: ${(props) => props.align ?? 'center'};
 
 	@media (max-width: ${STYLING.cutoffs.initial}) {
 		width: 100%;
@@ -392,3 +344,5 @@ export const PreviewCount = styled.span`
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
 	white-space: nowrap;
 `;
+
+export const TabWrapper = styled.div<{ label: string; icon?: string }>``;

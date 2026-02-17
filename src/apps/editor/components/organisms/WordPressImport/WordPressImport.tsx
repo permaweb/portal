@@ -676,7 +676,7 @@ export default function WordPressImport(props: {
 								WordPress sites).
 								<br />
 								<br />
-								<strong>🎨 Theme Detection:</strong> We'll automatically extract colors, fonts, and styling from your
+								<strong>Theme Detection:</strong> We'll automatically extract colors, fonts, and styling from your
 								WordPress site to create a matching portal theme.
 							</S.SectionInfo>
 							<FormField
@@ -720,10 +720,10 @@ export default function WordPressImport(props: {
 								</S.WhatToImportCheckboxes>
 								{fetchPosts && (
 									<S.PostsLimitRow onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
-										<S.PostsLimitLabel>Number of posts</S.PostsLimitLabel>
 										<S.PostsLimitInputWrap>
 											<FormField
 												value={postsCount.toString()}
+												label={'Number of posts'}
 												onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 													const val = parseInt(e.target.value) || 0;
 													if (val >= 0 && val <= 1000) {
@@ -734,6 +734,7 @@ export default function WordPressImport(props: {
 												disabled={false}
 												invalid={{ status: false, message: null }}
 												noMargin
+												hideErrorMessage
 											/>
 										</S.PostsLimitInputWrap>
 									</S.PostsLimitRow>
@@ -834,16 +835,17 @@ export default function WordPressImport(props: {
 					<S.PreviewHeader>
 						{props.createPortal ? (
 							<>
-								<S.SectionLabel>{language?.portalName || 'Portal name'}</S.SectionLabel>
 								<FormField
 									value={portalName}
+									label={language?.portalName || 'Portal Name'}
 									onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 										setPortalName(e.target.value);
 										if (props.onPortalNameChange) props.onPortalNameChange(e.target.value);
 									}}
-									placeholder={importData.name || 'Enter portal name'}
+									placeholder={importData.name || 'Enter Portal Name'}
 									disabled={false}
 									invalid={{ status: false, message: null }}
+									hideErrorMessage
 								/>
 							</>
 						) : (
@@ -873,7 +875,7 @@ export default function WordPressImport(props: {
 							importData.extractedTheme &&
 							Object.values(importData.extractedTheme.colors).some((c) => c !== null) && (
 								<S.PreviewStat>
-									<S.PreviewStatLabel>🎨 Colors</S.PreviewStatLabel>
+									<S.PreviewStatLabel>Colors</S.PreviewStatLabel>
 									<S.PreviewStatValue>
 										{Object.values(importData.extractedTheme.colors).filter((c) => c !== null).length} detected
 									</S.PreviewStatValue>
@@ -895,7 +897,7 @@ export default function WordPressImport(props: {
 							Tags ({selectedTopics.size}/{importData.topics.length})
 						</S.Tab>
 						<S.Tab $active={activeTab === 'theme'} onClick={() => setActiveTab('theme')}>
-							🎨 Theme{' '}
+							Theme{' '}
 							{importMethod === 'file'
 								? '(File Import)'
 								: importData.extractedTheme && Object.values(importData.extractedTheme.colors).some((c) => c !== null)
@@ -913,65 +915,77 @@ export default function WordPressImport(props: {
 
 					{activeTab === 'posts' && (
 						<>
-							{importData.posts.length > 0 && (
-								<S.SelectAllWrapper>
-									<Checkbox checked={allPostsSelected} handleSelect={handleSelectAllPosts} disabled={false} />
-									<S.SelectAllTitle onClick={handleSelectAllPosts}>Select All Posts</S.SelectAllTitle>
-								</S.SelectAllWrapper>
+							{importData.posts.length > 0 ? (
+								<>
+									<S.SelectAllWrapper>
+										<Checkbox checked={allPostsSelected} handleSelect={handleSelectAllPosts} disabled={false} />
+										<S.SelectAllTitle onClick={handleSelectAllPosts}>Select All Posts</S.SelectAllTitle>
+									</S.SelectAllWrapper>
+									<S.PostList className={'scroll-wrapper'}>
+										{importData.posts.map((post) => (
+											<S.PostItem
+												key={post.wpId}
+												$selected={selectedPosts.has(post.wpId)}
+												onClick={() => handleTogglePost(post.wpId)}
+											>
+												<Checkbox
+													checked={selectedPosts.has(post.wpId)}
+													handleSelect={() => handleTogglePost(post.wpId)}
+													disabled={false}
+												/>
+												<S.PostItemContent>
+													<S.PostItemTitle>{post.title}</S.PostItemTitle>
+													<S.PostItemMeta>
+														{formatDate(post.dateCreated)} | {post.status} | {post.content.length} blocks
+													</S.PostItemMeta>
+												</S.PostItemContent>
+											</S.PostItem>
+										))}
+									</S.PostList>
+								</>
+							) : (
+								<S.Section>
+									<S.SectionInfo>No Data Found</S.SectionInfo>
+								</S.Section>
 							)}
-							<S.PostList>
-								{importData.posts.map((post) => (
-									<S.PostItem
-										key={post.wpId}
-										$selected={selectedPosts.has(post.wpId)}
-										onClick={() => handleTogglePost(post.wpId)}
-									>
-										<Checkbox
-											checked={selectedPosts.has(post.wpId)}
-											handleSelect={() => handleTogglePost(post.wpId)}
-											disabled={false}
-										/>
-										<S.PostItemContent>
-											<S.PostItemTitle>{post.title}</S.PostItemTitle>
-											<S.PostItemMeta>
-												{formatDate(post.dateCreated)} | {post.status} | {post.content.length} blocks
-											</S.PostItemMeta>
-										</S.PostItemContent>
-									</S.PostItem>
-								))}
-							</S.PostList>
 						</>
 					)}
 
 					{activeTab === 'pages' && (
 						<>
-							{importData.pages.length > 0 && (
-								<S.SelectAllWrapper>
-									<Checkbox checked={allPagesSelected} handleSelect={handleSelectAllPages} disabled={false} />
-									<S.SelectAllTitle onClick={handleSelectAllPages}>Select All Pages</S.SelectAllTitle>
-								</S.SelectAllWrapper>
+							{importData.pages.length > 0 ? (
+								<>
+									<S.SelectAllWrapper>
+										<Checkbox checked={allPagesSelected} handleSelect={handleSelectAllPages} disabled={false} />
+										<S.SelectAllTitle onClick={handleSelectAllPages}>Select All Pages</S.SelectAllTitle>
+									</S.SelectAllWrapper>
+									<S.PostList>
+										{importData.pages.map((page) => (
+											<S.PostItem
+												key={page.wpId}
+												$selected={selectedPages.has(page.wpId)}
+												onClick={() => handleTogglePage(page.wpId)}
+											>
+												<Checkbox
+													checked={selectedPages.has(page.wpId)}
+													handleSelect={() => handleTogglePage(page.wpId)}
+													disabled={false}
+												/>
+												<S.PostItemContent>
+													<S.PostItemTitle>{page.title}</S.PostItemTitle>
+													<S.PostItemMeta>
+														{formatDate(page.dateCreated)} | {page.content.length} blocks
+													</S.PostItemMeta>
+												</S.PostItemContent>
+											</S.PostItem>
+										))}
+									</S.PostList>
+								</>
+							) : (
+								<S.Section>
+									<S.SectionInfo>No Data Found</S.SectionInfo>
+								</S.Section>
 							)}
-							<S.PostList>
-								{importData.pages.map((page) => (
-									<S.PostItem
-										key={page.wpId}
-										$selected={selectedPages.has(page.wpId)}
-										onClick={() => handleTogglePage(page.wpId)}
-									>
-										<Checkbox
-											checked={selectedPages.has(page.wpId)}
-											handleSelect={() => handleTogglePage(page.wpId)}
-											disabled={false}
-										/>
-										<S.PostItemContent>
-											<S.PostItemTitle>{page.title}</S.PostItemTitle>
-											<S.PostItemMeta>
-												{formatDate(page.dateCreated)} | {page.content.length} blocks
-											</S.PostItemMeta>
-										</S.PostItemContent>
-									</S.PostItem>
-								))}
-							</S.PostList>
 						</>
 					)}
 
@@ -989,14 +1003,14 @@ export default function WordPressImport(props: {
 									</S.CheckboxContainer>
 								</S.CheckboxGroup>
 							</S.Section>
-							{importData.categories.length > 0 && (
+							{importData.categories.length > 0 ? (
 								<>
 									<S.Section>
 										<S.SectionInfo>
 											Select which categories to create. Parent and child categories can be selected individually.
 										</S.SectionInfo>
 									</S.Section>
-									<S.CategoryListScrollArea>
+									<S.CategoryListScrollArea className={'scroll-wrapper'}>
 										<S.SelectAllWrapper>
 											<Checkbox
 												checked={importData.categories.every((cat) => {
@@ -1027,7 +1041,6 @@ export default function WordPressImport(props: {
 																disabled={false}
 																icon={selectedCategories.has(cat.id) ? ICONS.close : ICONS.add}
 															/>
-															{depth > 0 && <S.CategoryLevelTag>{`Level ${depth + 1}`}</S.CategoryLevelTag>}
 														</S.CategoryButtonRow>
 														{cat.metadata?.description && (
 															<S.CategoryDescription>{cat.metadata.description}</S.CategoryDescription>
@@ -1044,6 +1057,10 @@ export default function WordPressImport(props: {
 										</S.CategoryButtonList>
 									</S.CategoryListScrollArea>
 								</>
+							) : (
+								<S.Section>
+									<S.SectionInfo>No Data Found</S.SectionInfo>
+								</S.Section>
 							)}
 						</>
 					)}
@@ -1069,7 +1086,7 @@ export default function WordPressImport(props: {
 											Select which tags to create on the portal. Only selected tags will be added as topics.
 										</S.SectionInfo>
 									</S.Section>
-									<S.CategoryListScrollArea>
+									<S.CategoryListScrollArea className={'scroll-wrapper'}>
 										<S.SelectAllWrapper>
 											<Checkbox
 												checked={
@@ -1098,7 +1115,7 @@ export default function WordPressImport(props: {
 							)}
 							{importData.topics.length === 0 && (
 								<S.Section>
-									<S.SectionInfo>No tags were found in the imported content.</S.SectionInfo>
+									<S.SectionInfo>No Data Found</S.SectionInfo>
 								</S.Section>
 							)}
 						</>
@@ -1120,7 +1137,7 @@ export default function WordPressImport(props: {
 								<>
 									{Object.values(importData.extractedTheme.colors).some((c) => c !== null) && (
 										<S.ThemeSection>
-											<S.ThemeSectionTitle>🎨 Extracted Theme Colors</S.ThemeSectionTitle>
+											<S.ThemeSectionTitle>Extracted Theme Colors</S.ThemeSectionTitle>
 											<S.SectionInfo>
 												We've automatically detected these colors from your WordPress site. They'll be applied to your
 												portal theme.
@@ -1202,153 +1219,163 @@ export default function WordPressImport(props: {
 						</S.ThemePreview>
 					)}
 
-					{activeTab === 'images' && importData.images && importData.images.length > 0 && (
+					{activeTab === 'images' && (
 						<>
-							<S.Section>
-								<S.SectionInfo>
-									Select images to upload to Arweave. Uploaded images will be stored permanently and their URLs will be
-									replaced in your imported content. Images smaller than 100KB are free to upload.
-								</S.SectionInfo>
-							</S.Section>
+							{importData.images && importData.images.length > 0 ? (
+								<>
+									<S.Section>
+										<S.SectionInfo>
+											Select images to upload to Arweave. Uploaded images will be stored permanently and their URLs will
+											be replaced in your imported content. Images smaller than 100KB are free to upload.
+										</S.SectionInfo>
+									</S.Section>
 
-							{/* Image cost summary */}
-							{(() => {
-								const stats = calculateImageCostEstimate(importData.images, selectedImages);
-								return (
-									<S.ImageSummary>
-										<S.ImageSummaryStat>
-											<S.ImageSummaryLabel>Total Images</S.ImageSummaryLabel>
-											<S.ImageSummaryValue>{stats.totalImages}</S.ImageSummaryValue>
-										</S.ImageSummaryStat>
-										<S.ImageSummaryStat>
-											<S.ImageSummaryLabel>Selected</S.ImageSummaryLabel>
-											<S.ImageSummaryValue>{stats.selectedImages}</S.ImageSummaryValue>
-										</S.ImageSummaryStat>
-										<S.ImageSummaryStat>
-											<S.ImageSummaryLabel>Uploaded</S.ImageSummaryLabel>
-											<S.ImageSummaryValue>{uploadedImageUrls.size}</S.ImageSummaryValue>
-										</S.ImageSummaryStat>
-									</S.ImageSummary>
-								);
-							})()}
+									{/* Image cost summary */}
+									{(() => {
+										const stats = calculateImageCostEstimate(importData.images, selectedImages);
+										return (
+											<S.ImageSummary>
+												<S.ImageSummaryStat>
+													<S.ImageSummaryLabel>Total Images</S.ImageSummaryLabel>
+													<S.ImageSummaryValue>{stats.totalImages}</S.ImageSummaryValue>
+												</S.ImageSummaryStat>
+												<S.ImageSummaryStat>
+													<S.ImageSummaryLabel>Selected</S.ImageSummaryLabel>
+													<S.ImageSummaryValue>{stats.selectedImages}</S.ImageSummaryValue>
+												</S.ImageSummaryStat>
+												<S.ImageSummaryStat>
+													<S.ImageSummaryLabel>Uploaded</S.ImageSummaryLabel>
+													<S.ImageSummaryValue>{uploadedImageUrls.size}</S.ImageSummaryValue>
+												</S.ImageSummaryStat>
+											</S.ImageSummary>
+										);
+									})()}
 
-							{/* Actions */}
-							<S.ImageActions>
-								<Checkbox
-									checked={
-										importData.images.length > 0 &&
-										importData.images.every((img) => selectedImages.has(img.originalUrl))
-									}
-									handleSelect={handleSelectAllImages}
-									disabled={isUploadingImages}
-								/>
-								<S.SelectAllTitle onClick={handleSelectAllImages}>Select All Images</S.SelectAllTitle>
-								<Button
-									type={'alt1'}
-									label={
-										isUploadingImages
-											? 'Uploading...'
-											: `Upload ${selectedImages.size} Image${selectedImages.size !== 1 ? 's' : ''}`
-									}
-									handlePress={handleUploadImages}
-									disabled={selectedImages.size === 0 || isUploadingImages || !arProvider.wallet}
-									icon={ICONS.upload}
-									iconLeftAlign
-								/>
-							</S.ImageActions>
+									{/* Actions */}
+									<S.ImageActions>
+										<Checkbox
+											checked={
+												importData.images.length > 0 &&
+												importData.images.every((img) => selectedImages.has(img.originalUrl))
+											}
+											handleSelect={handleSelectAllImages}
+											disabled={isUploadingImages}
+										/>
+										<S.SelectAllTitle onClick={handleSelectAllImages}>Select All Images</S.SelectAllTitle>
+										<Button
+											type={'alt1'}
+											label={
+												isUploadingImages
+													? 'Uploading...'
+													: `Upload ${selectedImages.size} Image${selectedImages.size !== 1 ? 's' : ''}`
+											}
+											handlePress={handleUploadImages}
+											disabled={selectedImages.size === 0 || isUploadingImages || !arProvider.wallet}
+											icon={ICONS.upload}
+											iconLeftAlign
+										/>
+									</S.ImageActions>
 
-							{/* Image grid */}
-							<S.ImageGrid>
-								{importData.images.map((image) => {
-									const uploadState = imageUploadStates.get(image.originalUrl);
-									const isUploaded = uploadedImageUrls.has(image.originalUrl);
-									const loadFailed = failedImageUrls.has(image.originalUrl);
+									{/* Image grid */}
+									<S.ImageGrid className={'scroll-wrapper'}>
+										{importData.images.map((image) => {
+											const uploadState = imageUploadStates.get(image.originalUrl);
+											const isUploaded = uploadedImageUrls.has(image.originalUrl);
+											const loadFailed = failedImageUrls.has(image.originalUrl);
 
-									return (
-										<S.ImageCard
-											key={image.originalUrl}
-											$selected={selectedImages.has(image.originalUrl)}
-											onClick={() => !isUploadingImages && handleToggleImage(image.originalUrl)}
-										>
-											<S.ImageThumbnail>
-												{loadFailed ? (
-													<S.ImageThumbnailPlaceholder>Image</S.ImageThumbnailPlaceholder>
-												) : (
-													<img
-														src={image.originalUrl}
-														alt=""
-														loading="lazy"
-														onError={() => {
-															setFailedImageUrls((prev) => new Set(prev).add(image.originalUrl));
-														}}
-													/>
-												)}
-											</S.ImageThumbnail>
-											<S.ImageCheckbox>
-												<Checkbox
-													checked={selectedImages.has(image.originalUrl)}
-													handleSelect={() => handleToggleImage(image.originalUrl)}
-													disabled={isUploadingImages}
-												/>
-											</S.ImageCheckbox>
-											<S.ImageBadge $type={image.sourceType}>
-												{image.sourceType === 'featured' ? 'Featured' : 'Content'}
-											</S.ImageBadge>
-											{image.postIds.length > 1 && <S.ImagePostCount>{image.postIds.length} posts</S.ImagePostCount>}
-
-											{/* Upload status overlay */}
-											{(uploadState || isUploaded) && (
-												<S.ImageUploadStatus $status={isUploaded ? 'complete' : uploadState?.status || 'pending'}>
-													{isUploaded ? (
-														<>
-															<S.ImageUploadStatusIcon>✓</S.ImageUploadStatusIcon>
-															<S.ImageUploadStatusText>Uploaded</S.ImageUploadStatusText>
-														</>
-													) : uploadState?.status === 'error' ? (
-														<>
-															<S.ImageUploadStatusIcon>✗</S.ImageUploadStatusIcon>
-															<S.ImageUploadStatusText>Failed</S.ImageUploadStatusText>
-														</>
-													) : uploadState?.status === 'complete' ? (
-														<>
-															<S.ImageUploadStatusIcon>✓</S.ImageUploadStatusIcon>
-															<S.ImageUploadStatusText>Complete</S.ImageUploadStatusText>
-														</>
-													) : (
-														<>
-															<S.ImageUploadStatusText>{uploadState?.status || 'pending'}</S.ImageUploadStatusText>
-															{uploadState?.progress !== undefined && (
-																<S.ImageUploadProgress>
-																	<S.ImageUploadProgressFill $progress={uploadState.progress} />
-																</S.ImageUploadProgress>
-															)}
-														</>
+											return (
+												<S.ImageCard
+													key={image.originalUrl}
+													$selected={selectedImages.has(image.originalUrl)}
+													onClick={() => !isUploadingImages && handleToggleImage(image.originalUrl)}
+												>
+													<S.ImageThumbnail>
+														{loadFailed ? (
+															<S.ImageThumbnailPlaceholder>Image</S.ImageThumbnailPlaceholder>
+														) : (
+															<img
+																src={image.originalUrl}
+																alt=""
+																loading="lazy"
+																onError={() => {
+																	setFailedImageUrls((prev) => new Set(prev).add(image.originalUrl));
+																}}
+															/>
+														)}
+													</S.ImageThumbnail>
+													<S.ImageCheckbox>
+														<Checkbox
+															checked={selectedImages.has(image.originalUrl)}
+															handleSelect={() => handleToggleImage(image.originalUrl)}
+															disabled={isUploadingImages}
+														/>
+													</S.ImageCheckbox>
+													<S.ImageBadge $type={image.sourceType}>
+														{image.sourceType === 'featured' ? 'Featured' : 'Content'}
+													</S.ImageBadge>
+													{image.postIds.length > 1 && (
+														<S.ImagePostCount>{image.postIds.length} posts</S.ImagePostCount>
 													)}
-												</S.ImageUploadStatus>
-											)}
-										</S.ImageCard>
-									);
-								})}
-							</S.ImageGrid>
 
-							{/* Warning about wallet */}
-							{!arProvider.wallet && (
-								<S.UploadWarning>
-									<span>
-										Connect your wallet to upload images to Arweave. Images not uploaded will keep their original
-										WordPress URLs.
-									</span>
-								</S.UploadWarning>
-							)}
+													{/* Upload status overlay */}
+													{(uploadState || isUploaded) && (
+														<S.ImageUploadStatus $status={isUploaded ? 'complete' : uploadState?.status || 'pending'}>
+															{isUploaded ? (
+																<>
+																	<S.ImageUploadStatusIcon>✓</S.ImageUploadStatusIcon>
+																	<S.ImageUploadStatusText>Uploaded</S.ImageUploadStatusText>
+																</>
+															) : uploadState?.status === 'error' ? (
+																<>
+																	<S.ImageUploadStatusIcon>✗</S.ImageUploadStatusIcon>
+																	<S.ImageUploadStatusText>Failed</S.ImageUploadStatusText>
+																</>
+															) : uploadState?.status === 'complete' ? (
+																<>
+																	<S.ImageUploadStatusIcon>✓</S.ImageUploadStatusIcon>
+																	<S.ImageUploadStatusText>Complete</S.ImageUploadStatusText>
+																</>
+															) : (
+																<>
+																	<S.ImageUploadStatusText>{uploadState?.status || 'pending'}</S.ImageUploadStatusText>
+																	{uploadState?.progress !== undefined && (
+																		<S.ImageUploadProgress>
+																			<S.ImageUploadProgressFill $progress={uploadState.progress} />
+																		</S.ImageUploadProgress>
+																	)}
+																</>
+															)}
+														</S.ImageUploadStatus>
+													)}
+												</S.ImageCard>
+											);
+										})}
+									</S.ImageGrid>
 
-							{/* Warning about failed uploads */}
-							{Array.from(imageUploadStates.values()).some((s) => s.status === 'error') && (
-								<S.UploadWarning>
-									<span>
-										Some images failed to upload. They will keep their original WordPress URLs. You can try uploading
-										them again or proceed with the import.
-									</span>
-								</S.UploadWarning>
+									{/* Warning about wallet */}
+									{!arProvider.wallet && (
+										<S.UploadWarning>
+											<span>
+												Connect your wallet to upload images to Arweave. Images not uploaded will keep their original
+												WordPress URLs.
+											</span>
+										</S.UploadWarning>
+									)}
+
+									{/* Warning about failed uploads */}
+									{Array.from(imageUploadStates.values()).some((s) => s.status === 'error') && (
+										<S.UploadWarning>
+											<span>
+												Some images failed to upload. They will keep their original WordPress URLs. You can try
+												uploading them again or proceed with the import.
+											</span>
+										</S.UploadWarning>
+									)}
+								</>
+							) : (
+								<S.Section>
+									<S.SectionInfo>No Data Found</S.SectionInfo>
+								</S.Section>
 							)}
 						</>
 					)}
