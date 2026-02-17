@@ -127,6 +127,7 @@ export const POST_PREVIEW_MINIMAL = {
 	layout: {
 		direction: 'column',
 		gap: '10px',
+		topLine: true,
 	},
 	rows: [
 		{

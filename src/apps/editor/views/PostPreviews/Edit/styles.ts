@@ -831,7 +831,7 @@ export const LivePreview = styled.div<{ $topLine?: boolean }>`
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
-	padding: var(--spacing-post, 20px);
+	padding: var(--preference-post-padding, 20px);
 	background: var(--color-post-background);
 	border: 1px solid var(--color-post-border);
 	border-radius: var(--border-radius);

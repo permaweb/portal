@@ -64,6 +64,12 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 	const isPortalCreator = post?.creator === portal?.id;
 	const displayName = isPortalCreator ? portal?.name : profile?.displayName;
 	const displayThumbnail = isPortalCreator ? portal?.logo : profile?.thumbnail;
+	const isLoadingPost = !post;
+	const [thumbnailFailed, setThumbnailFailed] = React.useState(false);
+
+	React.useEffect(() => {
+		setThumbnailFailed(false);
+	}, [post?.metadata?.thumbnail]);
 
 	const normalizeElement = (element: PostPreviewElement | string): PostPreviewElement => {
 		if (typeof element === 'string') {
@@ -76,6 +82,32 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 		}
 
 		return element;
+	};
+
+	const isRenderable = (element: PostPreviewElement): boolean => {
+		if (isLoadingPost) return true;
+
+		switch (element.type) {
+			case 'thumbnail':
+				return !!post?.metadata?.thumbnail && checkValidAddress(post.metadata.thumbnail) && !thumbnailFailed;
+			case 'description':
+				return !!post?.metadata?.description;
+			case 'categories': {
+				const hasCategories = (post?.metadata?.categories?.length || 0) > 0;
+				const hasTopics = (post?.metadata?.topics?.length || 0) > 0;
+				return hasCategories || hasTopics;
+			}
+			case 'comments':
+				if (element.layout?.hideWhenEmpty !== 'false' && !comments?.length) return false;
+				return true;
+			case 'body':
+			case 'meta': {
+				const children = (element.content || []).map((child: PostPreviewElement | string) => normalizeElement(child));
+				return children.some((child) => isRenderable(child));
+			}
+			default:
+				return true;
+		}
 	};
 
 	const getRows = (target: PostPreviewTemplate): PostPreviewRow[] => {
@@ -147,6 +179,7 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 						<img
 							className="loadingThumbnail"
 							onLoad={(e) => e.currentTarget.classList.remove('loadingThumbnail')}
+							onError={() => setThumbnailFailed(true)}
 							onClick={() => navigate(getRedirect(`post/${post?.metadata?.url ?? post?.id}`))}
 							src={getTxEndpoint(post.metadata.thumbnail)}
 						/>
@@ -288,11 +321,13 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 				);
 
 			case 'body':
+				const bodyChildren = (element.content || [])
+					.map((child: PostPreviewElement | string) => normalizeElement(child))
+					.filter((child) => isRenderable(child));
+				if (bodyChildren.length === 0) return null;
 				return (
 					<S.Body key={index} $layout={element.layout}>
-						{element.content?.map((child: PostPreviewElement | string, childIndex: number) =>
-							renderElement(normalizeElement(child as PostPreviewElement | string), childIndex)
-						)}
+						{bodyChildren.map((child: PostPreviewElement, childIndex: number) => renderElement(child, childIndex))}
 					</S.Body>
 				);
 
@@ -317,18 +352,46 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 	};
 
 	const rows = getRows(template);
+	const paddingValue = template.layout?.padding;
+	const paddingTopValue = template.layout?.paddingTop;
+	const hasAbsoluteCategories = rows.some((row) =>
+		row.columns.some((col) =>
+			col.blocks.some((block) => block.type === 'categories' && block.layout?.position === 'absolute')
+		)
+	);
+	const containerStyle: React.CSSProperties = {};
+	if (paddingValue !== undefined && paddingValue !== null && paddingValue !== '') {
+		containerStyle.padding = typeof paddingValue === 'number' ? `${paddingValue}px` : `${paddingValue}`;
+	}
+	if (paddingTopValue !== undefined && paddingTopValue !== null && paddingTopValue !== '') {
+		containerStyle.paddingTop = typeof paddingTopValue === 'number' ? `${paddingTopValue}px` : `${paddingTopValue}`;
+	} else if (hasAbsoluteCategories) {
+		containerStyle.paddingTop = '32px';
+	}
+	const containerStyleValue = Object.keys(containerStyle).length > 0 ? containerStyle : undefined;
 
 	return (
-		<S.Container $layout={template.layout} $portalLayout={Layout}>
-			{rows.map((row, rowIndex) => (
-				<S.Row key={row.id || rowIndex} $layout={template.layout}>
-					{row.columns.map((col, colIndex) => (
-						<S.Column key={col.id || colIndex}>
-							{col.blocks.map((element, index) => renderElement(element, index))}
-						</S.Column>
-					))}
-				</S.Row>
-			))}
+		<S.Container $layout={template.layout} $portalLayout={Layout} style={containerStyleValue}>
+			{rows
+				.map((row) => ({
+					...row,
+					columns: (row.columns || [])
+						.map((col) => ({
+							...col,
+							blocks: (col.blocks || []).map((block) => normalizeElement(block)).filter((block) => isRenderable(block)),
+						}))
+						.filter((col) => col.blocks.length > 0),
+				}))
+				.filter((row) => row.columns.length > 0)
+				.map((row, rowIndex) => (
+					<S.Row key={row.id || rowIndex} $layout={template.layout}>
+						{row.columns.map((col, colIndex) => (
+							<S.Column key={col.id || colIndex}>
+								{col.blocks.map((element, index) => renderElement(element, index))}
+							</S.Column>
+						))}
+					</S.Row>
+				))}
 		</S.Container>
 	);
 }

@@ -31,10 +31,10 @@ export const Container = styled.div<{ $layout: ContainerLayout; $portalLayout?: 
 	gap: ${(props) => props.$layout?.gap || '20px'};
 	margin-bottom: 20px;
 	box-sizing: border-box;
-	padding: var(--spacing-post, 20px);
+	padding: var(--preference-post-padding, 20px);
 	${(props) => props.$layout?.paddingTop && `padding-top: ${props.$layout.paddingTop};`}
 	background: var(--color-post-background);
-	border: 1px solid var(--color-post-border);
+	border: var(--preference-post-border-width, 1px) solid var(--color-post-border);
 	border-radius: var(--border-radius);
 	box-shadow: var(--preference-post-shadow);
 
@@ -79,14 +79,24 @@ export const Categories = styled.div<{ $layout?: ElementLayout; $isFirst?: boole
 	font-size: 12px;
 	font-weight: 600;
 	user-select: none;
+	color: var(--color-post-border-contrast);
+
+	a {
+		color: inherit !important;
+	}
 
 	${(props) =>
 		(props.$layout?.showBackground !== 'false' || props.$layout?.position === 'absolute') &&
 		css`
-			background-color: rgba(var(--color-background), 1);
+			background-color: rgba(var(--color-text), 1);
 			padding: 5px 15px 4px;
 			border-radius: var(--border-radius);
-			filter: invert(1);
+		`}
+
+	${(props) =>
+		props.$layout?.filter === 'invert' &&
+		css`
+			color: var(--color-post-border-contrast);
 		`}
 
 	${(props) =>
@@ -101,11 +111,11 @@ export const Categories = styled.div<{ $layout?: ElementLayout; $isFirst?: boole
 `;
 
 export const Category = styled.div<{ $layout?: ElementLayout }>`
+	color: rgba(var(--color-text-contrast), 1);
 	${(props) =>
 		props.$layout?.filter === 'invert' &&
 		css`
-			color: var(--color-post-border-contrast);
-			filter: invert(1);
+			color: rgba(var(--color-text-contrast), 1) !important;
 		`}
 `;
 
