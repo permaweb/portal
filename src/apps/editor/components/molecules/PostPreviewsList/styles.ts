@@ -1,51 +1,66 @@
 import styled from 'styled-components';
 
+import { STYLING } from 'helpers/config';
+
 export const Wrapper = styled.div`
 	width: 100%;
+`;
+
+export const HeaderRow = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+	margin-bottom: 20px;
 `;
 
 export const Description = styled.p`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xSmall};
-	margin: 0 0 20px 0;
+	margin: 0;
 `;
 
 export const TemplateGrid = styled.div`
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-	gap: 20px;
+	display: flex;
+	gap: 15px;
 `;
 
 export const TemplateCard = styled.div`
-	background: ${(props) => props.theme.colors.container.primary.background};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
-	border-radius: ${(props) => props.theme.borderRadius};
-	padding: 15px;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 12px;
+	background: ${(props) => props.theme.colors.button.primary.background};
+	border: 1px solid ${(props) => props.theme.colors.button.primary.border};
+	border-radius: ${STYLING.dimensions.radius.primary};
 	cursor: pointer;
-	transition: all 0.15s ease;
+	transition: all 100ms;
 
 	&:hover {
-		border-color: ${(props) => props.theme.colors.border.alt2};
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		background: ${(props) => props.theme.colors.button.primary.active.background};
+		border: 1px solid ${(props) => props.theme.colors.button.primary.active.border};
 	}
 `;
 
 export const TemplateHeader = styled.div`
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 12px;
+	justify-content: center;
 `;
 
-export const TemplateName = styled.h3`
-	margin: 0;
-	font-size: ${(props) => props.theme.typography.size.base};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+export const TemplateName = styled.p`
 	color: ${(props) => props.theme.colors.font.primary};
+	font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+	font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+	font-family: ${(props) => props.theme.typography.family.primary} !important;
+	text-transform: uppercase;
+	margin: auto 0 0 0;
 `;
 
 export const TemplatePreview = styled.div`
-	background: ${(props) => props.theme.colors.container.alt1.background};
+	width: 100%;
+	background: ${(props) => props.theme.colors.container.primary.background};
 	border-radius: 4px;
 	padding: 12px;
 	margin-bottom: 12px;
@@ -148,8 +163,4 @@ export const TemplateInfo = styled.div`
 		display: flex;
 		align-items: center;
 	}
-`;
-
-export const CreateButton = styled.div`
-	margin-bottom: 20px;
 `;

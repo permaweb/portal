@@ -97,11 +97,11 @@ export default function PostPreviewsList() {
 
 	return (
 		<S.Wrapper>
-			<S.Description>
-				{language?.postPreviewsDescription ||
-					'Customize how posts appear in feeds. Edit existing templates or create new ones.'}
-			</S.Description>
-			<S.CreateButton>
+			<S.HeaderRow>
+				<S.Description>
+					{language?.postPreviewsDescription ||
+						'Customize how posts appear in feeds. Edit existing templates or create new ones.'}
+				</S.Description>
 				<Button
 					type={'alt1'}
 					label={language?.createTemplate || 'Create Template'}
@@ -110,13 +110,10 @@ export default function PostPreviewsList() {
 					icon={ICONS.add}
 					iconLeftAlign
 				/>
-			</S.CreateButton>
+			</S.HeaderRow>
 			<S.TemplateGrid>
 				{Object.entries(templates).map(([id, template]: [string, any]) => (
 					<S.TemplateCard key={id} onClick={() => handleEditTemplate(id)}>
-						<S.TemplateHeader>
-							<S.TemplateName>{template.name || id}</S.TemplateName>
-						</S.TemplateHeader>
 						<S.TemplatePreview>
 							<S.PreviewLayout>
 								{getPreviewRows(template).map((row: any, rowIndex: number) => (
@@ -132,6 +129,7 @@ export default function PostPreviewsList() {
 								))}
 							</S.PreviewLayout>
 						</S.TemplatePreview>
+						<S.TemplateName>{template.name || id}</S.TemplateName>
 					</S.TemplateCard>
 				))}
 			</S.TemplateGrid>

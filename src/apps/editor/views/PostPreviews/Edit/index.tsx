@@ -22,12 +22,14 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 
 import { Button } from 'components/atoms/Button';
+import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
+import { Select } from 'components/atoms/Select';
 import { ICONS, POST_PREVIEWS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { getThemeVars } from 'helpers/themes';
-import { PortalPatchMapEnum } from 'helpers/types';
+import { PortalPatchMapEnum, SelectOptionType } from 'helpers/types';
 import { fixBooleanStrings, isMac } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -71,7 +73,7 @@ type SettingField = {
 	key: string;
 	label: string;
 	type: 'select' | 'number' | 'text' | 'range';
-	options?: { label: string; value: string }[];
+	options?: SelectOptionType[];
 	placeholder?: string;
 	showIf?: { key: string; value: string };
 	min?: number;
@@ -87,10 +89,10 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 			label: 'Aspect Ratio',
 			type: 'select',
 			options: [
-				{ label: '16/6', value: '16/6' },
-				{ label: '16/9', value: '16/9' },
-				{ label: '4/3', value: '4/3' },
-				{ label: '1/1', value: '1/1' },
+				{ id: '16/6', label: '16/6' },
+				{ id: '16/9', label: '16/9' },
+				{ id: '4/3', label: '4/3' },
+				{ id: '1/1', label: '1/1' },
 			],
 		},
 		{
@@ -98,9 +100,9 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 			label: 'Object Fit',
 			type: 'select',
 			options: [
-				{ label: 'Cover', value: 'cover' },
-				{ label: 'Contain', value: 'contain' },
-				{ label: 'Fill', value: 'fill' },
+				{ id: 'cover', label: 'Cover' },
+				{ id: 'contain', label: 'Contain' },
+				{ id: 'fill', label: 'Fill' },
 			],
 		},
 	],
@@ -111,8 +113,8 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 			label: 'Show Background',
 			type: 'select',
 			options: [
-				{ label: 'Yes', value: '' },
-				{ label: 'No', value: 'false' },
+				{ id: '', label: 'Yes' },
+				{ id: 'false', label: 'No' },
 			],
 		},
 		{
@@ -120,8 +122,8 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 			label: 'Filter',
 			type: 'select',
 			options: [
-				{ label: 'None', value: '' },
-				{ label: 'Invert', value: 'invert' },
+				{ id: '', label: 'None' },
+				{ id: 'invert', label: 'Invert' },
 			],
 		},
 		{
@@ -129,8 +131,8 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 			label: 'Top Line',
 			type: 'select',
 			options: [
-				{ label: 'No', value: '' },
-				{ label: 'Yes', value: 'true' },
+				{ id: '', label: 'No' },
+				{ id: 'true', label: 'Yes' },
 			],
 		},
 	],
@@ -145,8 +147,8 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 			label: 'Show Avatar',
 			type: 'select',
 			options: [
-				{ label: 'Yes', value: '' },
-				{ label: 'No', value: 'false' },
+				{ id: '', label: 'Yes' },
+				{ id: 'false', label: 'No' },
 			],
 		},
 		{
@@ -154,8 +156,8 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 			label: 'Width',
 			type: 'select',
 			options: [
-				{ label: 'Fit Content', value: '' },
-				{ label: 'Flex', value: 'flex' },
+				{ id: '', label: 'Fit Content' },
+				{ id: 'flex', label: 'Flex' },
 			],
 		},
 		{ key: 'flex', label: 'Flex Value', type: 'number', placeholder: '1', showIf: { key: 'width', value: 'flex' } },
@@ -166,8 +168,8 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 			label: 'Width',
 			type: 'select',
 			options: [
-				{ label: 'Fit Content', value: '' },
-				{ label: 'Flex', value: 'flex' },
+				{ id: '', label: 'Fit Content' },
+				{ id: 'flex', label: 'Flex' },
 			],
 		},
 		{ key: 'flex', label: 'Flex Value', type: 'number', placeholder: '1', showIf: { key: 'width', value: 'flex' } },
@@ -179,8 +181,8 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 			label: 'Hide When Empty',
 			type: 'select',
 			options: [
-				{ label: 'Yes', value: '' },
-				{ label: 'No', value: 'false' },
+				{ id: '', label: 'Yes' },
+				{ id: 'false', label: 'No' },
 			],
 		},
 		{ key: 'maxCount', label: 'Max Comments', type: 'number', placeholder: '10' },
@@ -189,8 +191,8 @@ const BLOCK_SETTINGS: Record<string, SettingField[]> = {
 			label: 'Sort Order',
 			type: 'select',
 			options: [
-				{ label: 'Newest First', value: '' },
-				{ label: 'Oldest First', value: 'asc' },
+				{ id: '', label: 'Newest First' },
+				{ id: 'asc', label: 'Oldest First' },
 			],
 		},
 	],
@@ -1450,45 +1452,51 @@ export default function PostPreviewEdit() {
 																)
 																.map((field) => (
 																	<S.SettingField key={field.key}>
-																		<S.SettingLabel>{field.label}</S.SettingLabel>
 																		{field.type === 'select' ? (
-																			<S.SettingSelect
+																			<Select
+																				label={field.label}
+																				activeOption={
+																					field.options?.find(
+																						(opt) =>
+																							opt.id ===
+																							((field.key === 'aspectRatio'
+																								? (selectedBlock.layout as any)?.[field.key] || '16/9'
+																								: (selectedBlock.layout as any)?.[field.key]) || '')
+																					) ||
+																					field.options?.[0] || { id: '', label: '' }
+																				}
+																				setActiveOption={(option: SelectOptionType) =>
+																					updateBlockLayout(selectedBlock.id, field.key, option.id)
+																				}
+																				options={field.options || []}
+																				disabled={false}
+																			/>
+																		) : (
+																			<FormField
+																				label={field.label}
+																				type={field.type === 'number' ? 'number' : undefined}
 																				value={
-																					(field.key === 'aspectRatio'
-																						? (selectedBlock.layout as any)?.[field.key] || '16/9'
-																						: (selectedBlock.layout as any)?.[field.key]) || ''
+																					field.type === 'number'
+																						? (selectedBlock.layout as any)?.[field.key] ?? ''
+																						: (selectedBlock.layout as any)?.[field.key] || ''
 																				}
-																				onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-																					updateBlockLayout(selectedBlock.id, field.key, e.target.value)
-																				}
-																			>
-																				{field.options?.map((opt) => (
-																					<option key={opt.value} value={opt.value}>
-																						{opt.label}
-																					</option>
-																				))}
-																			</S.SettingSelect>
-																		) : field.type === 'number' ? (
-																			<S.SettingInput
-																				type="number"
-																				value={(selectedBlock.layout as any)?.[field.key] ?? ''}
 																				placeholder={field.placeholder}
 																				onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
 																					updateBlockLayout(
 																						selectedBlock.id,
 																						field.key,
-																						e.target.value ? Number(e.target.value) : undefined
+																						field.type === 'number'
+																							? e.target.value
+																								? Number(e.target.value)
+																								: undefined
+																							: e.target.value
 																					)
 																				}
-																			/>
-																		) : (
-																			<S.SettingInput
-																				type="text"
-																				value={(selectedBlock.layout as any)?.[field.key] || ''}
-																				placeholder={field.placeholder}
-																				onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-																					updateBlockLayout(selectedBlock.id, field.key, e.target.value)
-																				}
+																				disabled={false}
+																				invalid={{ status: false, message: null }}
+																				sm
+																				noMargin
+																				hideErrorMessage
 																			/>
 																		)}
 																	</S.SettingField>
@@ -1501,29 +1509,36 @@ export default function PostPreviewEdit() {
 													) : (
 														POST_SETTINGS.map((field) => (
 															<S.SettingField key={field.key}>
-																<S.SettingLabel>{field.label}</S.SettingLabel>
 																{field.type === 'range' ? (
-																	<S.SliderField>
-																		<S.SettingInput
-																			type="range"
-																			min={field.min}
-																			max={field.max}
-																			step={field.step}
-																			value={parseInt((template.layout as any)?.[field.key]) || 20}
-																			onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-																				updateTemplateLayout(field.key, e.target.value)
-																			}
-																		/>
-																		<span>{parseInt((template.layout as any)?.[field.key]) || 20}px</span>
-																	</S.SliderField>
+																	<>
+																		<S.SettingLabel>{field.label}</S.SettingLabel>
+																		<S.SliderField>
+																			<S.SettingInput
+																				type="range"
+																				min={field.min}
+																				max={field.max}
+																				step={field.step}
+																				value={parseInt((template.layout as any)?.[field.key]) || 20}
+																				onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+																					updateTemplateLayout(field.key, e.target.value)
+																				}
+																			/>
+																			<span>{parseInt((template.layout as any)?.[field.key]) || 20}px</span>
+																		</S.SliderField>
+																	</>
 																) : (
-																	<S.SettingInput
-																		type="text"
+																	<FormField
+																		label={field.label}
 																		value={(template.layout as any)?.[field.key] || ''}
 																		placeholder={field.placeholder}
 																		onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
 																			updateTemplateLayout(field.key, e.target.value)
 																		}
+																		disabled={false}
+																		invalid={{ status: false, message: null }}
+																		sm
+																		noMargin
+																		hideErrorMessage
 																	/>
 																)}
 															</S.SettingField>

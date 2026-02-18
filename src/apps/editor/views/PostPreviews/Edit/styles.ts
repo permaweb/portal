@@ -33,7 +33,9 @@ export const ToolbarWrapper = styled.div<{ navWidth: number; hasBodyOverflow: bo
 `;
 
 export const ToolbarContent = styled.div<{ navWidth: number }>`
+	width: 100%;
 	max-width: ${STYLING.cutoffs.maxEditor} !important;
+	margin: 0 auto;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -50,6 +52,7 @@ export const TitleWrapper = styled.div`
 
 	input {
 		width: 100%;
+		padding: 0;
 		background: transparent;
 		border: none;
 		outline: none;
@@ -79,16 +82,17 @@ export const UpdateWrapper = styled.div`
 	gap: 7.5px;
 
 	span {
-		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.medium};
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		white-space: nowrap;
 	}
 
 	.indicator {
-		width: 7.5px;
-		height: 7.5px;
-		background: ${(props) => props.theme.colors.warning.primary};
+		height: 10px;
+		width: 10px;
 		border-radius: 50%;
+		background: ${(props) => props.theme.colors.indicator.neutral};
 	}
 `;
 
@@ -155,6 +159,7 @@ export const EmptyState = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	flex: 1;
 	padding: 40px;
 	color: ${(props) => props.theme.colors.font.alt2};
 	font-size: ${(props) => props.theme.typography.size.small};
@@ -596,21 +601,6 @@ export const SettingLabel = styled.label`
 	font-weight: ${(props) => props.theme.typography.weight.bold};
 	color: ${(props) => props.theme.colors.font.alt1};
 	text-transform: uppercase;
-`;
-
-export const SettingSelect = styled.select`
-	width: 100%;
-	padding: 6px 8px;
-	font-size: ${(props) => props.theme.typography.size.xSmall};
-	background: ${(props) => props.theme.colors.container.alt2.background};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
-	border-radius: ${STYLING.dimensions.radius.alt3};
-	color: ${(props) => props.theme.colors.font.primary};
-	outline: none;
-
-	&:focus {
-		border-color: ${(props) => props.theme.colors.button.alt1.background};
-	}
 `;
 
 export const SettingInput = styled.input`
