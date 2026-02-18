@@ -53,8 +53,9 @@ export default function PostPreviewsList() {
 		return [];
 	};
 
-	const renderPreviewBlock = (block: any, key: string | number) => {
-		if (!block) return null;
+	const renderPreviewBlock = (rawBlock: any, key: string | number) => {
+		if (!rawBlock) return null;
+		const block = typeof rawBlock === 'string' ? { type: rawBlock } : rawBlock;
 		const showTopLine = block.type === 'categories' && block.layout?.topLine;
 		if (block.type === 'body' || block.type === 'meta') {
 			const direction = block.layout?.direction || (block.type === 'meta' ? 'row' : 'column');

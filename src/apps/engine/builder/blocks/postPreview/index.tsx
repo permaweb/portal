@@ -92,11 +92,8 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 				return !!post?.metadata?.thumbnail && checkValidAddress(post.metadata.thumbnail) && !thumbnailFailed;
 			case 'description':
 				return !!post?.metadata?.description;
-			case 'categories': {
-				const hasCategories = (post?.metadata?.categories?.length || 0) > 0;
-				const hasTopics = (post?.metadata?.topics?.length || 0) > 0;
-				return hasCategories || hasTopics;
-			}
+			case 'categories':
+				return (post?.metadata?.categories?.length || 0) > 0;
 			case 'comments':
 				if (element.layout?.hideWhenEmpty !== 'false' && !comments?.length) return false;
 				return true;
@@ -153,15 +150,6 @@ export default function PostPreviewDynamic(props: PostPreviewDynamicProps) {
 											<S.Category $layout={element.layout}>{category.name}</S.Category>
 										</NavLink>
 										{catIndex < visibleCategories.length - 1 && <>,&nbsp;</>}
-									</React.Fragment>
-								))}
-								{post?.metadata?.topics?.length > 0 && visibleCategories.length > 0 && <>&nbsp;·&nbsp;</>}
-								{post?.metadata?.topics?.map((tag: string, tagIndex: number) => (
-									<React.Fragment key={tagIndex}>
-										<NavLink to={getRedirect(`feed/tag/${tag}`)}>
-											<S.Category $layout={element.layout}>#{tag}</S.Category>
-										</NavLink>
-										{tagIndex < post.metadata.topics.length - 1 && <>&nbsp;</>}
 									</React.Fragment>
 								))}
 							</>
