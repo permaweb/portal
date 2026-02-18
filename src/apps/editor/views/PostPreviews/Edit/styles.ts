@@ -557,7 +557,7 @@ export const SettingsPanelHeader = styled.div`
 	width: 100%;
 	padding: 12px 15px;
 	background: ${(props) => props.theme.colors.container.alt3.background};
-	border-radius: calc(${STYLING.dimensions.radius.primary} - 1px) calc(${STYLING.dimensions.radius.primary} - 1px) 0 0;
+	border-radius: 6.5px 6.5px 0 0;
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 
 	p {
