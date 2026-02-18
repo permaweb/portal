@@ -92,6 +92,7 @@ export const Actions = styled.div`
 	margin-top: 10px;
 	display: flex;
 	justify-content: flex-end;
+	margin: 7.5px 0 10px 0;
 `;
 
 export const Placeholder = styled.div`

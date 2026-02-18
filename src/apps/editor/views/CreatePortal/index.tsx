@@ -416,6 +416,7 @@ export default function CreatePortal() {
 							/>,
 						]}
 					/>
+					{creating && <Loader message={'Creating Portal...'} />}
 					<S.Body>
 						<S.Column>
 							<S.Section>
