@@ -17,7 +17,7 @@ export const ToolbarWrapper = styled.div<{ navWidth: number; hasBodyOverflow: bo
 	position: fixed;
 	top: ${STYLING.dimensions.nav.height};
 	left: ${(props) => `${props.navWidth}px`};
-	z-index: 10;
+	z-index: 1;
 	background: ${(props) => props.theme.colors.view.background};
 	border: 1px solid ${(props) => props.theme.colors.view.background};
 	padding: 10px 20px 15px 30px;
@@ -557,6 +557,7 @@ export const SettingsPanelHeader = styled.div`
 	width: 100%;
 	padding: 12px 15px;
 	background: ${(props) => props.theme.colors.container.alt3.background};
+	border-radius: calc(${STYLING.dimensions.radius.primary} - 1px) calc(${STYLING.dimensions.radius.primary} - 1px) 0 0;
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 
 	p {
