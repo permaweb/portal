@@ -407,6 +407,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				themes: presentation?.themes ?? current?.themes ?? null,
 				pages: presentation?.pages ?? current?.pages ?? null,
 				layout: presentation?.layout ?? current?.layout ?? null,
+				postPreviews: presentation?.layout?.postPreviews ?? presentation?.postPreviews ?? current?.postPreviews ?? {},
 				users: users?.roles ? getPortalUsers(users.roles) : current?.users ?? null,
 				roleOptions: users?.roleOptions ?? current?.roleOptions ?? null,
 				permissions: users?.permissions ?? current?.permissions ?? null,

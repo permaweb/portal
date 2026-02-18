@@ -31,6 +31,7 @@ export type PortalDetailType = {
 	fonts?: PortalFontsType;
 	themes?: PortalThemeType[];
 	layout?: any;
+	postPreviews?: Record<string, any>;
 	monetization?: any;
 	transfers?: any[];
 };

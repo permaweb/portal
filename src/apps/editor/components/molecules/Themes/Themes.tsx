@@ -33,6 +33,7 @@ function Color(props: {
 	width?: number;
 	maxWidth?: boolean;
 	isBorder?: boolean;
+	isBackground?: boolean;
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -53,6 +54,7 @@ function Color(props: {
 	const [showShadowColorPicker, setShowShadowColorPicker] = React.useState<boolean>(false);
 	const [shadowEnabled, setShadowEnabled] = React.useState<boolean>(true);
 	const [borderEnabled, setBorderEnabled] = React.useState<boolean>(props.value !== 'unset');
+	const [backgroundEnabled, setBackgroundEnabled] = React.useState<boolean>(props.value !== 'unset');
 
 	function getColor(basics: any, value: string) {
 		if (!basics || !value) return null;
@@ -132,6 +134,8 @@ function Color(props: {
 	React.useEffect(() => {
 		if (props.isBorder && props.value === 'unset') {
 			setBorderEnabled(false);
+		} else if (props.isBackground && props.value === 'unset') {
+			setBackgroundEnabled(false);
 		} else if (props.value) {
 			if (isColorValue(props.value) && props.basics) {
 				const absoluteValue = getColor(props.basics, props.value);
@@ -140,6 +144,8 @@ function Color(props: {
 				}
 				if (props.isBorder) {
 					setBorderEnabled(true);
+				} else if (props.isBackground) {
+					setBackgroundEnabled(true);
 				}
 			} else if (isShadowValue(props.value)) {
 				setTextValue(props.value);
@@ -150,6 +156,8 @@ function Color(props: {
 			}
 		} else if (props.isBorder) {
 			setBorderEnabled(false);
+		} else if (props.isBackground) {
+			setBackgroundEnabled(false);
 		}
 	}, [props.value, props.basics, props.scheme]);
 
@@ -192,7 +200,10 @@ function Color(props: {
 	const isShadow = isShadowValue(props.value);
 	const isBasicColorKey = ['primary', 'secondary', 'background', 'text', 'border'].includes(props.value);
 	const isBorderDisabled = props.isBorder && props.value === 'unset';
+	const isBackgroundDisabled = props.isBackground && props.value === 'unset';
 	const displayText = isBorderDisabled
+		? 'OFF'
+		: isBackgroundDisabled
 		? 'OFF'
 		: isColor
 		? isBasicColorKey
@@ -211,15 +222,15 @@ function Color(props: {
 			<S.ColorWrapper>
 				<S.ColorBody
 					onClick={() => {
-						if (isColor || isBorderDisabled) setShowSelector(true);
+						if (isColor || isBorderDisabled || isBackgroundDisabled) setShowSelector(true);
 						else setShowTextInput(true);
 					}}
 					disabled={props.disabled}
-					background={isBorderDisabled ? '#808080' : isColor ? value : '#808080'}
+					background={isBorderDisabled || isBackgroundDisabled ? '#808080' : isColor ? value : '#808080'}
 					height={props.height}
 					width={props.width}
 					maxWidth={props.maxWidth}
-					text={isColor && value && !isBorderDisabled ? getColorContrast(value) : 'white'}
+					text={isColor && value && !isBorderDisabled && !isBackgroundDisabled ? getColorContrast(value) : 'white'}
 				>
 					<span>{displayText}</span>
 				</S.ColorBody>
@@ -252,7 +263,29 @@ function Color(props: {
 								/>
 							</S.ShadowToggleRow>
 						)}
-						{props.isBorder && !borderEnabled ? (
+						{props.isBackground && (
+							<S.ShadowToggleRow>
+								<label>Background</label>
+								<Toggle
+									options={['OFF', 'ON']}
+									activeOption={backgroundEnabled ? 'ON' : 'OFF'}
+									handleToggle={(option) => {
+										const enabled = option === 'ON';
+										setBackgroundEnabled(enabled);
+										if (!enabled) {
+											props.onChange('unset');
+										} else {
+											const defaultColor = props.basics?.background?.[props.scheme] || '255,255,255';
+											const colorToUse = value || parseRgbStringToHex(defaultColor);
+											setValue(colorToUse);
+											props.onChange(hexToRgb(colorToUse));
+										}
+									}}
+									disabled={props.disabled}
+								/>
+							</S.ShadowToggleRow>
+						)}
+						{(props.isBorder && !borderEnabled) || (props.isBackground && !backgroundEnabled) ? (
 							<S.SelectorFlexWrapper style={{ opacity: 0.4 }}>
 								<S.SelectorPreview background={'#808080'} />
 								<div
@@ -283,7 +316,7 @@ function Color(props: {
 						)}
 						<S.SelectorActions>
 							<S.SelectorFlexActions>
-								{props.isBorder && !borderEnabled ? (
+								{(props.isBorder && !borderEnabled) || (props.isBackground && !backgroundEnabled) ? (
 									<input
 										type="text"
 										value="OFF"
@@ -355,6 +388,8 @@ function Color(props: {
 									label={language?.save}
 									handlePress={() => {
 										if (props.isBorder && !borderEnabled) {
+											props.onChange('unset');
+										} else if (props.isBackground && !backgroundEnabled) {
 											props.onChange('unset');
 										} else if (
 											!['primary', 'secondary', 'background', 'text', 'border'].includes(props.value) &&
@@ -627,7 +662,8 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 
 	const preferences = theme[section]?.preferences || {};
 	const validPreferences = Object.entries(preferences).filter(
-		([_, value]: any) => typeof value === 'object' && value.light !== undefined
+		([key, value]: any) =>
+			typeof value === 'object' && value.light !== undefined && !(section === 'post' && key.toLowerCase() === 'border')
 	);
 
 	function handleThemeChange(
@@ -637,6 +673,13 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 		key: string,
 		newValue: string | boolean | number
 	) {
+		const shouldDisablePostBorder =
+			section === 'post' &&
+			type === 'colors' &&
+			key.toLowerCase() === 'border' &&
+			typeof newValue === 'string' &&
+			(newValue === 'unset' || newValue === 'none' || newValue === 'transparent' || newValue === '');
+
 		const updatedTheme = {
 			...props.theme,
 			[section]: {
@@ -648,6 +691,17 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 						...((scheme ? { [scheme]: newValue } : newValue) as any),
 					},
 				},
+				...(section === 'post' && scheme
+					? {
+							preferences: {
+								...props.theme[section].preferences,
+								border: {
+									...(props.theme[section].preferences?.border || {}),
+									[scheme]: !shouldDisablePostBorder,
+								},
+							},
+					  }
+					: {}),
 			},
 		};
 
@@ -717,6 +771,7 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 															disabled={unauthorized}
 															width={125}
 															isBorder={key === 'border'}
+															isBackground={key === 'background' && section === 'post'}
 														/>
 													</S.ThemeValue>
 												</S.ThemeLight>
@@ -733,6 +788,7 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 															disabled={unauthorized}
 															width={125}
 															isBorder={key === 'border'}
+															isBackground={key === 'background' && section === 'post'}
 														/>
 													</S.ThemeValue>
 												</S.ThemeDark>
@@ -1692,19 +1748,23 @@ export default function Themes() {
 								},
 								preferences: {
 									opacity: { light: 1, dark: 0.6 },
+									border: { light: true, dark: true },
 									shadow: { light: 'none', dark: 'none' },
 								},
 							},
 						};
 					}
-					if (!theme.post.preferences?.shadow) {
+					const hasShadowPref = theme.post.preferences && 'shadow' in theme.post.preferences;
+					const hasBorderPref = theme.post.preferences && 'border' in theme.post.preferences;
+					if (!hasShadowPref || !hasBorderPref) {
 						return {
 							...theme,
 							post: {
 								...theme.post,
 								preferences: {
 									...theme.post.preferences,
-									shadow: { light: 'none', dark: 'none' },
+									border: hasBorderPref ? theme.post.preferences?.border : { light: true, dark: true },
+									shadow: hasShadowPref ? theme.post.preferences?.shadow : { light: 'none', dark: 'none' },
 								},
 							},
 						};

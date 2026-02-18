@@ -152,16 +152,36 @@ export function initThemes(Themes: any[]) {
 
 			// Posts
 			...(theme?.post
-				? {
-						'--color-post-background': `rgba(${getColor(theme, scheme, theme.post.colors.background[scheme])},${
-							theme.post.preferences.opacity[scheme]
-						})`,
-						'--color-post-border': `rgba(${getColor(theme, scheme, theme.post.colors.border[scheme])},1)`,
-						'--color-post-border-contrast': `rgba(${getContrastColor(
-							getColor(theme, scheme, theme.post.colors.border[scheme])
-						)},1)`,
-						'--preference-post-shadow': theme.post?.preferences?.shadow?.[scheme] || 'none',
-				  }
+				? (() => {
+						const borderValue = theme.post.colors.border[scheme];
+						const borderDisabled =
+							theme.post?.preferences?.border?.[scheme] === false ||
+							!borderValue ||
+							borderValue === 'unset' ||
+							borderValue === 'none' ||
+							borderValue === 'transparent';
+						return {
+							'--color-post-background': (() => {
+								const backgroundValue = theme.post.colors.background[scheme];
+								const backgroundDisabled =
+									!backgroundValue ||
+									backgroundValue === 'unset' ||
+									backgroundValue === 'none' ||
+									backgroundValue === 'transparent';
+								if (backgroundDisabled) return 'transparent';
+								return `rgba(${getColor(theme, scheme, backgroundValue)},${theme.post.preferences.opacity[scheme]})`;
+							})(),
+							'--color-post-border': borderDisabled ? 'transparent' : `rgba(${getColor(theme, scheme, borderValue)},1)`,
+							'--color-post-border-contrast': `rgba(${getContrastColor(getColor(theme, scheme, borderValue))},1)`,
+							'--preference-post-border-width': borderDisabled ? '0px' : '1px',
+							'--preference-post-padding': (() => {
+								const paddingValue = theme.post?.preferences?.padding?.[scheme];
+								if (paddingValue === undefined || paddingValue === null || paddingValue === '') return '20px';
+								return typeof paddingValue === 'number' ? `${paddingValue}px` : `${paddingValue}`;
+							})(),
+							'--preference-post-shadow': theme.post?.preferences?.shadow?.[scheme] || 'none',
+						};
+				  })()
 				: {}),
 
 			// Cards

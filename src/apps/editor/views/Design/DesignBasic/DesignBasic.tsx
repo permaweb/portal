@@ -1,6 +1,7 @@
 import { Fonts } from 'editor/components/molecules/Fonts';
 import { Layout } from 'editor/components/molecules/Layout';
 import { Media } from 'editor/components/molecules/Media';
+import { PostPreviewsList } from 'editor/components/molecules/PostPreviewsList';
 import { Themes } from 'editor/components/molecules/Themes';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -75,6 +76,14 @@ function ImagesView() {
 	);
 }
 
+function PostPreviewsView() {
+	return (
+		<S.ViewWrapper>
+			<PostPreviewsList />
+		</S.ViewWrapper>
+	);
+}
+
 export default function DesignBasic() {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
@@ -108,6 +117,12 @@ export default function DesignBasic() {
 			disabled: false,
 			url: `/${id}/design/images`,
 			view: ImagesView,
+		},
+		{
+			label: language?.postPreviews || 'Post Previews',
+			disabled: false,
+			url: `/${id}/design/post-previews`,
+			view: PostPreviewsView,
 		},
 	];
 

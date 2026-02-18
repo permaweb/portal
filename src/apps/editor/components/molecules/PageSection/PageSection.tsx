@@ -3,16 +3,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ReactSVG } from 'react-svg';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
+import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPageUpdate } from 'editor/store/page';
 
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Panel } from 'components/atoms/Panel';
-import { ARTICLE_BLOCKS, ICONS, PAGE_BLOCKS } from 'helpers/config';
+import { ARTICLE_BLOCKS, ICONS, PAGE_BLOCKS, POST_PREVIEWS } from 'helpers/config';
 import { ArticleBlockEnum, PageBlockEnum, PageBlockType, PageSectionEnum, PageSectionType } from 'helpers/types';
 import { capitalize } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
+import { CloseHandler } from 'wrappers/CloseHandler';
 
 import { ArticleBlock } from '../ArticleBlock';
 import { ArticleBlocks } from '../ArticleBlocks';
@@ -48,8 +50,21 @@ export default function PageSection(props: {
 	const { resizingBlockId: globalResizingBlockId, setResizingBlockId: setGlobalResizingBlockId } =
 		React.useContext(ResizeContext);
 
+	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+
+	const [feedLayoutDropdown, setFeedLayoutDropdown] = React.useState<string | null>(null);
+
+	const feedLayoutOptions = React.useMemo(() => {
+		const portalPreviews = portalProvider.current?.layout?.postPreviews || portalProvider.current?.postPreviews || {};
+		const allTemplates = { ...POST_PREVIEWS, ...portalPreviews };
+
+		return Object.entries(allTemplates).map(([id, template]: [string, any]) => ({
+			id: id,
+			label: template.name || id,
+		}));
+	}, [portalProvider.current?.postPreviews]);
 
 	const handleCurrentPageUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPageUpdate(updatedField));
@@ -426,7 +441,7 @@ export default function PageSection(props: {
 		}
 		switch (block.type) {
 			case 'feed':
-				return <FeedBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
+				return <FeedBlock index={index} key={block.id} block={block} />;
 			case 'post':
 				return <PostBlock index={index} key={block.id} block={block} onChangeBlock={handlePageBlockChange} />;
 			case 'postSpotlight':
@@ -569,6 +584,44 @@ export default function PageSection(props: {
 																					tooltipPosition={'bottom-right'}
 																					noFocus
 																				/>
+																			)}
+																			{block.type === 'feed' && (
+																				<CloseHandler
+																					active={feedLayoutDropdown === block.id}
+																					disabled={feedLayoutDropdown !== block.id}
+																					callback={() => setFeedLayoutDropdown(null)}
+																				>
+																					<S.FeedLayoutWrapper>
+																						<IconButton
+																							type={'alt1'}
+																							active={feedLayoutDropdown === block.id}
+																							src={ICONS.layout}
+																							handlePress={() =>
+																								setFeedLayoutDropdown(feedLayoutDropdown === block.id ? null : block.id)
+																							}
+																							dimensions={{ wrapper: 23.5, icon: 13.5 }}
+																							tooltip={language?.postLayout || 'Post Layout'}
+																							tooltipPosition={'bottom-right'}
+																							noFocus
+																						/>
+																						{feedLayoutDropdown === block.id && (
+																							<S.FeedLayoutDropdown>
+																								{feedLayoutOptions.map((option) => (
+																									<S.FeedLayoutOption
+																										key={option.id}
+																										$active={block.layout === option.id}
+																										onClick={() => {
+																											handlePageBlockChange({ ...block, layout: option.id }, index);
+																											setFeedLayoutDropdown(null);
+																										}}
+																									>
+																										{option.label}
+																									</S.FeedLayoutOption>
+																								))}
+																							</S.FeedLayoutDropdown>
+																						)}
+																					</S.FeedLayoutWrapper>
+																				</CloseHandler>
 																			)}
 																			<IconButton
 																				type={'alt1'}
