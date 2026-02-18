@@ -622,7 +622,7 @@ export default function WordPressImport(props: {
 	function renderInputStage() {
 		return (
 			<S.Wrapper>
-				<S.InputSection>
+				<S.InputSection $flat={!props.createPortal}>
 					<S.SectionLabel>Import Method</S.SectionLabel>
 					<S.SectionInfo>
 						Choose how you want to import your WordPress content. You can either import from a live WordPress site URL
@@ -668,7 +668,7 @@ export default function WordPressImport(props: {
 
 				{importMethod === 'url' ? (
 					<>
-						<S.InputSection>
+						<S.InputSection $flat={!props.createPortal}>
 							<S.SectionLabel>{language?.wordpressUrl || 'WordPress Site URL'}</S.SectionLabel>
 							<S.SectionInfo>
 								Enter the URL of the WordPress site you want to import content from. Supports both self-hosted WordPress
@@ -688,7 +688,7 @@ export default function WordPressImport(props: {
 							/>
 						</S.InputSection>
 
-						<S.InputSection>
+						<S.InputSection $flat={!props.createPortal}>
 							<S.SectionLabel>What to Import</S.SectionLabel>
 							<S.SectionInfo>Select what content you want to fetch from the WordPress site.</S.SectionInfo>
 							<S.WhatToImportList>
@@ -743,7 +743,7 @@ export default function WordPressImport(props: {
 						</S.InputSection>
 					</>
 				) : (
-					<S.InputSection>
+					<S.InputSection $flat={!props.createPortal}>
 						<S.SectionLabel>WordPress Export File</S.SectionLabel>
 						<S.SectionInfo>
 							Upload a WordPress export file (.xml). This file contains all your posts, pages, categories, tags, and
@@ -829,6 +829,18 @@ export default function WordPressImport(props: {
 		const allPostsSelected = importData.posts.length > 0 && importData.posts.every((p) => selectedPosts.has(p.wpId));
 		const allPagesSelected = importData.pages.length > 0 && importData.pages.every((p) => selectedPages.has(p.wpId));
 
+		const countAllCategories = (cats: any[]): number => {
+			let count = 0;
+			for (const cat of cats) {
+				count++;
+				if (cat.children && cat.children.length > 0) {
+					count += countAllCategories(cat.children);
+				}
+			}
+			return count;
+		};
+		const totalCategoriesCount = countAllCategories(importData.categories);
+
 		return (
 			<S.Wrapper>
 				<S.PreviewWrapper>
@@ -854,61 +866,62 @@ export default function WordPressImport(props: {
 						{importData.description && <S.PreviewDescription>{importData.description}</S.PreviewDescription>}
 					</S.PreviewHeader>
 
-					<S.PreviewStats>
-						<S.PreviewStat>
-							<S.PreviewStatLabel>Posts</S.PreviewStatLabel>
-							<S.PreviewStatValue>{importData.posts.length}</S.PreviewStatValue>
-						</S.PreviewStat>
-						<S.PreviewStat>
-							<S.PreviewStatLabel>Pages</S.PreviewStatLabel>
-							<S.PreviewStatValue>{importData.pages.length}</S.PreviewStatValue>
-						</S.PreviewStat>
-						<S.PreviewStat>
-							<S.PreviewStatLabel>Categories</S.PreviewStatLabel>
-							<S.PreviewStatValue>{importData.categories.length}</S.PreviewStatValue>
-						</S.PreviewStat>
-						<S.PreviewStat>
-							<S.PreviewStatLabel>Tags</S.PreviewStatLabel>
-							<S.PreviewStatValue>{importData.topics.length}</S.PreviewStatValue>
-						</S.PreviewStat>
-						{importMethod === 'url' &&
-							importData.extractedTheme &&
-							Object.values(importData.extractedTheme.colors).some((c) => c !== null) && (
-								<S.PreviewStat>
-									<S.PreviewStatLabel>Colors</S.PreviewStatLabel>
-									<S.PreviewStatValue>
-										{Object.values(importData.extractedTheme.colors).filter((c) => c !== null).length} detected
-									</S.PreviewStatValue>
-								</S.PreviewStat>
-							)}
-					</S.PreviewStats>
-
 					<S.Tabs>
 						<S.Tab $active={activeTab === 'posts'} onClick={() => setActiveTab('posts')}>
-							Posts ({selectedPosts.size}/{importData.posts.length})
+							<S.TabContent>
+								<span>Posts</span>
+								<S.TabCount>
+									{selectedPosts.size}/{importData.posts.length}
+								</S.TabCount>
+							</S.TabContent>
 						</S.Tab>
 						<S.Tab $active={activeTab === 'pages'} onClick={() => setActiveTab('pages')}>
-							Pages ({selectedPages.size}/{importData.pages.length})
+							<S.TabContent>
+								<span>Pages</span>
+								<S.TabCount>
+									{selectedPages.size}/{importData.pages.length}
+								</S.TabCount>
+							</S.TabContent>
 						</S.Tab>
 						<S.Tab $active={activeTab === 'categories'} onClick={() => setActiveTab('categories')}>
-							Categories ({importData.categories.length})
+							<S.TabContent>
+								<span>Categories</span>
+								<S.TabCount>
+									{selectedCategories.size}/{totalCategoriesCount}
+								</S.TabCount>
+							</S.TabContent>
 						</S.Tab>
 						<S.Tab $active={activeTab === 'tags'} onClick={() => setActiveTab('tags')}>
-							Tags ({selectedTopics.size}/{importData.topics.length})
+							<S.TabContent>
+								<span>Tags</span>
+								<S.TabCount>
+									{selectedTopics.size}/{importData.topics.length}
+								</S.TabCount>
+							</S.TabContent>
 						</S.Tab>
 						<S.Tab $active={activeTab === 'theme'} onClick={() => setActiveTab('theme')}>
-							Theme{' '}
-							{importMethod === 'file'
-								? '(File Import)'
-								: importData.extractedTheme && Object.values(importData.extractedTheme.colors).some((c) => c !== null)
-								? `(${Object.values(importData.extractedTheme.colors).filter((c) => c !== null).length} colors)`
-								: importData.theme
-								? '(Found)'
-								: ''}
+							<S.TabContent>
+								<span>Theme</span>
+								{importMethod === 'file' ? (
+									<S.TabCount>File Import</S.TabCount>
+								) : importData.extractedTheme &&
+								  Object.values(importData.extractedTheme.colors).some((c) => c !== null) ? (
+									<S.TabCount>
+										{Object.values(importData.extractedTheme.colors).filter((c) => c !== null).length} colors
+									</S.TabCount>
+								) : importData.theme ? (
+									<S.TabCount>Found</S.TabCount>
+								) : null}
+							</S.TabContent>
 						</S.Tab>
 						{importData.images && importData.images.length > 0 && (
 							<S.Tab $active={activeTab === 'images'} onClick={() => setActiveTab('images')}>
-								Images ({selectedImages.size}/{importData.images.length})
+								<S.TabContent>
+									<span>Images</span>
+									<S.TabCount>
+										{selectedImages.size}/{importData.images.length}
+									</S.TabCount>
+								</S.TabContent>
 							</S.Tab>
 						)}
 					</S.Tabs>
@@ -928,11 +941,13 @@ export default function WordPressImport(props: {
 												$selected={selectedPosts.has(post.wpId)}
 												onClick={() => handleTogglePost(post.wpId)}
 											>
-												<Checkbox
-													checked={selectedPosts.has(post.wpId)}
-													handleSelect={() => handleTogglePost(post.wpId)}
-													disabled={false}
-												/>
+												<S.CheckboxWrapper onClick={(e) => e.stopPropagation()}>
+													<Checkbox
+														checked={selectedPosts.has(post.wpId)}
+														handleSelect={() => handleTogglePost(post.wpId)}
+														disabled={false}
+													/>
+												</S.CheckboxWrapper>
 												<S.PostItemContent>
 													<S.PostItemTitle>{post.title}</S.PostItemTitle>
 													<S.PostItemMeta>
@@ -966,11 +981,13 @@ export default function WordPressImport(props: {
 												$selected={selectedPages.has(page.wpId)}
 												onClick={() => handleTogglePage(page.wpId)}
 											>
-												<Checkbox
-													checked={selectedPages.has(page.wpId)}
-													handleSelect={() => handleTogglePage(page.wpId)}
-													disabled={false}
-												/>
+												<S.CheckboxWrapper onClick={(e) => e.stopPropagation()}>
+													<Checkbox
+														checked={selectedPages.has(page.wpId)}
+														handleSelect={() => handleTogglePage(page.wpId)}
+														disabled={false}
+													/>
+												</S.CheckboxWrapper>
 												<S.PostItemContent>
 													<S.PostItemTitle>{page.title}</S.PostItemTitle>
 													<S.PostItemMeta>
@@ -1407,12 +1424,18 @@ export default function WordPressImport(props: {
 								typeof props.submitLabel === 'function'
 									? props.submitLabel(selectedPosts.size)
 									: props.submitLabel ??
-									  (props.createPortal
-											? `Create Portal & Import ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`
-											: `Import ${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`)
+									  (() => {
+											const parts: string[] = [];
+											if (selectedPosts.size > 0)
+												parts.push(`${selectedPosts.size} post${selectedPosts.size !== 1 ? 's' : ''}`);
+											if (selectedPages.size > 0)
+												parts.push(`${selectedPages.size} page${selectedPages.size !== 1 ? 's' : ''}`);
+											const summary = parts.length > 0 ? parts.join(', ') : 'content';
+											return props.createPortal ? `Create Portal & Import` : `Import ${summary}`;
+									  })()
 							}
 							handlePress={handleImport}
-							disabled={selectedPosts.size === 0}
+							disabled={selectedPosts.size === 0 && selectedPages.size === 0}
 							icon={ICONS.import}
 							iconLeftAlign
 						/>

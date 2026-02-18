@@ -30,11 +30,11 @@ export const Section = styled.div`
 	gap: 8px;
 `;
 
-export const InputSection = styled(Section)`
-	padding: 16px;
-	background: ${(props) => props.theme.colors.container.primary.background};
-	border: 1px solid ${(props) => props.theme.colors.border.primary};
-	border-radius: ${STYLING.dimensions.radius.alt2};
+export const InputSection = styled(Section)<{ $flat?: boolean }>`
+	padding: ${(props) => (props.$flat ? '0' : '16px')};
+	background: ${(props) => (props.$flat ? 'transparent' : props.theme.colors.container.primary.background)};
+	border: ${(props) => (props.$flat ? 'none' : `1px solid ${props.theme.colors.border.primary}`)};
+	border-radius: ${(props) => (props.$flat ? '0' : STYLING.dimensions.radius.alt2)};
 `;
 
 export const SectionHeader = styled.div`
@@ -248,6 +248,11 @@ export const PostItemMeta = styled.span`
 	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 
+export const CheckboxWrapper = styled.div`
+	display: flex;
+	align-items: center;
+`;
+
 export const SelectAllWrapper = styled.div`
 	display: flex;
 	align-items: center;
@@ -262,6 +267,7 @@ export const Tabs = styled.div`
 `;
 
 export const Tab = styled.button<{ $active: boolean }>`
+	flex: 1;
 	padding: 8px 16px;
 	background: ${(props) =>
 		props.$active ? props.theme.colors.button.primary.active.background : props.theme.colors.container.alt1.background};
@@ -281,6 +287,18 @@ export const Tab = styled.button<{ $active: boolean }>`
 				? props.theme.colors.button.primary.active.background
 				: props.theme.colors.container.primary.active};
 	}
+`;
+
+export const TabContent = styled.div`
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+`;
+
+export const TabCount = styled.span`
+	font-size: ${(props) => props.theme.typography.size.xxxxSmall};
+	opacity: 0.7;
 `;
 
 export const ThemePreview = styled.div`
