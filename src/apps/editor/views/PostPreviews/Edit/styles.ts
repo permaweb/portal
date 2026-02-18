@@ -550,7 +550,7 @@ export const SettingsPanel = styled.div`
 	border-radius: ${STYLING.dimensions.radius.primary};
 	background: ${(props) => props.theme.colors.container.primary.background};
 	border: 1px solid ${(props) => props.theme.colors.border.primary};
-	overflow: hidden;
+	overflow: visible;
 `;
 
 export const SettingsPanelHeader = styled.div`
