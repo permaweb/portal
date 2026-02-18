@@ -156,7 +156,7 @@ export default function WordPressImport(props: {
 				setSelectedImages(new Set(importData.images.map((img) => img.originalUrl)));
 			}
 		}
-	}, [importData, props.portalName, props.onPortalNameChange]);
+	}, [importData]);
 
 	React.useEffect(() => {
 		if (props.portalName !== undefined) {

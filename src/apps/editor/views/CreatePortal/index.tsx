@@ -133,10 +133,10 @@ export default function CreatePortal() {
 	}, []);
 
 	React.useEffect(() => {
-		if (portalProvider.current?.name) {
+		if (!creatingNew && portalProvider.current?.name) {
 			setName(portalProvider.current.name);
 		}
-	}, [portalProvider.current?.id, portalProvider.current?.name]);
+	}, [creatingNew, portalProvider.current?.id, portalProvider.current?.name]);
 
 	React.useEffect(() => {
 		if (importOption.id !== 'wordpress') {
