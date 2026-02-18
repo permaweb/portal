@@ -56,9 +56,10 @@ export const TitleWrapper = styled.div`
 		background: transparent;
 		border: none;
 		outline: none;
-		font-size: ${(props) => props.theme.typography.size.lg};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
 		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.base} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
 
 		&::placeholder {
 			color: ${(props) => props.theme.colors.font.alt2};
@@ -73,7 +74,7 @@ export const TitleWrapper = styled.div`
 export const EndActions = styled.div`
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 15px;
 `;
 
 export const UpdateWrapper = styled.div`

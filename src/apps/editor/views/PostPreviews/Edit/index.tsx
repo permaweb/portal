@@ -218,6 +218,7 @@ type BlockLayout = {
 	hideWhenEmpty?: string;
 	sortOrder?: string;
 	width?: string;
+	maxChars?: string;
 };
 
 type LayoutBlock = { id: string; type: string; layout?: BlockLayout; children?: LayoutBlock[] };
@@ -1192,7 +1193,7 @@ export default function PostPreviewEdit() {
 		setTemplate(resetTemplate);
 	};
 
-	const deleteBlock = (rowId: string, colId: string, blockId: string) => {
+	const deleteBlock = (_rowId: string, _colId: string, blockId: string) => {
 		if (!template || loading.active) return;
 		const location = findBlockLocation(blockId);
 		if (!location) return;
@@ -1339,7 +1340,6 @@ export default function PostPreviewEdit() {
 																						<S.InlineGroupWrapper>
 																							<S.InlineGroup>
 																								{block.children.map((child: any, childIndex: number) => {
-																									const isSelf = String(activeId) === child.id;
 																									const inlineActive = !!activeId;
 																									return (
 																										<S.BlockRow key={child.id}>
