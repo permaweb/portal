@@ -120,7 +120,7 @@ export const STYLING = {
 			max: '47.5px',
 		},
 		nav: {
-			height: '70px',
+			height: '72.5px',
 			linksHeight: '50px',
 			width: '260px',
 			widthMin: 67.5,
@@ -149,9 +149,11 @@ function createURLs() {
 	const pageEdit = (portalId: string) => `${pageBase(portalId)}edit/`;
 
 	const docsBase = `${base}docs/`;
+	const createBase = `${base}create`;
 
 	return {
 		base: base,
+		create: createBase,
 		category: (categoryId: string) => `category/${categoryId}`,
 		creator: (creatorId: string) => `creator/${creatorId}`,
 		info: (page: string) => `info/${page}`,
@@ -166,6 +168,7 @@ function createURLs() {
 		portalPages: (portalId: string) => `${portalBase(portalId)}pages/`,
 		portalLayout: (portalId: string) => `${portalBase(portalId)}layout/`,
 		portalSetup: (portalId: string) => `${portalBase(portalId)}setup/`,
+		portalCreate: (portalId: string) => `${portalBase(portalId)}create`,
 		post: (postId: string) => `post/${postId}`,
 		postCreate: (portalId: string) => `${postCreateBase(portalId)}`,
 		postEdit: (portalId: string) => `${postEditBase(portalId)}`,
