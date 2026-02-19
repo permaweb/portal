@@ -282,13 +282,15 @@ export default function Comment(props: any) {
 		}
 	}
 
+	const isPaidComment = !!commentData.tipReceiptId;
+
 	if (!commentData) return null;
 	const hasModPermission = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles?.includes(r));
 	if (commentData.status !== 'active' && !hasModPermission) return null;
 
 	return (
 		<>
-			<S.Comment $level={level} $status={commentData.status}>
+			<S.Comment $level={level} $status={commentData.status} $isPaid={isPaidComment}>
 				{(isUpdating || isEditSubmitting) && (
 					<S.LoadingOverlay>
 						<S.Spinner />
@@ -345,6 +347,11 @@ export default function Comment(props: any) {
 								<ReactSVG src={ICONS.close} />
 								Blocked User
 							</S.HiddenIndicator>
+						)}
+						{isPaidComment && commentData.tipAmount && (
+							<S.PaidIndicator>
+								{commentData.tipAmount} {commentData.tipAssetSymbol || 'Tip'}
+							</S.PaidIndicator>
 						)}
 						<S.Date>
 							{!commentData?.dateCreated ? (

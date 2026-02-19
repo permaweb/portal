@@ -26,7 +26,6 @@ import {
 
 import { ICONS } from 'helpers/config';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
-import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import EmojiPicker from './emojiPicker';
@@ -48,7 +47,6 @@ function CommentEditorContent(props: any) {
 	} = props;
 	const [editor] = useLexicalComposerContext();
 	const arProvider = useArweaveProvider();
-	const languageProvider = useLanguageProvider();
 	const { profile, libs } = usePermawebProvider();
 	const { portal, portalId } = usePortalProvider();
 	const { profile: portalProfile } = useProfile(portalId);
@@ -61,7 +59,12 @@ function CommentEditorContent(props: any) {
 	const [showProfileManage, setShowProfileManage] = React.useState(false);
 	const { rules } = useCommentRules(commentsId);
 	const [ruleError, setRuleError] = React.useState<string | null>(null);
-	const language = languageProvider.object?.[languageProvider.current] ?? null;
+	const [tipAmount, setTipAmount] = React.useState<string>('');
+	const [tipError, setTipError] = React.useState<string | null>(null);
+
+	const tippingEnabled = rules?.enableTipping && !isEditMode;
+	const tipRequired = tippingEnabled && rules?.requireTipToComment;
+
 	React.useEffect(() => {
 		if (initialContent && isEditMode) {
 			editor.update(() => {
@@ -115,6 +118,27 @@ function CommentEditorContent(props: any) {
 		);
 	}, [editor, canSend]);
 
+	const validateTip = (): string | null => {
+		if (!tipRequired) return null;
+
+		if (!tipAmount || tipAmount.trim() === '' || tipAmount === '0') {
+			return 'A tip is required to comment.';
+		}
+
+		const minTip = parseFloat(rules?.minTipAmount || '0');
+		const currentTip = parseFloat(tipAmount);
+
+		if (isNaN(currentTip) || currentTip <= 0) {
+			return 'Please enter a valid tip amount.';
+		}
+
+		if (minTip > 0 && currentTip < minTip) {
+			return `Minimum tip amount is ${rules.minTipAmount}.`;
+		}
+
+		return null;
+	};
+
 	const handleSubmit = async () => {
 		if (!profile?.id) {
 			setShowProfileManage(true);
@@ -124,6 +148,12 @@ function CommentEditorContent(props: any) {
 		const error = validateRules(editorText);
 		if (error) {
 			setRuleError(error);
+			return;
+		}
+
+		const tipValidationError = validateTip();
+		if (tipValidationError) {
+			setTipError(tipValidationError);
 			return;
 		}
 
@@ -153,7 +183,17 @@ function CommentEditorContent(props: any) {
 			} else {
 				let comment;
 
-				if (postAsPortal && portalId) {
+				const shouldTip = tippingEnabled && tipAmount && parseFloat(tipAmount) > 0;
+
+				if (shouldTip && libs.tipAndCreateComment) {
+					comment = await libs.tipAndCreateComment({
+						commentsId,
+						parentId,
+						content: plainText,
+						tipAssetId: rules.tipAssetId,
+						quantity: tipAmount,
+					});
+				} else if (postAsPortal && portalId) {
 					const tags = [
 						{ name: 'Forward-To', value: commentsId },
 						{ name: 'Forward-Action', value: 'Add-Comment' },
@@ -187,6 +227,8 @@ function CommentEditorContent(props: any) {
 				});
 				setEditorText('');
 				setCanSend(false);
+				setTipAmount('');
+				setTipError(null);
 
 				window.dispatchEvent(
 					new CustomEvent('commentAdded', {
@@ -198,8 +240,14 @@ function CommentEditorContent(props: any) {
 					onCommentAdded(comment);
 				}
 			}
-		} catch (error) {
-			console.error('Failed to save comment:', error);
+		} catch (err: any) {
+			console.error('Failed to save comment:', err);
+			const msg = err?.message || String(err);
+			if (msg.includes('Tip-Receipt-Id') || msg.includes('TipAssetId') || msg.includes('below minimum')) {
+				setTipError(msg);
+			} else {
+				setRuleError(msg);
+			}
 		} finally {
 			setIsSubmitting(false);
 			onSubmittingChange?.(false);
@@ -268,10 +316,19 @@ function CommentEditorContent(props: any) {
 		}
 	};
 
+	const handleTipAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value;
+		if (value === '' || /^\d*\.?\d*$/.test(value)) {
+			setTipAmount(value);
+			setTipError(null);
+		}
+	};
+
 	const roles = Array.isArray(profile?.roles) ? profile.roles : profile?.roles ? [profile.roles] : [];
 	return (
 		<>
 			{ruleError && <S.RuleError>{ruleError}</S.RuleError>}
+			{tipError && <S.RuleError>{tipError}</S.RuleError>}
 			<S.Editor onClick={handleEditorClick}>
 				{portalId && !isEditMode && roles && (roles.includes('Admin') || roles.includes('Moderator')) && (
 					<S.AuthorSelector ref={dropdownRef}>
@@ -322,6 +379,21 @@ function CommentEditorContent(props: any) {
 					</S.Send>
 				</S.Actions>
 			</S.Editor>
+
+			{tippingEnabled && (
+				<S.TipAttachment>
+					{tipRequired && <S.TipRequired>Tip required</S.TipRequired>}
+					<S.TipInput
+						type="text"
+						inputMode="decimal"
+						placeholder={
+							rules?.minTipAmount && rules.minTipAmount !== '0' ? `Min: ${rules.minTipAmount}` : 'Tip amount'
+						}
+						value={tipAmount}
+						onChange={handleTipAmountChange}
+					/>
+				</S.TipAttachment>
+			)}
 
 			<OnChangePlugin onChange={handleEditorChange} />
 			<HistoryPlugin />

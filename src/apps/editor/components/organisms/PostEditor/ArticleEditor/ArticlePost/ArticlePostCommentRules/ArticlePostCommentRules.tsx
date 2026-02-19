@@ -70,10 +70,20 @@ export default function ArticlePostCommentRules() {
 			.then((rules: any) => {
 				if (rules) {
 					const requireProfileThumbnail = rules.requireProfileThumbnail ?? rules.RequireProfileThumbnail;
+					const enableTipping = rules.enableTipping ?? rules.EnableTipping;
+					const requireTipToComment = rules.requireTipToComment ?? rules.RequireTipToComment;
+					const showPaidTab = rules.showPaidTab ?? rules.ShowPaidTab;
+					const highlightPaidComments = rules.highlightPaidComments ?? rules.HighlightPaidComments;
 					const normalizedRules: CommentRulesType = {
 						profileAgeRequired: rules.profileAgeRequired ?? rules.ProfileAgeRequired,
 						mutedWords: rules.mutedWords ?? rules.MutedWords,
 						requireProfileThumbnail: requireProfileThumbnail === 'true' || requireProfileThumbnail === true,
+						enableTipping: enableTipping === 'true' || enableTipping === true,
+						requireTipToComment: requireTipToComment === 'true' || requireTipToComment === true,
+						tipAssetId: rules.tipAssetId ?? rules.TipAssetId ?? '',
+						minTipAmount: rules.minTipAmount ?? rules.MinTipAmount ?? '0',
+						showPaidTab: showPaidTab === 'true' || showPaidTab === true,
+						highlightPaidComments: highlightPaidComments === 'true' || highlightPaidComments === true,
 					};
 					handleCurrentPostUpdate({ field: 'commentRules', value: normalizedRules });
 				}
@@ -134,6 +144,12 @@ export default function ArticlePostCommentRules() {
 					ProfileAgeRequired: currentPost.data.commentRules.profileAgeRequired ?? 0,
 					MutedWords: currentPost.data.commentRules.mutedWords ?? [],
 					RequireProfileThumbnail: !!currentPost.data.commentRules.requireProfileThumbnail,
+					EnableTipping: !!currentPost.data.commentRules.enableTipping,
+					RequireTipToComment: !!currentPost.data.commentRules.requireTipToComment,
+					TipAssetId: currentPost.data.commentRules.tipAssetId ?? '',
+					MinTipAmount: currentPost.data.commentRules.minTipAmount ?? '0',
+					ShowPaidTab: !!currentPost.data.commentRules.showPaidTab,
+					HighlightPaidComments: !!currentPost.data.commentRules.highlightPaidComments,
 				};
 
 				await permawebProvider.libs.sendMessage({
@@ -176,6 +192,7 @@ export default function ArticlePostCommentRules() {
 	const mutedWords = currentPost.data.commentRules?.mutedWords || [];
 	const profileAgeRequired = currentPost.data.commentRules?.profileAgeRequired || 0;
 	const profileAgeDays = Math.floor(profileAgeRequired / (24 * 60 * 60 * 1000));
+	const tippingEnabled = currentPost.data.commentRules?.enableTipping ?? false;
 
 	return (
 		<S.Wrapper>
@@ -269,6 +286,119 @@ export default function ArticlePostCommentRules() {
 					)}
 				</S.TagsWrapper>
 			</S.Section>
+
+			<S.SectionDivider />
+
+			<S.Section>
+				<S.RuleItem>
+					<S.RuleLabel>{language?.enableTipping || 'Enable Tipping'}</S.RuleLabel>
+					<Checkbox
+						checked={tippingEnabled}
+						handleSelect={() => handleRuleChange('enableTipping', !tippingEnabled)}
+						disabled={disabled || updating}
+					/>
+				</S.RuleItem>
+				<S.RuleDescription>
+					{language?.enableTippingDescription || 'Allow users to attach tips to their comments'}
+				</S.RuleDescription>
+			</S.Section>
+
+			{tippingEnabled && (
+				<>
+					<S.Section>
+						<S.RuleItem>
+							<S.RuleLabel>{language?.requireTipToComment || 'Require Tip to Comment'}</S.RuleLabel>
+							<Checkbox
+								checked={currentPost.data.commentRules?.requireTipToComment ?? false}
+								handleSelect={() =>
+									handleRuleChange('requireTipToComment', !currentPost.data.commentRules?.requireTipToComment)
+								}
+								disabled={disabled || updating}
+							/>
+						</S.RuleItem>
+						<S.RuleDescription>
+							{language?.requireTipToCommentDescription || 'Users must attach a tip to post a comment'}
+						</S.RuleDescription>
+					</S.Section>
+
+					<S.Section>
+						<FormField
+							label={language?.tipAssetId || 'Tip Asset ID'}
+							placeholder={'Process ID of the AO token'}
+							value={currentPost.data.commentRules?.tipAssetId ?? ''}
+							onChange={(e) => handleRuleChange('tipAssetId', e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									e.nativeEvent.stopImmediatePropagation();
+								}
+							}}
+							disabled={disabled || updating}
+							invalid={{ status: false, message: null }}
+							hideErrorMessage
+							sm
+							noMargin
+						/>
+						<S.RuleDescription>
+							{language?.tipAssetIdDescription || 'The process ID of the token used for tips'}
+						</S.RuleDescription>
+					</S.Section>
+
+					<S.Section>
+						<FormField
+							label={language?.minTipAmount || 'Minimum Tip Amount'}
+							placeholder={'0'}
+							value={currentPost.data.commentRules?.minTipAmount ?? '0'}
+							onChange={(e) => handleRuleChange('minTipAmount', e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									e.nativeEvent.stopImmediatePropagation();
+								}
+							}}
+							disabled={disabled || updating}
+							invalid={{ status: false, message: null }}
+							hideErrorMessage
+							sm
+							noMargin
+						/>
+						<S.RuleDescription>
+							{language?.minTipAmountDescription || 'Minimum tip amount in base units'}
+						</S.RuleDescription>
+					</S.Section>
+
+					<S.Section>
+						<S.RuleItem>
+							<S.RuleLabel>{language?.showPaidTab || 'Show Paid Tab'}</S.RuleLabel>
+							<Checkbox
+								checked={currentPost.data.commentRules?.showPaidTab ?? false}
+								handleSelect={() => handleRuleChange('showPaidTab', !currentPost.data.commentRules?.showPaidTab)}
+								disabled={disabled || updating}
+							/>
+						</S.RuleItem>
+						<S.RuleDescription>
+							{language?.showPaidTabDescription || 'Show a separate tab for paid/tipped comments'}
+						</S.RuleDescription>
+					</S.Section>
+
+					<S.Section>
+						<S.RuleItem>
+							<S.RuleLabel>{language?.highlightPaidComments || 'Highlight Paid Comments'}</S.RuleLabel>
+							<Checkbox
+								checked={currentPost.data.commentRules?.highlightPaidComments ?? false}
+								handleSelect={() =>
+									handleRuleChange('highlightPaidComments', !currentPost.data.commentRules?.highlightPaidComments)
+								}
+								disabled={disabled || updating}
+							/>
+						</S.RuleItem>
+						<S.RuleDescription>
+							{language?.highlightPaidCommentsDescription || 'Show top paid comments in a highlighted strip'}
+						</S.RuleDescription>
+					</S.Section>
+				</>
+			)}
+
 			<S.ActionWrapper>
 				<Button
 					type={'alt1'}
