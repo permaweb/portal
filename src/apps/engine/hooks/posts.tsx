@@ -135,12 +135,19 @@ export const usePost = (id: any) => {
 			return;
 		}
 
-		let postId = checkValidAddress(id) ? id : null;
+		let postId: string | null = null;
 
-		if (!postId && Posts && Array.isArray(Posts)) {
-			const found = Posts.find((p) => p.metadata?.url === id);
+		if (Posts) {
+			const postsList = Array.isArray(Posts) ? Posts : Object.values(Posts);
+			const found = postsList.find((p: any) => p.metadata?.url === id || p.id === id);
 			if (found) postId = found.id;
 		}
+
+		if (!postId && checkValidAddress(id)) {
+			postId = id;
+		}
+
+		if (!postId) return;
 
 		libs
 			.getAtomicAsset(postId)
@@ -153,7 +160,7 @@ export const usePost = (id: any) => {
 				setError(err);
 				setIsLoading(false);
 			});
-	}, [id, libs, checkValidAddress(id) ? null : Posts]);
+	}, [id, libs, Posts]);
 
 	return {
 		post: fullPost,

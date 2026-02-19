@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { ANT, ARIO, ArweaveSigner } = require('@ar.io/sdk');
+import { ANT, ARIO, ArweaveSigner } from '@ar.io/sdk';
 
 (async () => {
 	try {

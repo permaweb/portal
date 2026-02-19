@@ -7,7 +7,7 @@ import WebFont from 'webfontloader';
 
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalPermissionsType, PortalUserType } from 'helpers/types';
-import { cachePortal, fixBooleanStrings, getCachedPortal, getPortalUsers } from 'helpers/utils';
+import { cachePortal, filterRemoved, fixBooleanStrings, getCachedPortal, getPortalUsers } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -118,6 +118,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		(async () => {
 			try {
 				const cached = getCachedPortal(portalId);
+				if (cached && !portal) setPortal(cached);
 
 				// Fetch from multiple endpoints
 				const overview = fixBooleanStrings(
@@ -178,7 +179,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					? [...posts.index]
 							.filter((post) => {
 								const releaseDate = post.metadata?.releaseDate || post.dateCreated;
+								// If no date is set, include the post (don't filter it out)
+								if (!releaseDate) return true;
 								const postDate = new Date(Number(releaseDate));
+								// If date is invalid, include the post
+								if (isNaN(postDate.getTime())) return true;
 								const now = new Date();
 								// Only include posts that have been released (not in the future)
 								return postDate <= now;
@@ -186,11 +191,14 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 							.sort((a, b) => {
 								const aDate = a.metadata?.releaseDate || a.dateCreated;
 								const bDate = b.metadata?.releaseDate || b.dateCreated;
+								// Handle missing/invalid dates - put them at the end
+								const aNum = aDate ? Number(aDate) : 0;
+								const bNum = bDate ? Number(bDate) : 0;
 								// Sort descending (newest first)
-								return Number(bDate) - Number(aDate);
+								return bNum - aNum;
 							})
 					: [];
-				const zone = {
+				const zone = filterRemoved({
 					...defaultPortal,
 					...cached,
 					name: overview?.name,
@@ -208,7 +216,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					posts: sortedPosts,
 					users: portalUsers,
 					monetization: monetization,
-				};
+				});
 
 				const Name = zone?.name;
 				const Categories = zone?.categories;

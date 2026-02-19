@@ -208,56 +208,6 @@ export default function ArticleToolbar(props: {
 		}
 	}
 
-	// <Button
-	// 	type={'primary'}
-	// 	label={language?.toolkit}
-	// 	handlePress={() => {
-	// 		handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
-	// 		setCurrentTab(TABS[0]!.id);
-	// 	}}
-	// 	active={currentPost.editor.panelOpen}
-	// 	disabled={currentPost.editor.loading.active}
-	// 	icon={currentPost.editor.panelOpen ? ICONS.close : ICONS.tools}
-	// 	iconLeftAlign
-	// 	tooltip={'CTRL + K'}
-	// 	noFocus
-	// />
-
-	// <Button
-	// 	type={'primary'}
-	// 	label={language?.layout}
-	// 	handlePress={() =>
-	// 		handleCurrentPostUpdate({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode })
-	// 	}
-	// 	active={currentPost.editor.blockEditMode}
-	// 	disabled={currentPost.editor.loading.active}
-	// 	icon={currentPost.editor.blockEditMode ? ICONS.close : ICONS.layout}
-	// 	iconLeftAlign
-	// 	tooltip={'CTRL + L'}
-	// 	noFocus
-	// />
-	// <Button
-	// 	type={'primary'}
-	// 	label={language?.preview ?? 'Preview'}
-	// 	handlePress={() => setPreviewOpen(true)}
-	// 	active={false}
-	// 	disabled={currentPost.editor.loading.active}
-	// 	noFocus
-	// 	icon={ICONS.show}
-	// 	iconLeftAlign
-	// />
-
-	{
-		/* <Button
-		type={'primary'}
-		label={language?.changes}
-		handlePress={() => props.handleSwitchOriginal(props.viewMode === 'original' ? 'new' : 'original')}
-		icon={props.viewMode === 'original' ? ICONS.close : ICONS.help}
-		iconLeftAlign
-		noFocus
-	/> */
-	}
-
 	function handleOptionDropdownAction(action: () => void) {
 		action();
 		setShowDropdown(false);

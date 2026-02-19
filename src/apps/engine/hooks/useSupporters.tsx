@@ -1,16 +1,14 @@
 import React from 'react';
 
-import Arweave from 'arweave';
-
+import { fromBaseUnits, parseTipTags } from 'helpers/tokens';
 import { SupporterTip } from 'helpers/types';
 
-const arweave = Arweave.init({
-	host: 'arweave.net',
-	port: 443,
-	protocol: 'https',
-});
-
-export function useSupporters(walletAddress: string | null, scope: 'global' | 'post', postId?: string) {
+export function useSupporters(
+	walletAddress: string | null,
+	scope: 'global' | 'post',
+	postId?: string,
+	tokenFilter?: { symbol?: string; process?: string }
+) {
 	const [supporters, setSupporters] = React.useState<SupporterTip[]>([]);
 	const [loading, setLoading] = React.useState(false);
 	const [error, setError] = React.useState<string | null>(null);
@@ -31,14 +29,24 @@ export function useSupporters(walletAddress: string | null, scope: 'global' | 'p
 				setError(null);
 
 				// Build GraphQL query
+				const tagFilters = [
+					`{ name: "App-Name", values: ["Portal"] }`,
+					`{ name: "Type", values: ["Tip"] }`,
+					`{ name: "To-Address", values: $toAddr }`,
+				];
+				if (tokenFilter?.symbol) {
+					tagFilters.push(`{ name: "Token-Symbol", values: ["${tokenFilter.symbol}"] }`);
+				}
+				if (tokenFilter?.process) {
+					tagFilters.push(`{ name: "Token-Process", values: ["${tokenFilter.process}"] }`);
+				}
+
 				const query = {
 					query: `
 						query($toAddr: [String!]!) {
 							transactions(
 								tags: [
-									{ name: "App-Name", values: ["Portal"] },
-									{ name: "Type", values: ["Tip"] },
-									{ name: "To-Address", values: $toAddr }
+									${tagFilters.join(',\n')}
 								],
 								sort: HEIGHT_DESC,
 								first: 100
@@ -79,15 +87,23 @@ export function useSupporters(walletAddress: string | null, scope: 'global' | 'p
 					const getTag = (name: string) => tags.find((t) => t.name === name)?.value || undefined;
 
 					const winston = node.quantity?.winston || '0';
-					const amountAr = arweave.ar.winstonToAr(winston);
+					const parsedTip = parseTipTags(tags, winston);
 					const location = getTag('Location');
 					const locationPostId = getTag('Location-Post-Id');
+					const usdValue = getTag('USD-Value') || null;
 
 					return {
 						id: node.id,
 						timestamp: node.block?.timestamp ?? null,
 						winston,
-						amountAr,
+						amountAr: parsedTip.amount,
+						amount: parsedTip.amount,
+						amountRaw: parsedTip.amountRaw,
+						tokenSymbol: parsedTip.tokenSymbol,
+						tokenDecimals: parsedTip.tokenDecimals,
+						tokenProcess: parsedTip.tokenProcess,
+						tokenType: parsedTip.tokenType,
+						usdValue,
 						fromAddress: getTag('From-Address') || node.owner?.address || '',
 						fromProfile: getTag('From-Profile'),
 						location,
@@ -114,12 +130,25 @@ export function useSupporters(walletAddress: string | null, scope: 'global' | 'p
 
 					if (existing) {
 						// Aggregate amounts
-						const existingWinston = BigInt(existing.winston);
-						const tipWinston = BigInt(tip.winston);
-						const totalWinston = existingWinston + tipWinston;
+						const existingRaw = BigInt(existing.amountRaw || '0');
+						const tipRaw = BigInt(tip.amountRaw || '0');
+						const totalRaw = existingRaw + tipRaw;
 
-						existing.winston = totalWinston.toString();
-						existing.amountAr = arweave.ar.winstonToAr(existing.winston);
+						existing.amountRaw = totalRaw.toString();
+						existing.amount = fromBaseUnits(existing.amountRaw, tip.tokenDecimals ?? 0);
+						existing.amountAr = existing.amount;
+						existing.tokenSymbol = existing.tokenSymbol || tip.tokenSymbol;
+						existing.tokenDecimals = existing.tokenDecimals ?? tip.tokenDecimals;
+						existing.tokenProcess = existing.tokenProcess || tip.tokenProcess;
+						existing.tokenType = existing.tokenType || tip.tokenType;
+
+						// Aggregate USD value if present
+						if (tip.usdValue) {
+							const existingUsd = Number(existing.usdValue || 0);
+							const tipUsd = Number(tip.usdValue);
+							const totalUsd = existingUsd + (Number.isFinite(tipUsd) ? tipUsd : 0);
+							existing.usdValue = totalUsd > 0 ? totalUsd.toFixed(2) : existing.usdValue;
+						}
 
 						// Keep most recent timestamp
 						if (tip.timestamp && (!existing.timestamp || tip.timestamp > existing.timestamp)) {
@@ -150,7 +179,7 @@ export function useSupporters(walletAddress: string | null, scope: 'global' | 'p
 		return () => {
 			cancelled = true;
 		};
-	}, [walletAddress, scope, postId]);
+	}, [walletAddress, scope, postId, tokenFilter?.symbol, tokenFilter?.process]);
 
 	return { supporters, loading, error };
 }

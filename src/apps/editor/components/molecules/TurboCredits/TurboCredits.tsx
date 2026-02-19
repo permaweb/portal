@@ -71,7 +71,8 @@ export default function TurboCredits(props: Props) {
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
-	const [expanded, setExpanded] = React.useState<boolean>(props.allowExpandApprovals ?? false);
+
+	const [expanded, setExpanded] = React.useState<boolean>(props.allowExpandApprovals ?? true);
 	const [givenProfiles, setGivenProfiles] = React.useState<Record<string, any>>({});
 	const [showGivenBreakdown, setShowGivenBreakdown] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();

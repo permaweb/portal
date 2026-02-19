@@ -121,6 +121,26 @@ export const LeftSource = styled.div`
 	color: rgba(var(--color-secondary), 1);
 	margin-top: 6px;
 
+	a {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		color: white !important;
+		opacity: 1;
+
+		span {
+			opacity: 1 !important;
+		}
+
+		&:hover {
+			color: rgba(var(--color-primary), 1) !important;
+
+			> div {
+				--avatar-opacity: 0.8;
+			}
+		}
+	}
+
 	img {
 		width: 18px;
 		height: 18px;
@@ -198,6 +218,26 @@ export const RightSource = styled.div`
 	color: white;
 	font-size: 12px;
 	padding: 2px 4px;
+
+	a {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		color: white !important;
+		opacity: 1;
+
+		span {
+			opacity: 1 !important;
+		}
+
+		&:hover {
+			color: rgba(var(--color-primary), 1) !important;
+
+			> div {
+				--avatar-opacity: 0.8;
+			}
+		}
+	}
 
 	img {
 		width: 18px;

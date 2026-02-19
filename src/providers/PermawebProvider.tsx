@@ -1,15 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Arweave from 'arweave';
 import Permaweb, { Types } from '@permaweb/libs/browser';
 import { connect, createSigner } from '@permaweb/aoconnect/browser';
 
 import { Loader } from 'components/atoms/Loader';
-import { AO_NODE, STORAGE } from 'helpers/config';
+import { AO_NODE, STORAGE, URLS } from 'helpers/config';
 import { cacheProfile as cacheProfileById } from 'helpers/utils';
 
 import { useArweaveProvider } from './ArweaveProvider';
 import { useLanguageProvider } from './LanguageProvider';
+import { useNotifications } from './NotificationProvider';
 
 interface PermawebContextState {
 	deps: any;
@@ -39,9 +41,12 @@ export function usePermawebProvider(): PermawebContextState {
 }
 
 export function PermawebProvider(props: { children: React.ReactNode }) {
+	const navigate = useNavigate();
+
 	const arProvider = useArweaveProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	const { addNotification } = useNotifications();
 
 	const authoritiesRef = React.useRef(false);
 	const prevWalletRef = React.useRef<string | null>(null);
@@ -207,6 +212,8 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				return profileToUse;
 			} catch (e: any) {
 				console.error(e);
+				addNotification(language?.errorGettingProfile ?? 'Error getting profile', 'warning');
+				navigate(URLS.base);
 			}
 		}
 	}

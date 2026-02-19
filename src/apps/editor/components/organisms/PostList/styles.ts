@@ -146,16 +146,23 @@ export const PostsActionsRequestsBody = styled.div`
 	flex-direction: column;
 	gap: 15px;
 
-	> * {
+	/* > * {
 		border-bottom: 1px dotted ${(props) => props.theme.colors.border.primary};
 		padding: 0 0 15px 0;
-	}
+	} */
 `;
 
-export const PostActionRequest = styled.div`
+export const PostActionRequest = styled.button`
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
+	padding: 15px;
+	transition: all 100ms;
+	background: ${(props) => props.theme.colors.container.alt1.background};
+
+	&:hover {
+		background: ${(props) => props.theme.colors.container.primary.active};
+	}
 `;
 
 export const PostActionRequestLine = styled.div`
@@ -168,7 +175,7 @@ export const PostActionRequestLine = styled.div`
 		max-width: 85%;
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
 		font-weight: ${(props) => props.theme.typography.weight.bold};
 		text-align: left;
 		white-space: nowrap;
@@ -179,6 +186,19 @@ export const PostActionRequestLine = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
+	}
+
+	span {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		text-transform: uppercase;
+
+		svg {
+			height: 15px;
+			width: 15px;
+			margin: 5px 0 0 0;
+		}
 	}
 
 	.user-line {
@@ -217,11 +237,26 @@ export const PostsWrapper = styled.div<{ type: ViewLayoutType }>`
 	border-bottom-right-radius: ${STYLING.dimensions.radius.alt2};
 
 	margin: ${(props) => (props.type === 'header' ? '0' : '20px 0 0 0')};
-	overflow: hidden;
 
 	> * {
 		&:not(:last-child) {
 			border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+		}
+
+		&:first-child {
+			> * {
+				border-top-left-radius: ${(props) =>
+					props.type === 'header' ? '0' : `calc(${STYLING.dimensions.radius.alt1} - 1.5px)`};
+				border-top-right-radius: ${(props) =>
+					props.type === 'header' ? '0' : `calc(${STYLING.dimensions.radius.alt1} - 1.5px)`};
+			}
+		}
+
+		&:last-child {
+			> * {
+				border-bottom-left-radius: calc(${STYLING.dimensions.radius.alt1} - 1.5px);
+				border-bottom-right-radius: calc(${STYLING.dimensions.radius.alt1} - 1.5px);
+			}
 		}
 	}
 `;

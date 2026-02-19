@@ -81,27 +81,40 @@ export function generateColorFromId(id?: string): string {
 }
 
 export function initThemes(Themes: any[]) {
+	// Early return if Themes is not a valid array or is empty
+	if (!Array.isArray(Themes) || Themes.length === 0) {
+		return;
+	}
+
 	const activeTheme = Themes.find((e: any) => e.active);
 
+	// Early return if no active theme found
+	if (!activeTheme) {
+		return;
+	}
+
 	function getColor(theme: any, scheme: string, value: string) {
+		if (!theme?.basics?.colors) {
+			return value;
+		}
 		switch (value) {
 			case 'primary':
-				return theme.basics.colors.primary[scheme];
+				return theme.basics.colors.primary?.[scheme] || value;
 			case 'secondary':
-				return theme.basics.colors.secondary[scheme];
+				return theme.basics.colors.secondary?.[scheme] || value;
 			case 'background':
-				return theme.basics.colors.background[scheme];
+				return theme.basics.colors.background?.[scheme] || value;
 			case 'text':
-				return theme.basics.colors.text[scheme];
+				return theme.basics.colors.text?.[scheme] || value;
 			case 'border':
-				return theme.basics.colors.border[scheme];
+				return theme.basics.colors.border?.[scheme] || value;
 			default:
 				return value;
 		}
 	}
 
 	function setScheme(theme: any, scheme: string) {
-		if (!theme.basics) return null;
+		if (!theme || !theme.basics) return null;
 		updateThemeStyles(scheme, {
 			// Basics
 			'--color-text': theme.basics.colors.text[scheme],
@@ -139,16 +152,36 @@ export function initThemes(Themes: any[]) {
 
 			// Posts
 			...(theme?.post
-				? {
-						'--color-post-background': `rgba(${getColor(theme, scheme, theme.post.colors.background[scheme])},${
-							theme.post.preferences.opacity[scheme]
-						})`,
-						'--color-post-border': `rgba(${getColor(theme, scheme, theme.post.colors.border[scheme])},1)`,
-						'--color-post-border-contrast': `rgba(${getContrastColor(
-							getColor(theme, scheme, theme.post.colors.border[scheme])
-						)},1)`,
-						'--preference-post-shadow': theme.post?.preferences?.shadow?.[scheme] || 'none',
-				  }
+				? (() => {
+						const borderValue = theme.post.colors.border[scheme];
+						const borderDisabled =
+							theme.post?.preferences?.border?.[scheme] === false ||
+							!borderValue ||
+							borderValue === 'unset' ||
+							borderValue === 'none' ||
+							borderValue === 'transparent';
+						return {
+							'--color-post-background': (() => {
+								const backgroundValue = theme.post.colors.background[scheme];
+								const backgroundDisabled =
+									!backgroundValue ||
+									backgroundValue === 'unset' ||
+									backgroundValue === 'none' ||
+									backgroundValue === 'transparent';
+								if (backgroundDisabled) return 'transparent';
+								return `rgba(${getColor(theme, scheme, backgroundValue)},${theme.post.preferences.opacity[scheme]})`;
+							})(),
+							'--color-post-border': borderDisabled ? 'transparent' : `rgba(${getColor(theme, scheme, borderValue)},1)`,
+							'--color-post-border-contrast': `rgba(${getContrastColor(getColor(theme, scheme, borderValue))},1)`,
+							'--preference-post-border-width': borderDisabled ? '0px' : '1px',
+							'--preference-post-padding': (() => {
+								const paddingValue = theme.post?.preferences?.padding?.[scheme];
+								if (paddingValue === undefined || paddingValue === null || paddingValue === '') return '20px';
+								return typeof paddingValue === 'number' ? `${paddingValue}px` : `${paddingValue}`;
+							})(),
+							'--preference-post-shadow': theme.post?.preferences?.shadow?.[scheme] || 'none',
+						};
+				  })()
 				: {}),
 
 			// Cards

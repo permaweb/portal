@@ -2,7 +2,7 @@ import Arweave from 'arweave';
 import { ARIOToken, mARIOToken } from '@ar.io/sdk';
 
 import { FALLBACK_GATEWAY, STORAGE, URLS } from './config';
-import { PortalAssetType, PortalDomainType, PortalHeaderType, PortalUserType } from './types';
+import { PortalAssetType, PortalDetailType, PortalDomainType, PortalHeaderType, PortalUserType } from './types';
 
 export function checkValidAddress(address: string | null) {
 	if (!address) return false;
@@ -311,6 +311,33 @@ export function getPortalAssets(index: PortalAssetType[]) {
 	);
 }
 
+export function filterRemoved(obj: any): any {
+	if (obj === null || obj === undefined || obj === 'Removed') {
+		return null;
+	}
+
+	if (Array.isArray(obj)) {
+		return obj
+			.filter((item) => item !== 'Removed')
+			.map((item) => filterRemoved(item))
+			.filter((item) => item !== null);
+	}
+
+	if (typeof obj === 'object') {
+		const filtered: any = {};
+		for (const key of Object.keys(obj)) {
+			if (obj[key] === 'Removed') continue;
+			const value = filterRemoved(obj[key]);
+			if (value !== null) {
+				filtered[key] = value;
+			}
+		}
+		return filtered;
+	}
+
+	return obj;
+}
+
 export function getPortalUsers(roles: any) {
 	const users: PortalUserType[] = [];
 	if (roles) {
@@ -484,6 +511,11 @@ export function isOnlyPortal(portals: PortalHeaderType[], profileId: string): bo
 	if (!portals || portals.length === 0) return false;
 	if (portals.length === 1 && portals[0].id === profileId) return true;
 	return false;
+}
+
+export function isNotOwner(portal: PortalDetailType, walletAddress: string): boolean {
+	if (portal?.owner === walletAddress) return false;
+	return true;
 }
 
 export function isCompressibleImage(file: File): boolean {

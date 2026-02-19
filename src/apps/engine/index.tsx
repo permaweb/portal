@@ -18,6 +18,7 @@ import Header from './builder/base/header';
 import Navigation from './builder/base/navigation';
 import Loader from './components/loader';
 import ZoneEditor from './components/zoneEditor';
+import { EngineNotificationProvider } from './providers/notificationProvider';
 import { GlobalStyles } from './global-styles';
 import * as S from './global-styles';
 
@@ -79,14 +80,16 @@ function App() {
 	// Set the portal ID in the provider
 	useSetPortalId(portalId || '');
 
+	const themesHash = React.useMemo(() => JSON.stringify(Themes || []), [Themes]);
+
 	React.useEffect(() => {
 		if (Themes) {
 			const systemScheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 			setTheme(systemScheme);
-			document.documentElement.setAttribute('theme', theme);
+			document.documentElement.setAttribute('theme', systemScheme);
 			initThemes(Themes);
 		}
-	}, [Themes]);
+	}, [themesHash]);
 
 	React.useEffect(() => {
 		const portal = portalProvider.portal;
@@ -226,16 +229,18 @@ function App() {
 ReactDOM.createRoot(document.getElementById('portal') as HTMLElement).render(
 	<HashRouter>
 		<LanguageProvider>
-			<ArweaveProvider>
-				<PermawebProvider>
-					<NotificationProvider>
+			<NotificationProvider>
+				<ArweaveProvider>
+					<PermawebProvider>
 						<PortalProvider>
-							<GlobalStyles />
-							<App />
+							<EngineNotificationProvider>
+								<GlobalStyles />
+								<App />
+							</EngineNotificationProvider>
 						</PortalProvider>
-					</NotificationProvider>
-				</PermawebProvider>
-			</ArweaveProvider>
+					</PermawebProvider>
+				</ArweaveProvider>
+			</NotificationProvider>
 		</LanguageProvider>
 	</HashRouter>
 );

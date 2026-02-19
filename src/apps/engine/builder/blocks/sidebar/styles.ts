@@ -1,21 +1,21 @@
 import { BREAKPOINTS } from 'engine/constants/breakpoints';
 import styled from 'styled-components';
 
-export const Sidebar = styled.div<{ $fullWidth?: boolean }>`
+export const Sidebar = styled.div<{ $width?: number }>`
 	display: flex;
 	flex-direction: column;
-	min-width: ${(props) => (props.$fullWidth ? '100%' : '300px')};
-	max-width: ${(props) => (props.$fullWidth ? '100%' : '300px')};
+	flex: ${(props) => props.$width};
+	min-width: 300px;
 	min-height: 100%;
-	margin-left: ${(props) => (props.$fullWidth ? '0' : 'auto')};
 	box-sizing: border-box;
 
 	h2 {
 		background: rgba(var(--color-primary), 1);
 		color: rgba(var(--color-primary-contrast), 1);
+		font-weight: 800;
 		width: fit-content;
 		margin: 0;
-		font-size: 18px;
+		font-size: var(--font-size-large);
 		padding: 0 8px;
 		// margin-top:20px;
 		margin-top: 0;

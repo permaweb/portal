@@ -1,6 +1,7 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
 import Button from 'engine/components/form/button';
+import { useEngineNotifications } from 'engine/providers/notificationProvider';
 
 import { Types } from '@permaweb/libs';
 
@@ -9,7 +10,6 @@ import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress, compressImageToSize, isCompressibleImage } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
@@ -40,7 +40,7 @@ export default function ProfileEditor(props: {
 	const [thumbnailRemoved, setThumbnailRemoved] = React.useState<boolean>(false);
 
 	const [loading, setLoading] = React.useState<boolean>(false);
-	const { addNotification } = useNotifications();
+	const { addNotification } = useEngineNotifications();
 
 	const bannerChangedRef = React.useRef(false);
 	const thumbnailChangedRef = React.useRef(false);

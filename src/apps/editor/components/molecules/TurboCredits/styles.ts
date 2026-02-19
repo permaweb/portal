@@ -254,8 +254,8 @@ export const AccordionContent = styled.div`
 export const MetaRow = styled.div`
 	display: flex;
 	justify-content: space-between;
-	padding: 6px 0;
-	border-bottom: 1px dashed ${(p) => p.theme.colors.border.primary};
+	padding: 7.5px 0;
+	border-bottom: 1px dotted ${(p) => p.theme.colors.border.primary};
 
 	&:last-child {
 		border-bottom: none;

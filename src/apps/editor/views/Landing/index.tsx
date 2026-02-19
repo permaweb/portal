@@ -1,16 +1,15 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
-import { useTheme } from 'styled-components';
 
 import { ProfileManager } from 'editor/components/organisms/ProfileManager';
+import { Header } from 'editor/navigation';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
-import { LanguageSelect } from 'components/molecules/LanguageSelect';
 import { ICONS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalHeaderType } from 'helpers/types';
@@ -24,7 +23,6 @@ import * as S from './styles';
 
 export default function Landing() {
 	const navigate = useNavigate();
-	const theme = useTheme();
 
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -36,31 +34,6 @@ export default function Landing() {
 	const [showInvites, setShowInvites] = React.useState<boolean>(false);
 	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 	const [pendingPortalId, setPendingPortalId] = React.useState<string | null>(null);
-
-	React.useEffect(() => {
-		const header = document.getElementById('landing-header');
-		if (!header) return;
-
-		let lastScrollY = 0;
-		let ticking = false;
-		const borderColor = theme.colors.border.primary;
-
-		const handleScroll = () => {
-			lastScrollY = window.scrollY;
-			if (!ticking) {
-				window.requestAnimationFrame(() => {
-					header.style.borderBottom = lastScrollY > 0 ? `1px solid ${borderColor}` : '1px solid transparent';
-					ticking = false;
-				});
-				ticking = true;
-			}
-		};
-
-		window.addEventListener('scroll', handleScroll, { passive: true });
-		handleScroll();
-
-		return () => window.removeEventListener('scroll', handleScroll);
-	}, [theme.colors.border.primary]);
 
 	/* Log in directly if the user's profile is the portal itself */
 	React.useEffect(() => {
@@ -165,7 +138,7 @@ export default function Landing() {
 			disabled = false;
 			label = language?.createPortal;
 			icon = ICONS.add;
-			action = () => portalProvider.setShowPortalManager(true, true);
+			action = () => navigate(URLS.create);
 
 			if (portalProvider.portals && portalProvider.portals.length > 0) {
 				content = (
@@ -277,30 +250,13 @@ export default function Landing() {
 	return (
 		<>
 			<S.Wrapper>
-				<S.HeaderWrapper id={'landing-header'}>
-					<S.HeaderContent>
-						<S.HeaderActionsWrapper>
-							<S.HeaderAction>
-								<Link to={URLS.docs}>{language?.helpCenter}</Link>
-							</S.HeaderAction>
-							<S.HeaderAction>
-								<button onClick={() => setShowInvites((prev) => !prev)} disabled={loading}>
-									{language?.invites}
-									{portalProvider.invites?.length > 0 && (
-										<div className={'notification'}>
-											<span>{portalProvider.invites.length}</span>
-										</div>
-									)}
-								</button>
-							</S.HeaderAction>
-						</S.HeaderActionsWrapper>
-						<S.HeaderActionsWrapper>
-							<LanguageSelect />
-							<WalletConnect app={'editor'} />
-						</S.HeaderActionsWrapper>
-					</S.HeaderContent>
-				</S.HeaderWrapper>
-				<S.ContentWrapper className={'fade-in border-wrapper-alt3'}>
+				<Header
+					showInvites
+					onInvitesClick={() => setShowInvites((prev) => !prev)}
+					invitesCount={portalProvider.invites?.length}
+					loading={loading}
+				/>
+				<S.ContentWrapper className={'border-wrapper-alt3'}>
 					<S.ContentHeaderWrapper>
 						<h4>{`[${language?.app}]`}</h4>
 					</S.ContentHeaderWrapper>

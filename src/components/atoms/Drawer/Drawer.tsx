@@ -16,6 +16,7 @@ export default function Drawer(props: {
 	noContentWrapper?: boolean;
 	padContent?: boolean;
 	drawerKey?: string;
+	sm?: boolean;
 }) {
 	const settingsProvider = useSettingsProvider();
 	const persistedState = props.drawerKey ? settingsProvider.settings.drawerStates[props.drawerKey] : undefined;
@@ -31,8 +32,8 @@ export default function Drawer(props: {
 
 	return (
 		<S.Wrapper className={props.noContentWrapper ? '' : 'border-wrapper-alt2'}>
-			<S.Action onClick={handleToggle} open={open} noContentWrapper={props.noContentWrapper}>
-				<S.Label>
+			<S.Action onClick={handleToggle} open={open} noContentWrapper={props.noContentWrapper} sm={props.sm}>
+				<S.Label sm={props.sm}>
 					<S.Title>
 						{props.icon && <ReactSVG src={props.icon} />}
 						<p>{props.title}</p>
@@ -46,7 +47,7 @@ export default function Drawer(props: {
 								))}
 							</S.HeaderActions>
 						)}
-						<S.Arrow open={open}>
+						<S.Arrow open={open} sm={props.sm}>
 							<ReactSVG src={ICONS.arrow} />
 						</S.Arrow>
 					</S.HeaderEnd>

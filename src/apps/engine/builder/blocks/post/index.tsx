@@ -27,7 +27,7 @@ import Comments from '../comments';
 import * as S from './styles';
 
 export default function Post(props: any) {
-	const { preview, txId, onSetPost } = props;
+	const { txId, onSetPost } = props;
 	const { postId: routePostId } = useParams();
 	const postId = txId || routePostId;
 	const { portal } = usePortalProvider();
@@ -45,6 +45,11 @@ export default function Post(props: any) {
 		? [user.roles] // if it's a single string
 		: [];
 	const canEditPost = user?.owner && roles && ['Admin', 'Moderator'].some((r) => roles?.includes(r));
+
+	const isStaticPage = React.useMemo(() => {
+		if (!portal?.Pages || !postId) return false;
+		return Object.values(portal.Pages).some((page: any) => page?.type === 'static' && page?.id === postId);
+	}, [portal?.Pages, postId]);
 
 	const [showSetPostModal, setShowSetPostModal] = React.useState(false);
 	const [selectedPost, setSelectedPost] = React.useState<SelectOptionType | null>(null);
@@ -269,10 +274,18 @@ export default function Post(props: any) {
 							content={content}
 							isPreview={false}
 							postId={postId}
+							isStaticPage={isStaticPage}
 						/>
 					</div>
 				</S.Post>
-				<Comments commentsId={post?.metadata?.comments} postAuthorId={post?.creator} />
+				{/* postId && (
+					<S.TransactionLink>
+						<a href={`https://arweave.net/${postId}`} target="_blank" rel="noopener noreferrer">
+							View on Arweave
+						</a>
+					</S.TransactionLink>
+				) */}
+				{!isStaticPage && <Comments commentsId={post?.metadata?.comments} postAuthorId={post?.creator} />}
 			</S.Wrapper>
 			{showSetPostModal && (
 				<ModalPortal>

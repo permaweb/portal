@@ -22,23 +22,23 @@ export const Header = styled.div<{
 	margin-right: auto;
 	box-sizing: border-box;
 	border-bottom: ${(props) =>
-		props.$layout.border.bottom === true ? `1px solid rgba(var(--color-header-border),1)` : `unset`};
+		props.$layout?.border?.bottom === true ? `1px solid rgba(var(--color-header-border),1)` : `unset`};
 	border-top: ${(props) =>
 		props.$isSideNav
 			? 'none'
-			: props.$layout.border.top === true
+			: props.$layout?.border?.top === true
 			? `1px solid rgba(var(--color-header-border),1)`
 			: `unset`};
 	border-left: ${(props) =>
 		props.$isSideNav
 			? 'none'
-			: props.$layout.border.sides === true
+			: props.$layout?.border?.sides === true
 			? `1px solid rgba(var(--color-header-border),1)`
 			: `unset`};
 	border-right: ${(props) =>
 		props.$isSideNav
 			? 'none'
-			: props.$layout.border.sides === true
+			: props.$layout?.border?.sides === true
 			? `1px solid rgba(var(--color-header-border),1)`
 			: `unset`};
 	box-shadow: var(--preference-header-shadow);
@@ -83,6 +83,11 @@ export const HeaderContentWrapper = styled.div<{
 	@media (max-width: ${BREAKPOINTS['breakpoint-small']}) {
 		padding-left: var(--spacing-xxs);
 		padding-right: var(--spacing-xxs);
+	}
+
+	@media (max-width: ${BREAKPOINTS['breakpoint-large']}) {
+		padding-left: var(--spacing-xs);
+		padding-right: var(--spacing-xs);
 	}
 `;
 

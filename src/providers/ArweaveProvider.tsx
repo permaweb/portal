@@ -232,6 +232,11 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					}
 				} catch (e: any) {
 					debugLog('error', 'ArweaveProvider', 'Connection Error:', e.message ?? 'Unknown error');
+					localStorage.removeItem(STORAGE.walletType);
+					setAuth(null);
+					setWallet(null);
+					setWalletAddress(null);
+					setWalletType(null);
 				}
 			} else {
 				debugLog('warn', 'ArweaveProvider', 'No Wallet Available');

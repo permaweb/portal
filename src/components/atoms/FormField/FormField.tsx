@@ -28,6 +28,7 @@ export default function FormField(props: {
 	hideErrorMessage?: boolean;
 	required?: boolean;
 	noMargin?: boolean;
+	onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }) {
 	const [showTooltip, setShowTooltip] = React.useState<boolean>(false);
 
@@ -69,6 +70,7 @@ export default function FormField(props: {
 					value={getValue()}
 					onWheel={(e: any) => e.target.blur()}
 					onChange={props.onChange}
+					onKeyDown={props.onKeyDown}
 					disabled={props.disabled}
 					invalid={props.invalid.status}
 					placeholder={props.placeholder ? props.placeholder : ''}

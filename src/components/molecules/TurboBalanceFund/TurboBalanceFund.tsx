@@ -208,7 +208,6 @@ export default function TurboBalanceFund(props: { handleClose: () => void }) {
 												setAmount(defaultAmount);
 												setCustomAmount(0);
 											}}
-											active={active}
 											height={40}
 											width={125}
 										/>

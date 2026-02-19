@@ -117,7 +117,7 @@ export const PanelContent = styled.div<{ open: boolean }>`
 
 export const PanelLink = styled.div<{ showText?: boolean; useFill?: boolean }>`
 	a {
-		height: 40.5px;
+		height: 38.5px;
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;
@@ -131,11 +131,10 @@ export const PanelLink = styled.div<{ showText?: boolean; useFill?: boolean }>`
 		border-radius: ${STYLING.dimensions.radius.primary};
 		white-space: nowrap;
 		transition: all 100ms;
-		padding: 0 8.5px;
+		padding: 0 8.5px 2.5px 8.5px;
 		svg {
 			height: 17.5px;
 			width: 17.5px;
-			margin: ${(props) => (props.showText ? '6.5px 12.5px 0 0' : '4.5px 0 0 0')};
 			color: ${(props) => props.theme.colors.font.primary};
 			${(props) => props.useFill && `fill: ${props.theme.colors.font.primary};`}
 		}
@@ -152,13 +151,19 @@ export const PanelLink = styled.div<{ showText?: boolean; useFill?: boolean }>`
 	}
 `;
 
+export const PanelIconWrapper = styled.div<{ showText?: boolean }>`
+	height: 17.5px;
+	width: 17.5px;
+	margin: ${(props) => (props.showText ? '3.5px 13.5px 0 0' : '3.5px 0 0 0')};
+`;
+
 export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 	height: 70px;
 	width: 100%;
 	padding: 15px;
 
 	a {
-		height: 40.5px;
+		height: 38.5px;
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;
@@ -176,7 +181,6 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 		svg {
 			height: 17.5px;
 			width: 17.5px;
-			margin: ${(props) => (props.showText ? '4.5px 10.5px 0 0' : '4.5px 0 0 0')};
 			color: ${(props) => props.theme.colors.font.primary};
 			fill: ${(props) => props.theme.colors.font.primary};
 		}
@@ -194,10 +198,16 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 	}
 `;
 
+export const PanelIconFooterWrapper = styled.div<{ showText?: boolean }>`
+	height: 17.5px;
+	width: 17.5px;
+	margin: ${(props) => (props.showText ? '0 10.5px 0 0' : '0 0 0 0')};
+`;
+
 export const Header = styled.header<{ navigationOpen: boolean; navWidth?: number }>`
 	height: ${STYLING.dimensions.nav.height};
 	width: 100%;
-	padding: 0 20px 0
+	padding: 0 25px 0
 		calc(
 			${(props) => (props.navWidth !== undefined ? `${props.navWidth}px` : STYLING.dimensions.nav.width)} +
 				${(props) => (props.navigationOpen ? '10px' : '25px')}
@@ -456,6 +466,7 @@ export const PDropdownAction = styled.div`
 
 		.info {
 			padding: 2.5px 7.5px !important;
+			border: 1px solid ${(props) => props.theme.colors.border.primary};
 		}
 
 		svg {
@@ -530,6 +541,18 @@ export const PDropdownFooter = styled.div`
 		}
 		&:hover {
 			background: ${(props) => props.theme.colors.container.primary.active};
+		}
+	}
+`;
+
+export const PDropdownWarning = styled(PDropdownFooter)`
+	button {
+		padding: 0 8.5px;
+		color: ${(props) => props.theme.colors.warning.primary} !important;
+
+		svg {
+			color: ${(props) => props.theme.colors.warning.primary} !important;
+			fill: ${(props) => props.theme.colors.warning.primary} !important;
 		}
 	}
 `;
@@ -632,4 +655,29 @@ export const LoadingWrapper = styled.div`
 		text-overflow: ellipsis;
 		overflow: hidden;
 	}
+`;
+
+export const LeaveModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 0 20px 20px 20px !important;
+`;
+
+export const LeaveModalBodyWrapper = styled.div`
+	p {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
+	}
+`;
+
+export const LeaveModalActionsWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 15px;
+	margin: 10px 0 0 0;
 `;

@@ -5,6 +5,7 @@ import { ReactSVG } from 'react-svg';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { Drawer } from 'components/atoms/Drawer';
 import { FormField } from 'components/atoms/FormField';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
@@ -32,6 +33,7 @@ function Color(props: {
 	width?: number;
 	maxWidth?: boolean;
 	isBorder?: boolean;
+	isBackground?: boolean;
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -52,6 +54,7 @@ function Color(props: {
 	const [showShadowColorPicker, setShowShadowColorPicker] = React.useState<boolean>(false);
 	const [shadowEnabled, setShadowEnabled] = React.useState<boolean>(true);
 	const [borderEnabled, setBorderEnabled] = React.useState<boolean>(props.value !== 'unset');
+	const [backgroundEnabled, setBackgroundEnabled] = React.useState<boolean>(props.value !== 'unset');
 
 	function getColor(basics: any, value: string) {
 		if (!basics || !value) return null;
@@ -131,6 +134,8 @@ function Color(props: {
 	React.useEffect(() => {
 		if (props.isBorder && props.value === 'unset') {
 			setBorderEnabled(false);
+		} else if (props.isBackground && props.value === 'unset') {
+			setBackgroundEnabled(false);
 		} else if (props.value) {
 			if (isColorValue(props.value) && props.basics) {
 				const absoluteValue = getColor(props.basics, props.value);
@@ -139,6 +144,8 @@ function Color(props: {
 				}
 				if (props.isBorder) {
 					setBorderEnabled(true);
+				} else if (props.isBackground) {
+					setBackgroundEnabled(true);
 				}
 			} else if (isShadowValue(props.value)) {
 				setTextValue(props.value);
@@ -149,6 +156,8 @@ function Color(props: {
 			}
 		} else if (props.isBorder) {
 			setBorderEnabled(false);
+		} else if (props.isBackground) {
+			setBackgroundEnabled(false);
 		}
 	}, [props.value, props.basics, props.scheme]);
 
@@ -191,7 +200,10 @@ function Color(props: {
 	const isShadow = isShadowValue(props.value);
 	const isBasicColorKey = ['primary', 'secondary', 'background', 'text', 'border'].includes(props.value);
 	const isBorderDisabled = props.isBorder && props.value === 'unset';
+	const isBackgroundDisabled = props.isBackground && props.value === 'unset';
 	const displayText = isBorderDisabled
+		? 'OFF'
+		: isBackgroundDisabled
 		? 'OFF'
 		: isColor
 		? isBasicColorKey
@@ -210,15 +222,15 @@ function Color(props: {
 			<S.ColorWrapper>
 				<S.ColorBody
 					onClick={() => {
-						if (isColor || isBorderDisabled) setShowSelector(true);
+						if (isColor || isBorderDisabled || isBackgroundDisabled) setShowSelector(true);
 						else setShowTextInput(true);
 					}}
 					disabled={props.disabled}
-					background={isBorderDisabled ? '#808080' : isColor ? value : '#808080'}
+					background={isBorderDisabled || isBackgroundDisabled ? '#808080' : isColor ? value : '#808080'}
 					height={props.height}
 					width={props.width}
 					maxWidth={props.maxWidth}
-					text={isColor && value && !isBorderDisabled ? getColorContrast(value) : 'white'}
+					text={isColor && value && !isBorderDisabled && !isBackgroundDisabled ? getColorContrast(value) : 'white'}
 				>
 					<span>{displayText}</span>
 				</S.ColorBody>
@@ -251,7 +263,29 @@ function Color(props: {
 								/>
 							</S.ShadowToggleRow>
 						)}
-						{props.isBorder && !borderEnabled ? (
+						{props.isBackground && (
+							<S.ShadowToggleRow>
+								<label>Background</label>
+								<Toggle
+									options={['OFF', 'ON']}
+									activeOption={backgroundEnabled ? 'ON' : 'OFF'}
+									handleToggle={(option) => {
+										const enabled = option === 'ON';
+										setBackgroundEnabled(enabled);
+										if (!enabled) {
+											props.onChange('unset');
+										} else {
+											const defaultColor = props.basics?.background?.[props.scheme] || '255,255,255';
+											const colorToUse = value || parseRgbStringToHex(defaultColor);
+											setValue(colorToUse);
+											props.onChange(hexToRgb(colorToUse));
+										}
+									}}
+									disabled={props.disabled}
+								/>
+							</S.ShadowToggleRow>
+						)}
+						{(props.isBorder && !borderEnabled) || (props.isBackground && !backgroundEnabled) ? (
 							<S.SelectorFlexWrapper style={{ opacity: 0.4 }}>
 								<S.SelectorPreview background={'#808080'} />
 								<div
@@ -282,7 +316,7 @@ function Color(props: {
 						)}
 						<S.SelectorActions>
 							<S.SelectorFlexActions>
-								{props.isBorder && !borderEnabled ? (
+								{(props.isBorder && !borderEnabled) || (props.isBackground && !backgroundEnabled) ? (
 									<input
 										type="text"
 										value="OFF"
@@ -354,6 +388,8 @@ function Color(props: {
 									label={language?.save}
 									handlePress={() => {
 										if (props.isBorder && !borderEnabled) {
+											props.onChange('unset');
+										} else if (props.isBackground && !backgroundEnabled) {
 											props.onChange('unset');
 										} else if (
 											!['primary', 'secondary', 'background', 'text', 'border'].includes(props.value) &&
@@ -608,7 +644,6 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 
 	// Local state for name editing to prevent re-renders
 	const [localName, setLocalName] = React.useState(theme.name || '');
-	const [open, setOpen] = React.useState<boolean>(false);
 	const [showLinksModal, setShowLinksModal] = React.useState<boolean>(false);
 	const [linksScheme, setLinksScheme] = React.useState<'light' | 'dark'>('light');
 
@@ -627,7 +662,8 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 
 	const preferences = theme[section]?.preferences || {};
 	const validPreferences = Object.entries(preferences).filter(
-		([_, value]: any) => typeof value === 'object' && value.light !== undefined
+		([key, value]: any) =>
+			typeof value === 'object' && value.light !== undefined && !(section === 'post' && key.toLowerCase() === 'border')
 	);
 
 	function handleThemeChange(
@@ -637,6 +673,13 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 		key: string,
 		newValue: string | boolean | number
 	) {
+		const shouldDisablePostBorder =
+			section === 'post' &&
+			type === 'colors' &&
+			key.toLowerCase() === 'border' &&
+			typeof newValue === 'string' &&
+			(newValue === 'unset' || newValue === 'none' || newValue === 'transparent' || newValue === '');
+
 		const updatedTheme = {
 			...props.theme,
 			[section]: {
@@ -648,6 +691,17 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 						...((scheme ? { [scheme]: newValue } : newValue) as any),
 					},
 				},
+				...(section === 'post' && scheme
+					? {
+							preferences: {
+								...props.theme[section].preferences,
+								border: {
+									...(props.theme[section].preferences?.border || {}),
+									[scheme]: !shouldDisablePostBorder,
+								},
+							},
+					  }
+					: {}),
 			},
 		};
 
@@ -674,32 +728,455 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 
 	return (
 		<S.ThemeSectionColumnWrapper key={theme.name}>
-			<S.ThemeSectionColumnAction open={open} disabled={false} onClick={() => setOpen((prev) => !prev)}>
-				<p>{section === 'post' ? 'POST PREVIEW' : section.toUpperCase()}</p>
-				<ReactSVG src={ICONS.arrow} />
-			</S.ThemeSectionColumnAction>
-			{open && (
-				<S.ThemeSectionColumn>
-					<S.ThemeSectionHeader>
-						<span>{'Element'.toUpperCase()}</span>
-						<S.ThemeSectionHeaderVariants>
-							<span>
-								<ReactSVG src={ICONS.light} />
-								{'Light'.toUpperCase()}
-							</span>
-							<span>
-								<ReactSVG src={ICONS.dark} /> {'Dark'.toUpperCase()}
-							</span>
-						</S.ThemeSectionHeaderVariants>
-						<S.ThemeResetButtonPlaceholder />
-					</S.ThemeSectionHeader>
-					{Object.entries(sortedSection).map(([key, value]: any) => {
-						const originalValue = originalTheme?.[section]?.colors?.[key.toLowerCase()];
-						const hasChanges = JSON.stringify(originalValue) !== JSON.stringify(value);
+			<Drawer
+				title={section === 'post' ? 'POST PREVIEW' : section.toUpperCase()}
+				drawerKey={`theme-section-${section}`}
+				noContentWrapper={true}
+				sm={true}
+				content={
+					<S.ThemeSectionColumn>
+						<S.ThemeSectionHeader>
+							<span>{'Element'.toUpperCase()}</span>
+							<S.ThemeSectionHeaderVariants>
+								<span>
+									<ReactSVG src={ICONS.light} />
+									{'Light'.toUpperCase()}
+								</span>
+								<span>
+									<ReactSVG src={ICONS.dark} /> {'Dark'.toUpperCase()}
+								</span>
+							</S.ThemeSectionHeaderVariants>
+							<S.ThemeResetButtonPlaceholder />
+						</S.ThemeSectionHeader>
+						{Object.entries(sortedSection).map(([key, value]: any) => {
+							const originalValue = originalTheme?.[section]?.colors?.[key.toLowerCase()];
+							const hasChanges = JSON.stringify(originalValue) !== JSON.stringify(value);
 
-						return (
-							<React.Fragment key={key}>
-								<S.ThemeRowWrapper>
+							return (
+								<React.Fragment key={key}>
+									<S.ThemeRowWrapper>
+										<S.ThemeRow>
+											<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
+											<S.ThemeVariantsWrapper>
+												<S.ThemeLight colors={props.theme.basics?.colors}>
+													<S.ThemeValue>
+														<Color
+															key={`${key}-light`}
+															label={key}
+															value={value.light}
+															basics={props.theme.basics?.colors}
+															scheme={'light'}
+															onChange={(newColor) => handleThemeChange(section, 'colors', 'light', key, newColor)}
+															loading={loading}
+															disabled={unauthorized}
+															width={125}
+															isBorder={key === 'border'}
+															isBackground={key === 'background' && section === 'post'}
+														/>
+													</S.ThemeValue>
+												</S.ThemeLight>
+												<S.ThemeDark colors={props.theme.basics?.colors}>
+													<S.ThemeValue>
+														<Color
+															key={`${key}-dark`}
+															label={key}
+															value={value.dark}
+															basics={props.theme.basics?.colors}
+															scheme={'dark'}
+															onChange={(newColor) => handleThemeChange(section, 'colors', 'dark', key, newColor)}
+															loading={loading}
+															disabled={unauthorized}
+															width={125}
+															isBorder={key === 'border'}
+															isBackground={key === 'background' && section === 'post'}
+														/>
+													</S.ThemeValue>
+												</S.ThemeDark>
+											</S.ThemeVariantsWrapper>
+											<S.ThemeResetButton $hasChanges={hasChanges}>
+												<IconButton
+													type={'alt1'}
+													active={false}
+													src={ICONS.reset}
+													handlePress={() => handleReset(section, 'colors', key)}
+													disabled={unauthorized || !hasChanges}
+													dimensions={{ wrapper: 20, icon: 11 }}
+													tooltip={'Reset'}
+													tooltipPosition={'left'}
+													noFocus
+													className={hasChanges ? 'reset-active' : ''}
+												/>
+											</S.ThemeResetButton>
+										</S.ThemeRow>
+									</S.ThemeRowWrapper>
+									{section === 'basics' && key === 'text' && (
+										<S.ThemeRowWrapper>
+											<S.ThemeRow>
+												<S.ThemeKey>Links</S.ThemeKey>
+												<S.ThemeVariantsWrapper>
+													<S.ThemeLight colors={props.theme.basics?.colors}>
+														<S.ThemeValue>
+															<button
+																onClick={() => {
+																	setLinksScheme('light');
+																	setShowLinksModal(true);
+																}}
+																disabled={unauthorized}
+																style={{
+																	width: '125px',
+																	height: '40px',
+																	background: `rgba(${
+																		props.theme.basics?.colors?.background?.light || '255,255,255'
+																	},1)`,
+																	border: `1px solid rgba(${props.theme.basics?.colors?.border?.light || '0,0,0'},0.2)`,
+																	borderRadius: '7.5px',
+																	cursor: 'pointer',
+																	display: 'flex',
+																	alignItems: 'center',
+																	justifyContent: 'center',
+																	textDecoration: theme.links?.preferences?.default?.underline ? 'underline' : 'none',
+																	fontWeight: theme.links?.preferences?.default?.bold ? 'bold' : 'normal',
+																	fontStyle: theme.links?.preferences?.default?.cursive ? 'italic' : 'normal',
+																	fontSize: '14px',
+																	color: `rgba(${resolveColorForDisplay(
+																		theme.links?.colors?.default?.light,
+																		'light',
+																		props.theme.basics?.colors
+																	)},1)`,
+																	transition: 'all 0.2s ease',
+																}}
+																onMouseEnter={(e) => {
+																	e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+																		theme.links?.colors?.hover?.light,
+																		'light',
+																		props.theme.basics?.colors
+																	)},1)`;
+																	e.currentTarget.style.textDecoration = theme.links?.preferences?.hover?.underline
+																		? 'underline'
+																		: 'none';
+																	e.currentTarget.style.fontWeight = theme.links?.preferences?.hover?.bold
+																		? 'bold'
+																		: 'normal';
+																	e.currentTarget.style.fontStyle = theme.links?.preferences?.hover?.cursive
+																		? 'italic'
+																		: 'normal';
+																}}
+																onMouseLeave={(e) => {
+																	e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+																		theme.links?.colors?.default?.light,
+																		'light',
+																		props.theme.basics?.colors
+																	)},1)`;
+																	e.currentTarget.style.textDecoration = theme.links?.preferences?.default?.underline
+																		? 'underline'
+																		: 'none';
+																	e.currentTarget.style.fontWeight = theme.links?.preferences?.default?.bold
+																		? 'bold'
+																		: 'normal';
+																	e.currentTarget.style.fontStyle = theme.links?.preferences?.default?.cursive
+																		? 'italic'
+																		: 'normal';
+																}}
+															>
+																Example Link
+															</button>
+														</S.ThemeValue>
+													</S.ThemeLight>
+													<S.ThemeDark colors={props.theme.basics?.colors}>
+														<S.ThemeValue>
+															<button
+																onClick={() => {
+																	setLinksScheme('dark');
+																	setShowLinksModal(true);
+																}}
+																disabled={unauthorized}
+																style={{
+																	width: '125px',
+																	height: '40px',
+																	background: `rgba(${props.theme.basics?.colors?.background?.dark || '0,0,0'},1)`,
+																	border: `1px solid rgba(${
+																		props.theme.basics?.colors?.border?.dark || '255,255,255'
+																	},0.2)`,
+																	borderRadius: '7.5px',
+																	cursor: 'pointer',
+																	display: 'flex',
+																	alignItems: 'center',
+																	justifyContent: 'center',
+																	textDecoration: theme.links?.preferences?.default?.underline ? 'underline' : 'none',
+																	fontWeight: theme.links?.preferences?.default?.bold ? 'bold' : 'normal',
+																	fontStyle: theme.links?.preferences?.default?.cursive ? 'italic' : 'normal',
+																	fontSize: '14px',
+																	color: `rgba(${resolveColorForDisplay(
+																		theme.links?.colors?.default?.dark,
+																		'dark',
+																		props.theme.basics?.colors
+																	)},1)`,
+																	transition: 'all 0.2s ease',
+																}}
+																onMouseEnter={(e) => {
+																	e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+																		theme.links?.colors?.hover?.dark,
+																		'dark',
+																		props.theme.basics?.colors
+																	)},1)`;
+																	e.currentTarget.style.textDecoration = theme.links?.preferences?.hover?.underline
+																		? 'underline'
+																		: 'none';
+																	e.currentTarget.style.fontWeight = theme.links?.preferences?.hover?.bold
+																		? 'bold'
+																		: 'normal';
+																	e.currentTarget.style.fontStyle = theme.links?.preferences?.hover?.cursive
+																		? 'italic'
+																		: 'normal';
+																}}
+																onMouseLeave={(e) => {
+																	e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
+																		theme.links?.colors?.default?.dark,
+																		'dark',
+																		props.theme.basics?.colors
+																	)},1)`;
+																	e.currentTarget.style.textDecoration = theme.links?.preferences?.default?.underline
+																		? 'underline'
+																		: 'none';
+																	e.currentTarget.style.fontWeight = theme.links?.preferences?.default?.bold
+																		? 'bold'
+																		: 'normal';
+																	e.currentTarget.style.fontStyle = theme.links?.preferences?.default?.cursive
+																		? 'italic'
+																		: 'normal';
+																}}
+															>
+																Example Link
+															</button>
+														</S.ThemeValue>
+													</S.ThemeDark>
+												</S.ThemeVariantsWrapper>
+												<S.ThemeResetButton
+													$hasChanges={JSON.stringify(originalTheme?.links) !== JSON.stringify(theme.links)}
+												>
+													<IconButton
+														type={'alt1'}
+														active={false}
+														src={ICONS.reset}
+														handlePress={() => {
+															const savedValue = originalTheme?.links;
+															if (!savedValue) return;
+															setTheme({ ...theme, links: savedValue });
+														}}
+														disabled={
+															unauthorized || JSON.stringify(originalTheme?.links) === JSON.stringify(theme.links)
+														}
+														dimensions={{ wrapper: 20, icon: 11 }}
+														tooltip={'Reset'}
+														tooltipPosition={'left'}
+														noFocus
+														className={
+															JSON.stringify(originalTheme?.links) !== JSON.stringify(theme.links) ? 'reset-active' : ''
+														}
+													/>
+												</S.ThemeResetButton>
+											</S.ThemeRow>
+										</S.ThemeRowWrapper>
+									)}
+								</React.Fragment>
+							);
+						})}
+						{section === 'basics' && (
+							<S.ThemeRowWrapper>
+								<S.ThemeRow>
+									<S.ThemeKey>Border Radius</S.ThemeKey>
+									<S.ThemeVariantsWrapper>
+										<S.ThemeValue style={{ flex: 1 }}>
+											<S.RangeWrapper>
+												<input
+													type="range"
+													value={theme.basics?.preferences?.borderRadius ?? 0}
+													onChange={(e) => {
+														const updatedTheme = {
+															...theme,
+															basics: {
+																...theme.basics,
+																preferences: {
+																	...theme.basics?.preferences,
+																	borderRadius: parseInt(e.target.value),
+																},
+															},
+														};
+														setTheme(updatedTheme);
+													}}
+													disabled={unauthorized}
+													min="0"
+													max="18"
+													step="1"
+												/>
+												<span>{theme.basics?.preferences?.borderRadius ?? 0}px</span>
+											</S.RangeWrapper>
+										</S.ThemeValue>
+									</S.ThemeVariantsWrapper>
+									<S.ThemeResetButton
+										$hasChanges={
+											(originalTheme?.basics?.preferences?.borderRadius ?? 0) !==
+											(theme.basics?.preferences?.borderRadius ?? 0)
+										}
+									>
+										<IconButton
+											type={'alt1'}
+											active={false}
+											src={ICONS.reset}
+											handlePress={() => {
+												const savedValue = originalTheme?.basics?.preferences?.borderRadius ?? 0;
+												const updatedTheme = {
+													...theme,
+													basics: {
+														...theme.basics,
+														preferences: {
+															...theme.basics?.preferences,
+															borderRadius: savedValue,
+														},
+													},
+												};
+												setTheme(updatedTheme);
+											}}
+											disabled={
+												unauthorized ||
+												(originalTheme?.basics?.preferences?.borderRadius ?? 0) ===
+													(theme.basics?.preferences?.borderRadius ?? 0)
+											}
+											dimensions={{ wrapper: 20, icon: 11 }}
+											tooltip={'Reset'}
+											tooltipPosition={'left'}
+											noFocus
+											className={
+												(originalTheme?.basics?.preferences?.borderRadius ?? 0) !==
+												(theme.basics?.preferences?.borderRadius ?? 0)
+													? 'reset-active'
+													: ''
+											}
+										/>
+									</S.ThemeResetButton>
+								</S.ThemeRow>
+							</S.ThemeRowWrapper>
+						)}
+						{validPreferences.map(([key, value]: any) => {
+							const isBoolean = typeof value.light === 'boolean';
+							const isNumeric = typeof value.light === 'number';
+							const originalValue = originalTheme?.[section]?.preferences?.[key.toLowerCase()];
+							const hasChanges = JSON.stringify(originalValue) !== JSON.stringify(value);
+
+							if (isNumeric) {
+								return (
+									<S.ThemeRowWrapper key={key}>
+										<S.ThemeRow>
+											<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
+											<S.ThemeVariantsWrapper>
+												<S.ThemeLight colors={props.theme.basics?.colors}>
+													<S.ThemeValue>
+														<S.RangeWrapper>
+															<input
+																type="range"
+																value={value.light}
+																onChange={(e) =>
+																	handleThemeChange(section, 'preferences', 'light', key, parseFloat(e.target.value))
+																}
+																disabled={unauthorized}
+																min="0"
+																max="1"
+																step="0.01"
+															/>
+															<span>{value.light}</span>
+														</S.RangeWrapper>
+													</S.ThemeValue>
+												</S.ThemeLight>
+												<S.ThemeDark colors={props.theme.basics?.colors}>
+													<S.ThemeValue>
+														<S.RangeWrapper>
+															<input
+																type="range"
+																value={value.dark}
+																onChange={(e) =>
+																	handleThemeChange(section, 'preferences', 'dark', key, parseFloat(e.target.value))
+																}
+																disabled={unauthorized}
+																min="0"
+																max="1"
+																step="0.01"
+															/>
+															<span>{value.dark}</span>
+														</S.RangeWrapper>
+													</S.ThemeValue>
+												</S.ThemeDark>
+											</S.ThemeVariantsWrapper>
+											<S.ThemeResetButton $hasChanges={hasChanges}>
+												<IconButton
+													type={'alt1'}
+													active={false}
+													src={ICONS.reset}
+													handlePress={() => handleReset(section, 'preferences', key)}
+													disabled={unauthorized || !hasChanges}
+													dimensions={{ wrapper: 20, icon: 11 }}
+													tooltip={'Reset'}
+													tooltipPosition={'left'}
+													noFocus
+													className={hasChanges ? 'reset-active' : ''}
+												/>
+											</S.ThemeResetButton>
+										</S.ThemeRow>
+									</S.ThemeRowWrapper>
+								);
+							}
+
+							if (isBoolean) {
+								return (
+									<S.ThemeRowWrapper key={key}>
+										<S.ThemeRow>
+											<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
+											<S.ThemeVariantsWrapper>
+												<S.ThemeLight colors={props.theme.basics?.colors}>
+													<S.ThemeValue>
+														<Toggle
+															options={['OFF', 'ON']}
+															activeOption={value.light ? 'ON' : 'OFF'}
+															handleToggle={(option) =>
+																handleThemeChange(section, 'preferences', 'light', key, option === 'ON')
+															}
+															disabled={unauthorized}
+														/>
+													</S.ThemeValue>
+												</S.ThemeLight>
+												<S.ThemeDark colors={props.theme.basics?.colors}>
+													<S.ThemeValue>
+														<Toggle
+															options={['OFF', 'ON']}
+															activeOption={value.dark ? 'ON' : 'OFF'}
+															handleToggle={(option) =>
+																handleThemeChange(section, 'preferences', 'dark', key, option === 'ON')
+															}
+															disabled={unauthorized}
+														/>
+													</S.ThemeValue>
+												</S.ThemeDark>
+											</S.ThemeVariantsWrapper>
+											<S.ThemeResetButton $hasChanges={hasChanges}>
+												<IconButton
+													type={'alt1'}
+													active={false}
+													src={ICONS.reset}
+													handlePress={() => handleReset(section, 'preferences', key)}
+													disabled={unauthorized || !hasChanges}
+													dimensions={{ wrapper: 20, icon: 11 }}
+													tooltip={'Reset'}
+													tooltipPosition={'left'}
+													noFocus
+													className={hasChanges ? 'reset-active' : ''}
+												/>
+											</S.ThemeResetButton>
+										</S.ThemeRow>
+									</S.ThemeRowWrapper>
+								);
+							}
+
+							return (
+								<S.ThemeRowWrapper key={key}>
 									<S.ThemeRow>
 										<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
 										<S.ThemeVariantsWrapper>
@@ -711,11 +1188,10 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 														value={value.light}
 														basics={props.theme.basics?.colors}
 														scheme={'light'}
-														onChange={(newColor) => handleThemeChange(section, 'colors', 'light', key, newColor)}
+														onChange={(newValue) => handleThemeChange(section, 'preferences', 'light', key, newValue)}
 														loading={loading}
 														disabled={unauthorized}
 														width={125}
-														isBorder={key === 'border'}
 													/>
 												</S.ThemeValue>
 											</S.ThemeLight>
@@ -727,372 +1203,10 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 														value={value.dark}
 														basics={props.theme.basics?.colors}
 														scheme={'dark'}
-														onChange={(newColor) => handleThemeChange(section, 'colors', 'dark', key, newColor)}
+														onChange={(newValue) => handleThemeChange(section, 'preferences', 'dark', key, newValue)}
 														loading={loading}
 														disabled={unauthorized}
 														width={125}
-														isBorder={key === 'border'}
-													/>
-												</S.ThemeValue>
-											</S.ThemeDark>
-										</S.ThemeVariantsWrapper>
-										<S.ThemeResetButton $hasChanges={hasChanges}>
-											<IconButton
-												type={'alt1'}
-												active={false}
-												src={ICONS.reset}
-												handlePress={() => handleReset(section, 'colors', key)}
-												disabled={unauthorized || !hasChanges}
-												dimensions={{ wrapper: 20, icon: 11 }}
-												tooltip={'Reset'}
-												tooltipPosition={'left'}
-												noFocus
-												className={hasChanges ? 'reset-active' : ''}
-											/>
-										</S.ThemeResetButton>
-									</S.ThemeRow>
-								</S.ThemeRowWrapper>
-								{section === 'basics' && key === 'text' && (
-									<S.ThemeRowWrapper>
-										<S.ThemeRow>
-											<S.ThemeKey>Links</S.ThemeKey>
-											<S.ThemeVariantsWrapper>
-												<S.ThemeLight colors={props.theme.basics?.colors}>
-													<S.ThemeValue>
-														<button
-															onClick={() => {
-																setLinksScheme('light');
-																setShowLinksModal(true);
-															}}
-															disabled={unauthorized}
-															style={{
-																width: '125px',
-																height: '40px',
-																background: `rgba(${props.theme.basics?.colors?.background?.light || '255,255,255'},1)`,
-																border: `1px solid rgba(${props.theme.basics?.colors?.border?.light || '0,0,0'},0.2)`,
-																borderRadius: '7.5px',
-																cursor: 'pointer',
-																display: 'flex',
-																alignItems: 'center',
-																justifyContent: 'center',
-																textDecoration: theme.links?.preferences?.default?.underline ? 'underline' : 'none',
-																fontWeight: theme.links?.preferences?.default?.bold ? 'bold' : 'normal',
-																fontStyle: theme.links?.preferences?.default?.cursive ? 'italic' : 'normal',
-																fontSize: '14px',
-																color: `rgba(${resolveColorForDisplay(
-																	theme.links?.colors?.default?.light,
-																	'light',
-																	props.theme.basics?.colors
-																)},1)`,
-																transition: 'all 0.2s ease',
-															}}
-															onMouseEnter={(e) => {
-																e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
-																	theme.links?.colors?.hover?.light,
-																	'light',
-																	props.theme.basics?.colors
-																)},1)`;
-																e.currentTarget.style.textDecoration = theme.links?.preferences?.hover?.underline
-																	? 'underline'
-																	: 'none';
-																e.currentTarget.style.fontWeight = theme.links?.preferences?.hover?.bold
-																	? 'bold'
-																	: 'normal';
-																e.currentTarget.style.fontStyle = theme.links?.preferences?.hover?.cursive
-																	? 'italic'
-																	: 'normal';
-															}}
-															onMouseLeave={(e) => {
-																e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
-																	theme.links?.colors?.default?.light,
-																	'light',
-																	props.theme.basics?.colors
-																)},1)`;
-																e.currentTarget.style.textDecoration = theme.links?.preferences?.default?.underline
-																	? 'underline'
-																	: 'none';
-																e.currentTarget.style.fontWeight = theme.links?.preferences?.default?.bold
-																	? 'bold'
-																	: 'normal';
-																e.currentTarget.style.fontStyle = theme.links?.preferences?.default?.cursive
-																	? 'italic'
-																	: 'normal';
-															}}
-														>
-															Example Link
-														</button>
-													</S.ThemeValue>
-												</S.ThemeLight>
-												<S.ThemeDark colors={props.theme.basics?.colors}>
-													<S.ThemeValue>
-														<button
-															onClick={() => {
-																setLinksScheme('dark');
-																setShowLinksModal(true);
-															}}
-															disabled={unauthorized}
-															style={{
-																width: '125px',
-																height: '40px',
-																background: `rgba(${props.theme.basics?.colors?.background?.dark || '0,0,0'},1)`,
-																border: `1px solid rgba(${
-																	props.theme.basics?.colors?.border?.dark || '255,255,255'
-																},0.2)`,
-																borderRadius: '7.5px',
-																cursor: 'pointer',
-																display: 'flex',
-																alignItems: 'center',
-																justifyContent: 'center',
-																textDecoration: theme.links?.preferences?.default?.underline ? 'underline' : 'none',
-																fontWeight: theme.links?.preferences?.default?.bold ? 'bold' : 'normal',
-																fontStyle: theme.links?.preferences?.default?.cursive ? 'italic' : 'normal',
-																fontSize: '14px',
-																color: `rgba(${resolveColorForDisplay(
-																	theme.links?.colors?.default?.dark,
-																	'dark',
-																	props.theme.basics?.colors
-																)},1)`,
-																transition: 'all 0.2s ease',
-															}}
-															onMouseEnter={(e) => {
-																e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
-																	theme.links?.colors?.hover?.dark,
-																	'dark',
-																	props.theme.basics?.colors
-																)},1)`;
-																e.currentTarget.style.textDecoration = theme.links?.preferences?.hover?.underline
-																	? 'underline'
-																	: 'none';
-																e.currentTarget.style.fontWeight = theme.links?.preferences?.hover?.bold
-																	? 'bold'
-																	: 'normal';
-																e.currentTarget.style.fontStyle = theme.links?.preferences?.hover?.cursive
-																	? 'italic'
-																	: 'normal';
-															}}
-															onMouseLeave={(e) => {
-																e.currentTarget.style.color = `rgba(${resolveColorForDisplay(
-																	theme.links?.colors?.default?.dark,
-																	'dark',
-																	props.theme.basics?.colors
-																)},1)`;
-																e.currentTarget.style.textDecoration = theme.links?.preferences?.default?.underline
-																	? 'underline'
-																	: 'none';
-																e.currentTarget.style.fontWeight = theme.links?.preferences?.default?.bold
-																	? 'bold'
-																	: 'normal';
-																e.currentTarget.style.fontStyle = theme.links?.preferences?.default?.cursive
-																	? 'italic'
-																	: 'normal';
-															}}
-														>
-															Example Link
-														</button>
-													</S.ThemeValue>
-												</S.ThemeDark>
-											</S.ThemeVariantsWrapper>
-											<S.ThemeResetButton
-												$hasChanges={JSON.stringify(originalTheme?.links) !== JSON.stringify(theme.links)}
-											>
-												<IconButton
-													type={'alt1'}
-													active={false}
-													src={ICONS.reset}
-													handlePress={() => {
-														const savedValue = originalTheme?.links;
-														if (!savedValue) return;
-														setTheme({ ...theme, links: savedValue });
-													}}
-													disabled={
-														unauthorized || JSON.stringify(originalTheme?.links) === JSON.stringify(theme.links)
-													}
-													dimensions={{ wrapper: 20, icon: 11 }}
-													tooltip={'Reset'}
-													tooltipPosition={'left'}
-													noFocus
-													className={
-														JSON.stringify(originalTheme?.links) !== JSON.stringify(theme.links) ? 'reset-active' : ''
-													}
-												/>
-											</S.ThemeResetButton>
-										</S.ThemeRow>
-									</S.ThemeRowWrapper>
-								)}
-							</React.Fragment>
-						);
-					})}
-					{section === 'basics' && (
-						<S.ThemeRowWrapper>
-							<S.ThemeRow>
-								<S.ThemeKey>Border Radius</S.ThemeKey>
-								<S.ThemeVariantsWrapper>
-									<S.ThemeValue style={{ flex: 1 }}>
-										<S.RangeWrapper>
-											<input
-												type="range"
-												value={theme.basics?.preferences?.borderRadius ?? 0}
-												onChange={(e) => {
-													const updatedTheme = {
-														...theme,
-														basics: {
-															...theme.basics,
-															preferences: {
-																...theme.basics?.preferences,
-																borderRadius: parseInt(e.target.value),
-															},
-														},
-													};
-													setTheme(updatedTheme);
-												}}
-												disabled={unauthorized}
-												min="0"
-												max="18"
-												step="1"
-											/>
-											<span>{theme.basics?.preferences?.borderRadius ?? 0}px</span>
-										</S.RangeWrapper>
-									</S.ThemeValue>
-								</S.ThemeVariantsWrapper>
-								<S.ThemeResetButton
-									$hasChanges={
-										(originalTheme?.basics?.preferences?.borderRadius ?? 0) !==
-										(theme.basics?.preferences?.borderRadius ?? 0)
-									}
-								>
-									<IconButton
-										type={'alt1'}
-										active={false}
-										src={ICONS.reset}
-										handlePress={() => {
-											const savedValue = originalTheme?.basics?.preferences?.borderRadius ?? 0;
-											const updatedTheme = {
-												...theme,
-												basics: {
-													...theme.basics,
-													preferences: {
-														...theme.basics?.preferences,
-														borderRadius: savedValue,
-													},
-												},
-											};
-											setTheme(updatedTheme);
-										}}
-										disabled={
-											unauthorized ||
-											(originalTheme?.basics?.preferences?.borderRadius ?? 0) ===
-												(theme.basics?.preferences?.borderRadius ?? 0)
-										}
-										dimensions={{ wrapper: 20, icon: 11 }}
-										tooltip={'Reset'}
-										tooltipPosition={'left'}
-										noFocus
-										className={
-											(originalTheme?.basics?.preferences?.borderRadius ?? 0) !==
-											(theme.basics?.preferences?.borderRadius ?? 0)
-												? 'reset-active'
-												: ''
-										}
-									/>
-								</S.ThemeResetButton>
-							</S.ThemeRow>
-						</S.ThemeRowWrapper>
-					)}
-					{validPreferences.map(([key, value]: any) => {
-						const isBoolean = typeof value.light === 'boolean';
-						const isNumeric = typeof value.light === 'number';
-						const originalValue = originalTheme?.[section]?.preferences?.[key.toLowerCase()];
-						const hasChanges = JSON.stringify(originalValue) !== JSON.stringify(value);
-
-						if (isNumeric) {
-							return (
-								<S.ThemeRowWrapper key={key}>
-									<S.ThemeRow>
-										<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
-										<S.ThemeVariantsWrapper>
-											<S.ThemeLight colors={props.theme.basics?.colors}>
-												<S.ThemeValue>
-													<S.RangeWrapper>
-														<input
-															type="range"
-															value={value.light}
-															onChange={(e) =>
-																handleThemeChange(section, 'preferences', 'light', key, parseFloat(e.target.value))
-															}
-															disabled={unauthorized}
-															min="0"
-															max="1"
-															step="0.01"
-														/>
-														<span>{value.light}</span>
-													</S.RangeWrapper>
-												</S.ThemeValue>
-											</S.ThemeLight>
-											<S.ThemeDark colors={props.theme.basics?.colors}>
-												<S.ThemeValue>
-													<S.RangeWrapper>
-														<input
-															type="range"
-															value={value.dark}
-															onChange={(e) =>
-																handleThemeChange(section, 'preferences', 'dark', key, parseFloat(e.target.value))
-															}
-															disabled={unauthorized}
-															min="0"
-															max="1"
-															step="0.01"
-														/>
-														<span>{value.dark}</span>
-													</S.RangeWrapper>
-												</S.ThemeValue>
-											</S.ThemeDark>
-										</S.ThemeVariantsWrapper>
-										<S.ThemeResetButton $hasChanges={hasChanges}>
-											<IconButton
-												type={'alt1'}
-												active={false}
-												src={ICONS.reset}
-												handlePress={() => handleReset(section, 'preferences', key)}
-												disabled={unauthorized || !hasChanges}
-												dimensions={{ wrapper: 20, icon: 11 }}
-												tooltip={'Reset'}
-												tooltipPosition={'left'}
-												noFocus
-												className={hasChanges ? 'reset-active' : ''}
-											/>
-										</S.ThemeResetButton>
-									</S.ThemeRow>
-								</S.ThemeRowWrapper>
-							);
-						}
-
-						if (isBoolean) {
-							return (
-								<S.ThemeRowWrapper key={key}>
-									<S.ThemeRow>
-										<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
-										<S.ThemeVariantsWrapper>
-											<S.ThemeLight colors={props.theme.basics?.colors}>
-												<S.ThemeValue>
-													<Toggle
-														options={['OFF', 'ON']}
-														activeOption={value.light ? 'ON' : 'OFF'}
-														handleToggle={(option) =>
-															handleThemeChange(section, 'preferences', 'light', key, option === 'ON')
-														}
-														disabled={unauthorized}
-													/>
-												</S.ThemeValue>
-											</S.ThemeLight>
-											<S.ThemeDark colors={props.theme.basics?.colors}>
-												<S.ThemeValue>
-													<Toggle
-														options={['OFF', 'ON']}
-														activeOption={value.dark ? 'ON' : 'OFF'}
-														handleToggle={(option) =>
-															handleThemeChange(section, 'preferences', 'dark', key, option === 'ON')
-														}
-														disabled={unauthorized}
 													/>
 												</S.ThemeValue>
 											</S.ThemeDark>
@@ -1114,64 +1228,10 @@ const ThemeSection = React.memo(function ThemeSection(props: any) {
 									</S.ThemeRow>
 								</S.ThemeRowWrapper>
 							);
-						}
-
-						return (
-							<S.ThemeRowWrapper key={key}>
-								<S.ThemeRow>
-									<S.ThemeKey>{key.charAt(0).toUpperCase() + key.slice(1)}</S.ThemeKey>
-									<S.ThemeVariantsWrapper>
-										<S.ThemeLight colors={props.theme.basics?.colors}>
-											<S.ThemeValue>
-												<Color
-													key={`${key}-light`}
-													label={key}
-													value={value.light}
-													basics={props.theme.basics?.colors}
-													scheme={'light'}
-													onChange={(newValue) => handleThemeChange(section, 'preferences', 'light', key, newValue)}
-													loading={loading}
-													disabled={unauthorized}
-													width={125}
-												/>
-											</S.ThemeValue>
-										</S.ThemeLight>
-										<S.ThemeDark colors={props.theme.basics?.colors}>
-											<S.ThemeValue>
-												<Color
-													key={`${key}-dark`}
-													label={key}
-													value={value.dark}
-													basics={props.theme.basics?.colors}
-													scheme={'dark'}
-													onChange={(newValue) => handleThemeChange(section, 'preferences', 'dark', key, newValue)}
-													loading={loading}
-													disabled={unauthorized}
-													width={125}
-												/>
-											</S.ThemeValue>
-										</S.ThemeDark>
-									</S.ThemeVariantsWrapper>
-									<S.ThemeResetButton $hasChanges={hasChanges}>
-										<IconButton
-											type={'alt1'}
-											active={false}
-											src={ICONS.reset}
-											handlePress={() => handleReset(section, 'preferences', key)}
-											disabled={unauthorized || !hasChanges}
-											dimensions={{ wrapper: 20, icon: 11 }}
-											tooltip={'Reset'}
-											tooltipPosition={'left'}
-											noFocus
-											className={hasChanges ? 'reset-active' : ''}
-										/>
-									</S.ThemeResetButton>
-								</S.ThemeRow>
-							</S.ThemeRowWrapper>
-						);
-					})}
-				</S.ThemeSectionColumn>
-			)}
+						})}
+					</S.ThemeSectionColumn>
+				}
+			/>
 			{showLinksModal && (
 				<Modal header={'Links'} handleClose={() => setShowLinksModal(false)}>
 					<S.ModalWrapper>
@@ -1567,373 +1627,99 @@ function Theme(props: { theme: any; published: any; loading: boolean; onThemeUpd
 
 	return (
 		<S.ThemeWrapper id={'ThemeWrapper'}>
-			<FormField
-				key={'theme-name-field'}
-				value={localName}
-				label={'Name'}
-				onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-					const newName = e.target.value;
-					setLocalName(newName);
-					setPendingNameChange(newName);
-				}}
-				invalid={{ status: false, message: null }}
-				disabled={false}
-				hideErrorMessage={true}
-			/>
+			<S.ThemeHeaderWrapper>
+				<S.ThemeHeaderInput>
+					<FormField
+						key={'theme-name-field'}
+						value={localName}
+						label={'Name'}
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+							const newName = e.target.value;
+							setLocalName(newName);
+							setPendingNameChange(newName);
+						}}
+						invalid={{ status: false, message: null }}
+						disabled={true}
+						hideErrorMessage={true}
+						noMargin={true}
+					/>
+				</S.ThemeHeaderInput>
+				<S.ThemeHeaderAction>
+					<Button
+						type={'alt1'}
+						label={language?.saveChanges || 'Save Changes'}
+						handlePress={() => {
+							// Include pending name change if exists
+							const finalTheme = pendingNameChange !== null ? { ...theme, name: pendingNameChange } : theme;
+							props.onThemeUpdate(finalTheme);
+							setPendingNameChange(null); // Clear pending change after save
+						}}
+						loading={props.loading}
+						disabled={props.loading || !hasChanges}
+						height={45}
+						fullWidth
+						icon={ICONS.save}
+						iconLeftAlign
+					/>
+				</S.ThemeHeaderAction>
+			</S.ThemeHeaderWrapper>
 			<S.Theme>
-				<ThemeSection
-					theme={theme}
-					setTheme={setTheme}
-					originalTheme={originalTheme}
-					section={'basics'}
-					loading={props.loading}
-					onNameChange={setPendingNameChange}
-				/>
-				<ThemeSection
-					theme={theme}
-					setTheme={setTheme}
-					originalTheme={originalTheme}
-					section={'header'}
-					loading={props.loading}
-					onNameChange={setPendingNameChange}
-				/>
-				<ThemeSection
-					theme={theme}
-					setTheme={setTheme}
-					originalTheme={originalTheme}
-					section={'navigation'}
-					loading={props.loading}
-					onNameChange={setPendingNameChange}
-				/>
-				<ThemeSection
-					theme={theme}
-					setTheme={setTheme}
-					originalTheme={originalTheme}
-					section={'post'}
-					loading={props.loading}
-					onNameChange={setPendingNameChange}
-				/>
-				<ThemeSection
-					theme={theme}
-					setTheme={setTheme}
-					originalTheme={originalTheme}
-					section={'footer'}
-					loading={props.loading}
-					onNameChange={setPendingNameChange}
-				/>
-				<ThemeSection
-					theme={theme}
-					setTheme={setTheme}
-					originalTheme={originalTheme}
-					section={'card'}
-					loading={props.loading}
-					onNameChange={setPendingNameChange}
-				/>
+				<S.ThemeSectionsColumn>
+					<ThemeSection
+						theme={theme}
+						setTheme={setTheme}
+						originalTheme={originalTheme}
+						section={'basics'}
+						loading={props.loading}
+						onNameChange={setPendingNameChange}
+					/>
+					<ThemeSection
+						theme={theme}
+						setTheme={setTheme}
+						originalTheme={originalTheme}
+						section={'header'}
+						loading={props.loading}
+						onNameChange={setPendingNameChange}
+					/>
+					<ThemeSection
+						theme={theme}
+						setTheme={setTheme}
+						originalTheme={originalTheme}
+						section={'post'}
+						loading={props.loading}
+						onNameChange={setPendingNameChange}
+					/>
+				</S.ThemeSectionsColumn>
+				<S.ThemeSectionsColumn>
+					<ThemeSection
+						theme={theme}
+						setTheme={setTheme}
+						originalTheme={originalTheme}
+						section={'navigation'}
+						loading={props.loading}
+						onNameChange={setPendingNameChange}
+					/>
+					<ThemeSection
+						theme={theme}
+						setTheme={setTheme}
+						originalTheme={originalTheme}
+						section={'footer'}
+						loading={props.loading}
+						onNameChange={setPendingNameChange}
+					/>
+					<ThemeSection
+						theme={theme}
+						setTheme={setTheme}
+						originalTheme={originalTheme}
+						section={'card'}
+						loading={props.loading}
+						onNameChange={setPendingNameChange}
+					/>
+				</S.ThemeSectionsColumn>
 			</S.Theme>
-
-			<S.EndActions>
-				<Button
-					type={'alt1'}
-					label={language?.save || 'Save'}
-					handlePress={() => {
-						// Include pending name change if exists
-						const finalTheme = pendingNameChange !== null ? { ...theme, name: pendingNameChange } : theme;
-						props.onThemeUpdate(finalTheme);
-						setPendingNameChange(null); // Clear pending change after save
-					}}
-					loading={props.loading}
-					disabled={props.loading || !hasChanges}
-				/>
-			</S.EndActions>
 		</S.ThemeWrapper>
 	);
 }
-
-// function Section(props: {
-// 	label: string;
-// 	theme: PortalThemeType;
-// 	onThemeChange: (theme: PortalThemeType, publish: boolean, prevName?: string) => void;
-// 	onThemePublish: (theme: PortalThemeType) => void;
-// 	onThemeCancel: (theme: PortalThemeType) => void;
-// 	handleThemeRemove: (theme: PortalThemeType) => void;
-// 	removeDisabled: boolean;
-// 	published: boolean;
-// 	loading: boolean;
-// }) {
-// 	const portalProvider = usePortalProvider();
-// 	const [theme, setTheme] = React.useState<PortalThemeType>(props.theme);
-// 	const [name, setName] = React.useState<string>(props.theme.name ?? '-');
-// 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
-
-// 	React.useEffect(() => {
-// 		setTheme(props.theme);
-// 		setName(props.theme.name ?? '-');
-// 	}, [props.theme]);
-
-// 	function handleThemeChange(key: string, newColor: string) {
-// 		const updatedTheme = {
-// 			...theme,
-// 			basics: {
-// 				...theme.basics,
-// 				colors: {
-// 					...theme.basics.colors,
-// 					[key]: newColor,
-// 				},
-// 			},
-// 		};
-// 		setTheme(updatedTheme);
-// 		if (props.published) props.onThemeChange(updatedTheme, false);
-// 	}
-
-// 	const languageProvider = useLanguageProvider();
-// 	const language = languageProvider.object[languageProvider.current];
-
-// 	// const { background, ...remainingTheme } = props.theme.basics.colors;
-// 	const remainingTheme = props.theme.basics.colors;
-
-// 	const [scheme, setScheme] = React.useState<'light' | 'dark'>(props.theme.scheme);
-// 	const [showNameEdit, setShowNameEdit] = React.useState<boolean>(false);
-// 	const [showRemoveConfirmation, setShowRemoveConfirmation] = React.useState<boolean>(false);
-
-// 	const orderedRemainingTheme = Object.keys(THEME.DEFAULT.basics.colors)
-// 		// .filter((key) => key !== 'background')
-// 		.reduce((acc: Record<string, any>, key) => {
-// 			if (remainingTheme && remainingTheme.hasOwnProperty(key)) {
-// 				acc[key] = remainingTheme[key];
-// 			}
-// 			return acc;
-// 		}, {} as Record<string, any>);
-
-// 	function handleNameChange() {
-// 		const updatedTheme = {
-// 			...theme,
-// 			name: name,
-// 		};
-
-// 		if (props.published) props.onThemeChange(updatedTheme, false, props.theme.name);
-
-// 		setTheme(updatedTheme);
-// 		setShowNameEdit(false);
-// 	}
-
-// 	function handleSchemeChange(option: string) {
-// 		const updatedScheme = option as PortalSchemeType;
-
-// 		const updatedTheme = {
-// 			...theme,
-// 			scheme: updatedScheme,
-// 		};
-
-// 		if (props.published) props.onThemeChange(updatedTheme, false, props.theme.name);
-
-// 		setTheme(updatedTheme);
-// 		setScheme(updatedScheme);
-// 	}
-
-// 	return (
-// 		<>
-// 			<S.Section id={'Section'}>
-// 				<S.SectionHeader>
-// 					<p>{name}</p>
-// 					{/*
-// 					<S.SectionHeaderActions>
-// 						<IconButton
-// 							type={'alt1'}
-// 							active={false}
-// 							src={ICONS.write}
-// 							handlePress={() => setShowNameEdit(true)}
-// 							disabled={unauthorized}
-// 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
-// 							tooltip={language?.editThemeName}
-// 							tooltipPosition={'bottom-right'}
-// 							noFocus
-// 						/>
-// 						<IconButton
-// 							type={'alt1'}
-// 							active={false}
-// 							src={ICONS.delete}
-// 							handlePress={() => setShowRemoveConfirmation(true)}
-// 							disabled={unauthorized || props.removeDisabled}
-// 							dimensions={{ wrapper: 23.5, icon: 13.5 }}
-// 							tooltip={language?.remove}
-// 							tooltipPosition={'bottom-right'}
-// 							noFocus
-// 						/>
-// 					</S.SectionHeaderActions>
-// 					*/}
-// 				</S.SectionHeader>
-// 				<S.SectionBody>
-// 					{/*
-// 					<S.FlexWrapper>
-// 						<S.SectionsWrapper>
-// 							Background
-// 							<Color
-// 								label={language?.background}
-// 								value={background}
-// 								onChange={(newColor) => handleThemeChange('background', newColor)}
-// 								loading={props.loading}
-// 								width={130.5}
-// 								disabled={unauthorized}
-// 							/>
-// 						</S.SectionsWrapper>
-
-// 					</S.FlexWrapper>
-// 					*/}
-// 					<S.AttributesWrapper
-// 						className={'border-wrapper-alt2'}
-// 						style={{
-// 							color: `rgba(${theme.basics.colors.text},1)`,
-// 							background: `rgba(${theme.basics.colors.background},1)`,
-// 						}}
-// 					>
-// 						<S.GridWrapper id="GridWrapper">
-// 							<S.GridRows id="GridRows">
-// 								{Object.entries(orderedRemainingTheme).map(([key, value]: any) => (
-// 									<S.GridRow id="GridRow" key={key}>
-// 										<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-// 										<Color
-// 											key={key}
-// 											label={key}
-// 											value={value}
-// 											basics={theme.basics?.colors}
-// 											scheme={scheme}
-// 											onChange={(newColor) => handleThemeChange(key, newColor)}
-// 											loading={props.loading}
-// 											disabled={unauthorized}
-// 										/>
-// 									</S.GridRow>
-// 								))}
-// 							</S.GridRows>
-// 						</S.GridWrapper>
-// 					</S.AttributesWrapper>
-
-// 					<S.AttributesWrapper
-// 						className={'border-wrapper-alt2'}
-// 						style={{
-// 							color: `rgba(${theme.basics.colors.text},1)`,
-// 							background: `rgba(${theme.basics.colors.background},1)`,
-// 						}}
-// 					>
-// 						Default Button
-// 						<S.ButtonPreview theme={theme.buttons.default}>Preview</S.ButtonPreview>
-// 						<S.GridWrapper id={'GridWrapper'}>
-// 							<S.GridRows id={'GridRows'}>
-// 								{Object.entries(theme.buttons.default.default.colors).map(([key, value]: any) => (
-// 									<S.GridRow id={'GridRow'} key={key}>
-// 										<span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-// 										<Color
-// 											key={key}
-// 											label={key}
-// 											value={value}
-// 											basics={theme.basics?.colors}
-// 											scheme={scheme}
-// 											onChange={(newColor) => handleThemeChange(key, newColor)}
-// 											loading={props.loading}
-// 											disabled={unauthorized}
-// 										/>
-// 									</S.GridRow>
-// 								))}
-// 							</S.GridRows>
-// 						</S.GridWrapper>
-// 					</S.AttributesWrapper>
-// 					{/*
-
-// 						<Toggle
-// 							label={language?.colorScheme}
-// 							options={[PortalSchemeType.Light, PortalSchemeType.Dark]}
-// 							activeOption={scheme}
-// 							handleToggle={(option: string) => handleSchemeChange(option)}
-// 							disabled={unauthorized}
-// 						/>
-// 						{!props.published && (
-// 							<S.SectionActions>
-// 								<Button
-// 									type={'alt3'}
-// 									label={language?.cancel}
-// 									handlePress={() => {
-// 										props.onThemeCancel(props.theme);
-// 									}}
-// 									disabled={unauthorized}
-// 								/>
-// 								<Button
-// 									type={'alt4'}
-// 									label={language?.publishTheme}
-// 									handlePress={() => props.onThemePublish(theme)}
-// 									disabled={unauthorized}
-// 								/>
-// 							</S.SectionActions>
-// 						)}
-// 					</S.AttributesWrapper>
-// 					*/}
-// 				</S.SectionBody>
-// 			</S.Section>
-// 			{showNameEdit && (
-// 				<Modal header={language?.editThemeName} handleClose={() => setShowNameEdit(false)}>
-// 					<S.ModalWrapper>
-// 						<FormField
-// 							value={name}
-// 							onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-// 							invalid={{ status: false, message: null }}
-// 							disabled={unauthorized}
-// 							hideErrorMessage
-// 							sm
-// 						/>
-// 						<S.ModalActionsWrapper>
-// 							<Button
-// 								type={'primary'}
-// 								label={language?.cancel}
-// 								handlePress={() => setShowNameEdit(false)}
-// 								disabled={unauthorized}
-// 							/>
-// 							<Button
-// 								type={'alt1'}
-// 								label={language?.save}
-// 								handlePress={() => handleNameChange()}
-// 								disabled={unauthorized}
-// 								loading={false}
-// 							/>
-// 						</S.ModalActionsWrapper>
-// 					</S.ModalWrapper>
-// 				</Modal>
-// 			)}
-// 			{showRemoveConfirmation && (
-// 				<Modal header={language?.confirmDeletion} handleClose={() => setShowNameEdit(false)}>
-// 					<S.ModalWrapper>
-// 						<S.ModalBodyWrapper>
-// 							<p>{language?.themeDeleteConfirmationInfo}</p>
-// 							<S.ModalBodyElements>
-// 								<S.ModalBodyElement>
-// 									<span>{name}</span>
-// 								</S.ModalBodyElement>
-// 							</S.ModalBodyElements>
-// 						</S.ModalBodyWrapper>
-// 						<S.ModalActionsWrapper>
-// 							<Button
-// 								type={'primary'}
-// 								label={language?.cancel}
-// 								handlePress={() => setShowRemoveConfirmation(false)}
-// 								disabled={false}
-// 							/>
-// 							<Button
-// 								type={'primary'}
-// 								label={language?.themeDeleteConfirmation}
-// 								handlePress={() => {
-// 									props.handleThemeRemove(theme);
-// 									setShowRemoveConfirmation(false);
-// 								}}
-// 								disabled={unauthorized}
-// 								loading={false}
-// 								icon={ICONS.delete}
-// 								iconLeftAlign
-// 								warning
-// 							/>
-// 						</S.ModalActionsWrapper>
-// 					</S.ModalWrapper>
-// 				</Modal>
-// 			)}
-// 		</>
-// 	);
-// }
 
 export default function Themes() {
 	const arProvider = useArweaveProvider();
@@ -1962,19 +1748,23 @@ export default function Themes() {
 								},
 								preferences: {
 									opacity: { light: 1, dark: 0.6 },
+									border: { light: true, dark: true },
 									shadow: { light: 'none', dark: 'none' },
 								},
 							},
 						};
 					}
-					if (!theme.post.preferences?.shadow) {
+					const hasShadowPref = theme.post.preferences && 'shadow' in theme.post.preferences;
+					const hasBorderPref = theme.post.preferences && 'border' in theme.post.preferences;
+					if (!hasShadowPref || !hasBorderPref) {
 						return {
 							...theme,
 							post: {
 								...theme.post,
 								preferences: {
 									...theme.post.preferences,
-									shadow: { light: 'none', dark: 'none' },
+									border: hasBorderPref ? theme.post.preferences?.border : { light: true, dark: true },
+									shadow: hasShadowPref ? theme.post.preferences?.shadow : { light: 'none', dark: 'none' },
 								},
 							},
 						};
@@ -1985,59 +1775,6 @@ export default function Themes() {
 			}
 		}
 	}, [portalProvider.current]);
-
-	// // eslint-disable-next-line @typescript-eslint/no-unused-vars
-	// async function handleThemeUpdate(theme: PortalThemeType, publish: boolean, prevName?: string) {
-	// 	if (!theme) return;
-
-	// 	const allOptionNames = new Set(options?.map((t) => t.name));
-
-	// 	if (allOptionNames.has(theme.name)) {
-	// 		addNotification(`A theme '${theme.name}' already exists.`, 'warning');
-	// 		return;
-	// 	}
-
-	// 	if (prevName) {
-	// 		allOptionNames.delete(prevName);
-	// 	}
-
-	// 	const publishedNames = new Set(portalProvider.current?.themes.map((t) => t.name));
-
-	// 	if (prevName && publishedNames.has(prevName)) {
-	// 		publishedNames.delete(prevName);
-	// 		publishedNames.add(theme.name);
-	// 	} else if (publish) {
-	// 		publishedNames.add(theme.name);
-	// 	}
-
-	// 	const mapped =
-	// 		options?.map((existing) => {
-	// 			const matchKey = prevName ?? theme.name;
-	// 			return existing.name === matchKey ? theme : existing;
-	// 		}) || [];
-
-	// 	const updated = mapped.filter((t) => publishedNames.has(t.name));
-
-	// 	await submitUpdatedThemes(updated);
-	// }
-
-	// // eslint-disable-next-line @typescript-eslint/no-unused-vars
-	// async function handleThemePublish(theme: PortalThemeType) {
-	// 	if (!theme) return;
-
-	// 	const themeExists = portalProvider.current?.themes?.find(
-	// 		(existingTheme: PortalThemeType) => existingTheme.name === theme.name
-	// 	);
-
-	// 	if (themeExists) {
-	// 		addNotification(`A theme '${theme.name}' already exists.`, 'warning');
-	// 		return;
-	// 	}
-
-	// 	const updatedThemes = [...(portalProvider.current?.themes ?? []), theme];
-
-	// 	await submitUpdatedThemes(updatedThemes);
-	// }
 
 	async function submitUpdatedThemes(themes: PortalThemeType[]) {
 		if (!unauthorized && themes && arProvider.wallet && portalProvider.current?.id) {
@@ -2063,45 +1800,6 @@ export default function Themes() {
 			setLoading(false);
 		}
 	}
-
-	/*
-	async function handleAddTheme() {
-		const themes = options;
-
-		const baseName = DEFAULT_THEME.light.name;
-		const existingNames = new Set(themes.map((t) => t.name));
-		let newName = baseName;
-		if (existingNames.has(baseName)) {
-			let suffix = 2;
-			while (existingNames.has(`${baseName} ${suffix}`)) {
-				suffix++;
-			}
-			newName = `${baseName} ${suffix}`;
-		}
-
-		const newTheme: PortalThemeType = {
-			...DEFAULT_THEME.light,
-			name: newName,
-		};
-
-		const updatedThemes = [...themes, newTheme];
-
-		setOptions(updatedThemes);
-	}
-
-	async function handleRemoveTheme(themeToRemove: PortalThemeType) {
-		const updatedThemes = portalProvider.current?.themes?.filter(
-			(theme: PortalThemeType) => theme.name !== themeToRemove.name
-		);
-		await submitUpdatedThemes(updatedThemes);
-	}
-
-	function handleCancelTheme(theme: PortalThemeType) {
-		if (!theme) return;
-		const updated = options.filter((option) => option.name !== theme.name);
-		setOptions(updated);
-	}
-		*/
 
 	const getThemes = () => {
 		if (!options) {
@@ -2152,21 +1850,7 @@ export default function Themes() {
 
 	return (
 		<>
-			<S.Wrapper>
-				{getThemes()}
-				{/*
-				<S.EndActions>
-					<Button
-						type={'primary'}
-						label={language?.addTheme}
-						handlePress={handleAddTheme}
-						disabled={unauthorized}
-						icon={ICONS.add}
-						iconLeftAlign
-					/>
-				</S.EndActions>
-				*/}
-			</S.Wrapper>
+			<S.Wrapper>{getThemes()}</S.Wrapper>
 			{loading && <Loader message={`${language?.updatingTheme}...`} />}
 		</>
 	);

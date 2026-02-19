@@ -60,9 +60,9 @@ export const Footer = styled.div<{ $layout: any; $isSideNav?: boolean; $navWidth
 
 export const Links = styled.div`
 	display: flex;
-	gap: 20px;
-	margin-top: 20px;
-	margin-bottom: 10px;
+	gap: 8px;
+	margin-top: 5px;
+	margin-bottom: 0;
 	flex-wrap: wrap;
 	justify-content: center;
 `;

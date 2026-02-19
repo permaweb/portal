@@ -78,7 +78,7 @@ export default function Loader(props: {
 		}
 
 		if (props.relative) {
-			return <>{getLoader(27.5, 7.5, 2.65)}</>;
+			return <>{getLoader(25.5, 6.5, 2.65)}</>;
 		}
 
 		return (

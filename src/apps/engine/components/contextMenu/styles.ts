@@ -16,7 +16,7 @@ const slideDown = keyframes`
 export const Menu = styled.div`
 	position: absolute;
 	right: 0;
-	top: var(--spacing-s);
+	top: 0;
 	width: fit-content;
 `;
 

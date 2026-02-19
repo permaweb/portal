@@ -51,7 +51,7 @@ export default function Users() {
 				const inviterAddress = request.From ?? request.from;
 				if (!inviterAddress) continue;
 
-				// avoid refetching same address
+				// Avoid refetching same address
 				if (!profiles[inviterAddress]) {
 					try {
 						const profile = await permawebProvider.fetchProfile(inviterAddress);

@@ -1,10 +1,13 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import Builder from 'engine/builder';
 import SocialLinks from 'engine/components/socialLinks';
 import { defaultThemes } from 'engine/defaults/theme.defaults';
 import { initThemes } from 'engine/helpers/themes';
 import { useSettings } from 'engine/hooks/settings';
 import { usePortalProvider } from 'engine/providers/portalProvider';
+
+import { getRedirect } from 'helpers/utils';
 
 import { GlobalStyles } from '../../../global-styles';
 
@@ -20,6 +23,13 @@ export default function Footer(props: any) {
 	const Name = portal?.Name;
 
 	const { settings } = preview ? { settings: { theme: 'dark' } } : useSettings();
+
+	const staticPages = React.useMemo(() => {
+		if (!portal?.Pages) return [];
+		return Object.entries(portal.Pages)
+			.filter(([_, page]: [string, any]) => page?.type === 'static')
+			.map(([key, page]: [string, any]) => ({ key, ...page }));
+	}, [portal?.Pages]);
 
 	React.useEffect(() => {
 		if (preview) {
@@ -46,7 +56,18 @@ export default function Footer(props: any) {
 				>
 					<Builder layout={content} preview={preview} />
 					<SocialLinks isFooter />
-					<S.Copyright $hasContentAbove={!!content?.content?.length || !!portal?.Links?.length}>
+					{staticPages.length > 0 && (
+						<S.Links>
+							{staticPages.map((page: any) => (
+								<NavLink key={`footer-static-${page.key}`} to={getRedirect(`post/${page.id}`)}>
+									{page.name}
+								</NavLink>
+							))}
+						</S.Links>
+					)}
+					<S.Copyright
+						$hasContentAbove={!!content?.content?.length || !!portal?.Links?.length || staticPages.length > 0}
+					>
 						{Name} 2025
 					</S.Copyright>
 				</S.Footer>

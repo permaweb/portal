@@ -92,7 +92,7 @@ function Domain(props: { domain: PortalDomainType }) {
 				</Link>
 				{showDropdown && (
 					<CloseHandler active={showDropdown} disabled={!showDropdown} callback={() => setShowDropdown(false)}>
-						<S.DomainActionsDropdown className={'border-wrapper-alt1 fade-in'}>
+						<S.DomainActionsDropdown className={'border-wrapper-alt1'}>
 							<button
 								onClick={(e: any) => {
 									e.stopPropagation();
@@ -152,9 +152,5 @@ export default function DomainListPortal(props: { type: 'header' | 'detail' }) {
 		}
 	}
 
-	return (
-		<S.Wrapper className={'fade-in'} type={props.type}>
-			{getDomains()}
-		</S.Wrapper>
-	);
+	return <S.Wrapper type={props.type}>{getDomains()}</S.Wrapper>;
 }

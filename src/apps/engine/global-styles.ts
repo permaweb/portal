@@ -137,21 +137,21 @@ export const GlobalStyles = createGlobalStyle`
     background: currentColor;
     width:100%;
 		aspect-ratio: 16/9;
-    animation: pulse 4s infinite;
+    animation: loadingPulse 4s infinite;
     border: 0;
     outline: 0;
   }
 
   .loadingAvatar{
     background: currentColor;
-    animation: pulse 4s infinite;
+    animation: loadingPulse 4s infinite;
     border: 0;
     outline: 0;
   }
 
   .loadingPlaceholder{
     width:100px;
-    animation: pulse 4s infinite;
+    animation: loadingPulse 4s infinite;
   }
 
   .disabledLink{
@@ -170,7 +170,7 @@ export const GlobalStyles = createGlobalStyle`
     }
   }
 
-  @keyframes pulse {
+  @keyframes loadingPulse {
     0%, 100% { opacity: 0.4; }
     50% { opacity: .1; }
     100% { opacity: .4; }
