@@ -1,5 +1,6 @@
 import { LAYOUT_BLOG, LAYOUT_DOCUMENTATION, LAYOUT_JOURNAL } from './config/layouts';
 import { PAGES_BLOG, PAGES_DOCUMENTATION, PAGES_JOURNAL } from './config/pages';
+import { POST_PREVIEWS } from './config/postPreviews';
 import { THEME_DEFAULT } from './config/themes';
 import { ArticleBlockEnum, PageBlockEnum, PortalPatchMapEnum } from './types';
 
@@ -14,6 +15,7 @@ export const LAYOUT = {
 	BLOG: LAYOUT_BLOG,
 	DOCUMENTATION: LAYOUT_DOCUMENTATION,
 };
+export { POST_PREVIEWS };
 
 import { ICONS, ICONS_SOCIAL } from './config/icons';
 export { ICONS, ICONS_SOCIAL };
@@ -118,7 +120,7 @@ export const STYLING = {
 			max: '47.5px',
 		},
 		nav: {
-			height: '70px',
+			height: '72.5px',
 			linksHeight: '50px',
 			width: '260px',
 			widthMin: 67.5,
@@ -147,9 +149,11 @@ function createURLs() {
 	const pageEdit = (portalId: string) => `${pageBase(portalId)}edit/`;
 
 	const docsBase = `${base}docs/`;
+	const createBase = `${base}create`;
 
 	return {
 		base: base,
+		create: createBase,
 		category: (categoryId: string) => `category/${categoryId}`,
 		creator: (creatorId: string) => `creator/${creatorId}`,
 		info: (page: string) => `info/${page}`,
@@ -164,6 +168,7 @@ function createURLs() {
 		portalPages: (portalId: string) => `${portalBase(portalId)}pages/`,
 		portalLayout: (portalId: string) => `${portalBase(portalId)}layout/`,
 		portalSetup: (portalId: string) => `${portalBase(portalId)}setup/`,
+		portalCreate: (portalId: string) => `${portalBase(portalId)}create`,
 		post: (postId: string) => `post/${postId}`,
 		postCreate: (portalId: string) => `${postCreateBase(portalId)}`,
 		postEdit: (portalId: string) => `${postEditBase(portalId)}`,
@@ -178,6 +183,10 @@ function createURLs() {
 		postEditImage: (portalId: string) => `${postEditBase(portalId)}image/`,
 		postEditVideo: (portalId: string) => `${postEditBase(portalId)}video/`,
 		portalTips: (portalId: string) => `${portalBase(portalId)}tips/`,
+		portalPostPreviews: (portalId: string) => `${portalBase(portalId)}post-previews/`,
+		portalPostPreviewEdit: (portalId: string, previewId: string) =>
+			`${portalBase(portalId)}post-preview/edit/${previewId}`,
+		portalPostPreviewCreate: (portalId: string) => `${portalBase(portalId)}post-preview/create`,
 		docs: docsBase,
 		docsIntro: `${docsBase}overview/introduction`,
 		docsEditor: `${docsBase}posts/editor`,
@@ -499,7 +508,13 @@ export const PORTAL_PATCH_MAP = {
 	],
 	[PortalPatchMapEnum.Users]: ['Roles', 'RoleOptions', 'Permissions'],
 	[PortalPatchMapEnum.Navigation]: ['Store.Categories', 'Store.Topics', 'Store.Links', 'Store.Domains'],
-	[PortalPatchMapEnum.Presentation]: ['Store.Layout', 'Store.Pages', 'Store.Themes', 'Store.Fonts'],
+	[PortalPatchMapEnum.Presentation]: [
+		'Store.Layout',
+		'Store.Pages',
+		'Store.Themes',
+		'Store.Fonts',
+		'Store.PostPreviews',
+	],
 	[PortalPatchMapEnum.Media]: ['Store.Uploads'],
 	[PortalPatchMapEnum.Posts]: ['Store.Index'],
 	[PortalPatchMapEnum.Requests]: ['Store.IndexRequests'],

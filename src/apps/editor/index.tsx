@@ -30,6 +30,7 @@ import * as S from './styles';
 const views = (import.meta as any).glob('./views/**/index.tsx');
 
 const Landing = getLazyImport('Landing');
+const CreatePortal = getLazyImport('CreatePortal');
 const PortalView = getLazyImport('Portal');
 const Posts = getLazyImport('Posts');
 const Moderation = getLazyImport('Moderation');
@@ -49,6 +50,7 @@ const DomainsRegister = getLazyImport('Domains/Register');
 const Docs = getLazyImport('Docs');
 const NotFound = getLazyImport('NotFound');
 const Tips = getLazyImport('Tips');
+const PostPreviewEdit = getLazyImport('PostPreviews/Edit');
 
 function getLazyImport(view: string) {
 	const key = `./views/${view}/index.tsx`;
@@ -130,7 +132,7 @@ function AppContent() {
 	}, [permawebProvider.profile?.id, permawebProvider.profile?.version]);
 
 	function getRoute(path: string, element: React.ReactNode) {
-		const baseRoutes = [URLS.base, URLS.docs, `URLS.docs/*`, `${URLS.docs}:active/*`, URLS.notFound, '*'];
+		const baseRoutes = [URLS.base, URLS.create, URLS.docs, `URLS.docs/*`, `${URLS.docs}:active/*`, URLS.notFound, '*'];
 
 		if (baseRoutes.includes(path)) {
 			return <Route path={path} element={<Suspense fallback={<Loader />}>{element}</Suspense>} />;
@@ -224,6 +226,8 @@ function AppContent() {
 			<S.App>
 				<Routes>
 					{getRoute(URLS.base, <Landing />)}
+					{getRoute(URLS.create, <CreatePortal />)}
+					{getRoute(`${URLS.base}:portalId/create`, <CreatePortal />)}
 					{getRoute(`${URLS.base}:portalId`, <PortalView />)}
 					{getRoute(`${URLS.base}:portalId/posts`, <Posts />)}
 					{getRoute(`${URLS.base}:portalId/moderation`, <Moderation />)}
@@ -243,6 +247,8 @@ function AppContent() {
 					{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
 					{getRoute(`${URLS.base}:portalId/domains/register`, <DomainsRegister />)}
 					{getRoute(`${URLS.base}:portalId/tips`, <Tips />)}
+					{getRoute(`${URLS.base}:portalId/post-preview/edit/:previewId`, <PostPreviewEdit />)}
+					{getRoute(`${URLS.base}:portalId/post-preview/create`, <PostPreviewEdit />)}
 					{getRoute(URLS.docs, <Docs />)}
 					{getRoute(`${URLS.docs}:active/*`, <Docs />)}
 					{getRoute(URLS.notFound, <NotFound />)}
