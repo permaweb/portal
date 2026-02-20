@@ -102,6 +102,8 @@ export const SubmitWrapper = styled.div``;
 export const EditorWrapper = styled.div`
 	width: 100%;
 	margin: ${STYLING.dimensions.nav.height} 0 0 0;
+	position: relative;
+	z-index: 0;
 `;
 
 export const Editor = styled.div<{ blockEditMode: boolean }>`
