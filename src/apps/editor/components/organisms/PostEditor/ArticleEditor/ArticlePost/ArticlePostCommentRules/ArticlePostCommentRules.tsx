@@ -9,7 +9,8 @@ import { currentPostUpdate } from 'editor/store/post';
 import { Button } from 'components/atoms/Button';
 import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
-import { ICONS } from 'helpers/config';
+import { Select } from 'components/atoms/Select';
+import { ICONS, TIP_TOKEN_OPTIONS } from 'helpers/config';
 import { CommentRulesType, PortalUserType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -58,6 +59,20 @@ export default function ArticlePostCommentRules() {
 	}, [assetId, portalProvider.current?.assets, currentPost.data?.commentsId]);
 
 	const disabled = currentPost.editor?.loading?.active || !hasPermission;
+	const tipTokenOptions = TIP_TOKEN_OPTIONS.map((token) => ({
+		id: token.tokenAddress,
+		label: token.label,
+	}));
+	const selectedTipAssetId = currentPost.data.commentRules?.tipAssetId ?? '';
+	const hasSelectedPreset = tipTokenOptions.some((option) => option.id === selectedTipAssetId);
+	const tipAssetSelectOptions =
+		!selectedTipAssetId || hasSelectedPreset
+			? tipTokenOptions
+			: [{ id: selectedTipAssetId, label: `Custom token (${selectedTipAssetId.slice(0, 8)}...)` }, ...tipTokenOptions];
+	const activeTipAssetOption =
+		tipAssetSelectOptions.find((option) => option.id === selectedTipAssetId) ||
+		tipTokenOptions.find((option) => option.label.toUpperCase() === 'AR') ||
+		tipTokenOptions[0];
 
 	// Load existing rules when component mounts
 	React.useEffect(() => {
@@ -68,6 +83,10 @@ export default function ArticlePostCommentRules() {
 		permawebProvider.libs
 			.getRules({ commentsId })
 			.then((rules: any) => {
+				console.log('[comment-rules] fetched rules raw:', {
+					commentsId,
+					rules,
+				});
 				if (rules) {
 					const requireProfileThumbnail = rules.requireProfileThumbnail ?? rules.RequireProfileThumbnail;
 					const enableTipping = rules.enableTipping ?? rules.EnableTipping;
@@ -85,6 +104,7 @@ export default function ArticlePostCommentRules() {
 						showPaidTab: showPaidTab === 'true' || showPaidTab === true,
 						highlightPaidComments: highlightPaidComments === 'true' || highlightPaidComments === true,
 					};
+					console.log('[comment-rules] normalized rules from process:', normalizedRules);
 					handleCurrentPostUpdate({ field: 'commentRules', value: normalizedRules });
 				}
 				setHasLoaded(true);
@@ -99,10 +119,21 @@ export default function ArticlePostCommentRules() {
 	}, [commentsId, permawebProvider.libs, hasLoaded, hasPermission]);
 
 	const handleRuleChange = (field: keyof CommentRulesType, value: any) => {
-		const updatedRules = {
+		const updatedRules: CommentRulesType = {
 			...currentPost.data.commentRules,
 			[field]: value,
 		};
+		// Ensure tipping always has a token selected so updates do not fail server-side.
+		if (field === 'enableTipping' && value === true && !updatedRules.tipAssetId) {
+			updatedRules.tipAssetId = activeTipAssetOption?.id || 'AR';
+		}
+		if (field === 'enableTipping') {
+			console.log('[comment-rules] enableTipping changed:', {
+				prev: currentPost.data.commentRules?.enableTipping,
+				next: value,
+				tipAssetIdAfterChange: updatedRules.tipAssetId,
+			});
+		}
 		handleCurrentPostUpdate({ field: 'commentRules', value: updatedRules });
 	};
 
@@ -140,19 +171,43 @@ export default function ArticlePostCommentRules() {
 		if (commentsId && arProvider.wallet && portalProvider.current?.id && currentPost.data.commentRules) {
 			setUpdating(true);
 			try {
-				const rulesToSend = {
-					ProfileAgeRequired: currentPost.data.commentRules.profileAgeRequired ?? 0,
-					MutedWords: currentPost.data.commentRules.mutedWords ?? [],
-					RequireProfileThumbnail: !!currentPost.data.commentRules.requireProfileThumbnail,
-					EnableTipping: !!currentPost.data.commentRules.enableTipping,
-					RequireTipToComment: !!currentPost.data.commentRules.requireTipToComment,
-					TipAssetId: currentPost.data.commentRules.tipAssetId ?? '',
-					MinTipAmount: currentPost.data.commentRules.minTipAmount ?? '0',
-					ShowPaidTab: !!currentPost.data.commentRules.showPaidTab,
-					HighlightPaidComments: !!currentPost.data.commentRules.highlightPaidComments,
+				const normalizedTipAssetId =
+					currentPost.data.commentRules.enableTipping && !(currentPost.data.commentRules.tipAssetId || '').trim()
+						? activeTipAssetOption?.id || 'AR'
+						: currentPost.data.commentRules.tipAssetId ?? '';
+				const normalizedRulesForState: CommentRulesType = {
+					profileAgeRequired: currentPost.data.commentRules.profileAgeRequired ?? 0,
+					mutedWords: currentPost.data.commentRules.mutedWords ?? [],
+					requireProfileThumbnail: !!currentPost.data.commentRules.requireProfileThumbnail,
+					enableTipping: !!currentPost.data.commentRules.enableTipping,
+					requireTipToComment: !!currentPost.data.commentRules.requireTipToComment,
+					tipAssetId: normalizedTipAssetId,
+					minTipAmount: currentPost.data.commentRules.minTipAmount ?? '0',
+					showPaidTab: !!currentPost.data.commentRules.showPaidTab,
+					highlightPaidComments: !!currentPost.data.commentRules.highlightPaidComments,
 				};
+				const rulesToSend = {
+					ProfileAgeRequired: normalizedRulesForState.profileAgeRequired ?? 0,
+					MutedWords: normalizedRulesForState.mutedWords ?? [],
+					RequireProfileThumbnail: !!normalizedRulesForState.requireProfileThumbnail,
+					EnableTipping: !!normalizedRulesForState.enableTipping,
+					RequireTipToComment: !!normalizedRulesForState.requireTipToComment,
+					TipAssetId: normalizedRulesForState.tipAssetId ?? '',
+					MinTipAmount: normalizedRulesForState.minTipAmount ?? '0',
+					ShowPaidTab: !!normalizedRulesForState.showPaidTab,
+					HighlightPaidComments: !!normalizedRulesForState.highlightPaidComments,
+				};
+				console.log('[comment-rules] saving rules payload:', {
+					commentsId,
+					portalId: portalProvider.current.id,
+					rulesToSend,
+				});
 
-				await permawebProvider.libs.sendMessage({
+				// Keep local state in sync with normalized payload used for persistence.
+				handleCurrentPostUpdate({ field: 'commentRules', value: normalizedRulesForState });
+
+				// Update rules via portal forwarding (canonical Run-Action format).
+				const forwardResult = await permawebProvider.libs.sendMessage({
 					processId: portalProvider.current.id,
 					wallet: arProvider.wallet,
 					action: 'Run-Action',
@@ -161,11 +216,29 @@ export default function ArticlePostCommentRules() {
 						{ name: 'Forward-Action', value: 'Update-Rules' },
 					],
 					data: { Input: rulesToSend },
+					returnResult: true,
 				});
+				console.log('[comment-rules] forwarded updateRules result:', forwardResult);
+				const hadUpdateRulesError = (forwardResult?.Messages || []).some((message: any) => {
+					const tags = message?.Tags || [];
+					const actionTag = tags.find((tag: any) => tag?.name === 'Action')?.value;
+					return actionTag === 'Update-Rules-Error';
+				});
+				if (hadUpdateRulesError) {
+					const errorTag = (forwardResult?.Messages || [])
+						.flatMap((message: any) => message?.Tags || [])
+						.find((tag: any) => tag?.name === 'Error')?.value;
+					throw new Error(errorTag || 'Update-Rules-Error');
+				}
 
 				addNotification(`${language?.commentRulesUpdated || 'Comment rules updated'}!`, 'success');
 			} catch (e: any) {
 				console.error('Error updating comment rules:', e);
+				console.error('[comment-rules] save failed context:', {
+					commentsId,
+					portalId: portalProvider.current?.id,
+					currentRules: currentPost.data.commentRules,
+				});
 				addNotification(e.message ?? language?.errorUpdatingCommentRules, 'warning');
 			}
 			setUpdating(false);
@@ -322,25 +395,15 @@ export default function ArticlePostCommentRules() {
 					</S.Section>
 
 					<S.Section>
-						<FormField
+						<Select
 							label={language?.tipAssetId || 'Tip Asset ID'}
-							placeholder={'Process ID of the AO token'}
-							value={currentPost.data.commentRules?.tipAssetId ?? ''}
-							onChange={(e) => handleRuleChange('tipAssetId', e.target.value)}
-							onKeyDown={(e) => {
-								if (e.key === 'Enter') {
-									e.preventDefault();
-									e.nativeEvent.stopImmediatePropagation();
-								}
-							}}
+							activeOption={activeTipAssetOption}
+							setActiveOption={(option) => handleRuleChange('tipAssetId', option.id)}
+							options={tipAssetSelectOptions}
 							disabled={disabled || updating}
-							invalid={{ status: false, message: null }}
-							hideErrorMessage
-							sm
-							noMargin
 						/>
 						<S.RuleDescription>
-							{language?.tipAssetIdDescription || 'The process ID of the token used for tips'}
+							{language?.tipAssetIdDescription || 'Select the token used for comment tips'}
 						</S.RuleDescription>
 					</S.Section>
 

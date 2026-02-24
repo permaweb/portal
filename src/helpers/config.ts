@@ -21,9 +21,9 @@ import { ICONS, ICONS_SOCIAL } from './config/icons';
 export { ICONS, ICONS_SOCIAL };
 
 export const AO_NODE = {
-	url: 'https://hb.portalinto.com',
+	url: 'https://push.forward.computer',
 	authority: 'a5ZMUKbGClAsKzB4SHDYrwkOZZHIIfpbaxrmKwUHCe8',
-	scheduler: 'n_XZJhUnmldNFo4dhajoPZWhBXuJk-OcQr5JQ49c4Zo',
+	scheduler: 'YUsEnCSlxvOMxRd1qG6rkaPwMgi3xOorfDfYJoMDndA',
 };
 
 export const TIP_TOKEN_OPTIONS = [

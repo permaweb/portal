@@ -10,8 +10,11 @@ import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import Avatar from 'engine/components/avatar';
 import ModalPortal from 'engine/components/modalPortal';
 import ProfileEditor from 'engine/components/profileEditor';
+import TipModal from 'engine/components/tipModal';
 import { useCommentRules } from 'engine/hooks/comments';
 import { useProfile } from 'engine/hooks/profiles';
+import { useTokenTip } from 'engine/hooks/useTokenTip';
+import { useEngineNotifications } from 'engine/providers/notificationProvider';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 import {
 	$createParagraphNode,
@@ -24,7 +27,8 @@ import {
 	TextNode,
 } from 'lexical';
 
-import { ICONS } from 'helpers/config';
+import { ICONS, TIP_TOKEN_OPTIONS } from 'helpers/config';
+import { TipToken, toBaseUnits } from 'helpers/tokens';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -50,6 +54,8 @@ function CommentEditorContent(props: any) {
 	const { profile, libs } = usePermawebProvider();
 	const { portal, portalId } = usePortalProvider();
 	const { profile: portalProfile } = useProfile(portalId);
+	const { addNotification } = useEngineNotifications();
+	const { sendTip } = useTokenTip();
 	const [canSend, setCanSend] = React.useState(false);
 	const [editorText, setEditorText] = React.useState(initialContent || '');
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -59,11 +65,46 @@ function CommentEditorContent(props: any) {
 	const [showProfileManage, setShowProfileManage] = React.useState(false);
 	const { rules } = useCommentRules(commentsId);
 	const [ruleError, setRuleError] = React.useState<string | null>(null);
-	const [tipAmount, setTipAmount] = React.useState<string>('');
 	const [tipError, setTipError] = React.useState<string | null>(null);
+	const [showTipModal, setShowTipModal] = React.useState(false);
+	const [tipModalSubmitting, setTipModalSubmitting] = React.useState(false);
+	const [pendingCommentContent, setPendingCommentContent] = React.useState('');
 
 	const tippingEnabled = rules?.enableTipping && !isEditMode;
 	const tipRequired = tippingEnabled && rules?.requireTipToComment;
+	const configuredTipToken = React.useMemo<TipToken>(() => {
+		const tipAssetId = (rules?.tipAssetId || '').trim();
+		if (!tipAssetId || tipAssetId === 'AR') {
+			return { type: 'AR', symbol: 'AR', decimals: 12 };
+		}
+
+		const presetToken = TIP_TOKEN_OPTIONS.find((token) => token.tokenAddress === tipAssetId);
+		if (presetToken) {
+			return {
+				type: presetToken.tokenType,
+				symbol: presetToken.tokenSymbol || presetToken.label,
+				decimals: Number(presetToken.tokenDecimals ?? 12),
+				processId: presetToken.tokenType === 'AO' ? presetToken.tokenAddress : undefined,
+			};
+		}
+
+		return {
+			type: 'AO',
+			symbol: 'AO',
+			decimals: 12,
+			processId: tipAssetId,
+		};
+	}, [rules?.tipAssetId]);
+	const tipModalTokens = React.useMemo(
+		() => [
+			{
+				id: `${configuredTipToken.type}:${configuredTipToken.symbol}:${configuredTipToken.processId || 'AR'}`,
+				symbol: configuredTipToken.symbol,
+			},
+		],
+		[configuredTipToken]
+	);
+	const selectedTipTokenId = tipModalTokens[0]?.id || '';
 
 	React.useEffect(() => {
 		if (initialContent && isEditMode) {
@@ -118,15 +159,13 @@ function CommentEditorContent(props: any) {
 		);
 	}, [editor, canSend]);
 
-	const validateTip = (): string | null => {
-		if (!tipRequired) return null;
-
-		if (!tipAmount || tipAmount.trim() === '' || tipAmount === '0') {
+	const validateTipAmount = (amount: string): string | null => {
+		if (!amount || amount.trim() === '' || amount === '0') {
 			return 'A tip is required to comment.';
 		}
 
 		const minTip = parseFloat(rules?.minTipAmount || '0');
-		const currentTip = parseFloat(tipAmount);
+		const currentTip = parseFloat(amount);
 
 		if (isNaN(currentTip) || currentTip <= 0) {
 			return 'Please enter a valid tip amount.';
@@ -137,6 +176,79 @@ function CommentEditorContent(props: any) {
 		}
 
 		return null;
+	};
+
+	const finalizeCommentSubmission = (comment: string) => {
+		editor.update(() => {
+			const root = $getRoot();
+			root.clear();
+		});
+		setEditorText('');
+		setCanSend(false);
+		setTipError(null);
+		setPendingCommentContent('');
+
+		window.dispatchEvent(
+			new CustomEvent('commentAdded', {
+				detail: { comment, commentsId },
+			})
+		);
+
+		if (onCommentAdded && comment) {
+			onCommentAdded(comment);
+		}
+	};
+
+	const buildTipTags = (tipReceiptId?: string, tipAmount?: string) => {
+		const tags = [];
+		if (tipReceiptId) {
+			tags.push({ name: 'Tip-Receipt-Id', value: tipReceiptId });
+		}
+		if (rules?.tipAssetId) {
+			tags.push({ name: 'TipAssetId', value: rules.tipAssetId });
+		}
+		if (tipAmount) {
+			tags.push({ name: 'Tip-Amount', value: tipAmount });
+		}
+		return tags;
+	};
+
+	const submitNewComment = async (plainText: string, tipReceiptId?: string, tipAmount?: string) => {
+		let comment;
+		const tipTags = buildTipTags(tipReceiptId, tipAmount);
+
+		if (postAsPortal && portalId) {
+			const tags = [
+				{ name: 'Forward-To', value: commentsId },
+				{ name: 'Forward-Action', value: 'Add-Comment' },
+			];
+
+			if (parentId) {
+				tags.push({ name: 'Parent-Id', value: parentId });
+			}
+
+			tags.push(...tipTags);
+
+			const zoneCommentId = await libs.sendMessage({
+				processId: portalId,
+				wallet: arProvider.wallet,
+				action: 'Run-Action',
+				tags: tags,
+				data: { Input: plainText },
+			});
+
+			comment = zoneCommentId;
+		} else {
+			comment = await libs.createComment({
+				commentsId,
+				parentId,
+				content: plainText,
+				tipReceiptId,
+				tags: tipTags.filter((tag: any) => tag.name !== 'Tip-Receipt-Id'),
+			});
+		}
+
+		finalizeCommentSubmission(comment);
 	};
 
 	const handleSubmit = async () => {
@@ -151,12 +263,6 @@ function CommentEditorContent(props: any) {
 			return;
 		}
 
-		const tipValidationError = validateTip();
-		if (tipValidationError) {
-			setTipError(tipValidationError);
-			return;
-		}
-
 		if (!canSend || isSubmitting) return;
 
 		let plainText = '';
@@ -167,6 +273,19 @@ function CommentEditorContent(props: any) {
 
 		if (!plainText) return;
 		if (!isEditMode && checkForDuplicate(plainText)) return;
+
+		if (!isEditMode && tippingEnabled) {
+			if (!rules?.tipAssetId) {
+				setTipError('Tip token is not configured for this post.');
+				return;
+			}
+			if (tipRequired) {
+				setTipError(null);
+			}
+			setPendingCommentContent(plainText);
+			setShowTipModal(true);
+			return;
+		}
 
 		setIsSubmitting(true);
 		onSubmittingChange?.(true);
@@ -181,64 +300,7 @@ function CommentEditorContent(props: any) {
 					onCommentAdded(plainText);
 				}
 			} else {
-				let comment;
-
-				const shouldTip = tippingEnabled && tipAmount && parseFloat(tipAmount) > 0;
-
-				if (shouldTip && libs.tipAndCreateComment) {
-					comment = await libs.tipAndCreateComment({
-						commentsId,
-						parentId,
-						content: plainText,
-						tipAssetId: rules.tipAssetId,
-						quantity: tipAmount,
-					});
-				} else if (postAsPortal && portalId) {
-					const tags = [
-						{ name: 'Forward-To', value: commentsId },
-						{ name: 'Forward-Action', value: 'Add-Comment' },
-					];
-
-					if (parentId) {
-						tags.push({ name: 'Parent-Id', value: parentId });
-					}
-
-					const zoneCommentId = await libs.sendMessage({
-						processId: portalId,
-						wallet: arProvider.wallet,
-						action: 'Run-Action',
-						tags: tags,
-						data: { Input: plainText },
-					});
-
-					comment = zoneCommentId;
-				} else {
-					comment = await libs.createComment({
-						commentsId,
-						parentId,
-						content: plainText,
-					});
-				}
-
-				// Clear the editor after successful submission
-				editor.update(() => {
-					const root = $getRoot();
-					root.clear();
-				});
-				setEditorText('');
-				setCanSend(false);
-				setTipAmount('');
-				setTipError(null);
-
-				window.dispatchEvent(
-					new CustomEvent('commentAdded', {
-						detail: { comment, commentsId },
-					})
-				);
-
-				if (onCommentAdded && comment) {
-					onCommentAdded(comment);
-				}
+				await submitNewComment(plainText);
 			}
 		} catch (err: any) {
 			console.error('Failed to save comment:', err);
@@ -250,6 +312,60 @@ function CommentEditorContent(props: any) {
 			}
 		} finally {
 			setIsSubmitting(false);
+			onSubmittingChange?.(false);
+		}
+	};
+
+	const handleTipConfirm = async (amount: string) => {
+		if (!pendingCommentContent.trim()) {
+			setTipError('Comment text is missing. Please try again.');
+			setShowTipModal(false);
+			return;
+		}
+
+		const tipValidationError = validateTipAmount(amount);
+		if (tipValidationError) {
+			setTipError(tipValidationError);
+			return;
+		}
+
+		if (!sendTip) {
+			setTipError('Tip flow is unavailable right now.');
+			return;
+		}
+
+		setIsSubmitting(true);
+		setTipModalSubmitting(true);
+		onSubmittingChange?.(true);
+		try {
+			if (
+				configuredTipToken.type === 'AO' &&
+				configuredTipToken.processId &&
+				!postAsPortal &&
+				typeof libs?.tipAndCreateComment === 'function'
+			) {
+				const quantity = toBaseUnits(amount, configuredTipToken.decimals);
+				const result = await libs.tipAndCreateComment({
+					tipAssetId: configuredTipToken.processId,
+					commentsId,
+					quantity,
+					content: pendingCommentContent,
+					parentId,
+				});
+				finalizeCommentSubmission(result?.commentTxId);
+			} else {
+				const tipReceiptId = await sendTip(commentsId, amount, 'post', undefined, configuredTipToken);
+				await submitNewComment(pendingCommentContent, tipReceiptId, amount);
+			}
+			addNotification(`Tip sent and comment posted successfully.`, 'success');
+			setShowTipModal(false);
+		} catch (err: any) {
+			console.error('Failed to tip and post comment:', err);
+			const msg = err?.message || String(err);
+			setTipError(msg);
+		} finally {
+			setIsSubmitting(false);
+			setTipModalSubmitting(false);
 			onSubmittingChange?.(false);
 		}
 	};
@@ -316,14 +432,6 @@ function CommentEditorContent(props: any) {
 		}
 	};
 
-	const handleTipAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const value = e.target.value;
-		if (value === '' || /^\d*\.?\d*$/.test(value)) {
-			setTipAmount(value);
-			setTipError(null);
-		}
-	};
-
 	const roles = Array.isArray(profile?.roles) ? profile.roles : profile?.roles ? [profile.roles] : [];
 	return (
 		<>
@@ -380,19 +488,18 @@ function CommentEditorContent(props: any) {
 				</S.Actions>
 			</S.Editor>
 
-			{tippingEnabled && (
-				<S.TipAttachment>
-					{tipRequired && <S.TipRequired>Tip required</S.TipRequired>}
-					<S.TipInput
-						type="text"
-						inputMode="decimal"
-						placeholder={
-							rules?.minTipAmount && rules.minTipAmount !== '0' ? `Min: ${rules.minTipAmount}` : 'Tip amount'
-						}
-						value={tipAmount}
-						onChange={handleTipAmountChange}
-					/>
-				</S.TipAttachment>
+			{showTipModal && (
+				<TipModal
+					isOpen={showTipModal}
+					onClose={() => {
+						if (tipModalSubmitting) return;
+						setShowTipModal(false);
+					}}
+					onConfirm={handleTipConfirm}
+					tokens={tipModalTokens}
+					selectedTokenId={selectedTipTokenId}
+					onSelectToken={() => {}}
+				/>
 			)}
 
 			<OnChangePlugin onChange={handleEditorChange} />

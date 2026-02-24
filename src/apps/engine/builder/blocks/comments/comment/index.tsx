@@ -48,8 +48,14 @@ export default function Comment(props: any) {
 		prevReplyCountRef.current = currentReplyCount;
 	}, [data]);
 
-	const userIsAdmin = ['Admin'].some((r) => user?.roles?.includes(r));
-	const userIsModerator = ['Moderator'].some((r) => user?.roles?.includes(r));
+	const userRoles = React.useMemo(() => {
+		if (Array.isArray(user?.roles)) return user.roles;
+		if (typeof user?.roles === 'string') return [user.roles];
+		return [];
+	}, [user?.roles]);
+
+	const userIsAdmin = userRoles.includes('Admin');
+	const userIsModerator = userRoles.includes('Moderator');
 	// const userIsContributor = ['Contributor'].some((r) => user?.roles?.includes(r));
 
 	const commentAuthorPortalUser = portal?.Users?.find((u: any) => u.address === commentData.creator);
@@ -285,7 +291,7 @@ export default function Comment(props: any) {
 	const isPaidComment = !!commentData.tipReceiptId;
 
 	if (!commentData) return null;
-	const hasModPermission = user?.owner && user?.roles && ['Admin', 'Moderator'].some((r) => user.roles?.includes(r));
+	const hasModPermission = !!user?.owner && ['Admin', 'Moderator'].some((r) => userRoles.includes(r));
 	if (commentData.status !== 'active' && !hasModPermission) return null;
 
 	return (

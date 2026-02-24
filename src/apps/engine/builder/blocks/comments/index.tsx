@@ -11,6 +11,16 @@ import * as S from './styles';
 export default function Comments(props: any) {
 	const { preview, commentsId, postAuthorId } = props;
 	const { portal } = usePortalProvider();
+	const mockTippedCommentsEnabled = React.useMemo(() => {
+		if (!import.meta.env.DEV || typeof window === 'undefined') return false;
+
+		const fromSearch = new URLSearchParams(window.location.search).get('mockTippedComments');
+		if (fromSearch === '1') return true;
+
+		const hashQuery = window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '';
+		const fromHash = new URLSearchParams(hashQuery).get('mockTippedComments');
+		return fromHash === '1';
+	}, []);
 	const Themes = preview ? defaultThemes : portal?.Themes;
 	const { comments: fetchedComments } = useComments(commentsId);
 	const { rules } = useCommentRules(commentsId);
@@ -56,12 +66,42 @@ export default function Comments(props: any) {
 		return [...pinnedComments, ...rootComments];
 	}, []);
 
-	const comments = React.useMemo(() => organizeComments(fetchedComments), [fetchedComments, organizeComments]);
+	const mockTippedComment = React.useMemo(
+		() => ({
+			id: `mock-tipped-comment-${commentsId || 'default'}`,
+			parentId: null,
+			depth: 0,
+			status: 'active',
+			content: '[Mock] This is how a tipped comment will look in the feed.',
+			creator: postAuthorId || portal?.Id || commentsId || 'mock-creator',
+			dateCreated: Date.now() - 60 * 1000,
+			tipReceiptId: `mock-tip-receipt-${commentsId || 'default'}`,
+			tipAmount: '2.5',
+			tipAssetSymbol: 'AR',
+		}),
+		[commentsId, postAuthorId, portal?.Id]
+	);
 
-	const showTabs = rules?.showPaidTab && rules?.enableTipping;
-	const showHighlightStrip = rules?.highlightPaidComments && rules?.enableTipping && paidComments.length > 0;
+	const commentsForDisplay = React.useMemo(() => {
+		if (!mockTippedCommentsEnabled) return fetchedComments;
+		const hasMockComment = (fetchedComments || []).some((comment: any) => comment.id === mockTippedComment.id);
+		return hasMockComment ? fetchedComments : [mockTippedComment, ...(fetchedComments || [])];
+	}, [fetchedComments, mockTippedCommentsEnabled, mockTippedComment]);
 
-	const displayComments = activeTab === 'paid' ? paidComments : comments;
+	const paidCommentsForDisplay = React.useMemo(() => {
+		if (!mockTippedCommentsEnabled) return paidComments;
+		const hasMockPaidComment = (paidComments || []).some((comment: any) => comment.id === mockTippedComment.id);
+		return hasMockPaidComment ? paidComments : [mockTippedComment, ...(paidComments || [])];
+	}, [mockTippedCommentsEnabled, mockTippedComment, paidComments]);
+
+	const comments = React.useMemo(() => organizeComments(commentsForDisplay), [commentsForDisplay, organizeComments]);
+
+	const showTabs = (rules?.showPaidTab && rules?.enableTipping) || mockTippedCommentsEnabled;
+	const showHighlightStrip =
+		(rules?.highlightPaidComments && rules?.enableTipping && paidCommentsForDisplay.length > 0) ||
+		mockTippedCommentsEnabled;
+
+	const displayComments = activeTab === 'paid' ? paidCommentsForDisplay : comments;
 
 	React.useEffect(() => {
 		if (preview) {
@@ -77,7 +117,7 @@ export default function Comments(props: any) {
 
 			{showHighlightStrip && (
 				<S.HighlightStrip>
-					{paidComments.slice(0, 10).map((comment: any, index: number) => (
+					{paidCommentsForDisplay.slice(0, 10).map((comment: any, index: number) => (
 						<S.HighlightCard key={`highlight-${comment.id}-${index}`}>
 							<S.HighlightAmount>
 								{comment.tipAmount} {comment.tipAssetSymbol || 'Tip'}
