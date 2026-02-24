@@ -24,6 +24,8 @@
 		"start:engine": "NODE_ENV=development VITE_APP=engine VITE_AO=mainnet vite",
 		"build:editor": "NODE_OPTIONS=--max-old-space-size=6144 NODE_ENV=production VITE_APP=editor VITE_AO=mainnet vite build",
 		"build:engine": "NODE_OPTIONS=--max-old-space-size=6144 NODE_ENV=production VITE_APP=engine VITE_AO=mainnet vite build",
+		"start:widget": "NODE_ENV=development VITE_APP=widget VITE_AO=mainnet vite",
+		"build:widget": "NODE_OPTIONS=--max-old-space-size=6144 NODE_ENV=production VITE_APP=widget VITE_AO=mainnet vite build",
 		"deploy:editor:main": "VITE_APP=editor npm run build:editor && permaweb-deploy deploy --arns-name portal --ttl-seconds 60 --deploy-folder ./dist/editor",
 		"deploy:editor:staging": "VITE_APP=editor npm run build:editor && permaweb-deploy deploy --arns-name portalenv --ttl-seconds 60 --undername staging --deploy-folder ./dist/editor",
 		"deploy:editor:branch": "VITE_APP=editor npm run build:editor && permaweb-deploy deploy --arns-name portalenv --ttl-seconds 60 --undername $npm_config_branch --deploy-folder ./dist/editor",

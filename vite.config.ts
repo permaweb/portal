@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd());
 	const app = env.VITE_APP;
 
-	if (!app) throw new Error(`VITE_APP must be set to 'editor' or 'viewer'.`);
+	if (!app) throw new Error(`VITE_APP must be set to 'editor', 'viewer', or 'widget'.`);
 
 	const root = path.resolve(__dirname, `src/apps/${app}`);
 
@@ -85,6 +85,28 @@ export default defineConfig(({ mode }) => {
 				},
 			},
 		},
+		widget: {
+			port: 5000,
+			build: {
+				outDir: path.resolve(__dirname, `dist/${app}`),
+				emptyOutDir: true,
+				cssCodeSplit: false,
+				assetsInlineLimit: 10_000_000,
+				modulePreload: false,
+				rollupOptions: {
+					input: path.resolve(root, 'index.tsx'),
+					plugins: [polyfillNode()],
+					output: {
+						inlineDynamicImports: true,
+						manualChunks: undefined,
+						entryFileNames: `bundle.js`,
+						chunkFileNames: `bundle.js`,
+						assetFileNames: `[name][extname]`,
+						format: 'iife',
+					},
+				},
+			},
+		},
 	};
 
 	return {
@@ -102,6 +124,7 @@ export default defineConfig(({ mode }) => {
 				editor: path.resolve(__dirname, 'src/apps/editor'),
 				viewer: path.resolve(__dirname, 'src/apps/viewer'),
 				engine: path.resolve(__dirname, 'src/apps/engine'),
+				widget: path.resolve(__dirname, 'src/apps/widget'),
 				components: path.resolve(__dirname, 'src/components'),
 				helpers: path.resolve(__dirname, 'src/helpers'),
 				hooks: path.resolve(__dirname, 'src/hooks'),

@@ -1,0 +1,69 @@
+import React from 'react';
+
+import { usePermawebProvider } from '../providers/WidgetPermawebProvider';
+
+export const useModeration = (moderationId?: string) => {
+	const { libs, profile } = usePermawebProvider();
+	const [blockedComments, setBlockedComments] = React.useState<Set<string>>(new Set());
+	const [blockedUsers, setBlockedUsers] = React.useState<Set<string>>(new Set());
+	const [isLoading, setIsLoading] = React.useState(false);
+
+	const roles = Array.isArray(profile?.roles) ? profile.roles : profile?.roles ? [profile.roles] : [];
+
+	const isModerator = !!profile?.owner && roles.some((r: string) => ['Admin', 'Moderator'].includes(r));
+
+	const fetchModerationEntries = React.useCallback(() => {
+		if (!libs || !moderationId) return;
+
+		setIsLoading(true);
+
+		const commentPromise = libs
+			.getModerationEntries({ moderationId, targetType: 'comment', status: 'blocked' })
+			.then((entries: any) => entries)
+			.catch((err: any) => {
+				console.error('Error fetching comment entries:', err);
+				return [];
+			});
+
+		const userPromise = libs
+			.getModerationEntries({ moderationId, targetType: 'profile', status: 'blocked' })
+			.then((entries: any) => entries)
+			.catch((err: any) => {
+				console.error('Error fetching user entries:', err);
+				return [];
+			});
+
+		Promise.all([commentPromise, userPromise])
+			.then(([commentEntries, userEntries]: any) => {
+				const blockedCommentIds = (commentEntries || []).map((e: any) => e.targetId || e.TargetId);
+				const blockedUserIds = (userEntries || []).map((e: any) => e.targetId || e.TargetId);
+
+				setBlockedComments(new Set(blockedCommentIds));
+				setBlockedUsers(new Set(blockedUserIds));
+				setIsLoading(false);
+			})
+			.catch((err: any) => {
+				console.error('Error fetching moderation entries:', err);
+				setBlockedComments(new Set());
+				setBlockedUsers(new Set());
+				setIsLoading(false);
+			});
+	}, [libs, moderationId, isModerator]);
+
+	React.useEffect(() => {
+		fetchModerationEntries();
+	}, [fetchModerationEntries]);
+
+	React.useEffect(() => {
+		const handleModerationChange = () => fetchModerationEntries();
+		window.addEventListener('commentAdded', handleModerationChange);
+		return () => window.removeEventListener('commentAdded', handleModerationChange);
+	}, [fetchModerationEntries]);
+
+	return {
+		blockedComments,
+		blockedUsers,
+		isModerator,
+		isLoading,
+	};
+};
