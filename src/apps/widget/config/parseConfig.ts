@@ -16,6 +16,7 @@ function getScriptDataAttrs(): Partial<WidgetConfig> {
 			: undefined,
 		height: script.getAttribute('data-height') || undefined,
 		title: script.getAttribute('data-title') || undefined,
+		settingsId: script.getAttribute('data-settings-id') || undefined,
 	};
 }
 
@@ -31,6 +32,7 @@ function getUrlParams(): Partial<WidgetConfig> {
 		pollInterval: params.get('pollInterval') ? parseInt(params.get('pollInterval'), 10) : undefined,
 		height: params.get('height') || undefined,
 		title: params.get('title') || undefined,
+		settingsId: params.get('settingsId') || undefined,
 	};
 }
 

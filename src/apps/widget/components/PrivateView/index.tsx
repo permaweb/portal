@@ -5,6 +5,7 @@ import { useMessages } from '../../hooks/useMessages';
 import { useEncryption } from '../../hooks/useEncryption';
 import { usePermawebProvider } from '../../providers/WidgetPermawebProvider';
 import { useWalletProvider } from '../../providers/WalletBridgeProvider';
+import { useWidgetProvider } from '../../providers/WidgetProvider';
 import ConnectButton from '../shared/ConnectButton';
 import MessageBubble from '../ChatView/MessageBubble';
 import JoinGroup from './JoinGroup';
@@ -137,6 +138,7 @@ export default function PrivateView() {
 	const { activeGroup, groups, joinGroup, hasKey, encryptMessage, decryptMessage } = useEncryption();
 	const { profile } = usePermawebProvider();
 	const { walletAddress } = useWalletProvider();
+	const { settings } = useWidgetProvider();
 	const [text, setText] = React.useState('');
 	const [sending, setSending] = React.useState(false);
 	const [decryptedMessages, setDecryptedMessages] = React.useState<any[]>([]);
@@ -147,6 +149,10 @@ export default function PrivateView() {
 	const prevCountRef = React.useRef(0);
 
 	const isLoggedIn = Boolean(walletAddress && profile?.id);
+	const { showTimestamps, showAvatars } = settings.behavior;
+	const placeholder = settings.content.placeholder || 'Type an encrypted message...';
+	const emptyMessage = settings.content.emptyStateMessage || 'No messages yet';
+	const requireWallet = settings.access.requireWalletToView;
 
 	// Decrypt messages when they change
 	React.useEffect(() => {
@@ -228,6 +234,17 @@ export default function PrivateView() {
 		}
 	};
 
+	if (requireWallet && !walletAddress) {
+		return (
+			<Container>
+				<Empty>Connect your wallet to view messages</Empty>
+				<ConnectWrapper>
+					<ConnectButton />
+				</ConnectWrapper>
+			</Container>
+		);
+	}
+
 	if (showSecretPrompt) {
 		const group = groups.find((g) => g.groupHash === pendingGroupHash);
 		return (
@@ -272,16 +289,18 @@ export default function PrivateView() {
 	return (
 		<Container>
 			<GroupHeader>
-				<span>🔒 {activeGroup.name}</span>
+				<span>&#x1F512; {activeGroup.name}</span>
 				<LeaveButton onClick={() => window.location.reload()}>Leave</LeaveButton>
 			</GroupHeader>
 			<MessageList ref={listRef}>
 				{isLoading && decryptedMessages.length === 0 ? (
 					<Empty>Loading...</Empty>
 				) : decryptedMessages.length === 0 ? (
-					<Empty>No messages yet</Empty>
+					<Empty>{emptyMessage}</Empty>
 				) : (
-					decryptedMessages.map((msg: any, i: number) => <MessageBubble key={`${msg.id}-${i}`} data={msg} />)
+					decryptedMessages.map((msg: any, i: number) => (
+						<MessageBubble key={`${msg.id}-${i}`} data={msg} showTimestamp={showTimestamps} showAvatar={showAvatars} />
+					))
 				)}
 			</MessageList>
 			{isLoggedIn ? (
@@ -290,12 +309,12 @@ export default function PrivateView() {
 						value={text}
 						onChange={(e) => setText(e.target.value)}
 						onKeyDown={handleKeyDown}
-						placeholder="Type an encrypted message..."
+						placeholder={placeholder}
 						rows={1}
 						disabled={sending}
 					/>
 					<SendButton $active={canSend} onClick={handleSend} disabled={!canSend}>
-						↑
+						&#8593;
 					</SendButton>
 				</InputBar>
 			) : (

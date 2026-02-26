@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { useMessages } from '../../hooks/useMessages';
 import { usePermawebProvider } from '../../providers/WidgetPermawebProvider';
 import { useWalletProvider } from '../../providers/WalletBridgeProvider';
+import { useWidgetProvider } from '../../providers/WidgetProvider';
 import ConnectButton from '../shared/ConnectButton';
 import MessageBubble from './MessageBubble';
 
@@ -111,10 +112,16 @@ export default function ChatView() {
 	const { messages, isLoading, sendMessage } = useMessages();
 	const { profile } = usePermawebProvider();
 	const { walletAddress } = useWalletProvider();
+	const { settings } = useWidgetProvider();
 	const [text, setText] = React.useState('');
 	const [sending, setSending] = React.useState(false);
 	const listRef = React.useRef<HTMLDivElement>(null);
 	const prevCountRef = React.useRef(0);
+
+	const { showTimestamps, showAvatars } = settings.behavior;
+	const placeholder = settings.content.placeholder || 'Type a message...';
+	const emptyMessage = settings.content.emptyStateMessage || 'No messages yet';
+	const requireWallet = settings.access.requireWalletToView;
 
 	// Auto-scroll to bottom when new messages arrive
 	React.useEffect(() => {
@@ -156,15 +163,28 @@ export default function ChatView() {
 	const canSend = text.trim().length > 0 && !sending;
 	const isLoggedIn = Boolean(walletAddress && profile?.id);
 
+	if (requireWallet && !walletAddress) {
+		return (
+			<Container>
+				<Empty>Connect your wallet to view messages</Empty>
+				<ConnectWrapper>
+					<ConnectButton />
+				</ConnectWrapper>
+			</Container>
+		);
+	}
+
 	return (
 		<Container>
 			<MessageList ref={listRef}>
 				{isLoading && messages.length === 0 ? (
 					<Empty>Loading...</Empty>
 				) : messages.length === 0 ? (
-					<Empty>No messages yet</Empty>
+					<Empty>{emptyMessage}</Empty>
 				) : (
-					messages.map((msg: any, i: number) => <MessageBubble key={`${msg.id}-${i}`} data={msg} />)
+					messages.map((msg: any, i: number) => (
+						<MessageBubble key={`${msg.id}-${i}`} data={msg} showTimestamp={showTimestamps} showAvatar={showAvatars} />
+					))
 				)}
 			</MessageList>
 			{isLoggedIn ? (
@@ -173,7 +193,7 @@ export default function ChatView() {
 						value={text}
 						onChange={(e) => setText(e.target.value)}
 						onKeyDown={handleKeyDown}
-						placeholder="Type a message..."
+						placeholder={placeholder}
 						rows={1}
 						disabled={sending}
 					/>

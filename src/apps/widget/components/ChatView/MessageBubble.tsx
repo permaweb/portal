@@ -12,6 +12,8 @@ interface MessageBubbleProps {
 		content: string;
 		dateCreated: number;
 	};
+	showTimestamp?: boolean;
+	showAvatar?: boolean;
 }
 
 const Wrapper = styled.div`
@@ -81,7 +83,7 @@ function formatTimestamp(epoch: number): string {
 	return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-export default function MessageBubble({ data }: MessageBubbleProps) {
+export default function MessageBubble({ data, showTimestamp = true, showAvatar = true }: MessageBubbleProps) {
 	const profileId = data.creator || data.owner || '';
 	const { profile, isLoading } = useProfile(profileId);
 
@@ -90,11 +92,11 @@ export default function MessageBubble({ data }: MessageBubbleProps) {
 
 	return (
 		<Wrapper>
-			<Avatar profile={profile} isLoading={isLoading} size={28} />
+			{showAvatar && <Avatar profile={profile} isLoading={isLoading} size={28} />}
 			<Body>
 				<Meta>
 					<Name title={displayName}>{displayName}</Name>
-					{timestamp && <Timestamp>{timestamp}</Timestamp>}
+					{showTimestamp && timestamp && <Timestamp>{timestamp}</Timestamp>}
 				</Meta>
 				<Text>{data.content}</Text>
 			</Body>

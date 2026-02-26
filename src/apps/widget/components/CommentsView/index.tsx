@@ -3,6 +3,8 @@ import styled from 'styled-components';
 
 import { useComments } from '../../hooks/useComments';
 import { useWidgetProvider } from '../../providers/WidgetProvider';
+import { useWalletProvider } from '../../providers/WalletBridgeProvider';
+import ConnectButton from '../shared/ConnectButton';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
 
@@ -36,9 +38,21 @@ const Empty = styled.div`
 	font-size: 13px;
 `;
 
+const ConnectWrapper = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 12px;
+	border-top: 1px solid var(--widget-border);
+`;
+
 export default function CommentsView() {
-	const { config } = useWidgetProvider();
+	const { config, settings } = useWidgetProvider();
+	const { walletAddress } = useWalletProvider();
 	const { comments: fetchedComments, isLoading } = useComments(config.processId);
+
+	const emptyMessage = settings.content.emptyStateMessage || 'No comments yet';
+	const requireWallet = settings.access.requireWalletToView;
 
 	const organizeComments = React.useCallback((commentsList: any[]) => {
 		if (!commentsList || commentsList.length === 0) return [];
@@ -80,13 +94,24 @@ export default function CommentsView() {
 
 	const comments = React.useMemo(() => organizeComments(fetchedComments), [fetchedComments, organizeComments]);
 
+	if (requireWallet && !walletAddress) {
+		return (
+			<Container>
+				<Empty>Connect your wallet to view comments</Empty>
+				<ConnectWrapper>
+					<ConnectButton />
+				</ConnectWrapper>
+			</Container>
+		);
+	}
+
 	return (
 		<>
 			<Container>
 				{isLoading && comments.length === 0 ? (
 					<Empty>Loading comments...</Empty>
 				) : comments.length === 0 ? (
-					<Empty>No comments yet</Empty>
+					<Empty>{emptyMessage}</Empty>
 				) : (
 					<CommentList>
 						{comments.map((comment: any, index: number) => (
