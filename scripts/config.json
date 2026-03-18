@@ -1,9 +1,13 @@
 {
 	"scheduler": "https://schedule.forward.computer",
+	"schedulerAddress": "n_XZJhUnmldNFo4dhajoPZWhBXuJk-OcQr5JQ49c4Zo",
 	"portalSourceNode": "https://hb.portalinto.com",
-	"targetNodes": ["http://localhost:8734", "https://push.forward.computer"],
+	"targetNodes": ["https://hb.portalinto.com"],
 	"minBlock": 1818200,
-	"portalIds": ["nhdiOytr5s2MzGBlAAMIsKtcwvXDkiv54H0_O5FUacU", "GYOxC2in9PTT8ehdJ0Wzmpu_EskE4OhjcSq44TBqpxg"],
+	"portalHydrationIds": ["xq8avF1QxEPIdlx3CnOjDraYjq893Mc3RBZpOf5wkpk"],
+	"portalCloneIds": ["xq8avF1QxEPIdlx3CnOjDraYjq893Mc3RBZpOf5wkpk"],
+	"profileCloneIds": ["RaYW0T9i6xEjFkEZBWYwNk523BZyZMBAZImiIaettNA"],
+	"walletPath": "process.env.WALLET_FILE",
 	"writeToFiles": true,
 	"concurrency": {
 		"fetchPortals": 1,
@@ -13,5 +17,5 @@
 		"maxRetries": 10,
 		"latencyThreshold": 50
 	},
-	"dataDir": "scripts/data"
+	"dataDir": "data"
 }

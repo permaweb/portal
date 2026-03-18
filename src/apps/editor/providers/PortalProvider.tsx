@@ -610,7 +610,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 		// Start the import process
 		try {
-			addNotification(createPortal ? 'Creating portal from WordPress...' : 'Starting WordPress import...', 'info');
+			addNotification(createPortal ? 'Creating portal from WordPress...' : 'Starting WordPress import...', 'success');
 
 			// If creating a portal, create it first
 			if (createPortal) {
@@ -850,7 +850,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			if (data.name && (createPortal || !portalToUpdate.name)) {
 				updates.Name = data.name;
 			}
-			if (data.description && (createPortal || !portalToUpdate.description)) {
+			if (data.description && (createPortal || !(portalToUpdate as any).description)) {
 				updates.Description = data.description;
 			}
 
