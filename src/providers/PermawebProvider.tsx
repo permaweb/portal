@@ -111,16 +111,19 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 			}
 
 			const cachedProfile = getCachedProfile(arProvider.walletAddress);
-			if (cachedProfile?.id) {
-				setProfile(normalizeProfile(cachedProfile));
-			}
+
+			if (cachedProfile?.id) setProfile(normalizeProfile(cachedProfile));
+			// else setProfile({ id: null });
 
 			try {
 				const freshProfile = await resolveProfile(arProvider.walletAddress);
-				if (freshProfile) {
+				if (freshProfile?.id) {
 					setProfile(freshProfile);
 					cacheProfile(arProvider.walletAddress, freshProfile);
 					if (profilePending) setProfilePending(false);
+				} else if (!cachedProfile?.id) {
+					// Only reset state if there's no cached profile to fall back on
+					setProfile({ id: null });
 				}
 			} catch (e: any) {
 				console.error('Failed to fetch fresh profile:', e);
@@ -161,7 +164,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		if (arProvider.wallet && arProvider.walletAddress) {
 			try {
 				const newProfile = await resolveProfile(arProvider.walletAddress);
-				if (newProfile) {
+				if (newProfile?.id) {
 					setProfile(newProfile);
 					cacheProfile(arProvider.walletAddress, newProfile);
 					if (newProfile.id) {
@@ -201,7 +204,13 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	async function resolveProfile(address: string): Promise<Types.ProfileType | undefined> {
 		if (libs) {
 			try {
-				const fetchedProfile = await libs.getProfileByWalletAddress(address);
+				let fetchedProfile;
+
+				const cachedProfile = getCachedProfile(arProvider.walletAddress);
+
+				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
+				else fetchedProfile = await libs.getProfileByWalletAddress(address);
+
 				const profileToUse = normalizeProfile({ ...fetchedProfile });
 
 				cacheProfile(address, profileToUse);
@@ -233,8 +242,8 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	}
 
 	function cacheProfile(address: string, profileData: any) {
-		if (profileData) {
-			// Don't cache portal-specific roles
+		if (profileData?.id) {
+			// Only cache if profile has an ID, and don't cache portal-specific roles
 			const { roles, ...profileWithoutRoles } = profileData;
 			localStorage.setItem(STORAGE.profileByWallet(address), JSON.stringify(profileWithoutRoles));
 		}

@@ -4,7 +4,7 @@ import Arweave from 'arweave';
 import fs from 'fs';
 import { Agent, setGlobalDispatcher } from 'undici';
 
-import { debugLog } from './utils.mjs';
+import { checkValidAddress, debugLog, fetchZoneData, withRetries } from './utils.mjs';
 
 const config = JSON.parse(fs.readFileSync(new URL('./config.json', import.meta.url), 'utf-8'));
 
@@ -23,7 +23,7 @@ const SCHEDULER = config.scheduler;
 const PORTAL_SOURCE_NODE = config.portalSourceNode;
 const TARGET_NODES = config.targetNodes;
 const MIN_BLOCK = config.minBlock;
-const PORTAL_IDS = config.portalIds;
+const PORTAL_IDS = config.portalHydrationIds;
 
 const WRITE_TO_FILES = config.writeToFiles;
 
@@ -41,56 +41,6 @@ const ERROR_FILE = `${DATA_DIR}/hydration-errors.json`;
 const arweave = Arweave.init({});
 const ao = connect({ MODE: 'legacy' });
 const permaweb = Permaweb.init({ arweave, ao });
-
-async function withRetries(fn, options = {}) {
-	const { maxRetries = 3, delayMs = 1000, backoff = true, validate } = options;
-
-	let lastError;
-	let lastResult;
-
-	for (let attempt = 0; attempt < maxRetries; attempt++) {
-		try {
-			const result = await fn();
-
-			if (!validate || validate(result)) {
-				if (attempt > 0) {
-					debugLog('success', 'withRetries', `Success on attempt ${attempt + 1}`);
-				}
-				return result;
-			}
-
-			lastResult = result;
-			if (attempt < maxRetries - 1) {
-				const delay = backoff ? delayMs * Math.pow(2, attempt) : delayMs;
-				debugLog(
-					'warn',
-					'withRetries',
-					`Validation failed on attempt ${attempt + 1}/${maxRetries}, retrying in ${delay}ms...`
-				);
-				await new Promise((resolve) => setTimeout(resolve, delay));
-			}
-		} catch (error) {
-			lastError = error;
-			if (attempt < maxRetries - 1) {
-				const delay = backoff ? delayMs * Math.pow(2, attempt) : delayMs;
-				debugLog(
-					'warn',
-					'withRetries',
-					`Error on attempt ${attempt + 1}/${maxRetries}: ${error.message}, retrying in ${delay}ms...`
-				);
-				await new Promise((resolve) => setTimeout(resolve, delay));
-			}
-		}
-	}
-
-	if (lastError) {
-		debugLog('error', 'withRetries', `Failed after ${maxRetries} attempts: ${lastError.message}`);
-		throw lastError;
-	}
-
-	debugLog('warn', 'withRetries', `Validation failed after ${maxRetries} attempts`);
-	return lastResult;
-}
 
 function loadHydratedProcesses() {
 	return [];
@@ -217,38 +167,13 @@ async function findPortalProcesses() {
 	return portals || [];
 }
 
-async function fetchPortalData(portalId, sourceNode) {
-	try {
-		const url = `${sourceNode}/${portalId}~process@1.0/compute?require-codec=application/json&accept-bundle=true`;
-		debugLog('info', 'fetchPortalData', `Fetching data for ${portalId}...`);
-
-		const response = await fetch(url);
-
-		if (!response.ok) {
-			debugLog('warn', 'fetchPortalData', `Failed to fetch portal ${portalId}: HTTP ${response.status}`);
-			return null;
-		}
-
-		const data = await response.json();
-		debugLog('success', 'fetchPortalData', `Successfully fetched ${portalId}`);
-		return data;
-	} catch (error) {
-		debugLog('error', 'fetchPortalData', `Error fetching portal ${portalId}:`, error.message);
-		return null;
-	}
-}
-
-function isValidArweaveAddress(address) {
-	return typeof address === 'string' && /^[a-zA-Z0-9_-]{43}$/.test(address);
-}
-
 function extractPostIds(portalData) {
 	const postIds = [];
 
 	try {
 		const index = portalData?.posts?.Index;
 		for (const post of index) {
-			if (isValidArweaveAddress(post.Id)) {
+			if (checkValidAddress(post.Id)) {
 				postIds.push(post.Id);
 			} else {
 				debugLog('warn', 'extractPostIds', `Skipping invalid post ID: ${post.Id}`);
@@ -269,9 +194,9 @@ function extractUserIds(portalData) {
 		if (roles && typeof roles === 'object') {
 			Object.entries(roles).forEach(([key, value]) => {
 				// Only include addresses with Type: 'process'
-				if (isValidArweaveAddress(key) && value?.Type === 'process') {
+				if (checkValidAddress(key) && value?.Type === 'process') {
 					userIds.push(key);
-				} else if (key && !isValidArweaveAddress(key) && value?.Type === 'process') {
+				} else if (key && !checkValidAddress(key) && value?.Type === 'process') {
 					debugLog('warn', 'extractUserIds', `Skipping invalid user ID: ${key}`);
 				}
 			});
@@ -291,7 +216,7 @@ function extractCommentIds(portalData) {
 		if (index && typeof index === 'object') {
 			Object.values(index).forEach((post) => {
 				const commentsId = post?.Comments;
-				if (isValidArweaveAddress(commentsId)) {
+				if (checkValidAddress(commentsId)) {
 					commentIds.push(commentsId);
 				} else if (commentsId) {
 					debugLog('warn', 'extractCommentIds', `Skipping invalid comment ID: ${commentsId}`);
@@ -308,7 +233,7 @@ function extractCommentIds(portalData) {
 function extractModerationId(portalData) {
 	try {
 		const moderationId = portalData?.['bootloader-moderation'];
-		if (isValidArweaveAddress(moderationId)) {
+		if (checkValidAddress(moderationId)) {
 			return moderationId;
 		} else if (moderationId) {
 			debugLog('warn', 'extractModerationId', `Skipping invalid moderation ID: ${moderationId}`);
@@ -356,7 +281,7 @@ async function aggregatePortalEcosystemIds(portalProcesses, sourceNode) {
 				return { success: false };
 			}
 
-			const portalData = await fetchPortalData(portalId, sourceNode);
+			const portalData = await fetchZoneData(portalId, sourceNode);
 
 			if (!portalData) {
 				debugLog('warn', 'aggregatePortalEcosystemIds', `Failed to fetch data for portal ${portalId}`);
@@ -386,7 +311,7 @@ async function aggregatePortalEcosystemIds(portalProcesses, sourceNode) {
 			continue;
 		}
 
-		if (isValidArweaveAddress(result.portalId)) {
+		if (checkValidAddress(result.portalId)) {
 			allPortalIds.push(result.portalId);
 		} else {
 			debugLog('warn', 'aggregatePortalEcosystemIds', `Skipping invalid portal ID: ${result.portalId}`);
