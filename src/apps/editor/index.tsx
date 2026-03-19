@@ -9,6 +9,7 @@ import { CurrentZoneVersion } from '@permaweb/libs';
 import { Navigation, NavigationProvider, useNavigation } from 'editor/navigation';
 import { PortalProvider, usePortalProvider } from 'editor/providers/PortalProvider';
 import { SettingsProvider, useSettingsProvider } from 'editor/providers/SettingsProvider';
+import { WordPressImportProvider } from 'editor/providers/WordPressImportProvider';
 import { persistor, store } from 'editor/store';
 
 import { Button } from 'components/atoms/Button';
@@ -277,8 +278,10 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 							<ArweaveProvider>
 								<PermawebProvider>
 									<PortalProvider>
-										<GlobalStyle />
-										<App />
+										<WordPressImportProvider>
+											<GlobalStyle />
+											<App />
+										</WordPressImportProvider>
 									</PortalProvider>
 								</PermawebProvider>
 							</ArweaveProvider>

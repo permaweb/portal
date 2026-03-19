@@ -11,6 +11,7 @@ import { PostList } from 'editor/components/organisms/PostList';
 import { WordPressImport, type WordPressImportDraft } from 'editor/components/organisms/WordPressImport';
 import { Header } from 'editor/navigation';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
+import { useWordPressImportProvider } from 'editor/providers/WordPressImportProvider';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
@@ -99,6 +100,7 @@ export default function CreatePortal() {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
+	const wpImportProvider = useWordPressImportProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const { addNotification } = useNotifications();
@@ -336,7 +338,7 @@ export default function CreatePortal() {
 				name: effectiveName,
 			};
 
-			await portalProvider.importWordPress(
+			await wpImportProvider.importWordPress(
 				dataToUse,
 				importDraft.posts,
 				importDraft.pages,
@@ -589,7 +591,7 @@ export default function CreatePortal() {
 											selectedTopics,
 											uploadedImageUrls
 										) =>
-											portalProvider.importWordPress(
+											wpImportProvider.importWordPress(
 												data,
 												posts,
 												pages,

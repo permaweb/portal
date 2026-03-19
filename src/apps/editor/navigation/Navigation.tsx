@@ -5,6 +5,7 @@ import { debounce } from 'lodash';
 import { useTheme } from 'styled-components';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
+import { useWordPressImportProvider } from 'editor/providers/WordPressImportProvider';
 
 import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
@@ -30,6 +31,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
+	const wpImportProvider = useWordPressImportProvider();
 	const permawebProvider = usePermawebProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -529,7 +531,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 									</button>
 									<button
 										onClick={() => {
-											portalProvider.setShowWordPressImport(true);
+											wpImportProvider.setShowWordPressImport(true);
 											setShowPortalDropdown(false);
 										}}
 									>

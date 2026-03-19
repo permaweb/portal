@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { Media } from 'editor/components/molecules/Media';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
+import { useWordPressImportProvider } from 'editor/providers/WordPressImportProvider';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
@@ -48,6 +49,7 @@ export default function PortalManager(props: {
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
+	const wpImportProvider = useWordPressImportProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
@@ -296,7 +298,7 @@ export default function PortalManager(props: {
 	function handleWordPressImportClick() {
 		props.handleClose();
 		// Pass true for createPortal when we're in "create new portal" mode (props.portal is null)
-		portalProvider.setShowWordPressImport(true, !props.portal);
+		wpImportProvider.setShowWordPressImport(true, !props.portal);
 	}
 
 	function getConnectedView() {
