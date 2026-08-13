@@ -3,8 +3,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { IS_TESTNET } from 'helpers/config';
 import { UserOwnedDomain } from 'helpers/types';
-import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
-import { useArIOBalance } from 'hooks/useArIOBalance';
+import { toReadableARIO } from 'helpers/utils';
 
 import * as S from './styles';
 
@@ -23,7 +22,6 @@ const RenderUpgradeAndCosts = (props: {
 	setUpgradeModal: React.Dispatch<React.SetStateAction<{ open: boolean; domain?: UserOwnedDomain }>>;
 }) => {
 	const portalProvider = usePortalProvider();
-	const { balance: arIOBalance } = useArIOBalance();
 	if (props.domain.recordType !== 'lease') return null;
 	const canModifyDomains = portalProvider.permissions?.updatePortalMeta;
 	if (!canModifyDomains) return null;
@@ -32,9 +30,7 @@ const RenderUpgradeAndCosts = (props: {
 	const valueText = (c?: { winc: number; mario: number; fiatUSD: string | null }) => {
 		if (IS_TESTNET) return c ? `${toReadableARIO(c.mario)} tario` : '…';
 		if (!c) return '…';
-		const creditsText = `${getARAmountFromWinc(c.winc)} Credits${c.fiatUSD ? ` ($${c.fiatUSD})` : ''}`;
-		const showArio = !!(arIOBalance && arIOBalance > 0);
-		return showArio ? `${creditsText} • ${toReadableARIO(c.mario)} ARIO` : creditsText;
+		return `${toReadableARIO(c.mario)} ARIO`;
 	};
 	return (
 		<S.DomainCosts>

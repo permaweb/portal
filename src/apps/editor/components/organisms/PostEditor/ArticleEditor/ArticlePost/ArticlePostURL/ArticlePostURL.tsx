@@ -69,8 +69,7 @@ export default function ArticlePostURL() {
 
 	const submitUnauthorized =
 		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions?.postAutoIndex;
-	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
-	const urlDisabled = requestUnauthorized || submitUnauthorized || currentPost.editor.loading.active;
+	const urlDisabled = submitUnauthorized || currentPost.editor.loading.active;
 
 	return (
 		<S.Wrapper>

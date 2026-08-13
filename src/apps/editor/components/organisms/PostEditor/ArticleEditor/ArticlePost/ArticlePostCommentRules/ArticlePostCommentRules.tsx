@@ -10,6 +10,7 @@ import { Button } from 'components/atoms/Button';
 import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
 import { ICONS } from 'helpers/config';
+import { PORTAL_CAPABILITIES } from 'helpers/features';
 import { CommentRulesType, PortalUserType } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -157,6 +158,10 @@ export default function ArticlePostCommentRules() {
 	};
 
 	// Only show if post has comments process
+	if (!PORTAL_CAPABILITIES.COMMENTS) {
+		return null;
+	}
+
 	if (!commentsId || !hasPermission) {
 		return (
 			<S.WrapperEmpty>

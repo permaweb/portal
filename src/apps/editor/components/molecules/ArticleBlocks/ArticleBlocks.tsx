@@ -7,6 +7,7 @@ import { currentPageUpdate } from 'editor/store/page';
 import { currentPostUpdate } from 'editor/store/post';
 
 import { ARTICLE_BLOCKS } from 'helpers/config';
+import { PORTAL_CAPABILITIES } from 'helpers/features';
 import { ArticleBlockEnum, ArticleBlocksContextType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -38,6 +39,12 @@ export default function ArticleBlocks(props: {
 
 	const [focusedIndex, setFocusedIndex] = React.useState<number>(-1);
 	const [totalBlockCount, setTotalBlockCount] = React.useState(0);
+	const blockUnavailable = React.useCallback(
+		(type: ArticleBlockEnum) =>
+			!PORTAL_CAPABILITIES.TIPS &&
+			(type === ArticleBlockEnum.MonetizationButton || type === ArticleBlockEnum.Supporters),
+		[]
+	);
 
 	const handleCurrentReducerUpdate = (updatedField: { field: string; value: any }) => {
 		let currentReducerUpdate = null;
@@ -102,10 +109,10 @@ export default function ArticleBlocks(props: {
 					ARTICLE_BLOCKS[ArticleBlockEnum.HTML],
 					ARTICLE_BLOCKS[ArticleBlockEnum.MonetizationButton],
 					ARTICLE_BLOCKS[ArticleBlockEnum.Supporters],
-				].filter(Boolean),
+				].filter((block) => Boolean(block) && !blockUnavailable(block.type)),
 			},
 		],
-		[language.text, language.headers, language.media, language.design]
+		[language.text, language.headers, language.media, language.design, blockUnavailable]
 	);
 
 	const escFunction = React.useCallback(
@@ -189,7 +196,7 @@ export default function ArticleBlocks(props: {
 						newIndex += direction;
 						if (newIndex < 0) newIndex = totalBlockCount - 1;
 						if (newIndex >= totalBlockCount) newIndex = 0;
-					} while (!blockRefs.current[newIndex]);
+					} while (!blockRefs.current[newIndex] || blockRefs.current[newIndex]?.disabled);
 					return newIndex;
 				});
 			} else if (event.key === 'Enter') {
@@ -197,7 +204,7 @@ export default function ArticleBlocks(props: {
 				event.preventDefault();
 				if (focusedIndex >= 0 && focusedIndex < blockRefs.current.length) {
 					const focusedButton = blockRefs.current[focusedIndex];
-					if (focusedButton) {
+					if (focusedButton && !focusedButton.disabled) {
 						const blockType = focusedButton.getAttribute('data-block-type');
 						if (blockType) {
 							props.addBlock(blockType as ArticleBlockEnum);

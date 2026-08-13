@@ -12,15 +12,12 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
-import { Panel } from 'components/atoms/Panel';
 import { TxAddress } from 'components/atoms/TxAddress';
-import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { getArnsCost } from 'helpers/arnsCosts';
 import { ICONS, IS_TESTNET } from 'helpers/config';
 import { loadCachedDomains, saveCachedDomains } from 'helpers/domainCache';
 import { PortalPatchMapEnum, UserOwnedDomain } from 'helpers/types';
 import { debugLog, withTimeout } from 'helpers/utils';
-import { useArIOBalance } from 'hooks/useArIOBalance';
 import { useLatestANTVersion } from 'hooks/useLatestANTVersion';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -194,7 +191,6 @@ export default function DomainListArNS() {
 	const [confirmUnassignModal, setConfirmUnassignModal] = React.useState<{ open: boolean; domain?: UserOwnedDomain }>({
 		open: false,
 	});
-	const [showFund, setShowFund] = React.useState<boolean>(false);
 	// startTransition removed - using direct state updates for speed
 	const [expandedDetails, setExpandedDetails] = React.useState<Set<string>>(new Set());
 
@@ -224,7 +220,6 @@ export default function DomainListArNS() {
 
 	const ario = React.useMemo(() => (IS_TESTNET ? ARIO.testnet() : ARIO.mainnet()), []);
 	const { data: latestAntVersion } = useLatestANTVersion();
-	const { balance: arIOBalance } = useArIOBalance();
 
 	// Costs cache for expanded domains
 	const [costsByAntId, setCostsByAntId] = React.useState<
@@ -236,12 +231,8 @@ export default function DomainListArNS() {
 			}
 		>
 	>({});
-	const [extendPaymentMethod, _setExtendPaymentMethod] = React.useState<'turbo' | 'ario'>(
-		IS_TESTNET ? 'ario' : 'turbo'
-	);
-	const [upgradePaymentMethod, _setUpgradePaymentMethod] = React.useState<'turbo' | 'ario'>(
-		IS_TESTNET ? 'ario' : 'turbo'
-	);
+	const [extendPaymentMethod, _setExtendPaymentMethod] = React.useState<'turbo' | 'ario'>('ario');
+	const [upgradePaymentMethod, _setUpgradePaymentMethod] = React.useState<'turbo' | 'ario'>('ario');
 	const costsLoadingRef = React.useRef<Set<string>>(new Set());
 
 	// Dynamic cost for extend modal (updates when years change)
@@ -1152,7 +1143,6 @@ export default function DomainListArNS() {
 					extendCostLoading={extendCostLoading}
 					extendPaymentMethod={extendPaymentMethod}
 					setExtendPaymentMethod={_setExtendPaymentMethod}
-					setShowFund={setShowFund}
 					extendingDomains={extendingDomains}
 					setExtendingDomains={setExtendingDomains}
 					userOwnedDomains={userOwnedDomains}
@@ -1170,7 +1160,6 @@ export default function DomainListArNS() {
 					setExtendPaymentMethod={_setExtendPaymentMethod}
 					upgradePaymentMethod={upgradePaymentMethod}
 					setUpgradePaymentMethod={_setUpgradePaymentMethod}
-					setShowFund={setShowFund}
 					upgradingDomains={upgradingDomains}
 					setUpgradingDomains={setUpgradingDomains}
 					pollAndHydrateAfterChange={pollAndHydrateAfterChange}
@@ -1191,16 +1180,6 @@ export default function DomainListArNS() {
 						unassignDomainFromPortal={unassignDomainFromPortal}
 					/>
 				)}
-				<Panel
-					open={showFund}
-					width={575}
-					header={language.fundTurboBalance}
-					handleClose={() => setShowFund(false)}
-					className={'modal-wrapper'}
-				>
-					{!IS_TESTNET && <TurboBalanceFund handleClose={() => setShowFund(false)} />}
-				</Panel>
-
 				{listReady && validating.length > 0 && (
 					<S.LoadingBanner>
 						<span className={'label'}>{language.loadingDataFor}</span>

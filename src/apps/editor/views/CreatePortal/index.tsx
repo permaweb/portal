@@ -8,7 +8,7 @@ import { Media } from 'editor/components/molecules/Media';
 import { Themes } from 'editor/components/molecules/Themes';
 import { PortalSetup } from 'editor/components/organisms/PortalSetup';
 import { PostList } from 'editor/components/organisms/PostList';
-import { WordPressImport, type WordPressImportDraft } from 'editor/components/organisms/WordPressImport';
+import { WordPressImport } from 'editor/components/organisms/WordPressImport';
 import { Header } from 'editor/navigation';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -17,12 +17,22 @@ import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Select } from 'components/atoms/Select';
 import { Tabs } from 'components/atoms/Tabs';
-import { ICONS, LAYOUT, PAGES, PORTAL_DATA, PORTAL_PATCH_MAP, PORTAL_ROLES, THEME, URLS } from 'helpers/config';
+import {
+	ENGINE_LITE_REFERENCE_ID,
+	ICONS,
+	LAYOUT,
+	PAGES,
+	PORTAL_DATA,
+	PORTAL_PATCH_MAP,
+	PORTAL_ROLES,
+	THEME,
+	URLS,
+} from 'helpers/config';
 import { THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
+import { IS_BASE_MODE, PORTAL_CAPABILITIES } from 'helpers/features';
 import type { PortalHeaderType, SelectOptionType } from 'helpers/types';
 import { PortalPatchMapEnum } from 'helpers/types';
 import { checkValidAddress, debugLog, getBootTag } from 'helpers/utils';
-import type { PortalImportData } from 'helpers/wordpress';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -110,7 +120,7 @@ export default function CreatePortal() {
 	const [iconId, setIconId] = React.useState<string | null>(null);
 	const [wallpaperId, setWallpaperId] = React.useState<string | null>(null);
 	const [selectedLayout, setSelectedLayout] = React.useState<string>('journal');
-	const [importDraft, setImportDraft] = React.useState<WordPressImportDraft | null>(null);
+	const [showWordPressCreate, setShowWordPressCreate] = React.useState<boolean>(false);
 
 	const importOptions: SelectOptionType[] = [
 		{ id: 'none', label: language?.none || 'None' },
@@ -122,12 +132,6 @@ export default function CreatePortal() {
 	const portalReady = Boolean(portalProvider.current?.id && portalProvider.current?.id === portalId);
 	const creatingNew = !portalId;
 	const canUpdateMeta = portalProvider.permissions?.updatePortalMeta;
-	const hasImportDraft = Boolean(importDraft);
-
-	const handleImportDraftChange = React.useCallback((draft: WordPressImportDraft | null) => {
-		setImportDraft(draft);
-	}, []);
-
 	const handleWordPressPortalNameChange = React.useCallback((value: string) => {
 		setName(value);
 	}, []);
@@ -137,12 +141,6 @@ export default function CreatePortal() {
 			setName(portalProvider.current.name);
 		}
 	}, [creatingNew, portalProvider.current?.id, portalProvider.current?.name]);
-
-	React.useEffect(() => {
-		if (importOption.id !== 'wordpress') {
-			setImportDraft(null);
-		}
-	}, [importOption.id]);
 
 	const layoutOptions = [
 		{ name: 'journal', icon: ICONS.layoutJournal },
@@ -162,7 +160,21 @@ export default function CreatePortal() {
 
 		setCreating(true);
 		try {
-			let data: any = { Name: name };
+			let data: any = { Name: name, EngineReference: ENGINE_LITE_REFERENCE_ID };
+			const chosenLayout =
+				selectedLayout === 'blog'
+					? LAYOUT.BLOG
+					: selectedLayout === 'documentation'
+					? LAYOUT.DOCUMENTATION
+					: LAYOUT.JOURNAL;
+			const chosenPages =
+				selectedLayout === 'blog'
+					? PAGES.BLOG
+					: selectedLayout === 'documentation'
+					? PAGES.DOCUMENTATION
+					: PAGES.JOURNAL;
+			const chosenTheme =
+				selectedLayout === 'documentation' ? deepMerge(THEME.DEFAULT, THEME_DOCUMENTATION_PATCH) : THEME.DEFAULT;
 
 			if (logoId && checkValidAddress(logoId)) {
 				try {
@@ -204,6 +216,7 @@ export default function CreatePortal() {
 
 			const tags = [
 				getBootTag('Name', data.Name),
+				getBootTag('EngineReference', data.EngineReference),
 				{ name: 'Content-Type', value: 'text/html' },
 				{ name: 'Zone-Type', value: 'Portal' },
 			];
@@ -231,6 +244,15 @@ export default function CreatePortal() {
 					data: PORTAL_DATA(),
 					spawnModeration: false,
 					authUsers: [arProvider.walletAddress],
+					...(IS_BASE_MODE
+						? {
+								initialPortalData: {
+									Themes: [permawebProvider.libs.mapToProcessCase(chosenTheme)],
+									Layout: permawebProvider.libs.mapToProcessCase(chosenLayout),
+									Pages: permawebProvider.libs.mapToProcessCase(chosenPages),
+								},
+						  }
+						: {}),
 				},
 				(status: any) => debugLog('info', 'CreatePortal', status)
 			);
@@ -272,29 +294,17 @@ export default function CreatePortal() {
 				arProvider.wallet
 			);
 
-			const getLayoutAndPages = () => {
-				if (selectedLayout === 'blog') {
-					return { layout: LAYOUT.BLOG, pages: PAGES.BLOG };
-				} else if (selectedLayout === 'documentation') {
-					return { layout: LAYOUT.DOCUMENTATION, pages: PAGES.DOCUMENTATION };
-				}
-				return { layout: LAYOUT.JOURNAL, pages: PAGES.JOURNAL };
-			};
-
-			const { layout: chosenLayout, pages: chosenPages } = getLayoutAndPages();
-
-			const chosenTheme =
-				selectedLayout === 'documentation' ? deepMerge(THEME.DEFAULT, THEME_DOCUMENTATION_PATCH) : THEME.DEFAULT;
-
-			const portalUpdateId = await permawebProvider.libs.updateZone(
-				{
-					Themes: [permawebProvider.libs.mapToProcessCase(chosenTheme)],
-					Layout: permawebProvider.libs.mapToProcessCase(chosenLayout),
-					Pages: permawebProvider.libs.mapToProcessCase(chosenPages),
-				},
-				portalId,
-				arProvider.wallet
-			);
+			const portalUpdateId = IS_BASE_MODE
+				? null
+				: await permawebProvider.libs.updateZone(
+						{
+							Themes: [permawebProvider.libs.mapToProcessCase(chosenTheme)],
+							Layout: permawebProvider.libs.mapToProcessCase(chosenLayout),
+							Pages: permawebProvider.libs.mapToProcessCase(chosenPages),
+						},
+						portalId,
+						arProvider.wallet
+				  );
 
 			debugLog('info', 'CreatePortal', `Portal update: ${portalUpdateId}`);
 
@@ -309,51 +319,7 @@ export default function CreatePortal() {
 
 			addNotification(`${language?.portalCreated || 'Portal created'}!`, 'success');
 			navigate(URLS.portalBase(portalId));
-			window.location.reload();
-		} catch (e: any) {
-			addNotification(e.message ?? language?.errorUpdatingPortal, 'warning');
-		}
-		setCreating(false);
-	};
-
-	const handleCreateFromDraft = async () => {
-		if (!importDraft) return;
-		if (!arProvider.wallet || !arProvider.walletAddress) {
-			addNotification(language?.connectToContinue || 'Connect your wallet to continue', 'warning');
-			return;
-		}
-
-		const effectiveName = name || importDraft.data?.name || '';
-		if (!effectiveName) {
-			addNotification('Name is required', 'warning');
-			return;
-		}
-
-		setCreating(true);
-		try {
-			const dataToUse: PortalImportData = {
-				...importDraft.data,
-				name: effectiveName,
-			};
-
-			await portalProvider.importWordPress(
-				dataToUse,
-				importDraft.posts,
-				importDraft.pages,
-				importDraft.selectedCategories,
-				importDraft.createCategories,
-				importDraft.createTopics,
-				importDraft.selectedTopics,
-				true,
-				importDraft.uploadedImageUrls,
-				undefined,
-				false,
-				{
-					logoId,
-					iconId,
-					wallpaperId,
-				}
-			);
+			if (!IS_BASE_MODE) window.location.reload();
 		} catch (e: any) {
 			addNotification(e.message ?? language?.errorUpdatingPortal, 'warning');
 		}
@@ -405,48 +371,35 @@ export default function CreatePortal() {
 			<S.Wrapper>
 				<Header />
 				<S.ContentWrapper>
-					<ViewHeader
-						header={language?.createPortal || 'Create Portal'}
-						actions={[
-							<Button
-								key={'return-home'}
-								type={'alt1'}
-								label={language?.returnHome || 'Return Home'}
-								handlePress={() => navigate(URLS.base)}
-							/>,
-						]}
-					/>
+					<S.CreateHeader>
+						<ViewHeader
+							header={language?.createPortal || 'Create Portal'}
+							actions={[
+								<Button
+									key={'return-home'}
+									type={'primary'}
+									label={language?.returnHome || 'Return Home'}
+									handlePress={() => navigate(URLS.base)}
+								/>,
+								...(PORTAL_CAPABILITIES.WORDPRESS_IMPORT
+									? [
+											<Button
+												key={'wordpress-import'}
+												type={'primary'}
+												label={language?.importFromWordPress || 'Import'}
+												handlePress={() => setShowWordPressCreate(true)}
+												icon={ICONS.import}
+												iconLeftAlign
+											/>,
+									  ]
+									: []),
+							]}
+						/>
+					</S.CreateHeader>
 					{creating && <Loader message={'Creating Portal...'} />}
-					<S.Body>
+					<S.CreateBody>
 						<S.Column>
 							<S.Section>
-								<S.SectionHeader>
-									<S.SectionTitle>{language?.importFromWordPress || 'Import from WordPress'}</S.SectionTitle>
-								</S.SectionHeader>
-								<S.SectionBody>
-									<S.PanelInner>
-										<WordPressImport
-											open
-											inline
-											handleClose={() => setImportDraft(null)}
-											createPortal
-											closeOnComplete={false}
-											showImportingStage={false}
-											portalName={name}
-											hidePreviewSubmit
-											onPortalNameChange={handleWordPressPortalNameChange}
-											onDraftChange={handleImportDraftChange}
-											importingMessage={'Preparing import data...'}
-										/>
-									</S.PanelInner>
-								</S.SectionBody>
-							</S.Section>
-						</S.Column>
-						<S.Column>
-							<S.Section>
-								<S.SectionHeader>
-									<S.SectionTitle>{'Portal Details'}</S.SectionTitle>
-								</S.SectionHeader>
 								<S.SectionBody>
 									{!arProvider.walletAddress ? (
 										<WalletBlock />
@@ -500,11 +453,13 @@ export default function CreatePortal() {
 											</div>
 											<S.Actions>
 												<Button
-													type={'primary'}
-													label={hasImportDraft ? `Create & Import` : language?.create || 'Create'}
-													handlePress={hasImportDraft ? handleCreateFromDraft : handleCreatePortal}
-													disabled={(!name && !importDraft?.data?.name) || creating}
+													type={'alt1'}
+													label={language?.create || 'Create'}
+													handlePress={handleCreatePortal}
+													disabled={!name || creating}
 													loading={creating}
+													height={45}
+													width={200}
 												/>
 											</S.Actions>
 										</S.PanelInner>
@@ -512,8 +467,42 @@ export default function CreatePortal() {
 								</S.SectionBody>
 							</S.Section>
 						</S.Column>
-					</S.Body>
+					</S.CreateBody>
 				</S.ContentWrapper>
+				{PORTAL_CAPABILITIES.WORDPRESS_IMPORT && showWordPressCreate && (
+					<WordPressImport
+						open
+						handleClose={() => setShowWordPressCreate(false)}
+						createPortal
+						portalName={name}
+						onPortalNameChange={handleWordPressPortalNameChange}
+						onImportComplete={(
+							data,
+							posts,
+							pages,
+							selectedCategories,
+							createCategories,
+							createTopics,
+							selectedTopics,
+							uploadedImageUrls
+						) =>
+							portalProvider.importWordPress(
+								data,
+								posts,
+								pages,
+								selectedCategories,
+								createCategories,
+								createTopics,
+								selectedTopics,
+								true,
+								uploadedImageUrls,
+								undefined,
+								false,
+								{ logoId, iconId, wallpaperId }
+							)
+						}
+					/>
+				)}
 			</S.Wrapper>
 		);
 	}
@@ -528,7 +517,7 @@ export default function CreatePortal() {
 						actions={[
 							<Button
 								key={'return-home'}
-								type={'alt1'}
+								type={'primary'}
 								label={language?.returnHome || 'Return Home'}
 								handlePress={() => navigate(URLS.base)}
 							/>,
@@ -549,7 +538,7 @@ export default function CreatePortal() {
 					actions={[
 						<Button
 							key={'return-home'}
-							type={'alt1'}
+							type={'primary'}
 							label={language?.returnHome || 'Return Home'}
 							handlePress={() => navigate(URLS.base)}
 						/>,
@@ -557,59 +546,70 @@ export default function CreatePortal() {
 				/>
 				<S.Body>
 					<S.Column>
-						<S.Section>
-							<S.SectionHeader>
-								<S.SectionTitle>{language?.importFromWordPress || 'Import from WordPress'}</S.SectionTitle>
-							</S.SectionHeader>
-							<S.SectionBody>
-								<S.ImportRow>
-									<Select
-										label={'Import Option'}
-										activeOption={importOption}
-										setActiveOption={(option: SelectOptionType) => setImportOption(option)}
-										options={importOptions}
-										disabled={!portalProvider.current?.id}
-									/>
-								</S.ImportRow>
-								{importOption.id === 'wordpress' && portalProvider.current?.id ? (
-									<WordPressImport
-										open
-										inline
-										closeOnComplete={false}
-										title={language?.importFromWordPress || 'Import from WordPress'}
-										handleClose={() => setImportOption(importOptions[0])}
-										createPortal={false}
-										onImportComplete={(
-											data,
-											posts,
-											pages,
-											selectedCategories,
-											createCategories,
-											createTopics,
-											selectedTopics,
-											uploadedImageUrls
-										) =>
-											portalProvider.importWordPress(
-												data,
-												posts,
-												pages,
-												selectedCategories,
-												createCategories,
-												createTopics,
-												selectedTopics,
-												false,
-												uploadedImageUrls,
-												URLS.portalCreate(portalProvider.current?.id)
-											)
-										}
-									/>
-								) : (
-									<S.DisabledNote>
-										<p>{'Select WordPress to enable import.'}</p>
-									</S.DisabledNote>
-								)}
-							</S.SectionBody>
-						</S.Section>
+						{PORTAL_CAPABILITIES.WORDPRESS_IMPORT && (
+							<S.Section>
+								<S.SectionHeader>
+									<S.SectionTitle>{language?.importFromWordPress || 'Import from WordPress'}</S.SectionTitle>
+								</S.SectionHeader>
+								<S.SectionBody>
+									<S.ImportRow>
+										<Select
+											label={'Import Option'}
+											activeOption={importOption}
+											setActiveOption={(option: SelectOptionType) => setImportOption(option)}
+											options={importOptions}
+											disabled={!portalProvider.current?.id}
+										/>
+									</S.ImportRow>
+									{importOption.id === 'wordpress' && portalProvider.current?.id ? (
+										<fieldset
+											style={{
+												border: 0,
+												margin: 0,
+												padding: 0,
+												minWidth: 0,
+											}}
+										>
+											<WordPressImport
+												open
+												inline
+												closeOnComplete={false}
+												title={language?.importFromWordPress || 'Import from WordPress'}
+												handleClose={() => setImportOption(importOptions[0])}
+												createPortal={false}
+												onImportComplete={(
+													data,
+													posts,
+													pages,
+													selectedCategories,
+													createCategories,
+													createTopics,
+													selectedTopics,
+													uploadedImageUrls
+												) =>
+													portalProvider.importWordPress(
+														data,
+														posts,
+														pages,
+														selectedCategories,
+														createCategories,
+														createTopics,
+														selectedTopics,
+														false,
+														uploadedImageUrls,
+														URLS.portalCreate(portalProvider.current?.id)
+													)
+												}
+											/>
+										</fieldset>
+									) : (
+										<S.DisabledNote>
+											<p>{'Select WordPress to enable import.'}</p>
+										</S.DisabledNote>
+									)}
+								</S.SectionBody>
+							</S.Section>
+						)}
 
 						<S.Section>
 							<S.SectionHeader>
@@ -646,20 +646,22 @@ export default function CreatePortal() {
 							</S.SectionBody>
 						</S.Section>
 
-						<S.Section>
-							<S.SectionHeader>
-								<S.SectionTitle>{language?.posts || 'Posts'}</S.SectionTitle>
-							</S.SectionHeader>
-							<S.SectionBody>
-								{importOption.id !== 'wordpress' ? (
-									<S.DisabledNote>
-										<p>{'Enable WordPress import to populate posts.'}</p>
-									</S.DisabledNote>
-								) : (
-									<PostList type={'detail'} pageCount={5} />
-								)}
-							</S.SectionBody>
-						</S.Section>
+						{PORTAL_CAPABILITIES.WORDPRESS_IMPORT && (
+							<S.Section>
+								<S.SectionHeader>
+									<S.SectionTitle>{language?.posts || 'Posts'}</S.SectionTitle>
+								</S.SectionHeader>
+								<S.SectionBody>
+									{importOption.id !== 'wordpress' ? (
+										<S.DisabledNote>
+											<p>{'Enable WordPress import to populate posts.'}</p>
+										</S.DisabledNote>
+									) : (
+										<PostList type={'detail'} pageCount={5} />
+									)}
+								</S.SectionBody>
+							</S.Section>
+						)}
 					</S.Column>
 					<S.Column>
 						<S.Section>

@@ -5,6 +5,7 @@ import { useTokenTip } from 'engine/hooks/useTokenTip';
 import { useEngineNotifications } from 'engine/providers/notificationProvider';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
+import { PORTAL_CAPABILITIES } from 'helpers/features';
 import { normalizeTipTokens } from 'helpers/tokens';
 import { MonetizationConfig } from 'helpers/types';
 import { debugLog } from 'helpers/utils';
@@ -73,11 +74,13 @@ export default function TipsButton(props: TipsButtonProps) {
 		}
 	}, [tipTokens, selectedTokenId]);
 
+	if (!PORTAL_CAPABILITIES.TIPS) return null;
+
 	// If monetization is off or no wallet, render nothing (except in preview mode)
 	if ((!enabled || !walletAddress) && !props.preview) return null;
 
 	const handleClick = () => {
-		if (props.preview || submitting) return;
+		if (!PORTAL_CAPABILITIES.TIPS || props.preview || submitting) return;
 		if (tipTokens.length === 0) {
 			addNotification(
 				'Tips token config is invalid. Please ask the portal editor to fix token process IDs.',

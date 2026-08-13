@@ -5,6 +5,10 @@ export function getARBalanceEndpoint(walletAddress: string) {
 	return `${arweaveEndpoint}/wallet/${walletAddress}/balance`;
 }
 
+export function getARUploadCostEndpoint(bytes: number) {
+	return `${arweaveEndpoint}/price/${bytes}`;
+}
+
 export function getTxEndpoint(txId: string) {
 	return `${arweaveEndpoint}/${txId}`;
 }

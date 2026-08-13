@@ -1,6 +1,11 @@
 export type PortalHeaderType = {
 	id: string;
 	name: string;
+	mode?: 'base' | 'process';
+	manifestTxId?: string | null;
+	rootTxId?: string | null;
+	siteTxId?: string | null;
+	engineReferenceId?: string | null;
 	banner?: string | null;
 	thumbnail?: string | null;
 	logo?: string | null;
@@ -11,6 +16,11 @@ export type PortalHeaderType = {
 
 export type PortalDetailType = {
 	id: string;
+	mode?: 'base' | 'process';
+	manifestTxId?: string | null;
+	rootTxId?: string | null;
+	siteTxId?: string | null;
+	engineReferenceId?: string | null;
 	name: string;
 	logo: string | null;
 	icon: string | null;
@@ -20,6 +30,7 @@ export type PortalDetailType = {
 	users?: PortalUserType[];
 	pages?: PortalPageType[];
 	assets?: PortalAssetType[];
+	featuredPosts?: string[];
 	requests?: PortalAssetRequestType[];
 	categories?: PortalCategoryType[];
 	topics?: PortalTopicType[];
@@ -409,7 +420,7 @@ export type ValidationType = {
 
 export type ButtonType = 'primary' | 'alt1' | 'alt2' | 'alt3' | 'alt4' | 'indicator' | 'warning';
 
-export type SelectOptionType = { id: string; label: string };
+export type SelectOptionType = { id: string; label: string; disabled?: boolean };
 
 export type UploadMethodType = 'default' | 'turbo';
 

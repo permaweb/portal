@@ -34,7 +34,9 @@ interface ArweaveContextState {
 	wallet: any;
 	walletAddress: string | null;
 	walletType: WalletEnum | null;
+	walletInitializing: boolean;
 	arBalance: number | null;
+	refreshARBalance: () => Promise<number | null>;
 	turboBalance: number | null;
 	refreshTurboBalance: () => void;
 	handleConnect: any;
@@ -48,7 +50,11 @@ const DEFAULT_CONTEXT = {
 	wallet: null,
 	walletAddress: null,
 	walletType: null,
+	walletInitializing: true,
 	arBalance: null,
+	async refreshARBalance() {
+		return null;
+	},
 	turboBalance: null,
 	refreshTurboBalance() {},
 	handleConnect() {},
@@ -81,6 +87,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	};
 	const [wallet, setWallet] = React.useState<any>(null);
 	const [walletType, setWalletType] = React.useState<WalletEnum | null>(null);
+	const [walletInitializing, setWalletInitializing] = React.useState(true);
 	const [walletAddress, setWalletAddressState] = React.useState<string | null>(null);
 	const setWalletAddress = (addr: string | null) => {
 		walletAddressRef.current = addr;
@@ -99,30 +106,34 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	const [backupsNeeded, setBackupsNeeded] = React.useState<number>(0);
 
 	React.useEffect(() => {
-		handleWallet();
+		let mounted = true;
+		void handleWallet().finally(() => {
+			if (mounted) setWalletInitializing(false);
+		});
 
 		const onWalletSwitch = async () => {
 			if (disconnectingRef.current || !localStorage.getItem(STORAGE.walletType)) {
 				return;
 			}
+			setWalletInitializing(true);
 
-			setAuth(null);
-			setWallet(null);
-			setWalletAddress(null);
-			setWalletType(null);
-			setArBalance(null);
-			setTurboBalance(null);
-			setTurboBalanceObj({
-				winc: '0',
-				balance: '0',
-				controlledWinc: '0',
-				effectiveBalance: '0',
-				givenApprovals: [],
-				receivedApprovals: [],
-			});
+			try {
+				setAuth(null);
+				setWallet(null);
+				setWalletAddress(null);
+				setWalletType(null);
+				setArBalance(null);
+				setTurboBalance(null);
+				setTurboBalanceObj({
+					winc: '0',
+					balance: '0',
+					controlledWinc: '0',
+					effectiveBalance: '0',
+					givenApprovals: [],
+					receivedApprovals: [],
+				});
 
-			if (window.arweaveWallet) {
-				try {
+				if (window.arweaveWallet) {
 					await window.arweaveWallet.connect(WALLET_PERMISSIONS as any);
 					const address = await window.arweaveWallet.getActiveAddress();
 					setWalletAddress(address);
@@ -137,9 +148,11 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 						const storedWalletType = localStorage.getItem(STORAGE.walletType) || WalletEnum.wander;
 						setWalletType(storedWalletType as WalletEnum);
 					}
-				} catch (e) {
-					console.error('Error switching wallet:', e);
 				}
+			} catch (e) {
+				console.error('Error switching wallet:', e);
+			} finally {
+				if (mounted) setWalletInitializing(false);
 			}
 		};
 
@@ -156,6 +169,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		window.addEventListener('walletSwitch', onWalletSwitch);
 
 		return () => {
+			mounted = false;
 			window.removeEventListener('arweaveWalletLoaded', onArweaveWalletLoaded);
 			window.removeEventListener('message', onMessage);
 			window.removeEventListener('walletSwitch', onWalletSwitch);
@@ -163,17 +177,14 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}, []);
 
 	React.useEffect(() => {
-		(async function () {
-			if (wallet && walletAddress) {
-				try {
-					setArBalance(await getARBalance());
-					await getTurboBalance();
-				} catch (e: any) {
-					console.error(e);
-				}
-			}
-		})();
-	}, [walletAddress]);
+		if (!wallet || !walletAddress) return;
+		void refreshARBalance();
+		const handleBalanceChanged = () => {
+			void refreshARBalance();
+		};
+		window.addEventListener('arweaveBalanceChanged', handleBalanceChanged);
+		return () => window.removeEventListener('arweaveBalanceChanged', handleBalanceChanged);
+	}, [wallet, walletAddress]);
 
 	React.useEffect(() => {
 		setBackupsNeeded(window?.wanderInstance?.backupInfo?.backupsNeeded ?? 0);
@@ -191,14 +202,19 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 	async function handleConnect(walletType: string) {
 		disconnectingRef.current = false;
+		setWalletInitializing(true);
 		let walletObj: any = null;
-		switch (walletType) {
-			case WalletEnum.wander:
-				handleArConnect();
-				break;
-			case 'NATIVE_WALLET':
-				handleArConnect();
-				break;
+		try {
+			switch (walletType) {
+				case WalletEnum.wander:
+					await handleArConnect();
+					break;
+				case 'NATIVE_WALLET':
+					await handleArConnect();
+					break;
+			}
+		} finally {
+			setWalletInitializing(false);
 		}
 		return walletObj;
 	}
@@ -276,6 +292,7 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		setArBalance(null);
 		setTurboBalance(null);
 		setTurboBalanceObj(null);
+		setWalletInitializing(false);
 
 		if (redirect) navigate(URLS.base);
 	}
@@ -284,6 +301,18 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		const rawBalance = await fetch(getARBalanceEndpoint(walletAddress));
 		const jsonBalance = await rawBalance.json();
 		return jsonBalance / 1e12;
+	}
+
+	async function refreshARBalance(): Promise<number | null> {
+		if (!walletAddress) return null;
+		try {
+			const balance = await getARBalance();
+			setArBalance(balance);
+			return balance;
+		} catch (e) {
+			console.error(e);
+			return null;
+		}
 	}
 
 	async function getTurboBalance(): Promise<number | null> {
@@ -433,7 +462,9 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 				wallet,
 				walletAddress,
 				walletType,
+				walletInitializing,
 				arBalance,
+				refreshARBalance,
 				handleConnect,
 				handleDisconnect,
 				turboBalance,

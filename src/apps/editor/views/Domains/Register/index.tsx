@@ -15,7 +15,6 @@ import { Modal } from 'components/atoms/Modal';
 import { Panel } from 'components/atoms/Panel';
 import { TxAddress } from 'components/atoms/TxAddress';
 import { InsufficientBalanceCTA, PaymentSummary } from 'components/molecules/Payment';
-import { TurboBalanceFund } from 'components/molecules/TurboBalanceFund';
 import { getArnsCost } from 'helpers/arnsCosts';
 import { ICONS, IS_TESTNET, URLS } from 'helpers/config';
 import { PortalPatchMapEnum } from 'helpers/types';
@@ -44,7 +43,7 @@ export default function Domains() {
 	const [purchaseType, setPurchaseType] = React.useState<'buy' | 'lease' | null>(null);
 	const [leaseDuration, setLeaseDuration] = React.useState<number | null>(1);
 
-	const [paymentMethod, setPaymentMethod] = React.useState<'turbo' | 'ario'>(IS_TESTNET ? 'ario' : 'turbo');
+	const [paymentMethod] = React.useState<'turbo' | 'ario'>('ario');
 
 	const [turboFiatBuyAmount, setTurboFiatBuyAmount] = React.useState<string | null>(null);
 	const [turboFiatLeaseAmount, setTurboFiatLeaseAmount] = React.useState<string | null>(null);
@@ -67,27 +66,7 @@ export default function Domains() {
 
 	const [showConfirm, setShowConfirm] = React.useState<boolean>(false);
 	const [usePrimary, setUsePrimary] = React.useState<boolean>(true);
-	const [confirmPaymentMethod, setConfirmPaymentMethod] = React.useState<'turbo' | 'ario'>(
-		IS_TESTNET ? 'ario' : 'turbo'
-	);
-
-	React.useEffect(() => {
-		if (showConfirm) {
-			// Default to credits on mainnet; allow ARIO if user has some and previously chose it
-			if (!IS_TESTNET && arIOBalance && arIOBalance > 0 && paymentMethod === 'ario') {
-				setConfirmPaymentMethod('ario');
-			} else {
-				setConfirmPaymentMethod(IS_TESTNET ? 'ario' : 'turbo');
-			}
-		}
-	}, [showConfirm, paymentMethod, arIOBalance]);
-
-	// If ARIO balance becomes zero on mainnet, force payment method back to credits to avoid showing ARIO costs
-	React.useEffect(() => {
-		if (!IS_TESTNET && (arIOBalance == null || arIOBalance <= 0) && paymentMethod === 'ario') {
-			setPaymentMethod('turbo');
-		}
-	}, [arIOBalance, paymentMethod]);
+	const [confirmPaymentMethod] = React.useState<'turbo' | 'ario'>('ario');
 
 	const isCostReady = React.useMemo(() => {
 		if (!purchaseType) return false;
@@ -1020,29 +999,25 @@ export default function Domains() {
 				</Modal>
 			)}
 			<Panel
-				open={showFund}
+				open={IS_TESTNET && showFund}
 				width={575}
-				header={IS_TESTNET ? language.getTestnetTokens : language?.fundTurboBalance}
+				header={language.getTestnetTokens}
 				handleClose={() => setShowFund(false)}
 				className={'modal-wrapper'}
 			>
-				{IS_TESTNET ? (
-					<S.TestnetInfo>
-						<p>{language.testnetMode}</p>
-						<a href={'https://faucet.arweave.net'} target={'_blank'}>
-							{language.visitFaucet}
-						</a>
-						<Button
-							type={'primary'}
-							label={language.close}
-							handlePress={() => setShowFund(false)}
-							height={45}
-							fullWidth
-						/>
-					</S.TestnetInfo>
-				) : (
-					<TurboBalanceFund handleClose={() => setShowFund(false)} />
-				)}
+				<S.TestnetInfo>
+					<p>{language.testnetMode}</p>
+					<a href={'https://faucet.arweave.net'} target={'_blank'}>
+						{language.visitFaucet}
+					</a>
+					<Button
+						type={'primary'}
+						label={language.close}
+						handlePress={() => setShowFund(false)}
+						height={45}
+						fullWidth
+					/>
+				</S.TestnetInfo>
 			</Panel>
 		</>
 	);

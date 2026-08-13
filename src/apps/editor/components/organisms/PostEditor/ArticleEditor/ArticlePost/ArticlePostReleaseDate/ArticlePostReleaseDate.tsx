@@ -293,8 +293,7 @@ export default function ArticlePostReleaseDate() {
 
 	const submitUnauthorized =
 		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions?.postAutoIndex;
-	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
-	const releaseDateDisabled = requestUnauthorized || submitUnauthorized || currentPost.editor.loading.active;
+	const releaseDateDisabled = submitUnauthorized || currentPost.editor.loading.active;
 
 	return (
 		<>

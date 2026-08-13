@@ -98,13 +98,14 @@ export const Options = styled.ul<{ top: number }>`
 	background: ${(props) => props.theme.colors.container.primary.background} !important;
 `;
 
-export const Option = styled.li<{ active: boolean }>`
+export const Option = styled.li<{ active: boolean; $disabled?: boolean }>`
 	text-align: center;
 	height: 37.5px;
 	display: flex;
 	align-items: center;
-	cursor: ${(props) => (props.active ? 'default' : 'pointer')};
+	cursor: ${(props) => (props.active || props.$disabled ? 'default' : 'pointer')};
 	pointer-events: ${(props) => (props.active ? 'none' : 'all')};
+	opacity: ${(props) => (props.$disabled ? 0.45 : 1)};
 	color: ${(props) => (props.active ? props.theme.colors.font.primary : props.theme.colors.font.alt1)};
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
 	font-weight: ${(props) => props.theme.typography.weight.bold};

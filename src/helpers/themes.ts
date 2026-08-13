@@ -1,5 +1,7 @@
 import { DefaultTheme } from 'styled-components';
 
+import { THEME_DEFAULT } from './config/themes';
+
 export const common = {
 	positive1: '#64B686',
 	positive2: '#4EA673',
@@ -609,18 +611,39 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 });
 
 export function getThemeVars(theme: any, scheme: 'light' | 'dark') {
-	function getColor(theme: any, scheme: string, value: string) {
+	const resolvedTheme = {
+		...THEME_DEFAULT,
+		...(theme && typeof theme === 'object' ? theme : {}),
+		basics: {
+			...THEME_DEFAULT.basics,
+			...(theme?.basics || {}),
+			colors: {
+				...THEME_DEFAULT.basics.colors,
+				...(theme?.basics?.colors || {}),
+				text: { ...THEME_DEFAULT.basics.colors.text, ...(theme?.basics?.colors?.text || {}) },
+				background: {
+					...THEME_DEFAULT.basics.colors.background,
+					...(theme?.basics?.colors?.background || {}),
+				},
+				primary: { ...THEME_DEFAULT.basics.colors.primary, ...(theme?.basics?.colors?.primary || {}) },
+				secondary: { ...THEME_DEFAULT.basics.colors.secondary, ...(theme?.basics?.colors?.secondary || {}) },
+				border: { ...THEME_DEFAULT.basics.colors.border, ...(theme?.basics?.colors?.border || {}) },
+			},
+		},
+	};
+
+	function getColor(theme: any, scheme: 'light' | 'dark', value: string) {
 		switch (value) {
 			case 'primary':
-				return theme.basics.colors.primary[scheme];
+				return theme.basics?.colors?.primary?.[scheme] ?? THEME_DEFAULT.basics.colors.primary[scheme];
 			case 'secondary':
-				return theme.basics.colors.secondary[scheme];
+				return theme.basics?.colors?.secondary?.[scheme] ?? THEME_DEFAULT.basics.colors.secondary[scheme];
 			case 'background':
-				return theme.basics.colors.background[scheme];
+				return theme.basics?.colors?.background?.[scheme] ?? THEME_DEFAULT.basics.colors.background[scheme];
 			case 'text':
-				return theme.basics.colors.text[scheme];
+				return theme.basics?.colors?.text?.[scheme] ?? THEME_DEFAULT.basics.colors.text[scheme];
 			case 'border':
-				return theme.basics.colors.border[scheme];
+				return theme.basics?.colors?.border?.[scheme] ?? THEME_DEFAULT.basics.colors.border[scheme];
 			default:
 				return value;
 		}
@@ -634,47 +657,59 @@ export function getThemeVars(theme: any, scheme: 'light' | 'dark') {
 	}
 
 	const vars: Record<string, string> = {
-		'--color-text': theme.basics?.colors?.text?.[scheme] ?? '0,0,0',
-		'--color-text-contrast': getContrastColor(theme.basics?.colors?.text?.[scheme] ?? '0,0,0'),
-		'--color-background': theme.basics?.colors?.background?.[scheme] ?? '255,255,255',
-		'--color-primary': theme.basics?.colors?.primary?.[scheme] ?? '0,122,255',
-		'--color-primary-contrast': getContrastColor(theme.basics?.colors?.primary?.[scheme] ?? '0,122,255'),
-		'--color-secondary': theme.basics?.colors?.secondary?.[scheme] ?? '128,128,128',
-		'--color-secondary-contrast': getContrastColor(theme.basics?.colors?.secondary?.[scheme] ?? '128,128,128'),
-		'--color-border': theme.basics?.colors?.border?.[scheme] ?? '200,200,200',
-		'--color-header-background': getColor(theme, scheme, theme.header?.colors?.background?.[scheme] ?? 'inherit'),
-		'--color-content-background': `rgba(${theme.content?.colors?.background?.[scheme] ?? '255,255,255'},${
-			theme.content?.preferences?.opacity?.[scheme] ?? 1
+		'--color-text': resolvedTheme.basics.colors.text[scheme],
+		'--color-text-contrast': getContrastColor(resolvedTheme.basics.colors.text[scheme]),
+		'--color-background': resolvedTheme.basics.colors.background[scheme],
+		'--color-primary': resolvedTheme.basics.colors.primary[scheme],
+		'--color-primary-contrast': getContrastColor(resolvedTheme.basics.colors.primary[scheme]),
+		'--color-secondary': resolvedTheme.basics.colors.secondary[scheme],
+		'--color-secondary-contrast': getContrastColor(resolvedTheme.basics.colors.secondary[scheme]),
+		'--color-border': resolvedTheme.basics.colors.border[scheme],
+		'--color-header-background': getColor(
+			resolvedTheme,
+			scheme,
+			resolvedTheme.header?.colors?.background?.[scheme] ?? 'inherit'
+		),
+		'--color-content-background': `rgba(${resolvedTheme.content?.colors?.background?.[scheme] ?? '255,255,255'},${
+			resolvedTheme.content?.preferences?.opacity?.[scheme] ?? 1
 		})`,
 		'--color-post-background': `rgba(${getColor(
-			theme,
+			resolvedTheme,
 			scheme,
-			theme.post?.colors?.background?.[scheme] ?? 'inherit'
-		)},${theme.post?.preferences?.opacity?.[scheme] ?? 1})`,
+			resolvedTheme.post?.colors?.background?.[scheme] ?? 'inherit'
+		)},${resolvedTheme.post?.preferences?.opacity?.[scheme] ?? 1})`,
 		'--color-card-background': `rgba(${getColor(
-			theme,
+			resolvedTheme,
 			scheme,
-			theme.card?.colors?.background?.[scheme] ?? 'inherit'
-		)},${theme.card?.preferences?.opacity?.[scheme] ?? 1})`,
-		'--border-radius': `${theme.basics?.preferences?.borderRadius ?? 8}px`,
+			resolvedTheme.card?.colors?.background?.[scheme] ?? 'inherit'
+		)},${resolvedTheme.card?.preferences?.opacity?.[scheme] ?? 1})`,
+		'--border-radius': `${resolvedTheme.basics?.preferences?.borderRadius ?? 8}px`,
 	};
 
 	if (
-		theme?.links?.colors?.default &&
-		theme?.links?.colors?.hover &&
-		theme?.links?.preferences?.default &&
-		theme?.links?.preferences?.hover
+		resolvedTheme?.links?.colors?.default &&
+		resolvedTheme?.links?.colors?.hover &&
+		resolvedTheme?.links?.preferences?.default &&
+		resolvedTheme?.links?.preferences?.hover
 	) {
-		vars['--color-link-default'] = `rgba(${getColor(theme, scheme, theme.links.colors.default[scheme])},1)`;
-		vars['--color-link-hover'] = `rgba(${getColor(theme, scheme, theme.links.colors.hover[scheme])},1)`;
-		vars['--preference-link-text-decoration-default'] = theme.links.preferences.default.underline
+		vars['--color-link-default'] = `rgba(${getColor(
+			resolvedTheme,
+			scheme,
+			resolvedTheme.links.colors.default[scheme]
+		)},1)`;
+		vars['--color-link-hover'] = `rgba(${getColor(resolvedTheme, scheme, resolvedTheme.links.colors.hover[scheme])},1)`;
+		vars['--preference-link-text-decoration-default'] = resolvedTheme.links.preferences.default.underline
 			? 'underline'
 			: 'none';
-		vars['--preference-link-text-decoration-hover'] = theme.links.preferences.hover.underline ? 'underline' : 'none';
-		vars['--preference-link-font-weight-default'] = theme.links.preferences.default.bold ? 'bold' : 'normal';
-		vars['--preference-link-font-weight-hover'] = theme.links.preferences.hover.bold ? 'bold' : 'normal';
-		vars['--preference-link-font-style-default'] = theme.links.preferences.default.cursive ? 'italic' : 'normal';
-		vars['--preference-link-font-style-hover'] = theme.links.preferences.hover.cursive ? 'italic' : 'normal';
+		vars['--preference-link-text-decoration-hover'] = resolvedTheme.links.preferences.hover.underline
+			? 'underline'
+			: 'none';
+		vars['--preference-link-font-weight-default'] = resolvedTheme.links.preferences.default.bold ? 'bold' : 'normal';
+		vars['--preference-link-font-weight-hover'] = resolvedTheme.links.preferences.hover.bold ? 'bold' : 'normal';
+		vars['--preference-link-font-style-default'] = resolvedTheme.links.preferences.default.cursive
+			? 'italic'
+			: 'normal';
+		vars['--preference-link-font-style-hover'] = resolvedTheme.links.preferences.hover.cursive ? 'italic' : 'normal';
 	}
 
 	return vars;

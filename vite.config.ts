@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd());
 	const app = env.VITE_APP;
 
-	if (!app) throw new Error(`VITE_APP must be set to 'editor' or 'viewer'.`);
+	if (!app) throw new Error(`VITE_APP must be set to 'editor', 'viewer', 'engine', or 'engine-lite'.`);
 
 	const root = path.resolve(__dirname, `src/apps/${app}`);
 
@@ -85,7 +85,30 @@ export default defineConfig(({ mode }) => {
 				},
 			},
 		},
+		'engine-lite': {
+			port: 4100,
+			build: {
+				outDir: path.resolve(__dirname, `dist/${app}`),
+				emptyOutDir: true,
+				cssCodeSplit: false,
+				assetsInlineLimit: 10_000_000,
+				modulePreload: false,
+				rollupOptions: {
+					input: path.resolve(root, 'index.ts'),
+					output: {
+						inlineDynamicImports: true,
+						manualChunks: undefined,
+						entryFileNames: 'bundle.js',
+						chunkFileNames: 'bundle.js',
+						assetFileNames: '[name][extname]',
+						format: 'iife',
+					},
+				},
+			},
+		},
 	};
+
+	if (!config[app]) throw new Error(`Unknown VITE_APP: ${app}`);
 
 	return {
 		root,
@@ -102,6 +125,7 @@ export default defineConfig(({ mode }) => {
 				editor: path.resolve(__dirname, 'src/apps/editor'),
 				viewer: path.resolve(__dirname, 'src/apps/viewer'),
 				engine: path.resolve(__dirname, 'src/apps/engine'),
+				'engine-lite': path.resolve(__dirname, 'src/apps/engine-lite'),
 				components: path.resolve(__dirname, 'src/components'),
 				helpers: path.resolve(__dirname, 'src/helpers'),
 				hooks: path.resolve(__dirname, 'src/hooks'),

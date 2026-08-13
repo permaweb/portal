@@ -11,8 +11,9 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { ICONS, STYLING, URLS } from 'helpers/config';
+import { PORTAL_CAPABILITIES } from 'helpers/features';
 import { PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
-import { debugLog, formatAddress, isNotOwner, isOnlyPortal, resolvePrimaryDomain } from 'helpers/utils';
+import { debugLog, formatAddress, isNotOwner, isOnlyPortal } from 'helpers/utils';
 import { checkWindowCutoff } from 'helpers/window';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -109,52 +110,62 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 				path: currentId ? URLS.portalBase(currentId) : URLS.base,
 				icon: ICONS.portal,
 				label: language?.home,
+				enabled: true,
 			},
 			{
 				path: currentId ? URLS.portalPosts(currentId) : URLS.base,
 				icon: ICONS.posts,
 				label: language?.posts,
+				enabled: PORTAL_CAPABILITIES.POST_EDIT,
 			},
 			{
 				path: currentId ? URLS.portalModeration(currentId) : URLS.base,
 				icon: ICONS.moderation,
 				label: language?.moderation,
+				enabled: PORTAL_CAPABILITIES.MODERATION,
 			},
 			{
 				path: currentId ? URLS.portalDesign(currentId) : URLS.base,
 				icon: ICONS.design,
 				label: language?.design,
+				enabled: PORTAL_CAPABILITIES.DESIGN,
 			},
 			{
 				path: currentId ? URLS.portalMedia(currentId) : URLS.base,
 				icon: ICONS.media,
 				label: language?.media,
 				useFill: true,
+				enabled: PORTAL_CAPABILITIES.MEDIA_UPLOADS,
 			},
 			{
 				path: currentId ? URLS.portalSetup(currentId) : URLS.base,
 				icon: ICONS.setup,
 				label: language?.setup,
+				enabled: PORTAL_CAPABILITIES.PORTAL_EDIT,
 			},
 			{
 				path: currentId ? URLS.portalUsers(currentId) : URLS.base,
 				icon: ICONS.users,
 				label: language?.users,
+				enabled: PORTAL_CAPABILITIES.USER_INVITES,
 			},
 			{
 				path: currentId ? URLS.portalPages(currentId) : URLS.base,
 				icon: ICONS.pages,
 				label: language?.pages,
+				enabled: PORTAL_CAPABILITIES.PAGES,
 			},
 			{
 				path: currentId ? URLS.portalDomains(currentId) : URLS.base,
 				icon: ICONS.domains,
 				label: language?.domains,
+				enabled: PORTAL_CAPABILITIES.DOMAINS,
 			},
 			{
 				path: currentId ? URLS.portalTips(currentId) : URLS.base,
 				icon: ICONS.money,
 				label: language?.tips,
+				enabled: PORTAL_CAPABILITIES.TIPS,
 			},
 		];
 	}, [languageProvider?.current]);
@@ -293,21 +304,23 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 			<>
 				<S.PanelHeader>{navigationToggle}</S.PanelHeader>
 				<S.PanelContent open={props.open} className={'scroll-wrapper-hidden'}>
-					{paths.map((element, index) => (
-						<S.PanelLink key={index} showText={showText} useFill={element.useFill}>
-							<Link to={element.path} onClick={(e) => handleNavigate(e, element.path)}>
-								<S.PanelIconWrapper showText={showText}>
-									<ReactSVG src={element.icon} />
-								</S.PanelIconWrapper>
-								{showText && element.label}
-								{!showText && (
-									<S.LinkTooltip className={'info'}>
-										<span>{element.label}</span>
-									</S.LinkTooltip>
-								)}
-							</Link>
-						</S.PanelLink>
-					))}
+					{paths
+						.filter((element) => element.enabled)
+						.map((element, index) => (
+							<S.PanelLink key={index} showText={showText} useFill={element.useFill} disabled={false}>
+								<Link to={element.path} onClick={(e) => handleNavigate(e, element.path)}>
+									<S.PanelIconWrapper showText={showText}>
+										<ReactSVG src={element.icon} />
+									</S.PanelIconWrapper>
+									{showText && element.label}
+									{!showText && (
+										<S.LinkTooltip className={'info'}>
+											<span>{element.label}</span>
+										</S.LinkTooltip>
+									)}
+								</Link>
+							</S.PanelLink>
+						))}
 				</S.PanelContent>
 				<S.PanelFooter open={props.open} showText={showText}>
 					<Link to={URLS.docsIntro} onClick={(e) => handleNavigate(e, URLS.docsIntro)}>
@@ -493,7 +506,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 								<S.PDropdownFooter>
 									<button
 										onClick={() => {
-											window.open(resolvePrimaryDomain(portalProvider.current?.domains, portalProvider.current?.id));
+											void portalProvider.openCurrentPortalSite();
 											setShowPortalDropdown(false);
 										}}
 									>
@@ -527,15 +540,17 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 										<ReactSVG src={ICONS.add} />
 										{language?.createPortal}
 									</button>
-									<button
-										onClick={() => {
-											portalProvider.setShowWordPressImport(true);
-											setShowPortalDropdown(false);
-										}}
-									>
-										<ReactSVG src={ICONS.import} />
-										{language?.importFromWordPress || 'Import from WordPress'}
-									</button>
+									{PORTAL_CAPABILITIES.WORDPRESS_IMPORT && (
+										<button
+											onClick={() => {
+												portalProvider.setShowWordPressImport(true);
+												setShowPortalDropdown(false);
+											}}
+										>
+											<ReactSVG src={ICONS.import} />
+											{language?.importFromWordPress || 'Import from WordPress'}
+										</button>
+									)}
 									{!isOnlyPortal(portalProvider.portals, permawebProvider.profile?.id) && (
 										<button onClick={(e: any) => handleNavigate(e, URLS.base)}>
 											<ReactSVG src={ICONS.disconnect} />

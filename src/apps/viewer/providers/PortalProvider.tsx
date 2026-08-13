@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 import { Types } from '@permaweb/libs';
 
+import { IS_BASE_MODE } from 'helpers/features';
 import { PortalDetailType, PortalUserType } from 'helpers/types';
 import {
 	cachePortal,
@@ -114,12 +115,14 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 				const portal: PortalDetailType = filterRemoved({
 					id: currentId,
+					mode: IS_BASE_MODE ? 'base' : 'process',
 					name: portalData.store?.name ?? 'None',
 					logo: portalData.store?.logo ?? 'None',
 					icon: portalData.store?.icon ?? 'None',
 					users: users || [],
 					pages: portalData?.store?.pages ?? [],
 					assets: getPortalAssets(portalData?.store?.index),
+					featuredPosts: portalData?.store?.featuredPosts ?? [],
 					categories: portalData?.store?.categories ?? [],
 					topics: portalData?.store?.topics ?? [],
 					links: portalData?.store?.links ?? [],

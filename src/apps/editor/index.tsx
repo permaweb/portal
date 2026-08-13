@@ -1,7 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
-import { HashRouter, Route, Routes, useNavigate } from 'react-router-dom';
+import { HashRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { PersistGate } from 'redux-persist/integration/react';
 
 import { CurrentZoneVersion } from '@permaweb/libs';
@@ -15,11 +15,12 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Portal } from 'components/atoms/Portal';
 import { DOM, URLS } from 'helpers/config';
+import { IS_BASE_MODE, PORTAL_CAPABILITIES } from 'helpers/features';
 import { preloadAllAssets } from 'helpers/preloader';
 import { serviceWorkerManager } from 'helpers/serviceWorkerManager';
 import { GlobalStyle } from 'helpers/styles';
 import { debugLog, isVersionGreater } from 'helpers/utils';
-import { ArweaveProvider } from 'providers/ArweaveProvider';
+import { ArweaveProvider, useArweaveProvider } from 'providers/ArweaveProvider';
 import { LanguageProvider, useLanguageProvider } from 'providers/LanguageProvider';
 import { NotificationProvider } from 'providers/NotificationProvider';
 import { PermawebProvider, usePermawebProvider } from 'providers/PermawebProvider';
@@ -69,6 +70,7 @@ function getLazyImport(view: string) {
 function AppContent() {
 	const navigate = useNavigate();
 
+	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
@@ -94,7 +96,7 @@ function AppContent() {
 			hasInitializedServiceWorkerRef.current = true;
 			(async () => {
 				await serviceWorkerManager.register();
-				await serviceWorkerManager.checkArNSUpdate();
+				if (PORTAL_CAPABILITIES.DOMAINS) await serviceWorkerManager.checkArNSUpdate();
 			})();
 		}
 	}, []);
@@ -110,6 +112,7 @@ function AppContent() {
 	}, [settings]);
 
 	React.useEffect(() => {
+		if (IS_BASE_MODE) return;
 		(async function () {
 			if (hasCheckedProfileRef.current) return;
 			if (permawebProvider.profile?.id) {
@@ -139,7 +142,11 @@ function AppContent() {
 		}
 
 		const view = (() => {
-			if (!permawebProvider.profile) {
+			if (!arProvider.walletAddress && !arProvider.walletInitializing) {
+				return <Navigate to={URLS.base} replace />;
+			}
+
+			if (!arProvider.walletAddress || !permawebProvider.profile) {
 				return (
 					<Portal node={DOM.overlay}>
 						<S.CenteredWrapper className={'overlay'}>
@@ -230,7 +237,10 @@ function AppContent() {
 					{getRoute(`${URLS.base}:portalId/create`, <CreatePortal />)}
 					{getRoute(`${URLS.base}:portalId`, <PortalView />)}
 					{getRoute(`${URLS.base}:portalId/posts`, <Posts />)}
-					{getRoute(`${URLS.base}:portalId/moderation`, <Moderation />)}
+					{getRoute(
+						`${URLS.base}:portalId/moderation`,
+						PORTAL_CAPABILITIES.MODERATION ? <Moderation /> : <UnavailableInCurrentMode />
+					)}
 					{getRoute(`${URLS.base}:portalId/post/create`, <PostCreate />)}
 					{getRoute(`${URLS.base}:portalId/post/create/article`, <PostEdit />)}
 					{getRoute(`${URLS.base}:portalId/post/edit/article/:assetId`, <PostEdit />)}
@@ -244,9 +254,15 @@ function AppContent() {
 					{getRoute(`${URLS.base}:portalId/media`, <Media />)}
 					{getRoute(`${URLS.base}:portalId/users`, <Users />)}
 					{getRoute(`${URLS.base}:portalId/pages`, <Pages />)}
-					{getRoute(`${URLS.base}:portalId/domains`, <Domains />)}
-					{getRoute(`${URLS.base}:portalId/domains/register`, <DomainsRegister />)}
-					{getRoute(`${URLS.base}:portalId/tips`, <Tips />)}
+					{getRoute(
+						`${URLS.base}:portalId/domains`,
+						PORTAL_CAPABILITIES.DOMAINS ? <Domains /> : <UnavailableInCurrentMode />
+					)}
+					{getRoute(
+						`${URLS.base}:portalId/domains/register`,
+						PORTAL_CAPABILITIES.DOMAINS ? <DomainsRegister /> : <UnavailableInCurrentMode />
+					)}
+					{getRoute(`${URLS.base}:portalId/tips`, PORTAL_CAPABILITIES.TIPS ? <Tips /> : <UnavailableInCurrentMode />)}
 					{getRoute(`${URLS.base}:portalId/post-preview/edit/:previewId`, <PostPreviewEdit />)}
 					{getRoute(`${URLS.base}:portalId/post-preview/create`, <PostPreviewEdit />)}
 					{getRoute(URLS.docs, <Docs />)}
@@ -256,6 +272,16 @@ function AppContent() {
 				</Routes>
 			</S.App>
 		</>
+	);
+}
+
+function UnavailableInCurrentMode() {
+	return (
+		<S.CenteredWrapper>
+			<S.MessageWrapper>
+				<p>This functionality is unavailable in base mode.</p>
+			</S.MessageWrapper>
+		</S.CenteredWrapper>
 	);
 }
 

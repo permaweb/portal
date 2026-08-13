@@ -7,8 +7,19 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
-import { ICONS, LAYOUT, PAGES, PORTAL_DATA, PORTAL_PATCH_MAP, PORTAL_ROLES, THEME, URLS } from 'helpers/config';
+import {
+	ENGINE_LITE_REFERENCE_ID,
+	ICONS,
+	LAYOUT,
+	PAGES,
+	PORTAL_DATA,
+	PORTAL_PATCH_MAP,
+	PORTAL_ROLES,
+	THEME,
+	URLS,
+} from 'helpers/config';
 import { THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
+import { IS_BASE_MODE, PORTAL_CAPABILITIES } from 'helpers/features';
 import { PortalDetailType, PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
 import { checkValidAddress, debugLog, getBootTag } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -132,6 +143,7 @@ export default function PortalManager(props: {
 
 					portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Overview);
 				} else {
+					data.EngineReference = ENGINE_LITE_REFERENCE_ID;
 					const getPatchMapTag = (key: string, values: string[]) => {
 						const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
 						return {
@@ -142,6 +154,7 @@ export default function PortalManager(props: {
 
 					const tags = [
 						getBootTag('Name', data.Name),
+						getBootTag('EngineReference', data.EngineReference),
 						{ name: 'Content-Type', value: 'text/html' },
 						{ name: 'Zone-Type', value: 'Portal' },
 					];
@@ -245,7 +258,7 @@ export default function PortalManager(props: {
 					response = `${language?.portalCreated}!`;
 
 					navigate(URLS.portalBase(portalId));
-					window.location.reload();
+					if (!IS_BASE_MODE) window.location.reload();
 				}
 
 				if (profileUpdateId) debugLog('info', 'PortalManager', `Profile update: ${profileUpdateId}`);
@@ -296,7 +309,7 @@ export default function PortalManager(props: {
 	function handleWordPressImportClick() {
 		props.handleClose();
 		// Pass true for createPortal when we're in "create new portal" mode (props.portal is null)
-		portalProvider.setShowWordPressImport(true, !props.portal);
+		if (PORTAL_CAPABILITIES.WORDPRESS_IMPORT) portalProvider.setShowWordPressImport(true, !props.portal);
 	}
 
 	function getConnectedView() {
@@ -386,7 +399,7 @@ export default function PortalManager(props: {
 									loading={false}
 								/>
 							</S.SAction>
-							{!props.portal && (
+							{!props.portal && PORTAL_CAPABILITIES.WORDPRESS_IMPORT && (
 								<>
 									<S.HorizontalDivider />
 									<S.SectionWrapper>

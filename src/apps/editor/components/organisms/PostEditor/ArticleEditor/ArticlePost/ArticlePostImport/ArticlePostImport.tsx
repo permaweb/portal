@@ -9,6 +9,12 @@ import { FormField } from 'components/atoms/FormField';
 import { Loader } from 'components/atoms/Loader';
 import { Panel } from 'components/atoms/Panel';
 import { ICONS } from 'helpers/config';
+import {
+	extractMarkdownDocument,
+	getMarkdownDescription,
+	getMarkdownFeaturedImage,
+	getMarkdownTitle,
+} from 'helpers/markdown';
 import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
 import { checkValidAddress, debugLog } from 'helpers/utils';
 import { extractWordPressArticle } from 'helpers/wordpress';
@@ -302,12 +308,19 @@ export default function ArticlePostImport() {
 		setLoading(true);
 		try {
 			const text = await file.text();
-			const blocks = parseMarkdownToBlocks(text);
+			const markdown = extractMarkdownDocument(text);
+			const blocks = parseMarkdownToBlocks(markdown.body);
 
 			const existingContent = currentPost.data?.content || [];
 			const updatedContent = [...existingContent, ...blocks];
+			const title = getMarkdownTitle(markdown);
+			const description = getMarkdownDescription(markdown.frontmatter);
+			const featuredImage = getMarkdownFeaturedImage(markdown.frontmatter);
 
 			dispatch(currentPostUpdate({ field: 'content', value: updatedContent }));
+			if (title) dispatch(currentPostUpdate({ field: 'title', value: title }));
+			if (description) dispatch(currentPostUpdate({ field: 'description', value: description }));
+			if (featuredImage) dispatch(currentPostUpdate({ field: 'thumbnail', value: featuredImage }));
 
 			addNotification(language.markdownImportSuccess, 'success');
 			setShowOptions(false);

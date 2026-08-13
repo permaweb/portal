@@ -7,9 +7,8 @@ import { Panel } from 'components/atoms/Panel';
 import { PaymentSummary } from 'components/molecules/Payment';
 import { IS_TESTNET } from 'helpers/config';
 import { UserOwnedDomain } from 'helpers/types';
-import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
+import { toReadableARIO } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
-import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 
@@ -27,8 +26,6 @@ const ExtendDomainPanel = (props: {
 	extendPaymentMethod: 'turbo' | 'ario';
 	setExtendPaymentMethod: React.Dispatch<React.SetStateAction<'turbo' | 'ario'>>;
 
-	setShowFund: React.Dispatch<React.SetStateAction<boolean>>;
-
 	extendingDomains: Set<string>;
 	setExtendingDomains: React.Dispatch<React.SetStateAction<Set<string>>>;
 
@@ -42,7 +39,6 @@ const ExtendDomainPanel = (props: {
 	}) => any;
 }) => {
 	const portalProvider = usePortalProvider();
-	const arProvider = useArweaveProvider();
 	const languageProvider = useLanguageProvider();
 	const { addNotification } = useNotifications();
 	const { balance: arIOBalance } = useArIOBalance();
@@ -114,67 +110,33 @@ const ExtendDomainPanel = (props: {
 										</S.ModalCostValue>
 									</S.DomainDetailLine>
 								) : (
-									<>
-										<S.DomainDetailLine>
-											<S.ModalCostLabel>Credits</S.ModalCostLabel>
-											<S.DomainDetailDivider />
-											<S.ModalCostValue>
-												{props.extendCostLoading ? (
-													<S.LoadingIndicator>Fetching…</S.LoadingIndicator>
-												) : (
-													(() => {
-														const credits =
-															props.extendCost?.winc != null
-																? `${getARAmountFromWinc(props.extendCost.winc)} Credits`
-																: '—';
-														const usd = props.extendCost?.fiatUSD ? ` ($${props.extendCost.fiatUSD})` : '';
-														return `${credits}${usd}`;
-													})()
-												)}
-											</S.ModalCostValue>
-										</S.DomainDetailLine>
-
-										{!!(arIOBalance && arIOBalance > 0) && (
-											<S.DomainDetailLine>
-												<S.ModalCostLabel>ARIO</S.ModalCostLabel>
-												<S.DomainDetailDivider />
-												<S.ModalCostValue>
-													{props.extendCostLoading ? (
-														<S.LoadingIndicator>Fetching…</S.LoadingIndicator>
-													) : props.extendCost?.mario != null ? (
-														`${toReadableARIO(props.extendCost.mario)} ARIO`
-													) : (
-														'—'
-													)}
-												</S.ModalCostValue>
-											</S.DomainDetailLine>
-										)}
-									</>
+									<S.DomainDetailLine>
+										<S.ModalCostLabel>ARIO</S.ModalCostLabel>
+										<S.DomainDetailDivider />
+										<S.ModalCostValue>
+											{props.extendCostLoading ? (
+												<S.LoadingIndicator>Fetching…</S.LoadingIndicator>
+											) : props.extendCost?.mario != null ? (
+												`${toReadableARIO(props.extendCost.mario)} ARIO`
+											) : (
+												'—'
+											)}
+										</S.ModalCostValue>
+									</S.DomainDetailLine>
 								)}
 							</div>
 						</S.ModalCostSection>
 
 						{(() => {
-							const due =
-								IS_TESTNET || props.extendPaymentMethod === 'ario' ? props.extendCost?.mario : props.extendCost?.winc;
-
-							const unit = IS_TESTNET ? 'tario' : props.extendPaymentMethod === 'ario' ? 'ARIO' : 'Credits';
-
-							const bal =
-								IS_TESTNET || props.extendPaymentMethod === 'ario'
-									? arIOBalance
-									: Number(arProvider.turboBalanceObj.effectiveBalance);
-
+							const due = props.extendCost?.mario;
+							const unit = IS_TESTNET ? 'tario' : 'ARIO';
+							const bal = arIOBalance;
 							const loadingCost = props.extendCostLoading || due == null;
-							const loadingBal = IS_TESTNET
-								? arIOBalance == null
-								: props.extendPaymentMethod === 'ario'
-								? arIOBalance == null
-								: arProvider.turboBalanceObj.effectiveBalance == null;
+							const loadingBal = arIOBalance == null;
 
 							return (
 								<PaymentSummary
-									method={IS_TESTNET ? 'ario' : props.extendPaymentMethod}
+									method={'ario'}
 									unitLabel={unit}
 									loadingCost={loadingCost}
 									loadingBalance={loadingBal}
@@ -193,12 +155,7 @@ const ExtendDomainPanel = (props: {
 							handlePress={() => props.setExtendModal({ open: false, years: 1 })}
 						/>
 
-						<InsufficientBalanceSection
-							extendCost={props.extendCost}
-							extendCostLoading={props.extendCostLoading}
-							extendPaymentMethod={props.extendPaymentMethod}
-							setShowFund={props.setShowFund}
-						/>
+						<InsufficientBalanceSection extendCost={props.extendCost} extendCostLoading={props.extendCostLoading} />
 
 						<Button
 							type={'alt1'}
@@ -214,7 +171,6 @@ const ExtendDomainPanel = (props: {
 									await signed.extendLease({
 										name: props.extendModal.domain.name,
 										years: props.extendModal.years,
-										...(IS_TESTNET ? {} : props.extendPaymentMethod === 'turbo' ? { fundFrom: 'turbo' } : {}),
 									});
 
 									const previousEnd =
@@ -240,13 +196,8 @@ const ExtendDomainPanel = (props: {
 								}
 							}}
 							disabled={(() => {
-								const due =
-									IS_TESTNET || props.extendPaymentMethod === 'ario' ? props.extendCost?.mario : props.extendCost?.winc;
-
-								const bal =
-									IS_TESTNET || props.extendPaymentMethod === 'ario'
-										? arIOBalance
-										: Number(arProvider.turboBalanceObj.effectiveBalance);
+								const due = props.extendCost?.mario;
+								const bal = arIOBalance;
 
 								return (
 									due == null || bal == null || bal < due || props.extendingDomains.has(props.extendModal.domain!.name)

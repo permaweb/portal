@@ -8,9 +8,8 @@ import { Panel } from 'components/atoms/Panel';
 import { PaymentSummary } from 'components/molecules/Payment';
 import { IS_TESTNET } from 'helpers/config';
 import { UserOwnedDomain } from 'helpers/types';
-import { getARAmountFromWinc, toReadableARIO } from 'helpers/utils';
+import { toReadableARIO } from 'helpers/utils';
 import { useArIOBalance } from 'hooks/useArIOBalance';
-import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 
@@ -38,7 +37,6 @@ const PaymentInfoPanel = (props: {
 	setUpgradePaymentMethod: React.Dispatch<React.SetStateAction<'turbo' | 'ario'>>;
 
 	// From parent state/logic (used below)
-	setShowFund: React.Dispatch<React.SetStateAction<boolean>>;
 	upgradingDomains: Set<string>;
 	setUpgradingDomains: React.Dispatch<React.SetStateAction<Set<string>>>;
 	pollAndHydrateAfterChange: (args: {
@@ -48,7 +46,6 @@ const PaymentInfoPanel = (props: {
 		shouldStop?: (rec: any) => boolean;
 	}) => any;
 }) => {
-	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const { balance: arIOBalance } = useArIOBalance();
@@ -110,66 +107,37 @@ const PaymentInfoPanel = (props: {
 										</S.ModalCostValue>
 									</S.DomainDetailLine>
 								) : (
-									<>
-										<S.DomainDetailLine>
-											<S.ModalCostLabel>Credits</S.ModalCostLabel>
-											<S.DomainDetailDivider />
-											<S.ModalCostValue>
-												{(() => {
-													const entry = props.costsByAntId[props.upgradeModal.domain.antId]?.upgrade;
-													if (!entry || entry.winc == null)
-														return (
-															<S.LoadingIndicator>
-																<Loader xSm /> Fetching…
-															</S.LoadingIndicator>
-														);
-													const credits = `${getARAmountFromWinc(entry.winc)} Credits`;
-													const usd = entry?.fiatUSD ? ` ($${entry.fiatUSD})` : '';
-													return `${credits}${usd}`;
-												})()}
-											</S.ModalCostValue>
-										</S.DomainDetailLine>
-										{!!(arIOBalance && arIOBalance > 0) && (
-											<S.DomainDetailLine>
-												<S.ModalCostLabel>ARIO</S.ModalCostLabel>
-												<S.DomainDetailDivider />
-												<S.ModalCostValue>
-													{(() => {
-														const entry = props.costsByAntId[props.upgradeModal.domain.antId]?.upgrade;
-														if (!entry || entry.mario == null)
-															return (
-																<S.LoadingIndicator>
-																	<Loader xSm /> Fetching…
-																</S.LoadingIndicator>
-															);
-														return `${toReadableARIO(entry.mario)} ARIO`;
-													})()}
-												</S.ModalCostValue>
-											</S.DomainDetailLine>
-										)}
-									</>
+									<S.DomainDetailLine>
+										<S.ModalCostLabel>ARIO</S.ModalCostLabel>
+										<S.DomainDetailDivider />
+										<S.ModalCostValue>
+											{(() => {
+												const entry = props.costsByAntId[props.upgradeModal.domain.antId]?.upgrade;
+												if (!entry || entry.mario == null)
+													return (
+														<S.LoadingIndicator>
+															<Loader xSm /> Fetching…
+														</S.LoadingIndicator>
+													);
+												return `${toReadableARIO(entry.mario)} ARIO`;
+											})()}
+										</S.ModalCostValue>
+									</S.DomainDetailLine>
 								)}
 							</div>
 						</S.ModalCostSection>
 
 						{(() => {
 							const entry = props.costsByAntId[props.upgradeModal.domain!.antId]?.upgrade;
-							const due = IS_TESTNET || props.upgradePaymentMethod === 'ario' ? entry?.mario : entry?.winc;
-							const unit = IS_TESTNET ? 'tario' : props.upgradePaymentMethod === 'ario' ? 'ARIO' : 'Credits';
-							const bal =
-								IS_TESTNET || props.upgradePaymentMethod === 'ario'
-									? arIOBalance
-									: Number(arProvider.turboBalanceObj.effectiveBalance);
+							const due = entry?.mario;
+							const unit = IS_TESTNET ? 'tario' : 'ARIO';
+							const bal = arIOBalance;
 							const loadingCost = entry == null || due == null;
-							const loadingBal = IS_TESTNET
-								? arIOBalance == null
-								: props.upgradePaymentMethod === 'ario'
-								? arIOBalance == null
-								: arProvider.turboBalanceObj.effectiveBalance == null;
+							const loadingBal = arIOBalance == null;
 
 							return (
 								<PaymentSummary
-									method={IS_TESTNET ? 'ario' : props.upgradePaymentMethod}
+									method={'ario'}
 									unitLabel={unit}
 									loadingCost={loadingCost}
 									loadingBalance={loadingBal}
@@ -188,12 +156,7 @@ const PaymentInfoPanel = (props: {
 							handlePress={() => props.setUpgradeModal({ open: false })}
 						/>
 
-						<InsufficientBalanceSection
-							extendCost={props.extendCost}
-							extendCostLoading={props.extendCostLoading}
-							extendPaymentMethod={props.extendPaymentMethod}
-							setShowFund={props.setShowFund}
-						/>
+						<InsufficientBalanceSection extendCost={props.extendCost} extendCostLoading={props.extendCostLoading} />
 
 						<Button
 							type={'alt1'}
@@ -206,7 +169,6 @@ const PaymentInfoPanel = (props: {
 									const signed = await getSignedArio();
 									await signed.upgradeRecord({
 										name: props.upgradeModal.domain.name,
-										...(IS_TESTNET ? {} : props.upgradePaymentMethod === 'turbo' ? { fundFrom: 'turbo' } : {}),
 									});
 									await props.pollAndHydrateAfterChange({
 										name: props.upgradeModal.domain.name,
@@ -227,11 +189,8 @@ const PaymentInfoPanel = (props: {
 							}}
 							disabled={(() => {
 								const entry = props.costsByAntId[props.upgradeModal.domain!.antId]?.upgrade;
-								const due = IS_TESTNET || props.upgradePaymentMethod === 'ario' ? entry?.mario : entry?.winc;
-								const bal =
-									IS_TESTNET || props.upgradePaymentMethod === 'ario'
-										? arIOBalance
-										: Number(arProvider.turboBalanceObj.effectiveBalance);
+								const due = entry?.mario;
+								const bal = arIOBalance;
 								return (
 									due == null || bal == null || bal < due || props.upgradingDomains.has(props.upgradeModal.domain!.name)
 								);

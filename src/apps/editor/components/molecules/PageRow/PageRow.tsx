@@ -9,7 +9,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Modal } from 'components/atoms/Modal';
 import { ICONS, URLS } from 'helpers/config';
 import { PortalPatchMapEnum } from 'helpers/types';
-import { displayUrlName, resolvePrimaryDomain, urlify } from 'helpers/utils';
+import { displayUrlName, resolvePortalPath, urlify } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -46,9 +46,12 @@ export default function PageRow(props: PageRowProps) {
 
 	const redirectBase = page?.type === 'static' ? URLS.pageEditInfo : URLS.pageEditMain;
 	const redirectId = page?.type === 'static' ? page.id : props.pageKey;
-	const previewUrl = `${resolvePrimaryDomain(portalProvider.current?.domains, portalProvider.current?.id)}/#/${urlify(
-		props.pageKey
-	)}`;
+	const previewUrl = resolvePortalPath(
+		portalProvider.current?.domains,
+		portalProvider.current?.id,
+		portalProvider.current?.siteTxId,
+		urlify(props.pageKey)
+	);
 
 	function handleDropdownAction(e: any, fn: () => void) {
 		e.preventDefault();

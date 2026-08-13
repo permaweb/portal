@@ -133,7 +133,7 @@ export default function ProfileManager(props: {
 		if (e.target.files && e.target.files.length) {
 			const file = e.target.files[0];
 			if (file.type.startsWith('image/')) {
-				if (file.size >= UPLOAD.dispatchUploadSize && arProvider.wallet) {
+				if (file.size > UPLOAD.freeUploadLimit && arProvider.wallet) {
 					setPendingFile({ file, type });
 					await calculateUploadCost(file);
 				} else {
@@ -184,7 +184,7 @@ export default function ProfileManager(props: {
 		if (!pendingFile) return;
 		setCompressing(true);
 		try {
-			const compressedFile = await compressImageToSize(pendingFile.file, UPLOAD.dispatchUploadSize);
+			const compressedFile = await compressImageToSize(pendingFile.file, UPLOAD.freeUploadLimit);
 			applyFileToState(compressedFile, pendingFile.type);
 			handleClearPendingFile(null);
 		} catch (e: any) {

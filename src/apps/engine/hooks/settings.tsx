@@ -2,6 +2,8 @@ import React from 'react';
 
 import { dryrun } from '@permaweb/aoconnect';
 
+import { IS_PROCESS_MODE } from 'helpers/features';
+
 const getSettings = async () => {
 	return {
 		portal: 'ima',
@@ -31,7 +33,7 @@ export const initSettings = async () => {
 		console.error('Error: ', error);
 	}
 };
-initSettings();
+if (IS_PROCESS_MODE) initSettings();
 
 export const useSettings = (preview: boolean = false) => {
 	if (preview) return { settings: { theme: 'dark' }, updateSetting: () => {} };

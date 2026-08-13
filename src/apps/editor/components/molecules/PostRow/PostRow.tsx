@@ -8,8 +8,9 @@ import { Button } from 'components/atoms/Button';
 import { IconButton } from 'components/atoms/IconButton';
 import { Modal } from 'components/atoms/Modal';
 import { ICONS, URLS } from 'helpers/config';
-import { ArticleStatusType, PortalAssetType, PortalPatchMapEnum } from 'helpers/types';
-import { debugLog, formatAddress, formatDate, resolvePrimaryDomain } from 'helpers/utils';
+import { IS_BASE_MODE } from 'helpers/features';
+import { ArticleStatusEnum, ArticleStatusType, PortalAssetType, PortalPatchMapEnum } from 'helpers/types';
+import { debugLog, formatAddress, formatDate, resolvePortalPath } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -34,6 +35,11 @@ export default function PostRow(props: { post: PortalAssetType }) {
 	const [showPostDropdown, setShowPostDropdown] = React.useState<boolean>(false);
 	const [showRemoveConfirmation, setShowRemoveConfirmation] = React.useState<boolean>(false);
 	const [removeLoading, setRemoveLoading] = React.useState<boolean>(false);
+	const [featuredLoading, setFeaturedLoading] = React.useState<boolean>(false);
+	const [statusLoading, setStatusLoading] = React.useState<boolean>(false);
+	const isFeatured = Boolean(props.post?.id && portalProvider.current?.featuredPosts?.includes(props.post.id));
+	const isPublished = props.post.metadata?.status === ArticleStatusEnum.Published;
+	const canManageFeatured = Boolean(portalProvider.permissions?.updatePortalMeta);
 
 	React.useEffect(() => {
 		// Only fetch if creator exists, is not the portal itself, and profile not already loaded
@@ -53,10 +59,13 @@ export default function PostRow(props: { post: PortalAssetType }) {
 			? portalProvider.current?.name
 			: portalProvider.usersByPortalId?.[props.post?.creator]?.username ?? formatAddress(props.post?.creator, false);
 
-	const externalPostLink = `${resolvePrimaryDomain(
+	const externalPostLink = resolvePortalPath(
 		portalProvider.current?.domains,
-		portalProvider.current?.id
-	)}/#/post/${props.post.metadata?.url ?? props.post?.id}`;
+		portalProvider.current?.id,
+		portalProvider.current?.siteTxId,
+		`post/${props.post.metadata?.url ?? props.post?.id}`
+	);
+	const editorPostLink = `${URLS.postEditArticle(portalProvider.current.id)}${props.post.id}`;
 
 	function handleDropdownAction(e: any, fn: () => void) {
 		e.preventDefault();
@@ -64,6 +73,32 @@ export default function PostRow(props: { post: PortalAssetType }) {
 		fn();
 		setShowPostDropdown(false);
 	}
+
+	const handleFeaturedPost = async () => {
+		if (!props.post?.id || featuredLoading) return;
+		setFeaturedLoading(true);
+		try {
+			await portalProvider.setFeaturedPost(props.post.id, !isFeatured);
+			addNotification(isFeatured ? 'Featured post removed' : 'Featured post updated', 'success');
+		} catch (e: any) {
+			addNotification(e.message ?? 'Error updating featured post', 'warning');
+		}
+		setFeaturedLoading(false);
+	};
+
+	const handlePostStatus = async () => {
+		if (!props.post?.id || statusLoading) return;
+		setStatusLoading(true);
+		const status = isPublished ? ArticleStatusEnum.Draft : ArticleStatusEnum.Published;
+		try {
+			await portalProvider.setPostStatus(props.post.id, status);
+			addNotification(isPublished ? 'Post unpublished' : 'Post published', 'success');
+		} catch (e: any) {
+			addNotification(e.message ?? 'Error updating post status', 'warning');
+		} finally {
+			setStatusLoading(false);
+		}
+	};
 
 	const handleRemovePost = async () => {
 		if (!props.post?.id) return;
@@ -79,6 +114,7 @@ export default function PostRow(props: { post: PortalAssetType }) {
 				process: portalProvider.current.id,
 				message: removeId,
 			});
+			if (!IS_BASE_MODE && isFeatured) await portalProvider.setFeaturedPost(props.post.id, false);
 
 			addNotification(`${language?.postRemoved}!`, 'success');
 
@@ -94,7 +130,7 @@ export default function PostRow(props: { post: PortalAssetType }) {
 
 	return props.post ? (
 		<>
-			<Link to={externalPostLink} target={'_blank'}>
+			<Link to={editorPostLink}>
 				<S.PostWrapper>
 					<S.PostHeader>
 						<p>{props.post.name}</p>
@@ -135,6 +171,24 @@ export default function PostRow(props: { post: PortalAssetType }) {
 												>
 													<ReactSVG src={ICONS.write} />
 													<p>{language?.edit}</p>
+												</button>
+											)}
+											{!unauthorized && (
+												<button
+													disabled={statusLoading}
+													onClick={(e) => handleDropdownAction(e, () => void handlePostStatus())}
+												>
+													<ReactSVG src={isPublished ? ICONS.close : ICONS.checkmark} />
+													<p>{isPublished ? 'Unpublish' : 'Publish'}</p>
+												</button>
+											)}
+											{canManageFeatured && (
+												<button
+													disabled={featuredLoading}
+													onClick={(e) => handleDropdownAction(e, () => void handleFeaturedPost())}
+												>
+													<ReactSVG src={ICONS.featuredPost} />
+													<p>{isFeatured ? 'Remove Featured Post' : 'Feature'}</p>
 												</button>
 											)}
 											<button onClick={(e) => handleDropdownAction(e, () => window.open(externalPostLink))}>

@@ -28,7 +28,7 @@ export const SectionHeader = styled.div`
 	gap: 15px;
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;

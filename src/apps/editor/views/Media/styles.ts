@@ -6,7 +6,7 @@ export const Wrapper = styled.div`
 	width: 100%;
 `;
 
-export const CreditsWrapper = styled.div`
+export const BalanceWrapper = styled.div`
 	padding: 5px 15px;
 	border-radius: ${STYLING.dimensions.radius.primary} !important;
 	background: ${(props) => props.theme.colors.container.alt11.background};

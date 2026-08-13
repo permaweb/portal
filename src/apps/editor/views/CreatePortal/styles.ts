@@ -30,6 +30,20 @@ export const Body = styled.div`
 	}
 `;
 
+export const CreateHeader = styled.div`
+	width: 100%;
+	max-width: 750px;
+	margin: 0 auto;
+`;
+
+export const CreateBody = styled.div`
+	width: 100%;
+	display: grid;
+	grid-template-columns: minmax(0, 750px);
+	justify-content: center;
+	align-items: start;
+`;
+
 export const Column = styled.div`
 	min-width: 0;
 	display: flex;
@@ -89,10 +103,9 @@ export const DisabledNote = styled.div`
 `;
 
 export const Actions = styled.div`
-	margin-top: 10px;
 	display: flex;
-	justify-content: flex-end;
-	margin: 7.5px 0 10px 0;
+	justify-content: center;
+	margin: 20px 0 20px 0;
 `;
 
 export const Placeholder = styled.div`

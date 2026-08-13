@@ -2,6 +2,15 @@
 
 Portal is a decentralized publishing platform that lets you build your own website with true ownership, built on [Arweave](https://docs.arweave.org/developers/) and [AO](https://ao.arweave.net/). This project consists of two main applications: an editor for content management, and an engine for dynamic portal rendering.
 
+Portal has two persistence modes:
+
+- `process` (default) preserves the existing AO process-backed implementation.
+- `base` uses immutable Arweave transactions without AO processes. A small genesis manifest establishes the portal and its initial roles; subsequent `portal-release` transactions contain only changed fields or pointers to independently stored post revisions. Clients reconstruct the current portal by validating and folding authorized releases in Arweave order.
+
+Compact releases let multiple admins and contributors publish changes without re-uploading every post. Concurrent releases from the same earlier state are merged in transaction order, while role changes take effect before later releases are authorized. Scalar settings use direct values; users, categories, topics, links, domains, uploads, and themes use identity-keyed item operations; and pages, fonts, layout, and post preview definitions use leaf-level object patches. Anonymous ordered arrays use compact index/splice operations, while post releases contain only immutable post transaction pointers. Legacy whole-field releases remain readable.
+
+Both modes use `up.arweave.net` for uploads up to 100 KB. Larger uploads are submitted as L1 Arweave transactions and paid from the connected wallet's AR balance.
+
 ## Architecture
 
 The project is organized into two main applications:
@@ -22,6 +31,13 @@ The project is organized into two main applications:
 - Profile and post management
 - Customizable building blocks
 
+#### Engine Lite (`/src/apps/engine-lite/`)
+
+- Framework-free post feed and individual post routes
+- Uses portal colors, light/dark themes, and header/body fonts
+- Deliberately ignores configured layouts and pages
+- Ships as one self-contained JavaScript bundle referenced through `reference@1.0`
+
 ## Installation
 
 ```bash
@@ -39,6 +55,13 @@ npm run start:editor
 
 # Start engine application (port 5000)
 npm run start:engine
+
+# Start stripped-back engine application (port 4100)
+npm run start:engine-lite
+
+# Start either application in Arweave-only base mode
+npm run start:editor:base
+npm run start:engine:base
 ```
 
 ## Building
@@ -51,6 +74,13 @@ npm run build:editor
 
 # Build engine application
 npm run build:engine
+
+# Build the single-file lite engine
+npm run build:engine-lite
+
+# Build the Arweave-only base-mode applications
+npm run build:editor:base
+npm run build:engine:base
 ```
 
 ## Deployment
@@ -64,7 +94,19 @@ npm run deploy:editor:staging
 
 # Deploy engine
 npm run deploy:engine
+
+# Upload Engine Lite and update the stable reference@1.0 pointer
+PATH_TO_WALLET=/path/to/wallet.json npm run publish:engine-lite
+
+# Override the reference to update
+PATH_TO_WALLET=/path/to/wallet.json npm run publish:engine-lite -- --reference <reference-id>
+
+# Bootstrap a separate new reference (normally unnecessary)
+PATH_TO_WALLET=/path/to/wallet.json npm run publish:engine-lite -- --new-reference
 ```
+
+The current Engine Lite `reference@1.0` mapping is recorded in [`deployments/engine-lite.json`](deployments/engine-lite.json).
+New portals store that stable ID as `EngineReference`; their HTML loader resolves its current value at runtime. The publish command updates the recorded reference by default and refreshes the fallback transaction in the deployment file.
 
 ## Project Structure
 
@@ -74,7 +116,8 @@ Development Guide to follow while working on the Project - https://github.com/pe
 src/
 ├── apps/
 │   ├── editor/           # Editor application
-│   └── engine/           # Engine application
+│   ├── engine/           # Full engine application
+│   └── engine-lite/      # Feed-and-post-only engine
 ├── components/           # Shared UI components
 │   ├── atoms/           # Basic UI elements
 │   ├── molecules/       # Composed components
@@ -89,13 +132,15 @@ src/
 ## Environment Variables
 
 - `VITE_APP` - Set to `editor`, `viewer`, or `engine` to specify which application to build/serve
-- `VITE_ARIO_TESTNET` - Set to `true` to enable testnet mode (uses tario tokens instead of turbo credits)
+- `VITE_PORTAL_MODE` - Set to `base` for transaction/manifest persistence; defaults to `process`
+- `VITE_ENABLE_AO` - Set to `false` to disable AO connection initialization (base-mode scripts set this automatically)
+- `VITE_ARIO_TESTNET` - Set to `true` to enable testnet mode (uses tario instead of ARIO)
 
 ## Testnet Mode
 
 The application supports testnet mode for development and testing:
 
-- **Mainnet**: Uses turbo credits, and ario token (if balance available) for domain purchases
+- **Mainnet**: Uses ARIO for domain purchases
 - **Testnet**: Uses tario tokens for domain purchases
 
 ### Using Testnet Mode

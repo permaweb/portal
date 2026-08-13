@@ -400,6 +400,21 @@ export const PreviewCard = styled.div`
 	}
 `;
 
+export const PreviewFrame = styled.div`
+	width: 100%;
+	height: min(76vh, 860px);
+	overflow: hidden;
+	background: ${(props) => props.theme.colors.container.primary};
+
+	iframe {
+		display: block;
+		width: 100%;
+		height: 100%;
+		border: 0;
+		background: transparent;
+	}
+`;
+
 export const PreviewHeader = styled.div`
 	position: sticky;
 	top: 0;

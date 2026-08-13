@@ -5,6 +5,7 @@
 			"editor/*": ["apps/editor/*"],
 			"viewer/*": ["apps/viewer/*"],
 			"engine/*": ["apps/engine/*"],
+			"engine-lite/*": ["apps/engine-lite/*"],
 			"components/*": ["components/*"],
 			"helpers/*": ["helpers/*"],
 			"hooks/*": ["hooks/*"],

@@ -9,6 +9,7 @@ import { EditorStoreRootState } from 'editor/store';
 import { currentPostClear, currentPostUpdate, setOriginalData } from 'editor/store/post';
 
 import { URLS } from 'helpers/config';
+import { IS_BASE_MODE } from 'helpers/features';
 import { ArticleBlockEnum, ArticleBlockType, RequestUpdateType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -80,7 +81,9 @@ export default function ArticleEditor(props: {
 
 					try {
 						let source: any = null;
-						let assetData = await permawebProvider.libs.getAtomicAsset(assetId);
+						let assetData = IS_BASE_MODE
+							? await permawebProvider.libs.getAtomicAsset(assetId, portalProvider.current.id)
+							: await permawebProvider.libs.getAtomicAsset(assetId);
 
 						if (request && request.payload?.input) {
 							// If request already exists, use it as the source

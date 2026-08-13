@@ -44,7 +44,11 @@ export default function Select(props: {
 								<S.Option
 									key={index}
 									active={option.id === props.activeOption.id}
+									$disabled={Boolean(option.disabled)}
+									aria-disabled={Boolean(option.disabled)}
+									title={option.disabled ? 'Unavailable in the current mode' : undefined}
 									onClick={() => {
+										if (option.disabled) return;
 										props.setActiveOption(option);
 										setActive(false);
 									}}

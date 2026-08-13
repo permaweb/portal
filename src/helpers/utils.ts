@@ -422,11 +422,23 @@ export function getCurrentGateway() {
 	return `${parts[1]}.${parts[2]}`;
 }
 
-export function resolvePrimaryDomain(domains: PortalDomainType[], portalId: string) {
+export function resolvePrimaryDomain(domains: PortalDomainType[], portalId: string, siteTxId?: string | null) {
 	const gateway = window.location.hostname === 'localhost' ? FALLBACK_GATEWAY : getCurrentGateway();
 	const domain = domains?.find((domain) => domain.primary)?.name || domains?.[0]?.name;
 	if (domain) return `https://${domain}.${gateway}`;
-	else return `https://${gateway}/${portalId}`;
+	const siteId = siteTxId || portalId;
+	const portalQuery = siteId !== portalId ? `?portal=${encodeURIComponent(portalId)}` : '';
+	return `https://${gateway}/${siteId}${portalQuery}`;
+}
+
+export function resolvePortalPath(
+	domains: PortalDomainType[],
+	portalId: string,
+	siteTxId: string | null | undefined,
+	path: string
+) {
+	const route = path.replace(/^\/?#?\/?/, '');
+	return `${resolvePrimaryDomain(domains, portalId, siteTxId)}#/${route}`;
 }
 
 export const capitalize = (str: string) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : '-');

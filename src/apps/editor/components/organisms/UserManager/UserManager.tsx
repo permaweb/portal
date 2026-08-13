@@ -7,6 +7,7 @@ import { FormField } from 'components/atoms/FormField';
 import { Modal } from 'components/atoms/Modal';
 import { Select } from 'components/atoms/Select';
 import { ICONS } from 'helpers/config';
+import { IS_BASE_MODE } from 'helpers/features';
 import { PortalPatchMapEnum, SelectOptionType } from 'helpers/types';
 import { checkValidAddress, debugLog, formatRoleLabel } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -130,7 +131,11 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 		const roleOrder = Object.keys(roleDescriptions);
 
 		const sorted = Object.values(raw)
-			.map((r) => ({ id: r as string, label: formatRoleLabel(r as string) }))
+			.filter((r) => !IS_BASE_MODE || (r !== 'Moderator' && r !== 'ExternalContributor'))
+			.map((r) => ({
+				id: r as string,
+				label: formatRoleLabel(r as string),
+			}))
 			.sort((a, b) => roleOrder.indexOf(a.id) - roleOrder.indexOf(b.id));
 
 		// Hide Admin for non-owners
@@ -309,7 +314,9 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 						type={'alt1'}
 						label={props.user ? language?.save : language?.add}
 						handlePress={handleSubmit}
-						disabled={loading || !walletAddress || !checkValidAddress(walletAddress) || unauthorized || !role}
+						disabled={
+							loading || !walletAddress || !checkValidAddress(walletAddress) || unauthorized || !role || role.disabled
+						}
 						loading={loading}
 						icon={props.user ? null : ICONS.add}
 						iconLeftAlign

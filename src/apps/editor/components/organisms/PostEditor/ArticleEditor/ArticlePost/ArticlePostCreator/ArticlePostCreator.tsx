@@ -76,8 +76,7 @@ export default function ArticlePostCreator() {
 
 	const submitUnauthorized =
 		assetId && currentUser?.address !== currentPost.data?.creator && !portalProvider.permissions?.postAutoIndex;
-	const requestUnauthorized = !portalProvider.permissions?.updatePostRequestStatus;
-	const creatorDisabled = requestUnauthorized || submitUnauthorized || currentPost.editor.loading.active;
+	const creatorDisabled = submitUnauthorized || currentPost.editor.loading.active;
 
 	const creator =
 		currentPost.data.creator === portalProvider.current?.id

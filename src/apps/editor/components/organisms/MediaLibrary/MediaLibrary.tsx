@@ -176,7 +176,7 @@ export default function MediaLibrary(props: {
 		if (!mediaData) return;
 		setCompressing(true);
 		try {
-			const compressedFile = await compressImageToSize(mediaData, UPLOAD.dispatchUploadSize);
+			const compressedFile = await compressImageToSize(mediaData, UPLOAD.freeUploadLimit);
 			clearUploadState();
 			setMediaData(compressedFile);
 		} catch (e: any) {

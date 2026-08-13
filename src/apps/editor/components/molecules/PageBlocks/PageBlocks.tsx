@@ -7,6 +7,7 @@ import { currentPageUpdate } from 'editor/store/page';
 import { currentPostUpdate } from 'editor/store/post';
 
 import { PAGE_BLOCKS } from 'helpers/config';
+import { PORTAL_CAPABILITIES } from 'helpers/features';
 import { ArticleBlocksContextType, PageBlockEnum } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -38,6 +39,11 @@ export default function PageBlocks(props: {
 
 	const [focusedIndex, setFocusedIndex] = React.useState<number>(-1);
 	const [totalBlockCount, setTotalBlockCount] = React.useState(0);
+	const blockUnavailable = React.useCallback(
+		(type: PageBlockEnum) =>
+			!PORTAL_CAPABILITIES.TIPS && (type === PageBlockEnum.MonetizationButton || type === PageBlockEnum.Supporters),
+		[]
+	);
 
 	const handleCurrentReducerUpdate = (updatedField: { field: string; value: any }) => {
 		let currentReducerUpdate = null;
@@ -67,10 +73,10 @@ export default function PageBlocks(props: {
 					PAGE_BLOCKS[PageBlockEnum.Sidebar],
 					PAGE_BLOCKS[PageBlockEnum.MonetizationButton],
 					PAGE_BLOCKS[PageBlockEnum.Supporters],
-				],
+				].filter((block) => Boolean(block) && !blockUnavailable(block.type)),
 			},
 		],
-		[language.dynamicElements]
+		[language.dynamicElements, blockUnavailable]
 	);
 
 	const escFunction = React.useCallback(
@@ -154,7 +160,7 @@ export default function PageBlocks(props: {
 						newIndex += direction;
 						if (newIndex < 0) newIndex = totalBlockCount - 1;
 						if (newIndex >= totalBlockCount) newIndex = 0;
-					} while (!blockRefs.current[newIndex]);
+					} while (!blockRefs.current[newIndex] || blockRefs.current[newIndex]?.disabled);
 					return newIndex;
 				});
 			} else if (event.key === 'Enter') {
@@ -162,7 +168,7 @@ export default function PageBlocks(props: {
 				event.preventDefault();
 				if (focusedIndex >= 0 && focusedIndex < blockRefs.current.length) {
 					const focusedButton = blockRefs.current[focusedIndex];
-					if (focusedButton) {
+					if (focusedButton && !focusedButton.disabled) {
 						const blockType = focusedButton.getAttribute('data-block-type');
 						if (blockType) {
 							props.addBlock(blockType as PageBlockEnum);

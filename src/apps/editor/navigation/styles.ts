@@ -115,14 +115,15 @@ export const PanelContent = styled.div<{ open: boolean }>`
 	padding: 0 15px 15px 15px;
 `;
 
-export const PanelLink = styled.div<{ showText?: boolean; useFill?: boolean }>`
+export const PanelLink = styled.div<{ showText?: boolean; useFill?: boolean; disabled?: boolean }>`
+	opacity: ${(props) => (props.disabled ? 0.42 : 1)};
 	a {
 		height: 38.5px;
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;
 		position: relative;
-		cursor: pointer;
+		cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
@@ -363,7 +364,7 @@ export const UpdateNotification = styled.div`
 
 export const PortalDropdown = styled.div`
 	max-height: 75vh;
-	width: 350px;
+	width: 310px;
 	max-width: 80vw;
 	position: absolute;
 	top: 47.5px;

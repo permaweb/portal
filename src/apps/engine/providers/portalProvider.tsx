@@ -6,6 +6,7 @@ import { defaultThemes } from 'engine/defaults/theme.defaults';
 import WebFont from 'webfontloader';
 
 import { getTxEndpoint } from 'helpers/endpoints';
+import { IS_BASE_MODE } from 'helpers/features';
 import { PortalPermissionsType, PortalUserType } from 'helpers/types';
 import { cachePortal, filterRemoved, fixBooleanStrings, getCachedPortal, getPortalUsers } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -120,37 +121,28 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const cached = getCachedPortal(portalId);
 				if (cached && !portal) setPortal(cached);
 
-				// Fetch from multiple endpoints
-				const overview = fixBooleanStrings(
-					permawebProvider.libs.mapFromProcessCase(
-						await permawebProvider.libs.readState({ processId: portalId, path: 'overview' })
-					)
-				);
-				const presentation = fixBooleanStrings(
-					permawebProvider.libs.mapFromProcessCase(
-						await permawebProvider.libs.readState({ processId: portalId, path: 'presentation' })
-					)
-				);
-				const navigation = fixBooleanStrings(
-					permawebProvider.libs.mapFromProcessCase(
-						await permawebProvider.libs.readState({ processId: portalId, path: 'navigation' })
-					)
-				);
-				const posts = fixBooleanStrings(
-					permawebProvider.libs.mapFromProcessCase(
-						await permawebProvider.libs.readState({ processId: portalId, path: 'posts' })
-					)
-				);
-				const users = fixBooleanStrings(
-					permawebProvider.libs.mapFromProcessCase(
-						await permawebProvider.libs.readState({ processId: portalId, path: 'users' })
-					)
-				);
-				const monetization = fixBooleanStrings(
-					permawebProvider.libs.mapFromProcessCase(
-						await permawebProvider.libs.readState({ processId: portalId, path: 'monetization' })
-					)
-				);
+				let overview, presentation, navigation, posts, users, monetization;
+				if (IS_BASE_MODE) {
+					const resolved = fixBooleanStrings(
+						permawebProvider.libs.mapFromProcessCase(await permawebProvider.libs.readState({ processId: portalId }))
+					);
+					overview = resolved?.overview;
+					presentation = resolved?.presentation;
+					navigation = resolved?.navigation;
+					posts = resolved?.posts;
+					users = resolved?.users;
+					monetization = resolved?.monetization;
+				} else {
+					[overview, presentation, navigation, posts, users, monetization] = await Promise.all(
+						['overview', 'presentation', 'navigation', 'posts', 'users', 'monetization'].map(async (path) =>
+							fixBooleanStrings(
+								permawebProvider.libs.mapFromProcessCase(
+									await permawebProvider.libs.readState({ processId: portalId, path })
+								)
+							)
+						)
+					);
+				}
 
 				const portalUsers = users?.roles ? getPortalUsers(users.roles) : null;
 
@@ -201,6 +193,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const zone = filterRemoved({
 					...defaultPortal,
 					...cached,
+					mode: IS_BASE_MODE ? 'base' : 'process',
 					name: overview?.name,
 					logo: overview?.banner ?? overview?.logo,
 					icon: overview?.thumbnail ?? overview?.icon ?? overview?.cover,
@@ -214,6 +207,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					topics: navigation?.topics,
 					links: navigation?.links,
 					posts: sortedPosts,
+					featuredPosts: posts?.featuredPosts ?? [],
 					users: portalUsers,
 					monetization: monetization,
 				});
@@ -223,6 +217,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const Layout = zone?.layout;
 				const Pages = zone?.pages;
 				const Posts = zone?.posts;
+				const FeaturedPosts = zone?.featuredPosts;
 				const Themes = zone?.themes;
 				const Links = zone?.links;
 				const Logo = zone?.logo;
@@ -239,6 +234,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					Pages,
 					Themes,
 					Posts,
+					FeaturedPosts,
 					Links,
 					Logo,
 					Fonts,

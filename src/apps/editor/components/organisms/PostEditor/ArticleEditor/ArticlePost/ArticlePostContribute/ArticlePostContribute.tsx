@@ -5,6 +5,7 @@ import { EditorStoreRootState } from 'editor/store';
 import { currentPostUpdate } from 'editor/store/post';
 
 import { Checkbox } from 'components/atoms/Checkbox';
+import { PORTAL_CAPABILITIES } from 'helpers/features';
 import { PortalHeaderType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -18,6 +19,7 @@ export default function ArticlePostContribute() {
 	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
+	if (!PORTAL_CAPABILITIES.CROSS_POSTING) return null;
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));

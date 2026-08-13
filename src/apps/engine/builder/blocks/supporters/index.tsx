@@ -2,6 +2,7 @@ import React from 'react';
 import { useSupporters } from 'engine/hooks/useSupporters';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
+import { PORTAL_CAPABILITIES } from 'helpers/features';
 import { normalizeTipToken } from 'helpers/tokens';
 import { MonetizationConfig, SupportersBlockData } from 'helpers/types';
 
@@ -49,7 +50,7 @@ export default function Supporters(props: SupportersProps) {
 
 	// Fetch real data from GraphQL
 	const { supporters, loading, error } = useSupporters(
-		enabled && walletAddress ? walletAddress : null,
+		PORTAL_CAPABILITIES.TIPS && enabled && walletAddress ? walletAddress : null,
 		config.scope,
 		props.postId,
 		{
@@ -57,6 +58,10 @@ export default function Supporters(props: SupportersProps) {
 			process: activeToken.type === 'AO' ? activeToken.processId : undefined,
 		}
 	);
+
+	if (!PORTAL_CAPABILITIES.TIPS) {
+		return null;
+	}
 
 	// If monetization is off or no wallet, render nothing
 	if (!enabled || !walletAddress) {

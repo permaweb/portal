@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { UPLOAD } from 'helpers/config';
-import { getTurboCostWincEndpoint } from 'helpers/endpoints';
+import { getARUploadCostEndpoint } from 'helpers/endpoints';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 
@@ -19,18 +19,20 @@ export function useUploadCost() {
 
 			const contentSize = file.size;
 
-			if (contentSize < UPLOAD.dispatchUploadSize) {
+			if (contentSize <= UPLOAD.freeUploadLimit) {
 				return { requiresConfirmation: false, cost: 0 };
 			}
 
 			try {
 				setShowUploadConfirmation(true);
 
-				const uploadPriceResponse = await fetch(getTurboCostWincEndpoint(contentSize));
-				const uploadInWinc = Number((await uploadPriceResponse.json()).winc);
+				const uploadPriceResponse = await fetch(getARUploadCostEndpoint(contentSize));
+				if (!uploadPriceResponse.ok) throw new Error(`Unable to calculate the Arweave upload fee`);
+				const uploadInWinc = Number(await uploadPriceResponse.text());
+				const arBalanceInWinc = Number(arProvider.arBalance || 0) * 1e12;
 
 				setUploadCost(uploadInWinc);
-				if (uploadInWinc > Number(arProvider.turboBalanceObj.effectiveBalance)) {
+				if (uploadInWinc > arBalanceInWinc) {
 					setInsufficientBalance(true);
 					return { requiresConfirmation: true, cost: uploadInWinc, hasInsufficientBalance: true };
 				}
@@ -42,12 +44,13 @@ export function useUploadCost() {
 				return null;
 			}
 		},
-		[arProvider.wallet, arProvider.turboBalanceObj]
+		[arProvider.wallet, arProvider.arBalance]
 	);
 
 	const clearUploadState = React.useCallback(() => {
 		setUploadCost(null);
 		setShowUploadConfirmation(false);
+		setInsufficientBalance(false);
 	}, []);
 
 	return {

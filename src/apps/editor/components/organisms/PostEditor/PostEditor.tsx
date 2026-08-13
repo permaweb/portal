@@ -10,6 +10,7 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { ASSET_UPLOAD, PORTAL_POST_DATA, URLS } from 'helpers/config';
+import { IS_BASE_MODE } from 'helpers/features';
 import {
 	PortalAssetRequestType,
 	PortalHeaderType,
@@ -328,6 +329,7 @@ export default function PostEditor() {
 						assetType: ASSET_UPLOAD.ansType,
 						users: getAssetAuthUsers(),
 						spawnComments: true,
+						...(IS_BASE_MODE ? { initialPostData: data, portalId: portalProvider.current.id } : {}),
 					};
 
 					const bytes = getByteSize(JSON.stringify(args));
@@ -721,12 +723,23 @@ export default function PostEditor() {
 
 		// Check for duplicate title or URL
 		if (portalProvider.current?.assets) {
-			const existingPosts = portalProvider.current.assets.filter((asset: any) => asset.id !== currentPost.data.id);
+			const currentPostIds = new Set([assetId, currentPost.data.id].filter(Boolean));
+			const existingPosts = portalProvider.current.assets.filter((asset: any) => !currentPostIds.has(asset.id));
+			const isEditing = currentPostIds.size > 0;
+			const normalizeUniqueValue = (value: unknown) => (typeof value === 'string' ? value.trim().toLowerCase() : '');
+			const titleChanged =
+				!isEditing ||
+				(Boolean(currentPost.originalData) &&
+					normalizeUniqueValue(currentPost.data.title) !== normalizeUniqueValue(currentPost.originalData?.title));
+			const urlChanged =
+				!isEditing ||
+				(Boolean(currentPost.originalData) &&
+					normalizeUniqueValue(currentPost.data.url) !== normalizeUniqueValue(currentPost.originalData?.url));
 
-			// Check for duplicate title
-			if (currentPost.data.title) {
+			// Existing posts can always save when these identity fields are unchanged.
+			if (currentPost.data.title && titleChanged) {
 				const duplicateTitle = existingPosts.some(
-					(asset: any) => asset.name?.toLowerCase() === currentPost.data.title.toLowerCase()
+					(asset: any) => normalizeUniqueValue(asset.name) === normalizeUniqueValue(currentPost.data.title)
 				);
 				if (duplicateTitle) {
 					valid = false;
@@ -735,10 +748,9 @@ export default function PostEditor() {
 				}
 			}
 
-			// Check for duplicate URL
-			if (currentPost.data.url) {
+			if (currentPost.data.url && urlChanged) {
 				const duplicateUrl = existingPosts.some(
-					(asset: any) => asset.metadata?.url?.toLowerCase() === currentPost.data.url.toLowerCase()
+					(asset: any) => normalizeUniqueValue(asset.metadata?.url) === normalizeUniqueValue(currentPost.data.url)
 				);
 				if (duplicateUrl) {
 					valid = false;

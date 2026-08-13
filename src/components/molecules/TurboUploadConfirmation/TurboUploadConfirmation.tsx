@@ -1,13 +1,9 @@
 import React from 'react';
 
 import { Button } from 'components/atoms/Button';
-import { Modal } from 'components/atoms/Modal';
-import { ICONS } from 'helpers/config';
 import { getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
-
-import { TurboBalanceFund } from '../TurboBalanceFund';
 
 import * as S from './styles';
 
@@ -28,12 +24,13 @@ export default function TurboUploadConfirmation(props: {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const [showFundUpload, setShowFundUpload] = React.useState<boolean>(false);
 	const [selectedOption, setSelectedOption] = React.useState<UploadOption>(
 		props.canCompress ? 'compressed' : 'uncompressed'
 	);
 
-	const insufficientBalance = Number(arProvider.turboBalanceObj.effectiveBalance || 0) < props.uploadCost;
+	const balanceInWinc = Number(arProvider.arBalance || 0) * 1e12;
+	const insufficientBalance = props.insufficientBalance ?? balanceInWinc < props.uploadCost;
+	const remainingBalance = Math.max(0, balanceInWinc - props.uploadCost);
 
 	const handleConfirm = () => {
 		if (selectedOption === 'compressed' && props.handleCompress) {
@@ -78,26 +75,22 @@ export default function TurboUploadConfirmation(props: {
 								</S.RadioButton>
 								<S.RadioLabel disabled={insufficientBalance}>
 									<span>{language?.uploadUncompressed}</span>
-									<p>{props.uploadCost ? `${getARAmountFromWinc(props.uploadCost)} ${language?.credits}` : '-'}</p>
+									<p>{props.uploadCost ? `${getARAmountFromWinc(props.uploadCost)} AR` : '-'}</p>
 								</S.RadioLabel>
 							</S.RadioOptionHeader>
 							<S.InputActionsInfo disabled={insufficientBalance}>
 								<S.InputActionsInfoLine>
 									<p>
-										<span>{`${language?.yourUploadBalance}:`}</span>
+										<span>AR balance:</span>
 										&nbsp;
-										{arProvider.turboBalanceObj.effectiveBalance
-											? `${getARAmountFromWinc(Number(arProvider.turboBalanceObj.effectiveBalance))} ${
-													language?.credits
-											  }`
-											: '-'}
+										{arProvider.arBalance == null ? '-' : `${Number(arProvider.arBalance).toFixed(6)} AR`}
 									</p>
 								</S.InputActionsInfoLine>
 								<S.InputActionsInfoLine>
 									<p>
 										<span>{`${language?.costToUpload}:`}</span>
 										&nbsp;
-										{props.uploadCost ? `${getARAmountFromWinc(props.uploadCost)} ${language?.credits}` : '-'}
+										{props.uploadCost ? `${getARAmountFromWinc(props.uploadCost)} AR` : '-'}
 									</p>
 								</S.InputActionsInfoLine>
 								<S.InputActionsInfoDivider />
@@ -105,43 +98,16 @@ export default function TurboUploadConfirmation(props: {
 									<p>
 										<span>{`${language?.remainingAfterUpload}:`}</span>
 										&nbsp;
-										{arProvider.turboBalanceObj.effectiveBalance && props.uploadCost
-											? `${getARAmountFromWinc(
-													Number(arProvider.turboBalanceObj.effectiveBalance) - props.uploadCost
-											  )} ${language?.credits}`
-											: '-'}
+										{arProvider.arBalance == null || !props.uploadCost
+											? '-'
+											: `${getARAmountFromWinc(remainingBalance)} AR`}
 									</p>
 								</S.InputActionsInfoLine>
 							</S.InputActionsInfo>
-							{insufficientBalance && (
-								<S.AddFundsAction>
-									<Button
-										type={'alt1'}
-										label={language?.addFunds}
-										handlePress={(e) => {
-											e.stopPropagation();
-											setShowFundUpload(true);
-										}}
-										disabled={showFundUpload}
-										icon={ICONS.add}
-										iconLeftAlign
-										height={40}
-										width={350}
-									/>
-								</S.AddFundsAction>
-							)}
+							{insufficientBalance && <S.AddFundsAction>Insufficient AR balance</S.AddFundsAction>}
 						</S.RadioOptionContent>
 					</S.RadioOption>
 				</S.RadioGroup>
-				{showFundUpload && (
-					<Modal
-						header={language?.fundTurboBalance}
-						handleClose={() => setShowFundUpload(false)}
-						className={'modal-wrapper'}
-					>
-						<TurboBalanceFund handleClose={() => setShowFundUpload(false)} />
-					</Modal>
-				)}
 				<S.InputActionsFlex>
 					<Button
 						type={'primary'}

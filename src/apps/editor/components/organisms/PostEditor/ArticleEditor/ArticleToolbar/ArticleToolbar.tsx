@@ -2,6 +2,8 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
+import { createLitePostPreview } from 'engine-lite/data';
+import { EngineLitePostPreview } from 'engine-lite/preview';
 import { debounce } from 'lodash';
 
 import { ArticleBlocks } from 'editor/components/molecules/ArticleBlocks';
@@ -14,9 +16,7 @@ import { IconButton } from 'components/atoms/IconButton';
 import { Modal } from 'components/atoms/Modal';
 import { Portal } from 'components/atoms/Portal';
 import { Tabs } from 'components/atoms/Tabs';
-import { PostRenderer } from 'components/molecules/PostRenderer';
 import { DOM, ICONS, STYLING } from 'helpers/config';
-import { getThemeVars } from 'helpers/themes';
 import {
 	ArticleBlockEnum,
 	PortalAssetRequestType,
@@ -432,44 +432,28 @@ export default function ArticleToolbar(props: {
 	}, [currentPost.editor.panelOpen, currentTab, props.addBlock, desktop, currentPost.editor.loading.active]);
 
 	const previewPost = React.useMemo(() => {
-		const d = currentPost.data;
-		return {
-			name: d?.title || '',
-			dateCreated: d?.dateCreated || Date.now(),
-			creator: d?.creator,
-			metadata: {
-				status: (d?.status?.toLowerCase?.() as 'draft' | 'published') || 'draft',
-				description: d?.description || '',
-				thumbnail: d?.thumbnail || undefined,
-				topics: d?.topics || [],
+		const data = currentPost.data;
+		const post = createLitePostPreview(
+			{
+				id: assetId || 'preview',
+				name: data.title,
+				creator: data.creator,
+				dateCreated: data.dateCreated || Date.now(),
+				metadata: {
+					description: data.description,
+					thumbnail: data.thumbnail,
+					topics: data.topics,
+					categories: data.categories,
+					content: data.content,
+					releaseDate: data.releaseDate,
+					url: data.url,
+				},
 			},
-		} as any;
-	}, [currentPost.data]);
-
-	// Reuse the editor content as-is
-	const previewContent = React.useMemo(() => currentPost.data?.content || [], [currentPost.data?.content]);
-
-	// Fetch the creator's profile for preview
-	React.useEffect(() => {
-		const creatorId = currentPost.data?.creator;
-		if (creatorId && !portalProvider.usersByPortalId[creatorId]) {
-			portalProvider.fetchPortalUserProfile({ address: creatorId } as PortalUserType);
-		}
-	}, [currentPost.data?.creator, portalProvider]);
-
-	// Use the creator's profile for author display in preview
-	const previewProfile = React.useMemo(() => {
-		const creatorId = currentPost.data?.creator;
-		const p = creatorId ? portalProvider.usersByPortalId[creatorId] : permawebProvider.profile;
-		return {
-			displayName: p?.displayName || p?.handle || p?.id || 'Author',
-			thumbnail: p?.thumbnail || p?.avatar || undefined,
-		};
-	}, [currentPost.data?.creator, portalProvider.usersByPortalId, permawebProvider.profile]);
-
-	const scheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-	const activeTheme = portalProvider.current.themes.find((t: any) => t.active);
-	const themeVars = getThemeVars(activeTheme, scheme);
+			portalProvider.current?.id || '',
+			portalProvider.current?.name || 'Portal'
+		);
+		return post;
+	}, [assetId, currentPost.data, portalProvider.current?.id, portalProvider.current?.name]);
 
 	const previewModal = React.useMemo(() => {
 		if (!previewOpen) return null;
@@ -481,20 +465,16 @@ export default function ArticleToolbar(props: {
 				width={900}
 				className={'scroll-wrapper-hidden'}
 			>
-				<S.PreviewCard style={Object.fromEntries(Object.entries(themeVars))}>
-					<PostRenderer
-						isLoadingPost={false}
-						isLoadingProfile={false}
-						isLoadingContent={false}
+				<S.PreviewFrame>
+					<EngineLitePostPreview
 						post={previewPost}
-						profile={previewProfile}
-						content={previewContent}
-						isPreview={true}
+						themes={portalProvider.current?.themes || []}
+						fonts={portalProvider.current?.fonts || null}
 					/>
-				</S.PreviewCard>
+				</S.PreviewFrame>
 			</Modal>
 		);
-	}, [previewOpen, previewPost, previewProfile, previewContent, language, themeVars]);
+	}, [previewOpen, previewPost, language, portalProvider.current?.themes, portalProvider.current?.fonts]);
 
 	return (
 		<>

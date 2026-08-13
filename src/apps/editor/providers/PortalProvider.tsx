@@ -8,7 +8,9 @@ import { WordPressImport } from 'editor/components/organisms/WordPressImport';
 
 import { Panel } from 'components/atoms/Panel';
 import { AO_NODE, ASSET_UPLOAD, PORTAL_PATCH_MAP, PORTAL_POST_DATA, URLS } from 'helpers/config';
+import { IS_BASE_MODE } from 'helpers/features';
 import {
+	ArticleStatusType,
 	PortalDetailType,
 	PortalHeaderType,
 	PortalPatchMapEnum,
@@ -30,6 +32,7 @@ import {
 	getPortalUsers,
 	isEqual,
 	isVersionGreater,
+	resolvePrimaryDomain,
 	urlify,
 } from 'helpers/utils';
 import { ConvertedPost, PortalImportData } from 'helpers/wordpress';
@@ -69,6 +72,9 @@ interface PortalContextState {
 			wallpaperId?: string | null;
 		}
 	) => Promise<void>;
+	setFeaturedPost: (postId: string, featured: boolean) => Promise<void>;
+	setPostStatus: (postId: string, status: ArticleStatusType) => Promise<void>;
+	openCurrentPortalSite: () => Promise<void>;
 	refreshCurrentPortal: (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => void;
 	fetchPortalUserProfile: (user: PortalUserType) => void;
 	usersByPortalId: any;
@@ -89,6 +95,9 @@ const DEFAULT_CONTEXT = {
 	wordPressImportCreatePortal: false,
 	wordPressImportData: null,
 	importWordPress: async () => {},
+	setFeaturedPost: async () => {},
+	setPostStatus: async () => {},
+	openCurrentPortalSite: async () => {},
 	refreshCurrentPortal() {},
 	fetchPortalUserProfile(_user: PortalUserType) {},
 	usersByPortalId: {},
@@ -114,7 +123,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	const authoritiesRef = React.useRef(false);
 	const patchMapRef = React.useRef(false);
-	const portalsRequestRef = React.useRef(false);
+	const portalsRequestRef = React.useRef(0);
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
 	const [invites, setInvites] = React.useState<PortalHeaderType[] | null>(null);
@@ -155,21 +164,21 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		setCurrent(null);
 		setPortals(null);
-		portalsRequestRef.current = false;
+		portalsRequestRef.current += 1;
 		if (!arProvider.walletAddress) {
 			setPermissions(null);
 		}
 	}, [arProvider.walletAddress]);
 
 	React.useEffect(() => {
-		if (permawebProvider.profile?.id && !portalsRequestRef.current) {
+		if (permawebProvider.profile?.id) {
+			const requestId = ++portalsRequestRef.current;
 			const profilePortals = permawebProvider.profile?.portals ?? [];
 
 			setPortals(profilePortals);
 			setInvites(permawebProvider.profile?.invites ?? []);
 
 			if (profilePortals.length > 0) {
-				portalsRequestRef.current = true;
 				(async () => {
 					const updated = await Promise.all(
 						profilePortals.map(async (portal: PortalHeaderType) => {
@@ -192,6 +201,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								}
 								return {
 									...portal,
+									engineReferenceId:
+										overview.engineReference ?? overview.store?.engineReference ?? portal.engineReferenceId ?? null,
 									name: overview.name ?? overview.store?.name ?? 'None',
 									logo: overview.banner ?? overview.logo ?? overview.store?.logo ?? 'None',
 									icon: overview.thumbnail ?? overview.icon ?? overview.store?.icon ?? 'None',
@@ -220,10 +231,8 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 							}
 						})
 					);
-					setPortals(updated);
+					if (portalsRequestRef.current === requestId) setPortals(updated);
 				})();
-			} else {
-				setPermissions({ base: false });
 			}
 		}
 	}, [
@@ -234,12 +243,15 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	]);
 
 	React.useEffect(() => {
-		if (portals?.length > 0) {
+		if (portals !== null) {
+			const routePortalId = location.pathname.split('/').filter(Boolean)[0] || null;
 			const currentPortal = portals.find((portal) => location.pathname.startsWith(`/${portal.id}`));
-			if (currentPortal?.id) {
-				if (currentId !== currentPortal.id) {
+			const portalIdToLoad =
+				currentPortal?.id || (IS_BASE_MODE && routePortalId && checkValidAddress(routePortalId) ? routePortalId : null);
+			if (portalIdToLoad) {
+				if (currentId !== portalIdToLoad) {
 					setPermissions(null);
-					setCurrentId(currentPortal.id);
+					setCurrentId(portalIdToLoad);
 					setCurrent(null);
 				}
 			} else {
@@ -264,8 +276,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					if (cachedPortal) setCurrent(cachedPortal);
 
 					// Load cached permissions if available
-					if (permawebProvider.profile?.id) {
-						const cachedPerms = getCachedPermissions(currentId, permawebProvider.profile.id);
+					const permissionAddress = IS_BASE_MODE ? arProvider.walletAddress : permawebProvider.profile?.id;
+					if (permissionAddress) {
+						const cachedPerms = getCachedPermissions(currentId, permissionAddress);
 						if (cachedPerms) setPermissions(cachedPerms);
 					}
 
@@ -429,13 +442,19 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			}
 
 			setUpdateAvailable(
-				isVersionGreater(CurrentZoneVersion, overview?.version) &&
+				!IS_BASE_MODE &&
+					isVersionGreater(CurrentZoneVersion, overview?.version) &&
 					arProvider.wallet &&
 					arProvider.walletAddress === overview?.owner
 			);
 
 			const portalState: PortalDetailType = filterRemoved({
 				id: idToFetch,
+				mode: overview?.mode ?? (IS_BASE_MODE ? 'base' : 'process'),
+				manifestTxId: overview?.manifestTxId ?? current?.manifestTxId ?? null,
+				rootTxId: overview?.rootTxId ?? current?.rootTxId ?? null,
+				siteTxId: overview?.siteTxId ?? current?.siteTxId ?? null,
+				engineReferenceId: overview?.engineReference ?? current?.engineReferenceId ?? null,
 				name: overview?.name ?? current?.name ?? null,
 				logo: overview?.banner ?? overview?.logo ?? current?.logo ?? null,
 				icon: overview?.thumbnail ?? overview?.icon ?? current?.icon ?? null,
@@ -443,6 +462,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				owner: overview?.owner ?? current?.owner ?? null,
 				moderation: overview?.moderation ?? current?.moderation ?? null,
 				assets: posts?.index ? getPortalAssets(posts.index) : current?.assets ?? [],
+				featuredPosts: posts?.featuredPosts ?? current?.featuredPosts ?? [],
 				requests: requests?.indexRequests ?? current?.requests ?? null,
 				categories: navigation?.categories ?? current?.categories ?? [],
 				topics: navigation?.topics ?? current?.topics ?? [],
@@ -461,14 +481,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				transfers: transfers?.transfers ?? current?.transfers ?? [],
 			});
 
-			if (permawebProvider.profile?.id && portalState.users) {
-				const userPermissions = getUserPermissions(
-					permawebProvider.profile.id,
-					portalState.users,
-					portalState.permissions
-				);
+			const permissionAddress = IS_BASE_MODE ? arProvider.walletAddress : permawebProvider.profile?.id;
+			if (permissionAddress && portalState.users) {
+				const userPermissions = getUserPermissions(permissionAddress, portalState.users, portalState.permissions);
 				setPermissions(userPermissions);
-				cachePermissions(idToFetch, permawebProvider.profile.id, userPermissions);
+				cachePermissions(idToFetch, permissionAddress, userPermissions);
 			}
 
 			cachePortal(idToFetch, portalState);
@@ -614,7 +631,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 			// If creating a portal, create it first
 			if (createPortal) {
-				const { PORTAL_DATA, PORTAL_PATCH_MAP } = await import('helpers/config');
+				const { ENGINE_LITE_REFERENCE_ID, PORTAL_DATA, PORTAL_PATCH_MAP } = await import('helpers/config');
 				const { PORTAL_ROLES } = await import('helpers/config');
 
 				const getBootTag = (key: string, value: string) => ({
@@ -632,6 +649,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 				const tags = [
 					getBootTag('Name', data.name || 'Imported Portal'),
+					getBootTag('EngineReference', ENGINE_LITE_REFERENCE_ID),
 					{ name: 'Content-Type', value: 'text/html' },
 					{ name: 'Zone-Type', value: 'Portal' },
 				];
@@ -703,7 +721,14 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 				// Add to profile
 				const currentPortals = Array.isArray(permawebProvider.profile?.portals) ? permawebProvider.profile.portals : [];
-				const updatedPortals = [...currentPortals, { Id: targetPortalId, Name: data.name || 'Imported Portal' }];
+				const updatedPortals = [
+					...currentPortals,
+					{
+						Id: targetPortalId,
+						Name: data.name || 'Imported Portal',
+						EngineReference: ENGINE_LITE_REFERENCE_ID,
+					},
+				];
 				await permawebProvider.libs.updateZone(
 					{ Portals: permawebProvider.libs.mapToProcessCase(updatedPortals) },
 					profileId,
@@ -941,6 +966,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						assetType: ASSET_UPLOAD.ansType,
 						users: [portalToUpdate.id],
 						spawnComments: true,
+						...(IS_BASE_MODE ? { initialPostData: postData, portalId: portalToUpdate.id } : {}),
 					};
 
 					const assetId = await permawebProvider.libs.createAtomicAsset(args, (status: any) =>
@@ -1014,6 +1040,15 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 				for (const page of pages) {
 					try {
+						const initialPageData = permawebProvider.libs.mapToProcessCase({
+							name: page.title,
+							description: page.description,
+							content: page.content,
+							thumbnail: page.thumbnail,
+							status: page.status,
+							creator: effectiveProfileId,
+							originPortal: portalToUpdate.id,
+						});
 						const args = {
 							name: page.title,
 							description: page.description,
@@ -1024,6 +1059,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 							assetType: ASSET_UPLOAD.ansType,
 							users: [],
 							spawnComments: false,
+							...(IS_BASE_MODE ? { initialPostData: initialPageData, portalId: portalToUpdate.id } : {}),
 						};
 
 						const assetId = await permawebProvider.libs.createAtomicAsset(args, (status: any) =>
@@ -1120,6 +1156,99 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		setRefreshCurrentTrigger((prev) => !prev);
 	};
 
+	const openCurrentPortalSite = async () => {
+		if (!current?.id) return;
+		const popup = window.open('about:blank', '_blank');
+		if (popup) popup.opener = null;
+		try {
+			let siteTxId = current.siteTxId;
+			if (!current.domains?.length && (IS_BASE_MODE || current.mode === 'base')) {
+				siteTxId = await permawebProvider.libs.ensurePortalSite(current.id);
+				if (siteTxId !== current.siteTxId) {
+					setCurrent((portal) => (portal ? { ...portal, siteTxId } : portal));
+				}
+			}
+			const url = resolvePrimaryDomain(current.domains, current.id, siteTxId);
+			if (popup) popup.location.replace(url);
+			else window.open(url, '_blank', 'noopener,noreferrer');
+		} catch (error: any) {
+			popup?.close();
+			addNotification(error.message ?? 'Unable to open this portal site', 'warning', { persistent: true });
+		}
+	};
+
+	const setFeaturedPost = async (postId: string, featured: boolean) => {
+		if (!current?.id || !arProvider.wallet) throw new Error('A portal and connected wallet are required');
+		if (!permissions?.updatePortalMeta) throw new Error('You do not have permission to feature posts');
+
+		const featuredPosts = featured ? [postId] : [];
+		const updateId = await permawebProvider.libs.updateZone(
+			{ FeaturedPosts: featuredPosts },
+			current.id,
+			arProvider.wallet
+		);
+		if (updateId && permawebProvider.deps?.ao?.result) {
+			await permawebProvider.deps.ao.result({ process: current.id, message: updateId });
+		}
+
+		setCurrent((portal) => {
+			if (!portal) return portal;
+			const updated = { ...portal, featuredPosts };
+			cachePortal(portal.id, updated);
+			return updated;
+		});
+		refreshCurrentPortal(PortalPatchMapEnum.Posts);
+	};
+
+	const setPostStatus = async (postId: string, status: ArticleStatusType) => {
+		if (!current?.id || !arProvider.wallet) throw new Error('A portal and connected wallet are required');
+
+		const post = current.assets?.find((asset) => asset.id === postId);
+		const canEdit =
+			permissions?.postAutoIndex ||
+			permissions?.updatePostRequestStatus ||
+			post?.creator === permawebProvider.profile?.id;
+		if (!canEdit) throw new Error('You do not have permission to update this post');
+
+		const excludeFromIndex = JSON.stringify([
+			'Balances',
+			'Ticker',
+			'Process-Type',
+			'Total-Supply',
+			'Transferable',
+			'Metadata.Content',
+		]);
+		const useAutoIndex = Boolean(permissions?.postAutoIndex);
+		const updateResult = await permawebProvider.libs.sendMessage({
+			processId: current.id,
+			wallet: arProvider.wallet,
+			action: useAutoIndex ? 'Run-Action' : 'Update-Asset-Through-Zone',
+			tags: [
+				{ name: 'Forward-To', value: postId },
+				{ name: 'Forward-Action', value: 'Update-Asset' },
+				{ name: 'Exclude-Index', value: excludeFromIndex },
+			],
+			data: { Input: permawebProvider.libs.mapToProcessCase({ status }) },
+			...(useAutoIndex ? { returnResult: true } : {}),
+		});
+		if (typeof updateResult === 'string' && permawebProvider.deps?.ao?.result) {
+			await permawebProvider.deps.ao.result({ process: current.id, message: updateResult });
+		}
+
+		setCurrent((portal) => {
+			if (!portal) return portal;
+			const updated = {
+				...portal,
+				assets: portal.assets?.map((asset) =>
+					asset.id === postId ? { ...asset, metadata: { ...asset.metadata, status } } : asset
+				),
+			};
+			cachePortal(portal.id, updated);
+			return updated;
+		});
+		refreshCurrentPortal(PortalPatchMapEnum.Posts);
+	};
+
 	const importWordPress = async (
 		data: PortalImportData,
 		posts: ConvertedPost[],
@@ -1167,6 +1296,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				wordPressImportCreatePortal,
 				wordPressImportData,
 				importWordPress,
+				setFeaturedPost,
+				setPostStatus,
+				openCurrentPortalSite,
 				refreshCurrentPortal: (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => refreshCurrentPortal(field),
 				fetchPortalUserProfile: (userRole: PortalUserType) => fetchPortalUserProfile(userRole),
 				usersByPortalId: usersByPortalId,

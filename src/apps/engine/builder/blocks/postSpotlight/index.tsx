@@ -7,6 +7,7 @@ import ModalPortal from 'engine/components/modalPortal';
 import Placeholder from 'engine/components/placeholder';
 import { usePost, usePosts } from 'engine/hooks/posts';
 import { useProfile } from 'engine/hooks/profiles';
+import { usePortalProvider } from 'engine/providers/portalProvider';
 
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
@@ -19,23 +20,27 @@ import * as S from './styles';
 export default function PostSpotlight(props: any) {
 	const { txId, onSetPost } = props;
 	const { profile: user } = usePermawebProvider();
+	const { portal } = usePortalProvider();
 	const { Posts: allPosts, isLoading: isLoadingPosts } = usePosts();
+	const featuredPostId = portal?.FeaturedPosts?.[0];
 
 	// Use provided txId for fetching specific post
 	var { post: fetchedPost, isLoading: isLoadingPost } = usePost(txId || null);
 
-	// Get the latest post from the posts list if no txId is provided
+	// A block-specific post remains authoritative. Otherwise use the portal-level
+	// featured post, falling back to the latest visible post when none is set.
 	let post = fetchedPost;
 	let isLoading = isLoadingPost;
 
 	if (!txId && allPosts && Array.isArray(allPosts) && allPosts.length > 0) {
-		// Create a copy and sort by dateCreated to get the latest post
-		const sortedPosts = [...allPosts].sort((a: any, b: any) => {
-			const dateA = Number(a.metadata?.releasedDate || a.dateCreated || 0);
-			const dateB = Number(b.metadata?.releasedDate || b.dateCreated || 0);
-			return dateB - dateA;
-		});
-		post = sortedPosts[0];
+		post = featuredPostId ? allPosts.find((candidate: any) => candidate.id === featuredPostId) : null;
+		if (!post) {
+			post = [...allPosts].sort((a: any, b: any) => {
+				const dateA = Number(a.metadata?.releasedDate || a.dateCreated || 0);
+				const dateB = Number(b.metadata?.releasedDate || b.dateCreated || 0);
+				return dateB - dateA;
+			})[0];
+		}
 		isLoading = isLoadingPosts;
 	} else if (!txId) {
 		isLoading = isLoadingPosts;

@@ -23,7 +23,7 @@ export default function WalletBlock() {
 			<S.WalletConnect>
 				<Button
 					type={'alt1'}
-					label={auth?.authStatus === 'loading' ? language.loading : language.connect}
+					label={auth?.authStatus === 'loading' ? language.loading : 'Connect Wander'}
 					handlePress={() => arProvider.handleConnect(WalletEnum.wander)}
 					disabled={auth?.authStatus === 'loading'}
 				/>

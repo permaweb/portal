@@ -224,6 +224,15 @@ export const DAddress = styled.div`
 	}
 `;
 
+export const ARBalance = styled.div`
+	position: absolute;
+	right: 10px;
+	bottom: 4px;
+	font-size: 10px;
+	font-weight: 700;
+	color: white;
+`;
+
 export const NavigationWrapper = styled.div`
 	width: 100%;
 	padding: 4px 6px;

@@ -16,11 +16,140 @@ export const Wrapper = styled.div`
 export const PWrapper = styled.div`
 	display: flex;
 	align-items: center;
+	gap: 8px;
 	position: relative;
 
 	svg {
 		padding: 2.5px 0 0 0;
 		margin: 2.5px 0 0 0;
+	}
+`;
+
+export const PendingControl = styled.div`
+	position: relative;
+	display: flex;
+	align-items: center;
+	margin: 0 12px 0 0;
+`;
+
+export const PendingButton = styled.button`
+	width: auto;
+	height: 18px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 0;
+	background: transparent;
+	border: 0;
+	cursor: pointer;
+	transition: opacity ${transition3};
+
+	&:hover {
+		opacity: 0.65;
+	}
+`;
+
+export const PendingLabel = styled.span`
+	color: ${(props) => props.theme.colors.font.primary};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-size: ${(props) => props.theme.typography.size.xxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
+	white-space: nowrap;
+`;
+
+export const PendingSpinner = styled.span`
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	border: 2px solid ${(props) => props.theme.colors.indicator.neutral};
+	border-right-color: transparent;
+	animation: pending-spin 0.85s linear infinite;
+
+	@keyframes pending-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+`;
+
+export const PendingDropdown = styled.div`
+	width: 430px;
+	max-width: calc(100vw - 24px);
+	padding: 0 12px;
+	position: absolute;
+	z-index: 2;
+	top: 28px;
+	right: -5px;
+`;
+
+export const PendingHeader = styled.div`
+	padding: 12px 4px;
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+
+	p {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+	}
+`;
+
+export const PendingList = styled.ul`
+	max-height: 280px;
+	overflow-y: auto;
+	padding: 0;
+
+	li:not(:last-child) {
+		border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+	}
+
+	li button {
+		width: 100%;
+		padding: 12px 4px;
+		text-align: left;
+		border-radius: ${STYLING.dimensions.radius.alt4};
+		background: transparent;
+		border: 0;
+		cursor: pointer;
+
+		&:hover {
+			background: transparent;
+
+			span,
+			code {
+				color: ${(props) => props.theme.colors.font.alt1};
+				text-decoration: underline;
+				text-decoration-thickness: 1.25px;
+			}
+		}
+
+		code {
+			display: block;
+			margin-top: 9px;
+			color: ${(props) => props.theme.colors.font.primary};
+			font-size: ${(props) => props.theme.typography.size.xxxSmall};
+			line-height: 1.35;
+			white-space: nowrap;
+		}
+	}
+`;
+
+export const PendingTransactionHeader = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+
+	span {
+		color: ${(props) => props.theme.colors.font.primary};
+		font-size: ${(props) => props.theme.typography.size.xxxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		text-transform: uppercase;
+	}
+
+	time {
+		color: ${(props) => props.theme.colors.font.alt1};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
 	}
 `;
 
@@ -64,7 +193,7 @@ export const FlexAction = styled.div`
 
 export const Dropdown = styled.div`
 	max-height: 65vh;
-	width: 350px;
+	width: 300px;
 	max-width: 75vw;
 	padding: 11.5px 10px;
 	position: absolute;
@@ -234,7 +363,7 @@ export const DBodyWrapper = styled.ul`
 		align-items: center;
 		cursor: pointer;
 		color: ${(props) => props.theme.colors.font.primary} !important;
-		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
+		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		border: 1px solid transparent;
@@ -254,6 +383,15 @@ export const DBodyWrapper = styled.ul`
 			background: ${(props) => props.theme.colors.container.primary.active};
 		}
 
+		&[aria-disabled='true'] {
+			opacity: 0.45;
+			cursor: not-allowed;
+
+			&:hover {
+				background: transparent;
+			}
+		}
+
 		a {
 			height: 100%;
 			width: 100%;
@@ -266,10 +404,6 @@ export const DBodyWrapper = styled.ul`
 			}
 		}
 	}
-`;
-
-export const DCreditsWrapper = styled.div`
-	padding: 0 7.5px;
 `;
 
 export const DFooterWrapper = styled(DBodyWrapper)`

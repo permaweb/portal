@@ -7,7 +7,9 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { Drawer } from 'components/atoms/Drawer';
 import { Pagination } from 'components/atoms/Pagination';
+import { getAcceptedBasePortalMembers } from 'helpers/basePortal';
 import { URLS } from 'helpers/config';
+import { IS_BASE_MODE } from 'helpers/features';
 import { PortalUserType, ViewLayoutType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -25,6 +27,27 @@ export default function UserList(props: { type: ViewLayoutType }) {
 	const language = languageProvider.object[languageProvider.current];
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [usersWithPendingInvites, setUsersWithPendingInvites] = React.useState<Set<string>>(new Set());
+	const [acceptedBaseMembers, setAcceptedBaseMembers] = React.useState<Set<string>>(new Set());
+
+	React.useEffect(() => {
+		const portalId = portalProvider.current?.id;
+		if (!IS_BASE_MODE || !portalId) {
+			setAcceptedBaseMembers(new Set());
+			return;
+		}
+		let active = true;
+		const refresh = () => {
+			void getAcceptedBasePortalMembers(portalId).then((members) => {
+				if (active) setAcceptedBaseMembers(members);
+			});
+		};
+		refresh();
+		const interval = window.setInterval(refresh, 10_000);
+		return () => {
+			active = false;
+			window.clearInterval(interval);
+		};
+	}, [portalProvider.current?.id]);
 
 	const handleInviteDetected = React.useCallback((userAddress: string, hasPendingInvite: boolean) => {
 		setUsersWithPendingInvites((prev) => {
@@ -55,7 +78,7 @@ export default function UserList(props: { type: ViewLayoutType }) {
 		const currentUserId = permawebProvider.profile?.id;
 
 		return users
-			.filter((user) => user.type === 'process')
+			.filter((user) => user.type === (IS_BASE_MODE ? 'wallet' : 'process'))
 			.sort((a, b) => {
 				// owner first
 				if (a.address === ownerAddress && b.address !== ownerAddress) return -1;
@@ -124,7 +147,11 @@ export default function UserList(props: { type: ViewLayoutType }) {
 			<S.UsersWrapper type={props.type} className={'border-wrapper-alt2'}>
 				{pageUsers.map((user: PortalUserType) => (
 					<S.UserWrapper key={user.address}>
-						<User user={user} onInviteDetected={handleInviteDetected} />
+						<User
+							user={user}
+							onInviteDetected={handleInviteDetected}
+							baseMembershipAccepted={acceptedBaseMembers.has(user.address)}
+						/>
 					</S.UserWrapper>
 				))}
 			</S.UsersWrapper>
@@ -138,6 +165,7 @@ export default function UserList(props: { type: ViewLayoutType }) {
 		pageUsers,
 		handleInviteDetected,
 		usersWithPendingInvites,
+		acceptedBaseMembers,
 	]);
 
 	function getUsers() {

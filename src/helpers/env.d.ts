@@ -5,6 +5,12 @@ import 'styled-components';
 interface ImportMetaEnv {
 	readonly VITE_APP: string;
 	readonly VITE_ARIO_TESTNET?: string;
+	readonly VITE_PORTAL_MODE?: 'base' | 'process';
+	readonly VITE_ENABLE_AO?: string;
+	readonly VITE_ENABLE_DOMAINS?: string;
+	readonly VITE_ENABLE_PAYMENTS?: string;
+	readonly VITE_ENABLE_UPLOADS?: string;
+	readonly VITE_ENABLE_WANDER_AUTH?: string;
 }
 
 declare module 'styled-components' {

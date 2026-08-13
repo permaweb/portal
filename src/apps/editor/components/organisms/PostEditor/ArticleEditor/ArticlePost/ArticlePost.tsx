@@ -3,6 +3,7 @@ import React from 'react';
 import { Categories } from 'editor/components/molecules/Categories';
 import { Topics } from 'editor/components/molecules/Topics';
 
+import { PORTAL_CAPABILITIES } from 'helpers/features';
 import { PortalCategoryType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -10,6 +11,7 @@ import { ArticlePostCommentRules } from './ArticlePostCommentRules';
 import { ArticlePostContribute } from './ArticlePostContribute';
 import { ArticlePostCreator } from './ArticlePostCreator';
 import { ArticlePostDescription } from './ArticlePostDescription';
+import { ArticlePostFeatured } from './ArticlePostFeatured';
 import { ArticlePostImport } from './ArticlePostImport';
 import { ArticlePostReleaseDate } from './ArticlePostReleaseDate';
 import { ArticlePostStatus } from './ArticlePostStatus';
@@ -44,6 +46,7 @@ function ArticlePost(props: {
 					<ArticlePostThumbnail />
 				</S.SectionBody>
 			</S.Section>
+			<ArticlePostFeatured />
 			<S.Section>
 				<S.SectionHeader>
 					<p>{language?.publication}</p>
@@ -72,7 +75,7 @@ function ArticlePost(props: {
 					<p>{language?.categories}</p>
 				</S.SectionHeaderInput>
 				<S.SectionBody>
-					<Categories categories={props.categories} setCategories={props.setCategories} skipAuthCheck />
+					<Categories categories={props.categories} setCategories={props.setCategories} selectOnAdd skipAuthCheck />
 				</S.SectionBody>
 			</S.Section>
 			<S.TopicsSection>
@@ -80,29 +83,33 @@ function ArticlePost(props: {
 					<p>{language?.topics}</p>
 				</S.SectionHeaderInput>
 				<S.SectionBody>
-					<Topics topics={props.topics} setTopics={props.setTopics} skipAuthCheck />
+					<Topics topics={props.topics} setTopics={props.setTopics} selectOnAdd skipAuthCheck />
 				</S.SectionBody>
 			</S.TopicsSection>
-			<S.ContributeSection>
-				<S.SectionHeader>
-					<p>{language?.contribute}</p>
-				</S.SectionHeader>
-				<S.SectionBody>
-					<S.SectionStart>
-						<ArticlePostContribute />
-					</S.SectionStart>
-				</S.SectionBody>
-			</S.ContributeSection>
-			<S.Section>
-				<S.SectionHeader>
-					<p>{language?.commentRules}</p>
-				</S.SectionHeader>
-				<S.SectionBody>
-					<S.SectionStart>
-						<ArticlePostCommentRules />
-					</S.SectionStart>
-				</S.SectionBody>
-			</S.Section>
+			{PORTAL_CAPABILITIES.CROSS_POSTING && (
+				<S.ContributeSection>
+					<S.SectionHeader>
+						<p>{language?.contribute}</p>
+					</S.SectionHeader>
+					<S.SectionBody>
+						<S.SectionStart>
+							<ArticlePostContribute />
+						</S.SectionStart>
+					</S.SectionBody>
+				</S.ContributeSection>
+			)}
+			{PORTAL_CAPABILITIES.COMMENTS && (
+				<S.Section>
+					<S.SectionHeader>
+						<p>{language?.commentRules}</p>
+					</S.SectionHeader>
+					<S.SectionBody>
+						<S.SectionStart>
+							<ArticlePostCommentRules />
+						</S.SectionStart>
+					</S.SectionBody>
+				</S.Section>
+			)}
 		</S.Wrapper>
 	);
 }

@@ -4,6 +4,8 @@ import { initThemes } from 'engine/helpers/themes';
 import { useComments } from 'engine/hooks/comments';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
+import { PORTAL_CAPABILITIES } from 'helpers/features';
+
 import Comment from './comment';
 import CommentAdd from './commentAdd';
 import * as S from './styles';
@@ -12,7 +14,7 @@ export default function Comments(props: any) {
 	const { preview, commentsId, postAuthorId } = props;
 	const { portal } = usePortalProvider();
 	const Themes = preview ? defaultThemes : portal?.Themes;
-	const { comments: fetchedComments } = useComments(commentsId);
+	const { comments: fetchedComments } = useComments(PORTAL_CAPABILITIES.COMMENTS ? commentsId : null);
 
 	const organizeComments = React.useCallback((commentsList: any[]) => {
 		if (!commentsList || commentsList.length === 0) return [];
@@ -60,6 +62,7 @@ export default function Comments(props: any) {
 			document.getElementById('preview')?.setAttribute('data-theme', 'dark');
 		}
 	}, []);
+	if (!PORTAL_CAPABILITIES.COMMENTS) return null;
 
 	return (
 		<S.Comments>

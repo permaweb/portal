@@ -1,8 +1,13 @@
+import engineLiteDeployment from '../../deployments/engine-lite.json';
+
 import { LAYOUT_BLOG, LAYOUT_DOCUMENTATION, LAYOUT_JOURNAL } from './config/layouts';
 import { PAGES_BLOG, PAGES_DOCUMENTATION, PAGES_JOURNAL } from './config/pages';
 import { POST_PREVIEWS } from './config/postPreviews';
 import { THEME_DEFAULT } from './config/themes';
 import { ArticleBlockEnum, PageBlockEnum, PortalPatchMapEnum } from './types';
+
+export const ENGINE_LITE_REFERENCE_ID = engineLiteDeployment.referenceId;
+export const ENGINE_LITE_FALLBACK_ID = engineLiteDeployment.value;
 
 export const PAGES = {
 	JOURNAL: PAGES_JOURNAL,
@@ -93,6 +98,12 @@ export const DOM = {
 
 export const STORAGE = {
 	walletType: `wallet-type`,
+	basePortal: (id: string) => `base-portal-${id}`,
+	basePortalLatest: (id: string) => `base-portal-latest-${id}`,
+	basePortalMemberships: (address: string) => `base-portal-memberships-${address}`,
+	basePortalMembershipReceipts: (address: string) => `base-portal-membership-receipts-${address}`,
+	basePortalDeclined: (address: string) => `base-portal-declined-${address}`,
+	basePendingTransactions: (address: string) => `base-pending-transactions-${address}`,
 	profileByWallet: (id: string) => `profile-by-wallet-${id}`,
 	portal: (id: string) => `portal-${id}`,
 	profile: (id: string) => `profile-${id}`,
@@ -362,12 +373,16 @@ export const PAYMENT_URL = 'https://payment.ardrive.io';
 
 export const FALLBACK_GATEWAY = 'arweave.net';
 
+export const ARWEAVE_UPLOAD_NODE = 'https://up.arweave.net';
+export const ARWEAVE_FREE_UPLOAD_LIMIT = 100 * 1000;
+
 export const UPLOAD = {
-	node1: 'https://up.arweave.net',
-	node2: 'https://turbo.ardrive.io',
+	node1: ARWEAVE_UPLOAD_NODE,
+	node2: ARWEAVE_UPLOAD_NODE,
 	batchSize: 1,
 	chunkSize: 7500000,
-	dispatchUploadSize: 100 * 1000,
+	freeUploadLimit: ARWEAVE_FREE_UPLOAD_LIMIT,
+	dispatchUploadSize: ARWEAVE_FREE_UPLOAD_LIMIT,
 };
 
 export const PORTAL_DATA = () => `
@@ -377,23 +392,137 @@ export const PORTAL_DATA = () => `
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="portal-engine-reference" content="${ENGINE_LITE_REFERENCE_ID}" />
     <title>Portal</title>
   </head>
   <body>
     <div id="portal"></div>
-    <script type="module">
+    <script>
+      const ENGINE_REFERENCE_ID = '${ENGINE_LITE_REFERENCE_ID}';
+      const ENGINE_FALLBACK_ID = '${ENGINE_LITE_FALLBACK_ID}';
+      const ARWEAVE_ID = /^[a-zA-Z0-9_-]{43}$/;
+      const ENGINE_CACHE_KEY = 'portal-engine:' + ENGINE_REFERENCE_ID;
+
       function getGateway() {
         const host = window.location.hostname;
+        if (host === 'localhost' || host === '127.0.0.1') return 'arweave.net';
         const parts = host.split('.');
-		return \`\${parts[parts.length - 2]}.\${parts[parts.length - 1]}\`;
+        return parts.length > 1 ? parts[parts.length - 2] + '.' + parts[parts.length - 1] : 'arweave.net';
       }
 
-      const gateway = getGateway();
+      function messageFromTags(tags) {
+        return (tags || []).reduce(function (message, tag) {
+          message[tag.name] = tag.value;
+          return message;
+        }, {});
+      }
 
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = \`https://engine_portalenv.\${gateway}\`;
-      document.body.appendChild(script);
+      function timestamp(message) {
+        const value = Number(message.timestamp || 0);
+        return Number.isFinite(value) ? value : 0;
+      }
+
+      async function graphql(query) {
+        const response = await fetch('https://arweave.net/graphql', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify({ query: query }),
+        });
+        if (!response.ok) throw new Error('Engine reference query failed');
+        const payload = await response.json();
+        if (payload.errors && payload.errors.length) throw new Error(payload.errors[0].message);
+        return payload.data;
+      }
+
+      async function resolveReference(referenceId) {
+        const initData = await graphql(
+          'query { transaction(id: ' + JSON.stringify(referenceId) +
+          ') { id owner { address } tags { name value } } }'
+        );
+        const initNode = initData && initData.transaction;
+        if (!initNode) throw new Error('Engine reference was not found');
+
+        const init = messageFromTags(initNode.tags);
+        if (init.device !== 'reference@1.0' || init['reference-id']) {
+          throw new Error('Invalid engine reference');
+        }
+        const authority = init.authority || (initNode.owner && initNode.owner.address);
+        if (!ARWEAVE_ID.test(authority || '')) throw new Error('Invalid engine reference authority');
+
+        let currentTimestamp = timestamp(init);
+        let currentValue = init['reference-value'];
+        let after = null;
+
+        for (let page = 0; page < 100; page += 1) {
+          const afterArgument = after ? ', after: ' + JSON.stringify(after) : '';
+          const setData = await graphql(
+            'query { transactions(owners: [' + JSON.stringify(authority) +
+            '], tags: [{ name: "reference-id", values: [' + JSON.stringify(referenceId) +
+            '] }], sort: HEIGHT_ASC, first: 100' + afterArgument +
+            ') { pageInfo { hasNextPage } edges { cursor node { owner { address } tags { name value } } } } }'
+          );
+          const connection = setData && setData.transactions;
+          const edges = connection && Array.isArray(connection.edges) ? connection.edges : [];
+          for (const edge of edges) {
+            const message = messageFromTags(edge.node.tags);
+            const compatibleDevice = !message.device || message.device === 'reference@1.0';
+            const nextTimestamp = timestamp(message);
+            if (
+              compatibleDevice &&
+              message['reference-id'] === referenceId &&
+              edge.node.owner && edge.node.owner.address === authority &&
+              nextTimestamp > currentTimestamp
+            ) {
+              currentTimestamp = nextTimestamp;
+              currentValue = message['reference-value'];
+            }
+          }
+          if (!connection || !connection.pageInfo.hasNextPage || !edges.length) break;
+          after = edges[edges.length - 1].cursor;
+        }
+
+        if (!ARWEAVE_ID.test(currentValue || '')) throw new Error('Engine reference has no valid target');
+        return currentValue;
+      }
+
+      function cachedEngine() {
+        try {
+          const value = window.localStorage.getItem(ENGINE_CACHE_KEY);
+          return ARWEAVE_ID.test(value || '') ? value : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function cacheEngine(value) {
+        try {
+          window.localStorage.setItem(ENGINE_CACHE_KEY, value);
+        } catch {}
+      }
+
+      function loadEngine(engineId) {
+        const gateway = getGateway();
+        const script = document.createElement('script');
+        script.async = true;
+        script.dataset.engineReference = ENGINE_REFERENCE_ID;
+        script.src = 'https://' + gateway + '/' + engineId;
+        if (gateway !== 'arweave.net') {
+          script.addEventListener('error', function retryFromArweave() {
+            script.removeEventListener('error', retryFromArweave);
+            script.src = 'https://arweave.net/' + engineId;
+          });
+        }
+        document.body.appendChild(script);
+      }
+
+      resolveReference(ENGINE_REFERENCE_ID)
+        .then(function (engineId) {
+          cacheEngine(engineId);
+          loadEngine(engineId);
+        })
+        .catch(function () {
+          loadEngine(cachedEngine() || ENGINE_FALLBACK_ID);
+        });
     </script>
   </body>
 </html>
@@ -505,6 +634,7 @@ export const PORTAL_PATCH_MAP = {
 		'Store.Banner',
 		'Store.Wallpaper',
 		'Store.Moderation',
+		'Store.EngineReference',
 	],
 	[PortalPatchMapEnum.Users]: ['Roles', 'RoleOptions', 'Permissions'],
 	[PortalPatchMapEnum.Navigation]: ['Store.Categories', 'Store.Topics', 'Store.Links', 'Store.Domains'],
@@ -516,7 +646,7 @@ export const PORTAL_PATCH_MAP = {
 		'Store.PostPreviews',
 	],
 	[PortalPatchMapEnum.Media]: ['Store.Uploads'],
-	[PortalPatchMapEnum.Posts]: ['Store.Index'],
+	[PortalPatchMapEnum.Posts]: ['Store.Index', 'Store.FeaturedPosts'],
 	[PortalPatchMapEnum.Requests]: ['Store.IndexRequests'],
 	[PortalPatchMapEnum.Transfers]: ['Transfers'],
 	[PortalPatchMapEnum.Monetization]: ['Store.Monetization'],

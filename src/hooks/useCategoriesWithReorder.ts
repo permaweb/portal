@@ -27,6 +27,7 @@ export function useCategoriesWithReorder(props: {
 	const draggedElementRef = React.useRef<HTMLElement | null>(null);
 	const draggedIdRef = React.useRef<string | null>(null);
 	const originalDraggedRect = React.useRef<DOMRect | null>(null);
+	const categorySubmissionRef = React.useRef(false);
 
 	const [categoryOptions, setCategoryOptions] = React.useState<PortalCategoryType[] | null>(null);
 	const [showCategoryAdd, setShowCategoryAdd] = React.useState<boolean>(false);
@@ -159,15 +160,23 @@ export function useCategoriesWithReorder(props: {
 		setShowUnNestIndicator(false);
 	}, [isDragging, mouseX, categoryElementRects, categoryOptions]);
 
-	const addCategory = async () => {
-		if (!props.unauthorized && newCategoryName && props.portalId && arProvider.wallet) {
+	const addCategory = async (event?: React.SyntheticEvent) => {
+		event?.preventDefault();
+		event?.stopPropagation();
+
+		const categoryName = newCategoryName.trim();
+		if (!categorySubmissionRef.current && !props.unauthorized && categoryName && props.portalId && arProvider.wallet) {
+			categorySubmissionRef.current = true;
 			setCategoryLoading(true);
 			try {
 				const effectiveParent = getEffectiveParentId();
+				// The add form can become interactive one render before the options
+				// effect initializes an empty portal's category list.
+				const existingCategories = categoryOptions ?? props.portalCategories ?? [];
 
 				const newCategory: PortalCategoryType = {
 					id: Date.now().toString(),
-					name: newCategoryName,
+					name: categoryName,
 					parent: effectiveParent,
 					metadata: {},
 				};
@@ -184,9 +193,8 @@ export function useCategoriesWithReorder(props: {
 					});
 				};
 
-				if (isDuplicate(categoryOptions, newCategoryName)) {
+				if (isDuplicate(existingCategories, categoryName)) {
 					addNotification(language?.categoryDuplicateError || 'Category already exists', 'warning');
-					setCategoryLoading(false);
 					return;
 				}
 
@@ -207,7 +215,9 @@ export function useCategoriesWithReorder(props: {
 					});
 				};
 
-				const updatedCategories = effectiveParent ? addToParent(categoryOptions) : [...categoryOptions, newCategory];
+				const updatedCategories = effectiveParent
+					? addToParent(existingCategories)
+					: [...existingCategories, newCategory];
 
 				const categoryUpdateId = await permawebProvider.libs.updateZone(
 					{ Categories: permawebProvider.libs.mapToProcessCase(updatedCategories) },
@@ -219,15 +229,19 @@ export function useCategoriesWithReorder(props: {
 
 				console.log(`Categories update: ${categoryUpdateId}`);
 
-				if (props.selectOnAdd) props.setCategories([...props.categories, newCategory]);
+				if (props.selectOnAdd && !props.categories.some((category) => category.id === newCategory.id)) {
+					props.setCategories([...props.categories, newCategory]);
+				}
 
 				setCategoryOptions(updatedCategories);
 				addNotification(`${language?.categoryAdded}!`, 'success');
 				setNewCategoryName('');
 			} catch (e: any) {
 				addNotification(e.message ?? 'Error adding category', 'warning');
+			} finally {
+				categorySubmissionRef.current = false;
+				setCategoryLoading(false);
 			}
-			setCategoryLoading(false);
 		}
 	};
 

@@ -4,15 +4,16 @@
  * Handles fetching images from WordPress, compressing, and uploading to Arweave
  */
 
-import { compressImageToSize } from './utils';
+import { UPLOAD } from './config';
 import { ArticleBlockType } from './types';
+import { compressImageToSize } from './utils';
 import { ExtractedImage } from './wordpress';
 
 // CORS proxies to try (in order of preference)
 const CORS_PROXIES = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?'];
 
 // Free upload threshold (100KB)
-const FREE_UPLOAD_THRESHOLD = 100 * 1024;
+const FREE_UPLOAD_THRESHOLD = UPLOAD.freeUploadLimit;
 
 export type ImageUploadState = {
 	status: 'pending' | 'fetching' | 'compressing' | 'uploading' | 'complete' | 'error';

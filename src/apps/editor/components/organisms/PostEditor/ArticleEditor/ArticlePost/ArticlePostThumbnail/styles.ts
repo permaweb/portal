@@ -22,14 +22,15 @@ export const Input = styled.button<{ hasInput: boolean }>`
 	width: 100%;
 	position: relative;
 	background: ${(props) => props.theme.colors.container.primary.background};
-	border: ${(props) => (props.hasInput ? `none` : `1px dashed ${props.theme.colors.border.alt1}`)};
+	border: ${(props) => (props.hasInput ? `none` : `1px dotted ${props.theme.colors.border.alt1}`)};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	z-index: 1;
 	overflow: hidden;
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
+		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 	svg {
 		height: 25px;
@@ -44,7 +45,7 @@ export const Input = styled.button<{ hasInput: boolean }>`
 		object-fit: cover;
 	}
 	&:hover {
-		border: 1px dashed ${(props) => props.theme.colors.border.alt2};
+		border: 1px dotted ${(props) => props.theme.colors.border.alt2};
 		background: ${(props) => props.theme.colors.container.primary.active};
 	}
 	&:focus {
@@ -52,7 +53,7 @@ export const Input = styled.button<{ hasInput: boolean }>`
 	}
 	&:disabled {
 		background: ${(props) => props.theme.colors.button.primary.disabled.background};
-		border: 1px dashed ${(props) => props.theme.colors.button.primary.disabled.border};
+		border: 1px dotted ${(props) => props.theme.colors.button.primary.disabled.border};
 		span {
 			color: ${(props) => props.theme.colors.button.primary.disabled.color};
 		}

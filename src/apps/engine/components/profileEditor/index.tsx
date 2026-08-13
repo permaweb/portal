@@ -127,7 +127,7 @@ export default function ProfileEditor(props: {
 				const maxWidth = type === 'thumbnail' ? 100 : 1080;
 				if (isCompressibleImage(file)) {
 					try {
-						file = await compressImageToSize(file, UPLOAD.dispatchUploadSize, maxWidth);
+						file = await compressImageToSize(file, UPLOAD.freeUploadLimit, maxWidth);
 					} catch (err: any) {
 						addNotification(err.message ?? 'Error compressing image', 'warning');
 						e.target.value = '';

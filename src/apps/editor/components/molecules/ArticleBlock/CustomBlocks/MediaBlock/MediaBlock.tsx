@@ -273,7 +273,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		if (!mediaData.file) return;
 		setCompressing(true);
 		try {
-			const compressedFile = await compressImageToSize(mediaData.file, UPLOAD.dispatchUploadSize);
+			const compressedFile = await compressImageToSize(mediaData.file, UPLOAD.freeUploadLimit);
 			clearUploadState();
 			setMediaData((prevContent) => ({ ...prevContent, file: compressedFile }));
 		} catch (e: any) {
@@ -374,7 +374,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		if (!externalUploadFile) return;
 		setExternalCompressing(true);
 		try {
-			const compressed = await compressImageToSize(externalUploadFile, UPLOAD.dispatchUploadSize);
+			const compressed = await compressImageToSize(externalUploadFile, UPLOAD.freeUploadLimit);
 			clearUploadState();
 			setExternalUploadFile(compressed);
 		} catch (e: any) {

@@ -192,7 +192,7 @@ export default function Media(props: {
 		if (!(media instanceof File)) return;
 		setCompressing(true);
 		try {
-			const compressedFile = await compressImageToSize(media, UPLOAD.dispatchUploadSize);
+			const compressedFile = await compressImageToSize(media, UPLOAD.freeUploadLimit);
 			clearUploadState();
 			setMedia(compressedFile);
 		} catch (e: any) {

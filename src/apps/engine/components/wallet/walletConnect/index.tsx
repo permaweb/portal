@@ -1,6 +1,5 @@
 import React from 'react';
 import { ReactSVG } from 'react-svg';
-import { WanderConnect } from '@wanderapp/connect';
 import Avatar from 'engine/components/avatar';
 import { Panel } from 'engine/components/panel';
 import ProfileEditor from 'engine/components/profileEditor';
@@ -9,6 +8,7 @@ import { LogoSettings, usePortalProvider } from 'engine/providers/portalProvider
 
 import { ICONS, STORAGE } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
+import { FEATURES, PORTAL_CAPABILITIES } from 'helpers/features';
 import { checkValidAddress, getRedirect } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
@@ -29,8 +29,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	const [saving, setSaving] = React.useState<boolean>(false);
 	const [showProfileManage, setShowProfileManage] = React.useState<boolean>(false);
 	const [showLayoutPanel, setShowLayoutPanel] = React.useState<boolean>(false);
-	const [instance, setInstance] = React.useState(null);
-	const [label, setLabel] = React.useState<string>('Log in');
+	const [label, setLabel] = React.useState<string>(FEATURES.WANDER_EMBEDDED_AUTH ? 'Log in' : 'Connect Wander');
 	const [banner, setBanner] = React.useState<string>('');
 	const [avatar, setAvatar] = React.useState<string>('');
 	const [isLoading, setIsLoading] = React.useState<boolean>(false);
@@ -66,53 +65,60 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 		}
 	}, [showUserMenu]);
 
-	if (!window.wanderInstance && wrapperRef.current) {
-		try {
-			const wanderInstance = new WanderConnect({
-				clientId: 'FREE_TRIAL',
-				theme: 'Dark',
-				button: {
-					parent: wrapperRef.current,
-					label: false,
-					customStyles: `
+	React.useEffect(() => {
+		if (!FEATURES.WANDER_EMBEDDED_AUTH) return;
+		let active = true;
+
+		void (async () => {
+			if (window.wanderInstance || !wrapperRef.current) return;
+			try {
+				const { WanderConnect } = await import('@wanderapp/connect');
+				if (!active || window.wanderInstance || !wrapperRef.current) return;
+				const wanderInstance = new WanderConnect({
+					clientId: 'FREE_TRIAL',
+					theme: 'Dark' as any,
+					button: {
+						parent: wrapperRef.current,
+						label: false,
+						customStyles: `
 						#wanderConnectButtonHost {
 							// display:none;
 						}`,
-				},
-				iframe: {
-					routeLayout: {
-						default: {
-							// type: 'dropdown',
-							type: 'modal',
-						},
-						auth: {
-							type: 'modal',
-						},
-						'auth-request': {
-							type: 'modal',
-						},
 					},
-					cssVars: {
-						light: {
-							shadowBlurred: 'none',
+					iframe: {
+						routeLayout: {
+							default: {
+								// type: 'dropdown',
+								type: 'modal',
+							},
+							auth: {
+								type: 'modal',
+							},
+							'auth-request': {
+								type: 'modal',
+							},
 						},
-						dark: {
-							shadowBlurred: 'none',
-							boxShadow: 'none',
-						},
+						cssVars: {
+							light: {
+								shadowBlurred: 'none',
+							},
+							dark: {
+								shadowBlurred: 'none',
+								boxShadow: 'none',
+							},
+						} as any,
+						customStyles: ``,
 					},
-					customStyles: ``,
-				},
-			});
+				});
 
-			window.wanderInstance = wanderInstance;
-		} catch (e) {
-			console.error(e);
-		}
-	}
+				window.wanderInstance = wanderInstance;
+			} catch (e) {
+				console.error(e);
+			}
+		})();
 
-	React.useEffect(() => {
 		return () => {
+			active = false;
 			try {
 				window.wanderInstance?.destroy();
 				window.wanderInstance = null;
@@ -141,7 +147,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 			setBanner(profile?.banner && checkValidAddress(profile.banner) ? getTxEndpoint(profile.banner) : '');
 		} else {
 			setIsLoading(false);
-			setLabel('Log in');
+			setLabel(FEATURES.WANDER_EMBEDDED_AUTH ? 'Log in' : 'Connect Wander');
 			setAvatar('');
 			setBanner('');
 		}
@@ -150,8 +156,10 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 	function handlePress() {
 		if (auth?.authStatus === 'authenticated' || auth?.authType === 'NATIVE_WALLET' || arProvider.walletAddress) {
 			setShowUserMenu(!showUserMenu);
-		} else {
+		} else if (FEATURES.WANDER_EMBEDDED_AUTH && window.wanderInstance) {
 			window.wanderInstance.open();
+		} else {
+			void arProvider.handleConnect('NATIVE_WALLET');
 		}
 	}
 
@@ -424,6 +432,11 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 										{shorten(arProvider.walletAddress)}
 										<ReactSVG src={ICONS.copy} />
 									</S.DAddress>
+									<S.ARBalance>
+										{arProvider.arBalance == null
+											? `${language?.loading}...`
+											: `${Number(arProvider.arBalance).toLocaleString(undefined, { maximumFractionDigits: 6 })} AR`}
+									</S.ARBalance>
 								</S.Header>
 							</S.HeaderWrapper>
 							<S.NavigationWrapper>
@@ -447,13 +460,16 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 									<ReactSVG src={ICONS.comments} />
 									{language.myComments}
 								</S.NavigationEntry>
-								{auth?.authType !== 'NATIVE_WALLET' && arProvider.walletType !== 'NATIVE_WALLET' && (
-									<S.NavigationEntry onClick={() => window.wanderInstance.open('home')}>
-										<ReactSVG src={ICONS.wallet} />
-										{language.myWallet}
-									</S.NavigationEntry>
-								)}
-								{auth?.authType !== 'NATIVE_WALLET' &&
+								{FEATURES.WANDER_EMBEDDED_AUTH &&
+									auth?.authType !== 'NATIVE_WALLET' &&
+									arProvider.walletType !== 'NATIVE_WALLET' && (
+										<S.NavigationEntry onClick={() => window.wanderInstance.open('home')}>
+											<ReactSVG src={ICONS.wallet} />
+											{language.myWallet}
+										</S.NavigationEntry>
+									)}
+								{FEATURES.WANDER_EMBEDDED_AUTH &&
+									auth?.authType !== 'NATIVE_WALLET' &&
 									arProvider.walletType !== 'NATIVE_WALLET' &&
 									arProvider.backupsNeeded > 0 && (
 										<S.NavigationEntry onClick={() => window.wanderInstance.open('backup')}>
@@ -464,15 +480,17 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 											</S.Hint>
 										</S.NavigationEntry>
 									)}
-								<S.NavigationEntry onClick={() => setShowProfileManage(true)}>
-									<ReactSVG src={profile?.id ? ICONS.edit : ICONS.user} />
-									{profile?.id ? language.editProfile : language.createProfile}
-									{!profile?.id && (
-										<S.Hint>
-											<ReactSVG src={ICONS.info} />
-										</S.Hint>
-									)}
-								</S.NavigationEntry>
+								{PORTAL_CAPABILITIES.PROFILE_EDIT && (
+									<S.NavigationEntry onClick={() => setShowProfileManage(true)}>
+										<ReactSVG src={profile?.id ? ICONS.edit : ICONS.user} />
+										{profile?.id ? language.editProfile : language.createProfile}
+										{!profile?.id && (
+											<S.Hint>
+												<ReactSVG src={ICONS.info} />
+											</S.Hint>
+										)}
+									</S.NavigationEntry>
+								)}
 							</S.NavigationWrapper>
 							<S.DSpacer />
 							{(() => {
@@ -532,15 +550,16 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 
 	function getHeader() {
 		const profileReady = permawebProvider.libs && !permawebProvider.profileLoading;
-		const missingProfileCount = profileReady && !profile?.id ? 1 : 0;
-		const isEmbeddedWallet = auth?.authType !== 'NATIVE_WALLET' && arProvider.walletType !== 'NATIVE_WALLET';
+		const missingProfileCount = PORTAL_CAPABILITIES.PROFILE_EDIT && profileReady && !profile?.id ? 1 : 0;
+		const isEmbeddedWallet =
+			FEATURES.WANDER_EMBEDDED_AUTH && auth?.authType !== 'NATIVE_WALLET' && arProvider.walletType !== 'NATIVE_WALLET';
 		const backupCount = isEmbeddedWallet ? arProvider.backupsNeeded || 0 : 0;
 		const notificationCount = backupCount + missingProfileCount;
 		const showNotification = arProvider.walletAddress && notificationCount > 0;
 
 		return (
 			<S.UserButton>
-				<S.WanderConnectWrapper ref={wrapperRef} />
+				{FEATURES.WANDER_EMBEDDED_AUTH && <S.WanderConnectWrapper ref={wrapperRef} />}
 				{(label || isLoading) && (
 					<S.LAction onClick={handlePress}>
 						{avatar ? (
@@ -559,7 +578,7 @@ export default function WalletConnect(_props: { callback?: () => void }) {
 								<span />
 								<span />
 							</S.LoadingDots>
-							<span>{label || 'Log in'}</span>
+							<span>{label || (FEATURES.WANDER_EMBEDDED_AUTH ? 'Log in' : 'Connect Wander')}</span>
 						</S.LabelWrapper>
 						{showNotification && <S.NotificationBubble>{notificationCount}</S.NotificationBubble>}
 					</S.LAction>

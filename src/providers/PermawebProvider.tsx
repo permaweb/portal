@@ -6,7 +6,10 @@ import Permaweb, { Types } from '@permaweb/libs/browser';
 import { connect, createSigner } from '@permaweb/aoconnect/browser';
 
 import { Loader } from 'components/atoms/Loader';
+import { createBasePermawebAdapter } from 'helpers/basePortal';
 import { AO_NODE, STORAGE, URLS } from 'helpers/config';
+import { IS_BASE_MODE, PORTAL_MODE } from 'helpers/features';
+import { resolveUploadTransaction } from 'helpers/upload';
 import { cacheProfile as cacheProfileById } from 'helpers/utils';
 
 import { useArweaveProvider } from './ArweaveProvider';
@@ -59,6 +62,18 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		try {
+			if (IS_BASE_MODE) {
+				const baseDependencies = {
+					ao: { result: async () => ({ Messages: [{ Data: 'Base mode' }] }) },
+					arweave: Arweave.init({}),
+					signer: null,
+					node: null,
+				};
+				setDeps(baseDependencies);
+				setLibs(createBasePermawebAdapter(arProvider.wallet, arProvider.walletAddress || ''));
+				return;
+			}
+
 			const aoConnection = import.meta.env.VITE_AO ?? 'legacy';
 
 			let signer = null;
@@ -83,11 +98,13 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 			setDeps(dependencies);
 
 			const initializedLibs = Permaweb.init(dependencies);
+			initializedLibs.resolveTransaction = (data: any, args?: any) =>
+				resolveUploadTransaction(arProvider.wallet, data, args);
 			setLibs(initializedLibs);
 		} catch (error) {
 			console.error('Error in PermawebProvider initialization:', error);
 		}
-	}, [arProvider.wallet]);
+	}, [arProvider.wallet, arProvider.walletAddress]);
 
 	React.useEffect(() => {
 		(async function () {
@@ -167,7 +184,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				if (newProfile?.id) {
 					setProfile(newProfile);
 					cacheProfile(arProvider.walletAddress, newProfile);
-					if (newProfile.id) {
+					if (newProfile.id && !IS_BASE_MODE) {
 						cacheProfileById(newProfile.id, newProfile);
 					}
 				}
@@ -181,6 +198,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		If it's not then add it to the profile authorities list
 	*/
 	React.useEffect(() => {
+		if (IS_BASE_MODE) return;
 		if (authoritiesRef.current) return;
 
 		(async function () {
@@ -214,7 +232,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				const profileToUse = normalizeProfile({ ...fetchedProfile });
 
 				cacheProfile(address, profileToUse);
-				if (profileToUse?.id) {
+				if (profileToUse?.id && !IS_BASE_MODE) {
 					cacheProfileById(profileToUse.id, profileToUse);
 				}
 
@@ -237,7 +255,8 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	}
 
 	function getCachedProfile(address: string) {
-		const cached = localStorage.getItem(STORAGE.profileByWallet(address));
+		const cacheAddress = IS_BASE_MODE ? `${PORTAL_MODE}-${address}` : address;
+		const cached = localStorage.getItem(STORAGE.profileByWallet(cacheAddress));
 		return cached ? normalizeProfile(JSON.parse(cached)) : null;
 	}
 
@@ -245,7 +264,8 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		if (profileData?.id) {
 			// Only cache if profile has an ID, and don't cache portal-specific roles
 			const { roles, ...profileWithoutRoles } = profileData;
-			localStorage.setItem(STORAGE.profileByWallet(address), JSON.stringify(profileWithoutRoles));
+			const cacheAddress = IS_BASE_MODE ? `${PORTAL_MODE}-${address}` : address;
+			localStorage.setItem(STORAGE.profileByWallet(cacheAddress), JSON.stringify(profileWithoutRoles));
 		}
 	}
 

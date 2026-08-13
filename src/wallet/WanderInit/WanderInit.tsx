@@ -1,5 +1,6 @@
 import React from 'react';
-import { WanderConnect } from '@wanderapp/connect';
+
+import { FEATURES } from 'helpers/features';
 
 declare global {
 	interface Window {
@@ -11,8 +12,14 @@ export default function WanderInit() {
 	const wrapperRef = React.useRef<HTMLDivElement>(null);
 
 	React.useEffect(() => {
-		if (!window.wanderInstance) {
+		if (!FEATURES.WANDER_EMBEDDED_AUTH) return;
+		let active = true;
+
+		void (async () => {
+			if (window.wanderInstance) return;
 			try {
+				const { WanderConnect } = await import('@wanderapp/connect');
+				if (!active || window.wanderInstance) return;
 				const wanderInstance = new WanderConnect({
 					clientId: 'FREE_TRIAL',
 					theme: 'dark',
@@ -50,9 +57,10 @@ export default function WanderInit() {
 			} catch (e) {
 				console.error('Failed to initialize WanderConnect:', e);
 			}
-		}
+		})();
 
 		return () => {
+			active = false;
 			if (window.wanderInstance) {
 				try {
 					window.wanderInstance.destroy();
@@ -64,5 +72,5 @@ export default function WanderInit() {
 		};
 	}, []);
 
-	return <div ref={wrapperRef} style={{ display: 'none' }} />;
+	return FEATURES.WANDER_EMBEDDED_AUTH ? <div ref={wrapperRef} style={{ display: 'none' }} /> : null;
 }

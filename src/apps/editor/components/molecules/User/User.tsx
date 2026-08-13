@@ -8,6 +8,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Avatar } from 'components/atoms/Avatar';
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
+import { IS_BASE_MODE, PORTAL_CAPABILITIES } from 'helpers/features';
 import { PortalHeaderType, PortalUserType } from 'helpers/types';
 import { formatAddress, formatRoleLabel, getARAmountFromWinc } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -21,6 +22,7 @@ export default function User(props: {
 	user: PortalUserType;
 	onInviteDetected?: (userAddress: string, hasPendingInvite: boolean) => void;
 	hideAction?: boolean;
+	baseMembershipAccepted?: boolean;
 }) {
 	const arweaveProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
@@ -38,9 +40,17 @@ export default function User(props: {
 	const isPortalOwner = portalProvider.current?.owner === portalProvider.usersByPortalId?.[props.user.address]?.owner;
 	const userProfile = portalProvider.usersByPortalId?.[props.user.address] ?? { id: props.user.address };
 	const unauthorized = !portalProvider?.permissions?.updateUsers;
-	const invitePending =
-		userProfile?.invites?.find((invite: PortalHeaderType) => invite.id === portalProvider.current?.id) !== undefined;
-	const canShareCredits = portalProvider?.permissions?.updateUsers && !currentLoggedInUser && !invitePending;
+	const invitePending = IS_BASE_MODE
+		? props.user.address !== portalProvider.current?.owner && !props.baseMembershipAccepted
+		: userProfile?.invites?.find((invite: PortalHeaderType) => invite.id === portalProvider.current?.id) !== undefined;
+	const ownershipTransferTarget =
+		userProfile.owner === arweaveProvider.walletAddress && isCurrentLoggedInUserPortalOwner;
+	const actionDisabled = unauthorized || (ownershipTransferTarget && !PORTAL_CAPABILITIES.OWNERSHIP_TRANSFER);
+	const canShareCredits =
+		PORTAL_CAPABILITIES.CREDIT_SHARING &&
+		portalProvider?.permissions?.updateUsers &&
+		!currentLoggedInUser &&
+		!invitePending;
 
 	React.useEffect(() => {
 		// Only fetch if the profile is not already in the provider
@@ -49,8 +59,11 @@ export default function User(props: {
 		}
 	}, [props.user.address, portalProvider.usersByPortalId]);
 
-	const signer = new ArconnectSigner(arweaveProvider.wallet);
-	const turbo = TurboFactory.authenticated({ signer });
+	const turbo = React.useMemo(() => {
+		if (!PORTAL_CAPABILITIES.CREDIT_SHARING || !arweaveProvider.wallet) return null;
+		const signer = new ArconnectSigner(arweaveProvider.wallet);
+		return TurboFactory.authenticated({ signer });
+	}, [arweaveProvider.wallet]);
 
 	React.useEffect(() => {
 		if (props.onInviteDetected && !props.hideAction) {
@@ -59,6 +72,7 @@ export default function User(props: {
 	}, [props.onInviteDetected, props.user.address, props.hideAction, invitePending]);
 
 	React.useEffect(() => {
+		if (!turbo) return;
 		const run = async () => {
 			const userAddr = portalProvider.usersByPortalId?.[props.user?.address]?.owner;
 			if (!props.user || !userAddr) return;
@@ -86,24 +100,22 @@ export default function User(props: {
 		};
 
 		run();
-	}, [props.user?.address, portalProvider.usersByPortalId]);
+	}, [props.user?.address, portalProvider.usersByPortalId, turbo]);
 
 	return (
 		<>
 			<S.UserWrapper
 				key={props.user.address}
+				title={actionDisabled && ownershipTransferTarget ? 'Ownership transfer is unavailable in base mode' : undefined}
 				onClick={() => {
-					if (props.hideAction || unauthorized) return;
-					if (
-						portalProvider.usersByPortalId?.[props.user.address].owner === arweaveProvider.walletAddress &&
-						isCurrentLoggedInUserPortalOwner
-					) {
+					if (props.hideAction || actionDisabled) return;
+					if (ownershipTransferTarget) {
 						setShowManageOwner(true);
 						return;
 					}
 					setShowManageUser(true);
 				}}
-				disabled={unauthorized}
+				disabled={actionDisabled}
 				hideAction={props.hideAction}
 				isCurrent={currentLoggedInUser && !props.hideAction}
 			>
@@ -119,7 +131,7 @@ export default function User(props: {
 								<S.Indicator />
 							</S.PendingInvite>
 						)}
-						{totalRemaining !== 0 && (
+						{PORTAL_CAPABILITIES.CREDIT_SHARING && totalRemaining !== 0 && (
 							<S.PendingInvite className={'border-wrapper-alt3'}>
 								{totalRemaining > 0 ? (
 									<span>{getARAmountFromWinc(totalRemaining)} available credits</span>
@@ -163,21 +175,23 @@ export default function User(props: {
 				)}
 			</S.UserWrapper>
 
-			<Panel
-				open={showShareCredits}
-				width={575}
-				header={language.shareCredits}
-				handleClose={() => setShowShareCredits((prev) => !prev)}
-				closeHandlerDisabled
-			>
-				<ShareCredits
-					user={{
-						...props.user,
-						owner: userProfile?.owner,
-					}}
-					handleClose={() => setShowManageUser(false)}
-				/>
-			</Panel>
+			{PORTAL_CAPABILITIES.CREDIT_SHARING && (
+				<Panel
+					open={showShareCredits}
+					width={575}
+					header={language.shareCredits}
+					handleClose={() => setShowShareCredits((prev) => !prev)}
+					closeHandlerDisabled
+				>
+					<ShareCredits
+						user={{
+							...props.user,
+							owner: userProfile?.owner,
+						}}
+						handleClose={() => setShowManageUser(false)}
+					/>
+				</Panel>
+			)}
 
 			{props.user.roles && (
 				<Panel

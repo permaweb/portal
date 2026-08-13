@@ -114,7 +114,7 @@ export default function ArticlePostThumbnail() {
 		if (!thumbnailData) return;
 		setCompressing(true);
 		try {
-			const compressedFile = await compressImageToSize(thumbnailData, UPLOAD.dispatchUploadSize);
+			const compressedFile = await compressImageToSize(thumbnailData, UPLOAD.freeUploadLimit);
 			clearUploadState();
 			setThumbnailData(compressedFile);
 		} catch (e: any) {

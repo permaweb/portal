@@ -11,7 +11,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { Drawer } from 'components/atoms/Drawer';
 import { ICONS, URLS } from 'helpers/config';
-import { resolvePrimaryDomain } from 'helpers/utils';
+import { PORTAL_CAPABILITIES } from 'helpers/features';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
@@ -35,9 +35,7 @@ export default function Portal() {
 					<Button
 						type={'primary'}
 						label={language?.goToSite}
-						handlePress={() =>
-							window.open(resolvePrimaryDomain(portalProvider.current?.domains, portalProvider.current?.id))
-						}
+						handlePress={() => void portalProvider.openCurrentPortalSite()}
 						disabled={!portalProvider.current}
 						icon={ICONS.site}
 						iconLeftAlign
@@ -73,20 +71,22 @@ export default function Portal() {
 							]}
 						/>
 					</S.DesignSection>
-					<S.DomainSection>
-						<Drawer
-							drawerKey="portal-domains"
-							title={language?.domains}
-							content={<DomainListPortal type={'header'} />}
-							actions={[
-								<Button
-									type={'alt3'}
-									label={language?.domainsLink}
-									handlePress={() => navigate(URLS.portalDomains(portalProvider.current.id))}
-								/>,
-							]}
-						/>
-					</S.DomainSection>
+					{PORTAL_CAPABILITIES.DOMAINS && (
+						<S.DomainSection>
+							<Drawer
+								drawerKey="portal-domains"
+								title={language?.domains}
+								content={<DomainListPortal type={'header'} />}
+								actions={[
+									<Button
+										type={'alt3'}
+										label={language?.domainsLink}
+										handlePress={() => navigate(URLS.portalDomains(portalProvider.current.id))}
+									/>,
+								]}
+							/>
+						</S.DomainSection>
+					)}
 				</S.SectionWrapper>
 				<S.SectionWrapper>
 					<S.SetupSection>
