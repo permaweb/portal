@@ -11,7 +11,6 @@ import { Avatar } from 'components/atoms/Avatar';
 import { Button } from 'components/atoms/Button';
 import { Panel } from 'components/atoms/Panel';
 import { ICONS } from 'helpers/config';
-import { getTxEndpoint } from 'helpers/endpoints';
 import { FEATURES, IS_BASE_MODE, PORTAL_CAPABILITIES } from 'helpers/features';
 import { LanguageEnum } from 'helpers/language';
 import type { PendingTransaction } from 'helpers/pendingTransactions';
@@ -26,6 +25,8 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
 import * as S from './styles';
+
+const LUNAR_EXPLORER = 'https://lunar.arweave.net/#/explorer';
 
 export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engine'; callback?: () => void }) {
 	const { portalId: routePortalId } = useParams<{ portalId?: string }>();
@@ -244,7 +245,12 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 										<S.PendingList>
 											{pendingTransactions.map((transaction) => (
 												<li key={transaction.id}>
-													<button type={'button'} onClick={() => window.open(getTxEndpoint(transaction.id), '_blank')}>
+													<button
+														type={'button'}
+														onClick={() =>
+															window.open(`${LUNAR_EXPLORER}/${transaction.id}`, '_blank', 'noopener,noreferrer')
+														}
+													>
 														<S.PendingTransactionHeader>
 															<span>{pendingLabel(transaction.type)}</span>
 															<time>{new Date(transaction.createdAt).toLocaleTimeString()}</time>

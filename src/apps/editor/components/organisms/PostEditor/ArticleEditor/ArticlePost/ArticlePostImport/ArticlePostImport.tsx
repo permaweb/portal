@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPostUpdate } from 'editor/store/post';
 
@@ -15,19 +16,34 @@ import {
 	getMarkdownFeaturedImage,
 	getMarkdownTitle,
 } from 'helpers/markdown';
-import { ArticleBlockEnum, ArticleBlockType } from 'helpers/types';
+import { ArticleBlockEnum, ArticleBlockType, PortalPatchMapEnum, PortalUploadType } from 'helpers/types';
 import { checkValidAddress, debugLog } from 'helpers/utils';
 import { extractWordPressArticle } from 'helpers/wordpress';
+import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
+function featuredImageTransactionId(value: string) {
+	if (checkValidAddress(value)) return value;
+	const arUri = value.match(/^ar:\/\/([a-zA-Z0-9_-]{43})$/i)?.[1];
+	if (arUri) return arUri;
+	try {
+		const pathId = new URL(value).pathname.split('/').filter(Boolean).pop();
+		return pathId && checkValidAddress(pathId) ? pathId : null;
+	} catch {
+		return null;
+	}
+}
+
 export default function ArticlePostImport() {
 	const dispatch = useDispatch();
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
+	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
+	const portalProvider = usePortalProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const { addNotification } = useNotifications();
@@ -37,6 +53,47 @@ export default function ArticlePostImport() {
 	const [assetId, setAssetId] = React.useState<string>('');
 	const [wordPressUrl, setWordPressUrl] = React.useState<string>('');
 	const [loading, setLoading] = React.useState<boolean>(false);
+
+	const registerFeaturedImage = async (source: string) => {
+		if (!portalProvider.current?.id || !arProvider.wallet) return source;
+		let tx = featuredImageTransactionId(source);
+		if (!tx) {
+			const response = await fetch(source, { mode: 'cors' });
+			if (!response.ok) throw new Error(`Featured image request failed (${response.status})`);
+			const blob = await response.blob();
+			if (!blob.type.startsWith('image/')) throw new Error('The featured image URL did not return an image');
+			const extension = blob.type.split('/')[1]?.replace('jpeg', 'jpg') || 'png';
+			tx = await permawebProvider.libs.resolveTransaction(
+				new File([blob], `imported-featured-image.${extension}`, { type: blob.type })
+			);
+		}
+
+		const existingUploads = portalProvider.current.uploads || [];
+		if (!existingUploads.some((upload: PortalUploadType) => upload.tx === tx)) {
+			const upload: PortalUploadType = { tx, type: 'image', dateUploaded: Date.now().toString() };
+			if (permawebProvider.libs.addPortalUpload) {
+				await permawebProvider.libs.addPortalUpload(portalProvider.current.id, upload);
+			} else {
+				await permawebProvider.libs.updateZone(
+					{ Uploads: permawebProvider.libs.mapToProcessCase([...existingUploads, upload]) },
+					portalProvider.current.id,
+					arProvider.wallet
+				);
+			}
+			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Media);
+		}
+		return tx;
+	};
+
+	const importFeaturedImage = async (source: string) => {
+		try {
+			return await registerFeaturedImage(source);
+		} catch (error: any) {
+			debugLog('error', 'ArticlePostImport', 'Failed to register featured image', error);
+			addNotification(error?.message ?? 'The featured image could not be added to the media library', 'warning');
+			return source;
+		}
+	};
 
 	const parseInlineMarkup = (text: string): string => {
 		let result = text;
@@ -277,7 +334,7 @@ export default function ArticlePostImport() {
 
 			// Update thumbnail
 			if (convertedPost.thumbnail) {
-				dispatch(currentPostUpdate({ field: 'thumbnail', value: convertedPost.thumbnail }));
+				dispatch(currentPostUpdate({ field: 'thumbnail', value: await importFeaturedImage(convertedPost.thumbnail) }));
 			}
 
 			// Update date created if available
@@ -320,7 +377,9 @@ export default function ArticlePostImport() {
 			dispatch(currentPostUpdate({ field: 'content', value: updatedContent }));
 			if (title) dispatch(currentPostUpdate({ field: 'title', value: title }));
 			if (description) dispatch(currentPostUpdate({ field: 'description', value: description }));
-			if (featuredImage) dispatch(currentPostUpdate({ field: 'thumbnail', value: featuredImage }));
+			if (featuredImage) {
+				dispatch(currentPostUpdate({ field: 'thumbnail', value: await importFeaturedImage(featuredImage) }));
+			}
 
 			addNotification(language.markdownImportSuccess, 'success');
 			setShowOptions(false);
@@ -350,8 +409,14 @@ export default function ArticlePostImport() {
 						dispatch(currentPostUpdate({ field: 'content', value: updatedContent }));
 
 						if (response.name) dispatch(currentPostUpdate({ field: 'title', value: response.name }));
-						if (response.metadata.thumbnail)
-							dispatch(currentPostUpdate({ field: 'thumbnail', value: response.metadata.thumbnail }));
+						if (response.metadata.thumbnail) {
+							dispatch(
+								currentPostUpdate({
+									field: 'thumbnail',
+									value: await importFeaturedImage(response.metadata.thumbnail),
+								})
+							);
+						}
 					}
 					addNotification(language.contentImported, 'success');
 				} catch (e: any) {

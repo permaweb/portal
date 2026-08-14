@@ -12,7 +12,7 @@ export const defaultThemes: Portal = [
 				},
 				background: {
 					light: '250,250,250',
-					dark: '20,20,20',
+					dark: '0,0,0',
 				},
 				primary: {
 					light: '151,151,151',

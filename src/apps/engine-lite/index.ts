@@ -1,9 +1,14 @@
+import editorFavicon from '../editor/favicon.svg';
+
 import { fetchPortal, findPost, hydratePost, isArweaveId, type LitePortal, type LitePost } from './data';
-import { escapeHTML, renderFeed, renderPost } from './render';
+import { escapeHTML, type LiteThemeMode, renderFeed, renderPost, renderShell } from './render';
 import styles from './styles.css?inline';
 import { getLiteFontStylesheet, getLiteThemeVars } from './theme';
 
 const root = document.getElementById('portal');
+const THEME_STORAGE_KEY = 'portal-engine-lite-theme';
+const THEME_COLORS_STORAGE_PREFIX = 'portal-engine-lite-colors:';
+const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
 
 if (!root) throw new Error('Engine Lite requires a #portal element.');
 
@@ -16,6 +21,65 @@ let portal: LitePortal | null = null;
 let portalId = '';
 let selectedCategory: string | null = null;
 let searchQuery = '';
+let walletAddress: string | null = null;
+let themeMode: LiteThemeMode = readThemeMode();
+
+function readThemeMode(): LiteThemeMode {
+	try {
+		const value = window.localStorage.getItem(THEME_STORAGE_KEY);
+		return value === 'light' || value === 'dark' ? value : 'system';
+	} catch {
+		return 'system';
+	}
+}
+
+function effectiveScheme() {
+	if (themeMode !== 'system') return themeMode;
+	return systemTheme.matches ? 'dark' : 'light';
+}
+
+function themeColorsStorageKey(id: string) {
+	return `${THEME_COLORS_STORAGE_PREFIX}${id}`;
+}
+
+function applyThemeVars(variables: Record<string, string>) {
+	for (const [key, value] of Object.entries(variables)) {
+		if (key.startsWith('--lite-') && typeof value === 'string') {
+			document.documentElement.style.setProperty(key, value);
+		}
+	}
+}
+
+function cacheThemeVars(id: string, current: LitePortal) {
+	if (!id) return;
+	try {
+		window.localStorage.setItem(
+			themeColorsStorageKey(id),
+			JSON.stringify({
+				light: getLiteThemeVars(current, 'light'),
+				dark: getLiteThemeVars(current, 'dark'),
+			})
+		);
+	} catch {
+		// A fresh system palette remains available when storage is unavailable.
+	}
+}
+
+function applyCachedTheme(id: string) {
+	if (!id) return false;
+	const scheme = effectiveScheme();
+	try {
+		const cached = JSON.parse(window.localStorage.getItem(themeColorsStorageKey(id)) || 'null');
+		const variables = cached?.[scheme];
+		if (!variables || typeof variables !== 'object' || Array.isArray(variables)) return false;
+		applyThemeVars(variables);
+		document.documentElement.dataset.liteScheme = scheme;
+		document.documentElement.style.colorScheme = scheme;
+		return true;
+	} catch {
+		return false;
+	}
+}
 
 function hashParts() {
 	return window.location.hash
@@ -37,17 +101,6 @@ function portalIdFromLocation() {
 	return hashId && isArweaveId(hashId) ? hashId : '';
 }
 
-async function resolvePortalId() {
-	const local = portalIdFromLocation();
-	if (local) return local;
-	try {
-		const response = await fetch(window.location.origin, { method: 'HEAD', cache: 'no-store' });
-		return response.headers.get('X-Arns-Resolved-Id') || '';
-	} catch {
-		return '';
-	}
-}
-
 function routeParts() {
 	const parts = hashParts();
 	if (parts[0] && isArweaveId(parts[0])) parts.shift();
@@ -64,6 +117,10 @@ function homeHref() {
 
 function postHref(post: LitePost) {
 	return `#${routePrefix()}/post/${encodeURIComponent(post.slug)}`;
+}
+
+function renderPage(content: string) {
+	return portal ? renderShell(content, portal, homeHref(), walletAddress, themeMode) : content;
 }
 
 function setMeta(name: string, value: string, property = false) {
@@ -93,27 +150,33 @@ function setPageMeta(title: string, description: string, image?: string | null) 
 
 function loadPortalFonts(fonts: LitePortal['fonts']) {
 	const stylesheet = getLiteFontStylesheet(fonts);
-	if (!stylesheet) return;
-	const link = document.createElement('link');
+	const existing = document.head.querySelector<HTMLLinkElement>('link[data-engine-lite-fonts]');
+	if (!stylesheet) {
+		existing?.remove();
+		return;
+	}
+	if (existing?.href === stylesheet) return;
+	const link = existing || document.createElement('link');
 	link.rel = 'stylesheet';
 	link.href = stylesheet;
-	document.head.appendChild(link);
+	link.dataset.engineLiteFonts = 'true';
+	if (!existing) document.head.appendChild(link);
 }
 
 function applyTheme(current: LitePortal) {
-	const scheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-	for (const [key, value] of Object.entries(getLiteThemeVars(current, scheme))) {
-		document.documentElement.style.setProperty(key, value);
-	}
+	const scheme = effectiveScheme();
+	applyThemeVars(getLiteThemeVars(current, scheme));
+	cacheThemeVars(portalId, current);
+	document.documentElement.dataset.liteScheme = scheme;
 	document.documentElement.style.colorScheme = scheme;
 	loadPortalFonts(current.fonts);
 
-	if (current.icon) {
-		const icon = document.head.querySelector<HTMLLinkElement>('link[rel="icon"]') || document.createElement('link');
-		icon.rel = 'icon';
-		icon.href = current.icon;
-		document.head.appendChild(icon);
-	}
+	const icon = document.head.querySelector<HTMLLinkElement>('link[rel="icon"]') || document.createElement('link');
+	icon.rel = 'icon';
+	icon.href = current.icon || editorFavicon;
+	if (current.icon) icon.removeAttribute('type');
+	else icon.type = 'image/svg+xml';
+	if (!icon.isConnected) document.head.appendChild(icon);
 }
 
 function activateImages() {
@@ -121,6 +184,74 @@ function activateImages() {
 		const show = () => image.classList.add('is-loaded');
 		if (image.complete) show();
 		else image.addEventListener('load', show, { once: true });
+	});
+}
+
+async function readWalletAddress() {
+	if (!window.arweaveWallet?.getActiveAddress) return null;
+	try {
+		const address = await window.arweaveWallet.getActiveAddress();
+		return isArweaveId(address) ? address : null;
+	} catch {
+		return null;
+	}
+}
+
+async function connectWallet() {
+	const button = root?.querySelector<HTMLButtonElement>('[data-wallet-connect]');
+	if (!button) return;
+	if (!window.arweaveWallet?.connect) {
+		button.textContent = 'Wander Required';
+		return;
+	}
+
+	button.disabled = true;
+	button.textContent = 'Connecting...';
+	try {
+		await window.arweaveWallet.connect(['ACCESS_ADDRESS']);
+		walletAddress = await readWalletAddress();
+	} catch (error) {
+		console.error('[Engine Lite] Wallet connection failed', error);
+	}
+	await renderRoute();
+}
+
+async function disconnectWallet() {
+	const button = root?.querySelector<HTMLButtonElement>('[data-wallet-connect]');
+	if (!button || !walletAddress) return;
+
+	button.disabled = true;
+	button.textContent = 'Disconnecting...';
+	try {
+		await window.arweaveWallet?.disconnect?.();
+		walletAddress = null;
+	} catch (error) {
+		console.error('[Engine Lite] Wallet disconnection failed', error);
+	}
+	await renderRoute();
+}
+
+function setTheme(mode: LiteThemeMode) {
+	themeMode = mode;
+	try {
+		if (themeMode === 'system') window.localStorage.removeItem(THEME_STORAGE_KEY);
+		else window.localStorage.setItem(THEME_STORAGE_KEY, themeMode);
+	} catch {
+		// The selected theme still applies for this session when storage is unavailable.
+	}
+	if (portal) applyTheme(portal);
+	void renderRoute();
+}
+
+function attachShellEvents() {
+	root
+		?.querySelector<HTMLButtonElement>('[data-wallet-connect]')
+		?.addEventListener('click', () => void (walletAddress ? disconnectWallet() : connectWallet()));
+	root?.querySelectorAll<HTMLButtonElement>('[data-theme-mode]').forEach((button) => {
+		button.addEventListener('click', () => {
+			const mode = button.dataset.themeMode;
+			if (mode === 'system' || mode === 'light' || mode === 'dark') setTheme(mode);
+		});
 	});
 }
 
@@ -134,11 +265,18 @@ function attachFeedEvents() {
 	const search = root?.querySelector<HTMLInputElement>('.lite-search input');
 	search?.addEventListener('input', () => {
 		searchQuery = search.value;
+		const selectionStart = search.selectionStart ?? searchQuery.length;
+		const selectionEnd = search.selectionEnd ?? selectionStart;
 		if (!portal) return;
-		root.innerHTML = renderFeed(portal, { category: selectedCategory, search: searchQuery }, postHref);
+		root.innerHTML = renderPage(renderFeed(portal, { category: selectedCategory, search: searchQuery }, postHref));
 		attachFeedEvents();
+		attachShellEvents();
 		activateImages();
-		root.querySelector<HTMLInputElement>('.lite-search input')?.focus();
+		const nextSearch = root.querySelector<HTMLInputElement>('.lite-search input');
+		if (nextSearch) {
+			nextSearch.focus({ preventScroll: true });
+			nextSearch.setSelectionRange(selectionStart, selectionEnd);
+		}
 	});
 }
 
@@ -150,36 +288,43 @@ async function renderRoute() {
 	if (isPost && parts[1]) {
 		const match = findPost(portal.posts, parts.slice(1).join('/'));
 		if (!match) {
-			root.innerHTML = `<div class="lite-error">Post not found. <a href="${escapeHTML(
-				homeHref()
-			)}">View all posts</a></div>`;
+			root.innerHTML = renderPage(
+				`<div class="lite-error">Post not found. <a href="${escapeHTML(homeHref())}">View all posts</a></div>`
+			);
+			attachShellEvents();
 			return;
 		}
-		root.innerHTML = '<div class="lite-loading">Loading post</div>';
+		root.innerHTML = renderPage('<div class="lite-loading">Loading post</div>');
+		attachShellEvents();
 		const post = await hydratePost(match);
-		root.innerHTML = renderPost(post, homeHref());
+		root.innerHTML = renderPage(renderPost(post, homeHref()));
 		setPageMeta(`${post.title} | ${portal.name}`, post.excerpt || portal.description, post.image);
+		attachShellEvents();
 		activateImages();
 		return;
 	}
 
-	root.innerHTML = renderFeed(portal, { category: selectedCategory, search: searchQuery }, postHref);
+	root.innerHTML = renderPage(renderFeed(portal, { category: selectedCategory, search: searchQuery }, postHref));
 	setPageMeta(portal.name, portal.description || `${portal.name} posts`);
 	attachFeedEvents();
+	attachShellEvents();
 	activateImages();
 }
 
 async function start() {
+	portalId = portalIdFromLocation();
+	if (!applyCachedTheme(portalId)) {
+		document.documentElement.style.colorScheme = systemTheme.matches ? 'dark' : 'light';
+	}
 	root.innerHTML = '<div class="lite-loading">Loading posts</div>';
-	portalId = await resolvePortalId();
 	if (!portalId || !isArweaveId(portalId)) {
 		root.innerHTML =
-			'<div class="lite-error">No portal was found. Open this engine from a portal domain or pass <code>?portal=&lt;portal-id&gt;</code>.</div>';
+			'<div class="lite-error">No portal was found. Open a portal transaction or pass <code>?portal=&lt;portal-id&gt;</code>.</div>';
 		return;
 	}
 
 	try {
-		portal = await fetchPortal(portalId);
+		[portal, walletAddress] = await Promise.all([fetchPortal(portalId), readWalletAddress()]);
 		applyTheme(portal);
 		await renderRoute();
 	} catch (error) {
@@ -189,4 +334,25 @@ async function start() {
 }
 
 window.addEventListener('hashchange', () => void renderRoute());
+window.addEventListener(
+	'arweaveWalletLoaded',
+	() =>
+		void readWalletAddress().then((address) => {
+			walletAddress = address;
+			void renderRoute();
+		})
+);
+window.addEventListener(
+	'walletSwitch',
+	() =>
+		void readWalletAddress().then((address) => {
+			walletAddress = address;
+			void renderRoute();
+		})
+);
+systemTheme.addEventListener('change', () => {
+	if (themeMode !== 'system') return;
+	if (portal) applyTheme(portal);
+	else applyCachedTheme(portalId);
+});
 void start();

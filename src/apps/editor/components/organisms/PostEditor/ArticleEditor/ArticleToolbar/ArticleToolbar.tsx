@@ -470,11 +470,21 @@ export default function ArticleToolbar(props: {
 						post={previewPost}
 						themes={portalProvider.current?.themes || []}
 						fonts={portalProvider.current?.fonts || null}
+						portalName={portalProvider.current?.name}
+						portalLogo={portalProvider.current?.logo}
 					/>
 				</S.PreviewFrame>
 			</Modal>
 		);
-	}, [previewOpen, previewPost, language, portalProvider.current?.themes, portalProvider.current?.fonts]);
+	}, [
+		previewOpen,
+		previewPost,
+		language,
+		portalProvider.current?.themes,
+		portalProvider.current?.fonts,
+		portalProvider.current?.name,
+		portalProvider.current?.logo,
+	]);
 
 	return (
 		<>

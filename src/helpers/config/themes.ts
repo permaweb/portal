@@ -9,7 +9,7 @@ export const THEME_DEFAULT = {
 			},
 			background: {
 				light: '250,250,250',
-				dark: '27,27,27',
+				dark: '0,0,0',
 			},
 			primary: {
 				light: '94,102,219',

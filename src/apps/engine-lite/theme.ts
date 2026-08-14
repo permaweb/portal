@@ -18,7 +18,8 @@ export function getLiteThemeVars(
 ): Record<string, string> {
 	const activeTheme = portal.themes?.find((theme) => theme?.active) || portal.themes?.[0] || {};
 	const text = color(activeTheme, 'basics', 'text', scheme, scheme === 'dark' ? '255,255,255' : '0,0,0');
-	const background = color(activeTheme, 'basics', 'background', scheme, scheme === 'dark' ? '20,20,20' : '250,250,250');
+	const background = color(activeTheme, 'basics', 'background', scheme, scheme === 'dark' ? '0,0,0' : '250,250,250');
+	const primary = color(activeTheme, 'basics', 'primary', scheme, '94,102,219');
 	const surface = color(activeTheme, 'content', 'background', scheme, background);
 	const border = color(activeTheme, 'basics', 'border', scheme, text);
 
@@ -26,6 +27,7 @@ export function getLiteThemeVars(
 		'--lite-text': `rgb(${text})`,
 		'--lite-background': `rgb(${background})`,
 		'--lite-surface': `rgb(${surface})`,
+		'--lite-primary': `rgb(${primary})`,
 		'--lite-muted': `rgba(${text}, 0.62)`,
 		'--lite-faint': `rgba(${text}, 0.48)`,
 		'--lite-border': `rgba(${border}, 0.16)`,

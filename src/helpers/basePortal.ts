@@ -1795,6 +1795,20 @@ export async function updateBasePortal(portalId: string, data: any, wallet: any,
 	});
 }
 
+export async function addBasePortalUpload(portalId: string, upload: any, wallet: any, address: string) {
+	return queuePortalWrite(portalId, async () => {
+		const manifest = await fetchBasePortal(portalId, { fresh: true });
+		assertCanWrite(manifest, address, ['Admin', 'Contributor']);
+		if (!upload?.tx || manifest.uploads.some((entry) => entry?.tx === upload.tx)) return manifest;
+		return publishRelease(
+			manifest,
+			compactReleaseChanges(manifest, { uploads: [...manifest.uploads, upload] }),
+			wallet,
+			address
+		);
+	});
+}
+
 export async function setBasePortalUsers(portalId: string, grants: any[], wallet: any, address: string) {
 	return queuePortalWrite(portalId, async () => {
 		const manifest = await fetchBasePortal(portalId, { fresh: true });
@@ -2433,6 +2447,8 @@ export function createBasePermawebAdapter(wallet: any, address: string) {
 				throw error;
 			}
 		},
+		addPortalUpload: async (portalId: string, upload: any) =>
+			(await addBasePortalUpload(portalId, upload, wallet, address)).manifestTxId,
 		readState: async ({ processId, path }: any) => {
 			const manifest = await fetchBasePortal(processId);
 			activePortalId = manifest.portalId;

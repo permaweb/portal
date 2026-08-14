@@ -1,13 +1,26 @@
 :root {
-	--lite-background: rgb(250, 250, 250);
+	--lite-background: rgb(255, 255, 255);
 	--lite-surface: rgb(255, 255, 255);
 	--lite-text: rgb(0, 0, 0);
+	--lite-primary: rgb(94, 102, 219);
 	--lite-muted: rgba(0, 0, 0, 0.62);
 	--lite-faint: rgba(0, 0, 0, 0.48);
 	--lite-border: rgba(0, 0, 0, 0.12);
 	--lite-border-strong: rgba(0, 0, 0, 0.38);
 	--lite-header-font: Arial, Helvetica, sans-serif;
 	--lite-body-font: Arial, Helvetica, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--lite-background: rgb(0, 0, 0);
+		--lite-surface: rgb(0, 0, 0);
+		--lite-text: rgb(255, 255, 255);
+		--lite-muted: rgba(255, 255, 255, 0.62);
+		--lite-faint: rgba(255, 255, 255, 0.48);
+		--lite-border: rgba(255, 255, 255, 0.16);
+		--lite-border-strong: rgba(255, 255, 255, 0.48);
+	}
 }
 
 * {
@@ -63,7 +76,152 @@ video {
 .lite-shell {
 	width: 100%;
 	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
 	background: var(--lite-background);
+}
+
+.lite-site-header {
+	width: 100%;
+	background: var(--lite-background);
+}
+
+.lite-site-header-inner {
+	width: min(1020px, calc(100% - 48px));
+	height: 75px;
+	margin: 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+}
+
+.lite-site-logo {
+	min-width: 0;
+	display: inline-flex;
+	align-items: center;
+}
+
+.lite-site-logo img,
+.lite-site-logo svg {
+	display: block;
+	width: auto;
+	max-width: min(220px, 45vw);
+	height: 30px;
+	color: var(--lite-text);
+	object-fit: contain;
+	object-position: left center;
+}
+
+.lite-wallet-button {
+	display: inline-grid;
+	place-items: center;
+	height: 36px;
+	padding: 0 15px;
+	border: 1px solid var(--lite-border-strong);
+	background: transparent;
+	color: var(--lite-text);
+	font-size: 12px;
+	font-weight: 500;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: color 180ms ease, border-color 180ms ease, opacity 180ms ease;
+}
+
+.lite-wallet-button:hover:not(:disabled) {
+	color: var(--lite-muted);
+	border-color: var(--lite-muted);
+}
+
+.lite-wallet-button:disabled {
+	opacity: 0.65;
+	cursor: default;
+}
+
+.lite-wallet-disconnect {
+	grid-area: 1 / 1;
+	opacity: 0;
+	visibility: hidden;
+}
+
+.lite-wallet-address {
+	grid-area: 1 / 1;
+}
+
+.lite-wallet-button.is-connected:hover .lite-wallet-address {
+	opacity: 0;
+	visibility: hidden;
+}
+
+.lite-wallet-button.is-connected:hover .lite-wallet-disconnect {
+	opacity: 1;
+	visibility: visible;
+}
+
+.lite-site-footer {
+	width: min(1020px, calc(100% - 48px));
+	margin: auto auto 0;
+	padding: 24px 0 30px;
+	border-top: 1px solid var(--lite-border);
+}
+
+.lite-site-footer-inner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+}
+
+.lite-site-footer p {
+	margin: 0;
+	color: var(--lite-muted);
+	font-family: var(--lite-body-font);
+	font-size: 14px;
+}
+
+.lite-theme-toggle {
+	display: inline-flex;
+	align-items: center;
+	padding: 3px;
+	border: 1px solid var(--lite-border);
+	border-radius: 999px;
+	background: var(--lite-surface);
+	gap: 2px;
+}
+
+.lite-theme-option {
+	display: inline-grid;
+	place-items: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--lite-muted);
+	cursor: pointer;
+	transition: color 180ms ease, background 180ms ease;
+}
+
+.lite-theme-option:hover {
+	color: var(--lite-text);
+	background: color-mix(in srgb, var(--lite-text) 10%, transparent);
+}
+
+.lite-theme-option.is-active {
+	background: var(--lite-text);
+	color: var(--lite-background);
+	box-shadow: 0 0 0 1px var(--lite-text);
+}
+
+.lite-theme-option svg {
+	width: 16px;
+	height: 16px;
+	fill: none;
+	stroke: currentColor;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-width: 1.8;
 }
 
 .lite-loading,
@@ -96,7 +254,7 @@ video {
 	width: min(1020px, calc(100% - 48px));
 	min-height: 100vh;
 	margin: 0 auto;
-	padding: 54px 0 72px;
+	padding: 30px 0 72px;
 }
 
 .lite-featured {
@@ -128,16 +286,49 @@ video {
 	text-decoration: none;
 }
 
-.lite-featured-link.has-no-image {
-	grid-template-columns: 1fr;
-}
-
 .lite-featured-image,
 .lite-card-image,
 .lite-hero-image {
 	overflow: hidden;
 	border: 1px solid var(--lite-border);
 	background: var(--lite-surface);
+}
+
+.lite-image-fallback {
+	background-color: var(--lite-surface);
+}
+
+.lite-gradient-0 {
+	background-image: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--lite-primary) 55%, var(--lite-background)),
+		color-mix(in srgb, var(--lite-primary) 12%, var(--lite-surface))
+	);
+}
+
+.lite-gradient-1 {
+	background-image: linear-gradient(
+		45deg,
+		color-mix(in srgb, var(--lite-surface) 88%, var(--lite-primary)),
+		color-mix(in srgb, var(--lite-background) 56%, var(--lite-primary))
+	);
+}
+
+.lite-gradient-2 {
+	background-image: radial-gradient(
+		circle at 25% 20%,
+		color-mix(in srgb, var(--lite-primary) 62%, var(--lite-surface)),
+		color-mix(in srgb, var(--lite-background) 88%, var(--lite-primary)) 70%
+	);
+}
+
+.lite-gradient-3 {
+	background-image: linear-gradient(
+		160deg,
+		color-mix(in srgb, var(--lite-primary) 30%, var(--lite-background)),
+		color-mix(in srgb, var(--lite-text) 12%, var(--lite-surface)) 52%,
+		color-mix(in srgb, var(--lite-primary) 50%, var(--lite-background))
+	);
 }
 
 .lite-featured-image {
@@ -349,7 +540,7 @@ video {
 .lite-post-page {
 	width: min(600px, calc(100% - 48px));
 	margin: 0 auto;
-	padding: 54px 0 80px;
+	padding: 30px 0 80px;
 }
 
 .lite-article {
@@ -398,6 +589,11 @@ video {
 	margin-left: -50px;
 }
 
+.lite-hero-image.lite-image-fallback {
+	height: min(55vw, 440px);
+	min-height: 260px;
+}
+
 .lite-hero-image img {
 	display: block;
 	max-width: 100%;
@@ -415,6 +611,18 @@ video {
 	color: var(--lite-muted);
 	font-size: 13px;
 	line-height: 1.4;
+}
+
+.lite-author-link {
+	min-width: 0;
+	color: inherit;
+	overflow-wrap: anywhere;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+}
+
+.lite-author-link:hover {
+	color: var(--lite-text);
 }
 
 .lite-rich-text {
@@ -596,8 +804,24 @@ video {
 	.lite-post-page,
 	.lite-loading,
 	.lite-error,
-	.lite-empty {
+	.lite-empty,
+	.lite-site-header-inner,
+	.lite-site-footer {
 		width: min(100% - 32px, 1020px);
+	}
+
+	.lite-site-header-inner {
+		height: 60px;
+	}
+
+	.lite-site-logo img,
+	.lite-site-logo svg {
+		height: 26px;
+	}
+
+	.lite-wallet-button {
+		height: 34px;
+		padding: 0 12px;
 	}
 
 	.lite-feed,
@@ -637,6 +861,11 @@ video {
 		width: 100%;
 		max-width: 100%;
 		margin-left: 0;
+	}
+
+	.lite-hero-image.lite-image-fallback {
+		height: 220px;
+		min-height: 0;
 	}
 }
 

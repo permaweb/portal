@@ -1,7 +1,6 @@
 import { resolvePortalState } from '../../../scripts/resolve-base-portal.mjs';
 
 const ARWEAVE_ID = /^[a-zA-Z0-9_-]{43}$/;
-const PROCESS_NODE = 'https://hb.portalinto.com';
 const ARWEAVE_GATEWAY = 'https://arweave.net';
 
 export type LitePost = {
@@ -24,6 +23,7 @@ export type LitePortal = {
 	id: string;
 	name: string;
 	description: string;
+	logo: string | null;
 	icon: string | null;
 	fonts: { headers?: string; body?: string } | null;
 	themes: any[];
@@ -234,6 +234,7 @@ function portalFromState(portalId: string, source: unknown): LitePortal {
 		id: portalId,
 		name,
 		description: cleanText(overview.description || store.description || state.description),
+		logo: resolveAsset(overview.banner || overview.logo || store.banner || store.logo || state.banner || state.logo),
 		icon: resolveAsset(overview.thumbnail || overview.icon || store.thumbnail || store.icon || state.icon),
 		fonts: firstRecord(presentation.fonts, store.fonts, state.fonts),
 		themes: firstArray(presentation.themes, store.themes, state.themes),
@@ -251,6 +252,7 @@ function portalFromManifest(portalId: string, source: unknown): LitePortal | nul
 		overview: {
 			name: manifest.name || manifest.title,
 			description: manifest.description,
+			banner: manifest.bannerTxId,
 			thumbnail: manifest.iconTxId,
 		},
 		presentation: { fonts: manifest.fonts, themes: manifest.themes },
@@ -281,15 +283,9 @@ async function fetchValue(url: string, timeout = 25_000) {
 	}
 }
 
-function processPortalRequested() {
-	const params = new URLSearchParams(window.location.search);
-	return params.get('mode') === 'process' || params.get('portalMode') === 'process';
-}
-
 export async function fetchPortal(portalId: string): Promise<LitePortal> {
-	// Engine Lite is the base portal viewer. Resolve the manifest/release history
-	// first and never contact an AO process unless process mode was explicitly
-	// requested by a legacy caller.
+	// Engine Lite is the base portal viewer. Its only state source is the
+	// manifest/release history reconstructed by the portable resolver.
 	const basePortal = await resolvePortalState(portalId)
 		.then((value: unknown) => portalFromState(portalId, value))
 		.catch(() => null);
@@ -298,15 +294,7 @@ export async function fetchPortal(portalId: string): Promise<LitePortal> {
 	const directValue = await fetchJSON(`${ARWEAVE_GATEWAY}/${portalId}`, 12_000).catch(() => null);
 	const directPortal = directValue ? portalFromManifest(portalId, directValue) : null;
 	if (directPortal) return directPortal;
-	if (!processPortalRequested()) throw new Error('Portal manifest state was not found');
-
-	const processPortal = await fetchJSON(
-		`${PROCESS_NODE}/${portalId}~process@1.0/compute?require-codec=application/json&accept-bundle=true`
-	)
-		.then((value) => portalFromState(portalId, value))
-		.catch(() => null);
-	if (!processPortal) throw new Error('Portal state was not found');
-	return processPortal;
+	throw new Error('Portal manifest state was not found');
 }
 
 export async function hydratePost(post: LitePost): Promise<LitePost> {
@@ -323,27 +311,7 @@ export async function hydratePost(post: LitePost): Promise<LitePost> {
 			return post;
 		}
 	}
-	if (!ARWEAVE_ID.test(post.id)) return post;
-	if (!processPortalRequested()) return post;
-	try {
-		const state = unwrapResponse(
-			await fetchJSON(
-				`${PROCESS_NODE}/${post.id}~process@1.0/compute/asset?require-codec=application/json&accept-bundle=true`,
-				20_000
-			)
-		);
-		const asset = asRecord((state as any)?.asset ?? state);
-		const metadata = firstRecord(asset.metadata);
-		const content = metadata.content ?? asset.content ?? post.content;
-		return {
-			...post,
-			content,
-			image: post.image || resolveAsset(metadata.thumbnail),
-			readTime: estimateReadTime(content, post.excerpt),
-		};
-	} catch {
-		return post;
-	}
+	return post;
 }
 
 export function findPost(posts: LitePost[], slugOrId: string) {
