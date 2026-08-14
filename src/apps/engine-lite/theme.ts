@@ -20,21 +20,32 @@ export function getLiteThemeVars(
 	const text = color(activeTheme, 'basics', 'text', scheme, scheme === 'dark' ? '255,255,255' : '0,0,0');
 	const background = color(activeTheme, 'basics', 'background', scheme, scheme === 'dark' ? '0,0,0' : '250,250,250');
 	const primary = color(activeTheme, 'basics', 'primary', scheme, '94,102,219');
+	const link = color(activeTheme, 'links', 'default', scheme, primary);
+	const linkHover = color(activeTheme, 'links', 'hover', scheme, link);
 	const surface = color(activeTheme, 'content', 'background', scheme, background);
 	const border = color(activeTheme, 'basics', 'border', scheme, text);
 
-	return {
+	const variables = {
 		'--lite-text': `rgb(${text})`,
 		'--lite-background': `rgb(${background})`,
 		'--lite-surface': `rgb(${surface})`,
+		'--lite-alt-surface': `rgb(${surface})`,
 		'--lite-primary': `rgb(${primary})`,
+		'--lite-link': `rgb(${link})`,
+		'--lite-link-hover': `rgb(${linkHover})`,
 		'--lite-muted': `rgba(${text}, 0.62)`,
 		'--lite-faint': `rgba(${text}, 0.48)`,
 		'--lite-border': `rgba(${border}, 0.16)`,
 		'--lite-border-strong': `rgba(${border}, 0.48)`,
+		'--lite-code-primary': scheme === 'dark' ? '#ca83d4' : '#d64b6f',
+		'--lite-code-function': scheme === 'dark' ? '#918dd0' : '#6864a6',
+		'--lite-code-number': scheme === 'dark' ? '#8bb8de' : '#317aaf',
+		'--lite-code-deleted': '#b95b80',
+		'--lite-code-inserted': '#42a392',
 		'--lite-header-font': `'${fontFamily(portal.fonts?.headers)}', Arial, sans-serif`,
 		'--lite-body-font': `'${fontFamily(portal.fonts?.body)}', Arial, sans-serif`,
 	};
+	return variables;
 }
 
 export function getLiteFontFamilies(fonts: LitePortal['fonts']) {

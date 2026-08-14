@@ -7,6 +7,41 @@
 		<meta name="robots" content="index, follow, max-image-preview:large" />
 		<meta name="portal-engine-service-worker" content="./engine-lite-service-worker.js" />
 		<title>Portal</title>
+		<script>
+			(function () {
+				var ARWEAVE_ID = /^[a-zA-Z0-9_-]{43}$/;
+				var parts = window.location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+				var params = new URLSearchParams(window.location.search);
+				var explicit = params.get('portal') || params.get('portalId');
+				var pathId = window.location.pathname.split('/').filter(Boolean)[0];
+				var id =
+					explicit && ARWEAVE_ID.test(explicit) ? explicit : pathId && ARWEAVE_ID.test(pathId) ? pathId : parts[0];
+				var mode = 'system';
+				try {
+					var storedMode = window.localStorage.getItem('portal-engine-lite-theme');
+					if (storedMode === 'light' || storedMode === 'dark') mode = storedMode;
+				} catch (_) {}
+				var scheme =
+					mode === 'system'
+						? window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+							? 'dark'
+							: 'light'
+						: mode;
+				try {
+					var cachedThemes = JSON.parse(window.localStorage.getItem('portal-engine-lite-colors:' + id) || 'null');
+					var variables = cachedThemes && cachedThemes[scheme];
+					if (variables && typeof variables === 'object' && !Array.isArray(variables)) {
+						Object.keys(variables).forEach(function (key) {
+							if (key.indexOf('--lite-') === 0 && typeof variables[key] === 'string') {
+								document.documentElement.style.setProperty(key, variables[key]);
+							}
+						});
+					}
+				} catch (_) {}
+				document.documentElement.dataset.liteScheme = scheme;
+				document.documentElement.style.colorScheme = scheme;
+			})();
+		</script>
 		<style>
 			:root {
 				--lite-background: rgb(255, 255, 255);

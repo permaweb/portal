@@ -20,15 +20,12 @@ import { Tabs } from 'components/atoms/Tabs';
 import {
 	ENGINE_LITE_REFERENCE_ID,
 	ICONS,
-	LAYOUT,
-	PAGES,
 	PORTAL_DATA,
 	PORTAL_PATCH_MAP,
 	PORTAL_ROLES,
 	THEME,
 	URLS,
 } from 'helpers/config';
-import { THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
 import { IS_BASE_MODE, PORTAL_CAPABILITIES } from 'helpers/features';
 import type { PortalHeaderType, SelectOptionType } from 'helpers/types';
 import { PortalPatchMapEnum } from 'helpers/types';
@@ -40,25 +37,6 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
-
-function deepMerge(target: any, patch: any): any {
-	if (!target) return patch;
-	const result = { ...target };
-	for (const key of Object.keys(patch)) {
-		if (
-			patch[key] &&
-			typeof patch[key] === 'object' &&
-			!Array.isArray(patch[key]) &&
-			target[key] &&
-			typeof target[key] === 'object'
-		) {
-			result[key] = deepMerge(target[key], patch[key]);
-		} else {
-			result[key] = patch[key];
-		}
-	}
-	return result;
-}
 
 function ImagesView() {
 	const portalProvider = usePortalProvider();
@@ -119,7 +97,7 @@ export default function CreatePortal() {
 	const [logoId, setLogoId] = React.useState<string | null>(null);
 	const [iconId, setIconId] = React.useState<string | null>(null);
 	const [wallpaperId, setWallpaperId] = React.useState<string | null>(null);
-	const [selectedLayout, setSelectedLayout] = React.useState<string>('journal');
+	const [selectedLayout, setSelectedLayout] = React.useState<'blog' | 'docs'>('blog');
 	const [showWordPressCreate, setShowWordPressCreate] = React.useState<boolean>(false);
 
 	const importOptions: SelectOptionType[] = [
@@ -142,10 +120,9 @@ export default function CreatePortal() {
 		}
 	}, [creatingNew, portalProvider.current?.id, portalProvider.current?.name]);
 
-	const layoutOptions = [
-		{ name: 'journal', icon: ICONS.layoutJournal },
+	const layoutOptions: { name: 'blog' | 'docs'; icon: string }[] = [
 		{ name: 'blog', icon: ICONS.layoutBlog },
-		{ name: 'documentation', icon: ICONS.layoutDocumentation },
+		{ name: 'docs', icon: ICONS.layoutDocumentation },
 	];
 
 	const handleCreatePortal = async () => {
@@ -161,20 +138,8 @@ export default function CreatePortal() {
 		setCreating(true);
 		try {
 			let data: any = { Name: name, EngineReference: ENGINE_LITE_REFERENCE_ID };
-			const chosenLayout =
-				selectedLayout === 'blog'
-					? LAYOUT.BLOG
-					: selectedLayout === 'documentation'
-					? LAYOUT.DOCUMENTATION
-					: LAYOUT.JOURNAL;
-			const chosenPages =
-				selectedLayout === 'blog'
-					? PAGES.BLOG
-					: selectedLayout === 'documentation'
-					? PAGES.DOCUMENTATION
-					: PAGES.JOURNAL;
-			const chosenTheme =
-				selectedLayout === 'documentation' ? deepMerge(THEME.DEFAULT, THEME_DOCUMENTATION_PATCH) : THEME.DEFAULT;
+			const chosenLayout = selectedLayout;
+			const chosenTheme = THEME.DEFAULT;
 
 			if (logoId && checkValidAddress(logoId)) {
 				try {
@@ -241,15 +206,14 @@ export default function CreatePortal() {
 			const portalId = await permawebProvider.libs.createZone(
 				{
 					tags: tags,
-					data: PORTAL_DATA({ logo: data.Banner, theme: chosenTheme }),
+					data: PORTAL_DATA({ logo: data.Banner, theme: chosenTheme, layout: chosenLayout }),
 					spawnModeration: false,
 					authUsers: [arProvider.walletAddress],
 					...(IS_BASE_MODE
 						? {
 								initialPortalData: {
 									Themes: [permawebProvider.libs.mapToProcessCase(chosenTheme)],
-									Layout: permawebProvider.libs.mapToProcessCase(chosenLayout),
-									Pages: permawebProvider.libs.mapToProcessCase(chosenPages),
+									Layout: chosenLayout,
 								},
 						  }
 						: {}),
@@ -299,8 +263,7 @@ export default function CreatePortal() {
 				: await permawebProvider.libs.updateZone(
 						{
 							Themes: [permawebProvider.libs.mapToProcessCase(chosenTheme)],
-							Layout: permawebProvider.libs.mapToProcessCase(chosenLayout),
-							Pages: permawebProvider.libs.mapToProcessCase(chosenPages),
+							Layout: chosenLayout,
 						},
 						portalId,
 						arProvider.wallet

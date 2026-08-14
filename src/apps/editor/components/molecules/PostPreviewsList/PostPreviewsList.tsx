@@ -19,12 +19,12 @@ export default function PostPreviewsList() {
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
 	const templates = React.useMemo(() => {
-		const portalPreviews = portalProvider.current?.layout?.postPreviews || portalProvider.current?.postPreviews || {};
+		const portalPreviews = portalProvider.current?.postPreviews || portalProvider.current?.layout?.postPreviews || {};
 		return {
 			...POST_PREVIEWS,
 			...portalPreviews,
 		};
-	}, [portalProvider.current?.layout?.postPreviews, portalProvider.current?.postPreviews]);
+	}, [portalProvider.current?.postPreviews, portalProvider.current?.layout?.postPreviews]);
 
 	const handleEditTemplate = (templateId: string) => {
 		navigate(URLS.portalPostPreviewEdit(portalProvider.current.id, templateId));

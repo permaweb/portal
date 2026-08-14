@@ -57,14 +57,14 @@ export default function PageSection(props: {
 	const [feedLayoutDropdown, setFeedLayoutDropdown] = React.useState<string | null>(null);
 
 	const feedLayoutOptions = React.useMemo(() => {
-		const portalPreviews = portalProvider.current?.layout?.postPreviews || portalProvider.current?.postPreviews || {};
+		const portalPreviews = portalProvider.current?.postPreviews || portalProvider.current?.layout?.postPreviews || {};
 		const allTemplates = { ...POST_PREVIEWS, ...portalPreviews };
 
 		return Object.entries(allTemplates).map(([id, template]: [string, any]) => ({
 			id: id,
 			label: template.name || id,
 		}));
-	}, [portalProvider.current?.postPreviews]);
+	}, [portalProvider.current?.postPreviews, portalProvider.current?.layout?.postPreviews]);
 
 	const handleCurrentPageUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPageUpdate(updatedField));

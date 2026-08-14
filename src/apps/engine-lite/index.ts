@@ -6,7 +6,7 @@ import {
 	ENGINE_LITE_THEME_STORAGE_KEY,
 } from './constants';
 import { fetchPortal, findPost, hydratePost, isArweaveId, type LitePortal, type LitePost } from './data';
-import { escapeHTML, type LiteThemeMode, renderFeed, renderPost, renderShell } from './render';
+import { escapeHTML, type LiteThemeMode, renderDocs, renderFeed, renderPost, renderShell } from './render';
 import styles from './styles.css?inline';
 import { getLiteFontStylesheet, getLiteThemeVars } from './theme';
 
@@ -24,6 +24,22 @@ const engineScriptUrl =
 	'';
 
 if (!root) throw new Error('Engine Lite requires a #portal element.');
+
+let portal: LitePortal | null = null;
+let portalId = portalIdFromLocation();
+let selectedCategory: string | null = null;
+let searchQuery = '';
+let walletAddress: string | null = null;
+let themeMode: LiteThemeMode = readThemeMode();
+let imageLightbox: HTMLButtonElement | null = null;
+let imageLightboxCloseTimer: number | null = null;
+let imageLightboxPreviousFocus: HTMLElement | null = null;
+let imageLightboxPreviousOverflow = '';
+let pendingDocsAnchor: string | null = null;
+
+const IMAGE_LIGHTBOX_CLOSE_MS = 180;
+const CODE_COPY_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>`;
+const CODE_CHECK_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg>`;
 
 function registerEngineServiceWorker() {
 	const serviceWorkerId = window.__PORTAL_ENGINE_SERVICE_WORKER_ID__;
@@ -43,25 +59,18 @@ function registerEngineServiceWorker() {
 		.catch(() => undefined);
 }
 
+if (!applyCachedTheme(portalId)) {
+	const scheme = effectiveScheme();
+	document.documentElement.dataset.liteScheme = scheme;
+	document.documentElement.style.colorScheme = scheme;
+}
+
 registerEngineServiceWorker();
 
 const style = document.createElement('style');
 style.dataset.engineLite = 'true';
 style.textContent = styles;
 document.head.appendChild(style);
-
-let portal: LitePortal | null = null;
-let portalId = '';
-let selectedCategory: string | null = null;
-let searchQuery = '';
-let walletAddress: string | null = null;
-let themeMode: LiteThemeMode = readThemeMode();
-let imageLightbox: HTMLButtonElement | null = null;
-let imageLightboxCloseTimer: number | null = null;
-let imageLightboxPreviousFocus: HTMLElement | null = null;
-let imageLightboxPreviousOverflow = '';
-
-const IMAGE_LIGHTBOX_CLOSE_MS = 180;
 
 function readThemeMode(): LiteThemeMode {
 	try {
@@ -199,8 +208,8 @@ function setPageMeta(title: string, description: string, image?: string | null) 
 	}
 }
 
-function loadPortalFonts(fonts: LitePortal['fonts']) {
-	const stylesheet = getLiteFontStylesheet(fonts);
+function loadPortalFonts(current: LitePortal) {
+	const stylesheet = getLiteFontStylesheet(current.fonts);
 	const existing = document.head.querySelector<HTMLLinkElement>('link[data-engine-lite-fonts]');
 	if (!stylesheet) {
 		existing?.remove();
@@ -221,7 +230,8 @@ function applyTheme(current: LitePortal) {
 	cacheBrand(portalId, current);
 	document.documentElement.dataset.liteScheme = scheme;
 	document.documentElement.style.colorScheme = scheme;
-	loadPortalFonts(current.fonts);
+	document.documentElement.style.overscrollBehavior = current.layout === 'docs' ? 'none' : 'auto';
+	loadPortalFonts(current);
 
 	const icon = document.head.querySelector<HTMLLinkElement>('link[rel="icon"]') || document.createElement('link');
 	icon.rel = 'icon';
@@ -356,6 +366,195 @@ function attachPostImageEvents() {
 		});
 }
 
+function headingId(value: string, fallback: string) {
+	return (
+		value
+			.toLowerCase()
+			.trim()
+			.replace(/\s+/g, '-')
+			.replace(/[^\w-]/g, '') || fallback
+	);
+}
+
+async function copyText(value: string) {
+	if (!value) return false;
+	if (navigator.clipboard?.writeText) {
+		try {
+			await navigator.clipboard.writeText(value);
+			return true;
+		} catch {
+			// Fall back to the selection API when clipboard permission is unavailable.
+		}
+	}
+
+	const textarea = document.createElement('textarea');
+	textarea.value = value;
+	textarea.readOnly = true;
+	textarea.style.position = 'fixed';
+	textarea.style.opacity = '0';
+	document.body.appendChild(textarea);
+	textarea.select();
+	const copied = document.execCommand('copy');
+	textarea.remove();
+	return copied;
+}
+
+function attachCodeCopyEvents() {
+	root?.querySelectorAll<HTMLElement>('.lite-rich-text pre').forEach((block) => {
+		if (block.querySelector('[data-code-copy]')) return;
+		const button = document.createElement('button');
+		button.type = 'button';
+		button.className = 'lite-code-copy';
+		button.dataset.codeCopy = 'true';
+		button.title = 'Copy code';
+		button.setAttribute('aria-label', 'Copy code');
+		button.innerHTML = CODE_COPY_ICON;
+		button.addEventListener('click', async () => {
+			const value = block.querySelector('code')?.textContent || block.textContent || '';
+			if (await copyText(value)) {
+				button.classList.add('is-copied');
+				button.title = 'Copied';
+				button.setAttribute('aria-label', 'Copied code');
+				button.innerHTML = CODE_CHECK_ICON;
+				window.setTimeout(() => {
+					button.classList.remove('is-copied');
+					button.title = 'Copy code';
+					button.setAttribute('aria-label', 'Copy code');
+					button.innerHTML = CODE_COPY_ICON;
+				}, 2000);
+			}
+		});
+		block.appendChild(button);
+	});
+}
+
+function resolveDocsPostLink(href: string) {
+	if (!portal || !href.startsWith('/') || href.startsWith('//')) return null;
+	let url: URL;
+	try {
+		url = new URL(href, window.location.origin);
+	} catch {
+		return null;
+	}
+	if (url.origin !== window.location.origin) return null;
+
+	let path = url.pathname.replace(/^\/+|\/+$/g, '');
+	try {
+		path = decodeURIComponent(path);
+	} catch {
+		// Match against the authored path when it is not URI encoded correctly.
+	}
+	path = path.replace(/^docs\/?/i, '');
+	if (!path) return { post: portal.posts[0] || null, anchor: url.hash.slice(1) };
+	const last = path.split('/').filter(Boolean).pop() || path;
+	const normalize = (value: string) =>
+		value
+			.trim()
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, '-')
+			.replace(/^-+|-+$/g, '');
+	const candidates = new Set([normalize(path), normalize(last)]);
+	const post = portal.posts.find((entry) => candidates.has(entry.slug.toLowerCase())) || null;
+	return post ? { post, anchor: url.hash.slice(1) } : null;
+}
+
+function scrollToDocsAnchor(rawTargetId: string) {
+	let targetId = rawTargetId;
+	try {
+		targetId = decodeURIComponent(rawTargetId);
+	} catch {
+		// Use the authored target verbatim when it is not URI encoded correctly.
+	}
+	const target = targetId ? document.getElementById(targetId) : null;
+	if (!target) return false;
+	const top = target.getBoundingClientRect().top + window.scrollY - 95;
+	window.scrollTo({ top, behavior: 'smooth' });
+	return true;
+}
+
+function attachDocsEvents() {
+	const toggle = root?.querySelector<HTMLButtonElement>('[data-docs-nav-toggle]');
+	const list = root?.querySelector<HTMLElement>('[data-docs-nav-list]');
+	toggle?.addEventListener('click', () => {
+		const open = toggle.getAttribute('aria-expanded') !== 'true';
+		toggle.setAttribute('aria-expanded', String(open));
+		list?.classList.toggle('is-open', open);
+	});
+	root?.querySelectorAll<HTMLElement>('[data-docs-link]').forEach((link) => {
+		link.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+	});
+
+	const headings = Array.from(
+		root?.querySelectorAll<HTMLElement>(
+			'.lite-docs-copy h1, .lite-docs-copy h2, .lite-docs-copy h3, .lite-docs-copy h4, .lite-docs-copy h5, .lite-docs-copy h6'
+		) || []
+	);
+	const usedIds = new Set<string>();
+	headings.forEach((heading, index) => {
+		const base = heading.id || headingId(heading.textContent || '', `section-${index + 1}`);
+		let id = base;
+		let suffix = 2;
+		while (usedIds.has(id)) id = `${base}-${suffix++}`;
+		heading.id = id;
+		heading.style.scrollMarginTop = '100px';
+		usedIds.add(id);
+	});
+
+	const toc = root?.querySelector<HTMLElement>('[data-docs-toc]');
+	const tocList = toc?.querySelector('ul');
+	const tocHeadings = headings.filter((heading) => heading.tagName === 'H4');
+	root?.querySelectorAll<HTMLAnchorElement>('.lite-docs-copy a[href^="#"]').forEach((link) => {
+		link.addEventListener('click', (event) => {
+			const rawTargetId = link.getAttribute('href')?.slice(1) || '';
+			if (scrollToDocsAnchor(rawTargetId)) event.preventDefault();
+		});
+	});
+	root?.querySelectorAll<HTMLAnchorElement>('.lite-docs-copy a[href^="/"]').forEach((link) => {
+		link.addEventListener('click', (event) => {
+			if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+			if (link.target === '_blank') return;
+			const match = resolveDocsPostLink(link.getAttribute('href') || '');
+			if (!match?.post) return;
+			event.preventDefault();
+			pendingDocsAnchor = match.anchor || null;
+			const nextHash = postHref(match.post);
+			if (window.location.hash === nextHash) void renderRoute();
+			else window.location.hash = nextHash;
+		});
+	});
+	if (toc && tocList && tocHeadings.length) {
+		toc.hidden = false;
+		for (const heading of tocHeadings) {
+			const item = document.createElement('li');
+			const link = document.createElement('a');
+			link.href = `#${heading.id}`;
+			link.textContent = heading.textContent || '';
+			link.addEventListener('click', (event) => {
+				event.preventDefault();
+				scrollToDocsAnchor(heading.id);
+				tocList.querySelectorAll('a').forEach((entry) => entry.classList.remove('is-active'));
+				link.classList.add('is-active');
+			});
+			item.appendChild(link);
+			tocList.appendChild(item);
+		}
+	}
+	if (pendingDocsAnchor) {
+		const target = pendingDocsAnchor;
+		pendingDocsAnchor = null;
+		window.requestAnimationFrame(() => scrollToDocsAnchor(target));
+	}
+}
+
+function attachContentEvents(docs = false) {
+	activateImages();
+	attachPostImageEvents();
+	if (docs) {
+		attachCodeCopyEvents();
+		attachDocsEvents();
+	}
+}
+
 async function readWalletAddress() {
 	if (!window.arweaveWallet?.getActiveAddress) return null;
 	try {
@@ -413,6 +612,7 @@ function setTheme(mode: LiteThemeMode) {
 }
 
 function attachShellEvents() {
+	root?.querySelector('.lite-site-header')?.classList.toggle('is-scrolled', window.scrollY > 0);
 	root
 		?.querySelector<HTMLButtonElement>('[data-wallet-connect]')
 		?.addEventListener('click', () => void (walletAddress ? disconnectWallet() : connectWallet()));
@@ -455,6 +655,33 @@ async function renderRoute() {
 	window.scrollTo({ top: 0, behavior: 'auto' });
 	const parts = routeParts();
 	const isPost = parts[0] === 'post' || parts[0] === 'read';
+	if (portal.layout === 'docs') {
+		if (!portal.posts.length) {
+			root.innerHTML = renderPage('<div class="lite-empty">No documentation has been published yet.</div>');
+			setPageMeta(portal.name, portal.description || `${portal.name} documentation`);
+			attachShellEvents();
+			return;
+		}
+
+		const match = isPost && parts[1] ? findPost(portal.posts, parts.slice(1).join('/')) : portal.posts[0];
+		if (!match) {
+			root.innerHTML = renderPage(
+				`<div class="lite-error">Page not found. <a href="${escapeHTML(homeHref())}">View documentation</a></div>`
+			);
+			attachShellEvents();
+			return;
+		}
+
+		root.innerHTML = renderPage('<div class="lite-loading">Loading documentation</div>');
+		attachShellEvents();
+		const post = await hydratePost(match);
+		root.innerHTML = renderPage(renderDocs(portal, post, postHref));
+		setPageMeta(`${post.title} | ${portal.name}`, post.excerpt || portal.description, post.image);
+		attachShellEvents();
+		attachContentEvents(true);
+		return;
+	}
+
 	if (isPost && parts[1]) {
 		const match = findPost(portal.posts, parts.slice(1).join('/'));
 		if (!match) {
@@ -470,8 +697,7 @@ async function renderRoute() {
 		root.innerHTML = renderPage(renderPost(post, homeHref()));
 		setPageMeta(`${post.title} | ${portal.name}`, post.excerpt || portal.description, post.image);
 		attachShellEvents();
-		activateImages();
-		attachPostImageEvents();
+		attachContentEvents();
 		return;
 	}
 
@@ -505,6 +731,9 @@ async function start() {
 }
 
 window.addEventListener('hashchange', () => void renderRoute());
+window.addEventListener('scroll', () => {
+	root?.querySelector('.lite-site-header')?.classList.toggle('is-scrolled', window.scrollY > 0);
+});
 window.addEventListener(
 	'arweaveWalletLoaded',
 	() =>
@@ -532,6 +761,10 @@ document.addEventListener('keydown', (event) => {
 void start().finally(() => {
 	const loader = document.getElementById('portal-site-loader');
 	if (!loader) return;
-	loader.classList.add('is-hidden');
-	window.setTimeout(() => loader.remove(), 180);
+	window.requestAnimationFrame(() => {
+		window.requestAnimationFrame(() => {
+			loader.classList.add('is-hidden');
+			window.setTimeout(() => loader.remove(), 180);
+		});
+	});
 });

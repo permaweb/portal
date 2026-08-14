@@ -1,4 +1,4 @@
-import { ENGINE_LITE_REFERENCE_ID, FONT_OPTIONS, LAYOUT, PAGES, PORTAL_DATA, STORAGE, THEME } from './config';
+import { DEFAULT_FONTS, ENGINE_LITE_REFERENCE_ID, PAGES, PORTAL_DATA, STORAGE, THEME } from './config';
 import { trackObservedPendingTransaction, trackPendingTransaction } from './pendingTransactions';
 import { PortalHeaderType, PortalUserRoleType, PortalUserType } from './types';
 import { uploadTransaction } from './upload';
@@ -313,9 +313,9 @@ function normalizeManifest(value: any, txId?: string): BasePortalManifest | null
 		topics: Array.isArray(value.topics) ? value.topics : [],
 		links: Array.isArray(value.links) ? value.links : [],
 		domains: Array.isArray(value.domains) ? value.domains : [],
-		fonts: value.fonts || { headers: FONT_OPTIONS.headers[0], body: FONT_OPTIONS.body[0] },
+		fonts: value.fonts || { ...DEFAULT_FONTS },
 		themes: Array.isArray(value.themes) && value.themes.length ? value.themes : [THEME.DEFAULT],
-		layout: value.layout || LAYOUT.JOURNAL,
+		layout: value.layout || 'blog',
 		uploads: Array.isArray(value.uploads) ? value.uploads : [],
 		posts: Array.isArray(value.posts) ? value.posts : [],
 		featuredPosts: Array.isArray(value.featuredPosts)
@@ -1558,9 +1558,9 @@ export async function createBasePortal(args: {
 		links: [],
 		domains: [],
 		pages: args.pages ?? PAGES.JOURNAL,
-		fonts: args.fonts ?? { headers: FONT_OPTIONS.headers[0], body: FONT_OPTIONS.body[0] },
+		fonts: args.fonts ?? { ...DEFAULT_FONTS },
 		themes: args.themes?.length ? args.themes : [THEME.DEFAULT],
-		layout: args.layout ?? LAYOUT.JOURNAL,
+		layout: args.layout ?? 'blog',
 		postPreviews: {},
 		uploads: [],
 		posts: [],
@@ -1624,17 +1624,21 @@ export async function ensureBasePortalSite(portalId: string, wallet: any, addres
 	assertCanWrite(manifest, address, ['Admin']);
 	const siteThemes = Array.isArray(manifest.themes) ? manifest.themes : [];
 	const activeTheme = siteThemes.find((theme) => theme?.active || theme?.Active) || siteThemes[0];
-	const siteTxId = await uploadData(wallet, PORTAL_DATA({ logo: manifest.bannerTxId, theme: activeTheme }), [
-		{ name: 'Content-Type', value: 'text/html; charset=utf-8' },
-		{ name: 'App-Name', value: 'Portal' },
-		{ name: 'App-Version', value: BASE_SCHEMA_VERSION },
-		{ name: 'Portal-Mode', value: 'base' },
-		{ name: 'Type', value: 'portal-site' },
-		{ name: 'Portal-Id', value: portalId },
-		{ name: 'Portal-Owner', value: manifest.owner },
-		{ name: 'Engine-Reference', value: manifest.engineReferenceId },
-		{ name: 'Author', value: address },
-	]);
+	const siteTxId = await uploadData(
+		wallet,
+		PORTAL_DATA({ logo: manifest.bannerTxId, theme: activeTheme, layout: manifest.layout }),
+		[
+			{ name: 'Content-Type', value: 'text/html; charset=utf-8' },
+			{ name: 'App-Name', value: 'Portal' },
+			{ name: 'App-Version', value: BASE_SCHEMA_VERSION },
+			{ name: 'Portal-Mode', value: 'base' },
+			{ name: 'Type', value: 'portal-site' },
+			{ name: 'Portal-Id', value: portalId },
+			{ name: 'Portal-Owner', value: manifest.owner },
+			{ name: 'Engine-Reference', value: manifest.engineReferenceId },
+			{ name: 'Author', value: address },
+		]
+	);
 	rememberPortalSite(portalId, siteTxId);
 	return siteTxId;
 }
@@ -2406,7 +2410,7 @@ export function createBasePermawebAdapter(wallet: any, address: string) {
 			const initialTheme = initialThemes.find((theme: any) => theme?.active) || initialThemes[0];
 			const siteTxId = await uploadTransaction(
 				wallet,
-				args.data || PORTAL_DATA({ logo: bootTags.Banner, theme: initialTheme }),
+				args.data || PORTAL_DATA({ logo: bootTags.Banner, theme: initialTheme, layout: initialPortalData.layout }),
 				[
 					{ name: 'Content-Type', value: 'text/html; charset=utf-8' },
 					{ name: 'App-Name', value: 'Portal' },

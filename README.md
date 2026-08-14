@@ -7,7 +7,7 @@ Portal has two persistence modes:
 - `process` (default) preserves the existing AO process-backed implementation.
 - `base` uses immutable Arweave transactions without AO processes. A small genesis manifest establishes the portal and its initial roles; subsequent `portal-release` transactions contain only changed fields or pointers to independently stored post revisions. Clients reconstruct the current portal by validating and folding authorized releases in Arweave order.
 
-Compact releases let multiple admins and contributors publish changes without re-uploading every post. Concurrent releases from the same earlier state are merged in transaction order, while role changes take effect before later releases are authorized. Scalar settings use direct values; users, categories, topics, links, domains, uploads, and themes use identity-keyed item operations; and pages, fonts, layout, and post preview definitions use leaf-level object patches. Anonymous ordered arrays use compact index/splice operations, while post releases contain only immutable post transaction pointers. Legacy whole-field releases remain readable.
+Compact releases let multiple admins and contributors publish changes without re-uploading every post. Concurrent releases from the same earlier state are merged in transaction order, while role changes take effect before later releases are authorized. Scalar settings, including the `blog`/`docs` layout mode, use direct values; users, categories, topics, links, domains, uploads, and themes use identity-keyed item operations; and pages, fonts, and post preview definitions use leaf-level object patches. Anonymous ordered arrays use compact index/splice operations, while post releases contain only immutable post transaction pointers. Legacy whole-field releases remain readable.
 
 Both modes use `up.arweave.net` for uploads up to 100 KB. Larger uploads are submitted as L1 Arweave transactions and paid from the connected wallet's AR balance.
 
@@ -33,9 +33,9 @@ The project is organized into two main applications:
 
 #### Engine Lite (`/src/apps/engine-lite/`)
 
-- Framework-free post feed and individual post routes
-- Uses portal colors, light/dark themes, and header/body fonts
-- Deliberately ignores configured layouts and pages
+- Framework-free blog feed, post routes, and documentation navigation
+- Preserves portal light/dark colors and configured fonts while using Lunar's documentation geometry for docs
+- Supports scalar `blog` and Lunar-style `docs` layouts while ignoring legacy page-builder data
 - Ships as one self-contained JavaScript bundle referenced through `reference@1.0`
 
 ## Installation
@@ -117,7 +117,7 @@ src/
 ├── apps/
 │   ├── editor/           # Editor application
 │   ├── engine/           # Full engine application
-│   └── engine-lite/      # Feed-and-post-only engine
+│   └── engine-lite/      # Blog and documentation engine
 ├── components/           # Shared UI components
 │   ├── atoms/           # Basic UI elements
 │   ├── molecules/       # Composed components

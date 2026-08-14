@@ -111,6 +111,13 @@ export function usePortalProvider(): PortalContextState {
 	return React.useContext(PortalContext);
 }
 
+function mergePostPreviews(...values: unknown[]) {
+	return values.reduce<Record<string, any>>((result, value) => {
+		if (!value || typeof value !== 'object' || Array.isArray(value)) return result;
+		return { ...result, ...(value as Record<string, any>) };
+	}, {});
+}
+
 export function PortalProvider(props: { children: React.ReactNode }) {
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -472,7 +479,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				themes: presentation?.themes ?? current?.themes ?? null,
 				pages: presentation?.pages ?? current?.pages ?? null,
 				layout: presentation?.layout ?? current?.layout ?? null,
-				postPreviews: presentation?.layout?.postPreviews ?? presentation?.postPreviews ?? current?.postPreviews ?? {},
+				postPreviews: mergePostPreviews(
+					presentation?.postPreviews === undefined ? current?.postPreviews : undefined,
+					presentation?.layout?.postPreviews,
+					presentation?.postPreviews
+				),
 				users: users?.roles ? getPortalUsers(users.roles) : current?.users ?? null,
 				roleOptions: users?.roleOptions ?? current?.roleOptions ?? null,
 				permissions: users?.permissions ?? current?.permissions ?? null,
@@ -687,7 +698,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				targetPortalId = await permawebProvider.libs.createZone(
 					{
 						tags: tags,
-						data: PORTAL_DATA({ logo: banner, theme: defaultTheme }),
+						data: PORTAL_DATA({ logo: banner, theme: defaultTheme, layout: 'blog' }),
 						spawnModeration: false,
 						authUsers: [arProvider.walletAddress],
 					},
@@ -736,21 +747,21 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					arProvider.wallet
 				);
 
-				// Set default Layout, Pages, Theme, and Fonts (required for engine to render)
-				const { LAYOUT, PAGES, FONT_OPTIONS } = await import('helpers/config');
+				// Set the default blog layout alongside the imported portal's theme and fonts.
+				const { DEFAULT_FONTS, PAGES } = await import('helpers/config');
 
 				// Build Fonts object from extracted theme or use defaults
 				// Portal expects format like "Montserrat:400,700" for each font
 				const extractedFonts = data.extractedTheme?.fonts;
 				const portalFonts = {
-					headers: extractedFonts?.heading ? `${extractedFonts.heading}:400,700` : FONT_OPTIONS.headers[0],
-					body: extractedFonts?.body ? `${extractedFonts.body}:400,700` : FONT_OPTIONS.body[0],
+					headers: extractedFonts?.heading ? `${extractedFonts.heading}:400,700` : DEFAULT_FONTS.headers,
+					body: extractedFonts?.body ? `${extractedFonts.body}:400,700` : DEFAULT_FONTS.body,
 				};
 
 				await permawebProvider.libs.updateZone(
 					{
 						Themes: [permawebProvider.libs.mapToProcessCase(defaultTheme)],
-						Layout: permawebProvider.libs.mapToProcessCase(LAYOUT.JOURNAL),
+						Layout: 'blog',
 						Pages: permawebProvider.libs.mapToProcessCase(PAGES.JOURNAL),
 						Fonts: permawebProvider.libs.mapToProcessCase(portalFonts),
 					},
@@ -758,7 +769,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					arProvider.wallet
 				);
 
-				debugLog('info', 'WordPressImport', 'Set default Layout, Pages, Theme, and Fonts');
+				debugLog('info', 'WordPressImport', 'Set default blog layout, Pages, Theme, and Fonts');
 
 				permawebProvider.refreshProfile();
 				await new Promise((resolve) => setTimeout(resolve, 1000));

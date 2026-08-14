@@ -208,8 +208,9 @@ Schema version `2.1.0` currently materializes these major fields:
 | State                                                          | Write representation                                                       |
 | -------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | Name, description, banner, icon, and wallpaper                 | Scalar set/delete patch                                                    |
+| Layout (`blog` or `docs`)                                      | Scalar set patch                                                           |
 | Users, categories, topics, links, domains, themes, and uploads | Identity-based item patches where possible                                 |
-| Pages, fonts, layout, and post-preview settings                | Leaf patches, array operations, or complete field replacement when smaller |
+| Pages, fonts, and post-preview settings                        | Leaf patches, array operations, or complete field replacement when smaller |
 | Featured posts                                                 | Complete selection for setting; item removal for clearing                  |
 | Post index                                                     | Stable post ID to immutable revision transaction pointer                   |
 | Post content and frontmatter                                   | Complete separate `portal-post` revision                                   |
@@ -542,6 +543,7 @@ Engine-lite turns materialized manifest posts into a read-only public site:
 - Posts with future release dates are excluded until their date arrives.
 - Posts are ordered newest first.
 - The stable post slug or ID selects an individual post route.
+- The scalar layout selects either the blog feed or a Lunar-style documentation view with category navigation, an on-page table of contents, and previous/next links.
 - The portal's active theme, configured fonts, icon, featured-post list, categories, and post JSON blocks drive rendering.
 - Posts without images receive alternating deterministic gradients derived from the active site colors.
 - A shared site shell renders the portal logo, an optional Wander connection button, and the site title in the footer.

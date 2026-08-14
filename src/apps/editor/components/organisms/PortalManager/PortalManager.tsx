@@ -10,15 +10,12 @@ import { Loader } from 'components/atoms/Loader';
 import {
 	ENGINE_LITE_REFERENCE_ID,
 	ICONS,
-	LAYOUT,
-	PAGES,
 	PORTAL_DATA,
 	PORTAL_PATCH_MAP,
 	PORTAL_ROLES,
 	THEME,
 	URLS,
 } from 'helpers/config';
-import { THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
 import { IS_BASE_MODE, PORTAL_CAPABILITIES } from 'helpers/features';
 import { PortalDetailType, PortalHeaderType, PortalPatchMapEnum } from 'helpers/types';
 import { checkValidAddress, debugLog, getBootTag } from 'helpers/utils';
@@ -29,25 +26,6 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 import { WalletBlock } from 'wallet/WalletBlock';
 
 import * as S from './styles';
-
-function deepMerge(target: any, patch: any): any {
-	if (!target) return patch;
-	const result = { ...target };
-	for (const key of Object.keys(patch)) {
-		if (
-			patch[key] &&
-			typeof patch[key] === 'object' &&
-			!Array.isArray(patch[key]) &&
-			target[key] &&
-			typeof target[key] === 'object'
-		) {
-			result[key] = deepMerge(target[key], patch[key]);
-		} else {
-			result[key] = patch[key];
-		}
-	}
-	return result;
-}
 
 export default function PortalManager(props: {
 	portal: PortalDetailType | null;
@@ -65,14 +43,13 @@ export default function PortalManager(props: {
 	const [name, setName] = React.useState<string>('');
 	const [logoId, setLogoId] = React.useState<string | null>(null);
 	const [iconId, setIconId] = React.useState<string | null>(null);
-	const [selectedLayout, setSelectedLayout] = React.useState<string>('journal');
+	const [selectedLayout, setSelectedLayout] = React.useState<'blog' | 'docs'>('blog');
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 
-	const layoutOptions = [
-		{ name: 'journal', icon: ICONS.layoutJournal },
+	const layoutOptions: { name: 'blog' | 'docs'; icon: string }[] = [
 		{ name: 'blog', icon: ICONS.layoutBlog },
-		{ name: 'documentation', icon: ICONS.layoutDocumentation },
+		{ name: 'docs', icon: ICONS.layoutDocumentation },
 	];
 	const { addNotification } = useNotifications();
 
@@ -144,8 +121,7 @@ export default function PortalManager(props: {
 					portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Overview);
 				} else {
 					data.EngineReference = ENGINE_LITE_REFERENCE_ID;
-					const chosenTheme =
-						selectedLayout === 'documentation' ? deepMerge(THEME.DEFAULT, THEME_DOCUMENTATION_PATCH) : THEME.DEFAULT;
+					const chosenTheme = THEME.DEFAULT;
 					const getPatchMapTag = (key: string, values: string[]) => {
 						const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
 						return {
@@ -184,7 +160,7 @@ export default function PortalManager(props: {
 					const portalId = await permawebProvider.libs.createZone(
 						{
 							tags: tags,
-							data: PORTAL_DATA({ logo: data.Banner, theme: chosenTheme }),
+							data: PORTAL_DATA({ logo: data.Banner, theme: chosenTheme, layout: selectedLayout }),
 							spawnModeration: false,
 							authUsers: [arProvider.walletAddress],
 						},
@@ -231,22 +207,10 @@ export default function PortalManager(props: {
 						arProvider.wallet
 					);
 
-					const getLayoutAndPages = () => {
-						if (selectedLayout === 'blog') {
-							return { layout: LAYOUT.BLOG, pages: PAGES.BLOG };
-						} else if (selectedLayout === 'documentation') {
-							return { layout: LAYOUT.DOCUMENTATION, pages: PAGES.DOCUMENTATION };
-						}
-						return { layout: LAYOUT.JOURNAL, pages: PAGES.JOURNAL };
-					};
-
-					const { layout: chosenLayout, pages: chosenPages } = getLayoutAndPages();
-
 					const portalUpdateId = await permawebProvider.libs.updateZone(
 						{
 							Themes: [permawebProvider.libs.mapToProcessCase(chosenTheme)],
-							Layout: permawebProvider.libs.mapToProcessCase(chosenLayout),
-							Pages: permawebProvider.libs.mapToProcessCase(chosenPages),
+							Layout: selectedLayout,
 						},
 						portalId,
 						arProvider.wallet

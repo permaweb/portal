@@ -396,6 +396,7 @@ export const UPLOAD = {
 type PortalBootstrapOptions = {
 	logo?: string | null;
 	theme?: any;
+	layout?: unknown;
 };
 
 function getBootstrapThemeColor(theme: any, key: 'background' | 'text', scheme: 'light' | 'dark') {
@@ -445,6 +446,53 @@ export const PORTAL_DATA = (options: PortalBootstrapOptions = {}) => {
     <meta name="portal-engine-reference" content="${ENGINE_LITE_REFERENCE_ID}" />
     <meta name="portal-engine-service-worker" content="${ENGINE_LITE_SERVICE_WORKER_ID}" />
     <title>Portal</title>
+    <script>
+      (function () {
+        var THEME_STORAGE_KEY = ${serializePortalBootstrap(ENGINE_LITE_THEME_STORAGE_KEY)};
+        var THEME_COLORS_PREFIX = ${serializePortalBootstrap(ENGINE_LITE_THEME_COLORS_STORAGE_PREFIX)};
+        var EMBEDDED_THEME = ${serializePortalBootstrap(theme)};
+        var ARWEAVE_ID = /^[a-zA-Z0-9_-]{43}$/;
+        var parts = window.location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+        var params = new URLSearchParams(window.location.search);
+        var explicit = params.get('portal') || params.get('portalId');
+        var pathId = window.location.pathname.split('/').filter(Boolean)[0];
+        var id = explicit && ARWEAVE_ID.test(explicit)
+          ? explicit
+          : pathId && ARWEAVE_ID.test(pathId)
+          ? pathId
+          : parts[0] && ARWEAVE_ID.test(parts[0])
+          ? parts[0]
+          : '';
+        var mode = 'system';
+        try {
+          var storedMode = window.localStorage.getItem(THEME_STORAGE_KEY);
+          if (storedMode === 'light' || storedMode === 'dark') mode = storedMode;
+        } catch (_) {}
+        var scheme = mode === 'system'
+          ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          : mode;
+        var cachedThemes = null;
+        try {
+          cachedThemes = id
+            ? JSON.parse(window.localStorage.getItem(THEME_COLORS_PREFIX + id) || 'null')
+            : null;
+        } catch (_) {}
+        var variables = cachedThemes && cachedThemes[scheme];
+        if (variables && typeof variables === 'object' && !Array.isArray(variables)) {
+          Object.keys(variables).forEach(function (key) {
+            if (key.indexOf('--lite-') === 0 && typeof variables[key] === 'string') {
+              document.documentElement.style.setProperty(key, variables[key]);
+            }
+          });
+        } else {
+          var colors = EMBEDDED_THEME[scheme];
+          document.documentElement.style.setProperty('--lite-background', colors.background);
+          document.documentElement.style.setProperty('--lite-text', colors.text);
+        }
+        document.documentElement.dataset.liteScheme = scheme;
+        document.documentElement.style.colorScheme = scheme;
+      })();
+    </script>
     <style>
       :root {
         --lite-background: rgb(255, 255, 255);
@@ -891,48 +939,48 @@ export const PORTAL_ROLES = {
 	GUEST_CONTRIBUTOR: 'Guest Contributor',
 };
 
-export const FONT_OPTIONS = {
-	headers: [
-		'Crimson Pro:400,600,700',
-		'Montserrat:400,700',
-		'Poppins:400,700',
-		'Raleway:400,700',
-		'Oswald:400,700',
-		'Bebas Neue',
-		'Playfair Display:400,700,900',
-		'DM Serif Display',
-		'Space Grotesk:400,700',
-		'Anton',
-		'Abril Fatface',
-		'Libre Baskerville:400,700',
-		'Cormorant Garamond:400,500,600,700',
-		'EB Garamond:400,500,600,700',
-		'Lora:400,500,600,700',
-		'Merriweather:400,700,900',
-		'Tinos:400,700',
-		'Spectral:400,500,600,700',
-		'Alegreya:400,500,700,800',
-		'Orbitron:400,500,700',
-		'Exo 2:400,600,800',
-		'Audiowide',
-		'Russo One:400,700',
-		'Share Tech Mono:400,700',
-	],
-	body: [
-		'Open Sans:400,600,700',
-		'Inter:400,600',
-		'Roboto:400,500',
-		'Lato:400,700',
-		'Work Sans:400,500',
-		'Source Sans Pro:400,600',
-		'Merriweather:400,700',
-		'DM Sans:400,500',
-		'Nunito:400,700',
-		'Hind:400,500',
-		'Space Mono:400,700',
-		'VT323',
-		'Major Mono Display',
-		'Rajdhani:400,500,700',
-		'Titillium Web:400,600,700',
-	],
+export const DEFAULT_FONTS = {
+	headers: 'Crimson Pro:400,600,700',
+	body: 'Open Sans:400,600,700',
 };
+
+export const FONT_OPTIONS = [
+	DEFAULT_FONTS.headers,
+	'Montserrat:400,700',
+	'Poppins:400,700',
+	'Raleway:400,700',
+	'Oswald:400,700',
+	'Bebas Neue',
+	'Playfair Display:400,700,900',
+	'DM Serif Display',
+	'Space Grotesk:400,700',
+	'Anton',
+	'Abril Fatface',
+	'Libre Baskerville:400,700',
+	'Cormorant Garamond:400,500,600,700',
+	'EB Garamond:400,500,600,700',
+	'Lora:400,500,600,700',
+	'Merriweather:400,700,900',
+	'Tinos:400,700',
+	'Spectral:400,500,600,700',
+	'Alegreya:400,500,700,800',
+	'Orbitron:400,500,700',
+	'Exo 2:400,600,800',
+	'Audiowide',
+	'Russo One:400,700',
+	'Share Tech Mono:400,700',
+	DEFAULT_FONTS.body,
+	'Inter:400,600',
+	'Roboto:400,500',
+	'Lato:400,700',
+	'Work Sans:400,500',
+	'Source Sans Pro:400,600',
+	'DM Sans:400,500',
+	'Nunito:400,700',
+	'Hind:400,500',
+	'Space Mono:400,700',
+	'VT323',
+	'Major Mono Display',
+	'Rajdhani:400,500,700',
+	'Titillium Web:400,600,700',
+];

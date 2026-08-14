@@ -775,7 +775,7 @@ export default function PostPreviewEdit() {
 
 	React.useEffect(() => {
 		if (previewId && portalProvider.current) {
-			const portalPreviews = portalProvider.current?.layout?.postPreviews || portalProvider.current?.postPreviews || {};
+			const portalPreviews = portalProvider.current?.postPreviews || portalProvider.current?.layout?.postPreviews || {};
 			const existingTemplate = portalPreviews[previewId] || POST_PREVIEWS[previewId as keyof typeof POST_PREVIEWS];
 			if (existingTemplate) {
 				const rows = migrateToRows(existingTemplate.rows || existingTemplate.content || []);
@@ -817,7 +817,7 @@ export default function PostPreviewEdit() {
 		if (!template || !portalProvider.current?.id || !arProvider.wallet) return;
 		setLoading({ active: true, message: `${language?.saving}...` });
 		try {
-			let existingPreviews = portalProvider.current?.layout?.postPreviews || portalProvider.current?.postPreviews || {};
+			let existingPreviews = portalProvider.current?.postPreviews || portalProvider.current?.layout?.postPreviews || {};
 			if (Object.keys(existingPreviews).length === 0) {
 				try {
 					const response = await permawebProvider.libs.readState({
@@ -834,13 +834,8 @@ export default function PostPreviewEdit() {
 			const contentForSave = serializeRows(template.rows);
 			const templateToSave = { ...template, content: contentForSave };
 			const updatedPreviews = { ...existingPreviews, [template.id]: templateToSave };
-			const updatedLayout = {
-				...(portalProvider.current?.layout || {}),
-				postPreviews: updatedPreviews,
-			};
-
 			await permawebProvider.libs.updateZone(
-				{ Layout: permawebProvider.libs.mapToProcessCase(updatedLayout) },
+				{ PostPreviews: permawebProvider.libs.mapToProcessCase(updatedPreviews) },
 				portalProvider.current.id,
 				arProvider.wallet
 			);

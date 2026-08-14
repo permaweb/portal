@@ -1,3 +1,13 @@
+import Prism from 'prismjs';
+
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-diff';
+import 'prismjs/components/prism-graphql';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-lua';
+import 'prismjs/components/prism-markdown';
+import 'prismjs/components/prism-typescript';
+
 import { ENGINE_LITE_FALLBACK_LOGO } from './constants';
 import type { LitePortal, LitePost } from './data';
 
@@ -58,7 +68,7 @@ function themeOption(mode: LiteThemeMode, activeMode: LiteThemeMode) {
 
 export function renderShell(
 	content: string,
-	portal: Pick<LitePortal, 'name' | 'logo'>,
+	portal: Pick<LitePortal, 'name' | 'logo' | 'layout'>,
 	homeHref: string,
 	address: string | null,
 	themeMode: LiteThemeMode
@@ -71,7 +81,7 @@ export function renderShell(
 				walletLabel(address)
 		  )}</span><span class="lite-wallet-disconnect">Disconnect</span>`
 		: '<span>Connect Wallet</span>';
-	return `<div class="lite-shell">
+	return `<div class="lite-shell is-${portal.layout}">
 		<header class="lite-site-header">
 			<div class="lite-site-header-inner">
 				<a class="lite-site-logo${portal.logo ? '' : ' is-fallback'}" href="${escapeHTML(homeHref)}" aria-label="${escapeHTML(
@@ -176,6 +186,19 @@ function selectedFeaturedPost(portal: LitePortal) {
 		if (match) return match;
 	}
 	return null;
+}
+
+function docsGroups(portal: LitePortal) {
+	const groups = new Map<string, LitePost[]>();
+	for (const post of portal.posts) {
+		const category = post.category || 'Articles';
+		groups.set(category, [...(groups.get(category) || []), post]);
+	}
+	return groups;
+}
+
+function docsPostSequence(portal: LitePortal) {
+	return Array.from(docsGroups(portal).values()).flat();
 }
 
 export function renderFeed(portal: LitePortal, filters: FeedFilters, postHref: (post: LitePost) => string) {
@@ -307,9 +330,37 @@ function inlineMarkdown(value: string) {
 	return escapeHTML(tokenized)
 		.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
 		.replace(/__([^_]+)__/g, '<strong>$1</strong>')
+		.replace(/~~([^~]+)~~/g, '<del>$1</del>')
 		.replace(/\*([^*]+)\*/g, '<em>$1</em>')
 		.replace(/_([^_]+)_/g, '<em>$1</em>')
 		.replace(/\u0000(\d+)\u0000/g, (_, index) => tokens[Number(index)]);
+}
+
+function tableCells(value: string) {
+	return value
+		.trim()
+		.replace(/^\||\|$/g, '')
+		.split('|')
+		.map((cell) => cell.trim());
+}
+
+function isTableDivider(value: string) {
+	const cells = tableCells(value);
+	return cells.length > 0 && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+}
+
+function highlightedCode(value: string, language: string) {
+	const aliases: Record<string, string> = {
+		gql: 'graphql',
+		js: 'javascript',
+		md: 'markdown',
+		sh: 'bash',
+		shell: 'bash',
+		ts: 'typescript',
+	};
+	const normalized = aliases[language.toLowerCase()] || language.toLowerCase();
+	const grammar = Prism.languages[normalized];
+	return grammar ? Prism.highlight(value, grammar, normalized) : escapeHTML(value);
 }
 
 function renderMarkdown(content: string) {
@@ -330,10 +381,12 @@ function renderMarkdown(content: string) {
 			index += 1;
 			while (index < lines.length && !/^\s*```\s*$/.test(lines[index])) code.push(lines[index++]);
 			if (index < lines.length) index += 1;
+			const language = fence[1].toLowerCase();
+			const value = code.join('\n');
 			blocks.push(
-				`<pre><code${fence[1] ? ` class="language-${escapeHTML(fence[1])}"` : ''}>${escapeHTML(
-					code.join('\n')
-				)}</code></pre>`
+				`<pre><code${language ? ` class="language-${escapeHTML(language)}"` : ''}>${
+					language ? highlightedCode(value, language) : escapeHTML(value)
+				}</code></pre>`
 			);
 			continue;
 		}
@@ -352,6 +405,26 @@ function renderMarkdown(content: string) {
 			continue;
 		}
 
+		if (line.includes('|') && index + 1 < lines.length && isTableDivider(lines[index + 1])) {
+			const headers = tableCells(line);
+			const rows: string[][] = [];
+			index += 2;
+			while (index < lines.length && lines[index].trim() && lines[index].includes('|')) {
+				rows.push(tableCells(lines[index++]));
+			}
+			blocks.push(
+				`<table><thead><tr>${headers
+					.map((cell) => `<th>${inlineMarkdown(cell)}</th>`)
+					.join('')}</tr></thead><tbody>${rows
+					.map(
+						(row) =>
+							`<tr>${headers.map((_, cellIndex) => `<td>${inlineMarkdown(row[cellIndex] || '')}</td>`).join('')}</tr>`
+					)
+					.join('')}</tbody></table>`
+			);
+			continue;
+		}
+
 		const list = line.match(/^\s*(?:([-+*])|(\d+)\.)\s+(.+)$/);
 		if (list) {
 			const ordered = Boolean(list[2]);
@@ -360,7 +433,14 @@ function renderMarkdown(content: string) {
 			while (index < lines.length) {
 				const item = lines[index].match(pattern);
 				if (!item) break;
-				items.push(`<li>${inlineMarkdown(item[1])}</li>`);
+				const task = item[1].match(/^\[([ xX])\]\s+(.+)$/);
+				items.push(
+					task
+						? `<li class="task-list-item"><input type="checkbox" disabled${
+								task[1].toLowerCase() === 'x' ? ' checked' : ''
+						  } />${inlineMarkdown(task[2])}</li>`
+						: `<li>${inlineMarkdown(item[1])}</li>`
+				);
 				index += 1;
 			}
 			const tag = ordered ? 'ol' : 'ul';
@@ -420,5 +500,79 @@ export function renderPost(post: LitePost, homeHref: string, options: { showBack
 					: `<div class="lite-back"><a href="${escapeHTML(homeHref)}">&lt; View All</a></div>`
 			}
 		</article>
+		</main>`;
+}
+
+function docsNavigation(portal: LitePortal, activePost: LitePost, postHref: (post: LitePost) => string) {
+	return `<nav class="lite-docs-navigation" aria-label="Documentation">
+		<div class="lite-docs-navigation-inner">
+			<button class="lite-docs-navigation-toggle" type="button" data-docs-nav-toggle aria-expanded="false">
+				<span>${escapeHTML(activePost.title)}</span><i aria-hidden="true"></i>
+			</button>
+			<div class="lite-docs-navigation-list" data-docs-nav-list>
+				${Array.from(docsGroups(portal).entries())
+					.map(
+						([category, posts]) => `<section class="lite-docs-navigation-group">
+							<h2>${escapeHTML(category)}</h2>
+							<ul>${posts
+								.map(
+									(post) =>
+										`<li><a class="${post.id === activePost.id ? 'is-active' : ''}" href="${escapeHTML(
+											postHref(post)
+										)}" data-docs-link>${escapeHTML(post.title)}</a></li>`
+								)
+								.join('')}</ul>
+						</section>`
+					)
+					.join('')}
+			</div>
+		</div>
+	</nav>`;
+}
+
+function hasDocumentTitle(post: LitePost) {
+	if (Array.isArray(post.content)) {
+		return String(post.content[0]?.type || '').toLowerCase() === 'header-1';
+	}
+	if (typeof post.content !== 'string') return false;
+	return /^\s*(?:#\s+|<h1(?:\s|>))/i.test(post.content);
+}
+
+function docsPager(portal: LitePortal, activePost: LitePost, postHref: (post: LitePost) => string) {
+	const posts = docsPostSequence(portal);
+	const index = posts.findIndex((post) => post.id === activePost.id);
+	const previous = index > 0 ? posts[index - 1] : null;
+	const next = index >= 0 && index < posts.length - 1 ? posts[index + 1] : null;
+	const link = (
+		post: LitePost,
+		direction: 'previous' | 'next'
+	) => `<a class="lite-docs-pager-${direction}" href="${escapeHTML(postHref(post))}" data-docs-link>
+		<span>${direction === 'previous' ? '<i>‹</i> Previous Page' : 'Next Page <i>›</i>'}</span>
+		<strong>${escapeHTML(post.title)}</strong>
+	</a>`;
+
+	if (!previous && !next) return '';
+	return `<nav class="lite-docs-pager" aria-label="Documentation pages">
+		${previous ? link(previous, 'previous') : ''}
+		${next ? link(next, 'next') : ''}
+	</nav>`;
+}
+
+export function renderDocs(portal: LitePortal, post: LitePost, postHref: (post: LitePost) => string) {
+	const title = hasDocumentTitle(post) ? '' : `<h1>${escapeHTML(post.title)}</h1>`;
+	return `<main class="lite-docs">
+		<div class="lite-docs-body">
+			${docsNavigation(portal, post, postHref)}
+			<div class="lite-docs-content-wrapper">
+				<div class="lite-docs-document">
+					<article class="lite-docs-copy lite-rich-text">${title}${renderContent(post.content, post.excerpt)}</article>
+					<aside class="lite-docs-toc" data-docs-toc hidden>
+						<h2>On This Page</h2>
+						<ul></ul>
+					</aside>
+				</div>
+				${docsPager(portal, post, postHref)}
+			</div>
+		</div>
 	</main>`;
 }

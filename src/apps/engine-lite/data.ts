@@ -19,6 +19,8 @@ export type LitePost = {
 	raw: any;
 };
 
+export type LiteLayout = 'blog' | 'docs';
+
 export type LitePortal = {
 	id: string;
 	name: string;
@@ -27,6 +29,7 @@ export type LitePortal = {
 	icon: string | null;
 	fonts: { headers?: string; body?: string } | null;
 	themes: any[];
+	layout: LiteLayout;
 	featuredPosts: string[];
 	posts: LitePost[];
 };
@@ -82,6 +85,18 @@ function firstArray(...values: unknown[]): any[] {
 
 function cleanText(value: unknown): string {
 	return typeof value === 'string' ? value.trim() : '';
+}
+
+export function normalizeLayout(value: unknown): LiteLayout {
+	const normalized = normalizeProcessValue(value);
+	if (typeof normalized === 'string') {
+		return ['docs', 'documentation'].includes(normalized.trim().toLowerCase()) ? 'docs' : 'blog';
+	}
+
+	const layout = asRecord(normalized);
+	const navigation = firstRecord(layout.navigation);
+	const navigationLayout = firstRecord(navigation.layout);
+	return ['left', 'right'].includes(cleanText(navigationLayout.position).toLowerCase()) ? 'docs' : 'blog';
 }
 
 function plainText(value: unknown): string {
@@ -234,10 +249,37 @@ function portalFromState(portalId: string, source: unknown): LitePortal {
 		id: portalId,
 		name,
 		description: cleanText(overview.description || store.description || state.description),
-		logo: resolveAsset(overview.banner || overview.logo || store.banner || store.logo || state.banner || state.logo),
-		icon: resolveAsset(overview.thumbnail || overview.icon || store.thumbnail || store.icon || state.icon),
+		logo: resolveAsset(
+			overview.banner ||
+				overview.logo ||
+				overview.bannerTxId ||
+				store.banner ||
+				store.logo ||
+				store.bannerTxId ||
+				state.banner ||
+				state.logo ||
+				state.bannerTxId ||
+				zone.banner ||
+				zone.logo ||
+				zone.bannerTxId
+		),
+		icon: resolveAsset(
+			overview.thumbnail ||
+				overview.icon ||
+				overview.iconTxId ||
+				store.thumbnail ||
+				store.icon ||
+				store.iconTxId ||
+				state.thumbnail ||
+				state.icon ||
+				state.iconTxId ||
+				zone.thumbnail ||
+				zone.icon ||
+				zone.iconTxId
+		),
 		fonts: firstRecord(presentation.fonts, store.fonts, state.fonts),
 		themes: firstArray(presentation.themes, store.themes, state.themes),
+		layout: normalizeLayout(presentation.layout ?? store.layout ?? state.layout),
 		featuredPosts: firstArray(postsState.featuredPosts, store.featuredPosts, state.featuredPosts)
 			.map((entry) => cleanText(typeof entry === 'object' ? entry.id || entry.postId : entry))
 			.filter(Boolean),
@@ -255,7 +297,7 @@ function portalFromManifest(portalId: string, source: unknown): LitePortal | nul
 			banner: manifest.bannerTxId,
 			thumbnail: manifest.iconTxId,
 		},
-		presentation: { fonts: manifest.fonts, themes: manifest.themes },
+		presentation: { fonts: manifest.fonts, themes: manifest.themes, layout: manifest.layout },
 		posts: { index: manifest.posts, featuredPosts: manifest.featuredPosts },
 	});
 }

@@ -41,6 +41,7 @@ export default function Media(props: {
 	const { addNotification } = useNotifications();
 
 	const mediaInputRef = React.useRef<any>(null);
+	const autoSubmittedMediaRef = React.useRef<File | null>(null);
 
 	const [media, setMedia] = React.useState<string | File | null>(null);
 
@@ -78,12 +79,17 @@ export default function Media(props: {
 	React.useEffect(() => {
 		(async function () {
 			if (media instanceof File && arProvider.wallet) {
+				if (props.hideActions && autoSubmittedMediaRef.current === media) return;
+				if (props.hideActions) autoSubmittedMediaRef.current = media;
+
 				const result = await calculateUploadCost(media);
 				if (result && !result.requiresConfirmation) {
 					if (props.hideActions) {
 						await handleSubmit();
 					}
 				}
+			} else if (!(media instanceof File)) {
+				autoSubmittedMediaRef.current = null;
 			}
 		})();
 	}, [media, props.portal, props.hideActions, arProvider.wallet, calculateUploadCost]);

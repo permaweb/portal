@@ -1,12 +1,10 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
-import { ICONS, LAYOUT } from 'helpers/config';
-import { THEME_DEFAULT, THEME_DOCUMENTATION_PATCH } from 'helpers/config/themes';
+import { ICONS } from 'helpers/config';
 import { PortalPatchMapEnum } from 'helpers/types';
 import { debugLog } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -16,118 +14,22 @@ import { usePermawebProvider } from 'providers/PermawebProvider';
 
 import * as S from './styles';
 
-function deepMerge(target: any, patch: any): any {
-	if (!target) return patch;
-	const result = { ...target };
-	for (const key of Object.keys(patch)) {
-		if (
-			patch[key] &&
-			typeof patch[key] === 'object' &&
-			!Array.isArray(patch[key]) &&
-			target[key] &&
-			typeof target[key] === 'object'
-		) {
-			result[key] = deepMerge(target[key], patch[key]);
-		} else {
-			result[key] = patch[key];
-		}
-	}
-	return result;
+type LayoutMode = 'blog' | 'docs';
+
+function isScalarLayoutMode(value: unknown): value is LayoutMode {
+	return value === 'blog' || value === 'docs';
 }
 
-const LAYOUT_THEME_PATCHES: Record<string, any> = {
-	documentation: THEME_DOCUMENTATION_PATCH,
-};
-
-function getNestedValue(obj: any, path: string[]): any {
-	return path.reduce((acc, key) => acc?.[key], obj);
-}
-
-function setNestedValue(obj: any, path: string[], value: any): any {
-	if (path.length === 0) return value;
-	const [first, ...rest] = path;
-	return {
-		...obj,
-		[first]: rest.length === 0 ? value : setNestedValue(obj?.[first] || {}, rest, value),
-	};
-}
-
-function getPatchPaths(patch: any, prefix: string[] = []): string[][] {
-	const paths: string[][] = [];
-	for (const key of Object.keys(patch)) {
-		const currentPath = [...prefix, key];
-		if (patch[key] && typeof patch[key] === 'object' && !Array.isArray(patch[key])) {
-			paths.push(...getPatchPaths(patch[key], currentPath));
-		} else {
-			paths.push(currentPath);
-		}
+function normalizeLayoutMode(value: unknown): LayoutMode {
+	if (typeof value === 'string') {
+		const normalized = value.toLowerCase();
+		return normalized === 'docs' || normalized === 'documentation' ? 'docs' : 'blog';
 	}
-	return paths;
-}
+	if (!value || typeof value !== 'object') return 'blog';
 
-function applyLayoutPatch(theme: any, layoutName: string): any {
-	const patch = LAYOUT_THEME_PATCHES[layoutName];
-	if (!patch) return theme;
-
-	const paths = getPatchPaths(patch);
-	const original: any = {};
-	for (const path of paths) {
-		const currentValue = getNestedValue(theme, path);
-		if (currentValue !== undefined) {
-			original[path.join('.')] = currentValue;
-		}
-	}
-
-	const patched = deepMerge(theme, patch);
-	patched._layoutPatch = { layout: layoutName, original };
-	return patched;
-}
-
-function hasLegacyPatchColors(theme: any): string | null {
-	for (const [layoutName, patch] of Object.entries(LAYOUT_THEME_PATCHES)) {
-		const paths = getPatchPaths(patch);
-		for (const path of paths) {
-			const themeValue = getNestedValue(theme, path);
-			const patchValue = getNestedValue(patch, path);
-			if (themeValue === patchValue) {
-				return layoutName;
-			}
-		}
-	}
-	return null;
-}
-
-function resetLayoutPatch(theme: any): any {
-	if (theme._layoutPatch) {
-		const { original } = theme._layoutPatch;
-		let result = { ...theme };
-
-		for (const [pathStr, value] of Object.entries(original)) {
-			const path = pathStr.split('.');
-			result = setNestedValue(result, path, value);
-		}
-
-		delete result._layoutPatch;
-		return result;
-	}
-
-	const legacyLayout = hasLegacyPatchColors(theme);
-	if (legacyLayout) {
-		const patch = LAYOUT_THEME_PATCHES[legacyLayout];
-		const paths = getPatchPaths(patch);
-		let result = { ...theme };
-
-		for (const path of paths) {
-			const defaultValue = getNestedValue(THEME_DEFAULT, path);
-			if (defaultValue !== undefined) {
-				result = setNestedValue(result, path, defaultValue);
-			}
-		}
-
-		return result;
-	}
-
-	return theme;
+	const legacyLayout = value as any;
+	const position = legacyLayout?.navigation?.layout?.position ?? legacyLayout?.Navigation?.Layout?.Position;
+	return position === 'left' || position === 'right' ? 'docs' : 'blog';
 }
 
 export default function Layout() {
@@ -138,173 +40,61 @@ export default function Layout() {
 	const language = languageProvider.object[languageProvider.current];
 	const { addNotification } = useNotifications();
 
-	const [layout, setLayout] = React.useState(portalProvider.current?.layout || LAYOUT.JOURNAL);
-	const [pages, setPages] = React.useState<any>(portalProvider.current?.pages);
-	const [themes, setThemes] = React.useState<any>(portalProvider.current?.themes);
-	const [originalLayout, setOriginalLayout] = React.useState(portalProvider.current?.layout);
-	const originalLayoutSet = React.useRef(false);
-	const [originalPages] = React.useState(portalProvider.current?.pages);
-	const [originalThemes] = React.useState(portalProvider.current?.themes);
+	const initialLayout = normalizeLayoutMode(portalProvider.current?.layout);
+	const [layout, setLayout] = React.useState<LayoutMode>(initialLayout);
+	const [originalLayout, setOriginalLayout] = React.useState<LayoutMode>(initialLayout);
+	const [layoutStoredAsScalar, setLayoutStoredAsScalar] = React.useState(() =>
+		isScalarLayoutMode(portalProvider.current?.layout)
+	);
 	const [loading, setLoading] = React.useState<boolean>(false);
-
-	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
-
-	const options = [
-		{ name: 'journal', icon: ICONS.layoutJournal },
-		{ name: 'blog', icon: ICONS.layoutBlog },
-		{ name: 'documentation', icon: ICONS.layoutDocumentation },
-	];
-
-	const [activeName, setActiveName] = React.useState<string>('');
 	const hasUserSelected = React.useRef(false);
 
-	// Check if there are changes
-	const hasChanges = React.useMemo(() => {
-		const layoutChanged = JSON.stringify(originalLayout) !== JSON.stringify(layout);
-		const pagesChanged = JSON.stringify(originalPages) !== JSON.stringify(pages);
-		const themesChanged = JSON.stringify(originalThemes) !== JSON.stringify(themes);
-		return layoutChanged || pagesChanged || themesChanged;
-	}, [originalLayout, layout, originalPages, pages, originalThemes, themes]);
+	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
+	const hasChanges = originalLayout !== layout || !layoutStoredAsScalar;
+	const options: { name: LayoutMode; icon: string }[] = [
+		{ name: 'blog', icon: ICONS.layoutBlog },
+		{ name: 'docs', icon: ICONS.layoutDocumentation },
+	];
 
-	// Update local state when portal data changes (only if user hasn't made a selection)
 	React.useEffect(() => {
-		if (portalProvider.current?.layout && !originalLayoutSet.current) {
-			setOriginalLayout({
-				...portalProvider.current.layout,
-				postPreviews: portalProvider.current.layout?.postPreviews ?? {},
-			});
-			originalLayoutSet.current = true;
-		}
 		if (hasUserSelected.current) return;
-		if (portalProvider.current?.layout) {
-			setLayout({
-				...portalProvider.current.layout,
-				postPreviews: portalProvider.current.layout?.postPreviews ?? {},
-			});
-		}
-		if (portalProvider.current?.pages) {
-			setPages(portalProvider.current.pages);
-		}
-		if (portalProvider.current?.themes) {
-			setThemes(portalProvider.current.themes);
-		}
-	}, [portalProvider.current]);
+		const nextLayout = normalizeLayoutMode(portalProvider.current?.layout);
+		setLayout(nextLayout);
+		setOriginalLayout(nextLayout);
+		setLayoutStoredAsScalar(isScalarLayoutMode(portalProvider.current?.layout));
+	}, [portalProvider.current?.id, portalProvider.current?.layout]);
 
-	React.useEffect(() => {
-		if (portalProvider.current && !hasUserSelected.current) {
-			const currentLayout = portalProvider.current?.layout as any;
-			const navPosition = currentLayout?.navigation?.layout?.position;
-			const headerHeight = currentLayout?.header?.layout?.height;
-
-			if (navPosition === 'left' || navPosition === 'right') {
-				setActiveName('documentation');
-			} else if (headerHeight === '120px') {
-				setActiveName('blog');
-			} else if (headerHeight === '100px') {
-				setActiveName('journal');
-			} else {
-				setActiveName('journal');
-			}
-		}
-	}, [portalProvider.current]);
-
-	function handleLayoutOptionChange(optionName: string) {
+	function handleLayoutOptionChange(optionName: LayoutMode) {
 		hasUserSelected.current = true;
-		const existingPostPreviews = portalProvider.current?.layout?.postPreviews ?? layout?.postPreviews ?? {};
-		const layoutValue = optionName.toLowerCase();
-		const updateFeedLayouts = (node: any): any => {
-			if (!node) return node;
-			if (Array.isArray(node)) return node.map((item) => updateFeedLayouts(item));
-			if (node.type === 'feed') {
-				return { ...node, layout: layoutValue };
-			}
-			if (node.content && Array.isArray(node.content)) {
-				return { ...node, content: node.content.map((item: any) => updateFeedLayouts(item)) };
-			}
-			return node;
-		};
-		if (themes && Array.isArray(themes)) {
-			const updatedThemes = themes.map((theme: any) => {
-				if (!theme.active) return theme;
-				let updated = resetLayoutPatch(theme);
-				if (LAYOUT_THEME_PATCHES[optionName]) {
-					updated = applyLayoutPatch(updated, optionName);
-				}
-				return updated;
-			});
-			setThemes(updatedThemes);
-		}
-
-		if (optionName === 'blog') {
-			setLayout({ ...LAYOUT.BLOG, postPreviews: existingPostPreviews });
-			if (pages) setPages(updateFeedLayouts(pages));
-		} else if (optionName === 'journal') {
-			setLayout({ ...LAYOUT.JOURNAL, postPreviews: existingPostPreviews });
-			if (pages) setPages(updateFeedLayouts(pages));
-		} else if (optionName === 'documentation') {
-			setLayout({ ...LAYOUT.DOCUMENTATION, postPreviews: existingPostPreviews });
-			if (pages) setPages(updateFeedLayouts(pages));
-		} else {
-			const updatedPages = {
-				...pages,
-				Feed: {
-					...pages.feed,
-					content: [
-						{
-							...pages.feed.content[0],
-							content: [
-								{
-									...pages.feed.content[0].content[0],
-									layout: layoutValue,
-								},
-							],
-						},
-					],
-				},
-			};
-			setPages(updatedPages);
-		}
-		setActiveName(optionName);
+		setLayout(optionName);
 	}
 
 	async function handleSave() {
-		if (!arProvider.wallet || !portalProvider.current?.id || unauthorized) {
-			return;
-		}
+		if (!arProvider.wallet || !portalProvider.current?.id || unauthorized) return;
 
 		try {
 			setLoading(true);
-
-			const updateData: any = {};
-			const layoutWithPreviews = {
-				...(layout || {}),
-				postPreviews: layout?.postPreviews ?? portalProvider.current?.layout?.postPreviews ?? {},
-			};
-
-			if (JSON.stringify(originalLayout) !== JSON.stringify(layoutWithPreviews)) {
-				updateData.Layout = permawebProvider.libs.mapToProcessCase(layoutWithPreviews);
+			const currentLayout = portalProvider.current.layout as any;
+			const legacyPostPreviews = currentLayout?.postPreviews ?? currentLayout?.PostPreviews;
+			const update: Record<string, any> = { Layout: layout };
+			if (legacyPostPreviews && typeof legacyPostPreviews === 'object' && !Array.isArray(legacyPostPreviews)) {
+				update.PostPreviews = permawebProvider.libs.mapToProcessCase({
+					...legacyPostPreviews,
+					...(portalProvider.current.postPreviews || {}),
+				});
 			}
-			if (JSON.stringify(originalPages) !== JSON.stringify(pages)) {
-				updateData.Pages = permawebProvider.libs.mapToProcessCase(pages);
-			}
-			if (JSON.stringify(originalThemes) !== JSON.stringify(themes)) {
-				updateData.Themes = permawebProvider.libs.mapToProcessCase(themes);
-			}
-
-			if (Object.keys(updateData).length === 0) {
-				addNotification('No changes to save', 'warning');
-				return;
-			}
-
 			const layoutUpdateId = await permawebProvider.libs.updateZone(
-				updateData,
+				update,
 				portalProvider.current.id,
 				arProvider.wallet
 			);
 
+			setOriginalLayout(layout);
+			setLayoutStoredAsScalar(true);
+			hasUserSelected.current = false;
 			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Presentation);
 
-			debugLog('info', 'Layout', 'Layout/Pages update:', layoutUpdateId);
+			debugLog('info', 'Layout', 'Layout update:', layoutUpdateId);
 			addNotification(`${language?.layoutUpdated || 'Layout Updated'}!`, 'success');
 		} catch (e: any) {
 			addNotification(e.message ?? 'Error updating layout', 'warning');
@@ -319,14 +109,14 @@ export default function Layout() {
 			<S.Wrapper>
 				<S.OptionsWrapper>
 					{options.map((option) => {
-						const active = option.name === activeName;
+						const active = option.name === layout;
 
 						return (
 							<S.Option
 								key={option.name}
 								disabled={unauthorized}
 								$active={active}
-								onClick={() => (active ? {} : handleLayoutOptionChange(option.name))}
+								onClick={() => (active ? undefined : handleLayoutOptionChange(option.name))}
 							>
 								<S.OptionIcon $active={active}>
 									<img src={option.icon} alt={option.name} />

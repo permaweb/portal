@@ -6,7 +6,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Select } from 'components/atoms/Select';
-import { FONT_OPTIONS } from 'helpers/config';
+import { DEFAULT_FONTS, FONT_OPTIONS } from 'helpers/config';
 import { PortalPatchMapEnum, SelectOptionType } from 'helpers/types';
 import { debugLog, stripFontWeights } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -23,20 +23,16 @@ export default function Fonts() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 
-	const headerOptions = getFontOptions('headers');
-	const bodyOptions = getFontOptions('body');
+	const fontOptions = getFontOptions();
 
-	const [headerFont, setHeaderFont] = React.useState<SelectOptionType | null>(
-		getDefaultOption('headers', headerOptions)
-	);
-	const [bodyFont, setBodyFont] = React.useState<SelectOptionType | null>(getDefaultOption('body', bodyOptions));
+	const [headerFont, setHeaderFont] = React.useState<SelectOptionType | null>(getDefaultOption('headers', fontOptions));
+	const [bodyFont, setBodyFont] = React.useState<SelectOptionType | null>(getDefaultOption('body', fontOptions));
 
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const { addNotification } = useNotifications();
 
 	React.useEffect(() => {
-		const allFonts = [...FONT_OPTIONS.headers, ...FONT_OPTIONS.body];
-		WebFont.load({ google: { families: allFonts } });
+		WebFont.load({ google: { families: FONT_OPTIONS } });
 	}, []);
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
@@ -74,11 +70,12 @@ export default function Fonts() {
 			const family = portalProvider.current?.fonts?.[type];
 			return { id: family, label: stripFontWeights(family) };
 		}
-		return opts[0];
+		const defaultFont = DEFAULT_FONTS[type];
+		return opts.find((option) => option.id === defaultFont) || opts[0];
 	}
 
-	function getFontOptions(key: 'headers' | 'body') {
-		return FONT_OPTIONS[key].map((option: string) => ({ id: option, label: stripFontWeights(option) }));
+	function getFontOptions() {
+		return FONT_OPTIONS.map((option: string) => ({ id: option, label: stripFontWeights(option) }));
 	}
 
 	function renderFontOption(option: SelectOptionType) {
@@ -94,8 +91,8 @@ export default function Fonts() {
 	}
 
 	function hasChanges() {
-		const currentHeaderFont = portalProvider.current?.fonts?.headers || headerOptions[0].id;
-		const currentBodyFont = portalProvider.current?.fonts?.body || bodyOptions[0].id;
+		const currentHeaderFont = portalProvider.current?.fonts?.headers || DEFAULT_FONTS.headers;
+		const currentBodyFont = portalProvider.current?.fonts?.body || DEFAULT_FONTS.body;
 
 		return headerFont?.id !== currentHeaderFont || bodyFont?.id !== currentBodyFont;
 	}
@@ -106,9 +103,9 @@ export default function Fonts() {
 				<S.Section>
 					<Select
 						label={language?.headers}
-						activeOption={headerFont ?? headerOptions[0]}
+						activeOption={headerFont ?? fontOptions[0]}
 						setActiveOption={(option) => setHeaderFont(option)}
-						options={headerOptions}
+						options={fontOptions}
 						disabled={unauthorized || loading}
 						renderOption={renderFontOption}
 					/>
@@ -117,9 +114,9 @@ export default function Fonts() {
 				<S.Section>
 					<Select
 						label={language?.bodyText}
-						activeOption={bodyFont ?? bodyOptions[0]}
+						activeOption={bodyFont ?? fontOptions[0]}
 						setActiveOption={(option) => setBodyFont(option)}
-						options={bodyOptions}
+						options={fontOptions}
 						disabled={unauthorized || loading}
 						renderOption={renderFontOption}
 					/>
