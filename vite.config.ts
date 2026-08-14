@@ -1,5 +1,5 @@
-import fs from 'fs';
 import react from '@vitejs/plugin-react';
+import fs from 'fs';
 import path from 'path';
 import polyfillNode from 'rollup-plugin-polyfill-node';
 import { defineConfig, loadEnv } from 'vite';
@@ -95,6 +95,17 @@ export default defineConfig(({ mode }) => {
 				modulePreload: false,
 				rollupOptions: {
 					input: path.resolve(root, 'index.ts'),
+					plugins: [
+						{
+							name: 'copy-engine-lite-service-worker',
+							writeBundle() {
+								fs.copyFileSync(
+									path.resolve(root, 'engine-lite-service-worker.js'),
+									path.resolve(__dirname, `dist/${app}/engine-lite-service-worker.js`)
+								);
+							},
+						},
+					],
 					output: {
 						inlineDynamicImports: true,
 						manualChunks: undefined,

@@ -186,14 +186,14 @@ video {
 	border: 1px solid var(--lite-border);
 	border-radius: 999px;
 	background: var(--lite-surface);
-	gap: 2px;
+	gap: 6px;
 }
 
 .lite-theme-option {
 	display: inline-grid;
 	place-items: center;
-	width: 28px;
-	height: 28px;
+	width: 24px;
+	height: 24px;
 	padding: 0;
 	border: 0;
 	border-radius: 50%;
@@ -584,6 +584,7 @@ video {
 }
 
 .lite-hero-image {
+	position: relative;
 	width: calc(100% + 100px);
 	max-height: min(70vh, 640px);
 	margin-left: -50px;
@@ -601,6 +602,204 @@ video {
 	width: auto;
 	height: auto;
 	margin: 0 auto;
+}
+
+.lite-expandable-image {
+	cursor: zoom-in;
+}
+
+.lite-expandable-image:focus-visible {
+	outline: 2px solid var(--lite-primary);
+	outline-offset: 3px;
+}
+
+.lite-expandable-image-frame {
+	position: relative;
+	display: block;
+	width: calc(100% + 100px);
+	max-width: calc(100% + 100px);
+	max-height: min(70vh, 640px);
+	margin: 48px 0 48px -50px;
+}
+
+.lite-rich-text .lite-expandable-image-frame > img {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	max-height: min(70vh, 640px);
+	margin: 0;
+	border: 1px solid var(--lite-border);
+	object-fit: contain;
+}
+
+.lite-image-zoom-indicator {
+	position: absolute;
+	right: 12px;
+	bottom: 12px;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+	background: rgba(0, 0, 0, 0.45);
+	opacity: 0;
+	transform: translateY(4px);
+	transition: opacity 160ms ease, transform 160ms ease;
+	pointer-events: none;
+}
+
+.lite-image-zoom-indicator > span {
+	position: relative;
+	width: 10px;
+	height: 10px;
+	border: 1.5px solid #ffffff;
+	border-radius: 999px;
+	transform: translate(-1px, -1px);
+}
+
+.lite-image-zoom-indicator > span::after {
+	content: '';
+	position: absolute;
+	width: 5px;
+	height: 1.5px;
+	right: -4px;
+	bottom: -3px;
+	background: #ffffff;
+	border-radius: 999px;
+	transform: rotate(45deg);
+	transform-origin: center;
+}
+
+.lite-image-zoom-frame:hover > .lite-image-zoom-indicator,
+.lite-image-zoom-frame:focus-within > .lite-image-zoom-indicator {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+body.lite-lightbox-open {
+	overflow: hidden;
+}
+
+.lite-image-lightbox {
+	position: fixed;
+	inset: 0;
+	z-index: 1200;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	padding: 24px;
+	border: 0;
+	background: rgba(0, 0, 0, 0.78);
+	cursor: zoom-out;
+	animation: lite-lightbox-overlay-in 180ms ease forwards;
+}
+
+.lite-image-lightbox.is-closing {
+	animation-name: lite-lightbox-overlay-out;
+}
+
+.lite-image-lightbox-content {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	max-width: min(1100px, 94vw);
+}
+
+.lite-image-lightbox-image {
+	width: auto;
+	max-width: 100%;
+	height: auto;
+	max-height: 90vh;
+	border: 1px solid var(--lite-border);
+	background: var(--lite-surface);
+	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+	cursor: zoom-out;
+	animation: lite-lightbox-image-in 180ms ease forwards;
+}
+
+.lite-image-lightbox.is-closing .lite-image-lightbox-image {
+	animation-name: lite-lightbox-image-out;
+}
+
+.lite-image-lightbox-caption {
+	max-width: 100%;
+	color: #f2f2f2;
+	font-size: 13px;
+	font-style: italic;
+	line-height: 1.5;
+	text-align: center;
+	white-space: normal;
+}
+
+.lite-image-lightbox-close {
+	top: 10px;
+	right: 10px;
+	bottom: auto;
+	opacity: 1;
+	transform: translateY(0);
+	background: rgba(0, 0, 0, 0.55);
+}
+
+.lite-image-lightbox-close > span::before {
+	content: '';
+	position: absolute;
+	width: 7px;
+	height: 2px;
+	left: 50%;
+	top: 50%;
+	background: #ffffff;
+	border-radius: 999px;
+	transform: translate(-50%, -50%);
+}
+
+@keyframes lite-lightbox-overlay-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes lite-lightbox-overlay-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes lite-lightbox-image-in {
+	from {
+		opacity: 0;
+		filter: blur(10px);
+		transform: scale(0.96);
+	}
+	to {
+		opacity: 1;
+		filter: blur(0);
+		transform: scale(1);
+	}
+}
+
+@keyframes lite-lightbox-image-out {
+	from {
+		opacity: 1;
+		filter: blur(0);
+		transform: scale(1);
+	}
+	to {
+		opacity: 0;
+		filter: blur(8px);
+		transform: scale(0.96);
+	}
 }
 
 .lite-byline {
@@ -855,6 +1054,7 @@ video {
 	}
 
 	.lite-hero-image,
+	.lite-expandable-image-frame,
 	.lite-rich-text img,
 	.lite-rich-text video,
 	.lite-rich-text iframe {

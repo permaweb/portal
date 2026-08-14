@@ -241,7 +241,7 @@ export default function CreatePortal() {
 			const portalId = await permawebProvider.libs.createZone(
 				{
 					tags: tags,
-					data: PORTAL_DATA(),
+					data: PORTAL_DATA({ logo: data.Banner, theme: chosenTheme }),
 					spawnModeration: false,
 					authUsers: [arProvider.walletAddress],
 					...(IS_BASE_MODE

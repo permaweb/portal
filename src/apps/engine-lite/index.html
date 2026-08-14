@@ -3,11 +3,212 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="color-scheme" content="light dark" />
 		<meta name="robots" content="index, follow, max-image-preview:large" />
+		<meta name="portal-engine-service-worker" content="./engine-lite-service-worker.js" />
 		<title>Portal</title>
+		<style>
+			:root {
+				--lite-background: rgb(255, 255, 255);
+				--lite-text: rgb(0, 0, 0);
+				color-scheme: light;
+			}
+
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--lite-background: rgb(0, 0, 0);
+					--lite-text: rgb(255, 255, 255);
+					color-scheme: dark;
+				}
+			}
+
+			html,
+			body,
+			#portal {
+				min-height: 100%;
+				background: var(--lite-background);
+			}
+
+			body {
+				min-width: 320px;
+				min-height: 100vh;
+				margin: 0;
+				color: var(--lite-text);
+			}
+
+			#portal-site-loader {
+				position: fixed;
+				z-index: 9999;
+				inset: 0;
+				display: grid;
+				place-items: center;
+				background: var(--lite-background);
+				color: var(--lite-text);
+				opacity: 1;
+				visibility: visible;
+				transition: opacity 160ms ease, visibility 160ms ease;
+			}
+
+			#portal-site-loader.is-hidden {
+				opacity: 0;
+				visibility: hidden;
+				pointer-events: none;
+			}
+
+			#portal-site-loader-logo {
+				display: grid;
+				place-items: center;
+				width: min(180px, 50vw);
+				min-height: 50px;
+				animation: portal-loader-open 160ms ease-out;
+			}
+
+			#portal-site-loader-logo svg {
+				width: 50px;
+				height: 50px;
+			}
+
+			#portal-site-loader-logo img {
+				display: block;
+				width: auto;
+				max-width: 100%;
+				height: auto;
+				max-height: 60px;
+				object-fit: contain;
+			}
+
+			@keyframes portal-loader-open {
+				from {
+					opacity: 0;
+				}
+				to {
+					opacity: 1;
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				#portal-site-loader,
+				#portal-site-loader-logo {
+					transition: none;
+					animation: none;
+				}
+			}
+		</style>
+		<script>
+			(function () {
+				var ARWEAVE_ID = /^[a-zA-Z0-9_-]{43}$/;
+				var parts = window.location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+				var params = new URLSearchParams(window.location.search);
+				var explicit = params.get('portal') || params.get('portalId');
+				var pathId = window.location.pathname.split('/').filter(Boolean)[0];
+				var id =
+					explicit && ARWEAVE_ID.test(explicit) ? explicit : pathId && ARWEAVE_ID.test(pathId) ? pathId : parts[0];
+				var mode = 'system';
+				try {
+					var storedMode = window.localStorage.getItem('portal-engine-lite-theme');
+					if (storedMode === 'light' || storedMode === 'dark') mode = storedMode;
+				} catch (_) {}
+				var scheme =
+					mode === 'system'
+						? window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+							? 'dark'
+							: 'light'
+						: mode;
+				try {
+					var cachedThemes = JSON.parse(window.localStorage.getItem('portal-engine-lite-colors:' + id) || 'null');
+					var variables = cachedThemes && cachedThemes[scheme];
+					if (variables && typeof variables === 'object') {
+						Object.keys(variables).forEach(function (key) {
+							if (key.indexOf('--lite-') === 0 && typeof variables[key] === 'string') {
+								document.documentElement.style.setProperty(key, variables[key]);
+							}
+						});
+					}
+					var brand = JSON.parse(window.localStorage.getItem('portal-engine-lite-brand:' + id) || 'null');
+					window.__portalBootstrapLogo = brand && brand.logo;
+				} catch (_) {}
+				document.documentElement.dataset.liteScheme = scheme;
+				document.documentElement.style.colorScheme = scheme;
+			})();
+		</script>
 	</head>
 	<body>
+		<div id="portal-site-loader" role="status" aria-label="Loading site">
+			<div id="portal-site-loader-logo">
+				<svg viewBox="0 0 256 256" aria-hidden="true">
+					<path
+						d="M84.27,171.73l-55.09-20.3a7.92,7.92,0,0,1,0-14.86l55.09-20.3,20.3-55.09a7.92,7.92,0,0,1,14.86,0l20.3,55.09,55.09,20.3a7.92,7.92,0,0,1,0,14.86l-55.09,20.3-20.3,55.09a7.92,7.92,0,0,1-14.86,0Z"
+						fill="none"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="24"
+					/>
+					<line
+						x1="176"
+						y1="16"
+						x2="176"
+						y2="64"
+						fill="none"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="24"
+					/>
+					<line
+						x1="224"
+						y1="72"
+						x2="224"
+						y2="104"
+						fill="none"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="24"
+					/>
+					<line
+						x1="152"
+						y1="40"
+						x2="200"
+						y2="40"
+						fill="none"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="24"
+					/>
+					<line
+						x1="208"
+						y1="88"
+						x2="240"
+						y2="88"
+						fill="none"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="24"
+					/>
+				</svg>
+			</div>
+		</div>
 		<div id="portal"></div>
+		<script>
+			(function () {
+				var source = window.__portalBootstrapLogo;
+				var target = document.getElementById('portal-site-loader-logo');
+				if (source && target) {
+					var image = new Image();
+					image.alt = '';
+					image.onload = function () {
+						target.replaceChildren(image);
+					};
+					image.src = /^[a-zA-Z0-9_-]{43}$/.test(source) ? 'https://arweave.net/' + source : source;
+				}
+				if ('serviceWorker' in navigator) {
+					navigator.serviceWorker.register('./engine-lite-service-worker.js', { scope: './' }).catch(function () {});
+				}
+			})();
+		</script>
 		<script type="module" src="./index.ts"></script>
 	</body>
 </html>

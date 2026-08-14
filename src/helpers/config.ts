@@ -1,4 +1,10 @@
 import engineLiteDeployment from '../../deployments/engine-lite.json';
+import {
+	ENGINE_LITE_BRAND_STORAGE_PREFIX,
+	ENGINE_LITE_FALLBACK_LOGO,
+	ENGINE_LITE_THEME_COLORS_STORAGE_PREFIX,
+	ENGINE_LITE_THEME_STORAGE_KEY,
+} from '../apps/engine-lite/constants';
 
 import { LAYOUT_BLOG, LAYOUT_DOCUMENTATION, LAYOUT_JOURNAL } from './config/layouts';
 import { PAGES_BLOG, PAGES_DOCUMENTATION, PAGES_JOURNAL } from './config/pages';
@@ -8,6 +14,8 @@ import { ArticleBlockEnum, PageBlockEnum, PortalPatchMapEnum } from './types';
 
 export const ENGINE_LITE_REFERENCE_ID = engineLiteDeployment.referenceId;
 export const ENGINE_LITE_FALLBACK_ID = engineLiteDeployment.value;
+export const ENGINE_LITE_SERVICE_WORKER_ID =
+	(engineLiteDeployment as typeof engineLiteDeployment & { serviceWorkerId?: string }).serviceWorkerId || '';
 
 export const PAGES = {
 	JOURNAL: PAGES_JOURNAL,
@@ -385,23 +393,245 @@ export const UPLOAD = {
 	dispatchUploadSize: ARWEAVE_FREE_UPLOAD_LIMIT,
 };
 
-export const PORTAL_DATA = () => `
+type PortalBootstrapOptions = {
+	logo?: string | null;
+	theme?: any;
+};
+
+function getBootstrapThemeColor(theme: any, key: 'background' | 'text', scheme: 'light' | 'dark') {
+	const basics = theme?.basics || theme?.Basics || {};
+	const colors = basics.colors || basics.Colors || {};
+	const entry = colors[key] || colors[key.charAt(0).toUpperCase() + key.slice(1)] || {};
+	const raw = entry[scheme] || entry[scheme.charAt(0).toUpperCase() + scheme.slice(1)];
+	const reference = typeof raw === 'string' ? colors[raw] || colors[raw.charAt(0).toUpperCase() + raw.slice(1)] : null;
+	const resolved = reference?.[scheme] || reference?.[scheme.charAt(0).toUpperCase() + scheme.slice(1)] || raw;
+	const fallback =
+		scheme === 'dark'
+			? key === 'background'
+				? '0,0,0'
+				: '255,255,255'
+			: key === 'background'
+			? '255,255,255'
+			: '0,0,0';
+	const value = typeof resolved === 'string' && resolved.trim() ? resolved.trim() : fallback;
+	return /^(?:#|rgb|hsl|color\(|var\()/i.test(value) ? value : `rgb(${value})`;
+}
+
+function serializePortalBootstrap(value: unknown) {
+	return (JSON.stringify(value) || 'null').replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
+}
+
+export const PORTAL_DATA = (options: PortalBootstrapOptions = {}) => {
+	const theme = {
+		light: {
+			background: getBootstrapThemeColor(options.theme, 'background', 'light'),
+			text: getBootstrapThemeColor(options.theme, 'text', 'light'),
+		},
+		dark: {
+			background: getBootstrapThemeColor(options.theme, 'background', 'dark'),
+			text: getBootstrapThemeColor(options.theme, 'text', 'dark'),
+		},
+	};
+	const logo = options.logo && options.logo !== 'None' ? options.logo : null;
+
+	return `
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="portal-engine-reference" content="${ENGINE_LITE_REFERENCE_ID}" />
+    <meta name="portal-engine-service-worker" content="${ENGINE_LITE_SERVICE_WORKER_ID}" />
     <title>Portal</title>
+    <style>
+      :root {
+        --lite-background: rgb(255, 255, 255);
+        --lite-text: rgb(0, 0, 0);
+        color-scheme: light;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --lite-background: rgb(0, 0, 0);
+          --lite-text: rgb(255, 255, 255);
+          color-scheme: dark;
+        }
+      }
+
+      html, body, #portal {
+        min-height: 100%;
+        background: var(--lite-background);
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        color: var(--lite-text);
+      }
+
+      #portal-site-loader {
+        position: fixed;
+        z-index: 9999;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: var(--lite-background);
+        color: var(--lite-text);
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 160ms ease, visibility 160ms ease;
+      }
+
+      #portal-site-loader.is-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      #portal-site-loader-logo {
+        display: grid;
+        place-items: center;
+        width: min(180px, 50vw);
+        min-height: 50px;
+        animation: portal-loader-open 160ms ease-out;
+      }
+
+      #portal-site-loader-logo svg {
+        width: 50px;
+        height: 50px;
+      }
+
+      #portal-site-loader-logo img {
+        display: block;
+        width: auto;
+        max-width: 100%;
+        height: auto;
+        max-height: 60px;
+        object-fit: contain;
+      }
+
+      @keyframes portal-loader-open {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #portal-site-loader, #portal-site-loader-logo { transition: none; animation: none; }
+      }
+    </style>
+    <script>
+      (function () {
+        var THEME_STORAGE_KEY = ${serializePortalBootstrap(ENGINE_LITE_THEME_STORAGE_KEY)};
+        var THEME_COLORS_PREFIX = ${serializePortalBootstrap(ENGINE_LITE_THEME_COLORS_STORAGE_PREFIX)};
+        var BRAND_PREFIX = ${serializePortalBootstrap(ENGINE_LITE_BRAND_STORAGE_PREFIX)};
+        var EMBEDDED_THEME = ${serializePortalBootstrap(theme)};
+        var EMBEDDED_LOGO = ${serializePortalBootstrap(logo)};
+        var ARWEAVE_ID = /^[a-zA-Z0-9_-]{43}$/;
+
+        function hashParts() {
+          return window.location.hash.replace(/^#\/?/, '').split('/').map(function (part) {
+            try { return decodeURIComponent(part); } catch (_) { return part; }
+          }).filter(Boolean);
+        }
+
+        function portalId() {
+          var params = new URLSearchParams(window.location.search);
+          var explicit = params.get('portal') || params.get('portalId');
+          if (explicit && ARWEAVE_ID.test(explicit)) return explicit;
+          var pathId = window.location.pathname.split('/').filter(Boolean)[0];
+          if (pathId && ARWEAVE_ID.test(pathId)) return pathId;
+          var hashId = hashParts()[0];
+          return hashId && ARWEAVE_ID.test(hashId) ? hashId : '';
+        }
+
+        function readJSON(key) {
+          try { return JSON.parse(window.localStorage.getItem(key) || 'null'); } catch (_) { return null; }
+        }
+
+        function resolveLogo(value) {
+          if (typeof value !== 'string' || !value || value === 'None') return null;
+          return ARWEAVE_ID.test(value) ? 'https://arweave.net/' + value : value;
+        }
+
+        var id = portalId();
+        var mode = 'system';
+        try {
+          var storedMode = window.localStorage.getItem(THEME_STORAGE_KEY);
+          if (storedMode === 'light' || storedMode === 'dark') mode = storedMode;
+        } catch (_) {}
+        var scheme = mode === 'system'
+          ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          : mode;
+        var cachedThemes = id ? readJSON(THEME_COLORS_PREFIX + id) : null;
+        var variables = cachedThemes && cachedThemes[scheme];
+        var colors = EMBEDDED_THEME[scheme];
+
+        if (variables && typeof variables === 'object' && !Array.isArray(variables)) {
+          Object.keys(variables).forEach(function (key) {
+            if (key.indexOf('--lite-') === 0 && typeof variables[key] === 'string') {
+              document.documentElement.style.setProperty(key, variables[key]);
+            }
+          });
+        } else {
+          document.documentElement.style.setProperty('--lite-background', colors.background);
+          document.documentElement.style.setProperty('--lite-text', colors.text);
+        }
+        document.documentElement.dataset.liteScheme = scheme;
+        document.documentElement.style.colorScheme = scheme;
+
+        var cachedBrand = id ? readJSON(BRAND_PREFIX + id) : null;
+        var selectedLogo = cachedBrand && typeof cachedBrand === 'object' ? cachedBrand.logo : EMBEDDED_LOGO;
+        window.__portalBootstrapLogo = resolveLogo(selectedLogo);
+      })();
+    </script>
   </head>
   <body>
+    <div id="portal-site-loader" role="status" aria-label="Loading site">
+      <div id="portal-site-loader-logo">${ENGINE_LITE_FALLBACK_LOGO}</div>
+    </div>
     <div id="portal"></div>
     <script>
+      (function () {
+        var source = window.__portalBootstrapLogo;
+        var target = document.getElementById('portal-site-loader-logo');
+        if (!source || !target) return;
+        var image = new Image();
+        image.alt = '';
+        image.onload = function () { target.replaceChildren(image); };
+        image.src = source;
+      })();
+
       const ENGINE_REFERENCE_ID = '${ENGINE_LITE_REFERENCE_ID}';
       const ENGINE_FALLBACK_ID = '${ENGINE_LITE_FALLBACK_ID}';
+      const ENGINE_SERVICE_WORKER_ID = '${ENGINE_LITE_SERVICE_WORKER_ID}';
       const ARWEAVE_ID = /^[a-zA-Z0-9_-]{43}$/;
       const ENGINE_CACHE_KEY = 'portal-engine:' + ENGINE_REFERENCE_ID;
+
+      function registerEngineServiceWorker() {
+        if (!ENGINE_SERVICE_WORKER_ID || !('serviceWorker' in navigator)) return null;
+        const workerUrl = new URL('/' + ENGINE_SERVICE_WORKER_ID, window.location.origin);
+        return navigator.serviceWorker.register(workerUrl.href, { scope: '/' }).catch(function () { return null; });
+      }
+
+      const engineServiceWorker = registerEngineServiceWorker();
+
+      function cacheEngineWithServiceWorker(url) {
+        if (!engineServiceWorker) return;
+        engineServiceWorker.then(function (registration) {
+          if (!registration) return;
+          const worker = navigator.serviceWorker.controller || registration.active || registration.waiting;
+          if (worker) {
+            worker.postMessage({ type: 'CACHE_ENGINE', url: url });
+            return;
+          }
+          navigator.serviceWorker.ready.then(function (readyRegistration) {
+            if (readyRegistration.active) readyRegistration.active.postMessage({ type: 'CACHE_ENGINE', url: url });
+          });
+        });
+      }
 
       function getGateway() {
         const host = window.location.hostname;
@@ -506,6 +736,7 @@ export const PORTAL_DATA = () => `
         script.async = true;
         script.dataset.engineReference = ENGINE_REFERENCE_ID;
         script.src = 'https://' + gateway + '/' + engineId;
+        script.addEventListener('load', function () { cacheEngineWithServiceWorker(script.src); });
         if (gateway !== 'arweave.net') {
           script.addEventListener('error', function retryFromArweave() {
             script.removeEventListener('error', retryFromArweave);
@@ -527,6 +758,7 @@ export const PORTAL_DATA = () => `
   </body>
 </html>
 `;
+};
 
 export const PORTAL_POST_DATA = () => `
 <!DOCTYPE html>

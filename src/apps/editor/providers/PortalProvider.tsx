@@ -631,7 +631,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 			// If creating a portal, create it first
 			if (createPortal) {
-				const { ENGINE_LITE_REFERENCE_ID, PORTAL_DATA, PORTAL_PATCH_MAP } = await import('helpers/config');
+				const { ENGINE_LITE_REFERENCE_ID, PORTAL_DATA, PORTAL_PATCH_MAP, THEME } = await import('helpers/config');
 				const { PORTAL_ROLES } = await import('helpers/config');
 
 				const getBootTag = (key: string, value: string) => ({
@@ -671,6 +671,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				const banner = await resolveMediaOverride(mediaOverrides?.logoId);
 				const icon = await resolveMediaOverride(mediaOverrides?.iconId);
 				const wallpaper = await resolveMediaOverride(mediaOverrides?.wallpaperId);
+				const defaultTheme = data.theme || THEME.DEFAULT;
 
 				if (banner) tags.push(getBootTag('Banner', banner));
 				if (icon) tags.push(getBootTag('Thumbnail', icon));
@@ -686,7 +687,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				targetPortalId = await permawebProvider.libs.createZone(
 					{
 						tags: tags,
-						data: PORTAL_DATA(),
+						data: PORTAL_DATA({ logo: banner, theme: defaultTheme }),
 						spawnModeration: false,
 						authUsers: [arProvider.walletAddress],
 					},
@@ -736,8 +737,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				);
 
 				// Set default Layout, Pages, Theme, and Fonts (required for engine to render)
-				const { LAYOUT, PAGES, THEME, FONT_OPTIONS } = await import('helpers/config');
-				const defaultTheme = data.theme || THEME.DEFAULT;
+				const { LAYOUT, PAGES, FONT_OPTIONS } = await import('helpers/config');
 
 				// Build Fonts object from extracted theme or use defaults
 				// Portal expects format like "Montserrat:400,700" for each font

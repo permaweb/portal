@@ -5,10 +5,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { ArweaveSigner, createData } from '@dha-team/arbundles';
-import { ReferenceClient, fromJwk } from '@permaweb/references';
+import { fromJwk, ReferenceClient } from '@permaweb/references';
 import Arweave from 'arweave';
 
 const BUNDLE_PATH = path.resolve('dist/engine-lite/bundle.js');
+const SERVICE_WORKER_PATH = path.resolve('dist/engine-lite/engine-lite-service-worker.js');
 const DEPLOYMENT_PATH = path.resolve('deployments/engine-lite.json');
 const UPLOAD_URL = 'https://up.arweave.net/tx/arweave';
 const FREE_UPLOAD_LIMIT = 100 * 1000;
@@ -70,12 +71,25 @@ async function uploadPayload(jwk, data, tags) {
 		: uploadL1Transaction(jwk, bytes, tags);
 }
 
-async function uploadBundle(jwk) {
-	return uploadPayload(jwk, await fs.readFile(BUNDLE_PATH), [
+async function uploadBundle(jwk, serviceWorkerId) {
+	const bundle = await fs.readFile(BUNDLE_PATH, 'utf8');
+	const payload = `globalThis.__PORTAL_ENGINE_SERVICE_WORKER_ID__=${JSON.stringify(serviceWorkerId)};\n${bundle}`;
+	return uploadPayload(jwk, payload, [
 		{ name: 'Content-Type', value: 'application/javascript' },
 		{ name: 'App-Name', value: 'Portal' },
 		{ name: 'App-Version', value: '1.0.0' },
 		{ name: 'Type', value: 'portal-engine' },
+		{ name: 'Engine', value: 'lite' },
+		{ name: 'Service-Worker', value: serviceWorkerId },
+	]);
+}
+
+async function uploadServiceWorker(jwk) {
+	return uploadPayload(jwk, await fs.readFile(SERVICE_WORKER_PATH), [
+		{ name: 'Content-Type', value: 'application/javascript' },
+		{ name: 'App-Name', value: 'Portal' },
+		{ name: 'App-Version', value: '1.0.0' },
+		{ name: 'Type', value: 'portal-engine-service-worker' },
 		{ name: 'Engine', value: 'lite' },
 	]);
 }
@@ -114,7 +128,8 @@ async function main() {
 		}
 	}
 
-	const transactionId = await uploadBundle(jwk);
+	const serviceWorkerId = await uploadServiceWorker(jwk);
+	const transactionId = await uploadBundle(jwk, serviceWorkerId);
 
 	let referenceId = existingReference;
 	if (existingReference) {
@@ -132,6 +147,7 @@ async function main() {
 				device: 'reference@1.0',
 				referenceId,
 				value: transactionId,
+				serviceWorkerId,
 				publishedAt,
 			},
 			null,
@@ -144,6 +160,7 @@ async function main() {
 			{
 				referenceId,
 				transactionId,
+				serviceWorkerId,
 				publishedAt,
 				updated: Boolean(existingReference),
 			},

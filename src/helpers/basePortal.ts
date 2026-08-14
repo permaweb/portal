@@ -1622,7 +1622,9 @@ export async function ensureBasePortalSite(portalId: string, wallet: any, addres
 	}
 
 	assertCanWrite(manifest, address, ['Admin']);
-	const siteTxId = await uploadData(wallet, PORTAL_DATA(), [
+	const siteThemes = Array.isArray(manifest.themes) ? manifest.themes : [];
+	const activeTheme = siteThemes.find((theme) => theme?.active || theme?.Active) || siteThemes[0];
+	const siteTxId = await uploadData(wallet, PORTAL_DATA({ logo: manifest.bannerTxId, theme: activeTheme }), [
 		{ name: 'Content-Type', value: 'text/html; charset=utf-8' },
 		{ name: 'App-Name', value: 'Portal' },
 		{ name: 'App-Version', value: BASE_SCHEMA_VERSION },
@@ -2394,16 +2396,28 @@ export function createBasePermawebAdapter(wallet: any, address: string) {
 		},
 		createZone: async (args: any, onStatus?: (status: string) => void) => {
 			onStatus?.('Creating base portal site');
-			const siteTxId = await uploadTransaction(wallet, args.data || PORTAL_DATA(), [
-				{ name: 'Content-Type', value: 'text/html; charset=utf-8' },
-				{ name: 'App-Name', value: 'Portal' },
-				{ name: 'App-Version', value: BASE_SCHEMA_VERSION },
-				{ name: 'Portal-Mode', value: 'base' },
-				{ name: 'Type', value: 'portal-site' },
-				{ name: 'Portal-Owner', value: address },
-				{ name: 'Engine-Reference', value: ENGINE_LITE_REFERENCE_ID },
-				{ name: 'Author', value: address },
-			]);
+			const initialPortalData = normalizeUpdate(args.initialPortalData);
+			const bootTags = Object.fromEntries(
+				(args.tags || [])
+					.filter((tag: ArweaveTag) => tag.name.startsWith('Bootloader-') || tag.name.startsWith('Zone-'))
+					.map((tag: ArweaveTag) => [tag.name.replace(/^Bootloader-|^Zone-/, ''), tag.value])
+			);
+			const initialThemes = Array.isArray(initialPortalData.themes) ? initialPortalData.themes : [];
+			const initialTheme = initialThemes.find((theme: any) => theme?.active) || initialThemes[0];
+			const siteTxId = await uploadTransaction(
+				wallet,
+				args.data || PORTAL_DATA({ logo: bootTags.Banner, theme: initialTheme }),
+				[
+					{ name: 'Content-Type', value: 'text/html; charset=utf-8' },
+					{ name: 'App-Name', value: 'Portal' },
+					{ name: 'App-Version', value: BASE_SCHEMA_VERSION },
+					{ name: 'Portal-Mode', value: 'base' },
+					{ name: 'Type', value: 'portal-site' },
+					{ name: 'Portal-Owner', value: address },
+					{ name: 'Engine-Reference', value: ENGINE_LITE_REFERENCE_ID },
+					{ name: 'Author', value: address },
+				]
+			);
 			rememberPortalSite(siteTxId, siteTxId);
 			trackPendingTransaction({
 				id: siteTxId,
@@ -2413,12 +2427,6 @@ export function createBasePermawebAdapter(wallet: any, address: string) {
 				createdAt: Date.now(),
 			});
 			onStatus?.('Creating base portal manifest');
-			const initialPortalData = normalizeUpdate(args.initialPortalData);
-			const bootTags = Object.fromEntries(
-				(args.tags || [])
-					.filter((tag: ArweaveTag) => tag.name.startsWith('Bootloader-') || tag.name.startsWith('Zone-'))
-					.map((tag: ArweaveTag) => [tag.name.replace(/^Bootloader-|^Zone-/, ''), tag.value])
-			);
 			const manifest = await createBasePortal({
 				portalId: siteTxId,
 				name: bootTags.Name || 'Untitled Portal',

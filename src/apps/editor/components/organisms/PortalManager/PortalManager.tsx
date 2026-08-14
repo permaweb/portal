@@ -144,6 +144,8 @@ export default function PortalManager(props: {
 					portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Overview);
 				} else {
 					data.EngineReference = ENGINE_LITE_REFERENCE_ID;
+					const chosenTheme =
+						selectedLayout === 'documentation' ? deepMerge(THEME.DEFAULT, THEME_DOCUMENTATION_PATCH) : THEME.DEFAULT;
 					const getPatchMapTag = (key: string, values: string[]) => {
 						const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
 						return {
@@ -182,7 +184,7 @@ export default function PortalManager(props: {
 					const portalId = await permawebProvider.libs.createZone(
 						{
 							tags: tags,
-							data: PORTAL_DATA(),
+							data: PORTAL_DATA({ logo: data.Banner, theme: chosenTheme }),
 							spawnModeration: false,
 							authUsers: [arProvider.walletAddress],
 						},
@@ -239,9 +241,6 @@ export default function PortalManager(props: {
 					};
 
 					const { layout: chosenLayout, pages: chosenPages } = getLayoutAndPages();
-
-					const chosenTheme =
-						selectedLayout === 'documentation' ? deepMerge(THEME.DEFAULT, THEME_DOCUMENTATION_PATCH) : THEME.DEFAULT;
 
 					const portalUpdateId = await permawebProvider.libs.updateZone(
 						{

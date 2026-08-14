@@ -1,16 +1,49 @@
 import editorFavicon from '../editor/favicon.svg';
 
+import {
+	ENGINE_LITE_BRAND_STORAGE_PREFIX,
+	ENGINE_LITE_THEME_COLORS_STORAGE_PREFIX,
+	ENGINE_LITE_THEME_STORAGE_KEY,
+} from './constants';
 import { fetchPortal, findPost, hydratePost, isArweaveId, type LitePortal, type LitePost } from './data';
 import { escapeHTML, type LiteThemeMode, renderFeed, renderPost, renderShell } from './render';
 import styles from './styles.css?inline';
 import { getLiteFontStylesheet, getLiteThemeVars } from './theme';
 
+declare global {
+	interface Window {
+		__PORTAL_ENGINE_SERVICE_WORKER_ID__?: string;
+	}
+}
+
 const root = document.getElementById('portal');
-const THEME_STORAGE_KEY = 'portal-engine-lite-theme';
-const THEME_COLORS_STORAGE_PREFIX = 'portal-engine-lite-colors:';
 const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+const engineScriptUrl =
+	(document.currentScript instanceof HTMLScriptElement ? document.currentScript : null)?.src ||
+	document.querySelector<HTMLScriptElement>('script[data-engine-reference]')?.src ||
+	'';
 
 if (!root) throw new Error('Engine Lite requires a #portal element.');
+
+function registerEngineServiceWorker() {
+	const serviceWorkerId = window.__PORTAL_ENGINE_SERVICE_WORKER_ID__;
+	if (!serviceWorkerId || !isArweaveId(serviceWorkerId) || !('serviceWorker' in navigator)) return;
+
+	const workerUrl = new URL(`/${serviceWorkerId}`, window.location.origin);
+	void navigator.serviceWorker
+		.register(workerUrl.href, { scope: '/' })
+		.then((registration) => {
+			if (!engineScriptUrl) return;
+			const sendCacheRequest = (worker: ServiceWorker | null) =>
+				worker?.postMessage({ type: 'CACHE_ENGINE', url: engineScriptUrl });
+			const worker = navigator.serviceWorker.controller || registration.active || registration.waiting;
+			if (worker) sendCacheRequest(worker);
+			else void navigator.serviceWorker.ready.then((readyRegistration) => sendCacheRequest(readyRegistration.active));
+		})
+		.catch(() => undefined);
+}
+
+registerEngineServiceWorker();
 
 const style = document.createElement('style');
 style.dataset.engineLite = 'true';
@@ -23,10 +56,16 @@ let selectedCategory: string | null = null;
 let searchQuery = '';
 let walletAddress: string | null = null;
 let themeMode: LiteThemeMode = readThemeMode();
+let imageLightbox: HTMLButtonElement | null = null;
+let imageLightboxCloseTimer: number | null = null;
+let imageLightboxPreviousFocus: HTMLElement | null = null;
+let imageLightboxPreviousOverflow = '';
+
+const IMAGE_LIGHTBOX_CLOSE_MS = 180;
 
 function readThemeMode(): LiteThemeMode {
 	try {
-		const value = window.localStorage.getItem(THEME_STORAGE_KEY);
+		const value = window.localStorage.getItem(ENGINE_LITE_THEME_STORAGE_KEY);
 		return value === 'light' || value === 'dark' ? value : 'system';
 	} catch {
 		return 'system';
@@ -39,7 +78,7 @@ function effectiveScheme() {
 }
 
 function themeColorsStorageKey(id: string) {
-	return `${THEME_COLORS_STORAGE_PREFIX}${id}`;
+	return `${ENGINE_LITE_THEME_COLORS_STORAGE_PREFIX}${id}`;
 }
 
 function applyThemeVars(variables: Record<string, string>) {
@@ -62,6 +101,18 @@ function cacheThemeVars(id: string, current: LitePortal) {
 		);
 	} catch {
 		// A fresh system palette remains available when storage is unavailable.
+	}
+}
+
+function cacheBrand(id: string, current: LitePortal) {
+	if (!id) return;
+	try {
+		window.localStorage.setItem(
+			`${ENGINE_LITE_BRAND_STORAGE_PREFIX}${id}`,
+			JSON.stringify({ logo: current.logo, name: current.name })
+		);
+	} catch {
+		// The embedded fallback logo remains available when storage is unavailable.
 	}
 }
 
@@ -167,6 +218,7 @@ function applyTheme(current: LitePortal) {
 	const scheme = effectiveScheme();
 	applyThemeVars(getLiteThemeVars(current, scheme));
 	cacheThemeVars(portalId, current);
+	cacheBrand(portalId, current);
 	document.documentElement.dataset.liteScheme = scheme;
 	document.documentElement.style.colorScheme = scheme;
 	loadPortalFonts(current.fonts);
@@ -185,6 +237,123 @@ function activateImages() {
 		if (image.complete) show();
 		else image.addEventListener('load', show, { once: true });
 	});
+}
+
+function imageZoomIndicator() {
+	const indicator = document.createElement('span');
+	indicator.className = 'lite-image-zoom-indicator';
+	indicator.setAttribute('aria-hidden', 'true');
+	indicator.appendChild(document.createElement('span'));
+	return indicator;
+}
+
+function imageDetails(image: HTMLImageElement) {
+	const article = image.closest('.lite-article');
+	const mediaWrapper = image.closest('.portal-media-wrapper, figure');
+	const caption = mediaWrapper?.querySelector('figcaption, p')?.textContent?.trim() || '';
+	const isHero = Boolean(image.closest('.lite-hero-image'));
+	const title = article?.querySelector('.lite-post-title')?.textContent?.trim() || '';
+	const subtitle = article?.querySelector('.lite-post-subtitle')?.textContent?.trim() || '';
+	const alt = image.alt || (isHero ? title : '');
+	return { alt, description: caption || (isHero ? subtitle : '') || alt };
+}
+
+function closeExpandedImage(immediate = false) {
+	if (!imageLightbox) return;
+	if (imageLightboxCloseTimer !== null) window.clearTimeout(imageLightboxCloseTimer);
+
+	const remove = () => {
+		imageLightbox?.remove();
+		imageLightbox = null;
+		imageLightboxCloseTimer = null;
+		document.body.classList.remove('lite-lightbox-open');
+		document.body.style.overflow = imageLightboxPreviousOverflow;
+		imageLightboxPreviousFocus?.focus({ preventScroll: true });
+		imageLightboxPreviousFocus = null;
+	};
+
+	if (immediate) {
+		remove();
+		return;
+	}
+
+	imageLightbox.classList.add('is-closing');
+	imageLightboxCloseTimer = window.setTimeout(remove, IMAGE_LIGHTBOX_CLOSE_MS);
+}
+
+function openExpandedImage(image: HTMLImageElement) {
+	const source = image.currentSrc || image.src;
+	if (!source) return;
+	closeExpandedImage(true);
+
+	const details = imageDetails(image);
+	const lightbox = document.createElement('button');
+	lightbox.type = 'button';
+	lightbox.className = 'lite-image-lightbox';
+	lightbox.setAttribute('aria-label', 'Close expanded image');
+
+	const content = document.createElement('span');
+	content.className = 'lite-image-lightbox-content';
+	const closeIndicator = imageZoomIndicator();
+	closeIndicator.classList.add('lite-image-lightbox-close');
+
+	const expandedImage = document.createElement('img');
+	expandedImage.className = 'lite-image-lightbox-image';
+	expandedImage.src = source;
+	expandedImage.alt = details.alt;
+	content.append(closeIndicator, expandedImage);
+
+	if (details.description) {
+		const caption = document.createElement('span');
+		caption.className = 'lite-image-lightbox-caption';
+		caption.textContent = details.description;
+		content.appendChild(caption);
+	}
+
+	lightbox.appendChild(content);
+	lightbox.addEventListener('click', () => closeExpandedImage());
+	imageLightboxPreviousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+	imageLightboxPreviousOverflow = document.body.style.overflow;
+	imageLightbox = lightbox;
+	document.body.classList.add('lite-lightbox-open');
+	document.body.appendChild(lightbox);
+	lightbox.focus({ preventScroll: true });
+}
+
+function attachPostImageEvents() {
+	root
+		?.querySelectorAll<HTMLImageElement>('.lite-article .lite-hero-image img, .lite-article .lite-rich-text img')
+		.forEach((image) => {
+			if (image.dataset.expandableImage === 'true') return;
+			image.dataset.expandableImage = 'true';
+			image.classList.add('lite-expandable-image');
+			image.setAttribute('role', 'button');
+			image.setAttribute('aria-label', 'Expand image');
+			image.tabIndex = 0;
+
+			let frame = image.parentElement;
+			if (!frame?.classList.contains('lite-hero-image')) {
+				const wrapper = document.createElement('span');
+				wrapper.className = 'lite-expandable-image-frame';
+				image.replaceWith(wrapper);
+				wrapper.appendChild(image);
+				frame = wrapper;
+			}
+			frame.classList.add('lite-image-zoom-frame');
+			frame.appendChild(imageZoomIndicator());
+
+			image.addEventListener('click', (event) => {
+				event.preventDefault();
+				event.stopPropagation();
+				openExpandedImage(image);
+			});
+			image.addEventListener('keydown', (event) => {
+				if (event.key !== 'Enter' && event.key !== ' ') return;
+				event.preventDefault();
+				event.stopPropagation();
+				openExpandedImage(image);
+			});
+		});
 }
 
 async function readWalletAddress() {
@@ -234,8 +403,8 @@ async function disconnectWallet() {
 function setTheme(mode: LiteThemeMode) {
 	themeMode = mode;
 	try {
-		if (themeMode === 'system') window.localStorage.removeItem(THEME_STORAGE_KEY);
-		else window.localStorage.setItem(THEME_STORAGE_KEY, themeMode);
+		if (themeMode === 'system') window.localStorage.removeItem(ENGINE_LITE_THEME_STORAGE_KEY);
+		else window.localStorage.setItem(ENGINE_LITE_THEME_STORAGE_KEY, themeMode);
 	} catch {
 		// The selected theme still applies for this session when storage is unavailable.
 	}
@@ -282,6 +451,7 @@ function attachFeedEvents() {
 
 async function renderRoute() {
 	if (!portal) return;
+	closeExpandedImage(true);
 	window.scrollTo({ top: 0, behavior: 'auto' });
 	const parts = routeParts();
 	const isPost = parts[0] === 'post' || parts[0] === 'read';
@@ -301,6 +471,7 @@ async function renderRoute() {
 		setPageMeta(`${post.title} | ${portal.name}`, post.excerpt || portal.description, post.image);
 		attachShellEvents();
 		activateImages();
+		attachPostImageEvents();
 		return;
 	}
 
@@ -355,4 +526,12 @@ systemTheme.addEventListener('change', () => {
 	if (portal) applyTheme(portal);
 	else applyCachedTheme(portalId);
 });
-void start();
+document.addEventListener('keydown', (event) => {
+	if (event.key === 'Escape' && imageLightbox) closeExpandedImage();
+});
+void start().finally(() => {
+	const loader = document.getElementById('portal-site-loader');
+	if (!loader) return;
+	loader.classList.add('is-hidden');
+	window.setTimeout(() => loader.remove(), 180);
+});
