@@ -400,11 +400,28 @@ export const PreviewCard = styled.div`
 	}
 `;
 
+export const PreviewModalContent = styled.div`
+	width: 100%;
+	position: relative;
+`;
+
+export const PreviewModalClose = styled.div`
+	position: absolute;
+	z-index: 1;
+	top: 15px;
+	right: 30px;
+
+	@media (max-width: 960px) {
+		right: 8px;
+	}
+`;
+
 export const PreviewFrame = styled.div`
 	width: 100%;
-	height: min(76vh, 860px);
+	height: min(84vh, 860px);
 	overflow: hidden;
 	background: ${(props) => props.theme.colors.container.primary};
+	border-radius: ${STYLING.dimensions.radius.alt1};
 
 	iframe {
 		display: block;
@@ -413,14 +430,6 @@ export const PreviewFrame = styled.div`
 		border: 0;
 		background: transparent;
 	}
-`;
-
-export const PreviewHeader = styled.div`
-	position: sticky;
-	top: 0;
-	display: flex;
-	justify-content: flex-end;
-	background: inherit;
 `;
 
 export const OptionsWrapper = styled.div`

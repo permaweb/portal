@@ -459,32 +459,31 @@ export default function ArticleToolbar(props: {
 		if (!previewOpen) return null;
 
 		return (
-			<Modal
-				header={language?.preview ?? 'Preview'}
-				handleClose={() => setPreviewOpen(false)}
-				width={900}
-				className={'scroll-wrapper-hidden'}
-			>
-				<S.PreviewFrame>
-					<EngineLitePostPreview
-						post={previewPost}
-						themes={portalProvider.current?.themes || []}
-						fonts={portalProvider.current?.fonts || null}
-						portalName={portalProvider.current?.name}
-						portalLogo={portalProvider.current?.logo}
-					/>
-				</S.PreviewFrame>
+			<Modal header={null} handleClose={() => setPreviewOpen(false)} width={900} allowOverflow>
+				<S.PreviewModalContent>
+					<S.PreviewModalClose>
+						<IconButton
+							type={'alt1'}
+							warning
+							src={ICONS.close}
+							handlePress={() => setPreviewOpen(false)}
+							active={false}
+							dimensions={{ wrapper: 26, icon: 14 }}
+							tooltip={language?.close}
+							tooltipPosition={'left'}
+						/>
+					</S.PreviewModalClose>
+					<S.PreviewFrame>
+						<EngineLitePostPreview
+							post={previewPost}
+							themes={portalProvider.current?.themes || []}
+							fonts={portalProvider.current?.fonts || null}
+						/>
+					</S.PreviewFrame>
+				</S.PreviewModalContent>
 			</Modal>
 		);
-	}, [
-		previewOpen,
-		previewPost,
-		language,
-		portalProvider.current?.themes,
-		portalProvider.current?.fonts,
-		portalProvider.current?.name,
-		portalProvider.current?.logo,
-	]);
+	}, [previewOpen, previewPost, language, portalProvider.current?.themes, portalProvider.current?.fonts]);
 
 	return (
 		<>

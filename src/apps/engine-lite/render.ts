@@ -402,7 +402,7 @@ function renderContent(content: unknown, fallback: string) {
 	return `<p>${escapeHTML(fallback)}</p>`;
 }
 
-export function renderPost(post: LitePost, homeHref: string) {
+export function renderPost(post: LitePost, homeHref: string, options: { showBackLink?: boolean } = {}) {
 	return `<main class="lite-post-page">
 		<article class="lite-article">
 			<div class="lite-post-kicker">
@@ -418,7 +418,11 @@ export function renderPost(post: LitePost, homeHref: string) {
 				<span>${escapeHTML(post.readTime)}</span>
 			</div>
 			<section class="lite-rich-text">${renderContent(post.content, post.excerpt)}</section>
-			<div class="lite-back"><a href="${escapeHTML(homeHref)}">&lt; View All</a></div>
+			${
+				options.showBackLink === false
+					? ''
+					: `<div class="lite-back"><a href="${escapeHTML(homeHref)}">&lt; View All</a></div>`
+			}
 		</article>
 	</main>`;
 }
