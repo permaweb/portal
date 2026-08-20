@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import Arweave from 'arweave';
 import Permaweb, { Types } from '@permaweb/libs/browser';
@@ -7,7 +6,7 @@ import { connect, createSigner } from '@permaweb/aoconnect/browser';
 
 import { Loader } from 'components/atoms/Loader';
 import { createBasePermawebAdapter } from 'helpers/basePortal';
-import { AO_NODE, STORAGE, URLS } from 'helpers/config';
+import { AO_NODE, STORAGE } from 'helpers/config';
 import { IS_BASE_MODE, PORTAL_MODE } from 'helpers/features';
 import { resolveUploadTransaction } from 'helpers/upload';
 import { cacheProfile as cacheProfileById } from 'helpers/utils';
@@ -44,8 +43,6 @@ export function usePermawebProvider(): PermawebContextState {
 }
 
 export function PermawebProvider(props: { children: React.ReactNode }) {
-	const navigate = useNavigate();
-
 	const arProvider = useArweaveProvider();
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -221,10 +218,9 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 	async function resolveProfile(address: string): Promise<Types.ProfileType | undefined> {
 		if (libs) {
+			const cachedProfile = getCachedProfile(address);
 			try {
 				let fetchedProfile;
-
-				const cachedProfile = getCachedProfile(arProvider.walletAddress);
 
 				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
 				else fetchedProfile = await libs.getProfileByWalletAddress(address);
@@ -240,7 +236,7 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 			} catch (e: any) {
 				console.error(e);
 				addNotification(language?.errorGettingProfile ?? 'Error getting profile', 'warning');
-				navigate(URLS.base);
+				return cachedProfile?.id ? normalizeProfile(cachedProfile) : undefined;
 			}
 		}
 	}

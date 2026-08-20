@@ -73,6 +73,7 @@ interface PortalContextState {
 		}
 	) => Promise<void>;
 	setFeaturedPost: (postId: string, featured: boolean) => Promise<void>;
+	reorderPosts: (postIds: string[]) => Promise<void>;
 	setPostStatus: (postId: string, status: ArticleStatusType) => Promise<void>;
 	openCurrentPortalSite: () => Promise<void>;
 	refreshCurrentPortal: (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => void;
@@ -96,6 +97,7 @@ const DEFAULT_CONTEXT = {
 	wordPressImportData: null,
 	importWordPress: async () => {},
 	setFeaturedPost: async () => {},
+	reorderPosts: async () => {},
 	setPostStatus: async () => {},
 	openCurrentPortalSite: async () => {},
 	refreshCurrentPortal() {},
@@ -1211,6 +1213,40 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		refreshCurrentPortal(PortalPatchMapEnum.Posts);
 	};
 
+	const reorderPosts = async (postIds: string[]) => {
+		if (!current?.id || !arProvider.wallet) throw new Error('A portal and connected wallet are required');
+		if (!permissions?.updatePortalMeta) throw new Error('You do not have permission to reorder posts');
+
+		const currentPosts = current.assets ?? [];
+		const currentIds = new Set(currentPosts.map((post) => post.id));
+		if (
+			postIds.length !== currentPosts.length ||
+			new Set(postIds).size !== postIds.length ||
+			postIds.some((postId) => !currentIds.has(postId))
+		) {
+			throw new Error('The post list changed. Close this panel and try again.');
+		}
+
+		const postsById = new Map(currentPosts.map((post) => [post.id, post]));
+		const orderedPosts = postIds.map((postId) => postsById.get(postId)!);
+		const updateId = await permawebProvider.libs.updateZone(
+			{ Index: permawebProvider.libs.mapToProcessCase(orderedPosts) },
+			current.id,
+			arProvider.wallet
+		);
+		if (updateId && permawebProvider.deps?.ao?.result && current.mode !== 'base') {
+			await permawebProvider.deps.ao.result({ process: current.id, message: updateId });
+		}
+
+		setCurrent((portal) => {
+			if (!portal) return portal;
+			const updated = { ...portal, assets: orderedPosts as PortalDetailType['assets'] };
+			cachePortal(portal.id, updated);
+			return updated;
+		});
+		refreshCurrentPortal(PortalPatchMapEnum.Posts);
+	};
+
 	const setPostStatus = async (postId: string, status: ArticleStatusType) => {
 		if (!current?.id || !arProvider.wallet) throw new Error('A portal and connected wallet are required');
 
@@ -1308,6 +1344,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				wordPressImportData,
 				importWordPress,
 				setFeaturedPost,
+				reorderPosts,
 				setPostStatus,
 				openCurrentPortalSite,
 				refreshCurrentPortal: (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => refreshCurrentPortal(field),

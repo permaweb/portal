@@ -166,30 +166,39 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					setPermissions({ base: false });
 				}
 
-				// Sort posts by release date and filter out future posts
-				const sortedPosts = posts?.index
-					? [...posts.index]
-							.filter((post) => {
-								const releaseDate = post.metadata?.releaseDate || post.dateCreated;
-								// If no date is set, include the post (don't filter it out)
-								if (!releaseDate) return true;
-								const postDate = new Date(Number(releaseDate));
-								// If date is invalid, include the post
-								if (isNaN(postDate.getTime())) return true;
-								const now = new Date();
-								// Only include posts that have been released (not in the future)
-								return postDate <= now;
-							})
-							.sort((a, b) => {
-								const aDate = a.metadata?.releaseDate || a.dateCreated;
-								const bDate = b.metadata?.releaseDate || b.dateCreated;
-								// Handle missing/invalid dates - put them at the end
-								const aNum = aDate ? Number(aDate) : 0;
-								const bNum = bDate ? Number(bDate) : 0;
-								// Sort descending (newest first)
-								return bNum - aNum;
-							})
+				const layoutValue = presentation?.layout;
+				const normalizedLayout =
+					typeof layoutValue === 'string'
+						? layoutValue.toLowerCase()
+						: layoutValue?.navigation?.layout?.position === 'left' ||
+						  layoutValue?.navigation?.layout?.position === 'right'
+						? 'docs'
+						: 'blog';
+				// Docs use the stored post index order; blogs continue to show newest posts first.
+				const visiblePosts = posts?.index
+					? [...posts.index].filter((post) => {
+							const releaseDate = post.metadata?.releaseDate || post.dateCreated;
+							// If no date is set, include the post (don't filter it out)
+							if (!releaseDate) return true;
+							const postDate = new Date(Number(releaseDate));
+							// If date is invalid, include the post
+							if (isNaN(postDate.getTime())) return true;
+							const now = new Date();
+							// Only include posts that have been released (not in the future)
+							return postDate <= now;
+					  })
 					: [];
+				const sortedPosts = ['docs', 'documentation'].includes(normalizedLayout)
+					? visiblePosts
+					: visiblePosts.sort((a, b) => {
+							const aDate = a.metadata?.releaseDate || a.dateCreated;
+							const bDate = b.metadata?.releaseDate || b.dateCreated;
+							// Handle missing/invalid dates - put them at the end
+							const aNum = aDate ? Number(aDate) : 0;
+							const bNum = bDate ? Number(bDate) : 0;
+							// Sort descending (newest first)
+							return bNum - aNum;
+					  });
 				const zone = filterRemoved({
 					...defaultPortal,
 					...cached,

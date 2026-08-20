@@ -14,7 +14,7 @@ import { persistor, store } from 'editor/store';
 import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Portal } from 'components/atoms/Portal';
-import { DOM, URLS } from 'helpers/config';
+import { DOM, STORAGE, URLS } from 'helpers/config';
 import { IS_BASE_MODE, PORTAL_CAPABILITIES } from 'helpers/features';
 import { preloadAllAssets } from 'helpers/preloader';
 import { serviceWorkerManager } from 'helpers/serviceWorkerManager';
@@ -142,7 +142,8 @@ function AppContent() {
 		}
 
 		const view = (() => {
-			if (!arProvider.walletAddress && !arProvider.walletInitializing) {
+			const restoringStoredWallet = Boolean(localStorage.getItem(STORAGE.walletType));
+			if (!arProvider.walletAddress && !arProvider.walletInitializing && !restoringStoredWallet) {
 				return <Navigate to={URLS.base} replace />;
 			}
 

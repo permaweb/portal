@@ -96,6 +96,36 @@ export const PostsActionsEnd = styled.div`
 	align-items: center;
 `;
 
+export const PostSortSelect = styled.div<{ dropdown: boolean }>`
+	width: ${(props) => (props.dropdown ? '100%' : 'fit-content')};
+	max-width: 100%;
+
+	button {
+		width: ${(props) => (props.dropdown ? '100%' : 'auto')};
+		padding: 0;
+		background: transparent !important;
+		border: none !important;
+		border-radius: 0;
+
+		span,
+		svg {
+			transition: color 100ms, fill 100ms;
+		}
+
+		&:hover,
+		&:focus {
+			background: transparent !important;
+			border: none !important;
+
+			span,
+			svg {
+				color: ${(props) => props.theme.colors.font.alt1} !important;
+				fill: ${(props) => props.theme.colors.font.alt1} !important;
+			}
+		}
+	}
+`;
+
 export const PostsActionsRequestsWrapper = styled.div<{ type: ViewLayoutType }>`
 	display: flex;
 	position: relative;

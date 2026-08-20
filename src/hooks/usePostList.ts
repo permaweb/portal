@@ -5,6 +5,8 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { ArticleStatusType, PortalAssetRequestType } from 'helpers/types';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
+export type PostSortType = 'newest' | 'oldest' | 'order';
+
 export function usePostsList(props: { pageSize?: number }) {
 	const portalProvider = usePortalProvider();
 	const permawebProvider = usePermawebProvider();
@@ -12,7 +14,7 @@ export function usePostsList(props: { pageSize?: number }) {
 	const [currentPage, setCurrentPage] = React.useState<number>(1);
 	const [pageCount, setPageCount] = React.useState<number>(props.pageSize || 10);
 	const [currentStatusFilter, setCurrentStatusFilter] = React.useState<ArticleStatusType | 'all'>('all');
-	const [dateAscending, setDateAscending] = React.useState<boolean>(false);
+	const [sort, setSort] = React.useState<PostSortType>('newest');
 	const [showFilterActions, setShowFilterActions] = React.useState<boolean>(false);
 	const [showRequests, setShowRequests] = React.useState<boolean>(false);
 	const [loading, setLoading] = React.useState<boolean>(false);
@@ -25,7 +27,7 @@ export function usePostsList(props: { pageSize?: number }) {
 
 	React.useEffect(() => {
 		setCurrentPage(1);
-	}, [currentStatusFilter]);
+	}, [currentStatusFilter, sort]);
 
 	React.useEffect(() => {
 		if (!showRequests) {
@@ -87,14 +89,16 @@ export function usePostsList(props: { pageSize?: number }) {
 
 	const assets = React.useMemo(() => {
 		if (!portalProvider.current?.assets) return [];
-		return portalProvider.current.assets
-			.filter((asset: any) => currentStatusFilter === 'all' || asset.metadata?.status === currentStatusFilter)
-			.sort((a, b) => {
-				const dateA = new Date(Number(a.metadata?.releaseDate)).getTime();
-				const dateB = new Date(Number(b.metadata?.releaseDate)).getTime();
-				return dateAscending ? dateA - dateB : dateB - dateA;
-			});
-	}, [portalProvider.current, currentStatusFilter, dateAscending]);
+		const filtered = portalProvider.current.assets.filter(
+			(asset: any) => currentStatusFilter === 'all' || asset.metadata?.status === currentStatusFilter
+		);
+		if (sort === 'order') return filtered;
+		return [...filtered].sort((a, b) => {
+			const dateA = new Date(Number(a.metadata?.releaseDate)).getTime();
+			const dateB = new Date(Number(b.metadata?.releaseDate)).getTime();
+			return sort === 'oldest' ? dateA - dateB : dateB - dateA;
+		});
+	}, [portalProvider.current, currentStatusFilter, sort]);
 
 	const totalPages = Math.ceil(assets.length / pageCount);
 
@@ -124,8 +128,8 @@ export function usePostsList(props: { pageSize?: number }) {
 		draftCount,
 		currentStatusFilter,
 		setCurrentStatusFilter,
-		dateAscending,
-		setDateAscending,
+		sort,
+		setSort,
 		paginatedPosts,
 		currentPage,
 		setCurrentPage,

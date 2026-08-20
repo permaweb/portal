@@ -253,13 +253,15 @@ function normalizeRelease(value) {
 			(!posts ||
 				typeof posts !== 'object' ||
 				Array.isArray(posts) ||
-				Object.keys(posts).some((key) => key !== 'upsert' && key !== 'remove') ||
+				Object.keys(posts).some((key) => key !== 'upsert' && key !== 'remove' && key !== 'order') ||
 				(posts.upsert !== undefined &&
 					(!posts.upsert ||
 						typeof posts.upsert !== 'object' ||
 						Array.isArray(posts.upsert) ||
 						Object.values(posts.upsert).some((id) => typeof id !== 'string' || !ADDRESS.test(id)))) ||
-				(posts.remove !== undefined && !Array.isArray(posts.remove))))
+				(posts.remove !== undefined && !Array.isArray(posts.remove)) ||
+				(posts.order !== undefined &&
+					(!Array.isArray(posts.order) || posts.order.some((postId) => typeof postId !== 'string')))))
 	) {
 		return undefined;
 	}
@@ -450,6 +452,17 @@ async function applyRelease(state, release, transactionId, publisher, options) {
 		const post = await loadPost(postId, postTxId, release.portalId, posts.get(postId), options);
 		if (!post) return undefined;
 		posts.set(postId, post);
+	}
+	if (release.changes?.posts?.order) {
+		const orderedIds = [...new Set(release.changes.posts.order)];
+		const currentIds = [...posts.keys()];
+		if (orderedIds.length !== currentIds.length || currentIds.some((postId) => !orderedIds.includes(postId))) {
+			return undefined;
+		}
+		const reordered = new Map();
+		for (const postId of orderedIds) reordered.set(postId, posts.get(postId));
+		posts.clear();
+		for (const [postId, post] of reordered) posts.set(postId, post);
 	}
 	next.posts = [...posts.values()];
 	next.featuredPosts = (next.featuredPosts || []).filter((postId) => posts.has(postId));

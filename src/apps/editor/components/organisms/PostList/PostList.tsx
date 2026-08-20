@@ -10,10 +10,11 @@ import { Drawer } from 'components/atoms/Drawer';
 import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
 import { Panel } from 'components/atoms/Panel';
+import { Select } from 'components/atoms/Select';
 import { ICONS, URLS } from 'helpers/config';
-import { ArticleStatusType, PortalAssetType, ViewLayoutType } from 'helpers/types';
+import { ArticleStatusType, PortalAssetType, SelectOptionType, ViewLayoutType } from 'helpers/types';
 import { formatDate } from 'helpers/utils';
-import { usePostsList } from 'hooks/usePostList';
+import { PostSortType, usePostsList } from 'hooks/usePostList';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { CloseHandler } from 'wrappers/CloseHandler';
 
@@ -60,8 +61,8 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 		draftCount,
 		currentStatusFilter,
 		setCurrentStatusFilter,
-		dateAscending,
-		setDateAscending,
+		sort,
+		setSort,
 		paginatedPosts,
 		currentPage,
 		setCurrentPage,
@@ -101,7 +102,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 				label: `${language?.draft} (${draftCount})`,
 				status: 'draft',
 			},
-		].map((filterAction: { label: string; status: ArticleStatusType }) => (
+		].map((filterAction: { label: string; status: ArticleStatusType | 'all' }) => (
 			<Button
 				key={filterAction.status}
 				type={getButtonType(true, filterAction.status)}
@@ -110,6 +111,12 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 				active={dropdown ? currentStatusFilter === filterAction.status : false}
 			/>
 		));
+		const sortOptions: SelectOptionType[] = [
+			{ id: 'newest', label: language?.sortNewestToOldest },
+			{ id: 'oldest', label: language?.sortOldestToNewest },
+			{ id: 'order', label: language?.sortByOrder },
+		];
+		const activeSort = sortOptions.find((option) => option.id === sort) ?? sortOptions[0];
 
 		return (
 			<S.PostsActions dropdown={dropdown}>
@@ -122,18 +129,21 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 					<S.PostsStatusFilterWrapper>{filterButtons}</S.PostsStatusFilterWrapper>
 				</S.PostsActionsSection>
 				<S.PostsActionsSection dropdown={dropdown}>
-					{dropdown && (
-						<S.PostsActionsSectionHeader>
-							<p>{language?.sortBy}</p>
-						</S.PostsActionsSectionHeader>
-					)}
 					<S.PostsActionsEnd>
-						<Button
-							type={dropdown ? 'alt3' : 'primary'}
-							label={dateAscending ? language?.sortNewestToOldest : language?.sortOldestToNewest}
-							handlePress={() => handleActionPress(() => setDateAscending(!dateAscending))}
-							icon={ICONS.arrows}
-						/>
+						<S.PostSortSelect dropdown={dropdown}>
+							<Select
+								label={dropdown ? language?.sortBy : undefined}
+								activeOption={activeSort}
+								setActiveOption={(option) => {
+									setSort(option.id as PostSortType);
+									if (dropdown) setShowFilterActions(false);
+								}}
+								options={sortOptions}
+								disabled={false}
+								icon={ICONS.arrows}
+								dropdownTop={dropdown ? 70 : 45}
+							/>
+						</S.PostSortSelect>
 						{props.type === 'detail' && getRequests()}
 					</S.PostsActionsEnd>
 				</S.PostsActionsSection>

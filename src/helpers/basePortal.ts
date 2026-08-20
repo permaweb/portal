@@ -97,6 +97,7 @@ export type BasePortalManifest = {
 export type BasePortalPostChanges = {
 	upsert?: Record<string, string>;
 	remove?: string[];
+	order?: string[];
 };
 
 type BasePortalPatchSelector = ['=', string, string | number | boolean | null];
@@ -524,7 +525,7 @@ function normalizeRelease(value: any): BasePortalRelease | null {
 	}
 	if (posts !== undefined) {
 		if (!posts || typeof posts !== 'object' || Array.isArray(posts)) return null;
-		if (Object.keys(posts).some((key) => key !== 'upsert' && key !== 'remove')) return null;
+		if (Object.keys(posts).some((key) => key !== 'upsert' && key !== 'remove' && key !== 'order')) return null;
 		if (
 			posts.upsert !== undefined &&
 			(!posts.upsert ||
@@ -535,6 +536,12 @@ function normalizeRelease(value: any): BasePortalRelease | null {
 			return null;
 		}
 		if (posts.remove !== undefined && !Array.isArray(posts.remove)) return null;
+		if (
+			posts.order !== undefined &&
+			(!Array.isArray(posts.order) || posts.order.some((postId: unknown) => typeof postId !== 'string'))
+		) {
+			return null;
+		}
 	}
 
 	return {
@@ -1019,6 +1026,17 @@ async function applyRelease(
 		const post = knownPosts[postId] || (await fetchPostRevision(postTxId, parent.portalId, postId, posts.get(postId)));
 		if (!post) return null;
 		posts.set(postId, { ...post, id: postId, postTxId });
+	}
+	if (postChanges?.order) {
+		const orderedIds = [...new Set(postChanges.order)];
+		const currentIds = Array.from(posts.keys());
+		if (orderedIds.length !== currentIds.length || currentIds.some((postId) => !orderedIds.includes(postId))) {
+			return null;
+		}
+		const reordered = new Map<string, BasePortalPost>();
+		for (const postId of orderedIds) reordered.set(postId, posts.get(postId)!);
+		posts.clear();
+		for (const [postId, post] of reordered) posts.set(postId, post);
 	}
 
 	const generatedAt = release.generatedAt || new Date(0).toISOString();
@@ -1783,7 +1801,22 @@ function releaseChangesFromUpdate(manifest: BasePortalManifest, data: any): Base
 		const mapped = mappedKeys[key.toLowerCase()];
 		if (mapped) (values as any)[mapped] = (next as any)[mapped];
 	}
-	return compactReleaseChanges(manifest, values);
+	const changes = compactReleaseChanges(manifest, values);
+	if (Array.isArray(update.index)) {
+		const order = update.index
+			.map((post: any) => (typeof post === 'string' ? post : post?.id))
+			.filter((postId: unknown): postId is string => typeof postId === 'string');
+		const currentIds = manifest.posts.map((post) => post.id);
+		if (
+			order.length !== currentIds.length ||
+			new Set(order).size !== order.length ||
+			currentIds.some((postId) => !order.includes(postId))
+		) {
+			throw new Error('Post reordering must include every current post exactly once');
+		}
+		if (order.some((postId, index) => postId !== currentIds[index])) changes.posts = { order };
+	}
+	return changes;
 }
 
 export async function updateBasePortal(portalId: string, data: any, wallet: any, address: string) {

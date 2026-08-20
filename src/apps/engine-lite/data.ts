@@ -240,10 +240,11 @@ function portalFromState(portalId: string, source: unknown): LitePortal {
 	const postsState = firstRecord(state.posts, zone.posts, store.posts);
 
 	const name = cleanText(overview.name || store.name || state.name || zone.name) || 'Portal';
+	const layout = normalizeLayout(presentation.layout ?? store.layout ?? state.layout);
 	const posts = firstArray(postsState.index, store.index, state.index, state.posts, store.posts)
 		.map((post, index) => normalizePost(post, portalId, name, index))
-		.filter((post): post is LitePost => Boolean(post))
-		.sort((a, b) => b.date - a.date);
+		.filter((post): post is LitePost => Boolean(post));
+	if (layout === 'blog') posts.sort((a, b) => b.date - a.date);
 
 	return {
 		id: portalId,
@@ -279,7 +280,7 @@ function portalFromState(portalId: string, source: unknown): LitePortal {
 		),
 		fonts: firstRecord(presentation.fonts, store.fonts, state.fonts),
 		themes: firstArray(presentation.themes, store.themes, state.themes),
-		layout: normalizeLayout(presentation.layout ?? store.layout ?? state.layout),
+		layout,
 		featuredPosts: firstArray(postsState.featuredPosts, store.featuredPosts, state.featuredPosts)
 			.map((entry) => cleanText(typeof entry === 'object' ? entry.id || entry.postId : entry))
 			.filter(Boolean),

@@ -2,12 +2,14 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ViewHeader } from 'editor/components/atoms/ViewHeader';
+import { PostReorder } from 'editor/components/molecules/PostReorder';
 import { Topics } from 'editor/components/molecules/Topics';
 import { PostList } from 'editor/components/organisms/PostList';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Modal } from 'components/atoms/Modal';
+import { Panel } from 'components/atoms/Panel';
 import { ICONS, URLS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -22,6 +24,7 @@ export default function Posts() {
 
 	const [selectedTopics, setSelectedTopics] = React.useState<string[]>([]);
 	const [showTopicAction, setShowTopicAction] = React.useState<boolean>(false);
+	const [showPostReorder, setShowPostReorder] = React.useState<boolean>(false);
 
 	/* User is a moderator and can only review existing posts, not create new ones */
 	const unauthorizedCreate =
@@ -33,6 +36,18 @@ export default function Posts() {
 				<ViewHeader
 					header={language?.posts}
 					actions={[
+						<Button
+							type={'primary'}
+							label={language?.reorderPosts}
+							handlePress={() => setShowPostReorder(true)}
+							disabled={
+								!portalProvider.permissions?.updatePortalMeta ||
+								!portalProvider.current ||
+								(portalProvider.current.assets?.length ?? 0) < 2
+							}
+							icon={ICONS.drag}
+							iconLeftAlign
+						/>,
 						<Button
 							type={'alt1'}
 							label={language?.createPost}
@@ -59,6 +74,14 @@ export default function Posts() {
 					</S.TopicModalWrapper>
 				</Modal>
 			)}
+			<Panel
+				open={showPostReorder}
+				header={language?.reorderPosts}
+				handleClose={() => setShowPostReorder(false)}
+				width={600}
+			>
+				<PostReorder closeAction={() => setShowPostReorder(false)} />
+			</Panel>
 		</>
 	);
 }
