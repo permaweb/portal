@@ -52,7 +52,7 @@ export default function Loader(props: {
 	} else if (props.message) {
 		if (props.noOverlay) {
 			return (
-				<S.MessageWrapper className={'info'}>
+				<S.MessageWrapper>
 					{getLoader(16.5, 5.5, 1.95, true, true)}
 					<span>{props.message}</span>
 				</S.MessageWrapper>
@@ -60,12 +60,12 @@ export default function Loader(props: {
 		}
 		return (
 			<Portal node={DOM.overlay}>
-				<div className={'overlay'}>
-					<S.MessageWrapper className={'info'}>
+				<S.MessageOverlay>
+					<S.MessageWrapper>
 						{getLoader(16.5, 5.5, 1.95, true, true)}
 						<span>{props.message}</span>
 					</S.MessageWrapper>
-				</div>
+				</S.MessageOverlay>
 			</Portal>
 		);
 	} else {

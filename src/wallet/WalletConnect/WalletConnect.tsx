@@ -27,8 +27,19 @@ import { CloseHandler } from 'wrappers/CloseHandler';
 import * as S from './styles';
 
 const LUNAR_EXPLORER = 'https://lunar.arweave.net/#/explorer';
+type EditorAppearance = 'system' | 'light' | 'dark';
+
+function SystemAppearanceIcon() {
+	return (
+		<svg aria-hidden={'true'} viewBox={'0 0 24 24'} fill={'none'} strokeWidth={'1.75'}>
+			<rect x={'4'} y={'4'} width={'16'} height={'12'} rx={'1.5'} />
+			<path d={'M2.5 19.5h19M9 16v3.5M15 16v3.5'} />
+		</svg>
+	);
+}
 
 export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engine'; callback?: () => void }) {
+	const isEditor = props.app === 'editor';
 	const { portalId: routePortalId } = useParams<{ portalId?: string }>();
 	const arProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
@@ -38,8 +49,14 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 	const { auth, backupsNeeded } = arProvider;
 	const { profile } = permawebProvider;
 
-	const { settings, updateSettings, availableThemes } =
-		props.app === 'editor' ? useEditorSettingsProvider() : useViewerSettingsProvider();
+	const { settings, updateSettings, availableThemes } = isEditor
+		? useEditorSettingsProvider()
+		: useViewerSettingsProvider();
+	const editorAppearance: EditorAppearance = settings.syncWithSystem
+		? 'system'
+		: settings.theme.startsWith('dark')
+		? 'dark'
+		: 'light';
 
 	const [showWallet, _setShowWallet] = React.useState<boolean>(true);
 	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
@@ -199,6 +216,15 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 		window.setTimeout(() => setAddressCopied(false), 2000);
 	}
 
+	function handleEditorAppearance(appearance: EditorAppearance) {
+		if (appearance === 'system') {
+			updateSettings('syncWithSystem', true as any);
+			return;
+		}
+
+		updateSettings('theme', `${appearance}-primary` as any);
+	}
+
 	function pendingLabel(type: string) {
 		return (
 			{
@@ -329,13 +355,47 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 									<ReactSVG src={ICONS.language} />
 									{language?.language}
 								</li>
-								{availableThemes && (
+								{!isEditor && availableThemes && (
 									<li onClick={() => setShowThemeSelector(true)}>
 										<ReactSVG src={ICONS.design} />
 										{language?.appearance}
 									</li>
 								)}
 							</S.DBodyWrapper>
+							{isEditor && (
+								<S.AppearanceSection>
+									<S.AppearanceTitle>{language?.appearance || 'Appearance'}</S.AppearanceTitle>
+									<S.AppearanceOptions>
+										<S.AppearanceOption
+											type={'button'}
+											aria-pressed={editorAppearance === 'system'}
+											onClick={() => handleEditorAppearance('system')}
+										>
+											<SystemAppearanceIcon />
+											<span>System</span>
+											{editorAppearance === 'system' && <S.AppearanceIndicator />}
+										</S.AppearanceOption>
+										<S.AppearanceOption
+											type={'button'}
+											aria-pressed={editorAppearance === 'light'}
+											onClick={() => handleEditorAppearance('light')}
+										>
+											<ReactSVG src={ICONS.light} />
+											<span>Light</span>
+											{editorAppearance === 'light' && <S.AppearanceIndicator />}
+										</S.AppearanceOption>
+										<S.AppearanceOption
+											type={'button'}
+											aria-pressed={editorAppearance === 'dark'}
+											onClick={() => handleEditorAppearance('dark')}
+										>
+											<ReactSVG src={ICONS.dark} />
+											<span>Dark</span>
+											{editorAppearance === 'dark' && <S.AppearanceIndicator />}
+										</S.AppearanceOption>
+									</S.AppearanceOptions>
+								</S.AppearanceSection>
+							)}
 							<S.DFooterWrapper>
 								<li onClick={handleDisconnect}>
 									<ReactSVG src={ICONS.disconnect} />
@@ -360,7 +420,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 				/>
 			</Panel>
 
-			{availableThemes && (
+			{!isEditor && availableThemes && (
 				<Panel
 					open={showThemeSelector}
 					width={430}

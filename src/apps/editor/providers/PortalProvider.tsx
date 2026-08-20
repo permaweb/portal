@@ -873,15 +873,10 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				}
 			}
 
-			// Update theme if we have one - replace any existing "Imported Theme" or add as new
+			// The compact schema has one palette containing both light and dark appearances.
 			if (data.theme) {
-				const existingThemes = portalToUpdate.themes || [];
 				const newTheme = permawebProvider.libs.mapToProcessCase(data.theme);
-				// Remove any existing imported themes and deactivate others when adding new active theme
-				const filteredThemes = existingThemes
-					.filter((t: any) => t?.name !== 'Imported Theme' && t?.Name !== 'Imported Theme')
-					.map((t: any) => ({ ...t, active: false, Active: false }));
-				updates.Themes = [...filteredThemes, newTheme];
+				updates.Themes = [newTheme];
 			}
 
 			// Update portal metadata if we have site info (always set for new portals)

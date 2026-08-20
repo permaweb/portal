@@ -3,6 +3,7 @@ import { ThemeProvider } from 'styled-components';
 import WebFont from 'webfontloader';
 
 import { ICONS } from 'helpers/config';
+import { mixRgbChannels, normalizePortalTheme, PortalThemeScheme, rgbChannelsToHex } from 'helpers/portalTheme';
 import { darkTheme, lightTheme, theme } from 'helpers/themes';
 import { PortalThemeType } from 'helpers/types';
 import { stripFontWeights } from 'helpers/utils';
@@ -26,11 +27,35 @@ interface SettingsProviderProps {
 	children: React.ReactNode;
 }
 
+type ThemeSelection = {
+	id: string;
+	scheme: PortalThemeScheme;
+	theme: PortalThemeType;
+};
+
+const DEFAULT_THEME_NAME = 'Default';
+
+function getSystemScheme(): PortalThemeScheme {
+	return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function getThemeName(portalTheme: PortalThemeType, index: number) {
+	return typeof portalTheme?.name === 'string' && portalTheme.name.trim()
+		? portalTheme.name.trim()
+		: index === 0
+		? DEFAULT_THEME_NAME
+		: `Theme ${index + 1}`;
+}
+
+function getThemeId(portalTheme: PortalThemeType, index: number, scheme: PortalThemeScheme) {
+	return `${getThemeName(portalTheme, index)}:${scheme}`;
+}
+
 const defaultSettings: Settings = {
-	theme: window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark-primary' : 'light-primary',
+	theme: `${DEFAULT_THEME_NAME}:${getSystemScheme()}`,
 	syncWithSystem: true,
-	preferredLightTheme: 'light-primary',
-	preferredDarkTheme: 'dark-primary',
+	preferredLightTheme: `${DEFAULT_THEME_NAME}:light`,
+	preferredDarkTheme: `${DEFAULT_THEME_NAME}:dark`,
 };
 
 const SettingsContext = React.createContext<SettingsContextState>({
@@ -45,46 +70,100 @@ export function useSettingsProvider(): SettingsContextState {
 
 export function SettingsProvider(props: SettingsProviderProps) {
 	const portalProvider = usePortalProvider();
-	const preferredFallbackTheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? darkTheme : lightTheme;
+	const preferredFallbackTheme = getSystemScheme() === 'dark' ? darkTheme : lightTheme;
 
 	const loadStoredSettings = (): Settings => {
 		const stored = localStorage.getItem('settings');
-		const preferredTheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches
-			? 'dark-primary'
-			: 'light-primary';
+		if (!stored) return defaultSettings;
 
-		let settings: Settings;
-		if (stored) {
+		try {
 			const parsedSettings = JSON.parse(stored);
-			settings = {
+			return {
+				...defaultSettings,
 				...parsedSettings,
 				syncWithSystem: parsedSettings.syncWithSystem ?? true,
-				preferredLightTheme: parsedSettings.preferredLightTheme ?? 'light-primary',
-				preferredDarkTheme: parsedSettings.preferredDarkTheme ?? 'dark-primary',
 			};
-		} else {
-			settings = {
-				...defaultSettings,
-				theme: preferredTheme,
-			};
+		} catch {
+			return defaultSettings;
 		}
-
-		return settings;
 	};
 
 	const [settings, setSettings] = React.useState<Settings>(loadStoredSettings());
 
-	// Listen for system theme changes when syncWithSystem is enabled
+	function getThemeSelection(
+		themeId: string,
+		fallbackScheme: PortalThemeScheme,
+		requireScheme = false
+	): ThemeSelection | null {
+		const portalThemes = portalProvider.current?.themes;
+		if (!Array.isArray(portalThemes) || !portalThemes.length) return null;
+
+		for (let index = 0; index < portalThemes.length; index += 1) {
+			const portalTheme = portalThemes[index];
+			for (const scheme of ['light', 'dark'] as PortalThemeScheme[]) {
+				if (portalTheme?.scheme && portalTheme.scheme !== scheme) continue;
+				if (getThemeId(portalTheme, index, scheme) === themeId) {
+					if (!requireScheme || scheme === fallbackScheme) {
+						return { id: themeId, scheme, theme: portalTheme };
+					}
+				}
+			}
+		}
+
+		const fallbackIndex = Math.max(
+			0,
+			portalThemes.findIndex((portalTheme: PortalThemeType) => portalTheme?.active || portalTheme?.Active)
+		);
+		const fallbackTheme =
+			portalThemes.find(
+				(portalTheme: PortalThemeType) => !portalTheme?.scheme || portalTheme.scheme === fallbackScheme
+			) || portalThemes[fallbackIndex];
+		const index = portalThemes.indexOf(fallbackTheme);
+		const scheme =
+			fallbackTheme?.scheme === 'dark' ? 'dark' : fallbackTheme?.scheme === 'light' ? 'light' : fallbackScheme;
+
+		return {
+			id: getThemeId(fallbackTheme, index, scheme),
+			scheme,
+			theme: fallbackTheme,
+		};
+	}
+
+	React.useEffect(() => {
+		if (!portalProvider.current?.themes?.length) return;
+
+		setSettings((current) => {
+			const light = getThemeSelection(current.preferredLightTheme, 'light', true);
+			const dark = getThemeSelection(current.preferredDarkTheme, 'dark', true);
+			const systemScheme = getSystemScheme();
+			const selected = getThemeSelection(current.theme, systemScheme);
+			const next = {
+				...current,
+				preferredLightTheme: light?.id || current.preferredLightTheme,
+				preferredDarkTheme: dark?.id || current.preferredDarkTheme,
+				theme: current.syncWithSystem
+					? systemScheme === 'dark'
+						? dark?.id || current.theme
+						: light?.id || current.theme
+					: selected?.id || current.theme,
+			};
+
+			if (JSON.stringify(next) === JSON.stringify(current)) return current;
+			localStorage.setItem('settings', JSON.stringify(next));
+			return next;
+		});
+	}, [portalProvider.current?.themes]);
+
 	React.useEffect(() => {
 		if (!settings.syncWithSystem || !portalProvider.current?.themes) return;
 
 		const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-		const handleChange = (e: MediaQueryListEvent) => {
-			const newTheme = e.matches ? settings.preferredDarkTheme : settings.preferredLightTheme;
-			setSettings((prevSettings) => {
-				const newSettings = { ...prevSettings, theme: newTheme };
-				localStorage.setItem('settings', JSON.stringify(newSettings));
-				return newSettings;
+		const handleChange = (event: MediaQueryListEvent) => {
+			const newTheme = event.matches ? settings.preferredDarkTheme : settings.preferredLightTheme;
+			setSettings((current) => {
+				const next = { ...current, theme: newTheme };
+				localStorage.setItem('settings', JSON.stringify(next));
+				return next;
 			});
 		};
 
@@ -98,93 +177,49 @@ export function SettingsProvider(props: SettingsProviderProps) {
 	]);
 
 	React.useEffect(() => {
-		if (portalProvider.current?.fonts) {
-			const fonts = portalProvider.current?.fonts;
-			const families = [];
+		const fonts = portalProvider.current?.fonts;
+		if (!fonts) return;
 
-			if (fonts.headers) families.push(fonts.headers);
-			if (fonts.body) families.push(fonts.body);
-
-			if (families.length > 0) {
-				WebFont.load({ google: { families: families } });
-			}
-		}
+		const families = [fonts.headers, fonts.body].filter(Boolean);
+		if (families.length) WebFont.load({ google: { families } });
 	}, [portalProvider.current?.fonts]);
 
-	function luminance(hex) {
-		const [r, g, b] = hexToRgbArray(hex).map((v) => v / 255);
-		return 0.299 * r + 0.587 * g + 0.114 * b;
-	}
+	function createThemeFromCustom(currentTheme: PortalThemeType, scheme: PortalThemeScheme) {
+		const palette = normalizePortalTheme(currentTheme).colors[scheme];
+		const backgroundHex = rgbChannelsToHex(palette.background);
+		const surfaceHex = rgbChannelsToHex(palette.surface);
+		const textHex = rgbChannelsToHex(palette.text);
+		const borderHex = rgbChannelsToHex(palette.border);
+		const primaryHex = rgbChannelsToHex(palette.accent);
+		const neutralMixes = [0.06, 0.11, 0.17, 0.23, 0.34, 0.42];
+		const textMixes = [0, 0.08, 0.14, 0.21, 0.29, 0.39, 0.5];
 
-	function parseRgbString(s) {
-		return s.split(',').map((v) => parseInt(v, 10));
-	}
-
-	function rgbArrayToHex([r, g, b]) {
-		return '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
-	}
-
-	function hexToRgbArray(hex) {
-		const n = parseInt(hex.slice(1), 16);
-		return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
-	}
-
-	function shadeColor(hex, percent) {
-		let [r, g, b] = hexToRgbArray(hex);
-		if (percent > 0) {
-			r += Math.round((255 - r) * (percent / 100));
-			g += Math.round((255 - g) * (percent / 100));
-			b += Math.round((255 - b) * (percent / 100));
-		} else {
-			r = Math.round(r * (1 + percent / 100));
-			g = Math.round(g * (1 + percent / 100));
-			b = Math.round(b * (1 + percent / 100));
-		}
-		return rgbArrayToHex([r, g, b]);
-	}
-
-	function createThemeFromCustom(currentTheme: PortalThemeType) {
-		if (!currentTheme) return preferredFallbackTheme;
-
-		const { colors, scheme } = currentTheme;
-
-		const bgHex = rgbArrayToHex(parseRgbString(colors.background));
-		const isBgDark = luminance(bgHex) < 0.5;
-
-		const neutralPercents = isBgDark ? [0, 5, 10, 15, 20, 25, 30, 35, 40] : [0, -5, -10, -15, -20, -25, -30, -35, -40];
-
-		const neutrals = neutralPercents.reduce((acc, pct, idx) => {
-			acc[`neutral${idx + 1}`] = shadeColor(bgHex, pct);
-			return acc;
-		}, {});
-
-		const accentPercents = isBgDark ? [100, 95, 90, 85, 80, 75, 70] : [-100, -95, -90, -85, -80, -75, -70];
-
-		const neutralsA = accentPercents.reduce((acc, pct, idx) => {
-			acc[`neutralA${idx + 1}`] = shadeColor(bgHex, pct);
-			return acc;
-		}, {});
-
-		const primaryHex = rgbArrayToHex(parseRgbString(colors.primary));
-		const linkHex = rgbArrayToHex(parseRgbString(colors.links));
-
-		const theme: any = {
+		const customTheme: any = {
 			scheme,
-			...neutrals,
-			...neutralsA,
+			neutral1: backgroundHex,
+			neutral2: surfaceHex,
+			neutral3: rgbChannelsToHex(mixRgbChannels(palette.surface, palette.text, neutralMixes[0])),
+			neutral4: rgbChannelsToHex(mixRgbChannels(palette.surface, palette.text, neutralMixes[1])),
+			neutral5: rgbChannelsToHex(mixRgbChannels(palette.surface, palette.text, neutralMixes[2])),
+			neutral6: borderHex,
+			neutral7: rgbChannelsToHex(mixRgbChannels(palette.surface, palette.text, neutralMixes[3])),
+			neutral8: rgbChannelsToHex(mixRgbChannels(palette.surface, palette.text, neutralMixes[4])),
+			neutral9: rgbChannelsToHex(mixRgbChannels(palette.surface, palette.text, neutralMixes[5])),
 			overlay1: 'rgba(0,0,0,0.45)',
 			overlay2: 'rgba(0,0,0,0.5)',
-			shadow1: 'rgba(220,220,220,0.5)',
+			shadow1: 'rgba(0,0,0,0.15)',
+			shadow2: 'rgba(0,0,0,0.25)',
 			primary1: primaryHex,
-			primary2: shadeColor(primaryHex, -20),
-			link1: linkHex,
-			link2: shadeColor(linkHex, -20),
+			primary2: rgbChannelsToHex(mixRgbChannels(palette.accent, scheme === 'dark' ? '255,255,255' : '0,0,0', 0.2)),
+			link1: rgbChannelsToHex(palette.link),
+			link2: rgbChannelsToHex(mixRgbChannels(palette.link, scheme === 'dark' ? '255,255,255' : '0,0,0', 0.2)),
 			roles: {
 				primary: primaryHex,
 				alt1: primaryHex,
 				alt2: primaryHex,
 				alt3: primaryHex,
 			},
+			editor: preferredFallbackTheme.editor,
 			positive1: preferredFallbackTheme.positive1,
 			positive2: preferredFallbackTheme.positive2,
 			caution1: preferredFallbackTheme.caution1,
@@ -203,124 +238,79 @@ export function SettingsProvider(props: SettingsProviderProps) {
 			},
 		};
 
+		textMixes.forEach((amount, index) => {
+			customTheme[`neutralA${index + 1}`] =
+				index === 0 ? textHex : rgbChannelsToHex(mixRgbChannels(palette.text, palette.background, amount));
+		});
+
 		if (portalProvider.current?.fonts) {
 			const { body, headers } = portalProvider.current.fonts;
-
-			theme.typography = {
-				family: {
-					...(body && { primary: stripFontWeights(body) }),
-					...(headers && { alt1: stripFontWeights(headers) }),
-				},
+			customTheme.typography.family = {
+				...(body && { primary: stripFontWeights(body) }),
+				...(headers && { alt1: stripFontWeights(headers) }),
 			};
 		}
 
-		return theme;
+		return customTheme;
 	}
 
 	const updateSettings = <K extends keyof Settings>(key: K, value: Settings[K]) => {
 		React.startTransition(() => {
-			setSettings((prevSettings) => {
-				let newSettings = { ...prevSettings, [key]: value };
+			setSettings((current) => {
+				const next = { ...current, [key]: value };
 
-				// When changing theme and syncWithSystem is enabled, update the preferred theme
-				if (key === 'theme' && prevSettings.syncWithSystem && portalProvider.current?.themes) {
-					const themeValue = value as string;
-					const selectedTheme = portalProvider.current.themes.find((t) => t.name === themeValue);
-					const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-					if (selectedTheme) {
-						if (selectedTheme.scheme === 'light') {
-							newSettings.preferredLightTheme = themeValue;
-							// Only apply the theme if system is currently in light mode
-							if (!systemIsDark) {
-								newSettings.theme = themeValue;
-							} else {
-								// Keep the current dark theme
-								newSettings.theme = prevSettings.theme;
-							}
-						} else {
-							newSettings.preferredDarkTheme = themeValue;
-							// Only apply the theme if system is currently in dark mode
-							if (systemIsDark) {
-								newSettings.theme = themeValue;
-							} else {
-								// Keep the current light theme
-								newSettings.theme = prevSettings.theme;
-							}
-						}
+				if (key === 'theme') {
+					const selected = getThemeSelection(value as string, getSystemScheme());
+					if (selected && current.syncWithSystem) {
+						if (selected.scheme === 'light') next.preferredLightTheme = selected.id;
+						else next.preferredDarkTheme = selected.id;
+						next.theme = selected.scheme === getSystemScheme() ? selected.id : current.theme;
 					}
 				}
 
-				// When disabling syncWithSystem, keep the current theme
-				if (key === 'syncWithSystem' && value === false) {
-					// Current theme stays as is
-				}
-
-				// When enabling syncWithSystem, switch to the appropriate preferred theme
 				if (key === 'syncWithSystem' && value === true) {
-					const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-					newSettings.theme = isDark ? prevSettings.preferredDarkTheme : prevSettings.preferredLightTheme;
+					next.theme = getSystemScheme() === 'dark' ? current.preferredDarkTheme : current.preferredLightTheme;
 				}
 
-				localStorage.setItem('settings', JSON.stringify(newSettings));
-				return newSettings;
+				localStorage.setItem('settings', JSON.stringify(next));
+				return next;
 			});
 		});
 	};
 
 	function getAvailableThemes() {
-		if (portalProvider.current?.themes) {
-			const getVariants = (scheme: 'light' | 'dark') =>
-				portalProvider.current.themes
-					.filter((theme: PortalThemeType) => theme.scheme === scheme)
-					.map((theme: PortalThemeType) => {
-						return {
-							id: theme.name,
-							name: theme.name,
-							background: rgbArrayToHex(parseRgbString(theme.colors.background)),
-							accent1: rgbArrayToHex(parseRgbString(theme.colors.primary)),
-						};
-					});
+		const portalThemes = portalProvider.current?.themes;
+		if (!Array.isArray(portalThemes) || !portalThemes.length) return null;
 
-			return {
-				light: {
-					label: 'Light Themes',
-					icon: ICONS.light,
-					variants: getVariants('light'),
-				},
-				dark: {
-					label: 'Dark Themes',
-					icon: ICONS.dark,
-					variants: getVariants('dark'),
-				},
-			};
-		}
+		const getVariants = (scheme: PortalThemeScheme) =>
+			portalThemes
+				.map((portalTheme: PortalThemeType, index: number) => ({ portalTheme, index }))
+				.filter(({ portalTheme }) => !portalTheme?.scheme || portalTheme.scheme === scheme)
+				.map(({ portalTheme, index }) => {
+					const palette = normalizePortalTheme(portalTheme).colors[scheme];
+					return {
+						id: getThemeId(portalTheme, index, scheme),
+						name: getThemeName(portalTheme, index),
+						background: rgbChannelsToHex(palette.background),
+						accent1: rgbChannelsToHex(palette.accent),
+					};
+				});
 
-		return null;
+		return {
+			light: { label: 'Light Themes', icon: ICONS.light, variants: getVariants('light') },
+			dark: { label: 'Dark Themes', icon: ICONS.dark, variants: getVariants('dark') },
+		};
 	}
 
 	const currentTheme = React.useMemo(() => {
-		if (!portalProvider.current?.themes) return theme(preferredFallbackTheme);
-
-		let selectedTheme = portalProvider.current.themes.find((theme: PortalThemeType) => theme.name === settings.theme);
-
-		const preferredScheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-
-		if (!selectedTheme) {
-			const filteredThemes = portalProvider.current.themes.filter(
-				(theme: PortalThemeType) => theme.scheme === preferredScheme
-			);
-			selectedTheme = filteredThemes[0];
-			if (selectedTheme) updateSettings('theme', selectedTheme.name);
-		}
-
-		return theme(selectedTheme ? createThemeFromCustom(selectedTheme) : preferredFallbackTheme);
-	}, [settings.theme, portalProvider.current?.themes]);
+		const selection = getThemeSelection(settings.theme, getSystemScheme());
+		return theme(selection ? createThemeFromCustom(selection.theme, selection.scheme) : preferredFallbackTheme);
+	}, [settings.theme, portalProvider.current?.themes, portalProvider.current?.fonts]);
 
 	const availableThemes = React.useMemo(() => getAvailableThemes(), [portalProvider.current?.themes]);
 
 	return (
-		<SettingsContext.Provider value={{ settings: settings, updateSettings: updateSettings, availableThemes }}>
+		<SettingsContext.Provider value={{ settings, updateSettings, availableThemes }}>
 			<ThemeProvider theme={currentTheme}>{props.children}</ThemeProvider>
 		</SettingsContext.Provider>
 	);

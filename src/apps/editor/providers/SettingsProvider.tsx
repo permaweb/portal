@@ -2,29 +2,11 @@ import React from 'react';
 import { debounce } from 'lodash';
 import { ThemeProvider } from 'styled-components';
 
-import { ICONS, STYLING } from 'helpers/config';
-import {
-	darkTheme,
-	darkThemeAlt1,
-	darkThemeAlt2,
-	darkThemeHighContrast,
-	lightTheme,
-	lightThemeAlt1,
-	lightThemeAlt2,
-	lightThemeHighContrast,
-	theme,
-} from 'helpers/themes';
+import { STYLING } from 'helpers/config';
+import { darkTheme, lightTheme, theme } from 'helpers/themes';
 import { checkWindowCutoff } from 'helpers/window';
 
-type ThemeType =
-	| 'light-primary'
-	| 'light-high-contrast'
-	| 'light-alt-1'
-	| 'light-alt-2'
-	| 'dark-primary'
-	| 'dark-high-contrast'
-	| 'dark-alt-1'
-	| 'dark-alt-2';
+type ThemeType = 'light-primary' | 'dark-primary';
 
 interface Settings {
 	theme: ThemeType;
@@ -69,6 +51,17 @@ const defaultSettings: Settings = {
 	language: 'en',
 };
 
+function getSystemTheme(): ThemeType {
+	return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark-primary' : 'light-primary';
+}
+
+function normalizeEditorTheme(value: unknown, fallback: ThemeType = getSystemTheme()): ThemeType {
+	if (typeof value !== 'string') return fallback;
+	if (value.startsWith('dark-')) return 'dark-primary';
+	if (value.startsWith('light-')) return 'light-primary';
+	return fallback;
+}
+
 const SettingsContext = React.createContext<SettingsContextState>({
 	settings: defaultSettings,
 	updateSettings: () => {},
@@ -84,18 +77,18 @@ export function SettingsProvider(props: SettingsProviderProps) {
 	const loadStoredSettings = (): Settings => {
 		const stored = localStorage.getItem('settings');
 		const isDesktop = checkWindowCutoff(parseInt(STYLING.cutoffs.desktop));
-		const preferredTheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches
-			? 'dark-primary'
-			: 'light-primary';
+		const preferredTheme = getSystemTheme();
 
 		let settings: Settings;
 		if (stored) {
 			const parsedSettings = JSON.parse(stored);
+			const syncWithSystem = parsedSettings.syncWithSystem ?? true;
 			// If not desktop, ensure navWidth is at minimum to hide overlay on load
 			const navWidth = isDesktop ? parsedSettings.navWidth ?? parseInt(STYLING.dimensions.nav.width) : 0;
 
 			settings = {
 				...parsedSettings,
+				theme: syncWithSystem ? preferredTheme : normalizeEditorTheme(parsedSettings.theme, preferredTheme),
 				isDesktop,
 				windowSize: { width: window.innerWidth, height: window.innerHeight },
 				sidebarOpen: isDesktop ? parsedSettings.sidebarOpen : false,
@@ -105,9 +98,9 @@ export function SettingsProvider(props: SettingsProviderProps) {
 				navWidth,
 				drawerStates: parsedSettings.drawerStates ?? {},
 				language: parsedSettings.language ?? 'en',
-				syncWithSystem: parsedSettings.syncWithSystem ?? true,
-				preferredLightTheme: parsedSettings.preferredLightTheme ?? 'light-primary',
-				preferredDarkTheme: parsedSettings.preferredDarkTheme ?? 'dark-primary',
+				syncWithSystem,
+				preferredLightTheme: 'light-primary',
+				preferredDarkTheme: 'dark-primary',
 			};
 		} else {
 			settings = {
@@ -172,22 +165,10 @@ export function SettingsProvider(props: SettingsProviderProps) {
 	React.useEffect(() => {
 		const themeBackgrounds = {
 			'light-primary': '#FFFFFF',
-			'light-high-contrast': '#FEFEFE',
-			'light-alt-1': '#FEFEFE',
-			'light-alt-2': '#FCFCFC',
-			'dark-primary': '#1B1B1B',
-			'dark-high-contrast': '#101013',
-			'dark-alt-1': '#16161C',
-			'dark-alt-2': '#17191F',
+			'dark-primary': '#1A1A1A',
 		};
 
-		const backgroundColor =
-			themeBackgrounds[settings.theme] ||
-			themeBackgrounds[
-				window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-					? 'dark-primary'
-					: 'light-primary'
-			];
+		const backgroundColor = themeBackgrounds[settings.theme] || themeBackgrounds[getSystemTheme()];
 		document.body.style.background = backgroundColor;
 	}, [settings.theme]);
 
@@ -197,7 +178,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 
 		const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 		const handleChange = (e: MediaQueryListEvent) => {
-			const newTheme = e.matches ? settings.preferredDarkTheme : settings.preferredLightTheme;
+			const newTheme: ThemeType = e.matches ? 'dark-primary' : 'light-primary';
 			setSettings((prevSettings) => {
 				const newSettings = { ...prevSettings, theme: newTheme };
 				localStorage.setItem('settings', JSON.stringify(newSettings));
@@ -207,49 +188,21 @@ export function SettingsProvider(props: SettingsProviderProps) {
 
 		mediaQuery.addEventListener('change', handleChange);
 		return () => mediaQuery.removeEventListener('change', handleChange);
-	}, [settings.syncWithSystem, settings.preferredLightTheme, settings.preferredDarkTheme]);
+	}, [settings.syncWithSystem]);
 
 	const updateSettings = <K extends keyof Settings>(key: K, value: Settings[K]) => {
 		React.startTransition(() => {
 			setSettings((prevSettings) => {
-				let newSettings = { ...prevSettings, [key]: value };
+				const newSettings: Settings = { ...prevSettings, [key]: value };
 
-				// When changing theme and syncWithSystem is enabled, update the preferred theme
-				if (key === 'theme' && prevSettings.syncWithSystem) {
-					const themeValue = value as ThemeType;
-					const isLightTheme = themeValue.startsWith('light-');
-					const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-					if (isLightTheme) {
-						newSettings.preferredLightTheme = themeValue;
-						// Only apply the theme if system is currently in light mode
-						if (!systemIsDark) {
-							newSettings.theme = themeValue;
-						} else {
-							// Keep the current dark theme
-							newSettings.theme = prevSettings.theme;
-						}
-					} else {
-						newSettings.preferredDarkTheme = themeValue;
-						// Only apply the theme if system is currently in dark mode
-						if (systemIsDark) {
-							newSettings.theme = themeValue;
-						} else {
-							// Keep the current light theme
-							newSettings.theme = prevSettings.theme;
-						}
-					}
+				// A manual light/dark choice leaves system mode in one action.
+				if (key === 'theme') {
+					newSettings.theme = normalizeEditorTheme(value, prevSettings.theme);
+					newSettings.syncWithSystem = false;
 				}
 
-				// When disabling syncWithSystem, keep the current theme
-				if (key === 'syncWithSystem' && value === false) {
-					// Current theme stays as is
-				}
-
-				// When enabling syncWithSystem, switch to the appropriate preferred theme
 				if (key === 'syncWithSystem' && value === true) {
-					const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-					newSettings.theme = isDark ? prevSettings.preferredDarkTheme : prevSettings.preferredLightTheme;
+					newSettings.theme = getSystemTheme();
 				}
 
 				localStorage.setItem('settings', JSON.stringify(newSettings));
@@ -269,90 +222,8 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		});
 	};
 
-	const AVAILABLE_THEMES = {
-		light: {
-			label: 'Light Themes',
-			icon: ICONS.light,
-			variants: [
-				{
-					id: 'light-primary',
-					name: 'Light Default',
-					background: lightTheme.neutral1,
-					accent1: lightTheme.primary1,
-				},
-				{
-					id: 'light-high-contrast',
-					name: 'Light High Contrast',
-					background: lightThemeHighContrast.neutral1,
-					accent1: lightThemeHighContrast.neutral9,
-				},
-				{
-					id: 'light-alt-1',
-					name: 'Sunlit',
-					background: lightThemeAlt1.neutral1,
-					accent1: lightThemeAlt1.primary1,
-				},
-				{
-					id: 'light-alt-2',
-					name: 'Daybreak',
-					background: lightThemeAlt2.neutral1,
-					accent1: lightThemeAlt2.primary1,
-				},
-			],
-		},
-		dark: {
-			label: 'Dark Themes',
-			icon: ICONS.dark,
-			variants: [
-				{
-					id: 'dark-primary',
-					name: 'Dark Default',
-					background: darkTheme.neutral1,
-					accent1: darkTheme.primary1,
-				},
-				{
-					id: 'dark-high-contrast',
-					name: 'Dark High Contrast',
-					background: darkThemeHighContrast.neutral1,
-					accent1: darkThemeHighContrast.neutralA1,
-				},
-				{
-					id: 'dark-alt-1',
-					name: 'Eclipse',
-					background: darkThemeAlt1.neutral1,
-					accent1: darkThemeAlt1.primary1,
-				},
-				{
-					id: 'dark-alt-2',
-					name: 'Midnight',
-					background: darkThemeAlt2.neutral1,
-					accent1: darkThemeAlt2.primary1,
-				},
-			],
-		},
-	};
-
 	const currentTheme = React.useMemo(() => {
-		switch (settings.theme) {
-			case 'light-primary':
-				return theme(lightTheme);
-			case 'light-high-contrast':
-				return theme(lightThemeHighContrast);
-			case 'light-alt-1':
-				return theme(lightThemeAlt1);
-			case 'light-alt-2':
-				return theme(lightThemeAlt2);
-			case 'dark-primary':
-				return theme(darkTheme);
-			case 'dark-high-contrast':
-				return theme(darkThemeHighContrast);
-			case 'dark-alt-1':
-				return theme(darkThemeAlt1);
-			case 'dark-alt-2':
-				return theme(darkThemeAlt2);
-			default:
-				return theme(lightTheme);
-		}
+		return theme(settings.theme === 'dark-primary' ? darkTheme : lightTheme);
 	}, [settings.theme]);
 
 	return (
@@ -361,7 +232,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 				settings: settings,
 				updateSettings: updateSettings,
 				updateDrawerState: updateDrawerState,
-				availableThemes: AVAILABLE_THEMES,
+				availableThemes: null,
 			}}
 		>
 			<ThemeProvider theme={currentTheme}>{props.children}</ThemeProvider>

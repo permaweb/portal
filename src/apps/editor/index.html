@@ -103,31 +103,30 @@
 		<script>
 			const themeBackgrounds = {
 				'light-primary': '#FFFFFF',
-				'light-high-contrast': '#FEFEFE',
-				'light-alt-1': '#FEFEFE',
-				'light-alt-2': '#FCFCFC',
-				'dark-primary': '#1B1B1B',
-				'dark-high-contrast': '#101013',
-				'dark-alt-1': '#16161C',
-				'dark-alt-2': '#17191F',
+				'dark-primary': '#1A1A1A',
 			};
 
 			function getTheme() {
+				const systemTheme =
+					window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+						? 'dark-primary'
+						: 'light-primary';
+
 				try {
 					const settings = localStorage.getItem('settings');
 					if (settings) {
 						const parsed = JSON.parse(settings);
-						return parsed.theme;
+						if (parsed.syncWithSystem !== false) return systemTheme;
+						if (typeof parsed.theme === 'string' && parsed.theme.startsWith('dark-')) return 'dark-primary';
+						if (typeof parsed.theme === 'string' && parsed.theme.startsWith('light-')) return 'light-primary';
 					}
 				} catch (e) {}
 
-				return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-					? 'dark-primary'
-					: 'light-primary';
+				return systemTheme;
 			}
 
 			const theme = getTheme();
-			const backgroundColor = themeBackgrounds[theme] || themeBackgrounds['dark-primary'];
+			const backgroundColor = themeBackgrounds[theme] || themeBackgrounds['light-primary'];
 			document.body.style.background = backgroundColor;
 
 			const isDarkTheme = theme.startsWith('dark');

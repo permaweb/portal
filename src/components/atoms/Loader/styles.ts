@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 
-import { loaderKeyFrame } from 'helpers/animations';
+import { loaderKeyFrame, open, transition2 } from 'helpers/animations';
+import { STYLING } from 'helpers/config';
 
 export const Wrapper = styled.div`
 	height: 100%;
@@ -132,6 +133,13 @@ export const Placeholder = styled.div`
 	background: ${(props) => props.theme.colors.container.alt1.background};
 `;
 
+export const MessageOverlay = styled.div`
+	position: fixed;
+	inset: 0;
+	z-index: 11;
+	background: ${(props) => props.theme.colors.overlay.alt1};
+`;
+
 export const MessageWrapper = styled.div`
 	max-width: 90vw;
 	padding: 11.5px 40px !important;
@@ -143,9 +151,17 @@ export const MessageWrapper = styled.div`
 	justify-content: center;
 	align-items: center;
 	gap: 20px;
+	background: ${(props) => props.theme.colors.contrast.background};
 	border: none !important;
+	border-radius: ${STYLING.dimensions.radius.alt4};
+	box-shadow: 0 4px 18px ${(props) => props.theme.colors.shadow.primary};
+	opacity: 1;
+	animation: ${open} ${transition2};
 
 	span {
+		color: ${(props) => props.theme.colors.contrast.color};
 		font-size: ${(props) => props.theme?.typography?.size?.xSmall || '12px'} !important;
+		font-weight: ${(props) => props.theme.typography.weight.bold};
+		white-space: nowrap;
 	}
 `;

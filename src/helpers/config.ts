@@ -10,6 +10,7 @@ import { LAYOUT_BLOG, LAYOUT_DOCUMENTATION, LAYOUT_JOURNAL } from './config/layo
 import { PAGES_BLOG, PAGES_DOCUMENTATION, PAGES_JOURNAL } from './config/pages';
 import { POST_PREVIEWS } from './config/postPreviews';
 import { THEME_DEFAULT } from './config/themes';
+import { getPortalThemeColor } from './portalTheme';
 import { ArticleBlockEnum, PageBlockEnum, PortalPatchMapEnum } from './types';
 
 export const ENGINE_LITE_REFERENCE_ID = engineLiteDeployment.referenceId;
@@ -400,22 +401,7 @@ type PortalBootstrapOptions = {
 };
 
 function getBootstrapThemeColor(theme: any, key: 'background' | 'text', scheme: 'light' | 'dark') {
-	const basics = theme?.basics || theme?.Basics || {};
-	const colors = basics.colors || basics.Colors || {};
-	const entry = colors[key] || colors[key.charAt(0).toUpperCase() + key.slice(1)] || {};
-	const raw = entry[scheme] || entry[scheme.charAt(0).toUpperCase() + scheme.slice(1)];
-	const reference = typeof raw === 'string' ? colors[raw] || colors[raw.charAt(0).toUpperCase() + raw.slice(1)] : null;
-	const resolved = reference?.[scheme] || reference?.[scheme.charAt(0).toUpperCase() + scheme.slice(1)] || raw;
-	const fallback =
-		scheme === 'dark'
-			? key === 'background'
-				? '0,0,0'
-				: '255,255,255'
-			: key === 'background'
-			? '255,255,255'
-			: '0,0,0';
-	const value = typeof resolved === 'string' && resolved.trim() ? resolved.trim() : fallback;
-	return /^(?:#|rgb|hsl|color\(|var\()/i.test(value) ? value : `rgb(${value})`;
+	return `rgb(${getPortalThemeColor(theme, key, scheme)})`;
 }
 
 function serializePortalBootstrap(value: unknown) {

@@ -411,6 +411,81 @@ export const DFooterWrapper = styled(DBodyWrapper)`
 	padding: 10px 0 0 0;
 `;
 
+export const AppearanceSection = styled.section`
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	padding: 10px 0;
+	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
+`;
+
+export const AppearanceTitle = styled.p`
+	padding: 0 7.5px;
+	color: ${(props) => props.theme.colors.font.alt1};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-size: ${(props) => props.theme.typography.size.xxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
+`;
+
+export const AppearanceOptions = styled.div`
+	display: flex;
+	flex-direction: column;
+`;
+
+export const AppearanceOption = styled.button`
+	width: 100%;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	padding: 0 7.5px;
+	color: ${(props) => props.theme.colors.font.primary};
+	font-family: ${(props) => props.theme.typography.family.primary};
+	font-size: ${(props) => props.theme.typography.size.xxSmall};
+	font-weight: ${(props) => props.theme.typography.weight.bold};
+	text-align: left;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: ${STYLING.dimensions.radius.alt4};
+	cursor: pointer;
+	transition: all 100ms;
+
+	> div,
+	> svg {
+		width: 16.5px;
+		height: 16.5px;
+		margin-right: 9.5px;
+		flex: none;
+	}
+
+	> div {
+		display: flex;
+		align-items: center;
+	}
+
+	svg {
+		width: 16.5px;
+		height: 16.5px;
+		color: ${(props) => props.theme.colors.font.alt1};
+		stroke: currentColor;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	&:hover {
+		color: ${(props) => props.theme.colors.font.primary};
+		background: ${(props) => props.theme.colors.container.primary.active};
+	}
+`;
+
+export const AppearanceIndicator = styled.span`
+	width: 7px;
+	height: 7px;
+	margin-left: auto;
+	background: ${(props) => props.theme.colors.indicator.active};
+	border-radius: 50%;
+	flex: none;
+`;
+
 export const MWrapper = styled.div`
 	display: flex;
 	flex-direction: column;

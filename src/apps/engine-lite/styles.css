@@ -10,6 +10,7 @@
 	--lite-faint: rgba(0, 0, 0, 0.48);
 	--lite-border: rgba(0, 0, 0, 0.12);
 	--lite-border-strong: rgba(0, 0, 0, 0.38);
+	--lite-radius: 10px;
 	--lite-header-font: Arial, Helvetica, sans-serif;
 	--lite-body-font: Arial, Helvetica, sans-serif;
 }
@@ -122,6 +123,7 @@ video {
 	height: 36px;
 	padding: 0 15px;
 	border: 1px solid var(--lite-border-strong);
+	border-radius: var(--lite-radius);
 	background: transparent;
 	color: var(--lite-text);
 	font-size: 12px;
@@ -272,6 +274,7 @@ video {
 	width: fit-content;
 	padding: 7px 12px 6px;
 	border: 1px solid var(--lite-border-strong);
+	border-radius: var(--lite-radius);
 	background: var(--lite-surface);
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 	font-size: 11px;
@@ -294,6 +297,7 @@ video {
 .lite-hero-image {
 	overflow: hidden;
 	border: 1px solid var(--lite-border);
+	border-radius: var(--lite-radius);
 	background: var(--lite-surface);
 }
 
@@ -462,6 +466,7 @@ video {
 	gap: 12px;
 	padding: 0 13px;
 	border: 1px solid var(--lite-border);
+	border-radius: var(--lite-radius);
 	background: var(--lite-surface);
 }
 
@@ -720,6 +725,7 @@ body.lite-lightbox-open {
 	height: auto;
 	max-height: 90vh;
 	border: 1px solid var(--lite-border);
+	border-radius: var(--lite-radius);
 	background: var(--lite-surface);
 	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 	cursor: zoom-out;
@@ -903,6 +909,7 @@ body.lite-lightbox-open {
 	max-height: min(70vh, 640px);
 	margin: 48px 0 48px -50px;
 	border: 1px solid var(--lite-border);
+	border-radius: var(--lite-radius);
 	object-fit: contain;
 }
 
@@ -916,6 +923,7 @@ body.lite-lightbox-open {
 	padding: 18px;
 	overflow: auto;
 	border: 1px solid var(--lite-border);
+	border-radius: var(--lite-radius);
 	background: var(--lite-surface);
 	font-size: 13px;
 	line-height: 1.6;
@@ -924,6 +932,7 @@ body.lite-lightbox-open {
 .lite-rich-text code:not(pre code) {
 	padding: 2px 5px;
 	border: 1px solid var(--lite-border);
+	border-radius: var(--lite-radius);
 	background: var(--lite-surface);
 	font-size: 0.9em;
 }
@@ -977,7 +986,7 @@ body.lite-lightbox-open {
 	place-items: center;
 	padding: 0;
 	border: 1px solid var(--lite-border);
-	border-radius: 5px;
+	border-radius: var(--lite-radius);
 	background: var(--lite-background);
 	color: var(--lite-text);
 	opacity: 0.8;
@@ -1296,7 +1305,7 @@ body.lite-lightbox-open {
 	max-width: 100%;
 	padding: 1.5px 5.5px 2.5px;
 	border: 1px solid var(--lite-border);
-	border-radius: 5px;
+	border-radius: var(--lite-radius);
 	background: var(--lite-alt-surface);
 	color: var(--lite-text);
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -1310,7 +1319,7 @@ body.lite-lightbox-open {
 	margin: 0;
 	padding: 10px 45px 10px 15px;
 	border: 1px solid var(--lite-border);
-	border-radius: 7.5px;
+	border-radius: var(--lite-radius);
 	background: var(--lite-surface);
 	overflow-x: auto;
 	white-space: pre-wrap;
@@ -1392,7 +1401,7 @@ body.lite-lightbox-open {
 	border-collapse: separate;
 	border-spacing: 0;
 	border: 1px solid var(--lite-border);
-	border-radius: 7.5px;
+	border-radius: var(--lite-radius);
 	background: var(--lite-surface);
 	overflow: hidden;
 }
@@ -1431,7 +1440,7 @@ body.lite-lightbox-open {
 	height: auto;
 	max-height: none;
 	margin: -15px auto 0;
-	border-radius: 7.5px;
+	border-radius: var(--lite-radius);
 	object-fit: contain;
 }
 
@@ -1446,7 +1455,7 @@ body.lite-lightbox-open {
 	max-height: none;
 	margin: 0;
 	border: 1px solid var(--lite-border);
-	border-radius: 7.5px;
+	border-radius: var(--lite-radius);
 	box-shadow: 0 1px 2px color-mix(in srgb, var(--lite-text) 8%, transparent);
 }
 
@@ -1522,7 +1531,7 @@ body.lite-lightbox-open {
 	gap: 5px;
 	padding: 8.5px 15px 15px;
 	border: 1px solid var(--lite-border);
-	border-radius: 7.5px;
+	border-radius: var(--lite-radius);
 	background: var(--lite-surface);
 	color: var(--lite-text);
 	text-decoration: none;
@@ -1601,7 +1610,7 @@ body.lite-lightbox-open {
 	.lite-docs-navigation-inner {
 		padding: 0 15px;
 		border: 1px solid var(--lite-border);
-		border-radius: 7.5px;
+		border-radius: var(--lite-radius);
 		background: var(--lite-surface);
 	}
 

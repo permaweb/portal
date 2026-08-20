@@ -1219,7 +1219,7 @@ export default function WordPressImport(props: {
 										<S.ThemeSection>
 											<S.ThemeSectionTitle>Portal Theme Preview</S.ThemeSectionTitle>
 											<S.SectionInfo>
-												These colors will be converted to your portal theme format (RGB values for light/dark modes).
+												These colors will be converted into compact palettes for light and dark appearances.
 											</S.SectionInfo>
 										</S.ThemeSection>
 									)}

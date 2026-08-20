@@ -5,6 +5,13 @@
  * and convert it to Portal-compatible formats.
  */
 
+import {
+	DEFAULT_PORTAL_THEME,
+	getPortalThemeContrast,
+	mixRgbChannels,
+	normalizeRgbChannels,
+	SimplePortalTheme,
+} from './portalTheme';
 import { ArticleBlockEnum, ArticleBlockType, PortalCategoryType, PortalTopicType } from './types';
 
 // WordPress API Types
@@ -180,7 +187,7 @@ export function getDefaultExtractedTheme(): ExtractedTheme {
 			primary: '#5E66DB', // Portal default primary
 			secondary: '#38BD80', // Portal default secondary
 			background: '#FAFAFA',
-			text: '#1A1A1A',
+			text: '##1A1A1A',
 			accent: '#5E66DB',
 			border: '#E0E0E0',
 			link: '#5E66DB',
@@ -1689,326 +1696,51 @@ export function convertPost(
 	};
 }
 
-// Portal theme type for import - must match engine's expected structure
-export type PortalThemeImport = {
-	name: string;
-	active: boolean;
-	basics: {
-		colors: {
-			text: { light: string; dark: string };
-			background: { light: string; dark: string };
-			primary: { light: string; dark: string };
-			secondary: { light: string; dark: string };
-			border: { light: string; dark: string };
-		};
-		preferences: {
-			borderRadius: number;
-			wallpaper?: string;
-		};
-	};
-	header: {
-		colors: {
-			background: { light: string; dark: string };
-			border: { light: string; dark: string };
-			shadow: { light: string; dark: string };
-		};
-		preferences: {
-			opacity: { light: number; dark: number };
-			shadow: { light: string; dark: string };
-			gradient: { light: boolean; dark: boolean };
-		};
-	};
-	navigation: {
-		colors: {
-			background: { light: string; dark: string };
-			text: { light: string; dark: string };
-			border: { light: string; dark: string };
-			hover: { light: string; dark: string };
-		};
-		preferences: {
-			opacity: { light: number; dark: number };
-			shadow: { light: string; dark: string };
-		};
-	};
-	content: {
-		colors: {
-			background: { light: string; dark: string };
-		};
-		preferences: {
-			opacity: { light: number; dark: number };
-		};
-	};
-	footer: {
-		colors: {
-			background: { light: string; dark: string };
-			border: { light: string; dark: string };
-		};
-		preferences: {
-			opacity: { light: number; dark: number };
-		};
-	};
-	post: {
-		colors: {
-			background: { light: string; dark: string };
-			border: { light: string; dark: string };
-		};
-		preferences: {
-			opacity: { light: number; dark: number };
-			shadow: { light: string; dark: string };
-		};
-	};
-	card: {
-		colors: {
-			background: { light: string; dark: string };
-			border: { light: string; dark: string };
-		};
-		preferences: {
-			opacity: { light: number; dark: number };
-		};
-	};
-	buttons: {
-		default: {
-			default: {
-				colors: {
-					color: { light: string; dark: string };
-					background: { light: string; dark: string };
-					border: { light: string; dark: string };
-				};
-				preferences: {
-					opacity: { light: number; dark: number };
-				};
-			};
-			hover: {
-				colors: {
-					color: { light: string; dark: string };
-					background: { light: string; dark: string };
-					border: { light: string; dark: string };
-				};
-				preferences: {
-					opacity: { light: number; dark: number };
-				};
-			};
-		};
-		primary: {
-			default: {
-				colors: {
-					color: { light: string; dark: string };
-					background: { light: string; dark: string };
-					border: { light: string; dark: string };
-				};
-				preferences: {
-					opacity: number;
-				};
-			};
-			hover: {
-				colors: {
-					color: { light: string; dark: string };
-					background: { light: string; dark: string };
-					border: { light: string; dark: string };
-				};
-				preferences: {
-					opacity: number;
-				};
-			};
-		};
-	};
-};
+// Portal theme type for import - intentionally matches the compact portal schema
+export type PortalThemeImport = SimplePortalTheme;
 
-// Helper to convert hex/rgb color to RGB string format (R,G,B)
-function colorToRgbString(color: string): string {
-	if (!color) return '128,128,128';
-
-	// Handle hex colors
-	if (color.startsWith('#')) {
-		const hex = color.slice(1);
-		const fullHex =
-			hex.length === 3
-				? hex
-						.split('')
-						.map((c) => c + c)
-						.join('')
-				: hex;
-		const r = parseInt(fullHex.slice(0, 2), 16);
-		const g = parseInt(fullHex.slice(2, 4), 16);
-		const b = parseInt(fullHex.slice(4, 6), 16);
-		return `${r},${g},${b}`;
-	}
-
-	// Handle rgb/rgba colors
-	const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-	if (rgbMatch) {
-		return `${rgbMatch[1]},${rgbMatch[2]},${rgbMatch[3]}`;
-	}
-
-	// Handle named colors (basic ones)
-	const namedColors: Record<string, string> = {
-		white: '255,255,255',
-		black: '0,0,0',
-		red: '255,0,0',
-		green: '0,128,0',
-		blue: '0,0,255',
-		gray: '128,128,128',
-		grey: '128,128,128',
-	};
-
-	return namedColors[color.toLowerCase()] || '128,128,128';
-}
-
-// Helper to determine if a color is light or dark
-function isLightColor(rgbString: string): boolean {
-	const [r, g, b] = rgbString.split(',').map(Number);
-	const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-	return luminance > 0.5;
-}
-
-// Convert extracted WordPress theme to Portal theme format
+// Convert an extracted WordPress palette to the compact Portal theme format
 export function convertThemeToPortal(extractedTheme: ExtractedTheme): PortalThemeImport {
-	const primaryColor = extractedTheme.colors.primary || extractedTheme.colors.accent || '#5E66DB';
-	const secondaryColor = extractedTheme.colors.secondary || extractedTheme.colors.accent || '#38BD80';
-	const backgroundColor = extractedTheme.colors.background || '#FAFAFA';
-	const textColor = extractedTheme.colors.text || '#000000';
-	const borderColor = extractedTheme.colors.border || '#CCCCCC';
+	const accent = normalizeRgbChannels(
+		extractedTheme.colors.primary || extractedTheme.colors.accent,
+		DEFAULT_PORTAL_THEME.colors.light.accent
+	);
+	const extractedBackground = normalizeRgbChannels(
+		extractedTheme.colors.background,
+		DEFAULT_PORTAL_THEME.colors.light.background
+	);
+	const extractedText = normalizeRgbChannels(extractedTheme.colors.text, DEFAULT_PORTAL_THEME.colors.light.text);
+	const extractedBorder = normalizeRgbChannels(extractedTheme.colors.border, DEFAULT_PORTAL_THEME.colors.light.border);
+	const link = normalizeRgbChannels(extractedTheme.colors.link, accent);
+	const extractedIsLight = getPortalThemeContrast(extractedBackground) === '0,0,0';
 
-	const primaryRgb = colorToRgbString(primaryColor);
-	const secondaryRgb = colorToRgbString(secondaryColor);
-	const backgroundRgb = colorToRgbString(backgroundColor);
-	const textRgb = colorToRgbString(textColor);
-	const borderRgb = colorToRgbString(borderColor);
-
-	// Determine light mode colors based on background brightness
-	const isLightMode = isLightColor(backgroundRgb);
-
-	// For dark mode, invert if necessary
-	const darkBackground = isLightMode ? '27,27,27' : backgroundRgb;
-	const darkText = isLightMode ? '255,255,255' : textRgb;
-	const lightBackground = isLightMode ? backgroundRgb : '250,250,250';
-	const lightText = isLightMode ? textRgb : '0,0,0';
-	const darkBorder = isLightColor(borderRgb) ? '100,100,100' : borderRgb;
+	const lightBackground = extractedIsLight ? extractedBackground : DEFAULT_PORTAL_THEME.colors.light.background;
+	const darkBackground = extractedIsLight ? DEFAULT_PORTAL_THEME.colors.dark.background : extractedBackground;
+	const lightText = extractedIsLight ? extractedText : DEFAULT_PORTAL_THEME.colors.light.text;
+	const darkText = extractedIsLight ? DEFAULT_PORTAL_THEME.colors.dark.text : extractedText;
 
 	return {
-		name: 'Imported Theme',
-		active: true,
-		basics: {
-			colors: {
-				text: { light: lightText, dark: darkText },
-				background: { light: lightBackground, dark: darkBackground },
-				primary: { light: primaryRgb, dark: primaryRgb },
-				secondary: { light: secondaryRgb, dark: secondaryRgb },
-				border: { light: borderRgb, dark: darkBorder },
+		colors: {
+			light: {
+				background: lightBackground,
+				surface: mixRgbChannels(lightBackground, '255,255,255', 0.35),
+				text: lightText,
+				accent,
+				link,
+				border: extractedIsLight ? extractedBorder : DEFAULT_PORTAL_THEME.colors.light.border,
 			},
-			preferences: {
-				borderRadius: extractedTheme.borderRadius || 10,
-			},
-		},
-		header: {
-			colors: {
-				background: { light: 'background', dark: 'background' },
-				border: { light: 'border', dark: 'border' },
-				shadow: { light: 'rgba(0, 0, 0, 0.4)', dark: 'rgba(0, 0, 0, 0.4)' },
-			},
-			preferences: {
-				opacity: { light: 1, dark: 0.4 },
-				shadow: { light: '0 4px 10px', dark: '0 4px 10px' },
-				gradient: { light: true, dark: true },
+			dark: {
+				background: darkBackground,
+				surface: mixRgbChannels(darkBackground, '255,255,255', 0.04),
+				text: darkText,
+				accent,
+				link,
+				border: extractedIsLight ? DEFAULT_PORTAL_THEME.colors.dark.border : extractedBorder,
 			},
 		},
-		navigation: {
-			colors: {
-				background: { light: '238,238,238', dark: '32,32,32' },
-				text: { light: 'text', dark: 'text' },
-				border: { light: 'border', dark: 'border' },
-				hover: { light: '50,50,50', dark: '208,208,208' },
-			},
-			preferences: {
-				opacity: { light: 1, dark: 1 },
-				shadow: { light: 'unset', dark: '0 2px 2px' },
-			},
-		},
-		content: {
-			colors: {
-				background: { light: '255,255,255', dark: '0,0,0' },
-			},
-			preferences: {
-				opacity: { light: 1, dark: 1 },
-			},
-		},
-		footer: {
-			colors: {
-				background: { light: 'background', dark: 'background' },
-				border: { light: 'border', dark: 'border' },
-			},
-			preferences: {
-				opacity: { light: 1, dark: 1 },
-			},
-		},
-		post: {
-			colors: {
-				background: { light: 'background', dark: 'background' },
-				border: { light: 'border', dark: 'border' },
-			},
-			preferences: {
-				opacity: { light: 1, dark: 0.6 },
-				shadow: { light: 'none', dark: 'none' },
-			},
-		},
-		card: {
-			colors: {
-				background: { light: 'background', dark: 'background' },
-				border: { light: 'border', dark: 'border' },
-			},
-			preferences: {
-				opacity: { light: 1, dark: 0.6 },
-			},
-		},
-		buttons: {
-			default: {
-				default: {
-					colors: {
-						color: { light: '255,255,255', dark: '255,255,255' },
-						background: { light: '0,0,0', dark: '33,33,33' },
-						border: { light: '0,0,0', dark: '33,33,33' },
-					},
-					preferences: {
-						opacity: { light: 1, dark: 1 },
-					},
-				},
-				hover: {
-					colors: {
-						color: { light: '255,255,255', dark: '255,255,255' },
-						background: { light: '50,50,50', dark: '50,50,50' },
-						border: { light: '0,0,0', dark: '50,50,50' },
-					},
-					preferences: {
-						opacity: { light: 1, dark: 1 },
-					},
-				},
-			},
-			primary: {
-				default: {
-					colors: {
-						color: { light: '255,255,255', dark: '255,255,255' },
-						background: { light: 'primary', dark: 'primary' },
-						border: { light: 'primary', dark: 'primary' },
-					},
-					preferences: {
-						opacity: 1,
-					},
-				},
-				hover: {
-					colors: {
-						color: { light: '255,255,255', dark: '255,255,255' },
-						background: { light: 'primary', dark: 'primary' },
-						border: { light: 'primary', dark: 'primary' },
-					},
-					preferences: {
-						opacity: 1,
-					},
-				},
-			},
-		},
+		borderRadius: extractedTheme.borderRadius || DEFAULT_PORTAL_THEME.borderRadius,
 	};
 }
-
 // Convert all WordPress data to Portal-compatible structure
 export type PortalImportData = {
 	name: string;

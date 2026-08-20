@@ -34,7 +34,7 @@ export default function PortalDesign() {
 		switch (panelType) {
 			case 'themes':
 				header = language?.themes;
-				component = <Themes />;
+				component = <Themes compact />;
 				break;
 			case 'fonts':
 				header = language?.fonts;

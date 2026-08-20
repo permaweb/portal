@@ -1212,7 +1212,9 @@ export default function PostPreviewEdit() {
 	const primaryDisabled = unauthorized || !hasChanges || loading.active;
 
 	const scheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-	const activeTheme = portalProvider.current?.themes?.find((t: any) => t.active);
+	const activeTheme =
+		portalProvider.current?.themes?.find((candidate: any) => candidate?.active || candidate?.Active) ||
+		portalProvider.current?.themes?.[0];
 	const themeVars = activeTheme ? getThemeVars(activeTheme, scheme) : {};
 
 	if (!template) return <Loader message={`${language?.loading}...`} />;

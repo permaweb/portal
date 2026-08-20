@@ -46,7 +46,7 @@ This documentation will guide you through every aspect of the Portal platform. Y
 
 - Modify your portal's theme and colors
 - Upload custom logos and branding
-- Create multiple theme variations
+- Configure matching light and dark color palettes
 - Ensure your portal matches your brand identity
 
 **Team Collaboration:**

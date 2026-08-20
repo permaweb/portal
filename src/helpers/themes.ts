@@ -1,6 +1,6 @@
 import { DefaultTheme } from 'styled-components';
 
-import { THEME_DEFAULT } from './config/themes';
+import { getPortalThemeContrast, mixRgbChannels, normalizePortalTheme } from './portalTheme';
 
 export const common = {
 	positive1: '#64B686',
@@ -77,120 +77,13 @@ export const lightTheme = {
 	link2: '#0069CC',
 };
 
-export const lightThemeHighContrast = {
-	scheme: 'light',
-	...common,
-	editor: { ...common.editorLight },
-	neutral1: '#FEFEFE',
-	neutral2: '#F0F0F0',
-	neutral3: '#E0E0E0',
-	neutral4: '#BDBDBD',
-	neutral5: '#8C8C8C',
-	neutral6: '#545454',
-	neutral7: '#616161',
-	neutral8: '#424242',
-	neutral9: '#212121',
-	neutralA1: '#000000',
-	neutralA2: '#212121',
-	neutralA3: '#424242',
-	neutralA4: '#3A3A3A',
-	neutralA5: '#0A0A0A',
-	neutralA6: '#9E9E9E',
-	neutralA7: '#BDBDBD',
-	overlay1: 'rgb(0, 0, 0, .45)',
-	overlay2: 'rgb(0, 0, 0, .5)',
-	shadow1: 'rgb(200, 200, 200, .15)',
-	shadow2: 'rgb(0, 0, 0, .15)',
-	primary1: '#5E66DB',
-	primary2: '#454CB0',
-	light1: '#FFFFFF',
-	light2: '#F2F2F2',
-	light3: '#B0B0B0',
-	dark1: '#151515',
-	dark2: '#333333',
-	link1: '#0074E4',
-	link2: '#0069CC',
-};
-
-export const lightThemeAlt1 = {
-	scheme: 'light',
-	...common,
-	editor: { ...common.editorLight },
-	neutral1: '#FEFEFE',
-	neutral2: '#F9F9F9',
-	neutral3: '#F0F0F0',
-	neutral4: '#C9C9C9',
-	neutral5: '#BFBFBF',
-	neutral6: '#B3B3B3',
-	neutral7: '#A6A6A6',
-	neutral8: '#999999',
-	neutral9: '#8D8D8D',
-	neutralA1: '#1C1C1C',
-	neutralA2: '#393939',
-	neutralA3: '#454545',
-	neutralA4: '#505050',
-	neutralA5: '#3A3A3A',
-	neutralA6: '#787878',
-	neutralA7: '#858585',
-	overlay1: 'rgba(0, 0, 0, 0.4)',
-	overlay2: 'rgba(0, 0, 0, 0.55)',
-	shadow1: 'rgb(200, 200, 200, .15)',
-	shadow2: 'rgb(0, 0, 0, .15)',
-	primary1: '#DB5461',
-	primary2: '#D43545',
-	light1: '#FFFFFF',
-	light2: '#E5E5E5',
-	light3: '#BFBFBF',
-	dark1: '#1C1C1C',
-	dark2: '#383838',
-	link1: '#0074E4',
-	link2: '#0069CC',
-};
-
-export const lightThemeAlt2 = {
-	scheme: 'light',
-	...common,
-	editor: { ...common.editorLight },
-	positive1: '#5AB6A0',
-	positive2: '#379B83',
-	neutral1: '#FEFEFE',
-	neutral2: '#F7F7F7',
-	neutral3: '#F0F0F0',
-	neutral4: '#C9C9C9',
-	neutral5: '#BFBFBF',
-	neutral6: '#B3B3B3',
-	neutral7: '#A6A6A6',
-	neutral8: '#999999',
-	neutral9: '#8D8D8D',
-	neutralA1: '#1C1C1C',
-	neutralA2: '#393939',
-	neutralA3: '#454545',
-	neutralA4: '#505050',
-	neutralA5: '#3A3A3A',
-	neutralA6: '#787878',
-	neutralA7: '#858585',
-	overlay1: 'rgba(0, 0, 0, 0.4)',
-	overlay2: 'rgba(0, 0, 0, 0.55)',
-	shadow1: 'rgb(200, 200, 200, .15)',
-	shadow2: 'rgb(0, 0, 0, .15)',
-	primary1: '#5AB6A0',
-	primary2: '#379B83',
-	light1: '#FFFFFF',
-	light2: '#E3E3E3',
-	light3: '#BCBCBC',
-	dark1: '#1C1C1C',
-	dark2: '#393939',
-	link1: '#0C84CB',
-	link2: '#2274A5',
-};
-
 export const darkTheme = {
 	scheme: 'dark',
 	...common,
 	editor: { ...common.editorDark },
 	positive1: '#38BD80',
 	positive2: '#2F9D6A',
-	neutral1: '#1B1B1B',
+	neutral1: '#1A1A1A',
 	neutral2: '#202020',
 	neutral3: '#2D2D2D',
 	neutral4: '#2F2F2F',
@@ -221,117 +114,6 @@ export const darkTheme = {
 	link2: '#0074E4',
 };
 
-export const darkThemeHighContrast = {
-	scheme: 'dark',
-	...common,
-	editor: { ...common.editorDark },
-	positive1: '#38BD80',
-	positive2: '#2F9D6A',
-	neutral1: '#101013',
-	neutral2: '#161619',
-	neutral3: '#1d1e23',
-	neutral4: '#2a2c33',
-	neutral5: '#40434b',
-	neutral6: '#b9b9cc',
-	neutral7: '#62656d',
-	neutral8: '#6e7179',
-	neutral9: '#7d7f87',
-	neutralA1: '#FAFAFA',
-	neutralA2: '#f0f1f3',
-	neutralA3: '#e0e2e5',
-	neutralA4: '#c9ccd1',
-	neutralA5: '#bfc4cb',
-	neutralA6: '#999ea6',
-	neutralA7: '#7f848c',
-	overlay1: 'rgba(0, 0, 0, 0.4)',
-	overlay2: 'rgba(0, 0, 0, 0.6)',
-	shadow1: 'rgba(0, 0, 0, 0.5)',
-	shadow2: 'rgb(0, 0, 0, .55)',
-	primary1: '#5E66DB',
-	primary2: '#454CB0',
-	light1: '#FFFFFF',
-	light2: '#EAEAEA',
-	light3: '#C2C2C2',
-	dark1: '#151515',
-	dark2: '#333333',
-	link1: '#009AF7',
-	link2: '#0074E4',
-};
-
-export const darkThemeAlt1 = {
-	scheme: 'dark',
-	...common,
-	editor: { ...common.editorDark },
-	positive1: '#38BD80',
-	positive2: '#2F9D6A',
-	neutral1: '#16161c',
-	neutral2: '#1D1E24',
-	neutral3: '#23242A',
-	neutral4: '#282930',
-	neutral5: '#2E2F36',
-	neutral6: '#474952',
-	neutral7: '#3A3B42',
-	neutral8: '#404148',
-	neutral9: '#47484F',
-	neutralA1: '#F9F9F9',
-	neutralA2: '#E4E4E4',
-	neutralA3: '#D6D6D6',
-	neutralA4: '#CCCCCC',
-	neutralA5: '#CFCFCF',
-	neutralA6: '#8F8F8F',
-	neutralA7: '#707070',
-	overlay1: 'rgb(0, 0, 0, .35)',
-	overlay2: 'rgb(0, 0, 0, .5)',
-	shadow1: '#17191f85',
-	shadow2: '#17191f85',
-	primary1: '#DB5461',
-	primary2: '#D43545',
-	light1: '#FFFFFF',
-	light2: '#DADADA',
-	light3: '#B3B3B3',
-	dark1: '#151515',
-	dark2: '#333333',
-	link1: '#4DA8FF',
-	link2: '#0074E4',
-};
-
-export const darkThemeAlt2 = {
-	scheme: 'dark',
-	...common,
-	editor: { ...common.editorDark },
-	positive1: '#38BD80',
-	positive2: '#2F9D6A',
-	neutral1: '#17191f',
-	neutral2: '#1c1f25',
-	neutral3: '#262834',
-	neutral4: '#2E2F34',
-	neutral5: '#3d3e45',
-	neutral6: '#484953',
-	neutral7: '#52545F',
-	neutral8: '#4D4F57',
-	neutral9: '#36363F',
-	neutralA1: '#F9F9F9',
-	neutralA2: '#E4E4E4',
-	neutralA3: '#D6D6D6',
-	neutralA4: '#CCCCCC',
-	neutralA5: '#CFCFCF',
-	neutralA6: '#8F8F8F',
-	neutralA7: '#707070',
-	overlay1: 'rgb(0, 0, 0, .35)',
-	overlay2: 'rgb(0, 0, 0, .5)',
-	shadow1: '#17191f85',
-	shadow2: '#17191f85',
-	primary1: '#5AB6A0',
-	primary2: '#379B83',
-	light1: '#FFFFFF',
-	light2: '#DADADA',
-	light3: '#B3B3B3',
-	dark1: '#151515',
-	dark2: '#333333',
-	link1: '#00B1CC',
-	link2: '#00ccbf',
-};
-
 export const theme = (currentTheme: any): DefaultTheme => ({
 	scheme: currentTheme.scheme,
 	colors: {
@@ -341,10 +123,10 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			color: currentTheme.neutralA1,
 		},
 		border: {
-			primary: currentTheme.neutral6,
-			alt1: currentTheme.neutral7,
-			alt2: currentTheme.neutral8,
-			alt3: currentTheme.neutral9,
+			primary: currentTheme.neutral5,
+			alt1: currentTheme.neutral6,
+			alt2: currentTheme.neutral7,
+			alt3: currentTheme.neutral8,
 			alt4: currentTheme.neutralA7,
 			alt5: currentTheme.primary1,
 			alt6: currentTheme.primary2,
@@ -601,116 +383,73 @@ export const theme = (currentTheme: any): DefaultTheme => ({
 			h4: 'clamp(25.6px, 2.5vw, 38.6px)',
 		},
 		weight: {
-			light: '300',
-			regular: '400',
-			medium: '500',
-			bold: '600',
-			xBold: '700',
+			light: '200',
+			regular: '300',
+			medium: '400',
+			bold: '500',
+			xBold: '600',
 		},
 	},
 });
 
 export function getThemeVars(theme: any, scheme: 'light' | 'dark') {
-	const resolvedTheme = {
-		...THEME_DEFAULT,
-		...(theme && typeof theme === 'object' ? theme : {}),
-		basics: {
-			...THEME_DEFAULT.basics,
-			...(theme?.basics || {}),
-			colors: {
-				...THEME_DEFAULT.basics.colors,
-				...(theme?.basics?.colors || {}),
-				text: { ...THEME_DEFAULT.basics.colors.text, ...(theme?.basics?.colors?.text || {}) },
-				background: {
-					...THEME_DEFAULT.basics.colors.background,
-					...(theme?.basics?.colors?.background || {}),
-				},
-				primary: { ...THEME_DEFAULT.basics.colors.primary, ...(theme?.basics?.colors?.primary || {}) },
-				secondary: { ...THEME_DEFAULT.basics.colors.secondary, ...(theme?.basics?.colors?.secondary || {}) },
-				border: { ...THEME_DEFAULT.basics.colors.border, ...(theme?.basics?.colors?.border || {}) },
-			},
-		},
-	};
-
-	function getColor(theme: any, scheme: 'light' | 'dark', value: string) {
-		switch (value) {
-			case 'primary':
-				return theme.basics?.colors?.primary?.[scheme] ?? THEME_DEFAULT.basics.colors.primary[scheme];
-			case 'secondary':
-				return theme.basics?.colors?.secondary?.[scheme] ?? THEME_DEFAULT.basics.colors.secondary[scheme];
-			case 'background':
-				return theme.basics?.colors?.background?.[scheme] ?? THEME_DEFAULT.basics.colors.background[scheme];
-			case 'text':
-				return theme.basics?.colors?.text?.[scheme] ?? THEME_DEFAULT.basics.colors.text[scheme];
-			case 'border':
-				return theme.basics?.colors?.border?.[scheme] ?? THEME_DEFAULT.basics.colors.border[scheme];
-			default:
-				return value;
-		}
-	}
-
-	function getContrastColor(bg: string) {
-		const rgba = bg.replace(/^rgba?\(|\s+|\)$/g, '').split(',');
-		const [r, g, b] = rgba.map(Number);
-		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-		return luminance > 0.6 ? '0,0,0' : '255,255,255';
-	}
-
+	const resolvedTheme = normalizePortalTheme(theme);
+	const { text, background, surface, accent, link, border } = resolvedTheme.colors[scheme];
+	const accentHover = mixRgbChannels(accent, scheme === 'dark' ? '255,255,255' : '0,0,0', 0.18);
+	const linkHover = mixRgbChannels(link, scheme === 'dark' ? '255,255,255' : '0,0,0', 0.18);
 	const vars: Record<string, string> = {
-		'--color-text': resolvedTheme.basics.colors.text[scheme],
-		'--color-text-contrast': getContrastColor(resolvedTheme.basics.colors.text[scheme]),
-		'--color-background': resolvedTheme.basics.colors.background[scheme],
-		'--color-primary': resolvedTheme.basics.colors.primary[scheme],
-		'--color-primary-contrast': getContrastColor(resolvedTheme.basics.colors.primary[scheme]),
-		'--color-secondary': resolvedTheme.basics.colors.secondary[scheme],
-		'--color-secondary-contrast': getContrastColor(resolvedTheme.basics.colors.secondary[scheme]),
-		'--color-border': resolvedTheme.basics.colors.border[scheme],
-		'--color-header-background': getColor(
-			resolvedTheme,
-			scheme,
-			resolvedTheme.header?.colors?.background?.[scheme] ?? 'inherit'
-		),
-		'--color-content-background': `rgba(${resolvedTheme.content?.colors?.background?.[scheme] ?? '255,255,255'},${
-			resolvedTheme.content?.preferences?.opacity?.[scheme] ?? 1
-		})`,
-		'--color-post-background': `rgba(${getColor(
-			resolvedTheme,
-			scheme,
-			resolvedTheme.post?.colors?.background?.[scheme] ?? 'inherit'
-		)},${resolvedTheme.post?.preferences?.opacity?.[scheme] ?? 1})`,
-		'--color-card-background': `rgba(${getColor(
-			resolvedTheme,
-			scheme,
-			resolvedTheme.card?.colors?.background?.[scheme] ?? 'inherit'
-		)},${resolvedTheme.card?.preferences?.opacity?.[scheme] ?? 1})`,
-		'--border-radius': `${resolvedTheme.basics?.preferences?.borderRadius ?? 8}px`,
+		'--color-text': text,
+		'--color-text-contrast': getPortalThemeContrast(text),
+		'--color-background': background,
+		'--color-primary': accent,
+		'--color-primary-contrast': getPortalThemeContrast(accent),
+		'--color-secondary': accentHover,
+		'--color-secondary-contrast': getPortalThemeContrast(accentHover),
+		'--color-border': border,
+		'--color-header-background': background,
+		'--color-header-opacity': '1',
+		'--color-header-border': border,
+		'--preference-header-shadow': 'none',
+		'--color-navigation-background': `rgb(${surface})`,
+		'--color-navigation-border': border,
+		'--color-navigation-text': text,
+		'--color-navigation-text-hover': accent,
+		'--preference-navigation-shadow': 'none',
+		'--color-content-background': `rgb(${surface})`,
+		'--color-footer-background': background,
+		'--color-footer-border': border,
+		'--color-post-background': `rgb(${surface})`,
+		'--color-post-border': `rgba(${border},0.32)`,
+		'--color-post-border-contrast': `rgb(${getPortalThemeContrast(border)})`,
+		'--preference-post-border-width': '1px',
+		'--preference-post-padding': '20px',
+		'--preference-post-shadow': 'none',
+		'--color-card-background': `rgb(${surface})`,
+		'--color-card-border': `rgba(${border},0.32)`,
+		'--color-card-border-contrast': `rgb(${getPortalThemeContrast(border)})`,
+		'--preference-card-shadow': 'none',
+		'--color-button-default': `rgb(${getPortalThemeContrast(text)})`,
+		'--color-button-default-background': `rgb(${text})`,
+		'--color-button-default-border': `rgb(${text})`,
+		'--color-button-default-hover': `rgb(${getPortalThemeContrast(mixRgbChannels(text, background, 0.18))})`,
+		'--color-button-default-hover-background': `rgb(${mixRgbChannels(text, background, 0.18)})`,
+		'--color-button-default-hover-border': `rgb(${mixRgbChannels(text, background, 0.18)})`,
+		'--color-button-primary': `rgb(${getPortalThemeContrast(accent)})`,
+		'--color-button-primary-background': `rgb(${accent})`,
+		'--color-button-primary-border': `rgb(${accent})`,
+		'--color-button-primary-hover': `rgb(${getPortalThemeContrast(accentHover)})`,
+		'--color-button-primary-hover-background': `rgb(${accentHover})`,
+		'--color-button-primary-hover-border': `rgb(${accentHover})`,
+		'--color-link-default': `rgb(${link})`,
+		'--color-link-hover': `rgb(${linkHover})`,
+		'--preference-link-text-decoration-default': 'underline',
+		'--preference-link-text-decoration-hover': 'underline',
+		'--preference-link-font-weight-default': 'normal',
+		'--preference-link-font-weight-hover': 'normal',
+		'--preference-link-font-style-default': 'normal',
+		'--preference-link-font-style-hover': 'normal',
+		'--border-radius': `${resolvedTheme.borderRadius}px`,
 	};
-
-	if (
-		resolvedTheme?.links?.colors?.default &&
-		resolvedTheme?.links?.colors?.hover &&
-		resolvedTheme?.links?.preferences?.default &&
-		resolvedTheme?.links?.preferences?.hover
-	) {
-		vars['--color-link-default'] = `rgba(${getColor(
-			resolvedTheme,
-			scheme,
-			resolvedTheme.links.colors.default[scheme]
-		)},1)`;
-		vars['--color-link-hover'] = `rgba(${getColor(resolvedTheme, scheme, resolvedTheme.links.colors.hover[scheme])},1)`;
-		vars['--preference-link-text-decoration-default'] = resolvedTheme.links.preferences.default.underline
-			? 'underline'
-			: 'none';
-		vars['--preference-link-text-decoration-hover'] = resolvedTheme.links.preferences.hover.underline
-			? 'underline'
-			: 'none';
-		vars['--preference-link-font-weight-default'] = resolvedTheme.links.preferences.default.bold ? 'bold' : 'normal';
-		vars['--preference-link-font-weight-hover'] = resolvedTheme.links.preferences.hover.bold ? 'bold' : 'normal';
-		vars['--preference-link-font-style-default'] = resolvedTheme.links.preferences.default.cursive
-			? 'italic'
-			: 'normal';
-		vars['--preference-link-font-style-hover'] = resolvedTheme.links.preferences.hover.cursive ? 'italic' : 'normal';
-	}
 
 	return vars;
 }
