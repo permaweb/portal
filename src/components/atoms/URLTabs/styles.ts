@@ -45,14 +45,14 @@ export const Tab = styled.div<{ active: boolean }>`
 			content: '';
 			position: absolute;
 			bottom: -11px;
-			height: 4.5px;
+			height: 2.5px;
 			width: 100%;
 			background: ${(props) =>
 				props.active ? props.theme.colors.tabs.active.background : props.theme.colors.border.alt4};
 			border-radius: 1.5px;
 			opacity: ${(props) => (props.active ? 1 : 0)};
 			pointer-events: none;
-			transition: all 200ms;
+			transition: all 100ms;
 		}
 		&:hover:before {
 			opacity: 1;

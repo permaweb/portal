@@ -209,8 +209,9 @@ export function renderFeed(portal: LitePortal, filters: FeedFilters, postHref: (
 		a.localeCompare(b)
 	);
 	const query = filters.search.trim().toLowerCase();
+	const showPinned = Boolean(pinned && !filters.category && !query);
 	const posts = portal.posts.filter((post) => {
-		if (pinned && post.id === pinned.id) return false;
+		if (showPinned && pinned && post.id === pinned.id) return false;
 		if (filters.category && post.category !== filters.category) return false;
 		if (!query) return true;
 		return [post.title, post.excerpt, post.author, post.category].join(' ').toLowerCase().includes(query);
@@ -222,7 +223,7 @@ export function renderFeed(portal: LitePortal, filters: FeedFilters, postHref: (
 		}" type="button" data-category="${escapeHTML(category ?? '')}">${escapeHTML(label)}</button>`;
 
 	return `<main class="lite-feed">
-		${pinned ? featuredMarkup(pinned, postHref(pinned), 0) : ''}
+		${showPinned && pinned ? featuredMarkup(pinned, postHref(pinned), 0) : ''}
 		<div class="lite-controls">
 			<div class="lite-filters">
 				${filterButton('All', null)}
@@ -237,7 +238,7 @@ export function renderFeed(portal: LitePortal, filters: FeedFilters, postHref: (
 		${
 			posts.length
 				? `<div class="lite-grid">${posts
-						.map((post, index) => cardMarkup(post, postHref(post), (index + (pinned ? 1 : 0)) % 4))
+						.map((post, index) => cardMarkup(post, postHref(post), (index + (showPinned ? 1 : 0)) % 4))
 						.join('')}</div>`
 				: '<div class="lite-empty">No posts found.</div>'
 		}

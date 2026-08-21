@@ -47,6 +47,7 @@ export default function Posts() {
 							}
 							icon={ICONS.drag}
 							iconLeftAlign
+							className={'reorder-posts-button'}
 						/>,
 						<Button
 							type={'alt1'}

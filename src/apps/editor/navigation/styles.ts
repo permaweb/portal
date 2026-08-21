@@ -137,7 +137,17 @@ export const PanelLink = styled.div<{ showText?: boolean; useFill?: boolean; dis
 			height: 17.5px;
 			width: 17.5px;
 			color: ${(props) => props.theme.colors.font.primary};
-			${(props) => props.useFill && `fill: ${props.theme.colors.font.primary};`}
+			fill: none !important;
+
+			[fill='none'] {
+				fill: none !important;
+			}
+
+			${(props) =>
+				props.useFill &&
+				`circle:not([fill]) {
+					fill: currentColor !important;
+				}`}
 		}
 		&:hover {
 			color: ${(props) => props.theme.colors.font.primary};
@@ -183,7 +193,15 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 			height: 17.5px;
 			width: 17.5px;
 			color: ${(props) => props.theme.colors.font.primary};
-			fill: ${(props) => props.theme.colors.font.primary};
+			fill: none !important;
+
+			[fill='none'] {
+				fill: none !important;
+			}
+
+			circle:not([fill]) {
+				fill: currentColor !important;
+			}
 		}
 		&:hover {
 			color: ${(props) => props.theme.colors.font.primary};
@@ -314,7 +332,7 @@ export const Portal = styled.button<{ active: boolean }>`
 		height: 18.5px;
 		width: 18.5px;
 		color: ${(props) => props.theme.colors.font.alt1};
-		fill: ${(props) => props.theme.colors.font.alt1};
+		fill: none !important;
 		position: absolute;
 		top: 50%;
 		right: 15px;
@@ -424,7 +442,11 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 			width: 17.5px;
 			margin: 2.5px 0 0 0;
 			color: ${(props) => props.theme.colors.font.alt1};
-			fill: ${(props) => props.theme.colors.font.alt1};
+			fill: none !important;
+
+			[fill='none'] {
+				fill: none !important;
+			}
 		}
 
 		img {
@@ -475,7 +497,11 @@ export const PDropdownAction = styled.div`
 			width: 17.5px;
 			margin: 2.5px 0 0 0;
 			color: ${(props) => props.theme.colors.font.alt1};
-			fill: ${(props) => props.theme.colors.font.alt1};
+			fill: none !important;
+
+			[fill='none'] {
+				fill: none !important;
+			}
 		}
 
 		img {
@@ -504,7 +530,7 @@ export const PIndicator = styled.div`
 		height: 10.5px !important;
 		width: 10.5px !important;
 		color: ${(props) => props.theme.colors.font.light1} !important;
-		fill: ${(props) => props.theme.colors.font.light1} !important;
+		fill: none !important;
 		margin: 0 0 0.5px 0 !important;
 
 		polyline {
@@ -538,7 +564,11 @@ export const PDropdownFooter = styled.div`
 			width: 16.5px;
 			margin: 5.5px 9.5px 0 0;
 			color: ${(props) => props.theme.colors.font.alt1};
-			fill: ${(props) => props.theme.colors.font.alt1};
+			fill: none !important;
+
+			[fill='none'] {
+				fill: none !important;
+			}
 		}
 		&:hover {
 			background: ${(props) => props.theme.colors.container.primary.active};
@@ -553,7 +583,7 @@ export const PDropdownWarning = styled(PDropdownFooter)`
 
 		svg {
 			color: ${(props) => props.theme.colors.warning.primary} !important;
-			fill: ${(props) => props.theme.colors.warning.primary} !important;
+			fill: none !important;
 		}
 	}
 `;

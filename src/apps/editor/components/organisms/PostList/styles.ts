@@ -41,6 +41,11 @@ export const PostsHeaderDetailsActions = styled.div`
 
 export const PostsHeaderFilterWrapper = styled.div`
 	position: relative;
+
+	.posts-filter-button svg,
+	.posts-filter-button svg * {
+		fill: none !important;
+	}
 `;
 
 export const PostsHeaderFilterDropdown = styled.div`
@@ -109,7 +114,7 @@ export const PostSortSelect = styled.div<{ dropdown: boolean }>`
 
 		span,
 		svg {
-			transition: color 100ms, fill 100ms;
+			transition: color 100ms;
 		}
 
 		&:hover,
@@ -120,7 +125,6 @@ export const PostSortSelect = styled.div<{ dropdown: boolean }>`
 			span,
 			svg {
 				color: ${(props) => props.theme.colors.font.alt1} !important;
-				fill: ${(props) => props.theme.colors.font.alt1} !important;
 			}
 		}
 	}

@@ -89,6 +89,10 @@ export const DragHandle = styled.button`
 		width: 16px;
 		height: 16px;
 		color: currentColor !important;
+		fill: none !important;
+	}
+
+	svg circle {
 		fill: currentColor !important;
 	}
 `;

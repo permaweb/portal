@@ -51,6 +51,12 @@ export const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
 
+  /* Preserve the fill intent declared by outline SVG assets. */
+  :root svg[fill='none'],
+  :root svg [fill='none'] {
+    fill: none !important;
+  }
+
   html, body {
     margin: 0;
     color-scheme: ${(props) => props.theme.scheme};

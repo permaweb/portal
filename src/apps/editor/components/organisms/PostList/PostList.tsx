@@ -292,6 +292,7 @@ export default function PostList(props: { type: ViewLayoutType; pageCount?: numb
 									}}
 									icon={ICONS.filter}
 									iconLeftAlign
+									className={'posts-filter-button'}
 								/>
 								{showFilterActions && (
 									<S.PostsHeaderFilterDropdown className={'border-wrapper-alt1 fade-in scroll-wrapper'}>
