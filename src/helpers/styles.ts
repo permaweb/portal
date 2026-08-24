@@ -57,6 +57,17 @@ export const GlobalStyle = createGlobalStyle`
     fill: none !important;
   }
 
+  /* Keep monochrome Arweave icon outlines tied to the component's theme color. */
+  svg.injected-svg[data-src^='https://arweave.net/'][stroke]:not([stroke='none']),
+  svg.injected-svg[data-src^='https://arweave.net/'] [stroke]:not([stroke='none']) {
+    stroke: currentColor !important;
+  }
+
+  svg.injected-svg[data-src^='https://arweave.net/'][fill='currentColor'],
+  svg.injected-svg[data-src^='https://arweave.net/'] [fill='currentColor'] {
+    fill: currentColor !important;
+  }
+
   html, body {
     margin: 0;
     color-scheme: ${(props) => props.theme.scheme};
@@ -298,7 +309,8 @@ export const GlobalStyle = createGlobalStyle`
     svg {
       width: 50px;
       height: auto;
-      fill: ${(props) => props.theme.colors.font.primary};
+      color: ${(props) => props.theme.colors.font.primary};
+      fill: currentColor;
     }
   }
 

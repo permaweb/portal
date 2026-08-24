@@ -376,11 +376,6 @@ export const DBodyWrapper = styled.ul`
 			width: 16.5px;
 			margin: 5.5px 9.5px 0 0;
 			color: ${(props) => props.theme.colors.font.alt1};
-			fill: none !important;
-
-			[fill='none'] {
-				fill: none !important;
-			}
 		}
 
 		&:hover {
@@ -471,11 +466,9 @@ export const AppearanceOption = styled.button`
 		width: 16.5px;
 		height: 16.5px;
 		color: ${(props) => props.theme.colors.font.alt1};
-		fill: none !important;
-
-		[fill='none'] {
-			fill: none !important;
-		}
+		stroke: currentColor;
+		stroke-linecap: round;
+		stroke-linejoin: round;
 	}
 
 	&:hover {

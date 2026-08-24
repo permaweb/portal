@@ -18,6 +18,9 @@ export const Wrapper = styled.div`
 
 export const WalletConnect = styled.div`
 	margin: 25px 0 0 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
 `;
 
 export const Icon = styled.div`

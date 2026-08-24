@@ -117,7 +117,8 @@ export const HomeTemplateOptionIcon = styled.div<{ $active: boolean }>`
 		width: 40px;
 		height: 40px;
 		opacity: ${(props) => (props.$active ? 1 : 0.5)};
-		fill: ${(props) => props.theme.colors.font.alt1};
+		color: ${(props) => props.theme.colors.font.alt1};
+		fill: currentColor;
 	}
 `;
 

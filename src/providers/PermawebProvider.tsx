@@ -21,9 +21,13 @@ interface PermawebContextState {
 	profile: Types.ProfileType;
 	profileLoading: boolean;
 	handleInitialProfileCache: (address: string, profileId: string) => void;
-	refreshProfile: () => void;
+	refreshProfile: (options?: RefreshProfileOptions) => Promise<void>;
 	setPortalRoles: (roles: string[]) => void;
 	fetchProfile?: (address: string) => Promise<Types.ProfileType | undefined>;
+}
+
+interface RefreshProfileOptions {
+	silent?: boolean;
 }
 
 const DEFAULT_CONTEXT = {
@@ -32,7 +36,7 @@ const DEFAULT_CONTEXT = {
 	profile: null,
 	profileLoading: false,
 	handleInitialProfileCache(_address: string, _profileId: string) {},
-	refreshProfile() {},
+	async refreshProfile() {},
 	setPortalRoles(_roles: string[]) {},
 };
 
@@ -174,22 +178,25 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [arProvider.walletAddress, profilePending]);
 
-	const refreshProfile = React.useCallback(async () => {
-		if (arProvider.wallet && arProvider.walletAddress) {
-			try {
-				const newProfile = await resolveProfile(arProvider.walletAddress);
-				if (newProfile?.id) {
-					setProfile(newProfile);
-					cacheProfile(arProvider.walletAddress, newProfile);
-					if (newProfile.id && !IS_BASE_MODE) {
-						cacheProfileById(newProfile.id, newProfile);
+	const refreshProfile = React.useCallback(
+		async (options: RefreshProfileOptions = {}) => {
+			if (arProvider.wallet && arProvider.walletAddress) {
+				try {
+					const newProfile = await resolveProfile(arProvider.walletAddress, options);
+					if (newProfile?.id) {
+						setProfile(newProfile);
+						cacheProfile(arProvider.walletAddress, newProfile);
+						if (newProfile.id && !IS_BASE_MODE) {
+							cacheProfileById(newProfile.id, newProfile);
+						}
 					}
+				} catch (error) {
+					console.error(error);
 				}
-			} catch (error) {
-				console.error(error);
 			}
-		}
-	}, [arProvider.wallet, arProvider.walletAddress, profile]);
+		},
+		[arProvider.wallet, arProvider.walletAddress, libs]
+	);
 
 	/* Determine if the current authority has changed and if it is present in the profile.
 		If it's not then add it to the profile authorities list
@@ -216,7 +223,10 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 		})();
 	}, [profile?.id, AO_NODE.authority, libs?.updateZoneAuthorities]);
 
-	async function resolveProfile(address: string): Promise<Types.ProfileType | undefined> {
+	async function resolveProfile(
+		address: string,
+		options: RefreshProfileOptions = {}
+	): Promise<Types.ProfileType | undefined> {
 		if (libs) {
 			const cachedProfile = getCachedProfile(address);
 			try {
@@ -235,7 +245,9 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				return profileToUse;
 			} catch (e: any) {
 				console.error(e);
-				addNotification(language?.errorGettingProfile ?? 'Error getting profile', 'warning');
+				if (!options.silent) {
+					addNotification(language?.errorGettingProfile ?? 'Error getting profile', 'warning');
+				}
 				return cachedProfile?.id ? normalizeProfile(cachedProfile) : undefined;
 			}
 		}

@@ -59,8 +59,11 @@ export const LogoWrapper = styled.div`
 	svg {
 		height: 25px;
 		width: 25px;
+		color: ${(props) => props.theme.colors.icon.primary.fill};
+		fill: currentColor;
 		&:hover {
-			fill: ${(props) => props.theme.colors.icon.primary.active};
+			color: ${(props) => props.theme.colors.icon.primary.active};
+			fill: currentColor;
 		}
 	}
 `;

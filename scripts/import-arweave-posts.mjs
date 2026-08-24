@@ -47,6 +47,7 @@ Options:
   --tag <value>            Topic/tag assigned to every post (repeatable, defaults to AO)
   --published-slug <slug>  Publish only these slugs and import all others as drafts (repeatable)
   --featured-slug <slug>   Set the imported post with this slug as the sole featured post
+  --replace-post <value>   Replace one existing Portal post by ID or slug with the sole new manifest post
   --gateway <url>          Read gateway (defaults to ${DEFAULT_GATEWAY})
   --upload-node <url>      Data-item upload node (defaults to ${DEFAULT_UPLOAD_NODE})
   --concurrency <count>    Concurrent downloads/uploads (defaults to 4)
@@ -63,6 +64,7 @@ export function parseArgs(argv) {
 		tags: [],
 		publishedSlugs: [],
 		featuredSlug: '',
+		replacePost: '',
 		gateway: DEFAULT_GATEWAY,
 		uploadNode: DEFAULT_UPLOAD_NODE,
 		concurrency: 4,
@@ -100,6 +102,10 @@ export function parseArgs(argv) {
 				if (options.featuredSlug) throw new Error('--featured-slug may only be specified once');
 				options.featuredSlug = nextValue();
 				break;
+			case '--replace-post':
+				if (options.replacePost) throw new Error('--replace-post may only be specified once');
+				options.replacePost = nextValue();
+				break;
 			case '--gateway':
 				options.gateway = nextValue();
 				break;
@@ -131,6 +137,7 @@ export function parseArgs(argv) {
 		...new Set(options.publishedSlugs.map((slug) => slug.trim().toLowerCase()).filter(Boolean)),
 	];
 	options.featuredSlug = options.featuredSlug.trim().toLowerCase();
+	options.replacePost = options.replacePost.trim();
 	options.gateway = options.gateway.replace(/\/+$/, '');
 	options.uploadNode = options.uploadNode.replace(/\/+$/, '');
 	if (!Number.isInteger(options.concurrency) || options.concurrency < 1 || options.concurrency > 16) {
@@ -491,7 +498,19 @@ export function buildPortalPost({
 	};
 }
 
-function postPayload(portalId, post, createdAt) {
+export function postPayload(portalId, post, createdAt, replacement = null) {
+	if (replacement) {
+		return {
+			schemaVersion: PORTAL_SCHEMA_VERSION,
+			type: 'portal-post',
+			mode: 'base',
+			portalId,
+			postId: replacement.id,
+			previousTxId: replacement.postTxId || replacement.id,
+			updatedAt: new Date().toISOString(),
+			post,
+		};
+	}
 	return {
 		schemaVersion: PORTAL_SCHEMA_VERSION,
 		type: 'portal-post',
@@ -503,7 +522,7 @@ function postPayload(portalId, post, createdAt) {
 	};
 }
 
-function postTags(portalId, walletAddress, manifestTxId, sourcePost) {
+function postTags(portalId, walletAddress, manifestTxId, sourcePost, replacement = null) {
 	return [
 		{ name: 'Content-Type', value: 'application/json; charset=utf-8' },
 		{ name: 'App-Name', value: 'Portal' },
@@ -515,6 +534,7 @@ function postTags(portalId, walletAddress, manifestTxId, sourcePost) {
 		{ name: 'Import-Manifest', value: manifestTxId },
 		{ name: 'Source-Post-Id', value: sourcePost.id },
 		{ name: 'Source-Post-Tx', value: sourcePost.postTxId },
+		...(replacement ? [{ name: 'Post-Id', value: replacement.id }] : []),
 	];
 }
 
@@ -731,6 +751,21 @@ async function prepareImport(options) {
 		(sourcePost) => !duplicatePost(portal.posts, sourcePost, manifestTxId)
 	);
 	const skipped = sourceManifest.posts.filter((sourcePost) => duplicatePost(portal.posts, sourcePost, manifestTxId));
+	let replacement = null;
+	if (options.replacePost) {
+		const identifier = options.replacePost.toLowerCase();
+		replacement = portal.posts.find(
+			(post) =>
+				post.id === options.replacePost ||
+				post.postTxId === options.replacePost ||
+				post.slug?.toLowerCase() === identifier ||
+				post.url?.toLowerCase() === identifier
+		);
+		if (!replacement) throw new Error(`Replacement Portal post not found: ${options.replacePost}`);
+		if (candidates.length !== 1) {
+			throw new Error(`--replace-post requires exactly one new manifest post; found ${candidates.length}`);
+		}
+	}
 	const prepared = await mapWithConcurrency(candidates, options.concurrency, async (sourcePost) => {
 		const markdown = await fetchText(
 			`${options.gateway}/raw/${sourcePost.postTxId}`,
@@ -750,12 +785,12 @@ async function prepareImport(options) {
 			manifestTxId,
 			publishedSlugs: options.publishedSlugs,
 		});
-		const payload = postPayload(options.portalId, post, post.publishedAt);
+		const payload = postPayload(options.portalId, post, post.publishedAt, replacement);
 		const serialized = JSON.stringify(payload);
 		if (Buffer.byteLength(serialized) > FREE_UPLOAD_LIMIT) {
 			throw new Error(`Converted post exceeds the free upload limit: ${sourcePost.title}`);
 		}
-		return { sourcePost, post, payload, serialized, blockCount: post.content.length };
+		return { sourcePost, post, payload, serialized, blockCount: post.content.length, replacement };
 	});
 
 	return {
@@ -781,6 +816,13 @@ function printPlan(plan, receiptPath, publish) {
 	console.log(`Posts skipped as existing: ${plan.skipped.length}`);
 	console.log(`Shared topics/tags: ${plan.prepared.length ? plan.prepared[0].post.topics.join(', ') : '(none)'}`);
 	console.log(`Featured slug: ${plan.featuredSlug || '(unchanged)'}`);
+	console.log(
+		`Replacement: ${
+			plan.prepared[0]?.replacement
+				? `${plan.prepared[0].replacement.title} (${plan.prepared[0].replacement.id})`
+				: '(none)'
+		}`
+	);
 	console.log(`Converted payload bytes: ${totalBytes}`);
 	console.log(`Receipt: ${receiptPath}`);
 	console.log(`Mode: ${publish ? 'LIVE PERMANENT UPLOAD' : 'DRY RUN'}`);
@@ -818,7 +860,7 @@ async function publishImport(plan, options, receiptPath) {
 		const postTxId = await uploadDataItem({
 			wallet: plan.wallet,
 			data: entry.serialized,
-			tags: postTags(plan.portal.portalId, plan.walletAddress, plan.manifestTxId, entry.sourcePost),
+			tags: postTags(plan.portal.portalId, plan.walletAddress, plan.manifestTxId, entry.sourcePost, entry.replacement),
 			uploadNode: options.uploadNode,
 		});
 		receipt.posts[entry.sourcePost.id] = {
@@ -834,9 +876,11 @@ async function publishImport(plan, options, receiptPath) {
 	});
 	await receiptWrites;
 
-	const upsert = Object.fromEntries(results.map((result) => [result.postTxId, result.postTxId]));
+	const upsert = Object.fromEntries(
+		results.map((result) => [result.replacement?.id || result.postTxId, result.postTxId])
+	);
 	const currentIds = plan.portal.posts.map((post) => post.id);
-	const order = [...currentIds, ...results.map((result) => result.postTxId)];
+	const order = [...currentIds, ...results.filter((result) => !result.replacement).map((result) => result.postTxId)];
 	const featuredPost = options.featuredSlug
 		? results.find((result) => result.sourcePost.slug.toLowerCase() === options.featuredSlug) ||
 		  plan.portal.posts.find((post) => (post.slug || post.url || '').toLowerCase() === options.featuredSlug)

@@ -21,6 +21,8 @@ import { WalletConnect } from 'wallet/WalletConnect';
 
 import * as S from './styles';
 
+const INVITE_POLL_INTERVAL_MS = 15_000;
+
 export default function Landing() {
 	const navigate = useNavigate();
 
@@ -34,6 +36,37 @@ export default function Landing() {
 	const [showInvites, setShowInvites] = React.useState<boolean>(false);
 	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 	const [pendingPortalId, setPendingPortalId] = React.useState<string | null>(null);
+
+	React.useEffect(() => {
+		if (!arProvider.walletAddress || !permawebProvider.profile?.id) return;
+
+		let stopped = false;
+		let requestInFlight = false;
+
+		async function pollInvites() {
+			if (stopped || requestInFlight || document.visibilityState === 'hidden') return;
+
+			requestInFlight = true;
+			try {
+				await permawebProvider.refreshProfile({ silent: true });
+			} finally {
+				requestInFlight = false;
+			}
+		}
+
+		const intervalId = window.setInterval(() => void pollInvites(), INVITE_POLL_INTERVAL_MS);
+		const handlePageActive = () => void pollInvites();
+
+		document.addEventListener('visibilitychange', handlePageActive);
+		window.addEventListener('focus', handlePageActive);
+
+		return () => {
+			stopped = true;
+			window.clearInterval(intervalId);
+			document.removeEventListener('visibilitychange', handlePageActive);
+			window.removeEventListener('focus', handlePageActive);
+		};
+	}, [arProvider.walletAddress, permawebProvider.profile?.id, permawebProvider.refreshProfile]);
 
 	/* Log in directly if the user's profile is the portal itself */
 	React.useEffect(() => {

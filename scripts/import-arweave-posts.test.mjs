@@ -7,6 +7,7 @@ import {
 	manifestTransactionId,
 	markdownToPortalBlocks,
 	parseArgs,
+	postPayload,
 	resolvePostCategories,
 	sourcePostStatus,
 } from './import-arweave-posts.mjs';
@@ -43,6 +44,31 @@ test('parses a featured slug independently from publication status', () => {
 	]);
 	assert.equal(options.featuredSlug, 'bazar-is-live-on-mainnet-1-0');
 	assert.deepEqual(options.publishedSlugs, []);
+});
+
+test('parses an existing post replacement target', () => {
+	const options = parseArgs([
+		'--manifest',
+		'YjaS3Q-5kJTNeygkXsy0d4Xnxkwk2bFcTQRNUJXJpRo',
+		'--portal',
+		'xq688x6oyBtrZTDCUPIlU9U2U-4j8u5pWpCfbAK4hrs',
+		'--wallet',
+		'/tmp/wallet.json',
+		'--replace-post',
+		'old-post',
+	]);
+	assert.equal(options.replacePost, 'old-post');
+});
+
+test('builds a post revision payload when replacing an existing post', () => {
+	const payload = postPayload('p'.repeat(43), { title: 'Canonical' }, '2026-08-24T00:00:00.000Z', {
+		id: 'i'.repeat(43),
+		postTxId: 't'.repeat(43),
+	});
+	assert.equal(payload.postId, 'i'.repeat(43));
+	assert.equal(payload.previousTxId, 't'.repeat(43));
+	assert.equal(payload.createdAt, undefined);
+	assert.equal(payload.post.title, 'Canonical');
 });
 
 test('extracts transaction IDs from raw gateway URLs', () => {

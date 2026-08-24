@@ -30,11 +30,7 @@ export const Wrapper = styled.div<{
 		width: ${(props) => `${props.dimensions.icon.toString()}px`};
 		padding: 2.5px 0 0 0px;
 		color: ${(props) => props.theme.colors.font.primary};
-		fill: none !important;
-
-		[fill='none'] {
-			fill: none !important;
-		}
+		fill: ${(props) => props.theme.colors.font.primary};
 	}
 
 	pointer-events: none;

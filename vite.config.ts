@@ -133,6 +133,8 @@ export default defineConfig(({ mode }) => {
 		],
 		resolve: {
 			alias: {
+				api: path.resolve(__dirname, 'src/api'),
+				assets: path.resolve(__dirname, 'src/assets'),
 				editor: path.resolve(__dirname, 'src/apps/editor'),
 				viewer: path.resolve(__dirname, 'src/apps/viewer'),
 				engine: path.resolve(__dirname, 'src/apps/engine'),

@@ -220,13 +220,14 @@ export const CopyIcon = styled.button<{
 	}
 
 	&:hover {
-		background: ${(props) => props.theme.colors.button.alt1.hover};
+		background: ${(props) => props.theme.colors.button.alt1.active.background};
 	}
 
 	svg {
 		height: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `17.5px`)};
 		width: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `17.5px`)};
-		fill: ${(props) => props.theme.colors.button.alt1.label};
+		color: ${(props) => props.theme.colors.button.alt1.color};
+		fill: currentColor;
 		position: absolute;
 		top: 50%;
 		left: 50%;
@@ -240,9 +241,10 @@ export const CopyIcon = styled.button<{
 
 	&:disabled {
 		background: ${(props) => props.theme.colors.button.alt1.disabled.background};
-		color: ${(props) => props.theme.colors.button.alt1.disabled.label};
+		color: ${(props) => props.theme.colors.button.alt1.disabled.color};
 		svg {
-			fill: ${(props) => props.theme.colors.button.alt1.disabled.label};
+			color: ${(props) => props.theme.colors.button.alt1.disabled.color};
+			fill: currentColor;
 		}
 	}
 `;

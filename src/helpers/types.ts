@@ -400,6 +400,7 @@ export type DefaultGQLResponseType = {
 export type BatchAGQLResponseType = { [queryKey: string]: DefaultGQLResponseType };
 
 export enum WalletEnum {
+	permawebOs = 'permaweb-os',
 	wander = 'wander',
 	nativeWallet = 'NATIVE_WALLET',
 }

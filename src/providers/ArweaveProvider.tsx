@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { connectBrowserWallet, restoreBrowserWallet } from 'api/wallet';
 
 import { STORAGE, URLS } from 'helpers/config';
 import { getARBalanceEndpoint, getTurboBalanceEndpoint } from 'helpers/endpoints';
@@ -112,7 +113,8 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		});
 
 		const onWalletSwitch = async () => {
-			if (disconnectingRef.current || !localStorage.getItem(STORAGE.walletType)) {
+			const activeWalletType = localStorage.getItem(STORAGE.walletType);
+			if (disconnectingRef.current || !activeWalletType) {
 				return;
 			}
 			setWalletInitializing(true);
@@ -138,7 +140,10 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 					const address = await window.arweaveWallet.getActiveAddress();
 					setWalletAddress(address);
 					setWallet(window.arweaveWallet);
-					if (window.arweaveWallet.walletName && window.arweaveWallet.walletName !== 'Wander Connect') {
+					if (activeWalletType === WalletEnum.permawebOs) {
+						setWalletType(WalletEnum.permawebOs);
+						localStorage.setItem(STORAGE.walletType, WalletEnum.permawebOs);
+					} else if (window.arweaveWallet.walletName && window.arweaveWallet.walletName !== 'Wander Connect') {
 						setWalletType('NATIVE_WALLET' as WalletEnum);
 						localStorage.setItem(STORAGE.walletType, 'NATIVE_WALLET');
 					} else if (window?.wanderInstance?.authInfo?.authType) {
@@ -165,12 +170,14 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		};
 
 		window.addEventListener('arweaveWalletLoaded', onArweaveWalletLoaded);
+		window.addEventListener('permawebConnectLoaded', onArweaveWalletLoaded);
 		window.addEventListener('message', onMessage);
 		window.addEventListener('walletSwitch', onWalletSwitch);
 
 		return () => {
 			mounted = false;
 			window.removeEventListener('arweaveWalletLoaded', onArweaveWalletLoaded);
+			window.removeEventListener('permawebConnectLoaded', onArweaveWalletLoaded);
 			window.removeEventListener('message', onMessage);
 			window.removeEventListener('walletSwitch', onWalletSwitch);
 		};
@@ -191,9 +198,19 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	}, [auth]);
 
 	async function handleWallet() {
-		if (localStorage.getItem(STORAGE.walletType)) {
+		const storedWalletType = localStorage.getItem(STORAGE.walletType);
+		if (storedWalletType) {
 			try {
-				await handleConnect(localStorage.getItem(STORAGE.walletType) as any);
+				if (storedWalletType === WalletEnum.permawebOs) {
+					const connection = await restoreBrowserWallet(window, WalletEnum.permawebOs, WALLET_PERMISSIONS);
+					if (!connection) return;
+					window.arweaveWallet = connection.wallet as any;
+					setWallet(connection.wallet);
+					setWalletAddress(connection.address);
+					setWalletType(WalletEnum.permawebOs);
+					return;
+				}
+				await handleConnect(storedWalletType);
 			} catch (e: any) {
 				console.error(e);
 			}
@@ -206,8 +223,11 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 		let walletObj: any = null;
 		try {
 			switch (walletType) {
+				case WalletEnum.permawebOs:
+					await handleBrowserWallet(WalletEnum.permawebOs);
+					break;
 				case WalletEnum.wander:
-					await handleArConnect();
+					await handleBrowserWallet(WalletEnum.wander);
 					break;
 				case 'NATIVE_WALLET':
 					await handleArConnect();
@@ -217,6 +237,24 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 			setWalletInitializing(false);
 		}
 		return walletObj;
+	}
+
+	async function handleBrowserWallet(walletType: WalletEnum.permawebOs | WalletEnum.wander) {
+		if (disconnectingRef.current || walletAddressRef.current) return;
+		try {
+			const connection = await connectBrowserWallet(window, walletType, WALLET_PERMISSIONS);
+			window.arweaveWallet = connection.wallet as any;
+			setWalletAddress(connection.address);
+			setWallet(connection.wallet);
+			setWalletType(walletType);
+			localStorage.setItem(STORAGE.walletType, walletType);
+		} catch (e: any) {
+			debugLog('error', 'ArweaveProvider', 'Browser wallet connection error:', e.message ?? 'Unknown error');
+			localStorage.removeItem(STORAGE.walletType);
+			setWallet(null);
+			setWalletAddress(null);
+			setWalletType(null);
+		}
 	}
 
 	async function handleArConnect() {
@@ -263,7 +301,10 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 	async function handleDisconnect(redirect: boolean) {
 		disconnectingRef.current = true;
 		const isNativeWallet =
-			walletType === 'NATIVE_WALLET' || localStorage.getItem(STORAGE.walletType) === 'NATIVE_WALLET';
+			walletType === 'NATIVE_WALLET' ||
+			walletType === WalletEnum.permawebOs ||
+			localStorage.getItem(STORAGE.walletType) === 'NATIVE_WALLET' ||
+			localStorage.getItem(STORAGE.walletType) === WalletEnum.permawebOs;
 
 		if (localStorage.getItem(STORAGE.walletType)) {
 			localStorage.removeItem(STORAGE.walletType);
@@ -271,8 +312,8 @@ export function ArweaveProvider(props: { children: React.ReactNode }) {
 
 		if (isNativeWallet) {
 			try {
-				if (window.arweaveWallet?.disconnect) {
-					await window.arweaveWallet.disconnect();
+				if (wallet?.disconnect) {
+					await wallet.disconnect();
 				}
 			} catch (e) {
 				console.error('Error disconnecting from native wallet:', e);

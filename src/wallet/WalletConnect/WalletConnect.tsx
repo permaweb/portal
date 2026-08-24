@@ -19,6 +19,7 @@ import {
 	refreshPendingTransactions,
 	subscribeToPendingTransactions,
 } from 'helpers/pendingTransactions';
+import { WalletEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
@@ -86,6 +87,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 	const [showWallet, _setShowWallet] = React.useState<boolean>(true);
 	const [showProfileManager, setShowProfileManager] = React.useState<boolean>(false);
 	const [showWalletDropdown, setShowWalletDropdown] = React.useState<boolean>(false);
+	const [showWalletSelector, setShowWalletSelector] = React.useState<boolean>(false);
 	const [showPendingDropdown, setShowPendingDropdown] = React.useState<boolean>(false);
 	const [pendingTransactions, setPendingTransactions] = React.useState<PendingTransaction[]>([]);
 	const [showThemeSelector, setShowThemeSelector] = React.useState<boolean>(false);
@@ -208,7 +210,7 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 			}
 		} else {
 			// Not connected
-			setLabel(FEATURES.WANDER_EMBEDDED_AUTH ? 'Log in' : 'Connect Wander');
+			setLabel(FEATURES.WANDER_EMBEDDED_AUTH ? 'Log in' : 'Connect Wallet');
 		}
 	}, [showWallet, arProvider.walletAddress, permawebProvider.profile, language, auth]);
 
@@ -216,17 +218,24 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 		if ((auth?.authStatus === 'authenticated' || arProvider.walletAddress) && arProvider.walletAddress) {
 			setShowPendingDropdown(false);
 			setShowWalletDropdown(!showWalletDropdown);
-		} else if (FEATURES.WANDER_EMBEDDED_AUTH && window.wanderInstance) {
-			window.wanderInstance.open();
 		} else {
-			void arProvider.handleConnect('NATIVE_WALLET');
+			setShowWalletSelector(true);
 		}
+	}
+
+	function handleWalletChoice(walletType: WalletEnum.permawebOs | WalletEnum.wander) {
+		setShowWalletSelector(false);
+		if (walletType === WalletEnum.wander && FEATURES.WANDER_EMBEDDED_AUTH && window.wanderInstance) {
+			window.wanderInstance.open();
+			return;
+		}
+		void arProvider.handleConnect(walletType);
 	}
 
 	function handleDisconnect() {
 		const doRedirect = props.app === 'editor';
 		arProvider.handleDisconnect(doRedirect);
-		setLabel(FEATURES.WANDER_EMBEDDED_AUTH ? 'Log in' : 'Connect Wander');
+		setLabel(FEATURES.WANDER_EMBEDDED_AUTH ? 'Log in' : 'Connect Wallet');
 		setShowWalletDropdown(false);
 		setShowPendingDropdown(false);
 		if (props.callback) {
@@ -431,6 +440,22 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 					)}
 				</CloseHandler>
 			</S.Wrapper>
+			<Panel
+				open={showWalletSelector}
+				header={'Connect Wallet'}
+				handleClose={() => setShowWalletSelector(false)}
+				width={430}
+			>
+				<S.MWrapper className={'modal-wrapper'}>
+					<Button
+						type={'alt1'}
+						label={'PermawebOS'}
+						handlePress={() => handleWalletChoice(WalletEnum.permawebOs)}
+						fullWidth
+					/>
+					<Button type={'alt1'} label={'Wander'} handlePress={() => handleWalletChoice(WalletEnum.wander)} fullWidth />
+				</S.MWrapper>
+			</Panel>
 			<Panel
 				open={PORTAL_CAPABILITIES.PROFILE_EDIT && showProfileManager}
 				header={permawebProvider.profile?.id ? language?.editProfile : `${language?.createProfile}!`}

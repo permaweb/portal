@@ -1,4 +1,5 @@
 import { ReactSVG } from 'react-svg';
+import permawebOsIcon from 'assets/permawebos.svg';
 
 import { Button } from 'components/atoms/Button';
 import { ICONS } from 'helpers/config';
@@ -21,6 +22,14 @@ export default function WalletBlock() {
 			</S.Icon>
 			<p>{language?.connectToContinue}</p>
 			<S.WalletConnect>
+				<Button
+					type={'alt1'}
+					label={'Connect PermawebOS'}
+					icon={permawebOsIcon}
+					iconLeftAlign
+					handlePress={() => arProvider.handleConnect(WalletEnum.permawebOs)}
+					disabled={auth?.authStatus === 'loading'}
+				/>
 				<Button
 					type={'alt1'}
 					label={auth?.authStatus === 'loading' ? language.loading : 'Connect Wander'}

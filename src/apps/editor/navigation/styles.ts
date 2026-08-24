@@ -137,17 +137,7 @@ export const PanelLink = styled.div<{ showText?: boolean; useFill?: boolean; dis
 			height: 17.5px;
 			width: 17.5px;
 			color: ${(props) => props.theme.colors.font.primary};
-			fill: none !important;
-
-			[fill='none'] {
-				fill: none !important;
-			}
-
-			${(props) =>
-				props.useFill &&
-				`circle:not([fill]) {
-					fill: currentColor !important;
-				}`}
+			${(props) => props.useFill && `fill: ${props.theme.colors.font.primary};`}
 		}
 		&:hover {
 			color: ${(props) => props.theme.colors.font.primary};
@@ -193,15 +183,7 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 			height: 17.5px;
 			width: 17.5px;
 			color: ${(props) => props.theme.colors.font.primary};
-			fill: none !important;
-
-			[fill='none'] {
-				fill: none !important;
-			}
-
-			circle:not([fill]) {
-				fill: currentColor !important;
-			}
+			fill: ${(props) => props.theme.colors.font.primary};
 		}
 		&:hover {
 			color: ${(props) => props.theme.colors.font.primary};
@@ -271,9 +253,11 @@ export const LogoWrapper = styled.div`
 	svg {
 		height: 30px;
 		width: 30px;
-		fill: ${(props) => props.theme.colors.icon.alt2.fill};
+		color: ${(props) => props.theme.colors.icon.alt2.fill};
+		fill: currentColor;
 		&:hover {
-			fill: ${(props) => props.theme.colors.icon.alt2.active};
+			color: ${(props) => props.theme.colors.icon.alt2.active};
+			fill: currentColor;
 			opacity: 0.85;
 		}
 	}
@@ -332,7 +316,7 @@ export const Portal = styled.button<{ active: boolean }>`
 		height: 18.5px;
 		width: 18.5px;
 		color: ${(props) => props.theme.colors.font.alt1};
-		fill: none !important;
+		fill: ${(props) => props.theme.colors.font.alt1};
 		position: absolute;
 		top: 50%;
 		right: 15px;
@@ -442,11 +426,7 @@ export const PDropdownLink = styled.div<{ active: boolean }>`
 			width: 17.5px;
 			margin: 2.5px 0 0 0;
 			color: ${(props) => props.theme.colors.font.alt1};
-			fill: none !important;
-
-			[fill='none'] {
-				fill: none !important;
-			}
+			fill: ${(props) => props.theme.colors.font.alt1};
 		}
 
 		img {
@@ -497,11 +477,7 @@ export const PDropdownAction = styled.div`
 			width: 17.5px;
 			margin: 2.5px 0 0 0;
 			color: ${(props) => props.theme.colors.font.alt1};
-			fill: none !important;
-
-			[fill='none'] {
-				fill: none !important;
-			}
+			fill: ${(props) => props.theme.colors.font.alt1};
 		}
 
 		img {
@@ -530,7 +506,7 @@ export const PIndicator = styled.div`
 		height: 10.5px !important;
 		width: 10.5px !important;
 		color: ${(props) => props.theme.colors.font.light1} !important;
-		fill: none !important;
+		fill: ${(props) => props.theme.colors.font.light1} !important;
 		margin: 0 0 0.5px 0 !important;
 
 		polyline {
@@ -564,11 +540,7 @@ export const PDropdownFooter = styled.div`
 			width: 16.5px;
 			margin: 5.5px 9.5px 0 0;
 			color: ${(props) => props.theme.colors.font.alt1};
-			fill: none !important;
-
-			[fill='none'] {
-				fill: none !important;
-			}
+			fill: ${(props) => props.theme.colors.font.alt1};
 		}
 		&:hover {
 			background: ${(props) => props.theme.colors.container.primary.active};
@@ -583,7 +555,7 @@ export const PDropdownWarning = styled(PDropdownFooter)`
 
 		svg {
 			color: ${(props) => props.theme.colors.warning.primary} !important;
-			fill: none !important;
+			fill: ${(props) => props.theme.colors.warning.primary} !important;
 		}
 	}
 `;
@@ -647,7 +619,8 @@ export const PHeader = styled.div`
 	padding: 10px 15px;
 	border-bottom: 1px solid ${(props) => props.theme.colors.border.primary};
 	svg {
-		fill: ${(props) => props.theme.colors.icon.primary.fill};
+		color: ${(props) => props.theme.colors.icon.primary.fill};
+		fill: currentColor;
 	}
 	h4 {
 		font-size: ${(props) => props.theme.typography.size.lg};

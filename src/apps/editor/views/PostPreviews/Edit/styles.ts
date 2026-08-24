@@ -216,7 +216,8 @@ export const DropIndicator = styled.div`
 	svg {
 		width: 16px;
 		height: 16px;
-		fill: ${(props) => props.theme.colors.button.alt1.background};
+		color: ${(props) => props.theme.colors.button.alt1.background};
+		fill: currentColor;
 	}
 
 	span {
@@ -463,7 +464,8 @@ export const DragHandle = styled.div`
 	svg {
 		width: 10px;
 		height: 10px;
-		fill: ${(props) => props.theme.colors.font.alt2};
+		color: ${(props) => props.theme.colors.font.alt2};
+		fill: currentColor;
 	}
 `;
 
@@ -478,7 +480,8 @@ export const BlockContent = styled.div<{ $type?: string }>`
 	svg {
 		width: 24px;
 		height: 24px;
-		fill: ${(props) => props.theme.colors.font.alt2};
+		color: ${(props) => props.theme.colors.font.alt2};
+		fill: currentColor;
 	}
 `;
 
@@ -511,7 +514,8 @@ export const BlockPreviewHeader = styled.div`
 	svg {
 		width: 12px;
 		height: 12px;
-		fill: ${(props) => props.theme.colors.font.alt1};
+		color: ${(props) => props.theme.colors.font.alt1};
+		fill: currentColor;
 	}
 `;
 
