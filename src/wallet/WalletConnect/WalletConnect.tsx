@@ -250,6 +250,11 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 		window.setTimeout(() => setAddressCopied(false), 2000);
 	}
 
+	function handleOpenWallet() {
+		arProvider.handleOpenWallet();
+		setShowWalletDropdown(false);
+	}
+
 	function handleEditorAppearance(appearance: EditorAppearance) {
 		if (appearance === 'system') {
 			updateSettings('syncWithSystem', true as any);
@@ -362,6 +367,12 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 								</S.DBalanceBody>
 							</S.DBalanceWrapper>
 							<S.DBodyWrapper>
+								{arProvider.isEmbeddedWallet && (
+									<li onClick={handleOpenWallet}>
+										<ReactSVG src={ICONS.wallet} />
+										{language?.openWallet}
+									</li>
+								)}
 								<li onClick={() => void handleCopyAddress()}>
 									<CopyAddressIcon />
 									{addressCopied ? 'Copied!' : 'Copy Address'}
