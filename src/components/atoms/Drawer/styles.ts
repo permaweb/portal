@@ -8,7 +8,7 @@ export const Wrapper = styled.div``;
 export const Action = styled.div<{ open: boolean; noContentWrapper?: boolean; sm?: boolean }>`
 	width: 100%;
 	transition: all 100ms;
-	background: ${(props) => props.theme.colors.button.primary.background};
+	background: ${(props) => props.theme.colors.container.alt1.background};
 	border-top-left-radius: calc(${STYLING.dimensions.radius.alt2} - 1.5px);
 	border-top-right-radius: calc(${STYLING.dimensions.radius.alt2} - 1.5px);
 	border-bottom-left-radius: ${(props) => (props.open ? '0' : `calc(${STYLING.dimensions.radius.alt2} - 1.5px)`)};

@@ -13,6 +13,20 @@ export const Wrapper = styled.div`
 	}
 `;
 
+export const OutlineIcon = styled.svg`
+	display: block;
+	fill: none !important;
+	stroke: currentColor !important;
+	stroke-width: 1.75;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+
+	> * {
+		fill: none !important;
+		stroke: currentColor !important;
+	}
+`;
+
 export const PWrapper = styled.div`
 	display: flex;
 	align-items: center;

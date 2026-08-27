@@ -135,6 +135,7 @@ export default defineConfig(({ mode }) => {
 			alias: {
 				api: path.resolve(__dirname, 'src/api'),
 				assets: path.resolve(__dirname, 'src/assets'),
+				globalthis: path.resolve(__dirname, 'src/helpers/globalthis.ts'),
 				editor: path.resolve(__dirname, 'src/apps/editor'),
 				viewer: path.resolve(__dirname, 'src/apps/viewer'),
 				engine: path.resolve(__dirname, 'src/apps/engine'),
