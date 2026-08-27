@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
 
+import type { BrowserWallet } from 'api/wallet';
+
 import 'styled-components';
 
 interface ImportMetaEnv {
@@ -11,6 +13,7 @@ interface ImportMetaEnv {
 	readonly VITE_ENABLE_PAYMENTS?: string;
 	readonly VITE_ENABLE_UPLOADS?: string;
 	readonly VITE_ENABLE_WANDER_AUTH?: string;
+	readonly VITE_PERMAWEBOS_WALLET_URL?: string;
 }
 
 declare module 'styled-components' {
@@ -55,7 +58,7 @@ declare module '*.svg' {
 declare global {
 	interface Window {
 		arweaveWallet: any;
-		permawebConnect?: any;
+		permawebConnect?: BrowserWallet;
 		wanderInstance: any;
 	}
 }

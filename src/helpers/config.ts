@@ -93,6 +93,7 @@ export const TIP_TOKEN_OPTIONS = [
 ];
 
 export const IS_TESTNET = import.meta.env.VITE_ARIO_TESTNET === 'true';
+export const PERMAWEBOS_WALLET_URL = import.meta.env.VITE_PERMAWEBOS_WALLET_URL || 'http://localhost:5173/';
 
 export const ASSET_UPLOAD = {
 	ansType: 'blog-post',
@@ -121,6 +122,9 @@ export const STORAGE = {
 };
 
 export const STYLING = {
+	layers: {
+		embeddedWallet: 10000001,
+	},
 	cutoffs: {
 		desktop: '1250px',
 		initial: '1024px',
@@ -134,6 +138,14 @@ export const STYLING = {
 		button: {
 			height: '33.5px',
 			width: 'fit-content',
+		},
+		embeddedWallet: {
+			border: '1px',
+			errorPadding: '20px',
+			panelMaxWidth: '390px',
+			transitionDuration: '100ms',
+			viewportPadding: '20px',
+			viewportPaddingTotal: '40px',
 		},
 		form: {
 			small: '42.5px',

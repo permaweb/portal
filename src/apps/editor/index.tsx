@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { HashRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { EmbeddedWallet } from 'features/embeddedWallet';
 import { PersistGate } from 'redux-persist/integration/react';
 
 import { CurrentZoneVersion } from '@permaweb/libs';
@@ -228,6 +229,7 @@ function AppContent() {
 	return (
 		<>
 			<WanderInit />
+			<EmbeddedWallet />
 			<div id={DOM.loader} />
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />

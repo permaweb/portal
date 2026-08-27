@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { HashRouter, Route, Routes } from 'react-router-dom';
+import { EmbeddedWallet } from 'features/embeddedWallet';
 
 import { Footer } from 'viewer/navigation/footer';
 import { Header } from 'viewer/navigation/header';
@@ -84,6 +85,7 @@ function App() {
 
 	return (
 		<>
+			<EmbeddedWallet />
 			<div id={DOM.loader} />
 			<div id={DOM.notification} />
 			<div id={DOM.overlay} />

@@ -140,6 +140,7 @@ export default defineConfig(({ mode }) => {
 				engine: path.resolve(__dirname, 'src/apps/engine'),
 				'engine-lite': path.resolve(__dirname, 'src/apps/engine-lite'),
 				components: path.resolve(__dirname, 'src/components'),
+				features: path.resolve(__dirname, 'src/features'),
 				helpers: path.resolve(__dirname, 'src/helpers'),
 				hooks: path.resolve(__dirname, 'src/hooks'),
 				providers: path.resolve(__dirname, 'src/providers'),
