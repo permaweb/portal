@@ -133,6 +133,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const authoritiesRef = React.useRef(false);
 	const patchMapRef = React.useRef(false);
 	const portalsRequestRef = React.useRef(0);
+	const portalHeadersRef = React.useRef(new Map<string, PortalHeaderType>());
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
 	const [invites, setInvites] = React.useState<PortalHeaderType[] | null>(null);
@@ -174,6 +175,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		setCurrent(null);
 		setPortals(null);
 		portalsRequestRef.current += 1;
+		portalHeadersRef.current.clear();
 		if (!arProvider.walletAddress) {
 			setPermissions(null);
 		}
@@ -183,14 +185,48 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		if (permawebProvider.profile?.id) {
 			const requestId = ++portalsRequestRef.current;
 			const profilePortals = permawebProvider.profile?.portals ?? [];
+			const routePortalId = location.pathname.split('/').filter(Boolean)[0] || null;
+			// Profile data is enough for portal cards. External user lists are only needed
+			// while composing a cross-portal post, so avoid loading every portal on home.
+			const hydrateExternalPortalUsers = /\/post\/(?:create|edit)(?:\/|$)/.test(location.pathname);
+			const portalHeaders = profilePortals.map((portal: PortalHeaderType) => {
+				const hydrated = portalHeadersRef.current.get(portal.id);
+				const cached = getCachedPortal(portal.id);
+				return {
+					...cached,
+					...hydrated,
+					...portal,
+					name: portal.name ?? hydrated?.name ?? cached?.name ?? 'None',
+					logo: portal.logo ?? portal.banner ?? hydrated?.logo ?? cached?.logo ?? null,
+					icon: portal.icon ?? portal.thumbnail ?? hydrated?.icon ?? cached?.icon ?? null,
+					users: portal.users?.length
+						? portal.users
+						: portal.roles?.length
+						? portal.roles
+						: hydrated?.users ?? cached?.users ?? [],
+				};
+			});
 
-			setPortals(profilePortals);
+			setPortals(portalHeaders);
 			setInvites(permawebProvider.profile?.invites ?? []);
 
-			if (profilePortals.length > 0) {
+			const headersToHydrate = hydrateExternalPortalUsers
+				? portalHeaders.filter(
+						(portal: PortalHeaderType) =>
+							portal.id !== routePortalId &&
+							!portalHeadersRef.current.has(portal.id) &&
+							!portal.users?.length &&
+							!portal.roles?.length
+				  )
+				: [];
+
+			if (headersToHydrate.length > 0) {
 				(async () => {
-					const updated = await Promise.all(
-						profilePortals.map(async (portal: PortalHeaderType) => {
+					const updated: PortalHeaderType[] = [];
+					let cursor = 0;
+					const workers = Array.from({ length: Math.min(2, headersToHydrate.length) }, async () => {
+						while (cursor < headersToHydrate.length) {
+							const portal = headersToHydrate[cursor++];
 							try {
 								const response = fixBooleanStrings(
 									permawebProvider.libs.mapFromProcessCase(
@@ -204,11 +240,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								let users: any = {};
 								if (response?.users) users = parseField(PortalPatchMapEnum.Users, response);
 
-								let transfers: any = {};
-								if (response?.transfers) {
-									transfers = parseField(PortalPatchMapEnum.Transfers, response);
-								}
-								return {
+								const hydrated = {
 									...portal,
 									engineReferenceId:
 										overview.engineReference ?? overview.store?.engineReference ?? portal.engineReferenceId ?? null,
@@ -216,8 +248,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 									logo: overview.banner ?? overview.logo ?? overview.store?.logo ?? 'None',
 									icon: overview.thumbnail ?? overview.icon ?? overview.store?.icon ?? 'None',
 									users: users.users ?? getPortalUsers(users.roles),
-									transfers: transfers.transfers ?? [],
 								};
+								portalHeadersRef.current.set(portal.id, hydrated);
+								updated.push(hydrated);
 							} catch (e) {
 								debugLog(
 									'warn',
@@ -227,20 +260,29 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 								);
 								const cached = getCachedPortal(portal.id);
 								if (cached) {
-									return {
+									const hydrated = {
 										...portal,
 										name: cached.name ?? portal.name ?? 'None',
 										logo: cached.logo ?? portal.logo ?? 'None',
 										icon: cached.icon ?? portal.icon ?? 'None',
 										users: cached.users ?? portal.roles ?? [],
-										transfers: cached.transfers ?? [],
 									};
+									portalHeadersRef.current.set(portal.id, hydrated);
+									updated.push(hydrated);
+									continue;
 								}
-								return portal;
+								updated.push(portal);
 							}
-						})
-					);
-					if (portalsRequestRef.current === requestId) setPortals(updated);
+						}
+					});
+					await Promise.all(workers);
+					if (portalsRequestRef.current === requestId) {
+						const hydratedById = new Map(updated.map((portal) => [portal.id, portal]));
+						setPortals(
+							(currentPortals) =>
+								currentPortals?.map((portal) => hydratedById.get(portal.id) ?? portal) ?? currentPortals
+						);
+					}
 				})();
 			}
 		}
@@ -249,6 +291,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		permawebProvider.profile?.id,
 		permawebProvider.profile?.portals,
 		permawebProvider.profile?.invites,
+		location.pathname,
 	]);
 
 	React.useEffect(() => {
@@ -502,6 +545,25 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			}
 
 			cachePortal(idToFetch, portalState);
+			const portalHeader: PortalHeaderType = {
+				...(portalHeadersRef.current.get(idToFetch) || {}),
+				id: idToFetch,
+				name: portalState.name,
+				mode: portalState.mode,
+				manifestTxId: portalState.manifestTxId,
+				rootTxId: portalState.rootTxId,
+				siteTxId: portalState.siteTxId,
+				engineReferenceId: portalState.engineReferenceId,
+				logo: portalState.logo,
+				icon: portalState.icon,
+				users: portalState.users,
+			};
+			portalHeadersRef.current.set(idToFetch, portalHeader);
+			setPortals(
+				(currentPortals) =>
+					currentPortals?.map((portal) => (portal.id === idToFetch ? { ...portal, ...portalHeader } : portal)) ??
+					currentPortals
+			);
 			setCurrent(portalState);
 			if (opts?.portalId) {
 				setCurrentId(idToFetch);
