@@ -21,7 +21,7 @@ import { WalletConnect } from 'wallet/WalletConnect';
 
 import * as S from './styles';
 
-const INVITE_POLL_INTERVAL_MS = 15_000;
+const INVITE_POLL_INTERVAL_MS = 60_000;
 
 export default function Landing() {
 	const navigate = useNavigate();
@@ -42,11 +42,19 @@ export default function Landing() {
 
 		let stopped = false;
 		let requestInFlight = false;
+		let lastRequestAt = Date.now();
 
 		async function pollInvites() {
-			if (stopped || requestInFlight || document.visibilityState === 'hidden') return;
+			if (
+				stopped ||
+				requestInFlight ||
+				document.visibilityState === 'hidden' ||
+				Date.now() - lastRequestAt < INVITE_POLL_INTERVAL_MS
+			)
+				return;
 
 			requestInFlight = true;
+			lastRequestAt = Date.now();
 			try {
 				await permawebProvider.refreshProfile({ silent: true });
 			} finally {
