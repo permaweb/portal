@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
 	buildPortalPost,
+	canAdministerPortal,
 	extractMarkdownBody,
 	manifestTransactionId,
 	markdownToPortalBlocks,
@@ -11,6 +12,23 @@ import {
 	resolvePostCategories,
 	sourcePostStatus,
 } from './import-arweave-posts.mjs';
+
+test('allows Portal owners and admins to run an import', () => {
+	const owner = 'o'.repeat(43);
+	const admin = 'a'.repeat(43);
+	const contributor = 'c'.repeat(43);
+	const portal = {
+		owner,
+		users: [
+			{ address: admin, roles: ['Admin'] },
+			{ address: contributor, roles: ['Contributor'] },
+		],
+	};
+
+	assert.equal(canAdministerPortal(portal, owner), true);
+	assert.equal(canAdministerPortal(portal, admin), true);
+	assert.equal(canAdministerPortal(portal, contributor), false);
+});
 
 test('parses the importer arguments and defaults every post to the AO tag', () => {
 	const options = parseArgs([

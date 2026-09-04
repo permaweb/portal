@@ -398,6 +398,12 @@ function portalTopicValues(topics) {
 		.filter((topic) => typeof topic === 'string');
 }
 
+export function canAdministerPortal(portal, walletAddress) {
+	if (portal.owner === walletAddress) return true;
+	const roles = portal.users?.find((user) => user?.address === walletAddress)?.roles;
+	return Array.isArray(roles) && roles.includes('Admin');
+}
+
 export function resolvePostCategories(sourceCategories, portalCategories) {
 	const flattened = flattenCategories(portalCategories);
 	return (sourceCategories || []).map((sourceCategory) => {
@@ -738,7 +744,9 @@ async function prepareImport(options) {
 	}
 	if (portal.portalId !== options.portalId || portal.mode !== 'base')
 		throw new Error('The target is not a base-mode Portal');
-	if (portal.owner !== walletAddress) throw new Error('The supplied wallet does not own the target Portal');
+	if (!canAdministerPortal(portal, walletAddress)) {
+		throw new Error('The supplied wallet is not an owner or admin of the target Portal');
+	}
 	assertAddress(portal.rootTxId, 'Portal root');
 	assertAddress(portal.headTxId, 'Portal head');
 
