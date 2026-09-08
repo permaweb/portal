@@ -210,7 +210,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 		}
 
 		font-size: 15px;
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		color: ${(props) => props.theme.colors.font.alt1};
 
 		li {
@@ -219,7 +219,7 @@ export const Element = styled.div<{ blockEditMode: boolean; type: ArticleBlockEn
 			font-size: 15px;
 
 			&::marker {
-				font-weight: ${(props) => props.theme.typography.weight.bold};
+				font-weight: ${(props) => props.theme.typography.weight.medium};
 				color: ${(props) => props.theme.colors.font.alt1};
 			}
 
@@ -341,7 +341,7 @@ export const EToolbarHeader = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		display: block;
 		white-space: nowrap;
@@ -404,6 +404,13 @@ export const SelectionWrapper = styled.div`
 
 		&:hover {
 			background: ${(props) => props.theme.colors.link.active} !important;
+			span,
+			svg {
+				color: ${(props) => props.theme.colors.font.light1} !important;
+			}
+			svg {
+				fill: ${(props) => props.theme.colors.font.light1} !important;
+			}
 		}
 	}
 `;

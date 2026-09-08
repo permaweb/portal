@@ -105,7 +105,7 @@ export const GroupName = styled.p`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	font-size: ${(props) => props.theme.typography.size.small};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	text-overflow: ellipsis;
 	white-space: nowrap;
 `;
@@ -115,7 +115,7 @@ export const PostCount = styled.span`
 	padding: 3px 7px;
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	text-align: center;
 	background: ${(props) => props.theme.colors.container.alt1.background};
 	border-radius: ${STYLING.dimensions.radius.alt3};
@@ -126,7 +126,7 @@ export const PostTitle = styled.p`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	font-size: ${(props) => props.theme.typography.size.xSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	text-overflow: ellipsis;
 	white-space: nowrap;
 `;
@@ -134,7 +134,7 @@ export const PostTitle = styled.p`
 export const Status = styled.span`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	text-transform: uppercase;
 
 	@media (max-width: 520px) {

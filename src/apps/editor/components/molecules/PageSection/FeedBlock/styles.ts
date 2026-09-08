@@ -34,7 +34,7 @@ export const CategoryHeader = styled.div<{ layout: string }>`
 		color: ${(props) => (props.layout === 'blog' ? props.theme.colors.font.alt1 : props.theme.colors.font.primary)};
 		font-size: ${(props) =>
 			props.layout === 'blog' ? props.theme.typography.size.xSmall : props.theme.typography.size.xxxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 	}
 `;
@@ -63,7 +63,7 @@ export const PostInfo = styled.div<{ layout: string }>`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) =>
 			props.layout === 'blog' ? props.theme.typography.size.xLg : props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) =>
 			props.layout === 'blog' ? props.theme.typography.family.alt1 : props.theme.typography.family.primary};
 	}
@@ -71,7 +71,7 @@ export const PostInfo = styled.div<{ layout: string }>`
 	span {
 		color: ${(props) => props.theme.colors.font.alt2};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 	}
 `;
@@ -96,7 +96,7 @@ export const PostImage = styled.div<{ hasImage: boolean }>`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		text-transform: uppercase;
 		padding: 30px;

@@ -12,7 +12,7 @@ export const Header = styled.div`
 	h4 {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: clamp(18px, 3.25vw, 24px);
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		line-height: 1.5;
 	}
 `;
@@ -45,7 +45,7 @@ export const CWrapper = styled.div`
 	align-items: center;
 	span {
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		display: block;
 		max-width: 75%;
 		white-space: nowrap;
@@ -123,7 +123,7 @@ export const LInput = styled.div<{ hasMedia: boolean; isIcon: boolean; disabled:
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) =>
 			props.isIcon ? props.theme.typography.size.xxxxSmall : props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		${(props) => (props.isIcon ? 'line-height: 1; padding: 0 2px; text-align: center;' : '')}
 	}
 	svg {
@@ -227,7 +227,7 @@ export const SActions = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-align: right;
 	}
 `;
@@ -252,7 +252,7 @@ export const MInfo = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;

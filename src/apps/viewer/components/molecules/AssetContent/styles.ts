@@ -41,16 +41,16 @@ export const Wrapper = styled.div`
 		}
 
 		font-size: ${(props) => props.theme.typography.size.base};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		color: ${(props) => props.theme.colors.font.alt1};
 
 		li {
 			color: ${(props) => props.theme.colors.font.primary};
-			font-weight: ${(props) => props.theme.typography.weight.bold};
+			font-weight: ${(props) => props.theme.typography.weight.medium};
 			font-size: ${(props) => props.theme.typography.size.base};
 
 			&::marker {
-				font-weight: ${(props) => props.theme.typography.weight.bold};
+				font-weight: ${(props) => props.theme.typography.weight.medium};
 				color: ${(props) => props.theme.colors.font.alt1};
 			}
 		}
@@ -121,7 +121,7 @@ export const Wrapper = styled.div`
 			min-width: 300px;
 			color: ${(props) => props.theme.colors.font.alt1};
 			font-size: ${(props) => props.theme.typography.size.xxSmall};
-			font-weight: ${(props) => props.theme.typography.weight.bold};
+			font-weight: ${(props) => props.theme.typography.weight.medium};
 			font-family: ${(props) => props.theme.typography.family.primary};
 		}
 

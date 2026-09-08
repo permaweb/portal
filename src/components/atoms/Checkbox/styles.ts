@@ -12,9 +12,9 @@ export const Wrapper = styled.div<{ disabled: boolean }>`
 		transform: translate(-50%, 0px);
 		pointer-events: none;
 		color: ${(props) =>
-			props.disabled ? props.theme.colors.button.primary.disabled.color : props.theme.colors.font.light1};
+			props.disabled ? props.theme.colors.button.primary.disabled.color : props.theme.colors.button.alt1.color};
 		fill: ${(props) =>
-			props.disabled ? props.theme.colors.button.primary.disabled.color : props.theme.colors.font.light1};
+			props.disabled ? props.theme.colors.button.primary.disabled.color : props.theme.colors.button.alt1.color};
 	}
 `;
 

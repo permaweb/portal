@@ -49,7 +49,7 @@ export const HeaderAction = styled.div`
 		gap: 7.5px;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 
 		&:hover {
@@ -122,7 +122,7 @@ export const ConnectionWrapper = styled.div`
 
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-size: ${(props) => props.theme.typography.size.base};
 	}
 `;
@@ -130,7 +130,7 @@ export const ConnectionWrapper = styled.div`
 export const ConnectionHeaderWrapper = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-size: ${(props) => props.theme.typography.size.lg};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		text-align: center;
@@ -144,7 +144,7 @@ export const PortalsWrapper = styled.div`
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 	}
 
@@ -195,7 +195,7 @@ export const PortalsListWrapper = styled.div`
 		overflow: hidden;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.small} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		background: transparent;
 		border: 1px solid transparent;

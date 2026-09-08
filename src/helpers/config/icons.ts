@@ -47,6 +47,7 @@ export const ICONS = {
 	header6: getTxEndpoint('FNHeUsqLSBi2lqkkwovy2Boba9MHoCWcCnUzfxz7Ayg'),
 	help: getTxEndpoint('827_dxZR1WAnw_hqxfwwb4jgP5m2fpkSrTMtdjRUWw4'),
 	hide: getTxEndpoint('4U1yIKk-oxoOX5a9qqEvf2UZjU8jd8VPF4GGq4a4x40'),
+	home: getTxEndpoint('AQWN8txyZq5Gcp6wZX1zx0pC1WZrXOxJHGKIizEm3P4'),
 	html: getTxEndpoint('OMzxjLEgeurEfKr0plK4cfOjDY3lm7IsPF1jD0VAmhA'),
 	icon: getTxEndpoint('r_kglJ9PvNP8amVl77FVbU-8A9HK0kiFtzivdB00Zm4'),
 	image: getTxEndpoint('357HeJjvG10nK28juQ8YMp6DlvHhGbmU7pOvZphEhUk'),

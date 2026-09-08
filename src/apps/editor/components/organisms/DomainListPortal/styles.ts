@@ -86,7 +86,7 @@ export const DomainHeader = styled.div`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		margin: 0;
 		line-height: 1;
 		display: inline-flex;
@@ -145,7 +145,7 @@ export const DomainBadge = styled.div`
 	padding: 2px 8px;
 	border-radius: 16px;
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	color: ${(props) => props.theme.colors.font.light1};
 	background: ${(props) => props.theme.colors.roles.alt3};
 `;
@@ -180,7 +180,7 @@ export const DomainActionsDropdown = styled.div`
 		p {
 			color: ${(props) => props.theme.colors.font.primary} !important;
 			font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-			font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 			font-family: ${(props) => props.theme.typography.family.primary} !important;
 			display: block;
 			white-space: nowrap;
@@ -229,7 +229,7 @@ export const WrapperEmpty = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}

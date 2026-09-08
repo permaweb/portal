@@ -26,7 +26,7 @@ export const SectionHeader = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		line-height: 1.5;
 		text-transform: uppercase;
 		white-space: nowrap;
@@ -94,7 +94,7 @@ export const IndicatorLine = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		line-height: 1.5;
 		text-transform: uppercase;
 		white-space: nowrap;
@@ -179,7 +179,7 @@ export const PurchaseAction = styled.div<{ disabled: boolean; active: boolean }>
 				? props.theme.colors.button.primary.disabled.color
 				: props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.base};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		line-height: 1.5;
 		text-transform: uppercase;
 		white-space: nowrap;
@@ -193,7 +193,7 @@ export const PurchaseAction = styled.div<{ disabled: boolean; active: boolean }>
 				? props.theme.colors.button.primary.disabled.color
 				: props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		line-height: 1.5;
 		text-transform: uppercase;
 		letter-spacing: 0.15px;
@@ -231,9 +231,10 @@ export const LeaseDuration = styled.div<{ active: boolean }>`
 	gap: 15px;
 
 	span {
-		color: ${(props) => (props.active ? props.theme.colors.font.light1 : props.theme.colors.font.primary)} !important;
+		color: ${(props) =>
+			props.active ? props.theme.colors.button.alt1.color : props.theme.colors.font.primary} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: none !important;
 	}
@@ -304,7 +305,7 @@ export const UpdateWrapper = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.light1} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: none !important;
 	}
@@ -344,7 +345,7 @@ export const UnauthorizedWrapper = styled(UpdateWrapper)`
 	span {
 		color: ${(props) => props.theme.colors.font.light1} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: none !important;
 	}
@@ -387,7 +388,7 @@ export const SuccessLine = styled.div`
 export const SuccessLabel = styled.span`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	display: flex;
 `;
@@ -440,7 +441,7 @@ export const ErrorLine = styled.div`
 export const ErrorLabel = styled.span`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.xSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	display: flex;
 `;
@@ -476,7 +477,7 @@ export const ModalWrapper = styled.div`
 `;
 
 export const ModalHeader = styled.div`
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-size: ${(props) => props.theme.typography.size.base};
 	color: ${(props) => props.theme.colors.font.primary};
 	font-family: ${(props) => props.theme.typography.family.primary};
@@ -554,7 +555,7 @@ export const ModalPrimaryNameWrapper = styled.div<{ active: boolean }>`
 	span {
 		color: ${(props) => (props.active ? props.theme.colors.font.primary : props.theme.colors.font.alt1)};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		text-transform: uppercase;
 	}
@@ -571,7 +572,7 @@ export const ModalPrimaryNameDescription = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 	}
 `;
@@ -598,14 +599,14 @@ export const TestnetInfo = styled.div`
 		width: fit-content;
 		display: block;
 		margin: 0 0 15px 0;
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 	}
 
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 	}

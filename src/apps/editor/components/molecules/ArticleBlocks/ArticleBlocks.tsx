@@ -12,6 +12,7 @@ import { ArticleBlockEnum, ArticleBlocksContextType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
 import * as S from './styles';
+import { useArticleBlockShortcuts } from './useArticleBlockShortcuts';
 
 export default function ArticleBlocks(props: {
 	type: 'post' | 'page';
@@ -216,80 +217,12 @@ export default function ArticleBlocks(props: {
 		[focusedIndex, props.addBlock]
 	);
 
-	React.useEffect(() => {
-		let ctrlSlashPressed = false;
-
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.ctrlKey && event.key === '/') {
-				ctrlSlashPressed = true;
-				event.preventDefault();
-			} else if (ctrlSlashPressed) {
-				switch (event.key.toLowerCase()) {
-					case '1':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header1);
-						break;
-					case '2':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header2);
-						break;
-					case '3':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header3);
-						break;
-					case '4':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header4);
-						break;
-					case '5':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header5);
-						break;
-					case '6':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Header6);
-						break;
-					case 'p':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Paragraph);
-						break;
-					case 'q':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Quote);
-						break;
-					case 'c':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Code);
-						break;
-					case 'n':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.OrderedList);
-						break;
-					case 'b':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.UnorderedList);
-						break;
-					case 'i':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Image);
-						break;
-					case 'v':
-						event.preventDefault();
-						props.addBlock(ArticleBlockEnum.Video);
-						break;
-					default:
-						break;
-				}
-				ctrlSlashPressed = false;
-			}
-		};
-
-		document.addEventListener('keydown', handleKeyDown);
-
-		return () => {
-			document.removeEventListener('keydown', handleKeyDown);
-		};
-	}, [props.addBlock]);
+	useArticleBlockShortcuts({
+		addBlock: props.addBlock,
+		disabled: currentReducer.editor.loading.active,
+		enabled: props.type !== 'post' || props.context === 'inline',
+		inline: props.context === 'inline',
+	});
 
 	function getShortcut(shortcut: string) {
 		const keys = shortcut.split(' ');

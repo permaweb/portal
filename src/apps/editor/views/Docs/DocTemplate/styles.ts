@@ -15,7 +15,7 @@ export const Wrapper = styled.div`
 	h5,
 	h6 {
 		font-size: clamp(32px, 3.75vw, 44px) !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.alt1} !important;
 		color: ${(props) => props.theme.colors.font.primary} !important;
 		margin: 0 0 5px 0;
@@ -61,7 +61,7 @@ export const Wrapper = styled.div`
 	strong,
 	b {
 		color: ${(props) => props.theme.colors.font.primary} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 	}
 
 	p,
@@ -137,7 +137,7 @@ export const Wrapper = styled.div`
 		background: ${(props) => props.theme.colors.container.alt3.background} !important;
 		border-radius: ${STYLING.dimensions.radius.alt4} !important;
 		color: ${(props) => props.theme.colors.font.alt1} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
 	}
 

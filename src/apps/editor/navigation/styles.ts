@@ -69,6 +69,7 @@ export const PanelHeader = styled.div`
 
 export const ToggleWrapper = styled.div<{ open: boolean }>`
 	height: ${STYLING.dimensions.nav.height};
+	flex-shrink: 0;
 	display: flex;
 	align-items: center;
 	gap: 7.5px;
@@ -127,7 +128,7 @@ export const PanelLink = styled.div<{ showText?: boolean; useFill?: boolean; dis
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		border: 1px solid transparent;
 		border-radius: ${STYLING.dimensions.radius.primary};
 		white-space: nowrap;
@@ -173,7 +174,7 @@ export const PanelFooter = styled.div<{ open: boolean; showText?: boolean }>`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		border: 1px solid ${(props) => props.theme.colors.border.primary};
 		border-radius: ${STYLING.dimensions.radius.primary};
 		white-space: nowrap;
@@ -235,17 +236,15 @@ export const Content = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 20px;
 `;
 
 export const C1Wrapper = styled.div`
-	width: fit-content;
+	min-width: 0;
+	flex: 0 1 auto;
 	display: flex;
 	align-items: center;
 	gap: 10px;
-
-	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		max-width: calc(100% - 60px);
-	}
 `;
 
 export const LogoWrapper = styled.div`
@@ -265,12 +264,13 @@ export const LogoWrapper = styled.div`
 
 export const PortalWrapper = styled.div`
 	position: relative;
+	min-width: 0;
 	display: flex;
 	align-items: center;
 	gap: 10px;
 
-	@media (max-width: ${STYLING.cutoffs.desktop}) {
-		max-width: calc(100% - 45px);
+	> div:first-child {
+		min-width: 0;
 	}
 `;
 
@@ -278,20 +278,17 @@ export const PortalUpdateWrapper = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 4.5px 13.5px;
-	background: ${(props) => props.theme.colors.contrast.background};
-	border: 1px solid ${(props) => props.theme.colors.contrast.border};
-	border-radius: ${STYLING.dimensions.radius.alt4};
 	margin: 0 0 0 10px;
 	span {
 		color: ${(props) => props.theme.colors.contrast.color};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;
 
 export const Portal = styled.button<{ active: boolean }>`
+	min-width: 0;
 	max-width: 100%;
 	display: flex;
 	align-items: center;
@@ -304,7 +301,7 @@ export const Portal = styled.button<{ active: boolean }>`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.lg} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		display: block;
 		white-space: nowrap;
@@ -578,7 +575,7 @@ export const DNavWrapper = styled.div`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		display: none;
@@ -586,6 +583,7 @@ export const DNavWrapper = styled.div`
 `;
 
 export const ActionsWrapper = styled.div`
+	flex-shrink: 0;
 	display: flex;
 	align-items: center;
 	gap: 20px;
@@ -652,7 +650,7 @@ export const LoadingWrapper = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.lg} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		display: block;
 		white-space: nowrap;
@@ -672,7 +670,7 @@ export const LeaveModalBodyWrapper = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;

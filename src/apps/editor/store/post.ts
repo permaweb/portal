@@ -6,6 +6,7 @@ import { debugLog } from 'helpers/utils';
 const UPDATE_CURRENT_POST = 'UPDATE_CURRENT_POST';
 const SET_ORIGINAL_DATA = 'SET_ORIGINAL_DATA';
 const CLEAR_CURRENT_POST = 'CLEAR_CURRENT_POST';
+const RESET_CURRENT_POST_FOCUS = 'RESET_CURRENT_POST_FOCUS';
 
 export const initStateCurrentPost: { data: PortalAssetPostReduxType; originalData: any; editor: any } = {
 	data: {
@@ -102,6 +103,24 @@ export function currentPostClear() {
 	};
 }
 
+export function currentPostResetFocus() {
+	return (dispatch: Dispatch) => {
+		dispatch({ type: RESET_CURRENT_POST_FOCUS });
+	};
+}
+
+function resetEditorFocus(editor: any) {
+	return {
+		...editor,
+		titleFocused: false,
+		toggleBlockFocus: false,
+		focusedBlock: null,
+		lastAddedBlockId: null,
+		markupUserInitiated: false,
+		markup: { ...initStateCurrentPost.editor.markup },
+	};
+}
+
 export function setOriginalData(data: any) {
 	return (dispatch: Dispatch) => {
 		dispatch({ type: SET_ORIGINAL_DATA, payload: data });
@@ -167,7 +186,10 @@ export function currentPost(
 				...state,
 				data: { ...initStateCurrentPost.data },
 				originalData: null,
+				editor: resetEditorFocus(state.editor),
 			};
+		case RESET_CURRENT_POST_FOCUS:
+			return { ...state, editor: resetEditorFocus(state.editor) };
 		default:
 			return state;
 	}

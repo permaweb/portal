@@ -20,7 +20,7 @@ export const ActionWrapper = styled.div`
 		span {
 			color: ${(props) => props.theme.colors.font.alt1};
 			font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-			font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 			font-family: ${(props) => props.theme.typography.family.primary} !important;
 		}
 

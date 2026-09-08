@@ -1,3 +1,4 @@
+import { invalidateBaseQueries, queryBaseGateway, withBaseReadLimit } from './basePortalRequests';
 import { DEFAULT_FONTS, ENGINE_LITE_REFERENCE_ID, PAGES, PORTAL_DATA, STORAGE, THEME } from './config';
 import { trackObservedPendingTransaction, trackPendingTransaction } from './pendingTransactions';
 import { PortalHeaderType, PortalUserRoleType, PortalUserType } from './types';
@@ -8,6 +9,7 @@ const ARWEAVE_GATEWAY = 'https://arweave.net';
 const BASE_SCHEMA_VERSION = '2.1.0';
 const ARWEAVE_ID = /^[a-zA-Z0-9_-]{43}$/;
 const BASE_RESOLVE_TTL_MS = 10_000;
+const PORTAL_HEADER_TTL_MS = 30_000;
 const TRANSACTION_FETCH_CONCURRENCY = 8;
 const CHECKPOINT_RELEASE_INTERVAL = 50;
 const CHECKPOINT_TAIL_BYTES = 250_000;
@@ -243,6 +245,12 @@ const transactionBodyCache = new Map<string, any>();
 const transactionBodyRequests = new Map<string, Promise<any | null>>();
 const portalResolveCache = new Map<string, { manifest: BasePortalManifest; resolvedAt: number }>();
 const portalResolveRequests = new Map<string, Promise<BasePortalManifest | null>>();
+// Card projections are deliberately isolated from authoritative, fully hydrated
+// manifests. Missing post bodies may still be propagating when a card appears.
+type BasePortalCard = { header: PortalHeaderType; owner: string };
+const portalHeaderCache = new Map<string, { card: BasePortalCard; resolvedAt: number }>();
+const portalHeaderRequests = new Map<string, Promise<BasePortalCard>>();
+const discoveryNodesCache = new Map<string, GraphQLNode[]>();
 
 function localStorageAvailable() {
 	return typeof window !== 'undefined' && Boolean(window.localStorage);
@@ -274,6 +282,13 @@ function cacheManifest(manifest: BasePortalManifest) {
 function rememberResolvedManifest(manifest: BasePortalManifest) {
 	cacheManifest(manifest);
 	portalResolveCache.set(manifest.portalId, { manifest, resolvedAt: Date.now() });
+	rememberPortalCard(manifest);
+}
+
+function rememberPortalCard(manifest: BasePortalManifest): BasePortalCard {
+	const card = { header: manifestToPortalHeader(manifest), owner: manifest.owner };
+	portalHeaderCache.set(manifest.portalId, { card, resolvedAt: Date.now() });
+	return card;
 }
 
 function getCachedManifest(portalId: string): BasePortalManifest | null {
@@ -425,17 +440,20 @@ async function fetchImmutableTransactionJson(txId: string): Promise<any | null> 
 				}
 			}
 
-			const response = await fetch(url, { cache: 'force-cache' });
-			if (!response.ok) return null;
-			if (typeof caches !== 'undefined') {
-				void caches
-					.open(TRANSACTION_CACHE_NAME)
-					.then((cache) => cache.put(url, response.clone()))
-					.catch(() => undefined);
-			}
-			const value = await response.json();
-			transactionBodyCache.set(txId, value);
-			return value;
+			return await withBaseReadLimit(async () => {
+				const response = await fetch(url, { cache: 'force-cache' });
+				if (!response.ok) return null;
+				const cacheResponse = typeof caches !== 'undefined' ? response.clone() : null;
+				const value = await response.json();
+				if (cacheResponse) {
+					void caches
+						.open(TRANSACTION_CACHE_NAME)
+						.then((cache) => cache.put(url, cacheResponse))
+						.catch(() => undefined);
+				}
+				transactionBodyCache.set(txId, value);
+				return value;
+			});
 		} catch {
 			return null;
 		}
@@ -800,25 +818,17 @@ async function queryTransactions(
 	first = 100,
 	sort: 'HEIGHT_ASC' | 'HEIGHT_DESC' = 'HEIGHT_DESC'
 ): Promise<GraphQLNode[]> {
-	const response = await fetch(ARWEAVE_GRAPHQL, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({
-			query: `
-				query BasePortalTransactions($tags: [TagFilter!], $first: Int!) {
-					transactions(tags: $tags, first: $first, sort: ${sort}) {
-						edges {
-							node { id owner { address } tags { name value } block { height timestamp } }
-						}
-					}
-				}
-			`,
-			variables: { tags: tags.map((tag) => ({ name: tag.name, values: [tag.value] })), first },
-		}),
-	});
-	if (!response.ok) throw new Error(`Base portal discovery failed: ${response.status}`);
-	const payload = await response.json();
-	if (payload.errors?.length) throw new Error(payload.errors[0]?.message || 'Base portal discovery failed');
+	const payload = await queryBaseGateway(
+		ARWEAVE_GRAPHQL,
+		`
+		query BasePortalTransactions($tags: [TagFilter!], $first: Int!) {
+			transactions(tags: $tags, first: $first, sort: ${sort}) {
+				edges { node { id owner { address } tags { name value } block { height timestamp } } }
+			}
+		}
+	`,
+		{ tags: tags.map((tag) => ({ name: tag.name, values: [tag.value] })), first }
+	);
 	return payload.data?.transactions?.edges?.map((edge: any) => edge.node) || [];
 }
 
@@ -830,33 +840,21 @@ async function queryAllTransactions(
 	let cursor: string | null = null;
 
 	for (let page = 0; page < 100; page += 1) {
-		const response = await fetch(ARWEAVE_GRAPHQL, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				query: `
-					query AllBasePortalTransactions($tags: [TagFilter!], $after: String) {
-						transactions(tags: $tags, first: 100, after: $after, sort: ${sort}) {
-							pageInfo { hasNextPage }
-							edges {
-								cursor
-								node { id owner { address } tags { name value } block { height timestamp } }
-							}
-						}
-					}
-				`,
-				variables: {
-					tags: tags.map((tag) => ({
-						name: tag.name,
-						values: Array.isArray(tag.value) ? tag.value : [tag.value],
-					})),
-					after: cursor,
-				},
-			}),
-		});
-		if (!response.ok) throw new Error(`Base portal discovery failed: ${response.status}`);
-		const payload = await response.json();
-		if (payload.errors?.length) throw new Error(payload.errors[0]?.message || 'Base portal discovery failed');
+		const payload = await queryBaseGateway(
+			ARWEAVE_GRAPHQL,
+			`
+			query AllBasePortalTransactions($tags: [TagFilter!], $after: String) {
+				transactions(tags: $tags, first: 100, after: $after, sort: ${sort}) {
+					pageInfo { hasNextPage }
+					edges { cursor node { id owner { address } tags { name value } block { height timestamp } } }
+				}
+			}
+		`,
+			{
+				tags: tags.map((tag) => ({ name: tag.name, values: Array.isArray(tag.value) ? tag.value : [tag.value] })),
+				after: cursor,
+			}
+		);
 		const connection = payload.data?.transactions;
 		const edges = Array.isArray(connection?.edges) ? connection.edges : [];
 		nodes.push(...edges.map((edge: any) => edge.node));
@@ -886,22 +884,15 @@ async function fetchPortalTransaction(txId: string): Promise<BasePortalTransacti
 async function fetchTransactionOwner(txId: string): Promise<string | null> {
 	if (!ARWEAVE_ID.test(txId)) return null;
 	try {
-		const response = await fetch(ARWEAVE_GRAPHQL, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				query: `
-					query BasePortalTransactionOwner($ids: [ID!]) {
-						transactions(ids: $ids, first: 1) {
-							edges { node { owner { address } } }
-						}
-					}
-				`,
-				variables: { ids: [txId] },
-			}),
-		});
-		if (!response.ok) return null;
-		const payload = await response.json();
+		const payload = await queryBaseGateway(
+			ARWEAVE_GRAPHQL,
+			`
+			query BasePortalTransactionOwner($ids: [ID!]) {
+				transactions(ids: $ids, first: 1) { edges { node { owner { address } } } }
+			}
+		`,
+			{ ids: [txId] }
+		);
 		return payload.data?.transactions?.edges?.[0]?.node?.owner?.address || null;
 	} catch {
 		return null;
@@ -1014,7 +1005,8 @@ async function applyRelease(
 	release: BasePortalRelease,
 	releaseTxId: string,
 	publisher: string,
-	knownPosts: Record<string, BasePortalPost> = {}
+	knownPosts: Record<string, BasePortalPost> = {},
+	cardOnly = false
 ): Promise<BasePortalManifest | null> {
 	const { posts: postChanges, patches, ...legacyPortalChanges } = release.changes;
 	const posts = new Map(parent.posts.map((post) => [post.id, post]));
@@ -1023,7 +1015,11 @@ async function applyRelease(
 		if (typeof postId === 'string') posts.delete(postId);
 	}
 	for (const [postId, postTxId] of Object.entries(postChanges?.upsert || {})) {
-		const post = knownPosts[postId] || (await fetchPostRevision(postTxId, parent.portalId, postId, posts.get(postId)));
+		// Discovery only needs post identities to replay ordering/removal. Bodies
+		// are validated by the full resolver when the user opens the portal.
+		const post = cardOnly
+			? ({ id: postId, postTxId } as BasePortalPost)
+			: knownPosts[postId] || (await fetchPostRevision(postTxId, parent.portalId, postId, posts.get(postId)));
 		if (!post) return null;
 		posts.set(postId, { ...post, id: postId, postTxId });
 	}
@@ -1111,7 +1107,8 @@ async function validateManifestChain(
 
 async function latestManifestForPortal(
 	portalId: string,
-	preferredTxId?: string | null
+	preferredTxId?: string | null,
+	cardOnly = false
 ): Promise<BasePortalManifest | null> {
 	const nodes = await queryAllTransactions(
 		[
@@ -1200,7 +1197,7 @@ async function latestManifestForPortal(
 		transaction: await fetchPortalTransaction(node.id),
 	}));
 	for (const { node, transaction } of loaded) {
-		if (transaction) continue;
+		if (transaction || cardOnly) continue;
 		trackObservedPendingTransaction({
 			id: node.id,
 			portalId,
@@ -1261,12 +1258,12 @@ async function latestManifestForPortal(
 				continue;
 			}
 			if (!publisherCanApplyRelease(current, release, publisher)) continue;
-			const next = await applyRelease(current, release, node.id, publisher);
+			const next = await applyRelease(current, release, node.id, publisher, {}, cardOnly);
 			if (!next) {
 				unresolved.add(node.id);
 				// A normal reconstruction visits every historical release. Only expose
 				// references when they actually prevent this release from being applied.
-				trackReleaseReferences(release);
+				if (!cardOnly) trackReleaseReferences(release);
 				continue;
 			}
 			current = next;
@@ -1277,7 +1274,7 @@ async function latestManifestForPortal(
 		if (!progressed) {
 			for (const { node, transaction } of nextPending) {
 				blocked.add(node.id);
-				if (transaction?.kind === 'release') {
+				if (!cardOnly && transaction?.kind === 'release') {
 					trackObservedPendingTransaction({
 						id: transaction.release.previousTxId,
 						portalId,
@@ -1296,7 +1293,7 @@ async function latestManifestForPortal(
 		return null;
 	}
 
-	rememberResolvedManifest(current);
+	if (!cardOnly) rememberResolvedManifest(current);
 	return current;
 }
 
@@ -1304,11 +1301,14 @@ export async function fetchBasePortal(
 	identifier: string,
 	options: { fresh?: boolean } = {}
 ): Promise<BasePortalManifest> {
+	if (options.fresh) invalidateBaseQueries();
 	const cached = getCachedManifest(identifier);
+	const known = portalResolveCache.get(identifier);
+	if (!options.fresh && known && Date.now() - known.resolvedAt < BASE_RESOLVE_TTL_MS) return known.manifest;
 	let direct: BasePortalManifest | null = null;
 	let directPortalId: string | null = null;
 
-	if (!cached && ARWEAVE_ID.test(identifier)) {
+	if (!cached && !portalHeaderCache.has(identifier) && ARWEAVE_ID.test(identifier)) {
 		const transaction = await fetchPortalTransaction(identifier);
 		if (transaction?.kind === 'manifest' || transaction?.kind === 'checkpoint') direct = transaction.manifest;
 		directPortalId =
@@ -1341,6 +1341,34 @@ export async function fetchBasePortal(
 	if (!fallback) throw new Error('Base portal manifest not found');
 	rememberResolvedManifest(fallback);
 	return fallback;
+}
+
+// For portal lists only. This never populates the full manifest cache or supplies
+// write authorization; opening a portal still resolves all referenced content.
+async function fetchBasePortalCard(portalId: string): Promise<BasePortalCard> {
+	const cached = portalHeaderCache.get(portalId);
+	if (cached && Date.now() - cached.resolvedAt < PORTAL_HEADER_TTL_MS) return cached.card;
+	const active = portalHeaderRequests.get(portalId);
+	if (active) return active;
+
+	const request = (async () => {
+		const full = getCachedManifest(portalId);
+		try {
+			const manifest = await latestManifestForPortal(portalId, full?.manifestTxId, true);
+			if (manifest) return rememberPortalCard(manifest);
+		} catch (error) {
+			if (!cached && !full) throw error;
+		}
+		if (full) return rememberPortalCard(full);
+		if (cached) return cached.card;
+		throw new Error('Base portal metadata not found');
+	})();
+	portalHeaderRequests.set(portalId, request);
+	try {
+		return await request;
+	} finally {
+		portalHeaderRequests.delete(portalId);
+	}
 }
 
 async function uploadData(wallet: any, data: string | ArrayBuffer | Uint8Array, tags: ArweaveTag[]): Promise<string> {
@@ -2169,9 +2197,19 @@ export function manifestToPortalHeader(manifest: BasePortalManifest): PortalHead
 
 type BasePortalMembershipStatus = 'accepted' | 'left';
 
-async function getBasePortalMembershipStatuses(address: string) {
+function membershipStatusesFromNodes(address: string, nodes: GraphQLNode[]) {
 	const statuses = new Map<string, BasePortalMembershipStatus>();
-	if (!ARWEAVE_ID.test(address)) return statuses;
+	for (const node of nodes) {
+		if (tagValue(node, 'Type') !== 'portal-membership' || node.owner?.address !== address) continue;
+		const portalId = tagValue(node, 'Portal-Id');
+		const status = tagValue(node, 'Membership-Status');
+		if (portalId && (status === 'accepted' || status === 'left')) statuses.set(portalId, status);
+	}
+	return statuses;
+}
+
+async function getBasePortalMembershipStatuses(address: string) {
+	if (!ARWEAVE_ID.test(address)) return new Map<string, BasePortalMembershipStatus>();
 	const nodes = await queryAllTransactions(
 		[
 			{ name: 'Portal-Mode', value: 'base' },
@@ -2180,13 +2218,7 @@ async function getBasePortalMembershipStatuses(address: string) {
 		],
 		'HEIGHT_ASC'
 	);
-	for (const node of nodes) {
-		if (node.owner?.address !== address) continue;
-		const portalId = tagValue(node, 'Portal-Id');
-		const status = tagValue(node, 'Membership-Status');
-		if (portalId && (status === 'accepted' || status === 'left')) statuses.set(portalId, status);
-	}
-	return statuses;
+	return membershipStatusesFromNodes(address, nodes);
 }
 
 export async function getBasePortalMembershipStatus(
@@ -2277,6 +2309,7 @@ async function publishBasePortalMembership(
 				{ name: 'Author', value: address },
 			]
 		);
+		invalidateBaseQueries();
 		rememberMembershipReceipt(address, portalId, txId);
 		return txId;
 	})();
@@ -2285,55 +2318,60 @@ async function publishBasePortalMembership(
 	return operation;
 }
 
-async function syncAcceptedBasePortalMemberships(wallet: any, address: string) {
+async function syncAcceptedBasePortalMemberships(
+	wallet: any,
+	address: string,
+	statuses: Map<string, BasePortalMembershipStatus>
+) {
 	const acceptedIds = readStringList(STORAGE.basePortalMemberships(address));
 	if (!acceptedIds.length) return;
-	const statuses = await getBasePortalMembershipStatuses(address).catch(() => new Map());
 	const receipts = getMembershipReceipts(address);
 	for (const portalId of acceptedIds) {
 		if (statuses.get(portalId) === 'accepted' || receipts[portalId]) continue;
 		try {
-			const manifest = await fetchBasePortal(portalId);
-			if (manifest.owner !== address) await publishBasePortalMembership(portalId, 'accepted', wallet, address);
+			const card = await fetchBasePortalCard(portalId);
+			if (card.owner !== address) await publishBasePortalMembership(portalId, 'accepted', wallet, address);
 		} catch {}
 	}
 }
 
-export async function discoverBasePortals(address: string) {
-	const manifests = new Map<string, BasePortalManifest>();
+async function discoverBasePortalCards(address: string) {
 	const localIds = readStringList(STORAGE.basePortalMemberships(address));
-	const membershipStatuses = await getBasePortalMembershipStatuses(address).catch(() => new Map());
-	for (const id of new Set([...localIds, ...membershipStatuses.keys()])) {
-		try {
-			const manifest = await fetchBasePortal(id);
-			if (manifest.owner === address || manifest.users.some((user) => user.address === address)) {
-				manifests.set(manifest.portalId, manifest);
-			}
-		} catch {}
-	}
-
+	let nodes: GraphQLNode[] = [];
+	let membershipDiscoverySucceeded = false;
 	try {
-		const nodes = await queryAllTransactions(
+		nodes = await queryAllTransactions(
 			[
 				{ name: 'Portal-Mode', value: 'base' },
 				{ name: 'Portal-User', value: address },
 			],
-			'HEIGHT_DESC'
+			'HEIGHT_ASC'
 		);
-		for (const node of nodes) {
-			const portalId = tagValue(node, 'Portal-Id');
-			if (!portalId || manifests.has(portalId)) continue;
-			try {
-				const manifest = await fetchBasePortal(portalId);
-				if (manifest.owner === address || manifest.users.some((user) => user.address === address)) {
-					manifests.set(portalId, manifest);
-				}
-			} catch {}
-		}
-	} catch {
+		discoveryNodesCache.set(address, nodes);
+		membershipDiscoverySucceeded = true;
+	} catch (error) {
 		// Locally cached portals remain usable while GraphQL indexing is delayed.
+		const previous = discoveryNodesCache.get(address);
+		if (!previous && localIds.length === 0) throw error;
+		nodes = previous || [];
 	}
-
+	const membershipStatuses = membershipStatusesFromNodes(address, nodes);
+	// Deduplicate before resolving, including failed/revoked candidates. Repeated
+	// historical Portal-User tags must not re-fetch a portal throughout the loop.
+	const portalIds = Array.from(
+		new Set([
+			...localIds,
+			...membershipStatuses.keys(),
+			...nodes.map((node) => tagValue(node, 'Portal-Id')).filter((id): id is string => Boolean(id)),
+		])
+	);
+	const cards = await mapWithConcurrency(portalIds, 2, async (portalId) => {
+		try {
+			return await fetchBasePortalCard(portalId);
+		} catch {
+			return null;
+		}
+	});
 	const accepted = new Set([
 		...readStringList(STORAGE.basePortalMemberships(address)),
 		...Array.from(membershipStatuses.entries())
@@ -2347,11 +2385,18 @@ export async function discoverBasePortals(address: string) {
 	}
 	const portals: PortalHeaderType[] = [];
 	const invites: PortalHeaderType[] = [];
-	for (const manifest of manifests.values()) {
-		const header = manifestToPortalHeader(manifest);
-		if (manifest.owner === address || accepted.has(manifest.portalId)) portals.push(header);
-		else if (!declined.has(manifest.portalId)) invites.push(header);
+	for (const card of cards) {
+		if (!card) continue;
+		const { header, owner } = card;
+		if (owner !== address && !header.users.some((user) => user.address === address)) continue;
+		if (owner === address || accepted.has(header.id)) portals.push(header);
+		else if (!declined.has(header.id)) invites.push(header);
 	}
+	return { portals, invites, membershipStatuses, membershipDiscoverySucceeded };
+}
+
+export async function discoverBasePortals(address: string) {
+	const { portals, invites } = await discoverBasePortalCards(address);
 	return { portals, invites };
 }
 
@@ -2606,9 +2651,19 @@ export function createBasePermawebAdapter(wallet: any, address: string) {
 		},
 		removeFromIndex: async ({ indexId }: any, zoneId: string) =>
 			(await removeBasePost(zoneId, indexId, wallet, address)).manifestTxId,
-		getProfileByWalletAddress: async (walletAddress: string) => {
-			const discovered = await discoverBasePortals(walletAddress);
-			if (walletAddress === address) void syncAcceptedBasePortalMemberships(wallet, address);
+		getProfileByWalletAddress: async (walletAddress: string, options?: { includePortals?: boolean }) => {
+			const discovered =
+				options?.includePortals === false
+					? {
+							portals: [],
+							invites: [],
+							membershipStatuses: new Map<string, BasePortalMembershipStatus>(),
+							membershipDiscoverySucceeded: false,
+					  }
+					: await discoverBasePortalCards(walletAddress);
+			if (walletAddress === address && discovered.membershipDiscoverySucceeded) {
+				void syncAcceptedBasePortalMemberships(wallet, address, discovered.membershipStatuses);
+			}
 			return {
 				id: walletAddress,
 				owner: walletAddress,
@@ -2619,8 +2674,9 @@ export function createBasePermawebAdapter(wallet: any, address: string) {
 				invites: discovered.invites,
 			};
 		},
-		getProfileById: async (profileId: string) => {
-			const discovered = await discoverBasePortals(profileId);
+		getProfileById: async (profileId: string, options?: { includePortals?: boolean }) => {
+			const discovered =
+				options?.includePortals === false ? { portals: [], invites: [] } : await discoverBasePortals(profileId);
 			return {
 				id: profileId,
 				owner: profileId,

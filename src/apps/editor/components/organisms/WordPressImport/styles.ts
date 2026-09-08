@@ -20,7 +20,7 @@ export const InlineTitle = styled.p`
 	margin: 0;
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.small};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 
@@ -46,7 +46,7 @@ export const SectionHeader = styled.div`
 export const SectionLabel = styled.span`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.small};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 
@@ -108,7 +108,7 @@ export const PreviewHeader = styled.div`
 export const PreviewTitle = styled.h3`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.base};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	margin: 0;
 `;
@@ -389,7 +389,7 @@ export const ThemeSection = styled.div`
 export const ThemeSectionTitle = styled.span`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 
@@ -585,7 +585,7 @@ export const CategoryLevelTag = styled.span`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
 	font-family: ${(props) => props.theme.typography.family.primary};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	text-transform: uppercase;
 `;
 
@@ -686,7 +686,7 @@ export const ImageBadge = styled.span<{ $type: 'featured' | 'content' }>`
 	right: 6px;
 	padding: 2px 6px;
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	background: ${(props) =>
 		props.$type === 'featured' ? props.theme.colors.button.primary.background : props.theme.colors.overlay.primary};
@@ -783,7 +783,7 @@ export const ImageSummaryLabel = styled.span`
 export const ImageSummaryValue = styled.span`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.xSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-family: ${(props) => props.theme.typography.family.primary};
 `;
 

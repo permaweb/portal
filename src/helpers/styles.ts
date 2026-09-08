@@ -101,7 +101,7 @@ export const GlobalStyle = createGlobalStyle`
   
   h1, h2, h3, h4, h5, h6 {
     font-family: ${(props) => props.theme.typography.family.alt1};
-    font-weight: ${(props) => props.theme.typography.weight.bold};
+    font-weight: ${(props) => props.theme.typography.weight.medium};
     color: ${(props) => props.theme.colors.font.primary};
     overflow-wrap: anywhere;
     line-height: 1.25;
@@ -261,7 +261,7 @@ export const GlobalStyle = createGlobalStyle`
     span {
       color: ${(props) => props.theme.colors.contrast.color};
       font-size: ${(props) => props.theme.typography.size.xxxSmall};
-      font-weight: ${(props) => props.theme.typography.weight.bold};
+      font-weight: ${(props) => props.theme.typography.weight.medium};
       white-space: nowrap;
     }
   }
@@ -269,7 +269,7 @@ export const GlobalStyle = createGlobalStyle`
 	.default-text {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
   
@@ -280,7 +280,7 @@ export const GlobalStyle = createGlobalStyle`
 		span {
 			color: ${(props) => props.theme.colors.font.light1};
 			font-size: ${(props) => props.theme.typography.size.xxxSmall};
-      font-weight: ${(props) => props.theme.typography.weight.bold};
+      font-weight: ${(props) => props.theme.typography.weight.medium};
       white-space: nowrap;
 		}
   }

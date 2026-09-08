@@ -12,7 +12,7 @@ export const Header = styled.div`
 	h4 {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: clamp(18px, 3.25vw, 24px);
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		line-height: 1.5;
 	}
 `;
@@ -64,7 +64,7 @@ export const CWrapper = styled.div`
 	align-items: center;
 	span {
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		display: block;
 		max-width: 75%;
 		white-space: nowrap;
@@ -92,7 +92,7 @@ export const BInput = styled.button<{ hasBanner: boolean }>`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 	svg {
 		height: 35px;
@@ -177,7 +177,7 @@ export const AInput = styled.button<{ hasAvatar: boolean }>`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 	svg {
 		height: 25px;

@@ -30,7 +30,7 @@ export const TWrapper = styled.div`
 export const Label = styled.label`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 `;
 
 export const Tooltip = styled.div`
@@ -52,7 +52,7 @@ export const Input = styled.input<{
 		props.disabled ? props.theme.colors.button.primary.disabled.color : props.theme.colors.font.primary};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	font-size: ${(props) => props.theme.typography.size.small};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	letter-spacing: 0.15px;
 	margin: 7.5px 0 0 0;
 	background: ${(props) => props.theme.colors.form.background};
@@ -103,7 +103,7 @@ export const EndText = styled.span<{ sm: boolean | undefined }>`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) =>
 		props.sm ? props.theme.typography.size.xxSmall : props.theme.typography.size.small ?? '15px'};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	width: 100%;
 `;
 

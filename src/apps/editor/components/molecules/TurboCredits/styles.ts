@@ -52,7 +52,7 @@ export const DBodyWrapper = styled.ul`
 		cursor: pointer;
 		color: ${(props) => props.theme.colors.font.primary} !important;
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		border: 1px solid transparent;
 		border-radius: ${STYLING.dimensions.radius.alt4};
@@ -157,7 +157,7 @@ export const MSectionBodyElement = styled.button`
 		p {
 			color: ${(props) => props.theme.colors.font.primary};
 			font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-			font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 			font-family: ${(props) => props.theme.typography.family.primary} !important;
 		}
 	}
@@ -209,7 +209,7 @@ export const WalletListItem = styled.button`
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.base};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 	}
 	&:hover {

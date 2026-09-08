@@ -147,7 +147,10 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			} else {
 				profile = getCachedProfile(address);
 				if (!profile) {
-					profile = await permawebProvider.libs.getProfileById(address);
+					profile = await permawebProvider.libs.getProfileById(
+						address,
+						IS_BASE_MODE ? { includePortals: false } : undefined
+					);
 					cacheProfile(address, profile);
 				}
 			}

@@ -12,7 +12,7 @@ export const Wrapper = styled.div`
 	p {
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		color: ${(props) => props.theme.colors.font.alt1};
 	}
 `;
@@ -28,7 +28,7 @@ export const InfoWrapper = styled.div`
 	p {
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		color: ${(props) => props.theme.colors.font.alt1};
 	}
 
@@ -65,7 +65,7 @@ export const TransferTitle = styled.h4`
 	padding: 0;
 	font-size: ${(p) => p.theme.typography.size.xSmall};
 	font-family: ${(p) => p.theme.typography.family.primary};
-	font-weight: ${(p) => p.theme.typography.weight.bold};
+	font-weight: ${(p) => p.theme.typography.weight.medium};
 	color: ${(p) => p.theme.colors.font.primary};
 `;
 
@@ -90,7 +90,7 @@ export const TableHeaderCell = styled.th`
 	padding: 10px 12px;
 	font-size: ${(p) => p.theme.typography.size.xxSmall};
 	font-family: ${(p) => p.theme.typography.family.primary};
-	font-weight: ${(p) => p.theme.typography.weight.bold};
+	font-weight: ${(p) => p.theme.typography.weight.medium};
 	color: ${(p) => p.theme.colors.font.alt1};
 	border-bottom: 1px solid ${(p) => p.theme.colors.border.primary};
 	text-transform: uppercase;
@@ -125,7 +125,7 @@ export const StateBadge = styled.span<{ $state?: string }>`
 	padding: 2px 8px;
 	border-radius: 999px;
 	font-size: ${(p) => p.theme.typography.size.xxxSmall};
-	font-weight: ${(p) => p.theme.typography.weight.bold};
+	font-weight: ${(p) => p.theme.typography.weight.medium};
 	text-transform: capitalize;
 	background: ${(p) => {
 		switch (p.$state) {

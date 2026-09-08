@@ -32,7 +32,7 @@ export const TableHeaderInfo = styled.div`
 
 	span {
 		font-size: ${(p) => p.theme.typography.size.xxSmall};
-		font-weight: ${(p) => p.theme.typography.weight.bold};
+		font-weight: ${(p) => p.theme.typography.weight.medium};
 		color: ${(p) => p.theme.colors.font.alt1};
 	}
 
@@ -68,7 +68,7 @@ export const Table = styled.div`
 
 	.row.header .cell {
 		background: ${(p) => p.theme.colors.container.alt1};
-		font-weight: ${(p) => p.theme.typography.weight.bold};
+		font-weight: ${(p) => p.theme.typography.weight.medium};
 	}
 
 	.cell {
@@ -130,7 +130,7 @@ export const ContextMenuItem = styled.div`
 	padding: 7.5px 12.5px;
 	cursor: pointer;
 	font-size: ${(p) => p.theme.typography.size.xxxSmall};
-	font-weight: ${(p) => p.theme.typography.weight.bold};
+	font-weight: ${(p) => p.theme.typography.weight.medium};
 	color: ${(p) => p.theme.colors.font.primary};
 	transition: all 100ms;
 	display: flex;

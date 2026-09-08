@@ -192,7 +192,7 @@ export default function Landing() {
 								return (
 									<Link key={portal.id} to={`${URLS.base}${portal.id}`}>
 										{portal.icon && checkValidAddress(portal.icon) ? (
-											<img src={getTxEndpoint(portal.icon)} alt={'Portal Icon'} />
+											<img src={getTxEndpoint(portal.icon)} alt={'Portal Icon'} loading={'lazy'} decoding={'async'} />
 										) : (
 											<ReactSVG src={ICONS.portal} />
 										)}
@@ -262,7 +262,7 @@ export default function Landing() {
 								return (
 									<button key={portal.id} onClick={() => joinPortal(portal.id)}>
 										{portal.icon && checkValidAddress(portal.icon) ? (
-											<img src={getTxEndpoint(portal.icon)} alt={'Portal Icon'} />
+											<img src={getTxEndpoint(portal.icon)} alt={'Portal Icon'} loading={'lazy'} decoding={'async'} />
 										) : (
 											<ReactSVG src={ICONS.portal} />
 										)}

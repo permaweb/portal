@@ -35,7 +35,7 @@ export const Tab = styled.div<{ active: boolean }>`
 		position: relative;
 		color: ${(props) => (props.active ? props.theme.colors.tabs.active.color : props.theme.colors.tabs.color)};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		&:hover {
 			cursor: pointer;

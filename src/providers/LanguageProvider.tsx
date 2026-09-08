@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 
-import { loadLanguage, loadLanguageAsync, LanguageEnum, LanguageTranslations } from 'helpers/language';
+import { LanguageEnum, LanguageTranslations, loadLanguage, loadLanguageAsync } from 'helpers/language';
 
 type LanguageKey = keyof typeof LanguageEnum;
 
@@ -45,11 +45,8 @@ export function LanguageProvider(props: LanguageProviderProps) {
 		};
 	});
 
-	const [isLoading, setIsLoading] = React.useState(current !== 'en');
-
 	React.useEffect(() => {
 		const loadTranslations = async () => {
-			setIsLoading(true);
 			const enTrans = await loadLanguageAsync('en');
 			const esTrans = await loadLanguageAsync('es');
 			const deTrans = await loadLanguageAsync('de');
@@ -59,7 +56,6 @@ export function LanguageProvider(props: LanguageProviderProps) {
 				es: esTrans,
 				de: deTrans,
 			});
-			setIsLoading(false);
 		};
 
 		loadTranslations();
@@ -78,7 +74,7 @@ export function LanguageProvider(props: LanguageProviderProps) {
 			setCurrent(newLanguage);
 			settingsProvider.updateSettings('language', newLanguage);
 		},
-		[settingsProvider]
+		[settingsProvider.updateSettings]
 	);
 
 	const contextValue = React.useMemo(

@@ -51,7 +51,7 @@ export const Label = styled.div<{ sm?: boolean }>`
 	padding: 2.5px 15px 0 15px;
 	p {
 		font-size: ${(props) => (props.sm ? props.theme.typography.size.xSmall : props.theme.typography.size.base)};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		color: ${(props) => props.theme.colors.font.primary};
 		padding: 0 0 2.5px 0;

@@ -41,7 +41,7 @@ export const CategoryHeader = styled.div`
 		color: ${(props) => props.theme.colors.font.alt4};
 		background: ${(props) => props.theme.colors.container.alt5.background};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-transform: uppercase;
 	}
 `;
@@ -66,7 +66,7 @@ export const PanelHeader = styled.div`
 		color: ${(props) => props.theme.colors.font.alt4};
 		background: ${(props) => props.theme.colors.container.alt5.background};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-transform: uppercase;
 	}
 `;

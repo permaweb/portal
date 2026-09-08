@@ -142,6 +142,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 		mediaAlign: 'center',
 	});
 	const [showCaptionEdit, setShowCaptionEdit] = React.useState<boolean>(false);
+	const [captionAutoFocus, setCaptionAutoFocus] = React.useState(false);
 	const [showMediaLibrary, setShowMediaLibrary] = React.useState<boolean>(false);
 	const [isValidUrl, setIsValidUrl] = React.useState(true);
 
@@ -167,6 +168,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 				props.data.width !== prevPropsDataRef.current?.width ||
 				props.data.mediaAlign !== prevPropsDataRef.current?.mediaAlign)
 		) {
+			setCaptionAutoFocus(false);
 			setMediaData(props.data);
 			prevPropsDataRef.current = {
 				url: props.data.url,
@@ -536,7 +538,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 													element={'p'}
 													value={mediaData?.caption ?? ''}
 													onChange={(value: string) => setMediaData({ ...mediaData, caption: value })}
-													autoFocus
+													autoFocus={captionAutoFocus}
 												/>
 												<S.CaptionToolsInline editMode={false}>
 													<IconButton
@@ -555,7 +557,14 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 									</div>
 									{mediaData?.caption === null && (
 										<S.CaptionEmpty>
-											<p onClick={() => setMediaData({ ...mediaData, caption: '' })}>{language?.addCaption}</p>
+											<p
+												onClick={() => {
+													setCaptionAutoFocus(true);
+													setMediaData({ ...mediaData, caption: '' });
+												}}
+											>
+												{language?.addCaption}
+											</p>
 										</S.CaptionEmpty>
 									)}
 									<S.ResizeHandle side="right" onMouseDown={(e) => handleResizeStart(e, 'right')} />
@@ -645,6 +654,7 @@ export default function MediaBlock(props: { type: 'image' | 'video'; content: an
 											type={'primary'}
 											label={language?.removeCaption}
 											handlePress={() => {
+												setCaptionAutoFocus(false);
 												setMediaData((prevContent) => ({
 													...prevContent,
 													caption: null,

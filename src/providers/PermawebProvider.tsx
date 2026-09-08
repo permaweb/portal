@@ -54,14 +54,19 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 	const authoritiesRef = React.useRef(false);
 	const prevWalletRef = React.useRef<string | null>(null);
-
-	const [deps, setDeps] = React.useState<any>(null);
-	const [libs, setLibs] = React.useState<any>(null);
+	const walletAddressRef = React.useRef(arProvider.walletAddress);
+	walletAddressRef.current = arProvider.walletAddress;
+	const profileRequestsRef = React.useRef(
+		new Map<string, { libs: any; promise: Promise<Types.ProfileType | undefined> }>()
+	);
+	const profileRefreshesRef = React.useRef(new Map<string, { libs: any; started: boolean; promise: Promise<void> }>());
 	const [profile, setProfile] = React.useState<Types.ProfileType | null>(null);
 	const [profileLoading, setProfileLoading] = React.useState<boolean>(false);
 	const [profilePending, setProfilePending] = React.useState<boolean>(false);
 
-	React.useEffect(() => {
+	// Initialize synchronously with the wallet so profile effects cannot run once
+	// with the previous wallet's adapter and again with its replacement.
+	const { deps, libs } = React.useMemo(() => {
 		try {
 			if (IS_BASE_MODE) {
 				const baseDependencies = {
@@ -70,9 +75,10 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 					signer: null,
 					node: null,
 				};
-				setDeps(baseDependencies);
-				setLibs(createBasePermawebAdapter(arProvider.wallet, arProvider.walletAddress || ''));
-				return;
+				return {
+					deps: baseDependencies,
+					libs: createBasePermawebAdapter(arProvider.wallet, arProvider.walletAddress || ''),
+				};
 			}
 
 			const aoConnection = import.meta.env.VITE_AO ?? 'legacy';
@@ -96,18 +102,52 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 				node: { ...AO_NODE },
 			};
 
-			setDeps(dependencies);
-
 			const initializedLibs = Permaweb.init(dependencies);
 			initializedLibs.resolveTransaction = (data: any, args?: any) =>
 				resolveUploadTransaction(arProvider.wallet, data, args);
-			setLibs(initializedLibs);
+			return { deps: dependencies, libs: initializedLibs };
 		} catch (error) {
 			console.error('Error in PermawebProvider initialization:', error);
+			return { deps: null, libs: null };
 		}
 	}, [arProvider.wallet, arProvider.walletAddress]);
 
+	const resolveProfile = React.useCallback(
+		async (address: string, options: RefreshProfileOptions = {}): Promise<Types.ProfileType | undefined> => {
+			if (!libs) return;
+			const pending = profileRequestsRef.current.get(address);
+			if (pending?.libs === libs) return pending.promise;
+
+			const request = (async () => {
+				const cachedProfile = getCachedProfile(address);
+				try {
+					const fetchedProfile = cachedProfile?.id
+						? await libs.getProfileById(cachedProfile.id)
+						: await libs.getProfileByWalletAddress(address);
+					const profileToUse = normalizeProfile({ ...fetchedProfile });
+					cacheProfile(address, profileToUse);
+					if (profileToUse?.id && !IS_BASE_MODE) cacheProfileById(profileToUse.id, profileToUse);
+					return profileToUse;
+				} catch (e: any) {
+					console.error(e);
+					if (!options.silent && walletAddressRef.current === address) {
+						addNotification(language?.errorGettingProfile ?? 'Error getting profile', 'warning');
+					}
+					return cachedProfile?.id ? normalizeProfile(cachedProfile) : undefined;
+				}
+			})();
+			profileRequestsRef.current.set(address, { libs, promise: request });
+			try {
+				return await request;
+			} finally {
+				if (profileRequestsRef.current.get(address)?.promise === request) profileRequestsRef.current.delete(address);
+			}
+		},
+		[libs, addNotification, language?.errorGettingProfile]
+	);
+
 	React.useEffect(() => {
+		let cancelled = false;
 		(async function () {
 			if (!arProvider.walletAddress) {
 				setProfile(null);
@@ -135,10 +175,11 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 
 			try {
 				const freshProfile = await resolveProfile(arProvider.walletAddress);
+				if (cancelled) return;
 				if (freshProfile?.id) {
 					setProfile(freshProfile);
 					cacheProfile(arProvider.walletAddress, freshProfile);
-					if (profilePending) setProfilePending(false);
+					setProfilePending(false);
 				} else if (!cachedProfile?.id) {
 					// Only reset state if there's no cached profile to fall back on
 					setProfile({ id: null });
@@ -146,56 +187,76 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 			} catch (e: any) {
 				console.error('Failed to fetch fresh profile:', e);
 			} finally {
-				setProfileLoading(false);
+				if (!cancelled) setProfileLoading(false);
 			}
 		})();
+		return () => {
+			cancelled = true;
+		};
 	}, [arProvider.walletAddress, libs?.getProfileByWalletAddress]);
 
 	React.useEffect(() => {
-		(async function () {
-			if (!arProvider.walletAddress) {
-				// Clear pending state when wallet disconnects
-				setProfilePending(false);
-				return;
-			}
-
-			if (profilePending) {
-				const cachedProfile = getCachedProfile(arProvider.walletAddress);
-
-				if (cachedProfile?.id) {
-					try {
-						const fetchedProfile = await libs.getProfileById(cachedProfile.id);
-						const normalizedProfile = normalizeProfile(fetchedProfile);
-
-						setProfile(normalizedProfile);
-						cacheProfile(arProvider.walletAddress, normalizedProfile);
+		let cancelled = false;
+		const address = arProvider.walletAddress;
+		if (!address) {
+			setProfilePending(false);
+			return;
+		}
+		if (profilePending && libs?.getProfileById) {
+			void (async () => {
+				try {
+					// Creation updates the cached ID while an older wallet lookup may
+					// still be running. Read again after it completes to load that ID.
+					const pending = profileRequestsRef.current.get(address);
+					if (pending?.libs === libs) await pending.promise;
+					if (cancelled) return;
+					const fetchedProfile = await resolveProfile(address);
+					if (!cancelled && fetchedProfile?.id) {
+						setProfile(fetchedProfile);
 						setProfilePending(false);
-					} catch (e: any) {
-						console.error(e);
 					}
+				} catch (error) {
+					console.error('Failed to load pending profile:', error);
 				}
-			}
-		})();
-	}, [arProvider.walletAddress, profilePending]);
+			})();
+		}
+		return () => {
+			cancelled = true;
+		};
+	}, [arProvider.walletAddress, profilePending, libs]);
 
 	const refreshProfile = React.useCallback(
 		async (options: RefreshProfileOptions = {}) => {
-			if (arProvider.wallet && arProvider.walletAddress) {
+			const address = arProvider.walletAddress;
+			if (!arProvider.wallet || !address) return;
+			const queued = profileRefreshesRef.current.get(address);
+			if (queued?.libs === libs && !queued.started) return queued.promise;
+
+			const pending = profileRequestsRef.current.get(address);
+			const refresh = { libs, started: false, promise: Promise.resolve() };
+			refresh.promise = (async () => {
 				try {
-					const newProfile = await resolveProfile(arProvider.walletAddress, options);
-					if (newProfile?.id) {
+					// A refresh may follow a write. Wait for any older read, then request
+					// fresh data; refreshes waiting for that same read share this follow-up.
+					await (pending?.libs === libs ? pending.promise : undefined);
+					if (walletAddressRef.current !== address) return;
+					refresh.started = true;
+					const newProfile = await resolveProfile(address, options);
+					if (newProfile?.id && walletAddressRef.current === address) {
 						setProfile(newProfile);
-						cacheProfile(arProvider.walletAddress, newProfile);
-						if (newProfile.id && !IS_BASE_MODE) {
-							cacheProfileById(newProfile.id, newProfile);
-						}
 					}
 				} catch (error) {
 					console.error(error);
 				}
+			})();
+			profileRefreshesRef.current.set(address, refresh);
+			try {
+				await refresh.promise;
+			} finally {
+				if (profileRefreshesRef.current.get(address) === refresh) profileRefreshesRef.current.delete(address);
 			}
 		},
-		[arProvider.wallet, arProvider.walletAddress, libs]
+		[arProvider.wallet, arProvider.walletAddress, libs, resolveProfile]
 	);
 
 	/* Determine if the current authority has changed and if it is present in the profile.
@@ -222,36 +283,6 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 			}
 		})();
 	}, [profile?.id, AO_NODE.authority, libs?.updateZoneAuthorities]);
-
-	async function resolveProfile(
-		address: string,
-		options: RefreshProfileOptions = {}
-	): Promise<Types.ProfileType | undefined> {
-		if (libs) {
-			const cachedProfile = getCachedProfile(address);
-			try {
-				let fetchedProfile;
-
-				if (cachedProfile?.id) fetchedProfile = await libs.getProfileById(cachedProfile.id);
-				else fetchedProfile = await libs.getProfileByWalletAddress(address);
-
-				const profileToUse = normalizeProfile({ ...fetchedProfile });
-
-				cacheProfile(address, profileToUse);
-				if (profileToUse?.id && !IS_BASE_MODE) {
-					cacheProfileById(profileToUse.id, profileToUse);
-				}
-
-				return profileToUse;
-			} catch (e: any) {
-				console.error(e);
-				if (!options.silent) {
-					addNotification(language?.errorGettingProfile ?? 'Error getting profile', 'warning');
-				}
-				return cachedProfile?.id ? normalizeProfile(cachedProfile) : undefined;
-			}
-		}
-	}
 
 	function normalizeProfile(profile: any) {
 		if (!profile) return profile;

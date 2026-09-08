@@ -8,13 +8,15 @@ import { WordPressImport } from 'editor/components/organisms/WordPressImport';
 
 import { Panel } from 'components/atoms/Panel';
 import { AO_NODE, ASSET_UPLOAD, PORTAL_PATCH_MAP, PORTAL_POST_DATA, URLS } from 'helpers/config';
-import { IS_BASE_MODE } from 'helpers/features';
+import { IS_BASE_MODE, PORTAL_CAPABILITIES } from 'helpers/features';
+import { registerPortalUpload } from 'helpers/portalMedia';
 import {
 	ArticleStatusType,
 	PortalDetailType,
 	PortalHeaderType,
 	PortalPatchMapEnum,
 	PortalPermissionsType,
+	PortalUploadType,
 	PortalUserType,
 } from 'helpers/types';
 import {
@@ -77,9 +79,11 @@ interface PortalContextState {
 	setPostStatus: (postId: string, status: ArticleStatusType) => Promise<void>;
 	openCurrentPortalSite: () => Promise<void>;
 	refreshCurrentPortal: (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => void;
+	addPortalUpload: (upload: PortalUploadType) => Promise<void>;
 	fetchPortalUserProfile: (user: PortalUserType) => void;
 	usersByPortalId: any;
 	updating: boolean;
+	loadError: string | null;
 	updateAvailable: boolean;
 }
 
@@ -101,9 +105,11 @@ const DEFAULT_CONTEXT = {
 	setPostStatus: async () => {},
 	openCurrentPortalSite: async () => {},
 	refreshCurrentPortal() {},
+	addPortalUpload: async () => {},
 	fetchPortalUserProfile(_user: PortalUserType) {},
 	usersByPortalId: {},
 	updating: false,
+	loadError: null,
 	updateAvailable: false,
 };
 
@@ -134,6 +140,26 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	const patchMapRef = React.useRef(false);
 	const portalsRequestRef = React.useRef(0);
 	const portalHeadersRef = React.useRef(new Map<string, PortalHeaderType>());
+	const externalUsersRequestsRef = React.useRef(new Map<string, { libs: any; promise: Promise<any> }>());
+	const userProfileRequestsRef = React.useRef(new Map<string, Promise<void>>());
+	const routePortalId = location.pathname.split('/').filter(Boolean)[0] || null;
+	const portalSessionRef = React.useRef({
+		walletAddress: arProvider.walletAddress,
+		portalId: routePortalId,
+		libs: permawebProvider.libs,
+	});
+	if (
+		portalSessionRef.current.walletAddress !== arProvider.walletAddress ||
+		portalSessionRef.current.portalId !== routePortalId ||
+		portalSessionRef.current.libs !== permawebProvider.libs
+	) {
+		// Each visit has its own identity, including when returning to the same portal.
+		portalSessionRef.current = {
+			walletAddress: arProvider.walletAddress,
+			portalId: routePortalId,
+			libs: permawebProvider.libs,
+		};
+	}
 
 	const [portals, setPortals] = React.useState<PortalHeaderType[] | null>(null);
 	const [invites, setInvites] = React.useState<PortalHeaderType[] | null>(null);
@@ -141,12 +167,17 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	const [currentId, setCurrentId] = React.useState<string | null>(null);
 	const [current, setCurrent] = React.useState<PortalDetailType | null>(null);
+	const currentRef = React.useRef(current);
+	currentRef.current = current;
+	const mediaWritesRef = React.useRef<Promise<void>>(Promise.resolve());
 	const [permissions, setPermissions] = React.useState<PortalPermissionsType | null>(null);
 	const [transfers, _setTransfers] = React.useState<any>([]);
 
 	const [refreshCurrentTrigger, setRefreshCurrentTrigger] = React.useState<boolean>(false);
 	const [refreshFields, setRefreshFields] = React.useState<PortalPatchMapEnum[] | null>(null);
 	const [updating, setUpdating] = React.useState<boolean>(false);
+	const [loadError, setLoadError] = React.useState<string | null>(null);
+	const [portalLoadTrigger, setPortalLoadTrigger] = React.useState(0);
 	const [updateAvailable, setUpdateAvailable] = React.useState<boolean>(false);
 
 	const [showPortalManager, setShowPortalManager] = React.useState<boolean>(false);
@@ -173,7 +204,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 	React.useEffect(() => {
 		setCurrent(null);
+		setCurrentId(null);
 		setPortals(null);
+		setInvites(null);
+		setUsersByPortalId({});
+		setLoadError(null);
 		portalsRequestRef.current += 1;
 		portalHeadersRef.current.clear();
 		if (!arProvider.walletAddress) {
@@ -182,13 +217,15 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	}, [arProvider.walletAddress]);
 
 	React.useEffect(() => {
+		let cancelled = false;
 		if (permawebProvider.profile?.id) {
 			const requestId = ++portalsRequestRef.current;
 			const profilePortals = permawebProvider.profile?.portals ?? [];
 			const routePortalId = location.pathname.split('/').filter(Boolean)[0] || null;
 			// Profile data is enough for portal cards. External user lists are only needed
 			// while composing a cross-portal post, so avoid loading every portal on home.
-			const hydrateExternalPortalUsers = /\/post\/(?:create|edit)(?:\/|$)/.test(location.pathname);
+			const hydrateExternalPortalUsers =
+				PORTAL_CAPABILITIES.CROSS_POSTING && /\/post\/(?:create|edit)(?:\/|$)/.test(location.pathname);
 			const portalHeaders = profilePortals.map((portal: PortalHeaderType) => {
 				const hydrated = portalHeadersRef.current.get(portal.id);
 				const cached = getCachedPortal(portal.id);
@@ -225,33 +262,40 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					const updated: PortalHeaderType[] = [];
 					let cursor = 0;
 					const workers = Array.from({ length: Math.min(2, headersToHydrate.length) }, async () => {
-						while (cursor < headersToHydrate.length) {
+						while (!cancelled && cursor < headersToHydrate.length) {
 							const portal = headersToHydrate[cursor++];
 							try {
-								const response = fixBooleanStrings(
-									permawebProvider.libs.mapFromProcessCase(
-										await permawebProvider.libs.readState({ processId: portal.id })
-									)
-								);
-
-								let overview: any = {};
-								if (response?.overview) overview = parseField(PortalPatchMapEnum.Overview, response);
-
-								let users: any = {};
-								if (response?.users) users = parseField(PortalPatchMapEnum.Users, response);
-
+								let request = externalUsersRequestsRef.current.get(portal.id);
+								if (request?.libs !== permawebProvider.libs) {
+									const promise = permawebProvider.libs
+										.readState({ processId: portal.id, path: PortalPatchMapEnum.Users, hydrate: true })
+										.then((response: any) =>
+											parseField(
+												PortalPatchMapEnum.Users,
+												fixBooleanStrings(permawebProvider.libs.mapFromProcessCase(response)),
+												PortalPatchMapEnum.Users
+											)
+										);
+									request = { libs: permawebProvider.libs, promise };
+									externalUsersRequestsRef.current.set(portal.id, request);
+									void promise
+										.finally(() => {
+											if (externalUsersRequestsRef.current.get(portal.id)?.promise === promise) {
+												externalUsersRequestsRef.current.delete(portal.id);
+											}
+										})
+										.catch(() => {});
+								}
+								const users = await request.promise;
+								if (cancelled) return;
 								const hydrated = {
 									...portal,
-									engineReferenceId:
-										overview.engineReference ?? overview.store?.engineReference ?? portal.engineReferenceId ?? null,
-									name: overview.name ?? overview.store?.name ?? 'None',
-									logo: overview.banner ?? overview.logo ?? overview.store?.logo ?? 'None',
-									icon: overview.thumbnail ?? overview.icon ?? overview.store?.icon ?? 'None',
-									users: users.users ?? getPortalUsers(users.roles),
+									users: users?.users ?? getPortalUsers(users?.roles),
 								};
 								portalHeadersRef.current.set(portal.id, hydrated);
 								updated.push(hydrated);
 							} catch (e) {
+								if (cancelled) return;
 								debugLog(
 									'warn',
 									'PortalProvider',
@@ -276,7 +320,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 						}
 					});
 					await Promise.all(workers);
-					if (portalsRequestRef.current === requestId) {
+					if (!cancelled && portalsRequestRef.current === requestId) {
 						const hydratedById = new Map(updated.map((portal) => [portal.id, portal]));
 						setPortals(
 							(currentPortals) =>
@@ -286,27 +330,33 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				})();
 			}
 		}
+		return () => {
+			cancelled = true;
+		};
 	}, [
 		arProvider.walletAddress,
 		permawebProvider.profile?.id,
 		permawebProvider.profile?.portals,
 		permawebProvider.profile?.invites,
 		location.pathname,
+		permawebProvider.libs,
 	]);
 
 	React.useEffect(() => {
 		if (portals !== null) {
 			const routePortalId = location.pathname.split('/').filter(Boolean)[0] || null;
-			const currentPortal = portals.find((portal) => location.pathname.startsWith(`/${portal.id}`));
+			const currentPortal = portals.find((portal) => portal.id === routePortalId);
 			const portalIdToLoad =
 				currentPortal?.id || (IS_BASE_MODE && routePortalId && checkValidAddress(routePortalId) ? routePortalId : null);
 			if (portalIdToLoad) {
 				if (currentId !== portalIdToLoad) {
+					setLoadError(null);
 					setPermissions(null);
 					setCurrentId(portalIdToLoad);
 					setCurrent(null);
 				}
 			} else {
+				setLoadError(null);
 				setPermissions({ base: false });
 				setCurrentId(null);
 				setCurrent(null);
@@ -321,31 +371,55 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	}, [location.pathname, portals, currentId]);
 
 	React.useEffect(() => {
-		(async function () {
+		if (
+			!currentId ||
+			currentId !== routePortalId ||
+			!permawebProvider.libs ||
+			!arProvider.walletAddress ||
+			!permawebProvider.profile?.id
+		)
+			return;
+
+		let cancelled = false;
+		let retryTimer: ReturnType<typeof setTimeout>;
+		const session = portalSessionRef.current;
+		const isCurrent = () => !cancelled && portalSessionRef.current === session;
+		const cachedPortal = getCachedPortal(currentId);
+		if (cachedPortal && currentRef.current?.id !== currentId) setCurrent(cachedPortal);
+		const permissionAddress = IS_BASE_MODE ? arProvider.walletAddress : permawebProvider.profile.id;
+		const cachedPerms = getCachedPermissions(currentId, permissionAddress);
+		if (cachedPerms) setPermissions(cachedPerms);
+		setLoadError(null);
+
+		const load = async (attempt: number) => {
 			try {
-				if (!current && currentId && permawebProvider.libs) {
-					const cachedPortal = getCachedPortal(currentId);
-					if (cachedPortal) setCurrent(cachedPortal);
-
-					// Load cached permissions if available
-					const permissionAddress = IS_BASE_MODE ? arProvider.walletAddress : permawebProvider.profile?.id;
-					if (permissionAddress) {
-						const cachedPerms = getCachedPermissions(currentId, permissionAddress);
-						if (cachedPerms) setPermissions(cachedPerms);
-					}
-
-					await fetchPortal();
+				await fetchPortal({ isCurrent });
+			} catch (error: any) {
+				if (!isCurrent()) return;
+				if (attempt < 2) {
+					retryTimer = setTimeout(() => void load(attempt + 1), 1000 * (attempt + 1));
+				} else {
+					setLoadError(error.message ?? 'Unable to load this portal. Please try again.');
 				}
-			} catch (e: any) {
-				debugLog('error', 'PortalProvider', 'Error getting portal:', e.message ?? 'Unknown error');
-				addNotification(e.message ?? 'An error occurred getting this portal', 'warning');
 			}
-		})();
-	}, [current, currentId, permawebProvider.libs]);
+		};
+		void load(0);
+		return () => {
+			cancelled = true;
+			clearTimeout(retryTimer);
+		};
+	}, [
+		currentId,
+		routePortalId,
+		permawebProvider.libs,
+		arProvider.walletAddress,
+		permawebProvider.profile?.id,
+		portalLoadTrigger,
+	]);
 
 	React.useEffect(() => {
 		(async function () {
-			if (current && refreshFields && refreshFields.length > 0) {
+			if (current?.id === routePortalId && refreshFields && refreshFields.length > 0) {
 				try {
 					refreshFields.forEach((field) => {
 						debugLog('info', 'PortalProvider', `Refreshing field ${field}`);
@@ -354,7 +428,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				} catch (e: any) {
 					debugLog('error', 'PortalProvider', 'Error refreshing portal:', e.message ?? 'Unknown error');
 				} finally {
-					setRefreshFields(null);
+					setRefreshFields((fields) => (fields === refreshFields ? null : fields));
 				}
 			}
 		})();
@@ -364,9 +438,14 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		patchKey?: string;
 		patchKeys?: string[];
 		portalId?: string;
+		isCurrent?: () => boolean;
 	}): Promise<PortalDetailType | void> => {
 		const idToFetch = opts?.portalId ?? currentId;
 		if (!idToFetch) return;
+		const session = portalSessionRef.current;
+		if (!opts?.portalId && session.portalId !== idToFetch) return;
+		const sessionIsCurrent = () => portalSessionRef.current === session && (!opts?.isCurrent || opts.isCurrent());
+		if (!sessionIsCurrent()) return;
 
 		setUpdating(true);
 		try {
@@ -374,7 +453,7 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 
 			if (opts?.patchKeys && opts.patchKeys.length > 0) {
 				const responses = await Promise.all(
-					opts.patchKeys.map((key) =>
+					[...new Set(opts.patchKeys)].map((key) =>
 						permawebProvider.libs
 							.readState({
 								processId: idToFetch,
@@ -463,6 +542,16 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				transfers = parseField(PortalPatchMapEnum.Transfers, response, opts?.patchKey);
 			}
 
+			// A completed request for the previous route must not replace the active portal.
+			if (!sessionIsCurrent()) return;
+			if (
+				!opts?.patchKey &&
+				!opts?.patchKeys?.length &&
+				(!overview || typeof overview !== 'object' || !users?.roles || typeof users.roles !== 'object')
+			) {
+				throw new Error('Portal data is not available yet. Please try again.');
+			}
+
 			/* Check for node updates and add the new node address as an authority */
 			if (
 				overview?.authorities &&
@@ -500,41 +589,42 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 					arProvider.walletAddress === overview?.owner
 			);
 
+			const previous = currentRef.current?.id === idToFetch ? currentRef.current : null;
 			const portalState: PortalDetailType = filterRemoved({
 				id: idToFetch,
 				mode: overview?.mode ?? (IS_BASE_MODE ? 'base' : 'process'),
-				manifestTxId: overview?.manifestTxId ?? current?.manifestTxId ?? null,
-				rootTxId: overview?.rootTxId ?? current?.rootTxId ?? null,
-				siteTxId: overview?.siteTxId ?? current?.siteTxId ?? null,
-				engineReferenceId: overview?.engineReference ?? current?.engineReferenceId ?? null,
-				name: overview?.name ?? current?.name ?? null,
-				logo: overview?.banner ?? overview?.logo ?? current?.logo ?? null,
-				icon: overview?.thumbnail ?? overview?.icon ?? current?.icon ?? null,
-				wallpaper: overview?.wallpaper ?? current?.wallpaper ?? null,
-				owner: overview?.owner ?? current?.owner ?? null,
-				moderation: overview?.moderation ?? current?.moderation ?? null,
-				assets: posts?.index ? getPortalAssets(posts.index) : current?.assets ?? [],
-				featuredPosts: posts?.featuredPosts ?? current?.featuredPosts ?? [],
-				requests: requests?.indexRequests ?? current?.requests ?? null,
-				categories: navigation?.categories ?? current?.categories ?? [],
-				topics: navigation?.topics ?? current?.topics ?? [],
-				links: navigation?.links ?? current?.links ?? [],
-				uploads: media?.uploads ?? current?.uploads ?? [],
-				fonts: presentation?.fonts ?? current?.fonts ?? null,
-				themes: presentation?.themes ?? current?.themes ?? null,
-				pages: presentation?.pages ?? current?.pages ?? null,
-				layout: presentation?.layout ?? current?.layout ?? null,
+				manifestTxId: overview?.manifestTxId ?? previous?.manifestTxId ?? null,
+				rootTxId: overview?.rootTxId ?? previous?.rootTxId ?? null,
+				siteTxId: overview?.siteTxId ?? previous?.siteTxId ?? null,
+				engineReferenceId: overview?.engineReference ?? previous?.engineReferenceId ?? null,
+				name: overview?.name ?? previous?.name ?? null,
+				logo: overview?.banner ?? overview?.logo ?? previous?.logo ?? null,
+				icon: overview?.thumbnail ?? overview?.icon ?? previous?.icon ?? null,
+				wallpaper: overview?.wallpaper ?? previous?.wallpaper ?? null,
+				owner: overview?.owner ?? previous?.owner ?? null,
+				moderation: overview?.moderation ?? previous?.moderation ?? null,
+				assets: posts?.index ? getPortalAssets(posts.index) : previous?.assets ?? [],
+				featuredPosts: posts?.featuredPosts ?? previous?.featuredPosts ?? [],
+				requests: requests?.indexRequests ?? previous?.requests ?? null,
+				categories: navigation?.categories ?? previous?.categories ?? [],
+				topics: navigation?.topics ?? previous?.topics ?? [],
+				links: navigation?.links ?? previous?.links ?? [],
+				uploads: media?.uploads ?? previous?.uploads ?? [],
+				fonts: presentation?.fonts ?? previous?.fonts ?? null,
+				themes: presentation?.themes ?? previous?.themes ?? null,
+				pages: presentation?.pages ?? previous?.pages ?? null,
+				layout: presentation?.layout ?? previous?.layout ?? null,
 				postPreviews: mergePostPreviews(
-					presentation?.postPreviews === undefined ? current?.postPreviews : undefined,
+					presentation?.postPreviews === undefined ? previous?.postPreviews : undefined,
 					presentation?.layout?.postPreviews,
 					presentation?.postPreviews
 				),
-				users: users?.roles ? getPortalUsers(users.roles) : current?.users ?? null,
-				roleOptions: users?.roleOptions ?? current?.roleOptions ?? null,
-				permissions: users?.permissions ?? current?.permissions ?? null,
-				domains: navigation?.domains ?? current?.domains ?? [],
-				monetization: monetization ?? current?.monetization ?? null,
-				transfers: transfers?.transfers ?? current?.transfers ?? [],
+				users: users?.roles ? getPortalUsers(users.roles) : previous?.users ?? null,
+				roleOptions: users?.roleOptions ?? previous?.roleOptions ?? null,
+				permissions: users?.permissions ?? previous?.permissions ?? null,
+				domains: navigation?.domains ?? previous?.domains ?? [],
+				monetization: monetization ?? previous?.monetization ?? null,
+				transfers: transfers?.transfers ?? previous?.transfers ?? [],
 			});
 
 			const permissionAddress = IS_BASE_MODE ? arProvider.walletAddress : permawebProvider.profile?.id;
@@ -570,10 +660,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			}
 			return portalState;
 		} catch (e: any) {
-			console.error(e);
+			if (!sessionIsCurrent()) return;
 			debugLog('error', 'PortalProvider', 'Failed to fetch portal data:', e.message ?? 'Unknown error');
+			throw e;
 		} finally {
-			setUpdating(false);
+			if (sessionIsCurrent()) setUpdating(false);
 		}
 	};
 
@@ -607,45 +698,47 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	}
 
 	async function fetchPortalUserProfile(user: PortalUserType) {
-		try {
-			// If profile is already loaded in state, skip fetching
-			if (usersByPortalId?.[user.address]) {
-				return;
-			}
-
-			let profile: any = null;
-			if (user.address === permawebProvider.profile?.id) {
-				profile = { ...permawebProvider.profile };
-			} else {
-				const cachedProfile = getCachedProfile(user.address);
-				if (cachedProfile) profile = cachedProfile;
-
-				if (profile?.id) {
-					setUsersByPortalId((prev) => ({
-						...prev,
-						[profile.id]: profile,
-					}));
-				}
-
-				try {
-					const freshProfile = await permawebProvider.libs.getProfileById(user.address, { hydrate: true });
-					if (freshProfile) {
-						profile = freshProfile;
-						cacheProfile(user.address, profile);
+		if (!user.address || usersByPortalId?.[user.address]) return;
+		const requestKey = `${arProvider.walletAddress ?? ''}:${user.address}`;
+		const pending = userProfileRequestsRef.current.get(requestKey);
+		if (pending) return pending;
+		const walletAddress = arProvider.walletAddress;
+		const request = (async () => {
+			try {
+				let profile: any = null;
+				if (user.address === permawebProvider.profile?.id) {
+					profile = { ...permawebProvider.profile };
+				} else {
+					profile = getCachedProfile(user.address);
+					if (profile?.id) {
+						setUsersByPortalId((prev) => ({ ...prev, [user.address]: profile }));
 					}
-				} catch (e: any) {
-					debugLog('error', 'PortalProvider', 'Error fetching profile:', e.message ?? 'Unknown error');
+					try {
+						// Author/member labels need identity only, never that person's portal list.
+						const freshProfile = await permawebProvider.libs.getProfileById(user.address, {
+							hydrate: true,
+							...(IS_BASE_MODE ? { includePortals: false } : {}),
+						});
+						if (freshProfile) {
+							profile = freshProfile;
+							cacheProfile(user.address, profile);
+						}
+					} catch (e: any) {
+						debugLog('error', 'PortalProvider', 'Error fetching profile:', e.message ?? 'Unknown error');
+					}
 				}
+				if (profile?.id && portalSessionRef.current.walletAddress === walletAddress) {
+					setUsersByPortalId((prev) => ({ ...prev, [user.address]: profile }));
+				}
+			} catch (e: any) {
+				debugLog('error', 'PortalProvider', 'Error fetching user profile:', e.message ?? 'Unknown error');
 			}
-
-			if (profile?.id) {
-				setUsersByPortalId((prev) => ({
-					...prev,
-					[profile.id]: profile,
-				}));
-			}
-		} catch (e: any) {
-			debugLog('error', 'PortalProvider', 'Error fetching user profile:', e.message ?? 'Unknown error');
+		})();
+		userProfileRequestsRef.current.set(requestKey, request);
+		try {
+			await request;
+		} finally {
+			if (userProfileRequestsRef.current.get(requestKey) === request) userProfileRequestsRef.current.delete(requestKey);
 		}
 	}
 
@@ -1219,11 +1312,45 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 	}
 
 	const refreshCurrentPortal = (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => {
+		if (!field || !current) {
+			setPortalLoadTrigger((previous) => previous + 1);
+			return;
+		}
 		if (field) {
 			const fieldsArray = Array.isArray(field) ? field : [field];
 			setRefreshFields(fieldsArray);
 		}
 		setRefreshCurrentTrigger((prev) => !prev);
+	};
+
+	const addPortalUpload = async (upload: PortalUploadType) => {
+		const portalId = current?.id;
+		const walletAddress = arProvider.walletAddress;
+		const write = mediaWritesRef.current
+			.catch(() => undefined)
+			.then(async () => {
+				if (currentRef.current?.id !== portalId || portalSessionRef.current.walletAddress !== walletAddress) {
+					throw new Error('The active portal or wallet changed. Please try again.');
+				}
+				const uploads = await registerPortalUpload({
+					portalId,
+					wallet: arProvider.wallet,
+					libs: permawebProvider.libs,
+					upload,
+					uploads: currentRef.current?.uploads,
+					waitForUpdate: permawebProvider.deps?.ao?.result
+						? (message) => permawebProvider.deps.ao.result({ process: portalId, message })
+						: undefined,
+				});
+				if (currentRef.current?.id !== portalId || portalSessionRef.current.walletAddress !== walletAddress) return;
+				// Show confirmed media immediately; a fresh node read can still return the old uploads list.
+				const updated = { ...currentRef.current, uploads };
+				currentRef.current = updated;
+				cachePortal(portalId, updated);
+				setCurrent(updated);
+			});
+		mediaWritesRef.current = write;
+		return write;
 	};
 
 	const openCurrentPortalSite = async () => {
@@ -1405,9 +1532,11 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 				setPostStatus,
 				openCurrentPortalSite,
 				refreshCurrentPortal: (field?: PortalPatchMapEnum | PortalPatchMapEnum[]) => refreshCurrentPortal(field),
+				addPortalUpload,
 				fetchPortalUserProfile: (userRole: PortalUserType) => fetchPortalUserProfile(userRole),
 				usersByPortalId: usersByPortalId,
 				updating,
+				loadError,
 				updateAvailable,
 				transfers,
 			}}

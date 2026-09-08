@@ -4,7 +4,7 @@ export const Wrapper = styled.div<{ maxHeight?: number; noWrapper?: boolean }>`
 	max-height: ${(props) => (props.maxHeight ? `${props.maxHeight.toString()}px` : 'none')};
 	padding: ${(props) => (props.noWrapper ? '0' : '10px 15px 15px 15px')};
 	font-family: ${(props) => props.theme.typography.family.alt2};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
 	letter-spacing: 0;
 	position: relative;
@@ -28,7 +28,7 @@ export const Header = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-size: ${(props) => props.theme.typography.size.lg};
 	}
 `;
@@ -38,7 +38,7 @@ export const Placeholder = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 	}
 `;

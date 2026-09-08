@@ -6,7 +6,7 @@ import { createLitePostPreview } from 'engine-lite/data';
 import { EngineLitePostPreview } from 'engine-lite/preview';
 import { debounce } from 'lodash';
 
-import { ArticleBlocks } from 'editor/components/molecules/ArticleBlocks';
+import { ArticleBlocks, useArticleBlockShortcuts } from 'editor/components/molecules/ArticleBlocks';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPostUpdate } from 'editor/store/post';
@@ -67,6 +67,10 @@ export default function ArticleToolbar(props: {
 
 	const titleRef = React.useRef<any>(null);
 	const prevDesktopRef = React.useRef<boolean>(desktop);
+	useArticleBlockShortcuts({
+		addBlock: props.addBlock,
+		disabled: currentPost.editor.loading.active || !portalProvider.current?.id,
+	});
 
 	const hasChanges = hasUnsavedPostChanges(currentPost.data, currentPost.originalData);
 	const isEmpty =
@@ -97,7 +101,7 @@ export default function ArticleToolbar(props: {
 	}, [debouncedResize]);
 
 	React.useEffect(() => {
-		if (titleRef && titleRef.current) titleRef.current.focus();
+		if (titleRef && titleRef.current) titleRef.current.focus({ preventScroll: true });
 	}, [titleRef]);
 
 	React.useEffect(() => {
@@ -123,13 +127,30 @@ export default function ArticleToolbar(props: {
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.ctrlKey) {
-				if (event.key.toLowerCase() === 'k') {
+			if (event.defaultPrevented || event.isComposing) return;
+			if (event.ctrlKey && !event.metaKey && !event.altKey) {
+				const previewShortcut = event.key.toLowerCase() === 'p' && !event.shiftKey;
+				const toolkitShortcut = event.key.toLowerCase() === 'k' && !event.shiftKey;
+				if (previewShortcut || toolkitShortcut) {
 					event.preventDefault();
-					handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
+					if (
+						event.repeat ||
+						currentPost.editor.loading.active ||
+						!portalProvider.current?.id ||
+						document.querySelector('[role="dialog"][aria-modal="true"]')
+					)
+						return;
+					if (toolkitShortcut) {
+						handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
+					} else {
+						setPreviewOpen(true);
+						setShowDropdown(false);
+					}
+					return;
 				}
 				if (event.key.toLowerCase() === 'l') {
 					event.preventDefault();
+					if (event.repeat) return;
 					handleCurrentPostUpdate({ field: 'blockEditMode', value: !currentPost.editor.blockEditMode });
 				}
 			}
@@ -151,7 +172,13 @@ export default function ArticleToolbar(props: {
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [currentPost.data, currentPost.editor.blockEditMode, currentPost.editor.panelOpen]);
+	}, [
+		currentPost.data,
+		currentPost.editor.blockEditMode,
+		currentPost.editor.panelOpen,
+		currentPost.editor.loading.active,
+		portalProvider.current?.id,
+	]);
 
 	React.useEffect(() => {
 		const handleFocus = () => {
@@ -216,6 +243,7 @@ export default function ArticleToolbar(props: {
 	function getOptionsDropdown() {
 		const actions = [
 			<button
+				aria-keyshortcuts={'Control+k'}
 				onClick={() =>
 					handleOptionDropdownAction(() => {
 						handleCurrentPostUpdate({ field: 'panelOpen', value: !currentPost.editor.panelOpen });
@@ -239,6 +267,7 @@ export default function ArticleToolbar(props: {
 				<span>CTRL + L</span>
 			</button>,
 			<button
+				aria-keyshortcuts={'Control+p'}
 				onClick={() =>
 					handleOptionDropdownAction(() => {
 						setPreviewOpen(true);
@@ -247,6 +276,7 @@ export default function ArticleToolbar(props: {
 			>
 				<ReactSVG src={ICONS.show} />
 				<p>{language?.preview}</p>
+				<span>CTRL + P</span>
 			</button>,
 		];
 
