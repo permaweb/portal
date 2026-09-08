@@ -162,11 +162,11 @@ test('pending transaction checks share the foreground gateway concurrency budget
 		return url.endsWith('/graphql') ? indexedResponse(JSON.parse(options.body).variables.ids) : { ok: true };
 	});
 	const pending = refreshPendingTransactions(address, portalId);
-	const foreground = Array.from({ length: 12 }, (_, index) =>
+	const foreground = Array.from({ length: 24 }, (_, index) =>
 		withBaseReadLimit(() => fetch(`https://arweave.net/foreground-${index}`))
 	);
 	await Promise.all([pending, ...foreground]);
-	assert.equal(maximum, 4);
+	assert.equal(maximum, 16);
 	assert.deepEqual(await pending, []);
 });
 

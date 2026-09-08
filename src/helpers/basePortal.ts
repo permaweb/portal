@@ -1,4 +1,4 @@
-import { invalidateBaseQueries, queryBaseGateway, withBaseReadLimit } from './basePortalRequests';
+import { BASE_READ_LIMITS, invalidateBaseQueries, queryBaseGateway, withBaseReadLimit } from './basePortalRequests';
 import { DEFAULT_FONTS, ENGINE_LITE_REFERENCE_ID, PAGES, PORTAL_DATA, STORAGE, THEME } from './config';
 import { trackObservedPendingTransaction, trackPendingTransaction } from './pendingTransactions';
 import { PortalHeaderType, PortalUserRoleType, PortalUserType } from './types';
@@ -10,7 +10,6 @@ const BASE_SCHEMA_VERSION = '2.1.0';
 const ARWEAVE_ID = /^[a-zA-Z0-9_-]{43}$/;
 const BASE_RESOLVE_TTL_MS = 10_000;
 const PORTAL_HEADER_TTL_MS = 30_000;
-const TRANSACTION_FETCH_CONCURRENCY = 8;
 const CHECKPOINT_RELEASE_INTERVAL = 50;
 const CHECKPOINT_TAIL_BYTES = 250_000;
 const TRANSACTION_CACHE_NAME = 'portal-base-transactions-v1';
@@ -1014,12 +1013,20 @@ async function applyRelease(
 	for (const postId of postChanges?.remove || []) {
 		if (typeof postId === 'string') posts.delete(postId);
 	}
-	for (const [postId, postTxId] of Object.entries(postChanges?.upsert || {})) {
-		// Discovery only needs post identities to replay ordering/removal. Bodies
-		// are validated by the full resolver when the user opens the portal.
-		const post = cardOnly
-			? ({ id: postId, postTxId } as BasePortalPost)
-			: knownPosts[postId] || (await fetchPostRevision(postTxId, parent.portalId, postId, posts.get(postId)));
+	// Post bodies within a release are independent reads. Fetch them concurrently,
+	// then apply in source order so response timing cannot change post ordering.
+	const upserts = await mapWithConcurrency(
+		Object.entries(postChanges?.upsert || {}),
+		BASE_READ_LIMITS.transactions,
+		async ([postId, postTxId]) => {
+			// Card discovery still avoids fetching post bodies entirely.
+			const post = cardOnly
+				? ({ id: postId, postTxId } as BasePortalPost)
+				: knownPosts[postId] || (await fetchPostRevision(postTxId, parent.portalId, postId, posts.get(postId)));
+			return { postId, postTxId, post };
+		}
+	);
+	for (const { postId, postTxId, post } of upserts) {
 		if (!post) return null;
 		posts.set(postId, { ...post, id: postId, postTxId });
 	}
@@ -1192,7 +1199,7 @@ async function latestManifestForPortal(
 				tagValue(node, 'Type') !== 'portal-checkpoint' &&
 				!includedCheckpointIds.has(node.id)
 		);
-	const loaded = await mapWithConcurrency(tailNodes, TRANSACTION_FETCH_CONCURRENCY, async (node) => ({
+	const loaded = await mapWithConcurrency(tailNodes, BASE_READ_LIMITS.transactions, async (node) => ({
 		node,
 		transaction: await fetchPortalTransaction(node.id),
 	}));
@@ -2365,7 +2372,7 @@ async function discoverBasePortalCards(address: string) {
 			...nodes.map((node) => tagValue(node, 'Portal-Id')).filter((id): id is string => Boolean(id)),
 		])
 	);
-	const cards = await mapWithConcurrency(portalIds, 2, async (portalId) => {
+	const cards = await mapWithConcurrency(portalIds, BASE_READ_LIMITS.portals, async (portalId) => {
 		try {
 			return await fetchBasePortalCard(portalId);
 		} catch {

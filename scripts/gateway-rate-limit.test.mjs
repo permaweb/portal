@@ -6,7 +6,10 @@ import vm from 'node:vm';
 import ts from 'typescript';
 
 const source = ts.transpileModule(
-	readFileSync(new URL('../src/helpers/gatewayRateLimit.ts', import.meta.url), 'utf8'),
+	readFileSync(new URL('../src/helpers/gatewayRateLimit.ts', import.meta.url), 'utf8').replaceAll(
+		'import.meta.env',
+		'gatewayTestEnv'
+	),
 	{ compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }
 ).outputText;
 const DEFAULTS = {
@@ -17,13 +20,21 @@ const DEFAULTS = {
 };
 const START = Date.UTC(2026, 8, 8, 12);
 const plain = (value) => JSON.parse(JSON.stringify(value));
+const retryOnly = (fetchOverride, storage, locks) => runtime(fetchOverride, storage, locks, {});
 const flush = async () => {
 	for (let i = 0; i < 20; i++) await Promise.resolve();
 	await new Promise(setImmediate);
 	for (let i = 0; i < 20; i++) await Promise.resolve();
 };
 
-function runtime(fetchOverride = () => new Response('ok'), storage = new Map(), locks) {
+// The existing pacing-policy tests explicitly opt in; retryOnly() below exercises
+// the shipped default with no environment override.
+function runtime(
+	fetchOverride = () => new Response('ok'),
+	storage = new Map(),
+	locks,
+	env = { VITE_ENABLE_GATEWAY_PACING: 'true' }
+) {
 	let now = START;
 	let timerId = 0;
 	const timers = new Map();
@@ -39,6 +50,7 @@ function runtime(fetchOverride = () => new Response('ok'), storage = new Map(), 
 		return fetchOverride(input, init, calls.length);
 	};
 	const context = vm.createContext({
+		gatewayTestEnv: env,
 		AbortController,
 		AbortSignal,
 		DOMException,
@@ -129,6 +141,158 @@ test('code can update the current configuration without persisting browser prefe
 		assert.throws(() => api.setGatewayRateLimitConfig(invalid));
 		assert.deepEqual(plain(api.getGatewayRateLimitConfig()), config);
 	}
+});
+
+test('default traffic starts concurrently without pacing, a four-request cap, budget writes, or Web Locks', async () => {
+	const releases = [];
+	const { api, calls, context, storage } = retryOnly(
+		() => new Promise((resolve) => releases.push(resolve)),
+		undefined,
+		{
+			request() {
+				throw new Error('Successful traffic must not acquire Web Locks');
+			},
+		}
+	);
+	api.installGatewayFetch();
+	const requests = Array.from({ length: 32 }, (_, i) => context.fetch(`https://arweave.net/${i}`));
+	await flush();
+	assert.equal(api.GATEWAY_PACING_ENABLED, false);
+	assert.equal(calls.length, 32);
+	assert.ok(calls.every(({ at }) => at === START));
+	assert.equal(api.getGatewayRequestSnapshot().activeRequests, 32);
+	assert.equal(api.getGatewayRequestSnapshot().queuedRequests, 0);
+	assert.equal(api.getGatewayRequestSnapshot().pacingEnabled, false);
+	assert.equal(api.getGatewayRequestSnapshot().requestsPerSecond, null);
+	assert.equal(storage.size, 0);
+	for (const release of releases) release(new Response('ok'));
+	await Promise.all(requests);
+	assert.equal(api.getGatewayRequestSnapshot().activeRequests, 0);
+	assert.equal(api.getGatewayRequestSnapshot().totalRequests, 32);
+});
+
+test('only the explicit true feature flag enables proactive pacing', async () => {
+	for (const flag of ['false', '', '1']) {
+		const { api, calls } = runtime(undefined, undefined, undefined, { VITE_ENABLE_GATEWAY_PACING: flag });
+		await Promise.all([api.gatewayFetch('https://arweave.net/one'), api.gatewayFetch('https://arweave.net/two')]);
+		assert.equal(api.getGatewayRequestSnapshot().pacingEnabled, false);
+		assert.ok(calls.every(({ at }) => at === START));
+	}
+	assert.equal(runtime().api.getGatewayRequestSnapshot().pacingEnabled, true);
+});
+
+test('default mode ignores old persisted pacing debt and configuration cannot reintroduce request delays', async () => {
+	const key = 'portal:gateway-request-budget:v1';
+	const saved = JSON.stringify({
+		lastRequestAt: START,
+		cooldownUntil: START + 300000,
+		balance: -120,
+		updatedAt: START,
+		requests: [START],
+		totalRequests: 999,
+		rateLimitResponses: 1,
+	});
+	const storage = new Map([[key, saved]]);
+	const { api, calls } = retryOnly(undefined, storage);
+	api.setGatewayRateLimitConfig({ ...DEFAULTS, 'rate-limit-requests': 1, 'rate-limit-min': -1000000 });
+	await Promise.all(Array.from({ length: 8 }, (_, i) => api.gatewayFetch(`https://arweave.net/${i}`)));
+	assert.equal(calls.length, 8);
+	assert.ok(calls.every(({ at }) => at === START));
+	assert.equal(api.getGatewayRequestSnapshot().cooldownUntil, 0);
+	assert.equal(storage.size, 1);
+	assert.equal(storage.get(key), saved);
+});
+
+test('default 429 fallback starts at two seconds and backs off to thirty seconds without inferred debt delays', async () => {
+	const { api, calls, advance } = retryOnly((_, __, attempt) => new Response('', { status: attempt < 8 ? 429 : 200 }));
+	const request = api.gatewayFetch('https://arweave.net/data');
+	await flush();
+	assert.equal(api.getGatewayRequestSnapshot().retryingRequests, 1);
+	await advance(1999);
+	assert.equal(calls.length, 1);
+	await advance(118001);
+	assert.equal((await request).status, 200);
+	assert.deepEqual(
+		calls.map(({ at }) => at - START),
+		[0, 2000, 6000, 14000, 30000, 60000, 90000, 120000]
+	);
+	assert.equal(api.getGatewayRequestSnapshot().retryingRequests, 0);
+	assert.equal(api.getGatewayRequestSnapshot().rateLimitResponses, 7);
+});
+
+test('default retries honor long Retry-After seconds and dates, then release ordinary traffic without spacing', async () => {
+	for (const retryAfter of ['600', new Date(START + 600000).toUTCString()]) {
+		const { api, calls, advance } = retryOnly(
+			(_, __, attempt) =>
+				new Response('', { status: attempt === 1 ? 429 : 200, headers: { 'Retry-After': retryAfter } })
+		);
+		const request = api.gatewayFetch('https://arweave.net/limited');
+		await flush();
+		const queued = api.gatewayFetch('https://arweave.net/queued');
+		await advance(600000);
+		assert.equal(calls.length, 1);
+		await advance(1000);
+		assert.ok((await Promise.all([request, queued])).every(({ status }) => status === 200));
+		assert.equal(calls.length, 3);
+		assert.equal(calls[1].at, calls[2].at);
+		assert.ok(calls[1].at > START + 600000);
+	}
+});
+
+test('actual default-mode cooldowns survive reloads without restoring old pacing budgets', async () => {
+	const storage = new Map();
+	const original = retryOnly(() => new Response('', { status: 429 }), storage);
+	const controller = new AbortController();
+	const rejected = assert.rejects(
+		original.api.gatewayFetch('https://arweave.net/data', { signal: controller.signal }),
+		{
+			name: 'AbortError',
+		}
+	);
+	await flush();
+	controller.abort();
+	await rejected;
+	assert.equal(original.api.getGatewayRequestSnapshot().retryingRequests, 0);
+	assert.equal(storage.has('portal:gateway-request-budget:v1'), false);
+	assert.ok(storage.has('portal:gateway-retry-cooldown:v1'));
+	const reloaded = retryOnly(undefined, storage);
+	const request = reloaded.api.gatewayFetch('https://arweave.net/data');
+	await reloaded.advance(1999);
+	assert.equal(reloaded.calls.length, 0);
+	await reloaded.advance(1);
+	assert.equal((await request).status, 200);
+	assert.equal(reloaded.calls.length, 1);
+});
+
+test('default retries replay POST bodies and do not consume the network-attempt timeout while waiting', async () => {
+	const bodies = [];
+	const { api, advance } = retryOnly(async (input, _init, attempt) => {
+		bodies.push(await input.text());
+		return new Response('ok', { status: attempt === 1 ? 429 : 200 });
+	});
+	const request = api.fetchGatewayWithTimeout(
+		'https://arweave.net/graphql',
+		{ method: 'POST', body: '{"query":"x"}' },
+		50
+	);
+	await advance(2000);
+	assert.equal((await request).status, 200);
+	assert.deepEqual(bodies, ['{"query":"x"}', '{"query":"x"}']);
+});
+
+test('default-mode cancellation while waiting does not send a request or leave retry state active', async () => {
+	const { api, calls, advance } = retryOnly(() => new Response('', { status: 429 }));
+	const controller = new AbortController();
+	const request = api.gatewayFetch('https://arweave.net/data', { signal: controller.signal });
+	const rejected = assert.rejects(request, { name: 'AbortError' });
+	await flush();
+	controller.abort();
+	await rejected;
+	await advance(60000);
+	assert.equal(calls.length, 1);
+	assert.equal(api.getGatewayRequestSnapshot().retryingRequests, 0);
+	assert.equal(api.getGatewayRequestSnapshot().activeRequests, 0);
+	assert.equal(api.getGatewayRequestSnapshot().queuedRequests, 0);
 });
 
 test('arweave.net and its subdomains share pacing while other destinations bypass the queue', async () => {

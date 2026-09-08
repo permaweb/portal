@@ -1,8 +1,66 @@
 # Gateway request limits
 
-Portal paces application requests to `arweave.net` and its subdomains using the
-HyperBEAM Edge rate limiter settings. Configure `DEFAULT_GATEWAY_RATE_LIMIT` in
-`src/helpers/gatewayRateLimit.ts`; there are no network settings controls in the UI.
+Proactive gateway pacing is **off by default**, including in
+`npm run build:editor:base`. Ordinary requests start without artificial spacing,
+without the limiter's four-request concurrency cap, and without per-request
+budget writes or Web Locks. Request counters remain available in memory.
+Retries and the retry notification still apply to actual HTTP 429 responses.
+
+The conservative pacing policy is available through a build-time feature flag:
+
+```sh
+VITE_ENABLE_GATEWAY_PACING=true npm run build:editor:base
+```
+
+The same flag works with the other Portal build commands. Leave it unset or set
+it to `false` for the faster default. There are no network settings controls in
+the UI. Rebuild and deploy to change this flag on the live application.
+
+## Responses with status 429
+
+An actual 429 pauses new gateway attempts while the shared cooldown is active.
+Portal honors `Retry-After` in seconds or HTTP-date form, adds recovery time and
+jitter, and increases the backoff when a request is repeatedly rate limited.
+A server-provided deadline is never shortened by the backoff cap.
+
+In the default mode, a missing or unreadable `Retry-After` starts at about two
+seconds plus jitter. Repeated failures double this delay up to 30 seconds plus
+jitter. This mode does not infer an 81-second wait from the configured maximum
+IP debt. Ordinary traffic resumes without artificial spacing after the cooldown.
+Actual cooldowns persist across reloads and coordinate across same-origin tabs;
+legacy pacing budgets and their inferred cooldowns are ignored by this mode.
+
+Retries continue until the request receives a response other than 429 or is
+cancelled. A persistent notification says requests are being retried. Network
+errors and other HTTP statuses keep their existing handling. Request bodies are
+preserved for retries, and explicit attempt timeouts exclude the cooldown wait.
+
+## Base-mode read concurrency
+
+Base-mode loaders have a separate concurrency ceiling, configured in
+`BASE_READ_LIMITS` in `src/helpers/basePortalRequests.ts`:
+
+| Work                         | Concurrency |
+| ---------------------------- | ----------: |
+| Shared gateway reads         |          16 |
+| Portal cards loading at once |           8 |
+| Transaction/post-body reads  |          16 |
+
+Portal, profile, transaction, and pending-transaction reads all share the
+16-request ceiling. These worker counts do not multiply the network limit, and
+they add no time-based pacing. Concurrent duplicate reads and cached responses
+continue to be reused.
+
+Post bodies within a release load concurrently, then apply in their original
+order. Releases themselves still apply in dependency order with full validation;
+an invalid post prevents the entire release from being accepted. Card discovery
+continues to skip post bodies. Enabling proactive gateway pacing adds that
+policy's tighter limits on top of these loader limits.
+
+## Optional proactive pacing
+
+When `VITE_ENABLE_GATEWAY_PACING=true`, Portal uses the HyperBEAM Edge settings
+in `DEFAULT_GATEWAY_RATE_LIMIT` in `src/helpers/gatewayRateLimit.ts`:
 
 | Setting               | Default | Meaning on HyperBEAM Edge                            |
 | --------------------- | ------: | ---------------------------------------------------- |
@@ -11,49 +69,39 @@ HyperBEAM Edge rate limiter settings. Configure `DEFAULT_GATEWAY_RATE_LIMIT` in
 | `rate-limit-max`      |    1200 | Maximum accumulated token balance for an IP address. |
 | `rate-limit-min`      |    -120 | Lowest balance after continued rejected requests.    |
 
-Application code can call `setGatewayRateLimitConfig(config)` to apply validated
-limits immediately, including to queued requests, for the current page. Runtime
-overrides are not persisted; browser preferences cannot override the code defaults.
-Request budgets and cooldowns still persist and coordinate across same-origin tabs.
-`getGatewayRequestSnapshot()` exposes request counts, queue activity, estimated
-balance, and cooldown for programmatic inspection.
+Edge uses a replenishing balance. The default recharge rate is
+`360 / 240 = 1.5` tokens per second. Every request costs one token, including a
+rejected request, and succeeds only when the balance after the debit is greater
+than zero. An idle IP can accumulate up to 1200 tokens.
 
-These values do not change the gateway's server configuration. Portal does not
-automatically discover server configuration; update the code when the gateway
-configuration changes.
+The opt-in policy schedules requests at 80% of that recharge rate: about 1.2
+requests per second, with at least 834 milliseconds between starts, and at most
+four active requests. It starts with a conservative estimated balance instead
+of assuming that the IP has its full burst allowance. This can make request-heavy
+screens much slower, which is why it is no longer the default.
 
-## Pacing and measurements
+With pacing enabled, the configured minimum balance also provides a conservative
+429 fallback of roughly 81 seconds when no `Retry-After` is readable. Exponential
+backoff can grow to five minutes, and longer server deadlines remain honored.
 
-Edge uses a replenishing balance, rather than a fixed request window. The default
-recharge rate is `360 / 240 = 1.5` tokens per second. Every request costs one
-token, including a rejected request, and succeeds only when the balance **after
-the debit is greater than zero**. An idle IP can accumulate up to 1200 tokens.
+Application code can call `setGatewayRateLimitConfig(config)` to update the
+validated settings for the current page. This adjusts queued pacing when the
+feature is enabled; it does not enable pacing when the feature flag is off.
+Runtime overrides are not persisted. These values do not change the gateway's
+server configuration, and Portal does not automatically discover server settings.
 
-Portal starts conservatively instead of assuming that the IP has its full burst
-balance. It schedules requests at 80% of the configured recharge rate: about
-1.2 requests per second, with at least 834 milliseconds between starts for the
-defaults. It also limits concurrent requests. The headroom helps accommodate
-other gateway traffic from the same IP.
+## Measurements and coordination
 
-The request count measures scheduled fetch attempts, including retries. The
-rolling count uses the configured period. The balance is a local estimate, not
-a reading from the gateway. Tabs coordinate budgets and cooldowns through
-browser storage and Web Locks where supported. Browsers without Web Locks have
-best-effort sharing; browsers that block storage keep an in-memory budget.
+`getGatewayRequestSnapshot()` exposes request counts, queue activity, local
+estimated balance, actual cooldown, and `pacingEnabled`. `requestsPerSecond` is
+`null` when pacing is disabled because no proactive rate is enforced. Counts
+measure application fetch attempts, including retries, over the configured period.
+The estimated balance is not a reading from the gateway.
 
-## Responses with status 429
-
-A 429 pauses all queued gateway requests. Portal honors `Retry-After` in either
-seconds or HTTP-date form, adds recovery time and jitter, and increases the
-backoff when a request is repeatedly rate limited. Edge's `Retry-After` normally
-only recharges a negative balance back to zero, so waiting for another token
-before retrying is necessary. With no readable header, the configured minimum
-balance gives a conservative fallback of roughly 81 seconds at the defaults.
-
-Retries continue until the request receives a response other than 429 or is
-cancelled. A persistent notification says requests are being retried. Queued work
-also observes later programmatic changes to the configured limits.
-Network errors and other HTTP statuses keep their existing handling.
+In the default mode, counters are per page and only actual retry cooldowns are
+persisted. With proactive pacing enabled, budgets and counters are also shared
+through browser storage and Web Locks. Browsers without Web Locks have
+best-effort coordination; browsers that block storage use in-memory state.
 
 ## Assets and browser coverage
 

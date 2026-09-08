@@ -13,6 +13,7 @@ interface ImportMetaEnv {
 	readonly VITE_ENABLE_PAYMENTS?: string;
 	readonly VITE_ENABLE_UPLOADS?: string;
 	readonly VITE_ENABLE_WANDER_AUTH?: string;
+	readonly VITE_ENABLE_GATEWAY_PACING?: string;
 	readonly VITE_PERMAWEBOS_WALLET_URL?: string;
 }
 

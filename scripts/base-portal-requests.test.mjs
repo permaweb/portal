@@ -116,35 +116,37 @@ function runtime(transactions = fixture(), fetchOverride) {
 		fetch: async (url, init) => {
 			calls.push({ url, init });
 			if (offline) return new Response('', { status: 429 });
-			if (fetchOverride) return fetchOverride(url, init);
-			if (url.endsWith('/graphql')) {
-				const { query, variables } = JSON.parse(init.body);
-				let nodes = transactions
-					.map((tx) => tx.node)
-					.filter(
-						(node) =>
-							(!variables.ids || variables.ids.includes(node.id)) &&
-							(variables.tags || []).every((filter) =>
-								node.tags.some((tag) => tag.name === filter.name && filter.values.includes(tag.value))
-							)
-					);
-				if (query.includes('HEIGHT_DESC')) nodes = nodes.reverse();
-				const start = variables.after ? Number(variables.after) : 0;
-				const limit = variables.first || 100;
-				return Response.json({
-					data: {
-						transactions: {
-							pageInfo: { hasNextPage: nodes.length > start + limit },
-							edges: nodes
-								.slice(start, start + limit)
-								.map((node, index) => ({ node, cursor: String(start + index + 1) })),
+			const respond = () => {
+				if (url.endsWith('/graphql')) {
+					const { query, variables } = JSON.parse(init.body);
+					let nodes = transactions
+						.map((tx) => tx.node)
+						.filter(
+							(node) =>
+								(!variables.ids || variables.ids.includes(node.id)) &&
+								(variables.tags || []).every((filter) =>
+									node.tags.some((tag) => tag.name === filter.name && filter.values.includes(tag.value))
+								)
+						);
+					if (query.includes('HEIGHT_DESC')) nodes = nodes.reverse();
+					const start = variables.after ? Number(variables.after) : 0;
+					const limit = variables.first || 100;
+					return Response.json({
+						data: {
+							transactions: {
+								pageInfo: { hasNextPage: nodes.length > start + limit },
+								edges: nodes
+									.slice(start, start + limit)
+									.map((node, index) => ({ node, cursor: String(start + index + 1) })),
+							},
 						},
-					},
-				});
-			}
-			const txId = url.split('/').at(-1);
-			const tx = transactions.find((entry) => entry.node.id === txId);
-			return tx?.body ? Response.json(tx.body) : new Response('', { status: 404 });
+					});
+				}
+				const txId = url.split('/').at(-1);
+				const tx = transactions.find((entry) => entry.node.id === txId);
+				return tx?.body ? Response.json(tx.body) : new Response('', { status: 404 });
+			};
+			return fetchOverride ? fetchOverride(url, init, respond) : respond();
 		},
 	});
 	function load(name) {
@@ -189,6 +191,166 @@ function runtime(transactions = fixture(), fetchOverride) {
 	};
 }
 const plain = (value) => JSON.parse(JSON.stringify(value));
+const flush = () => new Promise(setImmediate);
+const numberedId = (prefix, index) => prefix + String(index).padStart(42, '0');
+
+// Hold selected cold reads until the test releases them. Finishing a batch in
+// reverse order exposes accidental result-order changes caused by parallelism.
+function heldReads(matches) {
+	const held = new Map();
+	let maximum = 0;
+	const fetch = (url, init, respond) => {
+		if (!matches(url, init)) return respond();
+		return new Promise((resolve) => {
+			held.set(url + (init?.body || ''), () => resolve(respond()));
+			maximum = Math.max(maximum, held.size);
+		});
+	};
+	return {
+		fetch,
+		get count() {
+			return held.size;
+		},
+		get maximum() {
+			return maximum;
+		},
+		async drain() {
+			while (held.size) {
+				const batch = [...held.values()].reverse();
+				held.clear();
+				batch.forEach((release) => release());
+				await flush();
+			}
+		},
+	};
+}
+
+function multiPostFixture(count = 20) {
+	const transactions = fixture().filter(
+		(tx) => tx.node.tags.find((tag) => tag.name === 'Type')?.value !== 'portal-post'
+	);
+	const postIds = Array.from({ length: count }, (_, index) => numberedId('t', index));
+	transactions.find((tx) => tx.node.id === RELEASE).body.changes.posts.upsert = Object.fromEntries(
+		postIds.map((txId) => [txId, txId])
+	);
+	postIds.forEach((txId, index) =>
+		transactions.push(
+			transaction(txId, 'portal-post', {
+				type: 'portal-post',
+				mode: 'base',
+				portalId: PORTAL,
+				post: { title: `Post ${index}`, content: [] },
+			})
+		)
+	);
+	return { transactions, postIds };
+}
+
+test('cold portal discovery starts eight portals together while keeping their results independent', async () => {
+	const transactions = [];
+	for (let index = 0; index < 10; index++) {
+		const portalId = numberedId('p', index);
+		transactions.push(
+			transaction(
+				numberedId('r', index),
+				'portal-manifest',
+				{
+					...fixture()[0].body,
+					portalId,
+					name: `Portal ${index}`,
+				},
+				{ 'Portal-Id': portalId, 'Portal-User': MEMBER }
+			)
+		);
+		transactions.push(
+			transaction(
+				numberedId('a', index),
+				'portal-membership',
+				{},
+				{
+					'Portal-Id': portalId,
+					'Portal-User': MEMBER,
+					'Membership-Status': 'accepted',
+				},
+				MEMBER
+			)
+		);
+	}
+	const reads = heldReads(
+		(url, init) =>
+			url.endsWith('/graphql') && JSON.parse(init.body).variables.tags?.some((tag) => tag.name === 'Portal-Id')
+	);
+	const { api } = runtime(transactions, reads.fetch);
+	const loading = api.discoverBasePortals(MEMBER);
+	await flush();
+	assert.equal(reads.count, 8, 'eight histories must start before any finishes');
+	await reads.drain();
+	const result = await loading;
+	assert.equal(result.portals.length, 10);
+	assert.equal(new Set(result.portals.map((portal) => portal.name)).size, 10);
+	assert.equal(reads.maximum, 8);
+});
+
+test('cold transaction replay fills sixteen read slots and still applies releases in dependency order', async () => {
+	const transactions = [fixture()[0]];
+	const releaseIds = Array.from({ length: 20 }, (_, index) => numberedId('s', index));
+	releaseIds.forEach((txId, index) =>
+		transactions.push(
+			transaction(
+				txId,
+				'portal-release',
+				{
+					type: 'portal-release',
+					mode: 'base',
+					portalId: PORTAL,
+					rootTxId: ROOT,
+					previousTxId: releaseIds[index - 1] || ROOT,
+					authorAddress: OWNER,
+					changes: { name: `Release ${index}` },
+				},
+				{ 'Previous-Tx': releaseIds[index - 1] || ROOT },
+				OWNER,
+				index + 2
+			)
+		)
+	);
+	const reads = heldReads((url) => releaseIds.includes(url.split('/').at(-1)));
+	const { api } = runtime(transactions, reads.fetch);
+	const loading = api.fetchBasePortal(PORTAL);
+	await flush();
+	assert.equal(reads.count, 16);
+	await reads.drain();
+	const result = await loading;
+	assert.equal(result.name, 'Release 19');
+	assert.equal(result.manifestTxId, releaseIds.at(-1));
+	assert.equal(reads.maximum, 16);
+});
+
+test('a multi-post release downloads sixteen bodies together and preserves post order despite out-of-order responses', async () => {
+	const { transactions, postIds } = multiPostFixture();
+	const reads = heldReads((url) => postIds.includes(url.split('/').at(-1)));
+	const { api } = runtime(transactions, reads.fetch);
+	const loading = api.fetchBasePortal(PORTAL);
+	await flush();
+	assert.equal(reads.count, 16, 'post hydration must not await each body serially');
+	await reads.drain();
+	const result = await loading;
+	assert.equal(result.name, 'Updated');
+	assert.deepEqual(plain(result.posts.map((post) => post.id)), postIds);
+	assert.equal(reads.maximum, 16);
+});
+
+test('one invalid post still rejects the entire parallel-hydrated release without caching partial state', async () => {
+	const { transactions, postIds } = multiPostFixture(8);
+	transactions.find((tx) => tx.node.id === postIds.at(-1)).body.portalId = id('x');
+	const { api, storage } = runtime(transactions);
+	const result = await api.fetchBasePortal(PORTAL);
+	assert.equal(result.name, 'Original');
+	assert.equal(result.posts.length, 0);
+	const saved = JSON.parse(storage.get(`basePortal:${PORTAL}`));
+	assert.equal(saved.name, 'Original');
+	assert.equal(saved.posts.length, 0);
+});
 
 test('home discovery gets current cards and membership without fetching post bodies or probing site IDs', async () => {
 	const { api, calls, storage } = runtime();
@@ -268,7 +430,7 @@ test('read budget bounds concurrent gateway traffic across callers and releases 
 			})
 		)
 	);
-	assert.equal(maximum, 4);
+	assert.equal(maximum, 16);
 	assert.equal(results.filter((result) => result.status === 'fulfilled').length, 19);
 	assert.equal(await requests.withBaseReadLimit(async () => 'ready'), 'ready');
 });

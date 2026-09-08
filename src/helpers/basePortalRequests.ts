@@ -1,6 +1,10 @@
-// All base-portal reads share a budget, including concurrent portal/profile
-// loads. A per-portal worker limit alone multiplies the gateway burst.
-const READ_CONCURRENCY = 4;
+// Code-only tuning for cold loads. All portal/profile/transaction workers share
+// the request ceiling, so additional workers cannot multiply network concurrency.
+export const BASE_READ_LIMITS = {
+	requests: 16,
+	portals: 8,
+	transactions: 16,
+} as const;
 const QUERY_TTL_MS = 10_000;
 let activeReads = 0;
 let queryGeneration = 0;
@@ -9,7 +13,7 @@ const queryCache = new Map<string, { value: any; expiresAt: number }>();
 const queryRequests = new Map<string, Promise<any>>();
 
 export async function withBaseReadLimit<T>(read: () => Promise<T>): Promise<T> {
-	if (activeReads >= READ_CONCURRENCY) await new Promise<void>((resolve) => waitingReads.push(resolve));
+	if (activeReads >= BASE_READ_LIMITS.requests) await new Promise<void>((resolve) => waitingReads.push(resolve));
 	else activeReads += 1;
 	try {
 		return await read();

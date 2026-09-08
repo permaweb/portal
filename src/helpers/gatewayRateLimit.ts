@@ -5,6 +5,10 @@ export type GatewayRateLimitConfig = {
 	'rate-limit-min': number;
 };
 
+// Opt in only when a deployment needs proactive throttling. Keep this module
+// independent of SDK/feature imports so fetch is installed before SDK evaluation.
+export const GATEWAY_PACING_ENABLED = import.meta.env.VITE_ENABLE_GATEWAY_PACING === 'true';
+
 // Configure the gateway limits here. Runtime code can override them with
 // setGatewayRateLimitConfig(); browser preferences never override these values.
 export const DEFAULT_GATEWAY_RATE_LIMIT: GatewayRateLimitConfig = {
@@ -16,9 +20,14 @@ export const DEFAULT_GATEWAY_RATE_LIMIT: GatewayRateLimitConfig = {
 
 const BUDGET_KEY = 'portal:gateway-request-budget:v1';
 const LOCK_KEY = 'portal:gateway-request-budget:v1';
+// Retry-only mode must not inherit estimated debt or long inferred cooldowns
+// persisted by the older, always-on pacing policy.
+const RETRY_KEY = 'portal:gateway-retry-cooldown:v1';
 const SAFETY_FACTOR = 0.8;
 const MAX_CONCURRENCY = 4;
 const MAX_BACKOFF_MS = 300_000;
+const RETRY_ONLY_BASE_MS = 2000;
+const RETRY_ONLY_MAX_MS = 30_000;
 
 type Budget = {
 	lastRequestAt: number | null;
@@ -32,6 +41,7 @@ type Budget = {
 
 export type GatewayRequestSnapshot = {
 	config: GatewayRateLimitConfig;
+	pacingEnabled: boolean;
 	requestsInPeriod: number;
 	totalRequests: number;
 	queuedRequests: number;
@@ -40,7 +50,7 @@ export type GatewayRequestSnapshot = {
 	rateLimitResponses: number;
 	cooldownUntil: number;
 	estimatedBalance: number;
-	requestsPerSecond: number;
+	requestsPerSecond: number | null;
 };
 
 function validateConfig(value: unknown): GatewayRateLimitConfig {
@@ -127,7 +137,7 @@ class GatewayRequestManager {
 
 	constructor() {
 		globalThis.addEventListener?.('storage', (event: StorageEvent) => {
-			if (event.key === BUDGET_KEY || event.key === null) this.changed();
+			if (event.key === BUDGET_KEY || event.key === RETRY_KEY || event.key === null) this.changed();
 		});
 	}
 
@@ -151,7 +161,7 @@ class GatewayRequestManager {
 	}
 
 	private readBudget() {
-		const saved = (this.budgetStorageAvailable ? readStorage(BUDGET_KEY) : null) as Budget;
+		const saved = (GATEWAY_PACING_ENABLED && this.budgetStorageAvailable ? readStorage(BUDGET_KEY) : null) as Budget;
 		if (
 			saved &&
 			(saved.lastRequestAt === null || Number.isFinite(saved.lastRequestAt)) &&
@@ -162,6 +172,12 @@ class GatewayRequestManager {
 			saved.requests.every((time) => Number.isFinite(time))
 		) {
 			this.budget = saved;
+		}
+		if (!GATEWAY_PACING_ENABLED && this.budgetStorageAvailable) {
+			const retry = readStorage(RETRY_KEY) as { cooldownUntil?: number };
+			if (Number.isFinite(retry?.cooldownUntil)) {
+				this.budget.cooldownUntil = Math.max(this.budget.cooldownUntil, retry.cooldownUntil);
+			}
 		}
 		const now = Date.now();
 		this.budget.balance = Math.min(
@@ -176,7 +192,9 @@ class GatewayRequestManager {
 	private saveBudget() {
 		// A quota failure must not let an older persisted budget replace newer
 		// in-memory starts or cooldowns on the next reservation.
-		this.budgetStorageAvailable = writeStorage(BUDGET_KEY, this.budget);
+		this.budgetStorageAvailable = GATEWAY_PACING_ENABLED
+			? writeStorage(BUDGET_KEY, this.budget)
+			: writeStorage(RETRY_KEY, { cooldownUntil: this.budget.cooldownUntil });
 	}
 
 	private async locked<T>(action: () => T, signal?: AbortSignal): Promise<T> {
@@ -184,7 +202,7 @@ class GatewayRequestManager {
 		if (locks) {
 			let started = false;
 			try {
-				return await locks.request(LOCK_KEY, signal ? { signal } : {}, () => {
+				return await locks.request(GATEWAY_PACING_ENABLED ? LOCK_KEY : RETRY_KEY, signal ? { signal } : {}, () => {
 					started = true;
 					return action();
 				});
@@ -227,24 +245,28 @@ class GatewayRequestManager {
 		try {
 			while (true) {
 				throwIfAborted(signal);
-				const delay = await this.locked(() => {
+				const reserve = () => {
 					throwIfAborted(signal);
-					if (this.active >= MAX_CONCURRENCY) return 1000;
+					if (GATEWAY_PACING_ENABLED && this.active >= MAX_CONCURRENCY) return 1000;
 					const budget = this.readBudget();
 					const now = Date.now();
 					// Recompute from the previous start so live edits affect queued work.
-					const nextStart = budget.lastRequestAt === null ? 0 : budget.lastRequestAt + this.interval();
-					const balanceDelay = Math.max(0, (2 - budget.balance) * this.tokenInterval());
+					const nextStart =
+						GATEWAY_PACING_ENABLED && budget.lastRequestAt !== null ? budget.lastRequestAt + this.interval() : 0;
+					const balanceDelay = GATEWAY_PACING_ENABLED ? Math.max(0, (2 - budget.balance) * this.tokenInterval()) : 0;
 					const delay = Math.max(nextStart - now, budget.cooldownUntil - now, balanceDelay);
 					if (delay > 0) return Math.ceil(delay);
 					budget.balance -= 1;
 					budget.lastRequestAt = now;
 					budget.requests.push(now);
 					budget.totalRequests += 1;
-					this.saveBudget();
+					if (GATEWAY_PACING_ENABLED) this.saveBudget();
 					this.active += 1;
 					return 0;
-				}, signal);
+				};
+				// Successful traffic has no artificial spacing/concurrency cap, Web
+				// Lock contention, or per-request budget writes in the default mode.
+				const delay = GATEWAY_PACING_ENABLED ? await this.locked(reserve, signal) : reserve();
 				if (delay === 0) return;
 				await this.wait(delay, signal);
 			}
@@ -267,12 +289,20 @@ class GatewayRequestManager {
 		}
 		if (!Number.isFinite(serverDelay)) serverDelay = null;
 		const tokenMs = this.tokenInterval();
-		const recoveryMs = Math.max(1000, (1 - this.config['rate-limit-min']) * tokenMs);
+		const recoveryMs = GATEWAY_PACING_ENABLED
+			? Math.max(1000, (1 - this.config['rate-limit-min']) * tokenMs)
+			: RETRY_ONLY_BASE_MS;
 		const baseDelay = serverDelay ?? recoveryMs;
-		const backoff = Math.min(MAX_BACKOFF_MS, Math.max(1000, baseDelay) * Math.pow(2, Math.min(failures - 1, 10)));
+		const backoff = Math.min(
+			GATEWAY_PACING_ENABLED ? MAX_BACKOFF_MS : RETRY_ONLY_MAX_MS,
+			Math.max(1000, baseDelay) * Math.pow(2, Math.min(failures - 1, 10))
+		);
 		// Edge's Retry-After only recovers to zero. Add one token plus jitter,
 		// and never cap a server-specified delay to our exponential-backoff cap.
-		const delay = Math.ceil(Math.max(baseDelay, backoff) + tokenMs + Math.random() * Math.min(1000, tokenMs / 4));
+		const recoveryTokenMs = GATEWAY_PACING_ENABLED || serverDelay !== null ? tokenMs : 0;
+		const delay = Math.ceil(
+			Math.max(baseDelay, backoff) + recoveryTokenMs + Math.random() * Math.min(1000, tokenMs / 4)
+		);
 		await this.locked(() => {
 			const budget = this.readBudget();
 			budget.balance = Math.min(
@@ -366,6 +396,7 @@ class GatewayRequestManager {
 		const budget = this.readBudget();
 		return {
 			config: this.getConfig(),
+			pacingEnabled: GATEWAY_PACING_ENABLED,
 			requestsInPeriod: budget.requests.length,
 			totalRequests: budget.totalRequests,
 			queuedRequests: this.queued,
@@ -374,7 +405,9 @@ class GatewayRequestManager {
 			rateLimitResponses: budget.rateLimitResponses,
 			cooldownUntil: budget.cooldownUntil,
 			estimatedBalance: Math.max(this.config['rate-limit-min'], budget.balance),
-			requestsPerSecond: (this.config['rate-limit-requests'] / this.config['rate-limit-period']) * SAFETY_FACTOR,
+			requestsPerSecond: GATEWAY_PACING_ENABLED
+				? (this.config['rate-limit-requests'] / this.config['rate-limit-period']) * SAFETY_FACTOR
+				: null,
 		};
 	}
 
