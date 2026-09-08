@@ -1,10 +1,10 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 
 import { Types } from '@permaweb/libs';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { TextArea } from 'components/atoms/TextArea';

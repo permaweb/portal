@@ -1,8 +1,8 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 

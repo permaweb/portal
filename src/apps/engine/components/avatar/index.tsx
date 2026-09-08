@@ -1,6 +1,6 @@
-import { ReactSVG } from 'react-svg';
 import { generateColorFromId, getContrastColor } from 'engine/helpers/themes';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
@@ -40,6 +40,8 @@ export default function Avatar(props: AvatarProps) {
 		return (
 			<S.Avatar className={className} $size={size} $bgColor={bgColor} $iconColor={iconColor} $hoverable={hoverable}>
 				<img
+					loading="lazy"
+					decoding="async"
 					className="loadingAvatar"
 					onLoad={(e) => {
 						e.currentTarget.classList.remove('loadingAvatar');

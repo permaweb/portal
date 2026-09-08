@@ -1,8 +1,8 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 import PropTypes from 'prop-types';
 
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { TabType } from 'helpers/types';
 
 import * as S from './styles';

@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 import Avatar from 'engine/components/avatar';
 import ContextMenu, { MenuItem } from 'engine/components/contextMenu';
 import Placeholder from 'engine/components/placeholder';
@@ -8,6 +7,7 @@ import { useModeration } from 'engine/hooks/moderation';
 import { useProfile } from 'engine/hooks/profiles';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 import { getRedirect, urlify } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';

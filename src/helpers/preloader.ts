@@ -1,37 +1,17 @@
+import { getBundledIcon } from './config/iconAssets';
 import { ICONS, ICONS_SOCIAL } from './config';
+import { acquireGatewayAsset, isGatewayAsset } from './gatewayAssets';
 
 export class AssetPreloader {
 	private preloadedAssets = new Set<string>();
 	private loadingPromises = new Map<string, Promise<void>>();
 
-	private preloadImage(url: string): Promise<void> {
-		if (this.preloadedAssets.has(url)) {
-			return Promise.resolve();
-		}
-
-		if (this.loadingPromises.has(url)) {
-			return this.loadingPromises.get(url)!;
-		}
-
-		const promise = new Promise<void>((resolve, reject) => {
-			const img = new Image();
-			img.onload = () => {
-				this.preloadedAssets.add(url);
-				this.loadingPromises.delete(url);
-				resolve();
-			};
-			img.onerror = () => {
-				this.loadingPromises.delete(url);
-				reject(new Error(`Failed to preload image: ${url}`));
-			};
-			img.src = url;
-		});
-
-		this.loadingPromises.set(url, promise);
-		return promise;
-	}
-
 	private async preloadSVG(url: string): Promise<void> {
+		if (getBundledIcon(url) || url.startsWith('data:')) {
+			this.preloadedAssets.add(url);
+			return;
+		}
+
 		if (this.preloadedAssets.has(url)) {
 			return Promise.resolve();
 		}
@@ -40,24 +20,15 @@ export class AssetPreloader {
 			return this.loadingPromises.get(url)!;
 		}
 
-		const promise = new Promise<void>((resolve, reject) => {
-			fetch(url)
-				.then((response) => {
-					if (!response.ok) {
-						throw new Error(`HTTP error! status: ${response.status}`);
-					}
-					return response.text();
-				})
-				.then(() => {
-					this.preloadedAssets.add(url);
-					this.loadingPromises.delete(url);
-					resolve();
-				})
-				.catch((error) => {
-					this.loadingPromises.delete(url);
-					reject(new Error(`Failed to preload SVG: ${url} - ${error.message}`));
-				});
-		});
+		const request = acquireGatewayAsset(url);
+		const promise = request.promise
+			.then(() => {
+				this.preloadedAssets.add(url);
+			})
+			.finally(() => {
+				request.release();
+				this.loadingPromises.delete(url);
+			});
 
 		this.loadingPromises.set(url, promise);
 		return promise;
@@ -65,21 +36,18 @@ export class AssetPreloader {
 
 	private async preloadAsset(url: string): Promise<void> {
 		try {
-			// Determine if asset is likely an SVG based on URL patterns or content type
-			// Most assets in the config appear to be SVGs based on usage with ReactSVG
 			await this.preloadSVG(url);
 		} catch (error) {
-			// Fallback to image preloading if SVG fails
-			try {
-				await this.preloadImage(url);
-			} catch (imgError) {
-				console.warn(`Failed to preload asset: ${url}`, imgError);
-			}
+			console.warn(`Failed to preload asset: ${url}`, error);
 		}
 	}
 
 	async preloadAllAssets(): Promise<void> {
-		const allAssets = [...Object.values(ICONS_SOCIAL), ...Object.values(ICONS)];
+		// Bundled icons are already available. Custom gateway assets remain lazy
+		// so preloading cannot spend the user's shared IP request budget.
+		const allAssets = [...Object.values(ICONS_SOCIAL), ...Object.values(ICONS)].filter(
+			(url): url is string => typeof url === 'string' && !isGatewayAsset(url)
+		);
 
 		const preloadPromises = allAssets.map((url: any) => this.preloadAsset(url));
 
@@ -91,7 +59,9 @@ export class AssetPreloader {
 	}
 
 	async preloadSpecificAssets(assetKeys: string[]): Promise<void> {
-		const urlsToPreload = assetKeys.map((key) => (ICONS_SOCIAL as any)[key] || (ICONS as any)[key]).filter(Boolean);
+		const urlsToPreload = assetKeys
+			.map((key) => (ICONS_SOCIAL as any)[key] || (ICONS as any)[key])
+			.filter((url): url is string => typeof url === 'string');
 
 		const preloadPromises = urlsToPreload.map((url) => this.preloadAsset(url));
 

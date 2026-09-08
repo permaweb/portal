@@ -1,5 +1,4 @@
-import { ReactSVG } from 'react-svg';
-
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ButtonType } from 'helpers/types';
 
 import * as S from './styles';

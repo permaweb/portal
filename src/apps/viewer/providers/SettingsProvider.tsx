@@ -1,8 +1,8 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import WebFont from 'webfontloader';
 
 import { ICONS } from 'helpers/config';
+import { loadPortalFonts } from 'helpers/fonts';
 import { mixRgbChannels, normalizePortalTheme, PortalThemeScheme, rgbChannelsToHex } from 'helpers/portalTheme';
 import { darkTheme, lightTheme, theme } from 'helpers/themes';
 import { PortalThemeType } from 'helpers/types';
@@ -177,12 +177,8 @@ export function SettingsProvider(props: SettingsProviderProps) {
 	]);
 
 	React.useEffect(() => {
-		const fonts = portalProvider.current?.fonts;
-		if (!fonts) return;
-
-		const families = [fonts.headers, fonts.body].filter(Boolean);
-		if (families.length) WebFont.load({ google: { families } });
-	}, [portalProvider.current?.fonts]);
+		loadPortalFonts([portalProvider.current?.fonts?.headers, portalProvider.current?.fonts?.body]);
+	}, [portalProvider.current?.fonts?.headers, portalProvider.current?.fonts?.body]);
 
 	function createThemeFromCustom(currentTheme: PortalThemeType, scheme: PortalThemeScheme) {
 		const palette = normalizePortalTheme(currentTheme).colors[scheme];

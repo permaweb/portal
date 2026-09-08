@@ -1,11 +1,11 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 import Avatar from 'engine/components/avatar';
 import { Panel } from 'engine/components/panel';
 import ProfileEditor from 'engine/components/profileEditor';
 import useNavigate from 'engine/helpers/preview';
 import { LogoSettings, usePortalProvider } from 'engine/providers/portalProvider';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS, STORAGE } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { FEATURES, PORTAL_CAPABILITIES } from 'helpers/features';

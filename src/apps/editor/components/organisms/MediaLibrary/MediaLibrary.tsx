@@ -1,9 +1,9 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
@@ -280,18 +280,18 @@ export default function MediaLibrary(props: {
 	function getUpload(upload: PortalUploadType) {
 		switch (upload.type) {
 			case 'image':
-				return <img src={getTxEndpoint(upload.tx)} />;
+				return <img src={getTxEndpoint(upload.tx)} loading="lazy" decoding="async" />;
 			case 'video':
 				if (upload.thumbnail)
 					return (
 						<>
-							<img src={getTxEndpoint(upload.thumbnail)} />
+							<img src={getTxEndpoint(upload.thumbnail)} loading="lazy" decoding="async" />
 							<div className={'info'}>
 								<span>{language?.video}</span>
 							</div>
 						</>
 					);
-				return <video controls src={getTxEndpoint(upload.tx)} />;
+				return <video controls preload="none" src={getTxEndpoint(upload.tx)} />;
 		}
 	}
 

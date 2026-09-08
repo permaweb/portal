@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ReactSVG } from 'react-svg';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';

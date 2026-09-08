@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 
 import { Notification } from 'components/atoms/Notification';
 import { DOM } from 'helpers/config';
+import { getGatewayRequestSnapshot, subscribeGatewayRequests } from 'helpers/gatewayRateLimit';
+import { GATEWAY_RETRY_MESSAGE, mountGatewayRetryNotice } from 'helpers/gatewayRetryNotice';
 
 interface NotificationItem {
 	id: string;
@@ -35,22 +37,21 @@ export const useNotifications = () => {
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [notifications, setNotifications] = React.useState<NotificationItem[]>([]);
 	const [portalContainer, setPortalContainer] = React.useState<HTMLElement | null>(null);
+	const [gatewayRetrying, setGatewayRetrying] = React.useState(() => getGatewayRequestSnapshot().retryingRequests > 0);
+	const [ownsGatewayNotice, setOwnsGatewayNotice] = React.useState(false);
 
 	React.useEffect(() => {
-		const checkForContainer = () => {
-			const container = document.getElementById(DOM.notification);
-			if (container) {
-				setPortalContainer(container);
-			}
-		};
+		// The gateway may reject the first portal/profile request, before its notification node exists.
+		setPortalContainer(document.getElementById(DOM.notification) || document.body);
+		return mountGatewayRetryNotice({ onRetryNoticeOwnershipChange: setOwnsGatewayNotice });
+	}, []);
 
-		checkForContainer();
-
-		if (!portalContainer) {
-			const timer = setTimeout(checkForContainer, 100);
-			return () => clearTimeout(timer);
-		}
-	}, [portalContainer]);
+	React.useEffect(() => {
+		const update = () => setGatewayRetrying(getGatewayRequestSnapshot().retryingRequests > 0);
+		const unsubscribe = subscribeGatewayRequests(update);
+		update();
+		return unsubscribe;
+	}, []);
 
 	const addNotification = React.useCallback(
 		(message: string, type: 'success' | 'warning', opts?: NotificationOptions) => {
@@ -83,7 +84,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 			{children}
 			{portalContainer &&
 				createPortal(
-					<NotificationStack notifications={notifications} removeNotification={removeNotification} />,
+					<NotificationStack
+						notifications={notifications}
+						removeNotification={removeNotification}
+						gatewayRetrying={gatewayRetrying && ownsGatewayNotice}
+					/>,
 					portalContainer
 				)}
 		</NotificationContext.Provider>
@@ -93,9 +98,22 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 const NotificationStack: React.FC<{
 	notifications: NotificationItem[];
 	removeNotification: (id: string) => void;
-}> = ({ notifications, removeNotification }) => {
+	gatewayRetrying: boolean;
+}> = ({ notifications, removeNotification, gatewayRetrying }) => {
 	return (
 		<div style={{ position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
+			{gatewayRetrying && (
+				<div role="status" aria-live="polite" style={{ marginBottom: notifications.length ? 15 : 0 }}>
+					<Notification
+						message={GATEWAY_RETRY_MESSAGE}
+						type="warning"
+						persistent
+						dismissible={false}
+						wrap
+						callback={null}
+					/>
+				</div>
+			)}
 			{notifications.map((notification, index) => (
 				<div
 					key={notification.id}

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { LanguageSelect } from 'components/molecules/LanguageSelect';
 import { ICONS, STYLING, URLS } from 'helpers/config';
 import * as windowUtils from 'helpers/window';

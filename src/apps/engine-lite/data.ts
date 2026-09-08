@@ -1,4 +1,5 @@
 import { resolvePortalState } from '../../../scripts/resolve-base-portal.mjs';
+import { fetchGatewayWithTimeout } from '../../helpers/gatewayRateLimit';
 
 const ARWEAVE_ID = /^[a-zA-Z0-9_-]{43}$/;
 const ARWEAVE_GATEWAY = 'https://arweave.net';
@@ -310,19 +311,14 @@ async function fetchJSON(url: string, timeout = 25_000) {
 }
 
 async function fetchValue(url: string, timeout = 25_000) {
-	const controller = new AbortController();
-	const timer = window.setTimeout(() => controller.abort(), timeout);
+	// Time only network attempts, so a gateway cooldown cannot exhaust the request timeout.
+	const response = await fetchGatewayWithTimeout(url, { headers: { accept: 'application/json' } }, timeout);
+	if (!response.ok) throw new Error(`Request failed (${response.status})`);
+	const text = await response.text();
 	try {
-		const response = await fetch(url, { signal: controller.signal, headers: { accept: 'application/json' } });
-		if (!response.ok) throw new Error(`Request failed (${response.status})`);
-		const text = await response.text();
-		try {
-			return JSON.parse(text);
-		} catch {
-			return text;
-		}
-	} finally {
-		window.clearTimeout(timer);
+		return JSON.parse(text);
+	} catch {
+		return text;
 	}
 }
 

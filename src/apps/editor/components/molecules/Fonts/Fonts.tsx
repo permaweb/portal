@@ -1,5 +1,4 @@
 import React from 'react';
-import WebFont from 'webfontloader';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
@@ -7,6 +6,7 @@ import { Button } from 'components/atoms/Button';
 import { Loader } from 'components/atoms/Loader';
 import { Select } from 'components/atoms/Select';
 import { DEFAULT_FONTS, FONT_OPTIONS } from 'helpers/config';
+import { loadPortalFonts } from 'helpers/fonts';
 import { PortalPatchMapEnum, SelectOptionType } from 'helpers/types';
 import { debugLog, stripFontWeights } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -32,8 +32,8 @@ export default function Fonts() {
 	const { addNotification } = useNotifications();
 
 	React.useEffect(() => {
-		WebFont.load({ google: { families: FONT_OPTIONS } });
-	}, []);
+		loadPortalFonts([headerFont?.id, bodyFont?.id]);
+	}, [headerFont?.id, bodyFont?.id]);
 
 	const unauthorized = !portalProvider.permissions?.updatePortalMeta;
 
@@ -78,10 +78,6 @@ export default function Fonts() {
 		return FONT_OPTIONS.map((option: string) => ({ id: option, label: stripFontWeights(option) }));
 	}
 
-	function renderFontOption(option: SelectOptionType) {
-		return <span style={{ fontFamily: option.label }}>{option.label}</span>;
-	}
-
 	function getPreview(family: string) {
 		return (
 			<S.Preview fontFamily={family}>
@@ -107,7 +103,6 @@ export default function Fonts() {
 						setActiveOption={(option) => setHeaderFont(option)}
 						options={fontOptions}
 						disabled={unauthorized || loading}
-						renderOption={renderFontOption}
 					/>
 					{getPreview(headerFont.label)}
 				</S.Section>
@@ -118,7 +113,6 @@ export default function Fonts() {
 						setActiveOption={(option) => setBodyFont(option)}
 						options={fontOptions}
 						disabled={unauthorized || loading}
-						renderOption={renderFontOption}
 					/>
 					{getPreview(bodyFont.label)}
 				</S.Section>

@@ -1,6 +1,6 @@
-import { ReactSVG } from 'react-svg';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS_SOCIAL } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 

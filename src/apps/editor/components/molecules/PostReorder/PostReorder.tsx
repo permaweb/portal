@@ -1,11 +1,11 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { ReactSVG } from 'react-svg';
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 import { PortalAssetType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';

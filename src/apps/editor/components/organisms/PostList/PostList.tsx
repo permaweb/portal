@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 
 import { PostRow } from 'editor/components/molecules/PostRow';
 import { User } from 'editor/components/molecules/User';
@@ -7,6 +6,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { Drawer } from 'components/atoms/Drawer';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { Loader } from 'components/atoms/Loader';
 import { Pagination } from 'components/atoms/Pagination';
 import { Panel } from 'components/atoms/Panel';

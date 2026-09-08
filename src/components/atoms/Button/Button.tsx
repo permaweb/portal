@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ButtonType } from 'helpers/types';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 

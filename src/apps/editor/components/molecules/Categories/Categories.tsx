@@ -1,5 +1,4 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { useTheme } from 'styled-components';
 
@@ -8,6 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { Modal } from 'components/atoms/Modal';
 import { Select } from 'components/atoms/Select';
 import { ICONS, STYLING } from 'helpers/config';

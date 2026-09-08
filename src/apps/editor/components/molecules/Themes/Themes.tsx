@@ -1,10 +1,10 @@
 import React from 'react';
 import { HexColorInput, HexColorPicker } from 'react-colorful';
-import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
 import { ICONS } from 'helpers/config';

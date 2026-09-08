@@ -1,3 +1,7 @@
+// Install before SDK modules capture the browser fetch implementation.
+// eslint-disable-next-line simple-import-sort/imports
+import '../../helpers/gatewayFetchBootstrap';
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { HashRouter, useLocation } from 'react-router-dom';
