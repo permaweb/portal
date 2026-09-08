@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { Loader } from 'components/atoms/Loader';
 import { ICONS, URLS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';

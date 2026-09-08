@@ -1,6 +1,6 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -13,6 +13,8 @@ export default function Notification(props: {
 	callback: () => void | null;
 	type: 'success' | 'warning';
 	persistent?: boolean;
+	dismissible?: boolean;
+	wrap?: boolean;
 }) {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
@@ -43,11 +45,13 @@ export default function Notification(props: {
 				<S.Icon warning={props.type === 'warning'}>
 					<ReactSVG src={props.type === 'warning' ? ICONS.warning : ICONS.success} />
 				</S.Icon>
-				<S.Message>{props.message}</S.Message>
+				<S.Message $wrap={props.wrap}>{props.message}</S.Message>
 			</S.MessageWrapper>
-			<S.Close>
-				<Button type={'alt2'} label={language?.dismiss} handlePress={handleClose} />
-			</S.Close>
+			{props.dismissible !== false && (
+				<S.Close>
+					<Button type={'alt2'} label={language?.dismiss} handlePress={handleClose} />
+				</S.Close>
+			)}
 		</S.Wrapper>
 	) : null;
 }

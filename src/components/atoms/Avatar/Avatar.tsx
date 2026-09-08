@@ -1,6 +1,6 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress } from 'helpers/utils';
@@ -24,7 +24,14 @@ export default function Avatar(props: {
 
 	const thumbnail = React.useMemo(() => {
 		if (!hasError && props.owner && props.owner.thumbnail && checkValidAddress(props.owner.thumbnail)) {
-			return <img src={getTxEndpoint(props.owner.thumbnail)} onError={() => setHasError(true)} />;
+			return (
+				<img
+					src={getTxEndpoint(props.owner.thumbnail)}
+					loading="lazy"
+					decoding="async"
+					onError={() => setHasError(true)}
+				/>
+			);
 		} else if (props.loading) {
 			return (
 				<S.LoaderWrapper>

@@ -1,6 +1,5 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 
 import { ProfileManager } from 'editor/components/organisms/ProfileManager';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
@@ -9,6 +8,7 @@ import { useSettingsProvider as useViewerSettingsProvider } from 'viewer/provide
 
 import { Avatar } from 'components/atoms/Avatar';
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { Panel } from 'components/atoms/Panel';
 import { ICONS } from 'helpers/config';
 import { FEATURES, IS_BASE_MODE, PORTAL_CAPABILITIES } from 'helpers/features';

@@ -1,6 +1,5 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ReactSVG } from 'react-svg';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
@@ -8,6 +7,7 @@ import { EditorStoreRootState } from 'editor/store';
 import { currentPageUpdate } from 'editor/store/page';
 
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { IconButton } from 'components/atoms/IconButton';
 import { Panel } from 'components/atoms/Panel';
 import { ARTICLE_BLOCKS, ICONS, PAGE_BLOCKS, POST_PREVIEWS } from 'helpers/config';

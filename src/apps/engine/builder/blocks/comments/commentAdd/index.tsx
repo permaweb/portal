@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { ReactSVG } from 'react-svg';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -24,6 +23,7 @@ import {
 	TextNode,
 } from 'lexical';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';

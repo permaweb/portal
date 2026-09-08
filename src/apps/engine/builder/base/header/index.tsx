@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { NavLink } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 import SocialLinks from 'engine/components/socialLinks';
 import Toggle from 'engine/components/toggle';
 import WalletConnect from 'engine/components/wallet/walletConnect';
@@ -11,9 +10,10 @@ import { initThemes } from 'engine/helpers/themes';
 import { useSettings } from 'engine/hooks/settings';
 import { usePortalProvider } from 'engine/providers/portalProvider';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
-import { getRedirect } from 'helpers/utils';
+import { checkValidAddress, getRedirect } from 'helpers/utils';
 
 import { GlobalStyles } from '../../../global-styles';
 import Search from '../navigation/search';
@@ -93,7 +93,7 @@ export default function Header(props: any) {
 	}
 
 	const renderLogo = (txId: string) => {
-		const url = txId.startsWith('http') ? txId : getTxEndpoint(txId);
+		const url = checkValidAddress(txId) ? getTxEndpoint(txId) : txId;
 
 		if (logoError[txId]) {
 			return <img src={url} alt="Logo" />;

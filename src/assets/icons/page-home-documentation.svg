@@ -1,0 +1,21 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="80" height="80" fill="#1a1a1a"/>
+  <!-- Title -->
+  <rect x="4" y="4" width="50" height="5" rx="0.5" fill="#ddd"/>
+  <!-- Paragraphs -->
+  <rect x="4" y="14" width="72" height="2" rx="0.5" fill="#4a4a4a"/>
+  <rect x="4" y="18" width="68" height="2" rx="0.5" fill="#4a4a4a"/>
+  <rect x="4" y="22" width="72" height="2" rx="0.5" fill="#4a4a4a"/>
+  <rect x="4" y="26" width="60" height="2" rx="0.5" fill="#4a4a4a"/>
+  
+  <rect x="4" y="34" width="70" height="2" rx="0.5" fill="#4a4a4a"/>
+  <rect x="4" y="38" width="72" height="2" rx="0.5" fill="#4a4a4a"/>
+  <rect x="4" y="42" width="65" height="2" rx="0.5" fill="#4a4a4a"/>
+  <rect x="4" y="46" width="72" height="2" rx="0.5" fill="#4a4a4a"/>
+  <rect x="4" y="50" width="55" height="2" rx="0.5" fill="#4a4a4a"/>
+  
+  <rect x="4" y="58" width="72" height="2" rx="0.5" fill="#4a4a4a"/>
+  <rect x="4" y="62" width="68" height="2" rx="0.5" fill="#4a4a4a"/>
+  <rect x="4" y="66" width="72" height="2" rx="0.5" fill="#4a4a4a"/>
+  <rect x="4" y="70" width="40" height="2" rx="0.5" fill="#4a4a4a"/>
+</svg>

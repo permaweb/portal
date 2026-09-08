@@ -55,11 +55,11 @@ export const Icon = styled.div<{ warning: boolean | undefined }>`
 	}
 `;
 
-export const Message = styled.span`
+export const Message = styled.span<{ $wrap?: boolean }>`
 	display: block;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	white-space: nowrap;
+	white-space: ${(props) => (props.$wrap ? 'normal' : 'nowrap')};
 	color: ${(props) => props.theme?.colors?.font?.light1 ?? 'rgba(var(--color-text, 0,0,0), 1)'};
 	font-weight: ${(props) => props.theme?.typography?.weight?.bold ?? '600'} !important;
 	font-size: ${(props) => props.theme?.typography?.size?.xSmall ?? '13px'} !important;

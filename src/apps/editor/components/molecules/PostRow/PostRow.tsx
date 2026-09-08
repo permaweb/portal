@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { IconButton } from 'components/atoms/IconButton';
 import { Modal } from 'components/atoms/Modal';
 import { ICONS, URLS } from 'helpers/config';

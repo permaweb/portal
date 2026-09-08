@@ -1,5 +1,4 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 
 import { ANT, ArconnectSigner, ARIO, fetchAllArNSRecords } from '@ar.io/sdk';
 
@@ -9,6 +8,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { Checkbox } from 'components/atoms/Checkbox';
 import { FormField } from 'components/atoms/FormField';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';

@@ -3,10 +3,11 @@ import { defaultLayout } from 'engine/defaults/layout.defaults';
 import { defaultPages } from 'engine/defaults/pages.defaults';
 // Temp
 import { defaultThemes } from 'engine/defaults/theme.defaults';
-import WebFont from 'webfontloader';
 
+import { DEFAULT_FONTS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { IS_BASE_MODE } from 'helpers/features';
+import { loadPortalFonts } from 'helpers/fonts';
 import { PortalPermissionsType, PortalUserType } from 'helpers/types';
 import { cachePortal, filterRemoved, fixBooleanStrings, getCachedPortal, getPortalUsers } from 'helpers/utils';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
@@ -331,32 +332,25 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		return null;
 	}
 
-	if (portal?.Fonts) {
-		const fonts = portal?.Fonts;
-		const families = [];
+	React.useEffect(() => {
+		if (!portal) return;
+		const body = portal.Fonts?.body || DEFAULT_FONTS.body;
+		const headers = portal.Fonts?.headers || DEFAULT_FONTS.headers;
+		loadPortalFonts([headers, body]);
 
-		if (fonts.headers) families.push(fonts.headers);
-		if (fonts.body) families.push(fonts.body);
-
-		if (families.length > 0) {
-			WebFont.load({
-				google: { families: families },
-				active: () => {
-					const [bodyFont, bodyWeight] = fonts.body.trim().split(':');
-					const bodyWeights = bodyWeight.split(',');
-					document.documentElement.style.setProperty('--font-body', bodyFont);
-					document.documentElement.style.setProperty('--font-body-weight', bodyWeights[0]);
-					document.documentElement.style.setProperty('--font-body-weight-bold', bodyWeights[1]);
-
-					const [headerFont, headerWeight] = fonts.headers.trim().split(':');
-					const headerWeights = headerWeight.split(',');
-					document.documentElement.style.setProperty('--font-header', headerFont);
-					document.documentElement.style.setProperty('--font-header-weight', headerWeights[0]);
-					document.documentElement.style.setProperty('--font-header-weight-bold', headerWeights[1]);
-				},
-			});
+		// CSS applies the font when it becomes available; avoid a font-loader callback
+		// that can apply an older selection after the portal or its preview has changed.
+		for (const [type, font] of [
+			['body', body],
+			['header', headers],
+		]) {
+			const [family, variants = '400,700'] = font.trim().split(':');
+			const [regular = '400', bold = '700'] = variants.split(',');
+			document.documentElement.style.setProperty(`--font-${type}`, family);
+			document.documentElement.style.setProperty(`--font-${type}-weight`, regular);
+			document.documentElement.style.setProperty(`--font-${type}-weight-bold`, bold);
 		}
-	}
+	}, [Boolean(portal), portal?.Fonts?.body, portal?.Fonts?.headers]);
 
 	return (
 		<>

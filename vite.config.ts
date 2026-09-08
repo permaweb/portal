@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
 			port: 3000,
 			build: {
 				sourcemap: false,
+				cssCodeSplit: false,
 				outDir: path.resolve(__dirname, `dist/${app}`),
 				emptyOutDir: true,
 				rollupOptions: {
@@ -27,37 +28,38 @@ export default defineConfig(({ mode }) => {
 						polyfillNode(),
 						{
 							name: 'copy-service-worker',
-							writeBundle() {
+							generateBundle() {
 								const swPath = path.resolve(__dirname, 'public/service-worker.js');
-								const outPath = path.resolve(__dirname, `dist/${app}/service-worker.js`);
 								if (fs.existsSync(swPath)) {
-									fs.copyFileSync(swPath, outPath);
-									console.log('Service worker copied to dist');
+									this.emitFile({ type: 'asset', fileName: 'service-worker.js', source: fs.readFileSync(swPath) });
 								}
 							},
 						},
 					],
 					output: {
+						onlyExplicitManualChunks: true,
 						manualChunks: (id: string) => {
-							if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+							const modulePath = id.replace(/\\/g, '/').split('?')[0];
+							// Keep the bootstrap with SDKs so their source evaluation order is preserved:
+							// installing fetch in a separate chunk can run after SDKs capture native fetch.
+							if (/\/src\/helpers\/gateway(?:RateLimit|FetchBootstrap)\.ts$/.test(modulePath)) {
 								return 'vendor';
 							}
-							if (id.includes('@permaweb/libs') || id.includes('arweave')) {
-								return 'permaweb-libs';
-							}
-							if (id.includes('@stripe/')) {
-								return 'stripe';
-							}
+							// Dependencies import these shims; putting them in the UI would create a cycle.
+							if (/\/src\/helpers\/(?:globalthis|winston-shim)\.ts$/.test(modulePath)) return 'vendor';
 							if (
-								id.includes('html-react-parser') ||
-								id.includes('react-markdown') ||
-								id.includes('react-svg') ||
-								id.includes('webfontloader')
+								modulePath.includes('/node_modules/@monaco-editor/') ||
+								modulePath.endsWith('/src/components/molecules/JSONEditor/JSONEditor.tsx')
 							) {
-								return 'utils';
+								return 'code-editor';
 							}
-
-							return undefined;
+							if (modulePath.includes('/node_modules/@stripe/')) return 'payments';
+							if (modulePath.includes('/node_modules/@wanderapp/connect/')) return 'wander';
+							if (modulePath.includes('/node_modules/')) return 'vendor';
+							// Coalesce route components, shared UI, translations, and documentation:
+							// a navigation should not fan out into dozens of tiny gateway requests.
+							if (modulePath.includes('/src/') || modulePath.includes('/scripts/')) return 'portal-ui';
+							return 'vendor';
 						},
 					},
 				},
@@ -98,11 +100,12 @@ export default defineConfig(({ mode }) => {
 					plugins: [
 						{
 							name: 'copy-engine-lite-service-worker',
-							writeBundle() {
-								fs.copyFileSync(
-									path.resolve(root, 'engine-lite-service-worker.js'),
-									path.resolve(__dirname, `dist/${app}/engine-lite-service-worker.js`)
-								);
+							generateBundle() {
+								this.emitFile({
+									type: 'asset',
+									fileName: 'engine-lite-service-worker.js',
+									source: fs.readFileSync(path.resolve(root, 'engine-lite-service-worker.js')),
+								});
 							},
 						},
 					],

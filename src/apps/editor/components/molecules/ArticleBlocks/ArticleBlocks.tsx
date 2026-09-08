@@ -1,11 +1,11 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ReactSVG } from 'react-svg';
 
 import { EditorStoreRootState } from 'editor/store';
 import { currentPageUpdate } from 'editor/store/page';
 import { currentPostUpdate } from 'editor/store/post';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ARTICLE_BLOCKS } from 'helpers/config';
 import { PORTAL_CAPABILITIES } from 'helpers/features';
 import { ArticleBlockEnum, ArticleBlocksContextType } from 'helpers/types';

@@ -1,7 +1,7 @@
-import { ReactSVG } from 'react-svg';
-import permawebOsIcon from 'assets/permawebos.svg';
+import permawebOsIcon from 'assets/permawebos.svg?inline';
 
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 import { WalletEnum } from 'helpers/types';
 import { useArweaveProvider } from 'providers/ArweaveProvider';

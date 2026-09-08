@@ -78,7 +78,7 @@ export const loadStripeSDK = async () => {
 	if (!FEATURES.PAYMENTS) {
 		throw new Error('Payments are disabled');
 	}
-	return import('@stripe/stripe-js');
+	return import('@stripe/stripe-js/pure');
 };
 
 export const loadAOConnect = async () => {

@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 
 import PageRow from 'editor/components/molecules/PageRow/PageRow';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { Loader } from 'components/atoms/Loader';
 import { ICONS, PAGES, URLS } from 'helpers/config';
 import { PortalPatchMapEnum } from 'helpers/types';

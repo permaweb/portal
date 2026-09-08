@@ -57,14 +57,18 @@ export const GlobalStyle = createGlobalStyle`
     fill: none !important;
   }
 
-  /* Keep monochrome Arweave icon outlines tied to the component's theme color. */
+  /* Keep icon outlines tied to the component's theme color; preserve branded logos. */
   svg.injected-svg[data-src^='https://arweave.net/'][stroke]:not([stroke='none']),
-  svg.injected-svg[data-src^='https://arweave.net/'] [stroke]:not([stroke='none']) {
+  svg.injected-svg[data-src^='https://arweave.net/'] [stroke]:not([stroke='none']),
+  svg.injected-svg[data-portal-icon='true'][stroke]:not([stroke='none']),
+  svg.injected-svg[data-portal-icon='true'] [stroke]:not([stroke='none']) {
     stroke: currentColor !important;
   }
 
   svg.injected-svg[data-src^='https://arweave.net/'][fill='currentColor'],
-  svg.injected-svg[data-src^='https://arweave.net/'] [fill='currentColor'] {
+  svg.injected-svg[data-src^='https://arweave.net/'] [fill='currentColor'],
+  svg.injected-svg[data-portal-icon='true'][fill='currentColor'],
+  svg.injected-svg[data-portal-icon='true'] [fill='currentColor'] {
     fill: currentColor !important;
   }
 

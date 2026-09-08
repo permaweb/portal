@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 import { useTheme } from 'styled-components';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { LanguageSelect } from 'components/molecules/LanguageSelect';
 import { ICONS, URLS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';

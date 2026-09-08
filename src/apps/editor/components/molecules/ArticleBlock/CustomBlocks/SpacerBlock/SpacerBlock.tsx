@@ -1,9 +1,9 @@
 import { useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { ReactSVG } from 'react-svg';
 
 import { EditorStoreRootState } from 'editor/store';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 
 import * as S from './styles';

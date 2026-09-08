@@ -1,6 +1,6 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { IconButton } from 'components/atoms/IconButton';
 import { Portal } from 'components/atoms/Portal';
 import { DOM, ICONS } from 'helpers/config';

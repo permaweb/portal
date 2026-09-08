@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 import { debounce } from 'lodash';
 import { useTheme } from 'styled-components';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';

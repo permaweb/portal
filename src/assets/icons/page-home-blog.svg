@@ -1,0 +1,26 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="80" height="80" fill="#1a1a1a"/>
+  <!-- Featured media -->
+  <rect x="4" y="4" width="44" height="28" rx="1" fill="#3a3a3a"/>
+  <!-- Featured info (no background) -->
+  <rect x="52" y="8" width="10" height="2" rx="0.5" fill="#4a4a4a"/>
+  <rect x="52" y="12" width="22" height="3" rx="0.5" fill="#ddd"/>
+  <rect x="52" y="17" width="20" height="2" rx="0.5" fill="#ddd"/>
+  <rect x="52" y="24" width="14" height="2" rx="0.5" fill="#4a4a4a"/>
+  
+  <!-- Lower half background -->
+  <rect x="0" y="34" width="80" height="46" fill="#000"/>
+  
+  <!-- List items left (6 items) -->
+  <rect x="4" y="36" width="34" height="5" rx="1" fill="#3a3a3a"/>
+  <rect x="4" y="43" width="34" height="5" rx="1" fill="#3a3a3a"/>
+  <rect x="4" y="50" width="34" height="5" rx="1" fill="#3a3a3a"/>
+  <rect x="4" y="57" width="34" height="5" rx="1" fill="#3a3a3a"/>
+  <rect x="4" y="64" width="34" height="5" rx="1" fill="#3a3a3a"/>
+  <rect x="4" y="71" width="34" height="5" rx="1" fill="#3a3a3a"/>
+  
+  <!-- Cards right (3 cards, each height of 2 list items) -->
+  <rect x="42" y="36" width="34" height="12" rx="1" fill="#3a3a3a"/>
+  <rect x="42" y="50" width="34" height="12" rx="1" fill="#3a3a3a"/>
+  <rect x="42" y="64" width="34" height="12" rx="1" fill="#3a3a3a"/>
+</svg>

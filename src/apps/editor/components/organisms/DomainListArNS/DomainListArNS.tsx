@@ -1,5 +1,4 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 
 import { ANT, ArconnectSigner, ARIO, defaultTargetManifestId } from '@ar.io/sdk';
 
@@ -11,6 +10,7 @@ import { RenderUpgradeAndCosts } from 'editor/components/molecules/RenderUpgrade
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { Loader } from 'components/atoms/Loader';
 import { TxAddress } from 'components/atoms/TxAddress';
 import { getArnsCost } from 'helpers/arnsCosts';

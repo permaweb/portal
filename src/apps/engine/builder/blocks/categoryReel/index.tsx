@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 
 import * as S from './styles';

@@ -1,3 +1,8 @@
+// Install before SDK modules capture the browser fetch implementation.
+// eslint-disable-next-line simple-import-sort/imports
+import '../../helpers/gatewayFetchBootstrap';
+
+import { mountGatewayRetryNotice } from '../../helpers/gatewayRetryNotice';
 import editorFavicon from '../editor/favicon.svg';
 
 import {
@@ -24,6 +29,8 @@ const engineScriptUrl =
 	'';
 
 if (!root) throw new Error('Engine Lite requires a #portal element.');
+
+mountGatewayRetryNotice({ showRetryNotice: true });
 
 let portal: LitePortal | null = null;
 let portalId = portalIdFromLocation();

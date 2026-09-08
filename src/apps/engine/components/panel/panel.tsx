@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ReactSVG } from 'react-svg';
 import { CloseHandler } from 'engine/components/wrappers/closeHandler';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS } from 'helpers/config';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 

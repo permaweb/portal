@@ -1,10 +1,10 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { Modal } from 'components/atoms/Modal';
 import { ICONS, ICONS_SOCIAL } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';

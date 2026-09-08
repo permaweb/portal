@@ -1,10 +1,10 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 import Button from 'engine/components/form/button';
 import { useEngineNotifications } from 'engine/providers/notificationProvider';
 
 import { Types } from '@permaweb/libs';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS, UPLOAD } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { checkValidAddress, compressImageToSize, isCompressibleImage } from 'helpers/utils';

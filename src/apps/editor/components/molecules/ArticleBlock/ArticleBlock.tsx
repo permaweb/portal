@@ -1,6 +1,5 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ReactSVG } from 'react-svg';
 import { Draggable } from '@hello-pangea/dnd';
 
 import { EditorStoreRootState } from 'editor/store';
@@ -10,6 +9,7 @@ import { currentPostUpdate } from 'editor/store/post';
 import { Button } from 'components/atoms/Button';
 import { ContentEditable } from 'components/atoms/ContentEditable';
 import { FormField } from 'components/atoms/FormField';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { IconButton } from 'components/atoms/IconButton';
 import { Modal } from 'components/atoms/Modal';
 import { ARTICLE_BLOCKS, ICONS } from 'helpers/config';

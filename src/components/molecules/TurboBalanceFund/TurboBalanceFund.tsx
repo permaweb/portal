@@ -1,6 +1,6 @@
 import React from 'react';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js/pure';
 import { useTheme } from 'styled-components';
 
 import { Button } from 'components/atoms/Button';
@@ -15,7 +15,12 @@ import { useNotifications } from 'providers/NotificationProvider';
 
 import * as S from './styles';
 
-const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
+let stripePromise: ReturnType<typeof loadStripe>;
+
+function getStripe() {
+	// Importing the shared UI must not start Stripe's external scripts/iframes.
+	return (stripePromise ??= loadStripe(STRIPE_PUBLISHABLE_KEY));
+}
 
 function CheckoutForm(props: {
 	handleGoBack: () => void;
@@ -264,7 +269,7 @@ export default function TurboBalanceFund(props: { handleClose: () => void }) {
 								<span>{language?.fundTurboPaymentDetail}</span>
 							</S.MInfo>
 							<Elements
-								stripe={stripePromise}
+								stripe={getStripe()}
 								options={{
 									clientSecret: clientSecret,
 									appearance: {

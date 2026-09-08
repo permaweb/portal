@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'viewer/providers/PortalProvider';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { ICONS, URLS } from 'helpers/config';
 import { getTxEndpoint } from 'helpers/endpoints';
 import { PortalCategoryType, PortalLinkType, PortalPageType } from 'helpers/types';

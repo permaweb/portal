@@ -1,9 +1,9 @@
 import React from 'react';
-import { ReactSVG } from 'react-svg';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 
 import { Button } from 'components/atoms/Button';
+import { ReactSVG } from 'components/atoms/GatewaySVG';
 import { IconButton } from 'components/atoms/IconButton';
 import { Loader } from 'components/atoms/Loader';
 import { Modal } from 'components/atoms/Modal';
