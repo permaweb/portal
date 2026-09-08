@@ -161,7 +161,7 @@ export const MessageWrapper = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.contrast.color};
 		font-size: ${(props) => props.theme?.typography?.size?.xSmall || '12px'} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		white-space: nowrap;
 	}
 `;

@@ -25,7 +25,7 @@ export const BADropdownSectionHeader = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
@@ -123,7 +123,7 @@ export const BADropdownActionShortcut = styled.div`
 		border-radius: ${STYLING.dimensions.radius.alt3};
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: 10px !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;

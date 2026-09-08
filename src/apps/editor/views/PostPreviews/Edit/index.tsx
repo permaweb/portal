@@ -18,8 +18,8 @@ import {
 	useSensors,
 } from '@dnd-kit/core';
 
+import { useNavigation } from 'editor/navigation';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
-import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
@@ -701,7 +701,7 @@ export default function PostPreviewEdit() {
 	const languageProvider = useLanguageProvider();
 	const language = languageProvider.object[languageProvider.current];
 	const { addNotification } = useNotifications();
-	const { settings } = useSettingsProvider();
+	const { navWidth } = useNavigation();
 
 	const isNew = !previewId;
 	const isDefaultTemplate = previewId && ['blog', 'journal', 'minimal'].includes(previewId);
@@ -1222,8 +1222,8 @@ export default function PostPreviewEdit() {
 	return (
 		<>
 			<S.Wrapper>
-				<S.ToolbarWrapper navWidth={settings.navWidth} hasBodyOverflow={hasBodyOverflow}>
-					<S.ToolbarContent className={'max-view-wrapper'} navWidth={settings.navWidth}>
+				<S.ToolbarWrapper navWidth={navWidth} hasBodyOverflow={hasBodyOverflow}>
+					<S.ToolbarContent className={'max-view-wrapper'} navWidth={navWidth}>
 						<S.TitleWrapper>
 							<input
 								value={template.name}

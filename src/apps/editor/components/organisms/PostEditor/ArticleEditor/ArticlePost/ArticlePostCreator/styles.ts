@@ -20,7 +20,7 @@ export const HeaderWrapper = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.primary} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-align: center;
 		text-transform: none !important;
@@ -35,7 +35,7 @@ export const HeaderWrapper = styled.div`
 	.post-creator-info {
 		color: ${(props) => props.theme.colors.font.alt2} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-align: center;
 		text-transform: none !important;
@@ -79,7 +79,7 @@ export const Option = styled.li<{ active: boolean }>`
 	pointer-events: ${(props) => (props.active ? 'none' : 'all')};
 	color: ${(props) => (props.active ? props.theme.colors.font.primary : props.theme.colors.font.alt1)};
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	background: ${(props) =>
 		props.active ? props.theme.colors.container.primary.active : props.theme.colors.container.primary.background};
 	border: 1px solid transparent;

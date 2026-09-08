@@ -31,7 +31,7 @@ export const TitleWrapper = styled.div`
 		text-overflow: ellipsis;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.base} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		padding: 0;
 		outline: 0;
@@ -51,7 +51,7 @@ export const UpdateWrapper = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		white-space: nowrap;
 	}
 
@@ -420,7 +420,7 @@ export const PreviewFrame = styled.div`
 	width: 100%;
 	height: min(84vh, 860px);
 	overflow: hidden;
-	background: ${(props) => props.theme.colors.container.primary};
+	background: ${(props) => props.theme.colors.container.primary.background};
 	border-radius: ${STYLING.dimensions.radius.alt1};
 
 	iframe {
@@ -481,7 +481,7 @@ export const OptionsDropdown = styled.div`
 			border-radius: ${STYLING.dimensions.radius.alt3} !important;
 			color: ${(props) => props.theme.colors.font.primary} !important;
 			font-size: 10px !important;
-			font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 
 			margin: 0 0 0 auto;
 		}

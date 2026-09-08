@@ -188,7 +188,10 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 				profile = { id: targetProcessId || props.user.address };
 			} else {
 				// Adding: Resolve profile process id from wallet
-				profile = await permawebProvider.libs.getProfileByWalletAddress(walletAddress);
+				profile = await permawebProvider.libs.getProfileByWalletAddress(
+					walletAddress,
+					IS_BASE_MODE ? { includePortals: false } : undefined
+				);
 			}
 
 			if (!profile?.id) {

@@ -48,7 +48,7 @@ export const ErrorWrapper = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.warning.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
 	}
 `;

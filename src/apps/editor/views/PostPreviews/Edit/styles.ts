@@ -58,7 +58,7 @@ export const TitleWrapper = styled.div`
 		outline: none;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.base} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 
 		&::placeholder {
@@ -85,7 +85,7 @@ export const UpdateWrapper = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		white-space: nowrap;
 	}
 
@@ -222,7 +222,7 @@ export const DropIndicator = styled.div`
 
 	span {
 		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		color: ${(props) => props.theme.colors.button.alt1.background};
 		text-transform: uppercase;
 	}
@@ -432,7 +432,7 @@ export const BlockHeader = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-transform: uppercase;
 	}
 `;
@@ -507,7 +507,7 @@ export const BlockPreviewHeader = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-transform: uppercase;
 	}
 
@@ -570,7 +570,7 @@ export const SettingsPanelHeader = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 		margin: 0;
@@ -606,7 +606,7 @@ export const SettingField = styled.div`
 
 export const SettingLabel = styled.label`
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	color: ${(props) => props.theme.colors.font.alt1};
 	text-transform: uppercase;
 `;
@@ -711,7 +711,7 @@ export const BlocksPanelHeader = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 		margin: 0;
@@ -818,7 +818,7 @@ export const LivePreviewWrapper = styled.div`
 export const LivePreviewHeader = styled.p`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	text-transform: uppercase;
 	margin: 0;
 `;

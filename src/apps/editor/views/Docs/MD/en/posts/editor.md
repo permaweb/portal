@@ -11,12 +11,17 @@ The portal editor uses a **block-based** approach to content creation, where eac
 - **Block Creation & Editing**
 
   - Each piece of content is a “block.” Examples include **Header**, **Paragraph**, **Quote**, **Lists**, **Image**, and **Video** blocks.
-  - You can add a new block by using the **Toolkit** (right panel) or a keyboard shortcut (e.g., `Ctrl + / + P` for Paragraph).
+  - You can add a new block by using the **Toolkit** (right panel) or a keyboard shortcut (e.g., press `Ctrl + /`, then `P` for Paragraph or `E` for Embed).
 
 - **Toolkit**
 
   - On the right, you’ll find the **Toolkit** panel with a list of available blocks and their associated keyboard shortcuts.
   - Use this panel to quickly insert new blocks or to reference shortcuts for faster editing.
+  - Press `Ctrl + K` to open or close the Toolkit.
+
+- **Preview**
+
+  - Press `Ctrl + P` to preview the current post. Press `Escape` to close the preview.
 
 - **Layout**
   - Each block can be dragged and dropped to reorder content.
@@ -26,7 +31,7 @@ The portal editor uses a **block-based** approach to content creation, where eac
 
 - **Add a New Block**
 
-  - Select a block type from the **Toolkit** or use a keyboard shortcut (e.g., `Ctrl + P` for Paragraph).
+  - Select a block type from the **Toolkit** or use a keyboard shortcut (e.g., press `Ctrl + /`, then `P` for Paragraph).
   - A new block appears; type your content or insert media.
 
 - **Apply Headings and Styles**

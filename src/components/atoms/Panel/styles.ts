@@ -7,7 +7,7 @@ export const PanelOverlay = styled.div<{ open: boolean }>`
 	height: 100vh;
 	width: 100%;
 	position: fixed;
-	z-index: 5;
+	z-index: 6;
 	top: 0;
 	left: 0;
 	background: ${(props) => props.theme.colors.overlay.primary};
@@ -54,7 +54,7 @@ export const LT = styled.div`
 export const Title = styled.p`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.lg};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	line-height: calc(${(props) => props.theme.typography.size.lg} + 5px);
 	white-space: nowrap;
 	overflow: hidden;

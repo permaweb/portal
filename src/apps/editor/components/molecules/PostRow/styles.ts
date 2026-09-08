@@ -35,7 +35,7 @@ export const PostHeader = styled.div`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.base};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		white-space: nowrap;
 		overflow-x: hidden;
 		text-overflow: ellipsis;
@@ -55,7 +55,7 @@ export const PostHeaderDetail = styled.div`
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		white-space: nowrap;
 		overflow-x: hidden;
 		text-overflow: ellipsis;
@@ -143,7 +143,7 @@ export const PostMenuDropdown = styled.div`
 			border-radius: ${STYLING.dimensions.radius.alt3} !important;
 			color: ${(props) => props.theme.colors.font.primary} !important;
 			font-size: 10px !important;
-			font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 
 			margin: 0 0 0 auto;
 		}
@@ -200,7 +200,7 @@ export const PostStatus = styled.div<{ status: ArticleStatusType }>`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
@@ -225,7 +225,7 @@ export const RemoveModalBodyWrapper = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;

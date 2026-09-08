@@ -16,7 +16,7 @@ export const HeaderWrapper = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.primary} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-align: center;
 		text-transform: none !important;
@@ -28,7 +28,7 @@ export const HeaderWrapper = styled.div`
 	.post-release-info {
 		color: ${(props) => props.theme.colors.font.alt2} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-align: center;
 		text-transform: none !important;
@@ -59,7 +59,7 @@ export const Section = styled.div`
 	h4 {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
@@ -135,7 +135,7 @@ export const ErrorMessage = styled.div`
 	width: 100%;
 	padding: 5px 0;
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	text-align: center;
 	margin: 25px 0 0 0;
 `;

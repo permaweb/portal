@@ -140,6 +140,7 @@ export default function Button(props: {
 					active={props.active}
 					width={props.width}
 					height={props.height}
+					warning={props.warning || false}
 					className={props.className || ''}
 					target={props.target ?? ''}
 					style={{ pointerEvents: props.disabled ? 'none' : 'auto' }}

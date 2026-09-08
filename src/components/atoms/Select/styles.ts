@@ -15,7 +15,7 @@ export const Label = styled.div<{ disabled: boolean }>`
 		color: ${(props) =>
 			props.disabled ? props.theme.colors.button.primary.disabled.color : props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		line-height: 1.5;
 	}
 `;
@@ -70,7 +70,7 @@ export const Dropdown = styled.button<{ active: boolean }>`
 		text-overflow: ellipsis;
 		overflow: hidden;
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		color: ${(props) =>
 			props.active ? props.theme.colors.font.primary : props.theme.colors.button.primary.color} !important;
@@ -108,7 +108,7 @@ export const Option = styled.li<{ active: boolean; $disabled?: boolean }>`
 	opacity: ${(props) => (props.$disabled ? 0.45 : 1)};
 	color: ${(props) => (props.active ? props.theme.colors.font.primary : props.theme.colors.font.alt1)};
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	background: ${(props) =>
 		props.active ? props.theme.colors.container.primary.active : props.theme.colors.container.primary.background};
 	border: 1px solid transparent;

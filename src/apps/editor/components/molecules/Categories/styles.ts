@@ -90,7 +90,7 @@ export const ParentCategoryOption = styled.button<{ level: number }>`
 	span {
 		color: ${(props) => props.theme.colors.font.primary} !important;
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		display: block;
 		white-space: nowrap;
@@ -144,7 +144,7 @@ export const WrapperEmpty = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
@@ -170,7 +170,7 @@ export const ModalBodyWrapper = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;
@@ -186,7 +186,7 @@ export const ModalBodyElement = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
@@ -230,7 +230,7 @@ export const CategoryDrag = styled.div<{ level: number; isDragging: boolean; has
 		pointer-events: none;
 		font-size: 8px;
 		text-transform: uppercase;
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		color: ${(props) => props.theme.colors.font.light1};
 	}
 
@@ -325,7 +325,7 @@ export const ChildDropZone = styled.div<{ visible: boolean; level: number }>`
 	justify-content: center;
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
 	color: ${(props) => props.theme.colors.font.alt1};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	text-transform: uppercase;
 	padding: 2.5px 15.5px;
 
@@ -389,7 +389,7 @@ export const FieldLabel = styled.label`
 
 export const Info = styled.p<{ inlineAdd: boolean }>`
 	font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-	font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+	font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 	color: ${(props) => props.theme.colors.font.alt1};
 	margin: ${(props) => (props.inlineAdd ? '10.5px 0 0 0' : '12.5px 0 0 0')};
 `;
@@ -402,7 +402,7 @@ export const Inline = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;

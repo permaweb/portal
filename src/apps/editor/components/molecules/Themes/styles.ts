@@ -21,19 +21,20 @@ export const Header = styled.div<{ $compact?: boolean }>`
 `;
 
 export const HeaderCopy = styled.div`
-	max-width: 680px;
+	max-width: 650px;
 
 	h2 {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.lg};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 
 	p {
-		margin-top: 5px;
+		margin-top: 8px;
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-size: ${(props) => props.theme.typography.size.xSmall};
+		font-size: ${(props) => props.theme.typography.size.xxSmall};
+		font-weight: ${(props) => props.theme.typography.weight.regular};
 	}
 `;
 
@@ -75,7 +76,7 @@ export const PaletteHeader = styled.div`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 `;
 
@@ -125,7 +126,7 @@ export const ColorLabel = styled.p`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	font-size: ${(props) => props.theme.typography.size.xSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 `;
 
 export const ColorDescription = styled.p`
@@ -150,7 +151,7 @@ export const ColorButton = styled.button`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 
 	&:hover:not(:disabled) {
@@ -262,7 +263,7 @@ export const RadiusCopy = styled.div`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 
 	p {
@@ -315,7 +316,7 @@ export const RadiusControl = styled.div`
 		min-width: 36px;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
@@ -357,7 +358,7 @@ export const PickerFooter = styled.div`
 		padding: 0 10px;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-transform: uppercase;
 		background: ${(props) => props.theme.colors.form.background};
 		border: 1px solid ${(props) => props.theme.colors.form.border};

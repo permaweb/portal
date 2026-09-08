@@ -38,7 +38,7 @@ export const Wrapper = styled.div`
 
 		p {
 			font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-			font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 			font-family: ${(props) => props.theme.typography.family.primary} !important;
 			color: ${(props) => props.theme.colors.font.primary} !important;
 		}

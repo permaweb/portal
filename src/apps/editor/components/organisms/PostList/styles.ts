@@ -28,7 +28,7 @@ export const PostsHeaderDetails = styled.div`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.base};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 `;
 
@@ -81,7 +81,7 @@ export const PostsActionsSectionHeader = styled.div`
 		color: ${(props) => props.theme.colors.font.alt1} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		text-transform: uppercase !important;
 		text-align: left !important;
 	}
@@ -159,7 +159,7 @@ export const PostsActionsRequestsHeader = styled.div`
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-transform: uppercase;
 		text-align: left;
 	}
@@ -210,7 +210,7 @@ export const PostActionRequestLine = styled.div`
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-align: left;
 		white-space: nowrap;
 		overflow: hidden;
@@ -251,7 +251,7 @@ export const PostsActionsRequestsInfo = styled.div`
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-transform: uppercase;
 		text-align: left;
 	}
@@ -311,7 +311,7 @@ export const WrapperEmpty = styled.div<{ type: ViewLayoutType }>`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}

@@ -25,7 +25,7 @@ export const CategoryHeader = styled.div`
 		background: ${(props) => props.theme.colors.container.primary.active};
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 	}
 `;
@@ -74,7 +74,7 @@ export const PostInfo = styled.div`
 	h1 {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.h1};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.alt1};
 		margin: 0 0 0 -25%;
 
@@ -99,7 +99,7 @@ export const PostInfo = styled.div`
 		background: ${(props) => props.theme.colors.container.primary.active};
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		margin: 0 0 0 15px;
 		box-shadow: 0 1.5px 10px 0 ${(props) => props.theme.colors.shadow.alt1};

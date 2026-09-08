@@ -54,7 +54,12 @@ export default function Modal(props: {
 
 	return (
 		<Portal node={DOM.overlay}>
-			<S.Wrapper noHeader={!props.header} top={window ? (window as any).pageYOffset : 0}>
+			<S.Wrapper
+				role={'dialog'}
+				aria-modal={'true'}
+				noHeader={!props.header}
+				top={window ? (window as any).pageYOffset : 0}
+			>
 				<S.Container noHeader={!props.header} width={props.width}>
 					{props.header && (
 						<S.Header>

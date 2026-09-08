@@ -28,7 +28,7 @@ export const TitleWrapper = styled.div`
 		text-overflow: ellipsis;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.base} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		padding: 0;
 		outline: 0;
@@ -48,7 +48,7 @@ export const UpdateWrapper = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		white-space: nowrap;
 	}
 

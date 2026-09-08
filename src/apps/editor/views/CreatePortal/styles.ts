@@ -63,7 +63,7 @@ export const SectionTitle = styled.p`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	font-size: ${(props) => props.theme.typography.size.base};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	margin: 0;
 `;
 
@@ -163,7 +163,7 @@ export const MediaTitle = styled.p`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	margin: 0;
 `;
 
@@ -215,7 +215,7 @@ export const LayoutOptionIcon = styled.div<{ $active: boolean }>`
 export const LayoutOptionLabel = styled.p`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-	font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+	font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 	font-family: ${(props) => props.theme.typography.family.primary} !important;
 	text-transform: uppercase;
 	margin: 0;
@@ -289,7 +289,7 @@ export const IconTitleWrapper = styled(MediaTitleWrapper)`
 export const MediaInfo = styled.span`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xxxxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	display: block;
 	margin: 5px 0 0 0;
 `;
@@ -305,7 +305,7 @@ export const SubSectionTitle = styled.p`
 	margin: 0;
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	text-transform: uppercase;
 `;
 

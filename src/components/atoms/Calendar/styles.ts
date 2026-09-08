@@ -37,7 +37,7 @@ export const NavButton = styled.button`
 
 export const MonthYear = styled.div`
 	font-size: ${(props) => props.theme.typography.size.small};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	color: ${(props) => props.theme.colors.font.primary};
 `;
 
@@ -74,7 +74,7 @@ export const Day = styled.div<{ disabled?: boolean; selected?: boolean }>`
 	align-items: center;
 	justify-content: center;
 	font-size: ${(props) => props.theme.typography.size.xxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	border: 1px solid ${(props) => props.theme.colors.border.alt1};
 	border-radius: ${STYLING.dimensions.radius.primary};
 	cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
@@ -91,7 +91,7 @@ export const Day = styled.div<{ disabled?: boolean; selected?: boolean }>`
 		`
 		background: ${props.theme.colors.button.alt1.background};
 		color: ${props.theme.colors.button.alt1.color};
-		font-weight: ${props.theme.typography.weight.bold};
+		font-weight: ${props.theme.typography.weight.medium};
 	`}
 	
 	${(props) =>

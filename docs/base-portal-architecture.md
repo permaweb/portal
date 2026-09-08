@@ -573,13 +573,19 @@ No transaction is overwritten or deleted during recovery. New releases, checkpoi
 ## Performance Characteristics
 
 - GraphQL discovery is paginated at 100 transactions per page.
-- Immutable transaction bodies are loaded with concurrency capped at eight.
+- Portal-list discovery reads metadata and membership from the release log without downloading referenced post revisions. Post bodies are deferred until a portal is opened.
+- Cards have a separate 30-second memory cache. They are display projections, never authoritative manifests or write authorization; full resolution still validates every referenced post. During propagation, a card may show newer metadata before all of a release's post bodies are available.
+- Membership receipts and candidate portal IDs come from one paginated query per wallet. Repeated candidates, concurrent reads, and successful GraphQL queries within 10 seconds share work. Explicit fresh reads and membership writes invalidate the query cache.
+- Immutable transaction bodies and pending-transaction checks share a maximum of four active gateway reads across portals. Failed pending checks back off, and polling pauses while the page is hidden.
 - A valid checkpoint avoids replaying all releases incorporated into it.
 - Only the release tail, newly referenced posts, and uncached immutable bodies require network downloads.
 - Portal field refreshes are selective in the editor, avoiding complete state reloads after every action.
+- Author and member identity reads omit portal discovery. Cross-portal user lists load only in the process-mode post editor and request only the users field. Editor icons load when rendered instead of all being preloaded on startup.
 - A portal with no usable checkpoint becomes progressively slower to cold-load as its release history grows.
 
 Checkpointing bounds release replay, but a checkpoint is itself a complete state upload. Large media is never embedded in the checkpoint; it remains referenced by transaction ID.
+
+Request regression tests run with `node --test scripts/base-portal-requests.test.mjs scripts/pending-transactions.test.mjs`, without starting a server or building the application. A captured-data comparison on 2026-09-07 using portals `I70hlpCfoHn7OlWWLDQS0E54q-NZPMe9OpsQOEfBrco` and `xq688x6oyBtrZTDCUPIlU9U2U-4j8u5pWpCfbAK4hrs` reduced cold list discovery from 97 to 30 requests for either supplied member wallet, with no post-body requests (previously 64). Card fields, memberships, and subsequently loaded post content matched full resolution. These counts exclude visible image/icon requests and pending-upload checks.
 
 ## Schema Evolution and Compatibility
 

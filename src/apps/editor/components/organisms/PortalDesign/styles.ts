@@ -23,7 +23,7 @@ export const ActionWrapper = styled.div`
 		span {
 			color: ${(props) => props.theme.colors.font.alt1};
 			font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-			font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+			font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 			font-family: ${(props) => props.theme.typography.family.primary} !important;
 		}
 
@@ -60,6 +60,6 @@ export const MediaTitle = styled.p`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	font-size: ${(props) => props.theme.typography.size.small};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	margin: 0 0 15px 0;
 `;

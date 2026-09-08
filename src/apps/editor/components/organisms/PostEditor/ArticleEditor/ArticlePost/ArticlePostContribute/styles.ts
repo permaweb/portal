@@ -10,7 +10,7 @@ export const Wrapper = styled.div`
 		max-width: 100%;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		white-space: nowrap;
 		overflow-x: hidden;
 		text-overflow: ellipsis;

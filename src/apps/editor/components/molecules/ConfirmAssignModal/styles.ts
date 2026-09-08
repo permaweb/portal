@@ -12,7 +12,7 @@ export const ModalSection = styled.div`
 	gap: 2.5px;
 
 	p {
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
@@ -20,7 +20,7 @@ export const ModalSection = styled.div`
 `;
 
 export const ModalSectionTitle = styled.div`
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	color: ${(props) => props.theme.colors.font.primary};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	font-size: ${(props) => props.theme.typography.size.small};

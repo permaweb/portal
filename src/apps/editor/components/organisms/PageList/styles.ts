@@ -43,7 +43,7 @@ export const WrapperEmpty = styled.div`
 	p {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
@@ -143,7 +143,7 @@ export const HomeTemplateIconPlaceholder = styled.div<{ $active: boolean }>`
 export const HomeTemplateOptionLabel = styled.p`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-	font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+	font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 	font-family: ${(props) => props.theme.typography.family.primary} !important;
 	text-transform: uppercase;
 	margin: 0;

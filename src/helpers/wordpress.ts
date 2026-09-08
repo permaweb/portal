@@ -187,7 +187,7 @@ export function getDefaultExtractedTheme(): ExtractedTheme {
 			primary: '#5E66DB', // Portal default primary
 			secondary: '#38BD80', // Portal default secondary
 			background: '#FAFAFA',
-			text: '##1A1A1A',
+			text: '#1A1A1A',
 			accent: '#5E66DB',
 			border: '#E0E0E0',
 			link: '#5E66DB',

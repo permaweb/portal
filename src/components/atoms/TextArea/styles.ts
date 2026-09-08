@@ -16,7 +16,7 @@ export const Wrapper = styled.div`
 export const Label = styled.label`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 `;
 
 export const TextArea = styled.textarea<{
@@ -27,7 +27,7 @@ export const TextArea = styled.textarea<{
 	color: ${(props) => props.theme.colors.font.primary};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	font-size: ${(props) => props.theme.typography.size.base};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	letter-spacing: 0.15px;
 	margin: 7.5px 0 0 0;
 	background: ${(props) => props.theme.colors.form.background};

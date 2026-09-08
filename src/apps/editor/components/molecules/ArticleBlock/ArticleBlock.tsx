@@ -395,6 +395,7 @@ export default function ArticleBlock(props: {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			// Only handle if this block is focused
 			if (currentReducer.editor.focusedBlock?.id !== props.block.id) return;
+			if (e.defaultPrevented || e.isComposing || document.querySelector('[role="dialog"][aria-modal="true"]')) return;
 
 			// Handle Enter key in list items to clear formatting
 			if (e.key === 'Enter' && (props.block.type === 'ordered-list' || props.block.type === 'unordered-list')) {
@@ -658,61 +659,67 @@ export default function ArticleBlock(props: {
 	}
 
 	function handleLinkSave() {
-		if (validateUrl(newLinkUrl)) {
-			restoreSelection();
-			if (!editableRef.current) {
-				debugLog('warn', 'ArticleBlock', 'Editable element not found');
-				return;
-			}
+		if (!validateUrl(newLinkUrl)) return;
 
-			const selection = window.getSelection();
-			if (!selection || selection.rangeCount === 0) {
-				debugLog('warn', 'ArticleBlock', 'No selection available');
-				handleLinkClear();
-				return;
-			}
-
-			const range = selection.getRangeAt(0);
-			if (range.collapsed) {
-				debugLog('warn', 'ArticleBlock', 'Selection is collapsed');
-				handleLinkClear();
-				return;
-			}
-
-			if (!editableRef.current.contains(range.commonAncestorContainer)) {
-				debugLog('warn', 'ArticleBlock', 'Selection is outside the editable area');
-				handleLinkClear();
-				return;
-			}
-
-			const anchor = document.createElement('a');
-			if (validateUrl(newLinkUrl)) {
-				anchor.href = newLinkUrl;
-				anchor.target = '_blank';
-				anchor.rel = 'noopener noreferrer';
-				anchor.setAttribute('data-link-id', `${Date.now()}`);
-			}
-
-			const extractedContent = range.extractContents();
-			if (textToConvert && textToConvert !== extractedContent.textContent) {
-				anchor.textContent = textToConvert;
-			} else {
-				anchor.appendChild(extractedContent);
-			}
-
-			range.insertNode(anchor);
-
-			range.setStartAfter(anchor);
-			range.collapse(true);
-			selection.removeAllRanges();
-			selection.addRange(range);
-
-			const updatedContent = editableRef.current.innerHTML;
-
-			props.onChangeBlock({ id: props.block.id, content: updatedContent });
+		restoreSelection();
+		if (!editableRef.current) {
+			debugLog('warn', 'ArticleBlock', 'Editable element not found');
+			return;
 		}
 
+		const selection = window.getSelection();
+		if (!selection || selection.rangeCount === 0) {
+			debugLog('warn', 'ArticleBlock', 'No selection available');
+			handleLinkClear();
+			return;
+		}
+
+		const range = selection.getRangeAt(0);
+		if (range.collapsed) {
+			debugLog('warn', 'ArticleBlock', 'Selection is collapsed');
+			handleLinkClear();
+			return;
+		}
+
+		if (!editableRef.current.contains(range.commonAncestorContainer)) {
+			debugLog('warn', 'ArticleBlock', 'Selection is outside the editable area');
+			handleLinkClear();
+			return;
+		}
+
+		const anchor = document.createElement('a');
+		anchor.href = newLinkUrl;
+		anchor.target = '_blank';
+		anchor.rel = 'noopener noreferrer';
+		anchor.setAttribute('data-link-id', `${Date.now()}`);
+
+		const extractedContent = range.extractContents();
+		if (textToConvert && textToConvert !== extractedContent.textContent) {
+			anchor.textContent = textToConvert;
+		} else {
+			anchor.appendChild(extractedContent);
+		}
+
+		range.insertNode(anchor);
+
+		range.setStartAfter(anchor);
+		range.collapse(true);
+		selection.removeAllRanges();
+		selection.addRange(range);
+
+		const updatedContent = editableRef.current.innerHTML;
+
+		props.onChangeBlock({ id: props.block.id, content: updatedContent });
+
 		handleLinkClear();
+	}
+
+	function handleLinkKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+		if (event.key !== 'Enter') return;
+		event.stopPropagation();
+		if (event.nativeEvent.isComposing) return;
+		event.preventDefault();
+		if (!event.repeat) handleLinkSave();
 	}
 
 	function handleLinkClear() {
@@ -961,11 +968,12 @@ export default function ArticleBlock(props: {
 					)}
 				</S.ElementWrapper>
 				{showLinkModal && (
-					<Modal header={language?.editLink} handleClose={() => setShowLinkModal(false)}>
+					<Modal header={language?.editLink} handleClose={handleLinkClear}>
 						<S.ModalWrapper>
 							<FormField
 								value={textToConvert}
 								onChange={(e: any) => setTextToConvert(e.target.value)}
+								onKeyDown={handleLinkKeyDown}
 								invalid={{ status: false, message: null }}
 								label={language?.text}
 								disabled={false}
@@ -975,16 +983,23 @@ export default function ArticleBlock(props: {
 							<FormField
 								value={newLinkUrl}
 								onChange={(e: any) => setNewLinkUrl(e.target.value)}
+								onKeyDown={handleLinkKeyDown}
 								invalid={{ status: invalidLink, message: null }}
 								label={language?.url}
 								placeholder={'https://'}
 								disabled={false}
+								autoFocus
 								hideErrorMessage
 								sm
 							/>
 							<S.ModalActionsWrapper>
 								<Button type={'primary'} label={language?.cancel} handlePress={() => handleLinkClear()} />
-								<Button type={'alt1'} label={language?.save} handlePress={() => handleLinkSave()} disabled={false} />
+								<Button
+									type={'alt1'}
+									label={language?.save}
+									handlePress={() => handleLinkSave()}
+									disabled={!validateUrl(newLinkUrl)}
+								/>
 							</S.ModalActionsWrapper>
 						</S.ModalWrapper>
 					</Modal>

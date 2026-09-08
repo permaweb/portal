@@ -20,9 +20,13 @@ export default function Media() {
 					actions={[
 						<S.BalanceWrapper className={'border-wrapper-alt3'}>
 							<p>
-								{arProvider.arBalance == null
-									? `${language?.loading}...`
-									: `${Number(arProvider.arBalance).toLocaleString(undefined, { maximumFractionDigits: 6 })} AR`}
+								{arProvider.arBalance == null ? (
+									`${language?.loading}...`
+								) : (
+									<>
+										<b>{Number(arProvider.arBalance).toLocaleString(undefined, { maximumFractionDigits: 6 })}</b> AR
+									</>
+								)}
 							</p>
 						</S.BalanceWrapper>,
 					]}

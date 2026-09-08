@@ -12,7 +12,7 @@ export const Header = styled.div`
 	h4 {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: clamp(18px, 3.25vw, 24px);
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		line-height: 1.5;
 	}
 `;
@@ -66,7 +66,7 @@ export const CWrapper = styled.div`
 	align-items: center;
 	span {
 		font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		display: block;
 		max-width: 75%;
 		white-space: nowrap;
@@ -98,7 +98,7 @@ export const LInput = styled.button<{ hasLogo: boolean }>`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 	}
 	svg {
 		height: 25px;
@@ -212,7 +212,7 @@ export const SectionLabel = styled.p`
 	width: 100%;
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-family: ${(props) => props.theme.typography.family.primary};
 	margin: 0;
 `;
@@ -273,7 +273,7 @@ export const LayoutOptionIcon = styled.div<{ $active: boolean }>`
 export const LayoutOptionLabel = styled.p`
 	color: ${(props) => props.theme.colors.font.primary};
 	font-size: ${(props) => props.theme.typography.size.xSmall} !important;
-	font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+	font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 	font-family: ${(props) => props.theme.typography.family.primary} !important;
 	text-transform: uppercase;
 	margin: 0;
@@ -284,7 +284,7 @@ export const SectionInfo = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		line-height: 1.5;
 	}
@@ -299,7 +299,7 @@ export const SectionDivider = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}

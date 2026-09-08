@@ -68,7 +68,7 @@ export const NTitle = styled.div`
 	p {
 		font-family: ${(props) => props.theme.typography.family.alt1};
 		font-size: ${(props) => props.theme.typography.size.xLg} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		color: ${(props) => props.theme.colors.font.primary} !important;
 	}
 `;
@@ -92,7 +92,7 @@ export const NTitleMobile = styled.button<{ open: boolean }>`
 	p {
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		color: ${(props) => props.theme.colors.font.primary} !important;
 	}
 	svg {
@@ -129,7 +129,7 @@ export const NListItem = styled.li<{ disabled: boolean; active: boolean }>`
 	cursor: pointer;
 	font-size: ${(props) => props.theme.typography.size.xSmall};
 	color: ${(props) => (props.active ? props.theme.colors.font.alt5 : props.theme.colors.font.alt1)};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	margin: 0 0 7.5px 0;
 	line-height: 1.75;
 	text-align: left;

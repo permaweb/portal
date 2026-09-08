@@ -97,8 +97,10 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 			setShowPendingDropdown(false);
 			return;
 		}
+		let stopped = false;
 
 		const updatePendingTransactions = (transactions: PendingTransaction[]) => {
+			if (stopped) return;
 			const unique = Array.from(new Map(transactions.map((transaction) => [transaction.id, transaction])).values());
 			setPendingTransactions((current) => {
 				const currentIds = current.map((transaction) => transaction.id).join(':');
@@ -108,15 +110,24 @@ export default function WalletConnect(props: { app?: 'editor' | 'viewer' | 'engi
 		};
 		const loadLocal = () => updatePendingTransactions(getPendingTransactions(address, portalId));
 		const refresh = () => {
+			if (document.visibilityState === 'hidden') {
+				loadLocal();
+				return;
+			}
 			void refreshPendingTransactions(address, portalId).then(updatePendingTransactions);
 		};
 		loadLocal();
 		refresh();
 		const unsubscribe = subscribeToPendingTransactions(address, refresh);
 		const interval = window.setInterval(refresh, 10_000);
+		document.addEventListener('visibilitychange', refresh);
+		window.addEventListener('focus', refresh);
 		return () => {
+			stopped = true;
 			unsubscribe();
 			window.clearInterval(interval);
+			document.removeEventListener('visibilitychange', refresh);
+			window.removeEventListener('focus', refresh);
 		};
 	}, [arProvider.walletAddress, portalProvider.current?.id, routePortalId]);
 

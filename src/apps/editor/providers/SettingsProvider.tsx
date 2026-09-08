@@ -8,6 +8,11 @@ import { checkWindowCutoff } from 'helpers/window';
 
 type ThemeType = 'light-primary' | 'dark-primary';
 
+const EDITOR_THEMES = {
+	'light-primary': theme(lightTheme),
+	'dark-primary': theme(darkTheme),
+};
+
 interface Settings {
 	theme: ThemeType;
 	syncWithSystem: boolean;
@@ -115,12 +120,48 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		return settings;
 	};
 
-	const [settings, setSettings] = React.useState<Settings>(loadStoredSettings());
+	const [settings, setSettings] = React.useState<Settings>(loadStoredSettings);
+	const currentTheme = EDITOR_THEMES[settings.theme];
+	const initialSettingsRef = React.useRef(settings);
+	const pendingSettingsRef = React.useRef<Settings | null>(null);
+
+	const persistSettings = React.useCallback(() => {
+		if (!pendingSettingsRef.current) return;
+		try {
+			localStorage.setItem('settings', JSON.stringify(pendingSettingsRef.current));
+			pendingSettingsRef.current = null;
+		} catch (error) {
+			console.warn('Unable to save editor settings', error);
+		}
+	}, []);
+
+	// Coalesce changes and keep serialization/storage out of the theme update.
+	React.useEffect(() => {
+		// Editor and viewer share storage; don't overwrite viewer preferences just by opening the editor.
+		if (settings === initialSettingsRef.current) return;
+		pendingSettingsRef.current = settings;
+		const timeout = window.setTimeout(persistSettings, 0);
+		return () => window.clearTimeout(timeout);
+	}, [settings, persistSettings]);
+
+	React.useEffect(() => {
+		window.addEventListener('pagehide', persistSettings);
+		return () => {
+			window.removeEventListener('pagehide', persistSettings);
+			persistSettings();
+		};
+	}, [persistSettings]);
 
 	const handleWindowResize = React.useCallback(() => {
 		const newIsDesktop = checkWindowCutoff(parseInt(STYLING.cutoffs.desktop));
 		const newWindowSize = { width: window.innerWidth, height: window.innerHeight };
 		setSettings((prevSettings) => {
+			if (
+				prevSettings.windowSize.width === newWindowSize.width &&
+				prevSettings.windowSize.height === newWindowSize.height &&
+				prevSettings.isDesktop === newIsDesktop
+			)
+				return prevSettings;
 			// Determine navWidth based on desktop mode transition
 			let navWidth: number;
 			if (newIsDesktop && !prevSettings.isDesktop) {
@@ -141,7 +182,6 @@ export function SettingsProvider(props: SettingsProviderProps) {
 				sidebarOpen: newIsDesktop ? prevSettings.sidebarOpen : false,
 				navWidth,
 			};
-			localStorage.setItem('settings', JSON.stringify(newSettings));
 			return newSettings;
 		});
 	}, []);
@@ -152,6 +192,7 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		window.addEventListener('resize', debouncedResize);
 		return () => {
 			window.removeEventListener('resize', debouncedResize);
+			debouncedResize.cancel();
 		};
 	}, [debouncedResize]);
 
@@ -163,14 +204,8 @@ export function SettingsProvider(props: SettingsProviderProps) {
 	}, [settings.isDesktop, settings.sidebarOpen]);
 
 	React.useEffect(() => {
-		const themeBackgrounds = {
-			'light-primary': '#FFFFFF',
-			'dark-primary': '#1A1A1A',
-		};
-
-		const backgroundColor = themeBackgrounds[settings.theme] || themeBackgrounds[getSystemTheme()];
-		document.body.style.background = backgroundColor;
-	}, [settings.theme]);
+		document.body.style.background = currentTheme.colors.view.background;
+	}, [currentTheme]);
 
 	// Listen for system theme changes when syncWithSystem is enabled
 	React.useEffect(() => {
@@ -180,9 +215,8 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		const handleChange = (e: MediaQueryListEvent) => {
 			const newTheme: ThemeType = e.matches ? 'dark-primary' : 'light-primary';
 			setSettings((prevSettings) => {
-				const newSettings = { ...prevSettings, theme: newTheme };
-				localStorage.setItem('settings', JSON.stringify(newSettings));
-				return newSettings;
+				if (!prevSettings.syncWithSystem || prevSettings.theme === newTheme) return prevSettings;
+				return { ...prevSettings, theme: newTheme };
 			});
 		};
 
@@ -190,51 +224,47 @@ export function SettingsProvider(props: SettingsProviderProps) {
 		return () => mediaQuery.removeEventListener('change', handleChange);
 	}, [settings.syncWithSystem]);
 
-	const updateSettings = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-		React.startTransition(() => {
-			setSettings((prevSettings) => {
-				const newSettings: Settings = { ...prevSettings, [key]: value };
-
-				// A manual light/dark choice leaves system mode in one action.
-				if (key === 'theme') {
-					newSettings.theme = normalizeEditorTheme(value, prevSettings.theme);
-					newSettings.syncWithSystem = false;
-				}
-
-				if (key === 'syncWithSystem' && value === true) {
-					newSettings.theme = getSystemTheme();
-				}
-
-				localStorage.setItem('settings', JSON.stringify(newSettings));
-				return newSettings;
-			});
-		});
-	};
-
-	const updateDrawerState = (key: string, isOpen: boolean) => {
+	const updateSettings = React.useCallback(<K extends keyof Settings>(key: K, value: Settings[K]) => {
 		setSettings((prevSettings) => {
-			const newSettings = {
+			const newSettings: Settings = { ...prevSettings, [key]: value };
+
+			// A manual light/dark choice leaves system mode in one action.
+			if (key === 'theme') {
+				newSettings.theme = normalizeEditorTheme(value, prevSettings.theme);
+				newSettings.syncWithSystem = false;
+			}
+
+			if (key === 'syncWithSystem' && value === true) {
+				newSettings.theme = getSystemTheme();
+			}
+
+			if (
+				Object.is(newSettings[key], prevSettings[key]) &&
+				newSettings.theme === prevSettings.theme &&
+				newSettings.syncWithSystem === prevSettings.syncWithSystem
+			)
+				return prevSettings;
+			return newSettings;
+		});
+	}, []);
+
+	const updateDrawerState = React.useCallback((key: string, isOpen: boolean) => {
+		setSettings((prevSettings) => {
+			if (prevSettings.drawerStates[key] === isOpen) return prevSettings;
+			return {
 				...prevSettings,
 				drawerStates: { ...prevSettings.drawerStates, [key]: isOpen },
 			};
-			localStorage.setItem('settings', JSON.stringify(newSettings));
-			return newSettings;
 		});
-	};
+	}, []);
 
-	const currentTheme = React.useMemo(() => {
-		return theme(settings.theme === 'dark-primary' ? darkTheme : lightTheme);
-	}, [settings.theme]);
+	const contextValue = React.useMemo(
+		() => ({ settings, updateSettings, updateDrawerState, availableThemes: null }),
+		[settings, updateSettings, updateDrawerState]
+	);
 
 	return (
-		<SettingsContext.Provider
-			value={{
-				settings: settings,
-				updateSettings: updateSettings,
-				updateDrawerState: updateDrawerState,
-				availableThemes: null,
-			}}
-		>
+		<SettingsContext.Provider value={contextValue}>
 			<ThemeProvider theme={currentTheme}>{props.children}</ThemeProvider>
 		</SettingsContext.Provider>
 	);

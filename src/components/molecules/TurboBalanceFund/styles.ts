@@ -14,7 +14,7 @@ export const MInfo = styled.div`
 	}
 	p {
 		color: ${(props) => props.theme.colors.font.primary};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-size: ${(props) => props.theme.typography.size.small};
 		margin: 0 0 5px 0;
 	}
@@ -33,7 +33,7 @@ export const DHeader = styled.div`
 	margin: 0 0 7.5px 0;
 	span {
 		color: ${(props) => props.theme.colors.font.alt1};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 	}
 `;

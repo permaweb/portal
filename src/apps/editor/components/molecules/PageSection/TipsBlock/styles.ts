@@ -50,7 +50,7 @@ export const FieldColumn = styled.div`
 export const LabelRow = styled.label`
 	color: ${(props) => props.theme.colors.font.alt1};
 	font-size: ${(props) => props.theme.typography.size.xxxSmall};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 `;
 
 export const Select = styled.select`

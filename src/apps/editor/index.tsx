@@ -7,9 +7,10 @@ import { PersistGate } from 'redux-persist/integration/react';
 
 import { CurrentZoneVersion } from '@permaweb/libs';
 
+import { useRouteScrollReset } from 'editor/hooks/useRouteScrollReset';
 import { Navigation, NavigationProvider, useNavigation } from 'editor/navigation';
 import { PortalProvider, usePortalProvider } from 'editor/providers/PortalProvider';
-import { SettingsProvider, useSettingsProvider } from 'editor/providers/SettingsProvider';
+import { SettingsProvider } from 'editor/providers/SettingsProvider';
 import { persistor, store } from 'editor/store';
 
 import { Button } from 'components/atoms/Button';
@@ -17,7 +18,6 @@ import { Loader } from 'components/atoms/Loader';
 import { Portal } from 'components/atoms/Portal';
 import { DOM, STORAGE, URLS } from 'helpers/config';
 import { IS_BASE_MODE, PORTAL_CAPABILITIES } from 'helpers/features';
-import { preloadAllAssets } from 'helpers/preloader';
 import { serviceWorkerManager } from 'helpers/serviceWorkerManager';
 import { GlobalStyle } from 'helpers/styles';
 import { debugLog, isVersionGreater } from 'helpers/utils';
@@ -70,6 +70,7 @@ function getLazyImport(view: string) {
 
 function AppContent() {
 	const navigate = useNavigate();
+	useRouteScrollReset();
 
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -78,19 +79,9 @@ function AppContent() {
 	const language = languageProvider.object[languageProvider.current];
 	const { navWidth, setNavWidth } = useNavigation();
 
-	const { settings } = useSettingsProvider();
-
 	const hasCheckedProfileRef = React.useRef(false);
-	const hasInitializedPreloaderRef = React.useRef(false);
 	const hasHiddenLoaderRef = React.useRef(false);
 	const hasInitializedServiceWorkerRef = React.useRef(false);
-
-	React.useEffect(() => {
-		if (!hasInitializedPreloaderRef.current) {
-			preloadAllAssets();
-			hasInitializedPreloaderRef.current = true;
-		}
-	}, []);
 
 	React.useEffect(() => {
 		if (!hasInitializedServiceWorkerRef.current) {
@@ -103,14 +94,14 @@ function AppContent() {
 	}, []);
 
 	React.useEffect(() => {
-		if (!hasHiddenLoaderRef.current && settings) {
+		if (!hasHiddenLoaderRef.current) {
 			hasHiddenLoaderRef.current = true;
 			const loader = document.getElementById('app-loader');
 			if (loader) {
 				loader.style.display = 'none';
 			}
 		}
-	}, [settings]);
+	}, []);
 
 	React.useEffect(() => {
 		if (IS_BASE_MODE) return;
@@ -154,6 +145,25 @@ function AppContent() {
 						<S.CenteredWrapper className={'overlay'}>
 							<S.MessageWrapper>
 								<p>{`${language?.gettingProfile}...`}</p>
+							</S.MessageWrapper>
+						</S.CenteredWrapper>
+					</Portal>
+				);
+			}
+
+			if (portalProvider.loadError) {
+				return (
+					<Portal node={DOM.overlay}>
+						<S.CenteredWrapper className={'overlay'}>
+							<S.MessageWrapper>
+								<p>{portalProvider.loadError}</p>
+								<Button
+									type={'primary'}
+									label={'Retry'}
+									handlePress={() => portalProvider.refreshCurrentPortal()}
+									height={36.5}
+									width={145}
+								/>
 							</S.MessageWrapper>
 						</S.CenteredWrapper>
 					</Portal>

@@ -20,7 +20,7 @@ export const SubheaderWrapper = styled.div`
 	a {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 
 		&:hover {
 			color: ${(props) => props.theme.colors.link.color};

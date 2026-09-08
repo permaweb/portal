@@ -38,7 +38,7 @@ export const UserHeader = styled.div`
 		color: ${(props) => props.theme.colors.font.primary};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		white-space: nowrap;
 		overflow-x: hidden;
 		text-overflow: ellipsis;
@@ -69,7 +69,7 @@ export const PendingInvite = styled.div`
 	span {
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 	}
 `;
@@ -114,7 +114,7 @@ export const UserRole = styled.div<{ role: PortalUserRoleType }>`
 	span {
 		color: ${(props) => props.theme.colors.font.light1};
 		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 	}
@@ -131,7 +131,7 @@ export const InfoWrapper = styled.div`
 	p {
 		font-size: ${(props) => props.theme.typography.size.xxSmall};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		color: ${(props) => props.theme.colors.font.alt1};
 	}
 

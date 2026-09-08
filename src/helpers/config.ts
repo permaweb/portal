@@ -384,6 +384,7 @@ export const ARTICLE_BLOCKS = {
 		type: ArticleBlockEnum.Embed,
 		label: 'Embed',
 		icon: ICONS.link,
+		shortcut: 'Ctrl / E',
 	},
 };
 

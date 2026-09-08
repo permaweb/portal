@@ -27,7 +27,7 @@ export const ETitle = styled.div`
 	color: ${(p) => p.theme.colors.font.primary};
 	font-family: ${(p) => p.theme.typography.family.primary};
 	font-size: ${(p) => p.theme.typography.size.small};
-	font-weight: ${(p) => p.theme.typography.weight.bold};
+	font-weight: ${(p) => p.theme.typography.weight.medium};
 `;
 
 export const EActions = styled.div`

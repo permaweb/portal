@@ -84,22 +84,7 @@ export const Primary = styled.button<{
 		color: ${(props) =>
 			props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.primary.color} !important;
 	}
-	&:hover {
-		background: ${(props) =>
-			props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.primary.active.background};
-		border: 1px solid
-			${(props) => (props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.primary.active.border)};
-		span {
-			color: ${(props) =>
-				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.primary.active.color} !important;
-		}
-		svg {
-			fill: ${(props) =>
-				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.primary.active.color} !important;
-			color: ${(props) =>
-				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.primary.active.color} !important;
-		}
-	}
+	&:hover,
 	&:focus {
 		background: ${(props) =>
 			props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.primary.active.background};
@@ -133,7 +118,7 @@ export const Primary = styled.button<{
 		text-overflow: ellipsis;
 		overflow: hidden;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		font-family: ${(props) => props.theme.typography.family.primary} !important;
 		text-transform: uppercase;
 		letter-spacing: 0.35px;
@@ -182,29 +167,19 @@ export const Alt1 = styled(Primary)`
 			props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
 	}
 
-	&:hover {
+	&:hover,
+	&:focus {
 		background: ${(props) => props.theme.colors.button.alt1.active.background};
 		border: 1px solid ${(props) => props.theme.colors.button.alt1.active.border};
 		span {
-			color: ${(props) => props.theme.colors.button.alt1.active.color} !important;
+			color: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.active.color} !important;
 		}
 		svg {
-			fill: ${(props) => props.theme.colors.button.alt1.active.color} !important;
-			color: ${(props) => props.theme.colors.button.alt1.active.color} !important;
-		}
-	}
-	&:focus {
-		background: ${(props) =>
-			props.active
-				? props.theme.colors.button.alt1.active.background
-				: props.theme.colors.button.alt1.active.background};
-		border: 1px solid ${(props) => props.theme.colors.button.alt1.active.border};
-		span {
-			color: ${(props) => props.theme.colors.button.alt1.active.color} !important;
-		}
-		svg {
-			fill: ${(props) => props.theme.colors.button.alt1.active.color} !important;
-			color: ${(props) => props.theme.colors.button.alt1.active.color} !important;
+			fill: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.active.color} !important;
+			color: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.active.color} !important;
 		}
 	}
 	&:disabled {
@@ -223,7 +198,8 @@ export const Alt1 = styled(Primary)`
 		width: fit-content;
 		text-overflow: ellipsis;
 		overflow: hidden;
-		color: ${(props) => props.theme.colors.font.light1} !important;
+		color: ${(props) =>
+			props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
 	}
 `;
 
@@ -232,6 +208,8 @@ export const IconAlt1 = styled(IconPrimary)`
 		color: ${(props) =>
 			props.disabled
 				? props.theme.colors.button.alt1.disabled.color
+				: props.warning
+				? props.theme.colors.font.light1
 				: props.active
 				? props.theme.colors.button.alt1.active.color
 				: props.theme.colors.button.alt1.color};
@@ -248,24 +226,33 @@ export const Alt2 = styled(Alt1)`
 	border: none !important;
 	border-radius: 0;
 
-	&:hover {
-		span {
-			color: ${(props) => props.theme.colors.button.alt2.active.color} !important;
-		}
-
-		svg {
-			fill: ${(props) => props.theme.colors.button.alt2.active.color} !important;
-			color: ${(props) => props.theme.colors.button.alt2.active.color} !important;
-		}
+	svg {
+		fill: ${(props) =>
+			props.warning
+				? props.theme.colors.font.light1
+				: props.active
+				? props.theme.colors.button.alt2.active.color
+				: props.theme.colors.button.alt2.color} !important;
+		color: ${(props) =>
+			props.warning
+				? props.theme.colors.font.light1
+				: props.active
+				? props.theme.colors.button.alt2.active.color
+				: props.theme.colors.button.alt2.color} !important;
 	}
+
+	&:hover,
 	&:focus {
 		span {
-			color: ${(props) => props.theme.colors.button.alt2.active.color} !important;
+			color: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt2.active.color} !important;
 		}
 
 		svg {
-			fill: ${(props) => props.theme.colors.button.alt2.active.color} !important;
-			color: ${(props) => props.theme.colors.button.alt2.active.color} !important;
+			fill: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt2.active.color} !important;
+			color: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt2.active.color} !important;
 		}
 	}
 	&:disabled {
@@ -285,10 +272,14 @@ export const Alt2 = styled(Alt1)`
 		text-overflow: ellipsis;
 		overflow: hidden;
 		font-size: ${(props) => props.theme.typography.size.xxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		text-transform: none;
 		color: ${(props) =>
-			props.active ? props.theme.colors.button.alt2.active.color : props.theme.colors.button.alt2.color} !important;
+			props.warning
+				? props.theme.colors.font.light1
+				: props.active
+				? props.theme.colors.button.alt2.active.color
+				: props.theme.colors.button.alt2.color} !important;
 	}
 `;
 
@@ -298,6 +289,8 @@ export const IconAlt2 = styled(IconAlt1)`
 		color: ${(props) =>
 			props.disabled
 				? props.theme.colors.button.alt2.disabled.color
+				: props.warning
+				? props.theme.colors.font.light1
 				: props.active
 				? props.theme.colors.button.alt2.active.color
 				: props.theme.colors.button.alt2.color};
@@ -326,12 +319,12 @@ export const Alt3 = styled(Primary)`
 
 	span {
 		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		color: ${(props) =>
 			props.warning
 				? props.theme.colors.font.light1
 				: props.active
-				? props.theme.colors.font.light1
+				? props.theme.colors.button.alt1.color
 				: props.theme.colors.button.primary.color} !important;
 	}
 
@@ -340,32 +333,17 @@ export const Alt3 = styled(Primary)`
 			props.warning
 				? props.theme.colors.font.light1
 				: props.active
-				? props.theme.colors.font.light1
+				? props.theme.colors.button.alt1.color
 				: props.theme.colors.button.primary.color} !important;
 		fill: ${(props) =>
 			props.warning
 				? props.theme.colors.font.light1
 				: props.active
-				? props.theme.colors.font.light1
+				? props.theme.colors.button.alt1.color
 				: props.theme.colors.button.primary.color} !important;
 	}
 
-	&:hover {
-		background: ${(props) =>
-			props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.alt1.background};
-		border: 1px solid
-			${(props) => (props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.alt1.border)};
-		span {
-			color: ${(props) =>
-				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
-		}
-		svg {
-			fill: ${(props) =>
-				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
-			color: ${(props) =>
-				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
-		}
-	}
+	&:hover,
 	&:focus {
 		background: ${(props) =>
 			props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.alt1.background};
@@ -406,7 +384,7 @@ export const IconAlt3 = styled(IconPrimary)`
 				: props.warning
 				? props.theme.colors.font.light1
 				: props.active
-				? props.theme.colors.font.light1
+				? props.theme.colors.button.alt1.color
 				: props.theme.colors.button.primary.color};
 		fill: ${(props) =>
 			props.disabled
@@ -414,7 +392,7 @@ export const IconAlt3 = styled(IconPrimary)`
 				: props.warning
 				? props.theme.colors.font.light1
 				: props.active
-				? props.theme.colors.font.light1
+				? props.theme.colors.button.alt1.color
 				: props.theme.colors.button.primary.color};
 	}
 `;
@@ -441,13 +419,9 @@ export const Alt4 = styled(Primary)`
 
 	span {
 		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		color: ${(props) =>
-			props.warning
-				? props.theme.colors.font.light1
-				: props.active
-				? props.theme.colors.font.light1
-				: props.theme.colors.button.alt1.color} !important;
+			props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
 	}
 
 	svg {
@@ -457,22 +431,7 @@ export const Alt4 = styled(Primary)`
 			props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
 	}
 
-	&:hover {
-		background: ${(props) =>
-			props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.alt1.active.background};
-		border: 1px solid
-			${(props) => (props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.alt1.active.border)};
-		span {
-			color: ${(props) =>
-				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.active.color} !important;
-		}
-		svg {
-			fill: ${(props) =>
-				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.active.color} !important;
-			color: ${(props) =>
-				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.active.color} !important;
-		}
-	}
+	&:hover,
 	&:focus {
 		background: ${(props) =>
 			props.warning ? props.theme.colors.warning.alt1 : props.theme.colors.button.alt1.active.background};
@@ -512,15 +471,11 @@ export const IconAlt4 = styled(IconPrimary)`
 				? props.theme.colors.button.alt2.disabled.color
 				: props.warning
 				? props.theme.colors.font.light1
-				: props.active
-				? props.theme.colors.font.light1
 				: props.theme.colors.button.alt1.color};
 		fill: ${(props) =>
 			props.disabled
 				? props.theme.colors.button.alt2.disabled.color
 				: props.warning
-				? props.theme.colors.font.light1
-				: props.active
 				? props.theme.colors.font.light1
 				: props.theme.colors.button.alt1.color};
 	}
@@ -530,27 +485,19 @@ export const Indicator = styled(Alt1)`
 	background: ${(props) => (props.active ? props.theme.colors.indicator.active : props.theme.colors.indicator.base)};
 	border: 1px solid
 		${(props) => (props.active ? props.theme.colors.indicator.active : props.theme.colors.indicator.base)};
-	&:hover {
+	&:hover,
+	&:focus {
 		background: ${(props) => props.theme.colors.indicator.active};
 		border: 1px solid ${(props) => props.theme.colors.indicator.active};
 		span {
-			color: ${(props) => props.theme.colors.font.light1} !important;
+			color: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
 		}
 		svg {
-			fill: ${(props) => props.theme.colors.font.light1} !important;
-			color: ${(props) => props.theme.colors.font.light1} !important;
-		}
-	}
-	&:focus {
-		background: ${(props) =>
-			props.active ? props.theme.colors.indicator.active : props.theme.colors.indicator.active};
-		border: 1px solid ${(props) => props.theme.colors.indicator.active};
-		span {
-			color: ${(props) => props.theme.colors.font.light1} !important;
-		}
-		svg {
-			fill: ${(props) => props.theme.colors.font.light1} !important;
-			color: ${(props) => props.theme.colors.font.light1} !important;
+			fill: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
+			color: ${(props) =>
+				props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
 		}
 	}
 	&:disabled {
@@ -569,7 +516,8 @@ export const Indicator = styled(Alt1)`
 		width: fit-content;
 		text-overflow: ellipsis;
 		overflow: hidden;
-		color: ${(props) => props.theme.colors.font.light1} !important;
+		color: ${(props) =>
+			props.warning ? props.theme.colors.font.light1 : props.theme.colors.button.alt1.color} !important;
 	}
 `;
 
@@ -578,16 +526,17 @@ export const IconIndicator = styled(IconPrimary)`
 		color: ${(props) =>
 			props.disabled
 				? props.theme.colors.button.alt1.disabled.color
-				: props.active
+				: props.warning
 				? props.theme.colors.font.light1
-				: props.theme.colors.font.light1};
+				: props.theme.colors.button.alt1.color};
 	}
 `;
 
 export const Warning = styled(Alt1)`
 	background: ${(props) => (props.active ? props.theme.colors.warning.alt1 : props.theme.colors.warning.primary)};
 	border: 1px solid ${(props) => (props.active ? props.theme.colors.warning.alt1 : props.theme.colors.warning.primary)};
-	&:hover {
+	&:hover,
+	&:focus {
 		background: ${(props) => props.theme.colors.warning.alt1};
 		border: 1px solid ${(props) => props.theme.colors.warning.alt1};
 		span {
@@ -598,17 +547,6 @@ export const Warning = styled(Alt1)`
 			color: ${(props) => props.theme.colors.font.light1} !important;
 		}
 	}
-	&:focus {
-		background: ${(props) => (props.active ? props.theme.colors.warning.alt1 : props.theme.colors.warning.alt1)};
-		border: 1px solid ${(props) => props.theme.colors.warning.alt1};
-		span {
-			color: ${(props) => props.theme.colors.font.light1} !important;
-		}
-		svg {
-			fill: ${(props) => props.theme.colors.font.light1} !important;
-			color: ${(props) => props.theme.colors.font.light1} !important;
-		}
-	}
 	&:disabled {
 		background: ${(props) => props.theme.colors.button.alt1.disabled.background};
 		border: 1px solid ${(props) => props.theme.colors.button.alt1.disabled.border};
@@ -621,21 +559,18 @@ export const Warning = styled(Alt1)`
 		}
 	}
 
-	span {
-		width: fit-content;
-		text-overflow: ellipsis;
-		overflow: hidden;
+	span,
+	svg {
 		color: ${(props) => props.theme.colors.font.light1} !important;
+	}
+	svg {
+		fill: ${(props) => props.theme.colors.font.light1} !important;
 	}
 `;
 
 export const IconWarning = styled(IconPrimary)`
 	svg {
 		color: ${(props) =>
-			props.disabled
-				? props.theme.colors.button.alt1.disabled.color
-				: props.active
-				? props.theme.colors.font.light1
-				: props.theme.colors.font.light1};
+			props.disabled ? props.theme.colors.button.alt1.disabled.color : props.theme.colors.font.light1};
 	}
 `;

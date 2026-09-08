@@ -108,7 +108,7 @@ export default function Navigation(props: { open: boolean; toggle: () => void })
 		return [
 			{
 				path: currentId ? URLS.portalBase(currentId) : URLS.base,
-				icon: ICONS.portal,
+				icon: ICONS.home,
 				label: language?.home,
 				enabled: true,
 			},

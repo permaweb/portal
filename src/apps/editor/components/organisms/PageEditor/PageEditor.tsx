@@ -4,8 +4,8 @@ import { useParams } from 'react-router-dom';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 
 import { PageSection, ResizeContext } from 'editor/components/molecules/PageSection';
+import { useNavigation } from 'editor/navigation';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
-import { useSettingsProvider } from 'editor/providers/SettingsProvider';
 import { EditorStoreRootState } from 'editor/store';
 import { currentPageClear, currentPageUpdate, setOriginalData } from 'editor/store/page';
 
@@ -33,7 +33,7 @@ export default function PageEditor() {
 	const language = languageProvider.object[languageProvider.current];
 
 	const { addNotification } = useNotifications();
-	const { settings } = useSettingsProvider();
+	const { navWidth } = useNavigation();
 
 	const [resizingBlockId, setResizingBlockId] = React.useState<string | null>(null);
 	const [hasBodyOverflow, setHasBodyOverflow] = React.useState(false);
@@ -314,8 +314,8 @@ export default function PageEditor() {
 	return (
 		<>
 			<S.Wrapper>
-				<S.ToolbarWrapper id={'toolbar-wrapper'} navWidth={settings.navWidth} hasBodyOverflow={hasBodyOverflow}>
-					<S.ToolbarContent className={'max-view-wrapper'} navWidth={settings.navWidth}>
+				<S.ToolbarWrapper id={'toolbar-wrapper'} navWidth={navWidth} hasBodyOverflow={hasBodyOverflow}>
+					<S.ToolbarContent className={'max-view-wrapper'} navWidth={navWidth}>
 						<PageToolbar handleSubmit={handleSubmit} addSection={addSection} />
 					</S.ToolbarContent>
 				</S.ToolbarWrapper>

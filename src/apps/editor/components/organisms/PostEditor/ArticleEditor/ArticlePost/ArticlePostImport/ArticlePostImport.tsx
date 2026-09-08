@@ -1,9 +1,10 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
-import { currentPostUpdate } from 'editor/store/post';
+import { currentPostResetFocus, currentPostUpdate } from 'editor/store/post';
 
 import { Button } from 'components/atoms/Button';
 import { FormField } from 'components/atoms/FormField';
@@ -15,10 +16,11 @@ import {
 	getMarkdownDescription,
 	getMarkdownFeaturedImage,
 	getMarkdownTitle,
+	parseMarkdownToBlocks,
 } from 'helpers/markdown';
-import { ArticleBlockEnum, ArticleBlockType, PortalPatchMapEnum, PortalUploadType } from 'helpers/types';
 import { checkValidAddress, debugLog } from 'helpers/utils';
 import { extractWordPressArticle } from 'helpers/wordpress';
+import { useScrollToTop } from 'hooks/useScrollToTop';
 import { useArweaveProvider } from 'providers/ArweaveProvider';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { useNotifications } from 'providers/NotificationProvider';
@@ -40,6 +42,7 @@ function featuredImageTransactionId(value: string) {
 
 export default function ArticlePostImport() {
 	const dispatch = useDispatch();
+	const { key: routeKey } = useLocation();
 	const currentPost = useSelector((state: EditorStoreRootState) => state.currentPost);
 	const arProvider = useArweaveProvider();
 	const permawebProvider = usePermawebProvider();
@@ -53,9 +56,31 @@ export default function ArticlePostImport() {
 	const [assetId, setAssetId] = React.useState<string>('');
 	const [wordPressUrl, setWordPressUrl] = React.useState<string>('');
 	const [loading, setLoading] = React.useState<boolean>(false);
+	const [importVersion, setImportVersion] = React.useState(0);
+	useScrollToTop(importVersion, importVersion > 0);
 
-	const registerFeaturedImage = async (source: string) => {
-		if (!portalProvider.current?.id || !arProvider.wallet) return source;
+	const importSessionRef = React.useRef<{ routeKey: string } | null>(null);
+	const routeChanged = importSessionRef.current?.routeKey !== routeKey;
+	React.useLayoutEffect(() => {
+		importSessionRef.current = { routeKey };
+		setLoading(false);
+		setShowOptions(false);
+		setAssetId('');
+		return () => {
+			importSessionRef.current = null;
+		};
+	}, [routeKey]);
+
+	const completeImport = () => {
+		dispatch(currentPostResetFocus());
+		setShowOptions(false);
+		setImportVersion((version) => version + 1);
+	};
+
+	const importFeaturedImage = async (source: string) => {
+		if (!portalProvider.current?.id || !arProvider.wallet) {
+			throw new Error('A portal and connected wallet are required to import a featured image');
+		}
 		let tx = featuredImageTransactionId(source);
 		if (!tx) {
 			const response = await fetch(source, { mode: 'cors' });
@@ -68,241 +93,8 @@ export default function ArticlePostImport() {
 			);
 		}
 
-		const existingUploads = portalProvider.current.uploads || [];
-		if (!existingUploads.some((upload: PortalUploadType) => upload.tx === tx)) {
-			const upload: PortalUploadType = { tx, type: 'image', dateUploaded: Date.now().toString() };
-			if (permawebProvider.libs.addPortalUpload) {
-				await permawebProvider.libs.addPortalUpload(portalProvider.current.id, upload);
-			} else {
-				await permawebProvider.libs.updateZone(
-					{ Uploads: permawebProvider.libs.mapToProcessCase([...existingUploads, upload]) },
-					portalProvider.current.id,
-					arProvider.wallet
-				);
-			}
-			portalProvider.refreshCurrentPortal(PortalPatchMapEnum.Media);
-		}
+		await portalProvider.addPortalUpload({ tx, type: 'image', dateUploaded: Date.now().toString() });
 		return tx;
-	};
-
-	const importFeaturedImage = async (source: string) => {
-		try {
-			return await registerFeaturedImage(source);
-		} catch (error: any) {
-			debugLog('error', 'ArticlePostImport', 'Failed to register featured image', error);
-			addNotification(error?.message ?? 'The featured image could not be added to the media library', 'warning');
-			return source;
-		}
-	};
-
-	const parseInlineMarkup = (text: string): string => {
-		let result = text;
-
-		// Bold: **text** or __text__
-		result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-		result = result.replace(/__(.+?)__/g, '<strong>$1</strong>');
-
-		// Italic: *text* or _text_ (but not if part of **)
-		result = result.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
-		result = result.replace(/(?<!_)_(?!_)(.+?)(?<!_)_(?!_)/g, '<em>$1</em>');
-
-		// Inline code: `code`
-		result = result.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-		// Links: [text](url)
-		result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-
-		// Strikethrough: ~~text~~
-		result = result.replace(/~~(.+?)~~/g, '<del>$1</del>');
-
-		return result;
-	};
-
-	const parseMarkdownToBlocks = (markdown: string): ArticleBlockType[] => {
-		const blocks: ArticleBlockType[] = [];
-		const lines = markdown.split('\n');
-		let i = 0;
-
-		while (i < lines.length) {
-			const line = lines[i].trim();
-
-			// Skip empty lines
-			if (!line) {
-				i++;
-				continue;
-			}
-
-			// Skip frontmatter (--- blocks at the start)
-			if (i === 0 && line === '---') {
-				i++;
-				while (i < lines.length && lines[i].trim() !== '---') {
-					i++;
-				}
-				i++; // Skip closing ---
-				continue;
-			}
-
-			// Skip import statements
-			if (line.startsWith('import ')) {
-				i++;
-				continue;
-			}
-
-			// Headers
-			if (line.startsWith('#')) {
-				const headerMatch = line.match(/^(#{1,6})\s+(.+)$/);
-				if (headerMatch) {
-					const level = headerMatch[1].length;
-					const content = parseInlineMarkup(headerMatch[2]);
-					blocks.push({
-						id: Date.now().toString() + '-' + i,
-						type: `header-${level}` as ArticleBlockEnum,
-						content: content,
-					});
-					i++;
-					continue;
-				}
-			}
-
-			// Code blocks
-			if (line.startsWith('```')) {
-				const codeLines: string[] = [];
-				i++; // Skip opening ```
-				while (i < lines.length && !lines[i].trim().startsWith('```')) {
-					codeLines.push(lines[i]);
-					i++;
-				}
-				blocks.push({
-					id: Date.now().toString() + '-' + i,
-					type: ArticleBlockEnum.Code,
-					content: codeLines.join('\n'),
-				});
-				i++; // Skip closing ```
-				continue;
-			}
-
-			// Quote blocks
-			if (line.startsWith('>')) {
-				const quoteLines: string[] = [];
-				while (i < lines.length && lines[i].trim().startsWith('>')) {
-					quoteLines.push(lines[i].trim().substring(1).trim());
-					i++;
-				}
-				blocks.push({
-					id: Date.now().toString() + '-' + i,
-					type: ArticleBlockEnum.Quote,
-					content: parseInlineMarkup(quoteLines.join('\n')),
-				});
-				continue;
-			}
-
-			// HTML/JSX blocks - detect opening tags and capture until closing tag
-			if (line.startsWith('<') && !line.startsWith('</')) {
-				const tagMatch = line.match(/^<(\w+)(?:\s|>)/);
-				if (tagMatch) {
-					const tagName = tagMatch[1];
-					const htmlLines: string[] = [lines[i]];
-					i++;
-
-					// Check if it's a self-closing tag
-					const isSelfClosing = lines[i - 1].trim().endsWith('/>');
-
-					if (!isSelfClosing) {
-						// Capture until we find the closing tag or reach a balanced state
-						let depth = 1;
-						while (i < lines.length && depth > 0) {
-							htmlLines.push(lines[i]);
-							const currentLine = lines[i].trim();
-
-							// Count opening tags
-							const openMatches = currentLine.match(new RegExp(`<${tagName}(?:\\s|>)`, 'g'));
-							if (openMatches) depth += openMatches.length;
-
-							// Count closing tags
-							const closeMatches = currentLine.match(new RegExp(`</${tagName}>`, 'g'));
-							if (closeMatches) depth -= closeMatches.length;
-
-							i++;
-						}
-					}
-
-					blocks.push({
-						id: Date.now().toString() + '-' + i,
-						type: ArticleBlockEnum.HTML,
-						content: htmlLines.join('\n'),
-					});
-					continue;
-				}
-			}
-
-			// Unordered lists
-			if (line.match(/^[-*+]\s+/)) {
-				const listItems: string[] = [];
-				while (i < lines.length) {
-					const currentLine = lines[i].trim();
-
-					// Check if it's a list item
-					if (currentLine.match(/^[-*+]\s+/)) {
-						const itemContent = currentLine.replace(/^[-*+]\s+/, '');
-						listItems.push(`<li>${parseInlineMarkup(itemContent)}</li>`);
-						i++;
-					}
-					// Allow empty lines between list items
-					else if (currentLine === '' && i + 1 < lines.length && lines[i + 1].trim().match(/^[-*+]\s+/)) {
-						i++;
-					}
-					// End of list
-					else {
-						break;
-					}
-				}
-				blocks.push({
-					id: Date.now().toString() + '-' + i,
-					type: ArticleBlockEnum.UnorderedList,
-					content: listItems.join(''),
-				});
-				continue;
-			}
-
-			// Ordered lists
-			if (line.match(/^\d+\.\s+/)) {
-				const listItems: string[] = [];
-				while (i < lines.length) {
-					const currentLine = lines[i].trim();
-
-					// Check if it's a list item
-					if (currentLine.match(/^\d+\.\s+/)) {
-						const itemContent = currentLine.replace(/^\d+\.\s+/, '');
-						listItems.push(`<li>${parseInlineMarkup(itemContent)}</li>`);
-						i++;
-					}
-					// Allow empty lines between list items
-					else if (currentLine === '' && i + 1 < lines.length && lines[i + 1].trim().match(/^\d+\.\s+/)) {
-						i++;
-					}
-					// End of list
-					else {
-						break;
-					}
-				}
-				blocks.push({
-					id: Date.now().toString() + '-' + i,
-					type: ArticleBlockEnum.OrderedList,
-					content: listItems.join(''),
-				});
-				continue;
-			}
-
-			// Paragraph (default)
-			blocks.push({
-				id: Date.now().toString() + '-' + i,
-				type: ArticleBlockEnum.Paragraph,
-				content: parseInlineMarkup(line),
-			});
-			i++;
-		}
-
-		return blocks;
 	};
 
 	const handleMarkdownUpload = () => {
@@ -316,8 +108,12 @@ export default function ArticlePostImport() {
 		}
 
 		setLoading(true);
+		const session = importSessionRef.current;
 		try {
 			const convertedPost = await extractWordPressArticle(wordPressUrl.trim());
+			if (importSessionRef.current !== session) return;
+			const thumbnail = convertedPost.thumbnail ? await importFeaturedImage(convertedPost.thumbnail) : null;
+			if (importSessionRef.current !== session) return;
 
 			// Update post content
 			dispatch(currentPostUpdate({ field: 'content', value: convertedPost.content }));
@@ -333,8 +129,8 @@ export default function ArticlePostImport() {
 			}
 
 			// Update thumbnail
-			if (convertedPost.thumbnail) {
-				dispatch(currentPostUpdate({ field: 'thumbnail', value: await importFeaturedImage(convertedPost.thumbnail) }));
+			if (thumbnail) {
+				dispatch(currentPostUpdate({ field: 'thumbnail', value: thumbnail }));
 			}
 
 			// Update date created if available
@@ -343,13 +139,14 @@ export default function ArticlePostImport() {
 			}
 
 			addNotification('WordPress article imported successfully', 'success');
-			setShowOptions(false);
+			completeImport();
 			setWordPressUrl('');
 		} catch (e: any) {
+			if (importSessionRef.current !== session) return;
 			debugLog('error', 'ArticlePostImport', e);
 			addNotification(e.message ?? 'Failed to import WordPress article', 'warning');
 		} finally {
-			setLoading(false);
+			if (importSessionRef.current === session) setLoading(false);
 		}
 	};
 
@@ -363,8 +160,10 @@ export default function ArticlePostImport() {
 		}
 
 		setLoading(true);
+		const session = importSessionRef.current;
 		try {
 			const text = await file.text();
+			if (importSessionRef.current !== session) return;
 			const markdown = extractMarkdownDocument(text);
 			const blocks = parseMarkdownToBlocks(markdown.body);
 
@@ -373,21 +172,24 @@ export default function ArticlePostImport() {
 			const title = getMarkdownTitle(markdown);
 			const description = getMarkdownDescription(markdown.frontmatter);
 			const featuredImage = getMarkdownFeaturedImage(markdown.frontmatter);
+			const thumbnail = featuredImage ? await importFeaturedImage(featuredImage) : null;
+			if (importSessionRef.current !== session) return;
 
 			dispatch(currentPostUpdate({ field: 'content', value: updatedContent }));
 			if (title) dispatch(currentPostUpdate({ field: 'title', value: title }));
 			if (description) dispatch(currentPostUpdate({ field: 'description', value: description }));
-			if (featuredImage) {
-				dispatch(currentPostUpdate({ field: 'thumbnail', value: await importFeaturedImage(featuredImage) }));
+			if (thumbnail) {
+				dispatch(currentPostUpdate({ field: 'thumbnail', value: thumbnail }));
 			}
 
 			addNotification(language.markdownImportSuccess, 'success');
-			setShowOptions(false);
+			completeImport();
 		} catch (e: any) {
+			if (importSessionRef.current !== session) return;
 			debugLog('error', 'ArticlePostImport', e);
 			addNotification(e.message ?? language.markdownImportError, 'warning');
 		} finally {
-			setLoading(false);
+			if (importSessionRef.current === session) setLoading(false);
 			// Reset file input
 			if (fileInputRef.current) {
 				fileInputRef.current.value = '';
@@ -396,30 +198,42 @@ export default function ArticlePostImport() {
 	};
 
 	React.useEffect(() => {
+		// On navigation, this render can still contain the previous route's post ID.
+		if (routeChanged) return;
+		let active = true;
+		const session = importSessionRef.current;
+		const isCurrent = () => active && importSessionRef.current === session;
 		if (checkValidAddress(assetId)) {
 			(async function () {
 				setLoading(true);
 				try {
 					const response = await permawebProvider.libs.getAtomicAsset(assetId);
+					if (!isCurrent()) return;
 					debugLog('info', 'ArticlePostImport', response);
 					if (response?.metadata?.content) {
+						const thumbnail = response.metadata.thumbnail
+							? await importFeaturedImage(response.metadata.thumbnail)
+							: null;
+						if (!isCurrent()) return;
 						const existingContent = currentPost.data.content || [];
 						const updatedContent = [...existingContent, ...response.metadata.content];
 
 						dispatch(currentPostUpdate({ field: 'content', value: updatedContent }));
 
 						if (response.name) dispatch(currentPostUpdate({ field: 'title', value: response.name }));
-						if (response.metadata.thumbnail) {
+						if (thumbnail) {
 							dispatch(
 								currentPostUpdate({
 									field: 'thumbnail',
-									value: await importFeaturedImage(response.metadata.thumbnail),
+									value: thumbnail,
 								})
 							);
 						}
 					}
 					addNotification(language.contentImported, 'success');
+					completeImport();
 				} catch (e: any) {
+					if (!isCurrent()) return;
 					debugLog('error', 'ArticlePostImport', e);
 					addNotification(e.message ?? language.errorImportingPost, 'warning');
 				}
@@ -428,7 +242,10 @@ export default function ArticlePostImport() {
 				setAssetId('');
 			})();
 		}
-	}, [assetId]);
+		return () => {
+			active = false;
+		};
+	}, [assetId, routeKey]);
 
 	return (
 		<>

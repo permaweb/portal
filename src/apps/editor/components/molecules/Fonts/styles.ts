@@ -18,7 +18,7 @@ export const Preview = styled.div<{ fontFamily?: string }>`
 	p {
 		font-family: ${(props) => (props.fontFamily ? props.fontFamily : props.theme.typography.family.primary)};
 		font-size: ${(props) => props.theme.typography.size.xLg};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		color: ${(props) => props.theme.colors.font.primary};
 	}
 `;

@@ -142,7 +142,7 @@ export const ListPostImage = styled.div`
 
 export const ListPostNumber = styled.div`
 	font-size: ${(props) => props.theme.typography.size.h1};
-	font-weight: ${(props) => props.theme.typography.weight.bold};
+	font-weight: ${(props) => props.theme.typography.weight.medium};
 	font-family: ${(props) => props.theme.typography.family.alt1};
 	color: ${(props) => props.theme.colors.font.light1};
 	line-height: 1;

@@ -54,7 +54,7 @@ export const SectionHeader = styled.div`
 		color: ${(props) => props.theme.colors.font.alt1};
 		font-family: ${(props) => props.theme.typography.family.primary};
 		font-size: ${(props) => props.theme.typography.size.small};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-transform: uppercase;
 		line-height: 1;
 	}

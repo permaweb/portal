@@ -75,7 +75,7 @@ export const Tooltip = styled.div<{ position: string }>`
 		line-height: 1.65 !important;
 		color: ${(props) => props.theme.colors.contrast.color} !important;
 		font-size: ${(props) => props.theme.typography.size.xxxSmall} !important;
-		font-weight: ${(props) => props.theme.typography.weight.bold} !important;
+		font-weight: ${(props) => props.theme.typography.weight.medium} !important;
 		white-space: nowrap !important;
 		text-decoration: none !important;
 	}
@@ -196,13 +196,13 @@ export const Alt2 = styled(Primary)`
 		width: ${(props) => (props.dimensions ? `${props.dimensions.icon.toString()}px` : `24.5px`)};
 		color: ${(props) =>
 			props.active
-				? props.theme.colors.font.light1
+				? props.theme.colors.button.alt1.active.color
 				: props.disabled
 				? props.theme.colors.button.alt1.disabled.color
 				: props.theme.colors.button.alt1.color};
 		fill: ${(props) =>
 			props.active
-				? props.theme.colors.font.light1
+				? props.theme.colors.button.alt1.active.color
 				: props.disabled
 				? props.theme.colors.button.alt1.disabled.color
 				: props.theme.colors.button.alt1.color};

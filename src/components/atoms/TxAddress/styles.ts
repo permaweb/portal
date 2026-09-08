@@ -7,7 +7,7 @@ export const Wrapper = styled.div<{ disabled: boolean }>`
 		color: ${(props) => (props.disabled ? props.theme.colors.font.alt2 : props.theme.colors.link.color)};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
 		font-family: ${(props) => props.theme.typography.family.primary};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		text-decoration: ${(props) => (props.disabled ? 'none' : 'underline')};
 		text-decoration-thickness: 1.25px;
 

@@ -6,12 +6,13 @@ import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { ArticleBlock } from 'editor/components/molecules/ArticleBlock';
 import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { EditorStoreRootState } from 'editor/store';
-import { currentPostClear, currentPostUpdate, setOriginalData } from 'editor/store/post';
+import { currentPostClear, currentPostResetFocus, currentPostUpdate, setOriginalData } from 'editor/store/post';
 
 import { URLS } from 'helpers/config';
 import { IS_BASE_MODE } from 'helpers/features';
 import { ArticleBlockEnum, ArticleBlockType, RequestUpdateType } from 'helpers/types';
 import { checkValidAddress } from 'helpers/utils';
+import { useScrollToTop } from 'hooks/useScrollToTop';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 import { usePermawebProvider } from 'providers/PermawebProvider';
 
@@ -37,6 +38,8 @@ export default function ArticleEditor(props: {
 	const [viewMode, setViewMode] = React.useState<'original' | 'new'>('new');
 	const [originalData, setOriginalDataState] = React.useState({});
 	const [newChanges, setNewChanges] = React.useState({});
+	const [loadedPostVersion, setLoadedPostVersion] = React.useState(0);
+	useScrollToTop(loadedPostVersion, loadedPostVersion > 0);
 
 	const handleCurrentPostUpdate = (updatedField: { field: string; value: any }) => {
 		dispatch(currentPostUpdate(updatedField));
@@ -58,10 +61,13 @@ export default function ArticleEditor(props: {
 
 	const previousAssetIdRef = React.useRef<string | undefined>(undefined);
 
-	async function loadPostData() {
+	async function loadPostData(isCurrent: () => boolean) {
 		if (portalProvider.current?.id) {
 			if (assetId) {
-				if (!checkValidAddress(assetId)) navigate(URLS.postCreateArticle(portalProvider.current.id));
+				if (!checkValidAddress(assetId)) {
+					navigate(URLS.postCreateArticle(portalProvider.current.id));
+					return;
+				}
 
 				const hasCurrentPostData = currentPost.data.id === assetId && currentPost.data.title;
 
@@ -84,6 +90,7 @@ export default function ArticleEditor(props: {
 						let assetData = IS_BASE_MODE
 							? await permawebProvider.libs.getAtomicAsset(assetId, portalProvider.current.id)
 							: await permawebProvider.libs.getAtomicAsset(assetId);
+						if (!isCurrent()) return;
 
 						if (request && request.payload?.input) {
 							// If request already exists, use it as the source
@@ -160,7 +167,9 @@ export default function ArticleEditor(props: {
 
 						// Set original data for comparison
 						dispatch(setOriginalData(postData as any));
+						setLoadedPostVersion((version) => version + 1);
 					} catch (e) {
+						if (!isCurrent()) return;
 						console.error(e);
 					}
 
@@ -171,15 +180,21 @@ export default function ArticleEditor(props: {
 				// But have content from an existing post (currentPost.data.id exists)
 				// This handles the case where user navigates from editing an existing post to creating new
 				if (currentPost.data.id) dispatch(currentPostClear());
+				else dispatch(currentPostResetFocus());
+				handleCurrentPostUpdate({ field: 'loading', value: { active: false, message: null } });
+				// A preserved draft may still point at the last block edited on a previous visit.
+				setLoadedPostVersion((version) => version + 1);
 			}
 			previousAssetIdRef.current = assetId;
 		}
 	}
 
 	React.useEffect(() => {
-		(async function () {
-			await loadPostData();
-		})();
+		let active = true;
+		void loadPostData(() => active);
+		return () => {
+			active = false;
+		};
 	}, [assetId, portalProvider.current?.id]);
 
 	React.useEffect(() => {
@@ -194,6 +209,10 @@ export default function ArticleEditor(props: {
 
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.defaultPrevented || event.isComposing || document.querySelector('[role="dialog"][aria-modal="true"]')) {
+				return;
+			}
+
 			if (portalProvider.current?.id) {
 				if (currentPost.editor.focusedBlock) {
 					switch (currentPost.editor.focusedBlock.type) {

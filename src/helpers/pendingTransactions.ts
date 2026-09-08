@@ -1,3 +1,4 @@
+import { withBaseReadLimit } from './basePortalRequests';
 import { STORAGE } from './config';
 
 const ARWEAVE_GRAPHQL = 'https://arweave.net/graphql';
@@ -9,7 +10,8 @@ const PENDING_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const PENDING_MAX_ENTRIES = 100;
 const PENDING_RETRY_BASE_MS = 10_000;
 const PENDING_RETRY_MAX_MS = 10 * 60 * 1000;
-const PENDING_FETCH_CONCURRENCY = 8;
+const PENDING_FETCH_CONCURRENCY = 4;
+const pendingRefreshes = new Map<string, Promise<PendingTransaction[]>>();
 
 export type PendingTransaction = {
 	id: string;
@@ -122,88 +124,111 @@ async function coldLoadableTransactionIds(entries: PendingTransaction[]): Promis
 	const indexed = new Set<string>();
 	for (let offset = 0; offset < ids.length; offset += GRAPHQL_IDS_LIMIT) {
 		const chunk = ids.slice(offset, offset + GRAPHQL_IDS_LIMIT);
-		const response = await fetch(ARWEAVE_GRAPHQL, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				query: `
+		const payload = await withBaseReadLimit(async () => {
+			const response = await fetch(ARWEAVE_GRAPHQL, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					query: `
 					query PendingPortalTransactions($ids: [ID!], $first: Int!) {
 						transactions(ids: $ids, first: $first) { edges { node { id } } }
 					}
 				`,
-				variables: { ids: chunk, first: chunk.length },
-			}),
+					variables: { ids: chunk, first: chunk.length },
+				}),
+			});
+			if (!response.ok) throw new Error(`Pending transaction check failed: ${response.status}`);
+			return await response.json();
 		});
-		if (!response.ok) throw new Error(`Pending transaction check failed: ${response.status}`);
-		const payload = await response.json();
 		if (payload.errors?.length) throw new Error(payload.errors[0]?.message || 'Pending transaction check failed');
 		for (const edge of payload.data?.transactions?.edges || []) indexed.add(edge.node.id);
 	}
 	const loadable = new Set<string>();
 	await mapWithConcurrency(Array.from(indexed), PENDING_FETCH_CONCURRENCY, async (id) => {
-		try {
-			const response = await fetch(`https://arweave.net/${id}`, { cache: 'force-cache' });
-			if (!response.ok) return;
-			const entry = byId.get(id);
-			if (
-				entry?.type === 'portal-release' ||
-				entry?.type === 'portal-manifest' ||
-				entry?.type === 'portal-checkpoint' ||
-				entry?.type === 'portal-post'
-			) {
-				const payload = await response.json();
+		await withBaseReadLimit(async () => {
+			try {
+				const response = await fetch(`https://arweave.net/${id}`, { cache: 'force-cache' });
+				if (!response.ok) return;
+				const entry = byId.get(id);
 				if (
-					payload?.mode !== 'base' ||
-					payload?.type !== entry.type ||
-					(entry.portalId && payload?.portalId !== entry.portalId)
+					entry?.type === 'portal-release' ||
+					entry?.type === 'portal-manifest' ||
+					entry?.type === 'portal-checkpoint' ||
+					entry?.type === 'portal-post'
 				) {
-					return;
+					const payload = await response.json();
+					if (
+						payload?.mode !== 'base' ||
+						payload?.type !== entry.type ||
+						(entry.portalId && payload?.portalId !== entry.portalId)
+					) {
+						return;
+					}
 				}
-			}
-			loadable.add(id);
-		} catch {}
+				loadable.add(id);
+			} catch {}
+		});
 	});
 	return loadable;
 }
 
 export async function refreshPendingTransactions(address: string, portalId?: string): Promise<PendingTransaction[]> {
+	const key = `${address}:${portalId || ''}`;
+	const existing = pendingRefreshes.get(key);
+	if (existing) return existing;
+	const refresh = refreshPendingTransactionsForScope(address, portalId).catch(() =>
+		getPendingTransactions(address, portalId)
+	);
+	pendingRefreshes.set(key, refresh);
+	try {
+		return await refresh;
+	} finally {
+		if (pendingRefreshes.get(key) === refresh) pendingRefreshes.delete(key);
+	}
+}
+
+async function refreshPendingTransactionsForScope(address: string, portalId?: string): Promise<PendingTransaction[]> {
 	const entries = getPendingTransactions(address, portalId);
 	if (!entries.length) return entries;
 	const now = Date.now();
 	const due = entries.filter((entry) => (entry.nextCheckAt || 0) <= now);
 	if (!due.length) return entries;
+	let loadable = new Set<string>();
 	try {
-		const loadable = await coldLoadableTransactionIds(due);
-		const dueIds = new Set(due.map((entry) => entry.id));
-		const pending = entries
-			.filter((entry) => !loadable.has(entry.id))
-			.map((entry) => {
-				if (!dueIds.has(entry.id)) return entry;
-				const attempts = (entry.attempts || 0) + 1;
-				return {
-					...entry,
-					attempts,
-					nextCheckAt: now + Math.min(PENDING_RETRY_BASE_MS * 2 ** Math.min(attempts - 1, 10), PENDING_RETRY_MAX_MS),
-				};
-			});
-		const own = pending.filter((entry) => entry.address === address);
-		savePendingTransactions(address, own);
-		if (portalId) {
-			const observed = pending.filter((entry) => entry.address === OBSERVED_PENDING_KEY);
-			const storedObserved = getStoredTransactions(OBSERVED_PENDING_KEY);
-			const nextObserved = [
-				...storedObserved.filter((entry) => entry.portalId !== portalId && entry.createdAt >= now - PENDING_MAX_AGE_MS),
-				...observed,
-			].slice(0, PENDING_MAX_ENTRIES);
-			if (JSON.stringify(nextObserved) !== JSON.stringify(storedObserved)) {
-				localStorage.setItem(STORAGE.basePendingTransactions(OBSERVED_PENDING_KEY), JSON.stringify(nextObserved));
-				emit(OBSERVED_PENDING_KEY);
-			}
-		}
-		return pending;
+		loadable = await coldLoadableTransactionIds(due);
 	} catch {
-		return entries;
+		// Gateway errors must back off too, especially while a user is being rate limited.
 	}
+	const dueIds = new Set(due.map((entry) => entry.id));
+	const checkedAt = Date.now();
+	// Transactions may have been submitted while the gateway checks were in flight.
+	const pending = getPendingTransactions(address, portalId)
+		.filter((entry) => !loadable.has(entry.id))
+		.map((entry) => {
+			if (!dueIds.has(entry.id)) return entry;
+			const attempts = (entry.attempts || 0) + 1;
+			return {
+				...entry,
+				attempts,
+				nextCheckAt:
+					checkedAt + Math.min(PENDING_RETRY_BASE_MS * 2 ** Math.min(attempts - 1, 10), PENDING_RETRY_MAX_MS),
+			};
+		});
+	const own = pending.filter((entry) => entry.address === address);
+	savePendingTransactions(address, own);
+	if (portalId) {
+		const observed = pending.filter((entry) => entry.address === OBSERVED_PENDING_KEY);
+		const storedObserved = getStoredTransactions(OBSERVED_PENDING_KEY);
+		const nextObserved = [
+			...storedObserved.filter((entry) => entry.portalId !== portalId && entry.createdAt >= now - PENDING_MAX_AGE_MS),
+			...observed,
+		].slice(0, PENDING_MAX_ENTRIES);
+		if (JSON.stringify(nextObserved) !== JSON.stringify(storedObserved)) {
+			localStorage.setItem(STORAGE.basePendingTransactions(OBSERVED_PENDING_KEY), JSON.stringify(nextObserved));
+			emit(OBSERVED_PENDING_KEY);
+		}
+	}
+	return pending;
 }
 
 export function subscribeToPendingTransactions(address: string, callback: () => void) {

@@ -31,7 +31,7 @@ export const HeaderAction = styled.div`
 		gap: 7.5px;
 		color: ${(props) => props.theme.colors.font.primary};
 		font-size: ${(props) => props.theme.typography.size.xSmall};
-		font-weight: ${(props) => props.theme.typography.weight.bold};
+		font-weight: ${(props) => props.theme.typography.weight.medium};
 		font-family: ${(props) => props.theme.typography.family.primary};
 
 		&:hover {
@@ -81,7 +81,7 @@ export const TransfersCountBubble = styled.span`
 	color: ${(p) => p.theme.colors.contrast};
 
 	font-size: ${(p) => p.theme.typography.size.xxxSmall};
-	font-weight: ${(p) => p.theme.typography.weight.bold};
+	font-weight: ${(p) => p.theme.typography.weight.medium};
 	line-height: 1;
 `;
 
@@ -131,7 +131,7 @@ export const TransferInviteMeta = styled.div`
 
 	span {
 		font-size: ${(p) => p.theme.typography.size.xSmall};
-		font-weight: ${(p) => p.theme.typography.weight.bold};
+		font-weight: ${(p) => p.theme.typography.weight.medium};
 		color: ${(p) => p.theme.colors.font.alt1};
 	}
 `;
@@ -143,7 +143,7 @@ export const TransferInviteState = styled.span<{ $state?: string }>`
 	padding: 2px 8px;
 	border-radius: 999px;
 	font-size: ${(p) => p.theme.typography.size.xxxSmall};
-	font-weight: ${(p) => p.theme.typography.weight.bold};
+	font-weight: ${(p) => p.theme.typography.weight.medium};
 	text-transform: capitalize;
 	background: ${(p) => {
 		switch (p.$state) {
