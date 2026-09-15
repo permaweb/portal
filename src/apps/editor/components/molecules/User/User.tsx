@@ -22,7 +22,7 @@ export default function User(props: {
 	user: PortalUserType;
 	onInviteDetected?: (userAddress: string, hasPendingInvite: boolean) => void;
 	hideAction?: boolean;
-	baseMembershipAccepted?: boolean;
+	baseInvitePending?: boolean;
 }) {
 	const arweaveProvider = useArweaveProvider();
 	const portalProvider = usePortalProvider();
@@ -41,7 +41,7 @@ export default function User(props: {
 	const userProfile = portalProvider.usersByPortalId?.[props.user.address] ?? { id: props.user.address };
 	const unauthorized = !portalProvider?.permissions?.updateUsers;
 	const invitePending = IS_BASE_MODE
-		? props.user.address !== portalProvider.current?.owner && !props.baseMembershipAccepted
+		? props.user.address !== portalProvider.current?.owner && props.baseInvitePending === true
 		: userProfile?.invites?.find((invite: PortalHeaderType) => invite.id === portalProvider.current?.id) !== undefined;
 	const ownershipTransferTarget =
 		userProfile.owner === arweaveProvider.walletAddress && isCurrentLoggedInUserPortalOwner;

@@ -138,9 +138,9 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 			}))
 			.sort((a, b) => roleOrder.indexOf(a.id) - roleOrder.indexOf(b.id));
 
-		// Hide Admin for non-owners
-		return isOwner ? sorted : sorted.filter((r) => r.id !== 'Admin');
-	}, [portalProvider.current?.roleOptions, roleDescriptions, isOwner]);
+		// Owners and admins can grant the Admin role.
+		return isOwner || actorRoles.includes('Admin') ? sorted : sorted.filter((r) => r.id !== 'Admin');
+	}, [portalProvider.current?.roleOptions, roleDescriptions, isOwner, actorRoles]);
 
 	// Initialize form state for edit vs add
 	React.useEffect(() => {
@@ -169,7 +169,11 @@ export default function UserManager(props: { user?: any; handleClose: () => void
 		// Add new user defaults
 		setUnauthorized(false);
 		setWalletAddress('');
-		const defaultRole = roleOptions.find((r) => r.id === 'Contributor') || roleOptions[0] || null;
+		const defaultRole =
+			roleOptions.find((r) => r.id === 'Admin') ||
+			roleOptions.find((r) => r.id === 'Contributor') ||
+			roleOptions[0] ||
+			null;
 		setRole(defaultRole);
 	}, [props.user, roleOptions, portalProvider?.current?.owner, arProvider.walletAddress, targetProfile?.owner]);
 

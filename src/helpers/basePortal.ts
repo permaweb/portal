@@ -2202,7 +2202,7 @@ export function manifestToPortalHeader(manifest: BasePortalManifest): PortalHead
 	};
 }
 
-type BasePortalMembershipStatus = 'accepted' | 'left';
+export type BasePortalMembershipStatus = 'accepted' | 'left';
 
 function membershipStatusesFromNodes(address: string, nodes: GraphQLNode[]) {
 	const statuses = new Map<string, BasePortalMembershipStatus>();
@@ -2239,29 +2239,23 @@ export async function getBasePortalMembershipStatus(
 	}
 }
 
-export async function getAcceptedBasePortalMembers(portalId: string): Promise<Set<string>> {
+export async function getBasePortalMemberStatuses(portalId: string): Promise<Map<string, BasePortalMembershipStatus>> {
 	const statuses = new Map<string, BasePortalMembershipStatus>();
-	try {
-		const nodes = await queryAllTransactions(
-			[
-				{ name: 'Portal-Mode', value: 'base' },
-				{ name: 'Type', value: 'portal-membership' },
-				{ name: 'Portal-Id', value: portalId },
-			],
-			'HEIGHT_ASC'
-		);
-		for (const node of nodes) {
-			const address = node.owner?.address;
-			if (!address || tagValue(node, 'Portal-User') !== address) continue;
-			const status = tagValue(node, 'Membership-Status');
-			if (status === 'accepted' || status === 'left') statuses.set(address, status);
-		}
-	} catch {}
-	return new Set(
-		Array.from(statuses.entries())
-			.filter(([, status]) => status === 'accepted')
-			.map(([address]) => address)
+	const nodes = await queryAllTransactions(
+		[
+			{ name: 'Portal-Mode', value: 'base' },
+			{ name: 'Type', value: 'portal-membership' },
+			{ name: 'Portal-Id', value: portalId },
+		],
+		'HEIGHT_ASC'
 	);
+	for (const node of nodes) {
+		const address = node.owner?.address;
+		if (!address || tagValue(node, 'Portal-User') !== address) continue;
+		const status = tagValue(node, 'Membership-Status');
+		if (status === 'accepted' || status === 'left') statuses.set(address, status);
+	}
+	return statuses;
 }
 
 function getMembershipReceipts(address: string): Record<string, string> {

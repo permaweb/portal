@@ -7,7 +7,7 @@ import { usePortalProvider } from 'editor/providers/PortalProvider';
 import { Button } from 'components/atoms/Button';
 import { Drawer } from 'components/atoms/Drawer';
 import { Pagination } from 'components/atoms/Pagination';
-import { getAcceptedBasePortalMembers } from 'helpers/basePortal';
+import { BasePortalMembershipStatus, getBasePortalMemberStatuses } from 'helpers/basePortal';
 import { URLS } from 'helpers/config';
 import { IS_BASE_MODE } from 'helpers/features';
 import { PortalUserType, ViewLayoutType } from 'helpers/types';
@@ -27,19 +27,26 @@ export default function UserList(props: { type: ViewLayoutType }) {
 	const language = languageProvider.object[languageProvider.current];
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [usersWithPendingInvites, setUsersWithPendingInvites] = React.useState<Set<string>>(new Set());
-	const [acceptedBaseMembers, setAcceptedBaseMembers] = React.useState<Set<string>>(new Set());
+	const [baseMemberStatuses, setBaseMemberStatuses] = React.useState<{
+		portalId: string;
+		statuses: Map<string, BasePortalMembershipStatus>;
+	} | null>(null);
 
 	React.useEffect(() => {
 		const portalId = portalProvider.current?.id;
+		setBaseMemberStatuses(null);
 		if (!IS_BASE_MODE || !portalId) {
-			setAcceptedBaseMembers(new Set());
 			return;
 		}
 		let active = true;
 		const refresh = () => {
-			void getAcceptedBasePortalMembers(portalId).then((members) => {
-				if (active) setAcceptedBaseMembers(members);
-			});
+			void getBasePortalMemberStatuses(portalId)
+				.then((statuses) => {
+					if (active) setBaseMemberStatuses({ portalId, statuses });
+				})
+				.catch(() => {
+					if (active) setBaseMemberStatuses(null);
+				});
 		};
 		refresh();
 		const interval = window.setInterval(refresh, 10_000);
@@ -150,7 +157,10 @@ export default function UserList(props: { type: ViewLayoutType }) {
 						<User
 							user={user}
 							onInviteDetected={handleInviteDetected}
-							baseMembershipAccepted={acceptedBaseMembers.has(user.address)}
+							baseInvitePending={
+								baseMemberStatuses?.portalId === portalProvider.current.id &&
+								!baseMemberStatuses.statuses.has(user.address)
+							}
 						/>
 					</S.UserWrapper>
 				))}
@@ -165,7 +175,7 @@ export default function UserList(props: { type: ViewLayoutType }) {
 		pageUsers,
 		handleInviteDetected,
 		usersWithPendingInvites,
-		acceptedBaseMembers,
+		baseMemberStatuses,
 	]);
 
 	function getUsers() {

@@ -89,7 +89,7 @@ function fixture({ unavailablePost = false, revoked = false } = {}) {
 	];
 }
 
-function runtime(transactions = fixture(), fetchOverride) {
+function runtime(transactions = fixture(), fetchOverride, uploadOverride) {
 	const calls = [];
 	const uploads = [];
 	let clock = Date.now();
@@ -168,6 +168,7 @@ function runtime(transactions = fixture(), fetchOverride) {
 				return {
 					uploadTransaction: (...args) => {
 						uploads.push(args);
+						if (uploadOverride) return uploadOverride(...args);
 						throw new Error('Unexpected upload');
 					},
 				};
@@ -193,6 +194,36 @@ function runtime(transactions = fixture(), fetchOverride) {
 const plain = (value) => JSON.parse(JSON.stringify(value));
 const flush = () => new Promise(setImmediate);
 const numberedId = (prefix, index) => prefix + String(index).padStart(42, '0');
+
+test('an existing base portal admin can grant Admin and the grant survives a fresh read', async () => {
+	const transactions = fixture();
+	transactions[0].body.users.find((user) => user.address === MEMBER).roles = ['Admin'];
+	const newAdmin = id('n');
+	const releaseId = id('v');
+	const { api, uploads } = runtime(transactions, undefined, () => releaseId);
+	const manifest = await api.setBasePortalUsers(PORTAL, [{ granteeId: newAdmin, roles: ['Admin'] }], {}, MEMBER);
+	assert.deepEqual(plain(manifest.users.find((user) => user.address === newAdmin).roles), ['Admin']);
+	assert.equal(manifest.owner, OWNER);
+	assert.equal(uploads.length, 1);
+	const [, data, tags] = uploads[0];
+	assert.ok(tags.some((tag) => tag.name === 'Portal-User' && tag.value === newAdmin));
+	transactions.push(transaction(releaseId, 'portal-release', JSON.parse(data), {}, MEMBER, 5));
+	const reloaded = await runtime(transactions).api.fetchBasePortal(PORTAL);
+	assert.deepEqual(plain(reloaded.users.find((user) => user.address === newAdmin).roles), ['Admin']);
+});
+
+test('base portal users without Admin cannot grant Admin', async () => {
+	for (const roles of [[], ['Contributor'], ['Moderator'], ['ExternalContributor']]) {
+		const transactions = fixture();
+		transactions[0].body.users.find((user) => user.address === MEMBER).roles = roles;
+		const { api, uploads } = runtime(transactions);
+		await assert.rejects(
+			api.setBasePortalUsers(PORTAL, [{ granteeId: id('n'), roles: ['Admin'] }], {}, MEMBER),
+			/authorized/i
+		);
+		assert.equal(uploads.length, 0);
+	}
+});
 
 // Hold selected cold reads until the test releases them. Finishing a batch in
 // reverse order exposes accidental result-order changes caused by parallelism.
@@ -404,6 +435,44 @@ test('membership receipts must be signed by the member', async () => {
 	const result = await api.discoverBasePortals(MEMBER);
 	assert.equal(result.portals.length, 0);
 	assert.equal(result.invites.length, 1);
+});
+
+test('member status lookup distinguishes accepted, declined, and unanswered invitations', async () => {
+	const transactions = fixture();
+	const declinedMember = id('d');
+	transactions.push(
+		transaction(
+			id('l'),
+			'portal-membership',
+			{},
+			{ 'Portal-User': declinedMember, 'Membership-Status': 'left' },
+			declinedMember,
+			5
+		)
+	);
+	const { api } = runtime(transactions);
+	const statuses = await api.getBasePortalMemberStatuses(PORTAL);
+	assert.equal(statuses.get(MEMBER), 'accepted');
+	assert.equal(statuses.get(declinedMember), 'left');
+	assert.equal(statuses.has(id('n')), false);
+});
+
+test('member status lookup uses the latest signed response and ignores forged receipts', async () => {
+	const transactions = fixture();
+	transactions.push(
+		transaction(id('l'), 'portal-membership', {}, { 'Portal-User': MEMBER, 'Membership-Status': 'left' }, MEMBER, 5),
+		transaction(id('f'), 'portal-membership', {}, { 'Portal-User': MEMBER, 'Membership-Status': 'accepted' }, OWNER, 6)
+	);
+	const { api } = runtime(transactions);
+	const statuses = await api.getBasePortalMemberStatuses(PORTAL);
+	assert.equal(statuses.get(MEMBER), 'left');
+	assert.equal(statuses.size, 1);
+});
+
+test('failed member status lookup does not report an empty set of responses', async () => {
+	const { api, setOffline } = runtime();
+	setOffline();
+	await assert.rejects(api.getBasePortalMemberStatuses(PORTAL), /429/);
 });
 
 test('identity-only member/profile reads make no network requests', async () => {
