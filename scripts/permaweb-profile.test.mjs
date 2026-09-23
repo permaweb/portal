@@ -158,3 +158,20 @@ test('effect cleanup also prevents a completed fresh read from changing active p
 	assert.equal(profiles.length, 0);
 	assert.equal(context.profilePending, true);
 });
+
+for (const failure of ['read', 'write', 'corrupt']) {
+	test(`profile loading succeeds after a browser cache ${failure} failure`, async () => {
+		const { api, calls, context } = runtime();
+		if (failure === 'corrupt') context.localStorage.getItem = () => '{invalid';
+		else
+			context.localStorage[failure === 'read' ? 'getItem' : 'setItem'] = () => {
+				throw new Error('Storage unavailable');
+			};
+		const request = api.resolveProfile(address);
+		assert.equal(calls[0].method, 'getProfileByWalletAddress');
+		calls[0].resolve({ id: profileId, displayname: 'Loaded profile' });
+		const profile = await request;
+		assert.equal(profile.id, profileId);
+		assert.equal(profile.displayName, 'Loaded profile');
+	});
+}

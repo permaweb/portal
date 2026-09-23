@@ -18,6 +18,7 @@
 const DEFAULT_GATEWAY = 'https://arweave.net';
 const ADDRESS = /^[A-Za-z0-9_-]{43}$/;
 const DEFAULT_CONCURRENCY = 8;
+const MAX_PREDECESSOR_LOOKUPS = 100;
 const TRANSACTION_CACHE_NAME = 'portal-immutable-transactions-v1';
 const PATCHABLE_FIELDS = new Set([
 	'name',
@@ -52,7 +53,7 @@ async function readBrowserTransactionCache(key) {
 	try {
 		const cache = await globalThis.caches.open(TRANSACTION_CACHE_NAME);
 		const response = await cache.match(key);
-		return response?.ok ? response.json() : undefined;
+		return response?.ok ? await response.json() : undefined;
 	} catch {
 		return undefined;
 	}
@@ -167,6 +168,79 @@ async function queryPortalTransactions(portalId, options) {
 		after = edges.at(-1).cursor;
 	}
 	return nodes;
+}
+
+function orderPortalTransactions(nodes) {
+	const byId = new Map(nodes.map((node) => [node.id, node]));
+	const ordered = [];
+	const visited = new Set();
+	const visiting = new Set();
+	// Height alone cannot order transactions bundled into the same block.
+	// Traverse predecessors first without recursion, including checkpoint chains.
+	for (const node of [...byId.values()].sort((a, b) => (a.block?.height ?? Infinity) - (b.block?.height ?? Infinity))) {
+		const stack = [{ node, ready: false }];
+		while (stack.length) {
+			const entry = stack.pop();
+			if (visited.has(entry.node.id)) continue;
+			if (entry.ready) {
+				visiting.delete(entry.node.id);
+				visited.add(entry.node.id);
+				ordered.push(entry.node);
+			} else if (!visiting.has(entry.node.id)) {
+				visiting.add(entry.node.id);
+				stack.push({ node: entry.node, ready: true });
+				const previous = byId.get(tag(entry.node, 'Previous-Tx') || '');
+				if (previous) stack.push({ node: previous, ready: false });
+			}
+		}
+	}
+	return ordered;
+}
+
+async function recoverPortalHistory(portalId, nodes, knownTxIds, options) {
+	const recovered = new Map(nodes.map((node) => [node.id, node]));
+	const requested = new Set();
+	while (requested.size < MAX_PREDECESSOR_LOOKUPS) {
+		const missing = [...new Set([...knownTxIds, ...[...recovered.values()].map((node) => tag(node, 'Previous-Tx'))])]
+			.filter((id) => ADDRESS.test(id || '') && !recovered.has(id) && !requested.has(id))
+			.slice(0, MAX_PREDECESSOR_LOOKUPS - requested.size);
+		if (!missing.length) break;
+		missing.forEach((id) => requested.add(id));
+		try {
+			const payload = await json(
+				await options.fetch(options.graphql, {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					signal: options.signal,
+					body: JSON.stringify({
+						query: `query PortalPredecessors($ids: [ID!]) {
+						transactions(ids: $ids, first: 100, sort: HEIGHT_ASC) {
+							edges { node { id owner { address } tags { name value } block { height timestamp } } }
+						}
+					}`,
+						variables: { ids: missing },
+					}),
+				}),
+				'Portal predecessor query'
+			);
+			if (payload.errors?.length) break;
+			for (const { node } of payload.data?.transactions?.edges || []) {
+				if (
+					missing.includes(node.id) &&
+					node.owner?.address &&
+					tag(node, 'Portal-Mode') === 'base' &&
+					tag(node, 'Portal-Id') === portalId &&
+					['portal-manifest', 'portal-release', 'portal-checkpoint'].includes(tag(node, 'Type'))
+				) {
+					recovered.set(node.id, node);
+				}
+			}
+		} catch {
+			// Leave unresolved dependencies unapplied when the gateway is unavailable.
+			break;
+		}
+	}
+	return orderPortalTransactions([...recovered.values()]);
 }
 
 function normalizeManifest(value, transactionId) {
@@ -502,7 +576,12 @@ export async function resolvePortalState(identifier, config = {}) {
 	if (!options.fetch) throw new Error('No fetch implementation available');
 
 	const portalId = await portalIdFromIdentifier(identifier.trim(), options);
-	const nodes = await queryPortalTransactions(portalId, options);
+	const nodes = await recoverPortalHistory(
+		portalId,
+		await queryPortalTransactions(portalId, options),
+		identifier.trim() !== portalId ? [identifier.trim()] : [],
+		options
+	);
 	let rootEntry;
 	let rootIndex = -1;
 	for (let index = 0; index < nodes.length; index += 1) {
@@ -522,6 +601,11 @@ export async function resolvePortalState(identifier, config = {}) {
 		}
 	}
 	if (!rootEntry) throw new Error(`Portal root is not indexed: ${portalId}`);
+	if (rootIndex > 0) {
+		const [rootNode] = nodes.splice(rootIndex, 1);
+		nodes.unshift(rootNode);
+		rootIndex = 0;
+	}
 
 	const rootOwner = rootEntry.node.owner?.address;
 	let state = rootEntry.manifest;

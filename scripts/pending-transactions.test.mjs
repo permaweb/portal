@@ -26,9 +26,8 @@ const moduleSource = stripTypeScriptTypes(
 			'const STORAGE = { basePendingTransactions: (address) => `base-pending-transactions-${address}` };'
 		)
 );
-const { getPendingTransactions, refreshPendingTransactions, trackPendingTransaction } = await import(
-	`data:text/javascript;base64,${Buffer.from(moduleSource).toString('base64')}`
-);
+const { getPendingTransactions, refreshPendingTransactions, trackPendingTransaction, trackObservedPendingTransaction } =
+	await import(`data:text/javascript;base64,${Buffer.from(moduleSource).toString('base64')}`);
 
 const address = 'w'.repeat(43);
 const portalId = 'p'.repeat(43);
@@ -184,3 +183,27 @@ test('shared refresh callers recover consistently when browser storage becomes u
 	assert.equal(results[0].length, 1);
 	assert.deepEqual(results[0], results[1]);
 });
+
+for (const failure of ['access', 'write']) {
+	test(`pending transaction tracking tolerates browser storage ${failure} failure`, (t) => {
+		if (failure === 'access')
+			Object.defineProperty(window, 'localStorage', {
+				get() {
+					throw new Error('SecurityError');
+				},
+			});
+		else
+			t.mock.method(localStorage, 'setItem', () => {
+				throw new Error('QuotaExceededError');
+			});
+		assert.doesNotThrow(() => track('g'.repeat(43)));
+		assert.doesNotThrow(() =>
+			trackObservedPendingTransaction({
+				id: 'h'.repeat(43),
+				portalId,
+				type: 'portal-release',
+				createdAt: Date.now(),
+			})
+		);
+	});
+}

@@ -132,6 +132,14 @@ const answer = 42;
 	assert.match(blocks[1].content, /<strong>bold<\/strong>/);
 });
 
+test('preserves literal formatting and escapes HTML inside inline code', () => {
+	const [block] = markdownToPortalBlocks('Use `ACCESS_PUBLIC_KEY`, `**literal**`, `<address>`, and `[text](/path)`.');
+	assert.equal(
+		block.content,
+		'Use <code>ACCESS_PUBLIC_KEY</code>, <code>**literal**</code>, <code>&lt;address&gt;</code>, and <code>[text](/path)</code>.'
+	);
+});
+
 test('maps manifest category labels to the existing Portal category objects', () => {
 	const portalCategories = [
 		{ id: '1', name: 'Dev', metadata: {} },

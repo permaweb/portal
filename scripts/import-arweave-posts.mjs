@@ -175,16 +175,19 @@ function escapeHtml(value) {
 }
 
 function parseInlineMarkup(value) {
-	let result = value;
+	const codeSpans = [];
+	let result = value.replace(/`([^`]+)`/g, (_match, code) => {
+		codeSpans.push(`<code>${escapeHtml(code)}</code>`);
+		return `\u0000code-${codeSpans.length - 1}\u0000`;
+	});
 	result = result.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+["'].*?["'])?\)/g, '<img src="$2" alt="$1">');
 	result = result.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+["'].*?["'])?\)/g, '<a href="$2">$1</a>');
-	result = result.replace(/`([^`]+)`/g, '<code>$1</code>');
 	result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 	result = result.replace(/__(.+?)__/g, '<strong>$1</strong>');
 	result = result.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
 	result = result.replace(/(?<!_)_(?!_)(.+?)(?<!_)_(?!_)/g, '<em>$1</em>');
 	result = result.replace(/~~(.+?)~~/g, '<del>$1</del>');
-	return result;
+	return result.replace(/\u0000code-(\d+)\u0000/g, (_match, index) => codeSpans[Number(index)]);
 }
 
 function mediaBlockHtml(url, caption, alt) {

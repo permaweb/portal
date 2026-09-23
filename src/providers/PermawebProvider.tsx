@@ -294,9 +294,13 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 	}
 
 	function getCachedProfile(address: string) {
-		const cacheAddress = IS_BASE_MODE ? `${PORTAL_MODE}-${address}` : address;
-		const cached = localStorage.getItem(STORAGE.profileByWallet(cacheAddress));
-		return cached ? normalizeProfile(JSON.parse(cached)) : null;
+		try {
+			const cacheAddress = IS_BASE_MODE ? `${PORTAL_MODE}-${address}` : address;
+			const cached = localStorage.getItem(STORAGE.profileByWallet(cacheAddress));
+			return cached ? normalizeProfile(JSON.parse(cached)) : null;
+		} catch {
+			return null;
+		}
 	}
 
 	function cacheProfile(address: string, profileData: any) {
@@ -304,7 +308,11 @@ export function PermawebProvider(props: { children: React.ReactNode }) {
 			// Only cache if profile has an ID, and don't cache portal-specific roles
 			const { roles, ...profileWithoutRoles } = profileData;
 			const cacheAddress = IS_BASE_MODE ? `${PORTAL_MODE}-${address}` : address;
-			localStorage.setItem(STORAGE.profileByWallet(cacheAddress), JSON.stringify(profileWithoutRoles));
+			try {
+				localStorage.setItem(STORAGE.profileByWallet(cacheAddress), JSON.stringify(profileWithoutRoles));
+			} catch {
+				// The fetched profile remains usable when browser persistence is unavailable.
+			}
 		}
 	}
 

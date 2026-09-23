@@ -1,7 +1,8 @@
 import React from 'react';
 
 import { type LitePortal, type LitePost, normalizeLayout } from './data';
-import { renderDocs, renderPost } from './render';
+import { attachDocsSidebar, attachDocsTableOfContents } from './docs';
+import { renderDocs, renderPost, renderShell } from './render';
 import styles from './styles.css?inline';
 import { getLiteFontStylesheet, getLiteThemeVars } from './theme';
 
@@ -9,25 +10,8 @@ const DOCS_PREVIEW_SCRIPT = `<script>
 (() => {
 	const copyIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>';
 	const checkIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg>';
-	const toggle = document.querySelector('[data-docs-nav-toggle]');
-	const list = document.querySelector('[data-docs-nav-list]');
-	toggle?.addEventListener('click', () => {
-		const open = toggle.getAttribute('aria-expanded') !== 'true';
-		toggle.setAttribute('aria-expanded', String(open));
-		list?.classList.toggle('is-open', open);
-	});
-	const slug = (value, fallback) => value.toLowerCase().trim().replace(/\\s+/g, '-').replace(/[^\\w-]/g, '') || fallback;
-	const headings = Array.from(document.querySelectorAll('.lite-docs-copy h1, .lite-docs-copy h2, .lite-docs-copy h3, .lite-docs-copy h4, .lite-docs-copy h5, .lite-docs-copy h6'));
-	const used = new Set();
-	headings.forEach((heading, index) => {
-		const base = heading.id || slug(heading.textContent || '', 'section-' + (index + 1));
-		let id = base;
-		let suffix = 2;
-		while (used.has(id)) id = base + '-' + suffix++;
-		heading.id = id;
-		heading.style.scrollMarginTop = '100px';
-		used.add(id);
-	});
+	(${attachDocsSidebar.toString()})(document, { collapsed: false, mobileOpen: false, query: '', collapsedCategories: new Set() });
+	(${attachDocsTableOfContents.toString()})(document);
 	const scrollToId = (id) => {
 		let targetId = id;
 		try { targetId = decodeURIComponent(id); } catch {}
@@ -39,26 +23,6 @@ const DOCS_PREVIEW_SCRIPT = `<script>
 	document.querySelectorAll('.lite-docs-copy a[href^="#"]').forEach((link) => link.addEventListener('click', (event) => {
 		if (scrollToId((link.getAttribute('href') || '').slice(1))) event.preventDefault();
 	}));
-	const toc = document.querySelector('[data-docs-toc]');
-	const tocList = toc?.querySelector('ul');
-	const tocHeadings = headings.filter((heading) => heading.tagName === 'H4');
-	if (toc && tocList && tocHeadings.length) {
-		toc.hidden = false;
-		tocHeadings.forEach((heading) => {
-			const item = document.createElement('li');
-			const link = document.createElement('a');
-			link.href = '#' + heading.id;
-			link.textContent = heading.textContent || '';
-			link.addEventListener('click', (event) => {
-				event.preventDefault();
-				scrollToId(heading.id);
-				tocList.querySelectorAll('a').forEach((entry) => entry.classList.remove('is-active'));
-				link.classList.add('is-active');
-			});
-			item.appendChild(link);
-			tocList.appendChild(item);
-		});
-	}
 	document.querySelectorAll('.lite-docs-copy pre').forEach((block) => {
 		const button = document.createElement('button');
 		button.type = 'button';
@@ -122,15 +86,42 @@ export function EngineLitePostPreview(props: {
 		const fontStylesheet = getLiteFontStylesheet(props.fonts);
 		const content =
 			layout === 'docs'
-				? renderDocs(portal, props.post, () => '#')
+				? renderShell(
+						renderDocs(portal, props.post, () => '#'),
+						portal,
+						'#',
+						null,
+						'system',
+						props.post,
+						() => '#'
+				  )
 				: renderPost(props.post, '#', { showBackLink: false });
 		return `<!DOCTYPE html>
 			<html lang="en" data-lite-scheme="${scheme}" style="${variables};color-scheme:${scheme}">
 				<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />${
 					fontStylesheet ? `<link rel="stylesheet" href="${fontStylesheet}" />` : ''
 				}<style>${styles}</style></head>
-				<body><div id="portal"><div class="lite-shell is-${layout}">${content}</div></div>${
-			layout === 'docs' ? DOCS_PREVIEW_SCRIPT : ''
+				<body><div id="portal">${layout === 'docs' ? content : `<div class="lite-shell is-${layout}">${content}</div>`}</div>${
+			layout === 'docs'
+				? DOCS_PREVIEW_SCRIPT +
+				  `<script>
+			const themes = ${JSON.stringify({
+				light: getLiteThemeVars(portal, 'light'),
+				dark: getLiteThemeVars(portal, 'dark'),
+			}).replace(/</g, '\\u003c')};
+			document.querySelectorAll('[data-theme-mode]').forEach((button) => button.addEventListener('click', () => {
+				const mode = button.dataset.themeMode;
+				const scheme = mode === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : mode;
+				Object.entries(themes[scheme]).forEach(([key, value]) => document.documentElement.style.setProperty(key, value));
+				document.documentElement.dataset.liteScheme = scheme;
+				document.documentElement.style.colorScheme = scheme;
+				document.querySelectorAll('[data-theme-mode]').forEach((entry) => {
+					entry.classList.toggle('is-active', entry === button);
+					entry.setAttribute('aria-pressed', String(entry === button));
+				});
+			}));
+		</script>`
+				: ''
 		}</body>
 			</html>`;
 	}, [props.post, props.themes, props.fonts, props.layout, props.portalName, scheme]);

@@ -286,22 +286,37 @@ export function filterDuplicates(arr: string[]): string[] {
 	return arr.filter((item, idx, self) => self.indexOf(item) === idx);
 }
 
+function readCachedJson(key: string) {
+	try {
+		const cached = localStorage.getItem(key);
+		return cached ? JSON.parse(cached) : null;
+	} catch {
+		return null;
+	}
+}
+
+function cacheJson(key: string, data: any) {
+	try {
+		localStorage.setItem(key, JSON.stringify(data));
+	} catch {
+		// Browser storage is an optional cache, not a prerequisite for loaded data.
+	}
+}
+
 export const getCachedPortal = (id: string) => {
-	const cached = localStorage.getItem(STORAGE.portal(id));
-	return cached ? JSON.parse(cached) : null;
+	return readCachedJson(STORAGE.portal(id));
 };
 
 export const cachePortal = (id: string, portalData: any) => {
-	localStorage.setItem(STORAGE.portal(id), JSON.stringify(portalData));
+	cacheJson(STORAGE.portal(id), portalData);
 };
 
 export const getCachedPermissions = (portalId: string, userId: string) => {
-	const cached = localStorage.getItem(STORAGE.permissions(portalId, userId));
-	return cached ? JSON.parse(cached) : null;
+	return readCachedJson(STORAGE.permissions(portalId, userId));
 };
 
 export const cachePermissions = (portalId: string, userId: string, permissions: any) => {
-	localStorage.setItem(STORAGE.permissions(portalId, userId), JSON.stringify(permissions));
+	cacheJson(STORAGE.permissions(portalId, userId), permissions);
 };
 
 export function getPortalAssets(index: PortalAssetType[]) {
@@ -392,21 +407,19 @@ export function getRedirect(path?: string): string {
 }
 
 export function getCachedProfile(address: string) {
-	const cached = localStorage.getItem(STORAGE.profile(address));
-	return cached ? JSON.parse(cached) : null;
+	return readCachedJson(STORAGE.profile(address));
 }
 
 export function cacheProfile(address: string, profileData: any) {
-	localStorage.setItem(STORAGE.profile(address), JSON.stringify(profileData));
+	cacheJson(STORAGE.profile(address), profileData);
 }
 
 export function getCachedModeration(id: string) {
-	const cached = localStorage.getItem(STORAGE.moderation(id));
-	return cached ? JSON.parse(cached) : null;
+	return readCachedJson(STORAGE.moderation(id));
 }
 
 export function cacheModeration(id: string, moderationData: any) {
-	localStorage.setItem(STORAGE.moderation(id), JSON.stringify(moderationData));
+	cacheJson(STORAGE.moderation(id), moderationData);
 }
 
 export function stripAnsiChars(input: string) {

@@ -24,7 +24,11 @@ export type PendingTransaction = {
 };
 
 function available() {
-	return typeof window !== 'undefined' && Boolean(window.localStorage);
+	try {
+		return typeof window !== 'undefined' && Boolean(window.localStorage);
+	} catch {
+		return false;
+	}
 }
 
 function emit(address: string) {
@@ -73,11 +77,15 @@ export function getPendingTransactions(address: string, portalId?: string): Pend
 
 function savePendingTransactions(address: string, entries: PendingTransaction[]) {
 	if (!address || !available()) return;
-	const key = STORAGE.basePendingTransactions(address);
-	const serialized = JSON.stringify(entries);
-	if (localStorage.getItem(key) === serialized) return;
-	localStorage.setItem(key, serialized);
-	emit(address);
+	try {
+		const key = STORAGE.basePendingTransactions(address);
+		const serialized = JSON.stringify(entries);
+		if (localStorage.getItem(key) === serialized) return;
+		localStorage.setItem(key, serialized);
+		emit(address);
+	} catch {
+		// Pending-status persistence must not interrupt portal loading or publishing.
+	}
 }
 
 export function trackPendingTransaction(entry: PendingTransaction) {
@@ -106,8 +114,7 @@ export function trackObservedPendingTransaction(entry: Omit<PendingTransaction, 
 		0,
 		PENDING_MAX_ENTRIES
 	);
-	localStorage.setItem(STORAGE.basePendingTransactions(OBSERVED_PENDING_KEY), JSON.stringify(next));
-	emit(OBSERVED_PENDING_KEY);
+	savePendingTransactions(OBSERVED_PENDING_KEY, next);
 }
 
 async function mapWithConcurrency<T>(values: T[], limit: number, mapper: (value: T) => Promise<void>) {
