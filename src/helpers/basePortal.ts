@@ -10,6 +10,7 @@ const BASE_SCHEMA_VERSION = '2.1.0';
 const ARWEAVE_ID = /^[a-zA-Z0-9_-]{43}$/;
 const BASE_RESOLVE_TTL_MS = 10_000;
 const PORTAL_HEADER_TTL_MS = 30_000;
+const MAX_PREDECESSOR_LOOKUPS = 100;
 const CHECKPOINT_RELEASE_INTERVAL = 50;
 const CHECKPOINT_TAIL_BYTES = 250_000;
 const TRANSACTION_CACHE_NAME = 'portal-base-transactions-v1';
@@ -252,7 +253,11 @@ const portalHeaderRequests = new Map<string, Promise<BasePortalCard>>();
 const discoveryNodesCache = new Map<string, GraphQLNode[]>();
 
 function localStorageAvailable() {
-	return typeof window !== 'undefined' && Boolean(window.localStorage);
+	try {
+		return typeof window !== 'undefined' && Boolean(window.localStorage);
+	} catch {
+		return false;
+	}
 }
 
 function readStringList(key: string): string[] {
@@ -272,9 +277,13 @@ function writeStringList(key: string, values: string[]) {
 
 function cacheManifest(manifest: BasePortalManifest) {
 	if (!localStorageAvailable()) return;
-	localStorage.setItem(STORAGE.basePortal(manifest.portalId), JSON.stringify(manifest));
-	if (manifest.manifestTxId) {
-		localStorage.setItem(STORAGE.basePortalLatest(manifest.portalId), manifest.manifestTxId);
+	try {
+		localStorage.setItem(STORAGE.basePortal(manifest.portalId), JSON.stringify(manifest));
+		if (manifest.manifestTxId) {
+			localStorage.setItem(STORAGE.basePortalLatest(manifest.portalId), manifest.manifestTxId);
+		}
+	} catch {
+		// Persistence is optional; the resolved portal remains usable in memory.
 	}
 }
 
@@ -291,6 +300,8 @@ function rememberPortalCard(manifest: BasePortalManifest): BasePortalCard {
 }
 
 function getCachedManifest(portalId: string): BasePortalManifest | null {
+	const memory = portalResolveCache.get(portalId);
+	if (memory) return memory.manifest;
 	if (!localStorageAvailable()) return null;
 	try {
 		const value = localStorage.getItem(STORAGE.basePortal(portalId));
@@ -428,8 +439,8 @@ async function fetchImmutableTransactionJson(txId: string): Promise<any | null> 
 
 	const request = (async () => {
 		const url = `${ARWEAVE_GATEWAY}/${txId}`;
-		try {
-			if (typeof caches !== 'undefined') {
+		if (typeof caches !== 'undefined') {
+			try {
 				const cache = await caches.open(TRANSACTION_CACHE_NAME);
 				const cached = await cache.match(url);
 				if (cached?.ok) {
@@ -437,8 +448,11 @@ async function fetchImmutableTransactionJson(txId: string): Promise<any | null> 
 					transactionBodyCache.set(txId, value);
 					return value;
 				}
+			} catch {
+				// Disabled storage or a corrupt cache entry must not block the network.
 			}
-
+		}
+		try {
 			return await withBaseReadLimit(async () => {
 				const response = await fetch(url, { cache: 'force-cache' });
 				if (!response.ok) return null;
@@ -864,6 +878,83 @@ async function queryAllTransactions(
 	return nodes;
 }
 
+function orderPortalTransactions(nodes: GraphQLNode[]): GraphQLNode[] {
+	const byId = new Map(nodes.map((node) => [node.id, node]));
+	const ordered: GraphQLNode[] = [];
+	const visited = new Set<string>();
+	const visiting = new Set<string>();
+	// Height alone cannot order transactions bundled into the same block.
+	// Traverse predecessors first without recursion, including checkpoint chains.
+	for (const node of [...byId.values()].sort((a, b) => (a.block?.height ?? Infinity) - (b.block?.height ?? Infinity))) {
+		const stack = [{ node, ready: false }];
+		while (stack.length) {
+			const entry = stack.pop()!;
+			if (visited.has(entry.node.id)) continue;
+			if (entry.ready) {
+				visiting.delete(entry.node.id);
+				visited.add(entry.node.id);
+				ordered.push(entry.node);
+			} else if (!visiting.has(entry.node.id)) {
+				visiting.add(entry.node.id);
+				stack.push({ node: entry.node, ready: true });
+				const previous = byId.get(tagValue(entry.node, 'Previous-Tx') || '');
+				if (previous) stack.push({ node: previous, ready: false });
+			}
+		}
+	}
+	return ordered;
+}
+
+async function recoverMissingPortalPredecessors(
+	portalId: string,
+	nodes: GraphQLNode[],
+	knownTxIds: string[] = []
+): Promise<GraphQLNode[]> {
+	const recovered = new Map(nodes.map((node) => [node.id, node]));
+	const requested = new Set<string>();
+	while (requested.size < MAX_PREDECESSOR_LOOKUPS) {
+		const missing = Array.from(
+			new Set([...knownTxIds, ...Array.from(recovered.values()).map((node) => tagValue(node, 'Previous-Tx'))])
+		)
+			.filter((txId): txId is string =>
+				Boolean(txId && ARWEAVE_ID.test(txId) && !recovered.has(txId) && !requested.has(txId))
+			)
+			.slice(0, MAX_PREDECESSOR_LOOKUPS - requested.size);
+		if (!missing.length) break;
+		missing.forEach((txId) => requested.add(txId));
+		try {
+			// Tag search can omit an indexed transaction that is still available by
+			// ID. Retrieve its signed owner metadata too; the body author is not proof.
+			const payload = await queryBaseGateway(
+				ARWEAVE_GRAPHQL,
+				`
+				query BasePortalPredecessors($ids: [ID!]) {
+					transactions(ids: $ids, first: 100, sort: HEIGHT_ASC) {
+						edges { node { id owner { address } tags { name value } block { height timestamp } } }
+					}
+				}
+			`,
+				{ ids: missing }
+			);
+			for (const { node } of payload.data?.transactions?.edges || []) {
+				if (
+					missing.includes(node.id) &&
+					node.owner?.address &&
+					tagValue(node, 'Portal-Mode') === 'base' &&
+					tagValue(node, 'Portal-Id') === portalId &&
+					['portal-manifest', 'portal-release', 'portal-checkpoint'].includes(tagValue(node, 'Type') || '')
+				) {
+					recovered.set(node.id, node);
+				}
+			}
+		} catch {
+			// Keep the known history usable when the gateway cannot recover a gap.
+			break;
+		}
+	}
+	return orderPortalTransactions(Array.from(recovered.values()));
+}
+
 async function fetchManifestTransaction(txId: string): Promise<BasePortalManifest | null> {
 	if (!ARWEAVE_ID.test(txId)) return null;
 	return normalizeManifest(await fetchImmutableTransactionJson(txId), txId);
@@ -1115,7 +1206,9 @@ async function validateManifestChain(
 async function latestManifestForPortal(
 	portalId: string,
 	preferredTxId?: string | null,
-	cardOnly = false
+	cardOnly = false,
+	knownNodes: GraphQLNode[] = [],
+	knownTxIds: string[] = []
 ): Promise<BasePortalManifest | null> {
 	const nodes = await queryAllTransactions(
 		[
@@ -1125,8 +1218,15 @@ async function latestManifestForPortal(
 		],
 		'HEIGHT_ASC'
 	);
-	const portalNodes = nodes.filter((node) =>
-		['portal-manifest', 'portal-release', 'portal-checkpoint'].includes(tagValue(node, 'Type') || '')
+	const portalNodes = await recoverMissingPortalPredecessors(
+		portalId,
+		[...knownNodes, ...nodes].filter(
+			(node) =>
+				tagValue(node, 'Portal-Mode') === 'base' &&
+				tagValue(node, 'Portal-Id') === portalId &&
+				['portal-manifest', 'portal-release', 'portal-checkpoint'].includes(tagValue(node, 'Type') || '')
+		),
+		[...knownTxIds, ...(preferredTxId ? [preferredTxId] : [])]
 	);
 	const portalNodeIds = new Set(portalNodes.map((node) => node.id));
 
@@ -1150,6 +1250,13 @@ async function latestManifestForPortal(
 		}
 	}
 	if (!root?.manifestTxId || !rootOwner || !rootTxId) return null;
+	// GraphQL can list same-block descendants before the root. Start replay at
+	// the root without discarding those updates or treating them as validated.
+	if (rootIndex > 0) {
+		const [rootNode] = portalNodes.splice(rootIndex, 1);
+		portalNodes.unshift(rootNode);
+		rootIndex = 0;
+	}
 
 	// Only a checkpoint signed by the immutable root owner can bootstrap a cold
 	// load without replaying the releases that established administrator roles.
@@ -1308,8 +1415,7 @@ export async function fetchBasePortal(
 	identifier: string,
 	options: { fresh?: boolean } = {}
 ): Promise<BasePortalManifest> {
-	if (options.fresh) invalidateBaseQueries();
-	const cached = getCachedManifest(identifier);
+	let cached = getCachedManifest(identifier);
 	const known = portalResolveCache.get(identifier);
 	if (!options.fresh && known && Date.now() - known.resolvedAt < BASE_RESOLVE_TTL_MS) return known.manifest;
 	let direct: BasePortalManifest | null = null;
@@ -1332,11 +1438,28 @@ export async function fetchBasePortal(
 	if (!options.fresh && memory && Date.now() - memory.resolvedAt < BASE_RESOLVE_TTL_MS) return memory.manifest;
 
 	try {
+		if (options.fresh) {
+			// A forced read must start after any older reconstruction has finished,
+			// otherwise its result (and its cache writes) can hide newly indexed data.
+			await portalResolveRequests.get(portalId)?.catch(() => undefined);
+			invalidateBaseQueries();
+			cached = getCachedManifest(portalId) || cached;
+		}
 		let request = portalResolveRequests.get(portalId);
 		if (!request) {
-			request = latestManifestForPortal(portalId, cached?.manifestTxId);
+			// A list card may know a root or invitation absent from the portal query.
+			// Use its IDs as lookup hints; the full loader still validates the history.
+			const header = portalHeaderCache.get(portalId)?.card.header;
+			const knownTxIds = [directPortalId ? identifier : null, header?.manifestTxId, header?.rootTxId].filter(
+				(txId): txId is string => Boolean(txId)
+			);
+			request = latestManifestForPortal(portalId, cached?.manifestTxId, false, [], knownTxIds);
 			portalResolveRequests.set(portalId, request);
-			void request.finally(() => portalResolveRequests.delete(portalId)).catch(() => undefined);
+			void request
+				.finally(() => {
+					if (portalResolveRequests.get(portalId) === request) portalResolveRequests.delete(portalId);
+				})
+				.catch(() => undefined);
 		}
 		const latest = await request;
 		if (latest) return latest;
@@ -1352,7 +1475,7 @@ export async function fetchBasePortal(
 
 // For portal lists only. This never populates the full manifest cache or supplies
 // write authorization; opening a portal still resolves all referenced content.
-async function fetchBasePortalCard(portalId: string): Promise<BasePortalCard> {
+async function fetchBasePortalCard(portalId: string, knownNodes: GraphQLNode[] = []): Promise<BasePortalCard> {
 	const cached = portalHeaderCache.get(portalId);
 	if (cached && Date.now() - cached.resolvedAt < PORTAL_HEADER_TTL_MS) return cached.card;
 	const active = portalHeaderRequests.get(portalId);
@@ -1361,7 +1484,7 @@ async function fetchBasePortalCard(portalId: string): Promise<BasePortalCard> {
 	const request = (async () => {
 		const full = getCachedManifest(portalId);
 		try {
-			const manifest = await latestManifestForPortal(portalId, full?.manifestTxId, true);
+			const manifest = await latestManifestForPortal(portalId, full?.manifestTxId, true, knownNodes);
 			if (manifest) return rememberPortalCard(manifest);
 		} catch (error) {
 			if (!cached && !full) throw error;
@@ -2348,6 +2471,9 @@ async function discoverBasePortalCards(address: string) {
 			],
 			'HEIGHT_ASC'
 		);
+		// Search omissions do not revoke membership. Retain immutable discovery
+		// records, then check access against each portal's reconstructed user list.
+		nodes = orderPortalTransactions([...(discoveryNodesCache.get(address) || []), ...nodes]);
 		discoveryNodesCache.set(address, nodes);
 		membershipDiscoverySucceeded = true;
 	} catch (error) {
@@ -2368,7 +2494,10 @@ async function discoverBasePortalCards(address: string) {
 	);
 	const cards = await mapWithConcurrency(portalIds, BASE_READ_LIMITS.portals, async (portalId) => {
 		try {
-			return await fetchBasePortalCard(portalId);
+			return await fetchBasePortalCard(
+				portalId,
+				nodes.filter((node) => tagValue(node, 'Portal-Id') === portalId)
+			);
 		} catch {
 			return null;
 		}

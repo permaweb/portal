@@ -1,0 +1,1 @@
+These regular-weight SVGs are from [Phosphor Icons](https://github.com/phosphor-icons/core/tree/main/assets/regular), licensed under the included MIT license. They are bundled inline; no runtime icon requests are made.

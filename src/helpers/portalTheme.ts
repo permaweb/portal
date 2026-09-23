@@ -11,19 +11,19 @@ export type SimplePortalTheme = {
 export const DEFAULT_PORTAL_THEME: SimplePortalTheme = {
 	colors: {
 		light: {
-			background: '250,250,250',
-			surface: '255,255,255',
+			background: '255,255,255',
+			surface: '240,240,240',
 			text: '0,0,0',
 			accent: '94,102,219',
-			link: '94,102,219',
+			link: '113,159,208',
 			border: '50,50,50',
 		},
 		dark: {
 			background: '0,0,0',
-			surface: '0,0,0',
+			surface: '16,16,16',
 			text: '255,255,255',
 			accent: '94,102,219',
-			link: '94,102,219',
+			link: '113,159,208',
 			border: '160,160,160',
 		},
 	},

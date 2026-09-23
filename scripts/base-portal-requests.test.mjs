@@ -5,6 +5,8 @@ import vm from 'node:vm';
 
 import ts from 'typescript';
 
+import { resolvePortalState } from './resolve-base-portal.mjs';
+
 const compiled = new Map(
 	['basePortal', 'basePortalRequests'].map((name) => [
 		name,
@@ -179,6 +181,8 @@ function runtime(transactions = fixture(), fetchOverride, uploadOverride) {
 	}
 	return {
 		api: load('basePortal'),
+		context,
+		fetch: context.fetch,
 		requests: load('basePortalRequests'),
 		calls,
 		storage,
@@ -357,6 +361,56 @@ test('cold transaction replay fills sixteen read slots and still applies release
 	assert.equal(reads.maximum, 16);
 });
 
+function rootAfterInviteHistory() {
+	const [root, invite] = fixture();
+	root.body.users = [{ address: OWNER, roles: ['Admin'] }];
+	invite.body.changes = {
+		patches: [['s', ['users', ['=', 'address', MEMBER]], { address: MEMBER, roles: ['Admin'] }]],
+	};
+	invite.node.block = { ...root.node.block };
+	const update = transaction(
+		id('u'),
+		'portal-release',
+		{
+			...invite.body,
+			previousTxId: RELEASE,
+			authorAddress: MEMBER,
+			changes: { name: 'Updated by invited admin' },
+		},
+		{ 'Previous-Tx': RELEASE },
+		MEMBER,
+		2
+	);
+	return [invite, root, update];
+}
+
+test('a same-block invite listed before the root survives fresh discovery and authorizes later updates', async () => {
+	const { api } = runtime(rootAfterInviteHistory());
+	const result = await api.discoverBasePortals(MEMBER);
+	assert.equal(result.invites.length, 1);
+	assert.equal(result.invites[0].name, 'Updated by invited admin');
+	assert.equal(result.invites[0].manifestTxId, id('u'));
+	const full = await api.fetchBasePortal(PORTAL);
+	assert.equal(full.name, 'Updated by invited admin');
+	assert.deepEqual(plain(full.users.find((user) => user.address === MEMBER).roles), ['Admin']);
+});
+
+test('transactions listed before the root are validated rather than trusted as historical predecessors', async () => {
+	const [invite, root, update] = rootAfterInviteHistory();
+	invite.node.owner.address = id('x');
+	invite.body.authorAddress = id('x');
+	update.node.owner.address = OWNER;
+	update.body.authorAddress = OWNER;
+	const { api } = runtime([invite, root, update]);
+	const result = await api.fetchBasePortal(PORTAL);
+	assert.equal(result.manifestTxId, ROOT);
+	assert.equal(result.name, 'Original');
+	assert.equal(
+		result.users.some((user) => user.address === MEMBER),
+		false
+	);
+});
+
 test('a multi-post release downloads sixteen bodies together and preserves post order despite out-of-order responses', async () => {
 	const { transactions, postIds } = multiPostFixture();
 	const reads = heldReads((url) => postIds.includes(url.split('/').at(-1)));
@@ -396,6 +450,84 @@ test('home discovery gets current cards and membership without fetching post bod
 		false
 	);
 	assert.equal(storage.has(`basePortal:${PORTAL}`), false, 'card must not become a full manifest');
+});
+
+function missingInviteHistory() {
+	const root = fixture()[0];
+	root.body.users = [{ address: OWNER, roles: ['Admin'] }];
+	const makeRelease = (txId, previousTxId, changes, height, tags = {}) =>
+		transaction(
+			txId,
+			'portal-release',
+			{
+				type: 'portal-release',
+				mode: 'base',
+				portalId: PORTAL,
+				rootTxId: ROOT,
+				previousTxId,
+				authorAddress: OWNER,
+				changes,
+			},
+			{ 'Previous-Tx': previousTxId, ...tags },
+			OWNER,
+			height
+		);
+	return [
+		root,
+		makeRelease(id('h'), ROOT, { name: 'Older name' }, 2),
+		makeRelease(id('j'), id('h'), { patches: [['s', ['description'], 'Recovered description']] }, 3),
+		makeRelease(id('k'), ROOT, { name: 'Latest name' }, 4),
+		makeRelease(
+			RELEASE,
+			id('j'),
+			{ patches: [['s', ['users', ['=', 'address', MEMBER]], { address: MEMBER, roles: ['Admin'] }]] },
+			5,
+			{ 'Portal-User': MEMBER }
+		),
+	];
+}
+
+function omitHistoryNodes(ids) {
+	return async (url, init, respond) => {
+		const response = respond();
+		if (!url.endsWith('/graphql') || !JSON.parse(init.body).variables.tags) return response;
+		const payload = await response.json();
+		payload.data.transactions.edges = payload.data.transactions.edges.filter(({ node }) => !ids.includes(node.id));
+		return Response.json(payload);
+	};
+}
+
+test('an invite survives omitted predecessors while preserving the order of independent updates', async () => {
+	const { api, calls } = runtime(missingInviteHistory(), omitHistoryNodes([id('h'), id('j')]));
+	const result = await api.discoverBasePortals(MEMBER);
+	assert.equal(result.invites.length, 1);
+	assert.equal(result.invites[0].name, 'Latest name');
+	assert.equal(result.invites[0].manifestTxId, RELEASE);
+	assert.deepEqual(plain(result.invites[0].users.find((user) => user.address === MEMBER).roles), ['Admin']);
+	const full = await api.fetchBasePortal(PORTAL);
+	assert.equal(full.description, 'Recovered description');
+	assert.equal(full.manifestTxId, RELEASE);
+	for (const txId of [id('h'), id('j')]) {
+		assert.equal(calls.filter(({ url }) => url.endsWith(txId)).length, 1, 'recovered bodies are cached');
+	}
+});
+
+test('recovered predecessors still require an authorized signer', async () => {
+	const transactions = missingInviteHistory();
+	transactions[1].node.owner.address = id('x');
+	const { api } = runtime(transactions, omitHistoryNodes([id('h'), id('j')]));
+	assert.deepEqual(plain(await api.discoverBasePortals(MEMBER)), { portals: [], invites: [] });
+	assert.equal((await api.fetchBasePortal(PORTAL)).name, 'Latest name');
+});
+
+test('an unavailable predecessor is requested once and leaves dependent invites unapplied', async () => {
+	const transactions = missingInviteHistory().filter((tx) => tx.node.id !== id('h'));
+	const { api, calls } = runtime(transactions);
+	assert.deepEqual(plain(await api.discoverBasePortals(MEMBER)), { portals: [], invites: [] });
+	const lookups = calls.filter(
+		({ url, init }) => url.endsWith('/graphql') && JSON.parse(init.body).variables.ids?.includes(id('h'))
+	);
+	assert.equal(lookups.length, 1);
 });
 
 test('concurrent and repeated discovery share requests, and opening hydrates the full portal', async () => {
@@ -579,4 +711,265 @@ test('cold discovery errors propagate so the profile provider can retain its per
 	const { api, setOffline } = runtime();
 	setOffline();
 	await assert.rejects(api.discoverBasePortals(MEMBER), /429/);
+});
+
+function checkpointHistory() {
+	const root = fixture()[0];
+	const release = (txId, previousTxId, name, height) =>
+		transaction(
+			txId,
+			'portal-release',
+			{
+				type: 'portal-release',
+				mode: 'base',
+				portalId: PORTAL,
+				rootTxId: ROOT,
+				previousTxId,
+				authorAddress: OWNER,
+				changes: { name },
+			},
+			{ 'Previous-Tx': previousTxId },
+			OWNER,
+			height
+		);
+	const checkpoint = (txId, previousTxId, baseCheckpointTxId, includedTxIds, name) =>
+		transaction(
+			txId,
+			'portal-checkpoint',
+			{
+				type: 'portal-checkpoint',
+				mode: 'base',
+				portalId: PORTAL,
+				rootTxId: ROOT,
+				previousTxId,
+				baseCheckpointTxId,
+				includedTxIds,
+				authorAddress: OWNER,
+				state: { ...root.body, name },
+			},
+			{ 'Previous-Tx': previousTxId },
+			OWNER,
+			3
+		);
+	const before = release(RELEASE, ROOT, 'Before checkpoint', 2);
+	const first = checkpoint(id('c'), RELEASE, ROOT, [RELEASE], 'Before checkpoint');
+	const middle = release(id('u'), id('c'), 'After first checkpoint', 3);
+	const second = checkpoint(id('d'), id('u'), id('c'), [id('u')], 'After first checkpoint');
+	const last = release(id('v'), id('d'), 'After latest checkpoint', 4);
+	return [root, before, second, first, middle, last];
+}
+
+for (const loader of ['editor', 'viewer']) {
+	const resolve = async (transactions, fetchOverride, identifier = PORTAL) => {
+		const rt = runtime(transactions, fetchOverride);
+		return loader === 'editor'
+			? rt.api.fetchBasePortal(identifier)
+			: resolvePortalState(identifier, { fetch: rt.fetch, transactionCache: new Map() });
+	};
+	test(`${loader}: reversed same-block checkpoints still reach the latest update`, async () => {
+		const state = await resolve(checkpointHistory());
+		assert.equal(state.name, 'After latest checkpoint');
+		assert.equal(state.manifestTxId, id('v'));
+	});
+	test(`${loader}: replay recovers missing ancestors without reverting independent changes`, async () => {
+		const state = await resolve(missingInviteHistory(), omitHistoryNodes([id('h'), id('j')]));
+		assert.equal(state.name, 'Latest name');
+		assert.equal(state.description, 'Recovered description');
+		assert.equal(state.manifestTxId, RELEASE);
+	});
+	test(`${loader}: same-block grants before the root authorize later updates`, async () => {
+		const state = await resolve(rootAfterInviteHistory());
+		assert.equal(state.name, 'Updated by invited admin');
+		assert.equal(state.manifestTxId, id('u'));
+	});
+	test(`${loader}: recovered ancestors cannot claim another signer's authority`, async () => {
+		const transactions = missingInviteHistory();
+		transactions[1].node.owner.address = id('x');
+		transactions[1].body.authorAddress = id('x');
+		const state = await resolve(transactions, omitHistoryNodes([id('h'), id('j')]));
+		assert.equal(
+			state.users.some((user) => user.address === MEMBER),
+			false
+		);
+	});
+	test(`${loader}: a directly supplied release ID survives omission from history search`, async () => {
+		const state = await resolve(missingInviteHistory(), omitHistoryNodes([RELEASE]), RELEASE);
+		assert.equal(state.manifestTxId, RELEASE);
+		assert.equal(
+			state.users.some((user) => user.address === MEMBER),
+			true
+		);
+	});
+}
+
+function omitPortalHistory(ids) {
+	return async (url, init, respond) => {
+		if (url.endsWith('/graphql') && JSON.parse(init.body).variables.tags?.some((tag) => tag.name === 'Portal-Id')) {
+			const payload = await respond().json();
+			payload.data.transactions.edges = payload.data.transactions.edges.filter(({ node }) => !ids.includes(node.id));
+			return Response.json(payload);
+		}
+		return respond();
+	};
+}
+
+test('wallet discovery supplies an invitation omitted from the portal history query', async () => {
+	const { api } = runtime(missingInviteHistory(), omitPortalHistory([RELEASE]));
+	const result = await api.discoverBasePortals(MEMBER);
+	assert.equal(result.invites[0]?.manifestTxId, RELEASE);
+	const opened = await api.fetchBasePortal(PORTAL);
+	assert.equal(opened.manifestTxId, RELEASE);
+	assert.equal(
+		opened.users.some((user) => user.address === MEMBER),
+		true
+	);
+});
+
+test('wallet discovery supplies a creation record omitted from the portal history query', async () => {
+	const root = fixture()[0];
+	root.node.tags.find((tag) => tag.name === 'Portal-User').value = OWNER;
+	const { api } = runtime([root], omitPortalHistory([ROOT]));
+	const result = await api.discoverBasePortals(OWNER);
+	assert.equal(result.portals[0]?.id, PORTAL);
+	assert.equal((await api.fetchBasePortal(PORTAL)).rootTxId, ROOT);
+});
+
+test('incomplete wallet search retains known portals but does not preserve revoked access', async () => {
+	const transactions = fixture();
+	let empty = false;
+	const { api, advanceClock } = runtime(transactions, (url, init, respond) => {
+		if (
+			empty &&
+			url.endsWith('/graphql') &&
+			JSON.parse(init.body).variables.tags?.some((tag) => tag.name === 'Portal-User')
+		) {
+			return Response.json({ data: { transactions: { edges: [], pageInfo: { hasNextPage: false } } } });
+		}
+		return respond();
+	});
+	assert.equal((await api.discoverBasePortals(MEMBER)).portals.length, 1);
+	empty = true;
+	advanceClock(60_000);
+	assert.equal((await api.discoverBasePortals(MEMBER)).portals.length, 1);
+	transactions.push(
+		transaction(
+			id('z'),
+			'portal-release',
+			{
+				...transactions[1].body,
+				previousTxId: RELEASE,
+				changes: { users: [] },
+			},
+			{ 'Previous-Tx': RELEASE },
+			OWNER,
+			5
+		)
+	);
+	advanceClock(60_000);
+	assert.deepEqual(plain(await api.discoverBasePortals(MEMBER)), { portals: [], invites: [] });
+});
+
+for (const failure of ['open', 'json']) {
+	test(`Cache Storage ${failure} failure falls back to network loading`, async () => {
+		const { api, context, calls } = runtime();
+		context.caches = {
+			open: async () => {
+				if (failure === 'open') throw new Error('Cache Storage unavailable');
+				return {
+					match: async () => ({
+						ok: true,
+						json: async () => {
+							throw new Error('Invalid JSON');
+						},
+					}),
+					put: async () => {},
+				};
+			},
+		};
+		const state = await api.fetchBasePortal(PORTAL);
+		assert.equal(state.name, 'Updated');
+		assert.equal(state.posts.length, 1);
+		assert.equal(
+			calls.some(({ url }) => url.endsWith(ROOT)),
+			true
+		);
+	});
+}
+
+for (const failure of ['open', 'json']) {
+	test(`viewer: Cache Storage ${failure} failure falls back to network loading`, async (t) => {
+		const originalCaches = globalThis.caches;
+		t.after(() => {
+			if (originalCaches === undefined) delete globalThis.caches;
+			else globalThis.caches = originalCaches;
+		});
+		globalThis.caches = {
+			open: async () => {
+				if (failure === 'open') throw new Error('Cache Storage unavailable');
+				return {
+					match: async () => ({
+						ok: true,
+						json: async () => {
+							throw new Error('Invalid JSON');
+						},
+					}),
+					put: async () => {},
+				};
+			},
+		};
+		const rt = runtime();
+		const state = await resolvePortalState(PORTAL, { fetch: rt.fetch, transactionCache: new Map() });
+		assert.equal(state.name, 'Updated');
+		assert.equal(state.posts.length, 1);
+	});
+}
+
+test('full localStorage cannot fail a successful network load or its memory cache', async () => {
+	const { api, context, calls } = runtime();
+	context.localStorage.setItem = () => {
+		throw new Error('QuotaExceededError');
+	};
+	const state = await api.fetchBasePortal(PORTAL);
+	assert.equal(state.name, 'Updated');
+	const requestCount = calls.length;
+	assert.equal((await api.fetchBasePortal(PORTAL)).name, 'Updated');
+	assert.equal(calls.length, requestCount);
+});
+
+test('blocked localStorage access still permits a network load', async () => {
+	const { api, context } = runtime();
+	Object.defineProperty(context.window, 'localStorage', {
+		get() {
+			throw new Error('SecurityError');
+		},
+	});
+	assert.equal((await api.fetchBasePortal(PORTAL)).name, 'Updated');
+});
+
+test('fresh loads wait out an older in-flight read then query again', async () => {
+	const transactions = [fixture()[0]];
+	let resume;
+	let historyQueries = 0;
+	const { api } = runtime(transactions, async (url, init, respond) => {
+		if (url.endsWith('/graphql') && JSON.parse(init.body).variables.tags?.some((tag) => tag.name === 'Portal-Id')) {
+			historyQueries += 1;
+			const response = respond();
+			if (historyQueries === 1)
+				await new Promise((resolve) => {
+					resume = resolve;
+				});
+			return response;
+		}
+		return respond();
+	});
+	const old = api.fetchBasePortal(PORTAL);
+	await flush();
+	assert.ok(resume);
+	transactions.push(fixture()[1], fixture()[2]);
+	const fresh = api.fetchBasePortal(PORTAL, { fresh: true });
+	await flush();
+	resume();
+	assert.equal((await old).name, 'Original');
+	assert.equal((await fresh).name, 'Updated');
+	assert.equal(historyQueries, 2);
 });

@@ -8,6 +8,11 @@ import 'prismjs/components/prism-lua';
 import 'prismjs/components/prism-markdown';
 import 'prismjs/components/prism-typescript';
 
+import bookIcon from './icons/book-open.svg?raw';
+import caretIcon from './icons/caret-right.svg?raw';
+import searchIcon from './icons/magnifying-glass.svg?raw';
+import sidebarIcon from './icons/sidebar-simple.svg?raw';
+import tocIcon from './icons/text-align-left.svg?raw';
 import { ENGINE_LITE_FALLBACK_LOGO } from './constants';
 import type { LitePortal, LitePost } from './data';
 
@@ -66,16 +71,55 @@ function themeOption(mode: LiteThemeMode, activeMode: LiteThemeMode) {
 	)}" aria-pressed="${mode === activeMode}">${themeIcon(mode)}</button>`;
 }
 
+function docsIcon(source: string) {
+	return source.replace('<svg ', '<svg class="lite-docs-icon" aria-hidden="true" focusable="false" ');
+}
+
 export function renderShell(
 	content: string,
-	portal: Pick<LitePortal, 'name' | 'logo' | 'layout'>,
+	portal: LitePortal,
 	homeHref: string,
 	address: string | null,
-	themeMode: LiteThemeMode
+	themeMode: LiteThemeMode,
+	activePost?: LitePost,
+	postHref: (post: LitePost) => string = (post) => `#/post/${encodeURIComponent(post.slug || post.id)}`
 ) {
 	const logo = portal.logo
 		? `<img src="${escapeHTML(portal.logo)}" alt="${escapeHTML(portal.name)}" />`
 		: ENGINE_LITE_FALLBACK_LOGO;
+	if (portal.layout === 'docs') {
+		return `<div class="lite-shell is-docs">
+			<aside class="lite-docs-sidebar" id="lite-docs-sidebar" aria-label="Documentation sidebar">
+				<header class="lite-docs-brand">
+					<a class="lite-site-logo" href="${escapeHTML(homeHref)}" aria-label="${escapeHTML(portal.name)} home">
+						${logo}<span>${escapeHTML(portal.name)}</span>
+					</a>
+					<button class="lite-docs-icon-button" type="button" data-docs-sidebar-toggle aria-controls="lite-docs-sidebar" aria-expanded="true" aria-label="Collapse sidebar" title="Collapse sidebar">${docsIcon(
+						sidebarIcon
+					)}</button>
+				</header>
+				<label class="lite-docs-search">
+					${docsIcon(searchIcon)}
+					<input type="search" data-docs-search placeholder="Search docs..." aria-label="Search documentation" aria-controls="lite-docs-navigation" autocomplete="off" />
+					<kbd aria-hidden="true">⌘ K</kbd>
+				</label>
+				${docsNavigation(portal, activePost, postHref)}
+				<footer class="lite-docs-sidebar-footer">
+					<div class="lite-theme-toggle" role="group" aria-label="Theme">
+						${themeOption('light', themeMode)}${themeOption('dark', themeMode)}${themeOption('system', themeMode)}
+					</div>
+				</footer>
+			</aside>
+			<button class="lite-docs-backdrop" type="button" data-docs-sidebar-close aria-label="Close sidebar" tabindex="-1" hidden></button>
+			<div class="lite-docs-mobile-bar">
+				<button class="lite-docs-icon-button" type="button" data-docs-sidebar-toggle data-docs-sidebar-open aria-controls="lite-docs-sidebar" aria-expanded="false" aria-label="Expand sidebar" title="Expand sidebar">${docsIcon(
+					sidebarIcon
+				)}</button>
+				<span>${escapeHTML(portal.name)}</span>
+			</div>
+			<div class="lite-docs-main" data-docs-main>${content}</div>
+		</div>`;
+	}
 	const walletContent = address
 		? `<span class="lite-wallet-address">${escapeHTML(
 				walletLabel(address)
@@ -504,39 +548,33 @@ export function renderPost(post: LitePost, homeHref: string, options: { showBack
 		</main>`;
 }
 
-function docsNavigation(portal: LitePortal, activePost: LitePost, postHref: (post: LitePost) => string) {
-	return `<nav class="lite-docs-navigation" aria-label="Documentation">
-		<div class="lite-docs-navigation-inner">
-			<button class="lite-docs-navigation-toggle" type="button" data-docs-nav-toggle aria-expanded="false">
-				<span>${escapeHTML(activePost.title)}</span><i aria-hidden="true"></i>
-			</button>
-			<div class="lite-docs-navigation-list" data-docs-nav-list>
+function docsNavigation(portal: LitePortal, activePost: LitePost | undefined, postHref: (post: LitePost) => string) {
+	return `<nav class="lite-docs-navigation" id="lite-docs-navigation" aria-label="Documentation">
+			<div class="lite-docs-navigation-list">
 				${Array.from(docsGroups(portal).entries())
 					.map(
-						([category, posts]) => `<section class="lite-docs-navigation-group">
-							<h2>${escapeHTML(category)}</h2>
-							<ul>${posts
-								.map(
-									(post) =>
-										`<li><a class="${post.id === activePost.id ? 'is-active' : ''}" href="${escapeHTML(
-											postHref(post)
-										)}" data-docs-link>${escapeHTML(post.title)}</a></li>`
-								)
-								.join('')}</ul>
+						([category, posts], index) => `<section class="lite-docs-navigation-group" data-docs-group="${escapeHTML(
+							category
+						)}">
+							<h2><button type="button" data-docs-category-toggle aria-expanded="true" aria-controls="lite-docs-category-${index}">${docsIcon(
+							bookIcon
+						)}<span>${escapeHTML(category)}</span>${docsIcon(caretIcon)}</button></h2>
+							<ul id="lite-docs-category-${index}">${posts
+							.map(
+								(post) =>
+									`<li data-docs-search-text="${escapeHTML(
+										[post.title, post.category, post.excerpt].join(' ').toLowerCase()
+									)}"><a class="${post.id === activePost?.id ? 'is-active' : ''}" ${
+										post.id === activePost?.id ? 'aria-current="page"' : ''
+									} href="${escapeHTML(postHref(post))}" data-docs-link>${escapeHTML(post.title)}</a></li>`
+							)
+							.join('')}</ul>
 						</section>`
 					)
 					.join('')}
 			</div>
-		</div>
+			<p class="lite-docs-search-status" data-docs-search-status role="status" hidden></p>
 	</nav>`;
-}
-
-function hasDocumentTitle(post: LitePost) {
-	if (Array.isArray(post.content)) {
-		return String(post.content[0]?.type || '').toLowerCase() === 'header-1';
-	}
-	if (typeof post.content !== 'string') return false;
-	return /^\s*(?:#\s+|<h1(?:\s|>))/i.test(post.content);
 }
 
 function docsPager(portal: LitePortal, activePost: LitePost, postHref: (post: LitePost) => string) {
@@ -560,20 +598,29 @@ function docsPager(portal: LitePortal, activePost: LitePost, postHref: (post: Li
 }
 
 export function renderDocs(portal: LitePortal, post: LitePost, postHref: (post: LitePost) => string) {
-	const title = hasDocumentTitle(post) ? '' : `<h1>${escapeHTML(post.title)}</h1>`;
+	const body = document.createElement('template');
+	body.innerHTML = renderContent(post.content, post.excerpt);
+	const authoredTitle = body.content.firstElementChild?.tagName === 'H1' ? body.content.firstElementChild : null;
+	const title = authoredTitle?.outerHTML || `<h1>${escapeHTML(post.title)}</h1>`;
+	authoredTitle?.remove();
 	return `<main class="lite-docs">
-		<div class="lite-docs-body">
-			${docsNavigation(portal, post, postHref)}
 			<div class="lite-docs-content-wrapper">
 				<div class="lite-docs-document">
-					<article class="lite-docs-copy lite-rich-text">${title}${renderContent(post.content, post.excerpt)}</article>
+					<div class="lite-docs-article-column">
+						<article class="lite-docs-copy lite-rich-text">
+							<header class="lite-docs-page-header">
+								${post.category ? `<p class="lite-docs-category">${escapeHTML(post.category)}</p>` : ''}
+								${title}
+							</header>
+							${body.innerHTML}
+						</article>
+						${docsPager(portal, post, postHref)}
+					</div>
 					<aside class="lite-docs-toc" data-docs-toc hidden>
-						<h2>On This Page</h2>
+						<h2>${docsIcon(tocIcon)}<span>On this page</span></h2>
 						<ul></ul>
 					</aside>
 				</div>
-				${docsPager(portal, post, postHref)}
 			</div>
-		</div>
 	</main>`;
 }

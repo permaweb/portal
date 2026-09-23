@@ -11,6 +11,8 @@ import {
 	ENGINE_LITE_THEME_STORAGE_KEY,
 } from './constants';
 import { fetchPortal, findPost, hydratePost, isArweaveId, type LitePortal, type LitePost } from './data';
+import { attachDocsSidebar, attachDocsTableOfContents, type DocsSidebarState } from './docs';
+import { inlineSvgLogo } from './logo';
 import { escapeHTML, type LiteThemeMode, renderDocs, renderFeed, renderPost, renderShell } from './render';
 import styles from './styles.css?inline';
 import { getLiteFontStylesheet, getLiteThemeVars } from './theme';
@@ -43,6 +45,14 @@ let imageLightboxCloseTimer: number | null = null;
 let imageLightboxPreviousFocus: HTMLElement | null = null;
 let imageLightboxPreviousOverflow = '';
 let pendingDocsAnchor: string | null = null;
+const docsSidebarState: DocsSidebarState = {
+	collapsed: false,
+	mobileOpen: false,
+	query: '',
+	collapsedCategories: new Set(),
+};
+let cleanupDocsSidebar = () => {};
+let cleanupDocsToc = () => {};
 
 const IMAGE_LIGHTBOX_CLOSE_MS = 180;
 const CODE_COPY_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>`;
@@ -186,8 +196,8 @@ function postHref(post: LitePost) {
 	return `#${routePrefix()}/post/${encodeURIComponent(post.slug)}`;
 }
 
-function renderPage(content: string) {
-	return portal ? renderShell(content, portal, homeHref(), walletAddress, themeMode) : content;
+function renderPage(content: string, activePost?: LitePost) {
+	return portal ? renderShell(content, portal, homeHref(), walletAddress, themeMode, activePost, postHref) : content;
 }
 
 function setMeta(name: string, value: string, property = false) {
@@ -373,16 +383,6 @@ function attachPostImageEvents() {
 		});
 }
 
-function headingId(value: string, fallback: string) {
-	return (
-		value
-			.toLowerCase()
-			.trim()
-			.replace(/\s+/g, '-')
-			.replace(/[^\w-]/g, '') || fallback
-	);
-}
-
 async function copyText(value: string) {
 	if (!value) return false;
 	if (navigator.clipboard?.writeText) {
@@ -480,36 +480,10 @@ function scrollToDocsAnchor(rawTargetId: string) {
 }
 
 function attachDocsEvents() {
-	const toggle = root?.querySelector<HTMLButtonElement>('[data-docs-nav-toggle]');
-	const list = root?.querySelector<HTMLElement>('[data-docs-nav-list]');
-	toggle?.addEventListener('click', () => {
-		const open = toggle.getAttribute('aria-expanded') !== 'true';
-		toggle.setAttribute('aria-expanded', String(open));
-		list?.classList.toggle('is-open', open);
-	});
+	cleanupDocsToc = attachDocsTableOfContents(root);
 	root?.querySelectorAll<HTMLElement>('[data-docs-link]').forEach((link) => {
 		link.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 	});
-
-	const headings = Array.from(
-		root?.querySelectorAll<HTMLElement>(
-			'.lite-docs-copy h1, .lite-docs-copy h2, .lite-docs-copy h3, .lite-docs-copy h4, .lite-docs-copy h5, .lite-docs-copy h6'
-		) || []
-	);
-	const usedIds = new Set<string>();
-	headings.forEach((heading, index) => {
-		const base = heading.id || headingId(heading.textContent || '', `section-${index + 1}`);
-		let id = base;
-		let suffix = 2;
-		while (usedIds.has(id)) id = `${base}-${suffix++}`;
-		heading.id = id;
-		heading.style.scrollMarginTop = '100px';
-		usedIds.add(id);
-	});
-
-	const toc = root?.querySelector<HTMLElement>('[data-docs-toc]');
-	const tocList = toc?.querySelector('ul');
-	const tocHeadings = headings.filter((heading) => heading.tagName === 'H4');
 	root?.querySelectorAll<HTMLAnchorElement>('.lite-docs-copy a[href^="#"]').forEach((link) => {
 		link.addEventListener('click', (event) => {
 			const rawTargetId = link.getAttribute('href')?.slice(1) || '';
@@ -529,23 +503,6 @@ function attachDocsEvents() {
 			else window.location.hash = nextHash;
 		});
 	});
-	if (toc && tocList && tocHeadings.length) {
-		toc.hidden = false;
-		for (const heading of tocHeadings) {
-			const item = document.createElement('li');
-			const link = document.createElement('a');
-			link.href = `#${heading.id}`;
-			link.textContent = heading.textContent || '';
-			link.addEventListener('click', (event) => {
-				event.preventDefault();
-				scrollToDocsAnchor(heading.id);
-				tocList.querySelectorAll('a').forEach((entry) => entry.classList.remove('is-active'));
-				link.classList.add('is-active');
-			});
-			item.appendChild(link);
-			tocList.appendChild(item);
-		}
-	}
 	if (pendingDocsAnchor) {
 		const target = pendingDocsAnchor;
 		pendingDocsAnchor = null;
@@ -615,10 +572,18 @@ function setTheme(mode: LiteThemeMode) {
 		// The selected theme still applies for this session when storage is unavailable.
 	}
 	if (portal) applyTheme(portal);
-	void renderRoute();
+	root.querySelectorAll<HTMLButtonElement>('[data-theme-mode]').forEach((button) => {
+		const active = button.dataset.themeMode === mode;
+		button.classList.toggle('is-active', active);
+		button.setAttribute('aria-pressed', String(active));
+	});
 }
 
 function attachShellEvents() {
+	cleanupDocsSidebar();
+	cleanupDocsSidebar = attachDocsSidebar(root, docsSidebarState);
+	const logo = root?.querySelector<HTMLImageElement>('.lite-site-logo img');
+	if (logo) void inlineSvgLogo(logo);
 	root?.querySelector('.lite-site-header')?.classList.toggle('is-scrolled', window.scrollY > 0);
 	root
 		?.querySelector<HTMLButtonElement>('[data-wallet-connect]')
@@ -658,6 +623,7 @@ function attachFeedEvents() {
 
 async function renderRoute() {
 	if (!portal) return;
+	cleanupDocsToc();
 	closeExpandedImage(true);
 	window.scrollTo({ top: 0, behavior: 'auto' });
 	const parts = routeParts();
@@ -682,7 +648,7 @@ async function renderRoute() {
 		root.innerHTML = renderPage('<div class="lite-loading">Loading documentation</div>');
 		attachShellEvents();
 		const post = await hydratePost(match);
-		root.innerHTML = renderPage(renderDocs(portal, post, postHref));
+		root.innerHTML = renderPage(renderDocs(portal, post, postHref), post);
 		setPageMeta(`${post.title} | ${portal.name}`, post.excerpt || portal.description, post.image);
 		attachShellEvents();
 		attachContentEvents(true);

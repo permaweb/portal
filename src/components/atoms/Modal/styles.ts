@@ -25,7 +25,7 @@ export const Container = styled.div<{
 		props.noHeader
 			? 'transparent'
 			: props.theme?.colors?.container?.primary?.background || 'rgba(var(--color-surface), 1)'};
-	border: 1.25px solid ${(props) => props.theme?.colors?.border?.alt4 || 'rgba(var(--color-border), 0.5)'};
+	border: 1.25px solid ${(props) => props.theme?.colors?.border?.alt1 || 'rgba(var(--color-border), 0.5)'};
 	border-radius: ${STYLING.dimensions.radius.alt1};
 	margin: 20px auto;
 `;
