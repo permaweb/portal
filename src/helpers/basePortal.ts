@@ -1111,7 +1111,7 @@ async function applyRelease(
 	releaseTxId: string,
 	publisher: string,
 	knownPosts: Record<string, BasePortalPost> = {},
-	cardOnly = false
+	deferPostBodies = false
 ): Promise<BasePortalManifest | null> {
 	const { posts: postChanges, patches, ...legacyPortalChanges } = release.changes;
 	const posts = new Map(parent.posts.map((post) => [post.id, post]));
@@ -1125,8 +1125,8 @@ async function applyRelease(
 		Object.entries(postChanges?.upsert || {}),
 		BASE_READ_LIMITS.transactions,
 		async ([postId, postTxId]) => {
-			// Card discovery still avoids fetching post bodies entirely.
-			const post = cardOnly
+			// Replay can validate and merge pointers before loading current bodies.
+			const post = deferPostBodies
 				? ({ id: postId, postTxId } as BasePortalPost)
 				: knownPosts[postId] || (await fetchPostRevision(postTxId, parent.portalId, postId, posts.get(postId)));
 			return { postId, postTxId, post };
@@ -1318,6 +1318,8 @@ async function latestManifestForPortal(
 	]);
 	const unresolved = new Set<string>();
 	const blocked = new Set<string>();
+	let hydratedFallback = current;
+	const deferredPosts = new Map<string, { postTxId: string; releaseTxId: string }>();
 	const legacyValidated = new Map<string, boolean>([[rootTxId, true]]);
 	const tailNodes = portalNodes
 		.slice(baseCheckpointIndex + 1)
@@ -1381,6 +1383,8 @@ async function latestManifestForPortal(
 						(current.releaseBytesSinceCheckpoint || 0) + new TextEncoder().encode(JSON.stringify(candidate)).byteLength,
 					includedTxIdsSinceCheckpoint: [...(current.includedTxIdsSinceCheckpoint || []), node.id],
 				};
+				deferredPosts.clear();
+				hydratedFallback = current;
 				accepted.add(node.id);
 				progressed = true;
 				continue;
@@ -1393,7 +1397,9 @@ async function latestManifestForPortal(
 				continue;
 			}
 			if (!publisherCanApplyRelease(current, release, publisher)) continue;
-			const next = await applyRelease(current, release, node.id, publisher, {}, cardOnly);
+			// Post revisions contain complete snapshots. Replaying obsolete bodies
+			// makes one unavailable historical revision block every later update.
+			const next = await applyRelease(current, release, node.id, publisher, {}, true);
 			if (!next) {
 				unresolved.add(node.id);
 				// A normal reconstruction visits every historical release. Only expose
@@ -1402,6 +1408,11 @@ async function latestManifestForPortal(
 				continue;
 			}
 			current = next;
+			for (const postId of release.changes.posts?.remove || []) deferredPosts.delete(postId);
+			for (const [postId, postTxId] of Object.entries(release.changes.posts?.upsert || {})) {
+				deferredPosts.set(postId, { postTxId, releaseTxId: node.id });
+			}
+			if (!deferredPosts.size) hydratedFallback = current;
 			accepted.add(node.id);
 			progressed = true;
 		}
@@ -1454,9 +1465,34 @@ async function latestManifestForPortal(
 				pendingTransactionIds.add(transaction.manifest.previousTxId || node.id);
 			}
 		}
-		// A failed historical post can block a later membership grant. Returning the
-		// older users list as a successful read would incorrectly deny that member.
-		if (pendingTransactionIds.size) throw new IncompleteBasePortalError(current, [...pendingTransactionIds]);
+		let missingCurrentPost = false;
+		const posts = await mapWithConcurrency(current.posts, BASE_READ_LIMITS.transactions, async (post) => {
+			const reference = deferredPosts.get(post.id);
+			if (!reference) return post;
+			const embedded = hydratedFallback.posts.find((candidate) => candidate.id === post.id);
+			const hydrated =
+				embedded?.postTxId === reference.postTxId
+					? embedded
+					: await fetchPostRevision(reference.postTxId, portalId, post.id, embedded);
+			if (!hydrated) {
+				missingCurrentPost = true;
+				for (const [id, type] of [
+					[reference.releaseTxId, 'portal-release'],
+					[reference.postTxId, 'portal-post'],
+				]) {
+					pendingTransactionIds.add(id);
+					trackObservedPendingTransaction({ id, portalId, type, createdAt: Date.now() });
+				}
+			}
+			return hydrated;
+		});
+		// Never expose pointer-only posts, or return stale permissions as complete.
+		if (pendingTransactionIds.size) {
+			throw new IncompleteBasePortalError(missingCurrentPost ? hydratedFallback : { ...current, posts }, [
+				...pendingTransactionIds,
+			]);
+		}
+		current = { ...current, posts };
 	}
 	if (preferredTxId && !accepted.has(preferredTxId) && !historical.has(preferredTxId)) {
 		return null;

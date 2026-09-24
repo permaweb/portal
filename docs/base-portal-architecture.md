@@ -468,11 +468,11 @@ The browser that creates a release caches its body, uploaded post bodies, and ma
 
 - Arweave GraphQL indexes the release transaction.
 - A gateway can load the release body.
-- Any referenced post revision required by that release is loadable.
+- The post revisions still referenced by the current portal state are loadable.
 
 Media availability is independent of state replay. A manifest or release can resolve while a referenced image is still propagating; the UI should treat that as a temporarily unavailable asset rather than an invalid portal state.
 
-If a release is indexed before a referenced post transaction, the resolver leaves that release unresolved rather than applying incomplete state. The pending-transactions indicator shows the missing release or referenced transaction until it becomes loadable.
+Reconstruction first validates release authors, permissions, predecessor links, and post-index changes, then loads only the final post revision for each remaining post. Each revision is a complete snapshot, so replaced or removed post bodies are not required to reconstruct current content. An unavailable current revision still prevents a complete editor read. The pending-transactions indicator identifies that revision and its referencing release until it becomes loadable; an obsolete body does not block later membership changes or content updates.
 
 Editor `readState` and `getZone` calls require complete reconstruction before returning permissions. Missing authorized releases, their predecessors, or required post bodies raise a retryable loading error instead of returning an older users list. The editor logs blocking transaction IDs alongside the error for diagnosis. Partial or offline fallbacks remain available to other readers, but cannot satisfy these permission reads or replace a newer home-page card. On entry, the editor also revalidates persisted permissions, including denials cached during earlier incomplete loads.
 
@@ -504,7 +504,7 @@ The browser-compatible resolver performs the following process without AO:
 4. Select the newest valid checkpoint signed by the root owner.
 5. Fetch the remaining release tail with bounded concurrency.
 6. Repeatedly apply authorized releases whose predecessors are already accepted.
-7. Load post revisions referenced by `posts.upsert` entries.
+7. After merging the release log, load only the post revisions referenced by the final post index. Keep complete posts embedded in the selected checkpoint or manifest without re-fetching their bodies.
 8. Return the complete materialized portal state and any unresolved transaction IDs.
 
 Immutable transaction bodies are cached, so later resolutions do not need to download unchanged history again.
@@ -567,7 +567,7 @@ The architecture favors ignoring incomplete or invalid data rather than partiall
 
 - An invalid root means the portal cannot be resolved.
 - A release with the wrong portal, root, signer, author, permissions, or predecessor is ignored.
-- A release that references a missing post revision remains unresolved and is retried later.
+- A missing current post revision prevents a complete editor read and is retried later. Superseded or removed revisions are not downloaded. A permissive reader can fall back to a fully hydrated manifest or checkpoint, but pointer-only post state is never exposed or cached as complete.
 - A checkpoint not signed by the immutable root owner is ignored.
 - Failure to create a checkpoint does not invalidate the release that triggered it.
 - A temporary GraphQL failure can fall back to cached editor state, while a cold public load shows an error until discovery recovers.
@@ -580,11 +580,11 @@ No transaction is overwritten or deleted during recovery. New releases, checkpoi
 
 - GraphQL discovery is paginated at 100 transactions per page.
 - Portal-list discovery reads metadata and membership from the release log without downloading referenced post revisions. Post bodies are deferred until a portal is opened.
-- Cards have a separate 30-second memory cache. They are display projections, never authoritative manifests or write authorization; full resolution still validates every referenced post. During propagation, a card may show newer metadata before all of a release's post bodies are available.
+- Cards have a separate 30-second memory cache. They are display projections, never authoritative manifests or write authorization; full resolution still validates every current post reference. During propagation, a card may show newer metadata before the current post bodies are available.
 - Membership receipts and candidate portal IDs come from one paginated query per wallet. Repeated candidates, concurrent reads, and successful GraphQL queries within 10 seconds share work. Explicit fresh reads and membership writes invalidate the query cache.
 - Immutable transaction bodies and pending-transaction checks share a maximum of four active gateway reads across portals. Failed pending checks back off, and polling pauses while the page is hidden.
 - A valid checkpoint avoids replaying all releases incorporated into it.
-- Only the release tail, newly referenced posts, and uncached immutable bodies require network downloads.
+- Only the release tail, current post revisions, and uncached immutable bodies require network downloads. Historical revisions replaced or removed by accepted releases are not fetched.
 - Portal field refreshes are selective in the editor, avoiding complete state reloads after every action.
 - Author and member identity reads omit portal discovery. Cross-portal user lists load only in the process-mode post editor and request only the users field. Editor icons load when rendered instead of all being preloaded on startup.
 - A portal with no usable checkpoint becomes progressively slower to cold-load as its release history grows.

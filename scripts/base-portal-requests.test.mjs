@@ -993,6 +993,122 @@ for (const loader of ['editor', 'viewer']) {
 			? rt.api.fetchBasePortal(identifier)
 			: resolvePortalState(identifier, { fetch: rt.fetch, transactionCache: new Map() });
 	};
+	for (const disposition of ['replaced', 'removed']) {
+		test(`${loader}: unavailable historical post bodies do not block ${disposition} content or later grants`, async () => {
+			const transactions = inviteAfterPost();
+			const latestPost = id('z');
+			const latestRelease = id('y');
+			transactions.push(
+				transaction(
+					latestRelease,
+					'portal-release',
+					{
+						...transactions[1].body,
+						previousTxId: id('v'),
+						authorAddress: MEMBER,
+						changes: {
+							name: 'Current portal',
+							posts: disposition === 'removed' ? { remove: [POST] } : { upsert: { [POST]: latestPost } },
+						},
+					},
+					{ 'Previous-Tx': id('v') },
+					MEMBER,
+					6
+				)
+			);
+			transactions.push(
+				transaction(latestPost, 'portal-post', {
+					type: 'portal-post',
+					mode: 'base',
+					portalId: PORTAL,
+					postId: POST,
+					previousTxId: POST,
+					post: { title: 'Current post', content: [{ content: 'Current body' }] },
+				})
+			);
+			const rt = runtime(transactions, (url, _init, respond) =>
+				url.includes(POST) ? new Response('', { status: 503 }) : respond()
+			);
+			const state =
+				loader === 'editor'
+					? await rt.api.fetchBasePortal(PORTAL, { requireComplete: true })
+					: await resolvePortalState(PORTAL, { fetch: rt.fetch, transactionCache: new Map() });
+			assert.equal(state.manifestTxId, latestRelease);
+			assert.equal(state.name, 'Current portal');
+			assert.deepEqual(plain(state.users.find((user) => user.address === MEMBER).roles), ['Admin']);
+			assert.equal(state.posts.length, disposition === 'removed' ? 0 : 1);
+			if (disposition === 'replaced') assert.equal(state.posts[0].title, 'Current post');
+			assert.equal(
+				rt.calls.some(({ url }) => url.includes(POST)),
+				false,
+				'superseded bodies must not be requested'
+			);
+		});
+	}
+	test(`${loader}: an unauthorized removal cannot bypass a required current post body`, async () => {
+		const transactions = fixture({ unavailablePost: true });
+		transactions.push(
+			transaction(
+				id('y'),
+				'portal-release',
+				{
+					...transactions[1].body,
+					previousTxId: RELEASE,
+					authorAddress: id('x'),
+					changes: { posts: { remove: [POST] } },
+				},
+				{ 'Previous-Tx': RELEASE },
+				id('x'),
+				6
+			)
+		);
+		const rt = runtime(transactions);
+		if (loader === 'editor') {
+			await assert.rejects(rt.api.fetchBasePortal(PORTAL, { requireComplete: true }), (error) => {
+				assert.ok(error.pendingTransactionIds.includes(POST));
+				return true;
+			});
+		} else {
+			const state = await resolvePortalState(PORTAL, { fetch: rt.fetch, transactionCache: new Map() });
+			assert.equal(state.manifestTxId, ROOT);
+			assert.ok(state.unresolvedTransactions.some((entry) => entry.postTxId === POST));
+		}
+		assert.ok(rt.calls.some(({ url }) => url.endsWith(POST)));
+	});
+	test(`${loader}: later role revocation still applies when obsolete content is unavailable`, async () => {
+		const transactions = fixture({ unavailablePost: true });
+		const latestPost = id('z');
+		transactions.push(
+			transaction(
+				id('y'),
+				'portal-release',
+				{
+					...transactions[1].body,
+					previousTxId: RELEASE,
+					changes: { users: [], posts: { upsert: { [POST]: latestPost } } },
+				},
+				{ 'Previous-Tx': RELEASE },
+				OWNER,
+				6
+			)
+		);
+		transactions.push(
+			transaction(latestPost, 'portal-post', {
+				type: 'portal-post',
+				mode: 'base',
+				portalId: PORTAL,
+				postId: POST,
+				post: { title: 'Current post', content: [] },
+			})
+		);
+		const state = await resolve(transactions);
+		assert.equal(state.manifestTxId, id('y'));
+		assert.equal(
+			state.users.some((user) => user.address === MEMBER),
+			false
+		);
+		assert.equal(state.posts[0].postTxId, latestPost);
+	});
 	for (const failure of ['empty response', 'HTML response', 'HTTP 404']) {
 		test(`${loader}: an indexed post with ${failure} loads through the transaction data endpoint`, async () => {
 			const transactions = fixture();

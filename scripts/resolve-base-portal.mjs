@@ -530,7 +530,7 @@ async function loadPost(postId, transactionId, portalId, previous, options) {
 	return { ...previous, ...value.post, id: postId, postTxId: transactionId };
 }
 
-async function applyRelease(state, release, transactionId, publisher, options) {
+function applyRelease(state, release, transactionId, publisher) {
 	if (!canPublish(state, release, publisher)) return undefined;
 	const next = clone(state);
 	for (const [key, value] of Object.entries(release.changes || {})) {
@@ -542,9 +542,7 @@ async function applyRelease(state, release, transactionId, publisher, options) {
 	for (const postId of release.changes?.posts?.remove || []) posts.delete(postId);
 	for (const [postId, postTxId] of Object.entries(release.changes?.posts?.upsert || {})) {
 		if (!ADDRESS.test(postTxId)) return undefined;
-		const post = await loadPost(postId, postTxId, release.portalId, posts.get(postId), options);
-		if (!post) return undefined;
-		posts.set(postId, post);
+		posts.set(postId, { id: postId, postTxId });
 	}
 	if (release.changes?.posts?.order) {
 		const orderedIds = [...new Set(release.changes.posts.order)];
@@ -664,6 +662,9 @@ export async function resolvePortalState(identifier, config = {}) {
 	]);
 	const unresolved = [];
 	let appliedReleaseCount = 0;
+	let hydratedFallback = state;
+	let fallbackReleaseCount = 0;
+	const deferredPosts = new Map();
 	const tailNodes = nodes
 		.slice(baseCheckpointIndex + 1)
 		.filter(
@@ -690,7 +691,7 @@ export async function resolvePortalState(identifier, config = {}) {
 				nextPending.push({ node, value });
 				continue;
 			}
-			const next = await applyRelease(state, release, node.id, node.owner?.address, options);
+			const next = applyRelease(state, release, node.id, node.owner?.address);
 			if (!next) {
 				unresolved.push({ id: node.id, reason: 'invalid-or-content-not-indexed' });
 				continue;
@@ -698,6 +699,14 @@ export async function resolvePortalState(identifier, config = {}) {
 			state = next;
 			accepted.add(node.id);
 			appliedReleaseCount += 1;
+			for (const postId of release.changes.posts?.remove || []) deferredPosts.delete(postId);
+			for (const [postId, postTxId] of Object.entries(release.changes.posts?.upsert || {})) {
+				deferredPosts.set(postId, { postTxId, releaseTxId: node.id });
+			}
+			if (!deferredPosts.size) {
+				hydratedFallback = state;
+				fallbackReleaseCount = appliedReleaseCount;
+			}
 			progressed = true;
 		}
 		if (!progressed) {
@@ -712,6 +721,25 @@ export async function resolvePortalState(identifier, config = {}) {
 		}
 		pending = nextPending;
 	}
+
+	// Resolve only the final pointers. Superseded and removed post bodies are
+	// not dependencies of the current state; release authorization still is.
+	const posts = await mapWithConcurrency(state.posts, options.concurrency, async (post) => {
+		const reference = deferredPosts.get(post.id);
+		if (!reference) return post;
+		const embedded = hydratedFallback.posts.find((candidate) => candidate.id === post.id);
+		const hydrated =
+			embedded?.postTxId === reference.postTxId
+				? embedded
+				: await loadPost(post.id, reference.postTxId, portalId, embedded, options);
+		if (!hydrated)
+			unresolved.push({ id: reference.releaseTxId, reason: 'current-post-not-loadable', postTxId: reference.postTxId });
+		return hydrated;
+	});
+	if (posts.some((post) => !post)) {
+		state = hydratedFallback;
+		appliedReleaseCount = fallbackReleaseCount;
+	} else state = { ...state, posts };
 
 	return {
 		...state,
