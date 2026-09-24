@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { transition4 } from 'helpers/animations';
 import { STYLING } from 'helpers/config';
 
-export const ARTICLE_TOOLBAR_WIDTH = '350px';
+export const ARTICLE_TOOLBAR_WIDTH = STYLING.dimensions.articleToolbar.width;
 
 export const Wrapper = styled.div`
 	display: flex;

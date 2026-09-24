@@ -444,7 +444,7 @@ export default function ArticleEditor(props: {
 	};
 
 	return (
-		<S.Wrapper>
+		<S.Wrapper data-article-panel-open={currentPost.editor.panelOpen}>
 			<S.ToolbarWrapper>
 				<ArticleToolbar
 					addBlock={(type: ArticleBlockEnum) => addBlock(type)}

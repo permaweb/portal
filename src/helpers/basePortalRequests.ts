@@ -24,6 +24,25 @@ export async function withBaseReadLimit<T>(read: () => Promise<T>): Promise<T> {
 	}
 }
 
+export async function fetchBaseTransactionJson(txId: string): Promise<any> {
+	return withBaseReadLimit(async () => {
+		try {
+			const response = await fetch(`https://arweave.net/${txId}`, { cache: 'reload' });
+			if (!response.ok) throw new Error(`Transaction ${txId}: ${response.status}`);
+			return await response.json();
+		} catch {
+			// The content route can return an empty 200 even when an L1 upload is
+			// available. The transaction API serves its original base64url bytes.
+			const response = await fetch(`https://arweave.net/tx/${txId}/data`, { cache: 'reload' });
+			if (!response.ok) throw new Error(`Transaction data ${txId}: ${response.status}`);
+			const encoded = (await response.text()).trim();
+			if (!/^[A-Za-z0-9_-]+={0,2}$/.test(encoded)) throw new Error(`Invalid transaction data: ${txId}`);
+			const bytes = Uint8Array.from(atob(encoded.replace(/-/g, '+').replace(/_/g, '/')), (char) => char.charCodeAt(0));
+			return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+		}
+	});
+}
+
 export function invalidateBaseQueries() {
 	queryGeneration += 1;
 	queryCache.clear();

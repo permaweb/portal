@@ -169,6 +169,28 @@ test('pending transaction checks share the foreground gateway concurrency budget
 	assert.deepEqual(await pending, []);
 });
 
+test('syncing checks recover empty post responses through the same validated data fallback', async (t) => {
+	let now = 3_000_000;
+	t.mock.method(Date, 'now', () => now);
+	const id = 'j'.repeat(43);
+	trackPendingTransaction({ id, address, portalId, type: 'portal-post', createdAt: now });
+	let payloadPortalId = 'x'.repeat(43);
+	t.mock.method(globalThis, 'fetch', async (url) => {
+		if (url.endsWith('/graphql')) return indexedResponse([id]);
+		if (url.endsWith(`/tx/${id}/data`))
+			return new Response(
+				Buffer.from(JSON.stringify({ mode: 'base', type: 'portal-post', portalId: payloadPortalId })).toString(
+					'base64url'
+				)
+			);
+		return new Response('');
+	});
+	assert.equal((await refreshPendingTransactions(address, portalId)).length, 1);
+	payloadPortalId = portalId;
+	now += 10_000;
+	assert.deepEqual(await refreshPendingTransactions(address, portalId), []);
+});
+
 test('shared refresh callers recover consistently when browser storage becomes unwritable', async (t) => {
 	track('f'.repeat(43));
 	let resolveIndex;

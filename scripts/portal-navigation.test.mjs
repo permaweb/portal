@@ -26,10 +26,12 @@ const OWNER = 'w'.repeat(43);
 
 function deferred() {
 	let resolve;
-	const promise = new Promise((done) => {
+	let reject;
+	const promise = new Promise((done, fail) => {
 		resolve = done;
+		reject = fail;
 	});
-	return { promise, resolve };
+	return { promise, resolve, reject };
 }
 
 function portalState(id, name = id === A ? 'Portal A' : 'Portal B') {
@@ -46,11 +48,17 @@ function portalState(id, name = id === A ? 'Portal A' : 'Portal B') {
 	};
 }
 
-function runtime({ path = '/', ready = true, readState = ({ processId }) => portalState(processId), cached } = {}) {
+function runtime({
+	path = '/',
+	ready = true,
+	readState = ({ processId }) => portalState(processId),
+	cached,
+	cachedPermissions,
+} = {}) {
 	const hooks = [];
 	const timers = new Map();
 	const cache = new Map(cached ? [[cached.id, cached]] : []);
-	const permissionCache = new Map();
+	const permissionCache = new Map(cached && cachedPermissions ? [[`${cached.id}:${OWNER}`, cachedPermissions]] : []);
 	const reads = [];
 	const notices = [];
 	let cursor = 0;
@@ -250,6 +258,29 @@ test('an initial transient failure retries and recovers without a page reload', 
 	assert.equal(app.state.current?.id, A);
 	assert.equal(app.state.loadError, null);
 });
+
+for (const base of [false, true]) {
+	test(`base portal entry revalidates cached ${
+		base ? 'allowed' : 'denied'
+	} permissions before displaying access`, async () => {
+		const pending = deferred();
+		const app = runtime({
+			path: `/${A}`,
+			cached: { id: A, name: 'Cached portal', assets: [], uploads: [] },
+			cachedPermissions: { base },
+			readState: () => pending.promise,
+		});
+		await app.flush();
+		assert.equal(app.state.permissions, null);
+		pending.reject(new Error('Some portal data is still loading from Arweave. Please try again.'));
+		await app.runTimers();
+		assert.equal(app.state.permissions, null);
+		assert.match(app.state.loadError, /still loading from Arweave/);
+		await app.setLibs(() => portalState(A));
+		assert.equal(app.state.permissions?.base, true);
+		assert.equal(app.state.loadError, null);
+	});
+}
 
 test('a full refresh retries a failed initial load even when current portal data is missing', async () => {
 	let failing = true;

@@ -133,7 +133,17 @@ export default function PostRow(props: { post: PortalAssetType }) {
 			<Link to={editorPostLink}>
 				<S.PostWrapper>
 					<S.PostHeader>
-						<p>{props.post.name}</p>
+						<S.PostTitle>
+							<p>{props.post.name}</p>
+							{isFeatured && (
+								<S.FeaturedStar>
+									<ReactSVG src={ICONS.featuredPost} wrapper={'span'} role={'img'} aria-label={language.featuredPost} />
+									<S.FeaturedTooltip className={'info'} role={'tooltip'}>
+										<span>{language.featuredPost}</span>
+									</S.FeaturedTooltip>
+								</S.FeaturedStar>
+							)}
+						</S.PostTitle>
 						<S.PostHeaderDetail>
 							<ReactSVG src={ICONS.time} />
 							<span>{`${formatDate(props.post.metadata?.releaseDate, true)} · ${creatorName}`}</span>

@@ -1,4 +1,4 @@
-import { withBaseReadLimit } from './basePortalRequests';
+import { fetchBaseTransactionJson, withBaseReadLimit } from './basePortalRequests';
 import { STORAGE } from './config';
 
 const ARWEAVE_GRAPHQL = 'https://arweave.net/graphql';
@@ -152,29 +152,22 @@ async function coldLoadableTransactionIds(entries: PendingTransaction[]): Promis
 	}
 	const loadable = new Set<string>();
 	await mapWithConcurrency(Array.from(indexed), PENDING_FETCH_CONCURRENCY, async (id) => {
-		await withBaseReadLimit(async () => {
-			try {
-				const response = await fetch(`https://arweave.net/${id}`, { cache: 'force-cache' });
-				if (!response.ok) return;
-				const entry = byId.get(id);
+		try {
+			const entry = byId.get(id);
+			if (['portal-release', 'portal-manifest', 'portal-checkpoint', 'portal-post'].includes(entry?.type)) {
+				const payload = await fetchBaseTransactionJson(id);
 				if (
-					entry?.type === 'portal-release' ||
-					entry?.type === 'portal-manifest' ||
-					entry?.type === 'portal-checkpoint' ||
-					entry?.type === 'portal-post'
-				) {
-					const payload = await response.json();
-					if (
-						payload?.mode !== 'base' ||
-						payload?.type !== entry.type ||
-						(entry.portalId && payload?.portalId !== entry.portalId)
-					) {
-						return;
-					}
-				}
-				loadable.add(id);
-			} catch {}
-		});
+					payload?.mode !== 'base' ||
+					payload?.type !== entry.type ||
+					(entry.portalId && payload?.portalId !== entry.portalId)
+				)
+					return;
+			} else {
+				const response = await withBaseReadLimit(() => fetch(`https://arweave.net/${id}`, { cache: 'reload' }));
+				if (!response.ok) return;
+			}
+			loadable.add(id);
+		} catch {}
 	});
 	return loadable;
 }

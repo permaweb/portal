@@ -13,6 +13,7 @@ import { CurrentZoneVersion } from '@permaweb/libs';
 
 import { useRouteScrollReset } from 'editor/hooks/useRouteScrollReset';
 import { Navigation, NavigationProvider, useNavigation } from 'editor/navigation';
+import { AppDeployment } from 'editor/navigation/AppDeployment';
 import { PortalProvider, usePortalProvider } from 'editor/providers/PortalProvider';
 import { SettingsProvider } from 'editor/providers/SettingsProvider';
 import { persistor, store } from 'editor/store';
@@ -229,9 +230,12 @@ function AppContent() {
 						<Suspense fallback={<Loader relative />}>{element}</Suspense>
 					</S.View>
 					<S.Footer navigationOpen={navWidth > 0} navWidth={navWidth}>
-						<p>
-							{language?.app} {new Date().getFullYear()}
-						</p>
+						<S.FooterContent>
+							<p>
+								{language?.app} {new Date().getFullYear()}
+							</p>
+							<AppDeployment />
+						</S.FooterContent>
 					</S.Footer>
 				</>
 			);

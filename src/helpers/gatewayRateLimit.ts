@@ -356,7 +356,15 @@ class GatewayRequestManager {
 				let response: Response;
 				try {
 					throwIfAborted(template.signal);
-					response = await this.attempt(template.clone(), timeoutMs);
+					const retryRead = failures > 0 && ['GET', 'HEAD'].includes(template.method);
+					// Immutable reads use force-cache. If a browser has retained an error,
+					// retry from the network and replace it with the successful response.
+					// Preserve no-store for callers that explicitly prohibit storage.
+					const request =
+						retryRead && template.cache !== 'no-store'
+							? new Request(template.clone(), { cache: 'reload' })
+							: template.clone();
+					response = await this.attempt(request, timeoutMs);
 					if (response.status !== 429) return response;
 					if (failures === 0) this.retrying += 1;
 					failures += 1;

@@ -464,7 +464,7 @@ Administrators can publish releases, but only the immutable root owner can creat
 
 ## Indexing and Pending Transactions
 
-The browser that creates a release caches the transaction body and materialized portal state immediately. Another browser cannot discover it until:
+The browser that creates a release caches its body, uploaded post bodies, and materialized portal state immediately. For the remainder of that session, successfully submitted manifests, releases, and checkpoints also participate in reconstruction before GraphQL indexes them. They still pass the normal predecessor and role checks, and indexed metadata takes precedence once available. This lets post-save refreshes survive expiration of the 10-second materialized-state cache. Upload metadata is kept only in memory; persisted snapshots do not establish transaction ownership in a new session. Another browser cannot discover the update until:
 
 - Arweave GraphQL indexes the release transaction.
 - A gateway can load the release body.
@@ -473,6 +473,8 @@ The browser that creates a release caches the transaction body and materialized 
 Media availability is independent of state replay. A manifest or release can resolve while a referenced image is still propagating; the UI should treat that as a temporarily unavailable asset rather than an invalid portal state.
 
 If a release is indexed before a referenced post transaction, the resolver leaves that release unresolved rather than applying incomplete state. The pending-transactions indicator shows the missing release or referenced transaction until it becomes loadable.
+
+Editor `readState` and `getZone` calls require complete reconstruction before returning permissions. Missing authorized releases, their predecessors, or required post bodies raise a retryable loading error instead of returning an older users list. The editor logs blocking transaction IDs alongside the error for diagnosis. Partial or offline fallbacks remain available to other readers, but cannot satisfy these permission reads or replace a newer home-page card. On entry, the editor also revalidates persisted permissions, including denials cached during earlier incomplete loads.
 
 Pending state comes from two sources:
 
@@ -517,7 +519,11 @@ Caching improves responsiveness but is never an authorization source:
 - **Local storage:** Stores the latest materialized manifest, latest known head, portal memberships, pending transactions, site mappings, and the last resolved engine transaction.
 - **In-memory transaction cache:** Avoids decoding the same immutable body repeatedly during one session.
 
-A fresh write attempts network reconstruction first but falls back to the locally cached manifest when the newest uploaded head has not yet entered GraphQL. A cold browser has no such fallback and must wait for indexing.
+After a miss in the successful-body caches, editor and portable resolver transaction reads use `cache: 'reload'`. This bypasses browser HTTP responses retained before propagation, such as an early 404, while still reusing successful bodies from memory and `CacheStorage`. It does not guarantee bypassing a gateway's CDN cache.
+
+If the normal content route fails or returns invalid JSON (including an empty HTTP 200), readers try the same gateway's `/tx/<id>/data` endpoint once. This serves L1 transaction bytes encoded as base64url. Readers decode UTF-8 and parse JSON before caching the recovered body under the canonical transaction URL. Normal portal, post, predecessor, and role validation still applies. The syncing indicator uses the same fallback and checks payload type and portal identity before clearing a pending entry. If neither route supplies usable data, the transaction remains pending and can be retried.
+
+A fresh write attempts network reconstruction with this session's submitted transactions and can fall back to the locally cached manifest if discovery fails. Complete editor reads do not use that fallback. A new session must wait for indexing and required transaction bodies before returning permissions.
 
 Clearing browser storage removes these performance and pending-state hints, but it does not remove portal content or authority. The portal can be reconstructed again from Arweave once all required transactions are indexed and loadable.
 

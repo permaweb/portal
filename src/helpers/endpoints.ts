@@ -13,6 +13,10 @@ export function getTxEndpoint(txId: string) {
 	return `${arweaveEndpoint}/${txId}`;
 }
 
+export function getExplorerEndpoint(txId: string) {
+	return `https://lunar.arweave.net/#/explorer/${txId}`;
+}
+
 export function getTurboCostWincEndpoint(bytes: number) {
 	return `${turboEndpoint}/price/bytes/${bytes}`;
 }

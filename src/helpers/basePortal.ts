@@ -1,4 +1,9 @@
-import { BASE_READ_LIMITS, invalidateBaseQueries, queryBaseGateway, withBaseReadLimit } from './basePortalRequests';
+import {
+	BASE_READ_LIMITS,
+	fetchBaseTransactionJson,
+	invalidateBaseQueries,
+	queryBaseGateway,
+} from './basePortalRequests';
 import { DEFAULT_FONTS, ENGINE_LITE_REFERENCE_ID, PAGES, PORTAL_DATA, STORAGE, THEME } from './config';
 import { trackObservedPendingTransaction, trackPendingTransaction } from './pendingTransactions';
 import { PortalHeaderType, PortalUserRoleType, PortalUserType } from './types';
@@ -243,7 +248,10 @@ const writeQueues = new Map<string, Promise<any>>();
 const membershipWriteQueues = new Map<string, Promise<string>>();
 const transactionBodyCache = new Map<string, any>();
 const transactionBodyRequests = new Map<string, Promise<any | null>>();
-const portalResolveCache = new Map<string, { manifest: BasePortalManifest; resolvedAt: number }>();
+// Keep this session's successful submissions available while GraphQL indexes
+// them. Persisted snapshots are not a source of transaction owner metadata.
+const locallyPublishedNodes = new Map<string, GraphQLNode>();
+const portalResolveCache = new Map<string, { manifest: BasePortalManifest; resolvedAt: number; complete: boolean }>();
 const portalResolveRequests = new Map<string, Promise<BasePortalManifest | null>>();
 // Card projections are deliberately isolated from authoritative, fully hydrated
 // manifests. Missing post bodies may still be propagating when a card appears.
@@ -251,6 +259,13 @@ type BasePortalCard = { header: PortalHeaderType; owner: string };
 const portalHeaderCache = new Map<string, { card: BasePortalCard; resolvedAt: number }>();
 const portalHeaderRequests = new Map<string, Promise<BasePortalCard>>();
 const discoveryNodesCache = new Map<string, GraphQLNode[]>();
+
+class IncompleteBasePortalError extends Error {
+	constructor(readonly manifest: BasePortalManifest, readonly pendingTransactionIds: string[]) {
+		super('Some portal data is still loading from Arweave. Please try again.');
+		this.name = 'IncompleteBasePortalError';
+	}
+}
 
 function localStorageAvailable() {
 	try {
@@ -287,10 +302,11 @@ function cacheManifest(manifest: BasePortalManifest) {
 	}
 }
 
-function rememberResolvedManifest(manifest: BasePortalManifest) {
+function rememberResolvedManifest(manifest: BasePortalManifest, complete = true) {
 	cacheManifest(manifest);
-	portalResolveCache.set(manifest.portalId, { manifest, resolvedAt: Date.now() });
-	rememberPortalCard(manifest);
+	portalResolveCache.set(manifest.portalId, { manifest, resolvedAt: Date.now(), complete });
+	// A partial content replay must not erase a newer membership discovered on home.
+	if (complete) rememberPortalCard(manifest);
 }
 
 function rememberPortalCard(manifest: BasePortalManifest): BasePortalCard {
@@ -453,20 +469,19 @@ async function fetchImmutableTransactionJson(txId: string): Promise<any | null> 
 			}
 		}
 		try {
-			return await withBaseReadLimit(async () => {
-				const response = await fetch(url, { cache: 'force-cache' });
-				if (!response.ok) return null;
-				const cacheResponse = typeof caches !== 'undefined' ? response.clone() : null;
-				const value = await response.json();
-				if (cacheResponse) {
-					void caches
-						.open(TRANSACTION_CACHE_NAME)
-						.then((cache) => cache.put(url, cacheResponse))
-						.catch(() => undefined);
-				}
-				transactionBodyCache.set(txId, value);
-				return value;
-			});
+			const value = await fetchBaseTransactionJson(txId);
+			if (typeof caches !== 'undefined') {
+				// Cache decoded JSON under the canonical URL, including recovered L1
+				// data. Never persist the empty/invalid response that triggered fallback.
+				void caches
+					.open(TRANSACTION_CACHE_NAME)
+					.then((cache) =>
+						cache.put(url, new Response(JSON.stringify(value), { headers: { 'Content-Type': 'application/json' } }))
+					)
+					.catch(() => undefined);
+			}
+			transactionBodyCache.set(txId, value);
+			return value;
 		} catch {
 			return null;
 		}
@@ -1218,9 +1233,15 @@ async function latestManifestForPortal(
 		],
 		'HEIGHT_ASC'
 	);
+	for (const node of [...knownNodes, ...nodes]) {
+		// Retain indexed ordering and owner metadata even if a later query omits
+		// the transaction, rather than treating it as a new pending upload again.
+		if (locallyPublishedNodes.has(node.id)) locallyPublishedNodes.set(node.id, node);
+	}
 	const portalNodes = await recoverMissingPortalPredecessors(
 		portalId,
-		[...knownNodes, ...nodes].filter(
+		// Indexed metadata takes precedence over this session's upload metadata.
+		[...locallyPublishedNodes.values(), ...knownNodes, ...nodes].filter(
 			(node) =>
 				tagValue(node, 'Portal-Mode') === 'base' &&
 				tagValue(node, 'Portal-Id') === portalId &&
@@ -1403,6 +1424,40 @@ async function latestManifestForPortal(
 		}
 		pending = nextPending;
 	}
+	if (!cardOnly) {
+		const pendingTransactionIds = new Set(unresolved);
+		for (const { node, transaction } of loaded) {
+			const publisher = node.owner?.address || '';
+			if (!transaction) {
+				if (
+					publisher === rootOwner ||
+					current.users.some(
+						(user) =>
+							user.address === publisher && user.roles?.some((role) => role === 'Admin' || role === 'Contributor')
+					)
+				)
+					pendingTransactionIds.add(node.id);
+				continue;
+			}
+			if (unresolved.has(node.id) && transaction.kind === 'release') {
+				for (const txId of Object.values(transaction.release.changes.posts?.upsert || {})) {
+					if (!transactionBodyCache.has(txId)) pendingTransactionIds.add(txId);
+				}
+			}
+			if (!blocked.has(node.id)) continue;
+			if (transaction.kind === 'release' && publisherCanApplyRelease(current, transaction.release, publisher)) {
+				pendingTransactionIds.add(transaction.release.previousTxId);
+			} else if (
+				transaction.kind === 'manifest' &&
+				publisherCanCreateRevision(current, transaction.manifest, publisher)
+			) {
+				pendingTransactionIds.add(transaction.manifest.previousTxId || node.id);
+			}
+		}
+		// A failed historical post can block a later membership grant. Returning the
+		// older users list as a successful read would incorrectly deny that member.
+		if (pendingTransactionIds.size) throw new IncompleteBasePortalError(current, [...pendingTransactionIds]);
+	}
 	if (preferredTxId && !accepted.has(preferredTxId) && !historical.has(preferredTxId)) {
 		return null;
 	}
@@ -1413,11 +1468,17 @@ async function latestManifestForPortal(
 
 export async function fetchBasePortal(
 	identifier: string,
-	options: { fresh?: boolean } = {}
+	options: { fresh?: boolean; requireComplete?: boolean } = {}
 ): Promise<BasePortalManifest> {
 	let cached = getCachedManifest(identifier);
 	const known = portalResolveCache.get(identifier);
-	if (!options.fresh && known && Date.now() - known.resolvedAt < BASE_RESOLVE_TTL_MS) return known.manifest;
+	if (
+		!options.fresh &&
+		known &&
+		(!options.requireComplete || known.complete) &&
+		Date.now() - known.resolvedAt < BASE_RESOLVE_TTL_MS
+	)
+		return known.manifest;
 	let direct: BasePortalManifest | null = null;
 	let directPortalId: string | null = null;
 
@@ -1435,7 +1496,13 @@ export async function fetchBasePortal(
 	}
 	const portalId = cached?.portalId || directPortalId || direct?.portalId || identifier;
 	const memory = portalResolveCache.get(portalId);
-	if (!options.fresh && memory && Date.now() - memory.resolvedAt < BASE_RESOLVE_TTL_MS) return memory.manifest;
+	if (
+		!options.fresh &&
+		memory &&
+		(!options.requireComplete || memory.complete) &&
+		Date.now() - memory.resolvedAt < BASE_RESOLVE_TTL_MS
+	)
+		return memory.manifest;
 
 	try {
 		if (options.fresh) {
@@ -1464,12 +1531,15 @@ export async function fetchBasePortal(
 		const latest = await request;
 		if (latest) return latest;
 	} catch (error) {
-		if (!cached && !direct) throw error;
+		if (options.requireComplete) throw error;
+		if (error instanceof IncompleteBasePortalError) direct = error.manifest;
+		else if (!cached && !direct) throw error;
 	}
 
+	if (options.requireComplete) throw new Error('Portal data is still loading from Arweave. Please try again.');
 	const fallback = cached || direct;
 	if (!fallback) throw new Error('Base portal manifest not found');
-	rememberResolvedManifest(fallback);
+	rememberResolvedManifest(fallback, false);
 	return fallback;
 }
 
@@ -1506,6 +1576,9 @@ async function uploadData(wallet: any, data: string | ArrayBuffer | Uint8Array, 
 	const tag = (name: string) => tags.find((candidate) => candidate.name === name)?.value;
 	const address = tag('Author') || tag('Portal-Owner');
 	if (address && tag('Portal-Mode') === 'base') {
+		if (['portal-manifest', 'portal-release', 'portal-checkpoint'].includes(tag('Type') || '')) {
+			locallyPublishedNodes.set(txId, { id: txId, owner: { address }, tags: tags.map((tag) => ({ ...tag })) });
+		}
 		trackPendingTransaction({
 			id: txId,
 			address,
@@ -2132,6 +2205,7 @@ async function publishPostRevision(
 		{ name: 'Post-Id', value: postId },
 		{ name: 'Author', value: address },
 	]);
+	transactionBodyCache.set(txId, postPayload);
 	return { ...completePost, postTxId: txId };
 }
 
@@ -2670,14 +2744,14 @@ export function createBasePermawebAdapter(wallet: any, address: string) {
 		addPortalUpload: async (portalId: string, upload: any) =>
 			(await addBasePortalUpload(portalId, upload, wallet, address)).manifestTxId,
 		readState: async ({ processId, path }: any) => {
-			const manifest = await fetchBasePortal(processId);
+			const manifest = await fetchBasePortal(processId, { requireComplete: true });
 			activePortalId = manifest.portalId;
 			const state = manifestToZoneState(manifest);
 			if (!path) return state;
 			return state[String(path).toLowerCase()] ?? null;
 		},
 		getZone: async (zoneId: string) => {
-			const manifest = await fetchBasePortal(zoneId);
+			const manifest = await fetchBasePortal(zoneId, { requireComplete: true });
 			activePortalId = manifest.portalId;
 			const state = manifestToZoneState(manifest);
 			return {
@@ -2747,6 +2821,7 @@ export function createBasePermawebAdapter(wallet: any, address: string) {
 			];
 			if (portalId) tags.push({ name: 'Portal-Id', value: portalId });
 			const txId = await uploadData(wallet, JSON.stringify(payload), tags);
+			transactionBodyCache.set(txId, payload);
 			if (storedPost && portalId) initialPosts.set(txId, { portalId, post: storedPost });
 			onStatus?.('Base post transaction created');
 			return txId;

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { getPostStatusBackground } from 'editor/styles';
 
 import { STYLING } from 'helpers/config';
+import { common } from 'helpers/themes';
 import { ArticleStatusType } from 'helpers/types';
 
 export const PostWrapper = styled.div`
@@ -43,6 +44,53 @@ export const PostHeader = styled.div`
 
 	@media (max-width: ${STYLING.cutoffs.secondary}) {
 		max-width: 100%;
+	}
+`;
+
+export const PostTitle = styled.div`
+	display: flex;
+	align-items: flex-start;
+	gap: 5px;
+	min-width: 0;
+
+	p {
+		min-width: 0;
+	}
+`;
+
+export const FeaturedTooltip = styled.span`
+	display: none;
+	position: absolute;
+	bottom: calc(100% + 5px);
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 2;
+	font-size: ${(props) => props.theme.typography.size.xxxSmall};
+	line-height: 1.4;
+	white-space: nowrap;
+	pointer-events: none;
+
+	> span {
+		display: block;
+	}
+`;
+
+export const FeaturedStar = styled.span`
+	position: relative;
+	display: inline-flex;
+	flex-shrink: 0;
+	color: ${common.caution1};
+	line-height: 1;
+	margin-top: 2px;
+
+	svg {
+		display: block;
+		width: 14px;
+		height: 14px;
+	}
+
+	&:hover ${FeaturedTooltip}, a:focus-visible & ${FeaturedTooltip} {
+		display: block;
 	}
 `;
 

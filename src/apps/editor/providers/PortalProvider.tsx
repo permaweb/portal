@@ -388,7 +388,10 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		if (cachedPortal && currentRef.current?.id !== currentId) setCurrent(cachedPortal);
 		const permissionAddress = IS_BASE_MODE ? arProvider.walletAddress : permawebProvider.profile.id;
 		const cachedPerms = getCachedPermissions(currentId, permissionAddress);
-		if (cachedPerms) setPermissions(cachedPerms);
+		// Base permissions must come from a complete replay. Persisted permissions
+		// may include a denial produced by an earlier, incomplete content load.
+		if (IS_BASE_MODE) setPermissions(null);
+		else if (cachedPerms) setPermissions(cachedPerms);
 		setLoadError(null);
 
 		const load = async (attempt: number) => {
@@ -662,6 +665,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 		} catch (e: any) {
 			if (!sessionIsCurrent()) return;
 			debugLog('error', 'PortalProvider', 'Failed to fetch portal data:', e.message ?? 'Unknown error');
+			if (Array.isArray(e.pendingTransactionIds)) {
+				debugLog('error', 'PortalProvider', 'Blocking Arweave transactions:', e.pendingTransactionIds);
+			}
 			throw e;
 		} finally {
 			if (sessionIsCurrent()) setUpdating(false);

@@ -135,6 +135,9 @@ export const STYLING = {
 		secondary: '540px',
 	},
 	dimensions: {
+		articleToolbar: {
+			width: '350px',
+		},
 		button: {
 			height: '33.5px',
 			width: 'fit-content',
@@ -394,6 +397,14 @@ export const STRIPE_PUBLISHABLE_KEY =
 export const PAYMENT_URL = 'https://payment.ardrive.io';
 
 export const FALLBACK_GATEWAY = 'arweave.net';
+
+// The current Portal app release is carried by the `portal` Permaweb Name.
+export const APP_DEPLOYMENT = {
+	name: 'portal',
+	process: 'g57GjqisIQd82weoLTJxi26_eD7p1iq8WfNkLmwKhfM',
+	gateway: 'https://arweave.net',
+	readTimeoutMs: 15_000,
+};
 
 export const ARWEAVE_UPLOAD_NODE = 'https://up.arweave.net';
 export const ARWEAVE_FREE_UPLOAD_LIMIT = 100 * 1000;

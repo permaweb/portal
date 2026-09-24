@@ -19,3 +19,15 @@ export const Wrapper = styled.div<{ disabled: boolean }>`
 `;
 
 export const Details = styled.div``;
+
+export const ExplorerLink = styled(Wrapper)`
+	gap: 5px;
+	white-space: nowrap;
+
+	svg {
+		width: 12px;
+		height: 12px;
+		fill: currentColor;
+		color: ${(props) => props.theme.colors.link.color};
+	}
+`;

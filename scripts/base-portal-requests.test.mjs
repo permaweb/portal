@@ -100,6 +100,7 @@ function runtime(transactions = fixture(), fetchOverride, uploadOverride) {
 	const modules = new Map();
 	const localStorage = { getItem: (key) => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) };
 	const context = vm.createContext({
+		atob,
 		TextEncoder,
 		TextDecoder,
 		URL,
@@ -554,6 +555,232 @@ test('lightweight cards cannot bypass full post validation or populate write sta
 	assert.equal(JSON.parse(storage.get(`basePortal:${PORTAL}`)).name, 'Original');
 });
 
+function inviteAfterPost() {
+	const transactions = fixture();
+	transactions[0].body.users = [{ address: OWNER, roles: ['Admin'] }];
+	transactions.push(
+		transaction(
+			id('v'),
+			'portal-release',
+			{
+				...transactions[1].body,
+				previousTxId: RELEASE,
+				changes: { users: [...transactions[0].body.users, { address: MEMBER, roles: ['Admin'] }] },
+			},
+			{ 'Previous-Tx': RELEASE, 'Portal-User': MEMBER },
+			OWNER,
+			5
+		)
+	);
+	return transactions;
+}
+
+test('opening a listed admin portal retries missing historical content instead of returning older permissions', async () => {
+	const transactions = inviteAfterPost();
+	let unavailable = true;
+	const { api, calls } = runtime(transactions, (url, _init, respond) =>
+		unavailable && url.endsWith(POST) ? new Response('', { status: 503 }) : respond()
+	);
+	const adapter = api.createBasePermawebAdapter({}, MEMBER);
+	const home = await adapter.getProfileByWalletAddress(MEMBER);
+	assert.deepEqual(plain(home.portals[0].users.find((user) => user.address === MEMBER).roles), ['Admin']);
+	await assert.rejects(adapter.readState({ processId: PORTAL }), (error) => {
+		assert.match(error.message, /still loading from Arweave/);
+		assert.ok(error.pendingTransactionIds.includes(POST), 'the diagnostic identifies the unavailable post body');
+		return true;
+	});
+	// A permissive background read must not poison the strict reader's memory cache
+	// or replace the up-to-date home card with the older partial state.
+	assert.equal(
+		(await api.fetchBasePortal(PORTAL)).users.some((user) => user.address === MEMBER),
+		false
+	);
+	assert.equal((await api.discoverBasePortals(MEMBER)).portals.length, 1);
+	await assert.rejects(adapter.readState({ processId: PORTAL }), /still loading from Arweave/);
+	unavailable = false;
+	const state = await adapter.readState({ processId: PORTAL });
+	assert.deepEqual(plain(state.users.roles[MEMBER].roles), ['Admin']);
+	assert.equal(state.overview.manifestTxId, id('v'));
+	const requestCount = calls.length;
+	await adapter.readState({ processId: PORTAL });
+	assert.equal(calls.length, requestCount, 'complete portal state still uses the short-lived memory cache');
+});
+
+test('an unavailable invitation body cannot turn an indexed grant into denied permissions', async () => {
+	let unavailable = true;
+	const { api } = runtime(inviteAfterPost(), (url, _init, respond) =>
+		unavailable && url.endsWith(id('v')) ? new Response('', { status: 404 }) : respond()
+	);
+	const adapter = api.createBasePermawebAdapter({}, MEMBER);
+	await assert.rejects(adapter.readState({ processId: PORTAL }), (error) => {
+		assert.match(error.message, /still loading from Arweave/);
+		assert.ok(error.pendingTransactionIds.includes(id('v')), 'the diagnostic identifies the unavailable grant');
+		return true;
+	});
+	unavailable = false;
+	assert.deepEqual(plain((await adapter.readState({ processId: PORTAL })).users.roles[MEMBER].roles), ['Admin']);
+});
+
+test('a saved post remains readable when its release is indexed before the uploaded post body', async () => {
+	const transactions = fixture();
+	const revisionId = id('u');
+	const releaseId = id('v');
+	const { api, advanceClock, calls } = runtime(transactions, undefined, (_wallet, data, tags) => {
+		const payload = JSON.parse(data);
+		if (payload.type === 'portal-post') return revisionId;
+		assert.equal(payload.type, 'portal-release');
+		transactions.push(
+			transaction(
+				releaseId,
+				payload.type,
+				payload,
+				Object.fromEntries(tags.map(({ name, value }) => [name, value])),
+				OWNER,
+				5
+			)
+		);
+		return releaseId;
+	});
+	await api.saveBasePost(PORTAL, POST, { title: 'Saved title', content: [{ content: 'Saved content' }] }, {}, OWNER);
+	advanceClock(11_000);
+	const state = await api.createBasePermawebAdapter({}, OWNER).readState({ processId: PORTAL });
+	assert.equal(state.overview.manifestTxId, releaseId);
+	assert.equal(state.posts.index[0].name, 'Saved title');
+	assert.equal(
+		calls.some(({ url }) => url.endsWith(revisionId)),
+		false,
+		'a successful upload already supplied the post bytes'
+	);
+});
+
+test('local settings releases survive cache expiry and consecutive saves before indexing', async () => {
+	const releaseIds = [id('u'), id('v')];
+	let uploaded = 0;
+	const { api, advanceClock } = runtime(fixture(), undefined, () => releaseIds[uploaded++]);
+	const adapter = api.createBasePermawebAdapter({}, OWNER);
+	await adapter.updateZone({ name: 'Saved name' }, PORTAL);
+	advanceClock(11_000);
+	assert.equal((await adapter.readState({ processId: PORTAL })).overview.name, 'Saved name');
+	await adapter.updateZone({ description: 'Saved description' }, PORTAL);
+	advanceClock(11_000);
+	const state = await adapter.readState({ processId: PORTAL });
+	assert.equal(state.overview.name, 'Saved name');
+	assert.equal(state.overview.description, 'Saved description');
+	assert.equal(state.overview.manifestTxId, releaseIds[1]);
+});
+
+test('a newly created post remains readable before its body and release are indexed', async () => {
+	const postId = id('u');
+	const releaseId = id('v');
+	const ids = [postId, releaseId];
+	const { api, advanceClock } = runtime(fixture(), undefined, () => ids.shift());
+	const adapter = api.createBasePermawebAdapter({}, OWNER);
+	await adapter.readState({ processId: PORTAL });
+	assert.equal(
+		await adapter.createAtomicAsset({
+			name: 'New post',
+			initialPostData: { originPortal: PORTAL, name: 'New post', content: [] },
+		}),
+		postId
+	);
+	await adapter.sendMessage({ action: 'Update-Asset', processId: postId, data: { originPortal: PORTAL } });
+	advanceClock(11_000);
+	const state = await adapter.readState({ processId: PORTAL });
+	assert.equal(state.posts.index.find((post) => post.id === postId).name, 'New post');
+	assert.equal(state.overview.manifestTxId, releaseId);
+});
+
+test('indexed updates and role removals take precedence after a local save', async () => {
+	const transactions = fixture();
+	const localId = id('u');
+	const remoteId = id('v');
+	const { api, uploads, advanceClock } = runtime(transactions, undefined, () => localId);
+	const adapter = api.createBasePermawebAdapter({}, OWNER);
+	await adapter.updateZone({ name: 'Local name' }, PORTAL);
+	const localRelease = JSON.parse(uploads[0][1]);
+	transactions.push(
+		transaction(localId, 'portal-release', localRelease, { 'Previous-Tx': RELEASE }, OWNER, 5),
+		transaction(
+			remoteId,
+			'portal-release',
+			{
+				...localRelease,
+				previousTxId: RELEASE,
+				changes: { name: 'Remote name', users: [] },
+			},
+			{ 'Previous-Tx': RELEASE },
+			OWNER,
+			6
+		)
+	);
+	advanceClock(11_000);
+	const state = await adapter.readState({ processId: PORTAL });
+	assert.equal(state.overview.name, 'Remote name');
+	assert.equal(state.overview.manifestTxId, remoteId);
+	assert.equal(state.users.roles[MEMBER], undefined);
+	transactions.splice(
+		transactions.findIndex(({ node }) => node.id === localId),
+		1
+	);
+	advanceClock(11_000);
+	assert.equal(
+		(await adapter.readState({ processId: PORTAL })).overview.name,
+		'Remote name',
+		'an omitted indexed upload must not be replayed after newer independent changes'
+	);
+});
+
+test('persisted local state cannot substitute for unindexed transaction metadata in a new session', async () => {
+	const transactions = fixture();
+	const releaseId = id('u');
+	const writer = runtime(transactions, undefined, () => releaseId);
+	await writer.api.createBasePermawebAdapter({}, OWNER).updateZone({ name: 'Saved name' }, PORTAL);
+	const reader = runtime(transactions);
+	for (const [key, value] of writer.storage) reader.storage.set(key, value);
+	const adapter = reader.api.createBasePermawebAdapter({}, OWNER);
+	await assert.rejects(adapter.readState({ processId: PORTAL }), /still loading from Arweave/);
+	transactions.push(
+		transaction(releaseId, 'portal-release', JSON.parse(writer.uploads[0][1]), { 'Previous-Tx': RELEASE }, OWNER, 5)
+	);
+	reader.advanceClock(11_000);
+	assert.equal((await adapter.readState({ processId: PORTAL })).overview.name, 'Saved name');
+});
+
+test('a locally published checkpoint survives cache expiry before indexing', async () => {
+	const releaseId = id('u');
+	const checkpointId = id('v');
+	const ids = [releaseId, checkpointId];
+	const { api, uploads, advanceClock } = runtime(fixture(), undefined, () => ids.shift());
+	const adapter = api.createBasePermawebAdapter({}, OWNER);
+	const description = 'x'.repeat(250_000);
+	await adapter.updateZone({ description }, PORTAL);
+	assert.deepEqual(
+		uploads.map(([, data]) => JSON.parse(data).type),
+		['portal-release', 'portal-checkpoint']
+	);
+	advanceClock(11_000);
+	const state = await adapter.readState({ processId: PORTAL });
+	assert.equal(state.overview.description, description);
+	assert.equal(state.overview.manifestTxId, checkpointId);
+});
+
+test('a failed strict portal read cannot authorize using a persisted or expired fallback', async () => {
+	const { api, advanceClock, setOffline } = runtime();
+	const adapter = api.createBasePermawebAdapter({}, MEMBER);
+	await adapter.readState({ processId: PORTAL });
+	advanceClock(60_000);
+	setOffline();
+	await assert.rejects(adapter.readState({ processId: PORTAL }), /discovery failed/);
+	assert.equal((await api.fetchBasePortal(PORTAL)).name, 'Updated', 'permissive readers retain offline fallback');
+	await assert.rejects(adapter.readState({ processId: PORTAL }), /discovery failed/);
+});
+
+test('complete portal state still excludes a member whose role was removed', async () => {
+	const { api } = runtime(fixture({ revoked: true }));
+	const adapter = api.createBasePermawebAdapter({}, MEMBER);
+	assert.equal((await adapter.readState({ processId: PORTAL })).users.roles[MEMBER], undefined);
+});
+
 test('current role removals win over historical discovery tags', async () => {
 	const { api, calls } = runtime(fixture({ revoked: true }));
 	assert.deepEqual(plain(await api.discoverBasePortals(MEMBER)), { portals: [], invites: [] });
@@ -766,6 +993,95 @@ for (const loader of ['editor', 'viewer']) {
 			? rt.api.fetchBasePortal(identifier)
 			: resolvePortalState(identifier, { fetch: rt.fetch, transactionCache: new Map() });
 	};
+	for (const failure of ['empty response', 'HTML response', 'HTTP 404']) {
+		test(`${loader}: an indexed post with ${failure} loads through the transaction data endpoint`, async () => {
+			const transactions = fixture();
+			const post = transactions.find(({ node }) => node.id === POST).body;
+			post.post.title = 'Recovered café 🚀';
+			const rt = runtime(transactions, (url, _init, respond) => {
+				if (url.endsWith(`/tx/${POST}/data`))
+					return new Response(Buffer.from(JSON.stringify(post)).toString('base64url'));
+				if (url.endsWith(`/${POST}`))
+					return new Response(failure === 'HTML response' ? '<html>Not ready</html>' : '', {
+						status: failure === 'HTTP 404' ? 404 : 200,
+					});
+				return respond();
+			});
+			const cache = new Map();
+			const read = () =>
+				loader === 'editor'
+					? rt.api.fetchBasePortal(PORTAL, { fresh: true, requireComplete: true })
+					: resolvePortalState(PORTAL, { fetch: rt.fetch, transactionCache: cache });
+			const state = await read();
+			assert.equal(state.manifestTxId, RELEASE);
+			assert.equal(state.posts[0].title, post.post.title);
+			const requests = rt.calls.filter(({ url }) => url.includes(POST)).length;
+			assert.equal(requests, 2);
+			await read();
+			assert.equal(
+				rt.calls.filter(({ url }) => url.includes(POST)).length,
+				requests,
+				'cache the decoded JSON, not the empty response'
+			);
+		});
+	}
+	test(`${loader}: transaction-data fallback still rejects content belonging to another portal`, async () => {
+		const transactions = fixture();
+		const post = { ...transactions.find(({ node }) => node.id === POST).body, portalId: id('x') };
+		let fallbackRequested = false;
+		const state = await resolve(transactions, (url, _init, respond) => {
+			if (url.endsWith(`/tx/${POST}/data`)) {
+				fallbackRequested = true;
+				return new Response(Buffer.from(JSON.stringify(post)).toString('base64url'));
+			}
+			if (url.endsWith(`/${POST}`)) return new Response('');
+			return respond();
+		});
+		assert.equal(state.manifestTxId, ROOT);
+		assert.equal(state.posts.length, 0);
+		assert.equal(fallbackRequested, true);
+	});
+	test(`${loader}: malformed transaction data is not cached and a later retry can recover`, async () => {
+		const transactions = fixture();
+		const post = transactions.find(({ node }) => node.id === POST).body;
+		let recovered = false;
+		const rt = runtime(transactions, (url, _init, respond) => {
+			if (url.endsWith(`/tx/${POST}/data`))
+				return new Response(recovered ? Buffer.from(JSON.stringify(post)).toString('base64url') : 'invalid data!');
+			if (url.endsWith(`/${POST}`)) return new Response('');
+			return respond();
+		});
+		const cache = new Map();
+		const read = () =>
+			loader === 'editor'
+				? rt.api.fetchBasePortal(PORTAL, { fresh: true, requireComplete: true })
+				: resolvePortalState(PORTAL, { fetch: rt.fetch, transactionCache: cache });
+		if (loader === 'editor') await assert.rejects(read(), /still loading from Arweave/);
+		else assert.equal((await read()).manifestTxId, ROOT);
+		recovered = true;
+		assert.equal((await read()).manifestTxId, RELEASE);
+	});
+	for (const failedId of [RELEASE, POST]) {
+		test(`${loader}: reopening a portal bypasses a cached early 404 for ${
+			failedId === POST ? 'post content' : 'a release'
+		}`, async () => {
+			let staleHttpCache = true;
+			const rt = runtime(fixture(), (url, init, respond) => {
+				if (url.endsWith(failedId)) {
+					if (['reload', 'no-cache', 'no-store'].includes(init?.cache)) staleHttpCache = false;
+					if (staleHttpCache) return new Response('', { status: 404 });
+				}
+				return respond();
+			});
+			const state =
+				loader === 'editor'
+					? await rt.api.fetchBasePortal(PORTAL, { requireComplete: true })
+					: await resolvePortalState(PORTAL, { fetch: rt.fetch, transactionCache: new Map() });
+			assert.equal(state.manifestTxId, RELEASE);
+			assert.equal(state.posts[0].title, 'Full post');
+			assert.equal(staleHttpCache, false);
+		});
+	}
 	test(`${loader}: reversed same-block checkpoints still reach the latest update`, async () => {
 		const state = await resolve(checkpointHistory());
 		assert.equal(state.name, 'After latest checkpoint');

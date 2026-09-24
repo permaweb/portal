@@ -1,5 +1,8 @@
 import React from 'react';
 
+import { ReactSVG } from 'components/atoms/GatewaySVG';
+import { ICONS } from 'helpers/config';
+import { getExplorerEndpoint } from 'helpers/endpoints';
 import { formatAddress } from 'helpers/utils';
 import { useLanguageProvider } from 'providers/LanguageProvider';
 
@@ -20,6 +23,22 @@ export default function TxAddress(props: { address: string; wrap: boolean; view?
 			}
 		}
 	}, [props.address]);
+
+	if (props.view) {
+		return (
+			<S.ExplorerLink
+				as={'a'}
+				disabled={false}
+				href={getExplorerEndpoint(props.address)}
+				title={props.address}
+				target={'_blank'}
+				rel={'noopener noreferrer'}
+			>
+				<p>{formatAddress(props.address, props.wrap)}</p>
+				<ReactSVG src={props.viewIcon ?? ICONS.newTab} aria-hidden={'true'} />
+			</S.ExplorerLink>
+		);
+	}
 
 	return (
 		<>

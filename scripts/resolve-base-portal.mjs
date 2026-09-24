@@ -83,6 +83,28 @@ async function json(response, label) {
 	return response.json();
 }
 
+async function fetchTransactionJson(id, options) {
+	try {
+		return await json(
+			await options.fetch(`${options.gateway}/${id}`, { cache: 'reload', signal: options.signal }),
+			`Transaction ${id}`
+		);
+	} catch (error) {
+		if (options.signal?.aborted) throw error;
+		// The content route may return an empty 200 while L1 transaction bytes
+		// remain available through the base64url transaction-data endpoint.
+		const response = await options.fetch(`${options.gateway}/tx/${id}/data`, {
+			cache: 'reload',
+			signal: options.signal,
+		});
+		if (!response.ok) throw new Error(`Transaction data ${id}: ${response.status}`);
+		const encoded = (await response.text()).trim();
+		if (!/^[A-Za-z0-9_-]+={0,2}$/.test(encoded)) throw new Error(`Invalid transaction data: ${id}`);
+		const bytes = Uint8Array.from(atob(encoded.replace(/-/g, '+').replace(/_/g, '/')), (char) => char.charCodeAt(0));
+		return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+	}
+}
+
 async function fetchTransaction(id, options) {
 	if (!ADDRESS.test(id)) return undefined;
 	const key = `${options.gateway}/${id}`;
@@ -96,10 +118,7 @@ async function fetchTransaction(id, options) {
 					options.transactionCache.set(key, browserCached);
 					return browserCached;
 				}
-				const value = await json(
-					await options.fetch(key, { cache: 'force-cache', signal: options.signal }),
-					`Transaction ${id}`
-				);
+				const value = await fetchTransactionJson(id, options);
 				options.transactionCache.set(key, value);
 				await writeBrowserTransactionCache(key, value);
 				return value;

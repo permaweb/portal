@@ -220,6 +220,61 @@ test('default 429 fallback starts at two seconds and backs off to thirty seconds
 	assert.equal(api.getGatewayRequestSnapshot().rateLimitResponses, 7);
 });
 
+for (const method of ['GET', 'HEAD']) {
+	test(`${method} retries escape a cached 429 without disabling caching for successful reads`, async (t) => {
+		let cachedStatus = 429;
+		let networkReads = 0;
+		const { api, calls, advance } = retryOnly((input) => {
+			if (input.cache === 'reload') {
+				networkReads++;
+				cachedStatus = 200;
+			}
+			return new Response(null, { status: cachedStatus });
+		});
+		const controller = new AbortController();
+		const original = new Request('https://example.arweave.net/transaction', {
+			method,
+			cache: 'force-cache',
+			credentials: 'omit',
+			headers: { Accept: 'application/json' },
+			signal: controller.signal,
+		});
+		const request = api.gatewayFetch(original);
+		t.after(async () => {
+			controller.abort();
+			await request.catch(() => undefined);
+		});
+		await advance(1999);
+		assert.equal(networkReads, 0, 'cache recovery must respect the gateway cooldown');
+		await advance(1);
+		assert.equal(networkReads, 1, 'the retry must fetch fresh bytes instead of reusing the cached error');
+		assert.equal((await request).status, 200);
+		assert.equal(original.cache, 'force-cache', 'retry policy must not mutate the caller request');
+		assert.equal(calls[1].input.url, original.url);
+		assert.equal(calls[1].input.method, method);
+		assert.equal(calls[1].input.credentials, 'omit');
+		assert.equal(calls[1].input.headers.get('Accept'), 'application/json');
+		assert.equal((await api.gatewayFetch(original)).status, 200);
+		assert.equal(calls[2].input.cache, 'force-cache');
+		assert.equal(networkReads, 1, 'the recovered response remains reusable on later reads');
+	});
+}
+
+test('429 retries preserve an explicit no-store request and continue bypassing cache on repeated errors', async () => {
+	for (const cache of ['no-store', 'default']) {
+		const { api, calls, advance } = retryOnly(
+			(_, __, attempt) => new Response(null, { status: attempt < 3 ? 429 : 200 })
+		);
+		const request = api.gatewayFetch('https://arweave.net/transaction', { cache });
+		await advance(6000);
+		assert.equal((await request).status, 200);
+		assert.deepEqual(
+			calls.map(({ input }) => input.cache),
+			[cache, cache === 'no-store' ? 'no-store' : 'reload', cache === 'no-store' ? 'no-store' : 'reload']
+		);
+	}
+});
+
 test('default retries honor long Retry-After seconds and dates, then release ordinary traffic without spacing', async () => {
 	for (const retryAfter of ['600', new Date(START + 600000).toUTCString()]) {
 		const { api, calls, advance } = retryOnly(
