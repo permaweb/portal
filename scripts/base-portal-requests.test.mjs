@@ -101,6 +101,7 @@ function runtime(transactions = fixture(), fetchOverride, uploadOverride) {
 	const localStorage = { getItem: (key) => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) };
 	const context = vm.createContext({
 		atob,
+		AbortController,
 		TextEncoder,
 		TextDecoder,
 		URL,
@@ -993,6 +994,71 @@ for (const loader of ['editor', 'viewer']) {
 			? rt.api.fetchBasePortal(identifier)
 			: resolvePortalState(identifier, { fetch: rt.fetch, transactionCache: new Map() });
 	};
+	for (const failure of ['HTTP 404', 'HTTP 429', 'empty response', 'JSON error']) {
+		test(`${loader}: a bundled membership release survives primary gateway ${failure}`, async () => {
+			const transactions = inviteAfterPost();
+			const grant = id('v');
+			const rt = runtime(transactions, (url, _init, respond) => {
+				if (url === `https://arweave.net/tx/${grant}/data`) return new Response('', { status: 404 });
+				if (url === `https://arweave.net/${grant}`) {
+					if (failure === 'JSON error') return Response.json({ error: 'Temporarily unavailable' });
+					return new Response('', { status: failure === 'HTTP 404' ? 404 : failure === 'HTTP 429' ? 429 : 200 });
+				}
+				return respond();
+			});
+			const cache = new Map();
+			const read = () =>
+				loader === 'editor'
+					? rt.api.fetchBasePortal(PORTAL, { fresh: true, requireComplete: true })
+					: resolvePortalState(PORTAL, { fetch: rt.fetch, transactionCache: cache });
+			const state = await read();
+			assert.equal(state.manifestTxId, grant);
+			assert.deepEqual(plain(state.users.find((user) => user.address === MEMBER).roles), ['Admin']);
+			assert.equal(state.posts[0].title, 'Full post');
+			assert.deepEqual(
+				rt.calls.filter(({ url }) => url.includes(grant)).map(({ url }) => url),
+				[`https://arweave.net/${grant}`, `https://arweave.net/tx/${grant}/data`, `https://turbo-gateway.com/${grant}`]
+			);
+			await read();
+			assert.equal(rt.calls.filter(({ url }) => url.includes(grant)).length, 3, 'cache the recovered release');
+		});
+	}
+	test(`${loader}: independent fallback cannot authorize a forged membership release`, async () => {
+		const transactions = inviteAfterPost();
+		const grant = id('v');
+		transactions.find(({ node }) => node.id === grant).node.owner.address = id('x');
+		const state = await resolve(transactions, (url, _init, respond) => {
+			if (url.startsWith('https://arweave.net/') && url.includes(grant)) return new Response('', { status: 404 });
+			return respond();
+		});
+		assert.equal(
+			state.users.some((user) => user.address === MEMBER),
+			false
+		);
+		assert.notEqual(state.manifestTxId, grant);
+	});
+	test(`${loader}: a membership release unavailable on every gateway stays unresolved`, async () => {
+		const transactions = inviteAfterPost();
+		const grant = id('v');
+		const rt = runtime(transactions, (url, _init, respond) =>
+			url.includes(grant) ? new Response('', { status: 404 }) : respond()
+		);
+		if (loader === 'editor') {
+			await assert.rejects(rt.api.fetchBasePortal(PORTAL, { requireComplete: true }), (error) => {
+				assert.ok(error.pendingTransactionIds.includes(grant));
+				assert.match(error.transactionReadErrors[grant], /arweave\.net.*HTTP 404/);
+				assert.match(error.transactionReadErrors[grant], /turbo-gateway\.com.*HTTP 404/);
+				return true;
+			});
+		} else {
+			const state = await resolvePortalState(PORTAL, { fetch: rt.fetch, transactionCache: new Map() });
+			assert.equal(
+				state.users.some((user) => user.address === MEMBER),
+				false
+			);
+			assert.ok(state.unresolvedTransactions.some((entry) => entry.id === grant));
+		}
+	});
 	for (const disposition of ['replaced', 'removed']) {
 		test(`${loader}: unavailable historical post bodies do not block ${disposition} content or later grants`, async () => {
 			const transactions = inviteAfterPost();
@@ -1301,7 +1367,7 @@ test('incomplete wallet search retains known portals but does not preserve revok
 	assert.deepEqual(plain(await api.discoverBasePortals(MEMBER)), { portals: [], invites: [] });
 });
 
-for (const failure of ['open', 'json']) {
+for (const failure of ['open', 'json', 'JSON error', 'null']) {
 	test(`Cache Storage ${failure} failure falls back to network loading`, async () => {
 		const { api, context, calls } = runtime();
 		context.caches = {
@@ -1311,6 +1377,8 @@ for (const failure of ['open', 'json']) {
 					match: async () => ({
 						ok: true,
 						json: async () => {
+							if (failure === 'JSON error') return { error: 'Gateway unavailable' };
+							if (failure === 'null') return null;
 							throw new Error('Invalid JSON');
 						},
 					}),
@@ -1328,7 +1396,7 @@ for (const failure of ['open', 'json']) {
 	});
 }
 
-for (const failure of ['open', 'json']) {
+for (const failure of ['open', 'json', 'JSON error', 'null']) {
 	test(`viewer: Cache Storage ${failure} failure falls back to network loading`, async (t) => {
 		const originalCaches = globalThis.caches;
 		t.after(() => {
@@ -1342,6 +1410,8 @@ for (const failure of ['open', 'json']) {
 					match: async () => ({
 						ok: true,
 						json: async () => {
+							if (failure === 'JSON error') return { error: 'Gateway unavailable' };
+							if (failure === 'null') return null;
 							throw new Error('Invalid JSON');
 						},
 					}),
@@ -1355,6 +1425,74 @@ for (const failure of ['open', 'json']) {
 		assert.equal(state.posts.length, 1);
 	});
 }
+
+test('viewer: stalled primary response bodies time out and recover on the independent gateway', async () => {
+	const aborted = [];
+	const rt = runtime(fixture(), async (url, init, respond) => {
+		if (url.startsWith('https://arweave.net/') && url.includes(RELEASE)) {
+			return {
+				ok: true,
+				json: () =>
+					new Promise((_resolve, reject) => {
+						init.signal.addEventListener('abort', () => {
+							aborted.push(url);
+							reject(init.signal.reason);
+						});
+					}),
+				text: () =>
+					new Promise((_resolve, reject) => init.signal.addEventListener('abort', () => reject(init.signal.reason))),
+			};
+		}
+		return respond();
+	});
+	const state = await resolvePortalState(PORTAL, {
+		fetch: rt.fetch,
+		transactionCache: new Map(),
+		transactionTimeoutMs: 20,
+	});
+	assert.equal(state.manifestTxId, RELEASE);
+	assert.deepEqual(aborted, [`https://arweave.net/${RELEASE}`]);
+	assert.ok(rt.calls.some(({ url }) => url === `https://turbo-gateway.com/${RELEASE}`));
+});
+
+test('viewer: caller cancellation stops a transaction read without starting fallback', async () => {
+	const controller = new AbortController();
+	const rt = runtime(fixture(), (url, init, respond) => {
+		if (url === `https://arweave.net/${RELEASE}`) {
+			controller.abort(new Error('Cancelled by caller'));
+			throw init.signal.reason;
+		}
+		return respond();
+	});
+	await assert.rejects(
+		resolvePortalState(PORTAL, { fetch: rt.fetch, signal: controller.signal, transactionCache: new Map() }),
+		/Cancelled by caller/
+	);
+	assert.deepEqual(
+		rt.calls.filter(({ url }) => url.includes(RELEASE)).map(({ url }) => url),
+		[`https://arweave.net/${RELEASE}`]
+	);
+});
+
+test('viewer: custom gateways use only caller-configured fallbacks', async () => {
+	for (const fallbackGateways of [undefined, ['https://backup.example/']]) {
+		const rt = runtime(fixture(), (url, _init, respond) => {
+			if (url.startsWith('https://primary.example/') && url.includes(RELEASE)) return new Response('', { status: 404 });
+			return respond();
+		});
+		const state = await resolvePortalState(PORTAL, {
+			gateway: 'https://primary.example/',
+			fallbackGateways,
+			fetch: rt.fetch,
+			transactionCache: new Map(),
+		});
+		assert.equal(state.manifestTxId, fallbackGateways ? RELEASE : ROOT);
+		assert.equal(
+			rt.calls.some(({ url }) => url.startsWith('https://turbo-gateway.com/')),
+			false
+		);
+	}
+});
 
 test('full localStorage cannot fail a successful network load or its memory cache', async () => {
 	const { api, context, calls } = runtime();

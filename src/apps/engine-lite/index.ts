@@ -12,6 +12,7 @@ import {
 } from './constants';
 import { fetchPortal, findPost, hydratePost, isArweaveId, type LitePortal, type LitePost } from './data';
 import { attachDocsSidebar, attachDocsTableOfContents, type DocsSidebarState } from './docs';
+import { createSiteLoader } from './loading';
 import { inlineSvgLogo } from './logo';
 import { escapeHTML, type LiteThemeMode, renderDocs, renderFeed, renderPost, renderShell } from './render';
 import styles from './styles.css?inline';
@@ -53,6 +54,7 @@ const docsSidebarState: DocsSidebarState = {
 };
 let cleanupDocsSidebar = () => {};
 let cleanupDocsToc = () => {};
+let routeVersion = 0;
 
 const IMAGE_LIGHTBOX_CLOSE_MS = 180;
 const CODE_COPY_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>`;
@@ -88,6 +90,7 @@ const style = document.createElement('style');
 style.dataset.engineLite = 'true';
 style.textContent = styles;
 document.head.appendChild(style);
+const siteLoader = createSiteLoader(root);
 
 function readThemeMode(): LiteThemeMode {
 	try {
@@ -474,16 +477,14 @@ function scrollToDocsAnchor(rawTargetId: string) {
 	}
 	const target = targetId ? document.getElementById(targetId) : null;
 	if (!target) return false;
-	const top = target.getBoundingClientRect().top + window.scrollY - 95;
-	window.scrollTo({ top, behavior: 'smooth' });
+	const top = target.getBoundingClientRect().top + window.scrollY - 96;
+	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	window.scrollTo({ top, behavior: reducedMotion ? 'auto' : 'smooth' });
 	return true;
 }
 
 function attachDocsEvents() {
 	cleanupDocsToc = attachDocsTableOfContents(root);
-	root?.querySelectorAll<HTMLElement>('[data-docs-link]').forEach((link) => {
-		link.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-	});
 	root?.querySelectorAll<HTMLAnchorElement>('.lite-docs-copy a[href^="#"]').forEach((link) => {
 		link.addEventListener('click', (event) => {
 			const rawTargetId = link.getAttribute('href')?.slice(1) || '';
@@ -623,84 +624,98 @@ function attachFeedEvents() {
 
 async function renderRoute() {
 	if (!portal) return;
+	const version = ++routeVersion;
 	cleanupDocsToc();
+	cleanupDocsSidebar();
+	cleanupDocsSidebar = () => {};
 	closeExpandedImage(true);
-	window.scrollTo({ top: 0, behavior: 'auto' });
-	const parts = routeParts();
-	const isPost = parts[0] === 'post' || parts[0] === 'read';
-	if (portal.layout === 'docs') {
-		if (!portal.posts.length) {
-			root.innerHTML = renderPage('<div class="lite-empty">No documentation has been published yet.</div>');
-			setPageMeta(portal.name, portal.description || `${portal.name} documentation`);
+	siteLoader.show('Loading page…');
+	try {
+		window.scrollTo({ top: 0, behavior: 'auto' });
+		const parts = routeParts();
+		const isPost = parts[0] === 'post' || parts[0] === 'read';
+		if (portal.layout === 'docs') {
+			if (!portal.posts.length) {
+				root.innerHTML = renderPage('<div class="lite-empty">No documentation has been published yet.</div>');
+				setPageMeta(portal.name, portal.description || `${portal.name} documentation`);
+				attachShellEvents();
+				return;
+			}
+
+			const match = isPost && parts[1] ? findPost(portal.posts, parts.slice(1).join('/')) : portal.posts[0];
+			if (!match) {
+				root.innerHTML = renderPage(
+					`<div class="lite-error">Page not found. <a href="${escapeHTML(homeHref())}">View documentation</a></div>`
+				);
+				attachShellEvents();
+				return;
+			}
+
+			const post = await hydratePost(match);
+			if (version !== routeVersion) return;
+			root.innerHTML = renderPage(renderDocs(portal, post, postHref), post);
+			setPageMeta(`${post.title} | ${portal.name}`, post.excerpt || portal.description, post.image);
 			attachShellEvents();
+			attachContentEvents(true);
 			return;
 		}
 
-		const match = isPost && parts[1] ? findPost(portal.posts, parts.slice(1).join('/')) : portal.posts[0];
-		if (!match) {
-			root.innerHTML = renderPage(
-				`<div class="lite-error">Page not found. <a href="${escapeHTML(homeHref())}">View documentation</a></div>`
-			);
+		if (isPost && parts[1]) {
+			const match = findPost(portal.posts, parts.slice(1).join('/'));
+			if (!match) {
+				root.innerHTML = renderPage(
+					`<div class="lite-error">Post not found. <a href="${escapeHTML(homeHref())}">View all posts</a></div>`
+				);
+				attachShellEvents();
+				return;
+			}
+			const post = await hydratePost(match);
+			if (version !== routeVersion) return;
+			root.innerHTML = renderPage(renderPost(post, homeHref()));
+			setPageMeta(`${post.title} | ${portal.name}`, post.excerpt || portal.description, post.image);
 			attachShellEvents();
+			attachContentEvents();
 			return;
 		}
 
-		root.innerHTML = renderPage('<div class="lite-loading">Loading documentation</div>');
+		root.innerHTML = renderPage(renderFeed(portal, { category: selectedCategory, search: searchQuery }, postHref));
+		setPageMeta(portal.name, portal.description || `${portal.name} posts`);
+		attachFeedEvents();
 		attachShellEvents();
-		const post = await hydratePost(match);
-		root.innerHTML = renderPage(renderDocs(portal, post, postHref), post);
-		setPageMeta(`${post.title} | ${portal.name}`, post.excerpt || portal.description, post.image);
+		activateImages();
+	} catch (error) {
+		if (version !== routeVersion) return;
+		console.error('[Engine Lite] Page loading failed', error);
+		root.innerHTML = renderPage('<div class="lite-error">The page could not be loaded. Please try again.</div>');
 		attachShellEvents();
-		attachContentEvents(true);
-		return;
+	} finally {
+		if (version === routeVersion) siteLoader.hide();
 	}
-
-	if (isPost && parts[1]) {
-		const match = findPost(portal.posts, parts.slice(1).join('/'));
-		if (!match) {
-			root.innerHTML = renderPage(
-				`<div class="lite-error">Post not found. <a href="${escapeHTML(homeHref())}">View all posts</a></div>`
-			);
-			attachShellEvents();
-			return;
-		}
-		root.innerHTML = renderPage('<div class="lite-loading">Loading post</div>');
-		attachShellEvents();
-		const post = await hydratePost(match);
-		root.innerHTML = renderPage(renderPost(post, homeHref()));
-		setPageMeta(`${post.title} | ${portal.name}`, post.excerpt || portal.description, post.image);
-		attachShellEvents();
-		attachContentEvents();
-		return;
-	}
-
-	root.innerHTML = renderPage(renderFeed(portal, { category: selectedCategory, search: searchQuery }, postHref));
-	setPageMeta(portal.name, portal.description || `${portal.name} posts`);
-	attachFeedEvents();
-	attachShellEvents();
-	activateImages();
 }
 
 async function start() {
-	portalId = portalIdFromLocation();
-	if (!applyCachedTheme(portalId)) {
-		document.documentElement.style.colorScheme = systemTheme.matches ? 'dark' : 'light';
-	}
-	root.innerHTML = '<div class="lite-loading">Loading posts</div>';
-	if (!portalId || !isArweaveId(portalId)) {
-		root.innerHTML =
-			'<div class="lite-error">No portal was found. Open a portal transaction or pass <code>?portal=&lt;portal-id&gt;</code>.</div>';
-		return;
-	}
-
+	siteLoader.show();
 	try {
+		portalId = portalIdFromLocation();
+		if (!applyCachedTheme(portalId)) {
+			document.documentElement.style.colorScheme = systemTheme.matches ? 'dark' : 'light';
+		}
+		if (!portalId || !isArweaveId(portalId)) {
+			root.innerHTML =
+				'<div class="lite-error">No portal was found. Open a portal transaction or pass <code>?portal=&lt;portal-id&gt;</code>.</div>';
+			siteLoader.hide();
+			return;
+		}
+
 		[portal, walletAddress] = await Promise.all([fetchPortal(portalId), readWalletAddress()]);
 		applyTheme(portal);
-		await renderRoute();
 	} catch (error) {
 		console.error('[Engine Lite]', error);
 		root.innerHTML = '<div class="lite-error">The portal could not be loaded.</div>';
+		siteLoader.hide();
+		return;
 	}
+	await renderRoute();
 }
 
 window.addEventListener('hashchange', () => void renderRoute());
@@ -731,13 +746,4 @@ systemTheme.addEventListener('change', () => {
 document.addEventListener('keydown', (event) => {
 	if (event.key === 'Escape' && imageLightbox) closeExpandedImage();
 });
-void start().finally(() => {
-	const loader = document.getElementById('portal-site-loader');
-	if (!loader) return;
-	window.requestAnimationFrame(() => {
-		window.requestAnimationFrame(() => {
-			loader.classList.add('is-hidden');
-			window.setTimeout(() => loader.remove(), 180);
-		});
-	});
-});
+void start();

@@ -143,6 +143,32 @@ test('code can update the current configuration without persisting browser prefe
 	}
 });
 
+test('base transaction reads reach an independent gateway during a persistent primary 429 cooldown', async () => {
+	const id = 'r'.repeat(43);
+	const release = { mode: 'base', type: 'portal-release', portalId: 'p'.repeat(43) };
+	const rt = retryOnly((input) =>
+		new URL(input.url || input).hostname === 'arweave.net'
+			? new Response('', { status: 429, headers: { 'Retry-After': '120' } })
+			: Response.json(release)
+	);
+	rt.api.installGatewayFetch();
+	const exports = {};
+	const requestsSource = ts.transpileModule(
+		readFileSync(new URL('../src/helpers/basePortalRequests.ts', import.meta.url), 'utf8'),
+		{ compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }
+	).outputText;
+	vm.runInContext(`(function(exports) { ${requestsSource}\n})`, rt.context)(exports);
+	const result = exports.fetchBaseTransactionJson(id);
+	await rt.advance(30_000);
+	assert.deepEqual(plain(await result), release);
+	assert.ok(rt.calls.some(({ input }) => String(input.url || input) === `https://turbo-gateway.com/${id}`));
+	const snapshot = rt.api.getGatewayRequestSnapshot();
+	assert.equal(snapshot.activeRequests, 0);
+	assert.equal(snapshot.queuedRequests, 0);
+	assert.equal(snapshot.retryingRequests, 0);
+	assert.ok(snapshot.cooldownUntil > rt.now(), 'the primary gateway cooldown is still respected');
+});
+
 test('default traffic starts concurrently without pacing, a four-request cap, budget writes, or Web Locks', async () => {
 	const releases = [];
 	const { api, calls, context, storage } = retryOnly(

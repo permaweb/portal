@@ -654,6 +654,10 @@ Consumers should render only after resolution completes and should surface `unre
 
 The resolver accepts a logical portal ID or any base state transaction whose body names the logical portal ID. It is intentionally read-only: consumers do not need Portal UI code, wallet APIs, AO libraries, or local storage to reconstruct state.
 
+Immutable JSON reads try the primary content route, the base64url L1 transaction-data endpoint, and then `https://turbo-gateway.com`. Bundled data items may be unavailable through the L1 endpoint even when an independent gateway serves them. Each attempt has a 15-second deadline covering both the response body and any gateway retry cooldown. JSON error envelopes are ignored in memory and browser caches. Recovered transactions still pass the normal schema and signer authorization checks.
+
+The portable resolver accepts `fallbackGateways` and `transactionTimeoutMs` options. A custom `gateway` has no default fallback; supply `fallbackGateways` explicitly to use additional gateways, or `[]` to disable fallback. Discovery and signer metadata continue to use the configured GraphQL index. If editor entry remains incomplete, `PortalProvider` logs endpoint failure details for the unreadable transactions alongside the list of blocked dependents.
+
 ## Implementation
 
 - Portal write path and in-app resolver: [`src/helpers/basePortal.ts`](../src/helpers/basePortal.ts)

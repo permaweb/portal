@@ -2,6 +2,7 @@ import {
 	BASE_READ_LIMITS,
 	fetchBaseTransactionJson,
 	invalidateBaseQueries,
+	isBaseTransactionJson,
 	queryBaseGateway,
 } from './basePortalRequests';
 import { DEFAULT_FONTS, ENGINE_LITE_REFERENCE_ID, PAGES, PORTAL_DATA, STORAGE, THEME } from './config';
@@ -248,6 +249,7 @@ const writeQueues = new Map<string, Promise<any>>();
 const membershipWriteQueues = new Map<string, Promise<string>>();
 const transactionBodyCache = new Map<string, any>();
 const transactionBodyRequests = new Map<string, Promise<any | null>>();
+const transactionReadErrors = new Map<string, string>();
 // Keep this session's successful submissions available while GraphQL indexes
 // them. Persisted snapshots are not a source of transaction owner metadata.
 const locallyPublishedNodes = new Map<string, GraphQLNode>();
@@ -261,9 +263,15 @@ const portalHeaderRequests = new Map<string, Promise<BasePortalCard>>();
 const discoveryNodesCache = new Map<string, GraphQLNode[]>();
 
 class IncompleteBasePortalError extends Error {
+	readonly transactionReadErrors: Record<string, string>;
 	constructor(readonly manifest: BasePortalManifest, readonly pendingTransactionIds: string[]) {
 		super('Some portal data is still loading from Arweave. Please try again.');
 		this.name = 'IncompleteBasePortalError';
+		this.transactionReadErrors = Object.fromEntries(
+			pendingTransactionIds
+				.filter((id) => transactionReadErrors.has(id))
+				.map((id) => [id, transactionReadErrors.get(id)!])
+		);
 	}
 }
 
@@ -449,7 +457,10 @@ async function mapWithConcurrency<T, R>(
 
 async function fetchImmutableTransactionJson(txId: string): Promise<any | null> {
 	if (!ARWEAVE_ID.test(txId)) return null;
-	if (transactionBodyCache.has(txId)) return cloneJsonValue(transactionBodyCache.get(txId));
+	if (isBaseTransactionJson(transactionBodyCache.get(txId))) {
+		transactionReadErrors.delete(txId);
+		return cloneJsonValue(transactionBodyCache.get(txId));
+	}
 	const active = transactionBodyRequests.get(txId);
 	if (active) return cloneJsonValue(await active);
 
@@ -461,8 +472,11 @@ async function fetchImmutableTransactionJson(txId: string): Promise<any | null> 
 				const cached = await cache.match(url);
 				if (cached?.ok) {
 					const value = await cached.json();
-					transactionBodyCache.set(txId, value);
-					return value;
+					if (isBaseTransactionJson(value)) {
+						transactionReadErrors.delete(txId);
+						transactionBodyCache.set(txId, value);
+						return value;
+					}
 				}
 			} catch {
 				// Disabled storage or a corrupt cache entry must not block the network.
@@ -470,6 +484,7 @@ async function fetchImmutableTransactionJson(txId: string): Promise<any | null> 
 		}
 		try {
 			const value = await fetchBaseTransactionJson(txId);
+			transactionReadErrors.delete(txId);
 			if (typeof caches !== 'undefined') {
 				// Cache decoded JSON under the canonical URL, including recovered L1
 				// data. Never persist the empty/invalid response that triggered fallback.
@@ -482,7 +497,9 @@ async function fetchImmutableTransactionJson(txId: string): Promise<any | null> 
 			}
 			transactionBodyCache.set(txId, value);
 			return value;
-		} catch {
+		} catch (error) {
+			if (transactionReadErrors.size >= 100) transactionReadErrors.delete(transactionReadErrors.keys().next().value);
+			transactionReadErrors.set(txId, error.message || String(error));
 			return null;
 		}
 	})();

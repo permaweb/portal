@@ -98,11 +98,11 @@ export function renderShell(
 						sidebarIcon
 					)}</button>
 				</header>
-				<label class="lite-docs-search">
+				<button class="lite-docs-search" type="button" data-docs-search-open aria-haspopup="dialog" aria-controls="lite-docs-search-dialog" aria-keyshortcuts="/">
 					${docsIcon(searchIcon)}
-					<input type="search" data-docs-search placeholder="Search docs..." aria-label="Search documentation" aria-controls="lite-docs-navigation" autocomplete="off" />
-					<kbd aria-hidden="true">⌘ K</kbd>
-				</label>
+					<span>Search docs...</span>
+					<kbd aria-hidden="true">/</kbd>
+				</button>
 				${docsNavigation(portal, activePost, postHref)}
 				<footer class="lite-docs-sidebar-footer">
 					<div class="lite-theme-toggle" role="group" aria-label="Theme">
@@ -116,8 +116,12 @@ export function renderShell(
 					sidebarIcon
 				)}</button>
 				<span>${escapeHTML(portal.name)}</span>
+				<button class="lite-docs-icon-button" type="button" data-docs-search-open data-docs-search-mobile aria-label="Search documentation" aria-haspopup="dialog" aria-controls="lite-docs-search-dialog" aria-keyshortcuts="/" title="Search documentation (/)">${docsIcon(
+					searchIcon
+				)}</button>
 			</div>
 			<div class="lite-docs-main" data-docs-main>${content}</div>
+			${docsSearch(portal, postHref)}
 		</div>`;
 	}
 	const walletContent = address
@@ -548,8 +552,40 @@ export function renderPost(post: LitePost, homeHref: string, options: { showBack
 		</main>`;
 }
 
+function docsSearch(portal: LitePortal, postHref: (post: LitePost) => string) {
+	return `<div class="lite-docs-search-overlay" id="lite-docs-search-dialog" data-docs-search-dialog role="dialog" aria-modal="true" aria-label="Search documentation" hidden>
+		<div class="lite-docs-search-panel">
+			<div class="lite-docs-search-field">
+				${docsIcon(searchIcon)}
+				<input type="search" data-docs-search placeholder="Search documentation..." aria-label="Search documentation" aria-controls="lite-docs-search-results" autocomplete="off" spellcheck="false" />
+				<button class="lite-docs-search-close" type="button" data-docs-search-close aria-label="Close search">Esc</button>
+			</div>
+			<div class="lite-docs-search-output">
+				<p class="lite-docs-search-status" data-docs-search-status role="status">Search all documentation pages.</p>
+				<ul class="lite-docs-search-results lite-scroll-wrapper" id="lite-docs-search-results" hidden>
+					${portal.posts
+						.map(
+							(post) => `<li data-docs-search-text="${escapeHTML(
+								[post.title, post.category, post.excerpt].join(' ').toLowerCase()
+							)}" hidden>
+								<a class="lite-docs-search-result" href="${escapeHTML(postHref(post))}">
+									${docsIcon(bookIcon)}
+									<span><small>${escapeHTML(post.category)}</small><strong>${escapeHTML(post.title)}</strong>${
+								post.excerpt ? `<span>${escapeHTML(post.excerpt)}</span>` : ''
+							}</span>
+									${docsIcon(caretIcon)}
+								</a>
+							</li>`
+						)
+						.join('')}
+				</ul>
+			</div>
+		</div>
+	</div>`;
+}
+
 function docsNavigation(portal: LitePortal, activePost: LitePost | undefined, postHref: (post: LitePost) => string) {
-	return `<nav class="lite-docs-navigation" id="lite-docs-navigation" aria-label="Documentation">
+	return `<nav class="lite-docs-navigation lite-scroll-wrapper" id="lite-docs-navigation" aria-label="Documentation">
 			<div class="lite-docs-navigation-list">
 				${Array.from(docsGroups(portal).entries())
 					.map(
@@ -562,9 +598,7 @@ function docsNavigation(portal: LitePortal, activePost: LitePost | undefined, po
 							<ul id="lite-docs-category-${index}">${posts
 							.map(
 								(post) =>
-									`<li data-docs-search-text="${escapeHTML(
-										[post.title, post.category, post.excerpt].join(' ').toLowerCase()
-									)}"><a class="${post.id === activePost?.id ? 'is-active' : ''}" ${
+									`<li><a class="${post.id === activePost?.id ? 'is-active' : ''}" ${
 										post.id === activePost?.id ? 'aria-current="page"' : ''
 									} href="${escapeHTML(postHref(post))}" data-docs-link>${escapeHTML(post.title)}</a></li>`
 							)
@@ -573,7 +607,6 @@ function docsNavigation(portal: LitePortal, activePost: LitePost | undefined, po
 					)
 					.join('')}
 			</div>
-			<p class="lite-docs-search-status" data-docs-search-status role="status" hidden></p>
 	</nav>`;
 }
 
@@ -616,7 +649,7 @@ export function renderDocs(portal: LitePortal, post: LitePost, postHref: (post: 
 						</article>
 						${docsPager(portal, post, postHref)}
 					</div>
-					<aside class="lite-docs-toc" data-docs-toc hidden>
+					<aside class="lite-docs-toc lite-scroll-wrapper" data-docs-toc hidden>
 						<h2>${docsIcon(tocIcon)}<span>On this page</span></h2>
 						<ul></ul>
 					</aside>

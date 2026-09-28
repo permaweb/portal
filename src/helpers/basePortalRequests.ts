@@ -6,6 +6,7 @@ export const BASE_READ_LIMITS = {
 	transactions: 16,
 } as const;
 const QUERY_TTL_MS = 10_000;
+const TRANSACTION_TIMEOUT_MS = 15_000;
 let activeReads = 0;
 let queryGeneration = 0;
 const waitingReads: Array<() => void> = [];
@@ -24,22 +25,52 @@ export async function withBaseReadLimit<T>(read: () => Promise<T>): Promise<T> {
 	}
 }
 
+// JSON error envelopes (including null) are not immutable portal data. Keep
+// these out of persistent caches; callers still validate schemas and authority.
+export function isBaseTransactionJson(value: any): boolean {
+	return (
+		value?.mode === 'base' &&
+		typeof value.portalId === 'string' &&
+		['portal-manifest', 'portal-release', 'portal-checkpoint', 'portal-post'].includes(value.type)
+	);
+}
+
 export async function fetchBaseTransactionJson(txId: string): Promise<any> {
 	return withBaseReadLimit(async () => {
-		try {
-			const response = await fetch(`https://arweave.net/${txId}`, { cache: 'reload' });
-			if (!response.ok) throw new Error(`Transaction ${txId}: ${response.status}`);
-			return await response.json();
-		} catch {
-			// The content route can return an empty 200 even when an L1 upload is
-			// available. The transaction API serves its original base64url bytes.
-			const response = await fetch(`https://arweave.net/tx/${txId}/data`, { cache: 'reload' });
-			if (!response.ok) throw new Error(`Transaction data ${txId}: ${response.status}`);
-			const encoded = (await response.text()).trim();
-			if (!/^[A-Za-z0-9_-]+={0,2}$/.test(encoded)) throw new Error(`Invalid transaction data: ${txId}`);
-			const bytes = Uint8Array.from(atob(encoded.replace(/-/g, '+').replace(/_/g, '/')), (char) => char.charCodeAt(0));
-			return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+		const failures: string[] = [];
+		const endpoints = [
+			`https://arweave.net/${txId}`,
+			`https://arweave.net/tx/${txId}/data`,
+			// Bundled data items have no L1 transaction-data endpoint. Recover
+			// them through an independent gateway when the primary route fails.
+			`https://turbo-gateway.com/${txId}`,
+		];
+		for (const url of endpoints) {
+			const controller = new AbortController();
+			// Covers body reads and the global fetch wrapper's 429 cooldown too,
+			// so repeated primary failures cannot prevent independent fallback.
+			const timer = setTimeout(() => controller.abort(), TRANSACTION_TIMEOUT_MS);
+			try {
+				const response = await fetch(url, { cache: 'reload', signal: controller.signal });
+				if (!response.ok) throw new Error(`HTTP ${response.status}`);
+				let value: any;
+				if (url.endsWith('/data')) {
+					const encoded = (await response.text()).trim();
+					if (!/^[A-Za-z0-9_-]+={0,2}$/.test(encoded)) throw new Error('Invalid transaction data');
+					const bytes = Uint8Array.from(atob(encoded.replace(/-/g, '+').replace(/_/g, '/')), (char) =>
+						char.charCodeAt(0)
+					);
+					value = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+				} else value = await response.json();
+				if (!isBaseTransactionJson(value)) throw new Error('Invalid portal transaction JSON');
+				return value;
+			} catch (error) {
+				failures.push(`${url}: ${controller.signal.aborted ? 'Timed out' : error.message}`);
+			} finally {
+				clearTimeout(timer);
+			}
 		}
+		throw new Error(`Unable to read transaction ${txId}: ${failures.join('; ')}`);
 	});
 }
 

@@ -668,6 +668,9 @@ export function PortalProvider(props: { children: React.ReactNode }) {
 			if (Array.isArray(e.pendingTransactionIds)) {
 				debugLog('error', 'PortalProvider', 'Blocking Arweave transactions:', e.pendingTransactionIds);
 			}
+			if (e.transactionReadErrors && Object.keys(e.transactionReadErrors).length) {
+				debugLog('error', 'PortalProvider', 'Arweave transaction read failures:', e.transactionReadErrors);
+			}
 			throw e;
 		} finally {
 			if (sessionIsCurrent()) setUpdating(false);

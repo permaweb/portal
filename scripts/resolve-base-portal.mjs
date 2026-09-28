@@ -16,6 +16,8 @@
  */
 
 const DEFAULT_GATEWAY = 'https://arweave.net';
+const DEFAULT_FALLBACK_GATEWAY = 'https://turbo-gateway.com';
+const TRANSACTION_TIMEOUT_MS = 15_000;
 const ADDRESS = /^[A-Za-z0-9_-]{43}$/;
 const DEFAULT_CONCURRENCY = 8;
 const MAX_PREDECESSOR_LOOKUPS = 100;
@@ -53,7 +55,8 @@ async function readBrowserTransactionCache(key) {
 	try {
 		const cache = await globalThis.caches.open(TRANSACTION_CACHE_NAME);
 		const response = await cache.match(key);
-		return response?.ok ? await response.json() : undefined;
+		const value = response?.ok ? await response.json() : undefined;
+		return isBaseTransactionJson(value) ? value : undefined;
 	} catch {
 		return undefined;
 	}
@@ -83,32 +86,58 @@ async function json(response, label) {
 	return response.json();
 }
 
+function isBaseTransactionJson(value) {
+	return (
+		value?.mode === 'base' &&
+		typeof value.portalId === 'string' &&
+		['portal-manifest', 'portal-release', 'portal-checkpoint', 'portal-post'].includes(value.type)
+	);
+}
+
 async function fetchTransactionJson(id, options) {
-	try {
-		return await json(
-			await options.fetch(`${options.gateway}/${id}`, { cache: 'reload', signal: options.signal }),
-			`Transaction ${id}`
-		);
-	} catch (error) {
-		if (options.signal?.aborted) throw error;
-		// The content route may return an empty 200 while L1 transaction bytes
-		// remain available through the base64url transaction-data endpoint.
-		const response = await options.fetch(`${options.gateway}/tx/${id}/data`, {
-			cache: 'reload',
-			signal: options.signal,
-		});
-		if (!response.ok) throw new Error(`Transaction data ${id}: ${response.status}`);
-		const encoded = (await response.text()).trim();
-		if (!/^[A-Za-z0-9_-]+={0,2}$/.test(encoded)) throw new Error(`Invalid transaction data: ${id}`);
-		const bytes = Uint8Array.from(atob(encoded.replace(/-/g, '+').replace(/_/g, '/')), (char) => char.charCodeAt(0));
-		return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+	const failures = [];
+	const endpoints = [
+		`${options.gateway}/${id}`,
+		`${options.gateway}/tx/${id}/data`,
+		// The L1 endpoint cannot serve bundled items. Use an independent gateway
+		// for those, retaining the same schema and signer checks during replay.
+		...options.fallbackGateways.map((gateway) => `${gateway}/${id}`),
+	];
+	for (const url of endpoints) {
+		if (options.signal?.aborted) throw options.signal.reason;
+		const controller = new AbortController();
+		const abort = () => controller.abort(options.signal.reason);
+		options.signal?.addEventListener('abort', abort, { once: true });
+		const timer = setTimeout(() => controller.abort(), options.transactionTimeoutMs);
+		try {
+			const response = await options.fetch(url, { cache: 'reload', signal: controller.signal });
+			if (!response.ok) throw new Error(`HTTP ${response.status}`);
+			let value;
+			if (url.endsWith('/data')) {
+				const encoded = (await response.text()).trim();
+				if (!/^[A-Za-z0-9_-]+={0,2}$/.test(encoded)) throw new Error('Invalid transaction data');
+				const bytes = Uint8Array.from(atob(encoded.replace(/-/g, '+').replace(/_/g, '/')), (char) =>
+					char.charCodeAt(0)
+				);
+				value = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+			} else value = await response.json();
+			if (!isBaseTransactionJson(value)) throw new Error('Invalid portal transaction JSON');
+			return value;
+		} catch (error) {
+			if (options.signal?.aborted) throw error;
+			failures.push(`${url}: ${controller.signal.aborted ? 'Timed out' : error.message}`);
+		} finally {
+			clearTimeout(timer);
+			options.signal?.removeEventListener('abort', abort);
+		}
 	}
+	throw new Error(`Unable to read transaction ${id}: ${failures.join('; ')}`);
 }
 
 async function fetchTransaction(id, options) {
 	if (!ADDRESS.test(id)) return undefined;
 	const key = `${options.gateway}/${id}`;
-	if (options.transactionCache.has(key)) return clone(options.transactionCache.get(key));
+	if (isBaseTransactionJson(options.transactionCache.get(key))) return clone(options.transactionCache.get(key));
 	let request = transactionRequests.get(key);
 	if (!request) {
 		request = (async () => {
@@ -122,12 +151,16 @@ async function fetchTransaction(id, options) {
 				options.transactionCache.set(key, value);
 				await writeBrowserTransactionCache(key, value);
 				return value;
-			} catch {
+			} catch (error) {
+				if (options.signal?.aborted) throw error;
 				return undefined;
 			}
 		})();
 		transactionRequests.set(key, request);
-		void request.finally(() => transactionRequests.delete(key));
+		void request.then(
+			() => transactionRequests.delete(key),
+			() => transactionRequests.delete(key)
+		);
 	}
 	const value = await request;
 	return value === undefined ? undefined : clone(value);
@@ -583,6 +616,11 @@ export async function resolvePortalState(identifier, config = {}) {
 	const gateway = (config.gateway || DEFAULT_GATEWAY).replace(/\/+$/, '');
 	const options = {
 		gateway,
+		// Custom gateways stay self-contained unless their caller opts into fallback.
+		fallbackGateways: (config.fallbackGateways ?? (gateway === DEFAULT_GATEWAY ? [DEFAULT_FALLBACK_GATEWAY] : [])).map(
+			(value) => value.replace(/\/+$/, '')
+		),
+		transactionTimeoutMs: config.transactionTimeoutMs || TRANSACTION_TIMEOUT_MS,
 		graphql: config.graphql || `${gateway}/graphql`,
 		fetch: config.fetch || globalThis.fetch?.bind(globalThis),
 		signal: config.signal,

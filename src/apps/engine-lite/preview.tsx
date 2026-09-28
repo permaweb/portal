@@ -17,7 +17,8 @@ const DOCS_PREVIEW_SCRIPT = `<script>
 		try { targetId = decodeURIComponent(id); } catch {}
 		const target = document.getElementById(targetId);
 		if (!target) return false;
-		window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 95, behavior: 'smooth' });
+		const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 96, behavior: reducedMotion ? 'auto' : 'smooth' });
 		return true;
 	};
 	document.querySelectorAll('.lite-docs-copy a[href^="#"]').forEach((link) => link.addEventListener('click', (event) => {
