@@ -3,6 +3,7 @@
 import { randomBytes } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { ArweaveSigner, createData } from '@dha-team/arbundles';
 import { fromJwk, ReferenceClient } from '@permaweb/references';
@@ -24,9 +25,14 @@ function anchor() {
 	return randomBytes(32).toString('base64url').slice(0, 32);
 }
 
-async function uploadDataItem(jwk, data, tags) {
+export async function uploadDataItem(jwk, data, tags) {
 	const signer = new ArweaveSigner(jwk);
-	const dataItem = createData(data, signer, { tags, anchor: anchor() });
+	// Work around up.arweave.net rejecting unsorted lowercase reference tags.
+	// This compatibility tag is separate from the ANS-104 anchor field.
+	const uploadTags = tags.some((tag) => tag.name === 'anchor')
+		? tags
+		: [...tags, { name: 'anchor', value: new Date().toISOString() }];
+	const dataItem = createData(data, signer, { tags: uploadTags, anchor: anchor() });
 	await dataItem.sign(signer);
 
 	const response = await fetch(UPLOAD_URL, {
@@ -170,7 +176,10 @@ async function main() {
 	);
 }
 
-main().catch((error) => {
-	process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
-	process.exitCode = 1;
-});
+const executedPath = process.argv[1] ? path.resolve(process.argv[1]) : '';
+if (executedPath && fileURLToPath(import.meta.url) === executedPath) {
+	main().catch((error) => {
+		process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+		process.exitCode = 1;
+	});
+}
