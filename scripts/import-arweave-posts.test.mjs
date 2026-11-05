@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
+import { generateKeyPairSync } from 'node:crypto';
 import test from 'node:test';
+
+import { DataItem } from '@dha-team/arbundles';
 
 import {
 	buildPortalPost,
@@ -11,7 +14,30 @@ import {
 	postPayload,
 	resolvePostCategories,
 	sourcePostStatus,
+	uploadDataItem,
 } from './import-arweave-posts.mjs';
+
+test('uses the native ANS-104 route by default and retains the legacy route for custom upload nodes', async (t) => {
+	const wallet = generateKeyPairSync('rsa', { modulusLength: 4096 }).privateKey.export({ format: 'jwk' });
+	const calls = [];
+	t.mock.method(globalThis, 'fetch', async (url, request) => {
+		const item = new DataItem(Buffer.from(request.body));
+		assert(await item.isValid());
+		assert.equal(item.rawData.toString(), 'post');
+		calls.push({ url, headers: request.headers, id: item.id });
+		return calls.length === 1
+			? new Response('{}', { headers: { id: item.id } })
+			: Response.json({ id: item.id });
+	});
+	const upload = (uploadNode) => uploadDataItem({ wallet, data: 'post', tags: [], uploadNode });
+	assert.equal(await upload('https://up.arweave.net'), calls[0].id);
+	assert.equal(await upload('https://legacy.example'), calls[1].id);
+	assert.equal(calls[0].url, 'https://up.arweave.net/~bundler@1.0/tx');
+	assert.equal(calls[0].headers['Content-Type'], 'application/ans104');
+	assert.equal(calls[0].headers['bundler-subject'], 'body');
+	assert.equal(calls[1].url, 'https://legacy.example/tx/arweave');
+	assert.equal(calls[1].headers['Content-Type'], 'application/octet-stream');
+});
 
 test('allows Portal owners and admins to run an import', () => {
 	const owner = 'o'.repeat(43);

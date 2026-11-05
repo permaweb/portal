@@ -661,7 +661,7 @@ async function saveReceipt(receiptPath, receipt) {
 	await fs.rename(temporaryPath, receiptPath);
 }
 
-export async function uploadDataItem({ wallet, data, tags, uploadNode }) {
+export async function signDataItem({ wallet, data, tags }) {
 	const bytes = Buffer.from(data);
 	if (bytes.byteLength > FREE_UPLOAD_LIMIT) {
 		throw new Error(
@@ -671,29 +671,39 @@ export async function uploadDataItem({ wallet, data, tags, uploadNode }) {
 	const signer = new ArweaveSigner(wallet);
 	const dataItem = createData(bytes, signer, { tags });
 	await dataItem.sign(signer);
-	const expectedId = dataItem.id;
-	const raw = dataItem.getRaw();
+	return { id: dataItem.id, raw: dataItem.getRaw() };
+}
 
+export async function submitDataItem({ id: expectedId, raw }, uploadNode, native = true) {
+	const route = native ? '/~bundler@1.0/tx' : '/tx/arweave';
+	const headers = { Accept: 'application/json', 'Content-Type': 'application/octet-stream' };
+	if (native) {
+		headers['Content-Type'] = 'application/ans104';
+		headers['bundler-subject'] = 'body';
+	}
 	let lastError;
 	for (let attempt = 1; attempt <= 3; attempt += 1) {
 		try {
-			const response = await fetch(`${uploadNode}/tx/arweave`, {
+			const response = await fetch(`${uploadNode}${route}`, {
 				method: 'POST',
-				headers: { Accept: 'application/json', 'Content-Type': 'application/octet-stream' },
+				headers,
 				body: raw,
+				signal: AbortSignal.timeout(30_000),
 			});
 			const responseText = await response.text();
 			if (!response.ok && response.status !== 409) {
 				throw new Error(`${response.status}${responseText ? ` ${responseText}` : ''}`);
 			}
-			let returnedId = '';
-			try {
-				const parsed = JSON.parse(responseText);
-				returnedId = typeof parsed === 'string' ? parsed : parsed?.id || '';
-			} catch {
-				returnedId = responseText.trim();
+			let returnedId = response.headers.get('id');
+			if (!returnedId) {
+				try {
+					const parsed = JSON.parse(responseText);
+					returnedId = typeof parsed === 'string' ? parsed : parsed?.id || parsed?.body?.id || '';
+				} catch {
+					returnedId = responseText.trim();
+				}
 			}
-			if (returnedId && ADDRESS.test(returnedId) && returnedId !== expectedId) {
+			if ((native || ADDRESS.test(returnedId)) && returnedId !== expectedId) {
 				throw new Error(`Upload node returned an unexpected transaction ID: ${returnedId}`);
 			}
 			return expectedId;
@@ -703,6 +713,11 @@ export async function uploadDataItem({ wallet, data, tags, uploadNode }) {
 		}
 	}
 	throw new Error(`Arweave upload failed after 3 attempts: ${lastError?.message || 'unknown error'}`);
+}
+
+export async function uploadDataItem({ wallet, data, tags, uploadNode }) {
+	const signed = await signDataItem({ wallet, data, tags });
+	return submitDataItem(signed, uploadNode, uploadNode === DEFAULT_UPLOAD_NODE);
 }
 
 function validateSourceManifest(manifest, manifestTxId) {
