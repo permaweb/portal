@@ -535,7 +535,7 @@ function changedFields(changes) {
 	return fields;
 }
 
-function canPublish(state, release, publisher) {
+export function canPublish(state, release, publisher) {
 	if (!publisher || (release.authorAddress && release.authorAddress !== publisher)) return false;
 	if (state.owner === publisher) return true;
 	const roles = state.users.find((user) => user.address === publisher)?.roles || [];

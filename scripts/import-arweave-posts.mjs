@@ -2,11 +2,12 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isDeepStrictEqual } from 'node:util';
 
 import { ArweaveSigner, createData } from '@dha-team/arbundles';
 import Arweave from 'arweave';
 
-import { resolvePortalState } from './resolve-base-portal.mjs';
+import { canPublish, resolvePortalState } from './resolve-base-portal.mjs';
 
 const ADDRESS = /^[A-Za-z0-9_-]{43}$/;
 const DEFAULT_GATEWAY = 'https://arweave.net';
@@ -15,6 +16,24 @@ const DEFAULT_TAG = 'AO';
 const FREE_UPLOAD_LIMIT = 100 * 1000;
 const PORTAL_SCHEMA_VERSION = '2.1.0';
 const RECEIPT_SCHEMA_VERSION = '1.0.0';
+const LOCAL_POST_FIELDS = {
+	title: ['title'],
+	description: ['description', 'excerpt'],
+	slug: ['slug', 'url'],
+	date: ['date', 'releaseDate', 'publishedAt'],
+	status: ['status', 'draft'],
+	categories: ['categories'],
+	tags: ['tags', 'topics'],
+	thumbnail: ['thumbnail', 'bannerTxId'],
+};
+const LOCAL_FRONTMATTER_FIELDS = {
+	title: ['title'],
+	description: ['desc', 'description', 'excerpt'],
+	date: ['date'],
+	categories: ['category', 'categories'],
+	tags: ['tags'],
+	thumbnail: ['banner'],
+};
 
 const ARTICLE_BLOCK = Object.freeze({
 	Paragraph: 'paragraph',
@@ -39,15 +58,21 @@ function usage() {
     --manifest <arweave-manifest-id-or-url> \\
     --portal <base-portal-id> \\
     --wallet <jwk-file> [--tag AO] [--yes]
+  npm run import-arweave-posts -- \\
+    --portal <base-portal-id> --markdown <file.md> --metadata <file.json> [--feature]
 
 Options:
   --manifest <value>       Arweave transaction ID or gateway URL for the source manifest
   --portal <id>            Existing base-mode Portal ID
-  --wallet <path>          Arweave JWK file used to publish the import
-  --tag <value>            Topic/tag assigned to every post (repeatable, defaults to AO)
-  --published-slug <slug>  Publish only these slugs and import all others as drafts (repeatable)
-  --featured-slug <slug>   Set the imported post with this slug as the sole featured post
-  --replace-post <value>   Replace one existing Portal post by ID or slug with the sole new manifest post
+  --wallet <path>          Arweave JWK file (required for manifest imports and live local writes)
+  --tag <value>            Topic/tag (repeatable, defaults to AO for manifest imports)
+  --published-slug <slug>  Publish only these manifest slugs and import all others as drafts (repeatable)
+  --featured-slug <slug>   Set the imported manifest post with this slug as the sole featured post
+  --replace-post <value>   Update one existing Portal post by ID or slug
+  --markdown <path>        Local Markdown body, required for a new local post
+  --metadata <path>        Local JSON metadata, including optional replaceBlocks for an update
+  --expect-post-tx <id>    Current revision ID, required when updating from local files
+  --feature                Put the local post first in the featured list
   --gateway <url>          Read gateway (defaults to ${DEFAULT_GATEWAY})
   --upload-node <url>      Data-item upload node (defaults to ${DEFAULT_UPLOAD_NODE})
   --concurrency <count>    Concurrent downloads/uploads (defaults to 4)
@@ -59,12 +84,16 @@ Options:
 export function parseArgs(argv) {
 	const options = {
 		manifest: '',
+		markdownPath: '',
+		metadataPath: '',
 		portalId: '',
 		walletPath: '',
 		tags: [],
 		publishedSlugs: [],
 		featuredSlug: '',
 		replacePost: '',
+		expectPostTx: '',
+		feature: false,
 		gateway: DEFAULT_GATEWAY,
 		uploadNode: DEFAULT_UPLOAD_NODE,
 		concurrency: 4,
@@ -86,6 +115,12 @@ export function parseArgs(argv) {
 			case '--manifest':
 				options.manifest = nextValue();
 				break;
+			case '--markdown':
+				options.markdownPath = nextValue();
+				break;
+			case '--metadata':
+				options.metadataPath = nextValue();
+				break;
 			case '--portal':
 				options.portalId = nextValue();
 				break;
@@ -105,6 +140,12 @@ export function parseArgs(argv) {
 			case '--replace-post':
 				if (options.replacePost) throw new Error('--replace-post may only be specified once');
 				options.replacePost = nextValue();
+				break;
+			case '--expect-post-tx':
+				options.expectPostTx = nextValue();
+				break;
+			case '--feature':
+				options.feature = true;
 				break;
 			case '--gateway':
 				options.gateway = nextValue();
@@ -130,9 +171,8 @@ export function parseArgs(argv) {
 		}
 	}
 
-	options.tags = [...new Set((options.tags.length ? options.tags : [DEFAULT_TAG]).map((tag) => tag.trim()))].filter(
-		Boolean
-	);
+	if (!options.tags.length && !options.markdownPath && !options.metadataPath) options.tags.push(DEFAULT_TAG);
+	options.tags = [...new Set(options.tags.map((tag) => tag.trim()))].filter(Boolean);
 	options.publishedSlugs = [
 		...new Set(options.publishedSlugs.map((slug) => slug.trim().toLowerCase()).filter(Boolean)),
 	];
@@ -439,6 +479,7 @@ export function sourcePostStatus(sourcePost, publishedSlugs = []) {
 export function buildPortalPost({
 	sourcePost,
 	markdown,
+	blocks = markdownToPortalBlocks(markdown, sourcePost.id || sourcePost.slug),
 	categories,
 	sharedTags,
 	walletAddress,
@@ -447,7 +488,7 @@ export function buildPortalPost({
 }) {
 	const published = normalizeDate(sourcePost.publishedAt || sourcePost.date, sourcePost.date);
 	const updated = normalizeDate(sourcePost.updated || sourcePost.date || sourcePost.publishedAt, published.iso);
-	const content = markdownToPortalBlocks(markdown, sourcePost.id || sourcePost.slug);
+	const content = blocks;
 	if (!content.length) throw new Error(`Post has no importable content: ${sourcePost.title}`);
 	const text = plainTextFromBlocks(content);
 	const wordCount = Number.isFinite(sourcePost.wordCount)
@@ -531,6 +572,131 @@ export function postPayload(portalId, post, createdAt, replacement = null) {
 	};
 }
 
+function validateLocalMetadata(metadata) {
+	if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+		throw new Error('Local metadata must be a JSON object');
+	}
+	for (const key of Object.keys(metadata)) {
+		if (!Object.hasOwn(LOCAL_POST_FIELDS, key) && key !== 'replaceBlocks') {
+			throw new Error(`Unsupported metadata field: ${key}`);
+		}
+	}
+	for (const key of ['title', 'description', 'slug', 'date']) {
+		if (
+			Object.hasOwn(metadata, key) &&
+			(typeof metadata[key] !== 'string' || (key !== 'description' && !metadata[key].trim()))
+		) {
+			throw new Error(`Invalid metadata field: ${key}`);
+		}
+	}
+	if ('slug' in metadata && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(metadata.slug)) throw new Error('Invalid slug');
+	if ('date' in metadata) normalizeDate(metadata.date);
+	if ('status' in metadata && !['draft', 'published'].includes(metadata.status)) throw new Error('Invalid status');
+	if ('thumbnail' in metadata && metadata.thumbnail !== null) assertAddress(metadata.thumbnail, 'Thumbnail');
+	for (const key of ['categories', 'tags']) {
+		if (
+			key in metadata &&
+			(!Array.isArray(metadata[key]) || !metadata[key].every((value) => typeof value === 'string' && value.trim()))
+		) {
+			throw new Error(`Invalid metadata field: ${key}`);
+		}
+	}
+}
+
+function replaceLocalBlocks(blocks, replacements) {
+	if (!Array.isArray(replacements) || !replacements.length) throw new Error('replaceBlocks must be a nonempty array');
+	const byId = new Map();
+	for (const block of replacements) {
+		if (
+			typeof block?.id !== 'string' ||
+			!block.id ||
+			typeof block.type !== 'string' ||
+			!block.type ||
+			typeof block.content !== 'string'
+		) {
+			throw new Error('Invalid replacement block');
+		}
+		if (byId.has(block.id) || blocks.filter(({ id }) => id === block.id).length !== 1) {
+			throw new Error(`Block missing or ambiguous: ${block.id}`);
+		}
+		byId.set(block.id, { id: block.id, type: block.type, content: block.content, data: block.data ?? null });
+	}
+	return blocks.map((block) => byId.get(block.id) ?? block);
+}
+
+function selectLocalFields(fields, metadata, values) {
+	return Object.fromEntries(
+		Object.keys(metadata).flatMap((key) => (fields[key] ?? []).map((field) => [field, values[field]]))
+	);
+}
+
+export function prepareLocalPost({ portal, replacement, metadata, markdown, walletAddress, now }) {
+	validateLocalMetadata(metadata);
+	if (!replacement && (markdown === undefined || !metadata.title || !metadata.slug)) {
+		throw new Error('New local posts require Markdown, title and slug');
+	}
+	if ('replaceBlocks' in metadata && (!replacement || markdown !== undefined)) {
+		throw new Error('replaceBlocks requires an existing post and no Markdown input');
+	}
+	const slug = metadata.slug ?? replacement?.slug ?? replacement?.url;
+	if (!slug) throw new Error('Post has no slug');
+	if (
+		portal.posts.some(
+			(post) =>
+				post.id !== replacement?.id && [post.slug, post.url].some((url) => url?.toLowerCase() === slug.toLowerCase())
+		)
+	) {
+		throw new Error(`Slug already exists: ${slug}`);
+	}
+	const categories =
+		'categories' in metadata
+			? resolvePostCategories(metadata.categories, portal.categories)
+			: replacement?.categories ?? [];
+	const tags = metadata.tags ?? replacement?.topics ?? replacement?.tags ?? [];
+	if ('tags' in metadata) {
+		const available = portalTopicValues(portal.topics).map((tag) => tag.toLowerCase());
+		for (const tag of tags) {
+			if (!available.includes(tag.toLowerCase())) throw new Error(`Portal topic/tag not found: ${tag}`);
+		}
+	}
+	const bodyChanged = markdown !== undefined || 'replaceBlocks' in metadata;
+	const priorBlocks = Array.isArray(replacement?.content) ? replacement.content : [];
+	const blocks =
+		markdown !== undefined
+			? markdownToPortalBlocks(markdown, replacement?.id ?? slug)
+			: 'replaceBlocks' in metadata
+			? replaceLocalBlocks(priorBlocks, metadata.replaceBlocks)
+			: priorBlocks;
+	const { source, ...built } = buildPortalPost({
+		sourcePost: {
+			title: metadata.title ?? replacement?.title,
+			description: metadata.description ?? replacement?.description,
+			slug,
+			date: metadata.date ?? replacement?.date ?? now,
+			updated: now,
+			draft: (metadata.status ?? replacement?.status ?? 'draft') !== 'published',
+			bannerTxId: 'thumbnail' in metadata ? metadata.thumbnail : replacement?.thumbnail,
+			authorAddress: replacement?.authorAddress,
+		},
+		blocks,
+		categories,
+		sharedTags: tags,
+		walletAddress,
+	});
+	if (!replacement) return built;
+
+	const { id, postTxId, ...stored } = replacement;
+	const update = selectLocalFields(LOCAL_POST_FIELDS, metadata, built);
+	if (bodyChanged)
+		Object.assign(update, { content: blocks, wordCount: built.wordCount, readingTime: built.readingTime });
+	const frontmatter = selectLocalFields(LOCAL_FRONTMATTER_FIELDS, metadata, built.frontmatter);
+	if (Object.keys(frontmatter).length) update.frontmatter = { ...stored.frontmatter, ...frontmatter };
+	if (Object.entries(update).every(([key, value]) => isDeepStrictEqual(stored[key], value))) {
+		throw new Error('Post already matches the requested changes');
+	}
+	return { ...stored, ...update, lastUpdate: Date.parse(now), updated: now };
+}
+
 function postTags(portalId, walletAddress, manifestTxId, sourcePost, replacement = null) {
 	return [
 		{ name: 'Content-Type', value: 'application/json; charset=utf-8' },
@@ -540,9 +706,13 @@ function postTags(portalId, walletAddress, manifestTxId, sourcePost, replacement
 		{ name: 'Type', value: 'portal-post' },
 		{ name: 'Portal-Id', value: portalId },
 		{ name: 'Author', value: walletAddress },
-		{ name: 'Import-Manifest', value: manifestTxId },
-		{ name: 'Source-Post-Id', value: sourcePost.id },
-		{ name: 'Source-Post-Tx', value: sourcePost.postTxId },
+		...(manifestTxId
+			? [
+					{ name: 'Import-Manifest', value: manifestTxId },
+					{ name: 'Source-Post-Id', value: sourcePost.id },
+					{ name: 'Source-Post-Tx', value: sourcePost.postTxId },
+			  ]
+			: []),
 		...(replacement ? [{ name: 'Post-Id', value: replacement.id }] : []),
 	];
 }
@@ -574,8 +744,12 @@ function releaseTags(portal, walletAddress, manifestTxId, postCount) {
 		{ name: 'Portal-Root', value: portal.rootTxId },
 		{ name: 'Previous-Tx', value: portal.headTxId },
 		{ name: 'Author', value: walletAddress },
-		{ name: 'Import-Manifest', value: manifestTxId },
-		{ name: 'Import-Post-Count', value: String(postCount) },
+		...(manifestTxId
+			? [
+					{ name: 'Import-Manifest', value: manifestTxId },
+					{ name: 'Import-Post-Count', value: String(postCount) },
+			  ]
+			: []),
 	];
 }
 
@@ -632,21 +806,17 @@ function defaultReceiptPath(portalId, manifestTxId) {
 async function loadReceipt(receiptPath, expected) {
 	try {
 		const receipt = JSON.parse(await fs.readFile(receiptPath, 'utf8'));
-		if (
-			receipt.portalId !== expected.portalId ||
-			receipt.manifestTxId !== expected.manifestTxId ||
-			receipt.walletAddress !== expected.walletAddress
-		) {
+		if (Object.entries(expected).some(([key, value]) => receipt[key] !== value)) {
 			throw new Error('Receipt metadata does not match this import');
 		}
-		return { ...receipt, posts: receipt.posts || {} };
+		return { ...receipt, posts: Object.assign(Object.create(null), receipt.posts) };
 	} catch (error) {
 		if (error.code === 'ENOENT') {
 			return {
 				schemaVersion: RECEIPT_SCHEMA_VERSION,
 				...expected,
 				createdAt: new Date().toISOString(),
-				posts: {},
+				posts: Object.create(null),
 				release: null,
 			};
 		}
@@ -659,6 +829,22 @@ async function saveReceipt(receiptPath, receipt) {
 	const temporaryPath = `${receiptPath}.tmp`;
 	await fs.writeFile(temporaryPath, `${JSON.stringify(receipt, null, 2)}\n`, { mode: 0o600 });
 	await fs.rename(temporaryPath, receiptPath);
+}
+
+async function withReceiptLock(receiptPath, publish) {
+	await fs.mkdir(path.dirname(receiptPath), { recursive: true });
+	const lockPath = `${receiptPath}.lock`;
+	try {
+		await fs.writeFile(lockPath, `${process.pid}\n`, { flag: 'wx', mode: 0o600 });
+	} catch (error) {
+		if (error.code === 'EEXIST') throw new Error(`Receipt is locked: ${lockPath}`);
+		throw error;
+	}
+	try {
+		return await publish();
+	} finally {
+		await fs.unlink(lockPath);
+	}
 }
 
 export async function signDataItem({ wallet, data, tags }) {
@@ -742,6 +928,19 @@ function validateSourceManifest(manifest, manifestTxId) {
 	return { ...manifest, manifestTxId };
 }
 
+function findReplacement(portal, identifier) {
+	const target = identifier.toLowerCase();
+	const replacement = portal.posts.find(
+		(post) =>
+			post.id === identifier ||
+			post.postTxId === identifier ||
+			post.slug?.toLowerCase() === target ||
+			post.url?.toLowerCase() === target
+	);
+	if (!replacement) throw new Error(`Replacement Portal post not found: ${identifier}`);
+	return replacement;
+}
+
 async function prepareImport(options) {
 	assertAddress(options.portalId, 'Portal ID');
 	if (!options.walletPath) throw new Error('--wallet is required');
@@ -779,15 +978,7 @@ async function prepareImport(options) {
 	const skipped = sourceManifest.posts.filter((sourcePost) => duplicatePost(portal.posts, sourcePost, manifestTxId));
 	let replacement = null;
 	if (options.replacePost) {
-		const identifier = options.replacePost.toLowerCase();
-		replacement = portal.posts.find(
-			(post) =>
-				post.id === options.replacePost ||
-				post.postTxId === options.replacePost ||
-				post.slug?.toLowerCase() === identifier ||
-				post.url?.toLowerCase() === identifier
-		);
-		if (!replacement) throw new Error(`Replacement Portal post not found: ${options.replacePost}`);
+		replacement = findReplacement(portal, options.replacePost);
 		if (candidates.length !== 1) {
 			throw new Error(`--replace-post requires exactly one new manifest post; found ${candidates.length}`);
 		}
@@ -859,12 +1050,14 @@ function printPlan(plan, receiptPath, publish) {
 	}
 }
 
-async function publishImport(plan, options, receiptPath) {
-	const receipt = await loadReceipt(receiptPath, {
-		portalId: plan.portal.portalId,
-		manifestTxId: plan.manifestTxId,
-		walletAddress: plan.walletAddress,
-	});
+async function publishImport(plan, options, receiptPath, localReceipt) {
+	const receipt =
+		localReceipt ??
+		(await loadReceipt(receiptPath, {
+			portalId: plan.portal.portalId,
+			manifestTxId: plan.manifestTxId,
+			walletAddress: plan.walletAddress,
+		}));
 	if (receipt.release?.txId) {
 		console.log(`Import release already published: ${receipt.release.txId}`);
 		return receipt.release.txId;
@@ -875,27 +1068,36 @@ async function publishImport(plan, options, receiptPath) {
 		receiptWrites = receiptWrites.then(() => saveReceipt(receiptPath, receipt));
 		return receiptWrites;
 	};
+	const upload = async (data, tags, entry) => {
+		if (!localReceipt) return uploadDataItem({ wallet: plan.wallet, data, tags, uploadNode: options.uploadNode });
+		if (!entry.signed) {
+			const { id, raw } = await signDataItem({ wallet: plan.wallet, data, tags });
+			entry.signed = { id, raw: Buffer.from(raw).toString('base64') };
+			await persistReceipt();
+		}
+		const signed = { id: entry.signed.id, raw: Buffer.from(entry.signed.raw, 'base64') };
+		return submitDataItem(signed, options.uploadNode, options.uploadNode === DEFAULT_UPLOAD_NODE);
+	};
 
 	const results = await mapWithConcurrency(plan.prepared, options.concurrency, async (entry, index) => {
-		const saved = receipt.posts[entry.sourcePost.id];
+		const saved = receipt.posts[entry.sourcePost.id] ?? (receipt.posts[entry.sourcePost.id] = {});
 		if (saved?.postTxId && ADDRESS.test(saved.postTxId)) {
 			console.log(`[${index + 1}/${plan.prepared.length}] Reusing ${entry.sourcePost.title}: ${saved.postTxId}`);
 			return { ...entry, postTxId: saved.postTxId };
 		}
 		console.log(`[${index + 1}/${plan.prepared.length}] Uploading ${entry.sourcePost.title}`);
-		const postTxId = await uploadDataItem({
-			wallet: plan.wallet,
-			data: entry.serialized,
-			tags: postTags(plan.portal.portalId, plan.walletAddress, plan.manifestTxId, entry.sourcePost, entry.replacement),
-			uploadNode: options.uploadNode,
-		});
-		receipt.posts[entry.sourcePost.id] = {
+		const postTxId = await upload(
+			entry.serialized,
+			postTags(plan.portal.portalId, plan.walletAddress, plan.manifestTxId, entry.sourcePost, entry.replacement),
+			saved
+		);
+		Object.assign(saved, {
 			sourcePostTxId: entry.sourcePost.postTxId,
 			postTxId,
 			slug: entry.sourcePost.slug,
 			title: entry.sourcePost.title,
 			uploadedAt: new Date().toISOString(),
-		};
+		});
 		await persistReceipt();
 		console.log(`[${index + 1}/${plan.prepared.length}] Uploaded ${postTxId}`);
 		return { ...entry, postTxId };
@@ -906,7 +1108,9 @@ async function publishImport(plan, options, receiptPath) {
 		results.map((result) => [result.replacement?.id || result.postTxId, result.postTxId])
 	);
 	const currentIds = plan.portal.posts.map((post) => post.id);
-	const order = [...currentIds, ...results.filter((result) => !result.replacement).map((result) => result.postTxId)];
+	const order = localReceipt
+		? undefined
+		: [...currentIds, ...results.filter((result) => !result.replacement).map((result) => result.postTxId)];
 	const featuredPost = options.featuredSlug
 		? results.find((result) => result.sourcePost.slug.toLowerCase() === options.featuredSlug) ||
 		  plan.portal.posts.find((post) => (post.slug || post.url || '').toLowerCase() === options.featuredSlug)
@@ -914,7 +1118,12 @@ async function publishImport(plan, options, receiptPath) {
 	if (options.featuredSlug && !featuredPost) {
 		throw new Error(`Unable to resolve featured post: ${options.featuredSlug}`);
 	}
-	const featuredPosts = options.featuredSlug ? [featuredPost.postTxId || featuredPost.id] : null;
+	let featuredPosts = options.featuredSlug ? [featuredPost.postTxId || featuredPost.id] : null;
+	if (options.feature) {
+		const [result] = results;
+		const postId = result.replacement?.id ?? result.postTxId;
+		featuredPosts = [postId, ...plan.portal.featuredPosts.filter((id) => id !== postId)];
+	}
 	const release = releasePayload({
 		portal: plan.portal,
 		walletAddress: plan.walletAddress,
@@ -923,22 +1132,145 @@ async function publishImport(plan, options, receiptPath) {
 		featuredPosts,
 	});
 	const serializedRelease = JSON.stringify(release);
+	if (localReceipt) {
+		const latest = await resolveLocalPortal(options);
+		if (latest.headTxId !== localReceipt.headTxId) {
+			throw new Error(`Portal head changed to ${latest.headTxId} after the post upload. The release was withheld.`);
+		}
+	}
 	console.log(`Publishing one Portal release for ${results.length} posts`);
-	const releaseTxId = await uploadDataItem({
-		wallet: plan.wallet,
-		data: serializedRelease,
-		tags: releaseTags(plan.portal, plan.walletAddress, plan.manifestTxId, results.length),
-		uploadNode: options.uploadNode,
-	});
-	receipt.release = {
+	const releaseEntry = receipt.release ?? (receipt.release = {});
+	const releaseTxId = await upload(
+		serializedRelease,
+		releaseTags(plan.portal, plan.walletAddress, plan.manifestTxId, results.length),
+		releaseEntry
+	);
+	Object.assign(releaseEntry, {
 		txId: releaseTxId,
 		previousTxId: plan.portal.headTxId,
 		postCount: results.length,
 		publishedAt: new Date().toISOString(),
-	};
+	});
 	await saveReceipt(receiptPath, receipt);
 	console.log(`Release uploaded: ${releaseTxId}`);
 	return releaseTxId;
+}
+
+async function resolveLocalPortal(options) {
+	const { gateway, portalId } = options;
+	const fallbackGateways = gateway === DEFAULT_GATEWAY ? [DEFAULT_UPLOAD_NODE, 'https://turbo-gateway.com'] : [];
+	let unresolved;
+	for (let attempt = 0; attempt < 3; attempt += 1) {
+		// The resolver keeps successful reads of immutable bodies across attempts.
+		const portal = await resolvePortalState(portalId, { gateway, fallbackGateways, concurrency: options.concurrency });
+		if (portal.portalId !== portalId || portal.mode !== 'base') throw new Error('The target is not a base-mode Portal');
+		[unresolved] = portal.unresolvedTransactions;
+		if (!unresolved) return portal;
+	}
+	throw new Error(`Portal history is incomplete at ${unresolved.id}: ${unresolved.reason}`);
+}
+
+async function runLocalImport(options) {
+	if (options.manifest || options.publishedSlugs.length || options.featuredSlug) {
+		throw new Error('Local input cannot be combined with --manifest, --published-slug or --featured-slug');
+	}
+	assertAddress(options.portalId, 'Portal ID');
+	if (Boolean(options.replacePost) !== Boolean(options.expectPostTx)) {
+		throw new Error('Local updates require --replace-post and --expect-post-tx together');
+	}
+	if (options.expectPostTx) assertAddress(options.expectPostTx, 'Expected post revision');
+	if (options.publish && !options.walletPath) throw new Error('--yes requires --wallet');
+
+	const [inputMetadata, markdown, signer] = await Promise.all([
+		options.metadataPath ? fs.readFile(options.metadataPath, 'utf8').then(JSON.parse) : {},
+		options.markdownPath ? fs.readFile(options.markdownPath, 'utf8') : undefined,
+		options.walletPath ? loadWallet(options.walletPath) : null,
+	]);
+	validateLocalMetadata(inputMetadata);
+	if (options.tags.length && 'tags' in inputMetadata) throw new Error('Use --tag or metadata tags');
+	const metadata = options.tags.length ? { ...inputMetadata, tags: options.tags } : inputMetadata;
+	const walletAddress = signer?.address ?? '';
+	const localInputHash = createHash('sha256')
+		.update(
+			JSON.stringify([
+				metadata,
+				markdown,
+				options.replacePost,
+				options.expectPostTx,
+				options.feature,
+				options.gateway,
+				options.uploadNode,
+				walletAddress,
+			])
+		)
+		.digest('hex');
+	const receiptPath = path.resolve(
+		options.receiptPath || defaultReceiptPath(options.portalId, `local-${localInputHash}`)
+	);
+
+	const run = async () => {
+		const portal = await resolveLocalPortal(options);
+		const receipt = options.publish
+			? await loadReceipt(receiptPath, { portalId: options.portalId, localInputHash, walletAddress })
+			: null;
+		if (receipt?.release?.txId) {
+			console.log(`Import release already accepted: ${receipt.release.txId}`);
+			return receipt.release.txId;
+		}
+		if (receipt?.release?.signed) {
+			const txId = receipt.posts[localInputHash]?.postTxId;
+			const postId = receipt.replacementId ?? txId;
+			if (
+				portal.posts.some((post) => post.id === postId && post.postTxId === txId) &&
+				(!options.feature || portal.featuredPosts[0] === postId)
+			) {
+				console.log(`Import release already indexed: ${receipt.release.signed.id}`);
+				return receipt.release.signed.id;
+			}
+		}
+		if (receipt?.headTxId && receipt.headTxId !== portal.headTxId) {
+			throw new Error(`Portal head changed to ${portal.headTxId} since this receipt was staged`);
+		}
+		const replacement = options.replacePost ? findReplacement(portal, options.replacePost) : null;
+		if (replacement && replacement.postTxId !== options.expectPostTx) {
+			throw new Error(`Post revision changed to ${replacement.postTxId}`);
+		}
+		const now = new Date().toISOString();
+		const post = prepareLocalPost({ portal, replacement, metadata, markdown, walletAddress, now });
+		if (options.feature && post.status !== 'published') throw new Error('Only published posts can be featured');
+		const payload = postPayload(portal.portalId, post, now, replacement);
+		const serialized = JSON.stringify(payload);
+		if (Buffer.byteLength(serialized) > FREE_UPLOAD_LIMIT)
+			throw new Error('Converted post exceeds the free upload limit');
+		const postId = replacement?.id ?? '<post-tx-id>';
+		const sampleRelease = releasePayload({
+			portal,
+			walletAddress,
+			upsert: { [postId]: '<post-tx-id>' },
+			featuredPosts: options.feature ? [postId, ...portal.featuredPosts.filter((id) => id !== postId)] : null,
+		});
+		if (signer && !canPublish(portal, sampleRelease, walletAddress)) {
+			throw new Error('The supplied wallet is not permitted to publish these changes');
+		}
+		if (!receipt) {
+			console.log(JSON.stringify({ status: 'dry-run', post: payload, release: sampleRelease }, null, 2));
+			return null;
+		}
+		receipt.headTxId = portal.headTxId;
+		receipt.replacementId = replacement?.id ?? null;
+		const sourcePost = { id: localInputHash, title: post.title, slug: post.slug };
+		const prepared = [{ sourcePost, post, payload, serialized, replacement }];
+		console.log(`Receipt: ${receiptPath}`);
+		const releaseTxId = await publishImport(
+			{ wallet: signer.wallet, walletAddress, portal, prepared },
+			options,
+			receiptPath,
+			receipt
+		);
+		console.log(`View the release: ${options.gateway}/${releaseTxId}`);
+		return releaseTxId;
+	};
+	return options.publish ? withReceiptLock(receiptPath, run) : run();
 }
 
 export async function run(argv = process.argv.slice(2)) {
@@ -947,6 +1279,8 @@ export async function run(argv = process.argv.slice(2)) {
 		console.log(usage());
 		return null;
 	}
+	if (options.markdownPath || options.metadataPath) return runLocalImport(options);
+	if (options.feature || options.expectPostTx) throw new Error('--feature and --expect-post-tx require local input');
 	if (!options.manifest || !options.portalId || !options.walletPath) {
 		throw new Error(`--manifest, --portal, and --wallet are required\n\n${usage()}`);
 	}

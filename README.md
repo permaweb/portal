@@ -45,6 +45,30 @@ The project is organized into two main applications:
 npm install
 ```
 
+## Publish base Portal posts from the command line
+
+The existing `import-arweave-posts` command accepts a local Markdown body and JSON metadata. Media URLs can point to already uploaded files. This example plans a published post and puts it first in the featured list.
+
+```json
+{
+	"title": "Release announcement",
+	"slug": "release-announcement",
+	"description": "What changed in this release.",
+	"status": "published",
+	"categories": ["Announcements"],
+	"tags": ["AO"]
+}
+```
+
+```bash
+npm run import-arweave-posts -- --portal "$PORTAL_ID" \
+  --markdown post.md --metadata post.json --feature
+```
+
+For an existing post, pass `--replace-post "$POST_ID" --expect-post-tx "$CURRENT_REVISION_ID"`. The command preserves omitted fields. Include `replaceBlocks` in the JSON to update individual blocks by ID with a new `type`, `content`, and optional `data`. New local posts default to draft.
+
+The command prints the proposed post and release JSON by default. After reviewing it, add `--yes --wallet "$WALLET_FILE"` to sign and upload. The local Arweave JWK must belong to a wallet with Portal write access. Featuring a post requires Admin or owner access. The CLI uses the native ANS-104 bundler by default for payloads up to 100 KB. If an upload is interrupted, repeat the same command to reuse the signed items recorded in `.portal-imports/`. If an interrupted process leaves a `.lock` file, verify that the PID recorded in it has stopped before removing the lock and retrying.
+
 ## Development
 
 Start the development servers:
