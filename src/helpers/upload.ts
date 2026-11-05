@@ -64,11 +64,12 @@ export async function uploadDataItem(
 	if (!wallet) throw new Error('Connect a wallet to save to Arweave');
 
 	const signed = await signDataItem(wallet, toUint8Array(data), tags);
-	const response = await fetch(`${UPLOAD.node1}/tx/arweave`, {
+	const response = await fetch(`${UPLOAD.node1}/~bundler@1.0/tx`, {
 		method: 'POST',
 		headers: {
 			Accept: 'application/json',
-			'Content-Type': 'application/octet-stream',
+			'Content-Type': 'application/ans104',
+			'bundler-subject': 'body',
 		},
 		body: toRequestBody(signed.raw),
 	});
@@ -76,12 +77,14 @@ export async function uploadDataItem(
 	if (!response.ok)
 		throw new Error(`Arweave upload failed: ${response.status}${responseText ? ` ${responseText}` : ''}`);
 
-	let responseId: string | null = null;
-	try {
-		const payload = JSON.parse(responseText);
-		responseId = typeof payload === 'string' ? payload : payload?.id || null;
-	} catch {
-		responseId = responseText;
+	let responseId = response.headers.get('id');
+	if (!responseId) {
+		try {
+			const payload = JSON.parse(responseText);
+			responseId = typeof payload === 'string' ? payload : payload?.id || payload?.body?.id || null;
+		} catch {
+			responseId = responseText;
+		}
 	}
 
 	const transactionId = responseId || signed.id;
