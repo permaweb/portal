@@ -753,12 +753,13 @@ function releaseTags(portal, walletAddress, manifestTxId, postCount) {
 	];
 }
 
-function duplicatePost(existingPosts, sourcePost, manifestTxId) {
+function duplicatePost(existingPosts, sourcePost, manifestTxId, replacement) {
 	return (existingPosts || []).find(
 		(post) =>
 			(post.source?.manifestTxId === manifestTxId && post.source?.postId === sourcePost.id) ||
-			post.slug?.toLowerCase() === sourcePost.slug.toLowerCase() ||
-			post.url?.toLowerCase() === sourcePost.slug.toLowerCase()
+			(post.id !== replacement?.id &&
+				(post.slug?.toLowerCase() === sourcePost.slug.toLowerCase() ||
+					post.url?.toLowerCase() === sourcePost.slug.toLowerCase()))
 	);
 }
 
@@ -972,16 +973,15 @@ async function prepareImport(options) {
 		if (!availableTopics.includes(tag.toLowerCase())) throw new Error(`Portal topic/tag not found: ${tag}`);
 	}
 
-	const candidates = sourceManifest.posts.filter(
-		(sourcePost) => !duplicatePost(portal.posts, sourcePost, manifestTxId)
-	);
-	const skipped = sourceManifest.posts.filter((sourcePost) => duplicatePost(portal.posts, sourcePost, manifestTxId));
-	let replacement = null;
-	if (options.replacePost) {
-		replacement = findReplacement(portal, options.replacePost);
-		if (candidates.length !== 1) {
-			throw new Error(`--replace-post requires exactly one new manifest post; found ${candidates.length}`);
-		}
+	const replacement = options.replacePost ? findReplacement(portal, options.replacePost) : null;
+	const candidates = [];
+	const skipped = [];
+	for (const sourcePost of sourceManifest.posts) {
+		const existing = duplicatePost(portal.posts, sourcePost, manifestTxId, replacement);
+		(existing ? skipped : candidates).push(sourcePost);
+	}
+	if (replacement && candidates.length !== 1) {
+		throw new Error(`--replace-post requires exactly one new manifest post; found ${candidates.length}`);
 	}
 	const prepared = await mapWithConcurrency(candidates, options.concurrency, async (sourcePost) => {
 		const markdown = await fetchText(
@@ -1118,7 +1118,9 @@ async function publishImport(plan, options, receiptPath, localReceipt) {
 	if (options.featuredSlug && !featuredPost) {
 		throw new Error(`Unable to resolve featured post: ${options.featuredSlug}`);
 	}
-	let featuredPosts = options.featuredSlug ? [featuredPost.postTxId || featuredPost.id] : null;
+	let featuredPosts = options.featuredSlug
+		? [featuredPost.replacement?.id ?? featuredPost.id ?? featuredPost.postTxId]
+		: null;
 	if (options.feature) {
 		const [result] = results;
 		const postId = result.replacement?.id ?? result.postTxId;

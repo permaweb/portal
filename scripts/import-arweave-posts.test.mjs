@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
 import { generateKeyPairSync } from 'node:crypto';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import test from 'node:test';
 
 import { DataItem } from '@dha-team/arbundles';
+import Arweave from 'arweave';
 
 import {
 	buildPortalPost,
@@ -13,6 +17,7 @@ import {
 	parseArgs,
 	postPayload,
 	resolvePostCategories,
+	run,
 	sourcePostStatus,
 	uploadDataItem,
 } from './import-arweave-posts.mjs';
@@ -25,9 +30,7 @@ test('uses the native ANS-104 route by default and retains the legacy route for 
 		assert(await item.isValid());
 		assert.equal(item.rawData.toString(), 'post');
 		calls.push({ url, headers: request.headers, id: item.id });
-		return calls.length === 1
-			? new Response('{}', { headers: { id: item.id } })
-			: Response.json({ id: item.id });
+		return calls.length === 1 ? new Response('{}', { headers: { id: item.id } }) : Response.json({ id: item.id });
 	});
 	const upload = (uploadNode) => uploadDataItem({ wallet, data: 'post', tags: [], uploadNode });
 	assert.equal(await upload('https://up.arweave.net'), calls[0].id);
@@ -202,4 +205,78 @@ test('builds published Portal metadata with the shared tag and source identity',
 	assert.deepEqual(post.topics, ['AO']);
 	assert.deepEqual(post.tags, ['AO']);
 	assert.equal(post.source.postId, 'source-id');
+});
+
+test('replaces and features a manifest post that keeps its existing slug', async (t) => {
+	const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'portal-manifest-test-'));
+	t.after(() => fs.rm(dir, { force: true, recursive: true }));
+	const wallet = generateKeyPairSync('rsa', { modulusLength: 4096 }).privateKey.export({ format: 'jwk' });
+	const owner = await Arweave.init({}).wallets.jwkToAddress(wallet);
+	const walletPath = path.join(dir, 'wallet.json');
+	await fs.writeFile(walletPath, JSON.stringify(wallet), { mode: 0o600 });
+
+	const portalId = 'P'.repeat(43);
+	const rootId = 'R'.repeat(43);
+	const postId = 'S'.repeat(43);
+	const manifestId = 'M'.repeat(43);
+	const markdownId = 'W'.repeat(43);
+	const manifest = {
+		posts: [{ id: 'source-post', postTxId: markdownId, title: 'New title', slug: 'keep-slug', date: '2026-11-05' }],
+	};
+	const root = {
+		type: 'portal-manifest',
+		mode: 'base',
+		portalId,
+		owner,
+		topics: ['AO'],
+		posts: [{ id: postId, postTxId: postId, title: 'Old title', slug: 'keep-slug' }],
+	};
+	const writes = [];
+	t.mock.method(console, 'log', () => {});
+	t.mock.method(globalThis, 'fetch', async (url, request) => {
+		const route = new URL(url).pathname;
+		if (route === '/graphql') {
+			return Response.json({
+				data: {
+					transactions: {
+						edges: [
+							{ node: { id: rootId, owner: { address: owner }, tags: [{ name: 'Type', value: 'portal-manifest' }] } },
+						],
+					},
+				},
+			});
+		}
+		if (route === `/${rootId}`) return Response.json(root);
+		if (route === `/raw/${manifestId}`) return Response.json(manifest);
+		if (route === `/raw/${markdownId}`) return new Response('## Revised post');
+		if (route === '/~bundler@1.0/tx') {
+			const item = new DataItem(Buffer.from(request.body));
+			writes.push({ id: item.id, payload: JSON.parse(item.rawData.toString()) });
+			return Response.json({ body: { id: item.id } });
+		}
+		return new Response(null, { status: 404 });
+	});
+	await run([
+		'--manifest',
+		manifestId,
+		'--portal',
+		portalId,
+		'--wallet',
+		walletPath,
+		'--gateway',
+		'https://manifest-test.invalid',
+		'--receipt',
+		path.join(dir, 'receipt.json'),
+		'--replace-post',
+		'keep-slug',
+		'--featured-slug',
+		'keep-slug',
+		'--yes',
+	]);
+	assert.equal(writes.length, 2);
+	const [revision, release] = writes;
+	assert.equal(revision.payload.postId, postId);
+	assert.equal(revision.payload.post.slug, 'keep-slug');
+	assert.deepEqual(release.payload.changes.posts, { upsert: { [postId]: revision.id }, order: [postId] });
+	assert.deepEqual(release.payload.changes.featuredPosts, [postId]);
 });
